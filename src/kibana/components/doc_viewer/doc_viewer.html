@@ -14,8 +14,8 @@
         </td>
         <td width="1%" class="discover-table-details-buttons" ng-show="filter">
           <span bo-show="showFilters(mapping[field])">
-            <i ng-click="filter(doc, field, '+')" class="fa fa-search-plus"></i>
-            <i ng-click="filter(doc, field, '-')" class="fa fa-search-minus"></i>
+            <i ng-click="filter(field, flattened[field], '+')" class="fa fa-search-plus"></i>
+            <i ng-click="filter(field, flattened[field],'-')" class="fa fa-search-minus"></i>
           </span>
           <span bo-show="!showFilters(mapping[field])" tooltip="Unindexed fields can not be searched">
             <i class="fa fa-search-plus text-muted"></i>

@@ -83,8 +83,8 @@ define(function (require) {
           $compile($detailsTr)($detailsScope);
         };
 
-        $scope.filter = function (row, field, operation) {
-          $scope.filtering(field, row.$$_flattened[field] || row[field], operation);
+        $scope.filter = function (field, value, operation) {
+          $scope.filtering(field, value, operation);
         };
 
         $scope.$watchCollection('columns', function () {

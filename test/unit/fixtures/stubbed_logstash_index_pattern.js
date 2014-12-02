@@ -2,6 +2,8 @@ define(function (require) {
   return function stubbedLogstashIndexPatternService(Private) {
     var StubIndexPattern = Private(require('test_utils/stub_index_pattern'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+    var flattenHit = require('components/index_patterns/_flatten_hit');
+
     var _ = require('lodash');
 
     var indexPattern = new StubIndexPattern('logstash-*', 'time', [
@@ -22,6 +24,8 @@ define(function (require) {
     ]);
 
     indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);
+    indexPattern.flattenHit = _.bind(flattenHit, indexPattern);
+
 
     return indexPattern;
 
