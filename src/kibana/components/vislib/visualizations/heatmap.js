@@ -127,6 +127,61 @@ define(function (require) {
       return self.handler._attr.zeroColor;
     };
 
+    HeatMap.prototype.addRects = function (svg, data, gridWidth, gridHeight) {
+      var self = this;
+      // TODO: make gap and radius user configurable
+      var gap = 1;
+      var radius = 0;
+      var minWidth = 2;
+      var cellWidth = gridWidth - gap;
+      var cellHeight = gridHeight - gap;
+      var layer;
+      var heatMap;
+
+      if (cellWidth < minWidth) {
+        throw new errors.ContainerTooSmall();
+      }
+
+      layer = svg.selectAll('.layer')
+      .data(data.series)
+      .enter()
+      .append('g')
+      .attr('class', function (d) {
+        return d.label;
+      });
+
+      heatMap = layer.selectAll('.heat')
+      .data(function (d, i) {
+        d.values.forEach(function (obj) {
+          obj.rowIndex = i;
+          obj.rowLabel = d.label ? d.label : '_all';
+        });
+        return d.values;
+      });
+
+      heatMap
+      .exit()
+      .remove();
+
+      heatMap
+      .enter()
+      .append('rect')
+      .attr('x', function (d, i) { return 1 + i * gridWidth; })
+      .attr('y', function (d) { return (d.rowIndex) * gridHeight; })
+      .attr('rx', radius)
+      .attr('ry', radius)
+      .attr('width', cellWidth)
+      .attr('height', cellHeight)
+      .style('fill', function (d) {
+        return self.dataColor(d);
+      })
+      .attr('class', function (d) {
+        return 'rect bordered ' + self.colorToClass(self.dataColor(d));
+      });
+
+      return heatMap;
+    };
+
     /**
      * Renders heatmap chart
      *
@@ -156,13 +211,8 @@ define(function (require) {
           var widthN = data.series[0].values.length;
           var heightN = data.series.length;
 
-          // TODO: make gap and radius user configurable
-          var gap = 1;
-          var radius = 0;
           var gridWidth = width / widthN;
           var gridHeight = height / heightN;
-          var cellWidth = gridWidth - gap;
-          var cellHeight = gridHeight - gap;
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
@@ -176,39 +226,10 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+          var heatMap = self.addRects(svg, data, gridWidth, gridHeight);
+
           var rowLabels = self.addRowLabels(svg, data, gridWidth, gridHeight, margin);
           var colLabels = self.addColLabels(svg, data, gridWidth, gridHeight, height, margin);
-
-          var layer = svg.selectAll('.layer')
-          .data(data.series)
-          .enter()
-          .append('g')
-          .attr('class', function (d) {
-            return d.label;
-          });
-
-          var heatMap = layer.selectAll('.heat')
-          .data(function (d, i) {
-            d.values.forEach(function (obj) {
-              obj.rowIndex = i;
-              obj.rowLabel = d.label ? d.label : '_all';
-            });
-            return d.values;
-          })
-          .enter()
-          .append('rect')
-          .attr('x', function (d, i) { return 1 + i * gridWidth; })
-          .attr('y', function (d) { return (d.rowIndex) * gridHeight; })
-          .attr('rx', radius)
-          .attr('ry', radius)
-          .attr('width', cellWidth)
-          .attr('height', cellHeight)
-          .style('fill', function (d) {
-            return self.dataColor(d);
-          })
-          .attr('class', function (d) {
-            return 'rect bordered ' + self.colorToClass(self.dataColor(d));
-          });
 
           if (isTooltip) {
             heatMap.call(tooltip.render());
