@@ -1,10 +1,10 @@
 <div class="form-group">
-  <div ng-if="!params.scripted">
+  <div ng-if="!aggParam.scripted">
     <label for="field">
       Field
       <span ng-if="aggParam.scriptable && aggConfig.vis.indexPattern.scriptedFields.raw.length > 0">
         -
-        <a ng-click="params.scripted = true">Use Script</a>
+        <a ng-click="aggParam.scripted = true">Use Script</a>
       </span>
     </label>
     <select
@@ -21,22 +21,22 @@
     </select>
   </div>
 
-  <div ng-if="params.scripted">
+  <div ng-if="aggParam.scripted">
     <label for="field">
       Scripted Field
       <span ng-if="aggParam.scriptable">
         -
-        <a ng-click="params.scripted = false">Use Field</a>
+        <a ng-click="aggParam.scripted = false">Use Field</a>
       </span>
     </label>
     <select
       class="form-control"
       name="scriptedField"
       required
-      ng-model="params.script"
+      ng-model="params.field"
       ng-options="
         field as field.name for field in aggConfig.vis.indexPattern.scriptedFields.raw
-        | orderBy: ['type', 'name']
+        | orderBy: ['name']
       ">
     </select>
   </div>
