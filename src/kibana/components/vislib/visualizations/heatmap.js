@@ -24,6 +24,13 @@ define(function (require) {
         return new HeatMap(handler, chartEl, chartData);
       }
       HeatMap.Super.apply(this, arguments);
+      this._attr = _.defaults(handler._attr || {});
+      this._attr.margin = {
+        top: 5,
+        right: 5,
+        bottom: 16,
+        left: 40
+      };
     }
 
     HeatMap.prototype.addRowLabels = function (svg, data, gridWidth, gridHeight, margin) {

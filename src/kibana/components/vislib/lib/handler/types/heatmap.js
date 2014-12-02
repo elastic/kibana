@@ -14,12 +14,7 @@ define(function (require) {
     return function (vis) {
       var data = new Data(injectZeros(vis.data), vis._attr);
 
-      data._attr.margin = {
-        top: 5,
-        right: 5,
-        bottom: 16,
-        left: 80
-      };
+
 
       // configurable vars
       var zeroColor = vis._attr.zeroColor = '#f2f2f2';
@@ -78,6 +73,8 @@ define(function (require) {
       var getHeatmapColor = vis._attr.getHeatmapColor = function (val) {
         return colorObj[val];
       };
+
+
 
       return new Handler(vis, {
         data: data,

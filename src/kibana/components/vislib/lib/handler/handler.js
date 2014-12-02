@@ -26,7 +26,7 @@ define(function (require) {
       this.charts = [];
 
       this._attr = _.defaults(vis._attr || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
+        margin: { top: 10, right: 3, bottom: 5, left: 3 }
       });
 
       this.layout = new Layout(vis.el, vis.data, vis._attr.type);
