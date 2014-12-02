@@ -46,6 +46,7 @@ define(function (require) {
           group: 'buckets',
           name: 'split',
           title: 'Split Chart',
+          aggFilter: ['date_histogram', 'histogram', 'range', 'terms', 'filters', 'significant_terms'],
           min: 0,
           max: 1
         }
