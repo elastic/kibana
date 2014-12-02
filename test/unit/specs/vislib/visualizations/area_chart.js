@@ -10,6 +10,7 @@ define(function (require) {
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
   var termSeries = require('vislib_fixtures/mock_data/terms/_series');
   var termColumns = require('vislib_fixtures/mock_data/terms/_columns');
+
   var dataArray = [
     series,
     columns,
@@ -18,6 +19,7 @@ define(function (require) {
     termSeries,
     termColumns
   ];
+
   var names = [
     'series',
     'columns',
@@ -27,16 +29,17 @@ define(function (require) {
     'term columns'
   ];
 
+  var visLibParams = {
+    type: 'area',
+    addLegend: true,
+    addTooltip: true
+  };
+
   angular.module('AreaChartFactory', ['kibana']);
 
   dataArray.forEach(function (data, i) {
     describe('VisLib Area Chart Test Suite for ' + names[i] + ' Data', function () {
       var vis;
-      var visLibParams = {
-        type: 'area',
-        addLegend: true,
-        addTooltip: true
-      };
 
       beforeEach(function () {
         module('AreaChartFactory');
@@ -58,6 +61,49 @@ define(function (require) {
       afterEach(function () {
         $(vis.el).remove();
         vis = null;
+      });
+
+      describe('checkIfEnoughData method', function () {
+        var errorVis;
+        var goodVis;
+        var notEnoughData;
+        var enoughData;
+
+        beforeEach(function () {
+          inject(function (d3, Private) {
+            errorVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
+            goodVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
+            enoughData = require('vislib_fixtures/mock_data/date_histogram/_series');
+            notEnoughData = require('vislib_fixtures/mock_data/not_enough_data/_one_point');
+            require('css!components/vislib/styles/main');
+
+            errorVis.render(notEnoughData);
+            goodVis.render(enoughData);
+          });
+        });
+
+        afterEach(function () {
+          $(errorVis.el).remove();
+          $(goodVis.el).remove();
+          errorVis = null;
+          goodVis = null;
+        });
+
+        it('should throw a Not Enough Data Error', function () {
+          errorVis.handler.charts.forEach(function (chart) {
+            expect(function () {
+              chart.checkIfEnoughData();
+            }).to.throwError();
+          });
+        });
+
+        it('should not throw a Not Enough Data Error', function () {
+          goodVis.handler.charts.forEach(function (chart) {
+            expect(function () {
+              chart.checkIfEnoughData();
+            }).to.not.throwError();
+          });
+        });
       });
 
       describe('stackData method', function () {

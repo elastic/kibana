@@ -125,7 +125,7 @@ define(function (require) {
 
         it('should return an error classed DOM element with a text message', function () {
           expect($(vis.el).find('.error').length).to.be(1);
-          expect($('.error p').html()).to.be('This is an error!');
+          expect($('.error h4').html()).to.be('This is an error!');
         });
       });
 

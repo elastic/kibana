@@ -12,7 +12,7 @@ define(function (require) {
         depth: 3,
         value: 6,
         field: { format: { convert: convert } },
-        aggConfig: { params: { field: { name: 'field3' } } },
+        aggConfig: { params: { field: { displayName: 'field3' } } },
         parent: {
           name: 'bucket2',
           depth: 2,

@@ -46,7 +46,7 @@ define(function (require) {
           var col = columns[i];
 
           // field/agg details
-          var group = (col.field && col.field.name) || col.label || ('level ' + datum.depth);
+          var group = (col.field && col.field.displayName) || col.label || ('level ' + datum.depth);
 
           // field value that defines the bucket
           var bucket = parent.name;
