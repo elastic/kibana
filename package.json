@@ -49,7 +49,7 @@
     "test": "grunt test --use-jruby",
     "server": "grunt server",
     "precommit": "grunt jshint",
-    "prepush": ""
+    "prepush": "echo"
   },
   "repository": {
     "type": "git",
