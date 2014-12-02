@@ -105,13 +105,16 @@ define(function (require) {
       return maxLength;
     };
 
-    HeatMap.prototype.dataColor = function (val) {
+    HeatMap.prototype.dataColor = function (d) {
       var self = this;
-      if (val !== 0) {
+      if (d.x === '_all' && d.row === '_all') {
+        return self.handler._attr.colors[3];
+      }
+      if (d.y !== 0) {
         if (self.handler._attr.colorScaleType === 'quantize') {
-          return self.handler._attr.colorScale(val);
+          return self.handler._attr.colorScale(d.y);
         } else {
-          return self._attr.colors[self.handler._attr.colorScale(val)];
+          return self._attr.colors[self.handler._attr.colorScale(d.y)];
         }
       }
       return self.handler._attr.zeroColor;
@@ -180,24 +183,24 @@ define(function (require) {
           var heatMap = layer.selectAll('.heat')
           .data(function (d, i) {
             d.values.forEach(function (obj) {
-              obj.labelIndex = i;
-              obj.label = d.label;
+              obj.rowIndex = i;
+              obj.rowLabel = d.label ? d.label : '_all';
             });
             return d.values;
           })
           .enter()
           .append('rect')
           .attr('x', function (d, i) { return 1 + i * gridWidth; })
-          .attr('y', function (d) { return (d.labelIndex) * gridHeight; })
+          .attr('y', function (d) { return (d.rowIndex) * gridHeight; })
           .attr('rx', radius)
           .attr('ry', radius)
           .attr('width', cellWidth)
           .attr('height', cellHeight)
           .style('fill', function (d) {
-            return self.dataColor(d.y);
+            return self.dataColor(d);
           })
           .attr('class', function (d) {
-            return 'rect bordered ' + self.colorToClass(self.dataColor(d.y));
+            return 'rect bordered ' + self.colorToClass(self.dataColor(d));
           });
 
           if (isTooltip) {

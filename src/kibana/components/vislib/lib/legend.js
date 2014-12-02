@@ -64,6 +64,7 @@ define(function (require) {
      */
     Legend.prototype.list = function (el, arrOfLabels, args) {
       var self = this;
+
       return el.append('ul')
       .attr('class', function () {
         if (args._attr.isOpen) {
