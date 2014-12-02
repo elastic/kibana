@@ -187,6 +187,7 @@ define(function (require) {
         return mapper.clearCache(self)
         .then(function () {
           return self._fetchFields()
+          .then(self._setScriptedFields)
           .then(self.save);
         });
       };
@@ -196,6 +197,12 @@ define(function (require) {
         .then(function (fields) {
           setIndexedValue('fields', fields);
         });
+      };
+
+      self._setScriptedFields = function () {
+        if (!self.scriptedFields) {
+          self.scriptedFields = [];
+        }
       };
 
       self.toJSON = function () {
