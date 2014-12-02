@@ -13,7 +13,7 @@ define(function (require) {
 
     return function (vis) {
       var data = new Data(injectZeros(vis.data), vis._attr);
-
+      console.log('handler', data);
 
 
       // configurable vars
@@ -63,9 +63,9 @@ define(function (require) {
         } else {
           inc = i;
         }
-        var cols = Math.floor(colorScale.invertExtent(inc)[0]);
+        var cols = colorScale.invertExtent(inc)[0].toFixed(0);
         cols += ' – ';
-        cols += Math.ceil(colorScale.invertExtent(inc)[1]);
+        cols += colorScale.invertExtent(inc)[1].toFixed(0);
         legendRanges.push(cols);
       }
       var colList = _.flatten([zeroColor, colors]);

@@ -156,34 +156,6 @@ define(function (require) {
         chart.series.push({ values: [ { x: '_all', y: 0 } ] });
       }
 
-      /*
-      // add date format to align data by interval
-      var getInterval = function(ordered) {
-        if (ordered.date) {
-          if (ordered.interval > 604800000) {
-            ordered.str = 'month';
-            ordered.format = d3.time.format("%m");// month as a decimal number [01,12]
-          } else if (ordered.interval > 86400000) {
-            ordered.str = 'week';
-            ordered.format = d3.time.format("%w");// weekday as a decimal number [0,6]
-          } else if (ordered.interval > 3600000) {
-            ordered.str = 'day';
-            ordered.format = d3.time.format("%d");// zero-padded day of the month as a decimal number [01,31]
-          } else if (ordered.interval > 60000) {
-            ordered.str = 'hour';
-            ordered.format = d3.time.format("%H");// hour (24-hour clock) as a decimal number [00,23]
-          } else if (ordered.interval > 1000) {
-            ordered.str = 'min';
-            ordered.format = d3.time.format("%M");// minute as a decimal number [00,59]
-          } else {
-            ordered.str = 'sec';
-            ordered.format = d3.time.format("%S");// second as a decimal number [00,61]
-          }
-        }
-        return ordered;
-      };
-      */
-
       rows.forEach(function (row) {
         var seriesLabel = rowAxis && row[iRow];
         var s = rowAxis ? seriesByLabel[seriesLabel] : series[0];
@@ -212,11 +184,6 @@ define(function (require) {
 
         // skip this datum
         if (datum.y == null) return;
-
-        if (colAxis.metricScale) {
-          // support scaling response values to represent an average value on the y-axis
-          datum.y = datum.y * colAxis.metricScale;
-        }
 
         s.values.push(datum);
       });
