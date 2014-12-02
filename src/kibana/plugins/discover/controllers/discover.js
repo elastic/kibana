@@ -267,7 +267,7 @@ define(function (require) {
 
         var sort = $state.sort;
         var timeField = $scope.searchSource.get('index').timeFieldName;
-        var totalSize = $scope.size || 500;
+        var totalSize = $scope.size || $scope.opts.sampleSize;
 
         /**
          * Basically an emum.
