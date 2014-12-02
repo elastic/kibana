@@ -1,5 +1,6 @@
 define(function (require) {
   return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope) {
+    var _ = require('lodash');
     var errors = require('errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
     var NoDefinedIndexPatterns = errors.NoDefinedIndexPatterns;
@@ -17,7 +18,13 @@ define(function (require) {
         ])
         .then(function () {
           var path = $route.current.$$route.originalPath;
-          if (!path.match(/settings\/indices/) && !path.match(/settings\/about/)) {
+          var allowedRoutes = [
+            'settings/indices',
+            'settings/about'
+          ];
+          if (!_.find(allowedRoutes, function (route) {
+            return path.indexOf(route) >= 0;
+          })) {
             return courier.indexPatterns.getIds()
             .then(function (patterns) {
               if (!config.get('defaultIndex')) {
