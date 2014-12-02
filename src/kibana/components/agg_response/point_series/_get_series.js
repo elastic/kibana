@@ -24,8 +24,10 @@ define(function (require) {
 
         y.forEach(function (y) {
           var point = partGetPoint(row, y);
-          var seriesId = (point.series ? point.series + ': ' : '') + y.col.title;
-          addToSiri(series, point, seriesId);
+          var prefix = point.series ? point.series + ': ' : '';
+          var seriesId = prefix + y.agg.id;
+          var seriesLabel = prefix + y.col.title;
+          addToSiri(series, point, seriesId, seriesLabel);
         });
 
       }, {})

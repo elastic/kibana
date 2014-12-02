@@ -179,6 +179,16 @@ define(function (require) {
       return field ? field.format.convert : String;
     };
 
+    AggConfig.prototype.fieldName = function () {
+      var field = this.field();
+      return field ? field.name : '';
+    };
+
+    AggConfig.prototype.fieldDisplayName = function () {
+      var field = this.field();
+      return field ? (field.displayName || this.fieldName()) : '';
+    };
+
     return AggConfig;
   };
 });

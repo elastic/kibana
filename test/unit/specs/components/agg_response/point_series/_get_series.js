@@ -64,8 +64,8 @@ define(function (require) {
         aspects: {
           x: { i: 0 },
           y: [
-            { i: 1, col: { title: '0' } },
-            { i: 2, col: { title: '1' } },
+            { i: 1, col: { title: '0' }, agg: { id: 1 } },
+            { i: 2, col: { title: '1' }, agg: { id: 2 } },
           ]
         }
       };
@@ -151,8 +151,8 @@ define(function (require) {
           x: { i: -1 },
           series: { i: 0 },
           y: [
-            { i: 1, col: { title: '0' } },
-            { i: 2, col: { title: '1' } }
+            { i: 1, col: { title: '0' }, agg: { id: 1 } },
+            { i: 2, col: { title: '1' }, agg: { id: 2 } }
           ]
         }
       };
