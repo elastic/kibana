@@ -20,8 +20,8 @@ define(function (require) {
         vis = Private(require('vislib_fixtures/_vis_fixture'))();
         require('css!components/vislib/styles/main');
 
-        vis.on('click', function (e) {
-          return e;
+        vis.on('brush', function (e) {
+          console.log(e);
         });
 
         vis.render(data);
@@ -33,19 +33,79 @@ define(function (require) {
       vis = null;
     });
 
-    describe('eventResponse method', function () {
-      it('should return an object', function () {
+    describe('eventResponse method', function () {});
+
+    describe('addEvent method', function () {
+      it('should return a function', function () {
         vis.handler.charts.forEach(function (chart) {
-          console.log($($('rect')[5]).trigger('click'));
-          expect(_.isObject($(chart).trigger('click'))).to.be(true);
+          var clickEvent = function (e) {
+            console.log(e);
+          };
+          var addEvent = chart.events.addEvent;
+
+          expect(_.isFunction(addEvent('click', clickEvent))).to.be(true);
         });
       });
     });
-    describe('addEvent method', function () {});
-    describe('addHoverEvent method', function () {});
-    describe('addClickEvent method', function () {});
-    describe('addBrushEvent method', function () {});
-    describe('addMousePointer method', function () {});
+
+    describe('addHoverEvent method', function () {
+      it('should return a function', function () {
+        vis.handler.charts.forEach(function (chart) {
+          var hover = chart.events.addHoverEvent;
+
+          expect(_.isFunction(hover)).to.be(true);
+        });
+      });
+
+      it('should attach a hover event', function () {
+        vis.handler.charts.forEach(function (chart) {
+          expect(_.isFunction(chart.events.dispatch.hover)).to.be(true);
+        });
+      });
+    });
+
+    describe('addClickEvent method', function () {
+      it('should return a function', function () {
+        vis.handler.charts.forEach(function (chart) {
+          var click = chart.events.addClickEvent;
+
+          expect(_.isFunction(click)).to.be(true);
+        });
+      });
+
+      it('should attach a click event', function () {
+        vis.handler.charts.forEach(function (chart) {
+          expect(_.isFunction(chart.events.dispatch.click)).to.be(true);
+        });
+      });
+    });
+
+    describe('addBrushEvent method', function () {
+      it('should return a function', function () {
+        vis.handler.charts.forEach(function (chart) {
+          var brush = chart.events.addBrushEvent;
+
+          expect(_.isFunction(brush)).to.be(true);
+        });
+      });
+
+      it('should attach a brush event', function () {
+        vis.handler.charts.forEach(function (chart) {
+          expect(_.isFunction(chart.events.dispatch.brush)).to.be(true);
+        });
+      });
+    });
+
+    describe('addMousePointer method', function () {
+      it('should return a function', function () {
+        vis.handler.charts.forEach(function (chart) {
+          var pointer = chart.events.addMousePointer;
+
+          expect(_.isFunction(pointer)).to.be(true);
+        });
+      });
+    });
+
     describe('createBrush method', function () {});
   });
 });
