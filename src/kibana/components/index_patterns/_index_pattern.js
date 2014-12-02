@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier) {
+  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter) {
     var _ = require('lodash');
     var angular = require('angular');
     var errors = require('errors');
@@ -95,11 +95,19 @@ define(function (require) {
             field.count = field.count || 0;
 
             // non-enumerable type so that it does not get included in the JSON
-            Object.defineProperty(field, 'format', {
-              enumerable: false,
-              get: function () {
-                var formatName = self.customFormats && self.customFormats[field.name];
-                return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
+            Object.defineProperties(field, {
+              format: {
+                enumerable: false,
+                get: function () {
+                  var formatName = self.customFormats && self.customFormats[field.name];
+                  return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
+                }
+              },
+              displayName: {
+                enumerable: false,
+                get: function () {
+                  return shortDotsFilter(field.name);
+                }
               }
             });
 

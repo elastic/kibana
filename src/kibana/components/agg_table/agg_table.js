@@ -1,4 +1,5 @@
 define(function (require) {
+  require('components/paginated_table/paginated_table');
   require('services/compile_recursive_directive');
   require('css!components/agg_table/agg_table.css');
 
@@ -7,7 +8,6 @@ define(function (require) {
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
     var _ = require('lodash');
 
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
     var orderBy = $filter('orderBy');
 
     return {
@@ -31,42 +31,6 @@ define(function (require) {
         self.csv = {
           separator: config.get('csv:separator'),
           quoteValues: config.get('csv:quoteValues')
-        };
-
-        self.getColumnClass = function (col, $first, $last) {
-          var cls = [];
-          var agg = $scope.table.aggConfig(col);
-
-          if ($last || (agg.schema.group === 'metrics')) {
-            cls.push('visualize-table-right');
-          }
-
-          if (!self.sort || self.sort.field !== col) {
-            cls.push('no-sort');
-          }
-
-          return cls.join(' ');
-        };
-
-        self.cycleSort = function (col) {
-          if (!self.sort || self.sort.col !== col) {
-            self.sort = {
-              col: col,
-              asc: true
-            };
-          } else if (self.sort.asc) {
-            self.sort.asc = false;
-          } else {
-            self.sort = null;
-          }
-
-          if (self.sort && !self.sort.getter) {
-            var colI = $scope.table.columns.indexOf(self.sort.col);
-            self.sort.getter = function (row) {
-              return row[colI];
-            };
-            if (colI === -1) self.sort = null;
-          }
         };
 
         self.exportAsCsv = function () {
@@ -104,31 +68,43 @@ define(function (require) {
           }).join('');
         };
 
-        $scope.$watchMulti([
-          'table',
-          'aggTable.sort.asc',
-          'aggTable.sort.col'
-        ], function () {
+        $scope.$watch('table', function () {
           var table = $scope.table;
 
           if (!table) {
             $scope.formattedRows = null;
+            $scope.formattedColumns = null;
             return;
           }
 
+          setFormattedRows(table);
+          setFormattedColumns(table);
+        });
+
+        function setFormattedColumns(table) {
+          $scope.formattedColumns = table.columns.map(function (col, i) {
+            var formattedColumn = {
+              title: col.title
+            };
+
+            var agg = $scope.table.aggConfig(col);
+            var last = i === (table.columns.length - 1);
+
+            if (last || (agg.schema.group === 'metrics')) {
+              formattedColumn.class = 'visualize-table-right';
+            }
+
+            return formattedColumn;
+          });
+        }
+
+        function setFormattedRows(table) {
           var formatters = table.columns.map(function (col) {
             return table.fieldFormatter(col);
           });
 
-          // sort the row values, not formatted
-          if (self.sort) {
-            $scope.formattedRows = orderBy(table.rows, self.sort.getter, !self.sort.asc);
-          } else {
-            $scope.formattedRows = null;
-          }
-
           // format all row values
-          $scope.formattedRows = ($scope.formattedRows || table.rows).map(function (row) {
+          $scope.formattedRows = (table.rows).map(function (row) {
             return row.map(function (cell, i) {
               return formatters[i](cell);
             });
@@ -136,7 +112,7 @@ define(function (require) {
 
           // update the csv file's title
           self.csv.filename = (table.title() || 'table') + '.csv';
-        });
+        }
       }
     };
   });

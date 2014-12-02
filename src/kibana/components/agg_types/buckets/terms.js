@@ -9,7 +9,7 @@ define(function (require) {
       title: 'Terms',
       makeLabel: function (aggConfig) {
         var params = aggConfig.params;
-        return params.order.display + ' ' + params.size + ' ' + params.field.name;
+        return params.order.display + ' ' + params.size + ' ' + params.field.displayName;
       },
       params: [
         {

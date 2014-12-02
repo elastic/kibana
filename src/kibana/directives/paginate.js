@@ -69,7 +69,7 @@ define(function (require) {
             }
 
             self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
-            if (!self.perPage) {
+            if (self.perPage == null) {
               self.perPage = ALL;
               return;
             }

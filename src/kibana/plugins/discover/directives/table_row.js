@@ -7,6 +7,7 @@ define(function (require) {
 
   require('components/highlight/highlight');
   require('filters/trust_as_html');
+  require('filters/short_dots');
 
   // guestimate at the minimum number of chars wide cells in the table should be
   var MIN_LINE_LENGTH = 20;
@@ -19,7 +20,7 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config, highlightFilter) {
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter, shortDotsFilter) {
     var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
@@ -76,7 +77,7 @@ define(function (require) {
           // The fields to loop over
           if (!row._fields) {
             row._fields = _.union(
-              _.keys(row._source),
+              _.keys(row._formatted),
               config.get('metaFields')
             );
             row._fields.sort();
@@ -94,7 +95,7 @@ define(function (require) {
           };
 
           $detailsScope.showArrayInObjectsWarning = function (row, field) {
-            var value = row._source[field];
+            var value = row._formatted[field];
             return _.isArray(value) && typeof value[0] === 'object';
           };
 
@@ -102,7 +103,7 @@ define(function (require) {
         };
 
         $scope.filter = function (row, field, operation) {
-          $scope.filtering(field, row._source[field] || row[field], operation);
+          $scope.filtering(field, row._flattened[field] || row[field], operation);
         };
 
         $scope.$watchCollection('columns', function () {
@@ -134,7 +135,8 @@ define(function (require) {
                 source: _.mapValues(row._formatted, function (val, field) {
                   return _displayField(row, field, false);
                 }),
-                highlight: row.highlight
+                highlight: row.highlight,
+                shortDotsFilter: shortDotsFilter
               });
             } else {
               formatted = _displayField(row, column, true);
