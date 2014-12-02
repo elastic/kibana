@@ -15,7 +15,7 @@ define(function (require) {
       var data = new Data(injectZeros(vis.data), vis._attr);
 
       // configurable vars
-      var zeroColor = vis._attr.zeroColor = '#f2f2f2';
+      var zeroColor = vis._attr.zeroColor = '#ededed';//'#f2f2f2';
       var colors = vis._attr.colors = ['#d1e8c9', '#9fda9a', '#5dcb6c', '#2fa757', '#1f7f52', '#125946'];
       var colorScaleType = vis._attr.colorScaleType = 'quantize';
 
@@ -67,6 +67,8 @@ define(function (require) {
         legendRanges.push(cols);
       }
       var colList = _.flatten([zeroColor, colors]);
+      legendRanges.reverse();
+      colList.reverse();
       var colorObj = _.zipObject(legendRanges, colList);
       var getHeatmapColor = vis._attr.getHeatmapColor = function (val) {
         return colorObj[val];
