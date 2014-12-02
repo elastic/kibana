@@ -184,15 +184,22 @@ define(function (require) {
           var aggs = $scope.vis.aggs;
 
           var i = aggs.indexOf(agg);
-          if (i <= 0) return notify.log('already first');
+
+          // find the previous agg of the same group
+          var prevI = _.findLastIndex(aggs, function (otherAgg, otherI) {
+            return otherI < i && otherAgg.schema.group === agg.schema.group;
+          });
+
+          if (prevI === -1 || i === -1) {
+            notify.log('unable to move agg up when it is not in owned by the vis or is already at the top');
+            return;
+          }
+
+          // remove the agg from it's current prosition
           aggs.splice(i, 1);
 
-          // find the most previous bucket agg
-          var d = i - 1;
-          for (; d > 0 && aggs[d].schema.group !== 'buckets'; d--) ;
-
-          // place this right before
-          aggs.splice(d, 0, agg);
+          // place this before the most previous of the same group
+          aggs.splice(prevI, 0, agg);
         };
 
         $scope.moveDown = function (agg) {
