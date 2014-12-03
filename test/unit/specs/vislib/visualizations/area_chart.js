@@ -90,11 +90,13 @@ define(function (require) {
         });
 
         it('should throw a Not Enough Data Error', function () {
-          errorVis.handler.charts.forEach(function (chart) {
-            expect(function () {
-              chart.checkIfEnoughData();
-            }).to.throwError();
-          });
+          var chart = {
+            chartData: notEnoughData
+          };
+
+          expect(function () {
+            errorVis.handler.ChartClass.prototype.checkIfEnoughData.apply(chart);
+          }).to.throwError();
         });
 
         it('should not throw a Not Enough Data Error', function () {
