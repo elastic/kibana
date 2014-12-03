@@ -12,7 +12,7 @@ define(function (require) {
     function SavedDashboard(id) {
       // Gives our SavedDashboard the properties of a SavedObject
       courier.SavedObject.call(this, {
-        // this object will be saved at {{configFile.kibanaIndex}}/dashboard/{{id}}
+        // this object will be saved at {{configFile.kibana_index}}/dashboard/{{id}}
         type: SavedDashboard.type,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
