@@ -42,7 +42,7 @@ define(function (require) {
       });
 
       $provide.constant('configFile', {
-        kibanaIndex: 'test-index'
+        kibana_index: 'test-index'
       });
     });
 
