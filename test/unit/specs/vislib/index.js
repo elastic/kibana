@@ -6,7 +6,7 @@ define(function (require) {
   angular.module('kibana/vislib', ['kibana']);
 
   describe('VisLib Index Test Suite', function () {
-    var chart;
+    var visLib;
 
     beforeEach(function () {
       module('kibana/vislib');
@@ -14,16 +14,16 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, vislib) {
-        chart = vislib;
+        visLib = vislib;
       });
     });
 
     it('should return an object', function () {
-      expect(_.isObject(chart)).to.be(true);
+      expect(_.isObject(visLib)).to.be(true);
     });
 
     it('should return a Vis function', function () {
-      expect(_.isFunction(chart.Vis)).to.be(true);
+      expect(_.isFunction(visLib.Vis)).to.be(true);
     });
   });
 });

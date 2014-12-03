@@ -162,12 +162,19 @@ define(function (require) {
       .text(message);
     };
 
+    /**
+     * Destroys all the charts in the visualization
+     *
+     * @method destroy
+     */
     Handler.prototype.destroy = function () {
       this.charts.forEach(function (chart) {
         if (_.isFunction(chart.destroy)) {
           chart.destroy();
         }
       });
+
+      this.charts.length = 0;
     };
 
     return Handler;
