@@ -7,6 +7,7 @@ define(function (require) {
    * @returns {string}
    */
   return function (text) {
+    if (_.isUndefined(text)) return '';
     if (_.isString(text)) return text;
     if (_.isObject(text)) {
       if (text.query_string) return text.query_string.query;
