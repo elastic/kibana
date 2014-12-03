@@ -28,7 +28,7 @@ define(function (require) {
         sorting: '=',
         filtering: '=',
         refresh: '=',
-        mapping: '=',
+        indexPattern: '=',
         timefield: '=?'
       },
       link: function ($scope, $el) {
