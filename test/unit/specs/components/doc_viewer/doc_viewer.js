@@ -74,7 +74,7 @@ define(function (require) {
 
       it('should have the a value for each field', function () {
         _.each(_.keys(flattened), function (field) {
-          var cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.discover-table-details-value').text();
+          var cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.doc-viewer-value').text();
 
           // This sucks, but testing the filter chain is too hairy ATM
           expect(cellValue.length).to.be.greaterThan(0);

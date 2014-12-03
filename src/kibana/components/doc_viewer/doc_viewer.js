@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var html = require('text!components/doc_viewer/doc_viewer.html');
+  require('css!components/doc_viewer/doc_viewer.css');
 
   require('modules').get('kibana')
   .directive('docViewer', function (config, Private) {
@@ -10,8 +11,6 @@ define(function (require) {
     return {
       restrict: 'E',
       template: html,
-      transclude: true,
-      replace: true,
       scope: {
         hit: '=',
         indexPattern: '=',
