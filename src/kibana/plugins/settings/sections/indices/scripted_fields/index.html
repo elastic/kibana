@@ -4,6 +4,17 @@
     <div ng-controller="scriptedFieldsEdit">
       <h1>{{ action }} Scripted Field</h1>
 
+      <div class="bs-callout bs-callout-warning">
+        <h4>Proceed with caution</h4>
+
+        <p>Scripted fields can be used to display and aggregate calculated values. As such,
+        they can be very slow, and if done incorrectly, can cause Kibana to be unusable.</p>
+
+        <p>Please familiarize yourself with <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields</a> and with
+        <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations</a>
+        before using scripted fields.</p>
+      </div>
+
       <form name="scriptedFieldForm" ng-submit="submit()">
         <div class="form-group">
           <label>Name</label>
