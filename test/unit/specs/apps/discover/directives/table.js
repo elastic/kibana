@@ -313,23 +313,9 @@ define(function (require) {
             $scope.$digest();
           });
 
-          it('should be a tr', function () {
+          it('should be a tr with something in it', function () {
             expect($details.is('tr')).to.be(true);
-          });
-
-          it('should have a row for each field', function () {
-            var rows = $details.find('tr');
-            var row = $scope.row;
-            expect($details.find('tr').length).to.be(_.keys($parentScope.indexPattern.flattenHit($scope.row)).length);
-          });
-
-          describe('filtering', function () {
-            it('should filter when you click on the filter buttons', function () {
-              $details.find('.fa-search-plus').first().click();
-              expect($scope.filter.calledOnce).to.be(true);
-              $details.find('.fa-search-minus').first().click();
-              expect($scope.filter.calledTwice).to.be(true);
-            });
+            expect($details.text()).to.not.be.empty();
           });
 
         });
