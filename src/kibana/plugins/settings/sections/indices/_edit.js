@@ -25,7 +25,10 @@ define(function (require) {
     $scope.indexPattern = $route.current.locals.indexPattern;
     var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-    $scope.fieldTypes = Private(require('plugins/settings/sections/indices/_field_types'));
+    var FieldTypes = Private(require('plugins/settings/sections/indices/_field_types'));
+    $scope.$watch('indexPattern.fields', function () {
+      $scope.fieldTypes = FieldTypes($scope.indexPattern);
+    });
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
