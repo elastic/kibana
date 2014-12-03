@@ -128,11 +128,8 @@ define(function (require) {
       };
 
       self.removeScriptedField = function (name) {
-        var index = _.findIndex(self.scriptedFields, { name: name });
-        if (index !== -1) {
-          self.scriptedFields.splice(index, 1);
-          self.save();
-        }
+        _.remove(self.fields, { name: name });
+        self.save();
       };
 
       self.popularizeField = function (fieldName, unit) {
