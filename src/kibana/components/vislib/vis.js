@@ -45,7 +45,6 @@ define(function (require) {
      */
     Vis.prototype.render = function (data) {
       var chartType = this._attr.type;
-      console.log(chartType, handlerTypes, data);
 
       if (!data) {
         throw new Error('No valid data!');
