@@ -12,7 +12,9 @@ define(function (require) {
       template: require('text!plugins/settings/sections/indices/_scripted_fields.html'),
       scope: true,
       link: function ($scope, $el, attr) {
-        var fieldEditorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+        var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+        var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
+
         $scope.perPage = 25;
 
         $scope.columns = [{
@@ -47,7 +49,7 @@ define(function (require) {
             indexPattern: $scope.indexPattern.id
           };
 
-          kbnUrl.change(fieldEditorPath, params);
+          kbnUrl.change(fieldCreatorPath, params);
         };
 
         $scope.edit = function (field) {
@@ -56,7 +58,7 @@ define(function (require) {
             fieldName: field.name
           };
 
-          kbnUrl.change(fieldEditorPath + '/{{ fieldName }}', params);
+          kbnUrl.change(fieldEditorPath, params);
         };
 
         $scope.remove = function (field) {
