@@ -39,8 +39,9 @@ define(function (require) {
       var handler = this.handler;
       var color = handler.data.color;
       var isPercentage = (handler._attr.mode === 'percentage');
+      var isHeatmap = (handler._attr.type === 'heatmap');
 
-      if (isSeries) {
+      if (isSeries && !isHeatmap) {
 
         // Find object with the actual d value and add it to the point object
         var object = _.find(series, { 'label': d.label });
