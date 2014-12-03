@@ -12,7 +12,8 @@ define(function (require) {
       'extension': 'html',
       'bytes': 100,
       'point': {lat: 7, lon: 7},
-      'noMapping': 'hasNoMapping'
+      'noMapping': 'hasNoMapping',
+      'objectArray': [{foo: true}, {bar: false}]
     }
   };
 
@@ -82,25 +83,37 @@ define(function (require) {
 
 
       describe('filtering', function () {
-
         it('should apply a filter when clicking filterable fields', function () {
-          var filterCell = $elem.find('td[title="bytes"]').next();
+          var cell = $elem.find('td[title="bytes"]').next();
 
-          filterCell.find('.fa-search-plus').first().click();
+          cell.find('.fa-search-plus').first().click();
           expect($scope.filter.calledOnce).to.be(true);
-          filterCell.find('.fa-search-minus').first().click();
+          cell.find('.fa-search-minus').first().click();
           expect($scope.filter.calledTwice).to.be(true);
         });
 
         it('should NOT apply a filter when clicking non-filterable fields', function () {
-          var filterCell = $elem.find('td[title="point"]').next();
+          var cell = $elem.find('td[title="point"]').next();
 
-          filterCell.find('.fa-search-plus').first().click();
+          cell.find('.fa-search-plus').first().click();
           expect($scope.filter.calledOnce).to.be(false);
-          filterCell.find('.fa-search-minus').first().click();
+          cell.find('.fa-search-minus').first().click();
           expect($scope.filter.calledTwice).to.be(false);
         });
+      });
 
+      describe('warnings', function () {
+        it('displays a warning about missing mappings', function () {
+          var cells = $elem.find('td[title="noMapping"]').siblings();
+          expect(cells.find('.doc-viewer-no-mapping').length).to.be(1);
+          expect(cells.find('.doc-viewer-object-array').length).to.be(0);
+        });
+
+        it('displays a warning about objects in arrays', function () {
+          var cells = $elem.find('td[title="objectArray"]').siblings();
+          expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
+          expect(cells.find('.doc-viewer-object-array').length).to.be(1);
+        });
       });
 
     });

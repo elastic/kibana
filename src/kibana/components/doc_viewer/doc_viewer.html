@@ -12,7 +12,7 @@
             width="1%"
             class="discover-table-details-field">
         </td>
-        <td width="1%" class="discover-table-details-buttons" ng-show="filter">
+        <td width="1%" class="discover-table-details-buttons" ng-if="filter">
           <span bo-if="showFilters(mapping[field])">
             <i ng-click="filter(field, flattened[field], '+')" class="fa fa-search-plus"></i>
             <i ng-click="filter(field, flattened[field],'-')" class="fa fa-search-minus"></i>
