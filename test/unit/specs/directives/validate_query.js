@@ -187,8 +187,20 @@ define(function (require) {
         expect(toUser(notDefined)).to.be('');
       });
 
+      it('should present null as empty string', function () {
+        expect(toUser(null)).to.be('');
+      });
+
       it('should present objects as strings', function () {
         expect(toUser({foo: 'bar'})).to.be('{"foo":"bar"}');
+      });
+
+      it('should present query_string queries as strings', function () {
+        expect(toUser({ query_string: { query: 'lucene query string' } })).to.be('lucene query string');
+      });
+
+      it('should present query_string queries without a query as an empty string', function () {
+        expect(toUser({ query_string: {} })).to.be('');
       });
 
       it('should present string as strings', function () {
