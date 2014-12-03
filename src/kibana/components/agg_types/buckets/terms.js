@@ -14,7 +14,8 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          scriptable: true
+          scriptable: true,
+          filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
         },
         {
           name: 'size',
