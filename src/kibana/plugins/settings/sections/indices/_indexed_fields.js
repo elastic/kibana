@@ -36,7 +36,8 @@ define(function (require) {
         $scope.$watchCollection('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');
 
-          $scope.rows = $scope.indexPattern.fields.map(function (field) {
+          $scope.rows = _.filter($scope.indexPattern.fields, { scripted: undefined })
+          .map(function (field) {
             var childScope = $scope.$new();
             rowScopes.push(childScope);
             childScope.field = field;

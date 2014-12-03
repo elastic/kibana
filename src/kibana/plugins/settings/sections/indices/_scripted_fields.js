@@ -26,11 +26,12 @@ define(function (require) {
           sortable: false
         }];
 
-        $scope.$watch('indexPattern.scriptedFields', function () {
+        $scope.$watch('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
-          $scope.rows = $scope.indexPattern.scriptedFields.map(function (field, i) {
+          $scope.rows = _.filter($scope.indexPattern.fields, { scripted: true })
+          .map(function (field) {
             var rowScope = $scope.$new();
             var columns = [field.name, field.script];
             rowScope.field = field;

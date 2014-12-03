@@ -29,7 +29,10 @@ define(function (require) {
     } else {
       var scriptName = $route.current.params.field;
       $scope.action = 'Edit';
-      $scope.scriptedField = $scope.indexPattern.scriptedFields.byName[scriptName];
+      $scope.scriptedField = _.find($scope.indexPattern.fields, {
+        name: scriptName,
+        scripted: true
+      });
     }
 
     $scope.cancel = function () {
