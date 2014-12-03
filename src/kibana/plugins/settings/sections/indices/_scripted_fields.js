@@ -21,7 +21,6 @@ define(function (require) {
           title: 'script'
         }, {
           title: 'controls',
-          class: 'pull-right',
           sortable: false
         }];
 
