@@ -2,11 +2,10 @@
   <div ng-if="!aggParam.isScripted">
     <label for="field">
       Field
-      <span ng-if="aggParam.scriptable && aggConfig.vis.indexPattern.scriptedFields.raw.length > 0">
-        -
-        <a ng-click="aggParam.isScripted = true">Use Script</a>
-      </span>
     </label>
+    <span class="pull-right" ng-if="aggParam.scriptable && aggConfig.vis.indexPattern.scriptedFields.raw.length > 0">
+      <a ng-click="aggParam.isScripted = true">Use Script</a>
+    </span>
     <select
       class="form-control"
       name="field"
@@ -24,11 +23,10 @@
   <div ng-if="aggParam.isScripted">
     <label for="field">
       Scripted Field
-      <span ng-if="aggParam.scriptable">
-        -
-        <a ng-click="aggParam.isScripted = false">Use Field</a>
-      </span>
     </label>
+    <span class="pull-right" ng-if="aggParam.scriptable">
+      <a ng-click="aggParam.isScripted = false">Use Field</a>
+    </span>
     <select
       class="form-control"
       name="scriptedField"
