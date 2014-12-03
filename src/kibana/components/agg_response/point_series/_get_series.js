@@ -6,33 +6,50 @@ define(function (require) {
 
     return function getSeries(rows, chart) {
       var aspects = chart.aspects;
-      var x = aspects.x;
-      var y = aspects.y;
-      var series = aspects.series;
-      var multiY = _.isArray(y);
+      var multiY = _.isArray(aspects.y);
       var yScale = chart.yScale;
-      var partGetPoint = _.partial(getPoint, x, series, yScale);
+      var partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
 
-      return _(rows)
+      var series = _(rows)
       .transform(function (series, row) {
 
         if (!multiY) {
-          var point = partGetPoint(row, y);
+          var point = partGetPoint(row, aspects.y);
           addToSiri(series, point, point.series);
           return;
         }
 
-        y.forEach(function (y) {
+        aspects.y.forEach(function (y) {
           var point = partGetPoint(row, y);
           var prefix = point.series ? point.series + ': ' : '';
           var seriesId = prefix + y.agg.id;
           var seriesLabel = prefix + y.col.title;
+
+          point.yi = y.i;
           addToSiri(series, point, seriesId, seriesLabel);
         });
 
       }, {})
       .values()
       .value();
+
+      if (multiY) {
+        series = _.sortBy(series, function (siri) {
+          var firstVal = siri.values[0];
+          var y;
+
+          if (firstVal) {
+            var agg = firstVal.aggConfigResult.aggConfig;
+            y = _.find(aspects.y, function (y) {
+              return y.agg === agg;
+            });
+          }
+
+          return y ? y.i : series.length;
+        });
+      }
+
+      return series;
     };
   };
 });
