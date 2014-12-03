@@ -32,7 +32,7 @@ define(function (require) {
 
         if (!skipIndexPatternCache) {
           return es.get({
-            index: configFile.kibanaIndex,
+            index: configFile.kibana_index,
             type: 'index-pattern',
             id: id,
             _sourceInclude: ['fields']

@@ -51,7 +51,7 @@ define(function (require) {
           }
         }: { query: {match_all: {}}};
       return es.search({
-        index: configFile.kibanaIndex,
+        index: configFile.kibana_index,
         type: 'search',
         body: body,
         size: 100

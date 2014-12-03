@@ -16,7 +16,12 @@ define(function (require) {
           $rootScope.kibana.ready
         ])
         .then(function () {
-          if (!$route.current.$$route.originalPath.match(/settings\/indices/)) {
+          var path = $route.current.$$route.originalPath;
+          var allowedRoutes = [
+            '/settings/indices/',
+            '/settings/about'
+          ];
+          if (allowedRoutes.indexOf(path) < 0) {
             return courier.indexPatterns.getIds()
             .then(function (patterns) {
               if (!config.get('defaultIndex')) {

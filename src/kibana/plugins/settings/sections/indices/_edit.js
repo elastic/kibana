@@ -35,9 +35,9 @@ define(function (require) {
       $state.save();
     };
 
-    if (!$state.tab) {
-      $scope.changeTab($scope.fieldTypes[0]);
-    }
+    $scope.$watch('state.tab', function (tab) {
+      if (!tab) $scope.changeTab($scope.fieldTypes[0]);
+    });
 
     $scope.conflictFields = _.filter($scope.indexPattern.fields, {type: 'conflict'});
 

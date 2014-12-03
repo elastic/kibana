@@ -4,12 +4,12 @@
   <span class="label label-default visible-xs">Step 1</span>
 </h1>
 <ul class="list-group list-group-menu" ng-switch on="stepOneMode">
-  <li ng-click="stepOneMode='saved'"
-    ng-class="{'active': stepOneMode=='saved'}"
+  <li ng-click="stepOneMode='new'"
+    ng-class="{'active': stepOneMode=='new'}"
     class="list-group-item list-group-menu-item">
     From a new search
   </li>
-  <li class="list-group-item" ng-switch-when="saved">
+  <li class="list-group-item" ng-switch-when="new">
     <!-- Index patterns -->
     Select an index pattern
     <div class="form-group">
@@ -21,12 +21,12 @@
     </div>
   </li>
 
-  <li ng-click="stepOneMode='new'"
-    ng-class="{'active': stepOneMode=='new'}"
+  <li ng-click="stepOneMode='saved'"
+    ng-class="{'active': stepOneMode=='saved'}"
     class="list-group-item list-group-menu-item">
     From a saved search
   </li>
-  <li class="list-group-item" ng-switch-when="new">
+  <li class="list-group-item" ng-switch-when="saved">
     <!-- Saved searches -->
     <saved-object-finder
       title="Saved Searches"

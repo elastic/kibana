@@ -16,6 +16,12 @@ define(function (require) {
       title: 'Metric',
       icon: 'fa-calculator',
       template: require('text!plugins/metric_vis/metric_vis.html'),
+      params: {
+        defaults: {
+          fontSize: 60
+        },
+        editor: require('text!plugins/metric_vis/metric_vis_params.html')
+      },
       schemas: new Schemas([
         {
           group: 'metrics',
