@@ -27,7 +27,7 @@ define(function (require) {
       self.getIds.clearCache();
       patternCache.delete(pattern.id);
       return es.delete({
-        index: configFile.kibanaIndex,
+        index: configFile.kibana_index,
         type: 'index-pattern',
         id: pattern.id
       });

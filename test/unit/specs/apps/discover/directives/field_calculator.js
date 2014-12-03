@@ -91,7 +91,7 @@ define(function (require) {
 
       beforeEach(function () {
         hits = _.each(require('fixtures/real_hits.js'), function (hit) {
-          hit._flattened = indexPattern.flattenSearchResponse(hit._source);
+          hit.$$_flattened = indexPattern.flattenHit(hit);
         });
       });
 

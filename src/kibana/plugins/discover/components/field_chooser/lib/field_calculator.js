@@ -8,7 +8,7 @@ define(function (require) {
     return _.map(data, function (row) {
       var val;
 
-      val = _.isUndefined(row._flattened[name]) ? row[name] : row._flattened[name];
+      val = _.isUndefined(row.$$_flattened[name]) ? row[name] : row.$$_flattened[name];
 
       // for fields that come back in weird formats like geo_point
       if (val != null && normalize) val = normalize(val);

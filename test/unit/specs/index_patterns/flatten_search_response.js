@@ -27,10 +27,11 @@ define(function (require) {
       },
       bytes: 10039103,
       '@timestamp': (new Date()).toString(),
-      tags: [{ text: 'foo' }, { text: 'bar' }]
+      tags: [{ text: 'foo' }, { text: 'bar' }],
+      noMapping: true
     };
 
-    it('should only flatten keys as far as the mapping', function () {
+    it('should flatten keys as far down as the mapping goes', function () {
       var obj = indexPattern.flattenSearchResponse(fixture);
       expect(obj).to.have.property('geo.coordinates', fixture.geo.coordinates);
       expect(obj).to.not.have.property('geo.coordinates.lat');
@@ -40,6 +41,11 @@ define(function (require) {
       expect(obj).to.have.property('@timestamp', fixture['@timestamp']);
       expect(obj).to.have.property('message', 'Hello World');
       expect(obj).to.have.property('bytes', 10039103);
+    });
+
+    it('should flatten keys not in the mapping', function () {
+      var obj = indexPattern.flattenSearchResponse(fixture);
+      expect(obj).to.have.property('noMapping', true);
     });
 
     it('should preserve objects in arrays', function () {

@@ -47,7 +47,7 @@ define(function (require) {
           }
         }: { query: {match_all: {}}};
       return es.search({
-        index: config.file.kibanaIndex,
+        index: config.file.kibana_index,
         type: 'dashboard',
         body: body,
         size: 100
