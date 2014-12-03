@@ -320,7 +320,7 @@ define(function (require) {
           it('should have a row for each field', function () {
             var rows = $details.find('tr');
             var row = $scope.row;
-            expect($details.find('tr').length).to.be(_.keys(mapping).length);
+            expect($details.find('tr').length).to.be(_.keys($parentScope.indexPattern.flattenHit($scope.row)).length);
           });
 
           describe('filtering', function () {
@@ -338,6 +338,7 @@ define(function (require) {
     });
 
     describe('kbnTableRow meta', function () {
+
       var $elem = angular.element(
           '<tr kbn-table-row="row" ' +
           'columns="columns" ' +
@@ -376,7 +377,7 @@ define(function (require) {
       });
 
       it('should render even when the row source contains a field with the same name as a meta field', function () {
-        expect($details.find('tr').length).to.be(_.keys(mapping).length);
+        expect($details.find('tr').length).to.be(_.keys($parentScope.indexPattern.flattenHit($scope.row)).length);
       });
     });
 
@@ -415,7 +416,7 @@ define(function (require) {
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
         expect($before.eq(1).text().trim()).to.match(/^@timestamp_formatted/);
-        expect($before.eq(2).find('dl dt').length).to.be(_.keys(mapping).length);
+        expect($before.eq(2).find('dl dt').length).to.be(_.keys($scope.row.$$_flattened).length);
       }));
 
       afterEach(function () {
