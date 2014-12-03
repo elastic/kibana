@@ -26,6 +26,7 @@ define(function (require) {
 
         $scope.$watch('indexPattern.scriptedFields', function () {
           _.invoke(rowScopes, '$destroy');
+          rowScopes.length = 0;
 
           $scope.rows = $scope.indexPattern.scriptedFields.map(function (field, i) {
             var rowScope = $scope.$new();
