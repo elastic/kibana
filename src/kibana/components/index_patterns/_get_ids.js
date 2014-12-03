@@ -15,7 +15,7 @@ define(function (require) {
       }
 
       cachedPromise = es.search({
-        index: configFile.kibanaIndex,
+        index: configFile.kibana_index,
         type: 'index-pattern',
         fields: [],
         body: {

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter) {
+  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config) {
     var _ = require('lodash');
     var angular = require('angular');
     var errors = require('errors');
@@ -11,6 +11,8 @@ define(function (require) {
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+    var flattenHit = require('components/index_patterns/_flatten_hit');
+
     var IndexedArray = require('utils/indexed_array/index');
 
     var type = 'index-pattern';
@@ -39,7 +41,7 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibanaIndex)
+        .index(configFile.kibana_index)
         .type(type)
         .id(self.id);
 
@@ -194,7 +196,9 @@ define(function (require) {
         return '' + self.toJSON();
       };
 
+      self.metaFields = config.get('metaFields');
       self.flattenSearchResponse = flattenSearchResponse.bind(self);
+      self.flattenHit = flattenHit.bind(self);
 
     }
     return IndexPattern;

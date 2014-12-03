@@ -11,11 +11,13 @@ define(function (require) {
       scope: {
         columns: '=',
         sorting: '=',
-        mapping: '=',
+        indexPattern: '=',
         timefield: '=?'
       },
       template: headerHtml,
       controller: function ($scope) {
+        $scope.mapping = $scope.indexPattern.fields.byName;
+
         var unsortableFields = ['geo_point', 'geo_shape', 'attachment'];
         var sortableField = function (field) {
           var mapping = $scope.mapping[field];

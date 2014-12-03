@@ -2,7 +2,7 @@
   <thead
     kbn-table-header
     columns="columns"
-    mapping="mapping"
+    index-pattern="indexPattern"
     sorting="sorting"
     timefield="timefield">
   </thead>
@@ -10,10 +10,10 @@
     <tr ng-repeat="row in rows |limitTo:limit track by row._index+row._id"
       kbn-table-row="row"
       columns="columns"
-      mapping="mapping"
       sorting="sorting"
       timefield="timefield"
-      filtering="filtering"
+      filter="filtering"
+      index-pattern="indexPattern"
       class="discover-table-row"></tr>
   </tbody>
 </table>
