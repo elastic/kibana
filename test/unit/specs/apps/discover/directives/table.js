@@ -199,7 +199,7 @@ define(function (require) {
         'columns="columns" ' +
         'rows="rows" ' +
         'sorting="sorting"' +
-        'filtering="filtering"' +
+        'filter="filtering"' +
         'maxLength=maxLength ' +
         'index-pattern="indexPattern"' +
         'timefield="timefield" ' +
@@ -259,7 +259,7 @@ define(function (require) {
         '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
         'sorting="sorting"' +
-        'filtering="filtering"' +
+        'filter="filter"' +
         'index-pattern="indexPattern"' +
         'timefield="timefield" ' +
         '></tr>'
@@ -271,7 +271,7 @@ define(function (require) {
           row: getFakeRow(0, mapping),
           columns: [],
           sorting: [],
-          filtering: sinon.spy(),
+          filter: sinon.spy(),
           maxLength: 50,
         });
 
@@ -285,13 +285,6 @@ define(function (require) {
 
       describe('adding and removing columns', function () {
         columnTests('td', $elem);
-      });
-
-      describe('details row', function () {
-        it('should be an empty tr by default', function () {
-          expect($elem.next().is('tr')).to.be(true);
-          expect($elem.next().text()).to.be('');
-        });
       });
 
       describe('details row', function () {
@@ -333,9 +326,9 @@ define(function (require) {
           describe('filtering', function () {
             it('should filter when you click on the filter buttons', function () {
               $details.find('.fa-search-plus').first().click();
-              expect($scope.filtering.calledOnce).to.be(true);
+              expect($scope.filter.calledOnce).to.be(true);
               $details.find('.fa-search-minus').first().click();
-              expect($scope.filtering.calledTwice).to.be(true);
+              expect($scope.filter.calledTwice).to.be(true);
             });
           });
 

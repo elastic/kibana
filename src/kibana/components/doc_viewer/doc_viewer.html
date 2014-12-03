@@ -13,26 +13,26 @@
             class="discover-table-details-field">
         </td>
         <td width="1%" class="discover-table-details-buttons" ng-show="filter">
-          <span bo-show="showFilters(mapping[field])">
+          <span bo-if="showFilters(mapping[field])">
             <i ng-click="filter(field, flattened[field], '+')" class="fa fa-search-plus"></i>
             <i ng-click="filter(field, flattened[field],'-')" class="fa fa-search-minus"></i>
           </span>
-          <span bo-show="!showFilters(mapping[field])" tooltip="Unindexed fields can not be searched">
+          <span bo-if="!showFilters(mapping[field])" tooltip="Unindexed fields can not be searched">
             <i class="fa fa-search-plus text-muted"></i>
             <i class="fa fa-search-minus text-muted"></i>
           </span>
         </td>
 
         <td>
-          <i bo-show="!mapping[field] && !showArrayInObjectsWarning(doc, field)"
+          <i bo-if="!mapping[field] && !showArrayInObjectsWarning(doc, field)"
             tooltip-placement="top"
             tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
-            class="fa fa-warning text-color-warning ng-scope"></i>
-          <i bo-show="showArrayInObjectsWarning(doc, field)"
+            class="fa fa-warning text-color-warning ng-scope doc-viewer-no-mapping"></i>
+          <i bo-if="showArrayInObjectsWarning(doc, field)"
             tooltip-placement="top"
             tooltip="Objects in arrays are not well supported."
-            class="fa fa-warning text-color-warning ng-scope"></i>
-          <span class="discover-table-details-value" ng-bind-html="(formatted[field] || doc[field]) | highlight : hit.highlight[field] | trustAsHtml"></span>
+            class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
+          <span class="discover-table-details-value" ng-bind-html="(formatted[field] || hit[field]) | highlight : hit.highlight[field] | trustAsHtml"></span>
         </td>
       </tr>
     </tbody>

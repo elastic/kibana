@@ -4,7 +4,9 @@ define(function (require) {
   var html = require('text!components/doc_viewer/doc_viewer.html');
 
   require('modules').get('kibana')
-  .directive('docViewer', function (config, courier) {
+  .directive('docViewer', function (config, Private) {
+    var formats = Private(require('components/index_patterns/_field_formats'));
+
     return {
       restrict: 'E',
       template: html,
@@ -16,9 +18,8 @@ define(function (require) {
         filter: '=?',
       },
       link: function ($scope, $el, attr) {
-
         // If a field isn't in the mapping, use this
-        var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
+        var defaultFormat = formats.defaultByType.string;
 
         $scope.mode = 'table';
         $scope.mapping = $scope.indexPattern.fields.byName;
@@ -29,11 +30,12 @@ define(function (require) {
           return formatter.convert(value);
         });
         $scope.fields = _.keys($scope.flattened).sort();
+        $scope.filterableTypes = ['string', 'number', 'date', 'ip'];
+
 
         $scope.showFilters = function (mapping) {
-          var validTypes = ['string', 'number', 'date', 'ip'];
           if (!$scope.filter || !mapping || !mapping.indexed) return false;
-          return _.contains(validTypes, mapping.type);
+          return _.contains($scope.filterableTypes, mapping.type);
         };
 
         $scope.showArrayInObjectsWarning = function (row, field) {

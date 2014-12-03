@@ -32,7 +32,7 @@ define(function (require) {
       restrict: 'A',
       scope: {
         columns: '=',
-        filtering: '=',
+        filter: '=',
         indexPattern: '=',
         timefield: '=?',
         row: '=kbnTableRow'
@@ -81,10 +81,6 @@ define(function (require) {
           $detailsScope.row = row;
 
           $compile($detailsTr)($detailsScope);
-        };
-
-        $scope.filter = function (field, value, operation) {
-          $scope.filtering(field, value, operation);
         };
 
         $scope.$watchCollection('columns', function () {
