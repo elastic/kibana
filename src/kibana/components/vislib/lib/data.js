@@ -320,8 +320,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = obj.aggConfig ?
-          obj.aggConfig.params.field.format.convert : function (d) { return d; };
+        var fieldFormatter = obj.aggConfig ? obj.aggConfig.fieldFormatter() : String;
         names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {
