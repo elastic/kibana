@@ -14,9 +14,9 @@ define(function (require) {
     { from: 'now-1d/d', to: 'now-1d/d', display: 'Yesterday',             section: 1 },
     { from: 'now-2d/d', to: 'now-2d/d', display: 'Day before yesterday',  section: 1 },
     { from: 'now-7d/d', to: 'now-7d/d', display: 'This day last week',    section: 1 },
-    { from: 'now-1w/w', to: 'now-1w/w', display: 'Last week',             section: 1 },
-    { from: 'now-1M/M', to: 'now-1M/M', display: 'Last month',            section: 1 },
-    { from: 'now-1y/y', to: 'now-1y/y', display: 'Last year',             section: 1 },
+    { from: 'now-1w/w', to: 'now-1w/w', display: 'Previous week',         section: 1 },
+    { from: 'now-1M/M', to: 'now-1M/M', display: 'Previous month',        section: 1 },
+    { from: 'now-1y/y', to: 'now-1y/y', display: 'Previous year',         section: 1 },
 
     { from: 'now-15m',  to: 'now',      display: 'Last 15 minutes',       section: 2 },
     { from: 'now-30m',  to: 'now',      display: 'Last 30 minutes',       section: 2 },

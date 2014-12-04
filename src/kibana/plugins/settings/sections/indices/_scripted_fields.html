@@ -1,0 +1,14 @@
+<header>
+  <button ng-click="create()" class="btn btn-info">
+    <i class="fa fa-plus"></i>
+    Add Scripted Field
+  </button>
+</header>
+
+<paginated-table
+  columns="columns"
+  rows="rows"
+  per-page="perPage">
+</paginated-table>
+
+<div ng-if="rows.length === 0">No scripted fields</div>

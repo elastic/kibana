@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
+  require('plugins/settings/sections/indices/scripted_fields/index');
   require('plugins/settings/sections/indices/_create');
   require('plugins/settings/sections/indices/_edit');
 
