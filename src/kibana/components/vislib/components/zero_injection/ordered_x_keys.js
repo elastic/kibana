@@ -18,7 +18,9 @@ define(function (require) {
       return _.chain(objKeys)
       .pairs()
       .sortBy(function (d) {
-
+        if (d[1].isDate) {
+          return +d[0];
+        }
         // sort by index
         return d[1].index;
       })
