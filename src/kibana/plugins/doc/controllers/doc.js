@@ -23,21 +23,13 @@ define(function (require) {
     }
   });
 
-  app.controller('doc', function ($scope, courier, $route, Notifier, es) {
+  app.controller('doc', function ($scope, $route, es) {
 
     // Pretty much only need this for formatting, not actually using it for fetching anything.
     $scope.indexPattern = $route.current.locals.indexPattern;
 
-    var notify = new Notifier({
-      location: 'Doc'
-    });
-
     var computedFields = $scope.indexPattern.getComputedFields();
 
-    // Q: Hey jerk, why are you using this instead of just getting a document?
-    // A: No need for name calling. This is the only way we can get the scripted & stored fields.
-    // Q: Then why not use a searchSource?
-    // A: I only need the one index, constructing a temporary index pattern seems wasteful.
     es.search({
       index: $route.current.params.index,
       type: $route.current.params.type,
