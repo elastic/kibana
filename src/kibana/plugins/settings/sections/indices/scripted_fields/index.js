@@ -30,6 +30,9 @@ define(function (require) {
 
     if (createMode) {
       $scope.action = 'Create';
+      $scope.scriptedField = {
+        type: 'string'
+      };
     } else {
       var scriptName = $route.current.params.field;
       $scope.action = 'Edit';
