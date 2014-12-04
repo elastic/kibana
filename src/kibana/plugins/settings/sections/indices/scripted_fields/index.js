@@ -26,13 +26,10 @@ define(function (require) {
 
     $scope.indexPattern = $route.current.locals.indexPattern;
 
-    $scope.indexTypes = Object.keys(typeOptions.types);
+    $scope.indexTypes = typeOptions.types;
 
     if (createMode) {
       $scope.action = 'Create';
-      $scope.scriptedField = {
-        type: 'string'
-      };
     } else {
       var scriptName = $route.current.params.field;
       $scope.action = 'Edit';
