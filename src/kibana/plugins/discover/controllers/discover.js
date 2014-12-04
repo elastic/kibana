@@ -134,16 +134,20 @@ define(function (require) {
         var ignoreStateChanges = ['columns'];
 
         // listen for changes, and relisten everytime something happens
-        $scope.$listen($state, 'fetch_with_changes', function (changed) {
+        $scope.$listen($state, 'fetch_with_changes', updateFields);
+        $scope.$listen($state, 'reset_with_changes', updateFields);
+
+        function updateFields(changed) {
           if (_.contains(changed, 'columns')) {
             $scope.fields.forEach(function (field) {
               field.display = _.contains($state.columns, field.name);
             });
+            refreshColumns();
           }
 
           // if we only have ignorable changes, do nothing
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
-        });
+        }
 
         $scope.$listen(timefilter, 'update', function () {
           $scope.fetch();
@@ -418,7 +422,6 @@ define(function (require) {
     $scope.resetQuery = function () {
       $state.reset();
       $scope.fetch();
-      setFields();
     };
 
     $scope.newQuery = function () {
