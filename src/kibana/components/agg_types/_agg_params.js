@@ -6,7 +6,6 @@ define(function (require) {
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));
-    var ScriptAggParam = Private(require('components/agg_types/param_types/script'));
     var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
     var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
     var StringAggParam = Private(require('components/agg_types/param_types/string'));
@@ -47,9 +46,6 @@ define(function (require) {
         initialSet: params.map(function (param) {
           if (param.name === 'field') {
             return new FieldAggParam(param);
-          }
-          else if (param.name === 'script') {
-            return new ScriptAggParam(param);
           }
           else if (param.type === 'optioned') {
             return new OptionedAggParam(param);

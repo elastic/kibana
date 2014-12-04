@@ -45,11 +45,12 @@ define(function (require) {
      * @return {undefined}
      */
     FieldAggParam.prototype.write = function (aggConfig, output) {
-      // don't append field if script is defined
-      if (aggConfig.params.script) return;
-
       var field = aggConfig.params.field;
-      output.params.field = field.name;
+      if (field.scripted) {
+        output.params.script = field.script;
+      } else {
+        output.params.field = field.name;
+      }
     };
 
     return FieldAggParam;
