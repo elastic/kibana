@@ -60,9 +60,8 @@ define(function (require) {
     });
 
     function checkConflict(name) {
-      var match = _.find($scope.indexPattern.fields, {
-        name: name,
-        scripted: false
+      var match = _.find($scope.indexPattern.getFields(), {
+        name: name
       });
 
       if (match) {
