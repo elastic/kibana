@@ -6,50 +6,22 @@ define(function (require) {
       index: ['name'],
       group: ['type'],
       immutable: true,
-
-      initialSet: [{
-        name: 'float',
-        type: 'number'
-      }, {
-        name: 'double',
-        type: 'number'
-      }, {
-        name: 'integer',
-        type: 'number'
-      }, {
-        name: 'long',
-        type: 'number'
-      }, {
-        name: 'short',
-        type: 'number'
-      }, {
-        name: 'byte',
-        type: 'number'
-      }, {
-        name: 'token_count',
-        type: 'number'
-      }, {
-        name: 'date',
-        type: 'date'
-      }, {
-        name: 'boolean',
-        type: 'boolean'
-      }, {
-        name: 'ip',
-        type: 'ip'
-      }, {
-        name: 'attachment',
-        type: 'attachment'
-      }, {
-        name: 'geo_point',
-        type: 'geo_point'
-      }, {
-        name: 'geo_shape',
-        type: 'geo_shape'
-      }, {
-        name: 'string',
-        type: 'string'
-      }]
+      initialSet: [
+        {name: 'string', type: 'string', group: 'base'},
+        {name: 'date', type: 'date', group: 'base'},
+        {name: 'boolean', type: 'boolean', group: 'base'},
+        {name: 'float', type: 'number', group: 'number'},
+        {name: 'double', type: 'number', group: 'number'},
+        {name: 'integer', type: 'number', group: 'number'},
+        {name: 'long', type: 'number', group: 'number'},
+        {name: 'short', type: 'number', group: 'number'},
+        {name: 'byte', type: 'number', group: 'number'},
+        {name: 'token_count', type: 'number', group: 'number'},
+        {name: 'geo_point', type: 'geo_point', group: 'geo'},
+        {name: 'geo_shape', type: 'geo_shape', group: 'geo'},
+        {name: 'ip', type: 'ip', group: 'other'},
+        {name: 'attachment', type: 'attachment', group: 'other'},
+      ]
     });
 
     /**
