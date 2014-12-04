@@ -148,6 +148,13 @@ define(function (require) {
         self.save();
       };
 
+      self.getFields = function (type) {
+        if (type === 'scripted') {
+          return _.where(self.fields, { scripted: true });
+        }
+        return _.where(self.fields, { scripted: undefined });
+      };
+
       self.getInterval = function () {
         return this.intervalName && _.find(intervals, { name: this.intervalName });
       };
