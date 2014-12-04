@@ -138,7 +138,7 @@ define(function (require) {
           var tables = [];
 
           writer.split(vis.aggs[0], buckets, function () {
-            writer.cell(100, function () {
+            writer.cell(vis.aggs[1], 100, function () {
               tables.push(writer.row());
             });
           });
@@ -182,9 +182,9 @@ define(function (require) {
           var writer = new ResponseWriter(vis);
 
           var table = writer._table();
-          writer.cell(1, function () {
-            writer.cell(2, function () {
-              writer.cell(3, function () {
+          writer.cell({}, 1, function () {
+            writer.cell({}, 2, function () {
+              writer.cell({}, 3, function () {
                 writer.row();
               });
             });
@@ -220,7 +220,7 @@ define(function (require) {
           var writer = new ResponseWriter(vis);
 
           expect(writer.rowBuffer).to.have.length(0);
-          writer.cell(500, function () {
+          writer.cell({}, 500, function () {
             expect(writer.rowBuffer).to.have.length(1);
             expect(writer.rowBuffer[0]).to.be(500);
           });
@@ -234,9 +234,9 @@ define(function (require) {
           var writer = new ResponseWriter(vis);
 
           var table = writer._table();
-          writer.cell(1, function () {
-            writer.cell(2, function () {
-              writer.cell(3, function () {
+          writer.cell({}, 1, function () {
+            writer.cell({}, 2, function () {
+              writer.cell({}, 3, function () {
                 writer.row();
               });
             });
@@ -267,11 +267,13 @@ define(function (require) {
           var os = splits[2];
           var osBuckets = new Buckets({ buckets: [ { key: 'windows' }, { key: 'mac' } ] });
 
+          var count = vis.aggs[3];
+
           var writer = new ResponseWriter(vis);
           writer.split(type, typeBuckets, function () {
             writer.split(ext, extBuckets, function () {
               writer.split(os, osBuckets, function (bucket, key) {
-                writer.cell(key === 'windows' ? 1 : 2, function () {
+                writer.cell(count, key === 'windows' ? 1 : 2, function () {
                   writer.row();
                 });
               });
@@ -313,7 +315,7 @@ define(function (require) {
 
           var writer = new ResponseWriter(vis);
           var table = writer._table();
-          writer.cell('apache', function () {
+          writer.cell(vis.aggs[0], 'apache', function () {
             writer.row();
           });
 
@@ -332,7 +334,7 @@ define(function (require) {
 
           var writer = new ResponseWriter(vis);
           var table = writer._table();
-          writer.cell('apache', function () {
+          writer.cell(vis.aggs[0], 'apache', function () {
             writer.row();
           });
 
