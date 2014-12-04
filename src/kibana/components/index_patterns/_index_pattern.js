@@ -98,6 +98,7 @@ define(function (require) {
             // non-enumerable type so that it does not get included in the JSON
             Object.defineProperties(field, {
               format: {
+                configurable: true,
                 enumerable: false,
                 get: function () {
                   var formatName = self.customFormats && self.customFormats[field.name];
@@ -105,6 +106,7 @@ define(function (require) {
                 }
               },
               displayName: {
+                configurable: true,
                 enumerable: false,
                 get: function () {
                   return shortDotsFilter(field.name);
@@ -196,8 +198,14 @@ define(function (require) {
       self._fetchFields = function () {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
+          // append existing scripted fields
+          fields = fields.concat(self._getScriptedFields());
           setIndexedValue('fields', fields);
         });
+      };
+
+      self._getScriptedFields = function () {
+        return _.where(self.fields, { scripted: true });
       };
 
       self.toJSON = function () {
