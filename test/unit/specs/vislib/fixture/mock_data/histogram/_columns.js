@@ -98,7 +98,21 @@ define(function (require) {
                 'y': 0,
                 'y0': 0
               }
-            ]
+            ],
+            'xAxisFormatter': function (val) {
+              if (_.isObject(val)) {
+                return JSON.stringify(val);
+              }
+              else if (val == null) {
+                return '';
+              }
+              else {
+                return '' + val;
+              }
+            },
+            'tooltipFormatter': function (d) {
+              return d;
+            }
           }
         ]
       },
@@ -197,7 +211,21 @@ define(function (require) {
                 'y': 2,
                 'y0': 0
               }
-            ]
+            ],
+            'xAxisFormatter': function (val) {
+              if (_.isObject(val)) {
+                return JSON.stringify(val);
+              }
+              else if (val == null) {
+                return '';
+              }
+              else {
+                return '' + val;
+              }
+            },
+            'tooltipFormatter': function (d) {
+              return d;
+            }
           }
         ]
       },
@@ -298,23 +326,23 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       }
     ],
-    'hits': 40,
-    'xAxisFormatter': function (val) {
-      if (_.isObject(val)) {
-        return JSON.stringify(val);
-      }
-      else if (val == null) {
-        return '';
-      }
-      else {
-        return '' + val;
-      }
-    },
-    'tooltipFormatter': function (d) {
-      return d;
-    }
+    'hits': 40
   };
 });
