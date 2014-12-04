@@ -7,9 +7,10 @@ define(function (require) {
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-
     var chosen = require('angular-chosen');
+
     require('plugins/visualize/editor/agg_param');
+    require('filters/match_any');
 
     var notify = new Notifier({
       location: 'visAggGroup'
