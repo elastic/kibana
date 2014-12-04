@@ -32,7 +32,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'h5: headings',
@@ -63,7 +77,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'http: headings',
@@ -94,7 +122,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'success: headings',
@@ -125,7 +167,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'www.slate.com: headings',
@@ -156,23 +212,23 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       }
     ],
-    'hits': 171445,
-    'xAxisFormatter': function (val) {
-      if (_.isObject(val)) {
-        return JSON.stringify(val);
-      }
-      else if (val == null) {
-        return '';
-      }
-      else {
-        return '' + val;
-      }
-    },
-    'tooltipFormatter': function (d) {
-      return d;
-    }
+    'hits': 171445
   };
 });

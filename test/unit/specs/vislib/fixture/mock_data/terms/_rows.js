@@ -32,7 +32,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': '1000.0-2000.0: bytes',
@@ -63,23 +77,23 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       }
     ],
-    'hits': 171458,
-    'xAxisFormatter': function (val) {
-      if (_.isObject(val)) {
-        return JSON.stringify(val);
-      }
-      else if (val == null) {
-        return '';
-      }
-      else {
-        return '' + val;
-      }
-    },
-    'tooltipFormatter': function (d) {
-      return d;
-    }
+    'hits': 171458
   };
 });

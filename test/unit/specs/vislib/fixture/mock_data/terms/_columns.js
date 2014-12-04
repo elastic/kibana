@@ -32,7 +32,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': '2014.11.12: index',
@@ -63,7 +77,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': '2014.11.11: index',
@@ -94,23 +122,23 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       }
     ],
-    'hits': 171462,
-    'xAxisFormatter': function (val) {
-      if (_.isObject(val)) {
-        return JSON.stringify(val);
-      }
-      else if (val == null) {
-        return '';
-      }
-      else {
-        return '' + val;
-      }
-    },
-    'tooltipFormatter': function (d) {
-      return d;
-    }
+    'hits': 171462
   };
 });

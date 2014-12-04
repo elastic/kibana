@@ -32,7 +32,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'info: links',
@@ -63,7 +77,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'www.slate.com: links',
@@ -94,7 +122,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'twitter.com: links',
@@ -125,7 +167,21 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': 'www.www.slate.com: links',
@@ -156,23 +212,23 @@ define(function (require) {
               }
             ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       }
     ],
-    'hits': 171446,
-    'xAxisFormatter': function (val) {
-      if (_.isObject(val)) {
-        return JSON.stringify(val);
-      }
-      else if (val == null) {
-        return '';
-      }
-      else {
-        return '' + val;
-      }
-    },
-    'tooltipFormatter': function (d) {
-      return d;
-    }
+    'hits': 171446
   };
 });

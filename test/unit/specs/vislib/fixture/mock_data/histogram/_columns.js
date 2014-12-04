@@ -98,23 +98,23 @@ define(function (require) {
                 'y': 0,
                 'y0': 0
               }
-            ],
-            'xAxisFormatter': function (val) {
-              if (_.isObject(val)) {
-                return JSON.stringify(val);
-              }
-              else if (val == null) {
-                return '';
-              }
-              else {
-                return '' + val;
-              }
-            },
-            'tooltipFormatter': function (d) {
-              return d;
-            }
+            ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': '200: response',
@@ -211,23 +211,23 @@ define(function (require) {
                 'y': 2,
                 'y0': 0
               }
-            ],
-            'xAxisFormatter': function (val) {
-              if (_.isObject(val)) {
-                return JSON.stringify(val);
-              }
-              else if (val == null) {
-                return '';
-              }
-              else {
-                return '' + val;
-              }
-            },
-            'tooltipFormatter': function (d) {
-              return d;
-            }
+            ]
           }
-        ]
+        ],
+        'xAxisFormatter': function (val) {
+          if (_.isObject(val)) {
+            return JSON.stringify(val);
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
+            return '' + val;
+          }
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        }
       },
       {
         'label': '503: response',

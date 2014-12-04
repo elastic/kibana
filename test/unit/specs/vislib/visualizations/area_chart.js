@@ -5,28 +5,22 @@ define(function (require) {
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
-  var columns = require('vislib_fixtures/mock_data/date_histogram/_columns');
-  var rows = require('vislib_fixtures/mock_data/date_histogram/_rows');
-  var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
-  var termSeries = require('vislib_fixtures/mock_data/terms/_series');
   var termColumns = require('vislib_fixtures/mock_data/terms/_columns');
+  var rangeRows = require('vislib_fixtures/mock_data/range/_rows');
+  var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
 
   var dataArray = [
     series,
-    columns,
-    rows,
+    termColumns,
+    rangeRows,
     stackedSeries,
-    termSeries,
-    termColumns
   ];
 
   var names = [
     'series',
-    'columns',
-    'rows',
+    'term columns',
+    'range rows',
     'stackedSeries',
-    'term series',
-    'term columns'
   ];
 
   var visLibParams = {
