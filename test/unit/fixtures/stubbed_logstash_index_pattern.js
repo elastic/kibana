@@ -3,6 +3,7 @@ define(function (require) {
     var StubIndexPattern = Private(require('test_utils/stub_index_pattern'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
+    var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
     var _ = require('lodash');
 
@@ -23,6 +24,7 @@ define(function (require) {
       { name: 'custom_user_field',  displayName: 'custom_user_field', type: 'conflict',   indexed: false, analyzed: false,  count: 0 }
     ]);
 
+    indexPattern.getComputedFields = _.bind(getComputedFields, indexPattern);
     indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);
     indexPattern.flattenHit = _.bind(flattenHit, indexPattern);
     indexPattern.metaFields = ['_id', '_type', '_source'];
