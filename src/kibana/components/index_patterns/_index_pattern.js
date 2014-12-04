@@ -151,10 +151,10 @@ define(function (require) {
       };
 
       self.getFields = function (type) {
-        if (type === 'scripted') {
-          return _.where(self.fields, { scripted: true });
-        }
-        return _.where(self.fields, { scripted: undefined });
+        var getScripted = (type === 'scripted');
+        return _.where(self.fields, function (field) {
+          return field.scripted ? getScripted : !getScripted;
+        });
       };
 
       self.getInterval = function () {
@@ -208,13 +208,9 @@ define(function (require) {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
           // append existing scripted fields
-          fields = fields.concat(self._getScriptedFields());
+          fields = fields.concat(self.getFields('scripted'));
           setIndexedValue('fields', fields);
         });
-      };
-
-      self._getScriptedFields = function () {
-        return _.where(self.fields, { scripted: true });
       };
 
       self.toJSON = function () {
