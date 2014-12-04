@@ -24,8 +24,7 @@ define(function (require) {
       timeFieldName: 'string',
       intervalName: 'string',
       customFormats: 'json',
-      fields: 'json',
-      scriptedFields: 'json'
+      fields: 'json'
     });
 
     function IndexPattern(id) {
@@ -71,11 +70,10 @@ define(function (require) {
             _.assign(self, resp._source);
 
             if (self.id) {
-              if (!self.fields || !self.scriptedFields) {
+              if (!self.fields) {
                 return self.refreshFields();
               } else {
                 setIndexedValue('fields');
-                setIndexedValue('scriptedFields');
               }
             }
 
@@ -120,15 +118,16 @@ define(function (require) {
       }
 
       self.addScriptedField = function (name, script) {
-        var scriptedField = self.scriptedFields.push({
+        var scriptedField = self.fields.push({
           name: name,
+          scripted: true,
           script: script
         });
         self.save();
       };
 
       self.removeScriptedField = function (name) {
-        _.remove(self.fields, { name: name });
+        _.remove(self.fields, { name: name, scripted: true });
         self.save();
       };
 
@@ -186,7 +185,6 @@ define(function (require) {
         return mapper.clearCache(self)
         .then(function () {
           return self._fetchFields()
-          .then(self._setScriptedFields)
           .then(self.save);
         });
       };
@@ -196,12 +194,6 @@ define(function (require) {
         .then(function (fields) {
           setIndexedValue('fields', fields);
         });
-      };
-
-      self._setScriptedFields = function () {
-        if (!self.scriptedFields) {
-          self.scriptedFields = [];
-        }
       };
 
       self.toJSON = function () {
