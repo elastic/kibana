@@ -55,7 +55,7 @@ define(function (require) {
             }
 
             function useDefaults() {
-              index = configFile.kibanaIndex;
+              index = configFile.kibana_index;
               type = '__kibanaQueryValidator';
             }
 

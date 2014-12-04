@@ -42,7 +42,7 @@ define(function (require) {
       });
 
       $provide.constant('configFile', {
-        kibanaIndex: 'test-index'
+        kibana_index: 'test-index'
       });
     });
 
@@ -182,6 +182,11 @@ define(function (require) {
     });
 
     describe('model presentation formatter', function () {
+      it('should present undefined as empty string', function () {
+        var notDefined;
+        expect(toUser(notDefined)).to.be('');
+      });
+
       it('should present objects as strings', function () {
         expect(toUser({foo: 'bar'})).to.be('{"foo":"bar"}');
       });

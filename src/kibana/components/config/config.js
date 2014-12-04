@@ -33,7 +33,7 @@ define(function (require) {
 
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var doc = (new DocSource())
-      .index(configFile.kibanaIndex)
+      .index(configFile.kibana_index)
       .type('config')
       .id(kbnVersion);
 
