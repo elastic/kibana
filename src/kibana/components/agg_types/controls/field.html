@@ -3,9 +3,6 @@
     <label for="field">
       Field
     </label>
-    <span class="pull-right" ng-if="aggParam.scriptable && aggConfig.vis.indexPattern.scriptedFields.raw.length > 0">
-      <a ng-click="aggParam.isScripted = true">Use Script</a>
-    </span>
     <select
       class="form-control"
       name="field"
@@ -16,25 +13,6 @@
         | fieldType: aggParam.filterFieldTypes
         | filter: { indexed: true }
         | orderBy: ['type', 'name']
-      ">
-    </select>
-  </div>
-
-  <div ng-if="aggParam.isScripted">
-    <label for="field">
-      Scripted Field
-    </label>
-    <span class="pull-right" ng-if="aggParam.scriptable">
-      <a ng-click="aggParam.isScripted = false">Use Field</a>
-    </span>
-    <select
-      class="form-control"
-      name="scriptedField"
-      ng-valid="params.field || params.script"
-      ng-model="params.script"
-      ng-options="
-        field as field.name for field in aggConfig.vis.indexPattern.scriptedFields.raw
-        | orderBy: ['name']
       ">
     </select>
   </div>

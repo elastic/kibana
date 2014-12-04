@@ -18,10 +18,6 @@ define(function (require) {
           filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
         },
         {
-          name: 'script'
-          // no editor, will be used in place of field
-        },
-        {
           name: 'size',
           default: 5
           // editor: batched with order
