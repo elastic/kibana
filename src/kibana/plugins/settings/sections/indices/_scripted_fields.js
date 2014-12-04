@@ -22,6 +22,8 @@ define(function (require) {
         }, {
           title: 'script'
         }, {
+          title: 'type'
+        }, {
           title: 'controls',
           sortable: false
         }];
@@ -32,7 +34,7 @@ define(function (require) {
 
           $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
             var rowScope = $scope.$new();
-            var columns = [field.name, field.script];
+            var columns = [field.name, field.script, field.type];
             rowScope.field = field;
             rowScopes.push(rowScope);
 

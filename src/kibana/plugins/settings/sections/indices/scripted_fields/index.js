@@ -18,11 +18,15 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier) {
+  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private) {
+    var typeOptions = Private(require('components/index_patterns/_cast_mapping_type'));
     var fieldEditorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
     var notify = new Notifier();
     var createMode = (!$route.current.params.field);
+
     $scope.indexPattern = $route.current.locals.indexPattern;
+
+    $scope.indexTypes = Object.keys(typeOptions.types);
 
     if (createMode) {
       $scope.action = 'Create';
@@ -40,8 +44,9 @@ define(function (require) {
     };
 
     $scope.submit = function () {
+      var field = $scope.scriptedField;
       if (createMode) {
-        $scope.indexPattern.addScriptedField($scope.scriptedField.name, $scope.scriptedField.script);
+        $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
       } else {
         $scope.indexPattern.save();
       }

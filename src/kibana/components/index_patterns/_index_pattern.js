@@ -119,11 +119,13 @@ define(function (require) {
         });
       }
 
-      self.addScriptedField = function (name, script) {
+      self.addScriptedField = function (name, script, type) {
+        type = type || 'string';
         var scriptedField = self.fields.push({
           name: name,
+          script: script,
+          type: type,
           scripted: true,
-          script: script
         });
         self.save();
       };

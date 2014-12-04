@@ -24,6 +24,10 @@
           <label>Script</label>
           <textarea class="form-control span12" ng-model="scriptedField.script"></textarea>
         </div>
+        <div class="form-group">
+          <label>Result Type</label>
+          <select class="form-control span6" ng-model="scriptedField.type" ng-options="value for value in indexTypes" required></select>
+        </div>
       </form>
       <div ng-if="namingConflict" class="alert alert-danger">
         You already have a field with the name {{ scriptedField.name }}. Naming your scripted
