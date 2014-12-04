@@ -14,7 +14,7 @@ define(function (require) {
 
       return [{
         title: 'fields',
-        index: 'fields',
+        index: 'indexedFields',
         count: fieldCount.indexed
       }, {
         title: 'scripted fields',
