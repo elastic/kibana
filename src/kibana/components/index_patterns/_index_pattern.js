@@ -127,7 +127,11 @@ define(function (require) {
       };
 
       self.removeScriptedField = function (name) {
-        _.remove(self.fields, { name: name, scripted: true });
+        var fieldIndex = _.findIndex(self.fields, {
+          name: name,
+          scripted: true
+        });
+        self.fields.splice(fieldIndex, 1);
         self.save();
       };
 
