@@ -25,7 +25,6 @@ define(function (require) {
     var createMode = (!$route.current.params.field);
 
     $scope.indexPattern = $route.current.locals.indexPattern;
-
     $scope.indexTypes = typeOptions.types;
 
     if (createMode) {
