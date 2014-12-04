@@ -90,8 +90,9 @@ define(function (require) {
       var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
-      var fieldFormatter = function (label) {
-        return label;
+      var format = function (d, label) {
+        var formatter = d.aggConfig ? d.aggConfig.fieldFormatter() : String;
+        return formatter(label);
       };
 
       path = svg
@@ -103,18 +104,13 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
-
-          fieldFormatter = d.aggConfig ?
-            d.aggConfig.params.field.format.convert : fieldFormatter;
-          return self.colorToClass(color(fieldFormatter(d.name)));
+          return self.colorToClass(color(format(d, d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
 
-          fieldFormatter = d.aggConfig ?
-            d.aggConfig.params.field.format.convert : fieldFormatter;
-          return color(fieldFormatter(d.name));
+          return color(format(d, d.name));
         });
 
       if (isTooltip) {
