@@ -55,7 +55,11 @@ define(function (require) {
     });
 
     function checkConflict(name) {
-      var match = $scope.indexPattern.fields.byName[name];
+      var match = _.find($scope.indexPattern.fields, {
+        name: name,
+        scripted: false
+      });
+
       if (match) {
         $scope.namingConflict = true;
       } else {
