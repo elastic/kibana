@@ -2,6 +2,7 @@ define(function (require) {
   return function LineChartFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var errors = require('errors');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     require('css!components/vislib/styles/main');
@@ -247,8 +248,8 @@ define(function (require) {
           width = elWidth - margin.left - margin.right;
           height = elHeight - margin.top - margin.bottom;
 
-          if (_.isNaN(width) || width < minWidth || _.isNaN(height) || height < minHeight) {
-            throw new Error(chartToSmallError);
+          if (width < minWidth || height < minHeight) {
+            throw new errors.ContainerTooSmall();
           }
 
           div = d3.select(el);
