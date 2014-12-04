@@ -29,7 +29,7 @@ define(function (require) {
         top: 5,
         right: 5,
         bottom: 16,
-        left: 40
+        left: 26
       };
     }
 

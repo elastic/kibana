@@ -67,8 +67,11 @@ define(function (require) {
         legendRanges.push(cols);
       }
       var colList = _.flatten([zeroColor, colors]);
-      legendRanges.reverse();
-      colList.reverse();
+
+      // high to low in legend
+      //legendRanges.reverse();
+      //colList.reverse();
+
       var colorObj = _.zipObject(legendRanges, colList);
       var getHeatmapColor = vis._attr.getHeatmapColor = function (val) {
         return colorObj[val];
