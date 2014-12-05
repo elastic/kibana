@@ -3,19 +3,23 @@ define(function (require) {
 
   return {
     'label': '',
-    'xAxisLabel': '',
+    'xAxisLabel': 'bytes ranges',
     'yAxisLabel': 'Count of documents',
     'series': [
       {
         'values': [
           {
-            'x': '_all',
-            'y': 274
+            'x': '0.0-1000.0',
+            'y': 16576
+          },
+          {
+            'x': '1000.0-2000.0',
+            'y': 9005
           }
         ]
       }
     ],
-    'hits': 274,
+    'hits': 171500,
     'xAxisFormatter': function (val) {
       if (_.isObject(val)) {
         return JSON.stringify(val);

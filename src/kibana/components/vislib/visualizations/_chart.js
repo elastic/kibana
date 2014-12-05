@@ -59,6 +59,15 @@ define(function (require) {
       return 'color ' + Legend.prototype.colorToClass.call(null, label);
     };
 
+    /**
+     * Removes all DOM elements from the root element
+     *
+     * @method destroy
+     */
+    Chart.prototype.destroy = function () {
+      d3.select(this.chartEl).selectAll('*').remove();
+    };
+
     return Chart;
   };
 });

@@ -3,19 +3,35 @@ define(function (require) {
 
   return {
     'label': '',
-    'xAxisLabel': '',
+    'xAxisLabel': 'Top 5 extension',
     'yAxisLabel': 'Count of documents',
     'series': [
       {
         'values': [
           {
-            'x': '_all',
-            'y': 274
+            'x': 'jpg',
+            'y': 110710
+          },
+          {
+            'x': 'css',
+            'y': 27389
+          },
+          {
+            'x': 'png',
+            'y': 16661
+          },
+          {
+            'x': 'gif',
+            'y': 11269
+          },
+          {
+            'x': 'php',
+            'y': 5447
           }
         ]
       }
     ],
-    'hits': 274,
+    'hits': 171476,
     'xAxisFormatter': function (val) {
       if (_.isObject(val)) {
         return JSON.stringify(val);
