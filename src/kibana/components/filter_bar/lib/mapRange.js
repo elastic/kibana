@@ -6,7 +6,7 @@ define(function (require) {
       if (filter.range) {
         return courier
         .indexPatterns
-        .get(filter.$$indexPattern).then(function (indexPattern) {
+        .get(filter.meta.index).then(function (indexPattern) {
           key = _.keys(filter.range)[0];
           field = indexPattern.fields.byName[key];
           from = filter.range[key].gte || filter.range[key].gt;

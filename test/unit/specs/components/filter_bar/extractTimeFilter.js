@@ -29,8 +29,8 @@ define(function (require) {
 
       it('should return the matching filter for the defualt time field', function (done) {
         var filters = [
-          { query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
-          { range: { 'time': { gt: 1388559600000, lt: 1388646000000 } } }
+          { meta: { index: 'logstash-*' }, query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
+          { meta: { index: 'logstash-*' }, range: { 'time': { gt: 1388559600000, lt: 1388646000000 } } }
         ];
         extractTimeFilter(filters).then(function (filter) {
           expect(filter).to.eql(filters[1]);
@@ -41,8 +41,8 @@ define(function (require) {
 
       it('should not return the non-matching filter for the defualt time field', function (done) {
         var filters = [
-          { query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
-          { range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } }
+          { meta: { index: 'logstash-*' }, query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
+          { meta: { index: 'logstash-*' }, range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } }
         ];
         extractTimeFilter(filters).then(function (filter) {
           expect(filter).to.be(undefined);

@@ -26,7 +26,8 @@ define(function (require) {
         expect(filter.query.match).to.have.property('_type');
         expect(filter.query.match._type).to.have.property('query', 'apache');
         expect(filter.query.match._type).to.have.property('type', 'phrase');
-        expect(filter).to.have.property('$$indexPattern', indexPattern.id);
+        expect(filter).to.have.property('meta');
+        expect(filter.meta).to.have.property('index', indexPattern.id);
 
       });
 

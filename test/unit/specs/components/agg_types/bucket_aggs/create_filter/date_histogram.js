@@ -33,10 +33,11 @@ define(function (require) {
           var max = date.clone().add(interval, 'ms');
           var filter = createFilter(aggConfig, date.valueOf());
           expect(filter).to.have.property('range');
+          expect(filter).to.have.property('meta');
           expect(filter.range).to.have.property('@timestamp');
           expect(filter.range['@timestamp']).to.have.property('gte', date.valueOf());
           expect(filter.range['@timestamp']).to.have.property('lte', max.valueOf());
-          expect(filter).to.have.property('$$indexPattern', indexPattern.id);
+          expect(filter.meta).to.have.property('index', indexPattern.id);
         });
       };
 

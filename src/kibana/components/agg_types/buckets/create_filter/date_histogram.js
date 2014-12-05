@@ -7,12 +7,12 @@ define(function (require) {
     return function (aggConfig, key) {
       var result = calculateInterval(aggConfig);
       var date = moment(key).add(result.interval, 'ms');
-      var filter = { range: {} };
+      var filter = { meta: {}, range: {} };
       filter.range[aggConfig.params.field.name] = {
         gte: parseInt(key, 10),
         lte: date.valueOf()
       };
-      filter.$$indexPattern = aggConfig.vis.indexPattern.id;
+      filter.meta.index = aggConfig.vis.indexPattern.id;
       return filter;
     };
 

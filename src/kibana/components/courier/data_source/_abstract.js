@@ -296,7 +296,7 @@ define(function (require) {
            * @returns {object}
            */
           var cleanFilter = function (filter) {
-            return _.omit(filter, ['$$hashKey', '$$meta', '$$indexPattern']);
+            return _.omit(filter, ['$$hashKey', 'meta']);
           };
 
           // switch to filtered query if there are filters

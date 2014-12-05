@@ -31,10 +31,10 @@ define(function (require) {
 
         $rootScope.state = {
           filters: [
-            { query: { match: { '_type': { query: 'apache' } } } },
-            { query: { match: { '_type': { query: 'nginx' } } } },
-            { exists: { field: '@timestamp' } },
-            { missing: { field: 'host' }, disabled: true },
+            { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
+            { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
+            { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+            { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
           ]
         };
         done();

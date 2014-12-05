@@ -35,7 +35,7 @@ define(function (require) {
         var aggConfig = vis.aggs.byTypeName.filters[0];
         var filter = createFilter(aggConfig, '_type:nginx');
         expect(filter).to.be(aggConfig.params.filters[1]);
-        expect(filter).to.have.property('$$indexPattern', indexPattern.id);
+        expect(filter.meta).to.have.property('index', indexPattern.id);
 
       });
 

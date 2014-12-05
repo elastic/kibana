@@ -24,7 +24,7 @@ define(function (require) {
 			}));
 
       it('should return the key and value for matching filters', function (done) {
-        var filter = { query: { match: { _type: { query: 'apache', type: 'phrase' } } } };
+        var filter = { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } };
         mapTerms(filter).then(function (result) {
           expect(result).to.have.property('key', '_type');
           expect(result).to.have.property('value', 'apache');
@@ -34,7 +34,7 @@ define(function (require) {
       });
 
       it('should return undefined for none matching', function (done) {
-        var filter = { query: { query_string: { query: 'foo:bar' } } };
+        var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
         mapTerms(filter).catch(function (result) {
           expect(result).to.be(filter);
           done();

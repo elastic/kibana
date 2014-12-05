@@ -26,12 +26,12 @@ define(function (require) {
       var filters = [
         null,
         [
-          { exists: { field: '_type' } },
-          { missing: { field: '_type' } }
+          { meta: { index: 'logstash-*' }, exists: { field: '_type' } },
+          { meta: { index: 'logstash-*' }, missing: { field: '_type' } }
         ],
-        { query: { query_string: { query: 'foo:bar' } } },
-        { range: { bytes: { lt: 2048, gt: 1024 } } },
-        { query: { match: { _type: { query: 'apache', type: 'phrase' } } } }
+        { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } },
+        { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } },
+        { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } }
       ];
 
       it('should map and flatten the filters', function (done) {

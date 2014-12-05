@@ -6,7 +6,7 @@ define(function (require) {
       if (filter.query && filter.query.match) {
         return courier
         .indexPatterns
-        .get(filter.$$indexPattern).then(function (indexPattern) {
+        .get(filter.meta.index).then(function (indexPattern) {
           key = _.keys(filter.query.match)[0];
           field = indexPattern.fields.byName[key];
           value = filter.query.match[key].query;

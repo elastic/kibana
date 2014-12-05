@@ -26,7 +26,7 @@ define(function (require) {
 
     describe('mapFilter()', function () {
       it('should map query filters', function (done) {
-        var before = { query: { match: { '_type': { query: 'apache' } } } };
+        var before = { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } };
 				mapFilter(before).then(function (after) {
           expect(after).to.have.property('$$meta');
 					expect(after.$$meta).to.have.property('key', '_type');
@@ -39,7 +39,7 @@ define(function (require) {
       });
 
       it('should map exists filters', function (done) {
-        var before = { exists: { field: '@timestamp' } };
+        var before = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
 				mapFilter(before).then(function (after) {
           expect(after).to.have.property('$$meta');
 					expect(after.$$meta).to.have.property('key', 'exists');
@@ -52,7 +52,7 @@ define(function (require) {
       });
 
       it('should map missing filters', function (done) {
-        var before = { missing: { field: '@timestamp' } };
+        var before = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
 				mapFilter(before).then(function (after) {
           expect(after).to.have.property('$$meta');
 					expect(after.$$meta).to.have.property('key', 'missing');

@@ -562,7 +562,7 @@ define(function (require) {
           });
           break;
         default:
-          var filter = { $$indexPattern: $state.index, $$meta: { negate: false }, query: { match: {} } };
+          var filter = { meta: { index: $state.index }, $$meta: { negate: false }, query: { match: {} } };
           filter.$$meta.negate = operation === '-';
           filter.query.match[field] = { query: value, type: 'phrase' };
           filters.push(filter);

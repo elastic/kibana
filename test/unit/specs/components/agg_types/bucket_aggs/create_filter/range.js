@@ -34,7 +34,8 @@ define(function (require) {
         var aggConfig = vis.aggs.byTypeName.range[0];
         var filter = createFilter(aggConfig, '1024.0-2048.0');
         expect(filter).to.have.property('range');
-        expect(filter).to.have.property('$$indexPattern', indexPattern.id);
+        expect(filter).to.have.property('meta');
+        expect(filter.meta).to.have.property('index', indexPattern.id);
         expect(filter.range).to.have.property('bytes');
         expect(filter.range.bytes).to.have.property('gte', 1024.0);
         expect(filter.range.bytes).to.have.property('lte', 2048.0);

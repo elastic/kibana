@@ -24,7 +24,7 @@ define(function (require) {
 			}));
 
       it('should return the key and value for matching filters with gt/lt', function (done) {
-        var filter = { range: { bytes: { lt: 2048, gt: 1024 } } };
+        var filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
         mapRange(filter).then(function (result) {
           expect(result).to.have.property('key', 'bytes');
           expect(result).to.have.property('value', '1024 to 2048');
@@ -34,7 +34,7 @@ define(function (require) {
       });
 
       it('should return the key and value for matching filters with gte/lte', function (done) {
-        var filter = { range: { bytes: { lte: 2048, gte: 1024 } } };
+        var filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
         mapRange(filter).then(function (result) {
           expect(result).to.have.property('key', 'bytes');
           expect(result).to.have.property('value', '1024 to 2048');
@@ -44,7 +44,7 @@ define(function (require) {
       });
 
       it('should return undefined for none matching', function (done) {
-        var filter = { query: { query_string: { query: 'foo:bar' } } };
+        var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
         mapRange(filter).catch(function (result) {
           expect(result).to.be(filter);
           done();
