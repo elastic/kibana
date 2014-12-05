@@ -6,18 +6,18 @@ define(function (require) {
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
   var termsColumns = require('vislib_fixtures/mock_data/terms/_columns');
-  var significantTermsRows = require('vislib_fixtures/mock_data/significant_terms/_rows');
+  var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
   var dataArray = [
     series,
     termsColumns,
-    significantTermsRows,
+    histogramRows,
     stackedSeries
   ];
   var names = [
     'series',
     'terms columns',
-    'significant terms rows',
+    'histogram rows',
     'stackedSeries'
   ];
   var modes = [
