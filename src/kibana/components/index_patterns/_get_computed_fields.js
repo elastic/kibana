@@ -13,6 +13,7 @@ define(function (require) {
         };
       }
     });
+
     return {
       fields: ['*', '_source'],
       scriptFields: scriptFields
