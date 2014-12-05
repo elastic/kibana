@@ -9,7 +9,6 @@ define(function (require) {
     var errors = require('errors');
     require('css!components/vislib/styles/main.css');
 
-
     /**
      * Creates the visualizations.
      *
@@ -80,10 +79,11 @@ define(function (require) {
         // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
-        if (error instanceof errors.ContainerTooSmall) {
+        if (error instanceof errors.ContainerTooSmall ||
+          error instanceof errors.NotEnoughData) {
           this.handler.error(error.message);
         } else {
-          console.error(error.stack);
+          throw error;
         }
       }
     };

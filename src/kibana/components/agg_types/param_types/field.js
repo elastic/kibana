@@ -4,6 +4,7 @@ define(function (require) {
 
     var editorHtml = require('text!components/agg_types/controls/field.html');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
+    var SavedObjectNotFound = require('errors').SavedObjectNotFound;
 
     _(FieldAggParam).inherits(BaseAggParam);
     function FieldAggParam(config) {
@@ -32,7 +33,13 @@ define(function (require) {
      * @return {field}
      */
     FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
-      return aggConfig.vis.indexPattern.fields.byName[fieldName];
+      var field = aggConfig.vis.indexPattern.fields.byName[fieldName];
+
+      if (!field) {
+        throw new SavedObjectNotFound('index-pattern-field', fieldName);
+      }
+
+      return field;
     };
 
     /**
@@ -46,7 +53,13 @@ define(function (require) {
      * @return {undefined}
      */
     FieldAggParam.prototype.write = function (aggConfig, output) {
-      output.params.field = aggConfig.params.field.name;
+      var field = aggConfig.params.field;
+
+      if (field.scripted) {
+        output.params.script = field.script;
+      } else {
+        output.params.field = field.name;
+      }
     };
 
     return FieldAggParam;

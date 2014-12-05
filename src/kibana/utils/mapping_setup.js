@@ -23,7 +23,7 @@ define(function () {
      * @return {[type]} [description]
      */
     var getKnownKibanaTypes = _.once(function () {
-      var indexName = configFile.kibanaIndex;
+      var indexName = configFile.kibana_index;
       return es.indices.getFieldMapping({
         // only concerned with types in this kibana index
         index: indexName,
@@ -82,7 +82,7 @@ define(function () {
         };
 
         return es.indices.putMapping({
-          index: configFile.kibanaIndex,
+          index: configFile.kibana_index,
           type: type,
           body: body
         }).then(function (resp) {

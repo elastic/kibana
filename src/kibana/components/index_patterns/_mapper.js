@@ -32,7 +32,7 @@ define(function (require) {
 
         if (!skipIndexPatternCache) {
           return es.get({
-            index: configFile.kibanaIndex,
+            index: configFile.kibana_index,
             type: 'index-pattern',
             id: id,
             _sourceInclude: ['fields']
@@ -46,7 +46,8 @@ define(function (require) {
         }
 
         return es.indices.getFieldMapping({
-          // TODO: Change index to be the resolved in some way, last three months, last hour, last year, whatever
+          // TODO: Change index to be the resolved in some way,
+          // last three months, last hour, last year, whatever
           index: indexList,
           field: '*',
           ignoreUnavailable: _.isArray(indexList),

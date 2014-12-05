@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var module = require('modules').get('kibana');
 
-  module.directive('kbnRows', function ($parse) {
+  module.directive('kbnRows', function () {
     return {
       restrict: 'A',
       link: function ($scope, $el, attr) {
@@ -14,11 +14,16 @@ define(function (require) {
           // access to it here. This may become a problem with the switch to BigNumber
           if (_.isNumeric(contents)) $cell.addClass('numeric-value');
 
-          if (contents === '') {
-            $cell.html('&nbsp;');
+          if (_.isObject(contents)) {
+            $cell.html($(contents.markup));
           } else {
-            $cell.text(contents);
+            if (contents === '') {
+              $cell.html('&nbsp;');
+            } else {
+              $cell.text(contents);
+            }
           }
+
           $tr.append($cell);
         }
 

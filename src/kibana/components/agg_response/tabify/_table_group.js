@@ -17,7 +17,7 @@ define(function (require) {
       return this.aggConfig && this.aggConfig.params && this.aggConfig.params.field;
     };
 
-    TableGroup.prototype.fieldFormat = function () {
+    TableGroup.prototype.fieldFormatter = function () {
       var field = this.field();
       return field ? field.format.convert : _.identity;
     };

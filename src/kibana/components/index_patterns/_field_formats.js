@@ -48,15 +48,17 @@ define(function (require) {
         ],
         name: 'string',
         convert: function (val) {
-          if (_.isObject(val)) {
-            return JSON.stringify(val);
-          }
-          else if (val == null) {
-            return '';
-          }
-          else {
-            return '' + val;
-          }
+          return formatField(val, function (val) {
+            if (_.isObject(val)) {
+              return JSON.stringify(val);
+            }
+            else if (val == null) {
+              return '';
+            }
+            else {
+              return '' + val;
+            }
+          });
         }
       },
       {
@@ -65,7 +67,13 @@ define(function (require) {
         ],
         name: 'date',
         convert: function (val) {
-          return moment(val).format(config.get('dateFormat'));
+          return formatField(val, function (val) {
+            if (_.isNumber(val) || _.isDate(val)) {
+              return moment(val).format(config.get('dateFormat'));
+            } else {
+              return val;
+            }
+          });
         }
       },
       {
@@ -73,9 +81,11 @@ define(function (require) {
           'ip'
         ],
         name: 'ip',
-        convert: function (ip) {
-          if (!isFinite(ip)) return ip;
-          return [ip >>> 24, ip >>> 16 & 0xFF, ip >>> 8 & 0xFF, ip & 0xFF].join('.');
+        convert: function (val) {
+          return formatField(val, function (val) {
+            if (!isFinite(val)) return val;
+            return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
+          });
         }
       },
       {
@@ -84,10 +94,24 @@ define(function (require) {
         ],
         name: 'kilobytes',
         convert: function (val) {
-          return (val / 1024).toFixed(3) + ' kb';
+          return formatField(val, function (val) {
+            return (val / 1024).toFixed(3) + ' kb';
+          });
         }
       }
     ];
+
+    function formatField(value, fn) {
+      if (_.isArray(value)) {
+        if (value.length === 1) {
+          return fn(value[0]);
+        } else {
+          return JSON.stringify(_.map(value, fn));
+        }
+      } else {
+        return fn(value);
+      }
+    }
 
     formats.byType = _.transform(formats, function (byType, formatter) {
       formatter.types.forEach(function (type) {

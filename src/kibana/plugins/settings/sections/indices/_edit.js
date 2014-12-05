@@ -1,5 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
+  require('plugins/settings/sections/indices/_indexed_fields');
+  require('plugins/settings/sections/indices/_scripted_fields');
 
   require('routes')
   .when('/settings/indices/:id', {
@@ -14,30 +16,28 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState) {
+
     var notify = new Notifier();
     var $state = $scope.state = new AppState();
+    var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
 
     $scope.indexPattern = $route.current.locals.indexPattern;
     var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-    $scope.fieldTypes = Private(require('plugins/settings/sections/indices/_field_types'));
-
-    $scope.table = {
-      by: 'name',
-      reverse: false,
-      page: 0,
-      max: 35
-    };
+    var fieldTypes = Private(require('plugins/settings/sections/indices/_field_types'));
+    $scope.$watch('indexPattern.fields', function () {
+      $scope.fieldTypes = fieldTypes($scope.indexPattern);
+    });
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
       $state.save();
     };
 
-    if (!$state.tab) {
-      $scope.changeTab($scope.fieldTypes[0]);
-    }
+    $scope.$watch('state.tab', function (tab) {
+      if (!tab) $scope.changeTab($scope.fieldTypes[0]);
+    });
 
     $scope.conflictFields = _.filter($scope.indexPattern.fields, {type: 'conflict'});
 
@@ -63,24 +63,6 @@ define(function (require) {
 
     $scope.setDefaultPattern = function () {
       config.set('defaultIndex', $scope.indexPattern.id);
-    };
-
-    $scope.setFieldSort = function (by) {
-      if ($scope.table.by === by) {
-        $scope.table.reverse = !$scope.table.reverse;
-      } else {
-        $scope.table.by = by;
-      }
-    };
-
-    $scope.sortClass = function (column) {
-      if ($scope.table.by !== column) return;
-      return $scope.table.reverse ? ['fa', 'fa-sort-asc'] : ['fa', 'fa-sort-desc'];
-    };
-
-    $scope.tablePages = function () {
-      if (!$scope.indexPattern.fields) return 0;
-      return Math.ceil($scope.indexPattern.fields.length / $scope.table.max);
     };
 
     $scope.setIndexPatternsTimeField = function (field) {

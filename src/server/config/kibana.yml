@@ -17,10 +17,10 @@ elasticsearch_preserve_host: true
 
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations
 # and dashboards. It will create a new index if it doesn't already exist.
-kibanaIndex: ".kibana"
+kibana_index: ".kibana"
 
 # The default application to load.
-defaultAppId: "discover"
+default_app_id: "discover"
 
 # Time in seconds to wait for responses from the back end or elasticsearch.
 # Note this should always be higher than "shard_timeout".
@@ -34,4 +34,4 @@ shard_timeout: 30000
 
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
-verifySSL: true
+verify_ssl: true

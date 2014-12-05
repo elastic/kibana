@@ -1,0 +1,44 @@
+<div class="doc-viewer">
+  <ul class="nav nav-tabs">
+    <li ng-class="{active: mode == 'table'}"><a ng-click="mode='table'">Table</a></li>
+    <li ng-class="{active: mode == 'json'}"><a ng-click="mode='json'">JSON</a></li>
+  </ul>
+
+  <div class="content">
+    <table class="table table-condensed" ng-show="mode == 'table'" bindonce>
+      <tbody>
+        <tr ng-repeat="field in fields" bindonce>
+          <td field-name="field"
+              field-type="mapping[field].type"
+              width="1%"
+              class="doc-viewer-field">
+          </td>
+          <td width="1%" class="doc-viewer-buttons" ng-if="filter">
+            <span bo-if="showFilters(mapping[field])">
+              <i ng-click="filter(field, flattened[field], '+')" class="fa fa-search-plus"></i>
+              <i ng-click="filter(field, flattened[field],'-')" class="fa fa-search-minus"></i>
+            </span>
+            <span bo-if="!showFilters(mapping[field])" tooltip="Unindexed fields can not be searched">
+              <i class="fa fa-search-plus text-muted"></i>
+              <i class="fa fa-search-minus text-muted"></i>
+            </span>
+          </td>
+
+          <td>
+            <i bo-if="!mapping[field] && !showArrayInObjectsWarning(doc, field)"
+              tooltip-placement="top"
+              tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
+              class="fa fa-warning text-color-warning ng-scope doc-viewer-no-mapping"></i>
+            <i bo-if="showArrayInObjectsWarning(doc, field)"
+              tooltip-placement="top"
+              tooltip="Objects in arrays are not well supported."
+              class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
+            <span class="doc-viewer-value" ng-bind-html="(formatted[field] || hit[field]) | highlight : hit.highlight[field] | trustAsHtml"></span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pre ng-show="mode == 'json'">{{hit | json}}</pre>
+  </div>
+</div>

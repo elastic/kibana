@@ -43,7 +43,7 @@ define(function (require) {
             });
           } else {
             buckets.forEach(function (subBucket, key) {
-              write.cell(key, function () {
+              write.cell(agg, key, function () {
                 collectBucket(write, subBucket, key);
               });
             });
@@ -63,7 +63,7 @@ define(function (require) {
         break;
       case 'metrics':
         var value = (agg.type.name === 'count') ? bucketCount(bucket) : metricValue(aggResp);
-        write.cell(value, function () {
+        write.cell(agg, value, function () {
           if (!write.aggStack.length) {
             // row complete
             write.row();

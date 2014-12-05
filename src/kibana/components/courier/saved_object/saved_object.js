@@ -57,7 +57,7 @@ define(function (require) {
 
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibanaIndex)
+        .index(configFile.kibana_index)
         .type(type)
         .id(self.id);
 
@@ -217,7 +217,7 @@ define(function (require) {
         })
         .then(function () {
           return es.indices.refresh({
-            index: configFile.kibanaIndex
+            index: configFile.kibana_index
           });
         })
         .then(function () {
@@ -242,12 +242,12 @@ define(function (require) {
        */
       self.delete = function () {
         return es.delete({
-          index: configFile.kibanaIndex,
+          index: configFile.kibana_index,
           type: type,
           id: this.id
         }).then(function () {
           return es.indices.refresh({
-            index: configFile.kibanaIndex
+            index: configFile.kibana_index
           });
         });
       };

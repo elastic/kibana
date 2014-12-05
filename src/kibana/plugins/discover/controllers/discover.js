@@ -85,8 +85,6 @@ define(function (require) {
       docTitle.change(savedSearch.title);
     }
 
-    var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-
     var stateDefaults = {
       query: initialQuery || '',
       columns: savedSearch.columns || ['_source'],
@@ -134,16 +132,20 @@ define(function (require) {
         var ignoreStateChanges = ['columns'];
 
         // listen for changes, and relisten everytime something happens
-        $scope.$listen($state, 'fetch_with_changes', function (changed) {
+        $scope.$listen($state, 'fetch_with_changes', updateFields);
+        $scope.$listen($state, 'reset_with_changes', updateFields);
+
+        function updateFields(changed) {
           if (_.contains(changed, 'columns')) {
             $scope.fields.forEach(function (field) {
               field.display = _.contains($state.columns, field.name);
             });
+            refreshColumns();
           }
 
           // if we only have ignorable changes, do nothing
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
-        });
+        }
 
         $scope.$listen(timefilter, 'update', function () {
           $scope.fetch();
@@ -267,7 +269,7 @@ define(function (require) {
 
         var sort = $state.sort;
         var timeField = $scope.searchSource.get('index').timeFieldName;
-        var totalSize = $scope.size || 500;
+        var totalSize = $scope.size || $scope.opts.sampleSize;
 
         /**
          * Basically an emum.
@@ -327,30 +329,23 @@ define(function (require) {
               // ---
               // when we are sorting results, we need to redo the counts each time because the
               // "top 500" may change with each response
-              if (hit._formatted && !sortFn) return;
+              if (hit.$$_formatted && !sortFn) return;
 
               // Flatten the fields
               var indexPattern = $scope.searchSource.get('index');
-              hit._flattened = indexPattern.flattenSearchResponse(hit._source);
+              hit.$$_flattened = indexPattern.flattenHit(hit);
 
-              var formatValues = function (value, name) {
+              var formatAndCount = function (value, name) {
                 // add up the counts for each field name
-                if (counts[name]) counts[name] = counts[name] + 1;
-                else counts[name] = 1;
+                counts[name] = counts[name] ? counts[name] + 1 : 1;
 
-                return ($scope.formatsByName[name] || defaultFormat).convert(value);
+                var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
+                var formatter = indexPattern.fields.byName[name] ? indexPattern.fields.byName[name].format : defaultFormat;
+
+                return formatter.convert(value);
               };
 
-              var formattedSource = _.mapValues(hit._flattened, formatValues);
-              var formattedHits = _.mapValues(hit.fields, formatValues);
-
-              hit._formatted = _.merge(formattedSource, formattedHits);
-              hit._formatted._source = angular.toJson(hit._source);
-            });
-
-            // ensure that the meta fields always have a "row count" equal to the number of rows
-            metaFields.forEach(function (fieldName) {
-              counts[fieldName] = $scope.rows.length;
+              hit.$$_formatted = _.mapValues(hit.$$_flattened, formatAndCount);
             });
 
             // apply the field counts to the field list
@@ -448,7 +443,7 @@ define(function (require) {
       .set('filter', $state.filters || []);
 
       // get the current indexPattern
-      var indexPattern = $scope.searchSource.get('index');
+      var indexPattern = $scope.indexPattern = $scope.searchSource.get('index');
 
       // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
       // is not equal to the $scope.opts.index then either clean or
@@ -501,7 +496,6 @@ define(function (require) {
 
       $scope.fields = [];
       $scope.fieldsByName = {};
-      $scope.formatsByName = {};
 
       if (!indexPattern) return;
 
@@ -517,7 +511,6 @@ define(function (require) {
 
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
-        $scope.formatsByName[field.name] = field.format;
       });
 
       refreshColumns();
@@ -614,6 +607,7 @@ define(function (require) {
 
       // Make sure there are no columns added that aren't in the displayed field list.
       $state.columns = _.intersection($state.columns, fields);
+
 
       // If no columns remain, use _source
       if (!$state.columns.length) {

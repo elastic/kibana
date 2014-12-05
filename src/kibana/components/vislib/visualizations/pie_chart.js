@@ -26,7 +26,6 @@ define(function (require) {
 
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false,
-        getSize: function (d) { return d.size; }
       });
     }
 

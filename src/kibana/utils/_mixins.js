@@ -16,10 +16,6 @@ define(function (require) {
       Sub.prototype = _.create(Super.prototype, { 'constructor': Super });
       Sub.Super = Super;
     },
-    move: function (array, fromIndex, toIndex) {
-      array.splice(toIndex, 0, array.splice(fromIndex, 1)[0]);
-      return array;
-    },
     remove: function (array, index) {
       array.splice(index, 1);
       return array;
@@ -164,6 +160,47 @@ define(function (require) {
       var out = '';
       for (var i = 0; i < times; i++) out += string;
       return out;
+    },
+    /**
+     * move an obj either up or down in the collection by
+     * injecting it either before/after the prev/next obj that
+     * satisfied the qualifier
+     *
+     * or, just from one index to another...
+     *
+     * @param  {array} objs - the list to move the object within
+     * @param  {number|any} obj - the object that should be moved, or the index that the object is currently at
+     * @param  {number|boolean} below - the index to move the object to, or whether it should be moved up or down
+     * @param  {function} qualifier - a lodash-y callback, object = _.where, string = _.pluck
+     * @return {array} - the objs argument
+     */
+    move: function (objs, obj, below, qualifier) {
+      var origI = _.isNumber(obj) ? obj : objs.indexOf(obj);
+      if (origI === -1) return objs;
+
+      if (_.isNumber(below)) {
+        // move to a specific index
+        objs.splice(below, 0, objs.splice(origI, 1)[0]);
+        return objs;
+      }
+
+      below = !!below;
+      qualifier = _.createCallback(qualifier, null, 2);
+
+      var above = !below;
+      var finder = below ? _.findIndex : _.findLastIndex;
+
+      // find the index of the next/previous obj that meets the qualifications
+      var targetI = finder(objs, function (otherAgg, otherI) {
+        if (below && otherI <= origI) return;
+        if (above && otherI >= origI) return;
+        return !!qualifier(otherAgg, otherI);
+      });
+
+      if (targetI === -1) return objs;
+
+      // place the obj at it's new index
+      objs.splice(targetI, 0, objs.splice(origI, 1)[0]);
     }
   });
 

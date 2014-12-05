@@ -6,10 +6,10 @@ define(function (require) {
     return function checkForKibana() {
       var complete = notify.lifecycle('kibana index check');
       return es.indices.exists({
-        index: configFile.kibanaIndex
+        index: configFile.kibana_index
       })
       .catch(function (err) {
-        throw new SetupError('Unable to check for Kibana index "<%= configFile.kibanaIndex %>"', err);
+        throw new SetupError('Unable to check for Kibana index "<%= configFile.kibana_index %>"', err);
       })
       .then(complete, complete.failure);
     };

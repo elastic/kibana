@@ -2,17 +2,21 @@ define(function (require) {
   return function VisLibFixtures(Private) {
     var $ = require('jquery');
 
-    return function (type) {
+    return function (visLibParams) {
       var Vis = Private(require('components/vislib/vis'));
-      var visChart = $('body').append('<div class=visualize-chart></div>');
+
+      $('body').append('<div class=visualize-chart></div>');
+
       var $el = $('.visualize-chart');
-      var config = {
+
+      $el.width(1024);
+      $el.height(300);
+
+      var config = visLibParams || {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
-        addEvents: true,
-        addBrushing: true,
-        type: type
+        type: 'histogram'
       };
 
       return new Vis($el, config);

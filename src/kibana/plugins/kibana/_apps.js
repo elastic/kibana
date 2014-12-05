@@ -11,6 +11,10 @@ define(function (require) {
       return app.lastPath;
     }
 
+    function getShow(app) {
+      app.show = app.order >= 0 ? true : false;
+    }
+
     function setLastPath(app, path) {
       app.lastPath = path;
       return sessionStorage.set(appKey(app), path);
@@ -19,6 +23,8 @@ define(function (require) {
     $scope.apps = Private(require('registry/apps'));
     // initialize each apps lastPath (fetch it from storage)
     $scope.apps.forEach(getLastPath);
+    $scope.apps.forEach(getShow);
+
 
     function onRouteChange() {
       var route = $location.path().split(/\//);

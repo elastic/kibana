@@ -46,7 +46,7 @@ define(function (require) {
       });
 
       var hits = _.each(require('fixtures/hits.js'), function (hit) {
-        hit._flattened = indexPattern.flattenSearchResponse(hit._source);
+        hit.$$_flattened = indexPattern.flattenSearchResponse(hit._source);
       });
 
       init($elem, {

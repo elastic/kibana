@@ -6,12 +6,12 @@ define(function (require) {
    * @param {text} model value
    * @returns {string}
    */
-  return function (text) {
-    if (_.isString(text)) return text;
+  return function toUser(text) {
+    if (text == null) return '';
     if (_.isObject(text)) {
-      if (text.query_string) return text.query_string.query;
+      if (text.query_string) return toUser(text.query_string.query);
       return JSON.stringify(text);
     }
-    return text.toString();
+    return '' + text;
   };
 });

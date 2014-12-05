@@ -191,5 +191,17 @@ define(function (require) {
   };
   inherits(errors.ContainerTooSmall, KbnError);
 
+  /**
+   * error thrown when user tries to render an chart with less
+   * than the required number of data points
+   * @param {String} message - the message to provide with the error
+   */
+  errors.NotEnoughData = function NotEnoughData() {
+    KbnError.call(this,
+      'There are not enough data points to render this chart',
+      errors.NotEnoughData);
+  };
+  inherits(errors.NotEnoughData, KbnError);
+
   return errors;
 });

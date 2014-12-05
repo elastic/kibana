@@ -2,16 +2,12 @@ define(function (require) {
   return function VislibRenderbotFactory(Private, vislib) {
     var _ = require('lodash');
     var Renderbot = Private(require('plugins/vis_types/_renderbot'));
-    var normalizeChartData = Private(require('components/agg_response/index'));
+    var buildChartData = Private(require('plugins/vis_types/vislib/_build_chart_data'));
 
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {
       VislibRenderbot.Super.call(this, vis, $el);
       this.vislibVis = {};
-      this._normalizers = {
-        flat: normalizeChartData.flat,
-        hierarchical: normalizeChartData.hierarchical
-      };
       this._createVis();
     }
 
@@ -37,16 +33,10 @@ define(function (require) {
       );
     };
 
+    VislibRenderbot.prototype.buildChartData = buildChartData;
     VislibRenderbot.prototype.render = function (esResponse) {
-      var self = this;
-
-      var buildChartData = self._normalizers.flat;
-      if (self.vis.isHierarchical()) {
-        buildChartData = self._normalizers.hierarchical;
-      }
-
-      var chartData = buildChartData(self.vis, esResponse);
-      self.vislibVis.render(chartData);
+      var chartData = this.buildChartData(esResponse);
+      this.vislibVis.render(chartData);
     };
 
     VislibRenderbot.prototype.destroy = function () {

@@ -45,7 +45,7 @@ define(function (require) {
   // setup routes
   routes
     .otherwise({
-      redirectTo: '/' + configFile.defaultAppId
+      redirectTo: '/' + configFile.default_app_id
     });
 
   // tell the modules util to add it's modules as requirements for kibana

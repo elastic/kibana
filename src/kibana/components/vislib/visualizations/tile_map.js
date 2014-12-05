@@ -34,10 +34,9 @@ define(function (require) {
       // track the map objects
       this.maps = [];
 
-      // add allmin and allmax to geoJSON
-      var mapDataExtents = handler.data.mapDataExtents(handler.data.data.raw);
-      chartData.geoJSON.properties.allmin = mapDataExtents[0];
-      chartData.geoJSON.properties.allmax = mapDataExtents[1];
+      // add allmin and allmax to geoJson
+      chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
+      chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
     }
 
     /**
@@ -99,16 +98,16 @@ define(function (require) {
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
 
-          if (data.geoJSON) {
+          if (data.geoJson) {
             if (self._attr.mapType === 'Scaled Circle Markers') {
-              featureLayer = self.scaledCircleMarkers(map, data.geoJSON);
+              featureLayer = self.scaledCircleMarkers(map, data.geoJson);
             } else {
-              featureLayer = self.shadedCircleMarkers(map, data.geoJSON);
+              featureLayer = self.shadedCircleMarkers(map, data.geoJson);
             }
           }
 
-          if (data.geoJSON.properties.label) {
-            self.addLabel(data.geoJSON.properties.label, map);
+          if (data.geoJson.properties.label) {
+            self.addLabel(data.geoJson.properties.label, map);
           }
 
           // Add button to fit container to points
@@ -124,7 +123,7 @@ define(function (require) {
             }
           });
 
-          if (data && data.geoJSON && data.geoJSON.features.length > 0) {
+          if (data && data.geoJson && data.geoJson.features.length > 0) {
             map.addControl(new FitControl());
           }
 
@@ -138,7 +137,7 @@ define(function (require) {
 
     /**
      * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJSON)
+     * creates featurelayer from mapData (geoJson)
      * with circle markers that are scaled to illustrate values
      *
      * @method scaledCircleMarkers
@@ -190,7 +189,7 @@ define(function (require) {
 
     /**
      * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJSON)
+     * creates featurelayer from mapData (geoJson)
      * with circle markers that are shaded to illustrate values
      *
      * @method shadedCircleMarkers

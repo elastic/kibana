@@ -109,7 +109,10 @@ define(function (require) {
     State.prototype.reset = function () {
       // apply diff to _attributes from defaults, this is side effecting so
       // it will change the state in place.
-      applyDiff(this, this._defaults);
+      var diffResults = applyDiff(this, this._defaults);
+      if (diffResults.keys.length) {
+        this.emit('reset_with_changes', diffResults.keys);
+      }
       this.save();
     };
 

@@ -6,6 +6,7 @@ define(function (require) {
   var module = require('modules').get('app/discover');
 
   require('components/highlight/highlight');
+  require('components/doc_viewer/doc_viewer');
   require('filters/trust_as_html');
   require('filters/short_dots');
 
@@ -31,8 +32,8 @@ define(function (require) {
       restrict: 'A',
       scope: {
         columns: '=',
-        filtering: '=',
-        mapping: '=',
+        filter: '=',
+        indexPattern: '=',
         timefield: '=?',
         row: '=kbnTableRow'
       },
@@ -74,36 +75,12 @@ define(function (require) {
             $detailsScope = $scope.$new();
           }
 
-          // The fields to loop over
-          if (!row._fields) {
-            row._fields = _.union(
-              _.keys(row._formatted),
-              config.get('metaFields')
-            );
-            row._fields.sort();
-          }
-          row._mode = 'table';
-
           // empty the details and rebuild it
           $detailsTr.html(detailsHtml);
 
           $detailsScope.row = row;
-          $detailsScope.showFilters = function (mapping) {
-            var validTypes = ['string', 'number', 'date', 'ip'];
-            if (!mapping || !mapping.indexed) return false;
-            return _.contains(validTypes, mapping.type);
-          };
-
-          $detailsScope.showArrayInObjectsWarning = function (row, field) {
-            var value = row._formatted[field];
-            return _.isArray(value) && typeof value[0] === 'object';
-          };
 
           $compile($detailsTr)($detailsScope);
-        };
-
-        $scope.filter = function (row, field, operation) {
-          $scope.filtering(field, row._flattened[field] || row[field], operation);
         };
 
         $scope.$watchCollection('columns', function () {
@@ -132,7 +109,7 @@ define(function (require) {
             var formatted;
             if (column === '_source') {
               formatted = sourceTemplate({
-                source: _.mapValues(row._formatted, function (val, field) {
+                source: _.mapValues(row.$$_formatted, function (val, field) {
                   return _displayField(row, field, false);
                 }),
                 highlight: row.highlight,
@@ -210,7 +187,7 @@ define(function (require) {
           var val;
 
           // discover formats all of the values and puts them in _formatted for display
-          val = row._formatted[field] || row[field];
+          val = row.$$_formatted[field] || row[field];
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;

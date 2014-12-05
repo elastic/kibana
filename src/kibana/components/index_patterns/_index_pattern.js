@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter) {
+  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config) {
     var _ = require('lodash');
     var angular = require('angular');
     var errors = require('errors');
@@ -11,6 +11,10 @@ define(function (require) {
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+    var flattenHit = require('components/index_patterns/_flatten_hit');
+    var getComputedFields = require('components/index_patterns/_get_computed_fields');
+
+
     var IndexedArray = require('utils/indexed_array/index');
 
     var type = 'index-pattern';
@@ -22,8 +26,7 @@ define(function (require) {
       timeFieldName: 'string',
       intervalName: 'string',
       customFormats: 'json',
-      fields: 'json',
-      scriptedFields: 'json'
+      fields: 'json'
     });
 
     function IndexPattern(id) {
@@ -39,7 +42,7 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibanaIndex)
+        .index(configFile.kibana_index)
         .type(type)
         .id(self.id);
 
@@ -69,7 +72,7 @@ define(function (require) {
             _.assign(self, resp._source);
 
             if (self.id) {
-              if (!self.fields || !self.scriptedFields) {
+              if (!self.fields) {
                 return self.refreshFields();
               } else {
                 setIndexedValue('fields');
@@ -97,6 +100,7 @@ define(function (require) {
             // non-enumerable type so that it does not get included in the JSON
             Object.defineProperties(field, {
               format: {
+                configurable: true,
                 enumerable: false,
                 get: function () {
                   var formatName = self.customFormats && self.customFormats[field.name];
@@ -104,6 +108,7 @@ define(function (require) {
                 }
               },
               displayName: {
+                configurable: true,
                 enumerable: false,
                 get: function () {
                   return shortDotsFilter(field.name);
@@ -116,6 +121,26 @@ define(function (require) {
         });
       }
 
+      self.addScriptedField = function (name, script, type) {
+        type = type || 'string';
+        var scriptedField = self.fields.push({
+          name: name,
+          script: script,
+          type: type,
+          scripted: true,
+        });
+        self.save();
+      };
+
+      self.removeScriptedField = function (name) {
+        var fieldIndex = _.findIndex(self.fields, {
+          name: name,
+          scripted: true
+        });
+        self.fields.splice(fieldIndex, 1);
+        self.save();
+      };
+
       self.popularizeField = function (fieldName, unit) {
         if (_.isUndefined(unit)) unit = 1;
         if (!(self.fields.byName && self.fields.byName[fieldName])) return;
@@ -125,6 +150,13 @@ define(function (require) {
         if (!field.count) field.count = 1;
         else field.count = field.count + (unit);
         self.save();
+      };
+
+      self.getFields = function (type) {
+        var getScripted = (type === 'scripted');
+        return _.where(self.fields, function (field) {
+          return field.scripted ? getScripted : !getScripted;
+        });
       };
 
       self.getInterval = function () {
@@ -170,7 +202,6 @@ define(function (require) {
         return mapper.clearCache(self)
         .then(function () {
           return self._fetchFields()
-          .then(self._fetchScriptedFields)
           .then(self.save);
         });
       };
@@ -178,12 +209,10 @@ define(function (require) {
       self._fetchFields = function () {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
+          // append existing scripted fields
+          fields = fields.concat(self.getFields('scripted'));
           setIndexedValue('fields', fields);
         });
-      };
-
-      self._fetchScriptedFields = function () {
-        setIndexedValue('scriptedFields', []);
       };
 
       self.toJSON = function () {
@@ -194,7 +223,11 @@ define(function (require) {
         return '' + self.toJSON();
       };
 
+      self.metaFields = config.get('metaFields');
       self.flattenSearchResponse = flattenSearchResponse.bind(self);
+      self.flattenHit = flattenHit.bind(self);
+      self.getComputedFields = getComputedFields.bind(self);
+
 
     }
     return IndexPattern;

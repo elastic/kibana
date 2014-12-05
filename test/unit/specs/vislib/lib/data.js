@@ -265,7 +265,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (d3, Private) {
           Data = Private(require('components/vislib/lib/data'));
-          dataSeries = require('vislib_fixtures/mock_data/series/_data0');
+          dataSeries = require('vislib_fixtures/mock_data/date_histogram/_series');
           stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
           visData = new Data(dataSeries, {});
           stackedVisData = new Data(stackedDataSeries, {});

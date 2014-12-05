@@ -157,17 +157,24 @@ define(function (require) {
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
-      .attr('class', 'chart error')
-      .append('p')
+      .attr('class', 'visualize-error chart error')
+      .append('h4')
       .text(message);
     };
 
+    /**
+     * Destroys all the charts in the visualization
+     *
+     * @method destroy
+     */
     Handler.prototype.destroy = function () {
       this.charts.forEach(function (chart) {
         if (_.isFunction(chart.destroy)) {
           chart.destroy();
         }
       });
+
+      this.charts.length = 0;
     };
 
     return Handler;

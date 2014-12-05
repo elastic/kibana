@@ -25,6 +25,7 @@ define(function (require) {
         };
 
         self.sortColumn = function (col) {
+          if (col.sortable === false) return;
           var sortDirection;
           var cols = _.pluck($scope.columns, 'title');
           var index = cols.indexOf(col.title);
@@ -54,7 +55,9 @@ define(function (require) {
           } else {
             // use generic sort handler
             self.sort.getter = function (row) {
-              return row[index];
+              var value = row[index];
+              if (value.value) return value.value;
+              return value;
             };
           }
         };

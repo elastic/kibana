@@ -129,6 +129,26 @@ kbn-settings-objects-view {
   }
 }
 
+kbn-settings-indices .fields {
+  & th:first-child,
+  & td:first-child {
+    width: 35%;
+  }
+}
+
+kbn-settings-indices .scripted-fields {
+  & header {
+    margin: 5px 0;
+    text-align: right;
+  }
+
+  & th:last-child,
+  & td:last-child {
+    text-align: right;
+  }
+}
+
+
 .kbn-settings-indices-create {
   .time-and-pattern > div {}
 }
