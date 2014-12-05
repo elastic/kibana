@@ -11,6 +11,8 @@ define(function (require) {
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
+    var getComputedFields = require('components/index_patterns/_get_computed_fields');
+
 
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
@@ -233,6 +235,8 @@ define(function (require) {
       self.metaFields = config.get('metaFields');
       self.flattenSearchResponse = flattenSearchResponse.bind(self);
       self.flattenHit = flattenHit.bind(self);
+      self.getComputedFields = getComputedFields.bind(self);
+
 
     }
     return IndexPattern;

@@ -1,0 +1,47 @@
+<div ng-controller="doc" class="app-container">
+
+  <div class="container-fluid">
+    <div class="row">
+
+      <!-- no results -->
+      <div class="col-md-12" ng-if="status === 'notFound'">
+          <div class="col-md-12">
+            <h1>Failed to locate document. <i class="fa fa-meh-o"></i></h1>
+
+            <p>
+              Unfortunately I could not find any documents matching that id, of that type, in that index. I tried really hard. I wanted it to be there. Sometimes I swear documents grow legs and just walk out of the index. Sneaky. I wish I could offer some advice here, something to make you feel better
+            </p>
+
+          </div>
+      </div>
+
+            <!-- no results -->
+      <div class="col-md-12" ng-if="status === 'error'">
+          <div class="col-md-12">
+            <h1>This is bad. <i class="fa fa-meh-o"></i></h1>
+
+            <p>
+              Oh no. Something went very wrong. Its not just that I couldn't find your document, I couldn't even try. The index was missing, or the type. Go check out Elasticsearch, something isn't quite right here.
+            </p>
+
+          </div>
+      </div>
+
+      <!-- loading -->
+      <div class="col-md-12" ng-if="status === undefined">
+        <div class="discover-overlay">
+          <h2>Searching</h2>
+          <div class="spinner large"></div>
+          <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+        </div>
+      </div>
+
+      <!-- result -->
+      <div class="col-md-12" ng-if="status === 'found'">
+        <h2><b>Doc:</b> {{hit._index}}/{{hit._type}}/{{hit._id}}</h2>
+
+        <doc-viewer hit="hit" index-pattern="indexPattern"></doc-viewer>
+      </div>
+    </div>
+  </div>
+</div>

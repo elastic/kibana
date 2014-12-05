@@ -41,7 +41,6 @@ define(function (require) {
           }
         });
       }
-
     }
 
     AggConfigs.prototype.toDsl = function () {
