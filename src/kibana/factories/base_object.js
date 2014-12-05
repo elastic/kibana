@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var rison = require('utils/rison');
+  var angular = require('angular');
 
   return function BaseObjectProvider() {
 
@@ -25,7 +26,9 @@ define(function (require) {
      * @returns {string}
      */
     BaseObject.prototype.toRISON = function () {
-      return rison.encode(this.toObject());
+      var obj = this.toObject();
+      // Use Angular to remove the private vars
+      return rison.encode(JSON.parse(angular.toJson(obj)));
     };
 
     /**
