@@ -422,6 +422,7 @@ define(function (require) {
       var selection = d3.selectAll('.vis-wrapper');
       var titleHts = 30;
       var xAxisLabelHt = 15;
+      var padding = 15;
 
       if (self._attr.isRotated && self._attr.xAxisLabelHt) {
         xAxisLabelHt = self._attr.xAxisLabelHt;
@@ -433,11 +434,6 @@ define(function (require) {
         var visEl = d3.select(this);
         var $visEl = $(this);
 
-        $visEl.find('.x-axis-wrapper')
-        .height(xAxisLabelHt + titleHts);
-        $visEl.find('.x-axis-div-wrapper')
-        .height(xAxisLabelHt);
-
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.select('.y-axis-spacer-block')
           .append('div')
@@ -445,7 +441,7 @@ define(function (require) {
         }
 
         visEl.select('.inner-spacer-block')
-        .style('height', (xAxisLabelHt + titleHts) + 'px');
+        .style('height', (xAxisLabelHt + titleHts - padding) + 'px');
       });
 
     };
