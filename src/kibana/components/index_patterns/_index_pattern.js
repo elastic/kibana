@@ -12,7 +12,7 @@ define(function (require) {
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
-
+    var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
 
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
@@ -97,9 +97,13 @@ define(function (require) {
           group: ['type'],
           initialSet: value.map(function (field) {
             field.count = field.count || 0;
+            if (!field.mappedType) {
+              field.esType = field.type;
+              field.mappedType = true;
+            }
             if (field.hasOwnProperty('format')) return field;
 
-            var type = fieldTypes.byName[field.type];
+            var type = fieldTypes.byName[castMappingType(field.esType)];
             Object.defineProperties(field, {
               scripted: {
                 // enumerable properties end up in the JSON
@@ -107,10 +111,20 @@ define(function (require) {
                 value: !!field.scripted
               },
               sortable: {
-                value: field.indexed && type.sortable
+                value: type && type.sortable && field.indexed
               },
               filterable: {
                 value: field.name === '_id' || (field.indexed && type.filterable)
+              },
+              type: {
+                // enumerable: true,
+                get: function () {
+                  return castMappingType(field.esType);
+                },
+                set: function (type) {
+                  field.esType = type;
+                  field.mappedType = true;
+                }
               },
               format: {
                 get: function () {
