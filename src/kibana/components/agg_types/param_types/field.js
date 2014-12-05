@@ -12,6 +12,7 @@ define(function (require) {
     }
 
     FieldAggParam.prototype.editor = editorHtml;
+    FieldAggParam.prototype.scriptable = false;
     FieldAggParam.prototype.filterFieldTypes = '*';
 
     /**
