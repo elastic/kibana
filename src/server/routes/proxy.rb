@@ -12,7 +12,7 @@ module Kibana
         reverse_proxy(/^\/elasticsearch(.*)$/, "#{config["elasticsearch"]}$1",
             username: config["elasticsearch_username"],
             password: config["elasticsearch_password"],
-            preserve_host: config["preserve_elasticsearch_host"])
+            preserve_host: config["elasticsearch_preserve_host"])
       end
     end
   end
