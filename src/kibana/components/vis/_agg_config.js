@@ -170,6 +170,25 @@ define(function (require) {
       return this.type.makeLabel(this);
     };
 
+    AggConfig.prototype.field = function () {
+      return this.params.field;
+    };
+
+    AggConfig.prototype.fieldFormatter = function () {
+      var field = this.field();
+      return field ? field.format.convert : String;
+    };
+
+    AggConfig.prototype.fieldName = function () {
+      var field = this.field();
+      return field ? field.name : '';
+    };
+
+    AggConfig.prototype.fieldDisplayName = function () {
+      var field = this.field();
+      return field ? (field.displayName || this.fieldName()) : '';
+    };
+
     return AggConfig;
   };
 });

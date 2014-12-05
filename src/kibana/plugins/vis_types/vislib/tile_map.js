@@ -2,7 +2,7 @@ define(function (require) {
   return function TileMapVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
-    var TileMapConverter = Private(require('plugins/vis_types/converters/tile_map'));
+    var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
 
     return new VislibVisType({
       name: 'tile_map',
@@ -15,7 +15,7 @@ define(function (require) {
         mapTypes: ['Shaded Circle Markers', 'Scaled Circle Markers'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
-      responseConverter: TileMapConverter,
+      responseConverter: geoJsonConverter,
       schemas: new Schemas([
         {
           group: 'metrics',

@@ -13,6 +13,10 @@ define(function (require) {
       expect(fn).to.be.a(Function);
     });
 
+    it('should have a types property', function () {
+      expect(fn).to.have.property('types');
+    });
+
     it('should cast numeric types to "number"', function () {
       var types = [
         'float',

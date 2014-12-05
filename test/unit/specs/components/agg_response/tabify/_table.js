@@ -1,5 +1,7 @@
 define(function (require) {
   return ['Table class', function () {
+    var _ = require('lodash');
+
     var Table;
 
     beforeEach(module('kibana'));
@@ -50,60 +52,30 @@ define(function (require) {
     });
 
     describe('#field', function () {
-      it('accepts a column from the table and returns its field', function () {
+      it('calls the columns aggConfig#field() method', function () {
         var table = new Table();
         var football = {};
         var column = {
           aggConfig: {
-            params: {
-              field: football
-            }
+            field: _.constant(football)
           }
         };
 
         expect(table.field(column)).to.be(football);
       });
-
-      it('returns nothing if the columns does not have a field', function () {
-        var table = new Table();
-        var column = {
-          aggConfig: {
-            params: {}
-          }
-        };
-
-        expect(table.field(column)).to.not.be.ok();
-      });
     });
 
     describe('#fieldFormatter', function () {
-      it('accepts a column from the table and returns its field', function () {
+      it('calls the columns aggConfig#fieldFormatter() method', function () {
         var table = new Table();
         var football = {};
         var column = {
           aggConfig: {
-            params: {
-              field: {
-                format: {
-                  convert: football
-                }
-              }
-            }
+            fieldFormatter: _.constant(football)
           }
         };
 
         expect(table.fieldFormatter(column)).to.be(football);
-      });
-
-      it('returns nothing if the columns does not have a field', function () {
-        var table = new Table();
-        var column = {
-          aggConfig: {
-            params: {}
-          }
-        };
-
-        expect(table.field(column)).to.not.be.ok();
       });
     });
   }];

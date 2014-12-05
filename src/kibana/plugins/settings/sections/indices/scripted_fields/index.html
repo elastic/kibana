@@ -1,0 +1,44 @@
+<kbn-settings-app section="indices">
+  <kbn-settings-indices>
+
+    <div ng-controller="scriptedFieldsEdit">
+      <h1>{{ action }} Scripted Field</h1>
+
+      <div class="bs-callout bs-callout-warning">
+        <h4>Proceed with caution</h4>
+
+        <p>Scripted fields can be used to display and aggregate calculated values. As such,
+        they can be very slow, and if done incorrectly, can cause Kibana to be unusable.</p>
+
+        <p>Please familiarize yourself with <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields</a> and with
+        <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations</a>
+        before using scripted fields.</p>
+      </div>
+
+      <form name="scriptedFieldForm" ng-submit="submit()">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" ng-model="scriptedField.name" class="form-control span12">
+        </div>
+        <div class="form-group">
+          <label>Script</label>
+          <textarea class="form-control span12" ng-model="scriptedField.script"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Result Type</label>
+          <select class="form-control span6" ng-model="scriptedField.type" ng-options="value.name as value.name group by value.group for value in indexTypes" required></select>
+        </div>
+      </form>
+      <div ng-if="namingConflict" class="alert alert-danger">
+        You already have a field with the name {{ scriptedField.name }}. Naming your scripted
+        field with the same name means you won't be able to query both fields at the same time.
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-success" ng-click="submit()" ng-disabled="scriptedFieldForm.$invalid">
+          Save Scripted Field
+        </button>
+      </div>
+    </div>
+  </kbn-settings-indices>
+</kbn-settings-app>

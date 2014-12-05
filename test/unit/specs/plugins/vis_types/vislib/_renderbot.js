@@ -123,38 +123,18 @@ define(function (require) {
         sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
       });
 
-      it('should normalize chart data via flatten', function () {
+      it('should use #buildChartData', function () {
         var renderbot = new VislibRenderbot(vis, $el);
-        stubNormalizers(renderbot);
+
+        var football = {};
+        var buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
+        var renderStub = sinon.stub(renderbot.vislibVis, 'render');
+
         renderbot.render('flat data');
-        expect(stubs.render.callCount).to.be(1);
-        expect(stubs.flat.callCount).to.be(1);
-        expect(stubs.hierarchical.callCount).to.be(0);
+        expect(renderStub.callCount).to.be(1);
+        expect(buildStub.callCount).to.be(1);
+        expect(renderStub.firstCall.args[0]).to.be(football);
       });
-
-      it('should normalize chart data via hierarchical', function () {
-        vis = {
-          type: mockVisType,
-          isHierarchical: _.constant(true)
-        };
-
-        var renderbot = new VislibRenderbot(vis, $el);
-        stubNormalizers(renderbot);
-        renderbot.render('flat data');
-        expect(stubs.render.callCount).to.be(1);
-        expect(stubs.flat.callCount).to.be(0);
-        expect(stubs.hierarchical.callCount).to.be(1);
-      });
-
-      function stubNormalizers(renderbot) {
-        stubs.flat = sinon.stub(renderbot._normalizers, 'flat', _.constant({
-          flat: true
-        }));
-        stubs.hierarchical = sinon.stub(renderbot._normalizers, 'hierarchical', _.constant({
-          hierarchical: true
-        }));
-        stubs.render = sinon.stub(renderbot.vislibVis, 'render', _.noop);
-      }
     });
 
     describe('destroy', function () {

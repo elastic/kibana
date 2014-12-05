@@ -25,6 +25,7 @@ define(function (require) {
         };
 
         self.sortColumn = function (col) {
+          if (col.sortable === false) return;
           var sortDirection;
           var cols = _.pluck($scope.columns, 'title');
           var index = cols.indexOf(col.title);

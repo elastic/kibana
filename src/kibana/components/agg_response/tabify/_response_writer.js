@@ -4,6 +4,7 @@ define(function (require) {
     var Table = Private(require('components/agg_response/tabify/_table'));
     var TableGroup = Private(require('components/agg_response/tabify/_table_group'));
     var getColumns = Private(require('components/agg_response/tabify/_get_columns'));
+    var AggConfigResult = Private(require('components/vis/_agg_config_result'));
 
     /**
      * Writer class that collects information about an aggregation response and
@@ -36,6 +37,10 @@ define(function (require) {
       // for every bucket
       this.metricsForAllBuckets = visIsHier;
 
+      // if true, values will be wrapped in aggConfigResult objects which link them
+      // to their aggConfig and enable the filterbar and tooltip formatters
+      this.asAggConfigResults = !!this.opts.asAggConfigResults;
+
       this.columns = getColumns(vis, this.minimalColumns);
       this.aggStack = _.pluck(this.columns, 'aggConfig');
 
@@ -55,14 +60,17 @@ define(function (require) {
     TabbedAggResponseWriter.prototype._table = function (group, agg, key) {
       var Class = (group) ? TableGroup : Table;
       var table = new Class();
+      var parent = this.splitStack[0];
 
       if (group) {
         table.aggConfig = agg;
         table.key = key;
-        table.title = agg.makeLabel() + ': ' + (table.fieldFormat()(key));
+        table.title = agg.makeLabel() + ': ' + (table.fieldFormatter()(key));
+        if (this.asAggConfigResults) {
+          table.aggConfigResult = new AggConfigResult(agg, parent.aggConfigResult, key);
+        }
       }
 
-      var parent = this.splitStack[0];
       // link the parent and child
       table.$parent = parent;
       parent.tables.push(table);
@@ -134,7 +142,16 @@ define(function (require) {
      * @param  {function} block - the function to run while this value is in the row
      * @return {any} - the value that was added
      */
-    TabbedAggResponseWriter.prototype.cell = function (value, block) {
+    TabbedAggResponseWriter.prototype.cell = function (agg, value, block) {
+      if (this.asAggConfigResults) {
+        var parent = _.findLast(this.rowBuffer, function (result) {
+          return result.aggConfig.schema.group === 'buckets';
+        });
+        if (!parent) parent = this.splitStack[0].aggConfigResult;
+
+        value = new AggConfigResult(agg, parent, value);
+      }
+
       this.rowBuffer.push(value);
       if (_.isFunction(block)) block.call(this);
       this.rowBuffer.pop(value);

@@ -180,35 +180,13 @@ define(function (require) {
           return count + ' Error' + (count > 1 ? 's' : '');
         };
 
-        $scope.moveUp = function (agg) {
-          var aggs = $scope.vis.aggs;
-
-          var i = aggs.indexOf(agg);
-          if (i <= 0) return notify.log('already first');
-          aggs.splice(i, 1);
-
-          // find the most previous bucket agg
-          var d = i - 1;
-          for (; d > 0 && aggs[d].schema.group !== 'buckets'; d--) ;
-
-          // place this right before
-          aggs.splice(d, 0, agg);
-        };
-
-        $scope.moveDown = function (agg) {
-          var aggs = $scope.vis.aggs;
-
-          var i = aggs.indexOf(agg);
-          if (i >= aggs.length - 1) return notify.log('already last');
-          aggs.splice(i, 1);
-
-          // find the next bucket agg
-          var d = i;
-          for (; d < aggs.length && aggs[d].schema.group !== 'buckets'; d++) ;
-
-          // place this agg right after
-          aggs.splice(d + 1, 0, agg);
-        };
+        function move(below, agg) {
+          _.move($scope.vis.aggs, agg, below, function (otherAgg) {
+            return otherAgg.schema.group === agg.schema.group;
+          });
+        }
+        $scope.moveUp = _.partial(move, false);
+        $scope.moveDown = _.partial(move, true);
 
         $scope.remove = function (agg) {
           var aggs = $scope.vis.aggs;
