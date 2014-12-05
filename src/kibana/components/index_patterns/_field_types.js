@@ -4,7 +4,7 @@ define(function (require) {
 
     return new IndexedArray({
       index: ['name'],
-      group: ['type'],
+      group: ['sortable', 'filterable'],
       immutable: true,
       initialSet: [
         { name: 'ip',         sortable: true,   filterable: true  },
@@ -14,7 +14,7 @@ define(function (require) {
         { name: 'boolean',    sortable: true,   filterable: true  },
         { name: 'conflict',   sortable: false,  filterable: false },
         { name: 'geo_point',  sortable: false,  filterable: true  },
-        { name: 'geo_shape',  sortable: false,  filterable: true  },
+        { name: 'geo_shape',  sortable: false,  filterable: false },
         { name: 'attachment', sortable: false,  filterable: false },
       ]
     });
