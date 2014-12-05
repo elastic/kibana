@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   var collectBranch = require('components/agg_response/hierarchical/_collect_branch');
   describe('collectBranch()', function () {
     var results;
@@ -12,12 +13,12 @@ define(function (require) {
         depth: 3,
         value: 6,
         field: { format: { convert: convert } },
-        aggConfig: { params: { field: { displayName: 'field3' } } },
+        aggConfig: { params: { field: { displayName: 'field3' } }, fieldFormatter: _.constant(String) },
         parent: {
           name: 'bucket2',
           depth: 2,
           value: 12,
-          aggConfig: { label: 'field2' },
+          aggConfig: { label: 'field2', fieldFormatter: _.constant(String) },
           parent: {
             name: 'bucket1',
             depth: 1,
