@@ -7,7 +7,7 @@ define(function (require) {
      * Accepts a Kibana data object and returns
      * an array of x axis values.
      * values sorted by timestamp if isDate and Date Histogram agg
-     * values sorted by index if isNumber
+     * else values sorted by index
      */
 
     return function (obj) {
