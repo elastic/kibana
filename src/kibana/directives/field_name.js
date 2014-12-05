@@ -45,6 +45,7 @@ define(function (require) {
           var type = $scope.field ? $scope.field.type : $scope.fieldType;
           var name = $scope.field ? $scope.field.name : $scope.fieldName;
           var results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
+          var scripted = $scope.field ? $scope.field.scripted : false;
 
           var displayName = $filter('shortDots')(name);
 
@@ -52,7 +53,7 @@ define(function (require) {
             .text(displayName)
             .attr('title', name)
             .toggleClass('no-results', results)
-            .toggleClass('scripted', $scope.field.scripted)
+            .toggleClass('scripted', scripted)
             .prepend(typeIcon(type));
         });
       }
