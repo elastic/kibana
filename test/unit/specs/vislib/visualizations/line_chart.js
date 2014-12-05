@@ -5,38 +5,35 @@ define(function (require) {
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
-  var termColumns = require('vislib_fixtures/mock_data/terms/_columns');
+  var histogramColumns = require('vislib_fixtures/mock_data/histogram/_columns');
   var rangeRows = require('vislib_fixtures/mock_data/range/_rows');
-  var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
-
-  var dataArray = [
+  var termSeries = require('vislib_fixtures/mock_data/terms/_series');
+  var dateHistogramArray = [
     series,
-    termColumns,
+    histogramColumns,
     rangeRows,
-    stackedSeries,
+    termSeries,
   ];
-
   var names = [
     'series',
-    'term columns',
+    'histogram columns',
     'range rows',
-    'stackedSeries',
+    'term series',
   ];
 
-  var visLibParams = {
-    type: 'area',
-    addLegend: true,
-    addTooltip: true
-  };
+  angular.module('LineChartFactory', ['kibana']);
 
-  angular.module('AreaChartFactory', ['kibana']);
-
-  dataArray.forEach(function (data, i) {
-    describe('VisLib Area Chart Test Suite for ' + names[i] + ' Data', function () {
+  dateHistogramArray.forEach(function (data, i) {
+    describe('VisLib Line Chart Test Suite for ' + names[i] + ' Data', function () {
       var vis;
+      var visLibParams = {
+        type: 'line',
+        addLegend: true,
+        addTooltip: true
+      };
 
       beforeEach(function () {
-        module('AreaChartFactory');
+        module('LineChartFactory');
       });
 
       beforeEach(function () {
@@ -55,80 +52,6 @@ define(function (require) {
       afterEach(function () {
         $(vis.el).remove();
         vis = null;
-      });
-
-      describe('checkIfEnoughData method', function () {
-        var errorVis;
-        var goodVis;
-        var notEnoughData;
-        var enoughData;
-
-        beforeEach(function () {
-          inject(function (d3, Private) {
-            errorVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-            goodVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-            enoughData = require('vislib_fixtures/mock_data/date_histogram/_series');
-            notEnoughData = require('vislib_fixtures/mock_data/not_enough_data/_one_point');
-            require('css!components/vislib/styles/main');
-
-            errorVis.render(notEnoughData);
-            goodVis.render(enoughData);
-          });
-        });
-
-        afterEach(function () {
-          $(errorVis.el).remove();
-          $(goodVis.el).remove();
-          errorVis = null;
-          goodVis = null;
-        });
-
-        it('should throw a Not Enough Data Error', function () {
-          var chart = {
-            chartData: notEnoughData
-          };
-
-          expect(function () {
-            errorVis.handler.ChartClass.prototype.checkIfEnoughData.apply(chart);
-          }).to.throwError();
-        });
-
-        it('should not throw a Not Enough Data Error', function () {
-          goodVis.handler.charts.forEach(function (chart) {
-            expect(function () {
-              chart.checkIfEnoughData();
-            }).to.not.throwError();
-          });
-        });
-      });
-
-      describe('stackData method', function () {
-        var stackedData;
-        var isStacked;
-
-        beforeEach(function () {
-          vis.handler.charts.forEach(function (chart) {
-            stackedData = chart.stackData(chart.chartData);
-
-            isStacked = stackedData.every(function (arr) {
-              return arr.every(function (d) {
-                return _.isNumber(d.y0);
-              });
-            });
-          });
-        });
-
-        it('should append a d.y0 key to the data object', function () {
-          expect(isStacked).to.be(true);
-        });
-      });
-
-      describe('addPath method', function () {
-        it('should append a area paths', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect($(chart.chartEl).find('path').length).to.be.greaterThan(0);
-          });
-        });
       });
 
       describe('addCircleEvents method', function () {
@@ -186,6 +109,14 @@ define(function (require) {
         });
       });
 
+      describe('addLines method', function () {
+        it('should append a paths', function () {
+          vis.handler.charts.forEach(function (chart) {
+            expect($(chart.chartEl).find('path').length).to.be.greaterThan(0);
+          });
+        });
+      });
+
       // Cannot seem to get these tests to work on the box
       // They however pass in the browsers
       //describe('addClipPath method', function () {
@@ -199,7 +130,7 @@ define(function (require) {
       describe('draw method', function () {
         it('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.draw())).to.be(true);
+            expect(chart.draw()).to.be.a(Function);
           });
         });
       });
@@ -218,6 +149,7 @@ define(function (require) {
           });
         });
       });
+
     });
   });
 });

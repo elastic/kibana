@@ -3,19 +3,35 @@ define(function (require) {
 
   return {
     'label': '',
-    'xAxisLabel': '',
+    'xAxisLabel': 'Top 5 unusual terms in @tags',
     'yAxisLabel': 'Count of documents',
     'series': [
       {
         'values': [
           {
-            'x': '_all',
-            'y': 274
+            'x': 'success',
+            'y': 143995
+          },
+          {
+            'x': 'info',
+            'y': 128233
+          },
+          {
+            'x': 'security',
+            'y': 34515
+          },
+          {
+            'x': 'error',
+            'y': 10256
+          },
+          {
+            'x': 'warning',
+            'y': 17188
           }
         ]
       }
     ],
-    'hits': 274,
+    'hits': 171439,
     'xAxisFormatter': function (val) {
       if (_.isObject(val)) {
         return JSON.stringify(val);

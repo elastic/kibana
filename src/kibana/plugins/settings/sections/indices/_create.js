@@ -182,7 +182,10 @@ define(function (require) {
 
     $scope.moreSamples = function (andUpdate) {
       index.sampleCount += 5;
-      if (andUpdate) updateSamples();
+      if (andUpdate) {
+        updateSamples();
+        $scope.refreshFieldList();
+      }
     };
 
     $scope.$watchMulti([
