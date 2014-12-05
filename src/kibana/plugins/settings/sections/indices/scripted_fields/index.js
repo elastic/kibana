@@ -18,9 +18,9 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private) {
+  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private, kbnUrl) {
     var typeOptions = Private(require('components/index_patterns/_cast_mapping_type'));
-    var fieldEditorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+    var indexPatternPath = '/settings/indices/{{ indexPattern }}?_a=(tab:scriptedFields)';
     var notify = new Notifier();
     var createMode = (!$route.current.params.field);
 
@@ -38,8 +38,10 @@ define(function (require) {
       });
     }
 
-    $scope.cancel = function () {
-      $window.history.back();
+    $scope.goBack = function () {
+      kbnUrl.change(indexPatternPath, {
+        indexPattern: $scope.indexPattern.id
+      });
     };
 
     $scope.submit = function () {
@@ -51,7 +53,7 @@ define(function (require) {
       }
 
       notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
-      $window.history.back();
+      $scope.goBack();
     };
 
     $scope.$watch('scriptedField.name', function (name) {
