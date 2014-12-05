@@ -10,6 +10,7 @@ define(function (require) {
       { name: 'bytes',              displayName: 'bytes',             type: 'number',     indexed: true,  analyzed: true,   count: 10 },
       { name: 'ssl',                displayName: 'ssl',               type: 'boolean',    indexed: true,  analyzed: true,   count: 20 },
       { name: '@timestamp',         displayName: '@timestamp',        type: 'date',       indexed: true,  analyzed: true,   count: 30 },
+      { name: 'utc_time',           displayName: 'utc_time',          type: 'date',       indexed: true,  analyzed: true,   count: 0 },
       { name: 'phpmemory',          displayName: 'phpmemory',         type: 'number',     indexed: true,  analyzed: true,   count: 0 },
       { name: 'ip',                 displayName: 'ip',                type: 'ip',         indexed: true,  analyzed: true,   count: 0 },
       { name: 'request_body',       displayName: 'request_body',      type: 'attachment', indexed: true,  analyzed: true,   count: 0 },

@@ -34,7 +34,8 @@ define(function (require) {
         .catch(courier.redirectWhenMissing({
           'visualization': '/visualize',
           'search': '/settings/objects/savedVisualizations/' + $route.current.params.id,
-          'index-pattern': '/settings/objects/savedVisualizations/' + $route.current.params.id
+          'index-pattern': '/settings/objects/savedVisualizations/' + $route.current.params.id,
+          'index-pattern-field': '/settings/objects/savedVisualizations/' + $route.current.params.id
         }));
       }
     }

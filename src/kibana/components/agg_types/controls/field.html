@@ -10,7 +10,7 @@
     ng-options="
       field as field.displayName group by field.type for field in aggConfig.vis.indexPattern.fields.raw
       | fieldType: aggParam.filterFieldTypes
-      | filter: { indexed: true }
+      | matchAny: [{ indexed: true }, { scripted: true }]
       | orderBy: ['type', 'name']
     ">
   </select>
