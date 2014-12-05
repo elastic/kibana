@@ -52,14 +52,14 @@ define(function (require) {
             var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
             var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
             var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
-            var rowsOrMissing = (!filter.vals.missing || field.rowCount > 0);
+            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
             var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
             return !field.display
               && matchFilter
               && isAnalyzed
               && isIndexed
-              && rowsOrMissing
+              && rowsScritpedOrMissing
               && matchName
             ;
           },
