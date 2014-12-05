@@ -18,9 +18,6 @@ define(function (require) {
 
       // Override the mapping, even if elasticsearch says otherwise
       var mappingOverrides = {
-        _id: {
-          indexed: true
-        },
         _timestamp: {
           indexed: true,
           type: 'date'

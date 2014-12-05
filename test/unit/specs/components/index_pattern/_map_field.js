@@ -23,9 +23,14 @@ define(function (require) {
       expect(fields['foo.bar']).to.eql(pristine);
     });
 
-    it('should always consider _id to be indexed', function () {
+    it('should not consider _id indexed unless it is', function () {
       var mapped = fn(fields['_id'], '_id');
-      expect(mapped.indexed).to.be(true);
+      expect(mapped.indexed).to.be(false);
+
+      var mapping = _.cloneDeep(fields['_id']);
+      mapping.mapping._id.index = 'not_analyzed';
+      var mapped2 = fn(mapping, '_id');
+      expect(mapped2.indexed).to.be(true);
     });
 
     it('should always consider _timestamp to be an indexed date', function () {

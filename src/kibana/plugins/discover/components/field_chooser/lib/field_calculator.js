@@ -3,17 +3,9 @@ define(function (require) {
 
   var getFieldValues = function (data, field) {
     var name = field.name;
-    var normalize = field.format && field.format.normalize;
 
     return _.map(data, function (row) {
-      var val;
-
-      val = _.isUndefined(row.$$_flattened[name]) ? row[name] : row.$$_flattened[name];
-
-      // for fields that come back in weird formats like geo_point
-      if (val != null && normalize) val = normalize(val);
-
-      return val;
+      return row.$$_flattened[name] == null ? row[name] : row.$$_flattened[name];
     });
   };
 

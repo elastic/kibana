@@ -8,13 +8,14 @@ define(function (require) {
     var mapper = Private(require('components/index_patterns/_mapper'));
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
-    var mappingSetup = Private(require('utils/mapping_setup'));
-    var DocSource = Private(require('components/courier/data_source/doc_source'));
+    var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
 
+    var DocSource = Private(require('components/courier/data_source/doc_source'));
+    var mappingSetup = Private(require('utils/mapping_setup'));
     var IndexedArray = require('utils/indexed_array/index');
 
     var type = 'index-pattern';
@@ -96,20 +97,28 @@ define(function (require) {
           group: ['type'],
           initialSet: value.map(function (field) {
             field.count = field.count || 0;
+            if (field.hasOwnProperty('format')) return field;
 
-            // non-enumerable type so that it does not get included in the JSON
+            var type = fieldTypes.byName[field.type];
             Object.defineProperties(field, {
+              scripted: {
+                // enumerable properties end up in the JSON
+                enumerable: true,
+                value: !!field.scripted
+              },
+              sortable: {
+                value: field.indexed && type.sortable
+              },
+              filterable: {
+                value: field.name === '_id' || (field.indexed && type.filterable)
+              },
               format: {
-                configurable: true,
-                enumerable: false,
                 get: function () {
                   var formatName = self.customFormats && self.customFormats[field.name];
                   return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
                 }
               },
               displayName: {
-                configurable: true,
-                enumerable: false,
                 get: function () {
                   return shortDotsFilter(field.name);
                 }
