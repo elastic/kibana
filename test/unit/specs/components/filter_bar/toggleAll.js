@@ -30,7 +30,7 @@ define(function (require) {
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
           { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-          { meta: { index: 'logstash-*' }, missing: { field: 'host' }, $$meta: { disabled: true } },
+          { meta: { index: 'logstash-*', disabled: true }, missing: { field: 'host' } },
         ]
       };
     }));
@@ -56,7 +56,7 @@ define(function (require) {
       });
 
       var pickDisabled = function (filter) {
-        return filter.$$meta.disabled;
+        return filter.meta.disabled;
       };
 
       it('should toggle all the filters', function () {

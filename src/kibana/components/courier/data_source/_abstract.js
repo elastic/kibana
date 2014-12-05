@@ -285,8 +285,8 @@ define(function (require) {
            */
           var filterNegate = function (reverse) {
             return function (filter) {
-              if (_.isUndefined(filter.$$meta) || _.isUndefined(filter.$$meta.negate)) return !reverse;
-              return filter.$$meta && filter.$$meta.negate === reverse;
+              if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
+              return filter.meta && filter.meta.negate === reverse;
             };
           };
 

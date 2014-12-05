@@ -37,21 +37,21 @@ define(function (require) {
       it('should map and flatten the filters', function (done) {
 				mapAndFlattenFilters(filters).then(function (results) {
 					expect(results).to.have.length(5);
-          expect(results[0]).to.have.property('$$meta');
-          expect(results[1]).to.have.property('$$meta');
-          expect(results[2]).to.have.property('$$meta');
-          expect(results[3]).to.have.property('$$meta');
-          expect(results[4]).to.have.property('$$meta');
-					expect(results[0].$$meta).to.have.property('key', 'exists');
-					expect(results[0].$$meta).to.have.property('value', '_type');
-					expect(results[1].$$meta).to.have.property('key', 'missing');
-					expect(results[1].$$meta).to.have.property('value', '_type');
-					expect(results[2].$$meta).to.have.property('key', 'query');
-					expect(results[2].$$meta).to.have.property('value', 'foo:bar');
-					expect(results[3].$$meta).to.have.property('key', 'bytes');
-					expect(results[3].$$meta).to.have.property('value', '1024 to 2048');
-					expect(results[4].$$meta).to.have.property('key', '_type');
-					expect(results[4].$$meta).to.have.property('value', 'apache');
+          expect(results[0]).to.have.property('meta');
+          expect(results[1]).to.have.property('meta');
+          expect(results[2]).to.have.property('meta');
+          expect(results[3]).to.have.property('meta');
+          expect(results[4]).to.have.property('meta');
+					expect(results[0].meta).to.have.property('key', 'exists');
+					expect(results[0].meta).to.have.property('value', '_type');
+					expect(results[1].meta).to.have.property('key', 'missing');
+					expect(results[1].meta).to.have.property('value', '_type');
+					expect(results[2].meta).to.have.property('key', 'query');
+					expect(results[2].meta).to.have.property('value', 'foo:bar');
+					expect(results[3].meta).to.have.property('key', 'bytes');
+					expect(results[3].meta).to.have.property('value', '1024 to 2048');
+					expect(results[4].meta).to.have.property('key', '_type');
+					expect(results[4].meta).to.have.property('value', 'apache');
           done();
 				});
         $rootScope.$apply();

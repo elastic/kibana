@@ -10,8 +10,8 @@ define(function (require) {
      */
     return function (filter, force) {
       // Toggle the disabled flag
-      var disabled = _.isUndefined(force) ? !filter.$$meta.disabled : force;
-      filter.$$meta.disabled = disabled;
+      var disabled = _.isUndefined(force) ? !filter.meta.disabled : force;
+      filter.meta.disabled = disabled;
 
       // Save the filters back to the searchSource
       $scope.state.filters = $scope.filters;

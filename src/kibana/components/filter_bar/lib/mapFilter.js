@@ -50,11 +50,11 @@ define(function (require) {
 
       // Apply the mapping function
       return mapFn(filter).then(function (result) {
-        filter.$$meta = filter.$$meta || {};
-        filter.$$meta.key = result.key;
-        filter.$$meta.value = result.value;
-        filter.$$meta.disabled = !!(filter.$$meta.disabled);
-        filter.$$meta.negate = !!(filter.$$meta.negate);
+        filter.meta = filter.meta || {};
+        filter.meta.key = result.key;
+        filter.meta.value = result.value;
+        filter.meta.disabled = !!(filter.meta.disabled);
+        filter.meta.negate = !!(filter.meta.negate);
         return filter;
       });
     };

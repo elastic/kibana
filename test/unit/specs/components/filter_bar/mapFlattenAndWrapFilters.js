@@ -39,8 +39,8 @@ define(function (require) {
 				mapFlattenAndWrapFilters(filters).then(function (results) {
 					expect(results).to.have.length(5);
 					_.each(results, function (filter) {
-            expect(filter).to.have.property('$$meta');
-						expect(filter.$$meta).to.have.property('apply', true);
+            expect(filter).to.have.property('meta');
+						expect(filter.meta).to.have.property('apply', true);
 					});
           done();
         });

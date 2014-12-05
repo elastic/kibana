@@ -28,11 +28,11 @@ define(function (require) {
       it('should map query filters', function (done) {
         var before = { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } };
 				mapFilter(before).then(function (after) {
-          expect(after).to.have.property('$$meta');
-					expect(after.$$meta).to.have.property('key', '_type');
-					expect(after.$$meta).to.have.property('value', 'apache');
-					expect(after.$$meta).to.have.property('disabled', false);
-					expect(after.$$meta).to.have.property('negate', false);
+          expect(after).to.have.property('meta');
+					expect(after.meta).to.have.property('key', '_type');
+					expect(after.meta).to.have.property('value', 'apache');
+					expect(after.meta).to.have.property('disabled', false);
+					expect(after.meta).to.have.property('negate', false);
 					done();
 				});
 				$rootScope.$apply();
@@ -41,11 +41,11 @@ define(function (require) {
       it('should map exists filters', function (done) {
         var before = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
 				mapFilter(before).then(function (after) {
-          expect(after).to.have.property('$$meta');
-					expect(after.$$meta).to.have.property('key', 'exists');
-					expect(after.$$meta).to.have.property('value', '@timestamp');
-					expect(after.$$meta).to.have.property('disabled', false);
-					expect(after.$$meta).to.have.property('negate', false);
+          expect(after).to.have.property('meta');
+					expect(after.meta).to.have.property('key', 'exists');
+					expect(after.meta).to.have.property('value', '@timestamp');
+					expect(after.meta).to.have.property('disabled', false);
+					expect(after.meta).to.have.property('negate', false);
 					done();
 				});
 				$rootScope.$apply();
@@ -54,11 +54,11 @@ define(function (require) {
       it('should map missing filters', function (done) {
         var before = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
 				mapFilter(before).then(function (after) {
-          expect(after).to.have.property('$$meta');
-					expect(after.$$meta).to.have.property('key', 'missing');
-					expect(after.$$meta).to.have.property('value', '@timestamp');
-					expect(after.$$meta).to.have.property('disabled', false);
-					expect(after.$$meta).to.have.property('negate', false);
+          expect(after).to.have.property('meta');
+					expect(after.meta).to.have.property('key', 'missing');
+					expect(after.meta).to.have.property('value', '@timestamp');
+					expect(after.meta).to.have.property('disabled', false);
+					expect(after.meta).to.have.property('negate', false);
 					done();
 				});
 				$rootScope.$apply();

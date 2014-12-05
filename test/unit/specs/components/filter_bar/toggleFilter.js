@@ -29,7 +29,7 @@ define(function (require) {
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
           { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-          { meta: { index: 'logstash-*' }, missing: { field: 'host' }, $$meta: { disabled: true } },
+          { missing: { field: 'host' }, meta: { disabled: true, index: 'logstash-*' } },
         ]
       };
     }));
@@ -39,7 +39,7 @@ define(function (require) {
         var filter = $rootScope.state.filters[0];
         var fn = toggleFilter($rootScope);
         mapFilter(filter).then(fn).then(function (result) {
-          expect(result.$$meta).to.have.property('disabled', true);
+          expect(result.meta).to.have.property('disabled', true);
           done();
         });
         $rootScope.$apply();

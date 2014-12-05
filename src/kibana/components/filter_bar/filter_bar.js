@@ -31,7 +31,7 @@ define(function (require) {
           var newFilters = filterAppliedAndUnwrap(filters);
           $scope.state.filters = _.union($scope.state.filters, newFilters);
           $scope.newFilters = [];
-          if ($scope.changeTimeFilter.$$meta.apply) {
+          if ($scope.changeTimeFilter.meta.apply) {
             changeTimeFilter($scope.changeTimeFilter);
           }
         };

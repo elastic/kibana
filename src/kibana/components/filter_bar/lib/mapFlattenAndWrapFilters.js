@@ -5,8 +5,8 @@ define(function (require) {
 		return function (filters) {
 			return mapAndFlattenFilters(filters).then(function (filters) {
 				return _.map(filters, function (filter) {
-          filter.$$meta = filter.$$meta || {};
-          filter.$$meta.apply = true;
+          filter.meta = filter.meta || {};
+          filter.meta.apply = true;
           return filter;
 				});
 			});

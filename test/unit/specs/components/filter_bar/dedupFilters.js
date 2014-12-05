@@ -21,7 +21,7 @@ define(function (require) {
       it('should ignore the disabed attribute when comparing ', function () {
         var existing = [
           { range: { bytes: { from: 0, to: 1024 } } },
-          { $$meta: { disabled: true }, query: { match: { _term: { query: 'apache', type: 'phrase' } } } }
+          { meta: { disabled: true }, query: { match: { _term: { query: 'apache', type: 'phrase' } } } }
         ];
         var filters = [
           { range: { bytes: { from: 1024, to: 2048 } } },

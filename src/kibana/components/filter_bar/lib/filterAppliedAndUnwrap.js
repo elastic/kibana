@@ -3,7 +3,7 @@ define(function (require) {
   return function (filters) {
     return _(filters)
       .filter(function (filter) {
-        return filter.$$meta.apply;
+        return filter.meta.apply;
       })
       .value();
   };

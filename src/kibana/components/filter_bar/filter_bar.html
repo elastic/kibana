@@ -2,23 +2,23 @@
   <form ng-submit="applyFilters(newFilters)">
   <ul class="list-unstyled">
     <li>Apply these filters?</li>
-    <li ng-repeat="filter in newFilters" class="filter"><input type="checkbox" ng-model="filter.$$meta.apply"/> {{ filter.$$meta.key }}: {{ filter.$$meta.value }}</li>
-    <li ng-if="changeTimeFilter" class="changeTimeFilter filter"><input type="checkbox" ng-model="changeTimeFilter.$$meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.$$meta.value}} </li>
+    <li ng-repeat="filter in newFilters" class="filter"><input type="checkbox" ng-model="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
+    <li ng-if="changeTimeFilter" class="changeTimeFilter filter"><input type="checkbox" ng-model="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
     <li><button class="btn btn-xs btn-primary">Apply Now</button> or <a ng-click="clearFilterBar();">Cancel</a></li>
   </ul>
   </form>
 </div>
 <div class="bar" ng-show="filters.length">
-  <div class="filter" ng-class="{ negate: filter.$$meta.negate, disabled: filter.$$meta.disabled }" ng-repeat="filter in filters">
+  <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
-      <!--<span><i class="fa" ng-class="{'fa-plus': !filter.$$meta.negate, 'fa-minus': filter.$$meta.negate}"></i></span>-->
-      <span>{{ filter.$$meta.key }}:</span>
-      <span>"{{ filter.$$meta.value }}"</span>
+      <!--<span><i class="fa" ng-class="{'fa-plus': !filter.meta.negate, 'fa-minus': filter.meta.negate}"></i></span>-->
+      <span>{{ filter.meta.key }}:</span>
+      <span>"{{ filter.meta.value }}"</span>
     </div>
     <div class="filter-actions">
       <a class="filter-toggle" ng-click="toggleFilter(filter)">
-        <span ng-show="filter.$$meta.disabled">enable</span>
-        <span ng-hide="filter.$$meta.disabled">disable</span>
+        <span ng-show="filter.meta.disabled">enable</span>
+        <span ng-hide="filter.meta.disabled">disable</span>
       </a>
       <a class="filter-remove" ng-click="removeFilter(filter)">
         remove

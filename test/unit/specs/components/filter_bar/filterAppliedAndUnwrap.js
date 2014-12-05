@@ -4,8 +4,8 @@ define(function (require) {
     describe('filterAppliedAndUnwrap()', function () {
 
       var filters = [
-        { $$meta: { apply: true }, exists: { field: '_type' } },
-        { $$meta: { apply: false }, query: { query_string: { query: 'foo:bar' } } }
+        { meta: { apply: true }, exists: { field: '_type' } },
+        { meta: { apply: false }, query: { query_string: { query: 'foo:bar' } } }
       ];
 
       it('should filter the applied and unwrap the filter', function () {

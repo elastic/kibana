@@ -17,7 +17,7 @@ define(function (require) {
             { query: { match: { '@tags': { query: 'test' } } } },
             { query: { match: { '@tags': { query: 'bar' } } } },
             { exists: { field: '@timestamp' } },
-            { missing: { field: 'host' }, $$meta: { disabled: true } },
+            { missing: { field: 'host' }, meta: { disabled: true } },
           ]
         };
         done();
