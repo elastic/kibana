@@ -16,12 +16,8 @@ define(function (require) {
       },
       template: headerHtml,
       controller: function ($scope) {
-        $scope.mapping = $scope.indexPattern.fields.byName;
-
-        var unsortableFields = ['geo_point', 'geo_shape', 'attachment'];
         var sortableField = function (field) {
-          var mapping = $scope.mapping[field];
-          return mapping && mapping.indexed && !_.contains(unsortableFields, mapping.type);
+          return $scope.indexPattern.fields.byName[field].sortable;
         };
 
         $scope.headerClass = function (column) {
@@ -55,6 +51,7 @@ define(function (require) {
 
         $scope.sort = function (column) {
           if (!sortableField(column)) return;
+
           var sorting = $scope.sorting || [];
           $scope.sorting = [column, sorting[1] === 'asc' ? 'desc' : 'asc'];
         };
