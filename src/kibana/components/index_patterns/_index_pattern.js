@@ -75,6 +75,10 @@ define(function (require) {
             if (self.id) {
               if (!self.fields) {
                 return self.refreshFields();
+              // refresh fields if there is old field data in the stored index pattern
+              } else if (_.find(self.fields, { type: 'number', mappedType: undefined })) {
+                notify.info('Field mapping reloaded');
+                return self.refreshFields();
               } else {
                 setIndexedValue('fields');
               }
