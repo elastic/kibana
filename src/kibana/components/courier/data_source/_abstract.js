@@ -9,9 +9,10 @@ define(function (require) {
     var courierFetch = Private(require('components/courier/fetch/fetch'));
 
     function SourceAbstract(initialState) {
-      this._instanceid = _.uniqueId('data_source');
+      var self = this;
+      self._instanceid = _.uniqueId('data_source');
 
-      this._state = (function () {
+      self._state = (function () {
         // state can be serialized as JSON, and passed back in to restore
         if (initialState) {
           if (typeof initialState === 'string') {
@@ -25,20 +26,20 @@ define(function (require) {
       }());
 
       // set internal state values
-      this._methods.forEach(function (name) {
-        this[name] = function (val) {
+      self._methods.forEach(function (name) {
+        self[name] = function (val) {
           if (val == null) {
-            delete this._state[name];
+            delete self._state[name];
           } else {
-            this._state[name] = val;
+            self._state[name] = val;
           }
 
-          return this;
+          return self;
         };
-      }, this);
+      });
 
-      this.history = [];
-      this._fetchStrategy = courierFetch.strategies[this._getType()];
+      self.history = [];
+      self._fetchStrategy = courierFetch.strategies[self._getType()];
     }
 
     /*****
