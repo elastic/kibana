@@ -3,8 +3,8 @@ define(function (require) {
     var StubIndexPattern = Private(require('test_utils/stub_index_pattern'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
-    var getComputedFields = require('components/index_patterns/_get_computed_fields');
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
+    var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
     var _ = require('lodash');
 

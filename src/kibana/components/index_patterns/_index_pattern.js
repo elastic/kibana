@@ -115,7 +115,7 @@ define(function (require) {
                 value: !!field.scripted
               },
               sortable: {
-                value: type && type.sortable && field.indexed
+                value: field.indexed && type.sortable
               },
               filterable: {
                 value: field.name === '_id' || (field.indexed && type.filterable)
