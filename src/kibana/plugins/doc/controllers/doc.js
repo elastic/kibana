@@ -54,8 +54,12 @@ define(function (require) {
         }
       }
     }).catch(function (err) {
-      $scope.status = 'error';
-      $scope.resp = err;
+      if (err.status === 404) {
+        $scope.status = 'notFound';
+      } else {
+        $scope.status = 'error';
+        $scope.resp = err;
+      }
     });
 
   });
