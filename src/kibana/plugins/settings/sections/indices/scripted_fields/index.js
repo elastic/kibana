@@ -45,7 +45,7 @@ define(function (require) {
     $scope.submit = function () {
       var field = $scope.scriptedField;
       if (createMode) {
-        $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
+        $scope.indexPattern.addScriptedField(field.name, field.script, field.esType);
       } else {
         $scope.indexPattern.save();
       }
