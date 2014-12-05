@@ -192,8 +192,8 @@ define(function (require) {
   inherits(errors.ContainerTooSmall, KbnError);
 
   /**
-   * error thrown when user tries to render an area chart with less
-   * than 2 data points
+   * error thrown when user tries to render an chart with less
+   * than the required number of data points
    * @param {String} message - the message to provide with the error
    */
   errors.NotEnoughData = function NotEnoughData() {

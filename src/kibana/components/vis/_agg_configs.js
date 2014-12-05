@@ -7,11 +7,11 @@ define(function (require) {
     _(AggConfigs).inherits(IndexedArray);
     function AggConfigs(vis, configStates) {
       var self = this;
-      this.vis = vis;
+      self.vis = vis;
 
       configStates = AggConfig.ensureIds(configStates || []);
 
-      AggConfigs.Super.call(this, {
+      AggConfigs.Super.call(self, {
         index: ['id'],
         group: ['schema.group', 'type.name', 'schema.name'],
         initialSet: configStates.map(function (aggConfigState) {
@@ -41,7 +41,6 @@ define(function (require) {
           }
         });
       }
-
     }
 
     AggConfigs.prototype.toDsl = function () {
