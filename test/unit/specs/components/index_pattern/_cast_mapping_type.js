@@ -49,6 +49,10 @@ define(function (require) {
       });
     });
 
+    it('should leave conflicted types alone', function () {
+      expect(fn('conflict')).to.be('conflict');
+    });
+
     it('should treat everything else as a string', function () {
       expect(fn('fooTypeIsNotReal')).to.be('string');
     });

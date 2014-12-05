@@ -30,9 +30,11 @@ define(function (require) {
      * @return {String} - the most specific type that we care for
      */
     function castMappingType(name) {
-      var match = castMappingType.types.byName[name];
+      if (name === 'conflict') return 'conflict';
 
+      var match = castMappingType.types.byName[name];
       if (match) return match.type;
+
       return 'string';
     }
 

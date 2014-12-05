@@ -2,7 +2,6 @@ define(function (require) {
   return function transformMappingIntoFields(Private, configFile, config) {
     var _ = require('lodash');
     var MappingConflict = require('errors').MappingConflict;
-    var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
     var mapField = Private(require('components/index_patterns/_map_field'));
 
 
