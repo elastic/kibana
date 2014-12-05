@@ -97,7 +97,7 @@ define(function (require) {
       });
     });
 
-    describe('sorting', function () {
+    describe.skip('sorting', function () {
       var data;
       var lastRowIndex;
       var paginatedTable;
@@ -153,7 +153,7 @@ define(function (require) {
       });
     });
 
-    describe('custom sorting', function () {
+    describe.skip('custom sorting', function () {
       var data;
       var paginatedTable;
       var sortHandler;
