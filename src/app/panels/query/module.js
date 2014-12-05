@@ -96,6 +96,14 @@ define([
       dashboard.current.services.query.list[_nq.id] = querySrv.defaults(_nq);
     };
 
+    $scope.isEditable = function() {
+      if (dashboard.current.services.query.editable === undefined) { // Backward compatibility with existing Kibana definitions
+        return true;
+      } else {
+        return dashboard.current.services.query.editable;
+      }
+    };
+
     var update_history = function(query) {
       if($scope.panel.remember > 0) {
         $scope.panel.history = _.union(query.reverse(),$scope.panel.history);
