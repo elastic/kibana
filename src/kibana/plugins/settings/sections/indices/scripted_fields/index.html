@@ -18,11 +18,11 @@
       <form name="scriptedFieldForm" ng-submit="submit()">
         <div class="form-group">
           <label>Name</label>
-          <input type="text" ng-model="scriptedField.name" class="form-control span12">
+          <input required type="text" ng-model="scriptedField.name" class="form-control span12">
         </div>
         <div class="form-group">
           <label>Script</label>
-          <textarea class="form-control span12" ng-model="scriptedField.script"></textarea>
+          <textarea required class="form-control span12" ng-model="scriptedField.script"></textarea>
         </div>
         <div class="form-group">
           <label>Result Type</label>
