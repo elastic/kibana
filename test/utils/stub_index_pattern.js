@@ -23,6 +23,7 @@ define(function (require) {
           return field;
         })
       });
+      this.getFields = sinon.spy();
     }
     return StubIndexPattern;
   };
