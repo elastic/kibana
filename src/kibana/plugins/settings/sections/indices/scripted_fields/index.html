@@ -26,7 +26,7 @@
         </div>
         <div class="form-group">
           <label>Result Type</label>
-          <select class="form-control span6" ng-model="scriptedField.type" ng-options="value.name as value.name group by value.group for value in indexTypes" required></select>
+          <select class="form-control span6" ng-model="scriptedField.type" ng-options="value.name as value.name for value in fieldTypes" required></select>
         </div>
       </form>
       <div ng-if="namingConflict" class="alert alert-danger">

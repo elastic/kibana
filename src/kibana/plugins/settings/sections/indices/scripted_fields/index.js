@@ -19,13 +19,13 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private, kbnUrl) {
-    var typeOptions = Private(require('components/index_patterns/_cast_mapping_type'));
+    var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var indexPatternPath = '/settings/indices/{{ indexPattern }}?_a=(tab:scriptedFields)';
     var notify = new Notifier();
     var createMode = (!$route.current.params.field);
 
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexTypes = typeOptions.types;
+    $scope.fieldTypes = fieldTypes;
 
     if (createMode) {
       $scope.action = 'Create';
