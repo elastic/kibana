@@ -49,12 +49,18 @@ define(function (require) {
             filter.vals = _.clone(filter.defaults);
           },
           isFieldFiltered: function (field) {
+            var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
+            var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
+            var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
+            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+            var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
+
             return !field.display
-              && (filter.vals.type == null || field.type === filter.vals.type)
-              && (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed)
-              && (filter.vals.indexed == null || field.indexed === filter.vals.indexed)
-              && (!filter.vals.missing || field.rowCount > 0)
-              && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
+              && matchFilter
+              && isAnalyzed
+              && isIndexed
+              && rowsScritpedOrMissing
+              && matchName
             ;
           },
           popularity: function (field) {

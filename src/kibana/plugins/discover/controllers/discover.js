@@ -340,7 +340,8 @@ define(function (require) {
                 counts[name] = counts[name] ? counts[name] + 1 : 1;
 
                 var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-                var formatter = indexPattern.fields.byName[name] ? indexPattern.fields.byName[name].format : defaultFormat;
+                var field = indexPattern.fields.byName[name];
+                var formatter = (field && field.format) ? field.format : defaultFormat;
 
                 return formatter.convert(value);
               };

@@ -14,6 +14,10 @@ define(function (require) {
       }
     });
 
+    _.each(self.getFields('scripted'), function (field) {
+      scriptFields[field.name] = { script: field.script };
+    });
+
     return {
       fields: ['*', '_source'],
       scriptFields: scriptFields
