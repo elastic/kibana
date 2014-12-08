@@ -143,7 +143,7 @@ define(function (require) {
      */
     AreaChart.prototype.addCircleEvents = function (element, svg) {
       var events = this.events;
-      var isBrushable = (typeof events.dispatch.on('brush') === 'function');
+      var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
       var click = events.addClickEvent();

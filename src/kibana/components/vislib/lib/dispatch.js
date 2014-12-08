@@ -130,16 +130,34 @@ define(function (require) {
     };
 
     /**
+     * Determine if we will allow brushing
+     *
+     * @method allowBrushing
+     * @returns {Boolean}
+     */
+    Dispatch.prototype.allowBrushing = function () {
+      return !!this.handler.xAxis.ordered;
+    };
+
+    /**
+     * Determine if brushing is currently enabled
+     *
+     * @method isBrushable
+     * @returns {Boolean}
+     */
+    Dispatch.prototype.isBrushable = function () {
+      return this.allowBrushing() && (typeof this.dispatch.on('brush') === 'function');
+    };
+
+    /**
      *
      * @param svg
      * @returns {Function}
      */
     Dispatch.prototype.addBrushEvent = function (svg) {
-      var dispatch = this.dispatch;
+      if (!this.isBrushable()) return;
       var xScale = this.handler.xAxis.xScale;
-      var isBrushable = (dispatch.on('brush'));
       var brush = this.createBrush(xScale, svg);
-      var addEvent = this.addEvent;
 
       function brushEnd() {
         var bar = d3.select(this);
@@ -157,9 +175,7 @@ define(function (require) {
         bar.call(brush);
       }
 
-      if (isBrushable) {
-        return addEvent('mousedown', brushEnd);
-      }
+      return this.addEvent('mousedown', brushEnd);
     };
 
 
