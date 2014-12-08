@@ -14,12 +14,11 @@ require.config({
     'angular-elastic': 'bower_components/angular-elastic/elastic',
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
-    'angular-chosen': 'bower_components/angular-chosen-localytics/chosen',
+    'angular-ui-select': 'bower_components/angular-ui-select/dist/select',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',
     bower_components: 'bower_components',
-    chosen: 'bower_components/chosen/chosen.jquery.min',
     css: 'bower_components/require-css/css',
     d3: 'bower_components/d3/d3',
     elasticsearch: 'bower_components/elasticsearch/elasticsearch.angular',
@@ -41,12 +40,12 @@ require.config({
       exports: 'angular'
     },
     gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
-    'angular-chosen': ['jquery', 'chosen'],
     'angular-route': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
     'angular-ui-ace': ['angular', 'ace'],
+    'angular-ui-select': ['css!bower_components/angular-ui-select/dist/select.css'],
     'ng-clip': ['angular', 'zeroclipboard'],
     inflection: {
       exports: 'inflection'

@@ -13,13 +13,13 @@
       <small>(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html#field_detail"
         target="_blank">reference</a>)</small>
     </label>
-    <select
+    <ui-select
       multiple
-      chosen
-      width="'100%'"
-      data-placeholder="&nbsp"
-      ng-model="params[aggParam.name].flags"
-      ng-options="label for label in aggParam.flags">
-    </select>
+      ng-model="params[aggParam.name].flags">
+      <ui-select-match>{{ $item }}</ui-select-match>
+      <ui-select-choices repeat="label in aggParam.flags">
+        {{ label }}
+      </ui-select>
+    </ui-select>
   </div>
 </div>
