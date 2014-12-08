@@ -45,7 +45,7 @@ define(function (require) {
         var football = { tables: [], hits: { total: 1 } };
 
         var stub = sinon.stub(aggResponse, 'tabify').returns(football);
-        expect(buildChartData.call(renderbot, football)).to.eql({ hits: 1 });
+        expect(buildChartData.call(renderbot, football)).to.eql({ rows: [], hits: 1 });
         expect(stub).to.have.property('callCount', 1);
         expect(stub.firstCall.args[0]).to.be(renderbot.vis);
         expect(stub.firstCall.args[1]).to.be(football);

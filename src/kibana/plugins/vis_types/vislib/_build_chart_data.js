@@ -23,14 +23,16 @@ define(function (require) {
     };
 
     function convertTableGroup(vis, tableGroup) {
-      var child = tableGroup.tables[0];
-      if (child instanceof Table) {
-        return convertTable(vis, child);
+      var tables = tableGroup.tables;
+      var firstChild = tables[0];
+      if (firstChild instanceof Table) {
+        return convertTable(vis, firstChild);
       }
 
       var out = {};
       var outList;
-      tableGroup.tables.forEach(function (table) {
+
+      tables.forEach(function (table) {
         if (!outList) {
           var aggConfig = table.aggConfig;
           var direction = aggConfig.params.row ? 'rows' : 'columns';
@@ -39,6 +41,12 @@ define(function (require) {
 
         outList.push(convertTableGroup(vis, table));
       });
+
+      if (!tables.length) {
+        // mimic a row of tables that doesn't have any tables
+        // https://github.com/elasticsearch/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
+        out.rows = [];
+      }
 
       return out;
     }
