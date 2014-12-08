@@ -3,9 +3,11 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('scriptedFields', function ($compile, kbnUrl) {
+  .directive('scriptedFields', function ($compile, kbnUrl, Notifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
+
+    var notify = new Notifier();
 
     return {
       restrict: 'E',
@@ -50,7 +52,12 @@ define(function (require) {
 
         $scope.addDateScripts = function () {
           _.each(dateScripts($scope.indexPattern), function (script, field) {
-            $scope.indexPattern.addScriptedField(field, script, 'number');
+            try {
+              $scope.indexPattern.addScriptedField(field, script, 'number');
+            } catch (e) {
+              notify.info('Not adding duplicate fields. Remove the old scripted field definitions and retry if needed');
+            }
+
           });
         };
 
