@@ -46,14 +46,17 @@ define(function (require) {
 
     $scope.submit = function () {
       var field = $scope.scriptedField;
-      if (createMode) {
-        $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
-      } else {
-        $scope.indexPattern.save();
+      try {
+        if (createMode) {
+          $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
+        } else {
+          $scope.indexPattern.save();
+        }
+        notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
+        $scope.goBack();
+      } catch (e) {
+        notify.error(e.message);
       }
-
-      notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
-      $scope.goBack();
     };
 
     $scope.$watch('scriptedField.name', function (name) {
