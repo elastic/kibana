@@ -40,18 +40,11 @@ define(function (require) {
         return;
       }
 
-      // replace anything that is outside of brackets with a *
-      var wildcard = indexPatterns.patternToWildcard(index.name);
-      es.indices.getAliases({
-        index: wildcard
-      })
-      .then(function (resp) {
-        var all = Object.keys(resp);
-        var matches = all.filter(function (existingIndex) {
-          var parsed = moment(existingIndex, index.name);
-          return existingIndex === parsed.format(index.name);
-        });
-
+      var pattern = mockIndexPattern(index);
+      indexPatterns.mapper.getIndicesForIndexPattern(pattern)
+      .then(function (existing) {
+        var all = existing.all;
+        var matches = existing.matches;
         if (all.length) {
           index.existing = {
             class: all.length === matches.length ? 'success' : 'warning',
@@ -93,19 +86,7 @@ define(function (require) {
 
       return indexPatterns.mapper.clearCache(index.name)
       .then(function () {
-        // trick the mapper into thinking this is an indexPattern
-        var pattern = {
-          id: index.name,
-          nameInterval: index.nameInterval,
-          toIndexList: function (to, from) {
-            if (!index.nameInterval) {
-              index.listUsed = index.name;
-            } else {
-              index.listUsed = intervals.toIndexList(index.name, index.nameInterval, to, from);
-            }
-            return index.listUsed;
-          }
-        };
+        var pattern = mockIndexPattern(index);
 
         return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
         .catch(function (err) {
@@ -178,6 +159,14 @@ define(function (require) {
         delete index.nameInterval;
         delete index.timeField;
       }
+    };
+
+    var mockIndexPattern = function (index) {
+      // trick the mapper into thinking this is an indexPattern
+      return {
+        id: index.name,
+        intervalName: index.nameInterval
+      };
     };
 
     $scope.moreSamples = function (andUpdate) {
