@@ -46,7 +46,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -87,8 +87,13 @@ define(function (require) {
       var $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
-        vis.setState($state.vis);
-        editableVis.setState($state.vis);
+        Promise.try(function () {
+          vis.setState($state.vis);
+          editableVis.setState($state.vis);
+        })
+        .catch(courier.redirectWhenMissing({
+          'index-pattern-field': '/visualize'
+        }));
       }
 
       return $state;
