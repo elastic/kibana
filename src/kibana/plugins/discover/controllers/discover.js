@@ -53,6 +53,7 @@ define(function (require) {
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
     var SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
+    var brushEvent = Private(require('utils/brush_event'));
 
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
 
@@ -340,7 +341,8 @@ define(function (require) {
                 counts[name] = counts[name] ? counts[name] + 1 : 1;
 
                 var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-                var formatter = indexPattern.fields.byName[name] ? indexPattern.fields.byName[name].format : defaultFormat;
+                var field = indexPattern.fields.byName[name];
+                var formatter = (field && field.format) ? field.format : defaultFormat;
 
                 return formatter.convert(value);
               };
@@ -461,13 +463,14 @@ define(function (require) {
       .then(function (indexPattern) {
         $scope.opts.timefield = indexPattern.timeFieldName;
 
-        // are we updating the indexPattern?
+        // did we update the index pattern?
         var refresh = indexPattern !== $scope.searchSource.get('index');
 
         // make sure the pattern is set on the "leaf" searchSource, not just the root
-        $scope.searchSource.index(indexPattern);
+        $scope.searchSource.set('index', indexPattern);
 
         if (refresh) {
+          $scope.indexPattern = indexPattern;
           delete $scope.fields;
           delete $scope.columns;
           setFields();
@@ -501,13 +504,12 @@ define(function (require) {
 
       _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
         _.defaults(field, currentState[field.name]);
-        // clone the field and add it's display prop
-        var clone = _.assign({}, field, {
-          displayName: field.displayName, // this is a getter, so we need to copy it over manually
-          format: field.format, // this is a getter, so we need to copy it over manually
-          display: columnObjects[field.name] || false,
-          rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0
-        });
+
+        // clone the field with Object.create so that it's getters
+        // and non-enumerable props are preserved
+        var clone = Object.create(field);
+        clone.display = columnObjects[field.name] || false;
+        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
 
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
@@ -561,8 +563,8 @@ define(function (require) {
           });
           break;
         default:
-          var filter = { query: { match: {} } };
-          filter.negate = operation === '-';
+          var filter = { meta: { negate: false, index: $state.index }, query: { match: {} } };
+          filter.meta.negate = operation === '-';
           filter.query.match[field] = { query: value, type: 'phrase' };
           filters.push(filter);
           break;
@@ -665,16 +667,7 @@ define(function (require) {
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
           },
-          brush: function (e) {
-            var from = moment(e.range[0]);
-            var to = moment(e.range[1]);
-
-            if (to - from === 0) return;
-
-            timefilter.time.from = from;
-            timefilter.time.to = to;
-            timefilter.time.mode = 'absolute';
-          }
+          brush: brushEvent
         },
         aggs: [
           {

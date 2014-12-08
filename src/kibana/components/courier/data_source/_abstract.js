@@ -265,16 +265,12 @@ define(function (require) {
               'match_all': {}
             };
           }
-          flatState.body.fields = ['*', '_source'];
 
-          _.each(flatState.index.fields.byType['date'], function (field) {
-            if (field.indexed) {
-              flatState.body.script_fields = flatState.body.script_fields || {};
-              flatState.body.script_fields[field.name] = {
-                script: 'doc["' + field.name + '"].value'
-              };
-            }
-          });
+          var computedFields = flatState.index.getComputedFields();
+          flatState.body.fields = computedFields.fields;
+          flatState.body.script_fields = flatState.body.script_fields || {};
+          _.extend(flatState.body.script_fields, computedFields.scriptFields);
+
 
           /**
            * Create a filter that can be reversed for filters with negate set
@@ -285,8 +281,8 @@ define(function (require) {
            */
           var filterNegate = function (reverse) {
             return function (filter) {
-              if (_.isUndefined(filter.negate)) return !reverse;
-              return filter.negate === reverse;
+              if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
+              return filter.meta && filter.meta.negate === reverse;
             };
           };
 
@@ -296,7 +292,7 @@ define(function (require) {
            * @returns {object}
            */
           var cleanFilter = function (filter) {
-            return _.omit(filter, ['negate', 'disabled']);
+            return _.omit(filter, ['$$hashKey', 'meta']);
           };
 
           // switch to filtered query if there are filters

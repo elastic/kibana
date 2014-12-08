@@ -15,7 +15,7 @@ define(function (require) {
       describe('interval', function () {
         it('should accept a valid interval', function () {
           var output = paramWriter.write({ interval: 'day' });
-          expect(output.params).to.have.property('interval', 'day');
+          expect(output.params).to.have.property('interval', '86400000ms');
         });
 
         it('should throw an error if an invalid interval is given', function () {

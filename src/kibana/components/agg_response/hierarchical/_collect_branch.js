@@ -17,8 +17,8 @@ define(function (require) {
       // Set the bucket name, and use the converter to format the field if
       // the field exists.
       var bucket = item.name;
-      if (col && col.field && col.field.format && col.field.format.convert)  {
-        bucket = col.field.format.convert(bucket);
+      if (col)  {
+        bucket = col.fieldFormatter()(bucket);
       }
 
       // Add the row to the tooltipScope.rows

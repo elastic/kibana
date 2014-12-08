@@ -1,15 +1,17 @@
 define(function (require) {
-  var transformer = require('components/agg_response/hierarchical/_transform_aggregation');
-  var collectKeys = require('components/agg_response/hierarchical/_collect_keys');
-  return function (agg, metric, aggData) {
-    // Ceate the split structure
-    var split = { label: '', slices: { children: [] } };
+  return function biuldSplitProvider(Private) {
+    var transformer = Private(require('components/agg_response/hierarchical/_transform_aggregation'));
+    var collectKeys = require('components/agg_response/hierarchical/_collect_keys');
+    return function (agg, metric, aggData) {
+      // Ceate the split structure
+      var split = { label: '', slices: { children: [] } };
 
-    // Transform the aggData into splits
-    split.slices.children = transformer(agg, metric, aggData);
+      // Transform the aggData into splits
+      split.slices.children = transformer(agg, metric, aggData);
 
-    // Collect all the keys
-    split.names = collectKeys(split.slices.children);
-    return split;
+      // Collect all the keys
+      split.names = collectKeys(split.slices.children);
+      return split;
+    };
   };
 });

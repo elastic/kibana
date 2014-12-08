@@ -27,12 +27,10 @@ define(function (require) {
             var mapping = mapField(field, name);
 
             if (fields[name]) {
-              if (fields[name].type !== mapping.type
-              ) {
+              if (fields[name].type !== mapping.type) {
                 // conflict fields are not available for much except showing in the discover table
                 mapping.type = 'conflict';
                 mapping.indexed = false;
-
               }
             }
             fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values');

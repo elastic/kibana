@@ -18,14 +18,14 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private) {
-    var typeOptions = Private(require('components/index_patterns/_cast_mapping_type'));
-    var fieldEditorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private, kbnUrl) {
+    var fieldTypes = Private(require('components/index_patterns/_field_types'));
+    var indexPatternPath = '/settings/indices/{{ indexPattern }}?_a=(tab:scriptedFields)';
     var notify = new Notifier();
     var createMode = (!$route.current.params.field);
 
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexTypes = typeOptions.types;
+    $scope.fieldTypes = fieldTypes;
 
     if (createMode) {
       $scope.action = 'Create';
@@ -38,20 +38,25 @@ define(function (require) {
       });
     }
 
-    $scope.cancel = function () {
-      $window.history.back();
+    $scope.goBack = function () {
+      kbnUrl.change(indexPatternPath, {
+        indexPattern: $scope.indexPattern.id
+      });
     };
 
     $scope.submit = function () {
       var field = $scope.scriptedField;
-      if (createMode) {
-        $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
-      } else {
-        $scope.indexPattern.save();
+      try {
+        if (createMode) {
+          $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
+        } else {
+          $scope.indexPattern.save();
+        }
+        notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
+        $scope.goBack();
+      } catch (e) {
+        notify.error(e.message);
       }
-
-      notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
-      $window.history.back();
     };
 
     $scope.$watch('scriptedField.name', function (name) {

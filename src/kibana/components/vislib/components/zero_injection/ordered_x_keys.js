@@ -5,7 +5,9 @@ define(function (require) {
 
     /*
      * Accepts a Kibana data object and returns
-     * an array of x axis values ordered by their index number.
+     * an array of x axis values.
+     * values sorted by timestamp if isDate and Date Histogram agg
+     * else values sorted by index
      */
 
     return function (obj) {
@@ -18,8 +20,9 @@ define(function (require) {
       return _.chain(objKeys)
       .pairs()
       .sortBy(function (d) {
-
-        // sort by index
+        if (d[1].isDate) {
+          return +d[0];
+        }
         return d[1].index;
       })
       .map(function (d) {

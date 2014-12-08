@@ -2,6 +2,7 @@ define(function (require) {
   return function AggConfigFactory(Private) {
     var _ = require('lodash');
     var aggTypes = Private(require('components/agg_types/index'));
+    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
 
     function AggConfig(vis, opts) {
       var self = this;
@@ -106,6 +107,10 @@ define(function (require) {
       return this.type.params.write(this);
     };
 
+    AggConfig.prototype.createFilter = function (key) {
+      return this.type.createFilter(this, key);
+    };
+
     /**
      * Convert this aggConfig to it's dsl syntax.
      *
@@ -175,6 +180,10 @@ define(function (require) {
     };
 
     AggConfig.prototype.fieldFormatter = function () {
+      if (this.schema && this.schema.group === 'metrics') {
+        return fieldFormats.defaultByType.number.convert;
+      }
+
       var field = this.field();
       return field ? field.format.convert : String;
     };

@@ -12,9 +12,8 @@ define(function (require) {
       // to the original format to save in searchSource
       $scope.state.filters = _($scope.filters)
         .filter(function (filter) {
-          return filter.filter !== invalidFilter.filter;
+          return filter !== invalidFilter;
         })
-        .map(remapFilters)
         .value();
     };
 

@@ -17,6 +17,7 @@ define(function (require) {
       }
 
       var flattenedData = flattenDataArray(obj);
+      var isDate = (obj.ordered && obj.ordered.date);
       var uniqueXValues = {};
 
       flattenedData.forEach(function (d, i) {
@@ -25,14 +26,17 @@ define(function (require) {
         if (uniqueXValues[key] === void 0) {
           uniqueXValues[key] = {
             index: i,
+            isDate: isDate,
             isNumber: _.isNumber(key)
           };
         } else {
           uniqueXValues[key] = {
             index: Math.min(i, uniqueXValues[key].index),
+            isDate: isDate,
             isNumber: _.isNumber(key)
           };
         }
+
       });
 
       return uniqueXValues;
