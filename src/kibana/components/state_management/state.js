@@ -45,6 +45,8 @@ define(function (require) {
       } catch (e) {
         var notify = new Notifier();
         notify.error('Unable to parse URL');
+        search[this._urlParam] = rison.encode(this._defaults);
+        $location.search(search).replace();
         return null;
       }
     };
