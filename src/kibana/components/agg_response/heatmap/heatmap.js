@@ -4,38 +4,46 @@ define(function (require) {
     var $ = require('jquery');
     var moment = require('moment');
     var interval = require('utils/interval');
+    var tooltipFormatter = Private(require('components/agg_response/tooltip_formatter/tooltip_formatter'));
+    var fakeXAspect = Private(require('components/agg_response/point_series/_fake_x_aspect'));
 
-    var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('text!plugins/vis_types/tooltips/histogram.html'));
-    $compile($tooltip)($tooltipScope);
+    function unwrap(res, def) {
+      return res && res.value != null ? res.value : def;
+    }
 
-    return function (chart, columns, rows) {
+    function aspectFind(schemaName) {
+      return function (column) {
+        return column && column.aggConfig && column.aggConfig.schema && column.aggConfig.schema.name === schemaName;
+      };
+    }
+
+    return function (vis, table) {
+      var chart = {};
+      var columns = table.columns;
+      var rows = table.rows;
+
       // Row
-      var iRow = _.findIndex(columns, { categoryName: 'row' });
+      var iRow = _.findIndex(columns, aspectFind('row'));
 
       if (iRow === -1) {
-        iRow = columns.push({
-          label: '',
-          categoryName: 'row'
-        }) - 1;
+        var fakeRowAspect = fakeXAspect(vis);
+        iRow = columns.push(fakeRowAspect.col) - 1;
       }
 
       var rowAxis = columns[iRow];
 
       // Column
-      var iCol = _.findIndex(columns, { categoryName: 'column'});
+      var iCol = _.findIndex(columns, aspectFind('column'));
 
       if (iCol === -1) {
-        iCol = columns.push({
-          label: '',
-          categoryName: 'column'
-        }) - 1;
+        var fakeColAspect = fakeXAspect(vis);
+        iCol = columns.push(fakeColAspect.col) - 1;
       }
 
       var colAxis = columns[iCol];
 
       // Metric
-      var iMetric = _.findIndex(columns, { categoryName: 'metric'});
+      var iMetric = _.findIndex(columns, aspectFind('metric'));
       var metric = columns[iMetric];
 
       /*****
@@ -44,25 +52,19 @@ define(function (require) {
       chart.columnLabel = colAxis.label;
       chart.rowLabel = rowAxis.label;
       chart.metricLabel = metric.label;
-
-      if (metric.field) {
-        chart.metricFormatter = metric.field.format.convert;
-      }
+      chart.metricFormatter = table.fieldFormatter(metric);
 
       // aggregations for row and column
-      var aggCol = colAxis.aggType;
-      var aggRow = rowAxis.aggType;
-
       var labelFormatters = [
         {
           axis: colAxis,
-          agg: aggCol,
+          agg: colAxis.aggConfig,
           name: 'columnFormatter',
           ordered: 'columnOrdered'
         },
         {
           axis: rowAxis,
-          agg: aggRow,
+          agg: rowAxis.aggConfig,
           name: 'rowFormatter',
           ordered: 'rowOrdered'
         }
@@ -75,7 +77,7 @@ define(function (require) {
 
         chart[obj.ordered] = {};
 
-        if (agg && agg.ordered && agg.ordered.date) {
+        if (agg.type && agg.type.ordered && agg.type.ordered.date) {
           chart[name] = (function () {
             var bounds = timefilter.getBounds();
             var format = interval.calculate(
@@ -103,49 +105,15 @@ define(function (require) {
 
         if (!chart[obj.ordered]) {
           chart[name] = axis.field && axis.field.format.convert;
-          chart[obj.ordered] = agg && agg.ordered && {};
-          if (agg !== false && axis && axis.params && axis.params.interval) {
+          chart[obj.ordered] = agg.type && agg.type.ordered && {};
+          if (agg.type !== false && axis && axis.params && axis.params.interval) {
             chart[obj.ordered].interval = axis.params.interval;
           }
         }
       });
 
       // setup the formatter for the label
-      chart.tooltipFormatter = function (event) {
-        $tooltipScope.details = columns.map(function (obj) {
-          var datum = event.point;
-
-          var label;
-          var val;
-
-          switch (obj) {
-          case colAxis:
-            label = 'column';
-            val = datum.x;
-            break;
-          case rowAxis:
-            label = 'row';
-            val = datum.row;
-            break;
-          case metric:
-            label = 'metric';
-            val = datum.y;
-            break;
-          }
-
-          label = (obj.aggConfig && obj.aggConfig.makeLabel()) || (obj.field && obj.field.name) || label;
-          if (obj.field) val = obj.field.format.convert(val);
-
-          return {
-            label: label,
-            value: val
-          };
-
-        });
-
-        $tooltipScope.$apply();
-        return $tooltip[0].outerHTML;
-      };
+      chart.tooltipFormatter = tooltipFormatter;
 
       var series = chart.series = [];
       var seriesByLabel = {};
@@ -153,11 +121,11 @@ define(function (require) {
       // TODO: Need to make vislib accept an empty series.
       if (rows.length === 0) {
         chart.hits = 0;
-        chart.series.push({ values: [ { x: '_all', y: 0 } ] });
+        chart.series.push({ values: [ { x: '_all', row: '_all', y: 0 } ] });
       }
 
       rows.forEach(function (row) {
-        var seriesLabel = rowAxis && row[iRow];
+        var seriesLabel = rowAxis && unwrap(row[iRow], '');
         var s = rowAxis ? seriesByLabel[seriesLabel] : series[0];
 
         if (!s) {
@@ -177,9 +145,9 @@ define(function (require) {
         }
 
         var datum = {
-          x: (row[iCol] == null) ? '_all' : row[iCol],
-          row: (row[iRow] == null) ? '_all' : row[iRow],
-          y: row[iMetric === -1 ? row.length - 1 : iMetric]
+          x: unwrap(row[iCol], '_all'),
+          row: unwrap(row[iRow], '_all'),
+          y: unwrap(row[iMetric], 0)
         };
 
         // skip this datum
@@ -188,6 +156,8 @@ define(function (require) {
         s.values.push(datum);
       });
 
+
+      return chart;
     };
   };
 });

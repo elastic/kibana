@@ -4,12 +4,14 @@ define(function (require) {
     var $ = require('jquery');
 
     var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('text!components/agg_response/point_series/_tooltip.html'));
+    var $tooltip = $(require('text!components/agg_response/tooltip_formatter/tooltip.html'));
     $compile($tooltip)($tooltipScope);
 
     return function tooltipFormatter(event) {
       var datum = event.point;
       var point = datum.orig;
+
+      if (!point || !point.aggConfigResult) return '';
 
       var details = $tooltipScope.details = [];
       var result = { $parent: point.aggConfigResult };

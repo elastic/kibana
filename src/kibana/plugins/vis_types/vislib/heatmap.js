@@ -2,7 +2,7 @@ define(function (require) {
   return function HeatMapVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
-    var HeatMapConverter = Private(require('plugins/vis_types/vislib/converters/heatmap'));
+    var heatMapConverter = Private(require('components/agg_response/heatmap/heatmap'));
 
     return new VislibVisType({
       name: 'heatmap',
@@ -14,7 +14,7 @@ define(function (require) {
           addLegend: true
         }
       },
-      responseConverter: HeatMapConverter,
+      responseConverter: heatMapConverter,
       schemas: new Schemas([
         {
           group: 'metrics',
