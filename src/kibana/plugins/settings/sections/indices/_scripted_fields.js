@@ -12,6 +12,8 @@ define(function (require) {
       template: require('text!plugins/settings/sections/indices/_scripted_fields.html'),
       scope: true,
       link: function ($scope, $el, attr) {
+        var dateScripts = require('plugins/settings/sections/indices/_date_scripts');
+
         var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
@@ -45,6 +47,12 @@ define(function (require) {
             return columns;
           });
         });
+
+        $scope.addDateScripts = function () {
+          _.each(dateScripts($scope.indexPattern), function (script, field) {
+            $scope.indexPattern.addScriptedField(field, script, 'number');
+          });
+        };
 
         $scope.create = function () {
           var params = {
