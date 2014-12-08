@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var d3 = require('d3');
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
@@ -115,27 +116,18 @@ define(function (require) {
       describe('addGroupedBars method', function () {});
 
       describe('addBarEvents method', function () {
-        var rect;
-        var d3selectedRect;
-        var brush;
-        var onClick;
-        var onMouseOver;
-        var onBrush;
+        function checkChart(chart) {
+          var rect = $(chart.chartEl).find('rect')[4];
+          var d3selectedRect = d3.select(rect)[0][0];
+          var brush = d3.select('.brush')[0][0];
 
-        beforeEach(function () {
-          inject(function (d3) {
-            vis.handler.charts.forEach(function (chart) {
-              rect = $(chart.chartEl).find('rect')[4];
-              d3selectedRect = d3.select(rect)[0][0];
-              brush = d3.select('.brush')[0][0];
-
-              // d3 instance of click and hover
-              onBrush = (!!brush);
-              onClick = (!!d3selectedRect.__onclick);
-              onMouseOver = (!!d3selectedRect.__onmouseover);
-            });
-          });
-        });
+          // check for existance of stuff and things
+          return {
+            brush: !!brush,
+            click: !!d3selectedRect.__onclick,
+            mouseOver: !!d3selectedRect.__onmouseover
+          };
+        }
 
         // D3 brushing requires that a g element is appended that
         // listens for mousedown events. This g element includes
@@ -143,20 +135,23 @@ define(function (require) {
         // function being present. I will need to update this test
         // in the future.
         it('should attach a brush g element', function () {
-          vis.handler.charts.forEach(function () {
-            expect(onBrush).to.be(true);
+          vis.handler.charts.forEach(function (chart) {
+            var has = checkChart(chart);
+            expect(has.brush).to.be(true);
           });
         });
 
         it('should attach a click event', function () {
-          vis.handler.charts.forEach(function () {
-            expect(onClick).to.be(true);
+          vis.handler.charts.forEach(function (chart) {
+            var has = checkChart(chart);
+            expect(has.click).to.be(true);
           });
         });
 
         it('should attach a hover event', function () {
-          vis.handler.charts.forEach(function () {
-            expect(onMouseOver).to.be(true);
+          vis.handler.charts.forEach(function (chart) {
+            var has = checkChart(chart);
+            expect(has.mouseOver).to.be(true);
           });
         });
       });
