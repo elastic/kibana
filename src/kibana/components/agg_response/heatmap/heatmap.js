@@ -93,7 +93,7 @@ define(function (require) {
 
           chart[obj.ordered] = {
             date: true,
-            interval: interval.toMs(axis.params.interval)
+            interval: interval.toMs(agg.params.interval.val)
           };
 
           if (axis.aggConfig.vis.indexPattern.timeFieldName) {
@@ -147,7 +147,8 @@ define(function (require) {
         var datum = {
           x: unwrap(row[iCol], '_all'),
           row: unwrap(row[iRow], '_all'),
-          y: unwrap(row[iMetric], 0)
+          y: unwrap(row[iMetric], 0),
+          aggConfigResult: row[iMetric]
         };
 
         // skip this datum
