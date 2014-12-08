@@ -51,14 +51,24 @@ define(function (require) {
         });
 
         $scope.addDateScripts = function () {
+          var conflictFields = [];
+          var fieldsAdded = 0;
           _.each(dateScripts($scope.indexPattern), function (script, field) {
             try {
               $scope.indexPattern.addScriptedField(field, script, 'number');
+              fieldsAdded++;
             } catch (e) {
-              notify.info('Not adding duplicate fields. Remove the old scripted field definitions and retry if needed');
+              conflictFields.push(field);
             }
-
           });
+
+          if (fieldsAdded > 0) {
+            notify.info(fieldsAdded + ' script fields created');
+          }
+
+          if (conflictFields.length > 0) {
+            notify.info('Not adding ' + conflictFields.length + ' duplicate fields: ' + conflictFields.join(', '));
+          }
         };
 
         $scope.create = function () {
