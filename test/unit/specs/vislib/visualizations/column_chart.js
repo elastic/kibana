@@ -49,10 +49,7 @@ define(function (require) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
 
-          vis.on('brush', function (e) {
-            console.log(e);
-          });
-
+          vis.on('brush', _.noop);
           vis.render(data);
         });
       });
@@ -94,8 +91,10 @@ define(function (require) {
             numOfValues = chart.chartData.series[0].values.length;
             product = numOfSeries * numOfValues;
 
-            // Need to substract 4 rects from total since adding brushing
-            expect($(chart.chartEl).find('rect').length - 4).to.be(product);
+            // remove brushing el before counting rects
+            $(chart.chartEl).find('g.brush').remove();
+
+            expect($(chart.chartEl).find('rect')).to.have.length(product);
           });
         });
       });
@@ -134,10 +133,10 @@ define(function (require) {
         // listeners, however, I was not able to test for the listener
         // function being present. I will need to update this test
         // in the future.
-        it('should attach a brush g element', function () {
+        it('should attach a brush g element if the data is ordered', function () {
           vis.handler.charts.forEach(function (chart) {
             var has = checkChart(chart);
-            expect(has.brush).to.be(true);
+            expect(has.brush).to.be(!!vis.handler.data.get('ordered'));
           });
         });
 
