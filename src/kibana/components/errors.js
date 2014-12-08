@@ -140,7 +140,7 @@ define(function (require) {
    */
   errors.DuplicateField = function DuplicateField(name) {
     KbnError.call(this,
-      'The ' + name + ' field already exists in this mapping',
+      'The "' + name + '" field already exists in this mapping',
       errors.DuplicateField);
   };
   inherits(errors.DuplicateField, KbnError);
