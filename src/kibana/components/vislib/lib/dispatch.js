@@ -30,6 +30,7 @@ define(function (require) {
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
+      var datum = d._input || d;
       var data = d3.event.target.nearestViewportElement.__data__;
       var label = d.label ? d.label : d.name;
       var isSeries = !!(data.series);
@@ -44,7 +45,6 @@ define(function (require) {
         // Find object with the actual d value and add it to the point object
         var object = _.find(series, { 'label': d.label });
         d.value = +object.values[i].y;
-        d.orig = object.values[i];
 
         if (isPercentage) {
 
@@ -55,7 +55,8 @@ define(function (require) {
 
       return {
         value: d.y,
-        point: d,
+        point: datum,
+        datum: datum,
         label: label,
         color: color(label),
         pointIndex: i,

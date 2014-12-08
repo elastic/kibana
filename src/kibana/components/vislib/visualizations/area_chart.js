@@ -58,6 +58,7 @@ define(function (require) {
         var label = d.label;
         return d.values.map(function (e, i) {
           return {
+            _input: e,
             label: label,
             x: self._attr.xValue.call(d.values, e, i),
             y: self._attr.yValue.call(d.values, e, i)
