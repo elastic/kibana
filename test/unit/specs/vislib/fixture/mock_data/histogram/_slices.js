@@ -11,23 +11,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -39,23 +24,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -67,23 +37,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -95,23 +50,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -123,23 +63,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -151,23 +76,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -179,23 +89,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -207,23 +102,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -235,23 +115,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -263,23 +128,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -291,23 +141,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -319,23 +154,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -347,23 +167,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -375,23 +180,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -403,23 +193,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -431,23 +206,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -459,23 +219,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -487,23 +232,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -515,23 +245,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -543,23 +258,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -571,23 +271,8 @@ define(function () {
           'aggConfig': {
             'type': 'histogram',
             'schema': 'segment',
+            'fieldFormatter': _.constant(String),
             'params': {
-              'field': {
-                name: 'bytes',
-                format: {
-                  convert: function (val) {
-                    if (_.isObject(val)) {
-                      return JSON.stringify(val);
-                    }
-                    else if (val == null) {
-                      return '';
-                    }
-                    else {
-                      return '' + val;
-                    }
-                  }
-                }
-              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -619,193 +304,6 @@ define(function () {
       20000
     ],
     'hits': 3967374,
-    'raw': {
-      'rows': [
-        [
-          0,
-          378611
-        ],
-        [
-          1000,
-          205997
-        ],
-        [
-          2000,
-          397189
-        ],
-        [
-          3000,
-          397195
-        ],
-        [
-          4000,
-          398429
-        ],
-        [
-          5000,
-          397843
-        ],
-        [
-          6000,
-          398140
-        ],
-        [
-          7000,
-          398076
-        ],
-        [
-          8000,
-          396746
-        ],
-        [
-          9000,
-          397418
-        ],
-        [
-          10000,
-          20222
-        ],
-        [
-          11000,
-          20173
-        ],
-        [
-          12000,
-          20026
-        ],
-        [
-          13000,
-          19986
-        ],
-        [
-          14000,
-          20091
-        ],
-        [
-          15000,
-          20052
-        ],
-        [
-          16000,
-          20349
-        ],
-        [
-          17000,
-          20290
-        ],
-        [
-          18000,
-          20399
-        ],
-        [
-          19000,
-          20133
-        ],
-        [
-          20000,
-          9
-        ]
-      ],
-      'columns': [
-        {
-          'categoryName': 'segment',
-          'id': 'agg_27',
-          'aggConfig': {
-            'type': 'histogram',
-            'schema': 'segment',
-            'params': {
-              'field': 'bytes',
-              'interval': 1000,
-              'extended_bounds': {}
-            }
-          },
-          'aggType': {
-            'name': 'histogram',
-            'title': 'Histogram',
-            'ordered': {},
-            'hasNoDsl': false,
-            'params': [
-              {
-                'name': 'field',
-                'filterFieldTypes': 'number'
-              },
-              {
-                'name': 'interval',
-                'editor': '<div class=\'form-group\'>\n  <label>Interval</label>\n  ' +
-                '<select\n    ng-if=\'aggParam.options\'\n    ng-model=\'params.interval\'\n    ' +
-                'required\n    ng-options=\'opt as opt.display for opt in aggParam.options.raw | ' +
-                'filter:optionEnabled\'\n    class=\'form-control\'\n    name=\'interval\'>\n    ' +
-                '<option value=\'\'>-- select a valid interval --</option>\n  ' +
-                '</select>\n  <input\n    ng-if=\'!aggParam.options\'\n    ' +
-                'ng-model=\'params.interval\'\n    required\n    type=\'number\'\n    ' +
-                'class=\'form-control\'\n    name=\'interval\'\n    min=\'0\'\n    >\n</div>\n'
-              },
-              {
-                'name': 'min_doc_count',
-                'default': null,
-                'editor': '<div class=\'checkbox ng-scope\'>\n  <label>\n    ' +
-                '<input ng-model=\'params.min_doc_count\' type=\'checkbox\'>\n    ' +
-                'Show empty buckets&nbsp;\n    <kbn-info\n      info=\'Show all ' +
-                'buckets, not only the buckets with results.\'\n      ' +
-                'placement=\'right\'>\n      </kbn-info>\n  </label>\n</div>'
-              },
-              {
-                'name': 'extended_bounds',
-                'default': {},
-                'editor': '<div ng-if=\'aggParam.shouldShow(aggConfig)\' ' +
-                'class=\'vis-editor-agg-form-row\'>\n  <div class=\'form-group\'>\n    ' +
-                '<label>Min <small>(optional)</small></label>\n    <input\n      ' +
-                'ng-model=\'params.extended_bounds.min\'\n      type=\'number\'\n      ' +
-                'class=\'form-control\'\n      name=\'extended_bounds.min\' />\n  ' +
-                '</div>\n  <div class=\'form-group\'>\n    ' +
-                '<label>Max <small>(optional)</small></label>\n    <input\n      ' +
-                'ng-model=\'params.extended_bounds.max\'\n      type=\'number\'\n      ' +
-                'class=\'form-control\'\n      name=\'extended_bounds.max\' />\n  ' +
-                '</div>\n</div>'
-              },
-              {
-                'name': 'json',
-                'type': 'json',
-                'advanced': true
-              }
-            ],
-            'type': 'buckets'
-          },
-          'field': {
-            'type': 'number',
-            'indexed': true,
-            'analyzed': false,
-            'doc_values': false,
-            'name': 'bytes',
-            'count': 0
-          },
-          'label': 'bytes'
-        },
-        {
-          'categoryName': 'metric',
-          'id': 'agg_26',
-          'aggConfig': {
-            'type': 'count',
-            'schema': 'metric',
-            'params': {}
-          },
-          'aggType': {
-            'name': 'count',
-            'title': 'Count',
-            'hasNoDsl': true,
-            'params': [
-              {
-                'name': 'json',
-                'type': 'json',
-                'advanced': true
-              }
-            ],
-            'type': 'metrics'
-          },
-          'label': 'Count of documents'
-        }
-      ]
-    },
     'tooltipFormatter': function (event) {
       return event.point;
     }

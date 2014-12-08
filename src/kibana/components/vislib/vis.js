@@ -9,7 +9,6 @@ define(function (require) {
     var errors = require('errors');
     require('css!components/vislib/styles/main.css');
 
-
     /**
      * Creates the visualizations.
      *

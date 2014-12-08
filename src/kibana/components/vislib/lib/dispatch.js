@@ -42,10 +42,10 @@ define(function (require) {
       var isHeatmap = (handler._attr.type === 'heatmap');
 
       if (isSeries && !isHeatmap) {
-
         // Find object with the actual d value and add it to the point object
         var object = _.find(series, { 'label': d.label });
         d.value = +object.values[i].y;
+        d.orig = object.values[i];
 
         if (isPercentage) {
 

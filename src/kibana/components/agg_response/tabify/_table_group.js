@@ -14,12 +14,11 @@ define(function (require) {
     }
 
     TableGroup.prototype.field = function () {
-      return this.aggConfig && this.aggConfig.params && this.aggConfig.params.field;
+      if (this.aggConfig) return this.aggConfig.field();
     };
 
-    TableGroup.prototype.fieldFormat = function () {
-      var field = this.field();
-      return field ? field.format.convert : _.identity;
+    TableGroup.prototype.fieldFormatter = function () {
+      if (this.aggConfig) return this.aggConfig.fieldFormatter();
     };
 
     return TableGroup;

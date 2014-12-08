@@ -132,16 +132,20 @@ define(function (require) {
         var ignoreStateChanges = ['columns'];
 
         // listen for changes, and relisten everytime something happens
-        $scope.$listen($state, 'fetch_with_changes', function (changed) {
+        $scope.$listen($state, 'fetch_with_changes', updateFields);
+        $scope.$listen($state, 'reset_with_changes', updateFields);
+
+        function updateFields(changed) {
           if (_.contains(changed, 'columns')) {
             $scope.fields.forEach(function (field) {
               field.display = _.contains($state.columns, field.name);
             });
+            refreshColumns();
           }
 
           // if we only have ignorable changes, do nothing
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
-        });
+        }
 
         $scope.$listen(timefilter, 'update', function () {
           $scope.fetch();
@@ -336,7 +340,8 @@ define(function (require) {
                 counts[name] = counts[name] ? counts[name] + 1 : 1;
 
                 var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-                var formatter = indexPattern.fields.byName[name] ? indexPattern.fields.byName[name].format : defaultFormat;
+                var field = indexPattern.fields.byName[name];
+                var formatter = (field && field.format) ? field.format : defaultFormat;
 
                 return formatter.convert(value);
               };
@@ -457,13 +462,14 @@ define(function (require) {
       .then(function (indexPattern) {
         $scope.opts.timefield = indexPattern.timeFieldName;
 
-        // are we updating the indexPattern?
+        // did we update the index pattern?
         var refresh = indexPattern !== $scope.searchSource.get('index');
 
         // make sure the pattern is set on the "leaf" searchSource, not just the root
-        $scope.searchSource.index(indexPattern);
+        $scope.searchSource.set('index', indexPattern);
 
         if (refresh) {
+          $scope.indexPattern = indexPattern;
           delete $scope.fields;
           delete $scope.columns;
           setFields();
@@ -497,13 +503,12 @@ define(function (require) {
 
       _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
         _.defaults(field, currentState[field.name]);
-        // clone the field and add it's display prop
-        var clone = _.assign({}, field, {
-          displayName: field.displayName, // this is a getter, so we need to copy it over manually
-          format: field.format, // this is a getter, so we need to copy it over manually
-          display: columnObjects[field.name] || false,
-          rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0
-        });
+
+        // clone the field with Object.create so that it's getters
+        // and non-enumerable props are preserved
+        var clone = Object.create(field);
+        clone.display = columnObjects[field.name] || false;
+        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
 
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
@@ -603,6 +608,7 @@ define(function (require) {
 
       // Make sure there are no columns added that aren't in the displayed field list.
       $state.columns = _.intersection($state.columns, fields);
+
 
       // If no columns remain, use _source
       if (!$state.columns.length) {

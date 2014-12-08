@@ -1,9 +1,10 @@
 define(function (require) {
   return function NormalizeChartDataFactory(Private) {
     return {
-      flat: Private(require('components/agg_response/flat')),
       hierarchical: Private(require('components/agg_response/hierarchical/build_hierarchical_data')),
-      tabify: Private(require('components/agg_response/tabify/tabify'))
+      pointSeries: Private(require('components/agg_response/point_series/point_series')),
+      tabify: Private(require('components/agg_response/tabify/tabify')),
+      geoJson: Private(require('components/agg_response/geo_json/geo_json'))
     };
   };
 });

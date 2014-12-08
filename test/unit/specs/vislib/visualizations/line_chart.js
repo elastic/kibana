@@ -5,23 +5,20 @@ define(function (require) {
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
-  var columns = require('vislib_fixtures/mock_data/date_histogram/_columns');
-  var rows = require('vislib_fixtures/mock_data/date_histogram/_rows');
+  var histogramColumns = require('vislib_fixtures/mock_data/histogram/_columns');
+  var rangeRows = require('vislib_fixtures/mock_data/range/_rows');
   var termSeries = require('vislib_fixtures/mock_data/terms/_series');
-  var termColumns = require('vislib_fixtures/mock_data/terms/_columns');
   var dateHistogramArray = [
     series,
-    columns,
-    rows,
+    histogramColumns,
+    rangeRows,
     termSeries,
-    termColumns
   ];
   var names = [
     'series',
-    'columns',
-    'rows',
+    'histogram columns',
+    'range rows',
     'term series',
-    'term columns'
   ];
 
   angular.module('LineChartFactory', ['kibana']);
@@ -133,7 +130,7 @@ define(function (require) {
       describe('draw method', function () {
         it('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.draw())).to.be(true);
+            expect(chart.draw()).to.be.a(Function);
           });
         });
       });

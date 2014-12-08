@@ -25,7 +25,8 @@ define(function (require) {
 
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
         $scope.formatted =  _.mapValues($scope.flattened, function (value, name) {
-          var formatter = $scope.mapping[name] ? $scope.mapping[name].format : defaultFormat;
+          var mapping = $scope.mapping[name];
+          var formatter = (mapping && mapping.format) ? mapping.format : defaultFormat;
           return formatter.convert(value);
         });
         $scope.fields = _.keys($scope.flattened).sort();

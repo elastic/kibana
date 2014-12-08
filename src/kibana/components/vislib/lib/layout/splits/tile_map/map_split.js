@@ -41,7 +41,7 @@ define(function () {
             return divClass;
           });
 
-        if (!data.geoJSON) {
+        if (!data.geoJson) {
           charts.call(split);
         }
       });

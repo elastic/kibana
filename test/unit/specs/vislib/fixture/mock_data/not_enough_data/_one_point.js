@@ -15,42 +15,6 @@ define(function (require) {
         ]
       }
     ],
-    'raw': {
-      'splitColumns': [],
-      'splitValStack': [],
-      'columns': [
-        {
-          'categoryName': 'metric',
-          'id': 1,
-          'aggConfig': {
-            'id': 1,
-            'type': 'count',
-            'schema': 'metric',
-            'params': {}
-          },
-          'aggType': {
-            'name': 'count',
-            'title': 'Count',
-            'hasNoDsl': true,
-            'params': [
-              {
-                'name': 'json',
-                'type': 'json',
-                'advanced': true
-              }
-            ],
-            'type': 'metrics'
-          },
-          'label': 'Count of documents',
-          'params': {}
-        }
-      ],
-      'rows': [
-        [
-          274
-        ]
-      ]
-    },
     'hits': 274,
     'xAxisFormatter': function (val) {
       if (_.isObject(val)) {

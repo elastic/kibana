@@ -2,6 +2,7 @@ define(function (require) {
   return function AggConfigFactory(Private) {
     var _ = require('lodash');
     var aggTypes = Private(require('components/agg_types/index'));
+    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
 
     function AggConfig(vis, opts) {
       var self = this;
@@ -168,6 +169,29 @@ define(function (require) {
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
       return this.type.makeLabel(this);
+    };
+
+    AggConfig.prototype.field = function () {
+      return this.params.field;
+    };
+
+    AggConfig.prototype.fieldFormatter = function () {
+      if (this.schema && this.schema.group === 'metrics') {
+        return fieldFormats.defaultByType.number.convert;
+      }
+
+      var field = this.field();
+      return field ? field.format.convert : String;
+    };
+
+    AggConfig.prototype.fieldName = function () {
+      var field = this.field();
+      return field ? field.name : '';
+    };
+
+    AggConfig.prototype.fieldDisplayName = function () {
+      var field = this.field();
+      return field ? (field.displayName || this.fieldName()) : '';
     };
 
     return AggConfig;

@@ -36,6 +36,29 @@ define(function (require) {
         var state = new State();
         expect(state).to.be.an(Events);
       });
+
+      it('should emit an event if reset with changes', function (done) {
+        var state = new State('_s', { message: 'test' });
+        state.on('reset_with_changes', function (keys) {
+          expect(keys).to.eql(['message']);
+          done();
+        });
+        state.save();
+        state.message = 'foo';
+        state.reset();
+        $rootScope.$apply();
+      });
+
+      it('should not emit an event if reset without changes', function () {
+        var state = new State('_s', { message: 'test' });
+        state.on('reset_with_changes', function () {
+          expect().fail();
+        });
+        state.save();
+        state.message = 'test';
+        state.reset();
+        $rootScope.$apply();
+      });
     });
 
     describe('Search', function () {

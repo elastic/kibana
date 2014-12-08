@@ -2,10 +2,8 @@ define(function (require) {
   return ['Vislib', exportWrapper];
 
   function exportWrapper() {
-    [
-      require('specs/plugins/vis_types/vislib/_renderbot')
-    ].forEach(function (s) {
-      describe(s[0], s[1]);
-    });
+    run(require('specs/plugins/vis_types/vislib/_renderbot'));
+    run(require('specs/plugins/vis_types/vislib/_build_chart_data'));
+    function run(m) { describe(m[0], m[1]); }
   }
 });

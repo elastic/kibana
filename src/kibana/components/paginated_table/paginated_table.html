@@ -14,6 +14,7 @@
             <span bo-text="col.title"></span>
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
             <i
+              ng-if="col.sortable !== false"
               class="fa"
               ng-class="{
                 'fa-sort-asc': paginatedTable.sort.columnName === col.title && paginatedTable.sort.direction === 'asc',

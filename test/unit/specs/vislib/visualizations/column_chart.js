@@ -5,34 +5,26 @@ define(function (require) {
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
-  var columns = require('vislib_fixtures/mock_data/date_histogram/_columns');
-  var rows = require('vislib_fixtures/mock_data/date_histogram/_rows');
+  var termsColumns = require('vislib_fixtures/mock_data/terms/_columns');
+  var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
-  var termSeries = require('vislib_fixtures/mock_data/terms/_series');
-  var termColumns = require('vislib_fixtures/mock_data/terms/_columns');
   var dataArray = [
     series,
-    columns,
-    rows,
-    stackedSeries,
-    termSeries,
-    termColumns
+    termsColumns,
+    histogramRows,
+    stackedSeries
   ];
   var names = [
     'series',
-    'columns',
-    'rows',
-    'stackedSeries',
-    'term series',
-    'term columns'
+    'terms columns',
+    'histogram rows',
+    'stackedSeries'
   ];
   var modes = [
     'stacked',
     'grouped',
     'percentage',
-    'stacked',
-    'grouped',
-    'percentage'
+    'stacked'
   ];
 
   angular.module('ColumnChartFactory', ['kibana']);

@@ -38,6 +38,15 @@ define(function (require) {
     'slices'
   ];
 
+  var sizes = [
+    0,
+    5,
+    15,
+    30,
+    60,
+    120
+  ];
+
   aggArray.forEach(function (dataAgg, i) {
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
       var visLibParams = {
@@ -155,20 +164,37 @@ define(function (require) {
         });
       });
 
-      describe('containerTooSmall error', function () {
-        beforeEach(function () {
-          $(vis.el).height(0);
-          $(vis.el).width(0);
-        });
+      sizes.forEach(function (size) {
+        describe('containerTooSmall error', function () {
+          it('should throw an error', function () {
+            // 20px is the minimum height and width
+            vis.handler.charts.forEach(function (chart) {
+              $(chart.chartEl).height(size);
+              $(chart.chartEl).width(size);
 
-        it('should throw an error', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(function () {
-              chart.render();
-            }).to.throwError();
+              if (size < 20) {
+                expect(function () {
+                  chart.render();
+                }).to.throwError();
+              }
+            });
+          });
+
+          it('should not throw an error', function () {
+            vis.handler.charts.forEach(function (chart) {
+              $(chart.chartEl).height(size);
+              $(chart.chartEl).width(size);
+
+              if (size > 20) {
+                expect(function () {
+                  chart.render();
+                }).to.not.throwError();
+              }
+            });
           });
         });
       });
+
     });
   });
 });

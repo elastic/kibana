@@ -4,6 +4,8 @@ define(function (require) {
     run(require('specs/components/index_pattern/_map_field'));
     run(require('specs/components/index_pattern/_pattern_to_wildcard'));
     run(require('specs/components/index_pattern/_field_formats'));
+    run(require('specs/components/index_pattern/_get_computed_fields'));
+
     function run(mod) { describe(mod[0], mod[1]); }
   });
 });
