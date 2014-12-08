@@ -132,6 +132,13 @@ define(function (require) {
 
       self.addScriptedField = function (name, script, type) {
         type = type || 'string';
+
+        var scriptFields = _.pluck(self.getFields('scripted'), 'name');
+
+        if (_.contains(scriptFields, name)) {
+          throw new errors.DuplicateField(name);
+        }
+
         var scriptedField = self.fields.push({
           name: name,
           script: script,
