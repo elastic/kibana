@@ -3,15 +3,19 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('scriptedFields', function ($compile, kbnUrl) {
+  .directive('scriptedFields', function ($compile, kbnUrl, Notifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
+
+    var notify = new Notifier();
 
     return {
       restrict: 'E',
       template: require('text!plugins/settings/sections/indices/_scripted_fields.html'),
       scope: true,
       link: function ($scope, $el, attr) {
+        var dateScripts = require('plugins/settings/sections/indices/_date_scripts');
+
         var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
@@ -45,6 +49,27 @@ define(function (require) {
             return columns;
           });
         });
+
+        $scope.addDateScripts = function () {
+          var conflictFields = [];
+          var fieldsAdded = 0;
+          _.each(dateScripts($scope.indexPattern), function (script, field) {
+            try {
+              $scope.indexPattern.addScriptedField(field, script, 'number');
+              fieldsAdded++;
+            } catch (e) {
+              conflictFields.push(field);
+            }
+          });
+
+          if (fieldsAdded > 0) {
+            notify.info(fieldsAdded + ' script fields created');
+          }
+
+          if (conflictFields.length > 0) {
+            notify.info('Not adding ' + conflictFields.length + ' duplicate fields: ' + conflictFields.join(', '));
+          }
+        };
 
         $scope.create = function () {
           var params = {
