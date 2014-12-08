@@ -15,7 +15,7 @@ define(function (require) {
         toggleFilter(filter, force);
       });
 
-      $scope.state.filters = _.map($scope.filters, remapFilters);
+      $scope.state.filters = $scope.filters;
     };
   };
 });

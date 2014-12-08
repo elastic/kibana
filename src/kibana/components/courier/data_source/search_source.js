@@ -168,7 +168,9 @@ define(function (require) {
             if (!filter) return false;
             // return true for anything that is either empty or false
             // return false for anything that is explicitly set to true
-            return !filter.disabled;
+            if (filter.meta)
+              return !filter.meta.disabled;
+            return true;
           })
           .value();
         return;

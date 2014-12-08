@@ -2,6 +2,7 @@ define(function (require) {
   return function FiltersAggDefinition(Private) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
 
     function getTickLabel(query) {
 
@@ -14,6 +15,7 @@ define(function (require) {
     return new AggType({
       name: 'filters',
       title: 'Filters',
+      createFilter: createFilter,
       params: [
         {
           name: 'filters',

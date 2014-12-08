@@ -281,8 +281,8 @@ define(function (require) {
            */
           var filterNegate = function (reverse) {
             return function (filter) {
-              if (_.isUndefined(filter.negate)) return !reverse;
-              return filter.negate === reverse;
+              if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
+              return filter.meta && filter.meta.negate === reverse;
             };
           };
 
@@ -292,7 +292,7 @@ define(function (require) {
            * @returns {object}
            */
           var cleanFilter = function (filter) {
-            return _.omit(filter, ['negate', 'disabled']);
+            return _.omit(filter, ['$$hashKey', 'meta']);
           };
 
           // switch to filtered query if there are filters

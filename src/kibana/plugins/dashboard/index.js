@@ -95,14 +95,19 @@ define(function (require) {
         }
 
         function updateQueryOnRootSource() {
+          var filters = $state.filters;
           if ($state.query) {
-            dash.searchSource.set('filter', {
+            dash.searchSource.set('filter', _.union($state.filters, [{
               query:  $state.query
-            });
+            }]));
           } else {
-            dash.searchSource.set('filter', null);
+            dash.searchSource.set('filter', filters);
           }
         }
+
+        $scope.$watch('state.filters', function () {
+          $scope.filterResults();
+        });
 
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});

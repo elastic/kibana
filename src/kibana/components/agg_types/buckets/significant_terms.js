@@ -2,6 +2,7 @@ define(function (require) {
   return function SignificantTermsAggDefinition(Private) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
 
     return new AggType({
       name: 'significant_terms',
@@ -9,6 +10,7 @@ define(function (require) {
       makeLabel: function (aggConfig) {
         return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.displayName;
       },
+      createFilter: createFilter,
       params: [
         {
           name: 'field',
