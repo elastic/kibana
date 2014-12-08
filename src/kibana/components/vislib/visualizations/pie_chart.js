@@ -137,7 +137,7 @@ define(function (require) {
           var width = $(el).width();
           var height = $(el).height();
           var minWidth = 20;
-          var minHeight = 20;
+          var minHeight = 40;
           var path;
 
           if (width <= minWidth || height <= minHeight) {
