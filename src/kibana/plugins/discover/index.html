@@ -66,6 +66,16 @@
               Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here's some ideas:
             </p>
 
+            <div class="shard-failures" ng-show="failures">
+              <h3>Shard Failures</h3>
+              <p>The following shard failures ocurred:</p>
+              <ul>
+                <li ng-repeat="failure in failures | limitTo: failuresShown"><strong>Index:</strong> {{failure.index}} <strong>Shard:</strong> {{failure.shard}} <strong>Reason:</strong> {{failure.reason}} </li>
+              </ul>
+              <a ng-click="showAllFailures()" ng-if="failures.length > failuresShown">Show More</a>
+              <a ng-click="showLessFailures()" ng-if="failures.length === failuresShown">Show Less</a>
+            </div>
+
             <div ng-show="opts.timefield">
               <p>
                 <h3>Expand your time range</h3>
