@@ -41,6 +41,7 @@ define(function (require) {
       }
 
       var pattern = mockIndexPattern(index);
+
       indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .then(function (existing) {
         var all = existing.all;

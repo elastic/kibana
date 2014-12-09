@@ -50,6 +50,7 @@ define(function (require) {
         if (indexPattern.intervalName) {
           promise = self.getIndicesForIndexPattern(indexPattern)
           .then(function (existing) {
+            if (existing.all.length === 0) throw new IndexPatternMissingIndices();
             return existing.matches.slice(-5); // Grab the most recent 5
           });
         }
@@ -85,10 +86,12 @@ define(function (require) {
         })
         .then(function (resp) {
           var all = Object.keys(resp).sort();
+
           var matches = all.filter(function (existingIndex) {
             var parsed = moment(existingIndex, indexPattern.id);
             return existingIndex === parsed.format(indexPattern.id);
           });
+
           return {
             all: all,
             matches: matches
