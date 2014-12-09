@@ -5,6 +5,7 @@ define(function (require) {
     var Promise = require('bluebird');
     var IndexPattern;
     var mappingSetup;
+    var mockLogstashFields;
     var DocSource;
     var config;
     var docSourceResponse;
@@ -12,6 +13,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector, _config_) {
       config = _config_;
+      mockLogstashFields = Private(require('fixtures/logstash_fields'));
       docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
 
       DocSource = Private(require('components/courier/data_source/doc_source'));
@@ -37,9 +39,10 @@ define(function (require) {
     }
 
     describe('init', function () {
-      it('should call docsource fetch', function () {
+      it('should append the found fields', function () {
         return create('test-pattern').then(function (indexPattern) {
           expect(DocSource.prototype.fetch.callCount).to.be(1);
+          expect(indexPattern.fields).to.have.length(mockLogstashFields.length);
         });
       });
     });
