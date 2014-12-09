@@ -67,7 +67,7 @@ define(function () {
         size: {
           __template: 20
         },
-        from: {},
+        from: 0,
         sort: {
           __template: [
             {
