@@ -18,7 +18,7 @@
       <!-- Full navbar -->
       <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
         <ul class="nav navbar-nav">
-          <li ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}">
+          <li ng-repeat="app in apps.inOrder" ng-class="{active: activeApp === app}">
             <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
           </li>
         </ul>
@@ -30,6 +30,7 @@
           </li>
           <li ng-if="setupComplete" ng-show="timefilter.enabled" class="navbar-timepicker-display">
             <a ng-click="toggleTimepicker()">
+              Refresh: {{timefilter.refreshInterval.display}} - Filter:
               <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
               &nbsp;
               <i class="fa fa-clock-o"></i>

@@ -1,12 +1,13 @@
 define(function (require) {
   var errors = require('errors');
-
+  var _ = require('lodash');
+  
   require('services/es');
   require('services/promises');
   require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
-  .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
+  .service('courier', function ($rootScope, Private, Promise, indexPatterns, timefilter) {
     function Courier() {
       var self = this;
 
@@ -114,6 +115,13 @@ define(function (require) {
           throw new Error('Aborting all pending requests failed.');
         }
       };
+
+      // Listen for refreshInterval changes
+      $rootScope.$watch('timefilter.refreshInterval', function () {
+        if (!_.isUndefined(timefilter.refreshInterval)) {
+          self.fetchInterval(timefilter.refreshInterval.value);
+        }
+      });
     }
 
     return new Courier();
