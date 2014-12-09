@@ -22,18 +22,16 @@ define(function (require) {
     }
 
     var baseEvent = {
-      point: {
-        orig: {
-          aggConfigResult: {
-            aggConfig: agg('inner'),
-            value: 3,
+      datum: {
+        aggConfigResult: {
+          aggConfig: agg('inner'),
+          value: 3,
+          $parent: {
+            aggConfig: agg('middle'),
+            value: 2,
             $parent: {
-              aggConfig: agg('middle'),
-              value: 2,
-              $parent: {
-                aggConfig: agg('top'),
-                value: 1
-              }
+              aggConfig: agg('top'),
+              value: 1
             }
           }
         }

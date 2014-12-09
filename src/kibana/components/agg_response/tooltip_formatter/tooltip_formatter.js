@@ -8,13 +8,13 @@ define(function (require) {
     $compile($tooltip)($tooltipScope);
 
     return function tooltipFormatter(event) {
-      var datum = event.point;
-      var point = datum.orig;
+      var datum = event.datum;
+      if (!datum || !datum.aggConfigResult) return '';
 
       if (!point || !point.aggConfigResult) return '';
 
       var details = $tooltipScope.details = [];
-      var result = { $parent: point.aggConfigResult };
+      var result = { $parent: datum.aggConfigResult };
       while ((result = result.$parent) && result.aggConfig) {
         var agg = result.aggConfig;
 

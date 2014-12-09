@@ -92,8 +92,6 @@ define(function (require) {
         it('should remove all DOM elements from el', function () {
           expect($('.vis-wrapper').length).to.be(0);
         });
-
-        it('should turn off events', function () {});
       });
 
       describe('set Method', function () {
