@@ -88,7 +88,6 @@ define(function () {
             '_score'
           ]
         },
-        search_type: {},
         fields: ['{field}'],
         script_fields: {
           __template: {

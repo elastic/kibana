@@ -141,7 +141,6 @@ define(function () {
             }
           ]
         },
-        search_type: {},
         fields: ['{field}'],
         fielddata_fields: ["{field}"],
         script_fields: {
