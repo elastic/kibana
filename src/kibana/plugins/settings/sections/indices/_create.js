@@ -24,7 +24,9 @@ define(function (require) {
       isTimeBased: true,
       nameIsPattern: false,
       sampleCount: 5,
-      nameIntervalOptions: intervals
+      nameIntervalOptions: intervals,
+
+      fetchFieldsError: 'Loading'
     };
 
     index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
