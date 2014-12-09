@@ -137,7 +137,8 @@ define(function (require) {
      * @returns {Boolean}
      */
     Dispatch.prototype.allowBrushing = function () {
-      return !!this.handler.xAxis.ordered;
+      var xAxis = this.handler.xAxis;
+      return Boolean(xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
     };
 
     /**
