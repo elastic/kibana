@@ -125,6 +125,14 @@ define(function (require) {
     $scope.fields = null;
 
     var init = _.once(function () {
+      var showTotal = 5;
+      $scope.failuresShown = showTotal;
+      $scope.showAllFailures = function () {
+        $scope.failuresShown = $scope.failures.length;
+      };
+      $scope.showLessFailures = function () {
+        $scope.failuresShown = showTotal;
+      };
       return $scope.updateDataSource()
       .then(function () {
         setFields();
@@ -250,6 +258,7 @@ define(function (require) {
 
       function flushResponseData() {
         $scope.hits = 0;
+        $scope.faliures = [];
         $scope.rows = [];
         $scope.rows.fieldCounts = {};
       }
@@ -309,6 +318,13 @@ define(function (require) {
               if (!resp.hits.total) return;
               resetRows = false;
               flushResponseData();
+            }
+
+            if (resp._shards.failed > 0) {
+              $scope.failures = _.union($scope.failures, resp._shards.failures);
+              $scope.failures = _.uniq($scope.failures, false, function (failure) {
+                return failure.index + failure.shard + failure.reason;
+              });
             }
 
             $scope.hits += resp.hits.total;
