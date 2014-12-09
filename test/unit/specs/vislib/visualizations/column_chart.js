@@ -114,25 +114,26 @@ define(function (require) {
         function checkChart(chart) {
           var rect = $(chart.chartEl).find('rect')[4];
           var d3selectedRect = d3.select(rect)[0][0];
-          var brush = d3.select('.brush')[0][0];
 
           // check for existance of stuff and things
           return {
-            brush: !!brush,
             click: !!d3selectedRect.__onclick,
-            mouseOver: !!d3selectedRect.__onmouseover
+            mouseOver: !!d3selectedRect.__onmouseover,
+            // D3 brushing requires that a g element is appended that
+            // listens for mousedown events. This g element includes
+            // listeners, however, I was not able to test for the listener
+            // function being present. I will need to update this test
+            // in the future.
+            brush: !!d3.select('.brush')[0][0]
           };
         }
 
-        // D3 brushing requires that a g element is appended that
-        // listens for mousedown events. This g element includes
-        // listeners, however, I was not able to test for the listener
-        // function being present. I will need to update this test
-        // in the future.
-        it('should attach a brush g element if the data is ordered', function () {
+        it('should attach the brush if data is a set of ordered dates', function () {
           vis.handler.charts.forEach(function (chart) {
             var has = checkChart(chart);
-            expect(has.brush).to.be(!!vis.handler.data.get('ordered'));
+            var ordered = vis.handler.data.get('ordered');
+            var date = Boolean(ordered && ordered.date);
+            expect(has.brush).to.be(date);
           });
         });
 
