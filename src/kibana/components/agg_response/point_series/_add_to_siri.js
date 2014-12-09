@@ -1,7 +1,7 @@
 define(function (require) {
   return function PointSeriesAddToSiri() {
     return function addToSiri(series, point, id, label) {
-      id = id || '';
+      id = id == null ? '' : id + '';
 
       if (series[id]) {
         series[id].values.push(point);
@@ -9,7 +9,7 @@ define(function (require) {
       }
 
       series[id] = {
-        label: label || id,
+        label: label == null ? id : label,
         values: [point]
       };
     };
