@@ -5,7 +5,7 @@ define(function (require) {
   var applyDiff = require('utils/diff_object');
   var qs = require('utils/query_string');
 
-  return function StateProvider(Private, $rootScope, $location) {
+  return function StateProvider(Notifier, Private, $rootScope, $location) {
     var Events = Private(require('factories/events'));
 
     _(State).inherits(Events);
@@ -40,7 +40,15 @@ define(function (require) {
 
     State.prototype._readFromURL = function () {
       var search = $location.search();
-      return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
+      try {
+        return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
+      } catch (e) {
+        var notify = new Notifier();
+        notify.error('Unable to parse URL');
+        search[this._urlParam] = rison.encode(this._defaults);
+        $location.search(search).replace();
+        return null;
+      }
     };
 
     /**
