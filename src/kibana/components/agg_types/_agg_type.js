@@ -66,6 +66,14 @@ define(function (require) {
       this.hasNoDsl = !!config.hasNoDsl;
 
       /**
+       * The method to create a filter representation of the bucket
+       * @param {object} aggConfig The instance of the aggConfig
+       * @param {mixed} key The key for the bucket
+       * @returns {object} The filter
+       */
+      this.createFilter = config.createFilter;
+
+      /**
        * An instance of {{#crossLink "AggParams"}}{{/crossLink}}.
        *
        * @property params

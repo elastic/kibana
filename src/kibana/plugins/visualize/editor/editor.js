@@ -46,13 +46,15 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
+    var filterBarClickHandler = require('components/filter_bar/filter_bar_click_handler');
+    var brushEvent = Private(require('utils/brush_event'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -78,14 +80,20 @@ define(function (require) {
       var savedVisState = vis.getState();
       var stateDefaults = {
         query: searchSource.get('query') || {query_string: {query: '*'}},
+        filters: [],
         vis: savedVisState
       };
 
       var $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
-        vis.setState($state.vis);
-        editableVis.setState($state.vis);
+        Promise.try(function () {
+          vis.setState($state.vis);
+          editableVis.setState($state.vis);
+        })
+        .catch(courier.redirectWhenMissing({
+          'index-pattern-field': '/visualize'
+        }));
       }
 
       return $state;
@@ -98,7 +106,6 @@ define(function (require) {
       $scope.vis = vis;
       $scope.editableVis = editableVis;
       $scope.state = $state;
-
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
       $scope.toggleShare = _.bindKey(configTemplate, 'toggle', 'share');
@@ -113,6 +120,10 @@ define(function (require) {
         $state.query = $state.query || searchSource.get('query');
         courier.setRootSearchSource(searchSource);
         searchSource.set('query', $state.query);
+        searchSource.set('filter', $state.filters);
+        vis.listeners.click = filterBarClickHandler($state, vis);
+        vis.listeners.brush = brushEvent;
+        editableVis.listeners.brush = vis.listeners.brush;
       }
 
       // track state of editable vis vs. "actual" vis
@@ -128,6 +139,10 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
+      $scope.$watch('state.filters', function () {
+        $scope.fetch();
+      });
+
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
         if (_.contains(keys, 'vis')) {
           // only update when we need to, otherwise colors change and we
@@ -141,6 +156,12 @@ define(function (require) {
           searchSource.set('query', $state.query);
         } else {
           searchSource.set('query', null);
+        }
+
+        if ($state.filters.length) {
+          searchSource.set('filter', $state.filters);
+        } else {
+          searchSource.set('filter', []);
         }
 
         $scope.fetch();
@@ -160,9 +181,13 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      if (!$scope.linked) searchSource.set('query', $state.query);
+      if (!$scope.linked) {
+        searchSource.set('query', $state.query);
+        searchSource.set('filter', $state.filters);
+      }
       searchSource.fetch();
     };
+
 
     $scope.startOver = function () {
       kbnUrl.change('/visualize', {});

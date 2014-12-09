@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
+    var createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
 
     return new AggType({
       name: 'terms',
@@ -11,6 +12,7 @@ define(function (require) {
         var params = aggConfig.params;
         return params.order.display + ' ' + params.size + ' ' + params.field.displayName;
       },
+      createFilter: createFilter,
       params: [
         {
           name: 'field',

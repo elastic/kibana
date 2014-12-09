@@ -107,6 +107,10 @@ define(function (require) {
       return this.type.params.write(this);
     };
 
+    AggConfig.prototype.createFilter = function (key) {
+      return this.type.createFilter(this, key);
+    };
+
     /**
      * Convert this aggConfig to it's dsl syntax.
      *

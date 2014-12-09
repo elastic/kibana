@@ -17,9 +17,8 @@ define(function (require) {
       }
 
       var flattenedData = flattenDataArray(obj);
-      var uniqueXValues = {};
-
       var isDate = (obj.ordered && obj.ordered.date);
+      var uniqueXValues = {};
 
       flattenedData.forEach(function (d, i) {
         var key = d.x;

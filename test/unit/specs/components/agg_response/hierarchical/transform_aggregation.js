@@ -2,9 +2,15 @@ define(function (require) {
   describe('buildHierarchicalData()', function () {
     describe('transformAggregation()', function () {
 
-      var tranform = require('components/agg_response/hierarchical/_transform_aggregation');
+      var transform;
+      beforeEach(module('kibana'));
+      beforeEach(inject(function (Private) {
+        transform = Private(require('components/agg_response/hierarchical/_transform_aggregation'));
+      }));
+
       var fixture = {};
-      fixture.agg = { id: 'agg_2', name: 'test', _next: { id: 'agg_3', name: 'example' } };
+      fixture.agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' },
+        _next: { id: 'agg_3', name: 'example', schema: { group: 'buckets' } } };
       fixture.metric = { id: 'agg_1' };
       fixture.aggData = {
         buckets: [
@@ -14,7 +20,7 @@ define(function (require) {
       };
 
       it('should return an array of objects with the doc_count as the size if the metric does not exist', function () {
-        var agg = { id: 'agg_2', name: 'test' };
+        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }};
         var aggData = {
           buckets: [
             { key: 'foo', doc_count: 1 },
@@ -22,7 +28,7 @@ define(function (require) {
           ]
         };
 
-        var children = tranform(agg, fixture.metric, aggData);
+        var children = transform(agg, fixture.metric, aggData);
         expect(children).to.be.an(Array);
         expect(children).to.have.length(2);
         expect(children[0]).to.have.property('size', 1);
@@ -30,7 +36,7 @@ define(function (require) {
       });
 
       it('should return an array of objects with the metric agg value as the size', function () {
-        var agg = { id: 'agg_2', name: 'test' };
+        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' } };
         var aggData = {
           buckets: [
             { key: 'foo', doc_count: 1, agg_1: { value: 0 } },
@@ -38,7 +44,7 @@ define(function (require) {
           ]
         };
 
-        var children = tranform(agg, fixture.metric, aggData);
+        var children = transform(agg, fixture.metric, aggData);
         expect(children).to.be.an(Array);
         expect(children).to.have.length(2);
         expect(children[0]).to.have.property('size', 0);
@@ -46,7 +52,7 @@ define(function (require) {
       });
 
       it('should create two levels of metrics', function () {
-        var children = tranform(fixture.agg, fixture.metric, fixture.aggData);
+        var children = transform(fixture.agg, fixture.metric, fixture.aggData);
         expect(children).to.be.an(Array);
         expect(children).to.have.length(2);
         expect(children[0]).to.have.property('children');

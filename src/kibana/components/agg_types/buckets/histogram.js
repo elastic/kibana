@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var createFilter = Private(require('components/agg_types/buckets/create_filter/histogram'));
 
     return new AggType({
       name: 'histogram',
@@ -11,6 +12,7 @@ define(function (require) {
       makeLabel: function (aggConfig) {
         return aggConfig.params.field.displayName;
       },
+      createFilter: createFilter,
       params: [
         {
           name: 'field',

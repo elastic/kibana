@@ -1,11 +1,13 @@
 define(function (require) {
   return function buildHierarchicalDataProvider(Private) {
     var _ = require('lodash');
-    var buildSplit = require('components/agg_response/hierarchical/_build_split');
+    var buildSplit = Private(require('components/agg_response/hierarchical/_build_split'));
     var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');
     var createRawData = require('components/agg_response/hierarchical/_create_raw_data');
     var arrayToLinkedList = require('components/agg_response/hierarchical/_array_to_linked_list');
     var tooltipFormatter = Private(require('components/agg_response/hierarchical/_hierarchical_tooltip_formatter'));
+
+    var AggConfigResult = require('components/vis/_agg_config_result');
 
     return function (vis, resp) {
       // Create a refrenece to the buckets
@@ -55,6 +57,11 @@ define(function (require) {
           // Since splits display labels we need to set it.
           split.label = bucket.key + ': ' + firstAgg.params.field.displayName;
           split.tooltipFormatter = tooltipFormatter(raw.columns);
+          var aggConfigResult = new AggConfigResult(firstAgg, null, null, bucket.key);
+          split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
+          _.each(split.slices.children, function (child) {
+            child.aggConfigResult.$parent = aggConfigResult;
+          });
           return split;
         });
         var result = { hits: resp.hits.total, raw: raw };

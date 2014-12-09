@@ -4,7 +4,7 @@ define(function (require) {
     var Table = Private(require('components/agg_response/tabify/_table'));
     var TableGroup = Private(require('components/agg_response/tabify/_table_group'));
     var getColumns = Private(require('components/agg_response/tabify/_get_columns'));
-    var AggConfigResult = Private(require('components/vis/_agg_config_result'));
+    var AggConfigResult = require('components/vis/_agg_config_result');
 
     /**
      * Writer class that collects information about an aggregation response and
@@ -67,7 +67,7 @@ define(function (require) {
         table.key = key;
         table.title = agg.makeLabel() + ': ' + (table.fieldFormatter()(key));
         if (this.asAggConfigResults) {
-          table.aggConfigResult = new AggConfigResult(agg, parent.aggConfigResult, key);
+          table.aggConfigResult = new AggConfigResult(agg, parent.aggConfigResult, key, key);
         }
       }
 
@@ -149,7 +149,7 @@ define(function (require) {
         });
         if (!parent) parent = this.splitStack[0].aggConfigResult;
 
-        value = new AggConfigResult(agg, parent, value);
+        value = new AggConfigResult(agg, parent, value, value);
       }
 
       this.rowBuffer.push(value);

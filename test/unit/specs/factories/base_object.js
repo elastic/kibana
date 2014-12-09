@@ -29,6 +29,14 @@ define(function (require) {
       expect(rison).to.equal('(message:\'Testing... 1234\')');
     });
 
+    it('should not serialize $$attributes to RISON', function () {
+      var baseObject = new BaseObject();
+      baseObject.$$attributes = { foo: 'bar' };
+      baseObject.message = 'Testing... 1234';
+      var rison = baseObject.toRISON();
+      expect(rison).to.equal('(message:\'Testing... 1234\')');
+    });
+
     it('should serialize _attributes for JSON', function () {
       var baseObject = new BaseObject();
       baseObject.message = 'Testing... 1234';

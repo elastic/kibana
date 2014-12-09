@@ -17,6 +17,7 @@ define(function (require) {
       var cols = faker.Lorem.words(colCount).map(function (word) {
         return { title: word };
       });
+
       var rows = [];
       _.times(rowCount, function () {
         rows.push(faker.Lorem.words(colCount));
@@ -97,13 +98,15 @@ define(function (require) {
       });
     });
 
-    describe.skip('sorting', function () {
+    describe('sorting', function () {
       var data;
       var lastRowIndex;
       var paginatedTable;
 
       beforeEach(function () {
-        data = makeData(3, 3);
+        data = makeData(3, 0);
+        data.rows.push(['bbbb', 'bbbb', 'bbbb']);
+        data.rows.push(['cccc', 'cccc', 'cccc']);
         data.rows.push(['zzzz', 'zzzz', 'zzzz']);
         data.rows.push(['aaaa', 'aaaa', 'aaaa']);
 
@@ -119,7 +122,7 @@ define(function (require) {
       it('should not sort by default', function () {
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be(data.rows[0][0]);
-        expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
+        expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be(data.rows[lastRowIndex][0]);
       });
 
       it('should sort ascending on first invocation', function () {
@@ -153,7 +156,7 @@ define(function (require) {
       });
     });
 
-    describe.skip('custom sorting', function () {
+    describe('custom sorting', function () {
       var data;
       var paginatedTable;
       var sortHandler;
@@ -174,7 +177,7 @@ define(function (require) {
       });
 
       // TODO: This is failing randomly
-      it.skip('should allow custom sorting handler', function () {
+      it('should allow custom sorting handler', function () {
         var columnIndex = 1;
         paginatedTable.sortColumn(data.columns[columnIndex]);
         $scope.$digest();

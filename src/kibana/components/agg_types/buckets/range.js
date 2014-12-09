@@ -4,10 +4,12 @@ define(function (require) {
     var moment = require('moment');
     var angular = require('angular');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var createFilter = Private(require('components/agg_types/buckets/create_filter/range'));
 
     return new AggType({
       name: 'range',
       title: 'Range',
+      createFilter: createFilter,
       makeLabel: function (aggConfig) {
         return aggConfig.params.field.displayName + ' ranges';
       },

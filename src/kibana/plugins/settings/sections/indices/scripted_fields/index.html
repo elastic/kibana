@@ -4,15 +4,35 @@
     <div ng-controller="scriptedFieldsEdit">
       <h1>{{ action }} Scripted Field</h1>
 
+      <div>
+
+        <p>
+          By default, Elasticsearch scripts use <a target="_window" href="http://groovy.codehaus.org/">Groovy <i class="fa-link fa"></i></a>, which is a lot like Java, but scriptier. We'll let you do some reading on <a target="_window" href="http://groovy.codehaus.org/">Groovy <i class="fa-link fa"></i></a>, but the important bit, is that there are <strong>three ways</strong> to access the value of Elasticsearch fields, each with distinct advantages and disadvantages:
+
+          <h4><code>doc['some_field'].value</code> <small>(recommended)</small></h4>
+          <p>
+            Loads the field value from the field data cache (thus, the value is loaded from the inverted index). Very fast at the cost of memory consumption. Requires the field be indexed.
+          </p>
+
+          <h4><code>_source.some_field</code></h4>
+          <p>
+            Loads the field value from the _source, which means _source must be enabled. This does has the benefit of treating the field value as not_analyzed without needing to reindex, however it is extremely slow, and very disk I/O heavy. It will probably timeout if your timeouts are low and you have lots of data.
+          </p>
+
+          <h4><code>_fields['some_field']</code></h4>
+          <p>
+            Loads the field value from the stored field, if the field is stored. Stored fields are seperate from _source fields, and must be defined explicitly in your mapping. If you don't know if a field is stored or not, it probably is not. Might be lighter than _source, yet still very heavy & slow compared with doc notation. You probably don't want this.
+          </p>
+        </p>
+      </div>
+
       <div class="bs-callout bs-callout-warning">
         <h4>Proceed with caution</h4>
 
         <p>Scripted fields can be used to display and aggregate calculated values. As such,
-        they can be very slow, and if done incorrectly, can cause Kibana to be unusable.</p>
+        they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here, if you make a typo unexpected exceptions will be thrown all over the place!</p>
 
-        <p>Please familiarize yourself with <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields</a> and with
-        <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations</a>
-        before using scripted fields.</p>
+        <p></p>
       </div>
 
       <form name="scriptedFieldForm" ng-submit="submit()">
@@ -21,11 +41,13 @@
           <input required type="text" ng-model="scriptedField.name" class="form-control span12">
         </div>
         <div class="form-group">
-          <label>Script</label>
+          <label>Script <small>Please familiarize yourself with <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with
+        <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a>
+        before using scripted fields.</small></label>
           <textarea required class="form-control span12" ng-model="scriptedField.script"></textarea>
         </div>
         <div class="form-group">
-          <label>Result Type</label>
+          <label>Return Type <small>This determines which aggregations this field will be available for use in. Get it wrong and elasticsearch will error out!</small></label>
           <select class="form-control span6" ng-model="scriptedField.type" ng-options="value.name as value.name for value in fieldTypes" required></select>
         </div>
       </form>
@@ -40,5 +62,6 @@
         </button>
       </div>
     </div>
+
   </kbn-settings-indices>
 </kbn-settings-app>
