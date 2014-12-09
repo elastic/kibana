@@ -230,35 +230,48 @@ define(function (require) {
     XAxis.prototype.rotateAxisLabels = function () {
       var self = this;
       var text;
-      var maxWidth = self.xScale.rangeBand();
-      var maxRotatedLength = 150;
+      var barWidth = self.xScale.rangeBand();
+      var maxRotatedLength = 180;
       var textWidth = 0;
       var xAxisPadding = 15;
       var svg;
       var xAxisLabelHt = 15;
-      var width;
-      var widths = [];
+      var lengths = [];
+      var length;
       self._attr.isRotated = false;
 
       return function (selection) {
 
+        // maxRotatedLength = min of 60% chart height or maxRotatedLength
+        var chtWrap = d3.select(this.node().parentNode.parentNode.parentNode).select('.chart-wrapper');
+        if (chtWrap) {
+          var chtWrapHt = chtWrap.style('height');
+          chtWrapHt = 0.6 * +chtWrapHt.substring(0, chtWrapHt.length - 2);
+          maxRotatedLength = _.min([maxRotatedLength, chtWrapHt]);
+        }
+
         text = selection.selectAll('.tick text');
 
         text.each(function textWidths() {
-          widths.push(d3.select(this).node().getBBox().width);
+          lengths.push(d3.select(this).node().getBBox().width);
         });
-        width = _.max(widths);
-        xAxisLabelHt = width;
-        if (width > maxWidth) {
+        length = _.max(lengths);
+        self._attr.xAxisLabelHt = length + xAxisPadding;
+
+        // if longer than bar width, rotate
+        if (length > barWidth) {
           self._attr.isRotated = true;
-          xAxisLabelHt = maxWidth;
         }
-        xAxisLabelHt = maxRotatedLength;
+
+        // if longer than maxRotatedLength, truncate
+        if (length > maxRotatedLength) {
+          self._attr.xAxisLabelHt = maxRotatedLength;
+        }
 
         if (self._attr.isRotated) {
           text
           .text(function truncate() {
-            return self.truncateLabel(this, xAxisLabelHt);
+            return self.truncateLabel(this, self._attr.xAxisLabelHt);
           })
           .style('text-anchor', 'end')
           .attr('dx', '-.8em')
@@ -267,7 +280,7 @@ define(function (require) {
             return 'rotate(-90)';
           });
           selection.select('svg')
-          .attr('height', xAxisLabelHt);
+          .attr('height', self._attr.xAxisLabelHt);
         }
       };
     };
