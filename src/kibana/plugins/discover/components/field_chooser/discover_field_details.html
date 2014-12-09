@@ -17,7 +17,7 @@
           <div bo-if="!field.details.error">
             <div ng-repeat="bucket in field.details.buckets" class="discover-field-details-item">
               <div>
-                <span ng-show="field.indexed" class="pull-right">
+                <span ng-show="field.filterable" class="pull-right">
                   <i class="fa fa-search-minus pull-right discover-field-details-filter"
                     ng-click="updateFilterInQuery(field.name, bucket.value, '-')"></i>
                   <i class="fa fa-search-plus pull-right discover-field-details-filter"
@@ -32,21 +32,17 @@
           </div>
         </div>
       </div>
-      <div ng-show="field.indexed && !field.analyzed && field.doc_values"
-          ng-click="runAgg(field)"
-          class="sidebar-item-button success">Visualize</div>
 
-      <div ng-show="field.indexed && !field.analyzed"
-          ng-click="runAgg(field)"
-          tooltip="Doc_values are not enabled on this field. This may lead to excess heap consumption"
-          class="sidebar-item-button warning">Visualize</div>
+      <div ng-show="field.indexed || field.scripted"
+        ng-click="runAgg(field)"
+        class="sidebar-item-button primary">
+          Visualize
+          <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
+          ( {{warnings.length}} warnings <i class="fa fa-warning"></i> )
+          </span>
+      </div>
 
-      <div ng-show="field.indexed && field.analyzed"
-          ng-click="runAgg(field)"
-          tooltip="Analyzed fields may require more memory to visualize and may not give you the results you expect."
-          class="sidebar-item-button danger">Visualize</div>
-
-      <div ng-show="!field.indexed"
+      <div ng-show="!field.indexed && !field.scripted"
           disabled="disabled"
           tooltip="This field is not indexed thus unavailable for visualization and search"
-          class="sidebar-item-button default">Not Indexed</div>
+          class="sidebar-item-button primary">Not Indexed</div>
