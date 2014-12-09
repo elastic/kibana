@@ -73,7 +73,7 @@
                 <li ng-repeat="failure in failures | limitTo: failuresShown"><strong>Index:</strong> {{failure.index}} <strong>Shard:</strong> {{failure.shard}} <strong>Reason:</strong> {{failure.reason}} </li>
               </ul>
               <a ng-click="showAllFailures()" ng-if="failures.length > failuresShown">Show More</a>
-              <a ng-click="showLessFailures()" ng-if="failures.length === failuresShown">Show Less</a>
+              <a ng-click="showLessFailures()" ng-if="failures.length === failuresShown && failures.length > 5">Show Less</a>
             </div>
 
             <div ng-show="opts.timefield">
