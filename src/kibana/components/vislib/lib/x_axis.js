@@ -323,7 +323,6 @@ define(function (require) {
      * @returns {Function}
      */
     XAxis.prototype.filterAxisLabels = function () {
-      console.log('filterAxisLabels');
       var self = this;
       var startX = 0;
       var maxW;
