@@ -253,7 +253,7 @@ define(function (require) {
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 20;
-      var minHeight = 40;
+      var minHeight = 20;
       var div;
       var svg;
       var width;

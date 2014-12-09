@@ -220,7 +220,7 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var chartToSmallError = 'The height and/or width of this container is too small for this chart.';
       var minWidth = 20;
-      var minHeight = 40;
+      var minHeight = 20;
       var startLineX = 0;
       var lineStrokeWidth = 1;
       var div;

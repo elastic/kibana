@@ -191,9 +191,9 @@ define(function (require) {
     };
 
     /**
-     * Returns a function that evaluates scale type and applies
-     * filters tick labels on time scales
-     * rotates and truncates labels on nominal/ordinal scales
+     * Returns a function that evaluates scale type and
+     * applies filter to tick labels on time scales
+     * rotates and truncates tick labels on nominal/ordinal scales
      *
      * @method filterOrRotate
      * @returns {Function} Filters or rotates x axis tick labels
@@ -237,6 +237,7 @@ define(function (require) {
       var svg;
       var xAxisLabelHt = 15;
       var width;
+      var widths = [];
       self._attr.isRotated = false;
 
       return function (selection) {
@@ -244,14 +245,14 @@ define(function (require) {
         text = selection.selectAll('.tick text');
 
         text.each(function textWidths() {
-          width = d3.select(this).node().getBBox().width;
-          if (width > maxWidth) {
-            self._attr.isRotated = true;
-            xAxisLabelHt = _.max([textWidth, (Math.ceil(width + xAxisPadding))]);
-          }
+          widths.push(d3.select(this).node().getBBox().width);
         });
+        width = _.max(widths);
+        if (width > maxWidth) {
+          self._attr.isRotated = true;
+          xAxisLabelHt = width + xAxisPadding;
+        }
         self._attr.xAxisLabelHt = xAxisLabelHt;
-
 
         if (self._attr.isRotated) {
           text
@@ -268,8 +269,7 @@ define(function (require) {
           .attr('height', xAxisLabelHt);
         }
 
-        // TODO: need to add mouseover to show tooltip on truncated labels
-
+        // TODO: add mouseover to show tooltip on truncated labels
       };
     };
 
@@ -282,6 +282,7 @@ define(function (require) {
      * @returns {*|jQuery}
      */
     XAxis.prototype.truncateLabel = function (text, size) {
+      console.log('truncateLabel');
       var node = d3.select(text).node();
       var str = $(node).text();
       var width = node.getBBox().width;
@@ -311,6 +312,7 @@ define(function (require) {
      * @returns {Function}
      */
     XAxis.prototype.filterAxisLabels = function () {
+      console.log('filterAxisLabels');
       var self = this;
       var startX = 0;
       var maxW;
@@ -424,24 +426,17 @@ define(function (require) {
       var xAxisLabelHt = 15;
       var padding = 15;
 
-      if (self._attr.isRotated && self._attr.xAxisLabelHt) {
-        xAxisLabelHt = self._attr.xAxisLabelHt;
-      } else {
-        xAxisLabelHt = self._attr.xAxisLabelHt = xAxisLabelHt;
-      }
-
       selection.each(function () {
         var visEl = d3.select(this);
-        var $visEl = $(this);
 
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.select('.y-axis-spacer-block')
           .append('div')
           .attr('class', 'inner-spacer-block');
         }
+        var xAxisHt = visEl.select('.x-axis-wrapper').style('height');
 
-        visEl.select('.inner-spacer-block')
-        .style('height', (xAxisLabelHt + titleHts - padding) + 'px');
+        visEl.select('.inner-spacer-block').style('height', xAxisHt);
       });
 
     };
