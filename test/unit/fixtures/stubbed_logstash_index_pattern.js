@@ -23,7 +23,7 @@ define(function (require) {
       { name: 'machine.os',         type: 'string',     indexed: true,  analyzed: true,   count: 0 },
       { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true,   count: 0 },
       { name: '_type',              type: 'string',     indexed: true,  analyzed: true,   count: 0 },
-      { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false,  count: 0 }
+      { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false,  count: 0 },
     ].map(function (field) {
       field.displayName = field.name;
       var type = fieldTypes.byName[field.type];
