@@ -11,8 +11,6 @@ define(function (require) {
       var datum = event.datum;
       if (!datum || !datum.aggConfigResult) return '';
 
-      if (!point || !point.aggConfigResult) return '';
-
       var details = $tooltipScope.details = [];
       var result = { $parent: datum.aggConfigResult };
       while ((result = result.$parent) && result.aggConfig) {
