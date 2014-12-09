@@ -110,10 +110,6 @@ define(function (require) {
         });
       });
 
-      describe('addStackedBars method', function () {});
-
-      describe('addGroupedBars method', function () {});
-
       describe('addBarEvents method', function () {
         function checkChart(chart) {
           var rect = $(chart.chartEl).find('rect')[4];

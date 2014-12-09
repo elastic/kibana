@@ -33,8 +33,6 @@ define(function (require) {
       vis = null;
     });
 
-    describe('eventResponse method', function () {});
-
     describe('addEvent method', function () {
       it('should return a function', function () {
         vis.handler.charts.forEach(function (chart) {
@@ -105,7 +103,5 @@ define(function (require) {
         });
       });
     });
-
-    describe('createBrush method', function () {});
   });
 });
