@@ -208,8 +208,7 @@ define(function (require) {
         selection.each(function () {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
-
-          if (!ordered) {
+          if (!ordered || ordered === undefined) {
             axis.call(self.rotateAxisLabels());
           } else {
             axis.call(self.filterAxisLabels());
@@ -232,6 +231,7 @@ define(function (require) {
       var self = this;
       var text;
       var maxWidth = self.xScale.rangeBand();
+      var maxRotatedLength = 150;
       var textWidth = 0;
       var xAxisPadding = 15;
       var svg;
@@ -248,11 +248,12 @@ define(function (require) {
           widths.push(d3.select(this).node().getBBox().width);
         });
         width = _.max(widths);
+        xAxisLabelHt = width;
         if (width > maxWidth) {
           self._attr.isRotated = true;
-          xAxisLabelHt = width + xAxisPadding;
+          xAxisLabelHt = maxWidth;
         }
-        self._attr.xAxisLabelHt = xAxisLabelHt;
+        xAxisLabelHt = maxRotatedLength;
 
         if (self._attr.isRotated) {
           text
@@ -268,8 +269,6 @@ define(function (require) {
           selection.select('svg')
           .attr('height', xAxisLabelHt);
         }
-
-        // TODO: add mouseover to show tooltip on truncated labels
       };
     };
 
@@ -282,7 +281,6 @@ define(function (require) {
      * @returns {*|jQuery}
      */
     XAxis.prototype.truncateLabel = function (text, size) {
-      console.log('truncateLabel');
       var node = d3.select(text).node();
       var str = $(node).text();
       var width = node.getBBox().width;
