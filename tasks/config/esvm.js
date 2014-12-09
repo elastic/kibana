@@ -5,7 +5,8 @@ module.exports = function (grunt) {
     options: {
       version: '^1.4',
       plugins: [
-        'elasticsearch/marvel/latest'
+        'elasticsearch/marvel/latest',
+        'mobz/elasticsearch-head'
       ],
       config: {
         path: {

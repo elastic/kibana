@@ -1,5 +1,5 @@
 define(function (require) {
-  return ['tooltipFormatter', function () {
+  describe('Agg Response tooltip formatter', function () {
     var _ = require('lodash');
     var $ = require('jquery');
 
@@ -7,7 +7,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      tooltipFormatter = Private(require('components/agg_response/point_series/_tooltip_formatter'));
+      tooltipFormatter = Private(require('components/agg_response/tooltip_formatter/tooltip_formatter'));
     }));
 
     function agg(name) {
@@ -22,18 +22,16 @@ define(function (require) {
     }
 
     var baseEvent = {
-      point: {
-        orig: {
-          aggConfigResult: {
-            aggConfig: agg('inner'),
-            value: 3,
+      datum: {
+        aggConfigResult: {
+          aggConfig: agg('inner'),
+          value: 3,
+          $parent: {
+            aggConfig: agg('middle'),
+            value: 2,
             $parent: {
-              aggConfig: agg('middle'),
-              value: 2,
-              $parent: {
-                aggConfig: agg('top'),
-                value: 1
-              }
+              aggConfig: agg('top'),
+              value: 1
             }
           }
         }
@@ -58,5 +56,5 @@ define(function (require) {
       expect(cell($row3, 0)).to.be('top');
       expect(cell($row3, 1)).to.be('(1)');
     });
-  }];
+  });
 });

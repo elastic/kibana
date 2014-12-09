@@ -7,7 +7,7 @@ define(function (require) {
     var initYAxis = Private(require('components/agg_response/point_series/_init_y_axis'));
     var initXAxis = Private(require('components/agg_response/point_series/_init_x_axis'));
     var setupOrderedDateXAxis = Private(require('components/agg_response/point_series/_ordered_date_axis'));
-    var tooltipFormatter = Private(require('components/agg_response/point_series/_tooltip_formatter'));
+    var tooltipFormatter = Private(require('components/agg_response/tooltip_formatter/tooltip_formatter'));
 
     return function pointSeriesChartDataFromTable(vis, table) {
       var chart = {};
