@@ -1,5 +1,5 @@
 define(function (require) {
-  return ['Index Pattern', function () {
+  return ['index pattern', function () {
     var _ = require('lodash');
     var sinon = require('test_utils/auto_release_sinon');
     var Promise = require('bluebird');
@@ -38,6 +38,26 @@ define(function (require) {
       return indexPattern.init();
     }
 
+    describe('api', function () {
+      it('should have expected properties', function () {
+        return create('test-pattern').then(function (indexPattern) {
+          // methods
+          expect(indexPattern).to.have.property('refreshFields');
+          expect(indexPattern).to.have.property('popularizeField');
+          expect(indexPattern).to.have.property('getFields');
+          expect(indexPattern).to.have.property('getInterval');
+          expect(indexPattern).to.have.property('addScriptedField');
+          expect(indexPattern).to.have.property('removeScriptedField');
+          expect(indexPattern).to.have.property('toString');
+          expect(indexPattern).to.have.property('toJSON');
+          expect(indexPattern).to.have.property('save');
+
+          // properties
+          expect(indexPattern).to.have.property('fields');
+        });
+      });
+    });
+
     describe('init', function () {
       it('should append the found fields', function () {
         return create('test-pattern').then(function (indexPattern) {
@@ -45,6 +65,32 @@ define(function (require) {
           expect(indexPattern.fields).to.have.length(mockLogstashFields.length);
         });
       });
+    });
+
+    describe('getFields', function () {
+      it('should return all non-scripted fields', function () {
+        return create('test-pattern').then(function (indexPattern) {
+          var indexed = _.where(mockLogstashFields, { scripted: false });
+          expect(indexPattern.getFields()).to.eql(indexed);
+        });
+      });
+
+      it('should return all scripted fields', function () {
+        return create('test-pattern').then(function (indexPattern) {
+          var scripted = _.where(mockLogstashFields, { scripted: true });
+          expect(indexPattern.getFields('scripted')).to.eql(scripted);
+        });
+      });
+    });
+
+    describe('refresh fields', function () {
+      it('should fetch fields from the doc source');
+      it('should preserve the scripted fields');
+    });
+
+    describe('add and remove scripted fields', function () {
+      it('should append the scripted field');
+      it('should remove scritped field, by name');
     });
   }];
 });
