@@ -11,6 +11,8 @@ define(function (require) {
     var DocSource;
     var config;
     var docSourceResponse;
+    var indexPatternId = 'test-pattern';
+    var indexPattern;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector, _config_) {
@@ -36,6 +38,13 @@ define(function (require) {
 
       IndexPattern = Private(require('components/index_patterns/_index_pattern'));
     }));
+
+    // create an indexPattern instance for each test
+    beforeEach(function () {
+      return create(indexPatternId).then(function (pattern) {
+        indexPattern = pattern;
+      });
+    });
 
     // helper function to create index patterns
     function create(id, payload) {
@@ -72,31 +81,26 @@ define(function (require) {
 
     describe('init', function () {
       it('should append the found fields', function () {
-        return create('test-pattern').then(function (indexPattern) {
-          expect(DocSource.prototype.fetch.callCount).to.be(1);
-          expect(indexPattern.fields).to.have.length(mockLogstashFields.length);
-          expect(indexPattern.fields).to.be.an(IndexedArray);
-        });
+        expect(DocSource.prototype.fetch.callCount).to.be(1);
+        expect(indexPattern.fields).to.have.length(mockLogstashFields.length);
+        expect(indexPattern.fields).to.be.an(IndexedArray);
       });
     });
 
     describe('getFields', function () {
       it('should return all non-scripted fields', function () {
-        return create('test-pattern').then(function (indexPattern) {
-          var indexed = _.where(mockLogstashFields, { scripted: false });
-          expect(indexPattern.getFields()).to.eql(indexed);
-        });
+        var indexed = _.where(mockLogstashFields, { scripted: false });
+        expect(indexPattern.getFields()).to.eql(indexed);
       });
 
       it('should return all scripted fields', function () {
-        return create('test-pattern').then(function (indexPattern) {
-          var scripted = _.where(mockLogstashFields, { scripted: true });
-          expect(indexPattern.getFields('scripted')).to.eql(scripted);
-        });
+        var scripted = _.where(mockLogstashFields, { scripted: true });
+        expect(indexPattern.getFields('scripted')).to.eql(scripted);
       });
     });
 
     describe('refresh fields', function () {
+      // override the default indexPattern, with a truncated field list
       require('test_utils/no_digest_promises').activateForSuite();
       var indexPatternId = 'test-pattern';
       var indexPattern;
