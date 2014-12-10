@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('test_utils/auto_release_sinon');
     var Promise = require('bluebird');
+    var errors = require('errors');
     var IndexedArray = require('utils/indexed_array/index');
     var IndexPattern;
     var mapper;
@@ -187,6 +188,16 @@ define(function (require) {
         expect(saveSpy.callCount).to.equal(1);
         expect(indexPattern.getFields('scripted').length).to.equal(oldCount - 1);
         expect(indexPattern.fields.byName[scriptedField.name]).to.equal(undefined);
+      });
+
+      it('should not allow duplicate names', function () {
+        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedField = _.last(scriptedFields);
+        expect(function () {
+          indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
+        }).to.throwError(function (e) {
+          expect(e).to.be.a(errors.DuplicateField);
+        });
       });
     });
   }];
