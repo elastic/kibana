@@ -25,7 +25,7 @@ define(function (require) {
         ];
         var filters = [
           { range: { bytes: { from: 1024, to: 2048 } } },
-          { query: { match: { _term: { query: 'apache', type: 'phrase' } } } }
+          { meta: { negate: false }, query: { match: { _term: { query: 'apache', type: 'phrase' } } } }
         ];
         var results = dedupFilters(existing, filters);
         expect(results).to.contain(filters[0]);
