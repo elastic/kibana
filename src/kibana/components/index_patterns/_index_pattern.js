@@ -165,13 +165,12 @@ define(function (require) {
       };
 
       self.popularizeField = function (fieldName, unit) {
-        if (_.isUndefined(unit)) unit = 1;
+        if (unit == null) unit = 1;
         if (!(self.fields.byName && self.fields.byName[fieldName])) return;
 
         var field = self.fields.byName[fieldName];
         if (!field.count && unit < 1) return;
-        if (!field.count) field.count = 1;
-        else field.count = field.count + (unit);
+        field.count = field.count + (unit);
         self.save();
       };
 
