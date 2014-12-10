@@ -30,6 +30,7 @@ define(function (require) {
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
+      var datum = d._input || d;
       var data = d3.event.target.nearestViewportElement.__data__;
       var label = d.label ? d.label : d.name;
       var isSeries = !!(data.series);
@@ -44,7 +45,6 @@ define(function (require) {
         // Find object with the actual d value and add it to the point object
         var object = _.find(series, { 'label': d.label });
         d.value = +object.values[i].y;
-        d.orig = object.values[i];
 
         if (isPercentage) {
 
@@ -55,7 +55,8 @@ define(function (require) {
 
       return {
         value: d.y,
-        point: d,
+        point: datum,
+        datum: datum,
         label: label,
         color: color(label),
         pointIndex: i,
@@ -130,16 +131,35 @@ define(function (require) {
     };
 
     /**
+     * Determine if we will allow brushing
+     *
+     * @method allowBrushing
+     * @returns {Boolean}
+     */
+    Dispatch.prototype.allowBrushing = function () {
+      var xAxis = this.handler.xAxis;
+      return Boolean(xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
+    };
+
+    /**
+     * Determine if brushing is currently enabled
+     *
+     * @method isBrushable
+     * @returns {Boolean}
+     */
+    Dispatch.prototype.isBrushable = function () {
+      return this.allowBrushing() && (typeof this.dispatch.on('brush') === 'function');
+    };
+
+    /**
      *
      * @param svg
      * @returns {Function}
      */
     Dispatch.prototype.addBrushEvent = function (svg) {
-      var dispatch = this.dispatch;
+      if (!this.isBrushable()) return;
       var xScale = this.handler.xAxis.xScale;
-      var isBrushable = (dispatch.on('brush'));
       var brush = this.createBrush(xScale, svg);
-      var addEvent = this.addEvent;
 
       function brushEnd() {
         var bar = d3.select(this);
@@ -157,9 +177,7 @@ define(function (require) {
         bar.call(brush);
       }
 
-      if (isBrushable) {
-        return addEvent('mousedown', brushEnd);
-      }
+      return this.addEvent('mousedown', brushEnd);
     };
 
 
