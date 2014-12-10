@@ -80,7 +80,7 @@ define(function (require) {
       var savedVisState = vis.getState();
       var stateDefaults = {
         query: searchSource.get('query') || {query_string: {query: '*'}},
-        filters: [],
+        filters: searchSource.get('filter') || [],
         vis: savedVisState
       };
 
@@ -135,12 +135,14 @@ define(function (require) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
       }, true);
 
+      $state.replace();
+
       $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
         timefilter.enabled = !!timeField;
       });
 
-      $scope.$watch('state.filters', function () {
-        $scope.fetch();
+      $scope.$watch('state.filters', function (newFilters, oldFilters) {
+        if (newFilters !== oldFilters) $scope.fetch();
       });
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
