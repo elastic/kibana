@@ -42,11 +42,13 @@ define(function (require) {
         };
 
         $scope.$watch('state.$newFilters', function (filters) {
+          if (!filters) return;
+
           // If the filters is not undefined and the length is greater then
           // one we need to set the newFilters attribute and allow the
           // users to decide what they want to apply.
-          if (filters && filters.length > 1) {
-            mapFlattenAndWrapFilters(filters)
+          if (filters.length > 1) {
+            return mapFlattenAndWrapFilters(filters)
             .then(function (results) {
               extractTimeFilter(results).then(function (filter) {
                 $scope.changeTimeFilter = filter;
@@ -57,10 +59,15 @@ define(function (require) {
             .then(function (results) {
               $scope.newFilters = results;
             });
+          }
+
           // Just add single filters to the state.
-          } else if (filters) {
+          if (filters.length === 1) {
             Promise.resolve(filters).then(function (filters) {
-              extractTimeFilter(filters).then(changeTimeFilter);
+              extractTimeFilter(filters)
+              .then(function (timeFilter) {
+                if (timeFilter) changeTimeFilter(timeFilter);
+              });
               return filters;
             })
             .then(filterOutTimeBasedFilter)
