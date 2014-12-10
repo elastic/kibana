@@ -156,8 +156,38 @@ define(function (require) {
     });
 
     describe('add and remove scripted fields', function () {
-      it('should append the scripted field');
-      it('should remove scritped field, by name');
+      it('should append the scripted field', function () {
+        // keep a copy of the current scripted field count
+        var saveSpy = sinon.spy(indexPattern, 'save');
+        var oldCount = indexPattern.getFields('scripted').length;
+
+        // add a new scripted field
+        var scriptedField = {
+          name: 'new scripted field',
+          script: 'false',
+          type: 'boolean'
+        };
+        indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
+        indexPattern._indexFields(); // normally triggered by docSource.onUpdate()
+
+        var scriptedFields = indexPattern.getFields('scripted');
+        expect(saveSpy.callCount).to.equal(1);
+        expect(scriptedFields).to.have.length(oldCount + 1);
+        expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
+      });
+
+      it('should remove scripted field, by name', function () {
+        var saveSpy = sinon.spy(indexPattern, 'save');
+        var scriptedFields = indexPattern.getFields('scripted');
+        var oldCount = scriptedFields.length;
+        var scriptedField = _.last(scriptedFields);
+
+        indexPattern.removeScriptedField(scriptedField.name);
+
+        expect(saveSpy.callCount).to.equal(1);
+        expect(indexPattern.getFields('scripted').length).to.equal(oldCount - 1);
+        expect(indexPattern.fields.byName[scriptedField.name]).to.equal(undefined);
+      });
     });
   }];
 });

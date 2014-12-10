@@ -72,13 +72,7 @@ define(function (require) {
             // Give obj all of the values in _source.fields
             _.assign(self, resp._source);
 
-            if (self.id) {
-              if (!self.fields) {
-                return self.refreshFields();
-              } else {
-                setIndexedValue('fields');
-              }
-            }
+            self._indexFields();
 
             // Any time obj is updated, re-call applyESResp
             docSource.onUpdate().then(applyESResp, notify.fatal);
@@ -129,6 +123,16 @@ define(function (require) {
           })
         });
       }
+
+      self._indexFields = function () {
+        if (self.id) {
+          if (!self.fields) {
+            return self.refreshFields();
+          } else {
+            setIndexedValue('fields');
+          }
+        }
+      };
 
       self.addScriptedField = function (name, script, type) {
         type = type || 'string';
