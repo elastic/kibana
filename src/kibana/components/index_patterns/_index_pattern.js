@@ -145,6 +145,7 @@ define(function (require) {
           type: type,
           scripted: true,
         });
+
         self.save();
       };
 
@@ -153,7 +154,9 @@ define(function (require) {
           name: name,
           scripted: true
         });
+
         self.fields.splice(fieldIndex, 1);
+
         self.save();
       };
 
