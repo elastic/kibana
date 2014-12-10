@@ -47,6 +47,13 @@ define(function (require) {
       var firstAgg = buckets[0];
       var aggData = resp.aggregations[firstAgg.id];
 
+      var convertKey = function (key) {
+        if (firstAgg.params.field.format) {
+          return firstAgg.params.field.format.convert(key);
+        }
+
+        return key;
+      };
 
       // If the firstAgg is a split then we need to map
       // the split aggregations into rows.
@@ -55,7 +62,7 @@ define(function (require) {
           var agg = firstAgg._next;
           var split = buildSplit(agg, metric, bucket[agg.id]);
           // Since splits display labels we need to set it.
-          split.label = bucket.key + ': ' + firstAgg.params.field.displayName;
+          split.label = convertKey(bucket.key) + ': ' + firstAgg.params.field.displayName;
           split.tooltipFormatter = tooltipFormatter(raw.columns);
           var aggConfigResult = new AggConfigResult(firstAgg, null, null, bucket.key);
           split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
