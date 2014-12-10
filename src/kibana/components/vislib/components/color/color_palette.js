@@ -46,11 +46,11 @@ define(function (require) {
 
       var colors = seedColors;
 
-      if (num - seedColors.length > 0) {
-        _.times(num - seedColors.length, function (i) {
-          colors.push(d3.hsl((fraction(i + 1) * 360 + offset) % 360, 0.5, 0.5).toString());
-        });
-      }
+      var seedLength = seedColors.length;
+
+      _.times(num - seedLength, function (i) {
+        colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());
+      });
 
       return colors;
 
