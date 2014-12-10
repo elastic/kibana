@@ -24,7 +24,9 @@ define(function (require) {
       isTimeBased: true,
       nameIsPattern: false,
       sampleCount: 5,
-      nameIntervalOptions: intervals
+      nameIntervalOptions: intervals,
+
+      fetchFieldsError: 'Loading'
     };
 
     index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
@@ -41,6 +43,7 @@ define(function (require) {
       }
 
       var pattern = mockIndexPattern(index);
+
       indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .then(function (existing) {
         var all = existing.all;
@@ -69,7 +72,7 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    $scope.refreshFieldList = _.debounce(function () {
+    $scope.refreshFieldList = function () {
       index.dateFields = index.timeField = index.listUsed = null;
       var useIndexList = index.isTimeBased && index.nameIsPattern;
 
@@ -107,7 +110,7 @@ define(function (require) {
           });
         }
       }, notify.fatal);
-    }, 50);
+    };
 
     $scope.createIndexPattern = function () {
       // get an empty indexPattern to start
@@ -171,10 +174,7 @@ define(function (require) {
 
     $scope.moreSamples = function (andUpdate) {
       index.sampleCount += 5;
-      if (andUpdate) {
-        updateSamples();
-        $scope.refreshFieldList();
-      }
+      if (andUpdate) updateSamples();
     };
 
     $scope.$watchMulti([
@@ -190,8 +190,8 @@ define(function (require) {
     $scope.$watchMulti([
       'index.name',
       'index.isTimeBased',
-      'index.nameIsPattern',
-      'index.nameInterval'
+      'index.nameInterval',
+      'index.sampleCount'
     ], $scope.refreshFieldList);
   });
 });
