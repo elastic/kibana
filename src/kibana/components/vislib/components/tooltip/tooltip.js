@@ -82,8 +82,7 @@ define(function (require) {
         selection.each(function (d, i) {
           var element = d3.select(this);
 
-          element
-          .on('mousemove.tip', function () {
+          function show() {
             var placement = self.previousPlacement = self.getTooltipPlacement({
               $window: self.$window,
               $chart: self.$chart,
@@ -95,19 +94,26 @@ define(function (require) {
             if (!placement) return;
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
+            var html = tooltipFormatter(events);
+            if (!html) return hide();
 
             // return text and position for tooltip
-            return tooltipSelection.datum(events)
-              .html(tooltipFormatter)
-              .style('visibility', 'visible')
-              .style('left', placement.left + 'px')
-              .style('top', placement.top + 'px');
-          })
-          .on('mouseout.tip', function () {
+            return tooltipSelection
+            .html(html)
+            .style('visibility', 'visible')
+            .style('left', placement.left + 'px')
+            .style('top', placement.top + 'px');
+          }
+
+          function hide() {
             return tooltipSelection.style('visibility', 'hidden')
               .style('left', '-500px')
               .style('top', '-500px');
-          });
+          }
+
+          element
+          .on('mousemove.tip', show)
+          .on('mouseout.tip', hide);
         });
       };
     };

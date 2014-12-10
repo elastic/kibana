@@ -11,7 +11,7 @@ require "sinatra/json"
 require "routes/proxy"
 require "lib/FrameOptions"
 require "routes/plugins"
-require "rack/deflater"
+# require "rack/deflater"
 
 class Logger
   alias_method :write, :<<
@@ -52,7 +52,7 @@ module Kibana
       json :status => 404, :message => "Not Found"
     end
 
-    use Rack::Deflater
+    # use Rack::Deflater
 
     # Routes go here
     use Routes::Home
