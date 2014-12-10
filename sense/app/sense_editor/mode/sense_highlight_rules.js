@@ -68,7 +68,7 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
         addEOL(["whitespace"], /(\s+)/, "start", "url")
       ),
       "url": mergeTokens(
-        addEOL(["url.part"], /([^?\/,]+)/, "start"),
+        addEOL(["url.part"], /([^?\/,\s]+)/, "start"),
         addEOL(["url.comma"], /(,)/, "start"),
         addEOL(["url.slash"], /(\/)/, "start"),
         addEOL(["url.questionmark"], /(\?)/, "start", "urlParams")

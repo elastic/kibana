@@ -201,6 +201,11 @@ define([
   );
 
   token_test(
+    [ "method", "GET", "url.part", "index", "url.slash", "/", "url.part", "_search" ],
+    "GET index/_search "
+  );
+
+  token_test(
     [ "method", "PUT", "url.slash", "/", "url.part", "index" ],
     "PUT /index"
   );
