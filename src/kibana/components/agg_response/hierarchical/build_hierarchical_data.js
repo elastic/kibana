@@ -1,5 +1,5 @@
 define(function (require) {
-  return function buildHierarchicalDataProvider(Private) {
+  return function buildHierarchicalDataProvider(Private, Notifier) {
     var _ = require('lodash');
     var buildSplit = Private(require('components/agg_response/hierarchical/_build_split'));
     var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');
@@ -8,6 +8,10 @@ define(function (require) {
     var tooltipFormatter = Private(require('components/agg_response/hierarchical/_hierarchical_tooltip_formatter'));
 
     var AggConfigResult = require('components/vis/_agg_config_result');
+
+    var notify = new Notifier({
+      location: 'Pie chart response converter'
+    });
 
     return function (vis, resp) {
       // Create a refrenece to the buckets
@@ -47,41 +51,42 @@ define(function (require) {
       var firstAgg = buckets[0];
       var aggData = resp.aggregations[firstAgg.id];
 
-
-      // If the firstAgg is a split then we need to map
-      // the split aggregations into rows.
-      if (firstAgg.schema.name === 'split') {
-        var rows = _.map(extractBuckets(aggData), function (bucket) {
-          var agg = firstAgg._next;
-          var split = buildSplit(agg, metric, bucket[agg.id]);
-          // Since splits display labels we need to set it.
-          split.label = bucket.key + ': ' + firstAgg.params.field.displayName;
-          split.tooltipFormatter = tooltipFormatter(raw.columns);
-          var aggConfigResult = new AggConfigResult(firstAgg, null, null, bucket.key);
-          split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
-          _.each(split.slices.children, function (child) {
-            child.aggConfigResult.$parent = aggConfigResult;
-          });
-          return split;
-        });
-        var result = { hits: resp.hits.total, raw: raw };
-        if (firstAgg.params.row) {
-          result.rows = rows;
-        } else {
-          result.columns = rows;
-        }
-        return result;
-        // otherwise we can start at the first bucket.
-      } else {
-        return (function () {
-          var split = buildSplit(firstAgg, metric, aggData);
-          split.hits = resp.hits.total;
-          split.raw = raw;
-          split.tooltipFormatter = tooltipFormatter(raw.columns);
-          return split;
-        })();
+      if (!firstAgg._next && firstAgg.schema.name === 'split') {
+        notify.error('Splitting charts without splitting slices is not supported. Pretending that we are just splitting slices.');
       }
 
+      // start with splitting slices
+      if (!firstAgg._next || firstAgg.schema.name === 'segment') {
+        var split = buildSplit(firstAgg, metric, aggData);
+        split.hits = resp.hits.total;
+        split.raw = raw;
+        split.tooltipFormatter = tooltipFormatter(raw.columns);
+        return split;
+      }
+
+      // map the split aggregations into rows.
+      var rows = _.map(extractBuckets(aggData), function (bucket) {
+        var agg = firstAgg._next;
+        var split = buildSplit(agg, metric, bucket[agg.id]);
+        // Since splits display labels we need to set it.
+        split.label = bucket.key + ': ' + firstAgg.params.field.displayName;
+        split.tooltipFormatter = tooltipFormatter(raw.columns);
+        var aggConfigResult = new AggConfigResult(firstAgg, null, null, bucket.key);
+        split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
+        _.each(split.slices.children, function (child) {
+          child.aggConfigResult.$parent = aggConfigResult;
+        });
+        return split;
+      });
+
+      var result = { hits: resp.hits.total, raw: raw };
+      if (firstAgg.params.row) {
+        result.rows = rows;
+      } else {
+        result.columns = rows;
+      }
+
+      return result;
     };
   };
 });
