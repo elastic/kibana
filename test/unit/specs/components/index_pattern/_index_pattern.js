@@ -3,7 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('test_utils/auto_release_sinon');
     var Promise = require('bluebird');
+    var IndexedArray = require('utils/indexed_array/index');
     var IndexPattern;
+    var mapper;
     var mappingSetup;
     var mockLogstashFields;
     var DocSource;
@@ -17,9 +19,14 @@ define(function (require) {
       docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
 
       DocSource = Private(require('components/courier/data_source/doc_source'));
-      sinon.stub(DocSource.prototype, 'doUpdate');
       sinon.stub(DocSource.prototype, 'doIndex');
       sinon.stub(DocSource.prototype, 'fetch');
+
+      // stub mapper
+      mapper = Private(require('components/index_patterns/_mapper'));
+      sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
+        return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
+      });
 
       // stub mappingSetup
       mappingSetup = Private(require('utils/mapping_setup'));
@@ -33,9 +40,14 @@ define(function (require) {
     // helper function to create index patterns
     function create(id, payload) {
       var indexPattern = new IndexPattern(id);
+      DocSource.prototype.doIndex.returns(Promise.resolve(id));
       payload = _.defaults(payload || {}, docSourceResponse(id));
-      DocSource.prototype.fetch.returns(Promise.resolve(payload));
+      setDocsourcePayload(payload);
       return indexPattern.init();
+    }
+
+    function setDocsourcePayload(payload) {
+      DocSource.prototype.fetch.returns(Promise.resolve(payload));
     }
 
     describe('api', function () {
@@ -63,6 +75,7 @@ define(function (require) {
         return create('test-pattern').then(function (indexPattern) {
           expect(DocSource.prototype.fetch.callCount).to.be(1);
           expect(indexPattern.fields).to.have.length(mockLogstashFields.length);
+          expect(indexPattern.fields).to.be.an(IndexedArray);
         });
       });
     });
@@ -84,8 +97,58 @@ define(function (require) {
     });
 
     describe('refresh fields', function () {
-      it('should fetch fields from the doc source');
-      it('should preserve the scripted fields');
+      require('test_utils/no_digest_promises').activateForSuite();
+      var indexPatternId = 'test-pattern';
+      var indexPattern;
+      var fieldLength;
+      var truncatedFields;
+
+      beforeEach(function () {
+        fieldLength = mockLogstashFields.length;
+        truncatedFields = mockLogstashFields.slice(3);
+        return create(indexPatternId, {
+          _source: {
+            customFormats: '{}',
+            fields: JSON.stringify(truncatedFields)
+          }
+        }).then(function (pattern) {
+          indexPattern = pattern;
+        });
+      });
+
+      it('should fetch fields from the doc source', function () {
+        // ensure that we don't have all the fields
+        expect(truncatedFields.length).to.not.equal(mockLogstashFields.length);
+        expect(indexPattern.fields).to.have.length(truncatedFields.length);
+
+        // ensure that all fields will be included in the returned docSource
+        setDocsourcePayload(docSourceResponse(indexPatternId));
+
+        // refresh fields, which will fetch
+        return indexPattern.refreshFields().then(function () {
+          // compare non-scripted fields to the mapper.getFieldsForIndexPattern fields
+          return mapper.getFieldsForIndexPattern().then(function (fields) {
+            expect(indexPattern.getFields()).to.eql(fields);
+          });
+        });
+      });
+
+      it('should preserve the scripted fields', function () {
+        // ensure that all fields will be included in the returned docSource
+        setDocsourcePayload(docSourceResponse(indexPatternId));
+
+        // add spy to indexPattern.getFields
+        var getFieldsSpy = sinon.spy(indexPattern, 'getFields');
+
+        // refresh fields, which will fetch
+        return indexPattern.refreshFields().then(function () {
+          // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
+          expect(getFieldsSpy.callCount).to.equal(1);
+
+          var scripted = _.where(mockLogstashFields, { scripted: true });
+          expect(_.filter(indexPattern.fields, { scripted: true })).to.eql(scripted);
+        });
+      });
     });
 
     describe('add and remove scripted fields', function () {
