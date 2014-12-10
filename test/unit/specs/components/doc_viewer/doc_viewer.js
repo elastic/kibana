@@ -11,7 +11,7 @@ define(function (require) {
     '_source': {
       'extension': 'html',
       'bytes': 100,
-      'point': {lat: 7, lon: 7},
+      'area': [{lat: 7, lon: 7}],
       'noMapping': 'hasNoMapping',
       'objectArray': [{foo: true}, {bar: false}]
     }
@@ -93,7 +93,7 @@ define(function (require) {
         });
 
         it('should NOT apply a filter when clicking non-filterable fields', function () {
-          var cell = $elem.find('td[title="point"]').next();
+          var cell = $elem.find('td[title="area"]').next();
 
           cell.find('.fa-search-plus').first().click();
           expect($scope.filter.calledOnce).to.be(false);
