@@ -191,9 +191,9 @@ define(function (require) {
     };
 
     /**
-     * Returns a function that evaluates scale type and applies
-     * filters tick labels on time scales
-     * rotates and truncates labels on nominal/ordinal scales
+     * Returns a function that evaluates scale type and
+     * applies filter to tick labels on time scales
+     * rotates and truncates tick labels on nominal/ordinal scales
      *
      * @method filterOrRotate
      * @returns {Function} Filters or rotates x axis tick labels
@@ -208,8 +208,7 @@ define(function (require) {
         selection.each(function () {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
-
-          if (!ordered) {
+          if (!ordered || ordered === undefined) {
             axis.call(self.rotateAxisLabels());
           } else {
             axis.call(self.filterAxisLabels());
@@ -231,32 +230,48 @@ define(function (require) {
     XAxis.prototype.rotateAxisLabels = function () {
       var self = this;
       var text;
-      var maxWidth = self.xScale.rangeBand();
+      var barWidth = self.xScale.rangeBand();
+      var maxRotatedLength = 180;
       var textWidth = 0;
       var xAxisPadding = 15;
       var svg;
       var xAxisLabelHt = 15;
-      var width;
+      var lengths = [];
+      var length;
       self._attr.isRotated = false;
 
       return function (selection) {
 
+        // maxRotatedLength = min of 60% chart height or maxRotatedLength
+        var chtWrap = d3.select(this.node().parentNode.parentNode.parentNode).select('.chart-wrapper');
+        if (chtWrap) {
+          var chtWrapHt = chtWrap.style('height');
+          chtWrapHt = 0.6 * +chtWrapHt.substring(0, chtWrapHt.length - 2);
+          maxRotatedLength = _.min([maxRotatedLength, chtWrapHt]);
+        }
+
         text = selection.selectAll('.tick text');
 
         text.each(function textWidths() {
-          width = d3.select(this).node().getBBox().width;
-          if (width > maxWidth) {
-            self._attr.isRotated = true;
-            xAxisLabelHt = _.max([textWidth, (Math.ceil(width + xAxisPadding))]);
-          }
+          lengths.push(d3.select(this).node().getBBox().width);
         });
-        self._attr.xAxisLabelHt = xAxisLabelHt;
+        length = _.max(lengths);
+        self._attr.xAxisLabelHt = length + xAxisPadding;
 
+        // if longer than bar width, rotate
+        if (length > barWidth) {
+          self._attr.isRotated = true;
+        }
+
+        // if longer than maxRotatedLength, truncate
+        if (length > maxRotatedLength) {
+          self._attr.xAxisLabelHt = maxRotatedLength;
+        }
 
         if (self._attr.isRotated) {
           text
           .text(function truncate() {
-            return self.truncateLabel(this, xAxisLabelHt);
+            return self.truncateLabel(this, self._attr.xAxisLabelHt);
           })
           .style('text-anchor', 'end')
           .attr('dx', '-.8em')
@@ -265,11 +280,8 @@ define(function (require) {
             return 'rotate(-90)';
           });
           selection.select('svg')
-          .attr('height', xAxisLabelHt);
+          .attr('height', self._attr.xAxisLabelHt);
         }
-
-        // TODO: need to add mouseover to show tooltip on truncated labels
-
       };
     };
 
@@ -422,30 +434,19 @@ define(function (require) {
       var selection = d3.selectAll('.vis-wrapper');
       var titleHts = 30;
       var xAxisLabelHt = 15;
-
-      if (self._attr.isRotated && self._attr.xAxisLabelHt) {
-        xAxisLabelHt = self._attr.xAxisLabelHt;
-      } else {
-        xAxisLabelHt = self._attr.xAxisLabelHt = xAxisLabelHt;
-      }
+      var padding = 15;
 
       selection.each(function () {
         var visEl = d3.select(this);
-        var $visEl = $(this);
-
-        $visEl.find('.x-axis-wrapper')
-        .height(xAxisLabelHt + titleHts);
-        $visEl.find('.x-axis-div-wrapper')
-        .height(xAxisLabelHt);
 
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.select('.y-axis-spacer-block')
           .append('div')
           .attr('class', 'inner-spacer-block');
         }
+        var xAxisHt = visEl.select('.x-axis-wrapper').style('height');
 
-        visEl.select('.inner-spacer-block')
-        .style('height', (xAxisLabelHt + titleHts) + 'px');
+        visEl.select('.inner-spacer-block').style('height', xAxisHt);
       });
 
     };
