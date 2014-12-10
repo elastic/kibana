@@ -47,6 +47,12 @@ define(function (require) {
             warnings.push('Scripted fields can take a long time to execute.');
           }
 
+          if (warnings.length > 1) {
+            warnings = warnings.map(function (warning, i) {
+              return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
+            });
+          }
+
           return warnings;
 
         };
@@ -68,11 +74,11 @@ define(function (require) {
             $scope.details(field, recompute);
 
 
-            $scope.fieldMapping = $scope.indexPattern.fields.byName[$scope.field.name];
+            var fieldMapping = $scope.indexPattern.fields.byName[$scope.field.name];
 
             detailScope.$destroy();
             detailScope = $scope.$new();
-            detailScope.warnings = getWarnings($scope.fieldMapping);
+            detailScope.warnings = getWarnings(fieldMapping);
 
             detailsElem = $(detailsHtml);
             $compile(detailsElem)(detailScope);
