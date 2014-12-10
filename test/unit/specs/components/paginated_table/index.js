@@ -14,7 +14,9 @@ define(function (require) {
     var defaultPerPage = 10;
 
     var makeData = function (colCount, rowCount) {
-      var cols = faker.Lorem.words(colCount).map(function (word) {
+      // faker.Lorem.words can generate the same word multiple times
+      // so, generate 3x the request number, use uniq, and trim down to the requested total
+      var cols = _.uniq(faker.Lorem.words(colCount * 3)).slice(0, colCount).map(function (word) {
         return { title: word };
       });
 
