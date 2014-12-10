@@ -113,9 +113,6 @@ define(function (require) {
         expect(seedColors instanceof Array).to.be(true);
       });
 
-      it('should return an array of length 72', function () {
-        expect(seedColors.length).to.be(72);
-      });
     });
 
     describe('Color Palette', function () {
