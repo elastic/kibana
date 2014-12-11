@@ -107,10 +107,10 @@ define(function (require) {
 
       beforeEach(function () {
         data = makeData(3, 0);
-        data.rows.push(['bbbb', 'bbbb', 'bbbb']);
-        data.rows.push(['cccc', 'cccc', 'cccc']);
-        data.rows.push(['zzzz', 'zzzz', 'zzzz']);
-        data.rows.push(['aaaa', 'aaaa', 'aaaa']);
+        data.rows.push(['bbbb', 'aaaa', 'zzzz']);
+        data.rows.push(['cccc', 'cccc', 'aaaa']);
+        data.rows.push(['zzzz', 'bbbb', 'bbbb']);
+        data.rows.push(['aaaa', 'zzzz', 'cccc']);
 
         lastRowIndex = data.rows.length - 1;
         renderTable(data.columns, data.rows);
@@ -131,16 +131,18 @@ define(function (require) {
         // sortColumn
         paginatedTable.sortColumn(data.columns[0]);
         $scope.$digest();
+
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be('aaaa');
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('zzzz');
       });
 
-      it('should sort desciending on second invocation', function () {
+      it('should sort descending on second invocation', function () {
         // sortColumn
         paginatedTable.sortColumn(data.columns[0]);
         paginatedTable.sortColumn(data.columns[0]);
         $scope.$digest();
+
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be('zzzz');
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
