@@ -160,7 +160,7 @@ define(function (require) {
           searchSource.set('query', null);
         }
 
-        if ($state.filters.length) {
+        if ($state.filters && $state.filters.length) {
           searchSource.set('filter', $state.filters);
         } else {
           searchSource.set('filter', []);
