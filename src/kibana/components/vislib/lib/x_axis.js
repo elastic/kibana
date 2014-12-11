@@ -430,11 +430,7 @@ define(function (require) {
      * @method updateXaxisHeight
      */
     XAxis.prototype.updateXaxisHeight = function () {
-      var self = this;
-      var selection = d3.selectAll('.vis-wrapper');
-      var titleHts = 30;
-      var xAxisLabelHt = 15;
-      var padding = 15;
+      var selection = d3.select(this.el).selectAll('.vis-wrapper');
 
       selection.each(function () {
         var visEl = d3.select(this);
