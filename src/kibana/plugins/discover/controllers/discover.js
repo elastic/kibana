@@ -540,6 +540,7 @@ define(function (require) {
 
       var indexPattern = $scope.searchSource.get('index');
       indexPattern.popularizeField(field, 1);
+      var negate = operation === '-';
 
       // Grap the filters from the searchSource and ensure it's an array
       var filters = _.flatten([$state.filters], true);
@@ -561,7 +562,10 @@ define(function (require) {
           }
         });
 
-        if (existing) return;
+        if (existing) {
+          if (existing.meta.negate !== negate) existing.meta.negate = negate;
+          return;
+        }
 
         switch (field) {
         case '_exists_':
@@ -579,8 +583,7 @@ define(function (require) {
           });
           break;
         default:
-          var filter = { meta: { negate: false, index: $state.index }, query: { match: {} } };
-          filter.meta.negate = operation === '-';
+          var filter = { meta: { negate: negate, index: $state.index }, query: { match: {} } };
           filter.query.match[field] = { query: value, type: 'phrase' };
           filters.push(filter);
           break;
