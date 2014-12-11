@@ -121,9 +121,8 @@ define(function (require) {
         courier.setRootSearchSource(searchSource);
         searchSource.set('query', $state.query);
         searchSource.set('filter', $state.filters);
-        vis.listeners.click = filterBarClickHandler($state, vis);
-        vis.listeners.brush = brushEvent;
-        editableVis.listeners.brush = vis.listeners.brush;
+        editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state, vis);
+        editableVis.listeners.brush = vis.listeners.brush = brushEvent;
       }
 
       // track state of editable vis vs. "actual" vis
