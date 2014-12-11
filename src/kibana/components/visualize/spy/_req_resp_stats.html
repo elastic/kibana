@@ -5,7 +5,6 @@
 <div ng-show="spyMode.name === 'request'">
   <label>
     Elasticsearch request body &nbsp;
-    <kbn-clipboard copy="history.req | json"></kbn-clipboard>
   </label>
   <pre>{{history.req | json}}</pre>
 </div>
