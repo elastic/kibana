@@ -79,7 +79,7 @@ define(function (require) {
     var $state = (function initState() {
       var savedVisState = vis.getState();
       var stateDefaults = {
-        query: searchSource.get('query') || {query_string: {query: '*'}},
+        query: searchSource.getOwn('query') || {query_string: {query: '*'}},
         filters: searchSource.getOwn('filter') || [],
         vis: savedVisState
       };
