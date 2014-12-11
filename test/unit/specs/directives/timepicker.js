@@ -40,7 +40,7 @@ define(function (require) {
 
       // Create the element
       $elem = angular.element(
-        '<kbn-timepicker from="time.from" to="time.to" mode="time.mode"></kbn-timepicker>'
+        '<kbn-timepicker from="time.from" to="time.to" mode="time.mode" interval="time.refreshInterval"></kbn-timepicker>'
       );
 
       // And compile it
@@ -56,6 +56,38 @@ define(function (require) {
 
 
   describe('timepicker directive', function () {
+
+    describe('tabs', function () {
+
+      beforeEach(function () {
+        init();
+      });
+
+      it('should contain two tabs', function (done) {
+        expect($elem.find('.tab-pane').length).to.be(2);
+        done();
+      });
+    });
+
+    describe('refresh interval', function () {
+
+      beforeEach(function () {
+        init();
+      });
+
+      it('should contain a list of options', function (done) {
+        expect($elem.find('.kbn-refresh-list').length).to.be(1);
+        done();
+      });
+
+      it('should have a $scope.setRefreshInterval() that sets interval variable', function (done) {
+        $scope.setRefreshInterval('interval');
+        expect($scope.interval).to.be('interval');
+        done();
+      });
+      
+    });
+
     describe('mode setting', function () {
 
       beforeEach(function () {
@@ -80,7 +112,6 @@ define(function (require) {
 
         done();
       });
-
     });
 
     describe('quick mode', function () {
