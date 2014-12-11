@@ -80,7 +80,7 @@ define(function (require) {
       var savedVisState = vis.getState();
       var stateDefaults = {
         query: searchSource.get('query') || {query_string: {query: '*'}},
-        filters: searchSource.get('filter') || [],
+        filters: searchSource.getOwn('filter') || [],
         vis: savedVisState
       };
 
@@ -121,9 +121,10 @@ define(function (require) {
         courier.setRootSearchSource(searchSource);
         searchSource.set('query', $state.query);
         searchSource.set('filter', $state.filters);
-        editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state, vis);
-        editableVis.listeners.brush = vis.listeners.brush = brushEvent;
       }
+
+      editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
+      editableVis.listeners.brush = vis.listeners.brush = brushEvent;
 
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -182,10 +183,8 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      if (!$scope.linked) {
-        searchSource.set('query', $state.query);
-        searchSource.set('filter', $state.filters);
-      }
+      searchSource.set('filter', $state.filters);
+      if (!$scope.linked) searchSource.set('query', $state.query);
       searchSource.fetch();
     };
 

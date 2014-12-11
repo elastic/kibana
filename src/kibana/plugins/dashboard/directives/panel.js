@@ -27,7 +27,7 @@ define(function (require) {
           savedVisualizations.get($scope.panel.visId)
           .then(function (savedVis) {
             $scope.savedVis = savedVis;
-            savedVis.vis.listeners.click = filterBarClickHandler($state, savedVis.vis);
+            savedVis.vis.listeners.click = filterBarClickHandler($state);
             savedVis.vis.listeners.brush = brushEvent;
           })
           .catch(function (e) {
