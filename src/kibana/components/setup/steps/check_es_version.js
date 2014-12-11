@@ -14,8 +14,18 @@ define(function (require) {
           // Remove everything after the -, we don't handle beta/rc ES versions
           return v.version.split('-')[0];
         });
-        if (versionmath.is('>=' + minimumElasticsearchVersion, versions)) return true;
-        else throw SetupError('This version of Kibana requires at least Elasticsearch ' + minimumElasticsearchVersion);
+        if (versionmath.is('>=' + minimumElasticsearchVersion, versions)) {
+          return true;
+        }
+        else {
+          var badNodes = _.map(info.nodes, function (v) {
+            if (versionmath.is('<' + minimumElasticsearchVersion, [v.version.split('-')[0]])) {
+              return 'Elasticsearch ' + v.version + ' @ ' + v.transport_address + ' (' + v.ip + ')';
+            }
+          });
+          throw SetupError('This version of Kibana requires Elasticsearch ' + minimumElasticsearchVersion + ' or higher on all nodes. ' +
+            'I found the following incompatible nodes in your cluster: \n\n' + badNodes.join('\n'));
+        }
       })
       .then(complete, complete.failure);
     };
