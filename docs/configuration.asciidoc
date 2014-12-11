@@ -65,15 +65,15 @@ This setting is update-able via the Cluster Update Settings API.
 
 ==== added[1.3.0] SSL settings when exporting using HTTPS
 
-`marvel.agent.exporter.es.ssl.truststore`::
+`marvel.agent.exporter.es.ssl.truststore.path`::
 
 An absolute path for a custom trust store, which will be used for https connections.
 
-`marvel.agent.exporter.es.ssl.truststore_password`::
+`marvel.agent.exporter.es.ssl.truststore.password`::
 
 the password to use when accessing the trust store.
 
-`marvel.agent.exporter.es.ssl.truststore_algorithm`::
+`marvel.agent.exporter.es.ssl.truststore.algorithm`::
 
 Trust store format (defaults to SunX509).
 
