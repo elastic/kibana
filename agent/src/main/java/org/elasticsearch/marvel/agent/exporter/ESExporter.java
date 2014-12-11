@@ -455,12 +455,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     private boolean checkAndUploadIndexTemplate(final String host) {
         byte[] template;
         try {
-            InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
-            if (is == null) {
-                throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
-            }
-            template = Streams.copyToByteArray(is);
-            is.close();
+            template = Streams.copyToBytesFromClasspath("/marvel_index_template.json");
         } catch (IOException e) {
             // throwing an exception to stop exporting process - we don't want to send data unless
             // we put in the template for it.

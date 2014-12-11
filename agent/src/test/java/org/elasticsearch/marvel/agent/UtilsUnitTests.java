@@ -19,15 +19,12 @@
 package org.elasticsearch.marvel.agent;
 
 import org.elasticsearch.common.io.Streams;
-import org.elasticsearch.marvel.agent.exporter.ESExporter;
 import org.elasticsearch.test.ElasticsearchTestCase;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -43,13 +40,7 @@ public class UtilsUnitTests extends ElasticsearchTestCase {
 
     @Test
     public void testVersionIsExtractableFromIndexTemplate() throws IOException {
-        byte[] template;
-        InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
-        if (is == null) {
-            throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
-        }
-        template = Streams.copyToByteArray(is);
-        is.close();
+        byte[] template = Streams.copyToBytesFromClasspath("/marvel_index_template.json");
         MatcherAssert.assertThat(Utils.parseIndexVersionFromTemplate(template), Matchers.greaterThan(0));
     }
 
