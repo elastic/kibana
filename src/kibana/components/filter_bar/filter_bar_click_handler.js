@@ -3,7 +3,7 @@ define(function (require) {
   var dedupFilters = require('./lib/dedupFilters');
 
   return function (Notifier) {
-    return function ($state, vis) {
+    return function ($state) {
       return function (event) {
         // Hierarchical and tabular data set their aggConfigResult parameter
         // differently because of how the point is rewritten between the two. So
