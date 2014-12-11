@@ -29,9 +29,10 @@ define(function (require) {
 
         $scope.applyFilters = function (filters) {
           var newFilters = filterAppliedAndUnwrap(filters);
+          var changeTimeFilter = $scope.changeTimeFilter;
           $scope.state.filters = _.union($scope.state.filters, newFilters);
           $scope.newFilters = [];
-          if ($scope.changeTimeFilter.meta.apply) {
+          if (changeTimeFilter && changeTimeFilter.meta && changeTimeFilter.meta.apply) {
             changeTimeFilter($scope.changeTimeFilter);
           }
         };
