@@ -1,10 +1,10 @@
 define(function (require) {
   var moment = require('moment');
-  var filterBarClickHandler = require('components/filter_bar/filter_bar_click_handler');
   require('modules')
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, Notifier, Private) {
     var _ = require('lodash');
+    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier();
 

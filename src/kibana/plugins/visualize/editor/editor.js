@@ -53,8 +53,8 @@ define(function (require) {
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
-    var filterBarClickHandler = require('components/filter_bar/filter_bar_click_handler');
     var brushEvent = Private(require('utils/brush_event'));
+    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
