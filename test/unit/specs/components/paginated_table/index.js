@@ -154,9 +154,23 @@ define(function (require) {
         paginatedTable.sortColumn(data.columns[0]);
         paginatedTable.sortColumn(data.columns[0]);
         $scope.$digest();
+
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be(data.rows[0][0]);
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
+      });
+
+      it('should sort new column ascending', function () {
+        // sort by first column
+        paginatedTable.sortColumn(data.columns[0]);
+        $scope.$digest();
+        // sort by second column
+        paginatedTable.sortColumn(data.columns[1]);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+        expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).to.be('zzzz');
       });
     });
 
