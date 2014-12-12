@@ -169,9 +169,11 @@ define(function (require) {
         if (!(self.fields.byName && self.fields.byName[fieldName])) return;
 
         var field = self.fields.byName[fieldName];
-        if (!field.count && unit < 1) return;
-        field.count = field.count + (unit);
-        self.save();
+        var count = Math.max(field.count + unit, 0);
+        if (field.count !== count) {
+          field.count = count;
+          self.save();
+        }
       };
 
       self.getFields = function (type) {
