@@ -63,17 +63,17 @@ define(function (require) {
         };
 
         // update the sordedRows result
-        $scope.$watchMulti([
-          'paginatedTable.sort.direction',
-          'rows'
-        ], function () {
+        $scope.$watch('rows', rowSorter);
+        $scope.$watchCollection('paginatedTable.sort', rowSorter);
+
+        function rowSorter() {
           if (self.sort.direction == null) {
             $scope.sortedRows = $scope.rows.slice(0);
             return;
           }
 
           $scope.sortedRows = orderBy($scope.rows, self.sort.getter, self.sort.direction === 'desc');
-        });
+        }
       }
     };
   });
