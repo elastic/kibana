@@ -52,7 +52,6 @@ import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
-import org.elasticsearch.indices.InternalIndicesService;
 import org.elasticsearch.marvel.agent.event.*;
 import org.elasticsearch.marvel.agent.exporter.Exporter;
 import org.elasticsearch.node.service.NodeService;
@@ -74,7 +73,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     public static final String SETTINGS_SHARD_STATS_ENABLED = "marvel.agent.shard_stats.enabled";
     public static final String SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL = "marvel.agent.cluster_state.heartbeat";
 
-    private final InternalIndicesService indicesService;
+    private final IndicesService indicesService;
     private final NodeService nodeService;
     private final ClusterService clusterService;
     private final Client client;
@@ -104,7 +103,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                         @ClusterDynamicSettings DynamicSettings dynamicSettings,
                         Set<Exporter> exporters) {
         super(settings);
-        this.indicesService = (InternalIndicesService) indicesService;
+        this.indicesService = indicesService;
         this.clusterService = clusterService;
         this.nodeService = nodeService;
         this.samplingInterval = settings.getAsTime(SETTINGS_INTERVAL, TimeValue.timeValueSeconds(10)).millis();
