@@ -14,11 +14,10 @@ define(function (require) {
     _(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {
       DocSource.Super.call(this, initialState);
-
-      // move onResults over to onUpdate, because that makes more sense
-      this.onUpdate = this.onResults;
-      this.onResults = void 0;
     }
+
+    DocSource.prototype.onUpdate = SourceAbstract.prototype.onResults;
+    DocSource.prototype.onResults = void 0;
 
     /*****
      * PUBLIC API
