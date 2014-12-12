@@ -34,10 +34,10 @@ define(function (require) {
 
     es.search({
       index: $route.current.params.index,
-      type: $route.current.params.type,
       body: {
         query: {
           ids: {
+            type: $route.current.params.type,
             values: [$route.current.params.id]
           }
         },

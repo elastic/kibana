@@ -9,7 +9,7 @@ define(function (require) {
     _.each(self.fields.byType['date'], function (field) {
       if (field.indexed) {
         scriptFields[field.name] = {
-          script: 'doc["' + field.name + '"].value'
+          script: 'if (doc["' + field.name + '"].value == 0) { null } else { doc["' + field.name + '"].value }'
         };
       }
     });
