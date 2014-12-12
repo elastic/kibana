@@ -124,7 +124,7 @@ define(function (require) {
         done();
       });
 
-      it('setting field.display should move the field into selected', function (done) {
+      it('should move the field into selected when setting field.display', function (done) {
         var section = getSections($elem);
         indexPattern.fields.byName.bytes.display = true;
         $scope.$digest();

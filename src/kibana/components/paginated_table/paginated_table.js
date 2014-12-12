@@ -56,24 +56,24 @@ define(function (require) {
             // use generic sort handler
             self.sort.getter = function (row) {
               var value = row[index];
-              if (value.value) return value.value;
+              if (value && value.value != null) return value.value;
               return value;
             };
           }
         };
 
         // update the sordedRows result
-        $scope.$watchMulti([
-          'paginatedTable.sort.direction',
-          'rows'
-        ], function () {
+        $scope.$watch('rows', rowSorter);
+        $scope.$watchCollection('paginatedTable.sort', rowSorter);
+
+        function rowSorter() {
           if (self.sort.direction == null) {
             $scope.sortedRows = $scope.rows.slice(0);
             return;
           }
 
           $scope.sortedRows = orderBy($scope.rows, self.sort.getter, self.sort.direction === 'desc');
-        });
+        }
       }
     };
   });
