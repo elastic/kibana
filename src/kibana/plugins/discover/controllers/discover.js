@@ -119,6 +119,11 @@ define(function (require) {
       index: $state.index,
       savedSearch: savedSearch,
       indexPatternList: indexPatternList,
+      changeIndexAndReload: function () {
+        $state.index = $scope.opts.index;
+        $state.save();
+        $route.reload();
+      }
     };
 
     // stores the complete list of fields
