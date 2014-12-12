@@ -11,6 +11,126 @@ define(function (require) {
   angular.module('ZeroFilledArrayUtilService', ['kibana']);
 
   describe('Vislib Zero Injection Module Test Suite', function () {
+    var dateHistogramRows = {
+      'rows': [
+        {
+          'label': 'Top 5 @tags: success',
+          'series': [
+            {
+              'label': 'jpg',
+              'values': [
+                { 'x': 1418410560000, 'y': 2 },
+                { 'x': 1418410620000, 'y': 4 },
+                { 'x': 1418410680000, 'y': 1 },
+                { 'x': 1418410740000, 'y': 5 },
+                { 'x': 1418410800000, 'y': 2 },
+                { 'x': 1418410860000, 'y': 3 },
+                { 'x': 1418410920000, 'y': 2 }
+              ]
+            },
+            {
+              'label': 'css',
+              'values': [
+                { 'x': 1418410560000, 'y': 1 },
+                { 'x': 1418410620000, 'y': 3 },
+                { 'x': 1418410680000, 'y': 1 },
+                { 'x': 1418410740000, 'y': 4 },
+                { 'x': 1418410800000, 'y': 2 }
+              ]
+            },
+            {
+              'label': 'gif',
+              'values': [
+                { 'x': 1418410500000, 'y': 1 },
+                { 'x': 1418410680000, 'y': 3 },
+                { 'x': 1418410740000, 'y': 2 }
+              ]
+            }
+          ]
+        },
+        {
+          'label': 'Top 5 @tags: info',
+          'series': [
+            {
+              'label': 'jpg',
+              'values': [
+                { 'x': 1418410560000, 'y': 4 },
+                { 'x': 1418410620000, 'y': 2 },
+                { 'x': 1418410680000, 'y': 1 },
+                { 'x': 1418410740000, 'y': 5 },
+                { 'x': 1418410800000, 'y': 2 },
+                { 'x': 1418410860000, 'y': 3 },
+                { 'x': 1418410920000, 'y': 2 }
+              ]
+            },
+            {
+              'label': 'css',
+              'values': [
+                { 'x': 1418410620000, 'y': 3 },
+                { 'x': 1418410680000, 'y': 1 },
+                { 'x': 1418410740000, 'y': 4 },
+                { 'x': 1418410800000, 'y': 2 }
+              ]
+            },
+            {
+              'label': 'gif',
+              'values': [
+                { 'x': 1418410500000, 'y': 1 }
+              ]
+            }
+          ]
+        },
+        {
+          'label': 'Top 5 @tags: security',
+          'series': [
+            {
+              'label': 'jpg',
+              'values': [
+                { 'x': 1418410560000, 'y': 1 },
+                { 'x': 1418410620000, 'y': 3 },
+                { 'x': 1418410920000, 'y': 2 }
+              ]
+            },
+            {
+              'label': 'gif',
+              'values': [
+                { 'x': 1418410680000, 'y': 3 },
+                { 'x': 1418410740000, 'y': 1 }
+              ]
+            }
+          ]
+        },
+        {
+          'label': 'Top 5 @tags: login',
+          'series': [
+            {
+              'label': 'jpg',
+              'values': [
+                { 'x': 1418410740000, 'y': 1 }
+              ]
+            },
+            {
+              'label': 'css',
+              'values': [
+                { 'x': 1418410560000, 'y': 1 }
+              ]
+            }
+          ]
+        },
+        {
+          'label': 'Top 5 @tags: warning',
+          'series': [
+            {
+              'label': 'jpg',
+              'values': [
+                { 'x': 1418410860000, 'y': 2 }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
     var seriesData = {
       series: [
         {
@@ -84,7 +204,6 @@ define(function (require) {
       ]
     };
 
-    var ordered = {};
     var childrenObject = {
       children: []
     };
@@ -178,7 +297,7 @@ define(function (require) {
         expect(_.isFunction(injectZeros)).to.be(true);
       });
 
-      it('should return an object with series[0].values"', function () {
+      it('should return an object with series[0].values', function () {
         expect(_.isObject(sample1)).to.be(true);
         expect(_.isObject(sample1.series[0].values)).to.be(true);
       });
@@ -512,6 +631,31 @@ define(function (require) {
         expect(results[1].y).to.be(0);
         expect(results[3].y).to.be(0);
         expect(results[4].y).to.be(0);
+      });
+    });
+
+    describe('Injected Zeros return in the correct order for dates', function () {
+      // Need to test that for Date Histogram data, objects are always sorted by time and not by index
+      var injectZeros;
+      var dateHistogramData;
+
+      beforeEach(function () {
+        module('ZeroInjectionUtilService');
+      });
+
+      beforeEach(function () {
+        inject(function (Private) {
+          injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
+          dateHistogramData = injectZeros(dateHistogramRows);
+        });
+      });
+
+      afterEach(function () {
+        dateHistogramData = null;
+      });
+
+      it('should return dates in order', function () {
+
       });
     });
 
