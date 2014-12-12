@@ -56,7 +56,7 @@ define(function (require) {
             // use generic sort handler
             self.sort.getter = function (row) {
               var value = row[index];
-              if (value && value.value) return value.value;
+              if (value && value.value != null) return value.value;
               return value;
             };
           }
