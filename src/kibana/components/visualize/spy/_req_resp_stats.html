@@ -4,7 +4,7 @@
 
 <div ng-show="spyMode.name === 'request'">
   <label>
-    Elasticsearch request body &nbsp
+    Elasticsearch request body &nbsp;
     <kbn-clipboard copy="history.req | json"></kbn-clipboard>
   </label>
   <pre>{{history.req | json}}</pre>
@@ -12,7 +12,7 @@
 
 <div ng-show="spyMode.name === 'response'">
   <label>
-    Elasticsearch response body &nbsp
+    Elasticsearch response body &nbsp;
   </label>
   <pre>{{history.resp | json}}</pre>
 </div>
