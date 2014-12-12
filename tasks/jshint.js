@@ -10,9 +10,7 @@ module.exports = function (grunt) {
       // match these patterns
       var patterns = grunt.config.get('jshint.source.files.src');
       files = files.split('\n').filter(Boolean).map(function (file) {
-        if (file.length) {
-          return path.join(workingPath, file);
-        }
+        return path.join(workingPath, file);
       });
 
       files = grunt.file.match(patterns, files);
