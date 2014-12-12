@@ -134,7 +134,7 @@ define(function (require) {
           .catch(notify.fatal);
         };
 
-        var pendingVis = 0;
+        var pendingVis = _.size($state.panels);
         $scope.$on('ready:vis', function () {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
