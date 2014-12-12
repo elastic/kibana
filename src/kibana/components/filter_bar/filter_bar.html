@@ -2,8 +2,8 @@
   <form ng-submit="applyFilters(newFilters)">
   <ul class="list-unstyled">
     <li>Apply these filters?</li>
-    <li ng-repeat="filter in newFilters" class="filter"><input type="checkbox" ng-model="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
-    <li ng-if="changeTimeFilter" class="changeTimeFilter filter"><input type="checkbox" ng-model="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
+    <li ng-repeat="filter in newFilters" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-model="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
+    <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-model="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
     <li><button class="btn btn-xs btn-primary">Apply Now</button> or <a ng-click="clearFilterBar();">Cancel</a></li>
   </ul>
   </form>
