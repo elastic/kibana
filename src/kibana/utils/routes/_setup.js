@@ -6,6 +6,7 @@ define(function (require) {
     var firstNoDefaultError = true;
 
     var rootSearchSource = Private(require('components/courier/data_source/_root_search_source'));
+    var allowedRoutesRE = /^\/settings\//;
 
     return {
       routeSetupWork: function () {
@@ -17,11 +18,7 @@ define(function (require) {
         ])
         .then(function () {
           var path = $route.current.$$route.originalPath;
-          var allowedRoutes = [
-            '/settings/indices/',
-            '/settings/about'
-          ];
-          if (allowedRoutes.indexOf(path) < 0) {
+          if (!path.match(allowedRoutesRE)) {
             return courier.indexPatterns.getIds()
             .then(function (patterns) {
               if (!config.get('defaultIndex')) {
