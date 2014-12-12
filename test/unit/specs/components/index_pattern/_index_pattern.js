@@ -203,47 +203,49 @@ define(function (require) {
 
     describe('popularizeField', function () {
       it('should increment the poplarity count by default', function () {
-        var saveSpy = sinon.spy(indexPattern, 'save');
-        var field = _.sample(indexPattern.fields);
-        var oldCount = field.count;
+        var saveSpy = sinon.stub(indexPattern, 'save');
+        indexPattern.fields.forEach(function (field, i) {
+          var oldCount = field.count;
 
-        indexPattern.popularizeField(field.name);
+          indexPattern.popularizeField(field.name);
 
-        expect(saveSpy.callCount).to.equal(1);
-        expect(field.count).to.equal(oldCount + 1);
+          expect(saveSpy.callCount).to.equal(i + 1);
+          expect(field.count).to.equal(oldCount + 1);
+        });
       });
 
       it('should increment the poplarity count', function () {
-        var saveSpy = sinon.spy(indexPattern, 'save');
-        var field = _.sample(indexPattern.fields);
-        var oldCount = field.count;
-        var incrementAmount = 4;
+        var saveSpy = sinon.stub(indexPattern, 'save');
+        indexPattern.fields.forEach(function (field, i) {
+          var oldCount = field.count;
+          var incrementAmount = 4;
 
-        indexPattern.popularizeField(field.name, incrementAmount);
+          indexPattern.popularizeField(field.name, incrementAmount);
 
-        expect(saveSpy.callCount).to.equal(1);
-        expect(field.count).to.equal(oldCount + incrementAmount);
+          expect(saveSpy.callCount).to.equal(i + 1);
+          expect(field.count).to.equal(oldCount + incrementAmount);
+        });
       });
 
       it('should decrement the poplarity count', function () {
-        var saveSpy = sinon.spy(indexPattern, 'save');
-        var field = _.sample(indexPattern.fields);
-        var oldCount = field.count;
-        var incrementAmount = 4;
-        var decrementAmount = -2;
+        indexPattern.fields.forEach(function (field, i) {
+          var oldCount = field.count;
+          var incrementAmount = 4;
+          var decrementAmount = -2;
 
-        indexPattern.popularizeField(field.name, incrementAmount);
-        indexPattern.popularizeField(field.name, decrementAmount);
+          indexPattern.popularizeField(field.name, incrementAmount);
+          indexPattern.popularizeField(field.name, decrementAmount);
 
-        expect(saveSpy.callCount).to.equal(2);
-        expect(field.count).to.equal(oldCount + incrementAmount + decrementAmount);
+          expect(field.count).to.equal(oldCount + incrementAmount + decrementAmount);
+        });
       });
 
       it('should not go below 0', function () {
-        var field = _.sample(indexPattern.fields);
-        var decrementAmount = -20000000;
-        indexPattern.popularizeField(field.name, decrementAmount);
-        expect(field.count).to.equal(0);
+        indexPattern.fields.forEach(function (field) {
+          var decrementAmount = -Number.MAX_VALUE;
+          indexPattern.popularizeField(field.name, decrementAmount);
+          expect(field.count).to.equal(0);
+        });
       });
     });
   }];

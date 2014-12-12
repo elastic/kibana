@@ -8,7 +8,6 @@ define(function (require) {
       { name: 'phpmemory',          type: 'number',     indexed: true,  analyzed: true },
       { name: 'ip',                 type: 'ip',         indexed: true,  analyzed: true },
       { name: 'request_body',       type: 'attachment', indexed: true,  analyzed: true },
-      { name: 'extension',          type: 'string',     indexed: true,  analyzed: true },
       { name: 'point',              type: 'geo_point',  indexed: true,  analyzed: true },
       { name: 'area',               type: 'geo_shape',  indexed: true,  analyzed: true },
       { name: 'extension',          type: 'string',     indexed: true,  analyzed: true },

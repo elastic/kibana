@@ -166,10 +166,11 @@ define(function (require) {
 
       self.popularizeField = function (fieldName, unit) {
         if (unit == null) unit = 1;
-        if (!(self.fields.byName && self.fields.byName[fieldName])) return;
 
-        var field = self.fields.byName[fieldName];
-        var count = Math.max(field.count + unit, 0);
+        var field = _.deepGet(self, ['fields', 'byName', fieldName]);
+        if (!field) return;
+
+        var count = Math.max((field.count || 0) + unit, 0);
         if (field.count !== count) {
           field.count = count;
           self.save();
