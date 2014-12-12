@@ -232,10 +232,8 @@ define(function (require) {
       var text;
       var barWidth = self.xScale.rangeBand();
       var maxRotatedLength = 180;
-      var textWidth = 0;
       var xAxisPadding = 15;
       var svg;
-      var xAxisLabelHt = 15;
       var lengths = [];
       var length;
       self._attr.isRotated = false;
