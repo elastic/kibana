@@ -241,15 +241,6 @@ define(function (require) {
       self._attr.isRotated = false;
 
       return function (selection) {
-
-        // maxRotatedLength = min of 60% chart height or maxRotatedLength
-        var chtWrap = d3.select(this.node().parentNode.parentNode.parentNode).select('.chart-wrapper');
-        if (chtWrap) {
-          var chtWrapHt = chtWrap.style('height');
-          chtWrapHt = 0.6 * +chtWrapHt.substring(0, chtWrapHt.length - 2);
-          maxRotatedLength = _.min([maxRotatedLength, chtWrapHt]);
-        }
-
         text = selection.selectAll('.tick text');
 
         text.each(function textWidths() {
