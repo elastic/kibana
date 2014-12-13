@@ -51,6 +51,13 @@ define(function (require) {
       ], Boolean);
     }
 
+    /**
+     * Validates whether data is actually present in the data object
+     * used to render the Vis. Throws a no results error if data is not
+     * present.
+     *
+     * @private
+     */
     Handler.prototype._validateData = function () {
       var dataType = this.data.type;
 
