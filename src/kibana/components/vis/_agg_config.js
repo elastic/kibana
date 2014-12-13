@@ -108,9 +108,21 @@ define(function (require) {
     };
 
     AggConfig.prototype.createFilter = function (key) {
-      if (_.isFunction(this.type.createFilter)) {
-        return this.type.createFilter(this, key);
+      if (!_.isFunction(this.type.createFilter)) {
+        throw new TypeError('The "' + this.type.title + '" does not support filtering.');
       }
+
+      var field = this.field();
+      var label = this.fieldDisplayName();
+      if (field && !field.filterable) {
+        var message = '"' + label + '" can not be used for filtering.';
+        if (field.scripted) {
+          message = '"' + label + '" is a scripted field and can not be used for filtering.';
+        }
+        throw new TypeError(message);
+      }
+
+      return this.type.createFilter(this, key);
     };
 
     /**
