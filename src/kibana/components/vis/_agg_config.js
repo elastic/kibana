@@ -109,15 +109,15 @@ define(function (require) {
 
     AggConfig.prototype.createFilter = function (key) {
       if (!_.isFunction(this.type.createFilter)) {
-        throw new TypeError('The "' + this.type.title + '" does not support filtering.');
+        throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
       }
 
       var field = this.field();
       var label = this.fieldDisplayName();
       if (field && !field.filterable) {
-        var message = '"' + label + '" can not be used for filtering.';
+        var message = 'The "' + label + '" field can not be used for filtering.';
         if (field.scripted) {
-          message = '"' + label + '" is a scripted field and can not be used for filtering.';
+          message = 'The "' + label + '" field is scripted and can not be used for filtering.';
         }
         throw new TypeError(message);
       }
