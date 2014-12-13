@@ -108,7 +108,9 @@ define(function (require) {
     };
 
     AggConfig.prototype.createFilter = function (key) {
-      return this.type.createFilter(this, key);
+      if (_.isFunction(this.type.createFilter)) {
+        return this.type.createFilter(this, key);
+      }
     };
 
     /**
