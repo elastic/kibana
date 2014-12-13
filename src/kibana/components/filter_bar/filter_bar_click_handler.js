@@ -27,6 +27,7 @@ define(function (require) {
             .map(function (result) {
               return result.createFilter();
             })
+            .filter(Boolean)
             .value();
 
           if (!filters.length) return;
