@@ -45,7 +45,7 @@ define(function (require) {
       }
 
       this.color = this.labels ? color(this.labels) : undefined;
-      
+
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -67,6 +67,8 @@ define(function (require) {
           type = 'series';
         } else if (obj.slices) {
           type = 'slices';
+        } else if (obj.geoJSON) {
+          type = 'goeJSON';
         }
       });
 
@@ -459,7 +461,7 @@ define(function (require) {
      * series.rows is an array of arrays
      * each row is an array of values
      * last value in row array is bucket count
-     * 
+     *
      * @method mapDataExtents
      * @param series {Array} Array of data objects
      * @returns {Array} min and max values
