@@ -23,10 +23,8 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStats;
 import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
-import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
-import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
 import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.Base64;
@@ -90,7 +88,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     volatile boolean checkedAndUploadedIndexTemplate = false;
 
     final NodeStatsRenderer nodeStatsRenderer;
-    final ShardStatsRenderer shardStatsRenderer;
     final IndexStatsRenderer indexStatsRenderer;
     final IndicesStatsRenderer indicesStatsRenderer;
     final ClusterStatsRenderer clusterStatsRenderer;
@@ -121,7 +118,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         readTimeoutInMillis = (int) settings.getAsTime(SETTINGS_READ_TIMEOUT, new TimeValue(timeoutInMillis * 10)).millis();
 
         nodeStatsRenderer = new NodeStatsRenderer();
-        shardStatsRenderer = new ShardStatsRenderer();
         indexStatsRenderer = new IndexStatsRenderer();
         indicesStatsRenderer = new IndicesStatsRenderer();
         clusterStatsRenderer = new ClusterStatsRenderer();
@@ -177,11 +173,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         exportXContent(nodeStatsRenderer);
     }
 
-    @Override
-    public void exportShardStats(ShardStats[] shardStatsArray) {
-        shardStatsRenderer.reset(shardStatsArray);
-        exportXContent(shardStatsRenderer);
-    }
 
     @Override
     public void exportIndicesStats(IndicesStatsResponse indicesStats) {
@@ -598,43 +589,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             builder.field("cluster_name", clusterName.value());
             addNodeInfo(builder);
             stats.toXContent(builder, xContentParams);
-            builder.endObject();
-        }
-    }
-
-    class ShardStatsRenderer implements MultiXContentRenderer {
-
-        ShardStats[] stats;
-        long collectionTime;
-        ToXContent.Params xContentParams = ToXContent.EMPTY_PARAMS;
-
-        public void reset(ShardStats[] stats) {
-            this.stats = stats;
-            collectionTime = System.currentTimeMillis();
-        }
-
-        @Override
-        public int length() {
-            return stats == null ? 0 : stats.length;
-        }
-
-        @Override
-        public String type(int i) {
-            return "shard_stats";
-        }
-
-        @Override
-        public void render(int index, XContentBuilder builder) throws IOException {
-            builder.startObject();
-            builder.field("@timestamp", defaultDatePrinter.print(collectionTime));
-            builder.field("cluster_name", clusterName.value());
-            ShardRouting shardRouting = stats[index].getShardRouting();
-            builder.field("index", shardRouting.index());
-            builder.field("shard_id", shardRouting.id());
-            builder.field("shard_state", shardRouting.state());
-            builder.field("primary", shardRouting.primary());
-            addNodeInfo(builder);
-            stats[index].getStats().toXContent(builder, xContentParams);
             builder.endObject();
         }
     }

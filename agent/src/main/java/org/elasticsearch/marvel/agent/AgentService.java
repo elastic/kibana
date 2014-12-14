@@ -23,9 +23,7 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
-import org.elasticsearch.action.admin.indices.stats.CommonStatsFlags;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
-import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterChangedEvent;
 import org.elasticsearch.cluster.ClusterName;
@@ -47,7 +45,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
-import org.elasticsearch.index.service.IndexService;
 import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
@@ -70,7 +67,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     public static final String SETTINGS_INTERVAL = "marvel.agent.interval";
     public static final String SETTINGS_INDICES = "marvel.agent.indices";
     public static final String SETTINGS_ENABLED = "marvel.agent.enabled";
-    public static final String SETTINGS_SHARD_STATS_ENABLED = "marvel.agent.shard_stats.enabled";
     public static final String SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL = "marvel.agent.cluster_state.heartbeat";
 
     private final IndicesService indicesService;
@@ -88,7 +84,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     private volatile long samplingInterval;
     private volatile long clusterStateHeartbeatInterval;
     volatile private String[] indicesToExport = Strings.EMPTY_ARRAY;
-    volatile private boolean exportShardStats;
 
     private Collection<Exporter> exporters;
 
@@ -109,7 +104,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         this.samplingInterval = settings.getAsTime(SETTINGS_INTERVAL, TimeValue.timeValueSeconds(10)).millis();
         this.clusterStateHeartbeatInterval = settings.getAsTime(SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL, TimeValue.timeValueMinutes(60)).millis();
         this.indicesToExport = settings.getAsArray(SETTINGS_INDICES, this.indicesToExport, true);
-        this.exportShardStats = settings.getAsBoolean(SETTINGS_SHARD_STATS_ENABLED, false);
         this.client = client;
         this.clusterName = clusterName.value();
 
@@ -127,7 +121,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         nodeSettingsService.addListener(this);
         dynamicSettings.addDynamicSetting(SETTINGS_INTERVAL);
         dynamicSettings.addDynamicSetting(SETTINGS_INDICES + ".*"); // array settings
-        dynamicSettings.addDynamicSetting(SETTINGS_SHARD_STATS_ENABLED);
     }
 
     protected void applyIntervalSettings() {
@@ -212,12 +205,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
             logger.info("sampling indices updated to [{}]", Strings.arrayToCommaDelimitedString(indices));
             indicesToExport = indices;
         }
-
-        Boolean shardsExport = settings.getAsBoolean(SETTINGS_SHARD_STATS_ENABLED, null);
-        if (shardsExport != null) {
-            logger.info("updating " + SETTINGS_SHARD_STATS_ENABLED + " to [" + shardsExport + "]");
-            exportShardStats = shardsExport;
-        }
     }
 
     class ExportingWorker implements Runnable {
@@ -237,9 +224,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
 
                     // do the actual export..., go over the actual exporters list and...
                     exportNodeStats();
-                    if (exportShardStats) {
-                        exportShardStats();
-                    }
                     exportEvents();
 
                     ClusterState clusterState = clusterService.state();
@@ -306,36 +290,6 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
             for (Exporter e : exporters) {
                 try {
                     e.exportEvents(events);
-                } catch (Throwable t) {
-                    logger.error("exporter [{}] has thrown an exception:", t, e.name());
-                }
-            }
-        }
-
-        private void exportShardStats() {
-            logger.trace("Collecting shard stats");
-            String[] indices = clusterService.state().metaData().concreteIndices(indicesToExport);
-
-            List<ShardStats> shardStats = newArrayList();
-            for (String index : indices) {
-                IndexService indexService = indicesService.indexService(index);
-                if (indexService == null) {
-                    continue; // something changed, move along
-                }
-                for (int shardId : indexService.shardIds()) {
-                    IndexShard indexShard = indexService.shard(shardId);
-                    if (indexShard == null || indexShard.state() != IndexShardState.STARTED) {
-                        continue;
-                    }
-                    shardStats.add(new ShardStats(indexShard, CommonStatsFlags.ALL));
-                }
-            }
-            ShardStats[] shardStatsArray = shardStats.toArray(new ShardStats[shardStats.size()]);
-
-            logger.trace("Exporting shards stats");
-            for (Exporter e : exporters) {
-                try {
-                    e.exportShardStats(shardStatsArray);
                 } catch (Throwable t) {
                     logger.error("exporter [{}] has thrown an exception:", t, e.name());
                 }

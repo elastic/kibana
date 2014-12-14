@@ -57,12 +57,6 @@ Sets the connection timeout for sending data. Defaults to `6s`.
 +
 This setting is update-able via the Cluster Update Settings API.
 
-`marvel.agent.shard_stats.enabled`::
-
-Enables or disable exporting of shard level statistics. Defaults to `false`.
-+
-This setting is update-able via the Cluster Update Settings API.
-
 ==== added[1.3.0] SSL settings when exporting using HTTPS
 
 `marvel.agent.exporter.es.ssl.truststore.path`::

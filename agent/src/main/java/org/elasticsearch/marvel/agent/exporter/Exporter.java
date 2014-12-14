@@ -20,7 +20,6 @@ package org.elasticsearch.marvel.agent.exporter;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
-import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.marvel.agent.event.Event;
 
@@ -29,8 +28,6 @@ public interface Exporter<T> extends LifecycleComponent<T> {
     String name();
 
     void exportNodeStats(NodeStats nodeStats);
-
-    void exportShardStats(ShardStats[] shardStatsArray);
 
     void exportIndicesStats(IndicesStatsResponse indicesStats);
 
