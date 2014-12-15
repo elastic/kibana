@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  return function mapFilterProvider(Private) {
+  return function mapFilterProvider(Promise, Private) {
 
     var generateMappingChain = Private(require('./generateMappingChain'));
 
@@ -12,11 +12,33 @@ define(function (require) {
     // reject it with the original filter. We had to go down the promise interface
     // because mapTerms and mapRange need access to the indexPatterns to format
     // the values and that's only available through the field formatters.
-    var exists      = Private(require('./mapExists'));
-    var missing     = Private(require('./mapMissing'));
-    var range       = Private(require('./mapRange'));
-    var terms       = Private(require('./mapTerms'));
-    var queryString = Private(require('./mapQueryString'));
+
+    // The mappers to apply. Each mapper will either return
+    // a result object with a key and value attribute or
+    // undefined. If undefined is return then the next
+    // mapper will get the oppertunity to map the filter.
+    // To create a new mapper you just need to create a function
+    // that either handles the mapping opperation or not
+    // and add it here.
+    var mappers = [
+      Private(require('./mapTerms')),
+      Private(require('./mapRange')),
+      Private(require('./mapExists')),
+      Private(require('./mapMissing')),
+      Private(require('./mapQueryString')),
+      Private(require('./mapDefault')) // ProTip: last one to get applied
+    ];
+
+    var noop = function () {
+      return Promise.reject(new Error('No mappings have been found for filter.'));
+    };
+
+    // Create a chain of responsibility by reducing all the
+    // mappers down into one function.
+    var mapFn = _.reduceRight(mappers, function (memo, map) {
+      var filterChainFn = generateMappingChain(map);
+      return filterChainFn(memo);
+    }, noop);
 
     /**
      * Map the filter into an object with the key and value exposed so it's
@@ -25,29 +47,6 @@ define(function (require) {
      * @returns {Promise}
      */
     return function (filter) {
-
-      // The mappers to apply. Each mapper will either return
-      // a result object with a key and value attribute or
-      // undefined. If undefined is return then the next
-      // mapper will get the oppertunity to map the filter.
-      // To create a new mapper you just need to create a function
-      // that either handles the mapping opperation or not
-      // and add it here.
-      var mappers = [
-        terms,
-        queryString,
-        exists,
-        missing,
-        range
-      ];
-
-      // Create a chain of responsibility by reducing all the
-      // mappers down into one function.
-      var mapFn = _.reduce(mappers, function (memo, map) {
-        var filterChainFn = generateMappingChain(map);
-        return filterChainFn(memo);
-      });
-
       // Apply the mapping function
       return mapFn(filter).then(function (result) {
         filter.meta = filter.meta || {};

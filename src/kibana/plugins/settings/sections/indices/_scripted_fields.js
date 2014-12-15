@@ -3,7 +3,7 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('scriptedFields', function ($compile, kbnUrl, Notifier) {
+  .directive('scriptedFields', function (kbnUrl, Notifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
 
@@ -43,7 +43,8 @@ define(function (require) {
             rowScopes.push(rowScope);
 
             columns.push({
-              markup: $compile(controlsHtml)(rowScope)
+              markup: controlsHtml,
+              scope: rowScope
             });
 
             return columns;

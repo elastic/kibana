@@ -53,8 +53,8 @@ define(function (require) {
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
-    var filterBarClickHandler = require('components/filter_bar/filter_bar_click_handler');
     var brushEvent = Private(require('utils/brush_event'));
+    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -79,8 +79,8 @@ define(function (require) {
     var $state = (function initState() {
       var savedVisState = vis.getState();
       var stateDefaults = {
-        query: searchSource.get('query') || {query_string: {query: '*'}},
-        filters: [],
+        query: searchSource.getOwn('query') || {query_string: {query: '*'}},
+        filters: searchSource.getOwn('filter') || [],
         vis: savedVisState
       };
 
@@ -116,15 +116,16 @@ define(function (require) {
       if ($scope.linked) {
         // possibly left over state from unsaved unlinking
         delete $state.query;
+        $state.filters = searchSource.getOwn('filter');
       } else {
         $state.query = $state.query || searchSource.get('query');
         courier.setRootSearchSource(searchSource);
         searchSource.set('query', $state.query);
         searchSource.set('filter', $state.filters);
-        vis.listeners.click = filterBarClickHandler($state, vis);
-        vis.listeners.brush = brushEvent;
-        editableVis.listeners.brush = vis.listeners.brush;
       }
+
+      editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
+      editableVis.listeners.brush = vis.listeners.brush = brushEvent;
 
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -135,12 +136,14 @@ define(function (require) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
       }, true);
 
+      $state.replace();
+
       $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
         timefilter.enabled = !!timeField;
       });
 
-      $scope.$watch('state.filters', function () {
-        $scope.fetch();
+      $scope.$watch('state.filters', function (newFilters, oldFilters) {
+        if (newFilters !== oldFilters) $scope.fetch();
       });
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
@@ -158,7 +161,7 @@ define(function (require) {
           searchSource.set('query', null);
         }
 
-        if ($state.filters.length) {
+        if ($state.filters && $state.filters.length) {
           searchSource.set('filter', $state.filters);
         } else {
           searchSource.set('filter', []);
@@ -181,10 +184,8 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      if (!$scope.linked) {
-        searchSource.set('query', $state.query);
-        searchSource.set('filter', $state.filters);
-      }
+      searchSource.set('filter', $state.filters);
+      if (!$scope.linked) searchSource.set('query', $state.query);
       searchSource.fetch();
     };
 
@@ -223,17 +224,17 @@ define(function (require) {
 
       // display unlinking for 2 seconds, unless it is double clicked
       $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
+
       delete savedVis.savedSearchId;
-      var q = searchSource.get('query');
-      $state.query = q;
+      parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
 
-      var searchState = parent.toJSON();
-
-      // copy over all state except "aggs"
-      _(searchState).omit('aggs').forOwn(function (val, key) {
+      // copy over all state except "aggs" and filter, which is already copied
+      _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
         searchSource.set(key, val);
       });
 
+      $state.query = searchSource.get('query');
+      $state.filters = searchSource.get('filter');
       searchSource.inherits(parentsParent);
     };
 

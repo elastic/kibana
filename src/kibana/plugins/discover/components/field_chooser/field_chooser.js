@@ -143,6 +143,7 @@ define(function (require) {
             indexPattern: $scope.state.index,
             type: 'histogram',
             _a: rison.encode({
+              filters: $scope.state.filters || [],
               query: $scope.state.query || undefined,
               vis: {
                 aggs: [

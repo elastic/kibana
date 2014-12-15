@@ -9,7 +9,7 @@ define(function (require) {
 
     return function (columns) {
       return function (event) {
-        var datum = event.point;
+        var datum = event.datum;
         var parent;
         var sum;
 

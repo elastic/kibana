@@ -30,13 +30,6 @@ define(function (require) {
           return formatter.convert(value);
         });
         $scope.fields = _.keys($scope.flattened).sort();
-        $scope.filterableTypes = ['string', 'number', 'date', 'ip'];
-
-
-        $scope.showFilters = function (mapping) {
-          if (!$scope.filter || !mapping || !mapping.indexed) return false;
-          return _.contains($scope.filterableTypes, mapping.type);
-        };
 
         $scope.showArrayInObjectsWarning = function (row, field) {
           var value = $scope.flattened[field];

@@ -5,7 +5,6 @@ define(function (require) {
     var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
 
-
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;
 

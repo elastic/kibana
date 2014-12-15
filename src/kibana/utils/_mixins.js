@@ -5,12 +5,12 @@ define(function (require) {
    * use:
    * var _ = require('lodash');
    *
-   * require.js config points the "lodash" id to
+   * require.js config points the 'lodash' id to
    * this module, which provides a modified version
    * of lodash.
    */
   var _ = require('lodash_src');
-
+  _.mixin(require('lodash-deep'));
   _.mixin({
     inherits: function (Sub, Super) {
       Sub.prototype = _.create(Super.prototype, { 'constructor': Super });
