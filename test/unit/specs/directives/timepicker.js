@@ -32,15 +32,27 @@ define(function (require) {
       $parentScope = $rootScope;
 
       // Add some parameters to it
-      $parentScope.time = {
-        from: moment().subtract(15, 'minutes'),
-        to: moment(),
-        mode: undefined // Any isolate scope var using '=' must be passed, even if undefined
+      var timefilter = {
+        time : {
+          from: moment().subtract(15, 'minutes'),
+          to: moment(),
+          mode: undefined
+        },
+        refreshInterval : {
+          value : 0,
+          display : 'Off'
+        }
       };
+      $parentScope.timefilter = timefilter;
 
       // Create the element
       $elem = angular.element(
-        '<kbn-timepicker from="time.from" to="time.to" mode="time.mode" interval="time.refreshInterval"></kbn-timepicker>'
+        '<kbn-timepicker' +
+        ' from="timefilter.time.from"' +
+        ' to="timefilter.time.to"' +
+        ' mode="timefilter.time.mode"' +
+        ' interval="timefilter.refreshInterval">' +
+        '</kbn-timepicker>'
       );
 
       // And compile it
@@ -70,9 +82,13 @@ define(function (require) {
     });
 
     describe('refresh interval', function () {
-
+      var $courier;
       beforeEach(function () {
         init();
+        // Inject courier object
+        inject(function (courier) {
+          $courier = courier;
+        });
       });
 
       it('should contain a list of options', function (done) {
@@ -85,7 +101,22 @@ define(function (require) {
         expect($scope.interval).to.be('interval');
         done();
       });
-      
+
+      it('should set the interval on the courier', function (done) {
+        // Change refresh interval and digest
+        $scope.setRefreshInterval({ value : 1000});
+        $elem.scope().$digest();
+        expect($courier.searchLooper.loopInterval()).to.be(1000);
+        done();
+      });
+
+      it('should default the interval on the courier with incorrect values', function (done) {
+        // Change refresh interval and digest
+        $scope.setRefreshInterval('undefined');
+        $elem.scope().$digest();
+        expect($courier.searchLooper.loopInterval()).to.be(0);
+        done();
+      });
     });
 
     describe('mode setting', function () {

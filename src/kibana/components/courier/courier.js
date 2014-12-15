@@ -7,7 +7,7 @@ define(function (require) {
   require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
-  .service('courier', function ($rootScope, Private, Promise, indexPatterns, timefilter) {
+  .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
     function Courier() {
       var self = this;
 
@@ -117,9 +117,14 @@ define(function (require) {
       };
 
       // Listen for refreshInterval changes
-      $rootScope.$watch('timefilter.refreshInterval', function () {
-        if (!_.isUndefined(timefilter.refreshInterval)) {
-          self.fetchInterval(timefilter.refreshInterval.value);
+      var $parentScope = $rootScope;
+      $parentScope.$watch('timefilter.refreshInterval', function () {
+        if (!_.isUndefined($parentScope.timefilter)
+          && !_.isUndefined($parentScope.timefilter.refreshInterval)
+          && _.isNumber($parentScope.timefilter.refreshInterval.value)) {
+          self.fetchInterval($parentScope.timefilter.refreshInterval.value);
+        } else {
+          self.fetchInterval(0);
         }
       });
     }

@@ -98,6 +98,15 @@ define(function (require) {
       };
 
       /**
+       * Returns the current loop interval
+       *
+       * @return {number}
+       */
+      looper.loopInterval = function () {
+        return _ms;
+      };
+
+      /**
        * Wraps _fn so that _fn can be changed
        * without rescheduling and schedules
        * the next itteration
