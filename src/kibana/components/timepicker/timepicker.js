@@ -9,14 +9,14 @@ define(function (require) {
   require('components/timepicker/quick_ranges');
   require('components/timepicker/time_units');
 
-
   module.directive('kbnTimepicker', function (quickRanges, timeUnits) {
     return {
       restrict: 'E',
       scope: {
         from: '=',
         to: '=',
-        mode: '='
+        mode: '=',
+        interval: '='
       },
       template: html,
       controller: function ($scope) {
@@ -32,6 +32,20 @@ define(function (require) {
         $scope.quickLists = _.map(_.uniq(_.pluck(quickRanges, 'section')), function (section) {
           return _.filter(quickRanges, {section: section});
         });
+
+        $scope.refreshIntervals = [
+          { value : 0, display: 'Off'},
+          { value : 5000, display: '5 seconds'},
+          { value : 10000, display: '10 seconds'},
+          { value : 30000, display: '30 seconds'},
+          { value : 60000, display: '1 minute'},
+          { value : 300000, display: '5 minutes'},
+          { value : 900000, display: '15 minutes'},
+          { value : 1800000, display: '30 minutes'},
+          { value : 3600000, display: '1 hour'},
+          { value : 7200000, display: '2 hour'},
+          { value : 86400000, display: '1 day'}
+        ];
 
         $scope.relative = {
           count: 1,
@@ -129,6 +143,10 @@ define(function (require) {
         $scope.applyAbsolute = function () {
           $scope.from = moment($scope.absolute.from);
           $scope.to = moment($scope.absolute.to);
+        };
+
+        $scope.setRefreshInterval = function (interval) {
+          $scope.interval = interval;
         };
 
         init();

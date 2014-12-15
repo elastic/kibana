@@ -1,6 +1,7 @@
 define(function (require) {
   var errors = require('errors');
-
+  var _ = require('lodash');
+  
   require('services/es');
   require('services/promises');
   require('components/index_patterns/index_patterns');
@@ -114,6 +115,18 @@ define(function (require) {
           throw new Error('Aborting all pending requests failed.');
         }
       };
+
+      // Listen for refreshInterval changes
+      var $parentScope = $rootScope;
+      $parentScope.$watch('timefilter.refreshInterval', function () {
+        if (!_.isUndefined($parentScope.timefilter)
+          && !_.isUndefined($parentScope.timefilter.refreshInterval)
+          && _.isNumber($parentScope.timefilter.refreshInterval.value)) {
+          self.fetchInterval($parentScope.timefilter.refreshInterval.value);
+        } else {
+          self.fetchInterval(0);
+        }
+      });
     }
 
     return new Courier();

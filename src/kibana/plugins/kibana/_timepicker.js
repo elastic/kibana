@@ -4,6 +4,7 @@ define(function (require) {
 
     $scope.notifList = notify._notifs;
     $scope.timefilter = timefilter;
+    $scope.timefilter.refreshInterval = { value : 0, display: 'Off'};
 
     $scope.$listen(timefilter, 'update', function (newVal, oldVal) {
       globalState.time = _.clone(timefilter.time);
