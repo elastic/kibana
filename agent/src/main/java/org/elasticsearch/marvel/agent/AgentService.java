@@ -48,7 +48,6 @@ import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
-import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.marvel.agent.event.*;
 import org.elasticsearch.marvel.agent.exporter.Exporter;
 import org.elasticsearch.node.service.NodeService;
@@ -69,7 +68,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     public static final String SETTINGS_ENABLED = "marvel.agent.enabled";
     public static final String SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL = "marvel.agent.cluster_state.heartbeat";
 
-    private final IndicesService indicesService;
+    private final IndicesLifecycle indicesLifecycle;
     private final NodeService nodeService;
     private final ClusterService clusterService;
     private final Client client;
@@ -91,14 +90,14 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     private final BlockingQueue<Event> pendingEventsQueue;
 
     @Inject
-    public AgentService(Settings settings, IndicesService indicesService,
+    public AgentService(Settings settings, IndicesLifecycle indicesLifecycle,
                         NodeService nodeService, ClusterService clusterService,
                         Client client, ClusterName clusterName,
                         NodeSettingsService nodeSettingsService,
                         @ClusterDynamicSettings DynamicSettings dynamicSettings,
                         Set<Exporter> exporters) {
         super(settings);
-        this.indicesService = indicesService;
+        this.indicesLifecycle = indicesLifecycle;
         this.clusterService = clusterService;
         this.nodeService = nodeService;
         this.samplingInterval = settings.getAsTime(SETTINGS_INTERVAL, TimeValue.timeValueSeconds(10)).millis();
@@ -152,7 +151,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         for (Exporter e : exporters)
             e.start();
 
-        indicesService.indicesLifecycle().addListener(indicesLifeCycleListener);
+        indicesLifecycle.addListener(indicesLifeCycleListener);
         clusterService.addLast(clusterStateEventListener);
 
         applyIntervalSettings();
@@ -176,7 +175,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         for (Exporter e : exporters)
             e.stop();
 
-        indicesService.indicesLifecycle().removeListener(indicesLifeCycleListener);
+        indicesLifecycle.removeListener(indicesLifeCycleListener);
         clusterService.remove(clusterStateEventListener);
     }
 
