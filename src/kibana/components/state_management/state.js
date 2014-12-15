@@ -81,10 +81,10 @@ define(function (require) {
      * Saves the state to the url
      * @returns {void}
      */
-    State.prototype.save = function () {
+    State.prototype.save = function (replace) {
       var stash = this._readFromURL();
       var state = this.toObject();
-      var replace = false;
+      replace = replace || false;
 
       if (!stash) {
         replace = true;
@@ -107,6 +107,14 @@ define(function (require) {
       } else {
         $location.search(search);
       }
+    };
+
+    /**
+     * Calls save with a forced replace
+     * @returns {void}
+     */
+    State.prototype.replace = function () {
+      this.save(true);
     };
 
     /**

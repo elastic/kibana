@@ -4,7 +4,7 @@ define(function (require) {
   return function (existing, filters) {
     filters = _.filter(filters, function (item) {
       return !_.find(existing, function (existingFilter) {
-        return _.isEqual(_.omit(existingFilter, excludedAttributes), item);
+        return _.isEqual(_.omit(existingFilter, excludedAttributes), _.omit(item, excludedAttributes));
       });
     });
     return filters;

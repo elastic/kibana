@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var d3 = require('d3');
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
@@ -48,10 +49,7 @@ define(function (require) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
 
-          vis.on('brush', function (e) {
-            console.log(e);
-          });
-
+          vis.on('brush', _.noop);
           vis.render(data);
         });
       });
@@ -93,8 +91,10 @@ define(function (require) {
             numOfValues = chart.chartData.series[0].values.length;
             product = numOfSeries * numOfValues;
 
-            // Need to substract 4 rects from total since adding brushing
-            expect($(chart.chartEl).find('rect').length - 4).to.be(product);
+            // remove brushing el before counting rects
+            $(chart.chartEl).find('g.brush').remove();
+
+            expect($(chart.chartEl).find('rect')).to.have.length(product);
           });
         });
       });
@@ -110,53 +110,44 @@ define(function (require) {
         });
       });
 
-      describe('addStackedBars method', function () {});
-
-      describe('addGroupedBars method', function () {});
-
       describe('addBarEvents method', function () {
-        var rect;
-        var d3selectedRect;
-        var brush;
-        var onClick;
-        var onMouseOver;
-        var onBrush;
+        function checkChart(chart) {
+          var rect = $(chart.chartEl).find('rect')[4];
+          var d3selectedRect = d3.select(rect)[0][0];
 
-        beforeEach(function () {
-          inject(function (d3) {
-            vis.handler.charts.forEach(function (chart) {
-              rect = $(chart.chartEl).find('rect')[4];
-              d3selectedRect = d3.select(rect)[0][0];
-              brush = d3.select('.brush')[0][0];
+          // check for existance of stuff and things
+          return {
+            click: !!d3selectedRect.__onclick,
+            mouseOver: !!d3selectedRect.__onmouseover,
+            // D3 brushing requires that a g element is appended that
+            // listens for mousedown events. This g element includes
+            // listeners, however, I was not able to test for the listener
+            // function being present. I will need to update this test
+            // in the future.
+            brush: !!d3.select('.brush')[0][0]
+          };
+        }
 
-              // d3 instance of click and hover
-              onBrush = (!!brush);
-              onClick = (!!d3selectedRect.__onclick);
-              onMouseOver = (!!d3selectedRect.__onmouseover);
-            });
-          });
-        });
-
-        // D3 brushing requires that a g element is appended that
-        // listens for mousedown events. This g element includes
-        // listeners, however, I was not able to test for the listener
-        // function being present. I will need to update this test
-        // in the future.
-        it('should attach a brush g element', function () {
-          vis.handler.charts.forEach(function () {
-            expect(onBrush).to.be(true);
+        it('should attach the brush if data is a set of ordered dates', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var has = checkChart(chart);
+            var ordered = vis.handler.data.get('ordered');
+            var date = Boolean(ordered && ordered.date);
+            expect(has.brush).to.be(date);
           });
         });
 
         it('should attach a click event', function () {
-          vis.handler.charts.forEach(function () {
-            expect(onClick).to.be(true);
+          vis.handler.charts.forEach(function (chart) {
+            var has = checkChart(chart);
+            expect(has.click).to.be(true);
           });
         });
 
         it('should attach a hover event', function () {
-          vis.handler.charts.forEach(function () {
-            expect(onMouseOver).to.be(true);
+          vis.handler.charts.forEach(function (chart) {
+            var has = checkChart(chart);
+            expect(has.mouseOver).to.be(true);
           });
         });
       });

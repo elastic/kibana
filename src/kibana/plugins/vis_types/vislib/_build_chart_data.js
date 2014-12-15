@@ -26,7 +26,13 @@ define(function (require) {
       var tables = tableGroup.tables;
       var firstChild = tables[0];
       if (firstChild instanceof Table) {
-        return convertTable(vis, firstChild);
+
+        var chart = convertTable(vis, firstChild);
+        // if chart is within a split, assign group title to its label
+        if (tableGroup.$parent) {
+          chart.label = tableGroup.title;
+        }
+        return chart;
       }
 
       var out = {};

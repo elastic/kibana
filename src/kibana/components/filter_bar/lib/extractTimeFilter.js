@@ -1,10 +1,12 @@
 define(function (require) {
   var _ = require('lodash');
-  return function extractTimeFilterProvider(courier) {
-    return function (filters) {
+  return function extractTimeFilterProvider(courier, Promise) {
+    return Promise.method(function (filters) {
       // Assume all the index patterns are the same since they will be added
       // from the same visualization.
-      var id = filters[0].meta.index;
+      var id = _.deepGet(filters, '[0].meta.index');
+      if (id == null) return;
+
       return courier.indexPatterns.get(id).then(function (indexPattern) {
         var filter = _.find(filters, function (obj) {
           var key = _.keys(obj.range)[0];
@@ -14,6 +16,6 @@ define(function (require) {
           return filter;
         }
       });
-    };
+    });
   };
 });

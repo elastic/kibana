@@ -14,7 +14,9 @@ define(function (require) {
     var defaultPerPage = 10;
 
     var makeData = function (colCount, rowCount) {
-      var cols = faker.Lorem.words(colCount).map(function (word) {
+      // faker.Lorem.words can generate the same word multiple times
+      // so, generate 3x the request number, use uniq, and trim down to the requested total
+      var cols = _.uniq(faker.Lorem.words(colCount * 3)).slice(0, colCount).map(function (word) {
         return { title: word };
       });
 
@@ -105,10 +107,10 @@ define(function (require) {
 
       beforeEach(function () {
         data = makeData(3, 0);
-        data.rows.push(['bbbb', 'bbbb', 'bbbb']);
-        data.rows.push(['cccc', 'cccc', 'cccc']);
-        data.rows.push(['zzzz', 'zzzz', 'zzzz']);
-        data.rows.push(['aaaa', 'aaaa', 'aaaa']);
+        data.rows.push(['bbbb', 'aaaa', 'zzzz']);
+        data.rows.push(['cccc', 'cccc', 'aaaa']);
+        data.rows.push(['zzzz', 'bbbb', 'bbbb']);
+        data.rows.push(['aaaa', 'zzzz', 'cccc']);
 
         lastRowIndex = data.rows.length - 1;
         renderTable(data.columns, data.rows);
@@ -129,16 +131,18 @@ define(function (require) {
         // sortColumn
         paginatedTable.sortColumn(data.columns[0]);
         $scope.$digest();
+
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be('aaaa');
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('zzzz');
       });
 
-      it('should sort desciending on second invocation', function () {
+      it('should sort descending on second invocation', function () {
         // sortColumn
         paginatedTable.sortColumn(data.columns[0]);
         paginatedTable.sortColumn(data.columns[0]);
         $scope.$digest();
+
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be('zzzz');
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
@@ -150,9 +154,23 @@ define(function (require) {
         paginatedTable.sortColumn(data.columns[0]);
         paginatedTable.sortColumn(data.columns[0]);
         $scope.$digest();
+
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be(data.rows[0][0]);
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
+      });
+
+      it('should sort new column ascending', function () {
+        // sort by first column
+        paginatedTable.sortColumn(data.columns[0]);
+        $scope.$digest();
+        // sort by second column
+        paginatedTable.sortColumn(data.columns[1]);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+        expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).to.be('zzzz');
       });
     });
 
