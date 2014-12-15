@@ -224,20 +224,17 @@ define(function (require) {
 
       // display unlinking for 2 seconds, unless it is double clicked
       $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
-      delete savedVis.savedSearchId;
 
-      $state.query = searchSource.get('query');
-      $state.filters = _.union(searchSource.getOwn('filter'), parent.getOwn('filter'));
+      delete savedVis.savedSearchId;
+      parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
 
       // copy over all state except "aggs" and filter, which is already copied
       _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
-        if (key === 'filter') {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set(key, val);
-        }
+        searchSource.set(key, val);
       });
 
+      $state.query = searchSource.get('query');
+      $state.filters = searchSource.get('filter');
       searchSource.inherits(parentsParent);
     };
 
