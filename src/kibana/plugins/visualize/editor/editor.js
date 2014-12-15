@@ -116,6 +116,7 @@ define(function (require) {
       if ($scope.linked) {
         // possibly left over state from unsaved unlinking
         delete $state.query;
+        $state.filters = searchSource.getOwn('filter');
       } else {
         $state.query = $state.query || searchSource.get('query');
         courier.setRootSearchSource(searchSource);
@@ -224,14 +225,17 @@ define(function (require) {
       // display unlinking for 2 seconds, unless it is double clicked
       $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
       delete savedVis.savedSearchId;
-      var q = searchSource.get('query');
-      $state.query = q;
 
-      var searchState = parent.toJSON();
+      $state.query = searchSource.get('query');
+      $state.filters = _.union(searchSource.getOwn('filter'), parent.getOwn('filter'));
 
-      // copy over all state except "aggs"
-      _(searchState).omit('aggs').forOwn(function (val, key) {
-        searchSource.set(key, val);
+      // copy over all state except "aggs" and filter, which is already copied
+      _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
+        if (key === 'filter') {
+          searchSource.set('filter', $state.filters);
+        } else {
+          searchSource.set(key, val);
+        }
       });
 
       searchSource.inherits(parentsParent);
