@@ -16,7 +16,7 @@
       <select
         class="form-control"
         ng-model="indexPattern.selection"
-        ng-options="pattern as pattern for pattern in indexPattern.list">
+        ng-options="pattern as pattern for pattern in indexPattern.list | orderBy:'toString()'">
       </select>
     </div>
   </li>
