@@ -1,6 +1,7 @@
 define(function (require) {
   var errors = require('errors');
-
+  var _ = require('lodash');
+  
   require('services/es');
   require('services/promises');
   require('components/index_patterns/index_patterns');
@@ -114,6 +115,17 @@ define(function (require) {
           throw new Error('Aborting all pending requests failed.');
         }
       };
+
+      // Listen for refreshInterval changes
+      var $parentScope = $rootScope;
+      $parentScope.$watch('timefilter.refreshInterval', function () {
+        var refreshValue = _.deepGet($parentScope, 'timefilter.refreshInterval.value');
+        if (_.isNumber(refreshValue)) {
+          self.fetchInterval(refreshValue);
+        } else {
+          self.fetchInterval(0);
+        }
+      });
     }
 
     return new Courier();
