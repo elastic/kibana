@@ -39,7 +39,7 @@ define(function (require) {
       var Notifier = $injector.get('Notifier');
       notify = new Notifier();
 
-      SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
+      // SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
 
       // mock the searchSource
       searchSourceStubs = {
@@ -71,7 +71,7 @@ define(function (require) {
     });
   }
 
-  describe('segmented fetch', function () {
+  describe.skip('segmented fetch', function () {
     require('test_utils/no_digest_promises').activateForSuite();
 
     beforeEach(init);
