@@ -155,7 +155,7 @@ define(function (require) {
         }
 
         // we use state to track query, must write before we fetch
-        if ($state.query) {
+        if ($state.query && !$scope.linked) {
           searchSource.set('query', $state.query);
         } else {
           searchSource.set('query', null);
