@@ -1,6 +1,63 @@
 [[change_list]]
 == Change list
 
+
+=== 1.3.0
+
+- Agent:
+  * Added:    support for shipping over https.
+  * Removed:  support for optional shard level stats due to an incompatible change in ES 1.4.
+  * Fixed:    an issue causing a tribe node (ES 1.4.0) not to initialize when Marvel is installed.
+  * Improved: resiliency and error checking around the marvel index template (both checking for it and adding it).
+  * Improved: logging upon error, supressing repreated logs.
+  * Added:    Automcally detect the local node's port when using not default Marvel settings (previously was always 9200)
+  * Improved: Change _bulk export command to set the index name in the url param. This is usefull when `rest.action.multi.allow_explicit_index` is set to false.
+
+- Monitoring UI
+  * Added: charts for new circuit breakers introduce with ES 1.4.0
+  * Added: a chart to plot circuit break limit.
+  * Added: a charts for query cache.
+  * Added: charts for index throttling.
+  * Added: charts to expose memory usage of the index writer and version map.
+  * Fixed: Network Transport Bytes Received chart actually shows bytes sent
+  * Fixed: Node Stats dashboard missed some thread pools.
+
+- Sense:
+  * Added: a settings to allow disabling mappings and/or indices autocomplete. This is usefull for extremly large deployments where parsing by the browser is unrealistic.
+  * Added: Custer Reroute API.
+  * Added: Get Field Mappings API,
+  * Fixed: Url auto complete failed with completing fully qualified urls (i.e. with protocol and host).
+  * Added: Query Cache parmaters to the Search API.
+  * Added: Analyze API.
+  * Added: Validate Query API.
+  * Fixed: include_in_parent and include_in_root is missing for nested type mapping.
+  * Added: Put Percolator API.
+  * Fixed: Range filter template to use gt, gte, lt and lte.
+  * Added: cluster.routing.allocation.* settings
+  * Added: weight param to the Function Score query.
+  * Added: Flush API.
+  * Added: show_term_doc_count_error parameter to the Terms Aggregation.
+  * Added: Update API
+  * Added: _geo_distance as a sort option.
+  * Added: Updated the Significant Terms aggregation to 1.4.0 features.
+  * Added: metadata fields to the Mapping API.
+  * Added: Get Index API.
+  * Added: Scripted Metric Aggregation.
+  * Added: simple_query_string query.
+  * Added: Updated the More Like This query to 1.4.0 features.
+  * Added: min_childeren, max_children options to the has_child query and dilter.
+  * Added: Updated execution hint options in terms and significant terms aggs.
+  * Added: transform section of Mappings API.
+  * Added: indexed scripts and templates.
+  * Added: Geo Bounds aggregation.
+  * Added: Top Hits aggregation.
+  * Added: collect_mode option the Terms aggregation.
+  * Added: Percentiles Rank aggregation.
+  * Added: Disk Threshold Allocator settings.
+  * Fixed: Exists filter auto complete.
+  * Fixed: Snapshot and Restore API failed to autocomplete repository settings.
+
+
 === 1.2.1
   - Fix a cluster state data shipping for cluster states larger than 16K (in `SMILE` format and without meta data).
 
