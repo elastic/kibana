@@ -1,8 +1,9 @@
 define(function (require) {
-  return function FetchTheseProvider(Promise, es, Notifier, sessionId, configFile) {
+  return function FetchTheseProvider(Private, Promise, es, Notifier, sessionId, configFile) {
     var _ = require('lodash');
     var moment = require('moment');
     var errors = require('errors');
+    var pendingRequests = Private(require('components/courier/_pending_requests'));
 
     var notify = new Notifier({
       location: 'Courier Fetch'
@@ -20,7 +21,17 @@ define(function (require) {
       });
 
       return Promise.all(sets.map(function (set) {
-        return each(set[1], set[0]);
+        (function fetch(requests, strategy) {
+          return each(requests, strategy)
+          .then(function (result) {
+            if (_.isFunction(strategy.getIncompleteRequests)) {
+              var incomplete = strategy.getIncompleteRequests(pendingRequests);
+              if (incomplete.length) {
+                return fetch(incomplete, strategy);
+              }
+            }
+          });
+        }(set[1], set[0]));
       }));
     }
 

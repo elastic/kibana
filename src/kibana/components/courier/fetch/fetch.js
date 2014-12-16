@@ -30,6 +30,12 @@ define(function (require) {
      */
     this.searches = _.partial(fetchPending, strategies.search);
 
+    /**
+     * Fetch all pending search requests
+     * @async
+     */
+    this.segmentedSearches = _.partial(fetchPending, strategies.segmented);
+
     function fetchASource(source, strategy) {
       strategy = strategy || strategies[source._getType()];
       var defer = Promise.defer();
@@ -66,32 +72,6 @@ define(function (require) {
      */
     this.these = function (reqs) {
       return fetchThese(reqs, new RequestErrorHandler());
-    };
-
-    /**
-     * Fetch all segmented searches, refetch if needed
-     * @async
-     */
-    this.segmentedSearches = function fetchSegmentedSearches() {
-      var strategy = strategies.segmented;
-      var requests = strategy.getPendingRequests(pendingRequests);
-
-      if (!requests.length) {
-        return Promise.resolve();
-      }
-
-      // fetch the current requests, then check for incomplete requests
-      // and refetch until those are complete
-      return (function fetch(requests) {
-        return fetchThese(requests, new RequestErrorHandler())
-        .then(function () {
-          var incomplete = strategy.getIncompleteRequests(pendingRequests);
-
-          if (_.size(incomplete)) {
-            return fetch(incomplete);
-          }
-        });
-      }(requests));
     };
   };
 });
