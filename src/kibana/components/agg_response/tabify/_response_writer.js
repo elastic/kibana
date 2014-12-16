@@ -45,6 +45,7 @@ define(function (require) {
       this.aggStack = _.pluck(this.columns, 'aggConfig');
 
       this.root = new TableGroup();
+      this.acrStack = [];
       this.splitStack = [this.root];
     }
 
@@ -66,9 +67,6 @@ define(function (require) {
         table.aggConfig = agg;
         table.key = key;
         table.title = agg.makeLabel() + ': ' + (table.fieldFormatter()(key));
-        if (this.asAggConfigResults) {
-          table.aggConfigResult = new AggConfigResult(agg, parent.aggConfigResult, key, key);
-        }
       }
 
       // link the parent and child
@@ -99,16 +97,23 @@ define(function (require) {
 
       buckets.forEach(function (bucket, key) {
         // find the existing split that we should extend
-        var TableGroup = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
+        var tableGroup = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
         // create the split if it doesn't exist yet
-        if (!TableGroup) TableGroup = self._table(true, agg, key);
+        if (!tableGroup) tableGroup = self._table(true, agg, key);
+
+        var splitAcr = false;
+        if (self.asAggConfigResults) splitAcr = new AggConfigResult(agg, self.acrStack[0], key, key);
 
         // push the split onto the stack so that it will receive written tables
-        self.splitStack.unshift(TableGroup);
+        self.splitStack.unshift(tableGroup);
+        splitAcr && self.acrStack.unshift(splitAcr);
+
         // call the block
         if (_.isFunction(block)) block.call(self, bucket, key);
+
         // remove the split from the stack
         self.splitStack.shift();
+        splitAcr && self.acrStack.shift();
       });
     };
 
@@ -144,17 +149,18 @@ define(function (require) {
      */
     TabbedAggResponseWriter.prototype.cell = function (agg, value, block) {
       if (this.asAggConfigResults) {
-        var parent = _.findLast(this.rowBuffer, function (result) {
-          return result.aggConfig.schema.group === 'buckets';
-        });
-        if (!parent) parent = this.splitStack[0].aggConfigResult;
-
-        value = new AggConfigResult(agg, parent, value, value);
+        value = new AggConfigResult(agg, this.acrStack[0], value, value);
       }
 
+      var staskResult = this.asAggConfigResults && value.type === 'bucket';
+
       this.rowBuffer.push(value);
+      if (staskResult) this.acrStack.unshift(value);
+
       if (_.isFunction(block)) block.call(this);
+
       this.rowBuffer.pop(value);
+      if (staskResult) this.acrStack.shift();
 
       return value;
     };
