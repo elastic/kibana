@@ -19,7 +19,22 @@ define(function (require) {
        */
       looper.ms = function (ms) {
         _ms = ms;
-        looper.restart();
+        if (_ms) {
+          looper.restart();
+        } else {
+          looper.pause();
+        }
+        return this;
+      };
+
+      /**
+       * Cancels the current looper while keeping internal
+       * state as started
+       *
+       * @chainable
+       */
+      looper.pause = function () {
+        if (_timerId) _timerId = $timeout.cancel(_timerId);
         return this;
       };
 
