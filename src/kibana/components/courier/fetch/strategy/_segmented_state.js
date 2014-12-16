@@ -88,7 +88,7 @@ define(function (require) {
 
           self.emit('segment', resp);
 
-          mergeResponse(self.mergedResponse, resp);
+          self.mergeResponse(self.mergedResponse, resp);
           req.resp = _.omit(self.mergedResponse, '_bucketIndex');
 
           self.emit('mergedSegment', req.resp);
@@ -123,7 +123,8 @@ define(function (require) {
       return list;
     };
 
-    var mergeResponse = notify.timed('merge response segment', function (merged, resp) {
+
+    SegmentedState.prototype.mergeResponse = notify.timed('merge response segment', function (merged, resp) {
       merged.took += resp.took;
       merged.hits.total = Math.max(merged.hits.total, resp.hits.total);
       merged.hits.max_score = Math.max(merged.hits.max_score, resp.hits.max_score);
