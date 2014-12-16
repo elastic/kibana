@@ -16,13 +16,30 @@
         <i class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-submit="fetch()" class="inline-form" name="queryInput">
+      <form ng-if="linked" class="inline-form" name="queryInput">
+        <div class="typeahead">
+          <div class="input-group">
+            <input
+              disabled
+              type="text"
+              class="form-control">
+
+            <button
+              class="btn btn-default" type="submit"
+              ng-disabled="true">
+              <span class="fa fa-search"></span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <form ng-if="!linked" ng-submit="fetch()" class="inline-form" name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
             ng-class="queryInput.$invalid ? 'has-error' : ''">
             <input
               ng-model="state.query"
-              validate-query="savedVis.searchSource"
+              validate-query
               input-focus
               kbn-typeahead-input
               placeholder="Search..."
