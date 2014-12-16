@@ -1,8 +1,6 @@
 define(function (require) {
-  return function FetchStrategyForSearch(Private, Promise, Notifier, timefilter) {
+  return function FetchStrategyForSearch(Private, Promise, timefilter) {
     var _ = require('lodash');
-
-    var notify = new Notifier();
 
     return {
       clientMethod: 'msearch',
@@ -65,11 +63,27 @@ define(function (require) {
        *                   the courier's _pendingRequests queue
        */
       getPendingRequests: function (pendingRequests) {
+        var self = this;
+        return this._filterPending(pendingRequests, function (req) {
+          return self._validSearch(req) && self._qualifyPending(req);
+        });
+      },
+
+      _filterPending: function (pendingRequests, filter) {
         return pendingRequests.splice(0).filter(function (req) {
-          // filter by type first
-          if (req.source._getType() === 'search' && !req.source._fetchDisabled) return true;
+          if (filter(req)) return true;
           else pendingRequests.push(req);
         });
+      },
+
+      _validSearch: function (req) {
+        var isSearch = req.source._getType() === 'search';
+        var isEnabled = isSearch && !req.source._fetchDisabled;
+        return isSearch && isEnabled;
+      },
+
+      _qualifyPending: function (req) {
+        return !req.segmented;
       }
     };
   };

@@ -154,25 +154,30 @@ define(function (require) {
 
     /**
      * Fetch just this source ASAP
-     * @param {Function} cb - callback
+     *
+     * ONLY USE IF YOU NEED THE RESULTS OTHERWISE USE .fetchPending()
+     * TO TRIGGER FETCHING ALL PENDING REQUESTS
+     *
+     * @async
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
+      var req = _.first(self._myPending());
+      if (!req) {
+        req = self._createRequest();
+        pendingRequests.push(req);
+      }
 
-      var req = self._createRequest();
-      pendingRequests.push(req);
-
-      // fetch just the requests for this source
-      courierFetch.these(self._getType(), pendingRequests.splice(0).filter(function (req) {
-        if (req.source !== self) {
-          pendingRequests.push(req);
-          return false;
-        }
-
-        return true;
-      }));
-
+      self.fetchPending();
       return req.defer.promise;
+    };
+
+    /**
+     * Fetch all pending requests for this source ASAP
+     * @async
+     */
+    SourceAbstract.prototype.fetchPending = function () {
+      return courierFetch.these(this._pullMyPending());
     };
 
     /**
@@ -180,8 +185,7 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.cancelPending = function () {
-      var pending = _.where(pendingRequests, { source: this});
-      _.pull.apply(_, [pendingRequests].concat(pending));
+      this._pullMyPending();
     };
 
     /**
@@ -196,12 +200,28 @@ define(function (require) {
      * PRIVATE API
      *****/
 
+    SourceAbstract.prototype._myPending = function () {
+      return _.where(pendingRequests, { source: this });
+    };
+
+    SourceAbstract.prototype._pullMyPending = function () {
+      var self = this;
+      return pendingRequests.splice(0).filter(function (req) {
+        if (req.source !== self) {
+          pendingRequests.push(req);
+          return false;
+        }
+        return true;
+      });
+    };
+
     SourceAbstract.prototype._createRequest = function (defer) {
       var self = this;
 
       var req = {
         source: self,
-        defer: defer || Promise.defer()
+        defer: defer || Promise.defer(),
+        strategy: self._fetchStrategy
       };
 
       if (self.history) {
