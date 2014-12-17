@@ -27,7 +27,7 @@ define(function (require) {
           req.segmented = new SegmentedState(req.source, req.init, req.defer);
         }
 
-        return req.segmented.getStateFromRequest(req);
+        return req.segmented.getSourceStateFromRequest(req);
       },
 
       /**
