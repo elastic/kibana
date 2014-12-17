@@ -9,7 +9,7 @@ define(function (require) {
   require('components/timepicker/quick_ranges');
   require('components/timepicker/time_units');
 
-  module.directive('kbnTimepicker', function (quickRanges, timeUnits, sessionStorage) {
+  module.directive('kbnTimepicker', function (quickRanges, timeUnits) {
     return {
       restrict: 'E',
       scope: {
@@ -32,12 +32,6 @@ define(function (require) {
         $scope.quickLists = _.map(_.uniq(_.pluck(quickRanges, 'section')), function (section) {
           return _.filter(quickRanges, {section: section});
         });
-
-        if (_.isUndefined(sessionStorage.get('refreshInterval'))) {
-          $scope.interval = { value : 0, display : 'Off' };
-        } else {
-          $scope.interval = sessionStorage.get('refreshInterval');
-        }
 
         $scope.refreshIntervals = [
           { value : 0, display: 'Off'},
@@ -153,7 +147,6 @@ define(function (require) {
 
         $scope.setRefreshInterval = function (interval) {
           $scope.interval = interval;
-          sessionStorage.set('refreshInterval', _.clone(interval));
         };
 
         init();

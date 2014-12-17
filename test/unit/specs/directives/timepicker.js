@@ -26,7 +26,7 @@ define(function (require) {
     clock = sinon.useFakeTimers(moment(anchor).valueOf());
 
     // Create the scope
-    inject(function ($rootScope, $compile, sessionStorage) {
+    inject(function ($rootScope, $compile) {
 
       // Give us a scope
       $parentScope = $rootScope;
@@ -44,9 +44,6 @@ define(function (require) {
         }
       };
       $parentScope.timefilter = timefilter;
-
-      // Default refresh session storage value
-      sessionStorage.set('refreshInterval', { value : 1, display : 'defaultSessionValue' });
 
       // Create the element
       $elem = angular.element(
@@ -87,9 +84,7 @@ define(function (require) {
     describe('refresh interval', function () {
       var $courier;
       beforeEach(function () {
-        // Store a default refresh value
         init();
-
         // Inject courier object
         inject(function (courier) {
           $courier = courier;
@@ -122,22 +117,6 @@ define(function (require) {
         expect($courier.searchLooper.loopInterval()).to.be(0);
         done();
       });
-
-      it('should save the refreshInterval in sessionStorage', function (done) {
-        $scope.setRefreshInterval({ value : 10000});
-        inject(function (sessionStorage) {
-          expect(sessionStorage.get('refreshInterval').value).to.be(10000);
-          done();
-        });
-      });
-
-      it('should load the refreshInterval from sessionStorage', function (done) {
-        inject(function (sessionStorage) {
-          expect($scope.interval.display).to.be('defaultSessionValue');
-          done();
-        });
-      });
-
     });
 
     describe('mode setting', function () {
