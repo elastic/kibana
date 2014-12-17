@@ -49,6 +49,22 @@ define(function (require) {
         }).join('\n') + '\n';
       },
 
+      /**
+       * Resolve a single request using a single response from an msearch
+       * @param  {object} req - The request object, with a defer and source property
+       * @param  {object} resp - An object from the mget response's "docs" array
+       * @return {Promise} - the promise created by responding to the request
+       */
+      resolveRequest: function (req, resp) {
+        if (resp && resp.hits) {
+          resp.hits.hits.forEach(function (hit) {
+            hit._source = _.flattenWith('.', hit._source);
+          });
+        }
+
+        req.defer.resolve(resp);
+      },
+
       getIncompleteRequests: function (pendingRequests) {
         var self = this;
         return self._filterPending(pendingRequests, function (req) {

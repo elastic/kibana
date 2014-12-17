@@ -1,18 +1,12 @@
 define(function (require) {
   return function CourierSegmentedStateProvider(es, Private, Promise, Notifier, timefilter) {
     var _ = require('lodash');
-    var moment = require('moment');
-    var eventName = 'segmented fetch';
-    var errors = require('errors');
     var Events = Private(require('factories/events'));
     var pendingRequests = Private(require('components/courier/_pending_requests'));
 
     var notify = new Notifier({
       location: 'Segmented Fetch'
     });
-
-    window.requesterDefereds = [];
-    window.combinedEventAndResponses = [];
 
     _(SegmentedState).inherits(Events);
     function SegmentedState(source, init) {
@@ -64,63 +58,62 @@ define(function (require) {
           state.body.size = self.remainingSize;
         }
 
-        // don't emit right away, we want to guarentee event order
-        var emits = [];
-
         // update the status on every iteration
-        emits.push(['status', self._statusReport(state.index)]);
+        var initialStatus = self.emit('status', self._statusReport(state.index));
 
-        var requestersDefer = req.defer;
-        var ourDefer = req.defer = Promise.defer();
+        var resolveRequest = req.resolve;
+        req.resolve = function (resp) {
+          // wait for inital status event just in case
+          return initialStatus.then(function () {
+            return Promise.resolve(resp && self._consumeSegment(resp))
+            .then(function () {
+              req.resp = _.omit(self.mergedResponse, '_bucketIndex');
+              self.complete.push(state.index);
 
-        ourDefer.promise
-        .then(function (resp) {
-          // a response was swallowed intentionally. Wait for the next one
-          if (!resp) return;
+              if (self.queue.length) {
+                var nextReq = self.source._createRequest(resolveRequest);
+                nextReq.strategy = req.strategy;
+                nextReq.segmented = self;
+                pendingRequests.push(nextReq);
+                return;
+              }
 
-          if (self.remainingSize !== false) {
-            self.remainingSize -= resp.hits.hits.length;
-          }
-
-          if (!self.complete.length) emits.push(['first', resp]);
-          self.complete.push(state.index);
-
-          emits.push(['segment', resp]);
-
-          self.mergeResponse(self.mergedResponse, resp);
-          req.resp = _.omit(self.mergedResponse, '_bucketIndex');
-
-          emits.push(['mergedSegment', req.resp]);
-        })
-        .then(function () {
-          var done = !self.queue.length;
-
-          if (done) {
-            emits.push(['complete']);
-          }
-
-          self.emitChain = self.emitChain.then(function emitNext() {
-            var emit = emits.shift();
-            if (!emit) return;
-            console.log(state.index, 'emit', emit, 'from', emits);
-            return self.emit(emit[0], emit[1]).then(emitNext);
+              return self
+              .emit('complete')
+              .then(function () {
+                return Promise.delay(2000);
+              })
+              .then(function () {
+                resolveRequest(req.resp);
+              });
+            });
           });
 
-          if (done) {
-            return self.emitChain.then(function () {
-              requestersDefer.resolve(req.resp);
-            });
-          }
-
-          var nextReq = self.source._createRequest(requestersDefer);
-          nextReq.strategy = req.strategy;
-          nextReq.segmented = self;
-          pendingRequests.push(nextReq);
-        });
+        };
 
         return state;
       });
     };
+
+
+    SegmentedState.prototype._consumeSegment = function (resp) {
+      var self = this;
+      var first = !self.complete.length;
+      var last = self;
+
+
+      if (self.remainingSize !== false) {
+        self.remainingSize -= resp.hits.hits.length;
+      }
+
+      self._mergeResponse(self.mergedResponse, resp);
+
+      return Promise.all([
+        first && self.emit('first', resp),
+        self.emit('segment', resp)
+      ]);
+    };
+
 
     SegmentedState.prototype.getIndexList = function () {
       var self = this;
@@ -134,7 +127,7 @@ define(function (require) {
     };
 
 
-    SegmentedState.prototype.mergeResponse = notify.timed('merge response segment', function (merged, resp) {
+    SegmentedState.prototype._mergeResponse = notify.timed('merge response segment', function (merged, resp) {
       merged.took += resp.took;
       merged.hits.total = Math.max(merged.hits.total, resp.hits.total);
       merged.hits.max_score = Math.max(merged.hits.max_score, resp.hits.max_score);
