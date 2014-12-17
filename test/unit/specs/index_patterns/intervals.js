@@ -42,21 +42,21 @@ define(function (require) {
         expect(list).to.contain('logstash-2014.51');
       });
 
-      it('should return correct indices for monthly [logstash-]GGGG.MM', function () {
+      it('should return correct indices for monthly [logstash-]YYYY.MM', function () {
         var start = moment('2014-12-01');
         var end = moment('2015-02-01');
         var interval = { name: 'months', startOf: 'month', display: 'Monthly' };
-        var list = intervals.toIndexList('[logstash-]GGGG.MM', interval, start, end);
+        var list = intervals.toIndexList('[logstash-]YYYY.MM', interval, start, end);
         expect(list).to.contain('logstash-2014.12');
         expect(list).to.contain('logstash-2015.01');
         expect(list).to.contain('logstash-2015.02');
       });
 
-      it('should return correct indices for yearly [logstash-]GGGG', function () {
+      it('should return correct indices for yearly [logstash-]YYYY', function () {
         var start = moment('2014-12-01');
         var end = moment('2015-02-01');
         var interval = { name: 'years', startOf: 'year', display: 'Yearly' };
-        var list = intervals.toIndexList('[logstash-]GGGG', interval, start, end);
+        var list = intervals.toIndexList('[logstash-]YYYY', interval, start, end);
         expect(list).to.contain('logstash-2014');
         expect(list).to.contain('logstash-2015');
       });
