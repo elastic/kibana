@@ -2,7 +2,7 @@ define(function (require) {
   return function FetchStrategyForSegmentedSearch(Private, Promise, Notifier, timefilter, es, configFile) {
     var _ = require('lodash');
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
-    var SegmentedState = Private(require('components/courier/fetch/strategy/_segmented_state'));
+    var SegmentedState = Private(require('components/courier/fetch/segmented_state'));
 
     // extend the client to behave well for this strategy
     es.segmentSafeMsearch = function (params) {
@@ -24,7 +24,7 @@ define(function (require) {
       getSourceStateFromRequest: function (req) {
         if (!(req.segmented instanceof SegmentedState)) {
           // first request, setup the SegmentedState
-          req.segmented = new SegmentedState(req.source, req.init, req.defer);
+          req.segmented = new SegmentedState(req.source, req.init);
         }
 
         return req.segmented.getSourceStateFromRequest(req);

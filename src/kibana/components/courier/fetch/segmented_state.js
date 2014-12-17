@@ -11,30 +11,29 @@ define(function (require) {
       location: 'Segmented Fetch'
     });
 
+    window.requesterDefereds = [];
+    window.combinedEventAndResponses = [];
+
     _(SegmentedState).inherits(Events);
-    function SegmentedState(source, init, finalDefer) {
+    function SegmentedState(source, init) {
       SegmentedState.Super.call(this);
 
-      var self = this;
-
-      self.source = source;
-      self.promiseForFlatSource = self.source._flatten();
-
-      self.finalDefer = finalDefer;
-      self.totalSize = false;
-      self.direction = 'desc';
+      this.source = source;
+      this.promiseForFlatSource = this.source._flatten();
+      this.totalSize = false;
+      this.direction = 'desc';
 
       if (_.isFunction(init)) {
-        init(self);
+        init(this);
       }
 
-      self.remainingSize = self.totalSize !== false ? self.totalSize : false;
+      this.remainingSize = this.totalSize !== false ? this.totalSize : false;
 
-      self.all = self.getIndexList(self.source, self.direction);
-      self.queue = self.all.slice(0);
-      self.complete = [];
+      this.all = this.getIndexList(this.source, this.direction);
+      this.queue = this.all.slice(0);
+      this.complete = [];
 
-      self.mergedResponse = {
+      this.mergedResponse = {
         took: 0,
         hits: {
           hits: [],
@@ -43,23 +42,20 @@ define(function (require) {
         }
       };
 
-      self._statusReport(null);
+      this.emitChain = Promise.resolve();
+      this.emit('status', this._statusReport(null));
     }
 
     SegmentedState.prototype._statusReport = function (active) {
-      var self = this;
-      var status = {
-        total: self.all.length,
-        complete: self.complete.length,
-        remaining: self.queue.length,
+      return {
+        total: this.all.length,
+        complete: this.complete.length,
+        remaining: this.queue.length,
         active: active
       };
-
-      this.emit('status', status);
-      return status;
     };
 
-    SegmentedState.prototype.getStateFromRequest = function (req) {
+    SegmentedState.prototype.getSourceStateFromRequest = function (req) {
       var self = this;
       return self.promiseForFlatSource.then(function (flatSource) {
         var state = _.cloneDeep(flatSource);
@@ -68,8 +64,11 @@ define(function (require) {
           state.body.size = self.remainingSize;
         }
 
+        // don't emit right away, we want to guarentee event order
+        var emits = [];
+
         // update the status on every iteration
-        self._statusReport(state.index);
+        emits.push(['status', self._statusReport(state.index)]);
 
         var requestersDefer = req.defer;
         var ourDefer = req.defer = Promise.defer();
@@ -83,29 +82,40 @@ define(function (require) {
             self.remainingSize -= resp.hits.hits.length;
           }
 
-          if (!self.complete.length) self.emit('first', resp);
+          if (!self.complete.length) emits.push(['first', resp]);
           self.complete.push(state.index);
 
-          self.emit('segment', resp);
+          emits.push(['segment', resp]);
 
           self.mergeResponse(self.mergedResponse, resp);
           req.resp = _.omit(self.mergedResponse, '_bucketIndex');
 
-          self.emit('mergedSegment', req.resp);
+          emits.push(['mergedSegment', req.resp]);
+        })
+        .then(function () {
+          var done = !self.queue.length;
 
-          if (self.queue.length) {
-            var nextReq = self.source._createRequest(requestersDefer);
-            nextReq.strategy = req.strategy;
-            nextReq.segmented = self;
-
-            pendingRequests.push(nextReq);
-          } else {
-
-            self.emit('complete');
-            requestersDefer.resolve(self.mergedResponse);
+          if (done) {
+            emits.push(['complete']);
           }
 
-          return resp;
+          self.emitChain = self.emitChain.then(function emitNext() {
+            var emit = emits.shift();
+            if (!emit) return;
+            console.log(state.index, 'emit', emit, 'from', emits);
+            return self.emit(emit[0], emit[1]).then(emitNext);
+          });
+
+          if (done) {
+            return self.emitChain.then(function () {
+              requestersDefer.resolve(req.resp);
+            });
+          }
+
+          var nextReq = self.source._createRequest(requestersDefer);
+          nextReq.strategy = req.strategy;
+          nextReq.segmented = self;
+          pendingRequests.push(nextReq);
         });
 
         return state;
