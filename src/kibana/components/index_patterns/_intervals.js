@@ -2,29 +2,33 @@ define(function (require) {
   return function IndexNameIntervalsService(timefilter) {
     var _ = require('lodash');
     var moment = require('moment');
+    var IndexedArray = require('utils/indexed_array/index');
 
-    var intervals = [
-      {
-        name: 'hours',
-        display: 'Hourly'
-      },
-      {
-        name: 'days',
-        display: 'Daily'
-      },
-      {
-        name: 'weeks',
-        display: 'Weekly'
-      },
-      {
-        name: 'months',
-        display: 'Monthly'
-      },
-      {
-        name: 'years',
-        display: 'Yearly'
-      }
-    ];
+    var intervals = new IndexedArray({
+      index: ['name'],
+      initialSet: [
+        {
+          name: 'hours',
+          display: 'Hourly'
+        },
+        {
+          name: 'days',
+          display: 'Daily'
+        },
+        {
+          name: 'weeks',
+          display: 'Weekly'
+        },
+        {
+          name: 'months',
+          display: 'Monthly'
+        },
+        {
+          name: 'years',
+          display: 'Yearly'
+        }
+      ]
+    });
 
     intervals.toIndexList = function (format, interval, a, b) {
       var bounds;
