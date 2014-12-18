@@ -1,13 +1,13 @@
 define(function (require) {
-  require('modules')
-  .get('app/visualize', ['ui.select'])
+  require('angular-selectize');
+
+  require('modules').get('app/visualize', ['selectize'])
   .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-    require('angular-ui-select');
 
     require('plugins/visualize/editor/agg_param');
     require('filters/match_any');

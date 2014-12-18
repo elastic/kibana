@@ -14,7 +14,7 @@ require.config({
     'angular-elastic': 'bower_components/angular-elastic/elastic',
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
-    'angular-ui-select': 'bower_components/angular-ui-select/dist/select',
+    'angular-selectize': 'bower_components/angular-selectize.js/angular-selectize',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',
@@ -32,6 +32,7 @@ require.config({
     'lodash-deep': 'bower_components/lodash-deep/lodash-deep',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
+    selectize: 'bower_components/selectize/dist/js/standalone/selectize',
     text: 'bower_components/requirejs-text/text',
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard'
   },
@@ -45,8 +46,8 @@ require.config({
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
+    'angular-selectize': ['angular', 'selectize'],
     'angular-ui-ace': ['angular', 'ace'],
-    'angular-ui-select': ['css!bower_components/angular-ui-select/dist/select.css'],
     'ng-clip': ['angular', 'zeroclipboard'],
     inflection: {
       exports: 'inflection'
