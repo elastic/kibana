@@ -24,9 +24,9 @@ define(function (require) {
       expect(fn().fields).to.contain('_source');
     });
 
-    it('should request date fields as scripts', function () {
-      expect(fn().scriptFields).to.include.keys('@timestamp');
-      expect(fn().scriptFields).to.not.include.keys('bytes');
+    it('should request date fields as fielddata_fields', function () {
+      expect(fn().fielddataFields).to.contain('@timestamp');
+      expect(fn().fielddataFields).to.not.include.keys('bytes');
     });
 
 
