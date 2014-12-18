@@ -1,5 +1,5 @@
 define(function (require) {
-  describe.only('Private module loader', function () {
+  describe('Private module loader', function () {
 
     var Private;
 
