@@ -15,123 +15,54 @@ define(function (require) {
       $rootScope = _$rootScope_;
     }));
 
-    it('should not accept null index name patterns', function () {
-      $rootScope.indexName = null;
+    function checkPattern(input) {
+      $rootScope.indexName = input;
       var element = $compile(html)($rootScope);
       $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
+      return element;
+    }
+
+    var badPatterns = [
+      null,
+      undefined,
+      '',
+      '.',
+      '..',
+      '...',
+      'foo\\bar',
+      'foo/bar',
+      'foo?bar',
+      'foo"bar',
+      'foo<bar',
+      'foo>bar',
+      'foo|bar',
+      'foo bar',
+      'foo,bar',
+    ];
+
+    var goodPatterns = [
+      'foo',
+      'foo.bar',
+      'foo*',
+      'foo.bar*',
+      'foo.*',
+      '[foo-]YYYY-MM-DD',
+    ];
+
+    badPatterns.forEach(function (pattern) {
+      it('should not accept index pattern: ' + pattern, function () {
+        var element = checkPattern(pattern);
+        expect(element.hasClass('ng-invalid')).to.be(true);
+        expect(element.hasClass('ng-valid')).to.not.be(true);
+      });
     });
 
-    it('should not accept undefined index name patterns', function () {
-      $rootScope.indexName = undefined;
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept empty index name patterns', function () {
-      $rootScope.indexName = '';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept . as an index name pattern', function () {
-      $rootScope.indexName = '.';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept .. as an index name pattern', function () {
-      $rootScope.indexName = '..';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept \\ in an index name pattern', function () {
-      $rootScope.indexName = 'foo\\bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept / in an index name pattern', function () {
-      $rootScope.indexName = 'foo/bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept ? in an index name pattern', function () {
-      $rootScope.indexName = 'foo?bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept " in an index name pattern', function () {
-      $rootScope.indexName = 'foo"bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept < in an index name pattern', function () {
-      $rootScope.indexName = 'foo<bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept > in an index name pattern', function () {
-      $rootScope.indexName = 'foo>bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept | in an index name pattern', function () {
-      $rootScope.indexName = 'foo|bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept spaces in an index name pattern', function () {
-      $rootScope.indexName = 'foo bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should not accept , in an index name pattern', function () {
-      $rootScope.indexName = 'foo,bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    it('should accept a valid index name pattern', function () {
-      $rootScope.indexName = 'foo.bar';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.not.be.ok();
-    });
-
-    it('should accept * in an index name pattern', function () {
-      $rootScope.indexName = 'foo.*';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.not.be.ok();
-    });
-
-    it('should accept [] in an index name pattern', function () {
-      $rootScope.indexName = '[foo]-YYYY.MM.DD';
-      var element = $compile(html)($rootScope);
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.not.be.ok();
+    goodPatterns.forEach(function (pattern) {
+      it('should accept index pattern: ' + pattern, function () {
+        var element = checkPattern(pattern);
+        expect(element.hasClass('ng-invalid')).to.not.be(true);
+        expect(element.hasClass('ng-valid')).to.be(true);
+      });
     });
   });
 });
