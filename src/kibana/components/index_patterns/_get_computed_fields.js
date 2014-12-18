@@ -5,14 +5,9 @@ define(function (require) {
   return function () {
     var self = this;
     var scriptFields = {};
+    var fielddataFields = [];
 
-    _.each(self.fields.byType['date'], function (field) {
-      if (field.indexed) {
-        scriptFields[field.name] = {
-          script: 'if (doc["' + field.name + '"].value == 0) { null } else { doc["' + field.name + '"].value }'
-        };
-      }
-    });
+    fielddataFields = _.pluck(self.fields.byType['date'], 'name');
 
     _.each(self.getFields('scripted'), function (field) {
       scriptFields[field.name] = { script: field.script };
@@ -20,7 +15,8 @@ define(function (require) {
 
     return {
       fields: ['*', '_source'],
-      scriptFields: scriptFields
+      scriptFields: scriptFields,
+      fielddataFields: fielddataFields
     };
 
   };
