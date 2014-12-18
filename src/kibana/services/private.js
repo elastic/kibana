@@ -83,10 +83,9 @@ define(function (require) {
       return instance;
     };
 
-    provider.swap = function (fn, constructor) {
+    provider.swap = function (fn, prov) {
       var id = identify(fn);
-      swaps[id] = constructor;
-      delete cache[id];
+      swaps[id] = prov;
     };
 
     provider.$get = ['$injector', function PrivateFactory($injector) {
@@ -101,7 +100,7 @@ define(function (require) {
       function instantiate(prov, locals) {
         if (~privPath.indexOf(prov)) {
           throw new Error(
-            'Circluar refrence to "' + name(prov) + '"' +
+            'Circular refrence to "' + name(prov) + '"' +
             ' found while resolving private deps: ' + pathToString()
           );
         }
@@ -110,27 +109,44 @@ define(function (require) {
 
         var context = {};
         var instance = $injector.invoke(prov, context, locals);
-        // if the function returned an instance of something, use that. Otherwise use the context
         if (!_.isObject(instance)) instance = context;
 
         privPath.pop();
         return instance;
       }
 
-      function Private(prov) {
-        var id = identify(prov);
+      // retrieve an instance from cache or create and store on
+      function get(id, prov, $delegateProv, $delegateId) {
         if (cache[id]) return cache[id];
 
         var instance;
-        if (swaps[id]) {
-          instance = instantiate(swaps[id], {
-            $decorate: _.partial(instantiate, prov)
+
+        if ($delegateId != null && $delegateProv != null) {
+          instance = instantiate(prov, {
+            $decorate: _.partial(get, $delegateId, $delegateProv)
           });
         } else {
           instance = instantiate(prov);
         }
 
         return (cache[id] = instance);
+      }
+
+      // main api, get the appropriate instance for a provider
+      function Private(prov) {
+        var id = identify(prov);
+        var $delegateId;
+        var $delegateProv;
+
+        if (swaps[id]) {
+          $delegateId = id;
+          $delegateProv = prov;
+
+          prov = swaps[$delegateId];
+          id = identify(prov);
+        }
+
+        return get(id, prov, $delegateId, $delegateProv);
       }
 
       Private.stub = provider.stub;
