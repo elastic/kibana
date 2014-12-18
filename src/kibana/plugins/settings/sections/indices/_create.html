@@ -33,6 +33,8 @@
               ng-model="index.name"
               ng-attr-placeholder="{{index.defaultName}}"
               ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+              validate-index-name
+              name="name"
               required
               type="text"
               class="form-control">
@@ -116,7 +118,8 @@
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
             class="btn">
-            {{index.fetchFieldsError || "Create" }}
+            <span ng-hide="form.name.$error.indexNameInput">{{index.fetchFieldsError || "Create" }}</span>
+            <span ng-show="form.name.$error.indexNameInput">Invalid index name pattern.</span>
           </button>
         </form>
       </div>
