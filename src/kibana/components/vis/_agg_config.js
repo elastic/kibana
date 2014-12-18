@@ -75,10 +75,6 @@ define(function (require) {
       self.getAggParams().forEach(function (aggParam) {
         var val = from[aggParam.name];
 
-        if (_.isFunction(aggParam.init)) {
-          val = aggParam.init(val);
-        }
-
         if (val == null) {
           if (aggParam.default == null) return;
           else val = aggParam.default;

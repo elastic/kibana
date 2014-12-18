@@ -32,7 +32,7 @@ define(function (require) {
           name: 'precision',
           default: defaultPrecision,
           editor: require('text!components/agg_types/controls/precision.html'),
-          init: getPrecision,
+          deserialize: getPrecision,
           write: function (aggConfig, output) {
             output.params.precision = getPrecision(aggConfig.params.precision);
           }
