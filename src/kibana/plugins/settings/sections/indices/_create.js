@@ -3,6 +3,8 @@ define(function (require) {
   var moment = require('moment');
   var errors = require('errors');
 
+  require('directives/validate_index_name');
+
   require('routes')
   .when('/settings/indices/', {
     template: require('text!plugins/settings/sections/indices/_create.html')
