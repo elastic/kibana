@@ -1,6 +1,7 @@
 @import "../bower_components/selectize/dist/less/selectize.bootstrap3.less";
 
 @selectize-border: @input-border-width solid @input-border;
+@selectize-padding-item-y: 0;
 
 .selectize-input {
   .transition(~"border-color ease-in-out .15s, box-shadow ease-in-out .15s");
@@ -41,3 +42,8 @@
   }
 }
 
+.selectize-control.plugin-remove_button {
+  [data-value] .remove {
+    top: -1px;
+  }
+}
