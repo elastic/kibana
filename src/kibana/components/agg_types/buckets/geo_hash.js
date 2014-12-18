@@ -6,14 +6,16 @@ define(function (require) {
     var defaultPrecision = 3;
 
     function getPrecision(precision) {
+      var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
+
       precision = parseInt(precision, 10);
 
       if (isNaN(precision)) {
         precision = defaultPrecision;
       }
 
-      if (precision > config.get('visualization:tileMap:maxPrecision')) {
-        return parseInt(config.get('visualization:tileMap:maxPrecision'), 10);
+      if (precision > maxPrecision) {
+        return maxPrecision;
       }
 
       return precision;
