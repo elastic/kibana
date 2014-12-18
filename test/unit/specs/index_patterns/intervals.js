@@ -10,8 +10,8 @@ define(function (require) {
       }));
 
       it('should return correct indices for hourly [logstash-]YYYY.MM.DD.HH', function () {
-        var start = moment('2014-01-01T07:00:00Z');
-        var end = moment('2014-01-01T08:30:00Z');
+        var start = moment.utc('2014-01-01T07:00:00Z');
+        var end = moment.utc('2014-01-01T08:30:00Z');
         var interval = { name: 'hours', startOf: 'hour', display: 'Hourly' };
         var list = intervals.toIndexList('[logstash-]YYYY.MM.DD.HH', interval, start, end);
         expect(list).to.contain('logstash-2014.01.01.07');
@@ -34,8 +34,8 @@ define(function (require) {
       });
 
       it('should return correct indices for weekly [logstash-]GGGG.WW', function () {
-        var start = moment(1418244231248);
-        var end = moment(1418849261281);
+        var start = moment.utc(1418244231248);
+        var end = moment.utc(1418849261281);
         var interval = { name: 'weeks', startOf: 'isoWeek', display: 'Weekly' };
         var list = intervals.toIndexList('[logstash-]GGGG.WW', interval, start, end);
         expect(list).to.contain('logstash-2014.50');
@@ -43,8 +43,8 @@ define(function (require) {
       });
 
       it('should return correct indices for monthly [logstash-]YYYY.MM', function () {
-        var start = moment('2014-12-01');
-        var end = moment('2015-02-01');
+        var start = moment.utc('2014-12-01');
+        var end = moment.utc('2015-02-01');
         var interval = { name: 'months', startOf: 'month', display: 'Monthly' };
         var list = intervals.toIndexList('[logstash-]YYYY.MM', interval, start, end);
         expect(list).to.contain('logstash-2014.12');
@@ -53,8 +53,8 @@ define(function (require) {
       });
 
       it('should return correct indices for yearly [logstash-]YYYY', function () {
-        var start = moment('2014-12-01');
-        var end = moment('2015-02-01');
+        var start = moment.utc('2014-12-01');
+        var end = moment.utc('2015-02-01');
         var interval = { name: 'years', startOf: 'year', display: 'Yearly' };
         var list = intervals.toIndexList('[logstash-]YYYY', interval, start, end);
         expect(list).to.contain('logstash-2014');
