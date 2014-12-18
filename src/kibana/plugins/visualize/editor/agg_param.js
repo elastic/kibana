@@ -3,7 +3,7 @@ define(function (require) {
 
   require('modules')
   .get('app/visualize')
-  .directive('visAggParamEditor', function () {
+  .directive('visAggParamEditor', function (config) {
     return {
       restrict: 'E',
       scope: {
@@ -16,6 +16,7 @@ define(function (require) {
         return $el.html();
       },
       link: function ($scope) {
+        $scope.config = config;
         $scope.optionEnabled = function (option) {
           if (option && _.isFunction(option.enabled)) {
             return option.enabled($scope.aggConfig);
