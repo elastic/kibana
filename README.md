@@ -22,6 +22,8 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 - Elasticsearch version 1.4.0 or later
 - ...and nothing else
 
+*Note:* Groovy scripting must be enabled in Elasticsearch
+
 ## Installation
 
 * Download: [http://www.elasticsearch.org/overview/kibana/installation/](http://www.elasticsearch.org/overview/kibana/installation/)
