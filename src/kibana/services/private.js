@@ -1,32 +1,28 @@
 define(function (require) {
   /**
+   * # `Private()`
    * Private module loader, used to merge angular and require js dependency styles
    * by allowing a require.js module to export a single provider function that will
    * create a value used within an angular application. This provider can declare
    * angular dependencies by listing them as arguments, and can be require additional
    * Private modules.
    *
-   * ## Examples
-   *
-   * Define a private module provider:
+   * ## Define a private module provider:
    * ```js
    * define(function (require) {
    *   return function PingProvider($http) {
-   *
    *     this.ping = function () {
    *       return $http.head('/health-check');
    *     };
-   *
    *   };
    * });
    * ```
    *
-   * Require a private module:
+   * ## Require a private module:
    * ```js
    * define(function (require) {
    *   return function ServerHealthProvider(Private, Promise) {
    *     var ping = Private(require('components/ping'));
-   *
    *     return {
    *       check: Promise.method(function () {
    *         var attempts = 0;
@@ -47,6 +43,43 @@ define(function (require) {
    *     }
    *   };
    * });
+   * ```
+   *
+   * # `Private.stub(provider, newInstance)`
+   * `Private.stub()` replaces the instance of a module with another value. This is all we have needed until now.
+   *
+   * ```js
+   * beforeEach(inject(function ($injector, Private) {
+   *   Private.stub(
+   *     // since this module just exports a function, we need to change
+   *     // what Private returns in order to modify it's behavior
+   *     require('components/agg_response/hierarchical/_build_split'),
+   *     sinon.stub().returns(fakeSplit)
+   *   );
+   * }));
+   * ```
+   *
+   * # `Private.swap(oldProvider, newProvider)`
+   * This new method does an 1-for-1 swap of module providers, unlike `stub()` which replaces a modules instance.
+   * Pass the module you want to swap out, and the one it should be replaced with, then profit.
+   *
+   * Note: even though this example shows `swap()` being called in a config
+   * function, it can be called from anywhere. It is particularly useful
+   * in this scenario though.
+   *
+   * ```js
+   * beforeEach(module('kibana', function (PrivateProvider) {
+   *   PrivateProvider.swap(
+   *     // since the courier is required automatically before the tests are loaded,
+   *     // we can't stub it's internal components unless we do so before the
+   *     // application starts. This is why angular has config functions
+   *     require('components/courier/_redirect_when_missing'),
+   *     function StubbedRedirectProvider($decorate) {
+   *       // $decorate is a function that will instantiate the original module when called
+   *       return sinon.spy($decorate());
+   *     }
+   *   );
+   * }));
    * ```
    *
    * @param {[type]} prov [description]
