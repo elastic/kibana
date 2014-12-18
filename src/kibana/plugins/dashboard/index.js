@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var ConfigTemplate = require('utils/config_template');
+  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
   require('directives/config');
   require('components/courier/courier');
@@ -115,7 +116,8 @@ define(function (require) {
           }
         }
 
-        $scope.$watch('state.filters', function () {
+        $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (onlyDisabled(newFilters, oldFilters)) return;
           $scope.filterResults();
         });
 
