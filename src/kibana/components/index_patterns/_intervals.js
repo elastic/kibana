@@ -6,22 +6,27 @@ define(function (require) {
     var intervals = [
       {
         name: 'hours',
+        startOf: 'hour',
         display: 'Hourly'
       },
       {
         name: 'days',
+        startOf: 'day',
         display: 'Daily'
       },
       {
         name: 'weeks',
+        startOf: 'isoWeek',
         display: 'Weekly'
       },
       {
         name: 'months',
+        startOf: 'month',
         display: 'Monthly'
       },
       {
         name: 'years',
+        startOf: 'year',
         display: 'Yearly'
       }
     ];
@@ -46,7 +51,7 @@ define(function (require) {
         if (_.isNumeric(val)) val = moment().add(interval.name, val);
         else if (!moment.isMoment(val)) val = moment(val);
 
-        return val.clone().utc()[extend](interval.name);
+        return val.clone().utc()[extend](interval.startOf);
       }).sort(function (a, b) {
         return a - b;
       });
