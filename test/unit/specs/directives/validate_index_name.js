@@ -28,7 +28,6 @@ define(function (require) {
       '',
       '.',
       '..',
-      '...',
       'foo\\bar',
       'foo/bar',
       'foo?bar',
@@ -41,6 +40,7 @@ define(function (require) {
     ];
 
     var goodPatterns = [
+      '...',
       'foo',
       'foo.bar',
       'foo*',
