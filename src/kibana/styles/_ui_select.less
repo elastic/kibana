@@ -1,3 +1,12 @@
-.ui-select-multiple.ui-select-bootstrap .ui-select-match-item {
-  margin: 1px auto;
+@import "../bower_components/selectize/dist/less/selectize.bootstrap3.less";
+
+@selectize-border: @input-border-width solid @input-border;
+
+.selectize-input {
+  .transition(~"border-color ease-in-out .15s, box-shadow ease-in-out .15s");
+
+  &.focus {
+    .selectize-box-shadow(none);
+  }
 }
+
