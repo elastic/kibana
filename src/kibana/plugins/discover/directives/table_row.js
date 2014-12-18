@@ -53,12 +53,9 @@ define(function (require) {
 
         // toggle display of the rows details, a full list of the fields from each row
         $scope.toggleRow = function () {
-          var row = $scope.row;
+          var $detailsTr = $el.next();
 
           $scope.open = !$scope.open;
-
-          var $tr = $el;
-          var $detailsTr = $tr.next();
 
           ///
           // add/remove $details children
@@ -78,7 +75,7 @@ define(function (require) {
           // empty the details and rebuild it
           $detailsTr.html(detailsHtml);
 
-          $detailsScope.row = row;
+          $detailsScope.row = $scope.row;
 
           $compile($detailsTr)($detailsScope);
         };
@@ -150,6 +147,10 @@ define(function (require) {
               $compile($target)($toggleScope);
             }
           });
+
+          if ($scope.open) {
+            $detailsScope.row = row;
+          }
 
           // trim off cells that were not used rest of the cells
           $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
