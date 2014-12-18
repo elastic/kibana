@@ -19,9 +19,7 @@ define(function (require) {
 
     // this and child scopes will write pattern vars here
     var index = $scope.index = {
-      // set in updateDefaultForPatternType()
-      name: null,
-      defaultName: null,
+      name: 'logstash-*',
 
       isTimeBased: true,
       nameIsPattern: false,
@@ -35,7 +33,6 @@ define(function (require) {
     index.timeField = null;
 
     var updateSamples = function () {
-      updateDefaultForPatternType();
       index.samples = null;
       index.existing = null;
       index.patternErrors = [];
@@ -149,22 +146,52 @@ define(function (require) {
       });
     };
 
-    var updateDefaultForPatternType = function () {
-      var newDefault = index.nameIsPattern
-        ? '[logstash-]YYYY.MM.DD'
-        : 'logstash-*';
 
-      if (index.name === index.defaultName) {
-        index.name = index.defaultName = newDefault;
-      } else {
-        index.defaultName = newDefault;
+    $scope.$watchMulti([
+      'index.isTimeBased',
+      'index.nameIsPattern',
+      'index.nameInterval.name'
+    ], function (newVal, oldVal) {
+
+      function getPatternDefault(interval) {
+        switch (interval) {
+        case 'hours':
+          return '[logstash-]YYYY.MM.DD.HH';
+        case 'days':
+          return '[logstash-]YYYY.MM.DD';
+        case 'weeks':
+          return '[logstash-]GGGG.WW';
+        case 'months':
+          return '[logstash-]YYYY.MM';
+        case 'years':
+          return '[logstash-]YYYY';
+        default:
+          return 'logstash-*';
+        }
       }
 
-      if (!index.nameIsPattern) {
+      var isTimeBased = newVal[0];
+      var nameIsPattern = newVal[1];
+      var newDefault = getPatternDefault(newVal[2]);
+      var oldDefault = getPatternDefault(oldVal[2]);
+
+      if (index.name === oldDefault) {
+        index.name = newDefault;
+      }
+
+      if (!isTimeBased) {
+        index.nameIsPattern = false;
+      }
+
+      if (!nameIsPattern) {
         delete index.nameInterval;
         delete index.timeField;
+      } else {
+        index.nameInterval = index.nameInterval || intervals.byName['days'];
+        index.name = index.name || getPatternDefault(index.nameInterval);
       }
-    };
+
+    });
 
     var mockIndexPattern = function (index) {
       // trick the mapper into thinking this is an indexPattern
@@ -183,11 +210,6 @@ define(function (require) {
       'index.name',
       'index.nameInterval'
     ], updateSamples);
-
-    $scope.$watchMulti([
-      'index.nameIsPattern',
-      'index.isTimeBased'
-    ], updateDefaultForPatternType);
 
     $scope.$watchMulti([
       'index.name',
