@@ -99,6 +99,8 @@ filter-bar .bar {
     }
 
     > .filter-actions {
+      font-size: 1.3em;
+      line-height: 1.1em;
       position: absolute;
       padding: 4px 8px;
       top: 0;
@@ -109,10 +111,16 @@ filter-bar .bar {
       white-space: nowrap;
     }
 
-    .filter-toggle {
+    > .filter-actions > .action {
       border-right: 1px solid rgba(255, 255, 255, 0.4);
       padding-right: 6px;
-      margin-right: 3px;
+      margin-right: 8px;
+    }
+
+    > .filter-actions > .action:last-child {
+      border-right: 0;
+      padding-right: 0;
+      margin-right: 0;
     }
 
     &.negate {
