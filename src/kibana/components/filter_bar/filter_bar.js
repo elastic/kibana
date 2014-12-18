@@ -7,6 +7,8 @@ define(function (require) {
 
   var toggleFilter = require('components/filter_bar/lib/toggleFilter');
   var toggleAll = require('components/filter_bar/lib/toggleAll');
+  var invertFilter = require('components/filter_bar/lib/invertFilter');
+  var invertAll = require('components/filter_bar/lib/invertAll');
   var removeFilter = require('components/filter_bar/lib/removeFilter');
   var removeAll = require('components/filter_bar/lib/removeAll');
 
@@ -84,9 +86,11 @@ define(function (require) {
         });
 
         $scope.toggleFilter = toggleFilter($scope);
+        $scope.toggleAll = toggleAll($scope);
+        $scope.invertFilter = invertFilter($scope);
+        $scope.invertAll = invertAll($scope);
         $scope.removeFilter = removeFilter($scope);
         $scope.removeAll = removeAll($scope);
-        $scope.toggleAll = toggleAll($scope);
       }
     };
   });

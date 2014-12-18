@@ -7,9 +7,7 @@ define(function (require) {
       location: 'Courier Fetch Error'
     });
 
-    function RequestErrorHandler() {}
-
-    RequestErrorHandler.prototype.handle = function (req, error) {
+    function handleError(req, error) {
       pendingRequests.push(req);
 
       var handlerCount = 0;
@@ -22,8 +20,8 @@ define(function (require) {
       if (!handlerCount) {
         notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
       }
-    };
+    }
 
-    return RequestErrorHandler;
+    return handleError;
   };
 });

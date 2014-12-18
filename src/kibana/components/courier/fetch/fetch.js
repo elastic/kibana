@@ -8,14 +8,13 @@ define(function (require) {
       segmented: Private(require('components/courier/fetch/strategy/segmented'))
     };
 
-    var RequestErrorHandler = Private(require('components/courier/fetch/_request_error_handler'));
     var pendingRequests = Private(require('components/courier/_pending_requests'));
     var fetchThese = Private(require('components/courier/fetch/_fetch_these'));
 
     function fetchPending(strategy) {
       var requests = strategy.getPendingRequests(pendingRequests);
       if (!requests.length) return Promise.resolve();
-      else return fetchThese(requests, new RequestErrorHandler());
+      else return fetchThese(requests);
     }
 
     /**
@@ -41,12 +40,8 @@ define(function (require) {
       var defer = Promise.defer();
 
       fetchThese([
-        {
-          strategy: strategy,
-          source: source,
-          defer: defer
-        }
-      ], new RequestErrorHandler());
+        source._createRequest(defer.resolve)
+      ]);
 
       return defer.promise;
     }
@@ -66,12 +61,10 @@ define(function (require) {
     this.search = fetchASource;
 
     /**
-     * Fetch a list of pendingRequests
+     * Fetch a list of requests
      * @param {string} type - the type name for the sources in the requests
      * @param {array} reqs - the requests to fetch
      */
-    this.these = function (reqs) {
-      return fetchThese(reqs, new RequestErrorHandler());
-    };
+    this.these = fetchThese;
   };
 });

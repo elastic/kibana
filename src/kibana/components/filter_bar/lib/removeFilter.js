@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var remapFilters = require('./remapFilters');
   return function ($scope) {
     /**
      * Removes the filter from the searchSource

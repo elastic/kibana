@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var dedupFilters = require('./lib/dedupFilters');
+  var uniqFilters = require('./lib/uniqFilters');
 
   return function (Notifier) {
     return function ($state) {
@@ -28,6 +29,7 @@ define(function (require) {
 
           if (!filters.length) return;
 
+          filters = uniqFilters(filters);
           filters = dedupFilters($state.filters, filters);
           // We need to add a bunch of filter deduping here.
           $state.$newFilters = filters;
