@@ -7,9 +7,10 @@ define(function (require) {
 
   require('directives/input_datetime');
   require('components/timepicker/quick_ranges');
+  require('components/timepicker/refresh_intervals');
   require('components/timepicker/time_units');
 
-  module.directive('kbnTimepicker', function (quickRanges, timeUnits) {
+  module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {
       restrict: 'E',
       scope: {
@@ -33,19 +34,9 @@ define(function (require) {
           return _.filter(quickRanges, {section: section});
         });
 
-        $scope.refreshIntervals = [
-          { value : 0, display: 'Off'},
-          { value : 5000, display: '5 seconds'},
-          { value : 10000, display: '10 seconds'},
-          { value : 30000, display: '30 seconds'},
-          { value : 60000, display: '1 minute'},
-          { value : 300000, display: '5 minutes'},
-          { value : 900000, display: '15 minutes'},
-          { value : 1800000, display: '30 minutes'},
-          { value : 3600000, display: '1 hour'},
-          { value : 7200000, display: '2 hour'},
-          { value : 86400000, display: '1 day'}
-        ];
+        $scope.refreshLists = _.map(_.uniq(_.pluck(refreshIntervals, 'section')), function (section) {
+          return _.filter(refreshIntervals, {section: section});
+        });
 
         $scope.relative = {
           count: 1,
