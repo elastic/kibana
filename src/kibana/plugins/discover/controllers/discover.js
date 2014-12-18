@@ -88,6 +88,7 @@ define(function (require) {
 
     var stateDefaults = {
       query: initialQuery || '',
+      sort: savedSearch.sort || [],
       columns: savedSearch.columns || ['_source'],
       index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
@@ -245,6 +246,7 @@ define(function (require) {
       .then(function () {
         savedSearch.id = savedSearch.title;
         savedSearch.columns = $scope.state.columns;
+        savedSearch.sort = $scope.state.sort;
 
         return savedSearch.save()
         .then(function () {
