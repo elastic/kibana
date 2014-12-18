@@ -5,6 +5,7 @@ define(function (require) {
   var settingsHtml = require('text!plugins/discover/partials/settings.html');
   var saveHtml = require('text!plugins/discover/partials/save_search.html');
   var loadHtml = require('text!plugins/discover/partials/load_search.html');
+  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -175,7 +176,8 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        $scope.$watch('state.filters', function (filters) {
+        $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (onlyDisabled(newFilters, oldFilters)) return;
           $scope.fetch();
         });
 
