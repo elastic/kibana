@@ -96,6 +96,7 @@
   <filter-bar state="state"></filter-bar>
 
   <div class="vis-editor-content">
+
     <vis-editor-sidebar
       ng-if="!appEmbedded"
       vis="editableVis"
@@ -104,7 +105,10 @@
     </vis-editor-sidebar>
 
     <div class="vis-editor-canvas" ng-class="{ embedded: appEmbedded }">
-      <h3 class="vis-editor-canvas-title" ng-if="savedVis.id" bindonce bo-bind="savedVis.title"></h3>
+      <div class="visualize-info" ng-if="savedVis.id">
+        <span bindonce bo-bind="savedVis.title"></span>
+      </div>
+
       <visualize vis="vis" editable-vis="editableVis"  search-source="savedVis.searchSource"></visualize>
     </div>
   </div>

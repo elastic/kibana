@@ -43,7 +43,13 @@
       <filter-bar state="state"></filter-bar>
     </div>
     <div class="row">
-      <div class="discover-hits"><strong>{{hits || 0}}</strong> hits</div>
+      <div class="discover-info">
+        <span ng-show="opts.savedSearch.id" class="discover-info-title">
+          <span bindonce bo-bind="opts.savedSearch.title"></span>
+          <i tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo small"></i>
+        </span>
+        <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong> hits
+      </div>
 
       <div class="col-md-2 sidebar-container">
         <disc-field-chooser
@@ -121,10 +127,6 @@
 
       <!-- result -->
       <div class="col-md-10 results" ng-show="resultState === 'ready'">
-        <h3 ng-show="opts.savedSearch.id">
-          <span bindonce bo-bind="opts.savedSearch.title"></span>
-          <i tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo smallest small"></i>
-        </h3>
         <div class="discover-timechart" ng-if="opts.timefield">
           <center class="small">
             <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
