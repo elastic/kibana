@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var SegmentedState = Private(require('components/courier/fetch/segmented_state'));
+    var pendingRequests = Private(require('components/courier/_pending_requests'));
 
     // extend the client to behave well for this strategy
     es.segmentSafeMsearch = function (params) {
@@ -18,13 +19,12 @@ define(function (require) {
     };
 
     // extend the searchStrategy with simple pojo merging
-    return _.assign({}, searchStrategy, {
+    return _.assign(Object.create(searchStrategy), {
       clientMethod: 'segmentSafeMsearch',
 
       getSourceStateFromRequest: function (req) {
         if (!(req.segmented instanceof SegmentedState)) {
-          // first request, setup the SegmentedState
-          req.segmented = new SegmentedState(req.source, req.init);
+          this._setupRequest(req);
         }
 
         return req.segmented.getSourceStateFromRequest(req);
@@ -49,22 +49,6 @@ define(function (require) {
         }).join('\n') + '\n';
       },
 
-      /**
-       * Resolve a single request using a single response from an msearch
-       * @param  {object} req - The request object, with a defer and source property
-       * @param  {object} resp - An object from the mget response's "docs" array
-       * @return {Promise} - the promise created by responding to the request
-       */
-      resolveRequest: function (req, resp) {
-        if (resp && resp.hits) {
-          resp.hits.hits.forEach(function (hit) {
-            hit._source = _.flattenWith('.', hit._source);
-          });
-        }
-
-        req.defer.resolve(resp);
-      },
-
       getIncompleteRequests: function (pendingRequests) {
         var self = this;
         return self._filterPending(pendingRequests, function (req) {
@@ -72,12 +56,42 @@ define(function (require) {
         });
       },
 
+      /**
+       * Resolve a single request using a single response from an msearch
+       * @param  {object} req - The request object, with a defer and source property
+       * @param  {object} resp - An object from the mget response's "docs" array
+       * @return {Promise} - the promise created by responding to the request
+       */
+      resolveRequest: function (req, resp) {
+        if (req.next) {
+          req.next.ready = true;
+        }
+
+        return searchStrategy.resolveRequest(req, resp);
+      },
+
       _qualifyPending: function (req) {
         return req.segmented === true;
       },
 
       _qualifyIncomplete: function (req) {
-        return req.segmented instanceof SegmentedState;
+        return (req.segmented instanceof SegmentedState) && req.ready;
+      },
+
+      _setupRequest: function (req) {
+        req.segmented = new SegmentedState(req.source, req.init);
+
+        // generate upcomming requests and push into pending requests
+        _.range(req.segmented.all.length - 1).reduce(function (prev) {
+          var next = prev.next = req.source._createRequest(prev.defer);
+
+          next.strategy = prev.strategy;
+          next.segmented = req.segmented;
+          next.ready = false;
+
+          pendingRequests.push(next);
+          return next;
+        }, req);
       }
 
     });

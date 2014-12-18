@@ -36,8 +36,7 @@ define(function (require) {
         }
       };
 
-      this.emitChain = Promise.resolve();
-      this.emit('status', this._statusReport(null));
+      this.emitChain = this.emit('status', this._statusReport(null));
     }
 
     SegmentedState.prototype._statusReport = function (active) {
@@ -51,45 +50,55 @@ define(function (require) {
 
     SegmentedState.prototype.getSourceStateFromRequest = function (req) {
       var self = this;
+      var emits = [];
+
       return self.promiseForFlatSource.then(function (flatSource) {
+        var first = self.queue.length === self.all.length;
+        var index = self.queue.shift();
+        var last = self.queue.length === 0;
+
+        // update the status on every iteration
+        self.emitChain = self.emitChain.then(function () {
+          emits.push(['status', self._statusReport(index)]);
+        });
+
+        var requestersDefer = req.defer;
+        var ourDefer = req.defer = Promise.defer();
+
+        ourDefer.promise
+        .then(function (resp) {
+          if (resp) self._consumeSegment(resp);
+
+          req.resp = _.omit(self.mergedResponse, '_bucketIndex');
+          self.complete.push(index);
+
+          if (resp) {
+            if (first) emits.push(['first', resp]);
+            emits.push(['segment', resp]);
+            emits.push(['mergedSegment', req.resp]);
+          }
+
+          self.emitChain = self.emitChain
+          .then(function nextEmit() {
+            var emit = emits.shift();
+            if (emit) {
+              return self.emit(emit[0], emit[1]).then(nextEmit);
+            }
+          });
+
+          if (last) {
+            emits.push(['complete']);
+            self.emitChain = self.emitChain.then(function () {
+              requestersDefer.resolve(req.resp);
+            });
+          }
+        });
+
         var state = _.cloneDeep(flatSource);
-        state.index = self.queue.shift();
+        state.index = index;
         if (self.remainingSize !== false) {
           state.body.size = self.remainingSize;
         }
-
-        // update the status on every iteration
-        var initialStatus = self.emit('status', self._statusReport(state.index));
-
-        var resolveRequest = req.resolve;
-        req.resolve = function (resp) {
-          // wait for inital status event just in case
-          return initialStatus.then(function () {
-            return Promise.resolve(resp && self._consumeSegment(resp))
-            .then(function () {
-              req.resp = _.omit(self.mergedResponse, '_bucketIndex');
-              self.complete.push(state.index);
-
-              if (self.queue.length) {
-                var nextReq = self.source._createRequest(resolveRequest);
-                nextReq.strategy = req.strategy;
-                nextReq.segmented = self;
-                pendingRequests.push(nextReq);
-                return;
-              }
-
-              return self
-              .emit('complete')
-              .then(function () {
-                return Promise.delay(2000);
-              })
-              .then(function () {
-                resolveRequest(req.resp);
-              });
-            });
-          });
-
-        };
 
         return state;
       });
@@ -97,21 +106,11 @@ define(function (require) {
 
 
     SegmentedState.prototype._consumeSegment = function (resp) {
-      var self = this;
-      var first = !self.complete.length;
-      var last = self;
-
-
-      if (self.remainingSize !== false) {
-        self.remainingSize -= resp.hits.hits.length;
+      if (this.remainingSize !== false) {
+        this.remainingSize -= resp.hits.hits.length;
       }
 
-      self._mergeResponse(self.mergedResponse, resp);
-
-      return Promise.all([
-        first && self.emit('first', resp),
-        self.emit('segment', resp)
-      ]);
+      this._mergeResponse(this.mergedResponse, resp);
     };
 
 
