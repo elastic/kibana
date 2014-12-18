@@ -15,7 +15,10 @@ define(function (require) {
      */
     var searchLooper = new Looper(null, function () {
       // fatal if refreshes take longer then the refresh interval
-      if (_activeAutoSearch) return notif.fatal(new errors.HastyRefresh());
+      if (_activeAutoSearch) {
+        notif.warning('Skipping search attempt because previous search request has not completed');
+        return;
+      }
 
       return _activeAutoSearch = Promise.all([fetch.searches(), fetch.segmentedSearches()])
       .finally(function (res) {
