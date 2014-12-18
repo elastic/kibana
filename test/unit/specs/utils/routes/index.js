@@ -4,7 +4,7 @@ define(function (require) {
   var RouteManager = require('routes').RouteManager;
   var routes; // will contain an new instance of RouteManager for each test
   var sinon = require('test_utils/auto_release_sinon');
-  var getRouteProvider = require('./_get_route_provider');
+  var getRouteProvider = require('test/unit/specs/utils/routes/_get_route_provider');
   var chainableMethods = [
     { name: 'when', args: ['', {}] },
     { name: 'otherwise', args: [{}] },

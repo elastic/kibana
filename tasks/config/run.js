@@ -1,8 +1,14 @@
 module.exports = function (grunt) {
   var jrubyPath = grunt.config.get('jrubyPath');
   var jruby = jrubyPath + '/bin/jruby';
-  var cmd =  grunt.config.get('src') + '/server/bin/initialize';
-
+  var cmd = grunt.config.get('src') + '/server/bin/initialize';
+  var args = ['-H', '127.0.0.1'];
+  if (process.platform === 'win32') {
+    // Path to ruby file to run
+    args.unshift(cmd);
+    // Spawn must take executable
+    cmd = 'ruby.exe';
+  }
   // config:
   // wait: should task wait until the script exits before finishing
   // ready: if not waiting, then how do we know the process is ready?
@@ -15,8 +21,6 @@ module.exports = function (grunt) {
     quiet: true,
     failOnError: true
   };
-
-  var args = ['-H', '127.0.0.1'];
 
   var config = {
     mri_server: {
