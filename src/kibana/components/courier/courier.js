@@ -16,6 +16,7 @@ define(function (require) {
 
       var pendingRequests = Private(require('components/courier/_pending_requests'));
 
+      var fetch = Private(require('components/courier/fetch/fetch'));
       var docLooper = self.docLooper = Private(require('components/courier/looper/doc'));
       var searchLooper = self.searchLooper = Private(require('components/courier/looper/search'));
 
@@ -57,7 +58,11 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        return searchLooper.run();
+        searchLooper.start();
+        return Promise.all([
+          fetch.searches(),
+          fetch.segmentedSearches()
+        ]);
       };
 
 
