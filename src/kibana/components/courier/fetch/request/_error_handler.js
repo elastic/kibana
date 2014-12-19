@@ -1,6 +1,5 @@
 define(function (require) {
   return function RequestErrorHandlerFactory(Private, Notifier) {
-    var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
 
     var notify = new Notifier({
@@ -8,8 +7,6 @@ define(function (require) {
     });
 
     function handleError(req, error) {
-      requestQueue.push(req);
-
       var handlerCount = 0;
       errorHandlers.splice(0).forEach(function (handler) {
         if (handler.source !== req.source) return errorHandlers.push(handler);

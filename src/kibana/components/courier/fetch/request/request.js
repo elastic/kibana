@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var errors = require('errors');
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var requestErrorHandler = Private(require('components/courier/fetch/request/_error_handler'));
 
     function AbstractReq(source, defer) {
@@ -13,11 +14,13 @@ define(function (require) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.started = false;
+
+      requestQueue.push(this);
     }
 
 
     AbstractReq.prototype.isReady = function () {
-      return !this.source._fetchDisabled;
+      return !this.complete && !this.canceled && !this.source._fetchDisabled;
     };
 
 
@@ -41,9 +44,8 @@ define(function (require) {
         source.activeFetchCount = 1;
       }
 
-      var history = source.history;
-      if (history) {
-        history = _.first(history.concat(this), 20);
+      if (source.history) {
+        source.history = _.first(source.history.concat(this), 20);
       }
     };
 
@@ -53,9 +55,26 @@ define(function (require) {
         throw new TypeError('Unable to stop request because it has already stopped');
       }
 
+      _.pull(requestQueue, this);
+
       this.ms = this.moment.diff() * -1;
       this.complete = true;
       this.source.activeFetchCount -= 1;
+    };
+
+
+    AbstractReq.prototype.cancel = function () {
+      this.defer = null;
+      this.canceled = true;
+      _.pull(requestQueue, this);
+    };
+
+
+    AbstractReq.prototype.restart = function () {
+      var clone = this.clone();
+      this.cancel();
+      clone.start();
+      return clone;
     };
 
 
@@ -71,19 +90,13 @@ define(function (require) {
       this.stop();
       this.success = false;
       this.resp = resp;
+      this.clone();
       return requestErrorHandler(this, new errors.FetchFailure(this));
     };
 
 
     AbstractReq.prototype.clone = function () {
       return new this.constructor(this.source, this.defer);
-    };
-
-
-    AbstractReq.prototype.cancel = function () {
-      this.defer = null;
-      this.started = false;
-      this.canceled = true;
     };
 
     return AbstractReq;

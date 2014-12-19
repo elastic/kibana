@@ -21,8 +21,6 @@ define(function (require) {
       notif.warning('Skipping search attempt because previous search request has not completed');
     };
 
-    searchLooper.start();
-
     return searchLooper;
   };
 });

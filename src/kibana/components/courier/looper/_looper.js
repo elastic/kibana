@@ -7,7 +7,6 @@ define(function (require) {
       var _ms = ms === void 0 ? 1500 : ms;
       var _timerId;
       var _started = false;
-      var _loopPromise = true;
       var looper = this;
 
       /**
@@ -115,19 +114,20 @@ define(function (require) {
        * @return {undefined}
        */
       looper._looperOver = function () {
-        if (_loopPromise) {
+        if (looper.active) {
           looper.onHastyLoop();
         }
 
         _timerId = _ms ? $timeout(looper._looperOver, _ms) : null;
-        _loopPromise = Promise
+
+        looper.active = Promise
         .try(fn)
         .catch(function (err) {
           looper.stop();
           notify.fatal(err);
         })
         .finally(function () {
-          _loopPromise = true;
+          looper.active = null;
         });
       };
 

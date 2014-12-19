@@ -4,7 +4,7 @@ define(function (require) {
     function mergeDuplicateRequests(requests) {
       // dedupe requests
       var index = {};
-      return requests.splice(0).filter(function (req) {
+      return requests.filter(function (req) {
         var iid = req.source._instanceid;
         if (!index[iid]) {
           // this request is unique so far

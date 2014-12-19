@@ -20,10 +20,9 @@ define(function (require) {
         // generate requests for all upcomming segments and push into the request queue
         _.range(this.segState.all.length - 1)
         .reduce(function (prev) {
-          var next = prev.next = prev.makeNext();
+          var next = prev.next = prev.clone();
           next.prev = prev;
           next.segState = prev.segState;
-          requestQueue.push(next);
           return next;
         }, this);
       }
@@ -38,9 +37,6 @@ define(function (require) {
       return new SegmentedReq(this.source, this.defer, this.initFn);
     };
 
-    SegmentedReq.prototype.makeNext = SegmentedReq.Super.prototype.clone;
-
-
     SegmentedReq.prototype.strategy = strategy;
 
 
@@ -49,9 +45,38 @@ define(function (require) {
       return parent && !this.prev;
     };
 
+    SegmentedReq.prototype.stop = function (resp) {
+      SegmentedReq.Super.prototype.stop.call(this, resp);
+
+      if (!this.prev) {
+        // keep the first request "pending" until the last request is complete
+        this.isReady = _.constant(true);
+        requestQueue.push(this);
+      }
+
+      if (!this.next) {
+        // walk back and make sure all previous requests are removed from queue
+        var prev = { prev: this };
+        while (prev = prev.prev) {
+          _.pull(requestQueue, prev);
+        }
+      }
+    };
+
+    SegmentedReq.prototype.resolve = function (resp) {
+      SegmentedReq.Super.prototype.resolve(resp);
+    };
 
     SegmentedReq.prototype.isIncomplete = function () {
-      return this.prev && this.prev.complete === true;
+      return !this.complete && this.prev && this.prev.complete === true;
+    };
+
+    SegmentedReq.prototype.cancel = function () {
+      SegmentedReq.Super.prototype.cancel.call(this);
+      if (this.next) {
+        this.next.cancel();
+        _.pull(requestQueue, this.next);
+      }
     };
 
     return SegmentedReq;

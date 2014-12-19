@@ -4,7 +4,6 @@ define(function (require) {
 
     var errors = require('errors');
     var Notifier = require('components/notify/_notifier');
-
     var requestQueue = Private(require('components/courier/_request_queue'));
     var forEachStrategy = Private(require('components/courier/fetch/_for_each_strategy'));
     var mergeDuplicateRequests = Private(require('components/courier/fetch/_merge_duplicate_requests'));
@@ -29,18 +28,36 @@ define(function (require) {
     }
 
     function reqComplete(req, resp) {
-      _.pull(requestQueue, req);
-
       if (resp.timed_out) {
         notify.warning(new errors.SearchTimeout());
       }
 
+      if (req.canceled) return;
       return req[resp.error ? 'reject' : 'resolve'](resp);
     }
 
+    function startAndRestart(requests) {
+      var started = [];
+
+      requests.forEach(function (req) {
+        if (req.canceled) {
+          return;
+        }
+
+        if (req.started) {
+          req = req.restart();
+        } else {
+          req.start();
+        }
+
+        started.push(req);
+      });
+
+      return started;
+    }
+
     function executeFetch(requests, strategy) {
-      _.invoke(requests, 'start');
-      var uniq = mergeDuplicateRequests(requests);
+      var uniq = mergeDuplicateRequests(startAndRestart(requests));
       var states;
       var responses;
 

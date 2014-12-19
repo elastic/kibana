@@ -123,8 +123,7 @@ define(function (require) {
       var self = this;
 
       return new PromiseEmitter(function (resolve, reject, defer) {
-        var req = self._createRequest(defer);
-        requestQueue.push(req);
+        self._createRequest(defer);
       }, handler);
     };
 
@@ -155,20 +154,22 @@ define(function (require) {
     /**
      * Fetch just this source ASAP
      *
-     * ONLY USE IF YOU NEED THE RESULTS OTHERWISE USE .fetchPending()
-     * TO TRIGGER FETCHING ALL PENDING REQUESTS
+     * ONLY USE IF YOU WILL BE USING THE RESULTS
+     * provided by the returned promise, otherwise
+     * call #fetchPending()
      *
      * @async
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
-      var req = _.first(self._myPending());
+      var req = _.first(self._myPendingReq());
+
       if (!req) {
         req = self._createRequest();
-        requestQueue.push(req);
       }
 
-      self.fetchPending();
+      courierFetch.these([req]);
+
       return req.defer.promise;
     };
 
@@ -177,18 +178,15 @@ define(function (require) {
      * @async
      */
     SourceAbstract.prototype.fetchPending = function () {
-      return courierFetch.these(this._myPending());
+      return courierFetch.these(this._myPendingReq());
     };
 
     /**
      * Cancel all pending requests for this dataSource
      * @return {undefined}
      */
-    SourceAbstract.prototype.cancelPending = function (includeStarted) {
-      _(this._myPending(includeStarted)).forEach(function (req) {
-        req.cancel();
-        _.pull(requestQueue, req);
-      });
+    SourceAbstract.prototype.cancelPendingReq = function () {
+      _.invoke(this._myPendingReq(), 'cancel');
     };
 
     /**
@@ -196,15 +194,15 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.destroy = function () {
-      this.cancelPending(true);
+      this.cancelPendingReq();
     };
 
     /*****
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myPending = function (includeStarted) {
-      return _.where(requestQueue, { source: this, started: !!includeStarted });
+    SourceAbstract.prototype._myPendingReq = function (includeStarted) {
+      return _.where(requestQueue.getPending(), { source: this });
     };
 
     SourceAbstract.prototype._createRequest = function (defer) {

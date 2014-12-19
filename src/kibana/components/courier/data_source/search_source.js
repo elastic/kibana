@@ -4,7 +4,6 @@ define(function (require) {
     var _ = require('lodash');
     var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
-    var requestQueue = Private(require('components/courier/_request_queue'));
     var SearchRequest = Private(require('components/courier/fetch/request/search'));
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
 
@@ -131,14 +130,11 @@ define(function (require) {
     SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
       var self = this;
       return Promise.try(function addRequest() {
-        var defer = Promise.defer();
-        var req = new SegmentedRequest(self, defer, initFunction);
-
-        requestQueue.push(req);
+        var req = new SegmentedRequest(self, Promise.defer(), initFunction);
 
         // return promises created by the completion handler so that
         // errors will bubble properly
-        return defer.promise.then(addRequest);
+        return req.defer.promise.then(addRequest);
       });
     };
 

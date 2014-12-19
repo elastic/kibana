@@ -232,8 +232,10 @@ define(function (require) {
        * @return {undefined}
        */
       self.destroy = function () {
-        docSource.cancelPending();
-        if (self.searchSource) self.searchSource.cancelPending();
+        docSource.cancelPendingReq();
+        if (self.searchSource) {
+          self.searchSource.cancelPendingReq();
+        }
       };
 
       /**
