@@ -31,6 +31,8 @@ define(function (require) {
           default:
             if (_.isArray(config.get(conf.name))) {
               conf.array = true;
+            } else if (_.isObject(config.get(conf.name))) {
+              conf.json = true;
             } else if (typeof config.get(conf.name) === 'boolean') {
               conf.bool = true;
             } else {
