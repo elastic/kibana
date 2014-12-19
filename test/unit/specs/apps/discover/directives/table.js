@@ -116,26 +116,30 @@ define(function (require) {
         });
 
         it('should sort asc by default, then by desc if already sorting', function (done) {
-          var field = 'bytes';
+          var fields = ['bytes', '@timestamp'];
 
           // Should not be sorted at first
           expect($scope.sorting).to.eql(undefined);
-          expect($scope.headerClass(field)).to.contain('fa-sort');
+          expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
 
-          $scope.sort(field);
-          expect($scope.sorting).to.eql([field, 'asc']);
-          expect($scope.headerClass(field)).to.contain('fa-sort-up');
+          $scope.sort(fields[0]);
+          expect($scope.sorting).to.eql([fields[0], 'asc']);
+          expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
 
-          $scope.sort(field);
-          expect($scope.sorting).to.eql([field, 'desc']);
-          expect($scope.headerClass(field)).to.contain('fa-sort-down');
+          $scope.sort(fields[0]);
+          expect($scope.sorting).to.eql([fields[0], 'desc']);
+          expect($scope.headerClass(fields[0])).to.contain('fa-sort-down');
 
-          $scope.sort(field);
-          expect($scope.sorting).to.eql([field, 'asc']);
-          expect($scope.headerClass(field)).to.contain('fa-sort-up');
+          $scope.sort(fields[0]);
+          expect($scope.sorting).to.eql([fields[0], 'asc']);
+          expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
 
-          // Should show the default sort for any other field
-          expect($scope.headerClass('@timestamp')).to.contain('fa-sort');
+          $scope.sort(fields[1]);
+          expect($scope.sorting).to.eql([fields[1], 'asc']);
+          expect($scope.headerClass(fields[1])).to.contain('fa-sort-up');
+
+          // Should show the default sort for any other fields[0]
+          expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
 
           done();
         });
