@@ -33,15 +33,14 @@ define(function (require) {
           quoteValues: config.get('csv:quoteValues')
         };
 
-        self.exportAsCsv = function () {
-          var csv = new Blob([self.toCsv()], { type: 'text/plain' });
+        self.exportAsCsv = function (formatted) {
+          var csv = new Blob([self.toCsv(formatted)], { type: 'text/plain' });
           self._saveAs(csv, self.csv.filename);
         };
 
-
-        self.toCsv = function () {
-          var rows = $scope.table.rows;
-          var columns = $scope.table.columns;
+        self.toCsv = function (formatted) {
+          var rows = formatted ? $scope.formattedRows : $scope.table.rows;
+          var columns = formatted ? $scope.formattedColumns : $scope.table.columns;
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
           var allDoubleQuoteRE = /"/g;
 
