@@ -2,16 +2,16 @@ define(function (require) {
   return function DocRequestProvider(Private) {
     var _ = require('lodash');
 
-    var strategy = Private(require('components/courier/fetch/strategy/doc'));
+    var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
     var AbstractRequest = Private(require('components/courier/fetch/request/request'));
 
     _(DocRequest).inherits(AbstractRequest);
     function DocRequest(source, defer) {
       DocRequest.Super.call(this, source, defer);
-    }
 
-    DocRequest.prototype.type = 'doc';
-    DocRequest.prototype.strategy = strategy;
+      this.type = 'doc';
+      this.strategy = docStrategy;
+    }
 
     DocRequest.prototype.canStart = function () {
       var parent = DocRequest.Super.prototype.canStart.call(this);
