@@ -18,6 +18,7 @@ define(function (require) {
       // segmented request specific state
       this._initFn = initFn;
       this._totalSize = false;
+      this._remainingSize = false;
       this._direction = 'desc';
       this._handle = new SegmentedHandle(this);
 
@@ -25,7 +26,6 @@ define(function (require) {
       // parameters via the handle
       if (_.isFunction(initFn)) initFn(this._handle);
 
-      this._remainingSize = this._totalSize !== false ? this._totalSize : false;
       this._createQueue();
       this._all = this._queue.slice(0);
       this._complete = [];
@@ -42,7 +42,7 @@ define(function (require) {
       };
 
       // prevent the source from changing between requests
-      this._flattenSource = _.once(function () { return this.source._flatten(); });
+      this._getFlattenedSource = _.once(this._getFlattenedSource);
 
       // send out the initial status
       this._reportStatus();
@@ -65,7 +65,7 @@ define(function (require) {
     SegmentedReq.prototype.getFetchParams = function () {
       var self = this;
 
-      return self._flattenSource()
+      return self._getFlattenedSource()
       .then(function (flatSource) {
         var params = _.cloneDeep(flatSource);
         var index = self._active = self._queue.shift();
@@ -118,6 +118,20 @@ define(function (require) {
         complete: this._complete.length,
         remaining: this._queue.length,
         active: this._active
+      });
+    };
+
+    SegmentedReq.prototype._getFlattenedSource = function () {
+      var self = this;
+
+      return self.source._flatten()
+      .then(function (flatSource) {
+        var size = _.parseInt(_.deepGet(flatSource, 'body.size'));
+        if (_.isNumber(size)) {
+          self._totalSize = self._remainingSize = size;
+        }
+
+        return flatSource;
       });
     };
 
