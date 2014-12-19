@@ -51,7 +51,7 @@ define(function (require) {
 
             if (keyMatches) {
               // resolve the request with a copy of the response
-              req.resolve(_.cloneDeep(fetchResp));
+              req.handleResponse(_.cloneDeep(fetchResp));
               return;
             }
 
