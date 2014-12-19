@@ -186,7 +186,7 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.cancelPendingReq = function () {
-      _.invoke(this._myPendingReq(), 'cancel');
+      _.invoke(this._myPendingReq(), 'abort');
     };
 
     /**
