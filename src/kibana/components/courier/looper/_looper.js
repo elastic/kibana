@@ -1,13 +1,13 @@
 define(function (require) {
-  return function LooperFactory($timeout, Notifier) {
+  return function LooperFactory($timeout, Notifier, Promise) {
     var _ = require('lodash');
     var notify = new Notifier();
 
     function Looper(ms, fn) {
       var _ms = ms === void 0 ? 1500 : ms;
-      var _fns = [fn || _.noop];
       var _timerId;
       var _started = false;
+      var _loopPromise = true;
       var looper = this;
 
       /**
@@ -35,31 +35,6 @@ define(function (require) {
        */
       looper.pause = function () {
         if (_timerId) _timerId = $timeout.cancel(_timerId);
-        return this;
-      };
-
-      /**
-       * Set the function that will be executed at the
-       * end of each looper.
-       *
-       * @param  {function} fn
-       * @chainable
-       */
-      looper.add = function (fn) {
-        _fns.push(fn);
-        return this;
-      };
-
-      /**
-       * Set the function that will be executed at the
-       * end of each looper.
-       *
-       * @param  {function} fn
-       * @chainable
-       */
-      looper.remove = function (fn) {
-        var i = _fns.indexOf(fn);
-        if (i > -1) _fns.splice(i, 1);
         return this;
       };
 
@@ -122,6 +97,16 @@ define(function (require) {
       };
 
       /**
+       * Called when the loop is executed before the previous
+       * run has completed.
+       *
+       * @return {undefined}
+       */
+      looper.onHastyLoop = function () {
+        console.log('hasty loop', looper);
+      };
+
+      /**
        * Wraps _fn so that _fn can be changed
        * without rescheduling and schedules
        * the next itteration
@@ -130,18 +115,20 @@ define(function (require) {
        * @return {undefined}
        */
       looper._looperOver = function () {
-        try {
-          _.callEach(_fns);
-        } catch (e) {
-          looper.stop();
-          if (typeof console === 'undefined' || !console.error) {
-            throw e;
-          } else {
-            console.error(e.stack || e.message || e);
-          }
+        if (_loopPromise) {
+          looper.onHastyLoop();
         }
 
         _timerId = _ms ? $timeout(looper._looperOver, _ms) : null;
+        _loopPromise = Promise
+        .try(fn)
+        .catch(function (err) {
+          looper.stop();
+          notify.fatal(err);
+        })
+        .finally(function () {
+          _loopPromise = true;
+        });
       };
 
       /**

@@ -14,17 +14,14 @@ define(function (require) {
      * @type {Looper}
      */
     var searchLooper = new Looper(null, function () {
-      // fatal if refreshes take longer then the refresh interval
-      if (_activeAutoSearch) {
-        notif.warning('Skipping search attempt because previous search request has not completed');
-        return;
-      }
+      return Promise.all([fetch.searches(), fetch.segmentedSearches()]);
+    });
 
-      return _activeAutoSearch = Promise.all([fetch.searches(), fetch.segmentedSearches()])
-      .finally(function (res) {
-        _activeAutoSearch = null;
-      });
-    }).start();
+    searchLooper.onHastyLoop = function () {
+      notif.warning('Skipping search attempt because previous search request has not completed');
+    };
+
+    searchLooper.start();
 
     return searchLooper;
   };
