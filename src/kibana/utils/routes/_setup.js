@@ -1,5 +1,6 @@
 define(function (require) {
   return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope) {
+    var _ = require('lodash');
     var errors = require('errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
     var NoDefinedIndexPatterns = errors.NoDefinedIndexPatterns;
@@ -21,12 +22,20 @@ define(function (require) {
           if (!path.match(allowedRoutesRE)) {
             return courier.indexPatterns.getIds()
             .then(function (patterns) {
-              if (!config.get('defaultIndex')) {
-                throw new NoDefaultIndexPattern();
-              } else {
-                firstNoDefaultError = false;
-                return rootSearchSource.loadDefault();
+              var defined = !!config.get('defaultIndex');
+              var exists = defined && _.contains(patterns, defined);
+
+              if (defined && !exists) {
+                config.clear('defaultIndex');
+                defined = false;
               }
+
+              if (defined) {
+                throw new NoDefaultIndexPattern();
+              }
+
+              firstNoDefaultError = false;
+              return rootSearchSource.loadDefault();
             });
           }
         });
