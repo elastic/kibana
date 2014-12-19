@@ -37,53 +37,6 @@ define(function (require) {
        */
       getResponses: function (resp) {
         return resp.responses;
-      },
-
-      /**
-       * Resolve a single request using a single response from an msearch
-       * @param  {object} req - The request object, with a defer and source property
-       * @param  {object} resp - An object from the mget response's "docs" array
-       * @return {Promise} - the promise created by responding to the request
-       */
-      resolveRequest: function (req, resp) {
-        if (resp && resp.hits) {
-          resp.hits.hits.forEach(function (hit) {
-            hit._source = _.flattenWith('.', hit._source);
-          });
-        }
-        req.defer.resolve(resp);
-      },
-
-      /**
-       * Get the doc requests from the courier that are ready to be fetched
-       * @param {array} pendingRequests - The list of pending requests, from
-       *                                  which the requests to make should be
-       *                                  removed
-       * @return {array} - The filtered request list, pulled from
-       *                   the courier's _pendingRequests queue
-       */
-      getPendingRequests: function (pendingRequests) {
-        var self = this;
-        return this._filterPending(pendingRequests, function (req) {
-          return self._validSearch(req) && self._qualifyPending(req);
-        });
-      },
-
-      _filterPending: function (pendingRequests, filter) {
-        return pendingRequests.splice(0).filter(function (req) {
-          if (filter(req)) return true;
-          else pendingRequests.push(req);
-        });
-      },
-
-      _validSearch: function (req) {
-        var isSearch = req.source._getType() === 'search';
-        var isEnabled = isSearch && !req.source._fetchDisabled;
-        return isSearch && isEnabled;
-      },
-
-      _qualifyPending: function (req) {
-        return !req.segmented;
       }
     };
   };

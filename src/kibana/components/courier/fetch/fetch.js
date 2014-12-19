@@ -8,11 +8,11 @@ define(function (require) {
       segmented: Private(require('components/courier/fetch/strategy/segmented'))
     };
 
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var fetchThese = Private(require('components/courier/fetch/_fetch_these'));
 
     function fetchPending(strategy) {
-      var requests = strategy.getPendingRequests(pendingRequests);
+      var requests = requestQueue.getPending(strategy);
       if (!requests.length) return Promise.resolve();
       else return fetchThese(requests);
     }

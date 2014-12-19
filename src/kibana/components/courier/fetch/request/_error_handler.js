@@ -1,6 +1,6 @@
 define(function (require) {
   return function RequestErrorHandlerFactory(Private, Notifier) {
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
 
     var notify = new Notifier({
@@ -8,7 +8,7 @@ define(function (require) {
     });
 
     function handleError(req, error) {
-      pendingRequests.push(req);
+      requestQueue.push(req);
 
       var handlerCount = 0;
       errorHandlers.splice(0).forEach(function (handler) {

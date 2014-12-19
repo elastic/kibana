@@ -2,7 +2,6 @@ define(function (require) {
   return function CourierSegmentedStateProvider(es, Private, Promise, Notifier, timefilter) {
     var _ = require('lodash');
     var Events = Private(require('factories/events'));
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
 
     var notify = new Notifier({
       location: 'Segmented Fetch'
@@ -13,7 +12,6 @@ define(function (require) {
       SegmentedState.Super.call(this);
 
       this.source = source;
-      this.promiseForFlatSource = this.source._flatten();
       this.totalSize = false;
       this.direction = 'desc';
 
@@ -37,6 +35,10 @@ define(function (require) {
       };
 
       this.emitChain = this.emit('status', this._statusReport(null));
+
+      this.getFlattenedSource = _.once(function () {
+        return this.source._flatten();
+      });
     }
 
     SegmentedState.prototype._statusReport = function (active) {
@@ -52,7 +54,7 @@ define(function (require) {
       var self = this;
       var emits = [];
 
-      return self.promiseForFlatSource.then(function (flatSource) {
+      return self.getFlattenedSource().then(function (flatSource) {
         var first = self.queue.length === self.all.length;
         var index = self.queue.shift();
         var last = self.queue.length === 0;

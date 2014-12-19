@@ -26,10 +26,12 @@ define(function (require) {
 
   // ensure that the kibana module requires ui.bootstrap
   require('modules').get('kibana', ['ui.bootstrap'])
-  .directive('kibana', function ($rootScope, $injector, Promise, config, kbnSetup) {
+  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
     return {
       template: require('text!plugins/kibana/kibana.html'),
+      controllerAs: 'kibana',
       controller: function ($scope) {
+        var _ = require('lodash');
         var self = $rootScope.kibana = this;
         var notify = new Notifier({ location: 'Kibana' });
 
@@ -37,6 +39,20 @@ define(function (require) {
         $rootScope.$on('$routeChangeError', function (event, next, prev, err) {
           notify.fatal(err);
         });
+
+        $scope.courierRequestQueue = Private(require('components/courier/_request_queue'));
+        $scope.courierRequestStats = {};
+
+        $rootScope.$watchCollection('courierRequestQueue', function (queue) {
+          _.forOwn($scope.courierRequestStats, function (v, name, stats) {
+            stats[name] = 0;
+          });
+
+          queue.forEach(function (req) {
+            $scope.courierRequestStats[req.type] = ($scope.courierRequestStats[req.type] || 0) + 1;
+          });
+        });
+
 
         // run init functions before loading the mixins, so that we can ensure that
         // the environment is ready for them to get and use their dependencies

@@ -14,7 +14,7 @@ define(function (require) {
       var DocSource = Private(require('components/courier/data_source/doc_source'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
-      var pendingRequests = Private(require('components/courier/_pending_requests'));
+      var requestQueue = Private(require('components/courier/_request_queue'));
 
       var fetch = Private(require('components/courier/fetch/fetch'));
       var docLooper = self.docLooper = Private(require('components/courier/looper/doc'));
@@ -111,12 +111,12 @@ define(function (require) {
         searchLooper.stop();
         docLooper.stop();
 
-        [].concat(pendingRequests.splice(0), this._errorHandlers.splice(0))
+        [].concat(requestQueue.splice(0), this._errorHandlers.splice(0))
         .forEach(function (req) {
           req.defer.reject(new Abort());
         });
 
-        if (pendingRequests.length) {
+        if (requestQueue.length) {
           throw new Error('Aborting all pending requests failed.');
         }
       };

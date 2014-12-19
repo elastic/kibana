@@ -35,6 +35,7 @@ define(function (require) {
 
         $scope.refreshIntervals = [
           { value : 0, display: 'Off'},
+          { value : 100, display: 'Near-Realtime'},
           { value : 5000, display: '5 seconds'},
           { value : 10000, display: '10 seconds'},
           { value : 30000, display: '30 seconds'},

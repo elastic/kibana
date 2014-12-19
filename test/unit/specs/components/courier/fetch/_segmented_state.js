@@ -8,7 +8,7 @@ define(function (require) {
   var flatSource;
   var indexPattern;
   var SegmentedState;
-  var pendingRequests;
+  var requestQueue;
   var indices = [
     'logstash-2014.12.14',
     'logstash-2014.12.15',
@@ -23,7 +23,7 @@ define(function (require) {
       Promise = $injector.get('Promise');
       $rootScope = $injector.get('$rootScope');
       SegmentedState = Private(require('components/courier/fetch/segmented_state'));
-      pendingRequests = Private(require('components/courier/_pending_requests'));
+      requestQueue = Private(require('components/courier/_request_queue'));
 
       flatSource = {
         index: indices,
@@ -171,7 +171,7 @@ define(function (require) {
 
           // when pending requests are pushed into the pending
           // request queue, filter out the ones we are interested in
-          sinon.stub(pendingRequests, 'push', function (req) {
+          sinon.stub(requestQueue, 'push', function (req) {
             if (req.segmented === state) nextRequest(req);
           });
 

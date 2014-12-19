@@ -1,71 +1,96 @@
 define(function (require) {
-  return function FetchTheseProvider(Private, Promise, es, Notifier, sessionId, configFile) {
+  return function FetchTheseProvider(Private, Promise, es, sessionId, configFile) {
     var _ = require('lodash');
 
-    var initRequest = Private(require('components/courier/fetch/_init_request'));
-    var reqComplete = Private(require('components/courier/fetch/_request_complete'));
+    var errors = require('errors');
+    var Notifier = require('components/notify/_notifier');
+
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var forEachStrategy = Private(require('components/courier/fetch/_for_each_strategy'));
-    var requestErrorHandler = Private(require('components/courier/fetch/_request_error_handler'));
     var mergeDuplicateRequests = Private(require('components/courier/fetch/_merge_duplicate_requests'));
 
+    var notify = new Notifier({
+      location: 'Courier Fetch'
+    });
 
     function fetchThese(requests) {
-      return forEachStrategy(requests, function (requests, strategy) {
-        requests.forEach(initRequest);
-
-        var uniq = mergeDuplicateRequests(requests);
-        var states;
-        var responses;
-
-        return Promise.map(uniq, function (req) {
-          return strategy.getSourceStateFromRequest(req);
-        })
-        .then(function (_states_) {
-          states = _states_;
-
-          // all requests must have been disabled
-          if (!states.length) return Promise.resolve(false);
-
-          return es[strategy.clientMethod]({
-            timeout: configFile.shard_timeout,
-            preference: sessionId,
-            body: strategy.convertStatesToBody(states)
-          });
-        })
-        .then(strategy.getResponses)
-        .then(function (_responses_) {
-          responses = _responses_;
-
-          return Promise.all(responses.map(function (resp) {
-            var req = uniq.shift();
-            var state = states.shift();
-            if (!req._merged) {
-              req.state = state;
-              return reqComplete(req, resp);
-            } else {
-              return Promise.all(req._merged.map(function (mergedReq) {
-                mergedReq.state = state;
-                var respClone = _.cloneDeep(resp);
-                return reqComplete(mergedReq, respClone);
-              }));
-            }
-          }));
-        })
-        .then(function () {
-          return responses;
-        })
-        .catch(function (err) {
-          function sendFailure(req) {
-            req.source.activeFetchCount -= 1;
-            requestErrorHandler(req, err);
+      return forEachStrategy(requests, function fetchRequestsWithStrategy(requests, strategy) {
+        return executeFetch(requests, strategy)
+        .then(function checkForIncompleteRequests(result) {
+          var incomplete = requestQueue.getIncomplete(strategy);
+          if (incomplete.length) {
+            return fetchRequestsWithStrategy(incomplete, strategy);
           }
 
-          uniq.forEach(function (req) {
-            if (!req._merged) sendFailure(req);
-            else req._merged.forEach(sendFailure);
-          });
-          throw err;
+          return result;
         });
+      })
+      .catch(notify.fatal);
+    }
+
+    function reqComplete(req, resp) {
+      _.pull(requestQueue, req);
+
+      if (resp.timed_out) {
+        notify.warning(new errors.SearchTimeout());
+      }
+
+      return req[resp.error ? 'reject' : 'resolve'](resp);
+    }
+
+    function executeFetch(requests, strategy) {
+      _.invoke(requests, 'start');
+      var uniq = mergeDuplicateRequests(requests);
+      var states;
+      var responses;
+
+      return Promise
+      .map(uniq, strategy.getSourceStateFromRequest)
+      .then(function (_states_) {
+        states = _states_;
+
+        // all requests must have been disabled
+        if (!states.length) return Promise.resolve(false);
+
+        return es[strategy.clientMethod]({
+          timeout: configFile.shard_timeout,
+          preference: sessionId,
+          body: strategy.convertStatesToBody(states)
+        });
+      })
+      .then(strategy.getResponses)
+      .then(function (_responses_) {
+        responses = _responses_;
+
+        return Promise.all(responses.map(function (resp) {
+          var req = uniq.shift();
+          var state = states.shift();
+
+          if (!req._merged) {
+            req.state = state;
+            return reqComplete(req, resp);
+          } else {
+            return Promise.all(req._merged.map(function (mergedReq) {
+              mergedReq.state = state;
+              return reqComplete(mergedReq, _.cloneDeep(resp));
+            }));
+          }
+        }));
+      })
+      .then(function () {
+        return responses;
+      })
+      .catch(function (err) {
+        function sendFailure(req) {
+          req.reject(err);
+        }
+
+        uniq.forEach(function (req) {
+          if (!req._merged) sendFailure(req);
+          else req._merged.forEach(sendFailure);
+        });
+
+        throw err;
       });
     }
 

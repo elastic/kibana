@@ -4,8 +4,9 @@ define(function (require) {
     var _ = require('lodash');
     var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
-    var segmentedStrategy = Private(require('components/courier/fetch/strategy/segmented'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
+    var SearchRequest = Private(require('components/courier/fetch/request/search'));
+    var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
 
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;
@@ -127,24 +128,20 @@ define(function (require) {
       return normal;
     };
 
-    SearchSource.prototype.onBeginSegmentedFetch = function (init) {
+    SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
       var self = this;
       return Promise.try(function addRequest() {
         var defer = Promise.defer();
+        var req = new SegmentedRequest(self, defer, initFunction);
 
-        var req = self._createRequest(defer);
-        // add a couple items to this request to identify it as a segmented fetch request
-        req.segmented = true;
-        req.strategy = segmentedStrategy;
-        req.init = init;
-
-        pendingRequests.push(req);
+        requestQueue.push(req);
 
         // return promises created by the completion handler so that
         // errors will bubble properly
         return defer.promise.then(addRequest);
       });
     };
+
 
     /******
      * PRIVATE APIS
@@ -156,6 +153,19 @@ define(function (require) {
      */
     SearchSource.prototype._getType = function () {
       return 'search';
+    };
+
+    /**
+     * Create a common search request object, which should
+     * be put into the pending request queye, for this search
+     * source
+     *
+     * @param {Deferred} defer - the deferred object that should be resolved
+     *                         when the request is complete
+     * @return {SearchRequest}
+     */
+    SearchSource.prototype._createRequest = function (defer) {
+      return new SearchRequest(this, defer);
     };
 
     /**

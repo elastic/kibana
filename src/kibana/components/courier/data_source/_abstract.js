@@ -4,7 +4,7 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
 
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var courierFetch = Private(require('components/courier/fetch/fetch'));
 
@@ -124,7 +124,7 @@ define(function (require) {
 
       return new PromiseEmitter(function (resolve, reject, defer) {
         var req = self._createRequest(defer);
-        pendingRequests.push(req);
+        requestQueue.push(req);
       }, handler);
     };
 
@@ -165,7 +165,7 @@ define(function (require) {
       var req = _.first(self._myPending());
       if (!req) {
         req = self._createRequest();
-        pendingRequests.push(req);
+        requestQueue.push(req);
       }
 
       self.fetchPending();
@@ -177,15 +177,18 @@ define(function (require) {
      * @async
      */
     SourceAbstract.prototype.fetchPending = function () {
-      return courierFetch.these(this._pullMyPending());
+      return courierFetch.these(this._myPending());
     };
 
     /**
      * Cancel all pending requests for this dataSource
      * @return {undefined}
      */
-    SourceAbstract.prototype.cancelPending = function () {
-      this._pullMyPending();
+    SourceAbstract.prototype.cancelPending = function (includeStarted) {
+      _(this._myPending(includeStarted)).forEach(function (req) {
+        req.cancel();
+        _.pull(requestQueue, req);
+      });
     };
 
     /**
@@ -193,45 +196,19 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.destroy = function () {
-      this.cancelPending();
+      this.cancelPending(true);
     };
 
     /*****
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myPending = function () {
-      return _.where(pendingRequests, { source: this });
-    };
-
-    SourceAbstract.prototype._pullMyPending = function () {
-      var self = this;
-      return pendingRequests.splice(0).filter(function (req) {
-        if (req.source !== self) {
-          pendingRequests.push(req);
-          return false;
-        }
-        return true;
-      });
+    SourceAbstract.prototype._myPending = function (includeStarted) {
+      return _.where(requestQueue, { source: this, started: !!includeStarted });
     };
 
     SourceAbstract.prototype._createRequest = function (defer) {
-      var self = this;
-
-      var req = {
-        source: self,
-        defer: defer || Promise.defer(),
-        strategy: self._fetchStrategy
-      };
-
-      if (self.history) {
-        // latest history at the top
-        self.history.unshift(req);
-        // trim all entries beyond 19/20
-        self.history.splice(20);
-      }
-
-      return req;
+      throw new Error('_createRequest must be implemented by subclass');
     };
 
     /**
@@ -279,6 +256,8 @@ define(function (require) {
       }())
       .then(function () {
         if (type === 'search') {
+          flatState.body = flatState.body || {};
+
           // defaults for the query
           if (!flatState.body.query) {
             flatState.body.query = {
