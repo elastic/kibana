@@ -35,13 +35,11 @@ define(function (require) {
           return;
         }
 
-        if (esPromise) {
-          // cancel active request
+        if (esPromise && _.isFunction(esPromise.abort)) {
           esPromise.abort();
-        } else {
-          // prevent request creation
-          esPromise = false;
         }
+
+        esPromise = ABORTED;
 
         return respond();
       });
@@ -63,7 +61,8 @@ define(function (require) {
 
       Promise.resolve(strategy.convertReqsToBody(executable))
       .then(function (body) {
-        if (esPromise != null) {
+        // while the strategy was converting, our request was aborted
+        if (esPromise === ABORTED) {
           throw ABORTED;
         }
 
