@@ -10,14 +10,18 @@ define(function (require) {
     var INCOMPLETE = Private(require('components/courier/fetch/_req_status')).INCOMPLETE;
 
     function callClient(strategy, requests) {
+      // merging docs can change status to DUPLICATE, capture new statuses
       var statuses = mergeDuplicateRequests(requests);
 
+      // get the actual list of requests that we will be fetching
       var executable = statuses.filter(isRequest);
       var execCount = executable.length;
 
+      // resolved by respond()
       var esPromise;
       var defer = Promise.defer();
 
+      // attach abort handlers, close over request index
       statuses.forEach(function (req, i) {
         if (!isRequest(req)) return;
         req.whenAborted(function () {
@@ -25,6 +29,7 @@ define(function (require) {
         });
       });
 
+      // handle a request being aborted while being fetched
       var requestWasAborted = Promise.method(function (req, i) {
         if (statuses[i] === ABORTED) {
           defer.reject(new Error('Request was aborted twice?'));
@@ -32,6 +37,7 @@ define(function (require) {
 
         execCount -= 1;
         if (execCount > 0) {
+          // the multi-request still contains other requests
           return;
         }
 
@@ -44,6 +50,7 @@ define(function (require) {
         return respond();
       });
 
+      // for each respond with either the response or ABORTED
       var respond = function (responses) {
         responses = responses || [];
         return Promise.map(requests, function (req, i) {
@@ -59,6 +66,8 @@ define(function (require) {
         .then(defer.resolve, defer.reject);
       };
 
+      // Now that all of THAT^^^ is out of the way, lets actually
+      // call out to elasticsearch
       Promise.resolve(strategy.convertReqsToBody(executable))
       .then(function (body) {
         // while the strategy was converting, our request was aborted
@@ -81,7 +90,10 @@ define(function (require) {
         else defer.reject(err);
       });
 
-      return defer.promise.catch(function (err) {
+      // return our promise, but catch any errors we create and
+      // send them to the requests
+      return defer.promise
+      .catch(function (err) {
         requests.forEach(function (req, i) {
           if (statuses[i] !== ABORTED) {
             req.handleFailure(err);
