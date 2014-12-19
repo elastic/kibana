@@ -28,10 +28,6 @@
             <div class="spinner"></div>
           </li>
 
-          <span class="navbar-text" ng-repeat="(name, stat) in courierRequestStats">
-            {{name}}:{{stat}}
-          </span>
-
           <li ng-if="setupComplete" ng-show="timefilter.enabled" class="navbar-timepicker-container">
             <a ng-click="toggleTimepicker()">
               <span ng-show="timefilter.refreshInterval.value > 0" class="navbar-timepicker-auto-refresh-desc">

@@ -40,20 +40,6 @@ define(function (require) {
           notify.fatal(err);
         });
 
-        $scope.courierRequestQueue = Private(require('components/courier/_request_queue'));
-        $scope.courierRequestStats = {};
-
-        $rootScope.$watchCollection('courierRequestQueue', function (queue) {
-          _.forOwn($scope.courierRequestStats, function (v, name, stats) {
-            stats[name] = 0;
-          });
-
-          queue.forEach(function (req) {
-            $scope.courierRequestStats[req.type] = ($scope.courierRequestStats[req.type] || 0) + 1;
-          });
-        });
-
-
         // run init functions before loading the mixins, so that we can ensure that
         // the environment is ready for them to get and use their dependencies
         self.ready = Promise.all([ kbnSetup(), config.init() ])
