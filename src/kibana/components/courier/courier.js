@@ -59,10 +59,7 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        return Promise.all([
-          fetch.searches(),
-          fetch.segmentedSearches()
-        ]);
+        fetch.searches();
       };
 
 

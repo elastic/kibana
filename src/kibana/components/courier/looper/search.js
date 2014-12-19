@@ -14,7 +14,7 @@ define(function (require) {
      * @type {Looper}
      */
     var searchLooper = new Looper(null, function () {
-      return Promise.all([fetch.searches(), fetch.segmentedSearches()]);
+      return fetch.searches();
     });
 
     searchLooper.onHastyLoop = function () {

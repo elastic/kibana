@@ -28,11 +28,6 @@ define(function (require) {
      */
     this.searches = _.partial(fetchPending, strategies.search);
 
-    /**
-     * Fetch all pending search requests
-     * @async
-     */
-    this.segmentedSearches = _.partial(fetchPending, strategies.segmented);
 
     function fetchASource(source, strategy) {
       strategy = strategy || strategies[source._getType()];
