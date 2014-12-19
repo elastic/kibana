@@ -5,6 +5,7 @@ define(function (require) {
   var settingsHtml = require('text!plugins/discover/partials/settings.html');
   var saveHtml = require('text!plugins/discover/partials/save_search.html');
   var loadHtml = require('text!plugins/discover/partials/load_search.html');
+  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -81,6 +82,7 @@ define(function (require) {
 
     var stateDefaults = {
       query: initialQuery || '',
+      sort: savedSearch.sort || [],
       columns: savedSearch.columns || ['_source'],
       index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
@@ -168,9 +170,8 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        $scope.$watch('state.filters', function (filters, oldFilters) {
-          if (filters === oldFilters) return;
-
+        $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (onlyDisabled(newFilters, oldFilters)) return;
           $scope.fetch();
         });
 
@@ -240,6 +241,7 @@ define(function (require) {
       .then(function () {
         savedSearch.id = savedSearch.title;
         savedSearch.columns = $scope.state.columns;
+        savedSearch.sort = $scope.state.sort;
 
         return savedSearch.save()
         .then(function () {
