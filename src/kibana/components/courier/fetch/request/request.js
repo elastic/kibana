@@ -49,6 +49,10 @@ define(function (require) {
       return resp;
     };
 
+    AbstractReq.prototype.filterError = function (resp) {
+      return false;
+    };
+
     AbstractReq.prototype.handleResponse = function (resp) {
       this.success = true;
       this.resp = resp;

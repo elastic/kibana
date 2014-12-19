@@ -19,8 +19,21 @@ define(function (require) {
           notify.warning(new SearchTimeout());
         }
 
+        function progress() {
+          if (req.isIncomplete()) {
+            return INCOMPLETE;
+          }
+
+          req.complete();
+          return resp;
+        }
+
         if (resp.error) {
-          return req.handleFailure(new RequestFailure(null, resp));
+          if (req.filterError(resp)) {
+            return progress();
+          } else {
+            return req.handleFailure(new RequestFailure(null, resp));
+          }
         }
 
         return Promise.try(function () {
@@ -30,14 +43,7 @@ define(function (require) {
           resp = arguments[0];
           return req.handleResponse(resp);
         })
-        .then(function () {
-          if (req.isIncomplete()) {
-            return INCOMPLETE;
-          }
-
-          req.complete();
-          return resp;
-        });
+        .then(progress);
       });
     }
 

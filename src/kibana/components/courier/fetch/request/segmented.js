@@ -84,6 +84,13 @@ define(function (require) {
       return this._consumeSegment(resp);
     };
 
+    SegmentedReq.prototype.filterError = function (resp) {
+      if (/ClusterBlockException.*index\sclosed/.test(resp.error)) {
+        this._consumeSegment(false);
+        return true;
+      }
+    };
+
     SegmentedReq.prototype.isIncomplete = function () {
       return this._queue.length > 0;
     };
@@ -136,12 +143,16 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._consumeSegment = function (seg) {
-      this._segments.push(seg);
 
       var index = this._active;
-      var first = this._segments.length === 1;
+      var first = this._segments.length === 0;
 
       this._complete.push(index);
+
+      if (!seg) return; // segment was ignored/filtered, don't store it
+
+      this._segments.push(seg);
+
 
       if (this._remainingSize !== false) {
         this._remainingSize -= seg.hits.hits.length;
