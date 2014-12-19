@@ -9,7 +9,8 @@ define(function (require) {
      */
     var queue = window.requestQueue = [];
 
-    function getQualified(strategies, qualify) {
+    queue.getPending = function (/* strategies.. */) {
+      var strategies = _.toArray(arguments);
       return queue.filter(function (req) {
         var strategyMatch = !strategies.length;
         if (!strategyMatch) {
@@ -18,20 +19,7 @@ define(function (require) {
           });
         }
 
-        return strategyMatch && qualify(req);
-      });
-    }
-
-    queue.getPending = function (/* strategies.. */) {
-      return getQualified(_.toArray(arguments), function (req) {
-        return req.isReady();
-      });
-    };
-
-
-    queue.getIncomplete = function (/* strategies.. */) {
-      return getQualified(_.toArray(arguments), function (req) {
-        return req.isIncomplete();
+        return strategyMatch && req.canStart();
       });
     };
 
