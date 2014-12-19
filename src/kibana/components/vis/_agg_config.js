@@ -100,7 +100,8 @@ define(function (require) {
      * @return {object} the new params object
      */
     AggConfig.prototype.resetParams = function () {
-      return this.fillDefaults({});
+      // We need to ensure that row doesn't get overriden.
+      return this.fillDefaults(_.pick(this.params, 'row'));
     };
 
     AggConfig.prototype.write = function () {
