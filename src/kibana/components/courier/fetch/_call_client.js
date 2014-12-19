@@ -77,6 +77,7 @@ define(function (require) {
 
         return (esPromise = es[strategy.clientMethod]({
           timeout: configFile.shard_timeout,
+          ignore_unavailable: true,
           preference: sessionId,
           body: body
         }));
