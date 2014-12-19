@@ -42,12 +42,18 @@ define(function (require) {
        *
        * @chainable
        */
-      looper.start = function () {
+      looper.start = function (loopOver) {
+        if (loopOver == null) loopOver = true;
+
         looper.stop();
         _started = true;
 
-        // start with a run of the loop, which sets the next run
-        looper._looperOver();
+        if (loopOver) {
+          // start with a run of the loop, which sets the next run
+          looper._looperOver();
+        } else {
+          looper._scheduleLoop();
+        }
 
         return this;
       };
@@ -71,8 +77,7 @@ define(function (require) {
        */
       looper.restart = function () {
         if (looper.started()) {
-          looper.stop();
-          looper.start();
+          looper.start(false);
         }
         return this;
       };
@@ -118,7 +123,7 @@ define(function (require) {
           looper.onHastyLoop();
         }
 
-        _timerId = _ms ? $timeout(looper._looperOver, _ms) : null;
+        looper._scheduleLoop();
 
         looper.active = Promise
         .try(fn)
@@ -129,6 +134,17 @@ define(function (require) {
         .finally(function () {
           looper.active = null;
         });
+      };
+
+      /**
+       * Schedule the next itteration of the loop
+       *
+       * @private
+       * @return {number} - the timer promise
+       */
+      looper._scheduleLoop = function () {
+        _timerId = _ms ? $timeout(looper._looperOver, _ms) : null;
+        return _timerId;
       };
 
       /**
