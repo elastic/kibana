@@ -15,6 +15,7 @@ define(function (require) {
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
       var requestQueue = Private(require('components/courier/_request_queue'));
+      var errorHandlers = Private(require('components/courier/_error_handlers'));
 
       var fetch = Private(require('components/courier/fetch/fetch'));
       var docLooper = self.docLooper = Private(require('components/courier/looper/doc'));
@@ -111,7 +112,7 @@ define(function (require) {
         searchLooper.stop();
         docLooper.stop();
 
-        [].concat(requestQueue.splice(0), this._errorHandlers.splice(0))
+        [].concat(requestQueue.splice(0), errorHandlers.splice(0))
         .forEach(function (req) {
           req.defer.reject(new Abort());
         });

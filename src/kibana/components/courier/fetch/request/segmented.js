@@ -4,17 +4,19 @@ define(function (require) {
 
     var strategy = Private(require('components/courier/fetch/strategy/segmented'));
     var SearchRequest = Private(require('components/courier/fetch/request/search'));
-    var SegmentedState = Private(require('components/courier/fetch/segmented_state'));
+    var SegmentedRequestState = Private(require('components/courier/fetch/segmented_state'));
     var requestQueue = Private(require('components/courier/_request_queue'));
 
     _(SegmentedRequest).inherits(SearchRequest);
     function SegmentedRequest(source, defer, initFn) {
       SegmentedRequest.Super.call(this, source, defer);
+      this.initFn = initFn;
+    }
 
-      this.initFn;
+    SegmentedRequest.prototype.start = function () {
+      if (!this.segState) {
+        this.segState = new SegmentedRequestState(this.source, this.initFn);
 
-      if (_.isFunction(initFn)) {
-        this.segState = new SegmentedState(source, initFn);
         // generate requests for all upcomming segments and push into the request queue
         _.range(this.segState.all.length - 1)
         .reduce(function (prev) {
@@ -25,7 +27,9 @@ define(function (require) {
           return next;
         }, this);
       }
-    }
+
+      return SegmentedRequest.Super.prototype.start.call(this);
+    };
 
     SegmentedRequest.prototype.type = 'segmented';
 
@@ -33,7 +37,6 @@ define(function (require) {
     SegmentedRequest.prototype.clone = function () {
       return new SegmentedRequest(this.source, this.defer, this.initFn);
     };
-
 
     SegmentedRequest.prototype.getNext = SegmentedRequest.Super.prototype.clone;
 
