@@ -32,7 +32,6 @@ define(function (require) {
       self.SearchSource = SearchSource;
 
       var HastyRefresh = errors.HastyRefresh;
-      var Abort = errors.Abort;
 
       /**
        * update the time between automatic search requests
@@ -109,10 +108,7 @@ define(function (require) {
         searchLooper.stop();
         docLooper.stop();
 
-        [].concat(requestQueue.splice(0), errorHandlers.splice(0))
-        .forEach(function (req) {
-          req.defer.reject(new Abort());
-        });
+        _.invoke(requestQueue, 'abort');
 
         if (requestQueue.length) {
           throw new Error('Aborting all pending requests failed.');
