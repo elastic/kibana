@@ -59,7 +59,6 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        searchLooper.start();
         return Promise.all([
           fetch.searches(),
           fetch.segmentedSearches()
