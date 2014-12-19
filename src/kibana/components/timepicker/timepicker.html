@@ -164,12 +164,11 @@
     <!-- Refresh Intervals -->
     <div ng-show="tab == 'interval'" role="tabpanel" class="tab-pane active">
       <br>
-      <ul class="list-unstyled kbn-refresh-list">
-        <li ng-repeat="interval in refreshIntervals">
-          <a ng-click="setRefreshInterval(interval)">{{interval.display}}</a>
-        </li>
-      </ul>
+      <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
+        <ul class="list-unstyled">
+          <li ng-repeat="interval in list"><a ng-click="setRefreshInterval(interval)">{{interval.display}}</a></li>
+        </ul>
+      </div>
     </div>
-
   </div>
 </div>
