@@ -1,13 +1,13 @@
 define(function (require) {
-  return function GenericRequestProvider(Private, Promise) {
+  return function AbstractReqProvider(Private, Promise) {
     var _ = require('lodash');
     var moment = require('moment');
     var errors = require('errors');
     var requestErrorHandler = Private(require('components/courier/fetch/request/_error_handler'));
 
-    function GenericRequest(source, defer) {
-      if (!(this instanceof GenericRequest) || !this.constructor || this.constructor === GenericRequest) {
-        throw new Error('The GenericRequest class should not be called directly');
+    function AbstractReq(source, defer) {
+      if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {
+        throw new Error('The AbstractReq class should not be called directly');
       }
 
       this.source = source;
@@ -16,17 +16,17 @@ define(function (require) {
     }
 
 
-    GenericRequest.prototype.isReady = function () {
+    AbstractReq.prototype.isReady = function () {
       return !this.source._fetchDisabled;
     };
 
 
-    GenericRequest.prototype.isIncomplete = function () {
+    AbstractReq.prototype.isIncomplete = function () {
       return false;
     };
 
 
-    GenericRequest.prototype.start = function () {
+    AbstractReq.prototype.start = function () {
       if (this.started) {
         throw new TypeError('Unable to start request because it has already started');
       }
@@ -48,7 +48,7 @@ define(function (require) {
     };
 
 
-    GenericRequest.prototype.stop = function () {
+    AbstractReq.prototype.stop = function () {
       if (this.complete) {
         throw new TypeError('Unable to stop request because it has already stopped');
       }
@@ -59,7 +59,7 @@ define(function (require) {
     };
 
 
-    GenericRequest.prototype.resolve = function (resp) {
+    AbstractReq.prototype.resolve = function (resp) {
       this.stop();
       this.success = true;
       this.resp = resp;
@@ -67,7 +67,7 @@ define(function (require) {
     };
 
 
-    GenericRequest.prototype.reject = function (resp) {
+    AbstractReq.prototype.reject = function (resp) {
       this.stop();
       this.success = false;
       this.resp = resp;
@@ -75,17 +75,17 @@ define(function (require) {
     };
 
 
-    GenericRequest.prototype.clone = function () {
+    AbstractReq.prototype.clone = function () {
       return new this.constructor(this.source, this.defer);
     };
 
 
-    GenericRequest.prototype.cancel = function () {
+    AbstractReq.prototype.cancel = function () {
       this.defer = null;
       this.started = false;
       this.canceled = true;
     };
 
-    return GenericRequest;
+    return AbstractReq;
   };
 });

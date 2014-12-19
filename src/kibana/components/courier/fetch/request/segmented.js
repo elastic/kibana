@@ -1,26 +1,26 @@
 define(function (require) {
-  return function SegmentedRequestProvider(Private) {
+  return function SegmentedReqProvider(Private) {
     var _ = require('lodash');
 
     var strategy = Private(require('components/courier/fetch/strategy/segmented'));
-    var SearchRequest = Private(require('components/courier/fetch/request/search'));
-    var SegmentedRequestState = Private(require('components/courier/fetch/segmented_state'));
+    var SearchReq = Private(require('components/courier/fetch/request/search'));
+    var SegmentedReqState = Private(require('components/courier/fetch/segmented_state'));
     var requestQueue = Private(require('components/courier/_request_queue'));
 
-    _(SegmentedRequest).inherits(SearchRequest);
-    function SegmentedRequest(source, defer, initFn) {
-      SegmentedRequest.Super.call(this, source, defer);
+    _(SegmentedReq).inherits(SearchReq);
+    function SegmentedReq(source, defer, initFn) {
+      SegmentedReq.Super.call(this, source, defer);
       this.initFn = initFn;
     }
 
-    SegmentedRequest.prototype.start = function () {
+    SegmentedReq.prototype.start = function () {
       if (!this.segState) {
-        this.segState = new SegmentedRequestState(this.source, this.initFn);
+        this.segState = new SegmentedReqState(this.source, this.initFn);
 
         // generate requests for all upcomming segments and push into the request queue
         _.range(this.segState.all.length - 1)
         .reduce(function (prev) {
-          var next = prev.next = prev.getNext();
+          var next = prev.next = prev.makeNext();
           next.prev = prev;
           next.segState = prev.segState;
           requestQueue.push(next);
@@ -28,32 +28,32 @@ define(function (require) {
         }, this);
       }
 
-      return SegmentedRequest.Super.prototype.start.call(this);
+      return SegmentedReq.Super.prototype.start.call(this);
     };
 
-    SegmentedRequest.prototype.type = 'segmented';
+    SegmentedReq.prototype.type = 'segmented';
 
 
-    SegmentedRequest.prototype.clone = function () {
-      return new SegmentedRequest(this.source, this.defer, this.initFn);
+    SegmentedReq.prototype.clone = function () {
+      return new SegmentedReq(this.source, this.defer, this.initFn);
     };
 
-    SegmentedRequest.prototype.getNext = SegmentedRequest.Super.prototype.clone;
+    SegmentedReq.prototype.makeNext = SegmentedReq.Super.prototype.clone;
 
 
-    SegmentedRequest.prototype.strategy = strategy;
+    SegmentedReq.prototype.strategy = strategy;
 
 
-    SegmentedRequest.prototype.isReady = function () {
-      var parent = SegmentedRequest.Super.prototype.isReady.call(this);
+    SegmentedReq.prototype.isReady = function () {
+      var parent = SegmentedReq.Super.prototype.isReady.call(this);
       return parent && !this.prev;
     };
 
 
-    SegmentedRequest.prototype.isIncomplete = function () {
+    SegmentedReq.prototype.isIncomplete = function () {
       return this.prev && this.prev.complete === true;
     };
 
-    return SegmentedRequest;
+    return SegmentedReq;
   };
 });

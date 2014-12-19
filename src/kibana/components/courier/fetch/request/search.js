@@ -1,20 +1,20 @@
 define(function (require) {
-  return function SearchRequestProvider(Private) {
+  return function SearchReqProvider(Private) {
     var _ = require('lodash');
 
     var strategy = Private(require('components/courier/fetch/strategy/search'));
     var AbstractRequest = Private(require('components/courier/fetch/request/request'));
 
-    _(SearchRequest).inherits(AbstractRequest);
-    var Super = SearchRequest.Super;
-    function SearchRequest(source, defer) {
+    _(SearchReq).inherits(AbstractRequest);
+    var Super = SearchReq.Super;
+    function SearchReq(source, defer) {
       Super.call(this, source, defer);
     }
 
-    SearchRequest.prototype.type = 'search';
-    SearchRequest.prototype.strategy = strategy;
+    SearchReq.prototype.type = 'search';
+    SearchReq.prototype.strategy = strategy;
 
-    SearchRequest.prototype.resolve = function (resp) {
+    SearchReq.prototype.resolve = function (resp) {
       if (resp && resp.hits) {
         resp.hits.hits.forEach(function (hit) {
           hit._source = _.flattenWith('.', hit._source);
@@ -24,6 +24,6 @@ define(function (require) {
       return Super.prototype.resolve.call(this, resp);
     };
 
-    return SearchRequest;
+    return SearchReq;
   };
 });

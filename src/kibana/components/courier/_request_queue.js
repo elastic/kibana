@@ -9,10 +9,8 @@ define(function (require) {
      */
     var queue = window.requestQueue = [];
 
-    function getQualified(strategies, started, qualify) {
+    function getQualified(strategies, qualify) {
       return queue.filter(function (req) {
-        if (req.started !== started) return false;
-
         var strategyMatch = !strategies.length;
         if (!strategyMatch) {
           strategyMatch = strategies.some(function (strategy) {
@@ -25,14 +23,14 @@ define(function (require) {
     }
 
     queue.getPending = function (/* strategies.. */) {
-      return getQualified(_.toArray(arguments), false, function (req) {
+      return getQualified(_.toArray(arguments), function (req) {
         return req.isReady();
       });
     };
 
 
     queue.getIncomplete = function (/* strategies.. */) {
-      return getQualified(_.toArray(arguments), false, function (req) {
+      return getQualified(_.toArray(arguments), function (req) {
         return req.isIncomplete();
       });
     };
