@@ -5,9 +5,9 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('describe_bundled_plugins', function () {
-    var configKey = 'bundledPluginIds';
+    var configKey = 'bundled_plugin_ids';
     var file = grunt.config.process('<%= build %>/dist/kibana/config/kibana.yml');
-    var idList = grunt.config.get('bundledPluginModuleIds').map(function (id) {
+    var idList = grunt.config.get('bundled_plugin_module_ids').map(function (id) {
       return ' - ' + id;
     }).join('\n');
 
