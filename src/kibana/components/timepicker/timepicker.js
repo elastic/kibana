@@ -30,12 +30,8 @@ define(function (require) {
         $scope.modes = ['quick', 'relative', 'absolute'];
         if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
 
-        $scope.quickLists = _.map(_.uniq(_.pluck(quickRanges, 'section')), function (section) {
-          return _.filter(quickRanges, {section: section});
-        });
-        $scope.refreshLists = _.map(_.uniq(_.pluck(refreshIntervals, 'section')), function (section) {
-          return _.filter(refreshIntervals, {section: section});
-        });
+        $scope.quickLists = _(quickRanges).groupBy('section').values().value();
+        $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
         $scope.relative = {
           count: 1,
