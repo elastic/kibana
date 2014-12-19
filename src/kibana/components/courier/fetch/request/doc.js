@@ -13,8 +13,8 @@ define(function (require) {
     DocRequest.prototype.type = 'doc';
     DocRequest.prototype.strategy = strategy;
 
-    DocRequest.prototype.isReady = function () {
-      var parent = DocRequest.Super.prototype.isReady.call(this);
+    DocRequest.prototype.canStart = function () {
+      var parent = DocRequest.Super.prototype.canStart.call(this);
       if (!parent) return false;
 
       // _getStoredVersion updates the internal
@@ -31,14 +31,14 @@ define(function (require) {
       if (unknownVersion || versionMismatch || localVersionCleared) return true;
     };
 
-    DocRequest.prototype.resolve = function (resp) {
+    DocRequest.prototype.handleResponse = function (resp) {
       if (resp.found) {
         this.source._storeVersion(resp._version);
       } else {
         this.source._clearVersion();
       }
 
-      return DocRequest.Super.prototype.resolve.call(this, resp);
+      return DocRequest.Super.prototype.handleResponse.call(this, resp);
     };
 
     return DocRequest;

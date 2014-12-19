@@ -1,33 +1,39 @@
 define(function (require) {
-  return function FetchStrategyForSearch(Private, Promise, timefilter) {
+  return function FetchStrategyForSearch(Private, Promise, timefilter, configFile) {
     var _ = require('lodash');
 
     return {
       clientMethod: 'msearch',
 
-      getSourceStateFromRequest: function (req) {
-        return req.source._flatten();
-      },
-
       /**
        * Flatten a series of requests into as ES request body
+       *
        * @param  {array} requests - the requests to serialize
        * @return {string} - the request body
        */
-      convertStatesToBody: function (states) {
-        return states.map(function (state) {
-          var timeBounds = timefilter.getBounds();
-          var indexList = state.index.toIndexList(timeBounds.min, timeBounds.max);
+      convertReqsToBody: function (reqs) {
+        return Promise.map(reqs, function (req) {
+          return req.getFetchParams();
+        })
+        .then(function (reqsParams) {
+          return reqsParams.map(function (reqParams) {
+            var indexList = reqParams.index;
 
-          return JSON.stringify({
+            if (_.isFunction(_.deepGet(indexList, 'toIndexList'))) {
+              var timeBounds = timefilter.getBounds();
+              indexList = indexList.toIndexList(timeBounds.min, timeBounds.max);
+            }
+
+            return JSON.stringify({
               index: indexList,
-              type: state.type,
+              type: reqParams.type,
               ignore_unavailable: true
             })
             + '\n'
-            + JSON.stringify(state.body);
+            + JSON.stringify(reqParams.body || {});
 
-        }).join('\n') + '\n';
+          }).join('\n') + '\n';
+        });
       },
 
       /**

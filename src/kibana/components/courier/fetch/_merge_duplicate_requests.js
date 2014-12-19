@@ -1,27 +1,25 @@
 define(function (require) {
-  return function FetchMergeDuplicateRequests() {
+  return function FetchMergeDuplicateRequests(Private) {
+    var isRequest = Private(require('components/courier/fetch/_is_request'));
+    var DUPLICATE = Private(require('components/courier/fetch/_req_status')).DUPLICATE;
 
     function mergeDuplicateRequests(requests) {
       // dedupe requests
       var index = {};
-      return requests.filter(function (req) {
+      return requests.map(function (req) {
+        if (!isRequest(req)) return req;
+
         var iid = req.source._instanceid;
         if (!index[iid]) {
           // this request is unique so far
           index[iid] = req;
           // keep the request
-          return true;
+          return req;
         }
 
         // the source was requested at least twice
-        var uniq = index[iid];
-        if (uniq._merged) {
-          // already setup the merged list
-          uniq._merged.push(req);
-        } else {
-          // put all requests into this array and itterate them on response
-          uniq._merged = [uniq, req];
-        }
+        req._uniq = index[iid];
+        return DUPLICATE;
       });
     }
 

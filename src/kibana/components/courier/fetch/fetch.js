@@ -4,8 +4,7 @@ define(function (require) {
 
     var strategies = this.strategies = {
       doc: Private(require('components/courier/fetch/strategy/doc')),
-      search: Private(require('components/courier/fetch/strategy/search')),
-      segmented: Private(require('components/courier/fetch/strategy/segmented'))
+      search: Private(require('components/courier/fetch/strategy/search'))
     };
 
     var requestQueue = Private(require('components/courier/_request_queue'));

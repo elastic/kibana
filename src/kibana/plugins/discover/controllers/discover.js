@@ -307,8 +307,8 @@ define(function (require) {
         sortFn = new HitSortFn(sort[1]);
       }
 
-      segmented.totalSize = sortBy === 'non-time' ? false : totalSize;
-      segmented.direction = sortBy === 'time' ? sort[1] : 'desc';
+      segmented.setTotalSize(sortBy === 'non-time' ? false : totalSize);
+      segmented.setDirection(sortBy === 'time' ? sort[1] : 'desc');
 
       // triggered when the status updated
       segmented.on('status', function (status) {

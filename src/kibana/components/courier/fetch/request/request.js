@@ -13,21 +13,13 @@ define(function (require) {
 
       this.source = source;
       this.defer = defer || Promise.defer();
-      this.started = false;
 
       requestQueue.push(this);
     }
 
-
-    AbstractReq.prototype.isReady = function () {
-      return !this.complete && !this.canceled && !this.source._fetchDisabled;
+    AbstractReq.prototype.canStart = function () {
+      return !this.stopped && !this.aborted && !this.source._fetchDisabled;
     };
-
-
-    AbstractReq.prototype.isIncomplete = function () {
-      return false;
-    };
-
 
     AbstractReq.prototype.start = function () {
       if (this.started) {
@@ -49,51 +41,70 @@ define(function (require) {
       }
     };
 
-
-    AbstractReq.prototype.stop = function () {
-      if (this.complete) {
-        throw new TypeError('Unable to stop request because it has already stopped');
-      }
-
-      _.pull(requestQueue, this);
-
-      this.ms = this.moment.diff() * -1;
-      this.complete = true;
-      this.source.activeFetchCount -= 1;
+    AbstractReq.prototype.getFetchParams = function () {
+      return this.source._flatten();
     };
 
-
-    AbstractReq.prototype.cancel = function () {
-      this.defer = null;
-      this.canceled = true;
-      _.pull(requestQueue, this);
+    AbstractReq.prototype.transformResponse = function (resp) {
+      return resp;
     };
 
+    AbstractReq.prototype.handleResponse = function (resp) {
+      this.success = true;
+      this.resp = resp;
+    };
 
-    AbstractReq.prototype.restart = function () {
+    AbstractReq.prototype.handleFailure = function (error) {
+      this.success = false;
+      this.resp = error && error.resp;
+      this.retry();
+      return requestErrorHandler(this, error);
+    };
+
+    AbstractReq.prototype.isIncomplete = function () {
+      return false;
+    };
+
+    AbstractReq.prototype.continue = function () {
+      throw new Error('Unable to continue ' + this.type + ' request');
+    };
+
+    AbstractReq.prototype.retry = function () {
       var clone = this.clone();
-      this.cancel();
-      clone.start();
+      this.abort();
       return clone;
     };
 
+    // don't want people overriding this, so it becomes a natural
+    // part of .abort() and .complete()
+    function stop(then) {
+      return function () {
+        if (this.stopped) {
+          throw new TypeError('Unable to stop request because it has already stopped');
+        }
 
-    AbstractReq.prototype.resolve = function (resp) {
-      this.stop();
-      this.success = true;
-      this.resp = resp;
-      return this.defer.resolve(resp);
+        this.stopped = true;
+        this.source.activeFetchCount -= 1;
+        _.pull(requestQueue, this);
+        then.call(this);
+      };
+    }
+
+    AbstractReq.prototype.abort = stop(function () {
+      this.defer = null;
+      this.aborted = true;
+      if (this._whenAborted) _.callEach(this._whenAborted);
+    });
+
+    AbstractReq.prototype.whenAborted = function (cb) {
+      this._whenAborted = (this._whenAborted || []);
+      this._whenAborted.push(cb);
     };
 
-
-    AbstractReq.prototype.reject = function (resp) {
-      this.stop();
-      this.success = false;
-      this.resp = resp;
-      this.clone();
-      return requestErrorHandler(this, new errors.FetchFailure(this));
-    };
-
+    AbstractReq.prototype.complete = stop(function () {
+      this.ms = this.moment.diff() * -1;
+      this.defer.resolve(this.resp);
+    });
 
     AbstractReq.prototype.clone = function () {
       return new this.constructor(this.source, this.defer);

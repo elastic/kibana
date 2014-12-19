@@ -14,7 +14,7 @@ define(function (require) {
       });
 
       return Promise.all(sets.map(function (set) {
-        return block(set[1], set[0]);
+        return block(set[0], set[1]);
       }));
     }
 

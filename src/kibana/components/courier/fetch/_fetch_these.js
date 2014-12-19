@@ -1,113 +1,66 @@
 define(function (require) {
   return function FetchTheseProvider(Private, Promise, es, sessionId, configFile) {
     var _ = require('lodash');
-
-    var errors = require('errors');
-    var Notifier = require('components/notify/_notifier');
-    var requestQueue = Private(require('components/courier/_request_queue'));
+    var notify = Private(require('components/courier/fetch/_notifier'));
     var forEachStrategy = Private(require('components/courier/fetch/_for_each_strategy'));
-    var mergeDuplicateRequests = Private(require('components/courier/fetch/_merge_duplicate_requests'));
 
-    var notify = new Notifier({
-      location: 'Courier Fetch'
-    });
+    // core tasks
+    var callClient = Private(require('components/courier/fetch/_call_client'));
+    var callResponseHandlers = Private(require('components/courier/fetch/_call_response_handlers'));
+    var continueIncomplete = Private(require('components/courier/fetch/_continue_incomplete'));
+
+    var ABORTED = Private(require('components/courier/fetch/_req_status')).ABORTED;
+    var DUPLICATE = Private(require('components/courier/fetch/_req_status')).DUPLICATE;
+    var INCOMPLETE = Private(require('components/courier/fetch/_req_status')).INCOMPLETE;
 
     function fetchThese(requests) {
-      return forEachStrategy(requests, function fetchRequestsWithStrategy(requests, strategy) {
-        return executeFetch(requests, strategy)
-        .then(function checkForIncompleteRequests(result) {
-          var incomplete = requestQueue.getIncomplete(strategy);
-          if (incomplete.length) {
-            return fetchRequestsWithStrategy(incomplete, strategy);
-          }
-
-          return result;
-        });
+      return forEachStrategy(requests, function (strategy, requests) {
+        return fetchWithStrategy(strategy, requests.map(function (req) {
+          if (!req.started) return req;
+          return req.retry();
+        }));
       })
       .catch(notify.fatal);
     }
 
-    function reqComplete(req, resp) {
-      if (resp.timed_out) {
-        notify.warning(new errors.SearchTimeout());
-      }
+    function fetchWithStrategy(strategy, requests) {
 
-      if (req.canceled) return;
-      return req[resp.error ? 'reject' : 'resolve'](resp);
-    }
-
-    function startAndRestart(requests) {
-      var started = [];
-
-      requests.forEach(function (req) {
-        if (req.canceled) {
-          return;
+      requests = requests.map(function (req) {
+        if (req.aborted) {
+          return ABORTED;
         }
 
         if (req.started) {
-          req = req.restart();
+          req.continue();
         } else {
           req.start();
         }
 
-        started.push(req);
+        return req;
       });
 
-      return started;
-    }
-
-    function executeFetch(requests, strategy) {
-      var uniq = mergeDuplicateRequests(startAndRestart(requests));
-      var states;
-      var responses;
-
-      return Promise
-      .map(uniq, strategy.getSourceStateFromRequest)
-      .then(function (_states_) {
-        states = _states_;
-
-        // all requests must have been disabled
-        if (!states.length) return Promise.resolve(false);
-
-        return es[strategy.clientMethod]({
-          timeout: configFile.shard_timeout,
-          preference: sessionId,
-          body: strategy.convertStatesToBody(states)
-        });
-      })
-      .then(strategy.getResponses)
-      .then(function (_responses_) {
-        responses = _responses_;
-
-        return Promise.all(responses.map(function (resp) {
-          var req = uniq.shift();
-          var state = states.shift();
-
-          if (!req._merged) {
-            req.state = state;
-            return reqComplete(req, resp);
-          } else {
-            return Promise.all(req._merged.map(function (mergedReq) {
-              mergedReq.state = state;
-              return reqComplete(mergedReq, _.cloneDeep(resp));
-            }));
-          }
-        }));
-      })
+      return Promise.resolve()
       .then(function () {
-        return responses;
+        return callClient(strategy, requests);
       })
-      .catch(function (err) {
-        function sendFailure(req) {
-          req.reject(err);
-        }
-
-        uniq.forEach(function (req) {
-          if (!req._merged) sendFailure(req);
-          else req._merged.forEach(sendFailure);
+      .then(function (responses) {
+        return callResponseHandlers(strategy, requests, responses);
+      })
+      .then(function (responses) {
+        return continueIncomplete(strategy, requests, responses, fetchWithStrategy);
+      })
+      .then(function (responses) {
+        return responses.map(function (resp) {
+          switch (resp) {
+          case ABORTED:
+            return null;
+          case DUPLICATE:
+          case INCOMPLETE:
+            throw new Error('Failed to clear incomplete or duplicate request from responses.');
+          default:
+            return resp;
+          }
         });
-
-        throw err;
       });
     }
 

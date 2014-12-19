@@ -1,21 +1,24 @@
 define(function (require) {
   return function RequestErrorHandlerFactory(Private, Notifier) {
-    var errorHandlers = Private(require('components/courier/_error_handlers'));
+    var errHandlers = Private(require('components/courier/_error_handlers'));
 
     var notify = new Notifier({
       location: 'Courier Fetch Error'
     });
 
     function handleError(req, error) {
-      var handlerCount = 0;
-      errorHandlers.splice(0).forEach(function (handler) {
-        if (handler.source !== req.source) return errorHandlers.push(handler);
-        handler.defer.resolve(error);
-        handlerCount++;
+      var myHandlers = [];
+
+      errHandlers.splice(0).forEach(function (handler) {
+        (handler.source !== req.source ? myHandlers : errHandlers).push(handler);
       });
 
-      if (!handlerCount) {
+      if (!myHandlers.length) {
         notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
+      } else {
+        myHandlers.forEach(function (handler) {
+          handler.defer.resolve(error);
+        });
       }
     }
 

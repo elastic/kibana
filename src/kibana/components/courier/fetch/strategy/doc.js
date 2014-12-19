@@ -1,26 +1,22 @@
 define(function (require) {
-  return function FetchStrategyForDoc() {
+  return function FetchStrategyForDoc(Promise) {
     return {
       clientMethod: 'mget',
-
-      /**
-       * Turn a request into a flat "state"
-       * @param  {[type]} req [description]
-       * @return {[type]}     [description]
-       */
-      getSourceStateFromRequest: function (req) {
-        return req.source._flatten();
-      },
 
       /**
        * Flatten a series of requests into as ES request body
        * @param  {array} requests - an array of flattened requests
        * @return {string} - the request body
        */
-      convertStatesToBody: function (states) {
-        return {
-          docs: states
-        };
+      convertReqsToBody: function (reqs) {
+        return Promise.map(reqs, function (req) {
+          return req.getFetchParams();
+        })
+        .then(function (reqsParams) {
+          return {
+            docs: reqsParams
+          };
+        });
       },
 
       /**
