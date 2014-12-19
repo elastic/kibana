@@ -1,70 +1,65 @@
 define(function (require) {
-  return function FetchTheseProvider(Private, Promise, es, Notifier, sessionId, configFile) {
+  return function FetchTheseProvider(Private, Promise, es, sessionId, configFile) {
     var _ = require('lodash');
-
-    var initRequest = Private(require('components/courier/fetch/_init_request'));
-    var reqComplete = Private(require('components/courier/fetch/_request_complete'));
+    var notify = Private(require('components/courier/fetch/_notifier'));
     var forEachStrategy = Private(require('components/courier/fetch/_for_each_strategy'));
-    var requestErrorHandler = Private(require('components/courier/fetch/_request_error_handler'));
-    var mergeDuplicateRequests = Private(require('components/courier/fetch/_merge_duplicate_requests'));
 
+    // core tasks
+    var callClient = Private(require('components/courier/fetch/_call_client'));
+    var callResponseHandlers = Private(require('components/courier/fetch/_call_response_handlers'));
+    var continueIncomplete = Private(require('components/courier/fetch/_continue_incomplete'));
+
+    var ABORTED = Private(require('components/courier/fetch/_req_status')).ABORTED;
+    var DUPLICATE = Private(require('components/courier/fetch/_req_status')).DUPLICATE;
+    var INCOMPLETE = Private(require('components/courier/fetch/_req_status')).INCOMPLETE;
 
     function fetchThese(requests) {
-      return forEachStrategy(requests, function (requests, strategy) {
-        requests.forEach(initRequest);
+      return forEachStrategy(requests, function (strategy, requests) {
+        return fetchWithStrategy(strategy, requests.map(function (req) {
+          if (!req.started) return req;
+          return req.retry();
+        }));
+      })
+      .catch(notify.fatal);
+    }
 
-        var uniq = mergeDuplicateRequests(requests);
-        var states;
-        var responses;
+    function fetchWithStrategy(strategy, requests) {
 
-        return Promise.map(uniq, function (req) {
-          return strategy.getSourceStateFromRequest(req);
-        })
-        .then(function (_states_) {
-          states = _states_;
+      requests = requests.map(function (req) {
+        if (req.aborted) {
+          return ABORTED;
+        }
 
-          // all requests must have been disabled
-          if (!states.length) return Promise.resolve(false);
+        if (req.started) {
+          req.continue();
+        } else {
+          req.start();
+        }
 
-          return es[strategy.clientMethod]({
-            timeout: configFile.shard_timeout,
-            preference: sessionId,
-            body: strategy.convertStatesToBody(states)
-          });
-        })
-        .then(strategy.getResponses)
-        .then(function (_responses_) {
-          responses = _responses_;
+        return req;
+      });
 
-          return Promise.all(responses.map(function (resp) {
-            var req = uniq.shift();
-            var state = states.shift();
-            if (!req._merged) {
-              req.state = state;
-              return reqComplete(req, resp);
-            } else {
-              return Promise.all(req._merged.map(function (mergedReq) {
-                mergedReq.state = state;
-                var respClone = _.cloneDeep(resp);
-                return reqComplete(mergedReq, respClone);
-              }));
-            }
-          }));
-        })
-        .then(function () {
-          return responses;
-        })
-        .catch(function (err) {
-          function sendFailure(req) {
-            req.source.activeFetchCount -= 1;
-            requestErrorHandler(req, err);
+      return Promise.resolve()
+      .then(function () {
+        return callClient(strategy, requests);
+      })
+      .then(function (responses) {
+        return callResponseHandlers(strategy, requests, responses);
+      })
+      .then(function (responses) {
+        return continueIncomplete(strategy, requests, responses, fetchWithStrategy);
+      })
+      .then(function (responses) {
+        return responses.map(function (resp) {
+          switch (resp) {
+          case ABORTED:
+            return null;
+          case DUPLICATE:
+          case INCOMPLETE:
+            throw new Error('Failed to clear incomplete or duplicate request from responses.');
+          default:
+            return resp;
           }
-
-          uniq.forEach(function (req) {
-            if (!req._merged) sendFailure(req);
-            else req._merged.forEach(sendFailure);
-          });
-          throw err;
         });
       });
     }

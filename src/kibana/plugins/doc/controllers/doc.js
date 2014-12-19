@@ -42,7 +42,8 @@ define(function (require) {
           }
         },
         fields: computedFields.fields,
-        script_fields: computedFields.scriptFields
+        script_fields: computedFields.scriptFields,
+        fielddata_fields: computedFields.fielddataFields
       }
     }).then(function (resp) {
       if (resp.hits) {

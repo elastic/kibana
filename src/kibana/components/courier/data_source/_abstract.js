@@ -4,7 +4,7 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
 
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var courierFetch = Private(require('components/courier/fetch/fetch'));
 
@@ -123,8 +123,7 @@ define(function (require) {
       var self = this;
 
       return new PromiseEmitter(function (resolve, reject, defer) {
-        var req = self._createRequest(defer);
-        pendingRequests.push(req);
+        self._createRequest(defer);
       }, handler);
     };
 
@@ -155,20 +154,22 @@ define(function (require) {
     /**
      * Fetch just this source ASAP
      *
-     * ONLY USE IF YOU NEED THE RESULTS OTHERWISE USE .fetchPending()
-     * TO TRIGGER FETCHING ALL PENDING REQUESTS
+     * ONLY USE IF YOU WILL BE USING THE RESULTS
+     * provided by the returned promise, otherwise
+     * call #fetchPending()
      *
      * @async
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
-      var req = _.first(self._myPending());
+      var req = _.first(self._myPendingReq());
+
       if (!req) {
         req = self._createRequest();
-        pendingRequests.push(req);
       }
 
-      self.fetchPending();
+      courierFetch.these([req]);
+
       return req.defer.promise;
     };
 
@@ -177,15 +178,15 @@ define(function (require) {
      * @async
      */
     SourceAbstract.prototype.fetchPending = function () {
-      return courierFetch.these(this._pullMyPending());
+      return courierFetch.these(this._myPendingReq());
     };
 
     /**
      * Cancel all pending requests for this dataSource
      * @return {undefined}
      */
-    SourceAbstract.prototype.cancelPending = function () {
-      this._pullMyPending();
+    SourceAbstract.prototype.cancelPendingReq = function () {
+      _.invoke(this._myPendingReq(), 'abort');
     };
 
     /**
@@ -193,45 +194,19 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.destroy = function () {
-      this.cancelPending();
+      this.cancelPendingReq();
     };
 
     /*****
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myPending = function () {
-      return _.where(pendingRequests, { source: this });
-    };
-
-    SourceAbstract.prototype._pullMyPending = function () {
-      var self = this;
-      return pendingRequests.splice(0).filter(function (req) {
-        if (req.source !== self) {
-          pendingRequests.push(req);
-          return false;
-        }
-        return true;
-      });
+    SourceAbstract.prototype._myPendingReq = function (includeStarted) {
+      return _.where(requestQueue.getPending(), { source: this });
     };
 
     SourceAbstract.prototype._createRequest = function (defer) {
-      var self = this;
-
-      var req = {
-        source: self,
-        defer: defer || Promise.defer(),
-        strategy: self._fetchStrategy
-      };
-
-      if (self.history) {
-        // latest history at the top
-        self.history.unshift(req);
-        // trim all entries beyond 19/20
-        self.history.splice(20);
-      }
-
-      return req;
+      throw new Error('_createRequest must be implemented by subclass');
     };
 
     /**
@@ -279,6 +254,8 @@ define(function (require) {
       }())
       .then(function () {
         if (type === 'search') {
+          flatState.body = flatState.body || {};
+
           // defaults for the query
           if (!flatState.body.query) {
             flatState.body.query = {
@@ -289,7 +266,10 @@ define(function (require) {
           var computedFields = flatState.index.getComputedFields();
           flatState.body.fields = computedFields.fields;
           flatState.body.script_fields = flatState.body.script_fields || {};
+          flatState.body.fielddata_fields = flatState.body.fielddata_fields || [];
+
           _.extend(flatState.body.script_fields, computedFields.scriptFields);
+          flatState.body.fielddata_fields = _.union(flatState.body.fielddata_fields, computedFields.fielddataFields);
 
 
           /**

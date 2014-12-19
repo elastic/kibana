@@ -49,6 +49,7 @@ define(function (require) {
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
+    var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
@@ -143,6 +144,7 @@ define(function (require) {
       });
 
       $scope.$watch('state.filters', function (newFilters, oldFilters) {
+        if (onlyDisabled(newFilters, oldFilters)) return;
         if (newFilters !== oldFilters) $scope.fetch();
       });
 

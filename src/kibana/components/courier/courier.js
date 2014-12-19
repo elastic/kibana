@@ -14,8 +14,10 @@ define(function (require) {
       var DocSource = Private(require('components/courier/data_source/doc_source'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
-      var pendingRequests = Private(require('components/courier/_pending_requests'));
+      var requestQueue = Private(require('components/courier/_request_queue'));
+      var errorHandlers = Private(require('components/courier/_error_handlers'));
 
+      var fetch = Private(require('components/courier/fetch/fetch'));
       var docLooper = self.docLooper = Private(require('components/courier/looper/doc'));
       var searchLooper = self.searchLooper = Private(require('components/courier/looper/search'));
 
@@ -57,7 +59,7 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        return searchLooper.run();
+        fetch.searches();
       };
 
 
@@ -106,12 +108,12 @@ define(function (require) {
         searchLooper.stop();
         docLooper.stop();
 
-        [].concat(pendingRequests.splice(0), this._errorHandlers.splice(0))
+        [].concat(requestQueue.splice(0), errorHandlers.splice(0))
         .forEach(function (req) {
           req.defer.reject(new Abort());
         });
 
-        if (pendingRequests.length) {
+        if (requestQueue.length) {
           throw new Error('Aborting all pending requests failed.');
         }
       };

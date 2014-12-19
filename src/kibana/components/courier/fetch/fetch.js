@@ -4,15 +4,14 @@ define(function (require) {
 
     var strategies = this.strategies = {
       doc: Private(require('components/courier/fetch/strategy/doc')),
-      search: Private(require('components/courier/fetch/strategy/search')),
-      segmented: Private(require('components/courier/fetch/strategy/segmented'))
+      search: Private(require('components/courier/fetch/strategy/search'))
     };
 
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var fetchThese = Private(require('components/courier/fetch/_fetch_these'));
 
     function fetchPending(strategy) {
-      var requests = strategy.getPendingRequests(pendingRequests);
+      var requests = requestQueue.getPending(strategy);
       if (!requests.length) return Promise.resolve();
       else return fetchThese(requests);
     }
@@ -29,11 +28,6 @@ define(function (require) {
      */
     this.searches = _.partial(fetchPending, strategies.search);
 
-    /**
-     * Fetch all pending search requests
-     * @async
-     */
-    this.segmentedSearches = _.partial(fetchPending, strategies.segmented);
 
     function fetchASource(source, strategy) {
       strategy = strategy || strategies[source._getType()];

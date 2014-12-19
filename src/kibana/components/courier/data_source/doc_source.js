@@ -7,6 +7,7 @@ define(function (require) {
   return function DocSourceFactory(Private, Promise, es, sessionStorage) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
+    var DocRequest = Private(require('components/courier/fetch/request/doc'));
 
     var VersionConflict = errors.VersionConflict;
     var RequestFailure = errors.RequestFailure;
@@ -22,6 +23,10 @@ define(function (require) {
     /*****
      * PUBLIC API
      *****/
+
+    DocSource.prototype._createRequest = function (defer) {
+      return new DocRequest(this, defer);
+    };
 
     /**
      * List of methods that is turned into a chainable API in the constructor

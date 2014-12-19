@@ -10,16 +10,12 @@ define(function (require) {
       globalState.save();
     });
 
-    if (_.isUndefined(sessionStorage.get('refreshInterval'))) {
-      $scope.timefilter.refreshInterval = { value : 0, display : 'Off' };
-    } else {
-      $scope.timefilter.refreshInterval = sessionStorage.get('refreshInterval');
-    }
-
-    $scope.$watch('timefilter.refreshInterval', function () {
-      var refreshInterval = $scope.timefilter.refreshInterval;
-      if (!_.isUndefined(refreshInterval) && _.isNumber(refreshInterval.value)) {
+    $scope.timefilter.refreshInterval = sessionStorage.get('refreshInterval');
+    $scope.$watch('timefilter.refreshInterval', function (refreshInterval) {
+      if (refreshInterval != null && _.isNumber(refreshInterval.value)) {
         sessionStorage.set('refreshInterval', refreshInterval);
+      } else {
+        $scope.timefilter.refreshInterval = { value : 0, display : 'Off' };
       }
     });
 

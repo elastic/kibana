@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('get_build_props', function () {
     Promise.props({
-      sha: spawn.silent('git', ['log', '--format=%H', '-n1'])(),
+      sha: spawn.silent('git', ['rev-parse', 'HEAD'])(),
       num: spawn.silent('sh', ['-c', 'git log --format="%h" | wc -l'])()
     })
     .then(function (props) {

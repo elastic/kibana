@@ -22,6 +22,20 @@
               Use event times to create index names
             </label>
           </div>
+
+          <div class="form-group" ng-if="index.isTimeBased && index.nameIsPattern">
+            <label>
+              Index pattern interval&nbsp;
+              <kbn-info info="The interval at which index names rotate."></kbn-info>
+            </label>
+            <select
+              required
+              ng-options="opt.display for opt in index.nameIntervalOptions"
+              ng-model="index.nameInterval"
+              class="form-control">
+            </select>
+          </div>
+
           <div class="form-group">
             <label>
               Index name or pattern
@@ -33,24 +47,19 @@
               ng-model="index.name"
               ng-attr-placeholder="{{index.defaultName}}"
               ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+              validate-index-name
+              name="name"
               required
               type="text"
               class="form-control">
-          </div>
-          <section ng-if="index.isTimeBased && index.nameIsPattern">
-            <div class="form-group">
-              <label>
-                Index pattern interval&nbsp;
-                <kbn-info info="The interval at which index names rotate."></kbn-info>
-              </label>
-              <select
-                required
-                ng-options="opt.display for opt in index.nameIntervalOptions"
-                ng-model="index.nameInterval"
-                class="form-control">
-              </select>
+              <small ng-show="index.nameInterval.name == 'weeks'">
+                <strong>Note: </strong>
+                I noticed you're using weekly indices. Kibana requires ISO weeks be used in your index creation.
+                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date">Wikipedia: ISO Week Date</a>
+              </small>
             </div>
 
+          <section>
             <div class="alert alert-danger" ng-repeat="err in index.patternErrors">
               {{err}}
             </div>
@@ -116,7 +125,8 @@
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
             class="btn">
-            {{index.fetchFieldsError || "Create" }}
+            <span ng-hide="form.name.$error.indexNameInput">{{index.fetchFieldsError || "Create" }}</span>
+            <span ng-show="form.name.$error.indexNameInput">Invalid index name pattern.</span>
           </button>
         </form>
       </div>
