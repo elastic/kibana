@@ -4,7 +4,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   require('services/private');
 
-  describe.only('Events', function () {
+  describe('Events', function () {
     require('test_utils/no_digest_promises').activateForSuite();
 
     var $rootScope;

@@ -87,6 +87,10 @@
         var deps = JSON.parse(specListJson);
         deps.unshift('sinon/sinon');
         deps.unshift('kibana');
+
+        sessionStorage.clear();
+        localStorage.clear();
+
         require(deps, bootstrap);
       }
 
