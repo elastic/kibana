@@ -9,6 +9,7 @@ define(function (require) {
     function Events() {
       Events.Super.call(this);
       this._listeners = {};
+      this._emitChain = Promise.resolve();
     }
 
     /**
@@ -22,26 +23,20 @@ define(function (require) {
         this._listeners[name] = [];
       }
 
-      var listener = { handler: handler };
-
-      // capture the promise that is resolved when listener.defer is "fresh"/new
-      // and attach it to the listener
-      (function buildDefer(value) {
-
-        // we will execute the handler on each re-build, but not the initial build
-        var rebuilding = listener.defer != null;
-
-        listener.defer = Promise.defer();
-        listener.deferResolved = false;
-        listener.newDeferPromise = listener.defer.promise.then(buildDefer);
-
-        if (!rebuilding) return;
-
-        // we ignore the completion of handlers, just watch for unhandled errors
-        Promise.try(handler, [value]).catch(notify.fatal);
-      }());
-
+      var listener = {
+        handler: handler
+      };
       this._listeners[name].push(listener);
+
+      (function rebuildDefer() {
+        listener.defer = Promise.defer();
+        listener.resolved = listener.defer.promise.then(function (value) {
+          rebuildDefer();
+
+          // we ignore the completion of handlers, just watch for unhandled errors
+          Promise.resolve(handler(value)).catch(notify.fatal);
+        });
+      }());
     };
 
     /**
@@ -76,21 +71,17 @@ define(function (require) {
      * @returns {Promise}
      */
     Events.prototype.emit = function (name, value) {
-      if (!this._listeners[name]) {
-        return Promise.resolve();
+      var self = this;
+
+      if (!self._listeners[name]) {
+        return self._emitChain;
       }
 
-      return Promise.map(this._listeners[name], function resolveListener(listener) {
-        if (listener.deferResolved) {
-          // this listener has already been resolved by another call to events#emit()
-          // so we wait for listener.defer to be recreated and try again
-          return listener.newDeferPromise.then(function () {
-            return resolveListener(listener);
-          });
-        } else {
-          listener.deferResolved = true;
+      return Promise.map(self._listeners[name], function (listener) {
+        return self._emitChain = self._emitChain.then(function () {
           listener.defer.resolve(value);
-        }
+          return listener.resolved;
+        });
       });
     };
 

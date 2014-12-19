@@ -163,5 +163,33 @@ define(function (require) {
         });
       });
     });
+
+    it('should always emit in the same order', function () {
+      var handler = sinon.stub();
+
+      var obj = new Events();
+      obj.on('block', _.partial(handler, 'block'));
+      obj.on('last', _.partial(handler, 'last'));
+
+      return Promise
+      .all([
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('block'),
+        obj.emit('last')
+      ])
+      .then(function () {
+        expect(handler.callCount).to.be(10);
+        handler.args.forEach(function (args, i) {
+          expect(args[0]).to.be(i < 9 ? 'block' : 'last');
+        });
+      });
+    });
   });
 });
