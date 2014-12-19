@@ -50,6 +50,7 @@ define(function (require) {
        */
       self.start = function () {
         searchLooper.start();
+        docLooper.start();
         return this;
       };
 
