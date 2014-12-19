@@ -106,7 +106,9 @@
 
     <div class="vis-editor-canvas" ng-class="{ embedded: appEmbedded }">
       <div class="visualize-info" ng-if="savedVis.id">
-        <span bindonce bo-bind="savedVis.title"></span>
+        <div class="visualize-info-tab">
+          <span bindonce bo-bind="savedVis.title"></span>
+        </div>
       </div>
 
       <visualize vis="vis" editable-vis="editableVis"  search-source="savedVis.searchSource"></visualize>
