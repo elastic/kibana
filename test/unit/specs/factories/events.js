@@ -4,7 +4,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   require('services/private');
 
-  describe('Events', function () {
+  describe.only('Events', function () {
     require('test_utils/no_digest_promises').activateForSuite();
 
     var $rootScope;
@@ -23,26 +23,31 @@ define(function (require) {
       });
     });
 
-    it('should handle on events', function (done) {
+    it('should handle on events', function () {
       var obj = new Events();
-      obj.on('test', function (message) {
+      var prom = obj.on('test', function (message) {
         expect(message).to.equal('Hello World');
-        done();
       });
+
       obj.emit('test', 'Hello World');
+
+      return prom;
     });
 
-    it('should work with inherited objects', function (done) {
+    it('should work with inherited objects', function () {
       _(MyEventedObject).inherits(Events);
       function MyEventedObject() {
         MyEventedObject.Super.call(this);
       }
       var obj = new MyEventedObject();
-      obj.on('test', function (message) {
+
+      var prom = obj.on('test', function (message) {
         expect(message).to.equal('Hello World');
-        done();
       });
+
       obj.emit('test', 'Hello World');
+
+      return prom;
     });
 
     it('should clear events when off is called', function () {
@@ -54,7 +59,7 @@ define(function (require) {
       expect(obj._listeners).to.not.have.property('test');
     });
 
-    it('should clear a specific handler when off is called for an event', function (done) {
+    it('should clear a specific handler when off is called for an event', function () {
       var obj = new Events();
       var handler1 = sinon.stub();
       var handler2 = sinon.stub();
@@ -62,27 +67,29 @@ define(function (require) {
       obj.on('test', handler2);
       expect(obj._listeners).to.have.property('test');
       obj.off('test', handler1);
-      obj.emit('test', 'Hello World').then(function () {
+
+      return obj.emit('test', 'Hello World')
+      .then(function () {
         sinon.assert.calledOnce(handler2);
         sinon.assert.notCalled(handler1);
-        done();
       });
     });
 
-    it('should clear a all handlers when off is called for an event', function (done) {
+    it('should clear a all handlers when off is called for an event', function () {
       var obj = new Events();
       var handler1 = sinon.stub();
       obj.on('test', handler1);
       expect(obj._listeners).to.have.property('test');
       obj.off('test');
       expect(obj._listeners).to.not.have.property('test');
-      obj.emit('test', 'Hello World').then(function () {
+
+      return obj.emit('test', 'Hello World')
+      .then(function () {
         sinon.assert.notCalled(handler1);
-        done();
       });
     });
 
-    it('should handle mulitple identical emits in the same tick', function (done) {
+    it('should handle mulitple identical emits in the same tick', function () {
       var obj = new Events();
       var handler1 = sinon.stub();
 
@@ -93,16 +100,17 @@ define(function (require) {
         obj.emit('test', 'three')
       ];
 
-      Promise.all(emits).then(function () {
+      return Promise
+      .all(emits)
+      .then(function () {
         expect(handler1.callCount).to.be(emits.length);
         expect(handler1.getCall(0).calledWith('one')).to.be(true);
         expect(handler1.getCall(1).calledWith('two')).to.be(true);
         expect(handler1.getCall(2).calledWith('three')).to.be(true);
-        done();
       });
     });
 
-    it('should handle emits from the handler', function (done) {
+    it('should handle emits from the handler', function () {
       var obj = new Events();
       var secondEmit = Promise.defer();
       var handler1 = sinon.spy(function () {
@@ -114,16 +122,17 @@ define(function (require) {
 
       obj.on('test', handler1);
 
-      Promise.all([
+      return Promise
+      .all([
         obj.emit('test'),
         secondEmit.promise
-      ]).then(function () {
+      ])
+      .then(function () {
         expect(handler1.callCount).to.be(2);
-        done();
       });
     });
 
-    it('should only emit to handlers registered before emit is called', function (done) {
+    it('should only emit to handlers registered before emit is called', function () {
       var obj = new Events();
       var handler1 = sinon.stub();
       var handler2 = sinon.stub();
@@ -136,7 +145,7 @@ define(function (require) {
       ];
 
 
-      Promise.all(emits).then(function () {
+      return Promise.all(emits).then(function () {
         expect(handler1.callCount).to.be(emits.length);
 
         obj.on('test', handler2);
@@ -147,10 +156,10 @@ define(function (require) {
           obj.emit('test', 'six')
         ];
 
-        Promise.all(emits2).then(function () {
+        return Promise.all(emits2)
+        .then(function () {
           expect(handler1.callCount).to.be(emits.length + emits2.length);
           expect(handler2.callCount).to.be(emits2.length);
-          done();
         });
       });
     });
