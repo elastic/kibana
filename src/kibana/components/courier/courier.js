@@ -7,7 +7,7 @@ define(function (require) {
   require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
-  .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
+  .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {
     function Courier() {
       var self = this;
 
@@ -125,6 +125,10 @@ define(function (require) {
           self.fetchInterval(0);
         }
       });
+
+      var onFatalDefer = Promise.defer();
+      onFatalDefer.promise.then(self.close);
+      Notifier.fatalCallbacks.push(onFatalDefer.resolve);
     }
 
     return new Courier();

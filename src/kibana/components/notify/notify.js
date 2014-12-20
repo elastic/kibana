@@ -20,16 +20,9 @@ define(function (require) {
     return Notifier;
   });
 
-  module.run(function ($timeout, Promise, courier) {
+  module.run(function ($timeout) {
     // provide alternate methods for setting timeouts, which will properly trigger digest cycles
     Notifier.setTimerFns($timeout, $timeout.cancel);
-
-    var onFatalDefer = Promise.defer();
-    onFatalDefer.promise.then(function () {
-      courier.close();
-    });
-
-    Notifier.fatalCallbacks.push(onFatalDefer.resolve);
   });
 
   /**
