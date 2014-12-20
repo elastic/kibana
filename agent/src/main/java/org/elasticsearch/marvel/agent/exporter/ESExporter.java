@@ -161,7 +161,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         return "es_exporter";
     }
 
-    @Inject
+    @Inject(optional = true)
     public void setHttpServer(HttpServer httpServer) {
         this.httpServer = httpServer;
     }
@@ -337,7 +337,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     private HttpURLConnection openAndValidateConnection(String method, String path, String contentType) {
         if (hosts.length == 0) {
             if (httpServer == null) {
-                logger.debug("local http server is not yet injected. can't connect.");
+                logger.warn("http server is not enabled no hosts are manually configured");
                 return null;
             }
 

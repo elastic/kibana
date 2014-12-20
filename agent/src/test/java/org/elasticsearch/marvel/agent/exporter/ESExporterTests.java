@@ -52,6 +52,19 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertHitC
 public class ESExporterTests extends ElasticsearchIntegrationTest {
 
     @Test
+    public void testHttpServerOff() {
+        ImmutableSettings.Builder builder = ImmutableSettings.builder()
+                .put(AgentService.SETTINGS_INTERVAL, "200m")
+                .put("http.enabled", "false");
+        cluster().startNode(builder);
+        ESExporter esExporter = getEsExporter();
+        logger.info("trying exporting despite of no target");
+        esExporter.exportEvents(new Event[]{
+                new TestEvent()
+        });
+    }
+
+    @Test
     public void testLargeClusterStateSerialization() throws InterruptedException {
         // make sure no other exporting is done (quicker)..
         cluster().startNode(ImmutableSettings.builder().put(AgentService.SETTINGS_INTERVAL, "200m"));
