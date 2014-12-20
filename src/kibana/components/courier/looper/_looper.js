@@ -18,6 +18,9 @@ define(function (require) {
        */
       looper.ms = function (ms) {
         _ms = ms;
+
+        if (!_started) return;
+
         if (_ms) {
           looper.restart();
         } else {

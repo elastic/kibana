@@ -7,7 +7,7 @@ define(function (require) {
   require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
-  .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
+  .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {
     function Courier() {
       var self = this;
 
@@ -32,7 +32,6 @@ define(function (require) {
       self.SearchSource = SearchSource;
 
       var HastyRefresh = errors.HastyRefresh;
-      var Abort = errors.Abort;
 
       /**
        * update the time between automatic search requests
@@ -50,6 +49,7 @@ define(function (require) {
        */
       self.start = function () {
         searchLooper.start();
+        docLooper.start();
         return this;
       };
 
@@ -108,10 +108,7 @@ define(function (require) {
         searchLooper.stop();
         docLooper.stop();
 
-        [].concat(requestQueue.splice(0), errorHandlers.splice(0))
-        .forEach(function (req) {
-          req.defer.reject(new Abort());
-        });
+        _.invoke(requestQueue, 'abort');
 
         if (requestQueue.length) {
           throw new Error('Aborting all pending requests failed.');
@@ -128,6 +125,10 @@ define(function (require) {
           self.fetchInterval(0);
         }
       });
+
+      var onFatalDefer = Promise.defer();
+      onFatalDefer.promise.then(self.close);
+      Notifier.fatalCallbacks.push(onFatalDefer.resolve);
     }
 
     return new Courier();

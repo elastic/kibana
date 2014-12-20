@@ -85,14 +85,14 @@ define(function (require) {
       var $courier;
       beforeEach(function () {
         init();
-        // Inject courier object
-        inject(function (courier) {
+        inject(function (courier, $rootScope) {
           $courier = courier;
+          $rootScope.$apply();
         });
       });
 
       it('should contain a list of options', function (done) {
-        expect($elem.find('.kbn-refresh-list').length).to.be(1);
+        expect($elem.find('.kbn-refresh-section').length).to.be.greaterThan(0);
         done();
       });
 
@@ -131,14 +131,14 @@ define(function (require) {
       });
 
       it('should highlight the right mode', function (done) {
-        expect($elem.find('.kbn-timepicker-modes .active').text()).to.be('quick');
+        expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('quick');
 
         // Each of the 3 modes
         var modes = ['absolute', 'relative', 'quick'];
         _.each(modes, function (mode) {
           $scope.setMode(mode);
           $scope.$digest();
-          expect($elem.find('.kbn-timepicker-modes .active').text()).to.be(mode);
+          expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be(mode);
         });
 
         done();

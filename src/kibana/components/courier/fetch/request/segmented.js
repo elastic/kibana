@@ -21,11 +21,19 @@ define(function (require) {
       this._remainingSize = false;
       this._direction = 'desc';
       this._handle = new SegmentedHandle(this);
+      // prevent the source from changing between requests
+      this._getFlattenedSource = _.once(this._getFlattenedSource);
 
       // give the request consumer a chance to receive each segment and set
       // parameters via the handle
       if (_.isFunction(initFn)) initFn(this._handle);
+    }
 
+    /*********
+     ** SearchReq overrides
+     *********/
+
+    SegmentedReq.prototype.start = function () {
       this._createQueue();
       this._all = this._queue.slice(0);
       this._complete = [];
@@ -41,20 +49,9 @@ define(function (require) {
         }
       };
 
-      // prevent the source from changing between requests
-      this._getFlattenedSource = _.once(this._getFlattenedSource);
-
-      // send out the initial status
+      // Send the initial fetch status
       this._reportStatus();
-    }
 
-    /*********
-     ** SearchReq overrides
-     *********/
-
-    SegmentedReq.prototype.start = function () {
-      // update the status on every iteration
-      this._reportStatus();
       return SearchReq.prototype.start.call(this);
     };
 
@@ -82,6 +79,13 @@ define(function (require) {
 
     SegmentedReq.prototype.handleResponse = function (resp) {
       return this._consumeSegment(resp);
+    };
+
+    SegmentedReq.prototype.filterError = function (resp) {
+      if (/ClusterBlockException.*index\sclosed/.test(resp.error)) {
+        this._consumeSegment(false);
+        return true;
+      }
     };
 
     SegmentedReq.prototype.isIncomplete = function () {
@@ -136,12 +140,15 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._consumeSegment = function (seg) {
-      this._segments.push(seg);
 
       var index = this._active;
-      var first = this._segments.length === 1;
+      var first = this._segments.length === 0;
 
       this._complete.push(index);
+
+      if (!seg) return; // segment was ignored/filtered, don't store it
+
+      this._segments.push(seg);
 
       if (this._remainingSize !== false) {
         this._remainingSize -= seg.hits.hits.length;

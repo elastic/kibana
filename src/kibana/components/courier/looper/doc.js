@@ -9,7 +9,7 @@ define(function (require) {
      */
     var docLooper = new Looper(1500, function () {
       fetch.docs();
-    }).start();
+    });
 
     return docLooper;
   };
