@@ -8,6 +8,7 @@ define(function (require) {
 
     var rootSearchSource = Private(require('components/courier/data_source/_root_search_source'));
     var allowedRoutesRE = /^\/settings\//;
+    var notify = new Notifier();
 
     return {
       routeSetupWork: function () {
@@ -19,25 +20,28 @@ define(function (require) {
         ])
         .then(function () {
           var path = $route.current.$$route.originalPath;
-          if (!path.match(allowedRoutesRE)) {
-            return courier.indexPatterns.getIds()
-            .then(function (patterns) {
-              var defined = !!config.get('defaultIndex');
-              var exists = defined && _.contains(patterns, defined);
+          var defaultIndexRequired = !path.match(allowedRoutesRE);
 
-              if (defined && !exists) {
-                config.clear('defaultIndex');
-                defined = false;
-              }
+          return courier.indexPatterns.getIds()
+          .then(function (patterns) {
+            var defined = !!config.get('defaultIndex');
+            var exists = _.contains(patterns, config.get('defaultIndex'));
 
-              if (defined) {
+            if (defined && !exists) {
+              config.clear('defaultIndex');
+              defined = false;
+            }
+
+            if (!defined) {
+              if (defaultIndexRequired) {
                 throw new NoDefaultIndexPattern();
+              } else {
+                firstNoDefaultError = false;
               }
+            }
 
-              firstNoDefaultError = false;
-              return rootSearchSource.loadDefault();
-            });
-          }
+            return rootSearchSource.loadDefault();
+          });
         });
       },
       handleKnownError: function (err) {
@@ -50,7 +54,7 @@ define(function (require) {
             if (firstNoDefaultError) {
               firstNoDefaultError = false;
             } else {
-              (new Notifier()).error(err);
+              notify.error(err);
             }
           }
         } else {
