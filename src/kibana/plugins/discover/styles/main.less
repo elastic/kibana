@@ -6,30 +6,127 @@
   overflow-x: hidden;
 }
 
-.discover-timechart {
-  margin-bottom: 20px;
-  display: block;
-  position: relative;
+.discover {
 
-  visualize {
-    height: 200px;
-    max-height: 600px;
+  &-wrapper {
+    padding-right: 0px !important;
+  }
 
-    &.only-spy {
-      height: auto;
+  &-content {
+    padding-right: @padding-base-horizontal;
+    clear: both;
+  }
 
-      .visualize-table {
+  &-timechart {
+    margin-bottom: 20px;
+    display: block;
+    position: relative;
+
+    visualize {
+      height: 200px;
+      max-height: 600px;
+
+      &.only-spy {
         height: auto;
+
+        .visualize-table {
+          height: auto;
+        }
       }
+    }
+
+    .chartwrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    &.vis-overlay {
+      display: flex;
+      align-items: center;
     }
   }
 
-  .chartwrapper {
+  &-overlay {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    bottom: 0;
+    right: 0;
+    z-index: 20;
+
+    opacity: 0.75;
+    text-align: center;
+    background-color: #ffffff;
+
+    // spinner and prorgess counter
+    > div {
+      text-align: center;
+    }
+  }
+
+  &-info {
+    background-color: @well-bg;
+    float: right;
+    padding: 5px 10px;
+    border-bottom-left-radius: @border-radius-base;
+
+    text-align: right;
+
+    &-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  }
+
+  &-table {
+    overflow-y: auto;
+    overflow-x: auto;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+
+    tbody {
+      font-family: "Lucida Console", Monaco, monospace;
+    }
+
+    &-footer {
+      background-color: @well-bg;
+      padding: 5px 10px;
+    }
+
+    &-details-toggle {
+      margin-bottom: 3px;
+    }
+
+    &-timefield {
+      white-space: nowrap;
+    }
+
+    &-open-icon {
+      // when switching between open and closed, the toggle changes size
+      // slightly which is a problem because it forces the entire table to
+      // re-render which is SLOW
+      width: 7px;
+    }
+  }
+
+  &-field {
+    &-filter {
+      background-color: @well-bg;
+      margin-right: 10px;
+
+      .form-group {
+        margin-bottom: 0px;
+      }
+
+    }
+
+    &-toggle {
+      color: @btn-success-color;
+      font-size: 9px;
+    }
   }
 }
 
@@ -42,81 +139,6 @@
   li {
     padding-bottom: 5px;
   }
-}
-
-.discover-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  z-index: 20;
-
-  opacity: 0.75;
-  text-align: center;
-  background-color: #ffffff;
-
-  // spinner and prorgess counter
-  > div {
-    text-align: center;
-  }
-
-  &.vis-overlay {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.discover-hits {
-  background-color: @well-bg;
-  float: right;
-  padding: 5px 10px;
-  border-bottom-left-radius: @border-radius-base;
-}
-
-.discover-table {
-  overflow-y: auto;
-  overflow-x: auto;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-
-  tbody {
-    font-family: "Lucida Console", Monaco, monospace;
-  }
-
-  &-timefield {
-    white-space: nowrap;
-  }
-
-  &-open-icon {
-    // when switching between open and closed, the toggle changes size
-    // slightly which is a problem because it forces the entire table to
-    // re-render which is SLOW
-    width: 7px;
-  }
-}
-
-.discover-table-footer {
-  background-color: @well-bg;
-  padding: 5px 10px;
-}
-
-.discover-table-details-toggle {
-  margin-bottom: 3px;
-}
-
-.discover-field-filter {
-  background-color: @well-bg;
-  margin-right: 10px;
-
-  .form-group {
-    margin-bottom: 0px;
-  }
-}
-
-.discover-field-filter-toggle {
-  color: @btn-success-color;
-  font-size: 9px;
 }
 
 .sidebar-item button.discover-field-toggle {
@@ -132,25 +154,37 @@
   display: block;
 }
 
-.discover-field-details-close {
-  text-align: center;
-  border-top: 1px solid @well-border;
-  background-color: @well-bg;
-
-  &:hover {
-    background-color: @sidebar-hover-bg;
-    color: @sidebar-hover-color;
-  }
-}
-
 .discover-field-details {
   border-top: 1px solid @well-border;
   padding: 5px 10px;
   background-color: @body-bg;
   color: @text-color;
 
-  .discover-field-details-count {
+  &-close {
+    text-align: center;
+    border-top: 1px solid @well-border;
+    background-color: @well-bg;
+
+    &:hover {
+      background-color: @sidebar-hover-bg;
+      color: @sidebar-hover-color;
+    }
+  }
+
+  &-count {
     white-space: nowrap;
+  }
+
+  &-error {
+    margin-top: 5px;
+  }
+
+  &-item {
+    margin-top: 5px;
+  }
+
+  &-filter {
+    cursor: pointer;
   }
 
   a {
@@ -159,18 +193,6 @@
 
   a.btn {
     color: @text-color !important;
-  }
-
-  .discover-field-details-error {
-    margin-top: 5px;
-  }
-
-  .discover-field-details-item {
-    margin-top: 5px;
-  }
-
-  .discover-field-details-filter {
-    cursor: pointer;
   }
 
   .progress {
