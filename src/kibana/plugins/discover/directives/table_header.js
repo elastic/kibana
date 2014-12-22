@@ -24,15 +24,10 @@ define(function (require) {
           if (!sortableField(column)) return;
 
           var sorting = $scope.sorting;
-          var defaultClass = ['fa', 'fa-sort', 'table-header-sortchange'];
+          var defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
 
-          if (!sorting) return defaultClass;
-
-          if (column === sorting[0]) {
-            return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
-          } else {
-            return defaultClass;
-          }
+          if (!sorting || column !== sorting[0]) return defaultClass;
+          return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
         };
 
         $scope.moveLeft = function (column) {
@@ -53,9 +48,8 @@ define(function (require) {
           if (!sortableField(column)) return;
 
           var sorting = $scope.sorting || [];
-          $scope.sorting = [column, sorting[1] === 'asc' ? 'desc' : 'asc'];
+          $scope.sorting = [column, (sorting[0] === column && sorting[1] === 'asc') ? 'desc' : 'asc'];
         };
-
       }
     };
   });
