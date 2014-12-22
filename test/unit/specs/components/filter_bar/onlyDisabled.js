@@ -28,7 +28,7 @@ define(function (require) {
           null,
           { meta: { disabled: true } }
         ];
-        var newFilters = [filters[1]];
+        var newFilters = [];
         expect(function () {
           onlyDisabled(newFilters, filters);
         }).to.not.throwError();
