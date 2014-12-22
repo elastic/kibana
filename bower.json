@@ -26,7 +26,7 @@
     "angular-elastic": "~2.3.3",
     "angular-mocks": "~1.2.14",
     "angular-route": "~1.2.14",
-    "angular-selectize.js": "w33ble/angular-selectize.js#b0dd020c",
+    "angular-selectize.js": "w33ble/angular-selectize.js#537b534dceba",
     "angular-ui-ace": "bower",
     "async": "~0.2.10",
     "bluebird": "~2.1.3",
