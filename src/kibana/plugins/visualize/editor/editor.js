@@ -144,7 +144,10 @@ define(function (require) {
       });
 
       $scope.$watch('state.filters', function (newFilters, oldFilters) {
-        if (onlyDisabled(newFilters, oldFilters)) return;
+        if (onlyDisabled(newFilters, oldFilters)) {
+          $state.save();
+          return;
+        }
         if (newFilters !== oldFilters) $scope.fetch();
       });
 
