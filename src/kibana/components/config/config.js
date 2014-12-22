@@ -102,7 +102,7 @@ define(function (require) {
 
     // sets a value in the config
     config.set = function (key, val) {
-      if (defaults[key] && defaults[key].type === 'json') {
+      if (_.isPlainObject(val)) {
         return change(key, JSON.stringify(val));
       } else {
         return change(key, val);
