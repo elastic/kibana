@@ -164,7 +164,11 @@ define(function (require) {
         // called by the saved-object-finder when a user clicks a vis
         $scope.addVis = function (hit) {
           pendingVis++;
-          $state.panels.push({ visId: hit.id });
+          $state.panels.push({ id: hit.id, type: 'visualization' });
+        };
+
+        $scope.addSearch = function (hit) {
+          $state.panels.push({ id: hit.id, type: 'search' });
         };
 
         // Setup configurable values for config directive, after objects are initialized
@@ -172,6 +176,7 @@ define(function (require) {
           dashboard: dash,
           save: $scope.save,
           addVis: $scope.addVis,
+          addSearch: $scope.addSearch,
           shareData: function () {
             return {
               link: $location.absUrl(),

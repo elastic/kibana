@@ -2,7 +2,7 @@ define(function (require) {
   var moment = require('moment');
   require('modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function (savedVisualizations, Notifier, Private) {
+  .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private) {
     var _ = require('lodash');
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
@@ -20,11 +20,12 @@ define(function (require) {
         var $state = $scope.state;
 
         // receives panel object from the dashboard grid directive
-        $scope.$watch('visId', function (visId) {
+        $scope.$watch('id', function (id) {
           delete $scope.vis;
-          if (!$scope.panel.visId) return;
+          if (!$scope.panel.id || !$scope.panel.type) return;
 
-          savedVisualizations.get($scope.panel.visId)
+
+          savedVisualizations.get($scope.panel.id)
           .then(function (savedVis) {
             $scope.savedVis = savedVis;
             $scope.$on('$destroy', savedVis.destroy);
