@@ -19,22 +19,45 @@ define(function (require) {
         // using $scope inheritance, panels are available in AppState
         var $state = $scope.state;
 
+        $scope.view = {};
+
         // receives panel object from the dashboard grid directive
         $scope.$watch('id', function (id) {
           delete $scope.vis;
           if (!$scope.panel.id || !$scope.panel.type) return;
 
+          switch ($scope.panel.type) {
+          case 'visualization':
+            savedVisualizations.get($scope.panel.id)
+            .then(function (savedVis) {
+              $scope.savedVis = savedVis;
+              $scope.view.title = savedVis.title;
+              $scope.$on('$destroy', savedVis.destroy);
+              savedVis.vis.listeners.click = filterBarClickHandler($state);
+              savedVis.vis.listeners.brush = brushEvent;
+            })
+            .catch(function (e) {
+              $scope.error = e.message;
+            });
+            break;
+          case 'search':
+            savedSearches.get($scope.panel.id)
+            .then(function (savedSearch) {
+              $scope.$root.$broadcast('ready:vis');
 
-          savedVisualizations.get($scope.panel.id)
-          .then(function (savedVis) {
-            $scope.savedVis = savedVis;
-            $scope.$on('$destroy', savedVis.destroy);
-            savedVis.vis.listeners.click = filterBarClickHandler($state);
-            savedVis.vis.listeners.brush = brushEvent;
-          })
-          .catch(function (e) {
-            $scope.error = e.message;
-          });
+              var searchSource = savedSearch.searchSource;
+              $scope.view.title = savedSearch.title;
+              searchSource.onResults().then(function onResults(resp) {
+                $scope.view.content = resp;
+              }).catch(notify.fatal);
+            })
+            .catch(function (e) {
+              $scope.error = e.message;
+            });
+            break;
+          default:
+            $scope.error = 'Unknown panel type';
+          }
         });
 
         $scope.remove = function () {

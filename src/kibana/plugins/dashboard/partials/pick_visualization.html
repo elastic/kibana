@@ -1,2 +1,25 @@
-<saved-object-finder title="Choose a visualization" type="visualizations" on-choose="opts.addVis"></saved-object-finder>
-<saved-object-finder title="Choose a visualization" type="searches" on-choose="opts.addSearch"></saved-object-finder>
+<ul class="list-group list-group-menu" ng-init="panelType = 'visualization'" ng-switch on="panelType">
+
+  <li ng-click="panelType = 'visualization'"
+    ng-class="{'active': panelType == 'visualization'}"
+    class="list-group-item list-group-menu-item">
+    Add a visualization panel
+  </li>
+  <li class="list-group-item" ng-switch-when="visualization">
+    <!-- Saved searches -->
+    <saved-object-finder title="Choose a visualization" type="visualizations" on-choose="opts.addVis"></saved-object-finder>
+  </li>
+
+  <li ng-click="panelType = 'search'"
+    ng-class="{'active': panelType == 'search'}"
+    class="list-group-item list-group-menu-item">
+    Or add a saved search <small>as a table of hits</small>
+  </li>
+  <li class="list-group-item" ng-switch-when="search">
+    <!-- Saved searches -->
+    <saved-object-finder title="Choose a search" type="searches" on-choose="opts.addSearch"></saved-object-finder>
+  </li>
+
+</ul>
+
+

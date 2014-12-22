@@ -47,7 +47,7 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, AppState, timefilter, kbnUrl) {
+  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
         var notify = new Notifier({
@@ -168,6 +168,7 @@ define(function (require) {
         };
 
         $scope.addSearch = function (hit) {
+          pendingVis++;
           $state.panels.push({ id: hit.id, type: 'search' });
         };
 
