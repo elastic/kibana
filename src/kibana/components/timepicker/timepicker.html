@@ -49,16 +49,16 @@
             <div class="kbn-timepicker-section">
               <label>
                 From:
-                <span ng-show="relative.preview">{{relative.preview}}</span><span ng-hide="relative.preview"><i>Invalid Expression</i></span>
+                <span ng-show="relative.from.preview">{{relative.from.preview}}</span><span ng-hide="relative.from.preview"><i>Invalid Expression</i></span>
               </label><br>
               <div class="form-group">
                 <input type="number" class="form-control" required
-                  ng-model="relative.count"
+                  ng-model="relative.from.count"
                   ng-change="formatRelative()">
               </div>
               <div class="form-group">
                 <select class="form-control col-xs-2"
-                  ng-model="relative.unit"
+                  ng-model="relative.from.unit"
                   ng-options="opt.value as opt.text for opt in relativeOptions"
                   ng-change="formatRelative()">
                 </select>
@@ -66,21 +66,38 @@
               <br>
               <div class="small">
                 <input type="checkbox"
-                  ng-model="relative.round"
-                  ng-checked="relative.round"
-                  ng-change="formatRelative()"/> round to the {{units[relative.unit]}}
+                  ng-model="relative.from.round"
+                  ng-checked="relative.from.round"
+                  ng-change="formatRelative()"/> round to the {{units[relative.from.unit]}}
               </div>
 
             </div>
 
             <div class="kbn-timepicker-section">
               <label>
-                To: Now
+              To:
+              <span ng-show="relative.to.preview">{{relative.to.preview}}</span><span ng-hide="relative.to.preview"><i>Invalid Expression</i></span>
               </label><br>
               <div class="form-group">
-                <input type="text" disabled class="form-control" value="Now">
+                <input type="number" class="form-control" required
+                  ng-model="relative.to.count"
+                  ng-change="formatRelative()">
               </div>
-            </div>
+              <div class="form-group">
+                <select class="form-control col-xs-2"
+                  ng-model="relative.to.unit"
+                  ng-options="opt.value as opt.text for opt in relativeOptions"
+                  ng-change="formatRelative()">
+                </select>
+              </div>
+              <br>
+              <div class="small">
+                <input type="checkbox"
+                  ng-model="relative.to.round"
+                  ng-checked="relative.to.round"
+                  ng-change="formatRelative()"/> round to the {{units[relative.to.unit]}}
+                </div>
+              </div>
 
             <div class="kbn-timepicker-section">
               <label>&nbsp;</label><br>
@@ -88,9 +105,10 @@
                 <button
                   type="submit"
                   class="btn btn-primary kbn-timepicker-go"
-                  ng-disabled="!relative.preview">
+                  ng-disabled="relative.from.date > relative.to.date || !relative.from.preview || !relative.to.preview">
                   Go
                 </button>
+                <span class="small" ng-show="relative.from.date > relative.to.date"><strong>From</strong> must occur before <strong>To</strong></span>
               </div>
             </div>
           </form>
