@@ -247,10 +247,12 @@ define(function (require) {
         savedSearch.columns = $scope.state.columns;
 
         return savedSearch.save()
-        .then(function () {
-          notify.info('Saved Data Source "' + savedSearch.title + '"');
-          if (savedSearch.id !== $route.current.params.id) {
-            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+        .then(function (id) {
+          if (id) {
+            notify.info('Saved Data Source "' + savedSearch.title + '"');
+            if (savedSearch.id !== $route.current.params.id) {
+              kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            }
           }
         });
       })

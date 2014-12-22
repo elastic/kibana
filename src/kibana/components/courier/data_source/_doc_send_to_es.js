@@ -12,12 +12,12 @@ define(function (require) {
      *                                   of the the docs current version be sent to es?
      * @param  {String} body - HTTP request body
      */
-    return function (method, validateVersion, body) {
+    return function (method, validateVersion, body, ignore) {
       var doc = this;
       // straight assignment will causes undefined values
       var params = _.pick(this._state, ['id', 'type', 'index']);
       params.body = body;
-      params.ignore = [409];
+      params.ignore = ignore || [409];
 
       if (validateVersion && params.id) {
         params.version = doc._getVersion();

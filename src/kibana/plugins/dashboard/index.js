@@ -135,10 +135,12 @@ define(function (require) {
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
-          .then(function () {
-            notify.info('Saved Dashboard as "' + dash.title + '"');
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+          .then(function (id) {
+            if (id) {
+              notify.info('Saved Dashboard as "' + dash.title + '"');
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+              }
             }
           })
           .catch(notify.fatal);
