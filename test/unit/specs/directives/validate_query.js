@@ -43,6 +43,15 @@ define(function (require) {
         return { indices: { validateQuery: function () {} } };
       });
 
+      // Super simple config stub
+      $provide.service('config', function () {
+        var keys = {};
+        return {
+          get: function (key) { return keys[key]; },
+          set: function (key, value) { keys[key] = value; }
+        };
+      });
+
       $provide.constant('configFile', {
         kibana_index: 'test-index'
       });
@@ -164,7 +173,7 @@ define(function (require) {
 
       beforeEach(function () {
         fromUser = Private(require('components/validate_query/lib/from_user'));
-        config.set('query:queryString:options', '{}');
+        config.set('query:queryString:options', {});
       });
 
       it('should return the input if passed an object', function () {
