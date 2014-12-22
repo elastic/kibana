@@ -9,6 +9,8 @@ define(function (require) {
   var $timeout;
   var $compile;
   var Promise;
+  var Private;
+  var config;
   var debounceDelay = 300;
   var $elemScope;
   var $elem;
@@ -16,7 +18,7 @@ define(function (require) {
   var cycleIndex = 0;
   var mockValidateQuery;
   var markup = '<input ng-model="mockModel" validate-query="mockQueryInput" input-focus type="text">';
-  var fromUser = require('components/validate_query/lib/from_user');
+  var fromUser;
   var toUser = require('components/validate_query/lib/to_user');
 
 
@@ -47,10 +49,12 @@ define(function (require) {
     });
 
     // Create the scope
-    inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Promise_) {
+    inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Promise_, _Private_, _config_) {
       $timeout = _$timeout_;
       $compile = _$compile_;
       Promise = _Promise_;
+      Private = _Private_;
+      config = _config_;
 
       // Give us a scope
       $rootScope = _$rootScope_;
@@ -157,6 +161,12 @@ define(function (require) {
     });
 
     describe('user input parser', function () {
+
+      beforeEach(function () {
+        fromUser = Private(require('components/validate_query/lib/from_user'));
+        config.set('query:queryString:options', '{}');
+      });
+
       it('should return the input if passed an object', function () {
         expect(fromUser({foo: 'bar'})).to.eql({foo: 'bar'});
       });
@@ -168,6 +178,13 @@ define(function (require) {
       it('should treat an empty string as a *', function () {
         expect(fromUser('')).to.eql({query_string: {query: '*'}});
       });
+
+      it('should merge in the query string options', function () {
+        config.set('query:queryString:options', {analyze_wildcard: true});
+        expect(fromUser('foo')).to.eql({query_string: {query: 'foo', analyze_wildcard: true}});
+        expect(fromUser('')).to.eql({query_string: {query: '*', analyze_wildcard: true}});
+      });
+
 
       it('should treat input that does not start with { as a query string', function () {
         expect(fromUser('foo')).to.eql({query_string: {query: 'foo'}});

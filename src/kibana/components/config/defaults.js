@@ -3,8 +3,9 @@ define(function (require) {
 
   return {
     'query:queryString:options': {
-      value: { analyze_wildcard: true },
-      description: 'Edit this JSON'
+      value: '{ "analyze_wildcard": true }',
+      description: 'Options for the lucene query string parser',
+      type: 'json'
     },
     'dateFormat': {
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',

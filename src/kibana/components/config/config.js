@@ -82,20 +82,31 @@ define(function (require) {
     });
 
     config.get = function (key, defaultVal) {
+      var keyVal;
+
       if (vals[key] == null) {
         if (defaultVal == null) {
-          return defaults[key].value;
+          keyVal = defaults[key].value;
         } else {
-          return _.cloneDeep(defaultVal);
+          keyVal = _.cloneDeep(defaultVal);
         }
       } else {
-        return vals[key];
+        keyVal = vals[key];
       }
+
+      if (defaults[key] && defaults[key].type === 'json') {
+        return JSON.parse(keyVal);
+      }
+      return keyVal;
     };
 
     // sets a value in the config
     config.set = function (key, val) {
-      return change(key, val);
+      if (defaults[key] && defaults[key].type === 'json') {
+        return change(key, JSON.stringify(val));
+      } else {
+        return change(key, val);
+      }
     };
 
     // clears a value from the config
