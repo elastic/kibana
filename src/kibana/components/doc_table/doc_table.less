@@ -1,0 +1,24 @@
+@import (reference) "../../styles/_bootstrap.less";
+@import (reference) "../../styles/theme/_theme.less";
+@import (reference) "lesshat.less";
+
+doc-viewer .doc-viewer {
+
+  &-buttons, &-field {
+    white-space: nowrap;
+  }
+
+  &-value, pre {
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  td, pre {
+    font-family: "Lucida Console", Monaco, monospace;
+  }
+
+  .content {
+    margin-top: @padding-base-vertical;
+  }
+}

@@ -9,6 +9,8 @@ define(function (require) {
     var notify = new Notifier();
 
     require('components/visualize/visualize');
+    require('components/doc_table/doc_table');
+
     var brushEvent = Private(require('utils/brush_event'));
 
     return {
@@ -43,13 +45,9 @@ define(function (require) {
           case 'search':
             savedSearches.get($scope.panel.id)
             .then(function (savedSearch) {
-              $scope.$root.$broadcast('ready:vis');
-
-              var searchSource = savedSearch.searchSource;
+              $scope.searchSource = savedSearch.searchSource;
+              $scope.columns = [];
               $scope.view.title = savedSearch.title;
-              searchSource.onResults().then(function onResults(resp) {
-                $scope.view.content = resp;
-              }).catch(notify.fatal);
             })
             .catch(function (e) {
               $scope.error = e.message;

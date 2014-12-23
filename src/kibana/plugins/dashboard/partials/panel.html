@@ -18,8 +18,9 @@
     search-source="savedVis.searchSource"
     class="panel-content"></visualize>
 
-  <div ng-if="panel.type == 'search'"
+  <doc-table ng-if="panel.type == 'search'"
+    search-source="searchSource"
+    columns="columns"
     class="panel-content">
-    {{view.content}}
-  </div>
+  </doc-table>
 </div>
