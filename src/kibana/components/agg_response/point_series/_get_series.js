@@ -25,7 +25,6 @@ define(function (require) {
           var seriesId = prefix + y.agg.id;
           var seriesLabel = prefix + y.col.title;
 
-          point.yi = y.i;
           addToSiri(series, point, seriesId, seriesLabel);
         });
 

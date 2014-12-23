@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var ConfigTemplate = require('utils/config_template');
+  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
   require('directives/config');
   require('components/courier/courier');
@@ -56,10 +57,20 @@ define(function (require) {
         var dash = $scope.dash = $route.current.locals.dash;
         $scope.$on('$destroy', dash.destroy);
 
+        var matchQueryFilter = function (filter) {
+          return filter.query && filter.query.query_string && !filter.meta;
+        };
+
+        var extractQueryFromFilters = function (filters) {
+          var filter = _.find(filters, matchQueryFilter);
+          if (filter) return filter.query;
+        };
+
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
-          query: {query_string: {query: '*'}}
+          query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
@@ -105,7 +116,8 @@ define(function (require) {
           }
         }
 
-        $scope.$watch('state.filters', function () {
+        $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (onlyDisabled(newFilters, oldFilters)) return;
           $scope.filterResults();
         });
 
@@ -134,7 +146,7 @@ define(function (require) {
           .catch(notify.fatal);
         };
 
-        var pendingVis = 0;
+        var pendingVis = _.size($state.panels);
         $scope.$on('ready:vis', function () {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {

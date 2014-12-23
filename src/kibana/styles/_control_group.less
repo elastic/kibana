@@ -22,7 +22,7 @@
 
   // the element should take up an even share of available space
   > .fill {
-    .flex(1, 1, 0);
+    .flex(1, 1, 1%);
   }
 
   button {
@@ -75,9 +75,28 @@
     }
   }
 
-  .inline-form .input-group {
-    input {
-      height: auto;
+  .inline-form {
+    .flex-parent();
+    .display(flex);
+
+    > .typeahead {
+      .flex-parent();
+
+      > .input-group {
+        .display(flex);
+        .flex(1, 0, auto);
+
+        > * {
+          float: none;
+          height: auto;
+          width: auto;
+          .flex(0 0 auto);
+        }
+
+        input[type="text"] {
+          .flex(1 1 100%);
+        }
+      }
     }
   }
 }

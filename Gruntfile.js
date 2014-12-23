@@ -43,7 +43,7 @@ module.exports = function (grunt) {
     return 'plugins/' + dirname(fileName) + '/index';
   });
 
-  config.bundledPluginModuleIds = grunt.bundledPluginModuleIds = moduleIds;
+  config.bundled_plugin_module_ids = grunt.bundled_plugin_module_ids = moduleIds;
 
   // load plugins
   require('load-grunt-config')(grunt, {

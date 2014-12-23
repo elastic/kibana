@@ -21,14 +21,16 @@ define(function (require) {
           title: 'string',
           description: 'string',
           hits: 'integer',
-          columns: 'string'
+          columns: 'string',
+          sort: 'string'
         },
 
         defaults: {
           title: 'New Saved Search',
           description: '',
           columns: [],
-          hits: 0
+          hits: 0,
+          sort: []
         },
 
         searchSource: true

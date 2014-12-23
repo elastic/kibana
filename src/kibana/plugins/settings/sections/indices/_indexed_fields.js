@@ -3,7 +3,7 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('indexedFields', function ($compile) {
+  .directive('indexedFields', function () {
     var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
 
     return {
@@ -48,7 +48,8 @@ define(function (require) {
 
             return [field.name, field.type, field.analyzed, field.indexed,
               {
-                markup: $compile(popularityHtml)(childScope),
+                markup: popularityHtml,
+                scope: childScope,
                 value: field.count
               }
             ];

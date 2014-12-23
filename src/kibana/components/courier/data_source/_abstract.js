@@ -269,7 +269,10 @@ define(function (require) {
           var computedFields = flatState.index.getComputedFields();
           flatState.body.fields = computedFields.fields;
           flatState.body.script_fields = flatState.body.script_fields || {};
+          flatState.body.fielddata_fields = flatState.body.fielddata_fields || [];
+
           _.extend(flatState.body.script_fields, computedFields.scriptFields);
+          flatState.body.fielddata_fields = _.union(flatState.body.fielddata_fields, computedFields.fielddataFields);
 
 
           /**

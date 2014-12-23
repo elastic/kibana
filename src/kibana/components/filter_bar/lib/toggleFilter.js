@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var remapFilters = require('./remapFilters');
   return function ($scope) {
     /**
      * Toggles the filter between enabled/disabled.

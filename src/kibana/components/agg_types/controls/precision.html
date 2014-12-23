@@ -9,7 +9,7 @@
         class="form-control"
         type="range"
         min="1"
-        max="9"
+        max="{{config.get('visualization:tileMap:maxPrecision')}}"
         >
       <div class="form-group vis-editor-agg-form-value">
         {{params.precision}}

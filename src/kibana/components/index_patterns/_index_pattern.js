@@ -72,13 +72,7 @@ define(function (require) {
             // Give obj all of the values in _source.fields
             _.assign(self, resp._source);
 
-            if (self.id) {
-              if (!self.fields) {
-                return self.refreshFields();
-              } else {
-                setIndexedValue('fields');
-              }
-            }
+            self._indexFields();
 
             // Any time obj is updated, re-call applyESResp
             docSource.onUpdate().then(applyESResp, notify.fatal);
@@ -130,6 +124,16 @@ define(function (require) {
         });
       }
 
+      self._indexFields = function () {
+        if (self.id) {
+          if (!self.fields) {
+            return self.refreshFields();
+          } else {
+            setIndexedValue('fields');
+          }
+        }
+      };
+
       self.addScriptedField = function (name, script, type) {
         type = type || 'string';
 
@@ -145,6 +149,7 @@ define(function (require) {
           type: type,
           scripted: true,
         });
+
         self.save();
       };
 
@@ -153,19 +158,23 @@ define(function (require) {
           name: name,
           scripted: true
         });
+
         self.fields.splice(fieldIndex, 1);
+
         self.save();
       };
 
       self.popularizeField = function (fieldName, unit) {
-        if (_.isUndefined(unit)) unit = 1;
-        if (!(self.fields.byName && self.fields.byName[fieldName])) return;
+        if (unit == null) unit = 1;
 
-        var field = self.fields.byName[fieldName];
-        if (!field.count && unit < 1) return;
-        if (!field.count) field.count = 1;
-        else field.count = field.count + (unit);
-        self.save();
+        var field = _.deepGet(self, ['fields', 'byName', fieldName]);
+        if (!field) return;
+
+        var count = Math.max((field.count || 0) + unit, 0);
+        if (field.count !== count) {
+          field.count = count;
+          self.save();
+        }
       };
 
       self.getFields = function (type) {

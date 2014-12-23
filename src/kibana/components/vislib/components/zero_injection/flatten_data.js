@@ -8,22 +8,22 @@ define(function (require) {
      */
 
     return function (obj) {
+      var charts;
+
       if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
         throw new TypeError('FlattenDataObjUtilService expects an object with a series, rows, or columns key');
       }
 
       if (!obj.series) {
-        obj = obj.rows ? obj.rows : obj.columns;
-
-        return _.chain(obj)
-        .pluck('series')
-        .flatten()
-        .pluck('values')
-        .flatten()
-        .value();
+        charts = obj.rows ? obj.rows : obj.columns;
       }
 
-      return _.flatten(obj.series, 'values');
+      return _.chain(charts ? charts : [obj])
+      .pluck('series')
+      .flatten()
+      .pluck('values')
+      .flatten()
+      .value();
     };
   };
 });

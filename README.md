@@ -1,5 +1,5 @@
 <!-- render {"template":"# Kibana <%= pkg.version %>"} -->
-# Kibana 4.0.0-BETA2
+# Kibana 4.0.0-beta3
 <!-- /render -->
 
 [![Build Status](https://travis-ci.org/elasticsearch/kibana.svg?branch=master)](https://travis-ci.org/elasticsearch/kibana?branch=master)
@@ -22,6 +22,8 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 - Elasticsearch version 1.4.0 or later
 - ...and nothing else
 
+*Note:* Groovy scripting must be enabled in Elasticsearch
+
 ## Installation
 
 * Download: [http://www.elasticsearch.org/overview/kibana/installation/](http://www.elasticsearch.org/overview/kibana/installation/)
@@ -29,7 +31,6 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 * Visit [http://localhost:5601](http://localhost:5601)
 
 <!-- include {"path":"docs/quick_start.md"} -->
-
 ## Quick Start
 
 You're up and running! Fantastic! Kibana is now running on port 5601, so point your browser at http://YOURDOMAIN.com:5601.
@@ -326,6 +327,3 @@ Clicking *Edit* will allow you to change the title, description and other settin
 
 *Note:* this operation is for advanced users only - making changes here can break large portions of the application.
 <!-- /include -->
-
-## Building from Source
-If you want the latest code or need something that's not in a release package, you'll need to build from source. See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions.
