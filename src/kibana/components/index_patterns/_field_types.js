@@ -13,7 +13,7 @@ define(function (require) {
         { name: 'number',     sortable: true,   filterable: true  },
         { name: 'boolean',    sortable: true,   filterable: true  },
         { name: 'conflict',   sortable: false,  filterable: false },
-        { name: 'geo_point',  sortable: false,  filterable: true  },
+        { name: 'geo_point',  sortable: false,  filterable: false },
         { name: 'geo_shape',  sortable: false,  filterable: false },
         { name: 'attachment', sortable: false,  filterable: false },
       ]

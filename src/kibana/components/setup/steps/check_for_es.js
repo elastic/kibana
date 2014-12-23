@@ -6,8 +6,7 @@ define(function (require) {
     return function checkForES() {
       var complete = notify.lifecycle('es check');
       return es.info({
-        method: 'GET',
-        requestTimeout: 2000
+        method: 'GET'
       })
       .catch(function (err) {
         if (err.body && err.body.message) {

@@ -1,7 +1,7 @@
 <div dashboard-app class="app-container dashboard-container">
   <nav ng-show="!appEmbedded" class="navbar navbar-default navbar-static-top">
     <navbar>
-      <span class="name" ng-if="dash.id" bindonce bo-bind="dash.title"></span>
+      <span class="name" ng-if="dash.id" bindonce bo-bind="dash.title" tooltip="{{dash.title}}"></span>
 
       <form name="queryInput"
         class="fill inline-form"

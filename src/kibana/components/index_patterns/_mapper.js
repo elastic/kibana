@@ -50,7 +50,7 @@ define(function (require) {
         if (indexPattern.intervalName) {
           promise = self.getIndicesForIndexPattern(indexPattern)
           .then(function (existing) {
-            if (existing.all.length === 0) throw new IndexPatternMissingIndices();
+            if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
             return existing.matches.slice(-5); // Grab the most recent 5
           });
         }

@@ -24,8 +24,8 @@ define(function (require) {
               schema: 'segment',
               params: {
                 filters: [
-                  { query: { query_string: { query: '_type:apache' } } },
-                  { query: { query_string: { query: '_type:nginx' } } }
+                  { input: { query: { query_string: { query: '_type:apache' } } } },
+                  { input: { query: { query_string: { query: '_type:nginx' } } } }
                 ]
               }
             }
@@ -34,7 +34,7 @@ define(function (require) {
 
         var aggConfig = vis.aggs.byTypeName.filters[0];
         var filter = createFilter(aggConfig, '_type:nginx');
-        expect(filter).to.be(aggConfig.params.filters[1]);
+        expect(_.omit(filter, 'meta')).to.eql(aggConfig.params.filters[1].input);
         expect(filter.meta).to.have.property('index', indexPattern.id);
 
       });

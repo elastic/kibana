@@ -64,6 +64,29 @@ define(function (require) {
 				$rootScope.$apply();
       });
 
+      it('should map json filter', function (done) {
+        var before = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
+				mapFilter(before).then(function (after) {
+          expect(after).to.have.property('meta');
+					expect(after.meta).to.have.property('key', 'query');
+					expect(after.meta).to.have.property('value', '{"match_all":{}}');
+					expect(after.meta).to.have.property('disabled', false);
+					expect(after.meta).to.have.property('negate', false);
+					done();
+				});
+				$rootScope.$apply();
+      });
+
+      it('should finish with a catch', function (done) {
+        var before = { meta: { index: 'logstash-*' }, foo: '' };
+				mapFilter(before).catch(function (error) {
+          expect(error).to.be.an(Error);
+          expect(error.message).to.be('No mappings have been found for filter.');
+					done();
+				});
+				$rootScope.$apply();
+      });
+
     });
 
   });

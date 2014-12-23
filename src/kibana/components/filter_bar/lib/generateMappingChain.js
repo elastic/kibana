@@ -3,14 +3,19 @@ define(function (require) {
   return function generateMappingChainProvider(Promise) {
 
     var noop = function () {
-      return Promise.reject(Error('No mapping have been found for filter.'));
+      return Promise.reject(new Error('No mappings have been found for filter.'));
     };
 
     return function (fn) {
       return function (next) {
         next = next || noop;
         return function (filter) {
-          return fn(filter).catch(next);
+          return fn(filter).catch(function (result) {
+            if (result === filter) {
+              return next(filter);
+            }
+            throw result;
+          });
         };
       };
     };

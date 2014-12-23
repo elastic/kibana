@@ -5,8 +5,12 @@
   per-page="perPage">
 
   <div class="agg-table-controls">
-    <a class="small" ng-click="aggTable.exportAsCsv()">
-      Export <i class="fa fa-download"></i>
+    <small>Export:</small>&nbsp;&nbsp;
+    <a class="small" ng-click="aggTable.exportAsCsv(false)">
+      Raw <i class="fa fa-download"></i>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a class="small" ng-click="aggTable.exportAsCsv(true)">
+      Formatted <i class="fa fa-download"></i>
     </a>
     <paginate-controls></paginate-controls>
   </div>

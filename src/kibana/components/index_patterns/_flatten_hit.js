@@ -3,11 +3,19 @@
 define(function (require) {
   var _ = require('lodash');
   return function (hit) {
+    if (hit.$$_flattened) return hit.$$_flattened;
+
     var self = this;
-    return _.merge(
-      self.flattenSearchResponse(hit._source),
-      self.flattenSearchResponse(hit.fields),
-      _.pick(hit, self.metaFields)
-    );
+    var source = self.flattenSearchResponse(hit._source);
+    var fields = _.omit(self.flattenSearchResponse(hit.fields), function (val, name) {
+      var field = self.fields.byName[name];
+      if (field && !field.scripted && !_.has(source, name)) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    return hit.$$_flattened = _.merge(source, fields, _.pick(hit, self.metaFields));
   };
 });

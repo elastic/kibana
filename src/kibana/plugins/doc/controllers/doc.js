@@ -34,15 +34,16 @@ define(function (require) {
 
     es.search({
       index: $route.current.params.index,
-      type: $route.current.params.type,
       body: {
         query: {
           ids: {
+            type: $route.current.params.type,
             values: [$route.current.params.id]
           }
         },
         fields: computedFields.fields,
-        script_fields: computedFields.scriptFields
+        script_fields: computedFields.scriptFields,
+        fielddata_fields: computedFields.fielddataFields
       }
     }).then(function (resp) {
       if (resp.hits) {

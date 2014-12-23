@@ -30,6 +30,10 @@ define(function (require) {
       value: 100,
       description: 'Never show more than this many bar in date histograms, scale values if needed',
     },
+    'visualization:tileMap:maxPrecision': {
+      value: 6,
+      description: 'The maximum geoHash size allowed in a tile map',
+    },
     'csv:separator': {
       value: ',',
       description: 'Separate exported values with this string',
