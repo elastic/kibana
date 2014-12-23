@@ -1,16 +1,17 @@
 define(function (require) {
   require('modules')
   .get('app/visualize', ['ui.select'])
-  .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
+  .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
+    require('angular-ui-select');
+    require('filters/field_type');
+    require('filters/match_any');
+    require('plugins/visualize/editor/agg_param');
+
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-    require('angular-ui-select');
-
-    require('plugins/visualize/editor/agg_param');
-    require('filters/match_any');
 
     var notify = new Notifier({
       location: 'visAggGroup'
@@ -132,6 +133,20 @@ define(function (require) {
             attrs['agg-param'] = 'agg.type.params[' + idx + ']';
             if (param.advanced) {
               attrs['ng-show'] = 'advancedToggled';
+            }
+
+            // default field selection to the first field in the list, if none is selected
+            if (param.name === 'field' && !$scope.agg.params.field) {
+              var fields = $scope.agg.vis.indexPattern.fields.raw;
+              var fieldTypes = param.filterFieldTypes;
+
+              if (fieldTypes) {
+                fields = $filter('fieldType')(fields, fieldTypes);
+                fields = $filter('matchAny')(fields, [{ indexed: true }, { scripted: true }]);
+                fields = $filter('orderBy')(fields, ['type', 'name']);
+
+                $scope.agg.params.field = fields[0];
+              }
             }
 
             return $('<vis-agg-param-editor>')
