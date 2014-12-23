@@ -114,8 +114,8 @@ define(function (require) {
 
       it('has a preview of the "from" and "to" inputs', function (done) {
         var preview = {
-          'from': $elem.find ('.kbn-timepicker-section span[ng-show="relative.from.preview"]'),
-          'to': $elem.find ('.kbn-timepicker-section span[ng-show="relative.to.preview"]')
+          'from': $elem.find('.kbn-timepicker-section span[ng-show="relative.from.preview"]'),
+          'to': $elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]')
         };
         expect(preview.from.text()).to.be(moment().subtract(1, 'minutes').format($scope.format));
         expect(preview.to.text()).to.be(moment().format($scope.format));
@@ -144,7 +144,7 @@ define(function (require) {
       });
 
       it('disables the submit button if the from date is greater than the to date', function (done) {
-        var button;
+        var button, span;
         button = $elem.find('button[disabled]');
         expect(button.length).to.be(0);
 
@@ -163,8 +163,8 @@ define(function (require) {
 
       it('has a dropdown bound to relative.{from,to}.unit that contains all of the intervals', function (done) {
         var select = {
-          'from': $elem.find ('.kbn-timepicker-section select[ng-model="relative.from.unit"]'),
-          'to': $elem.find ('.kbn-timepicker-section select[ng-model="relative.to.unit"]')
+          'from': $elem.find('.kbn-timepicker-section select[ng-model="relative.from.unit"]'),
+          'to': $elem.find('.kbn-timepicker-section select[ng-model="relative.to.unit"]')
         };
         expect(select.from.length).to.be(1);
         expect(select.to.length).to.be(1);
@@ -182,8 +182,8 @@ define(function (require) {
 
       it('has a checkbox that is checked when rounding is enabled', function (done) {
         var checkbox = {
-          'from': $elem.find ('.kbn-timepicker-section input[ng-model="relative.from.round"]'),
-          'to': $elem.find ('.kbn-timepicker-section input[ng-model="relative.to.round"]')
+          'from': $elem.find('.kbn-timepicker-section input[ng-model="relative.from.round"]'),
+          'to': $elem.find('.kbn-timepicker-section input[ng-model="relative.to.round"]')
         };
         expect(checkbox.from.length).to.be(1);
         expect(checkbox.to.length).to.be(1);
@@ -343,7 +343,7 @@ define(function (require) {
           expect(select.from.val()).to.be(i.toString());
           i++;
         });
-        var i = 0;
+        i = 0;
         _.each($scope.units, function (longUnit, shortUnit) {
           $scope.relative.to.unit = shortUnit;
           $scope.$digest();
