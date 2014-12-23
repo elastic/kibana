@@ -15,6 +15,12 @@ define(function (require) {
       'rows': [
         {
           'label': 'Top 5 @tags: success',
+          'ordered': {
+            'date': true,
+            'interval': 60000,
+            'min': 1418410540548,
+            'max': 1418410936568
+          },
           'series': [
             {
               'label': 'jpg',
@@ -50,6 +56,12 @@ define(function (require) {
         },
         {
           'label': 'Top 5 @tags: info',
+          'ordered': {
+            'date': true,
+            'interval': 60000,
+            'min': 1418410540548,
+            'max': 1418410936568
+          },
           'series': [
             {
               'label': 'jpg',
@@ -82,6 +94,12 @@ define(function (require) {
         },
         {
           'label': 'Top 5 @tags: security',
+          'ordered': {
+            'date': true,
+            'interval': 60000,
+            'min': 1418410540548,
+            'max': 1418410936568
+          },
           'series': [
             {
               'label': 'jpg',
@@ -102,6 +120,12 @@ define(function (require) {
         },
         {
           'label': 'Top 5 @tags: login',
+          'ordered': {
+            'date': true,
+            'interval': 60000,
+            'min': 1418410540548,
+            'max': 1418410936568
+          },
           'series': [
             {
               'label': 'jpg',
@@ -119,6 +143,12 @@ define(function (require) {
         },
         {
           'label': 'Top 5 @tags: warning',
+          'ordered': {
+            'date': true,
+            'interval': 60000,
+            'min': 1418410540548,
+            'max': 1418410936568
+          },
           'series': [
             {
               'label': 'jpg',
@@ -204,6 +234,7 @@ define(function (require) {
       ]
     };
 
+    var ordered = {};
     var childrenObject = {
       children: []
     };
@@ -270,7 +301,7 @@ define(function (require) {
       });
 
       it('should throw an error if property series, rows, or columns is not ' +
-        'present', function () {
+      'present', function () {
 
         expect(function () {
           injectZeros(childrenObject);
@@ -278,7 +309,7 @@ define(function (require) {
       });
 
       it('should not throw an error if object has property series, rows, or ' +
-        'columns', function () {
+      'columns', function () {
 
         expect(function () {
           injectZeros(seriesObject);
@@ -581,6 +612,7 @@ define(function (require) {
           zeroFillArray = Private(require('components/vislib/components/zero_injection/zero_fill_data_array'));
           createZeroArray = Private(require('components/vislib/components/zero_injection/zero_filled_array'));
           arr1 = createZeroArray(xValueArr);
+
           // Takes zero array as 1st arg and data array as 2nd arg
           results = zeroFillArray(arr1, arr2);
         });
@@ -634,10 +666,9 @@ define(function (require) {
       });
     });
 
-    describe('Injected Zeros return in the correct order for dates', function () {
-      // Need to test that for Date Histogram data, objects are always sorted by time and not by index
+    describe('Injected Zero values return in the correct order', function () {
       var injectZeros;
-      var dateHistogramData;
+      var results;
 
       beforeEach(function () {
         module('ZeroInjectionUtilService');
@@ -646,18 +677,30 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
-          dateHistogramData = injectZeros(dateHistogramRows);
+          results = injectZeros(dateHistogramRows);
         });
       });
 
-      afterEach(function () {
-        dateHistogramData = null;
+      it('should return an array of objects', function () {
+        console.log(results);
+        expect(_.isArray(results.rows[0].series[0].values)).to.be(true);
+        expect(_.isArray(results.rows[1].series[0].values)).to.be(true);
+        expect(_.isArray(results.rows[2].series[0].values)).to.be(true);
+        expect(_.isArray(results.rows[3].series[0].values)).to.be(true);
+        expect(_.isArray(results.rows[4].series[0].values)).to.be(true);
       });
 
-      it('should return dates in order', function () {
-
+      it('should return ordered x values', function () {
+        var values = results.rows[0].series[0].values;
+        console.log(values);
+        expect(values[0].x).to.be.lessThan(values[1].x);
+        expect(values[1].x).to.be.lessThan(values[2].x);
+        expect(values[2].x).to.be.lessThan(values[3].x);
+        expect(values[3].x).to.be.lessThan(values[4].x);
+        expect(values[4].x).to.be.lessThan(values[5].x);
+        expect(values[5].x).to.be.lessThan(values[6].x);
+        expect(values[6].x).to.be.lessThan(values[7].x);
       });
     });
-
   });
 });
