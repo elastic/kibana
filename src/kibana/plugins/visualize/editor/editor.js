@@ -134,7 +134,8 @@ define(function (require) {
       $scope.$watch(function () {
         return editableVis.getState();
       }, function (newState) {
-        editableVis.dirty = !angular.equals(newState, vis.getState());
+        editableVis.dirtyAggs = !angular.equals(newState.aggs, vis.getState().aggs);
+        editableVis.dirtyParams = !angular.equals(newState.params, vis.getState().params);
       }, true);
 
       $state.replace();
@@ -248,7 +249,8 @@ define(function (require) {
     function transferVisState(fromVis, toVis, fetch) {
       return function () {
         toVis.setState(fromVis.getState());
-        editableVis.dirty = false;
+        editableVis.dirtyAggs = false;
+        editableVis.dirtyParams = false;
         $state.vis = vis.getState();
         $state.save();
 

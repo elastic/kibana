@@ -36,13 +36,13 @@
         <!-- apply/discard -->
         <li class="vis-editor-sidebar-buttons sidebar-item">
           <button
-            ng-disabled="!vis.dirty || visualizeEditor.$invalid"
+            ng-disabled="!vis.dirtyAggs || visualizeEditor.$invalid"
             type="submit"
             class="sidebar-item-button success">
             Apply
           </button>
           <button
-            ng-disabled="!vis.dirty"
+            ng-disabled="!vis.dirtyAggs"
             type="button"
             ng-click="reset()"
             class="sidebar-item-button warn">
