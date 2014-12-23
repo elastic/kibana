@@ -75,6 +75,9 @@ define(function (require) {
               $aggParamEditorsScope = null;
             }
 
+            // create child scope, used in the editors
+            $aggParamEditorsScope = $scope.$new();
+
             var agg = $scope.agg;
             var type = $scope.agg.type;
 
@@ -102,6 +105,11 @@ define(function (require) {
               if (aggParam = getAggParamHTML(param, i)) {
                 aggParamHTML[type].push(aggParam);
               }
+
+              // if field param exists, compute allowed fields
+              if (param.name === 'field') {
+                $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+              }
             });
 
             // compile the paramEditors html elements
@@ -112,7 +120,6 @@ define(function (require) {
               paramEditors = paramEditors.concat(aggParamHTML.advanced);
             }
 
-            $aggParamEditorsScope = $scope.$new();
             $aggParamEditors = $(paramEditors).appendTo($editorContainer);
             $compile($aggParamEditors)($aggParamEditorsScope);
           });
@@ -124,35 +131,30 @@ define(function (require) {
               return;
             }
 
-            var attrs = {
-              'agg-type': 'agg.type',
-              'agg-config': 'agg',
-              'params': 'agg.params'
-            };
+            var attrs = {};
 
             attrs['agg-param'] = 'agg.type.params[' + idx + ']';
             if (param.advanced) {
               attrs['ng-show'] = 'advancedToggled';
             }
 
-            // default field selection to the first field in the list, if none is selected
-            if (param.name === 'field' && !$scope.agg.params.field) {
-              var fields = $scope.agg.vis.indexPattern.fields.raw;
-              var fieldTypes = param.filterFieldTypes;
-
-              if (fieldTypes) {
-                fields = $filter('fieldType')(fields, fieldTypes);
-                fields = $filter('matchAny')(fields, [{ indexed: true }, { scripted: true }]);
-                fields = $filter('orderBy')(fields, ['type', 'name']);
-
-                $scope.agg.params.field = fields[0];
-              }
-            }
-
             return $('<vis-agg-param-editor>')
             .attr(attrs)
             .append(param.editor)
             .get(0);
+          }
+
+          function getIndexedFields(param) {
+            var fields = $scope.agg.vis.indexPattern.fields.raw;
+            var fieldTypes = param.filterFieldTypes;
+
+            if (fieldTypes) {
+              fields = $filter('fieldType')(fields, fieldTypes);
+              fields = $filter('matchAny')(fields, [{ indexed: true }, { scripted: true }]);
+              fields = $filter('orderBy')(fields, ['type', 'name']);
+            }
+
+            return fields;
           }
 
           // generic child scope creation, for both schema and agg
