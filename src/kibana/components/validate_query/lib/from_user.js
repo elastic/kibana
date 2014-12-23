@@ -1,15 +1,16 @@
 define(function (require) {
   var _ = require('lodash');
-  return function GetQueryFromUser(es, config) {
+  return function GetQueryFromUser(es, Private) {
+    var decorateQuery = Private(require('components/courier/data_source/_decorate_query'));
+
     /**
      * Take text from the user and make it into a query object
      * @param {text} user's query input
      * @returns {object}
      */
     return function (text) {
-      var queryOptions = config.get('query:queryString:options');
       function getQueryStringQuery(text) {
-        return {query_string: _.extend({query: text}, queryOptions)};
+        return decorateQuery({query_string: {query: text}});
       }
 
       var matchAll = getQueryStringQuery('*');

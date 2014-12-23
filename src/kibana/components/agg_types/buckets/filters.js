@@ -1,5 +1,5 @@
 define(function (require) {
-  return function FiltersAggDefinition(Private, Notifier) {
+  return function FiltersAggDefinition(Private, Notifier, config) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
@@ -24,6 +24,10 @@ define(function (require) {
 
               var query = input.query;
               if (!query) return notif.log('malformed filter agg params, missing "query" on input');
+
+              if (_.deepHas(query, 'query_string.query')) {
+                _.merge(query.query_string, config.get('query:queryString:options'));
+              }
 
               var label = _.deepGet(query, 'query_string.query') || JSON.stringify(query);
               filters[label] = input;
