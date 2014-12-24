@@ -134,10 +134,11 @@ define(function (require) {
         return;
       }
 
-      self._scheduleLoop();
-
       self.active = Promise
-      .try(self._fn)
+      .try(this._fn)
+      .then(function () {
+        self._scheduleLoop();
+      })
       .catch(function (err) {
         self.stop();
         notify.fatal(err);
