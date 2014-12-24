@@ -118,9 +118,8 @@ define(function (require) {
       };
 
       // Listen for refreshInterval changes
-      var $parentScope = $rootScope;
-      $parentScope.$watch('timefilter.refreshInterval', function () {
-        var refreshValue = _.deepGet($parentScope, 'timefilter.refreshInterval.value');
+      $rootScope.$watch('timefilter.refreshInterval', function () {
+        var refreshValue = _.deepGet($rootScope, 'timefilter.refreshInterval.value');
         if (_.isNumber(refreshValue)) {
           self.fetchInterval(refreshValue);
         } else {
