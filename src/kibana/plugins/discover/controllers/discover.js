@@ -268,10 +268,7 @@ define(function (require) {
       .then(setupVisualization)
       .then(function () {
         $state.save();
-        return $scope.searchSource.fetchQueued();
-      })
-      .then(function () {
-        courier.searchLooper.restart();
+        return courier.fetch();
       })
       .catch(notify.error);
     };
