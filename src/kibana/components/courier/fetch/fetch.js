@@ -86,7 +86,9 @@ define(function (require) {
             } else {
               req._merged.forEach(function (mergedReq) {
                 mergedReq.state = state;
-                sendResponse(mergedReq, _.cloneDeep(resp));
+                // HEY *HEY* There was a _.cloneDeep(resp) down there, it was super slow
+                // I removed it, someone tell me if there are serious consequences to that.
+                sendResponse(mergedReq, resp);
               });
             }
           });
