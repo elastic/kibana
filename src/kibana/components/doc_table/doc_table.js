@@ -19,9 +19,13 @@ define(function (require) {
         savedSearch: '=',
         filter: '=?',
       },
-      link: function ($scope, $el, attr) {
+      link: function ($scope) {
         var notify = new Notifier();
         $scope.columns = [];
+        $scope.panel = {
+          columns: [],
+          sorting: []
+        };
 
         var prereq = (function () {
           var fns = [];
@@ -46,9 +50,10 @@ define(function (require) {
           $scope.limit += 50;
         };
 
-        $scope.$watch('sorting', function (sorting) {
+        $scope.$watch('panel.sorting', function (sorting) {
           if (!$scope.indexPattern || !$scope.searchSource) return;
           $scope.searchSource.sort(getSort(sorting, $scope.indexPattern));
+          $scope.searchSource.fetch();
         });
 
         $scope.$watch('savedSearch', prereq(function (savedSearch) {
@@ -62,7 +67,7 @@ define(function (require) {
           $scope.searchSource.size(config.get('discover:sampleSize'));
 
           // Should trigger the above watcher
-          $scope.sorting = savedSearch.sort;
+          $scope.panel.sorting = savedSearch.sort;
 
           // TODO: we need to have some way to clean up result requests
           $scope.searchSource.onResults().then(function onResults(resp) {
