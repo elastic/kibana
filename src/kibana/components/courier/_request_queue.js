@@ -7,7 +7,7 @@ define(function (require) {
      * they are processed by fetch.[sourceType]().
      * @type {Array}
      */
-    var queue = window.requestQueue = [];
+    var queue = [];
 
     queue.getInactive = function (/* strategies */) {
       return queue.get.apply(queue, arguments)
