@@ -1,3 +1,17 @@
-<div>
-  {{content}}
-</div>
+<table class="kbn-table table" ng-if="indexPattern">
+  <thead
+    kbn-table-header
+    columns="columns"
+    index-pattern="indexPattern"
+    sorting="sorting">
+  </thead>
+  <tbody>
+    <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._id"
+      kbn-table-row="row"
+      columns="columns"
+      sorting="sorting"
+      index-pattern="indexPattern"
+      class="discover-table-row"></tr>
+  </tbody>
+</table>
+<kbn-infinite-scroll more="addRows"></kbn-infinite-scroll>

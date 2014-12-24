@@ -21,12 +21,12 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config, highlightFilter, shortDotsFilter) {
-    var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
-    var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
-    var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter, shortDotsFilter, courier) {
+    var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
+    var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
+    var cellTemplate = _.template(require('text!components/doc_table/components/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
-    var sourceTemplate = _.template(noWhiteSpace(require('text!plugins/discover/partials/table_row/_source.html')));
+    var sourceTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/_source.html')));
 
     return {
       restrict: 'A',
@@ -34,7 +34,6 @@ define(function (require) {
         columns: '=',
         filter: '=',
         indexPattern: '=',
-        timefield: '=?',
         row: '=kbnTableRow'
       },
       link: function ($scope, $el, attrs) {
@@ -42,7 +41,12 @@ define(function (require) {
         $el.empty();
 
         var init = function () {
+          _formatRow($scope.row);
           createSummaryRow($scope.row, $scope.row._id);
+
+          // Check for timefield on indexPattern
+          $scope.timefield = $scope.indexPattern.timeFieldName;
+
         };
 
         // when we compile the details, we use this $scope
@@ -187,13 +191,33 @@ define(function (require) {
         function _getValForField(row, field) {
           var val;
 
-          // discover formats all of the values and puts them in _formatted for display
-          val = row.$$_formatted[field] || row[field];
+          // discover formats all of the values and puts them in $$_formatted for display
+          val = (row.$$_formatted || _formatRow(row))[field];
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;
 
           return val;
+        }
+
+        /*
+         * Format a field with the index pattern on scope.
+         */
+        function _formatField(value, name) {
+          var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
+          var field = $scope.indexPattern.fields.byName[name];
+          var formatter = (field && field.format) ? field.format : defaultFormat;
+
+          return formatter.convert(value);
+        }
+
+        /*
+         * Create the $$_formatted key on a row
+         */
+        function _formatRow(row) {
+          row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
+          row.$$_formatted = _.mapValues(row.$$_flattened, _formatField);
+          return row.$$_formatted;
         }
 
         init();

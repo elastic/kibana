@@ -2,7 +2,11 @@ define(function (require) {
   var _ = require('lodash');
 
   var html = require('text!components/doc_table/doc_table.html');
+  var getSort = require('components/doc_table/lib/get_sort');
   require('css!components/doc_table/doc_table.css');
+  require('directives/truncated');
+  require('components/doc_table/components/table_header');
+  require('components/doc_table/components/table_row');
 
   require('modules').get('kibana')
   .directive('docTable', function (config, Private, Notifier) {
@@ -12,12 +16,12 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
-        searchSource: '=',
-        columns: '=',
+        savedSearch: '=',
         filter: '=?',
       },
       link: function ($scope, $el, attr) {
         var notify = new Notifier();
+        $scope.columns = [];
 
         var prereq = (function () {
           var fns = [];
@@ -38,19 +42,42 @@ define(function (require) {
           };
         }());
 
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          if (!searchSource) return;
+        $scope.addRows = function (foo) {
+          $scope.limit += 50;
+        };
+
+        $scope.$watch('sorting', function (sorting) {
+          if (!$scope.indexPattern || !$scope.searchSource) return;
+          $scope.searchSource.sort(getSort(sorting, $scope.indexPattern));
+        });
+
+        $scope.$watch('savedSearch', prereq(function (savedSearch) {
+          if (!(savedSearch && savedSearch.searchSource)) return;
+
+          $scope.searchSource = savedSearch.searchSource;
+          $scope.indexPattern = savedSearch.searchSource.get('index');
+
+          $scope.columns = savedSearch.columns;
+
+          $scope.searchSource.size(config.get('discover:sampleSize'));
+
+          // Should trigger the above watcher
+          $scope.sorting = savedSearch.sort;
 
           // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
+          $scope.searchSource.onResults().then(function onResults(resp) {
+            // Reset infinite scroll limit
+            $scope.limit = 50;
+
+            if ($scope.searchSource !== savedSearch.searchSource) return;
 
             $scope.content = resp;
+            $scope.hits = resp.hits.hits;
 
-            return searchSource.onResults().then(onResults);
+            return $scope.searchSource.onResults().then(onResults);
           }).catch(notify.fatal);
 
-          searchSource.onError(notify.error).catch(notify.fatal);
+          $scope.searchSource.onError(notify.error).catch(notify.fatal);
         }));
 
       }

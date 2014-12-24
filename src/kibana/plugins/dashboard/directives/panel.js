@@ -45,8 +45,7 @@ define(function (require) {
           case 'search':
             savedSearches.get($scope.panel.id)
             .then(function (savedSearch) {
-              $scope.searchSource = savedSearch.searchSource;
-              $scope.columns = [];
+              $scope.savedSearch = savedSearch;
               $scope.view.title = savedSearch.title;
             })
             .catch(function (e) {
