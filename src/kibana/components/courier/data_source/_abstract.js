@@ -156,13 +156,13 @@ define(function (require) {
      *
      * ONLY USE IF YOU WILL BE USING THE RESULTS
      * provided by the returned promise, otherwise
-     * call #fetchPending()
+     * call #fetchQueued()
      *
      * @async
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
-      var req = _.first(self._myPendingReq());
+      var req = _.first(self._myQueued());
 
       if (!req) {
         req = self._createRequest();
@@ -177,16 +177,16 @@ define(function (require) {
      * Fetch all pending requests for this source ASAP
      * @async
      */
-    SourceAbstract.prototype.fetchPending = function () {
-      return courierFetch.these(this._myPendingReq());
+    SourceAbstract.prototype.fetchQueued = function () {
+      return courierFetch.these(this._myQueued());
     };
 
     /**
      * Cancel all pending requests for this dataSource
      * @return {undefined}
      */
-    SourceAbstract.prototype.cancelPendingReq = function () {
-      _.invoke(this._myPendingReq(), 'abort');
+    SourceAbstract.prototype.cancelQueued = function () {
+      _.invoke(this._myQueued(), 'abort');
     };
 
     /**
@@ -194,15 +194,16 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.destroy = function () {
-      this.cancelPendingReq();
+      this.cancelQueued();
     };
 
     /*****
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myPendingReq = function (includeStarted) {
-      return _.where(requestQueue.getPending(), { source: this });
+    SourceAbstract.prototype._myQueued = function (includeStarted) {
+      var reqs = requestQueue.get(this._fetchStrategy);
+      return _.where(reqs, { source: this });
     };
 
     SourceAbstract.prototype._createRequest = function (defer) {

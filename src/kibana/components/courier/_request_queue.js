@@ -9,7 +9,14 @@ define(function (require) {
      */
     var queue = window.requestQueue = [];
 
-    queue.getPending = function (/* strategies.. */) {
+    queue.getInactive = function (/* strategies */) {
+      return queue.get.apply(queue, arguments)
+      .filter(function (req) {
+        return !req.started;
+      });
+    };
+
+    queue.get = function (/* strategies.. */) {
       var strategies = _.toArray(arguments);
       return queue.filter(function (req) {
         var strategyMatch = !strategies.length;

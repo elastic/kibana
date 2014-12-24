@@ -1,7 +1,9 @@
 define(function (require) {
   return function SearchLooperService(Private, Promise, Notifier) {
-    var errors = require('errors');
     var fetch = Private(require('components/courier/fetch/fetch'));
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
+
     var Looper = Private(require('components/courier/looper/_looper'));
 
     // track the currently executing search resquest
@@ -14,7 +16,9 @@ define(function (require) {
      * @type {Looper}
      */
     var searchLooper = new Looper(null, function () {
-      return fetch.searches();
+      return fetch.these(
+        requestQueue.getInactive(searchStrategy)
+      );
     });
 
     searchLooper.onHastyLoop = function () {

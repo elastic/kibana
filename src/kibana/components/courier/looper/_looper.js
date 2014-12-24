@@ -8,6 +8,8 @@ define(function (require) {
       this._ms = ms === void 0 ? 1500 : ms;
       this._timer;
       this._started = false;
+
+      this._looperOver = _.bind(this._looperOver, this);
     }
 
     /**

@@ -188,7 +188,7 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', $state.filters);
       if (!$scope.linked) searchSource.set('query', $state.query);
-      searchSource.fetchPending();
+      searchSource.fetchQueued();
     };
 
 
