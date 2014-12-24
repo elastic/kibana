@@ -14,7 +14,7 @@ define(function (require) {
   module.constant('configFile', configFile);
 
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, Notifier, kbnVersion, kbnSetup, $rootScope) {
+  module.service('config', function (Private, Notifier, kbnVersion, kbnSetup, $rootScope, buildNum) {
     var config = this;
 
     var angular = require('angular');
@@ -63,8 +63,11 @@ define(function (require) {
         };
 
         return doc.fetch().then(function initDoc(resp) {
-          if (!resp.found) return doc.doIndex({}).then(getDoc);
-          else {
+          if (!resp.found) {
+            return doc.doIndex({
+              buildNum: buildNum
+            }).then(getDoc);
+          } else {
             // apply update, and keep it quiet the first time
             applyMassUpdate(resp, true);
 

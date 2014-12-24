@@ -21,7 +21,7 @@ define(function (require) {
           description: 'string',
           hits: 'integer',
           columns: 'string',
-          sort: 'array'
+          sort: 'string'
         },
 
         defaults: {
