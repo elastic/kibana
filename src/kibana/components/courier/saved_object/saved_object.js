@@ -1,7 +1,6 @@
 define(function (require) {
   return function SavedObjectFactory(es, configFile, Promise, Private, Notifier, indexPatterns) {
     var errors = require('errors');
-    var angular = require('angular');
     var _ = require('lodash');
     var slugifyId = require('utils/slugify_id');
 

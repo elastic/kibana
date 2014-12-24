@@ -2,13 +2,9 @@ define(function (require) {
 
   return function SearchSourceFactory(Promise, Private) {
     var _ = require('lodash');
-    var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var SearchRequest = Private(require('components/courier/fetch/request/search'));
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
-
-    var FetchFailure = errors.FetchFailure;
-    var RequestFailure = errors.RequestFailure;
 
     _(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {

@@ -1,9 +1,7 @@
 define(function (require) {
-  var inherits = require('lodash').inherits;
   var _ = require('lodash');
-  var nextTick = require('utils/next_tick');
 
-  return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
+  return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
     var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var courierFetch = Private(require('components/courier/fetch/fetch'));
@@ -201,12 +199,12 @@ define(function (require) {
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myQueued = function (includeStarted) {
+    SourceAbstract.prototype._myQueued = function () {
       var reqs = requestQueue.get(this._fetchStrategy);
       return _.where(reqs, { source: this });
     };
 
-    SourceAbstract.prototype._createRequest = function (defer) {
+    SourceAbstract.prototype._createRequest = function () {
       throw new Error('_createRequest must be implemented by subclass');
     };
 
@@ -229,7 +227,7 @@ define(function (require) {
       var current = this;
 
       // call the ittr and return it's promise
-      return (function ittr(resolve, reject) {
+      return (function ittr() {
         // itterate the _state object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again

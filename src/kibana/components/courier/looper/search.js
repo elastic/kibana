@@ -5,10 +5,6 @@ define(function (require) {
     var requestQueue = Private(require('components/courier/_request_queue'));
 
     var Looper = Private(require('components/courier/looper/_looper'));
-
-    // track the currently executing search resquest
-    var _activeAutoSearch = null;
-
     var notif = new Notifier({ location: 'Search Looper' });
 
     /**

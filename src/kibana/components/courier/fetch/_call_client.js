@@ -7,7 +7,6 @@ define(function (require) {
 
     var ABORTED = Private(require('components/courier/fetch/_req_status')).ABORTED;
     var DUPLICATE = Private(require('components/courier/fetch/_req_status')).DUPLICATE;
-    var INCOMPLETE = Private(require('components/courier/fetch/_req_status')).INCOMPLETE;
 
     function callClient(strategy, requests) {
       // merging docs can change status to DUPLICATE, capture new statuses

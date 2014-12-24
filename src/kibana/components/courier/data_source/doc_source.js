@@ -1,16 +1,10 @@
 define(function (require) {
   var _ = require('lodash');
-  var errors = require('errors');
-
-  var inherits = require('lodash').inherits;
 
   return function DocSourceFactory(Private, Promise, es, sessionStorage) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var DocRequest = Private(require('components/courier/fetch/request/doc'));
-
-    var VersionConflict = errors.VersionConflict;
-    var RequestFailure = errors.RequestFailure;
 
     _(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {

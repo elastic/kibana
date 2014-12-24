@@ -4,7 +4,6 @@ define(function (require) {
 
   return function (Promise, Private, es) {
     var requestQueue = Private(require('components/courier/_request_queue'));
-    var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
 
     /**
      * Backend for doUpdate and doIndex
