@@ -59,7 +59,9 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        fetch.searches();
+        fetch.searches().then(function () {
+          searchLooper.restart();
+        });
       };
 
 
