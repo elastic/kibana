@@ -88,7 +88,7 @@ define(function (require) {
     describe('kbnTableHeader', function () {
 
       var $elem = angular.element(
-        '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort" timefield="timefield"></thead>'
+        '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort"></thead>'
       );
 
       beforeEach(function () {
@@ -208,7 +208,6 @@ define(function (require) {
         'filter="filtering"' +
         'maxLength=maxLength ' +
         'index-pattern="indexPattern"' +
-        'timefield="timefield" ' +
         '></thead>'
       );
 
@@ -229,7 +228,6 @@ define(function (require) {
           sorting: [],
           filtering: sinon.spy(),
           maxLength: 50,
-          timefield: '@timestamp'
         });
       });
       afterEach(function () {
@@ -267,7 +265,6 @@ define(function (require) {
         'sorting="sorting"' +
         'filter="filter"' +
         'index-pattern="indexPattern"' +
-        'timefield="timefield" ' +
         '></tr>'
       );
 
@@ -337,7 +334,6 @@ define(function (require) {
           'sorting="sorting"' +
           'filtering="filtering"' +
           'index-pattern="indexPattern"' +
-          'timefield="timefield" ' +
           '></tr>'
       );
       var $details;

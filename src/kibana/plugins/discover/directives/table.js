@@ -28,7 +28,6 @@ define(function (require) {
         filtering: '=',
         refresh: '=',
         indexPattern: '=',
-        timefield: '=?'
       },
       link: function ($scope, $el) {
         $scope.limit = 50;
