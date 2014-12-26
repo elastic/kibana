@@ -47,6 +47,14 @@ define(function (require) {
             }
           }).data('gridster');
 
+          // This is necessary to enable text selection within gridster elements
+          // http://stackoverflow.com/questions/21561027/text-not-selectable-from-editable-div-which-is-draggable
+          $el.on('mousedown', function () {
+            gridster.disable().disable_resize();
+          }).on('mouseup', function () {
+            gridster.enable().enable_resize();
+          });
+
           $scope.$watchCollection('state.panels', function (panels) {
             var currentPanels = gridster.$widgets.toArray().map(function (el) {
               return getPanelFor(el);
