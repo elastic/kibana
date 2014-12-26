@@ -216,7 +216,7 @@ define(function (require) {
          */
         function _formatRow(row) {
           row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
-          row.$$_formatted = _.mapValues(row.$$_flattened, _formatField);
+          row.$$_formatted = row.$$_formatted || _.mapValues(row.$$_flattened, _formatField);
           return row.$$_formatted;
         }
 
