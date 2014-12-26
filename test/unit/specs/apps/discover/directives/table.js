@@ -41,16 +41,8 @@ define(function (require) {
   // For testing column removing/adding for the header and the rows
   //
   var columnTests = function (elemType, parentElem) {
-    it('should create only the toggle column by default', function (done) {
-      var childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(1);
-      done();
-    });
 
     it('should create a time column if the timefield is defined', function (done) {
-      // Should include a column for toggling and the time column by default
-      $parentScope.timefield = '@timestamp';
-      parentElem.scope().$digest();
       var childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(2);
       done();
@@ -62,22 +54,32 @@ define(function (require) {
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      expect($(childElems[1]).text()).to.contain('bytes');
+      expect(childElems.length).to.be(3);
+      expect($(childElems[2]).text()).to.contain('bytes');
 
       $parentScope.columns = ['bytes', 'request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(4);
+      expect($(childElems[3]).text()).to.contain('request_body');
 
       $parentScope.columns = ['request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      expect($(childElems[1]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(3);
+      expect($(childElems[2]).text()).to.contain('request_body');
       done();
     });
+
+    it('should create only the toggle column if there is no timeField', function (done) {
+      delete parentElem.scope().indexPattern.timeFieldName;
+      parentElem.scope().$digest();
+
+      var childElems = parentElem.find(elemType);
+      expect(childElems.length).to.be(1);
+      done();
+    });
+
   };
 
 
@@ -404,7 +406,7 @@ define(function (require) {
         $before = $row.find('td');
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
-        expect($before.eq(1).text().trim()).to.match(/^@timestamp_formatted/);
+        expect($before.eq(1).text().trim()).to.match(/^time_formatted/);
         expect($before.eq(2).find('dl dt').length).to.be(_.keys($scope.row.$$_flattened).length);
       }));
 
