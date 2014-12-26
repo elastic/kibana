@@ -48,11 +48,8 @@ define(function (require) {
        * @return {Promise} - the promise created by responding to the request
        */
       resolveRequest: function (req, resp) {
-        if (resp && resp.hits) {
-          resp.hits.hits.forEach(function (hit) {
-            hit._source = _.flattenWith('.', hit._source);
-          });
-        }
+        // Whats was going on here? This was flattening without context.
+        // Eg, geo object were flattened beyond the mapping
         req.defer.resolve(resp);
       },
 
