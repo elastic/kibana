@@ -1,6 +1,5 @@
 define(function (require) {
-  return function FetchTheseProvider(Private, Promise, es, sessionId, configFile) {
-    var _ = require('lodash');
+  return function FetchTheseProvider(Private, Promise) {
     var notify = Private(require('components/courier/fetch/_notifier'));
     var forEachStrategy = Private(require('components/courier/fetch/_for_each_strategy'));
 

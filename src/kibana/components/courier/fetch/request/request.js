@@ -18,7 +18,7 @@ define(function (require) {
     }
 
     AbstractReq.prototype.canStart = function () {
-      return !this.stopped && !this.aborted && !this.source._fetchDisabled;
+      return !this.stopped && !this.source._fetchDisabled;
     };
 
     AbstractReq.prototype.start = function () {
@@ -83,9 +83,7 @@ define(function (require) {
     // part of .abort() and .complete()
     function stop(then) {
       return function () {
-        if (this.stopped) {
-          throw new TypeError('Unable to stop request because it has already stopped');
-        }
+        if (this.stopped) return;
 
         this.stopped = true;
         this.source.activeFetchCount -= 1;

@@ -268,7 +268,7 @@ define(function (require) {
       .then(setupVisualization)
       .then(function () {
         $state.save();
-        $scope.searchSource.fetchPending();
+        return courier.fetch();
       })
       .catch(notify.error);
     };

@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var inherits = require('lodash').inherits;
 
   require('components/notify/notify');
 
@@ -9,7 +8,7 @@ define(function (require) {
     'kibana/courier'
   ]);
 
-  module.factory('SavedSearch', function (courier, indexPatterns) {
+  module.factory('SavedSearch', function (courier) {
     _(SavedSearch).inherits(courier.SavedObject);
     function SavedSearch(id) {
       courier.SavedObject.call(this, {
@@ -22,7 +21,7 @@ define(function (require) {
           description: 'string',
           hits: 'integer',
           columns: 'string',
-          sort: 'array'
+          sort: 'string'
         },
 
         defaults: {

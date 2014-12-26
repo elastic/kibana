@@ -10,8 +10,8 @@ define(function (require) {
     var requestQueue = Private(require('components/courier/_request_queue'));
     var fetchThese = Private(require('components/courier/fetch/_fetch_these'));
 
-    function fetchPending(strategy) {
-      var requests = requestQueue.getPending(strategy);
+    function fetchQueued(strategy) {
+      var requests = requestQueue.get(strategy);
       if (!requests.length) return Promise.resolve();
       else return fetchThese(requests);
     }
@@ -20,13 +20,13 @@ define(function (require) {
      * Fetch all pending docs that are ready to be fetched
      * @async
      */
-    this.docs = _.partial(fetchPending, strategies.doc);
+    this.docs = _.partial(fetchQueued, strategies.doc);
 
     /**
      * Fetch all pending search requests
      * @async
      */
-    this.searches = _.partial(fetchPending, strategies.search);
+    this.searches = _.partial(fetchQueued, strategies.search);
 
 
     function fetchASource(source, strategy) {

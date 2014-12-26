@@ -7,9 +7,16 @@ define(function (require) {
      * they are processed by fetch.[sourceType]().
      * @type {Array}
      */
-    var queue = window.requestQueue = [];
+    var queue = [];
 
-    queue.getPending = function (/* strategies.. */) {
+    queue.getInactive = function (/* strategies */) {
+      return queue.get.apply(queue, arguments)
+      .filter(function (req) {
+        return !req.started;
+      });
+    };
+
+    queue.get = function (/* strategies.. */) {
       var strategies = _.toArray(arguments);
       return queue.filter(function (req) {
         var strategyMatch = !strategies.length;

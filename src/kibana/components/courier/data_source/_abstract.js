@@ -1,9 +1,7 @@
 define(function (require) {
-  var inherits = require('lodash').inherits;
   var _ = require('lodash');
-  var nextTick = require('utils/next_tick');
 
-  return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
+  return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
     var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var courierFetch = Private(require('components/courier/fetch/fetch'));
@@ -156,13 +154,13 @@ define(function (require) {
      *
      * ONLY USE IF YOU WILL BE USING THE RESULTS
      * provided by the returned promise, otherwise
-     * call #fetchPending()
+     * call #fetchQueued()
      *
      * @async
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
-      var req = _.first(self._myPendingReq());
+      var req = _.first(self._myQueued());
 
       if (!req) {
         req = self._createRequest();
@@ -177,16 +175,16 @@ define(function (require) {
      * Fetch all pending requests for this source ASAP
      * @async
      */
-    SourceAbstract.prototype.fetchPending = function () {
-      return courierFetch.these(this._myPendingReq());
+    SourceAbstract.prototype.fetchQueued = function () {
+      return courierFetch.these(this._myQueued());
     };
 
     /**
      * Cancel all pending requests for this dataSource
      * @return {undefined}
      */
-    SourceAbstract.prototype.cancelPendingReq = function () {
-      _.invoke(this._myPendingReq(), 'abort');
+    SourceAbstract.prototype.cancelQueued = function () {
+      _.invoke(this._myQueued(), 'abort');
     };
 
     /**
@@ -194,18 +192,19 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.destroy = function () {
-      this.cancelPendingReq();
+      this.cancelQueued();
     };
 
     /*****
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myPendingReq = function (includeStarted) {
-      return _.where(requestQueue.getPending(), { source: this });
+    SourceAbstract.prototype._myQueued = function () {
+      var reqs = requestQueue.get(this._fetchStrategy);
+      return _.where(reqs, { source: this });
     };
 
-    SourceAbstract.prototype._createRequest = function (defer) {
+    SourceAbstract.prototype._createRequest = function () {
       throw new Error('_createRequest must be implemented by subclass');
     };
 
@@ -228,7 +227,7 @@ define(function (require) {
       var current = this;
 
       // call the ittr and return it's promise
-      return (function ittr(resolve, reject) {
+      return (function ittr() {
         // itterate the _state object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
