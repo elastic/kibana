@@ -15,7 +15,6 @@ define(function (require) {
       },
       template: headerHtml,
       controller: function ($scope) {
-        $scope.timefield = $scope.indexPattern.timeFieldName;
 
         var sortableField = function (field) {
           return $scope.indexPattern.fields.byName[field].sortable;

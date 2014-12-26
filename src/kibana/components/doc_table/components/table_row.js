@@ -43,10 +43,6 @@ define(function (require) {
         var init = function () {
           _formatRow($scope.row);
           createSummaryRow($scope.row, $scope.row._id);
-
-          // Check for timefield on indexPattern
-          $scope.timefield = $scope.indexPattern.timeFieldName;
-
         };
 
         // when we compile the details, we use this $scope
@@ -88,7 +84,7 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
-        $scope.$watchMulti(['timefield', 'row.highlight'], function () {
+        $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight'], function () {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
@@ -99,10 +95,10 @@ define(function (require) {
             openRowHtml
           ];
 
-          if ($scope.timefield) {
+          if ($scope.indexPattern.timeFieldName) {
             newHtmls.push(cellTemplate({
               timefield: true,
-              formatted: _displayField(row, $scope.timefield)
+              formatted: _displayField(row, $scope.indexPattern.timeFieldName)
             }));
           }
 

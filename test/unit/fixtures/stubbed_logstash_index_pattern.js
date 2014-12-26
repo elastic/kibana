@@ -18,7 +18,7 @@ define(function (require) {
       return field;
     });
 
-    var indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
+    var indexPattern = new StubIndexPattern('logstash-*', '@timestamp', fields);
 
     indexPattern.getComputedFields = _.bind(getComputedFields, indexPattern);
     indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);

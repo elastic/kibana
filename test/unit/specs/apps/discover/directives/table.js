@@ -378,7 +378,7 @@ define(function (require) {
       var $before;
 
       beforeEach(module('kibana', 'apps/discover'));
-      beforeEach(inject(function ($rootScope, $compile) {
+      beforeEach(inject(function ($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
         $root.columns = ['_source'];
@@ -386,7 +386,7 @@ define(function (require) {
         $root.filtering = sinon.spy();
         $root.maxLength = 50;
         $root.mapping = mapping;
-        $root.timefield = '@timestamp';
+        $root.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
         $row = $('<tr>')
         .attr({
@@ -395,7 +395,6 @@ define(function (require) {
           'sorting': 'sortin',
           'filtering': 'filtering',
           'index-pattern': 'indexPattern',
-          'timefield': 'timefield',
         });
 
         $scope = $root.$new();
