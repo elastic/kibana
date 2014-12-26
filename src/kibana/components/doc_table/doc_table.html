@@ -1,15 +1,15 @@
 <table class="kbn-table table" ng-if="indexPattern">
   <thead
     kbn-table-header
-    columns="columns"
+    columns="persist.columns"
     index-pattern="indexPattern"
-    sorting="panel.sorting">
+    sorting="persist.sorting">
   </thead>
   <tbody>
     <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._id"
       kbn-table-row="row"
-      columns="columns"
-      sorting="panel.sorting"
+      columns="persist.columns"
+      sorting="persist.sorting"
       index-pattern="indexPattern"
       class="discover-table-row"></tr>
   </tbody>

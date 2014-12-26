@@ -22,10 +22,8 @@ define(function (require) {
       link: function ($scope) {
         var notify = new Notifier();
         $scope.columns = [];
-        $scope.panel = {
-          columns: [],
-          sorting: []
-        };
+        $scope.persist = $scope.persist || {};
+
 
         var prereq = (function () {
           var fns = [];
@@ -50,33 +48,36 @@ define(function (require) {
           $scope.limit += 50;
         };
 
-        $scope.$watch('panel.sorting', function (sorting) {
-          if (!$scope.indexPattern || !$scope.searchSource) return;
-          $scope.searchSource.sort(getSort(sorting, $scope.indexPattern));
-          $scope.searchSource.fetch();
+        $scope.$on('$destroy', function () {
+          if ($scope.searchSource) $scope.searchSource.destroy();
         });
 
         $scope.$watch('savedSearch', prereq(function (savedSearch) {
           if (!(savedSearch && savedSearch.searchSource)) return;
 
+          $scope.persist.sorting = savedSearch.sort;
+          $scope.persist.columns = savedSearch.columns;
           $scope.searchSource = savedSearch.searchSource;
           $scope.indexPattern = savedSearch.searchSource.get('index');
 
-          $scope.columns = savedSearch.columns;
-
           $scope.searchSource.size(config.get('discover:sampleSize'));
+          $scope.searchSource.sort(getSort(savedSearch.sort, $scope.indexPattern));
 
-          // Should trigger the above watcher
-          $scope.panel.sorting = savedSearch.sort;
+          // Set the watcher after initialization
+          $scope.$watch('persist.sorting', function (sorting) {
+            if (!$scope.indexPattern || !$scope.searchSource || !sorting) return;
+            $scope.searchSource.sort(getSort(sorting, $scope.indexPattern));
+            $scope.searchSource.fetch();
+          });
 
           // TODO: we need to have some way to clean up result requests
           $scope.searchSource.onResults().then(function onResults(resp) {
             // Reset infinite scroll limit
             $scope.limit = 50;
 
+            // Abort if something changed
             if ($scope.searchSource !== savedSearch.searchSource) return;
 
-            $scope.content = resp;
             $scope.hits = resp.hits.hits;
 
             return $scope.searchSource.onResults().then(onResults);

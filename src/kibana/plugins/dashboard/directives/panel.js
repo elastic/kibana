@@ -30,10 +30,11 @@ define(function (require) {
 
           switch ($scope.panel.type) {
           case 'visualization':
+
+            $scope.edit = '#visualize/edit';
             savedVisualizations.get($scope.panel.id)
             .then(function (savedVis) {
-              $scope.savedVis = savedVis;
-              $scope.view.title = savedVis.title;
+              $scope.savedObj = savedVis;
               $scope.$on('$destroy', savedVis.destroy);
               savedVis.vis.listeners.click = filterBarClickHandler($state);
               savedVis.vis.listeners.brush = brushEvent;
@@ -43,10 +44,11 @@ define(function (require) {
             });
             break;
           case 'search':
+
+            $scope.edit = '#discover';
             savedSearches.get($scope.panel.id)
             .then(function (savedSearch) {
-              $scope.savedSearch = savedSearch;
-              $scope.view.title = savedSearch.title;
+              $scope.savedObj = savedSearch;
             })
             .catch(function (e) {
               $scope.error = e.message;

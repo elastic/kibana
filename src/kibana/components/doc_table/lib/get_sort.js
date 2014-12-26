@@ -11,7 +11,6 @@ define(function (require) {
     var sortObj = {};
     if (_.isArray(sort)) {
       // At some point we need to refact the sorting logic, this array sucks.
-      if (sort.length !== 2) throw new Error('The sorting array contain exactly 2 items');
       sortObj[sort[0]] = sort[1];
     } else if (indexPattern.timeFieldName) {
       sortObj[indexPattern.timeFieldName] = 'desc';

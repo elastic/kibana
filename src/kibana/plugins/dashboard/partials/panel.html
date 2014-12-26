@@ -1,8 +1,8 @@
-<div class="panel panel-default">
+<div class="panel panel-default" ng-if="savedObj || error">
   <div class="panel-heading">
-    <span class="panel-title">{{view.title}}</span>
+    <span class="panel-title">{{savedObj.title}}</span>
     <div class="btn-group">
-      <a ng-show="!appEmbedded" ng-href="#visualize/edit/{{panel.id | uriescape}}"><i class="fa fa-pencil"></i></a>
+      <a ng-show="!appEmbedded" ng-href="{{edit}}/{{panel.id | uriescape}}"><i class="fa fa-pencil"></i></a>
       <a ng-show="!appEmbedded" ng-click="remove()"><i class="fa fa-times"></i></a>
     </div>
     <div class="clearfix"></div>
@@ -13,13 +13,13 @@
     <span ng-bind="error"></span>
   </div>
 
-  <visualize ng-if="panel.type == 'visualization' && savedVis"
-    vis="savedVis.vis"
-    search-source="savedVis.searchSource"
+  <visualize ng-if="panel.type == 'visualization'"
+    vis="savedObj.vis"
+    search-source="savedObj.searchSource"
     class="panel-content"></visualize>
 
   <doc-table ng-if="panel.type == 'search'"
-    saved-search="savedSearch"
+    saved-search="savedObj"
     class="panel-content">
   </doc-table>
 </div>
