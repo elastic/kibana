@@ -61,10 +61,6 @@ define(function (require) {
       expect($elem.text()).to.not.be.empty();
     });
 
-    it('should have an addRows function', function () {
-      expect($scope.addRows).to.be.a(Function);
-    });
-
     it('should set the indexPattern to that of the searchSource', function () {
       expect($scope.indexPattern).to.be(searchSource.get('index'));
     });
@@ -74,11 +70,34 @@ define(function (require) {
       expect($scope.searchSource.size.called).to.be(true);
     });
 
-    it('should set a row limit when results are received', function () {
-      expect($scope.limit).to.be(undefined);
+    it('should have an addRows function that increases the row cound', function () {
+      expect($scope.addRows).to.be.a(Function);
       searchSource.crankResults();
       $scope.$digest();
       expect($scope.limit).to.be(50);
+      $scope.addRows();
+      expect($scope.limit).to.be(100);
+    });
+
+    it('should reset the row limit when results are received', function () {
+      $scope.limit = 100;
+      expect($scope.limit).to.be(100);
+      searchSource.crankResults();
+      $scope.$digest();
+      expect($scope.limit).to.be(50);
+    });
+
+    it('should put the hits array on scope', function () {
+      expect($scope.hits).to.be(undefined);
+      searchSource.crankResults();
+      $scope.$digest();
+      expect($scope.hits).to.be.an(Array);
+    });
+
+    it('should destroy the searchSource when the scope is destroyed', function () {
+      expect(searchSource.destroy.called).to.be(false);
+      $scope.$destroy();
+      expect(searchSource.destroy.called).to.be(true);
     });
 
   });

@@ -9,7 +9,7 @@ define(function (require) {
    */
   return function (sort, indexPattern) {
     var sortObj = {};
-    if (_.isArray(sort)) {
+    if (_.isArray(sort) && sort.length === 2) {
       // At some point we need to refact the sorting logic, this array sucks.
       sortObj[sort[0]] = sort[1];
     } else if (indexPattern.timeFieldName) {
