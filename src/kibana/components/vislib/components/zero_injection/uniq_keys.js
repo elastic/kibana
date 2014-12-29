@@ -20,6 +20,7 @@ define(function (require) {
       var uniqueXValues = {};
       var charts;
       var isDate;
+      var isOrdered;
 
       if (!obj.series) {
         charts = obj.rows ? obj.rows : obj.columns;
@@ -31,6 +32,10 @@ define(function (require) {
         return chart.ordered && chart.ordered.date;
       });
 
+      isOrdered = charts.every(function (chart) {
+        return chart.ordered;
+      });
+
       flattenedData.forEach(function (d, i) {
         var key = d.x;
 
@@ -38,12 +43,14 @@ define(function (require) {
           uniqueXValues[key] = {
             index: i,
             isDate: isDate,
+            isOrdered: isOrdered,
             isNumber: _.isNumber(key)
           };
         } else {
           uniqueXValues[key] = {
             index: Math.min(i, uniqueXValues[key].index),
             isDate: isDate,
+            isOrdered: isOrdered,
             isNumber: _.isNumber(key)
           };
         }
