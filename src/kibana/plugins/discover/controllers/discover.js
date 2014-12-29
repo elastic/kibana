@@ -309,6 +309,8 @@ define(function (require) {
         sortFn = new HitSortFn(sort[1]);
       }
 
+      $scope.updateTime();
+
       segmented.setDirection(sortBy === 'time' ? sort[1] : 'desc');
 
       // triggered when the status updated
