@@ -144,7 +144,10 @@ define(function (require) {
       });
 
       $scope.$watch('state.filters', function (newFilters, oldFilters) {
-        if (onlyDisabled(newFilters, oldFilters)) return;
+        if (onlyDisabled(newFilters, oldFilters)) {
+          $state.save();
+          return;
+        }
         if (newFilters !== oldFilters) $scope.fetch();
       });
 
@@ -201,13 +204,13 @@ define(function (require) {
       savedVis.visState = $state.vis;
 
       savedVis.save()
-      .then(function () {
+      .then(function (id) {
+        if (id) {
+          notify.info('Saved Visualization "' + savedVis.title + '"');
+          if (savedVis.id === $route.current.params.id) return;
+          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        }
         configTemplate.close('save');
-        notify.info('Saved Visualization "' + savedVis.title + '"');
-
-        if (savedVis.id === $route.current.params.id) return;
-
-        kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
       }, notify.fatal);
     };
 
