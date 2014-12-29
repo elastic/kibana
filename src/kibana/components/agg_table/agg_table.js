@@ -98,16 +98,7 @@ define(function (require) {
         }
 
         function setFormattedRows(table) {
-          var formatters = table.columns.map(function (col) {
-            return table.fieldFormatter(col);
-          });
-
-          // format all row values
-          $scope.formattedRows = (table.rows).map(function (row) {
-            return row.map(function (cell, i) {
-              return formatters[i](cell);
-            });
-          });
+          $scope.rows = table.rows;
 
           // update the csv file's title
           self.csv.filename = (table.title() || 'table') + '.csv';
