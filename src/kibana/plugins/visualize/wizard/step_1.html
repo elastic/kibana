@@ -1,53 +1,22 @@
 <h1>
-  Create a visualization
+  Create a new visualization <br class="visible-xs">
   <span class="pull-right label label-default hidden-xs">Step 1</span>
   <span class="label label-default visible-xs">Step 1</span>
 </h1>
-<ul class="list-group list-group-menu" ng-switch on="stepOneMode">
-  <li ng-click="stepOneMode='new'"
-    ng-class="{'active': stepOneMode=='new'}"
-    class="list-group-item list-group-menu-item">
-    From a new search
-  </li>
-  <li class="list-group-item" ng-switch-when="new">
-    <!-- Index patterns -->
-    Select an index pattern
-    <div class="form-group">
-      <select
-        class="form-control"
-        ng-model="indexPattern.selection"
-        ng-options="pattern as pattern for pattern in indexPattern.list | orderBy:'toString()'">
-      </select>
-    </div>
-  </li>
 
-  <li ng-click="stepOneMode='saved'"
-    ng-class="{'active': stepOneMode=='saved'}"
-    class="list-group-item list-group-menu-item">
-    From a saved search
-  </li>
-  <li class="list-group-item" ng-switch-when="saved">
-    <!-- Saved searches -->
-    <saved-object-finder
-      title="Saved Searches"
-      type="searches"
-      make-url="step2WithSearchUrl">
-    </saved-object-finder>
-  </li>
-
-  <li ng-click="stepOneMode='edit'"
-    ng-class="{'active': stepOneMode=='edit'}"
-    class="list-group-item list-group-menu-item">
-    From an existing visualization
-  </li>
-  <li class="list-group-item" ng-switch-when="edit">
-    <!-- Existing visualizations -->
-    <saved-object-finder
-      title="Saved Visualizations"
-      type="visualizations">
-    </saved-object-finder>
-  </li>
+<ul class="visualizations list-group list-group-menu">
+  <a class="visualization list-group-item list-group-menu-item"
+     ng-repeat="type in visTypes.inTitleOrder"
+     ng-href="{{ visTypeUrl(type) }}">
+    <li>
+      <i class="fa" ng-class="type.icon"></i>{{type.title}}
+    </li>
+  </a>
 </ul>
 
+<h1>Or, open a saved visualization</h1>
 
-
+<saved-object-finder
+        title="Saved Visualizations"
+        type="visualizations">
+</saved-object-finder>
