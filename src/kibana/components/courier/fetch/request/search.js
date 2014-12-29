@@ -14,16 +14,6 @@ define(function (require) {
       this.strategy = searchStrategy;
     }
 
-    SearchReq.prototype.transformResponse = function (resp) {
-      if (resp && resp.hits) {
-        resp.hits.hits.forEach(function (hit) {
-          hit._source = _.flattenWith('.', hit._source);
-        });
-      }
-
-      return resp;
-    };
-
     return SearchReq;
   };
 });
