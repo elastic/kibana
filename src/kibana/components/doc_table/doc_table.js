@@ -3,6 +3,7 @@ define(function (require) {
 
   var html = require('text!components/doc_table/doc_table.html');
   var getSort = require('components/doc_table/lib/get_sort');
+
   require('css!components/doc_table/doc_table.css');
   require('directives/truncated');
   require('components/doc_table/components/table_header');
@@ -66,7 +67,7 @@ define(function (require) {
 
           // Set the watcher after initialization
           $scope.$watch('persist.sorting', function (sorting) {
-            if (!$scope.indexPattern || !$scope.searchSource || !sorting) return;
+            if (!sorting) return;
             $scope.searchSource.sort(getSort(sorting, $scope.indexPattern));
             $scope.searchSource.fetch();
           });

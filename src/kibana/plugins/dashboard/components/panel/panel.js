@@ -21,7 +21,6 @@ define(function (require) {
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState
         var $state = $scope.state;
-        var panelContentElem;
 
         // receives $scope.panel from the dashboard grid directive, seems like should be isolate?
         $scope.$watch('id', function (id) {
