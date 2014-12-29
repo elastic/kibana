@@ -10,7 +10,7 @@ define(function (require) {
   require('components/doc_table/components/table_row');
 
   require('modules').get('kibana')
-  .directive('docTable', function (config, Private, Notifier) {
+  .directive('docTable', function (config, Notifier) {
     return {
       restrict: 'E',
       template: html,
@@ -47,7 +47,7 @@ define(function (require) {
           };
         }());
 
-        $scope.addRows = function (foo) {
+        $scope.addRows = function () {
           $scope.limit += 50;
         };
 
