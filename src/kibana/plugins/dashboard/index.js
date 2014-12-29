@@ -13,7 +13,7 @@ define(function (require) {
 
 
   require('plugins/dashboard/directives/grid');
-  require('plugins/dashboard/directives/panel');
+  require('plugins/dashboard/components/panel/panel');
   require('plugins/dashboard/services/saved_dashboards');
   require('css!plugins/dashboard/styles/main.css');
 

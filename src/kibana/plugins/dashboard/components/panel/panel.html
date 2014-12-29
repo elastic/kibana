@@ -1,4 +1,4 @@
-<div class="panel panel-default" ng-if="savedObj || error">
+<div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
     <span class="panel-title">{{savedObj.title}}</span>
     <div class="btn-group">
@@ -13,12 +13,12 @@
     <span ng-bind="error"></span>
   </div>
 
-  <visualize ng-if="panel.type == 'visualization'"
+  <visualize ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
     class="panel-content"></visualize>
 
-  <doc-table ng-if="panel.type == 'search'"
+  <doc-table ng-switch-when="search"
     saved-search="savedObj"
     class="panel-content">
   </doc-table>
