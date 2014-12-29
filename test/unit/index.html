@@ -12,6 +12,7 @@
     <script>(function () {
       var COVERAGE = !!(/coverage/i.test(window.location.search));
       var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
+      var DISABLE_RESIZE_CHECKER = true;
 
       mocha.setup({
         ui: 'bdd',

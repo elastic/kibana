@@ -53,6 +53,10 @@ define(function (require) {
       return sendToEs.call(this, 'index', false, body);
     };
 
+    DocSource.prototype.doCreate = function (body) {
+      return sendToEs.call(this, 'create', false, body, []);
+    };
+
     /*****
      * PRIVATE API
      *****/

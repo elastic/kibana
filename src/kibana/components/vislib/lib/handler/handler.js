@@ -35,7 +35,7 @@ define(function (require) {
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
 
-      if (this._attr.addLegend && this.data.isLegendShown()) {
+      if (this._attr.addLegend) {
         this.legend = opts.legend;
       }
 
