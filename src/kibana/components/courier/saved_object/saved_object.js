@@ -211,18 +211,23 @@ define(function (require) {
       };
 
       self.saveSource = function (source) {
-        return docSource.doIndex(source)
-        .then(function (id) {
+        var finish = function (id) {
           self.id = id;
-        })
-        .then(function () {
           return es.indices.refresh({
             index: configFile.kibana_index
+          })
+          .then(function () {
+            return self.id;
           });
-        })
-        .then(function () {
-          // ensure that the object has the potentially new id
-          return self.id;
+        };
+        return docSource.doCreate(source)
+        .then(finish)
+        .catch(function (err) {
+          var confirmMessage = 'Are you sure you want to overwrite this?';
+          if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
+            return docSource.doIndex(source).then(finish);
+          }
+          return Promise.resolve(false);
         });
       };
 
