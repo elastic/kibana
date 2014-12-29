@@ -15,6 +15,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
+      window.DISABLE_RESIZE_CHECKER = false;
       ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
       EventEmitter = Private(require('factories/events'));
       reflowWatcher = Private(require('components/reflow_watcher'));
@@ -30,6 +31,7 @@ define(function (require) {
     }));
 
     afterEach(function () {
+      window.DISABLE_RESIZE_CHECKER = true;
       checker.$el.remove();
       checker.destroy();
     });
