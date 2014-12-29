@@ -25,9 +25,9 @@ define(function (require) {
       if (!this._started) return;
 
       if (this._ms) {
-        this.restart();
+        this.start(false);
       } else {
-        this.pause();
+        this._unScheduleLoop();
       }
 
       return this;
@@ -52,11 +52,13 @@ define(function (require) {
     Looper.prototype.start = function (loopOver) {
       if (loopOver == null) loopOver = true;
 
-      this.stop();
-      this._started = true;
+      if (!this._started) {
+        this._started = true;
+      } else {
+        this._unScheduleLoop();
+      }
 
       if (loopOver) {
-        // start with a run of the loop, which sets the next run
         this._looperOver();
       } else {
         this._scheduleLoop();
@@ -83,9 +85,7 @@ define(function (require) {
      * @chainable
      */
     Looper.prototype.restart = function () {
-      if (this._started) {
-        this.start(false);
-      }
+      this.start(false);
       return this;
     };
 
@@ -155,6 +155,7 @@ define(function (require) {
      * @return {number} - the timer promise
      */
     Looper.prototype._scheduleLoop = function () {
+      this._unScheduleLoop();
       this._timer = this._ms ? $timeout(this._looperOver, this._ms) : null;
       return this._timer;
     };
