@@ -21,12 +21,10 @@ define(function (require) {
       this._remainingSize = false;
       this._direction = 'desc';
       this._handle = new SegmentedHandle(this);
-      // prevent the source from changing between requests
-      this._getFlattenedSource = _.once(this._getFlattenedSource);
 
-      // give the request consumer a chance to receive each segment and set
-      // parameters via the handle
-      if (_.isFunction(initFn)) initFn(this._handle);
+      // prevent the source from changing between requests,
+      // all calls will return the same promise
+      this._getFlattenedSource = _.once(this._getFlattenedSource);
     }
 
     /*********
@@ -48,6 +46,10 @@ define(function (require) {
           max_score: 0
         }
       };
+
+      // give the request consumer a chance to receive each segment and set
+      // parameters via the handle
+      if (_.isFunction(this._initFn)) this._initFn(this._handle);
 
       // Send the initial fetch status
       this._reportStatus();
