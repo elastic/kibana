@@ -11,8 +11,6 @@ define(function (require) {
 
   require('modules').get('kibana')
   .directive('docTable', function (config, Private, Notifier) {
-    var formats = Private(require('components/index_patterns/_field_formats'));
-
     return {
       restrict: 'E',
       template: html,
