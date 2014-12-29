@@ -1,5 +1,5 @@
 define(function (require) {
-  return function FiltersAggDefinition(Private, Notifier, config) {
+  return function FiltersAggDefinition(Private, Notifier) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
