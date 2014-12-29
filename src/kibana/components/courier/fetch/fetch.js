@@ -10,6 +10,9 @@ define(function (require) {
     var requestQueue = Private(require('components/courier/_request_queue'));
     var fetchThese = Private(require('components/courier/fetch/_fetch_these'));
 
+    var callResponseHandlers = Private(require('components/courier/fetch/_call_response_handlers'));
+    var INCOMPLETE = Private(require('components/courier/fetch/_req_status')).INCOMPLETE;
+
     function fetchQueued(strategy) {
       var requests = requestQueue.get(strategy);
       if (!requests.length) return Promise.resolve();
@@ -56,9 +59,34 @@ define(function (require) {
 
     /**
      * Fetch a list of requests
-     * @param {string} type - the type name for the sources in the requests
      * @param {array} reqs - the requests to fetch
+     * @async
      */
     this.these = fetchThese;
+
+    /**
+     * Send responses to a list of requests, used when requests
+     * should be skipped (like when a doc is updated with an index).
+     *
+     * This logic is a simplified version of what fetch_these does, and
+     * could have been added elsewhere, but I would rather the logic be
+     * here than outside the courier/fetch module.
+     *
+     * @param {array[Request]} requests - the list of requests to respond to
+     * @param {array[any]} responses - the list of responses for each request
+     */
+    this.fakeFetchThese = function (requests, responses) {
+      return Promise.map(requests, function (req) {
+        return req.start();
+      })
+      .then(function () {
+        return callResponseHandlers(requests, responses);
+      })
+      .then(function (requestStates) {
+        if (_.contains(requestStates, INCOMPLETE)) {
+          throw new Error('responding to requests did not complete!');
+        }
+      });
+    };
   };
 });

@@ -43,7 +43,7 @@ define(function (require) {
         return callClient(strategy, requests);
       })
       .then(function (responses) {
-        return callResponseHandlers(strategy, requests, responses);
+        return callResponseHandlers(requests, responses);
       })
       .then(function (responses) {
         return continueIncomplete(strategy, requests, responses, fetchWithStrategy);

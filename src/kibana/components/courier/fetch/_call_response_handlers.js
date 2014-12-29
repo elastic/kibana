@@ -7,7 +7,7 @@ define(function (require) {
     var SearchTimeout = require('errors').SearchTimeout;
     var RequestFailure = require('errors').RequestFailure;
 
-    function callResponseHandlers(strategy, requests, responses) {
+    function callResponseHandlers(requests, responses) {
       return Promise.map(requests, function (req, i) {
         var resp = responses[i];
 
