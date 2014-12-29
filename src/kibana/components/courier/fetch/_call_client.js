@@ -57,7 +57,7 @@ define(function (require) {
           case ABORTED:
             return ABORTED;
           case DUPLICATE:
-            return _.cloneDeep(req._uniq.resp);
+            return req._uniq.resp;
           default:
             return responses[_.findIndex(executable, req)];
           }
