@@ -394,7 +394,7 @@ define(function (require) {
         }
         $scope.fetchStatus = false;
       });
-    });
+    }).catch(notify.fatal);
 
     $scope.updateTime = function () {
       $scope.timeRange = {
