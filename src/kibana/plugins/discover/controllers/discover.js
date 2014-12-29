@@ -251,10 +251,12 @@ define(function (require) {
         savedSearch.sort = $scope.state.sort;
 
         return savedSearch.save()
-        .then(function () {
-          notify.info('Saved Data Source "' + savedSearch.title + '"');
-          if (savedSearch.id !== $route.current.params.id) {
-            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+        .then(function (id) {
+          if (id) {
+            notify.info('Saved Data Source "' + savedSearch.title + '"');
+            if (savedSearch.id !== $route.current.params.id) {
+              kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            }
           }
         });
       })
