@@ -34,10 +34,20 @@ define(function (require) {
         });
 
         $scope.relative = {
-          count: 1,
-          unit: 'm',
-          preview: undefined,
-          round: false
+          'from' : {
+            count: 1,
+            unit: 'm',
+            preview: undefined,
+            round: false,
+            date: undefined
+          },
+          'to' : {
+            count: 0,
+            unit: 'm',
+            preview: undefined,
+            round: false,
+            date: undefined
+          }
         };
 
         $scope.absolute = {
@@ -54,7 +64,7 @@ define(function (require) {
           {text: 'Days ago', value: 'd'},
           {text: 'Weeks ago', value: 'w'},
           {text: 'Months ago', value: 'M'},
-          {text: 'Years ago', value: 'y'},
+          {text: 'Years ago', value: 'y'}
         ];
 
         $scope.$watch('absolute.from', function (date) {
@@ -70,31 +80,60 @@ define(function (require) {
           case 'quick':
             break;
           case 'relative':
-            var fromParts = $scope.from.toString().split('-');
-            var relativeParts = [];
+            var parts = {
+              'from': $scope.from.toString().split('-'),
+              'to': $scope.to.toString().split('-')
+            };
+            var relativeParts = {
+              'from' : [],
+              'to' : []
+            };
 
             // Try to parse the relative time, if we can't use moment duration to guestimate
-            if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
-              relativeParts = fromParts[1].match(/([0-9]+)([smhdwMy]).*/);
+            if (parts.from[0] === 'now' && parts.from[1] && parts.to[0] === 'now' && parts.to[1]) {
+              relativeParts.from = parts.from[1].match(/([0-9]+)([smhdwMy]).*/);
+              relativeParts.to = parts.to[1].match(/([0-9]+)([smhdwMy]).*/);
             }
-            if (relativeParts[1] && relativeParts[2]) {
-              $scope.relative.count = parseInt(relativeParts[1], 10);
-              $scope.relative.unit = relativeParts[2];
+            if (relativeParts.from[1] && relativeParts.from[2] && relativeParts.to[1] && relativeParts.to[2]) {
+              $scope.relative.from.count = parseInt(relativeParts.from[1], 10);
+              $scope.relative.to.count = parseInt(relativeParts.to[1], 10);
+              $scope.relative.from.unit = relativeParts.from[2];
+              $scope.relative.to.unit = relativeParts.to[2];
             } else {
-              var duration = moment.duration(moment().diff(datemath.parse($scope.from)));
+              var duration = {
+                'from': moment.duration(moment().diff(datemath.parse($scope.from))),
+                'to': moment.duration(moment().diff(datemath.parse($scope.to)))
+              };
               var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
-              if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+              if ($scope.from.toString().split('/')[1]) $scope.relative.from.round = true;
+              if ($scope.to.toString().split('/')[1]) $scope.relative.to.round = true;
               for (var i = 0; i < units.length; i++) {
-                var as = duration.as(units[i]);
-                if (as > 1) {
-                  $scope.relative.count = Math.round(as);
-                  $scope.relative.unit = units[i];
+                var ok = {
+                  'from' : false,
+                  'to' : false
+                };
+                var as = {
+                  'form' : duration.from.as(units[i]),
+                  'to' : duration.to.as(units[i])
+                };
+                if (as.from > 1 && !ok.from) {
+                  $scope.relative.from.count = Math.round(as.from);
+                  $scope.relative.from.unit = units[i];
+                  ok.from = true;
+                }
+                if (as.to > 1 && !ok.to) {
+                  $scope.relative.to.count = Math.round(as.to);
+                  $scope.relative.to.unit = units[i];
+                  ok.from = true;
+                }
+                if (ok.from && ok.to) {
                   break;
                 }
               }
             }
 
-            if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+            if ($scope.from.toString().split('/')[1]) $scope.relative.from.round = true;
+            if ($scope.to.toString().split('/')[1]) $scope.relative.to.round = true;
 
             break;
           case 'absolute':
@@ -112,18 +151,39 @@ define(function (require) {
         };
 
         $scope.formatRelative = function () {
-          var parsed = datemath.parse(getRelativeString());
-          $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
+          var parsed = {
+            'from' : datemath.parse(getRelativeString().from),
+            'to' : datemath.parse(getRelativeString().to)
+          };
+          if (parsed.from) {
+            $scope.relative.from.preview =  parsed.from.format($scope.format);
+            $scope.relative.from.date = parsed.from;
+          } else {
+            $scope.relative.from.preview = undefined;
+            $scope.relative.from.date = undefined;
+          }
+          if (parsed.to) {
+            $scope.relative.to.preview =  parsed.to.format($scope.format);
+            $scope.relative.to.date = parsed.to;
+          } else {
+            $scope.relative.to.preview = undefined;
+            $scope.relative.to.date = undefined;
+          }
           return parsed;
         };
 
         $scope.applyRelative = function () {
-          $scope.from = getRelativeString();
-          $scope.to = 'now';
+          $scope.from = getRelativeString().from;
+          $scope.to = getRelativeString().to;
         };
 
         var getRelativeString = function () {
-          return 'now-' + $scope.relative.count + $scope.relative.unit + ($scope.relative.round ? '/' + $scope.relative.unit : '');
+          return {
+            'from' : 'now-' + $scope.relative.from.count + $scope.relative.from.unit +
+              ($scope.relative.from.round ? '/' + $scope.relative.from.unit : ''),
+            'to' : 'now-' + $scope.relative.to.count + $scope.relative.to.unit +
+              ($scope.relative.to.round ? '/' + $scope.relative.to.unit : '')
+          };
         };
 
         $scope.applyAbsolute = function () {
