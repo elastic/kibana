@@ -16,10 +16,13 @@
   <visualize ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
-    class="panel-content"></visualize>
+    class="panel-content">
+  </visualize>
 
   <doc-table ng-switch-when="search"
-    saved-search="savedObj"
+    search-source="savedObj.searchSource"
+    sorting="savedObj.sort"
+    columns="savedObj.columns"
     class="panel-content">
   </doc-table>
 </div>

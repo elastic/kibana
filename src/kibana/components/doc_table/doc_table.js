@@ -16,14 +16,18 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
-        savedSearch: '=',
+        searchSource: '=',
+        sorting: '=',
+        columns: '=',
         filter: '=?',
       },
       link: function ($scope) {
         var notify = new Notifier();
-        $scope.columns = [];
-        $scope.persist = $scope.persist || {};
 
+        $scope.persist = {
+          sorting: $scope.sorting,
+          columns: $scope.columns
+        };
 
         var prereq = (function () {
           var fns = [];
@@ -52,16 +56,13 @@ define(function (require) {
           if ($scope.searchSource) $scope.searchSource.destroy();
         });
 
-        $scope.$watch('savedSearch', prereq(function (savedSearch) {
-          if (!(savedSearch && savedSearch.searchSource)) return;
+        $scope.$watch('searchSource', prereq(function (searchSource) {
+          if (!$scope.searchSource) return;
 
-          $scope.persist.sorting = savedSearch.sort;
-          $scope.persist.columns = savedSearch.columns;
-          $scope.searchSource = savedSearch.searchSource;
-          $scope.indexPattern = savedSearch.searchSource.get('index');
+          $scope.indexPattern = $scope.searchSource.get('index');
 
           $scope.searchSource.size(config.get('discover:sampleSize'));
-          $scope.searchSource.sort(getSort(savedSearch.sort, $scope.indexPattern));
+          $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
           // Set the watcher after initialization
           $scope.$watch('persist.sorting', function (sorting) {
@@ -76,7 +77,7 @@ define(function (require) {
             $scope.limit = 50;
 
             // Abort if something changed
-            if ($scope.searchSource !== savedSearch.searchSource) return;
+            if ($scope.searchSource !== $scope.searchSource) return;
 
             $scope.hits = resp.hits.hits;
 

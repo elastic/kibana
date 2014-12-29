@@ -1,8 +1,9 @@
 define(function (require) {
   var moment = require('moment');
+  var $ = require('jquery');
   require('modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private) {
+  .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $compile) {
     var _ = require('lodash');
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
     var loadPanel = Private(require('plugins/dashboard/components/panel/lib/load_panel'));
@@ -20,6 +21,7 @@ define(function (require) {
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState
         var $state = $scope.state;
+        var panelContentElem;
 
         // receives $scope.panel from the dashboard grid directive, seems like should be isolate?
         $scope.$watch('id', function (id) {
