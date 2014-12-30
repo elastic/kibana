@@ -1,16 +1,17 @@
 define(function (require) {
   require('modules')
   .get('app/visualize', ['ui.select'])
-  .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
+  .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
+    require('angular-ui-select');
+    require('filters/field_type');
+    require('filters/match_any');
+    require('plugins/visualize/editor/agg_param');
+
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-    require('angular-ui-select');
-
-    require('plugins/visualize/editor/agg_param');
-    require('filters/match_any');
 
     var notify = new Notifier({
       location: 'visAggGroup'
@@ -74,6 +75,9 @@ define(function (require) {
               $aggParamEditorsScope = null;
             }
 
+            // create child scope, used in the editors
+            $aggParamEditorsScope = $scope.$new();
+
             var agg = $scope.agg;
             var type = $scope.agg.type;
 
@@ -101,6 +105,11 @@ define(function (require) {
               if (aggParam = getAggParamHTML(param, i)) {
                 aggParamHTML[type].push(aggParam);
               }
+
+              // if field param exists, compute allowed fields
+              if (param.name === 'field') {
+                $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+              }
             });
 
             // compile the paramEditors html elements
@@ -111,7 +120,6 @@ define(function (require) {
               paramEditors = paramEditors.concat(aggParamHTML.advanced);
             }
 
-            $aggParamEditorsScope = $scope.$new();
             $aggParamEditors = $(paramEditors).appendTo($editorContainer);
             $compile($aggParamEditors)($aggParamEditorsScope);
           });
@@ -123,11 +131,7 @@ define(function (require) {
               return;
             }
 
-            var attrs = {
-              'agg-type': 'agg.type',
-              'agg-config': 'agg',
-              'params': 'agg.params'
-            };
+            var attrs = {};
 
             attrs['agg-param'] = 'agg.type.params[' + idx + ']';
             if (param.advanced) {
@@ -138,6 +142,19 @@ define(function (require) {
             .attr(attrs)
             .append(param.editor)
             .get(0);
+          }
+
+          function getIndexedFields(param) {
+            var fields = $scope.agg.vis.indexPattern.fields.raw;
+            var fieldTypes = param.filterFieldTypes;
+
+            if (fieldTypes) {
+              fields = $filter('fieldType')(fields, fieldTypes);
+              fields = $filter('matchAny')(fields, [{ indexed: true }, { scripted: true }]);
+              fields = $filter('orderBy')(fields, ['type', 'name']);
+            }
+
+            return fields;
           }
 
           // generic child scope creation, for both schema and agg
