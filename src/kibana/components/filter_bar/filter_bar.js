@@ -7,6 +7,8 @@ define(function (require) {
 
   var toggleFilter = require('components/filter_bar/lib/toggleFilter');
   var toggleAll = require('components/filter_bar/lib/toggleAll');
+  var pinFilter = require('components/filter_bar/lib/pinFilter');
+  var pinAll = require('components/filter_bar/lib/pinAll');
   var invertFilter = require('components/filter_bar/lib/invertFilter');
   var invertAll = require('components/filter_bar/lib/invertAll');
   var removeFilter = require('components/filter_bar/lib/removeFilter');
@@ -87,6 +89,8 @@ define(function (require) {
 
         $scope.toggleFilter = toggleFilter($scope);
         $scope.toggleAll = toggleAll($scope);
+        $scope.pinFilter = pinFilter($scope);
+        $scope.pinAll = pinAll($scope);
         $scope.invertFilter = invertFilter($scope);
         $scope.invertAll = invertAll($scope);
         $scope.removeFilter = removeFilter($scope);
