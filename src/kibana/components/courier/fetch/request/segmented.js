@@ -99,6 +99,7 @@ define(function (require) {
     };
 
     SegmentedReq.prototype.complete = function () {
+      this._handle.emit('complete');
       return SearchReq.prototype.complete.call(this);
     };
 
@@ -118,15 +119,15 @@ define(function (require) {
       return (this._queue = queue);
     };
 
-    SegmentedReq.prototype._reportStatus = function (active) {
+    SegmentedReq.prototype._reportStatus = function () {
       return this._handle.emit('status', {
         total: this._all.length,
         complete: this._complete.length,
         remaining: this._queue.length,
-        active: this._active
+        active: this._active,
+        hitCount: this._mergedResp.hits.hits.length
       });
     };
-
     SegmentedReq.prototype._getFlattenedSource = function () {
       var self = this;
 
@@ -142,32 +143,31 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._consumeSegment = function (seg) {
-
       var index = this._active;
-      var first = this._segments.length === 0;
-
       this._complete.push(index);
-
       if (!seg) return; // segment was ignored/filtered, don't store it
 
-      this._segments.push(seg);
+      var hadHits = _.deepGet(this._mergedResp, 'hits.hits.length') > 0;
+      var gotHits = _.deepGet(seg, 'hits.hits.length') > 0;
+      var firstHits = !hadHits && gotHits;
+      var haveHits = hadHits || gotHits;
+
+      this._mergeSegment(seg);
+      this.resp = _.omit(this._mergedResp, '_bucketIndex');
 
       if (this._remainingSize !== false) {
         this._remainingSize -= seg.hits.hits.length;
       }
 
-      if (seg) {
-        this._mergeSegment(seg);
-        this.resp = _.omit(this._mergedResp, '_bucketIndex');
-
-        if (first) this._handle.emit('first', seg);
-        this._handle.emit('segment', seg);
-        this._handle.emit('mergedSegment', this.resp);
-      }
+      if (firstHits) this._handle.emit('first', seg);
+      if (gotHits)   this._handle.emit('segment', seg);
+      if (haveHits)  this._handle.emit('mergedSegment', this.resp);
     };
 
     SegmentedReq.prototype._mergeSegment = notify.timed('merge response segment', function (seg) {
       var merged = this._mergedResp;
+
+      this._segments.push(seg);
 
       merged.took += seg.took;
       merged.hits.total = Math.max(merged.hits.total, seg.hits.total);
