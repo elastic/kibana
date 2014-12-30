@@ -83,6 +83,18 @@ define(function (require) {
       if (!(params instanceof AggParams)) {
         params = this.params = new AggParams(params);
       }
+
+      /**
+       * Designed for multi-value metric aggs, this method can return a
+       * set of AggConfigs that should replace this aggConfig in result sets
+       * that walk the AggConfig set.
+       *
+       * @method getReplacementAggs
+       * @returns {array[AggConfig]|undefined} - an array of aggConfig objects
+       *                                         that should replace this one,
+       *                                         or undefined
+       */
+      this.getReplacementAggs = config.getReplacementAggs || _.noop;
     }
 
     return AggType;
