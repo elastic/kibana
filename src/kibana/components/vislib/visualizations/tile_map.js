@@ -172,7 +172,7 @@ define(function (require) {
             color: self.darkerColor(defaultColor),
             weight: 1.0,
             opacity: 1,
-            fillOpacity: 0.7
+            fillOpacity: 0.75
           };
         }
       }).addTo(map);
@@ -233,7 +233,7 @@ define(function (require) {
             color: self.darkerColor(color),
             weight: 1.0,
             opacity: 1,
-            fillOpacity: 0.7
+            fillOpacity: 0.75
           };
         }
       }).addTo(map);
@@ -408,7 +408,7 @@ define(function (require) {
     };
 
     /**
-     * radiusScale returns a circle radius from
+     * radiusScale returns a a number for scaled circle markers
      * approx. square root of count
      * which is multiplied by a factor based on the geohash precision
      * for relative sizing of markers
@@ -426,40 +426,40 @@ define(function (require) {
       var maxr;
       switch (precision) {
         case 1:
-          maxr = 200;
+          maxr = 150;
           break;
         case 2:
-          maxr = 30;
+          maxr = 28;
           break;
         case 3:
-          maxr = 9;
+          maxr = 8;
           break;
         case 4:
-          maxr = 3;
+          maxr = 2;
           break;
         case 5:
-          maxr = 1.44;
+          maxr = 1.4;
           break;
         case 6:
-          maxr = 1.12;
-          break;
-        case 7:
           maxr = 0.6;
           break;
+        case 7:
+          maxr = 0.4;
+          break;
         case 8:
-          maxr = 0.3;
+          maxr = 0.2;
           break;
         case 9:
-          maxr = 0.22;
+          maxr = 0.12;
           break;
         default:
-          maxr = 9;
+          maxr = 8;
       }
       return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
     };
 
     /**
-     * returns a number to scale circle markers
+     * returns a number to scale shaded circle markers
      * based on the geohash precision
      *
      * @method quantRadiusScale
@@ -470,34 +470,34 @@ define(function (require) {
       var maxr;
       switch (precision) {
         case 1:
-          maxr = 100;
+          maxr = 150;
           break;
         case 2:
-          maxr = 12;
+          maxr = 18;
           break;
         case 3:
-          maxr = 3;
+          maxr = 4.5;
           break;
         case 4:
-          maxr = 0.6;
+          maxr = 0.7;
           break;
         case 5:
-          maxr = 0.3;
+          maxr = 0.26;
           break;
         case 6:
-          maxr = 0.22;
+          maxr = 0.20;
           break;
         case 7:
-          maxr = 0.18;
-          break;
-        case 8:
           maxr = 0.16;
           break;
+        case 8:
+          maxr = 0.13;
+          break;
         case 9:
-          maxr = 0.14;
+          maxr = 0.11;
           break;
         default:
-          maxr = 3;
+          maxr = 4.5;
       }
       return maxr;
     };
@@ -515,8 +515,8 @@ define(function (require) {
     TileMap.prototype.quantizeColorScale = function (count, min, max) {
       var self = this;
       var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-      var reds3 = ['#fed976', '#fd8d3c', '#bd0026'];
-      var reds1 = ['#bd0026'];
+      var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
+      var reds1 = ['#ff6128'];
       var colors = self._attr.colors = reds5;
 
       if (max - min < 3) {
