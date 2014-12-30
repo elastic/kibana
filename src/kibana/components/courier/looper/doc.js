@@ -7,7 +7,9 @@ define(function (require) {
      * The Looper which will manage the doc fetch interval
      * @type {Looper}
      */
-    var docLooper = new Looper(1500, fetch.docs).start();
+    var docLooper = new Looper(1500, function () {
+      fetch.docs();
+    });
 
     return docLooper;
   };

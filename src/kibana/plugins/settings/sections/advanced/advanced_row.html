@@ -1,0 +1,84 @@
+<tr ng-class="conf.value === undefined ? 'default' : 'custom'">
+  <td class="name">
+    <b>{{conf.name}}</b>
+    <span class="smaller" ng-show="conf.value !== undefined">
+      (Default: <i>{{conf.defVal == undefined ? 'null' : conf.defVal}}</i>)
+    </span>
+    <br>
+    <span class="smaller">{{conf.description}}</span>
+  </td>
+  <td class="value">
+    <form
+      name="forms.configEdit"
+      ng-if="conf.editting"
+      ng-submit="save(conf)">
+      <input
+        ng-show="conf.normal"
+        ng-model="conf.unsavedValue"
+        ng-keyup="maybeCancel($event, conf)"
+        placeholder="{{conf.value || conf.defVal}}"
+        type="text"
+        class="form-control">
+      <input
+        ng-show="conf.array"
+        ng-list=","
+        ng-model="conf.unsavedValue"
+        ng-keyup="maybeCancel($event, conf)"
+        placeholder="{{(conf.value || conf.defVal).join(', ')}}"
+        type="text"
+        class="form-control">
+      <textarea
+        ng-if="conf.json"
+        type="text"
+        class="form-control"
+        ng-model="conf.unsavedValue"
+        ng-keyup="maybeCancel($event, conf)"
+        validate-json
+        ></textarea>
+        <small ng-show="forms.configEdit.$error.jsonInput">Invalid JSON syntax</small>
+      <input
+        ng-show="conf.bool"
+        ng-model="conf.unsavedValue"
+        ng-checked="conf.unsavedValue === undefined ? conf.defVal : conf.unsavedValue"
+        type="checkbox"
+        class="form-control">
+    </form>
+    <span ng-if="!conf.editting && (conf.normal || conf.json)">{{conf.value || conf.defVal}}</span>
+    <span ng-if="!conf.editting && conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
+    <span ng-if="!conf.editting && conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
+
+  </td>
+  <td class="actions">
+    <button
+      ng-if="!conf.editting"
+      ng-click="edit(conf)"
+      class="btn btn-default"
+      ng-disabled="conf.tooComplex">
+      <i class="fa fa-pencil"></i>
+    </button>
+
+    <button
+      ng-if="conf.editting"
+      ng-click="save(conf)"
+      class="btn btn-success"
+      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid">
+      <i ng-if="!conf.loading" class="fa fa-save"></i>
+      <i ng-if="conf.loading" class="fa fa-spinner"></i>
+    </button>
+
+    <button
+      ng-if="!conf.editting"
+      ng-click="clear(conf)"
+      ng-hide="conf.value === undefined"
+      class="btn btn-danger">
+      <i class="fa fa-trash-o"></i>
+    </button>
+
+    <button
+      ng-if="conf.editting"
+      ng-click="cancelEdit(conf)"
+      class="btn btn-default">
+      <i class="fa fa-times"></i>
+    </button>
+  </td>
+</tr>

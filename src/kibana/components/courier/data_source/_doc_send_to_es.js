@@ -3,7 +3,8 @@ define(function (require) {
   var errors = require('errors');
 
   return function (Promise, Private, es) {
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
+    var courierFetch = Private(require('components/courier/fetch/fetch'));
 
     /**
      * Backend for doUpdate and doIndex
@@ -12,12 +13,12 @@ define(function (require) {
      *                                   of the the docs current version be sent to es?
      * @param  {String} body - HTTP request body
      */
-    return function (method, validateVersion, body) {
+    return function (method, validateVersion, body, ignore) {
       var doc = this;
       // straight assignment will causes undefined values
       var params = _.pick(this._state, ['id', 'type', 'index']);
       params.body = body;
-      params.ignore = [409];
+      params.ignore = ignore || [409];
 
       if (validateVersion && params.id) {
         params.version = doc._getVersion();
@@ -44,19 +45,22 @@ define(function (require) {
 
           // clear the queue and filter out the removed items, pushing the
           // unmatched ones back in.
-          pendingRequests.splice(0).filter(function (req) {
+          var respondTo = requestQueue.splice(0).filter(function (req) {
             var isDoc = req.source._getType() === 'doc';
             var keyMatches = isDoc && req.source._versionKey() === key;
 
-            if (keyMatches) {
-              // resolve the request with a copy of the response
-              req.defer.resolve(_.cloneDeep(fetchResp));
-              return;
+            // put some request back into the queue
+            if (!keyMatches) {
+              requestQueue.push(req);
+              return false;
             }
 
-            // otherwise, put the request back into the queue
-            pendingRequests.push(req);
+            return true;
           });
+
+          return courierFetch.fakeFetchThese(respondTo, respondTo.map(function () {
+            return _.cloneDeep(fetchResp);
+          }));
         });
 
         return resp._id;

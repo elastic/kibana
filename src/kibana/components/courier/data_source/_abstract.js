@@ -1,10 +1,8 @@
 define(function (require) {
-  var inherits = require('lodash').inherits;
   var _ = require('lodash');
-  var nextTick = require('utils/next_tick');
 
-  return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+  return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
+    var requestQueue = Private(require('components/courier/_request_queue'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var courierFetch = Private(require('components/courier/fetch/fetch'));
 
@@ -123,8 +121,7 @@ define(function (require) {
       var self = this;
 
       return new PromiseEmitter(function (resolve, reject, defer) {
-        var req = self._createRequest(defer);
-        pendingRequests.push(req);
+        self._createRequest(defer);
       }, handler);
     };
 
@@ -154,34 +151,40 @@ define(function (require) {
 
     /**
      * Fetch just this source ASAP
-     * @param {Function} cb - callback
+     *
+     * ONLY USE IF YOU WILL BE USING THE RESULTS
+     * provided by the returned promise, otherwise
+     * call #fetchQueued()
+     *
+     * @async
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
+      var req = _.first(self._myQueued());
 
-      var req = self._createRequest();
-      pendingRequests.push(req);
+      if (!req) {
+        req = self._createRequest();
+      }
 
-      // fetch just the requests for this source
-      courierFetch.these(self._getType(), pendingRequests.splice(0).filter(function (req) {
-        if (req.source !== self) {
-          pendingRequests.push(req);
-          return false;
-        }
-
-        return true;
-      }));
+      courierFetch.these([req]);
 
       return req.defer.promise;
+    };
+
+    /**
+     * Fetch all pending requests for this source ASAP
+     * @async
+     */
+    SourceAbstract.prototype.fetchQueued = function () {
+      return courierFetch.these(this._myQueued());
     };
 
     /**
      * Cancel all pending requests for this dataSource
      * @return {undefined}
      */
-    SourceAbstract.prototype.cancelPending = function () {
-      var pending = _.where(pendingRequests, { source: this});
-      _.pull.apply(_, [pendingRequests].concat(pending));
+    SourceAbstract.prototype.cancelQueued = function () {
+      _.invoke(this._myQueued(), 'abort');
     };
 
     /**
@@ -189,29 +192,20 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.destroy = function () {
-      this.cancelPending();
+      this.cancelQueued();
     };
 
     /*****
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._createRequest = function (defer) {
-      var self = this;
+    SourceAbstract.prototype._myQueued = function () {
+      var reqs = requestQueue.get(this._fetchStrategy);
+      return _.where(reqs, { source: this });
+    };
 
-      var req = {
-        source: self,
-        defer: defer || Promise.defer()
-      };
-
-      if (self.history) {
-        // latest history at the top
-        self.history.unshift(req);
-        // trim all entries beyond 19/20
-        self.history.splice(20);
-      }
-
-      return req;
+    SourceAbstract.prototype._createRequest = function () {
+      throw new Error('_createRequest must be implemented by subclass');
     };
 
     /**
@@ -233,7 +227,7 @@ define(function (require) {
       var current = this;
 
       // call the ittr and return it's promise
-      return (function ittr(resolve, reject) {
+      return (function ittr() {
         // itterate the _state object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
@@ -259,12 +253,19 @@ define(function (require) {
       }())
       .then(function () {
         if (type === 'search') {
+          // This is down here to prevent the circular dependency
+          var decorateQuery = Private(require('components/courier/data_source/_decorate_query'));
+
+          flatState.body = flatState.body || {};
+
           // defaults for the query
           if (!flatState.body.query) {
             flatState.body.query = {
               'match_all': {}
             };
           }
+
+          decorateQuery(flatState.body.query);
 
           var computedFields = flatState.index.getComputedFields();
           flatState.body.fields = computedFields.fields;
@@ -301,6 +302,12 @@ define(function (require) {
           // switch to filtered query if there are filters
           if (flatState.filters) {
             if (flatState.filters.length) {
+              _.each(flatState.filters, function (filter) {
+                if (filter.query) {
+                  decorateQuery(filter.query);
+                }
+              });
+
               flatState.body.query = {
                 filtered: {
                   query: flatState.body.query,
