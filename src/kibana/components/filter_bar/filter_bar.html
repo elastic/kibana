@@ -21,6 +21,9 @@
         <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o"></i>
         <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o"></i>
       </a>
+      <a class="action filter-toggle" ng-click="pinFilter(filter)">
+        <i ng-show="filter.meta.pinned" class="fa fa-fw fa-thumb-tack"></i>
+        <i ng-hide="filter.meta.pinned" class="fa fa-fw fa-thumb-tack  fa-rotate-270"></i>
       </a>
       <a class="action filter-invert" ng-click="invertFilter(filter)">
         <i ng-show="filter.meta.negate" class="fa fa-fw fa-search-plus"></i>
@@ -52,6 +55,12 @@
     </div>
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="pinAll(true)">Pin</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="pinAll(false)">Unpin</a></div>
     </div>
     <div class="filter-link">
       <div class="filter-description"><a ng-click="invertAll()">Invert</a></div>
