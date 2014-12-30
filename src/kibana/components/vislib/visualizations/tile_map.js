@@ -127,7 +127,6 @@ define(function (require) {
             map.addControl(new FitControl());
           }
 
-
           function fitBounds() {
             map.fitBounds(featureLayer.getBounds());
           }
@@ -290,14 +289,29 @@ define(function (require) {
         var div = L.DomUtil.create('div', 'tilemap-legend');
         var colors = self._attr.colors;
         var labels = [];
-        for (var i = 0; i < colors.length; i++) {
-          var vals = self._attr.cScale.invertExtent(colors[i]);
-          var strokecol = self.darkerColor(colors[i]);
+        var i = 0;
+        var vals;
+        var strokecol;
+
+        if (data.properties.min === data.properties.max) {
+          // 1 val for legend
+          vals = self._attr.cScale.invertExtent(colors[i]);
+          strokecol = self.darkerColor(colors[i]);
           labels.push(
             '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-            vals[0].toFixed(1) + ' &ndash; ' + vals[1].toFixed(1));
+            vals[0].toFixed(0));
+        } else {
+          // 3 to 5 vals for legend
+          for (i = 0; i < colors.length; i++) {
+            vals = self._attr.cScale.invertExtent(colors[i]);
+            strokecol = self.darkerColor(colors[i]);
+            labels.push(
+              '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
+              vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+          }
         }
         div.innerHTML = labels.join('<br>');
+
         return div;
       };
       legend.addTo(map);
@@ -500,14 +514,20 @@ define(function (require) {
      */
     TileMap.prototype.quantizeColorScale = function (count, min, max) {
       var self = this;
-      var greens = ['#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494'];
-      var reds =   ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-      var blues =  ['#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'];
-      var colors = self._attr.colors = reds;
+      var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
+      var reds3 = ['#fed976', '#fd8d3c', '#bd0026'];
+      var reds1 = ['#bd0026'];
+      var colors = self._attr.colors = reds5;
+
+      if (max - min < 3) {
+        colors = self._attr.colors = reds1;
+      } else if (max - min < 25) {
+        colors = self._attr.colors = reds3;
+      }
+
       var cScale = self._attr.cScale = d3.scale.quantize()
         .domain([min, max])
         .range(colors);
-
       if (max === min) {
         return colors[0];
       } else {
