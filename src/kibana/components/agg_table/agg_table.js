@@ -82,11 +82,13 @@ define(function (require) {
 
         function setFormattedColumns(table) {
           $scope.formattedColumns = table.columns.map(function (col, i) {
+            var agg = $scope.table.aggConfig(col);
+            var field = agg.field();
             var formattedColumn = {
-              title: col.title
+              title: col.title,
+              filterable: field && field.filterable
             };
 
-            var agg = $scope.table.aggConfig(col);
             var last = i === (table.columns.length - 1);
 
             if (last || (agg.schema.group === 'metrics')) {

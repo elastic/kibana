@@ -31,7 +31,7 @@ define(function (require) {
 
 
           if (contents instanceof AggConfigResult) {
-            if (contents.type === 'bucket') {
+            if (contents.type === 'bucket' && contents.aggConfig.field().filterable) {
               $cell = createAggConfigResultCell(contents);
             }
             contents = contents.toString();
