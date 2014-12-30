@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config) {
+  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config, Promise) {
     var _ = require('lodash');
     var angular = require('angular');
     var errors = require('errors');
@@ -197,7 +197,7 @@ define(function (require) {
         }
       };
 
-      self.save = function () {
+      self.prepBody = function () {
         var body = {};
 
         // serialize json fields
@@ -214,13 +214,32 @@ define(function (require) {
 
         // clear the indexPattern list cache
         getIds.clearCache();
+        return body;
 
-        // index the document
-        return docSource.doIndex(body)
-        .then(function (id) {
-          self.id = id;
-          return self.id;
+      };
+
+      // index the document
+      var finish =  function (id) {
+        self.id = id;
+        return self.id;
+      };
+
+      self.create = function () {
+        var body = self.prepBody();
+        return docSource.doCreate(body)
+        .then(finish).catch(function (err) {
+          var confirmMessage = 'Are you sure you want to overwrite this?';
+          if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
+            return docSource.doIndex(body).then(finish);
+          }
+          return Promise.resolve(false);
+
         });
+      };
+
+      self.save = function () {
+        var body = self.prepBody();
+        return docSource.doIndex(body).then(finish);
       };
 
       self.refreshFields = function () {

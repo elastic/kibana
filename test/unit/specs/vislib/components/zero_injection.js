@@ -234,7 +234,6 @@ define(function (require) {
       ]
     };
 
-    var ordered = {};
     var childrenObject = {
       children: []
     };
@@ -370,6 +369,7 @@ define(function (require) {
     describe('Order X Values', function () {
       var orderXValues;
       var results;
+      var numberedResults;
 
       beforeEach(function () {
         module('OrderedXKeysUtilService');
@@ -379,6 +379,7 @@ define(function (require) {
         inject(function (Private) {
           orderXValues = Private(require('components/vislib/components/zero_injection/ordered_x_keys'));
           results = orderXValues(multiSeriesData);
+          numberedResults = orderXValues(multiSeriesNumberedData);
         });
       });
 
@@ -422,6 +423,11 @@ define(function (require) {
         expect(results[2]).to.be('3');
         expect(results[3]).to.be('4');
         expect(results[4]).to.be('5');
+        expect(numberedResults[0]).to.be(1);
+        expect(numberedResults[1]).to.be(2);
+        expect(numberedResults[2]).to.be(3);
+        expect(numberedResults[3]).to.be(4);
+        expect(numberedResults[4]).to.be(5);
       });
     });
 

@@ -1,5 +1,6 @@
 define(function (require) {
   return function (Private) {
+    var _ = require('lodash');
     var sinon = require('sinon/sinon');
     var IndexedArray = require('utils/indexed_array/index');
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
@@ -25,7 +26,9 @@ define(function (require) {
         })
       });
       this.getFields = sinon.spy();
+      this.toIndexList = _.constant([pattern]);
     }
+
     return StubIndexPattern;
   };
 });

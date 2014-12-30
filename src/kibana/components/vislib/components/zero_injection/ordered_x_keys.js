@@ -20,7 +20,7 @@ define(function (require) {
       return _.chain(objKeys)
       .pairs()
       .sortBy(function (d) {
-        if (d[1].isDate) {
+        if (d[1].isDate || d[1].isOrdered) {
           return +d[0];
         }
         return d[1].index;
