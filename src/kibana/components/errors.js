@@ -209,10 +209,8 @@ define(function (require) {
    * than the required number of data points
    * @param {String} message - the message to provide with the error
    */
-  errors.NotEnoughData = function NotEnoughData() {
-    KbnError.call(this,
-      'There are not enough data points to render this chart',
-      errors.NotEnoughData);
+  errors.NotEnoughData = function NotEnoughData(message) {
+    KbnError.call(this, message, errors.NotEnoughData);
   };
   inherits(errors.NotEnoughData, KbnError);
 

@@ -265,13 +265,15 @@ define(function (require) {
 
     AreaChart.prototype.checkIfEnoughData = function () {
       var series = this.chartData.series;
+      var message = 'Area charts require more than one data point. Try adding ' +
+        'an X-Axis Aggregation';
 
       var notEnoughData = series.some(function (obj) {
         return obj.values.length < 2;
       });
 
       if (notEnoughData) {
-        throw new errors.NotEnoughData();
+        throw new errors.NotEnoughData(message);
       }
     };
 
