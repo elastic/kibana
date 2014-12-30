@@ -1,12 +1,21 @@
 define(function (require) {
   return function AggTypeMetricPercentilesProvider(Private) {
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var _ = require('lodash');
 
-    return new AggType({
+    var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
+    var getValueAggConfig = Private(require('components/agg_types/metrics/_get_value_agg_config'));
+
+    var valueProps = {
+      makeLabel: function () {
+        return this.key + 'th percentile of ' + this.fieldDisplayName();
+      }
+    };
+
+    return new MetricAggType({
       name: 'percentiles',
       title: 'Percentiles',
-      makeLabel: function (aggConfig) {
-        return 'Percentiles of ' + aggConfig.fieldDisplayName();
+      makeLabel: function (agg) {
+        return 'Percentiles of ' + agg.fieldDisplayName();
       },
       params: [
         {
@@ -14,9 +23,23 @@ define(function (require) {
           filterFieldTypes: 'number'
         },
         {
-          name: 'percents'
+          name: 'percents',
+          editor: require('text!components/agg_types/controls/percents.html'),
+          default: [1, 5, 25, 50, 75, 95, 99]
         }
-      ]
+      ],
+      getReplacementAggs: function (agg) {
+        var ValueAggConfig = getValueAggConfig(agg, valueProps);
+
+        return agg.params.percents.map(function (percent) {
+          return new ValueAggConfig(percent);
+        });
+      },
+      getValue: function (agg, bucket) {
+        return _.find(bucket[agg.parentId].values, function (value, key) {
+          return agg.key === parseFloat(key);
+        });
+      }
     });
   };
 });
