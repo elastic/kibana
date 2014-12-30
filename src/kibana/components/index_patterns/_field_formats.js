@@ -33,6 +33,20 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
 
+    function stringConverter(val) {
+      return formatField(val, function (val) {
+        if (_.isObject(val)) {
+          return JSON.stringify(val);
+        }
+        else if (val == null) {
+          return '';
+        }
+        else {
+          return '' + val;
+        }
+      });
+    }
+
     var formats = [
       {
         types: [
@@ -47,19 +61,7 @@ define(function (require) {
           'conflict'
         ],
         name: 'string',
-        convert: function (val) {
-          return formatField(val, function (val) {
-            if (_.isObject(val)) {
-              return JSON.stringify(val);
-            }
-            else if (val == null) {
-              return '';
-            }
-            else {
-              return '' + val;
-            }
-          });
-        }
+        convert: stringConverter
       },
       {
         types: [
@@ -106,7 +108,11 @@ define(function (require) {
         name: 'number',
         convert: function (val) {
           return formatField(val, function (val) {
-            return +val.toFixed(config.get('format:numberPrecision'));
+            if (_.isNumber(val)) {
+              return +val.toFixed(config.get('format:numberPrecision'));
+            } else {
+              return stringConverter(val);
+            }
           });
         }
       }
