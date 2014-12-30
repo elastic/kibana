@@ -4,10 +4,14 @@ define(function (require) {
 
     var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
     var getValueAggConfig = Private(require('components/agg_types/metrics/_get_value_agg_config'));
+    var ordinalSuffix = require('utils/ordinal_suffix');
+
+    require('components/agg_types/controls/_percent_list');
+    var percentEditor = require('text!components/agg_types/controls/percents.html');
 
     var valueProps = {
       makeLabel: function () {
-        return this.key + 'th percentile of ' + this.fieldDisplayName();
+        return ordinalSuffix(this.key) + ' percentile of ' + this.fieldDisplayName();
       }
     };
 
@@ -24,7 +28,7 @@ define(function (require) {
         },
         {
           name: 'percents',
-          editor: require('text!components/agg_types/controls/percents.html'),
+          editor: percentEditor,
           default: [1, 5, 25, 50, 75, 95, 99]
         }
       ],
