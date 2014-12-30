@@ -59,7 +59,7 @@ module.exports = function (grunt) {
 
   // include bundled plugins in the build
   var main = config.build.options.modules[0];
-  grunt.bundledPluginModuleIds.forEach(function (moduleId) {
+  grunt.bundled_plugin_module_ids.forEach(function (moduleId) {
     main.include.push(moduleId);
   });
 

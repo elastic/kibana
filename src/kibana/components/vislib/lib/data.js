@@ -39,7 +39,11 @@ define(function (require) {
       this.labels;
 
       if (this.type === 'series') {
-        this.labels = getLabels(data);
+        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
+          this.labels = [(this.get('yAxisLabel'))];
+        } else {
+          this.labels = getLabels(data);
+        }
       } else if (this.type === 'slices') {
         this.labels = this.pieNames();
       }

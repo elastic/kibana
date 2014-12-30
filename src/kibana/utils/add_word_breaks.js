@@ -2,6 +2,7 @@ define(function () {
   return function addWordBreaks(text, minLineLength) {
     var lineSize = 0;
     var newText = '';
+    var inHtmlTag = false;
 
     for (var i = 0, len = text.length; i < len; i++) {
       var chr = text.charAt(i);
@@ -16,8 +17,15 @@ define(function () {
         // natural line break, reset line size
         lineSize = 0;
         break;
+      case '<':
+        inHtmlTag = true;
+        break;
+      case '>':
+        inHtmlTag = false;
+        lineSize = 0;
+        break;
       default:
-        lineSize++;
+        if (!inHtmlTag) lineSize++;
         break;
       }
 

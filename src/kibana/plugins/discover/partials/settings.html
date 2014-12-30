@@ -8,7 +8,7 @@
       <select
         class="form-control"
         ng-model="opts.index"
-        ng-options="id as id for id in opts.indexPatternList"
+        ng-options="id as id for id in opts.indexPatternList | orderBy:'toString()'"
         ng-change="opts.changeIndexAndReload()">
       </select>
       <small>

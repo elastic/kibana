@@ -100,7 +100,8 @@ define(function (require) {
      * @return {object} the new params object
      */
     AggConfig.prototype.resetParams = function () {
-      return this.fillDefaults({});
+      // We need to ensure that row doesn't get overriden.
+      return this.fillDefaults(_.pick(this.params, 'row'));
     };
 
     AggConfig.prototype.write = function () {
@@ -108,6 +109,20 @@ define(function (require) {
     };
 
     AggConfig.prototype.createFilter = function (key) {
+      if (!_.isFunction(this.type.createFilter)) {
+        throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
+      }
+
+      var field = this.field();
+      var label = this.fieldDisplayName();
+      if (field && !field.filterable) {
+        var message = 'The "' + label + '" field can not be used for filtering.';
+        if (field.scripted) {
+          message = 'The "' + label + '" field is scripted and can not be used for filtering.';
+        }
+        throw new TypeError(message);
+      }
+
       return this.type.createFilter(this, key);
     };
 

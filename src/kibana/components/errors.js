@@ -52,6 +52,8 @@ define(function (require) {
    * @param {Object} resp - optional HTTP response
    */
   errors.RequestFailure = function RequestFailure(err, resp) {
+    err = err || false;
+
     KbnError.call(this,
       'Request to Elasticsearch failed: ' + JSON.stringify(resp || err.message),
       errors.RequestFailure);

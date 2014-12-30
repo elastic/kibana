@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var ConfigTemplate = require('utils/config_template');
+  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
   require('directives/config');
   require('components/courier/courier');
@@ -115,7 +116,11 @@ define(function (require) {
           }
         }
 
-        $scope.$watch('state.filters', function () {
+        $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (onlyDisabled(newFilters, oldFilters)) {
+            $state.save();
+            return;
+          }
           $scope.filterResults();
         });
 
@@ -126,7 +131,7 @@ define(function (require) {
         $scope.filterResults = function () {
           updateQueryOnRootSource();
           $state.save();
-          courier.fetch();
+          $scope.refresh();
         };
 
         $scope.save = function () {
@@ -135,10 +140,12 @@ define(function (require) {
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
-          .then(function () {
-            notify.info('Saved Dashboard as "' + dash.title + '"');
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+          .then(function (id) {
+            if (id) {
+              notify.info('Saved Dashboard as "' + dash.title + '"');
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+              }
             }
           })
           .catch(notify.fatal);
@@ -149,7 +156,7 @@ define(function (require) {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
             $state.save();
-            courier.fetch();
+            $scope.refresh();
           }
         });
 

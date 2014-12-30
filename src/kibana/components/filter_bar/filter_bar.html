@@ -2,12 +2,13 @@
   <form ng-submit="applyFilters(newFilters)">
   <ul class="list-unstyled">
     <li>Apply these filters?</li>
-    <li ng-repeat="filter in newFilters" class="filter"><input type="checkbox" ng-model="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
-    <li ng-if="changeTimeFilter" class="changeTimeFilter filter"><input type="checkbox" ng-model="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
+    <li ng-repeat="filter in newFilters" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
+    <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-checked="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
     <li><button class="btn btn-xs btn-primary">Apply Now</button> or <a ng-click="clearFilterBar();">Cancel</a></li>
   </ul>
   </form>
 </div>
+
 <div class="bar" ng-show="filters.length">
   <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
@@ -16,12 +17,16 @@
       <span>"{{ filter.meta.value }}"</span>
     </div>
     <div class="filter-actions">
-      <a class="filter-toggle" ng-click="toggleFilter(filter)">
-        <span ng-show="filter.meta.disabled">enable</span>
-        <span ng-hide="filter.meta.disabled">disable</span>
+      <a class="action filter-toggle" ng-click="toggleFilter(filter)">
+        <i ng-show="filter.meta.disabled" class="fa fa-square-o"></i>
+        <i ng-hide="filter.meta.disabled" class="fa fa-check-square-o"></i>
       </a>
-      <a class="filter-remove" ng-click="removeFilter(filter)">
-        remove
+      <a class="action filter-invert" ng-click="invertFilter(filter)">
+        <i ng-show="filter.meta.negate" class="fa fa-search-plus"></i>
+        <i ng-hide="filter.meta.negate" class="fa fa-search-minus"></i>
+      </a>
+      <a class="action filter-remove" ng-click="removeFilter(filter)">
+        <i class="fa fa-trash"></i>
       </a>
     </div>
   </div>
@@ -35,6 +40,7 @@
     </div>
   </div>
 </div>
+
 <div class="bar bar-condensed" ng-show="filters.length && showFilterActions">
   <div class="filter-actions-all">
     <div class="filter-link">
@@ -45,6 +51,9 @@
     </div>
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="invertAll()">Invert</a></div>
     </div>
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll()">Toggle</a></div>
