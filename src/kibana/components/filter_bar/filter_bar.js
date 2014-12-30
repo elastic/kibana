@@ -5,14 +5,7 @@ define(function (require) {
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
-  var toggleFilter = require('components/filter_bar/lib/toggleFilter');
-  var toggleAll = require('components/filter_bar/lib/toggleAll');
-  var pinFilter = require('components/filter_bar/lib/pinFilter');
-  var pinAll = require('components/filter_bar/lib/pinAll');
-  var invertFilter = require('components/filter_bar/lib/invertFilter');
-  var invertAll = require('components/filter_bar/lib/invertAll');
-  var removeFilter = require('components/filter_bar/lib/removeFilter');
-  var removeAll = require('components/filter_bar/lib/removeAll');
+  var filterActions = require('components/filter_bar/lib/filterActions');
 
   var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
 
@@ -30,6 +23,7 @@ define(function (require) {
         state: '='
       },
       link: function ($scope, $el, attrs) {
+        filterActions($scope).apply();
 
         $scope.applyFilters = function (filters) {
           var newFilters = filterAppliedAndUnwrap(filters);
@@ -86,15 +80,6 @@ define(function (require) {
             $scope.filters = results;
           });
         });
-
-        $scope.toggleFilter = toggleFilter($scope);
-        $scope.toggleAll = toggleAll($scope);
-        $scope.pinFilter = pinFilter($scope);
-        $scope.pinAll = pinAll($scope);
-        $scope.invertFilter = invertFilter($scope);
-        $scope.invertAll = invertAll($scope);
-        $scope.removeFilter = removeFilter($scope);
-        $scope.removeAll = removeAll($scope);
       }
     };
   });
