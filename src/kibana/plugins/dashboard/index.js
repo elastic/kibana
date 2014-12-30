@@ -131,7 +131,7 @@ define(function (require) {
         $scope.filterResults = function () {
           updateQueryOnRootSource();
           $state.save();
-          courier.fetch();
+          $scope.refresh();
         };
 
         $scope.save = function () {
@@ -156,7 +156,7 @@ define(function (require) {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
             $state.save();
-            courier.fetch();
+            $scope.refresh();
           }
         });
 

@@ -1,174 +1,92 @@
 define(function (require) {
-  return function fetchService(Private, es, Promise, Notifier, sessionId, configFile) {
+  return function fetchService(Private, Promise) {
     var _ = require('lodash');
-    var errors = require('errors');
-    var moment = require('moment');
 
-    var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
-    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var strategies = this.strategies = {
-      doc: docStrategy,
-      search: searchStrategy
+      doc: Private(require('components/courier/fetch/strategy/doc')),
+      search: Private(require('components/courier/fetch/strategy/search'))
     };
 
-    var RequestErrorHandler = Private(require('components/courier/fetch/_request_error_handler'));
-    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
+    var fetchThese = Private(require('components/courier/fetch/_fetch_these'));
 
-    var notify = new Notifier({
-      location: 'Courier Fetch'
-    });
+    var callResponseHandlers = Private(require('components/courier/fetch/_call_response_handlers'));
+    var INCOMPLETE = Private(require('components/courier/fetch/_req_status')).INCOMPLETE;
 
-    var fetchThese = function (strategy, requests, reqErrHandler) {
-      var all, body;
-
-      // dedupe requests
-      var uniqs = {};
-      all = requests.splice(0).filter(function (req) {
-        if (req.source.activeFetchCount) {
-          req.source.activeFetchCount += 1;
-        } else {
-          req.source.activeFetchCount = 1;
-        }
-
-        req.moment = moment();
-
-        var iid = req.source._instanceid;
-        if (!uniqs[iid]) {
-          // this request is unique so far
-          uniqs[iid] = req;
-          // keep the request
-          return true;
-        }
-
-        // the source was requested at least twice
-        var uniq = uniqs[iid];
-        if (uniq._merged) {
-          // already setup the merged list
-          uniq._merged.push(req);
-        } else {
-          // put all requests into this array and itterate them on response
-          uniq._merged = [uniq, req];
-        }
-      });
-
-      return Promise.map(all, _.limit(strategy.getSourceStateFromRequest, 1))
-      .then(function (states) {
-        // all requests must have been disabled
-        if (!states.length) return Promise.resolve();
-
-        body = strategy.convertStatesToBody(states);
-
-        return es[strategy.clientMethod]({
-          timeout: configFile.shard_timeout,
-          preference: sessionId,
-          body: body
-        })
-        .then(function (resp) {
-          var sendResponse = function (req, resp) {
-            if (resp.timed_out) {
-              notify.warning(new errors.SearchTimeout());
-            }
-            req.complete = true;
-            req.resp = resp;
-            req.ms = req.moment.diff() * -1;
-            req.source.activeFetchCount -= 1;
-
-            if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));
-            else strategy.resolveRequest(req, resp);
-          };
-
-          strategy.getResponses(resp).forEach(function (resp) {
-            var req = all.shift();
-            var state = states.shift();
-            if (!req._merged) {
-              req.state = state;
-              sendResponse(req, resp);
-            } else {
-              req._merged.forEach(function (mergedReq) {
-                mergedReq.state = state;
-                // HEY *HEY* There was a _.cloneDeep(resp) down there, it was super slow
-                // I removed it, someone tell me if there are serious consequences to that.
-                sendResponse(mergedReq, resp);
-              });
-            }
-          });
-
-          // pass the response along to the next promise
-          return resp;
-        })
-        .catch(function (err) {
-          var sendFailure = function (req) {
-            req.source.activeFetchCount -= 1;
-            reqErrHandler.handle(req, err);
-          };
-
-          all.forEach(function (req) {
-            if (!req._merged) sendFailure(req);
-            else req._merged.forEach(sendFailure);
-          });
-          throw err;
-        });
-      }, notify.fatal);
-    };
-
-    var fetchPending = function (strategy) {
-      var requests = strategy.getPendingRequests(pendingRequests);
+    function fetchQueued(strategy) {
+      var requests = requestQueue.get(strategy);
       if (!requests.length) return Promise.resolve();
-      else return fetchThese(strategy, requests, new RequestErrorHandler());
-    };
-
-    var fetchASource = function (strategy, source) {
-      var defer = Promise.defer();
-      fetchThese(strategy, [
-        {
-          source: source,
-          defer: defer
-        }
-      ], new RequestErrorHandler());
-      return defer.promise;
-    };
+      else return fetchThese(requests);
+    }
 
     /**
      * Fetch all pending docs that are ready to be fetched
-     * @param {Courier} courier - The courier to read the pending
-     *                          requests from
      * @async
      */
-    this.docs = _.partial(fetchPending, docStrategy);
+    this.docs = _.partial(fetchQueued, strategies.doc);
 
     /**
      * Fetch all pending search requests
-     * @param {Courier} courier - The courier to read the pending
-     *                          requests from
      * @async
      */
-    this.searches = _.partial(fetchPending, searchStrategy);
+    this.searches = _.partial(fetchQueued, strategies.search);
+
+
+    function fetchASource(source, strategy) {
+      strategy = strategy || strategies[source._getType()];
+      var defer = Promise.defer();
+
+      fetchThese([
+        source._createRequest(defer.resolve)
+      ]);
+
+      return defer.promise;
+    }
 
     /**
      * Fetch a single doc source
      * @param {DocSource} source - The DocSource to request
      * @async
      */
-    this.doc = _.partial(fetchASource, docStrategy);
+    this.doc = fetchASource;
 
     /**
      * Fetch a single search source
      * @param {SearchSource} source - The SearchSource to request
      * @async
      */
-    this.search = _.partial(fetchASource, searchStrategy);
+    this.search = fetchASource;
 
     /**
-     * Fetch a list of pendingRequests, which is already filtered
-     * @param {string} type - the type name for the sources in the requests
+     * Fetch a list of requests
      * @param {array} reqs - the requests to fetch
+     * @async
      */
-    this.these = function (type, reqs) {
-      return fetchThese(
-        strategies[type],
-        reqs,
-        new RequestErrorHandler()
-      );
+    this.these = fetchThese;
+
+    /**
+     * Send responses to a list of requests, used when requests
+     * should be skipped (like when a doc is updated with an index).
+     *
+     * This logic is a simplified version of what fetch_these does, and
+     * could have been added elsewhere, but I would rather the logic be
+     * here than outside the courier/fetch module.
+     *
+     * @param {array[Request]} requests - the list of requests to respond to
+     * @param {array[any]} responses - the list of responses for each request
+     */
+    this.fakeFetchThese = function (requests, responses) {
+      return Promise.map(requests, function (req) {
+        return req.start();
+      })
+      .then(function () {
+        return callResponseHandlers(requests, responses);
+      })
+      .then(function (requestStates) {
+        if (_.contains(requestStates, INCOMPLETE)) {
+          throw new Error('responding to requests did not complete!');
+        }
+      });
     };
   };
 });

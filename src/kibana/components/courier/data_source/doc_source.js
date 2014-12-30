@@ -1,15 +1,10 @@
 define(function (require) {
   var _ = require('lodash');
-  var errors = require('errors');
-
-  var inherits = require('lodash').inherits;
 
   return function DocSourceFactory(Private, Promise, es, sessionStorage) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
-
-    var VersionConflict = errors.VersionConflict;
-    var RequestFailure = errors.RequestFailure;
+    var DocRequest = Private(require('components/courier/fetch/request/doc'));
 
     _(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {
@@ -22,6 +17,10 @@ define(function (require) {
     /*****
      * PUBLIC API
      *****/
+
+    DocSource.prototype._createRequest = function (defer) {
+      return new DocRequest(this, defer);
+    };
 
     /**
      * List of methods that is turned into a chainable API in the constructor

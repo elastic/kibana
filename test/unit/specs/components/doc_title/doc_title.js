@@ -34,19 +34,15 @@ define(function (require) {
 
     describe('setup', function () {
       it('resets the title when a route change begins', function () {
-        var call;
         var spy = $rootScope.$on;
-        for (var i = 0; i < spy.callCount; i++) {
-          if (spy.args[i][0] === '$routeChangeStart') {
-            call = spy.getCall(i);
-            break;
-          }
+
+        var found = spy.args.some(function (args) {
+          return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
+        });
+
+        if (!found) {
+          throw new Error('$rootScope.$on not called');
         }
-
-        if (!call) throw new Error('$rootScope.$on not called');
-
-        expect(call.args[0]).to.be('$routeChangeStart');
-        expect(call.args[1]).to.be(docTitle.reset);
       });
     });
 

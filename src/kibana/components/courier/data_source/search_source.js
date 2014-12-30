@@ -2,11 +2,9 @@ define(function (require) {
 
   return function SearchSourceFactory(Promise, Private) {
     var _ = require('lodash');
-    var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
-
-    var FetchFailure = errors.FetchFailure;
-    var RequestFailure = errors.RequestFailure;
+    var SearchRequest = Private(require('components/courier/fetch/request/search'));
+    var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
 
     _(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
@@ -125,6 +123,18 @@ define(function (require) {
       return normal;
     };
 
+    SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
+      var self = this;
+      return Promise.try(function addRequest() {
+        var req = new SegmentedRequest(self, Promise.defer(), initFunction);
+
+        // return promises created by the completion handler so that
+        // errors will bubble properly
+        return req.defer.promise.then(addRequest);
+      });
+    };
+
+
     /******
      * PRIVATE APIS
      ******/
@@ -135,6 +145,19 @@ define(function (require) {
      */
     SearchSource.prototype._getType = function () {
       return 'search';
+    };
+
+    /**
+     * Create a common search request object, which should
+     * be put into the pending request queye, for this search
+     * source
+     *
+     * @param {Deferred} defer - the deferred object that should be resolved
+     *                         when the request is complete
+     * @return {SearchRequest}
+     */
+    SearchSource.prototype._createRequest = function (defer) {
+      return new SearchRequest(this, defer);
     };
 
     /**

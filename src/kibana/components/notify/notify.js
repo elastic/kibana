@@ -22,7 +22,7 @@ define(function (require) {
 
   module.run(function ($timeout) {
     // provide alternate methods for setting timeouts, which will properly trigger digest cycles
-    rootNotifier._setTimerFns($timeout, $timeout.cancel);
+    Notifier.setTimerFns($timeout, $timeout.cancel);
   });
 
   /**
