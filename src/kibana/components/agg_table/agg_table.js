@@ -86,7 +86,7 @@ define(function (require) {
             var field = agg.field();
             var formattedColumn = {
               title: col.title,
-              filterable: field && field.filterable
+              filterable: field && field.filterable && agg.schema.group === 'buckets'
             };
 
             var last = i === (table.columns.length - 1);
