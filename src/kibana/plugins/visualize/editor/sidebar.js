@@ -22,6 +22,11 @@ define(function (require) {
         $scope.dontApply = function () {
           $scope.hideErrors = false;
         };
+        $scope.$watch('vis.dirtyParams', function () {
+          if (!$scope.vis.dirtyAggs) {
+            $scope.apply();
+          }
+        });
       }
     };
   });

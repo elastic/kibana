@@ -64,12 +64,12 @@
 
       <kbn-tooltip text="Save Visualization" placement="bottom" append-to-body="1">
         <!-- normal save -->
-        <button ng-if="!editableVis.dirty" ng-click="toggleSave()">
+        <button ng-if="!editableVis.dirtyAggs" ng-click="toggleSave()">
           <i class="fa fa-save"></i>
         </button>
 
         <!-- save stub with tooltip -->
-        <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving">
+        <button disabled ng-if="editableVis.dirtyAggs" tooltip="Apply or Discard your changes before saving">
           <i class="fa fa-save"></i>
         </button>
       </kbn-tooltip>
