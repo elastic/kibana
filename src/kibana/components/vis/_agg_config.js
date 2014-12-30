@@ -185,6 +185,14 @@ define(function (require) {
       );
     };
 
+    AggConfig.prototype.getReplacements = function () {
+      return this.type.getReplacementAggs && this.type.getReplacementAggs(this);
+    };
+
+    AggConfig.prototype.getValue = function (bucket) {
+      return this.type.getValue(this, bucket);
+    };
+
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
       return this.type.makeLabel(this);

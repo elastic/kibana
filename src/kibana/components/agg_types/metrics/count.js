@@ -8,6 +8,9 @@ define(function (require) {
       hasNoDsl: true,
       makeLabel: function (aggConfig) {
         return 'Count of documents';
+      },
+      getValue: function (agg, bucket) {
+        return bucket.doc_count;
       }
     });
   };
