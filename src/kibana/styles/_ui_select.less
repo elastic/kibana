@@ -1,3 +1,49 @@
-.ui-select-multiple.ui-select-bootstrap .ui-select-match-item {
-  margin: 1px auto;
+@import "../bower_components/selectize/dist/less/selectize.bootstrap3.less";
+
+@selectize-border: @input-border-width solid @input-border;
+@selectize-padding-item-y: 0;
+
+.selectize-input {
+  .transition(~"border-color ease-in-out .15s, box-shadow ease-in-out .15s");
+
+  &.focus {
+    .selectize-box-shadow(none);
+  }
+}
+
+.selectize-control.multi .selectize-input {
+  vertical-align: top;
+
+  // show arrow on multi select
+  &:after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: @selectize-arrow-offset;
+    margin-top: round(-@selectize-arrow-size / 2);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: @selectize-arrow-size @selectize-arrow-size 0 @selectize-arrow-size;
+    border-color: @selectize-arrow-color transparent transparent transparent;
+  }
+
+  // hide arrow when item selection is open
+  &.dropdown-active:after {
+    content: none;
+  }
+}
+
+.selectize-control.multi .selectize-input.has-items {
+  // hode arrow on multi select when items are selected
+  &:after {
+    content: none;
+  }
+}
+
+.selectize-control.plugin-remove_button {
+  [data-value] .remove {
+    top: -1px;
+  }
 }
