@@ -688,17 +688,13 @@ define(function (require) {
       });
 
       it('should return an array of objects', function () {
-        console.log(results);
-        expect(_.isArray(results.rows[0].series[0].values)).to.be(true);
-        expect(_.isArray(results.rows[1].series[0].values)).to.be(true);
-        expect(_.isArray(results.rows[2].series[0].values)).to.be(true);
-        expect(_.isArray(results.rows[3].series[0].values)).to.be(true);
-        expect(_.isArray(results.rows[4].series[0].values)).to.be(true);
+        results.rows.forEach(function (row) {
+          expect(_.isArray(row.series[0].values)).to.be(true);
+        });
       });
 
       it('should return ordered x values', function () {
         var values = results.rows[0].series[0].values;
-        console.log(values);
         expect(values[0].x).to.be.lessThan(values[1].x);
         expect(values[1].x).to.be.lessThan(values[2].x);
         expect(values[2].x).to.be.lessThan(values[3].x);
