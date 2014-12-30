@@ -95,7 +95,18 @@ define(function (require) {
         name: 'kilobytes',
         convert: function (val) {
           return formatField(val, function (val) {
-            return (val / 1024).toFixed(3) + ' kb';
+            return (val / 1024).toFixed(config.get('format:numberPrecision')) + ' kb';
+          });
+        }
+      },
+      {
+        types: [
+          'number'
+        ],
+        name: 'number',
+        convert: function (val) {
+          return formatField(val, function (val) {
+            return +val.toFixed(config.get('format:numberPrecision'));
           });
         }
       }
@@ -123,7 +134,7 @@ define(function (require) {
     formats.byName = _.indexBy(formats, 'name');
 
     formats.defaultByType = {
-      number:     formats.byName.string,
+      number:     formats.byName.number,
       date:       formats.byName.date,
       boolean:    formats.byName.string,
       ip:         formats.byName.ip,
