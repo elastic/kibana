@@ -1,8 +1,8 @@
 define(function (require) {
   return function AggTypeMetricAvgProvider(Private) {
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
 
-    return new AggType({
+    return new MetricAggType({
       name: 'avg',
       title: 'Average',
       makeLabel: function (aggConfig) {

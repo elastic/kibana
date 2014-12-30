@@ -1,11 +1,11 @@
 define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
 
-    return new AggType({
+    return new BucketAggType({
       name: 'terms',
       title: 'Terms',
       makeLabel: function (aggConfig) {
