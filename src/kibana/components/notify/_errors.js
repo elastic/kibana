@@ -1,7 +1,6 @@
 define(function (require) {
   var errors = {};
   var _ = require('lodash');
-  var inherits = require('lodash').inherits;
 
   var canStack = (function () {
     var err = new Error();
@@ -9,6 +8,7 @@ define(function (require) {
   }());
 
   // abstract error class
+  _(KibanaError).inherits(Error);
   function KibanaError(msg, constructor) {
     this.message = msg;
 
@@ -24,7 +24,6 @@ define(function (require) {
     }
   }
   errors.KibanaError = KibanaError;
-  inherits(KibanaError, Error);
 
   /**
    * Map of error text for different error types
@@ -66,7 +65,7 @@ define(function (require) {
       'Unable to load ' + modules + ' because of ' + explain + '.',
       errors.ScriptLoadFailure);
   };
-  inherits(errors.ScriptLoadFailure, KibanaError);
+  _(errors.ScriptLoadFailure).inherits(KibanaError);
 
   return errors;
 });

@@ -48,7 +48,9 @@ define(function (require) {
       }, cb);
     };
     Promise.map = function (arr, fn) {
-      return Promise.all(arr.map(fn));
+      return Promise.all(arr.map(function (i, el, list) {
+        return Promise.try(fn, [i, el, list]);
+      }));
     };
     Promise.is = function (obj) {
       // $q doesn't create instances of any constructor, promises are just objects with a then function

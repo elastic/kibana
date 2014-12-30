@@ -144,7 +144,10 @@ define(function (require) {
       });
 
       $scope.$watch('state.filters', function (newFilters, oldFilters) {
-        if (onlyDisabled(newFilters, oldFilters)) return;
+        if (onlyDisabled(newFilters, oldFilters)) {
+          $state.save();
+          return;
+        }
         if (newFilters !== oldFilters) $scope.fetch();
       });
 
@@ -188,7 +191,7 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', $state.filters);
       if (!$scope.linked) searchSource.set('query', $state.query);
-      searchSource.fetch();
+      courier.fetch();
     };
 
 

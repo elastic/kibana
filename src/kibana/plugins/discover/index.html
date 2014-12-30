@@ -99,7 +99,6 @@
                 </p>
 
                 <p>
-
                   <h4>Examples:</h4>
                   Find requests that contain the number 200, in any field:
                   <pre>200</pre>
@@ -131,7 +130,6 @@
 
           <!-- result -->
           <div class="results" ng-show="resultState === 'ready'">
-
             <div class="discover-timechart" ng-if="opts.timefield">
               <center class="small">
                 <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
@@ -145,7 +143,7 @@
                 </select> -->
               </center>
 
-              <div ng-show="searchSource.activeFetchCount" class="discover-overlay">
+              <div ng-show="fetchStatus.hitCount === 0" class="discover-overlay vis-overlay">
                 <div class="spinner large"> </div>
               </div>
 

@@ -1,6 +1,5 @@
 define(function (require) {
   return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter, Notifier) {
-    var _ = require('lodash');
     var SearchSource = Private(require('components/courier/data_source/search_source'));
 
     var notify = new Notifier({ location: 'Root Search Source' });
