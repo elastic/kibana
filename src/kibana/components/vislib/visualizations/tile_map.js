@@ -70,7 +70,7 @@ define(function (require) {
             mapCenter = self._attr.lastCenter;
           }
 
-          var mapLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
+          var tileLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
@@ -80,7 +80,7 @@ define(function (require) {
           var mapOptions = {
             minZoom: 2,
             maxZoom: 16,
-            layers: mapLayer,
+            layers: tileLayer,
             center: mapCenter,
             zoom: mapZoom,
             continuousWorld: true,
@@ -92,6 +92,10 @@ define(function (require) {
 
           var map = L.map(div[0], mapOptions);
           self.maps.push(map);
+
+          tileLayer.on('tileload', function (e) {
+            saturateTiles();
+          });
 
           map.on('zoomend dragend', function () {
             mapZoom = self._attr.lastZoom = map.getZoom();
@@ -127,10 +131,16 @@ define(function (require) {
             map.addControl(new FitControl());
           }
 
-
           function fitBounds() {
             map.fitBounds(featureLayer.getBounds());
           }
+
+          function saturateTiles() {
+            if (!self._attr.isDesaturated) {
+              $('img.leaflet-tile-loaded').addClass('filters-off');
+            }
+          }
+
         });
       };
     };
