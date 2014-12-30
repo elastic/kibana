@@ -99,6 +99,7 @@ define(function (require) {
     };
 
     SegmentedReq.prototype.complete = function () {
+      this._reportStatus();
       this._handle.emit('complete');
       return SearchReq.prototype.complete.call(this);
     };
