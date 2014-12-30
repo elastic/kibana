@@ -276,8 +276,6 @@ define(function (require) {
     };
 
     $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
-      // flag used to set the scope based on data from segmentedFetch
-      var resetRows = true;
 
       function flushResponseData() {
         $scope.hits = 0;
@@ -285,6 +283,8 @@ define(function (require) {
         $scope.rows = [];
         $scope.rows.fieldCounts = {};
       }
+
+      if (!$scope.rows) flushResponseData();
 
       var sort = $state.sort;
       var timeField = $scope.searchSource.get('index').timeFieldName;
@@ -320,19 +320,11 @@ define(function (require) {
         $scope.fetchStatus = status;
       });
 
-      segmented.on('first', function (resp) {
-        if (!$scope.rows) {
-          flushResponseData();
-        }
+      segmented.on('first', function () {
+        flushResponseData();
       });
 
       segmented.on('segment', notify.timed('handle each segment', function (resp) {
-        if (resetRows) {
-          if (!resp.hits.total) return;
-          resetRows = false;
-          flushResponseData();
-        }
-
         if (resp._shards.failed > 0) {
           $scope.failures = _.union($scope.failures, resp._shards.failures);
           $scope.failures = _.uniq($scope.failures, false, function (failure) {
@@ -387,16 +379,13 @@ define(function (require) {
       }));
 
       segmented.on('mergedSegment', function (merged) {
-        if (!resetRows) {
-          $scope.mergedEsResp = merged;
-        }
+        $scope.mergedEsResp = merged;
       });
 
       segmented.on('complete', function () {
-        if (resetRows) {
+        if ($scope.fetchStatus.hitCount === 0) {
           flushResponseData();
         }
-        $scope.fetchStatus = false;
       });
     }).catch(notify.fatal);
 
