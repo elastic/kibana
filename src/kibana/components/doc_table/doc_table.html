@@ -1,4 +1,23 @@
-<table class="kbn-table table" ng-if="indexPattern">
+<paginate ng-if="!infiniteScroll" list="hits" per-page="50">
+  <table class="kbn-table table" ng-if="indexPattern">
+    <thead
+      kbn-table-header
+      columns="persist.columns"
+      index-pattern="indexPattern"
+      sorting="persist.sorting">
+    </thead>
+    <tbody>
+      <tr ng-repeat="row in page|limitTo:limit track by row._index+row._id"
+        kbn-table-row="row"
+        columns="persist.columns"
+        sorting="persist.sorting"
+        index-pattern="indexPattern"
+        class="discover-table-row"></tr>
+    </tbody>
+  </table>
+</paginate>
+
+<table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
   <thead
     kbn-table-header
     columns="persist.columns"
@@ -14,4 +33,4 @@
       class="discover-table-row"></tr>
   </tbody>
 </table>
-<kbn-infinite-scroll more="addRows"></kbn-infinite-scroll>
+<kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>

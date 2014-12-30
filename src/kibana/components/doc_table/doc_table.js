@@ -18,6 +18,7 @@ define(function (require) {
         searchSource: '=',
         sorting: '=',
         columns: '=',
+        infiniteScroll: '=?',
         filter: '=?',
       },
       link: function ($scope) {
