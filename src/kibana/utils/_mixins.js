@@ -13,7 +13,7 @@ define(function (require) {
   _.mixin(require('lodash-deep'));
   _.mixin({
     inherits: function (Sub, Super) {
-      Sub.prototype = _.create(Super.prototype, { 'constructor': Super });
+      Sub.prototype = _.create(Super.prototype, { 'constructor': Sub });
       Sub.Super = Super;
     },
     remove: function (array, index) {

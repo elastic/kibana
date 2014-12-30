@@ -1,23 +1,25 @@
 define(function (require) {
-  return function SearchLooperService(Private, Promise) {
-    var errors = require('errors');
+  return function SearchLooperService(Private, Promise, Notifier) {
     var fetch = Private(require('components/courier/fetch/fetch'));
-    var Looper = Private(require('components/courier/looper/_looper'));
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
+    var requestQueue = Private(require('components/courier/_request_queue'));
 
-    // track the currently executing search resquest
-    var _activeAutoSearch = null;
+    var Looper = Private(require('components/courier/looper/_looper'));
+    var notif = new Notifier({ location: 'Search Looper' });
 
     /**
      * The Looper which will manage the doc fetch interval
      * @type {Looper}
      */
     var searchLooper = new Looper(null, function () {
-      // fatal if refreshes take longer then the refresh interval
-      if (_activeAutoSearch) Promise.reject(new errors.HastyRefresh());
-      return _activeAutoSearch = fetch.searches().finally(function (res) {
-        _activeAutoSearch = null;
-      });
-    }).start();
+      return fetch.these(
+        requestQueue.getInactive(searchStrategy)
+      );
+    });
+
+    searchLooper.onHastyLoop = function () {
+      notif.warning('Skipping search attempt because previous search request has not completed');
+    };
 
     return searchLooper;
   };

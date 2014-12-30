@@ -1,20 +1,23 @@
 define(function (require) {
   var errors = require('errors');
-
+  var _ = require('lodash');
+  
   require('services/es');
   require('services/promises');
   require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
-  .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
+  .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {
     function Courier() {
       var self = this;
 
       var DocSource = Private(require('components/courier/data_source/doc_source'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
-      var pendingRequests = Private(require('components/courier/_pending_requests'));
+      var requestQueue = Private(require('components/courier/_request_queue'));
+      var errorHandlers = Private(require('components/courier/_error_handlers'));
 
+      var fetch = Private(require('components/courier/fetch/fetch'));
       var docLooper = self.docLooper = Private(require('components/courier/looper/doc'));
       var searchLooper = self.searchLooper = Private(require('components/courier/looper/search'));
 
@@ -29,7 +32,6 @@ define(function (require) {
       self.SearchSource = SearchSource;
 
       var HastyRefresh = errors.HastyRefresh;
-      var Abort = errors.Abort;
 
       /**
        * update the time between automatic search requests
@@ -47,6 +49,7 @@ define(function (require) {
        */
       self.start = function () {
         searchLooper.start();
+        docLooper.start();
         return this;
       };
 
@@ -56,7 +59,9 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        return searchLooper.run();
+        fetch.searches().then(function () {
+          searchLooper.restart();
+        });
       };
 
 
@@ -105,15 +110,26 @@ define(function (require) {
         searchLooper.stop();
         docLooper.stop();
 
-        [].concat(pendingRequests.splice(0), this._errorHandlers.splice(0))
-        .forEach(function (req) {
-          req.defer.reject(new Abort());
-        });
+        _.invoke(requestQueue, 'abort');
 
-        if (pendingRequests.length) {
+        if (requestQueue.length) {
           throw new Error('Aborting all pending requests failed.');
         }
       };
+
+      // Listen for refreshInterval changes
+      $rootScope.$watch('timefilter.refreshInterval', function () {
+        var refreshValue = _.deepGet($rootScope, 'timefilter.refreshInterval.value');
+        if (_.isNumber(refreshValue)) {
+          self.fetchInterval(refreshValue);
+        } else {
+          self.fetchInterval(0);
+        }
+      });
+
+      var onFatalDefer = Promise.defer();
+      onFatalDefer.promise.then(self.close);
+      Notifier.fatalCallbacks.push(onFatalDefer.resolve);
     }
 
     return new Courier();

@@ -102,6 +102,15 @@ define(function (require) {
     });
   }
 
+  // to be notified when the first fatal error occurs, push a function into this array.
+  Notifier.fatalCallbacks = [];
+
+  // set the timer functions that all notification managers will use
+  Notifier.setTimerFns = function (set, clear) {
+    setTO = set;
+    clearTO = clear;
+  };
+
   // simply a pointer to the global notif list
   Notifier.prototype._notifs = notifs;
 
@@ -163,6 +172,7 @@ define(function (require) {
    */
   Notifier.prototype._showFatal = function (err) {
     if (firstFatal) {
+      _.callEach(Notifier.fatalCallbacks);
       firstFatal = false;
       window.addEventListener('hashchange', function () {
         window.location.reload();
@@ -246,12 +256,6 @@ define(function (require) {
       log.apply(null, args);
     };
   }
-
-  // set the timer functions that all notification managers will use
-  Notifier.prototype._setTimerFns = function (set, clear) {
-    setTO = set;
-    clearTO = clear;
-  };
 
   // general functionality used by .event() and .lifecycle()
   function createGroupLogger(type, opts) {
