@@ -389,6 +389,8 @@ define(function (require) {
         if ($scope.fetchStatus.hitCount === 0) {
           flushResponseData();
         }
+
+        $scope.fetchStatus = null;
       });
     }).catch(notify.fatal);
 
