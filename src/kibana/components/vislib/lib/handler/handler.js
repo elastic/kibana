@@ -178,14 +178,18 @@ define(function (require) {
       .attr('class', 'visualize-error chart error');
 
       if (message === 'No results found') {
-        div.append('h2')
-        .html('<i class="fa fa-meh-o"></i>');
+        div.append('div')
+        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+        .append('div').attr('class', 'item top')
+        .append('div').attr('class', 'item')
+        .append('h2').html('<i class="fa fa-meh-o"></i>')
+        .append('h4').text(message);
+
+        div.append('div').attr('class', 'item bottom');
+        return div;
       }
 
-      div.append('h4')
-      .text(message);
-
-      return div;
+      return div.append('h4').text(message);
     };
 
     /**
