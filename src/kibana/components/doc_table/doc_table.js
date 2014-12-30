@@ -65,10 +65,11 @@ define(function (require) {
           $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
           // Set the watcher after initialization
-          $scope.$watch('persist.sorting', function (sorting) {
-            if (!sorting) return;
-            $scope.searchSource.sort(getSort(sorting, $scope.indexPattern));
-            $scope.searchSource.fetch();
+          $scope.$watch('persist.sorting', function (newSort, oldSort) {
+            // Don't react if sort values didn't really change
+            if (newSort === oldSort) return;
+            $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
+            $scope.searchSource.fetchQueued();
           });
 
           // TODO: we need to have some way to clean up result requests
