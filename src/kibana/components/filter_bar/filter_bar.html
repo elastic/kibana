@@ -18,15 +18,16 @@
     </div>
     <div class="filter-actions">
       <a class="action filter-toggle" ng-click="toggleFilter(filter)">
-        <i ng-show="filter.meta.disabled" class="fa fa-square-o"></i>
-        <i ng-hide="filter.meta.disabled" class="fa fa-check-square-o"></i>
+        <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o"></i>
+        <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o"></i>
+      </a>
       </a>
       <a class="action filter-invert" ng-click="invertFilter(filter)">
-        <i ng-show="filter.meta.negate" class="fa fa-search-plus"></i>
-        <i ng-hide="filter.meta.negate" class="fa fa-search-minus"></i>
+        <i ng-show="filter.meta.negate" class="fa fa-fw fa-search-plus"></i>
+        <i ng-hide="filter.meta.negate" class="fa fa-fw fa-search-minus"></i>
       </a>
       <a class="action filter-remove" ng-click="removeFilter(filter)">
-        <i class="fa fa-trash"></i>
+        <i class="fa fa-fw fa-trash"></i>
       </a>
     </div>
   </div>
