@@ -204,5 +204,28 @@ define(function (require) {
     }
   });
 
+  /**
+   * Inverse of _.some(), reads better in some cases,
+   * seperated because it returns a boolean
+   *
+   * @param  {array} arr
+   * @param  {Function} fn
+   * @param  {any} cntx
+   * @return {Boolean}
+   */
+  _.mixin({
+    none: function (arr, fn, cntx) {
+      return !_.some(arr, fn, cntx);
+    },
+    isOrdinal: function (arr) {
+      return _.all(arr, function (num, i, arr) {
+        if (i === 0) return true;
+        return num > arr[i - 1];
+      });
+    }
+  }, {
+    chain: false
+  });
+
   return _;
 });
