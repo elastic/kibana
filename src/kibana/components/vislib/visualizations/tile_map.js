@@ -50,8 +50,8 @@ define(function (require) {
       var self = this;
       var $elem = $(this.chartEl);
       var div;
-      var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-      var featureLayer;
+      var worldBounds = L.latLngBounds([-90, -180], [90, 180]);
+
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -70,7 +70,8 @@ define(function (require) {
             mapCenter = self._attr.lastCenter;
           }
 
-          var mapLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
+          var featureLayer;
+          var tileLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
@@ -80,7 +81,7 @@ define(function (require) {
           var mapOptions = {
             minZoom: 2,
             maxZoom: 16,
-            layers: mapLayer,
+            layers: tileLayer,
             center: mapCenter,
             zoom: mapZoom,
             continuousWorld: true,
@@ -93,7 +94,13 @@ define(function (require) {
           var map = L.map(div[0], mapOptions);
           self.maps.push(map);
 
-          map.on('zoomend dragend', function () {
+          tileLayer.on('tileload', saturateTiles);
+
+          map.on('unload', function () {
+            tileLayer.off('tileload', saturateTiles);
+          });
+
+          map.on('zoomend dragend', function setZoomCenter() {
             mapZoom = self._attr.lastZoom = map.getZoom();
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
@@ -130,6 +137,13 @@ define(function (require) {
           function fitBounds() {
             map.fitBounds(featureLayer.getBounds());
           }
+
+          function saturateTiles() {
+            if (!self._attr.isDesaturated) {
+              $('img.leaflet-tile-loaded').addClass('filters-off');
+            }
+          }
+
         });
       };
     };
