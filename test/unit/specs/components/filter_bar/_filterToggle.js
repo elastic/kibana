@@ -1,11 +1,11 @@
 /* global sinon */
 define(function (require) {
+  return ['toggle', function () {
+    var _ = require('lodash');
+    var filterActions = require('components/filter_bar/lib/filterActions');
 
-  var _ = require('lodash');
-  var toggleAll = require('components/filter_bar/lib/toggleAll');
-  describe('Filter Bar Directive', function () {
+    var mapFilter, $rootScope, Promise, getIndexPatternStub, indexPattern;
 
-    var mapFilter, $rootScope, $compile, Promise, getIndexPatternStub, indexPattern;
     beforeEach(module('kibana'));
 
     beforeEach(function () {
@@ -18,13 +18,12 @@ define(function (require) {
       });
     });
 
-    beforeEach(inject(function (_Promise_, _$rootScope_, _$compile_, Private) {
+    beforeEach(inject(function (_Promise_, _$rootScope_, Private) {
       Promise = _Promise_;
       mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       getIndexPatternStub.returns(Promise.resolve(indexPattern));
       $rootScope = _$rootScope_;
-      $compile = _$compile_;
       $rootScope.state = {
         filters: [
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
@@ -34,6 +33,23 @@ define(function (require) {
         ]
       };
     }));
+
+    describe('toggleFilter', function () {
+      var fn;
+
+      beforeEach(function () {
+        fn = filterActions($rootScope).toggleFilter;
+      });
+
+      it('should toggle filters on and off', function (done) {
+        var filter = $rootScope.state.filters[0];
+        mapFilter(filter).then(fn).then(function (result) {
+          expect(result.meta).to.have.property('disabled', true);
+          done();
+        });
+        $rootScope.$apply();
+      });
+    });
 
     describe('toggleAll', function () {
       var fn;
@@ -52,7 +68,7 @@ define(function (require) {
       });
 
       beforeEach(function () {
-        fn = toggleAll($rootScope);
+        fn = filterActions($rootScope).toggleAll;
       });
 
       var pickDisabled = function (filter) {
@@ -77,8 +93,7 @@ define(function (require) {
         expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(0);
       });
     });
-
-  });
+  }];
 });
 
 

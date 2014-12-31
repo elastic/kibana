@@ -6,7 +6,6 @@ define(function (require) {
   var moment = require('moment');
 
   var filterActions = require('components/filter_bar/lib/filterActions');
-
   var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
 
   module.directive('filterBar', function (Private, Promise) {
