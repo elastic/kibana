@@ -27,9 +27,10 @@ define(function (require) {
     });
   });
 
-  describe.only('Filter Bar Actions', function () {
+  describe('Filter Bar Actions', function () {
     var childSuites = [
       require('specs/components/filter_bar/_filterToggle'),
+      require('specs/components/filter_bar/_filterInvert'),
       require('specs/components/filter_bar/_filterRemove'),
     ].forEach(function (s) {
       describe(s[0], s[1]);
