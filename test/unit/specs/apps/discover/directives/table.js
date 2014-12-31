@@ -41,16 +41,8 @@ define(function (require) {
   // For testing column removing/adding for the header and the rows
   //
   var columnTests = function (elemType, parentElem) {
-    it('should create only the toggle column by default', function (done) {
-      var childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(1);
-      done();
-    });
 
     it('should create a time column if the timefield is defined', function (done) {
-      // Should include a column for toggling and the time column by default
-      $parentScope.timefield = '@timestamp';
-      parentElem.scope().$digest();
       var childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(2);
       done();
@@ -62,22 +54,32 @@ define(function (require) {
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      expect($(childElems[1]).text()).to.contain('bytes');
+      expect(childElems.length).to.be(3);
+      expect($(childElems[2]).text()).to.contain('bytes');
 
       $parentScope.columns = ['bytes', 'request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(4);
+      expect($(childElems[3]).text()).to.contain('request_body');
 
       $parentScope.columns = ['request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      expect($(childElems[1]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(3);
+      expect($(childElems[2]).text()).to.contain('request_body');
       done();
     });
+
+    it('should create only the toggle column if there is no timeField', function (done) {
+      delete parentElem.scope().indexPattern.timeFieldName;
+      parentElem.scope().$digest();
+
+      var childElems = parentElem.find(elemType);
+      expect(childElems.length).to.be(1);
+      done();
+    });
+
   };
 
 
@@ -86,7 +88,7 @@ define(function (require) {
     describe('kbnTableHeader', function () {
 
       var $elem = angular.element(
-        '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort" timefield="timefield"></thead>'
+        '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort"></thead>'
       );
 
       beforeEach(function () {
@@ -206,7 +208,6 @@ define(function (require) {
         'filter="filtering"' +
         'maxLength=maxLength ' +
         'index-pattern="indexPattern"' +
-        'timefield="timefield" ' +
         '></thead>'
       );
 
@@ -227,7 +228,6 @@ define(function (require) {
           sorting: [],
           filtering: sinon.spy(),
           maxLength: 50,
-          timefield: '@timestamp'
         });
       });
       afterEach(function () {
@@ -265,7 +265,6 @@ define(function (require) {
         'sorting="sorting"' +
         'filter="filter"' +
         'index-pattern="indexPattern"' +
-        'timefield="timefield" ' +
         '></tr>'
       );
 
@@ -335,7 +334,6 @@ define(function (require) {
           'sorting="sorting"' +
           'filtering="filtering"' +
           'index-pattern="indexPattern"' +
-          'timefield="timefield" ' +
           '></tr>'
       );
       var $details;
@@ -378,7 +376,7 @@ define(function (require) {
       var $before;
 
       beforeEach(module('kibana', 'apps/discover'));
-      beforeEach(inject(function ($rootScope, $compile) {
+      beforeEach(inject(function ($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
         $root.columns = ['_source'];
@@ -386,7 +384,7 @@ define(function (require) {
         $root.filtering = sinon.spy();
         $root.maxLength = 50;
         $root.mapping = mapping;
-        $root.timefield = '@timestamp';
+        $root.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
         $row = $('<tr>')
         .attr({
@@ -395,7 +393,6 @@ define(function (require) {
           'sorting': 'sortin',
           'filtering': 'filtering',
           'index-pattern': 'indexPattern',
-          'timefield': 'timefield',
         });
 
         $scope = $root.$new();
@@ -405,7 +402,7 @@ define(function (require) {
         $before = $row.find('td');
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
-        expect($before.eq(1).text().trim()).to.match(/^@timestamp_formatted/);
+        expect($before.eq(1).text().trim()).to.match(/^time_formatted/);
         expect($before.eq(2).find('dl dt').length).to.be(_.keys($scope.row.$$_flattened).length);
       }));
 

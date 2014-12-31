@@ -138,7 +138,16 @@ define(function (require) {
           });
 
           // ignore panels that don't have vis id's
-          if (!panel.visId) throw new Error('missing visId on panel');
+          if (!panel.id) {
+            // In the interest of backwards compat
+            if (panel.visId) {
+              panel.id = panel.visId;
+              panel.type = 'visualization';
+              delete panel.visId;
+            } else {
+              throw new Error('missing object id on panel');
+            }
+          }
 
           panel.$scope = $scope.$new();
           panel.$scope.panel = panel;
