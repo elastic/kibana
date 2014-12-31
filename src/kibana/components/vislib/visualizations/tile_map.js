@@ -50,8 +50,8 @@ define(function (require) {
       var self = this;
       var $elem = $(this.chartEl);
       var div;
-      var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-      var featureLayer;
+      var worldBounds = L.latLngBounds([-90, -180], [90, 180]);
+
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -70,6 +70,7 @@ define(function (require) {
             mapCenter = self._attr.lastCenter;
           }
 
+          var featureLayer;
           var tileLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -93,11 +94,13 @@ define(function (require) {
           var map = L.map(div[0], mapOptions);
           self.maps.push(map);
 
-          tileLayer.on('tileload', function (e) {
-            saturateTiles();
+          tileLayer.on('tileload', saturateTiles);
+
+          map.on('unload', function () {
+            tileLayer.off('tileload', saturateTiles);
           });
 
-          map.on('zoomend dragend', function () {
+          map.on('zoomend dragend', function setZoomCenter() {
             mapZoom = self._attr.lastZoom = map.getZoom();
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
