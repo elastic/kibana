@@ -127,7 +127,6 @@ define(function (require) {
             map.addControl(new FitControl());
           }
 
-
           function fitBounds() {
             map.fitBounds(featureLayer.getBounds());
           }
@@ -173,7 +172,7 @@ define(function (require) {
             color: self.darkerColor(defaultColor),
             weight: 1.0,
             opacity: 1,
-            fillOpacity: 0.7
+            fillOpacity: 0.75
           };
         }
       }).addTo(map);
@@ -234,7 +233,7 @@ define(function (require) {
             color: self.darkerColor(color),
             weight: 1.0,
             opacity: 1,
-            fillOpacity: 0.7
+            fillOpacity: 0.75
           };
         }
       }).addTo(map);
@@ -290,14 +289,29 @@ define(function (require) {
         var div = L.DomUtil.create('div', 'tilemap-legend');
         var colors = self._attr.colors;
         var labels = [];
-        for (var i = 0; i < colors.length; i++) {
-          var vals = self._attr.cScale.invertExtent(colors[i]);
-          var strokecol = self.darkerColor(colors[i]);
+        var i = 0;
+        var vals;
+        var strokecol;
+
+        if (data.properties.min === data.properties.max) {
+          // 1 val for legend
+          vals = self._attr.cScale.invertExtent(colors[i]);
+          strokecol = self.darkerColor(colors[i]);
           labels.push(
             '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-            vals[0].toFixed(1) + ' &ndash; ' + vals[1].toFixed(1));
+            vals[0].toFixed(0));
+        } else {
+          // 3 to 5 vals for legend
+          for (i = 0; i < colors.length; i++) {
+            vals = self._attr.cScale.invertExtent(colors[i]);
+            strokecol = self.darkerColor(colors[i]);
+            labels.push(
+              '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
+              vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+          }
         }
         div.innerHTML = labels.join('<br>');
+
         return div;
       };
       legend.addTo(map);
@@ -394,7 +408,7 @@ define(function (require) {
     };
 
     /**
-     * radiusScale returns a circle radius from
+     * radiusScale returns a a number for scaled circle markers
      * approx. square root of count
      * which is multiplied by a factor based on the geohash precision
      * for relative sizing of markers
@@ -412,40 +426,40 @@ define(function (require) {
       var maxr;
       switch (precision) {
         case 1:
-          maxr = 200;
+          maxr = 150;
           break;
         case 2:
-          maxr = 30;
+          maxr = 28;
           break;
         case 3:
-          maxr = 9;
+          maxr = 8;
           break;
         case 4:
-          maxr = 3;
+          maxr = 2;
           break;
         case 5:
-          maxr = 1.44;
+          maxr = 1.4;
           break;
         case 6:
-          maxr = 1.12;
-          break;
-        case 7:
           maxr = 0.6;
           break;
+        case 7:
+          maxr = 0.4;
+          break;
         case 8:
-          maxr = 0.3;
+          maxr = 0.2;
           break;
         case 9:
-          maxr = 0.22;
+          maxr = 0.12;
           break;
         default:
-          maxr = 9;
+          maxr = 8;
       }
       return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
     };
 
     /**
-     * returns a number to scale circle markers
+     * returns a number to scale shaded circle markers
      * based on the geohash precision
      *
      * @method quantRadiusScale
@@ -456,34 +470,34 @@ define(function (require) {
       var maxr;
       switch (precision) {
         case 1:
-          maxr = 100;
+          maxr = 150;
           break;
         case 2:
-          maxr = 12;
+          maxr = 18;
           break;
         case 3:
-          maxr = 3;
+          maxr = 4.5;
           break;
         case 4:
-          maxr = 0.6;
+          maxr = 0.7;
           break;
         case 5:
-          maxr = 0.3;
+          maxr = 0.26;
           break;
         case 6:
-          maxr = 0.22;
+          maxr = 0.20;
           break;
         case 7:
-          maxr = 0.18;
-          break;
-        case 8:
           maxr = 0.16;
           break;
+        case 8:
+          maxr = 0.13;
+          break;
         case 9:
-          maxr = 0.14;
+          maxr = 0.11;
           break;
         default:
-          maxr = 3;
+          maxr = 4.5;
       }
       return maxr;
     };
@@ -500,14 +514,20 @@ define(function (require) {
      */
     TileMap.prototype.quantizeColorScale = function (count, min, max) {
       var self = this;
-      var greens = ['#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494'];
-      var reds =   ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-      var blues =  ['#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'];
-      var colors = self._attr.colors = reds;
+      var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
+      var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
+      var reds1 = ['#ff6128'];
+      var colors = self._attr.colors = reds5;
+
+      if (max - min < 3) {
+        colors = self._attr.colors = reds1;
+      } else if (max - min < 25) {
+        colors = self._attr.colors = reds3;
+      }
+
       var cScale = self._attr.cScale = d3.scale.quantize()
         .domain([min, max])
         .range(colors);
-
       if (max === min) {
         return colors[0];
       } else {
