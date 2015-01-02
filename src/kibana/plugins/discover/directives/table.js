@@ -3,8 +3,8 @@ define(function (require) {
 
   require('directives/truncated');
   require('directives/infinite_scroll');
-  require('plugins/discover/directives/table_header');
-  require('plugins/discover/directives/table_row');
+  require('components/doc_table/components/table_header');
+  require('components/doc_table/components/table_row');
 
   var module = require('modules').get('app/discover');
 
@@ -22,14 +22,12 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
-        fields: '=',
         columns: '=',
         rows: '=',
         sorting: '=',
         filtering: '=',
         refresh: '=',
         indexPattern: '=',
-        timefield: '=?'
       },
       link: function ($scope, $el) {
         $scope.limit = 50;

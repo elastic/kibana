@@ -2,6 +2,8 @@ define(function (require) {
   var _ = require('lodash');
   var configDefaults = require('components/config/defaults');
 
+  require('plugins/settings/sections/advanced/advanced_row');
+
   require('routes')
   .when('/settings/advanced', {
     template: require('text!plugins/settings/sections/advanced/index.html')
@@ -21,12 +23,15 @@ define(function (require) {
         // determine if a value is too complex to be edditted (at this time)
         var tooComplex = function (conf) {
           // get the type of the current value or the default
-          switch (typeof config.get(conf.name)) {
+          switch (conf.type) {
           case 'string':
           case 'number':
           case 'null':
           case 'undefined':
             conf.normal = true;
+            break;
+          case 'json':
+            conf.json = true;
             break;
           default:
             if (_.isArray(config.get(conf.name))) {
@@ -39,20 +44,11 @@ define(function (require) {
           }
         };
 
-        // setup loading flag, run async op, then clear loading and editting flag (just in case)
-        var loading = function (conf, fn) {
-          conf.loading = true;
-          fn()
-          .finally(function () {
-            conf.loading = conf.editting = false;
-          })
-          .catch(notify.fatal);
-        };
-
         $scope.configs = _.map(configDefaults, function (def, name) {
           var conf = {
             name: name,
             defVal: def.value,
+            type: (def.type ||  typeof config.get(name)),
             description: def.description,
             value: configVals[name]
           };
@@ -67,39 +63,6 @@ define(function (require) {
 
           return conf;
         });
-
-        $scope.maybeCancel = function ($event, conf) {
-          if ($event.keyCode === keyCodes.ESC) {
-            $scope.cancelEdit(conf);
-          }
-        };
-
-        $scope.edit = function (conf) {
-          conf.unsavedValue = conf.value || conf.defVal;
-          $scope.configs.forEach(function (c) {
-            c.editting = (c === conf);
-          });
-        };
-
-        $scope.save = function (conf) {
-          loading(conf, function () {
-            if (conf.unsavedValue === conf.defVal) {
-              return config.clear(conf.name);
-            }
-
-            return config.set(conf.name, conf.unsavedValue);
-          });
-        };
-
-        $scope.cancelEdit = function (conf) {
-          conf.editting = false;
-        };
-
-        $scope.clear = function (conf) {
-          return loading(conf, function () {
-            return config.clear(conf.name);
-          });
-        };
       }
     };
   });

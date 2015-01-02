@@ -5,17 +5,17 @@ define(function (require) {
   require('filters/short_dots');
 
   module.directive('kbnTableHeader', function () {
-    var headerHtml = require('text!plugins/discover/partials/table_header.html');
+    var headerHtml = require('text!components/doc_table/components/table_header.html');
     return {
       restrict: 'A',
       scope: {
         columns: '=',
         sorting: '=',
         indexPattern: '=',
-        timefield: '=?'
       },
       template: headerHtml,
       controller: function ($scope) {
+
         var sortableField = function (field) {
           return $scope.indexPattern.fields.byName[field].sortable;
         };

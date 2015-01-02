@@ -16,7 +16,23 @@ define(function (require) {
   /** Wizard Step 1
   /********/
   routes.when('/visualize/step/1', {
-    template: templateStep(1, require('text!plugins/visualize/wizard/step_1.html')),
+    template: templateStep(1, require('text!plugins/visualize/wizard/step_1.html'))
+  });
+
+  module.controller('VisualizeWizardStep1', function ($scope, $route, $location, timefilter, Private) {
+    timefilter.enabled = false;
+
+    $scope.visTypes = Private(require('registry/vis_types'));
+    $scope.visTypeUrl = function (visType) {
+      return '#/visualize/step/2?type=' + encodeURIComponent(visType.name);
+    };
+  });
+
+  /********
+  /** Wizard Step 2
+  /********/
+  routes.when('/visualize/step/2', {
+    template: templateStep(2, require('text!plugins/visualize/wizard/step_2.html')),
     resolve: {
       indexPatternIds: function (courier) {
         return courier.indexPatterns.getIds();
@@ -24,9 +40,11 @@ define(function (require) {
     }
   });
 
-  module.controller('VisualizeWizardStep1', function ($route, $scope, $location, timefilter, kbnUrl) {
+  module.controller('VisualizeWizardStep2', function ($route, $scope, $location, timefilter, kbnUrl) {
+    var type = $route.current.params.type;
+
     $scope.step2WithSearchUrl = function (hit) {
-      return kbnUrl.eval('#/visualize/step/2?savedSearchId={{id}}', {id: hit.id});
+      return kbnUrl.eval('#/visualize/create?&type={{type}}&savedSearchId={{id}}', {type: type, id: hit.id});
     };
 
     timefilter.enabled = false;
@@ -36,7 +54,7 @@ define(function (require) {
       list: $route.current.locals.indexPatternIds
     };
 
-    $scope.$watch('stepOneMode', function (mode) {
+    $scope.$watch('stepTwoMode', function (mode) {
       if (mode === 'new') {
         if ($scope.indexPattern.list && $scope.indexPattern.list.length === 1) {
           $scope.indexPattern.selection = $scope.indexPattern.list[0];
@@ -46,31 +64,7 @@ define(function (require) {
 
     $scope.$watch('indexPattern.selection', function (pattern) {
       if (!pattern) return;
-      kbnUrl.change('/visualize/step/2?indexPattern={{pattern}}', {pattern: pattern});
+      kbnUrl.change('/visualize/create?type={{type}}&indexPattern={{pattern}}', {type: type, pattern: pattern});
     });
-  });
-
-  /********
-  /** Wizard Step 2
-  /********/
-  routes.when('/visualize/step/2', {
-    template: templateStep(2, require('text!plugins/visualize/wizard/step_2.html'))
-  });
-
-  module.controller('VisualizeWizardStep2', function ($scope, $route, $location, timefilter, Private) {
-    var existing = _.pick($route.current.params, 'indexPattern', 'savedSearchId');
-
-    timefilter.enabled = false;
-
-    $scope.visTypes = Private(require('registry/vis_types'));
-    $scope.visTypeUrl = function (visType) {
-      var query = _.defaults({
-        type: visType.name
-      }, existing);
-
-      return '#/visualize/create?' + _.map(query, function (val, key) {
-        return encodeURIComponent(key) + '=' + encodeURIComponent(val);
-      }).join('&');
-    };
   });
 });
