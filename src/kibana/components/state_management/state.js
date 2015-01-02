@@ -58,8 +58,7 @@ define(function (require) {
     State.prototype.fetch = function () {
       var stash = this._readFromURL();
 
-      // nothing to read from the url?
-      // we should save if were are ordered to persist
+      // nothing to read from the url? save if ordered to persist
       if (stash === null) {
         if (this._persistAcrossApps) {
           return this.save();

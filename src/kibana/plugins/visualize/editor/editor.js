@@ -144,10 +144,13 @@ define(function (require) {
       });
 
       $scope.$watch('state.filters', function (newFilters, oldFilters) {
+        $state.save();
+        searchSource.set('filter', $state.filters);
+
         if (onlyDisabled(newFilters, oldFilters)) {
-          $state.save();
           return;
         }
+
         if (newFilters !== oldFilters) $scope.fetch();
       });
 
@@ -173,7 +176,6 @@ define(function (require) {
         }
 
         $scope.fetch();
-
       });
 
       $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
@@ -189,7 +191,6 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      searchSource.set('filter', $state.filters);
       if (!$scope.linked) searchSource.set('query', $state.query);
       courier.fetch();
     };
