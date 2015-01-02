@@ -86,7 +86,7 @@ define(function (require) {
       columns: savedSearch.columns || ['_source'],
       index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.get('filter'))
+      filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
     };
 
     var metaFields = config.get('metaFields');
