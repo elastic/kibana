@@ -1,0 +1,13 @@
+@import (reference) "../../styles/_mixins.less";
+@import (reference) "lesshat.less";
+
+.metric-vis {
+  text-align: center;
+  .flex-parent();
+  .justify-content(center);
+
+  .metric-value {
+    font-weight: bold;
+    .ellipsis();
+  }
+}

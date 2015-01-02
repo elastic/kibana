@@ -15,7 +15,7 @@ define(function (require) {
     template: require('text!plugins/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
-        if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
+        if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId && $route.current.params.type !== 'markdown') {
           throw new Error('You must provide either an indexPattern or a savedSearchId');
         }
 

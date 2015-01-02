@@ -33,7 +33,8 @@ require.config({
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
-    zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard'
+    zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
+    marked: 'bower_components/marked/lib/marked'
   },
   shim: {
     angular: {
@@ -56,6 +57,9 @@ require.config({
     },
     leaflet: {
       deps: ['css!bower_components/leaflet/dist/leaflet.css']
+    },
+    marked: {
+      exports: 'marked'
     }
   },
   waitSeconds: 60
