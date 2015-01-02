@@ -28,7 +28,7 @@ define(function (require) {
        * Toggles the filter between enabled/disabled.
        * @param {object} filter The filter to toggle
        & @param {boolean} force disabled true/false
-       * @returns {void}
+       * @returns {object} filter passed in
        */
       function toggleFilter(filter, force) {
         // Toggle the disabled flag
@@ -55,13 +55,12 @@ define(function (require) {
        * Pins the filter to the global state
        * @param {object} filter The filter to pin
        * @param {boolean} force pinned state
-       * @returns {void}
+       * @returns {object} filter passed in
        */
       function pinFilter(filter, force) {
         var pinned = _.isUndefined(force) ? !filter.meta.pinned : force;
         filter.meta.pinned = pinned;
 
-        // Save the filters back to the searchSource
         saveState();
         return filter;
       }
@@ -80,7 +79,7 @@ define(function (require) {
       /**
        * Inverts the nagate value on the filter
        * @param {object} filter The filter to toggle
-       * @returns {void}
+       * @returns {object} filter passed in
        */
       function invertFilter(filter) {
         // Toggle the negate meta state
@@ -103,7 +102,7 @@ define(function (require) {
       /**
        * Adds new filters to the scope and state
        * @param {object|array} filter(s) to add
-       * @returns {void}
+       * @returns {object} resulting new filter list
        */
       function addFilters(filters) {
         if (!_.isArray(filters)) {
@@ -113,12 +112,13 @@ define(function (require) {
         var newFilters = filterAppliedAndUnwrap(filters);
         $scope.filters = _.union($scope.state.filters, newFilters);
         saveState();
+        return $scope.filters;
       }
 
       /**
        * Removes the filter from the searchSource
        * @param {object} filter The filter to remove
-       * @returns {void}
+       * @returns {object} resulting new filter list
        */
       function removeFilter(invalidFilter) {
         // Remove the filter from the the scope $filters and map it back
@@ -128,6 +128,7 @@ define(function (require) {
         });
 
         saveState();
+        return $scope.filters;
       }
 
       /**
