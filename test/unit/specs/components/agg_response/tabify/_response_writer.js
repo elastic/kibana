@@ -176,25 +176,6 @@ define(function (require) {
       });
 
       describe('#split()', function () {
-        it('creates a table group, pushes that group onto the splitStack, calls the block, and removes the group from the stack',
-        function () {
-          var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-          var writer = new ResponseWriter(vis);
-
-          var table = writer._table();
-          writer.cell({}, 1, function () {
-            writer.cell({}, 2, function () {
-              writer.cell({}, 3, function () {
-                writer.row();
-              });
-            });
-          });
-
-
-          expect(table.rows).to.have.length(1);
-          expect(table.rows[0]).to.eql([1, 2, 3]);
-        });
-
         it('with break if the user has specified that splitting is to be disabled', function () {
           var vis = new Vis(indexPattern, {
             type: 'histogram',
@@ -211,6 +192,62 @@ define(function (require) {
             writer.split(agg, buckets, _.noop);
           }).to.throwException(/splitting is disabled/);
         });
+
+        it('forks the acrStack and rewrites the parents', function () {
+          var vis = new Vis(indexPattern, {
+            type: 'histogram',
+            aggs: [
+              { type: 'terms', params: { field: 'extension' }, schema: 'segment' },
+              { type: 'terms', params: { field: '_type' }, schema: 'split' },
+              { type: 'terms', params: { field: 'machine.os' }, schema: 'segment' },
+              { type: 'count', schema: 'metric' }
+            ]
+          });
+
+          var writer = new ResponseWriter(vis, { asAggConfigResults: true });
+          var extensions = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
+          var types = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+          var os = new Buckets({ buckets: [ { key: 'window' }, { key: 'osx' } ] });
+
+          extensions.forEach(function (b, extension) {
+            writer.cell(vis.aggs[0], extension, function () {
+              writer.split(vis.aggs[1], types, function () {
+                os.forEach(function (b, os) {
+                  writer.cell(vis.aggs[2], os, function () {
+                    writer.cell(vis.aggs[3], 200, function () {
+                      writer.row();
+                    });
+                  });
+                });
+              });
+            });
+          });
+
+          var tables = _.flatten(_.pluck(writer.response().tables, 'tables'));
+          expect(tables.length).to.be(types.length);
+
+          // collect the far left acr from each table
+          var leftAcrs = _.pluck(tables, function (table) {
+            return table.rows[0][0];
+          });
+
+          leftAcrs.forEach(function (acr, i, acrs) {
+            expect(acr.aggConfig).to.be(vis.aggs[0]);
+            expect(acr.$parent.aggConfig).to.be(vis.aggs[1]);
+            expect(acr.$parent.$parent).to.be(void 0);
+
+            // for all but the last acr, compare to the next
+            if (i + 1 >= acrs.length) return;
+            var acr2 = leftAcrs[i + 1];
+
+            expect(acr.key).to.be(acr2.key);
+            expect(acr.value).to.be(acr2.value);
+            expect(acr.aggConfig).to.be(acr2.aggConfig);
+            expect(acr.$parent).to.not.be(acr2.$parent);
+          });
+        });
+
+
       });
 
       describe('#cell()', function () {
