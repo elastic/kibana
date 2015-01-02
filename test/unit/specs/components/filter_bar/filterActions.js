@@ -2,18 +2,18 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('test_utils/auto_release_sinon');
   var filterActions;
-  var $rootScope, globalStateMock;
+  var $rootScope, globalStateStub;
 
   describe('Filter Bar Actions', function () {
 
     beforeEach(function () {
       module('kibana', function ($provide) {
         $provide.service('globalState', function () {
-          globalStateMock = {};
-          globalStateMock.on = globalStateMock.off = _.noop;
-          globalStateMock.save = sinon.stub();
+          globalStateStub = {};
+          globalStateStub.on = globalStateStub.off = _.noop;
+          globalStateStub.save = sinon.stub();
 
-          return globalStateMock;
+          return globalStateStub;
         });
       });
 
@@ -26,7 +26,7 @@ define(function (require) {
 
     describe('global state', function () {
       beforeEach(function () {
-        globalStateMock.filters = [
+        globalStateStub.filters = [
           { meta: { pinned: true }, query: { match: { '@tags': { query: 'test1' } } } },
           { meta: { pinned: false }, query: { match: { '@tags': { query: 'test2' } } } }
         ];
@@ -34,7 +34,7 @@ define(function (require) {
 
       it('should call save on global state', function () {
         var actions = filterActions($rootScope);
-        expect(globalStateMock.save.callCount).to.be(1);
+        expect(globalStateStub.save.callCount).to.be(1);
       });
 
       it('should load filters from global state', function () {
@@ -44,9 +44,9 @@ define(function (require) {
       });
 
       it('should only persist pinned filters in global state', function () {
-        expect(globalStateMock.filters.length).to.be(2);
+        expect(globalStateStub.filters.length).to.be(2);
         var actions = filterActions($rootScope);
-        expect(globalStateMock.filters.length).to.be(1);
+        expect(globalStateStub.filters.length).to.be(1);
       });
 
       it('should merge scope state and global state', function () {
@@ -82,6 +82,7 @@ define(function (require) {
     var childSuites = [
       require('specs/components/filter_bar/_filterToggle'),
       require('specs/components/filter_bar/_filterInvert'),
+      require('specs/components/filter_bar/_filterPin'),
       require('specs/components/filter_bar/_filterAdd'),
       require('specs/components/filter_bar/_filterRemove'),
     ].forEach(function (s) {

@@ -81,9 +81,7 @@ define(function (require) {
       var fn;
 
       beforeEach(function (done) {
-        console.log($rootScope.state.filters);
         Promise.map($rootScope.state.filters, mapFilter).then(function (filters) {
-          console.log(filters);
           $rootScope.filters = filters;
           done();
         });
