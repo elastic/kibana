@@ -13,7 +13,7 @@ define(function (require) {
 
 
   require('plugins/dashboard/directives/grid');
-  require('plugins/dashboard/directives/panel');
+  require('plugins/dashboard/components/panel/panel');
   require('plugins/dashboard/services/saved_dashboards');
   require('css!plugins/dashboard/styles/main.css');
 
@@ -47,7 +47,7 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, AppState, timefilter, kbnUrl) {
+  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
         var notify = new Notifier({
@@ -117,7 +117,10 @@ define(function (require) {
         }
 
         $scope.$watch('state.filters', function (newFilters, oldFilters) {
-          if (onlyDisabled(newFilters, oldFilters)) return;
+          if (onlyDisabled(newFilters, oldFilters)) {
+            $state.save();
+            return;
+          }
           $scope.filterResults();
         });
 
@@ -128,7 +131,7 @@ define(function (require) {
         $scope.filterResults = function () {
           updateQueryOnRootSource();
           $state.save();
-          courier.fetch();
+          $scope.refresh();
         };
 
         $scope.save = function () {
@@ -137,10 +140,12 @@ define(function (require) {
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
-          .then(function () {
-            notify.info('Saved Dashboard as "' + dash.title + '"');
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+          .then(function (id) {
+            if (id) {
+              notify.info('Saved Dashboard as "' + dash.title + '"');
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+              }
             }
           })
           .catch(notify.fatal);
@@ -151,7 +156,7 @@ define(function (require) {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
             $state.save();
-            courier.fetch();
+            $scope.refresh();
           }
         });
 
@@ -164,7 +169,12 @@ define(function (require) {
         // called by the saved-object-finder when a user clicks a vis
         $scope.addVis = function (hit) {
           pendingVis++;
-          $state.panels.push({ visId: hit.id });
+          $state.panels.push({ id: hit.id, type: 'visualization' });
+        };
+
+        $scope.addSearch = function (hit) {
+          pendingVis++;
+          $state.panels.push({ id: hit.id, type: 'search' });
         };
 
         // Setup configurable values for config directive, after objects are initialized
@@ -172,6 +182,7 @@ define(function (require) {
           dashboard: dash,
           save: $scope.save,
           addVis: $scope.addVis,
+          addSearch: $scope.addSearch,
           shareData: function () {
             return {
               link: $location.absUrl(),

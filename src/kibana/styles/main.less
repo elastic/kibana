@@ -232,12 +232,23 @@ notifications {
     color: @navbar-inverse-brand-hover-color;
     vertical-align: middle;
   }
+}
+
+.navbar-timepicker {
+  &-auto-refresh-desc {
+    margin-right: 20px;
+  }
+
+  &-timefilter-desc {
+
+  }
 
   .fa {
-    font-size: @font-size-large;
-    vertical-align: text-top;
+    font-size: 16px;
+    vertical-align: middle;
   }
 }
+
 .kbn-timepicker .btn-default {
   background: transparent;
   color: @text-color;
@@ -253,7 +264,7 @@ notifications {
 
 //== Table
 
-kbn-table {
+kbn-table, .kbn-table {
   font-size: @font-size-small;
 
   th {

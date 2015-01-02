@@ -10,7 +10,8 @@ define(function (require) {
       icon: 'fa-map-marker',
       params: {
         defaults: {
-          mapType: 'Shaded Circle Markers'
+          mapType: 'Shaded Circle Markers',
+          isDesaturated: true
         },
         mapTypes: ['Shaded Circle Markers', 'Scaled Circle Markers'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')

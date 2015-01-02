@@ -125,14 +125,17 @@ define(function (require) {
         }
 
         // fetch the fields
-        return indexPattern.refreshFields()
-        .then(refreshKibanaIndex)
-        .then(function () {
-          if (!config.get('defaultIndex')) {
-            config.set('defaultIndex', indexPattern.id);
+        return indexPattern.create()
+        .then(function (id) {
+          if (id) {
+            refreshKibanaIndex().then(function () {
+              if (!config.get('defaultIndex')) {
+                config.set('defaultIndex', indexPattern.id);
+              }
+              indexPatterns.cache.clear(indexPattern.id);
+              kbnUrl.change('/settings/indices/' + indexPattern.id);
+            });
           }
-          indexPatterns.cache.clear(indexPattern.id);
-          kbnUrl.change('/settings/indices/' + indexPattern.id);
         });
 
         // refreshFields calls save() after a successfull fetch, no need to save again

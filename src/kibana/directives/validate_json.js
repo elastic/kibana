@@ -21,10 +21,16 @@ define(function (require) {
             return;
           }
 
-          try {
-            JSON.parse(newValue);
-            setValid();
-          } catch (err) {
+          // We actually need a proper object in all JSON inputs
+          newValue = (newValue || '').trim();
+          if (newValue[0] === '{') {
+            try {
+              JSON.parse(newValue);
+              setValid();
+            } catch (e) {
+              setInvalid();
+            }
+          } else {
             setInvalid();
           }
         }

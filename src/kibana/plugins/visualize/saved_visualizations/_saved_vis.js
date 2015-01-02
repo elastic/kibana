@@ -50,15 +50,9 @@ define(function (require) {
 
     SavedVis.prototype._afterEsResp = function () {
       var self = this;
-      var linkedSearch = self.savedSearchId;
 
-      return Promise.resolve(linkedSearch && savedSearches.get(linkedSearch))
-      .then(function (parent) {
-        if (parent) {
-          self.savedSearch = parent;
-          self.searchSource.inherits(parent.searchSource);
-        }
-
+      return self._getLinkedSavedSearch()
+      .then(function () {
         self.searchSource.size(0);
 
         return self.vis ? self._updateVis() : self._createVis();
@@ -71,6 +65,30 @@ define(function (require) {
         return self;
       });
     };
+
+    SavedVis.prototype._getLinkedSavedSearch = Promise.method(function () {
+      var self = this;
+      var linkedSearch = !!self.savedSearchId;
+      var current = self.savedSearch;
+
+      if (linkedSearch && current && current.id === self.savedSearchId) {
+        return;
+      }
+
+      if (self.savedSearch) {
+        self.searchSource.inherits(self.savedSearch.searchSource.getParent());
+        self.savedSearch.destroy();
+        self.savedSearch = null;
+      }
+
+      if (linkedSearch) {
+        return savedSearches.get(self.savedSearchId)
+        .then(function (savedSearch) {
+          self.savedSearch = savedSearch;
+          self.searchSource.inherits(self.savedSearch.searchSource);
+        });
+      }
+    });
 
     SavedVis.prototype._createVis = function () {
       var self = this;

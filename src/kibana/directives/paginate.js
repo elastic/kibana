@@ -9,12 +9,18 @@ define(function (require) {
       restrict: 'E',
       scope: true,
       link: {
-        pre: function ($scope, $el) {
-          if ($el.find('paginate-controls').size() === 0) {
-            $el.append($compile('<paginate-controls>')($scope));
+        pre: function ($scope, $el, attrs) {
+          if (_.isUndefined(attrs.bottomControls)) attrs.bottomControls = true;
+          if ($el.find('paginate-controls.paginate-bottom').size() === 0 && attrs.bottomControls) {
+            $el.append($compile('<paginate-controls class="paginate-bottom">')($scope));
           }
         },
         post: function ($scope, $el, attrs) {
+          if (_.isUndefined(attrs.topControls)) attrs.topControls = false;
+          if ($el.find('paginate-controls.paginate-top').size() === 0 && attrs.topControls) {
+            $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
+          }
+
           var paginate = $scope.paginate;
 
           // add some getters to the controller powered by attributes
