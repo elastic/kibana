@@ -4,6 +4,8 @@ define(function (require) {
 
   return function (globalState) {
     return function ($scope) {
+      applyGlobalFilters();
+
       var exports = {
         toggleFilter: toggleFilter,
         toggleAll: toggleAll,
@@ -23,6 +25,15 @@ define(function (require) {
           });
         },
       }, exports);
+
+      /**
+       * Reads filters from global state and applies them to the scope state
+       * @returns {void}
+       */
+      function applyGlobalFilters() {
+        $scope.filters = globalState.filters || [];
+        saveState();
+      }
 
       /**
        * Toggles the filter between enabled/disabled.
@@ -145,7 +156,17 @@ define(function (require) {
        * @returns {void}
        */
       function saveState() {
+        saveGlobalState();
         $scope.state.filters = $scope.filters;
+      }
+
+      /**
+       * Save pinned filters to the globalState
+       * @returns {void}
+       */
+      function saveGlobalState() {
+        globalState.filters = _.filter($scope.filters, { meta: { pinned: true } });
+        globalState.save();
       }
     };
   };
