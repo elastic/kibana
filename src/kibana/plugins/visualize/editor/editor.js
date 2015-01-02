@@ -147,10 +147,7 @@ define(function (require) {
         $state.save();
         searchSource.set('filter', $state.filters);
 
-        if (onlyDisabled(newFilters, oldFilters)) {
-          return;
-        }
-
+        if (onlyDisabled(newFilters, oldFilters)) return;
         if (newFilters !== oldFilters) $scope.fetch();
       });
 

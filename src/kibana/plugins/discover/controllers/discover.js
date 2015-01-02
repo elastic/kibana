@@ -171,11 +171,11 @@ define(function (require) {
         });
 
         $scope.$watch('state.filters', function (newFilters, oldFilters) {
-          if (onlyDisabled(newFilters, oldFilters)) {
-            $state.save();
-            return;
-          }
-          $scope.fetch();
+          $state.save();
+          $scope.searchSource.set('filter', $state.filters);
+
+          if (onlyDisabled(newFilters, oldFilters)) return;
+          if (newFilters !== oldFilters) $scope.fetch();
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
