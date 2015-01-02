@@ -122,7 +122,8 @@ define(function (require) {
         }
 
         var newFilters = filterAppliedAndUnwrap(filters);
-        $scope.filters = _.union($scope.state.filters, newFilters);
+        $scope.filters = _.union($scope.filters, newFilters);
+
         saveState();
         return $scope.filters;
       }
