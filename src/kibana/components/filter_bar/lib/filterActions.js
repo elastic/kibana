@@ -31,7 +31,8 @@ define(function (require) {
        * @returns {void}
        */
       function applyGlobalFilters() {
-        $scope.filters = globalState.filters || [];
+        var filters = ($scope.state) ? $scope.state.filters : [];
+        $scope.filters = _.union(filters, globalState.filters || []);
         saveState();
       }
 
@@ -157,7 +158,11 @@ define(function (require) {
        */
       function saveState() {
         saveGlobalState();
-        $scope.state.filters = $scope.filters;
+
+        // only save state if state exists
+        if ($scope.state) {
+          $scope.state.filters = $scope.filters;
+        }
       }
 
       /**
