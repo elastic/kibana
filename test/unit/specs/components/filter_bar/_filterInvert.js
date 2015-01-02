@@ -2,8 +2,7 @@
 define(function (require) {
   return ['invert', function () {
     var _ = require('lodash');
-    var filterActions = require('components/filter_bar/lib/filterActions');
-    var $rootScope, Promise, mapFilter, indexPattern, getIndexPatternStub;
+    var filterActions, $rootScope, Promise, mapFilter, indexPattern, getIndexPatternStub;
 
     beforeEach(module('kibana'));
 
@@ -24,6 +23,7 @@ define(function (require) {
 
         mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        filterActions = Private(require('components/filter_bar/lib/filterActions'));
 
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
 

@@ -1,15 +1,16 @@
 define(function (require) {
 
   return ['remove', function () {
-    var filterActions = require('components/filter_bar/lib/filterActions');
-    var $rootScope;
+    var filterActions, $rootScope;
 
     beforeEach(function () {
       // load the application
       module('kibana');
 
-      inject(function (_$rootScope_, _$compile_) {
+      inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
+        filterActions = Private(require('components/filter_bar/lib/filterActions'));
+
         $rootScope.state = {
           filters: [
             { query: { match: { '@tags': { query: 'test' } } } },

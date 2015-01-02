@@ -1,14 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
-  var filterActions = require('components/filter_bar/lib/filterActions');
+  var filterActions;
   var $rootScope;
 
   describe('Filter Bar Actions', function () {
     beforeEach(module('kibana'));
 
     beforeEach(function () {
-      inject(function (_$rootScope_) {
+      inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
+        filterActions = Private(require('components/filter_bar/lib/filterActions'));
       });
     });
 

@@ -5,10 +5,10 @@ define(function (require) {
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
-  var filterActions = require('components/filter_bar/lib/filterActions');
   var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
 
   module.directive('filterBar', function (Private, Promise) {
+    var filterActions = Private(require('components/filter_bar/lib/filterActions'));
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));

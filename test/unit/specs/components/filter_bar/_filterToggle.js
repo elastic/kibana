@@ -2,9 +2,7 @@
 define(function (require) {
   return ['toggle', function () {
     var _ = require('lodash');
-    var filterActions = require('components/filter_bar/lib/filterActions');
-
-    var mapFilter, $rootScope, Promise, getIndexPatternStub, indexPattern;
+    var filterActions, mapFilter, $rootScope, Promise, getIndexPatternStub, indexPattern;
 
     beforeEach(module('kibana'));
 
@@ -20,10 +18,13 @@ define(function (require) {
 
     beforeEach(inject(function (_Promise_, _$rootScope_, Private) {
       Promise = _Promise_;
+      $rootScope = _$rootScope_;
+      filterActions = Private(require('components/filter_bar/lib/filterActions'));
       mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+
       getIndexPatternStub.returns(Promise.resolve(indexPattern));
-      $rootScope = _$rootScope_;
+
       $rootScope.state = {
         filters: [
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
