@@ -5,8 +5,6 @@ define(function (require) {
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
-  var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
-
   module.directive('filterBar', function (Private, Promise) {
     var filterActions = Private(require('components/filter_bar/lib/filterActions'));
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
@@ -25,9 +23,11 @@ define(function (require) {
         filterActions($scope).apply();
 
         $scope.applyFilters = function (filters) {
-          var newFilters = filterAppliedAndUnwrap(filters);
-          $scope.state.filters = _.union($scope.state.filters, newFilters);
+          // add new filters
+          $scope.addFilters(filters);
           $scope.newFilters = [];
+
+          // change time filter
           if ($scope.changeTimeFilter && $scope.changeTimeFilter.meta && $scope.changeTimeFilter.meta.apply) {
             changeTimeFilter($scope.changeTimeFilter);
           }

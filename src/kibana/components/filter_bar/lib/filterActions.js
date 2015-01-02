@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
 
   return function (globalState) {
     return function ($scope) {
@@ -10,6 +11,7 @@ define(function (require) {
         pinAll: pinAll,
         invertFilter: invertFilter,
         invertAll: invertAll,
+        addFilters: addFilters,
         removeFilter: removeFilter,
         removeAll: removeAll
       };
@@ -52,7 +54,7 @@ define(function (require) {
       /**
        * Pins the filter to the global state
        * @param {object} filter The filter to pin
-       & @param {boolean} force pinned state
+       * @param {boolean} force pinned state
        * @returns {void}
        */
       function pinFilter(filter, force) {
@@ -78,7 +80,6 @@ define(function (require) {
       /**
        * Inverts the nagate value on the filter
        * @param {object} filter The filter to toggle
-       & @param {boolean} force disabled true/false
        * @returns {void}
        */
       function invertFilter(filter) {
@@ -97,6 +98,21 @@ define(function (require) {
         $scope.filters.forEach(function (filter) {
           invertFilter(filter);
         });
+      }
+
+      /**
+       * Adds new filters to the scope and state
+       * @param {object|array} filter(s) to add
+       * @returns {void}
+       */
+      function addFilters(filters) {
+        if (!_.isArray(filters)) {
+          filters = [filters];
+        }
+
+        var newFilters = filterAppliedAndUnwrap(filters);
+        $scope.filters = _.union($scope.state.filters, newFilters);
+        saveState();
       }
 
       /**
