@@ -1,6 +1,9 @@
 define(function (require) {
   var marked = require('marked');
-  marked.setOptions({sanitize: true}); // Sanitize HTML tags
+  marked.setOptions({
+    gfm: true, // Github-flavored markdown
+    sanitize: true // Sanitize HTML tags
+  });
 
   var module = require('modules').get('kibana/markdown_vis', ['kibana']);
   module.controller('KbnMarkdownVisController', function ($scope, $sce) {
