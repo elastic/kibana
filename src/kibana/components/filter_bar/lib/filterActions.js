@@ -31,7 +31,7 @@ define(function (require) {
        * @returns {void}
        */
       function applyGlobalFilters() {
-        var filters = ($scope.state) ? $scope.state.filters : [];
+        var filters = ($scope.state) ? _.filter($scope.state.filters, { meta: { pinned: false }}) : [];
         $scope.filters = _.union(filters, globalState.filters || []);
         saveState();
       }
@@ -71,7 +71,7 @@ define(function (require) {
        */
       function pinFilter(filter, force) {
         var pinned = _.isUndefined(force) ? !filter.meta.pinned : force;
-        filter.meta.pinned = pinned;
+        filter.meta.pinned = !!pinned;
 
         saveState();
         return filter;
@@ -162,7 +162,7 @@ define(function (require) {
 
         // only save state if state exists
         if ($scope.state) {
-          $scope.state.filters = $scope.filters;
+          $scope.state.filters = _.union($scope.filters);
         }
       }
 
@@ -171,7 +171,7 @@ define(function (require) {
        * @returns {void}
        */
       function saveGlobalState() {
-        globalState.filters = _.filter($scope.filters, { meta: { pinned: true } });
+        globalState.filters = _.union(_.filter($scope.filters, { meta: { pinned: true } }));
         globalState.save();
       }
     };
