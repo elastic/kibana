@@ -32,7 +32,8 @@ define(function (require) {
        */
       function applyGlobalFilters() {
         var filters = ($scope.state) ? _.filter($scope.state.filters, { meta: { pinned: false }}) : [];
-        $scope.filters = _.union(filters, globalState.filters || []);
+        var globalFilters = (globalState.filters) ? _.filter(globalState.filters, { meta: { pinned: true }}) : [];
+        $scope.filters = _.union(filters, globalFilters);
         saveState();
       }
 
