@@ -1,7 +1,7 @@
-/* global sinon */
 define(function (require) {
   return ['invert', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var filterActions, $rootScope, Promise, mapFilter, indexPattern, getIndexPatternStub;
 
     beforeEach(module('kibana'));
@@ -26,17 +26,24 @@ define(function (require) {
         filterActions = Private(require('components/filter_bar/lib/filterActions'));
 
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
-
-        $rootScope.state = {
-          filters: [
-            { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'jpg' } } } },
-            { meta: { index: 'logstash-*', negate: true }, query: { match: { 'extension': { query: 'png' } } } },
-            { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
-            { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
-            { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-          ]
-        };
       });
+    });
+
+    beforeEach(function (done) {
+      var filters = [
+        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'jpg' } } } },
+        { meta: { index: 'logstash-*', negate: true }, query: { match: { 'extension': { query: 'png' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
+        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+      ];
+
+      Promise.map(filters, mapFilter)
+      .then(function (filters) {
+        $rootScope.state = { filters: filters };
+        done();
+      });
+      $rootScope.$apply();
     });
 
     describe('invertFilter', function () {
@@ -46,47 +53,23 @@ define(function (require) {
         fn = filterActions($rootScope).invertFilter;
       });
 
-      it('should negate filter', function (done) {
+      it('should negate filter', function () {
         var filter = $rootScope.state.filters[0];
-        mapFilter(filter)
-        .then(function (result) {
-          expect(result.meta).to.have.property('negate', false);
-          return result;
-        })
-        .then(fn)
-        .then(function (result) {
-          expect(result.meta).to.have.property('negate', true);
-          done();
-        });
-        $rootScope.$apply();
+        expect(filter.meta).to.have.property('negate', false);
+        filter = fn(filter);
+        expect(filter.meta).to.have.property('negate', true);
       });
 
-      it('should de-negate filter', function (done) {
+      it('should de-negate filter', function () {
         var filter = $rootScope.state.filters[1];
-        mapFilter(filter)
-        .then(function (result) {
-          expect(result.meta).to.have.property('negate', true);
-          return result;
-        })
-        .then(fn)
-        .then(function (result) {
-          expect(result.meta).to.have.property('negate', false);
-          done();
-        });
-        $rootScope.$apply();
+        expect(filter.meta).to.have.property('negate', true);
+        filter = fn(filter);
+        expect(filter.meta).to.have.property('negate', false);
       });
     });
 
     describe('invertAll', function () {
       var fn;
-
-      beforeEach(function (done) {
-        Promise.map($rootScope.state.filters, mapFilter).then(function (filters) {
-          $rootScope.filters = filters;
-          done();
-        });
-        $rootScope.$apply();
-      });
 
       beforeEach(function () {
         fn = filterActions($rootScope).invertAll;
@@ -104,5 +87,3 @@ define(function (require) {
     });
   }];
 });
-
-

@@ -1,7 +1,7 @@
-/* global sinon */
 define(function (require) {
   return ['toggle', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var filterActions, mapFilter, $rootScope, Promise, getIndexPatternStub, indexPattern;
 
     beforeEach(module('kibana'));
@@ -17,23 +17,31 @@ define(function (require) {
     });
 
     beforeEach(inject(function (_Promise_, _$rootScope_, Private) {
-      Promise = _Promise_;
-      $rootScope = _$rootScope_;
-      filterActions = Private(require('components/filter_bar/lib/filterActions'));
-      mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        Promise = _Promise_;
+        $rootScope = _$rootScope_;
+        filterActions = Private(require('components/filter_bar/lib/filterActions'));
+        mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
+        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-      getIndexPatternStub.returns(Promise.resolve(indexPattern));
+        getIndexPatternStub.returns(Promise.resolve(indexPattern));
+      })
+    );
 
-      $rootScope.state = {
-        filters: [
-          { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
-          { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
-          { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-          { meta: { index: 'logstash-*', disabled: true }, missing: { field: 'host' } },
-        ]
-      };
-    }));
+    beforeEach(function (done) {
+      var filters = [
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
+        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+        { meta: { index: 'logstash-*', disabled: true }, missing: { field: 'host' } },
+      ];
+
+      Promise.map(filters, mapFilter)
+      .then(function (filters) {
+        $rootScope.state = { filters: filters };
+        done();
+      });
+      $rootScope.$apply();
+    });
 
     describe('toggleFilter', function () {
       var fn;
@@ -42,31 +50,14 @@ define(function (require) {
         fn = filterActions($rootScope).toggleFilter;
       });
 
-      it('should toggle filters on and off', function (done) {
-        var filter = $rootScope.state.filters[0];
-        mapFilter(filter).then(fn).then(function (result) {
-          expect(result.meta).to.have.property('disabled', true);
-          done();
-        });
-        $rootScope.$apply();
+      it('should toggle filters on and off', function () {
+        var filter = fn($rootScope.state.filters[0]);
+        expect(filter.meta).to.have.property('disabled', true);
       });
     });
 
     describe('toggleAll', function () {
       var fn;
-
-      beforeEach(function (done) {
-        var _filters = _($rootScope.state.filters)
-          .filter(function (filter) { return filter; })
-          .flatten(true)
-          .value();
-
-        Promise.map(_filters, mapFilter).then(function (filters) {
-          $rootScope.filters = filters;
-          done();
-        });
-        $rootScope.$apply();
-      });
 
       beforeEach(function () {
         fn = filterActions($rootScope).toggleAll;

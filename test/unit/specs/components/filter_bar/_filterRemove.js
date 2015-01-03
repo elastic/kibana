@@ -1,26 +1,46 @@
 define(function (require) {
-
   return ['remove', function () {
-    var filterActions, $rootScope;
+    var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
+    var filterActions, mapFilter, $rootScope, Promise, getIndexPatternStub, indexPattern;
+
+    beforeEach(module('kibana'));
 
     beforeEach(function () {
-      // load the application
-      module('kibana');
+      getIndexPatternStub = sinon.stub();
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', function () {
+          var courier = { indexPatterns: { get: getIndexPatternStub } };
+          return courier;
+        });
+      });
+    });
 
-      inject(function (_$rootScope_, Private) {
+    beforeEach(inject(function (_Promise_, _$rootScope_, Private) {
+        Promise = _Promise_;
         $rootScope = _$rootScope_;
         filterActions = Private(require('components/filter_bar/lib/filterActions'));
+        mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
+        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-        $rootScope.state = {
-          filters: [
-            { query: { match: { '@tags': { query: 'test' } } } },
-            { query: { match: { '@tags': { query: 'bar' } } } },
-            { exists: { field: '@timestamp' } },
-            { missing: { field: 'host' }, meta: { disabled: true } },
-          ]
-        };
+        getIndexPatternStub.returns(Promise.resolve(indexPattern));
+      })
+    );
+
+    beforeEach(function (done) {
+      var filters = [
+        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'foo' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'bar' } } } },
+        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+        { meta: { index: 'logstash-*', disabled: true }, missing: { field: 'host' } },
+      ];
+
+      Promise.map(filters, mapFilter)
+      .then(function (filters) {
+        $rootScope.state = { filters: filters };
+        done();
       });
-
+      $rootScope.$apply();
     });
 
     describe('removeFilter', function () {
@@ -52,5 +72,3 @@ define(function (require) {
     });
   }];
 });
-
-

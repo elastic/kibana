@@ -1,26 +1,48 @@
 define(function (require) {
+  return ['add', function () {
+    var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
+    var filterActions, $rootScope, Promise, mapFilter, indexPattern, getIndexPatternStub;
 
-  return ['remove', function () {
-    var filterActions, $rootScope;
+    beforeEach(module('kibana'));
 
     beforeEach(function () {
-      // load the application
-      module('kibana');
+      getIndexPatternStub = sinon.stub();
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', function () {
+          var courier = { indexPatterns: { get: getIndexPatternStub } };
+          return courier;
+        });
+      });
+    });
 
-      inject(function (_$rootScope_, Private) {
+    beforeEach(function () {
+      inject(function (_$rootScope_, _Promise_, Private) {
+        Promise = _Promise_;
         $rootScope = _$rootScope_;
+
+        mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
+        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         filterActions = Private(require('components/filter_bar/lib/filterActions'));
 
-        $rootScope.state = {
-          filters: [
-            { query: { match: { '@tags': { query: 'test' } } } },
-            { query: { match: { '@tags': { query: 'bar' } } } },
-            { exists: { field: '@timestamp' } },
-            { missing: { field: 'host' }, meta: { disabled: true } },
-          ]
-        };
+        getIndexPatternStub.returns(Promise.resolve(indexPattern));
       });
+    });
 
+    beforeEach(function (done) {
+      var filters = [
+        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'foo' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'bar' } } } },
+        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+        { meta: { index: 'logstash-*', disabled: true }, missing: { field: 'host' } },
+      ];
+
+      Promise.map(filters, mapFilter)
+      .then(function (filters) {
+        $rootScope.state = { filters: filters };
+        done();
+      });
+      $rootScope.$apply();
     });
 
     describe('addFilters', function () {
@@ -30,9 +52,9 @@ define(function (require) {
       beforeEach(function () {
         fn = filterActions($rootScope).addFilters;
         newFilters = [
-          { meta: { apply: true }, exists: { field: '_type' } },
-          { meta: { apply: false }, query: { query_string: { query: 'foo:bar' } } },
-          { meta: { apply: true }, query: { match: { 'extension': { query: 'jpg' } } } },
+          { meta: { index: 'logstash-*', apply: true }, query: { match: { 'extension': { query: 'baz' } } } },
+          { meta: { index: 'logstash-*', apply: false }, query: { match: { 'extension': { query: 'buz' } } } },
+          { meta: { index: 'logstash-*', disabled: true, apply: true }, missing: { field: 'geo.src' } },
         ];
       });
 
@@ -52,7 +74,7 @@ define(function (require) {
         expect($rootScope.state.filters[4]).to.eql(newFilters[0]);
       });
 
-      it('should not add filter that are not applied', function () {
+      it('should not add filters that are not applied', function () {
         expect($rootScope.state.filters.length).to.be(4);
         var filter = newFilters[1];
         fn(filter);

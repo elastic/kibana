@@ -24,40 +24,10 @@ define(function (require) {
     });
 
 
-    describe('global state', function () {
-      beforeEach(function () {
-        globalStateStub.filters = [
-          { meta: { pinned: true }, query: { match: { '@tags': { query: 'test1' } } } },
-          { meta: { pinned: false }, query: { match: { '@tags': { query: 'test2' } } } }
-        ];
-      });
-
+    describe('initialize', function () {
       it('should call save on global state', function () {
         var actions = filterActions($rootScope);
         expect(globalStateStub.save.callCount).to.be(1);
-      });
-
-      it('should load filters from global state', function () {
-        expect($rootScope.filters).to.be(undefined);
-        var actions = filterActions($rootScope);
-        expect($rootScope.filters.length).to.be(2);
-      });
-
-      it('should only persist pinned filters in global state', function () {
-        expect(globalStateStub.filters.length).to.be(2);
-        var actions = filterActions($rootScope);
-        expect(globalStateStub.filters.length).to.be(1);
-      });
-
-      it('should merge scope state and global state', function () {
-        $rootScope.state = {
-          filters: [
-            { meta: { negate: true }, query: { match: { '@tags': { query: 'test4' } } } }
-          ]
-        };
-
-        var actions = filterActions($rootScope);
-        expect($rootScope.filters.length).to.eql(3);
       });
     });
 

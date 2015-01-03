@@ -1,7 +1,7 @@
-/* global sinon */
 define(function (require) {
   return ['pin', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var filterActions, $rootScope, Promise, mapFilter, indexPattern, getIndexPatternStub, globalStateStub;
 
     beforeEach(module('kibana'));
@@ -34,16 +34,44 @@ define(function (require) {
         filterActions = Private(require('components/filter_bar/lib/filterActions'));
 
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
+      });
+    });
 
-        $rootScope.state = {
-          filters: [
-            { meta: { index: 'logstash-*', pinned: true }, query: { match: { 'extension': { query: 'jpg' } } } },
-            { meta: { index: 'logstash-*', negate: true, pinned: true }, query: { match: { 'extension': { query: 'png' } } } },
-            { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
-            { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
-            { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-          ]
-        };
+    beforeEach(function (done) {
+      var filters = [
+        { meta: { index: 'logstash-*', pinned: true }, query: { match: { 'extension': { query: 'jpg' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
+        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+      ];
+
+      globalStateStub.filters = [
+        { meta: { index: 'logstash-*', pinned: true }, query: { match: { '@tags': { query: 'test1' } } } },
+        { meta: { index: 'logstash-*', negate: true, pinned: true }, query: { match: { 'extension': { query: 'png' } } } },
+        { meta: { index: 'logstash-*', negate: true, pinned: true }, query: { match: { 'response': { query: '200' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '@tags': { query: 'test3' } } } }
+      ];
+
+      Promise.map(filters, mapFilter)
+      .then(function (filters) {
+        $rootScope.state = { filters: filters };
+        done();
+      });
+      $rootScope.$apply();
+    });
+
+    describe('global state', function () {
+      it('should only load unpinned filters from app state', function () {
+        globalStateStub.filters = [];
+        expect($rootScope.state.filters.length).to.be(3);
+        var actions = filterActions($rootScope);
+        expect($rootScope.filters.length).to.be(2);
+      });
+
+      it('should only load pinned filters from global state', function () {
+        expect($rootScope.state.filters.length).to.be(3);
+        var actions = filterActions($rootScope);
+        // 2 unpinned in scope state, 3 pinned in global state
+        expect($rootScope.state.filters.length).to.be(5);
       });
     });
 
@@ -54,74 +82,52 @@ define(function (require) {
         fn = filterActions($rootScope).pinFilter;
       });
 
-      it('should set pinned state and append to global state', function (done) {
-        var filter = $rootScope.state.filters[2];
-
-        mapFilter(filter)
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(false);
-          expect(globalStateStub.filters.length).to.be(2);
-          return result;
-        })
-        .then(fn)
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(true);
-          expect(globalStateStub.filters.length).to.be(3);
-          done();
-        });
-        $rootScope.$apply();
-      });
-
-      it('should unpin filter from global state', function (done) {
+      it('should set pinned state and append to global state', function () {
         var filter = $rootScope.state.filters[0];
 
-        mapFilter(filter)
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(true);
-          expect(globalStateStub.filters.length).to.be(2);
-          return result;
-        })
-        .then(fn)
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(false);
-          expect(globalStateStub.filters.length).to.be(1);
-          done();
-        });
-        $rootScope.$apply();
+        expect(filter.meta.pinned).to.be(false);
+        expect(globalStateStub.filters.length).to.be(3);
+
+        filter = fn(filter);
+
+        expect(filter.meta.pinned).to.be(true);
+        expect(globalStateStub.filters.length).to.be(4);
       });
 
-      it('should force pin filter to global state', function (done) {
+      it('should unpin filter from global state', function () {
+        var filter = globalStateStub.filters[0];
+
+        expect(filter.meta.pinned).to.be(true);
+        expect(globalStateStub.filters.length).to.be(3);
+
+        filter = fn(filter);
+
+        expect(filter.meta.pinned).to.be(false);
+        expect(globalStateStub.filters.length).to.be(2);
+      });
+
+      it('should force pin filter to global state', function () {
+        var filter = globalStateStub.filters[0];
+
+        expect(filter.meta.pinned).to.be(true);
+        expect(globalStateStub.filters.length).to.be(3);
+
+        filter = fn(filter, true);
+
+        expect(filter.meta.pinned).to.be(true);
+        expect(globalStateStub.filters.length).to.be(3);
+      });
+
+      it('should force unpin filter from global state', function () {
         var filter = $rootScope.state.filters[0];
 
-        mapFilter(filter)
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(true);
-          expect(globalStateStub.filters.length).to.be(2);
-          return fn(result, true);
-        })
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(true);
-          expect(globalStateStub.filters.length).to.be(2);
-          done();
-        });
-        $rootScope.$apply();
-      });
+        expect(filter.meta.pinned).to.be(false);
+        expect(globalStateStub.filters.length).to.be(3);
 
-      it('should force unpin filter from global state', function (done) {
-        var filter = $rootScope.state.filters[2];
+        filter = fn(filter, false);
 
-        mapFilter(filter)
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(false);
-          expect(globalStateStub.filters.length).to.be(2);
-          return fn(result, false);
-        })
-        .then(function (result) {
-          expect(result.meta.pinned).to.be(false);
-          expect(globalStateStub.filters.length).to.be(2);
-          done();
-        });
-        $rootScope.$apply();
+        expect(filter.meta.pinned).to.be(false);
+        expect(globalStateStub.filters.length).to.be(3);
       });
     });
 
