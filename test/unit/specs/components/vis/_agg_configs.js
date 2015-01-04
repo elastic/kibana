@@ -16,7 +16,13 @@ define(function (require) {
       // replace the AggConfig module with a spy
       var RealAggConfigPM = require('components/vis/_agg_config');
       AggConfig = Private(RealAggConfigPM);
-      Private.stub(RealAggConfigPM, sinon.spy(AggConfig));
+      var spy = sinon.spy(AggConfig);
+      Object.defineProperty(spy, 'aggTypes', {
+        get: function () { return AggConfig.aggTypes; },
+        set: function (val) { AggConfig.aggTypes = val; }
+      });
+
+      Private.stub(RealAggConfigPM, spy);
 
       // load main deps
       Vis = Private(require('components/vis/vis'));
