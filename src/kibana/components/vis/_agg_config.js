@@ -80,8 +80,10 @@ define(function (require) {
         }
 
         if (aggParam.deserialize) {
-          var isType = _.isFunction(aggParam.type) && (val instanceof aggParam.type);
-          var isObject = !isType && _.isObject(val);
+          var isTyped = _.isFunction(aggParam.type);
+
+          var isType = isTyped && (val instanceof aggParam.type);
+          var isObject = !isTyped && _.isObject(val);
           var isDeserialized = (isType || isObject);
 
           if (!isDeserialized) {

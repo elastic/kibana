@@ -46,12 +46,6 @@ define(function (require) {
         },
         {
           name: 'orderBy',
-          type: 'optioned',
-          default: 'count',
-          options: [
-            { display: 'Document Count', val: 'count' },
-            { display: 'Custom Metric', val: 'agg' }
-          ],
           write: _.noop // prevent default write, it's handled by orderAgg
         },
         {
@@ -66,16 +60,32 @@ define(function (require) {
             return new AggConfig(aggConfig.vis, stateJSON);
           },
           controller: function ($scope) {
-            $scope.$watch('params.orderBy', function (orderBy) {
-              if (!orderBy) return;
-              if (orderBy.val !== 'agg') {
-                $scope.params.orderAgg = null;
+            $scope.safeMakeLabel = function (agg) {
+              try {
+                return agg.makeLabel();
+              } catch (e) {
+                return '- agg not valid -';
+              }
+            };
+
+            $scope.$watch('params.orderBy', function (orderBy, prevOrderBy) {
+              var agg = $scope.aggConfig;
+              var aggs = agg.vis.aggs;
+              var params = $scope.params;
+
+              if (orderBy === prevOrderBy && !orderBy) {
+                params.orderBy = (_.first(aggs.bySchemaGroup.metrics) || { id: 'custom' }).id;
                 return;
               }
-              if ($scope.params.orderAgg) return;
 
-              var agg = $scope.aggConfig;
-              $scope.params.orderAgg = new AggConfig(agg.vis, {
+              if (!orderBy) return;
+              if (orderBy !== 'custom') {
+                params.orderAgg = null;
+                return;
+              }
+              if (params.orderAgg) return;
+
+              params.orderAgg = new AggConfig(agg.vis, {
                 schema: _.first(agg.vis.type.schemas.metrics)
               });
             });
@@ -84,12 +94,13 @@ define(function (require) {
             var dir = agg.params.order.val;
             var order = output.params.order = {};
 
-            if (agg.params.orderAgg) {
-              output.subAggs = (output.subAggs || []).concat(agg.params.orderAgg);
-              order[agg.params.orderAgg.id] = dir;
-            } else {
-              order._count = dir;
+            var orderAgg = agg.params.orderAgg;
+            if (!orderAgg) {
+              orderAgg = agg.vis.aggs.byId[agg.params.orderBy];
             }
+
+            output.subAggs = (output.subAggs || []).concat(orderAgg);
+            order[orderAgg.id] = dir;
           }
         }
       ]

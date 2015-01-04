@@ -1,18 +1,28 @@
-<div class="form-group">
-  <label>Order By</label>
-  <select
-    name="orderBy"
-    ng-model="params.orderBy"
-    required
-    ng-options="opt as opt.display for opt in aggType.params.byName.orderBy.options"
-    class="form-control">
-  </select>
-</div>
-<div ng-controller="aggParam.controller" ng-show="params.orderAgg" class="vis-editor-agg-order-agg">
-  <label>{{params.orderBy.display}} Aggregation</label>
-  <vis-editor-agg-params
-    agg="params.orderAgg"
-    ng-if="params.orderAgg"
-    group-name="'metrics'">
-  </vis-editor-agg-params>
+<div ng-controller="aggParam.controller">
+  <div class="form-group">
+    <label>Order By</label>
+    <select
+      name="orderBy"
+      ng-model="params.orderBy"
+      required
+      class="form-control">
+      <option
+        ng-repeat="agg in aggConfig.vis.aggs.bySchemaGroup.metrics"
+        value="{{agg.id}}"
+        ng-selected="params.orderBy === agg.id || (!params.orderBy && $index === 0)">
+        metric #{{$index + 1}}: {{safeMakeLabel(agg)}}
+      </option>
+      <option value="custom" ng-selected="params.orderBy === 'custom'">
+        Custom Metric
+      </option>
+    </select>
+  </div>
+  <div ng-show="params.orderAgg" class="vis-editor-agg-order-agg">
+    <label>{{params.orderBy.display}} Aggregation</label>
+    <vis-editor-agg-params
+      agg="params.orderAgg"
+      ng-if="params.orderAgg"
+      group-name="'metrics'">
+    </vis-editor-agg-params>
+  </div>
 </div>
