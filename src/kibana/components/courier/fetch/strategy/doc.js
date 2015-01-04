@@ -8,15 +8,10 @@ define(function (require) {
        * @param  {array} requests - an array of flattened requests
        * @return {string} - the request body
        */
-      convertReqsToBody: function (reqs) {
-        return Promise.map(reqs, function (req) {
-          return req.getFetchParams();
-        })
-        .then(function (reqsParams) {
-          return {
-            docs: reqsParams
-          };
-        });
+      reqsFetchParamsToBody: function (reqsFetchParams) {
+        return {
+          docs: reqsFetchParams
+        };
       },
 
       /**
