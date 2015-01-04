@@ -276,9 +276,9 @@ define(function (require) {
         var vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
-            { type: 'terms', schema: 'segment', params: { field: 'ip' } },
-            { type: 'terms', schema: 'segment', params: { field: 'extension' } },
-            { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
+            { type: 'terms', schema: 'segment', params: { field: 'ip', orderBy: 1 } },
+            { type: 'terms', schema: 'segment', params: { field: 'extension', orderBy: 1 } },
+            { id: 1, type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
             { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
             { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
             { type: 'max', schema: 'metric', params: { field: 'bytes' }  }
