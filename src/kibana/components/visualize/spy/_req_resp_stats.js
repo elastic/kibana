@@ -19,29 +19,25 @@ define(function (require) {
 
       if (!$scope.searchSource) return;
 
-      var searchHistory = $scope.searchSource.history;
-      if (!searchHistory) return;
+      var req = $scope.entry = _.last(_.deepGet($scope, 'searchSource.history'));
+      if (!req) return;
 
-      var entry = $scope.entry = _.find(searchHistory, 'state');
-      if (!entry) return;
-
-      var state = entry.state;
-      var resp = entry.resp;
+      var resp = req.resp;
       var meta = [];
 
       if (resp && resp.took != null) meta.push(['Query Duration', resp.took + 'ms']);
-      if (entry && entry.ms != null) meta.push(['Request Duration', entry.ms + 'ms']);
+      if (req && req.ms != null) meta.push(['Request Duration', req.ms + 'ms']);
       if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
 
-      if (state.index) meta.push(['Index', state.index]);
-      if (state.type) meta.push(['Type', state.type]);
-      if (state.id) meta.push(['Id', state.id]);
+      if (req.fetchParams.index) meta.push(['Index', req.fetchParams.index]);
+      if (req.fetchParams.type) meta.push(['Type', req.fetchParams.type]);
+      if (req.fetchParams.id) meta.push(['Id', req.fetchParams.id]);
 
       $scope.history = {
         meta: meta,
-        req: state.body,
-        resp: entry.resp,
-        complete: entry.complete
+        req: req.fetchParams.body,
+        resp: req.resp,
+        complete: req.complete
       };
     });
   };
