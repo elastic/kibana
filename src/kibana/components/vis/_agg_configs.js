@@ -106,6 +106,23 @@ define(function (require) {
       });
     };
 
+    /**
+     * Gets the AggConfigs (and possibly ValueAggConfigs) that
+     * represent the values that will be produced when all aggs
+     * are run.
+     *
+     * With multi-value metric aggs it is possible for a single agg
+     * request to result in multiple agg values, which is why the length
+     * of a vis' responseValuesAggs may be different than the vis' aggs
+     *
+     * @return {array[AggConfig]}
+     */
+    AggConfigs.prototype.getResponseValueAggs = function () {
+      return this.getSorted().reduce(function (responseValuesAggs, agg) {
+        return responseValuesAggs.concat(agg.getResponseValueAggs() || agg);
+      }, []);
+    };
+
     return AggConfigs;
   };
 });
