@@ -99,8 +99,12 @@ define(function (require) {
               orderAgg = agg.vis.aggs.byId[agg.params.orderBy];
             }
 
-            output.subAggs = (output.subAggs || []).concat(orderAgg);
-            order[orderAgg.id] = dir;
+            if (orderAgg.type.name === 'count') {
+              order._count = dir;
+            } else {
+              output.subAggs = (output.subAggs || []).concat(orderAgg);
+              order[orderAgg.id] = dir;
+            }
           }
         }
       ]
