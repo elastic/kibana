@@ -4,6 +4,8 @@ define(function (require) {
     var AggConfig = Private(require('components/vis/_agg_config'));
     var IndexedArray = require('utils/indexed_array/index');
 
+    AggConfig.aggTypes = Private(require('components/agg_types/index'));
+
     _(AggConfigs).inherits(IndexedArray);
     function AggConfigs(vis, configStates) {
       var self = this;

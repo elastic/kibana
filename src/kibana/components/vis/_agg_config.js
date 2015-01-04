@@ -1,7 +1,6 @@
 define(function (require) {
   return function AggConfigFactory(Private) {
     var _ = require('lodash');
-    var aggTypes = Private(require('components/agg_types/index'));
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
 
     function AggConfig(vis, opts) {
@@ -14,7 +13,7 @@ define(function (require) {
       // get the config type
       self.type = opts.type;
       if (_.isString(self.type)) {
-        self.type = aggTypes.byName[self.type];
+        self.type = AggConfig.aggTypes.byName[self.type];
       }
 
       // get the config schema
@@ -81,8 +80,11 @@ define(function (require) {
         }
 
         if (aggParam.deserialize) {
-          if (!_.isObject(val)) {
-            // only deserialize if we have a scalar value
+          var isType = _.isFunction(aggParam.type) && (val instanceof aggParam.type);
+          var isObject = !isType && _.isObject(val);
+          var isDeserialized = (isType || isObject);
+
+          if (!isDeserialized) {
             val = aggParam.deserialize(val, self);
           }
 

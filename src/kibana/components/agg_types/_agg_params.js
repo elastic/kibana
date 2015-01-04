@@ -9,7 +9,7 @@ define(function (require) {
       optioned: Private(require('components/agg_types/param_types/optioned')),
       regex: Private(require('components/agg_types/param_types/regex')),
       string: Private(require('components/agg_types/param_types/string')),
-      raw_json: Private(require('components/agg_types/param_types/raw_json')),
+      json: Private(require('components/agg_types/param_types/raw_json')),
       _default: Private(require('components/agg_types/param_types/base'))
     };
 
