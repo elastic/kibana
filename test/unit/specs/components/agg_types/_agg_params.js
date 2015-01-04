@@ -26,10 +26,9 @@ define(function (require) {
           { name: 'one' },
           { name: 'two' }
         ];
-        var paramLength = params.length + 1; // json is appended
         var aggParams = new AggParams(params);
 
-        expect(aggParams).to.have.length(paramLength);
+        expect(aggParams).to.have.length(params.length);
         expect(aggParams).to.be.an(Array);
         expect(aggParams.byName).to.have.keys(['one', 'two']);
       });
@@ -40,10 +39,9 @@ define(function (require) {
         var params = [
           { name: 'field' }
         ];
-        var paramLength = params.length + 1; // json is appended
         var aggParams = new AggParams(params);
 
-        expect(aggParams).to.have.length(paramLength);
+        expect(aggParams).to.have.length(params.length);
         expect(aggParams[0]).to.be.a(FieldAggParam);
       });
 
@@ -54,10 +52,9 @@ define(function (require) {
             type: 'optioned'
           }
         ];
-        var paramLength = params.length + 1; // json is appended
         var aggParams = new AggParams(params);
 
-        expect(aggParams).to.have.length(paramLength);
+        expect(aggParams).to.have.length(params.length);
         expect(aggParams[0]).to.be.a(OptionedAggParam);
       });
 
@@ -68,10 +65,9 @@ define(function (require) {
             type: 'regex'
           }
         ];
-        var paramLength = params.length + 1; // json is appended
         var aggParams = new AggParams(params);
 
-        expect(aggParams).to.have.length(paramLength);
+        expect(aggParams).to.have.length(params.length);
         expect(aggParams[0]).to.be.a(RegexAggParam);
       });
 
@@ -90,14 +86,13 @@ define(function (require) {
             editor: '<blink>small</blink>'
           }
         ];
-        var paramLength = params.length + 1; // json is appended
         var aggParams = new AggParams(params);
 
-        expect(BaseAggParam).to.have.property('callCount', paramLength);
+        expect(BaseAggParam).to.have.property('callCount', params.length);
         expect(FieldAggParam).to.have.property('callCount', 0);
         expect(OptionedAggParam).to.have.property('callCount', 0);
 
-        expect(aggParams).to.have.length(paramLength);
+        expect(aggParams).to.have.length(params.length);
         aggParams.forEach(function (aggParam) {
           expect(aggParam).to.be.a(BaseAggParam);
         });
