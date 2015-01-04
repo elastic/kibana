@@ -1,14 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var fromUser = require('components/validate_query/lib/from_user');
-  var toUser = require('components/validate_query/lib/to_user');
 
   require('services/debounce');
 
   require('modules')
     .get('kibana')
-    .directive('validateQuery', function (es, $compile, timefilter, configFile, debounce) {
+    .directive('validateQuery', function (es, $compile, timefilter, configFile, debounce, Private) {
+      var fromUser = Private(require('components/validate_query/lib/from_user'));
+      var toUser = require('components/validate_query/lib/to_user');
+
       return {
         restrict: 'A',
         require: 'ngModel',

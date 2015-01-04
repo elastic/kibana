@@ -1,0 +1,13 @@
+<div ng-if="aggIsTooLow" class="form-group">
+  <p class="vis-editor-agg-error">
+    "{{ agg.schema.title }}" aggs must run before all other buckets!
+  </p>
+  <input
+    type="number"
+    name="order"
+    ng-model="$index"
+    max="{{aggIsTooLow ? $index - 1 : $index}}"
+    style="display: none;">
+</div>
+
+<!-- schema editors get added down here: aggSelect.html, agg_types/controls/*.html -->

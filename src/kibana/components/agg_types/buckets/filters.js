@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
+    var decorateQuery = Private(require('components/courier/data_source/_decorate_query'));
     var notif = new Notifier({ location: 'Filters Agg' });
 
     return new BucketAggType({
@@ -24,6 +25,8 @@ define(function (require) {
 
               var query = input.query;
               if (!query) return notif.log('malformed filter agg params, missing "query" on input');
+
+              decorateQuery(query);
 
               var label = _.deepGet(query, 'query_string.query') || JSON.stringify(query);
               filters[label] = input;

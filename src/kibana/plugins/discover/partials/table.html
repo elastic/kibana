@@ -4,14 +4,12 @@
     columns="columns"
     index-pattern="indexPattern"
     sorting="sorting"
-    timefield="timefield">
   </thead>
   <tbody>
     <tr ng-repeat="row in rows |limitTo:limit track by row._index+row._id"
       kbn-table-row="row"
       columns="columns"
       sorting="sorting"
-      timefield="timefield"
       filter="filtering"
       index-pattern="indexPattern"
       class="discover-table-row"></tr>

@@ -16,7 +16,13 @@ define(function (require) {
       // replace the AggConfig module with a spy
       var RealAggConfigPM = require('components/vis/_agg_config');
       AggConfig = Private(RealAggConfigPM);
-      Private.stub(RealAggConfigPM, sinon.spy(AggConfig));
+      var spy = sinon.spy(AggConfig);
+      Object.defineProperty(spy, 'aggTypes', {
+        get: function () { return AggConfig.aggTypes; },
+        set: function (val) { AggConfig.aggTypes = val; }
+      });
+
+      Private.stub(RealAggConfigPM, spy);
 
       // load main deps
       Vis = Private(require('components/vis/vis'));
@@ -270,9 +276,9 @@ define(function (require) {
         var vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
-            { type: 'terms', schema: 'segment', params: { field: 'ip' } },
-            { type: 'terms', schema: 'segment', params: { field: 'extension' } },
-            { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
+            { type: 'terms', schema: 'segment', params: { field: 'ip', orderBy: 1 } },
+            { type: 'terms', schema: 'segment', params: { field: 'extension', orderBy: 1 } },
+            { id: 1, type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
             { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
             { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
             { type: 'max', schema: 'metric', params: { field: 'bytes' }  }

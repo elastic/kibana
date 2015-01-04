@@ -253,6 +253,9 @@ define(function (require) {
       }())
       .then(function () {
         if (type === 'search') {
+          // This is down here to prevent the circular dependency
+          var decorateQuery = Private(require('components/courier/data_source/_decorate_query'));
+
           flatState.body = flatState.body || {};
 
           // defaults for the query
@@ -261,6 +264,8 @@ define(function (require) {
               'match_all': {}
             };
           }
+
+          decorateQuery(flatState.body.query);
 
           var computedFields = flatState.index.getComputedFields();
           flatState.body.fields = computedFields.fields;
@@ -297,6 +302,12 @@ define(function (require) {
           // switch to filtered query if there are filters
           if (flatState.filters) {
             if (flatState.filters.length) {
+              _.each(flatState.filters, function (filter) {
+                if (filter.query) {
+                  decorateQuery(filter.query);
+                }
+              });
+
               flatState.body.query = {
                 filtered: {
                   query: flatState.body.query,
