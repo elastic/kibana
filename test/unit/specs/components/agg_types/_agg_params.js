@@ -21,19 +21,6 @@ define(function (require) {
     }));
 
     describe('constructor args', function () {
-      it('accepts an object of params defs', function () {
-        var params = {
-          one: {},
-          two: {}
-        };
-        var paramLength = Object.keys(params).length + 1; // json is appended
-        var aggParams = new AggParams(params);
-
-        expect(aggParams).to.have.length(paramLength);
-        expect(aggParams).to.be.an(Array);
-        expect(aggParams.byName).to.have.keys(['one', 'two']);
-      });
-
       it('accepts an array of param defs', function () {
         var params = [
           { name: 'one' },
