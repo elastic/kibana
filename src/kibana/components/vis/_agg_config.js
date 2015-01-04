@@ -189,8 +189,10 @@ define(function (require) {
       );
     };
 
-    AggConfig.prototype.getReplacements = function () {
-      return this.type.getReplacementAggs && this.type.getReplacementAggs(this);
+    AggConfig.prototype.getResponseValueAggs = function () {
+      if (_.isFunction(this.type.getResponseValueAggs)) {
+        return this.type.getResponseValueAggs(this);
+      }
     };
 
     AggConfig.prototype.getValue = function (bucket) {

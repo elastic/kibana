@@ -32,7 +32,7 @@ define(function (require) {
           default: [1, 5, 25, 50, 75, 95, 99]
         }
       ],
-      getReplacementAggs: function (agg) {
+      getResponseValueAggs: function (agg) {
         var ValueAggConfig = getValueAggConfig(agg, valueProps);
 
         return agg.params.percents.map(function (percent) {
