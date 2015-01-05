@@ -18,7 +18,8 @@ define(function (require) {
 
         tableGroups = tabifyAggResponse(vis, resp, {
           partialRows: params.showPartialRows,
-          minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels
+          minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels,
+          asAggConfigResults: true
         });
 
         hasSomeRows = tableGroups.tables.some(function haveRows(table) {

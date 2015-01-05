@@ -2,8 +2,10 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var module = require('modules').get('kibana');
+  var AggConfigResult = require('components/vis/_agg_config_result');
 
-  module.directive('kbnRows', function ($compile) {
+  module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
+    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
     return {
       restrict: 'A',
       link: function ($scope, $el, attr) {
@@ -13,6 +15,27 @@ define(function (require) {
           // TODO: It would be better to actually check the type of the field, but we don't have
           // access to it here. This may become a problem with the switch to BigNumber
           if (_.isNumeric(contents)) $cell.addClass('numeric-value');
+
+          var createAggConfigResultCell = function (aggConfigResult) {
+            var $cell = $(document.createElement('td'));
+            var $state = getAppState();
+            var clickHandler = filterBarClickHandler($state);
+            $cell.scope = $scope.$new();
+            $cell.addClass('cell-hover');
+            $cell.attr('ng-click', 'clickHandler()');
+            $cell.scope.clickHandler = function (negate) {
+              clickHandler({ point: { aggConfigResult: aggConfigResult } });
+            };
+            return $compile($cell)($cell.scope);
+          };
+
+
+          if (contents instanceof AggConfigResult) {
+            if (contents.type === 'bucket' && contents.aggConfig.field().filterable) {
+              $cell = createAggConfigResultCell(contents);
+            }
+            contents = contents.toString();
+          }
 
           if (_.isObject(contents)) {
             if (contents.scope) {
