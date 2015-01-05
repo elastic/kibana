@@ -4,7 +4,6 @@ define(function (require) {
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
     require('angular-ui-select');
     require('filters/field_type');
-    require('filters/match_any');
     require('plugins/visualize/editor/agg_param');
 
     var _ = require('lodash');
@@ -150,7 +149,7 @@ define(function (require) {
 
             if (fieldTypes) {
               fields = $filter('fieldType')(fields, fieldTypes);
-              fields = $filter('matchAny')(fields, [{ indexed: true }, { scripted: true }]);
+              fields = $filter('filter')(fields, { bucketable: true });
               fields = $filter('orderBy')(fields, ['type', 'name']);
             }
 
