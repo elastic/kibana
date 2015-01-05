@@ -129,7 +129,7 @@ define(function (require) {
 
       it('should sort ascending on first invocation', function () {
         // sortColumn
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -139,8 +139,8 @@ define(function (require) {
 
       it('should sort descending on second invocation', function () {
         // sortColumn
-        paginatedTable.sortColumn(data.columns[0]);
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -150,9 +150,9 @@ define(function (require) {
 
       it('should clear sorting on third invocation', function () {
         // sortColumn
-        paginatedTable.sortColumn(data.columns[0]);
-        paginatedTable.sortColumn(data.columns[0]);
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
+        paginatedTable.sortColumn(0);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -162,10 +162,11 @@ define(function (require) {
 
       it('should sort new column ascending', function () {
         // sort by first column
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
+
         // sort by second column
-        paginatedTable.sortColumn(data.columns[1]);
+        paginatedTable.sortColumn(1);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -197,7 +198,7 @@ define(function (require) {
       // TODO: This is failing randomly
       it('should allow custom sorting handler', function () {
         var columnIndex = 1;
-        paginatedTable.sortColumn(data.columns[columnIndex]);
+        paginatedTable.sortColumn(columnIndex);
         $scope.$digest();
         expect(sortHandler.callCount).to.be(1);
         expect(sortHandler.getCall(0).args[0]).to.be(columnIndex);
@@ -233,7 +234,7 @@ define(function (require) {
       });
 
       it('should sort using object value', function () {
-        paginatedTable.sortColumn(cols[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('h1').size()).to.be(0);
@@ -241,7 +242,7 @@ define(function (require) {
         // html row should be the last row
         expect(tableRows.eq(2).find('h1').size()).to.be(1);
 
-        paginatedTable.sortColumn(cols[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
         tableRows = $el.find('tbody tr');
         // html row should be the first row
