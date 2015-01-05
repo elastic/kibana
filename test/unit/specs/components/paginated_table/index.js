@@ -1,7 +1,6 @@
 define(function (require) {
   require('components/paginated_table/paginated_table');
   var _ = require('lodash');
-  var faker = require('faker');
   var sinon = require('sinon/sinon');
 
   describe('paginated table', function () {
@@ -14,19 +13,33 @@ define(function (require) {
     var defaultPerPage = 10;
 
     var makeData = function (colCount, rowCount) {
-      // faker.Lorem.words can generate the same word multiple times
-      // so, generate 3x the request number, use uniq, and trim down to the requested total
-      var cols = _.uniq(faker.Lorem.words(colCount * 3)).slice(0, colCount).map(function (word) {
-        return { title: word };
-      });
-
+      var columns = [];
       var rows = [];
-      _.times(rowCount, function () {
-        rows.push(faker.Lorem.words(colCount));
-      });
+
+      if (_.isNumber(colCount)) {
+        _.times(colCount, function (i) {
+          columns.push({ title: 'column' + i });
+        });
+      } else {
+        columns = colCount;
+      }
+
+      if (_.isNumber(rowCount)) {
+        _.times(rowCount, function (col) {
+          var rowItems = [];
+
+          _.times(columns.length, function (row) {
+            rowItems.push('item' + col + row);
+          });
+
+          rows.push(rowItems);
+        });
+      } else {
+        rows = rowCount;
+      }
 
       return {
-        columns: cols,
+        columns: columns,
         rows: rows
       };
     };
@@ -53,9 +66,9 @@ define(function (require) {
       $scope = $rootScope.$new();
     });
 
-    afterEach(function () {
-      $scope.$destroy();
-    });
+    // afterEach(function () {
+    //   $scope.$destroy();
+    // });
 
     describe('rendering', function () {
       it('should not display without rows', function () {
@@ -106,20 +119,21 @@ define(function (require) {
       var paginatedTable;
 
       beforeEach(function () {
-        data = makeData(3, 0);
-        data.rows.push(['bbbb', 'aaaa', 'zzzz']);
-        data.rows.push(['cccc', 'cccc', 'aaaa']);
-        data.rows.push(['zzzz', 'bbbb', 'bbbb']);
-        data.rows.push(['aaaa', 'zzzz', 'cccc']);
+        data = makeData(3, [
+          ['bbbb', 'aaaa', 'zzzz'],
+          ['cccc', 'cccc', 'aaaa'],
+          ['zzzz', 'bbbb', 'bbbb'],
+          ['aaaa', 'zzzz', 'cccc'],
+        ]);
 
         lastRowIndex = data.rows.length - 1;
         renderTable(data.columns, data.rows);
         paginatedTable = $el.isolateScope().paginatedTable;
       });
 
-      afterEach(function () {
-        $scope.$destroy();
-      });
+      // afterEach(function () {
+      //   $scope.$destroy();
+      // });
 
       it('should not sort by default', function () {
         var tableRows = $el.find('tbody tr');
@@ -196,6 +210,25 @@ define(function (require) {
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
         expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).to.be('zzzz');
+      });
+
+      it('should handle sorting on columns with the same name', function () {
+        data.columns = [];
+        for (var i = 0; i < data.rows[0].length; i++) {
+          data.columns.push({ title: 'test row' });
+        }
+
+        // sort by the last column
+        paginatedTable.sortColumn(2);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('aaaa');
+        expect(tableRows.eq(1).find('td').eq(2).text()).to.be('bbbb');
+        expect(tableRows.eq(2).find('td').eq(2).text()).to.be('cccc');
+        expect(tableRows.eq(3).find('td').eq(2).text()).to.be('zzzz');
       });
     });
 
