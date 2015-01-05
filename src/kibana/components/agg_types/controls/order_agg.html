@@ -7,9 +7,9 @@
       required
       class="form-control">
       <option
-        ng-repeat="respAgg in responseValueAggs"
+        ng-repeat="respAgg in responseValueAggs track by respAgg.id"
         value="{{respAgg.id}}"
-        ng-selected="agg.params.orderBy === respAgg.id || (!agg.params.orderBy && $index === 0)">
+        ng-selected="agg.params.orderBy === respAgg.id">
         <em>metric:</em> {{safeMakeLabel(respAgg)}}
       </option>
       <option value="custom" ng-selected="agg.params.orderBy === 'custom'">

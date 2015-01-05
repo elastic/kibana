@@ -124,6 +124,24 @@ define(function (require) {
       }, []);
     };
 
+
+    /**
+     * Find a response agg by it's id. This may be an agg in the aggConfigs, or one
+     * created specifically for a response value
+     *
+     * @param  {string} id - the id of the agg to find
+     * @return {AggConfig}
+     */
+    AggConfigs.prototype.getResponseAggById = function (id) {
+      var parts = String(id).split('.');
+      if (parts.length === 1) {
+        return this.byId[id];
+      }
+
+      var reqAgg = this.byId[parts[0]];
+      return _.find(reqAgg.getResponseAggs(), { id: id });
+    };
+
     return AggConfigs;
   };
 });

@@ -95,6 +95,10 @@ define(function (require) {
               // we aren't creating a custom aggConfig
               if (!orderBy || orderBy !== 'custom') {
                 params.orderAgg = null;
+                // ensure that orderBy is set to a valid agg
+                if (!_.find($scope.responseValueAggs, { id: orderBy })) {
+                  params.orderBy = null;
+                }
                 return;
               }
 
@@ -104,20 +108,24 @@ define(function (require) {
             }
           },
           write: function (agg, output) {
+            var vis = agg.vis;
             var dir = agg.params.order.val;
             var order = output.params.order = {};
 
-            var orderAgg = agg.params.orderAgg;
-            if (!orderAgg) {
-              orderAgg = agg.vis.aggs.byId[agg.params.orderBy];
-            }
+            var orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
 
             if (orderAgg.type.name === 'count') {
               order._count = dir;
-            } else {
-              output.subAggs = (output.subAggs || []).concat(orderAgg);
-              order[orderAgg.id] = dir;
+              return;
             }
+
+            var orderAggId = orderAgg.id;
+            if (orderAgg.parentId) {
+              orderAgg = vis.aggs.byId[orderAgg.parentId];
+            }
+
+            output.subAggs = (output.subAggs || []).concat(orderAgg);
+            order[orderAggId] = dir;
           }
         }
       ]
