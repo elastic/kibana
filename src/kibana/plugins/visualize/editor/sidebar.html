@@ -2,30 +2,14 @@
   <div class="sidebar-container">
     <form class="sidebar-list"
           ng-class="{'hide-errors': hideErrors}"
-          ng-submit="visualizeEditor.$invalid ? dontApply() : apply()"
+          ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
           name="visualizeEditor">
       <ul class="list-unstyled">
         <!-- metrics -->
-        <vis-editor-agg-group
-          ng-if="vis.type.schemas.metrics"
-          vis="vis"
-          saved-vis="savedVis"
-          schemas="vis.type.schemas.metrics"
-          group="vis.aggs.bySchemaGroup.metrics"
-          group-name="'metrics'"
-          >
-        </vis-editor-agg-group>
+        <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
 
         <!-- buckets -->
-        <vis-editor-agg-group
-          ng-if="vis.type.schemas.buckets"
-          vis="vis"
-          saved-vis="savedVis"
-          schemas="vis.type.schemas.buckets"
-          group="vis.aggs.bySchemaGroup.buckets"
-          group-name="'buckets'"
-          >
-        </vis-editor-agg-group>
+        <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
 
         <!-- vis options -->
         <vis-editor-vis-options
@@ -44,7 +28,7 @@
           <button
             ng-disabled="!vis.dirty"
             type="button"
-            ng-click="reset()"
+            ng-click="resetEditableVis()"
             class="sidebar-item-button warn">
             Discard
           </button>

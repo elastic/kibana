@@ -54,7 +54,7 @@
 
       <!-- remove button -->
       <button
-        ng-if="group.length > groupMin"
+        ng-if="group.length > stats.min"
         ng-click="remove(agg)"
         tooltip="Remove Dimension"
         tooltip-append-to-body="true"

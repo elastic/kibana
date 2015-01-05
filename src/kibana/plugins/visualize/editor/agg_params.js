@@ -18,11 +18,11 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/agg_params.html'),
-      scope: {
-        agg: '=',
-        groupName: '='
-      },
-      link: function ($scope, $el) {
+      scope: true,
+      link: function ($scope, $el, attr) {
+        $scope.$bind('agg', attr.agg);
+        $scope.$bind('groupName', attr.groupName);
+
         $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
         $scope.advancedToggled = false;
 

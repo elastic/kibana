@@ -12,13 +12,11 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/agg_group.html'),
       replace: true,
-      scope: {
-        vis: '=',
-        schemas: '=',
-        group: '=',
-        groupName: '='
-      },
-      link: function ($scope) {
+      scope: true,
+      link: function ($scope, $el, attr) {
+        $scope.groupName = attr.groupName;
+        $scope.$bind('group', 'vis.aggs.bySchemaGroup["' + $scope.groupName + '"]');
+        $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
 
         // "sub-scope" for the add form to use
         $scope.addForm = {};

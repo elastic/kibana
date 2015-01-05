@@ -18,14 +18,6 @@ define(function (require) {
       restrict: 'E',
       replace: true,
       template: require('text!plugins/visualize/editor/agg.html'),
-      scope: {
-        vis: '=',
-        agg: '=',
-        $index: '=',
-        group: '=',
-        groupName: '=',
-        groupMin: '='
-      },
       link: function ($scope, $el) {
         $scope.editorOpen = $scope.agg.brandNew;
 
@@ -33,9 +25,6 @@ define(function (require) {
           '$index',
           'group.length'
         ], function () {
-          var i = $scope.$index;
-          $scope.$first = i === 0;
-          $scope.$last = i === $scope.group.length - 1;
           $scope.aggIsTooLow = calcAggIsTooLow();
         });
 

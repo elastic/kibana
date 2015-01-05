@@ -11,13 +11,10 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/sidebar.html'),
       replace: true,
-      scope: {
-        vis: '=',
-        savedVis: '=',
-        apply: '&',
-        reset: '&'
-      },
+      scope: true,
       link: function ($scope) {
+        $scope.$bind('vis', 'editableVis');
+
         $scope.hideErrors = true;
         $scope.dontApply = function () {
           $scope.hideErrors = false;
