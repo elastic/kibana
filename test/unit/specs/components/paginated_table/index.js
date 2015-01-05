@@ -127,6 +127,30 @@ define(function (require) {
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be(data.rows[lastRowIndex][0]);
       });
 
+      it('should do nothing when sorting by invalid column id', function () {
+        // sortColumn
+        paginatedTable.sortColumn(999);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
+      });
+
+      it('should do nothing when sorting by non sortable column', function () {
+        data.columns[0].sortable = false;
+
+        // sortColumn
+        paginatedTable.sortColumn(0);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
+      });
+
       it('should sort ascending on first invocation', function () {
         // sortColumn
         paginatedTable.sortColumn(0);
