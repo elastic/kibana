@@ -24,13 +24,13 @@ define(function (require) {
           direction: null
         };
 
-        self.sortColumn = function (col) {
-          if (col.sortable === false) return;
-          var sortDirection;
-          var cols = _.pluck($scope.columns, 'title');
-          var index = cols.indexOf(col.title);
+        self.sortColumn = function (colIndex) {
+          var col = $scope.columns[colIndex];
 
-          if (index === -1) return;
+          if (!col) return;
+          if (col.sortable === false) return;
+
+          var sortDirection;
 
           if (self.sort.columnName !== col.title) {
             sortDirection = 'asc';
@@ -45,7 +45,7 @@ define(function (require) {
 
           self.sort.columnName = col.title;
           self.sort.direction = sortDirection;
-          self._setSortGetter(index);
+          self._setSortGetter(colIndex);
         };
 
         self._setSortGetter = function (index) {

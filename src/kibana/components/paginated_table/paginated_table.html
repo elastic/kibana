@@ -9,7 +9,7 @@
         <tr bindonce>
           <th
             ng-repeat="col in columns"
-            ng-click="paginatedTable.sortColumn(col)"
+            ng-click="paginatedTable.sortColumn($index)"
             class="{{ col.class }}">
             <span bo-text="col.title"></span>
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
