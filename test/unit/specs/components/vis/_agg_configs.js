@@ -142,7 +142,6 @@ define(function (require) {
           expect(ac).to.have.length(3);
           expect(ac.bySchemaName['segment'][0].type.name).to.equal('date_histogram');
         });
-
       });
     });
 
@@ -157,27 +156,68 @@ define(function (require) {
             { type: 'sum', schema: 'metric' },
             { type: 'date_histogram', schema: 'segment' },
             { type: 'filters', schema: 'split' },
+            { type: 'percentiles', schema: 'metric' }
+          ]
+        });
+
+        var sorted = vis.aggs.getRequestAggs();
+        var aggs = _.indexBy(vis.aggs, function (agg) {
+          return agg.type.name;
+        });
+
+        expect(sorted.shift()).to.be(aggs.terms);
+        expect(sorted.shift()).to.be(aggs.histogram);
+        expect(sorted.shift()).to.be(aggs.date_histogram);
+        expect(sorted.shift()).to.be(aggs.filters);
+        expect(sorted.shift()).to.be(aggs.avg);
+        expect(sorted.shift()).to.be(aggs.sum);
+        expect(sorted.shift()).to.be(aggs.percentiles);
+        expect(sorted).to.have.length(0);
+      });
+    });
+
+    describe('#getResponseAggs', function () {
+      it('returns all request aggs for basic aggs', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            { type: 'terms', schema: 'split' },
+            { type: 'date_histogram', schema: 'segment' },
             { type: 'count', schema: 'metric' }
           ]
         });
 
-        var avg = vis.aggs.byTypeName.avg[0];
-        var sum = vis.aggs.byTypeName.sum[0];
-        var count = vis.aggs.byTypeName.count[0];
-        var terms = vis.aggs.byTypeName.terms[0];
-        var histo = vis.aggs.byTypeName.histogram[0];
-        var dateHisto = vis.aggs.byTypeName.date_histogram[0];
-        var filters = vis.aggs.byTypeName.filters[0];
+        var sorted = vis.aggs.getResponseAggs();
+        var aggs = _.indexBy(vis.aggs, function (agg) {
+          return agg.type.name;
+        });
 
-        var sorted = vis.aggs.getRequestAggs();
+        expect(sorted.shift()).to.be(aggs.terms);
+        expect(sorted.shift()).to.be(aggs.date_histogram);
+        expect(sorted.shift()).to.be(aggs.count);
+        expect(sorted).to.have.length(0);
+      });
 
-        expect(sorted.shift()).to.be(terms);
-        expect(sorted.shift()).to.be(histo);
-        expect(sorted.shift()).to.be(dateHisto);
-        expect(sorted.shift()).to.be(filters);
-        expect(sorted.shift()).to.be(avg);
-        expect(sorted.shift()).to.be(sum);
-        expect(sorted.shift()).to.be(count);
+      it('expands aggs that have multiple responses', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            { type: 'terms', schema: 'split' },
+            { type: 'date_histogram', schema: 'segment' },
+            { type: 'percentiles', schema: 'metric', params: { percents: [1, 2, 3]} }
+          ]
+        });
+
+        var sorted = vis.aggs.getResponseAggs();
+        var aggs = _.indexBy(vis.aggs, function (agg) {
+          return agg.type.name;
+        });
+
+        expect(sorted.shift()).to.be(aggs.terms);
+        expect(sorted.shift()).to.be(aggs.date_histogram);
+        expect(sorted.shift().id).to.be(aggs.percentiles.id + '.' + 1);
+        expect(sorted.shift().id).to.be(aggs.percentiles.id + '.' + 2);
+        expect(sorted.shift().id).to.be(aggs.percentiles.id + '.' + 3);
         expect(sorted).to.have.length(0);
       });
     });
