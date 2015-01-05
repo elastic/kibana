@@ -316,7 +316,7 @@ define(function (require) {
 
       $scope.updateTime();
 
-      segmented.setDirection(sortBy === 'time' ? sort[1] : 'desc');
+      segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
 
       // triggered when the status updated
       segmented.on('status', function (status) {
@@ -443,10 +443,11 @@ define(function (require) {
       .size($scope.opts.sampleSize)
       .sort(function () {
         var sort = {};
-        if (_.isArray($state.sort)) {
+        if (_.isArray($state.sort) && $state.sort.length === 2) {
           sort[$state.sort[0]] = $state.sort[1];
-        } else if (indexPattern.timeFieldName) {
-          sort[indexPattern.timeFieldName] = 'desc';
+        } else if ($scope.indexPattern.timeFieldName) {
+          // Use the watcher to set sort in this case, the above `if` will now be true
+          $state.sort = [$scope.indexPattern.timeFieldName, 'desc'];
         } else {
           sort._score = 'desc';
         }
@@ -460,38 +461,25 @@ define(function (require) {
       })
       .set('filter', $state.filters || []);
 
-      // get the current indexPattern
-      var indexPattern = $scope.indexPattern = $scope.searchSource.get('index');
-
-      // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
-      // is not equal to the $scope.opts.index then either clean or
-      if (
-        Boolean($scope.opts.index) !== Boolean(indexPattern)
-        || (indexPattern && indexPattern.id) !== $scope.opts.index
-      ) {
-        $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
-        indexPattern = courier.indexPatterns.get($scope.opts.index);
-      }
-
-      $scope.opts.timefield = indexPattern.timeFieldName;
-
-      return Promise.cast(indexPattern)
-      .then(function (indexPattern) {
-        $scope.opts.timefield = indexPattern.timeFieldName;
+      $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
+      return courier.indexPatterns.get($scope.opts.index).then(function (pattern) {
+        $scope.indexPattern = pattern;
+        $scope.opts.timefield = $scope.indexPattern.timeFieldName;
 
         // did we update the index pattern?
-        var refresh = indexPattern !== $scope.searchSource.get('index');
+        var refresh = $scope.indexPattern !== $scope.searchSource.get('index');
 
         // make sure the pattern is set on the "leaf" searchSource, not just the root
-        $scope.searchSource.set('index', indexPattern);
+        $scope.searchSource.set('index', pattern);
 
         if (refresh) {
-          $scope.indexPattern = indexPattern;
+          delete $state.sort;
           delete $scope.fields;
           delete $scope.columns;
           setFields();
         }
       });
+
     };
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.

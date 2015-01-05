@@ -17,6 +17,7 @@ define(function (require) {
       controller: function ($scope) {
 
         var sortableField = function (field) {
+          if (!$scope.indexPattern) return;
           return $scope.indexPattern.fields.byName[field].sortable;
         };
 
