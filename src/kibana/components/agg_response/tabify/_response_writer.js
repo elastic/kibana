@@ -102,18 +102,47 @@ define(function (require) {
         if (!tableGroup) tableGroup = self._table(true, agg, key);
 
         var splitAcr = false;
-        if (self.asAggConfigResults) splitAcr = new AggConfigResult(agg, self.acrStack[0], key, key);
+        if (self.asAggConfigResults) {
+          // find the previous split so this split can follow it
+          var lastSplitI = _.findIndex(self.acrStack, { $$_fromSplit: true });
+          var lastSplit = self.acrStack[lastSplitI];
+
+          // create the acr for this split
+          splitAcr = new AggConfigResult(agg, lastSplit, key, key);
+          // tag so we can find this later
+          splitAcr.$$_fromSplit = true;
+
+          // inject our new acr into the stack
+          if (lastSplit) {
+            self.acrStack.splice(lastSplitI, 0, splitAcr);
+          } else {
+            self.acrStack.push(splitAcr);
+          }
+
+          // rebuild any acrs that have new parents
+          self.acrStack.forEach(function (acr, i, stack) {
+            var parent = stack[i + 1];
+            if (acr.$$_fromSplit || acr.$parent === parent) return;
+
+            var newAcr = new AggConfigResult(acr.aggConfig, parent, acr.value, acr.key);
+            // replace the acr in the stack
+            stack[i] = newAcr;
+
+            // and replace the acr in the row buffer if its there
+            var rowI = self.rowBuffer.indexOf(acr);
+            if (rowI > -1) self.rowBuffer[rowI] = newAcr;
+          });
+        }
 
         // push the split onto the stack so that it will receive written tables
         self.splitStack.unshift(tableGroup);
-        splitAcr && self.acrStack.unshift(splitAcr);
 
         // call the block
         if (_.isFunction(block)) block.call(self, bucket, key);
 
         // remove the split from the stack
         self.splitStack.shift();
-        splitAcr && self.acrStack.shift();
+        splitAcr && _.pull(self.acrStack, splitAcr);
       });
     };
 
