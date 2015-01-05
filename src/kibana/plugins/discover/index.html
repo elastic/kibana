@@ -154,6 +154,7 @@
               fixed-scroll='table'
               fixed-scroll-trigger="state.columns">
 
+
               <kbn-table class="table table-condensed"
                 rows="rows"
                 columns="state.columns"
@@ -162,6 +163,15 @@
                 refresh="fetch"
                 index-pattern="indexPattern">
               </kbn-table>
+
+
+              <doc-table
+                hits="rows"
+                index-pattern="indexPattern"
+                sorting="state.sort"
+                columns="state.columns"
+                infinite-scroll="true">
+              </doc-table>
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 <center>

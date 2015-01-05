@@ -160,7 +160,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('state.sort', function (sort) {
+        $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];

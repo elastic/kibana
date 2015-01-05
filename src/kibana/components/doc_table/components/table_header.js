@@ -48,7 +48,8 @@ define(function (require) {
           if (!sortableField(column)) return;
 
           var sorting = $scope.sorting || [];
-          $scope.sorting = [column, (sorting[0] === column && sorting[1] === 'asc') ? 'desc' : 'asc'];
+          $scope.sorting[0] = column;
+          $scope.sorting[1] = (sorting[0] === column && sorting[1] === 'asc') ? 'desc' : 'asc';
         };
       }
     };

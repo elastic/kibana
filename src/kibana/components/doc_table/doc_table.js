@@ -15,15 +15,17 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
-        searchSource: '=',
         sorting: '=',
         columns: '=',
+        hits: '=?', // You really want either hits & indexPattern, OR searchSource
+        indexPattern: '=?',
+        searchSource: '=?',
         infiniteScroll: '=?',
         filter: '=?',
       },
       link: function ($scope) {
         var notify = new Notifier();
-
+        $scope.limit = 50;
         $scope.persist = {
           sorting: $scope.sorting,
           columns: $scope.columns
@@ -52,8 +54,10 @@ define(function (require) {
           $scope.limit += 50;
         };
 
-        $scope.$on('$destroy', function () {
-          if ($scope.searchSource) $scope.searchSource.destroy();
+        // Set the watcher after initialization
+        $scope.$watchCollection('sorting', function (newSort, oldSort) {
+          // Don't react if sort values didn't really change
+          console.log(newSort);
         });
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
@@ -65,11 +69,15 @@ define(function (require) {
           $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
           // Set the watcher after initialization
-          $scope.$watch('persist.sorting', function (newSort, oldSort) {
+          $scope.$watchCollection('sorting', function (newSort, oldSort) {
             // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
             $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
             $scope.searchSource.fetchQueued();
+          });
+
+          $scope.$on('$destroy', function () {
+            if ($scope.searchSource) $scope.searchSource.destroy();
           });
 
           // TODO: we need to have some way to clean up result requests
