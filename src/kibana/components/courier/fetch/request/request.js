@@ -37,7 +37,8 @@ define(function (require) {
       }
 
       if (source.history) {
-        source.history = _.first(source.history.concat(this), 20);
+        source.history.push(this);
+        source.history = _.last(source.history, 20);
       }
     };
 
