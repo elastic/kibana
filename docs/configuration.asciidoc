@@ -153,7 +153,7 @@ More information is available {ref}/docs-index_.html#index-creation[here]
 [[cors]]
 ==== CORS
 
-If you are using <sense> to access a remote cluster, you will need to make sure
+If you are using <<sense>> to access a remote cluster, you will need to make sure
 Cross-origin resource sharing (CORS) is enabled on the cluster. The relevant settings
 are:
 
