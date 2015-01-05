@@ -128,13 +128,15 @@ define(function (require) {
         var section = getSections($elem);
         indexPattern.fields.byName.bytes.display = true;
         $scope.$digest();
+
         expect(section.selected.text()).to.contain('bytes');
         expect(section.popular.text()).to.not.contain('bytes');
 
-        indexPattern.fields.byName.ip.display = true;
+        indexPattern.fields.byName.request_body.display = true;
         $scope.$digest();
-        expect(section.selected.text()).to.contain('ip');
-        expect(section.unpopular.text()).to.not.contain('ip');
+
+        expect(section.selected.text()).to.contain('request_body');
+        expect(section.unpopular.text()).to.not.contain('request_body');
 
         expect(section.popular.text()).to.contain('ssl');
 
