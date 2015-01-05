@@ -69,27 +69,39 @@ define(function (require) {
               }
             };
 
-            $scope.$watch('agg.params.orderBy', function (orderBy, prevOrderBy) {
+            var INIT = {}; // flag to know when prevOrderBy has changed
+            var prevOrderBy = INIT;
+
+            $scope.$watch('responseValueAggs', updateOrderAgg);
+            $scope.$watch('agg.params.orderBy', updateOrderAgg);
+
+            function updateOrderAgg() {
               var agg = $scope.agg;
               var aggs = agg.vis.aggs;
               var params = agg.params;
+              var orderBy = params.orderBy;
 
-              if (orderBy === prevOrderBy && !orderBy) {
-                params.orderBy = (_.first(aggs.bySchemaGroup.metrics) || { id: 'custom' }).id;
+              // setup the initial value of orderBy
+              if (!orderBy && prevOrderBy === INIT) {
+                // abort until we get the responseValueAggs
+                if (!$scope.responseValueAggs) return;
+                params.orderBy = (_.first($scope.responseValueAggs) || { id: 'custom' }).id;
                 return;
               }
 
-              if (!orderBy) return;
-              if (orderBy !== 'custom') {
+              // track the previous value
+              prevOrderBy = orderBy;
+
+              // we aren't creating a custom aggConfig
+              if (!orderBy || orderBy !== 'custom') {
                 params.orderAgg = null;
                 return;
               }
-              if (params.orderAgg) return;
 
-              params.orderAgg = new AggConfig(agg.vis, {
+              params.orderAgg = params.orderAgg || new AggConfig(agg.vis, {
                 schema: _.first(agg.vis.type.schemas.metrics)
               });
-            });
+            }
           },
           write: function (agg, output) {
             var dir = agg.params.order.val;

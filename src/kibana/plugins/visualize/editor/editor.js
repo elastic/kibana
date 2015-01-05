@@ -135,6 +135,9 @@ define(function (require) {
         return editableVis.getState();
       }, function (newState) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
+        $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
+          return _.deepGet(agg, 'schema.group') === 'metrics';
+        });
       }, true);
 
       $state.replace();

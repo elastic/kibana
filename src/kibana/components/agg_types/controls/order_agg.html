@@ -7,10 +7,10 @@
       required
       class="form-control">
       <option
-        ng-repeat="agg in agg.vis.aggs.bySchemaGroup.metrics"
-        value="{{agg.id}}"
-        ng-selected="agg.params.orderBy === agg.id || (!agg.params.orderBy && $index === 0)">
-        metric #{{$index + 1}}: {{safeMakeLabel(agg)}}
+        ng-repeat="respAgg in responseValueAggs"
+        value="{{respAgg.id}}"
+        ng-selected="agg.params.orderBy === respAgg.id || (!agg.params.orderBy && $index === 0)">
+        <em>metric:</em> {{safeMakeLabel(respAgg)}}
       </option>
       <option value="custom" ng-selected="agg.params.orderBy === 'custom'">
         Custom Metric
