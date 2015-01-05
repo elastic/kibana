@@ -29,7 +29,7 @@ define(function (require) {
       });
     });
 
-    beforeEach(function (done) {
+    beforeEach(function () {
       var filters = [
         { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'jpg' } } } },
         { meta: { index: 'logstash-*', negate: true }, query: { match: { 'extension': { query: 'png' } } } },
@@ -41,9 +41,8 @@ define(function (require) {
       Promise.map(filters, mapFilter)
       .then(function (filters) {
         $rootScope.state = { filters: filters };
-        done();
       });
-      $rootScope.$apply();
+      $rootScope.$digest();
     });
 
     describe('invertFilter', function () {

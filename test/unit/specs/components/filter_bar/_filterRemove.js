@@ -27,7 +27,7 @@ define(function (require) {
       })
     );
 
-    beforeEach(function (done) {
+    beforeEach(function () {
       var filters = [
         { meta: { index: 'logstash-*' }, query: { match: { '@tags': { query: 'foo' } } } },
         { meta: { index: 'logstash-*' }, query: { match: { '@tags': { query: 'bar' } } } },
@@ -38,9 +38,8 @@ define(function (require) {
       Promise.map(filters, mapFilter)
       .then(function (filters) {
         $rootScope.state = { filters: filters };
-        done();
       });
-      $rootScope.$apply();
+      $rootScope.$digest();
     });
 
     describe('removeFilter', function () {

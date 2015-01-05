@@ -27,7 +27,7 @@ define(function (require) {
       })
     );
 
-    beforeEach(function (done) {
+    beforeEach(function () {
       var filters = [
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
@@ -38,9 +38,8 @@ define(function (require) {
       Promise.map(filters, mapFilter)
       .then(function (filters) {
         $rootScope.state = { filters: filters };
-        done();
       });
-      $rootScope.$apply();
+      $rootScope.$digest();
     });
 
     describe('toggleFilter', function () {
