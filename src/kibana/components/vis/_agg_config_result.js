@@ -32,5 +32,9 @@ define(function (require) {
     return this.aggConfig.createFilter(this.key);
   };
 
+  AggConfigResult.prototype.toString = function () {
+    return this.aggConfig.fieldFormatter()(this.value);
+  };
+
   return AggConfigResult;
 });
