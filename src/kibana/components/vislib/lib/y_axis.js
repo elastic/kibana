@@ -14,6 +14,7 @@ define(function (require) {
      */
     function YAxis(args) {
       this.el = args.el;
+      this.yMin = args.yMin;
       this.yMax = args.yMax;
       this._attr = _.defaults(args._attr || {}, {});
     }
@@ -40,7 +41,7 @@ define(function (require) {
     YAxis.prototype.getYScale = function (height) {
       // save reference to y scale
       this.yScale = d3.scale.linear()
-      .domain([0, this.yMax])
+      .domain([this.yMin, this.yMax])
       .range([height, 0])
       .nice(this.tickScale(height));
 
