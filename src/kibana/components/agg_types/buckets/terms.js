@@ -4,7 +4,17 @@ define(function (require) {
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
     var AggConfig = Private(require('components/vis/_agg_config'));
+    var Schemas = Private(require('plugins/vis_types/_schemas'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
+
+    var orderAggSchema = (new Schemas([
+      {
+        group: 'none',
+        name: 'orderAgg',
+        title: 'Order Agg',
+        aggFilter: '!percentiles'
+      }
+    ])).all[0];
 
     return new BucketAggType({
       name: 'terms',
@@ -57,8 +67,9 @@ define(function (require) {
           serialize: function (orderAgg) {
             return orderAgg.toJSON();
           },
-          deserialize: function (stateJSON, agg) {
-            return new AggConfig(agg.vis, stateJSON);
+          deserialize: function (state, agg) {
+            state.schema = orderAggSchema;
+            return new AggConfig(agg.vis, state);
           },
           controller: function ($scope) {
             $scope.safeMakeLabel = function (agg) {
@@ -103,7 +114,7 @@ define(function (require) {
               }
 
               params.orderAgg = params.orderAgg || new AggConfig(agg.vis, {
-                schema: _.first(agg.vis.type.schemas.metrics)
+                schema: orderAggSchema
               });
             }
           },
