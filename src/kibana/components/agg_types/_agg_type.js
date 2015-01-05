@@ -96,12 +96,12 @@ define(function (require) {
        * set of AggConfigs that should replace this aggConfig in result sets
        * that walk the AggConfig set.
        *
-       * @method getResponseValueAggs
+       * @method getResponseAggs
        * @returns {array[AggConfig]|undefined} - an array of aggConfig objects
        *                                         that should replace this one,
        *                                         or undefined
        */
-      this.getResponseValueAggs = config.getResponseValueAggs || _.noop;
+      this.getResponseAggs = config.getResponseAggs || _.noop;
     }
 
     return AggType;

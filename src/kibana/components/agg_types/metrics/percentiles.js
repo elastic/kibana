@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
-    var getValueAggConfig = Private(require('components/agg_types/metrics/_get_value_agg_config'));
+    var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
     var ordinalSuffix = require('utils/ordinal_suffix');
 
     require('components/agg_types/controls/_percent_list');
@@ -32,8 +32,8 @@ define(function (require) {
           default: [1, 5, 25, 50, 75, 95, 99]
         }
       ],
-      getResponseValueAggs: function (agg) {
-        var ValueAggConfig = getValueAggConfig(agg, valueProps);
+      getResponseAggs: function (agg) {
+        var ValueAggConfig = getResponseAggConfig(agg, valueProps);
 
         return agg.params.percents.map(function (percent) {
           return new ValueAggConfig(percent);

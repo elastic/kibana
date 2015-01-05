@@ -146,7 +146,7 @@ define(function (require) {
       });
     });
 
-    describe('#getSorted', function () {
+    describe('#getRequestAggs', function () {
       it('performs a stable sort, but moves metrics to the bottom', function () {
         var vis = new Vis(indexPattern, {
           type: 'histogram',
@@ -169,7 +169,7 @@ define(function (require) {
         var dateHisto = vis.aggs.byTypeName.date_histogram[0];
         var filters = vis.aggs.byTypeName.filters[0];
 
-        var sorted = vis.aggs.getSorted();
+        var sorted = vis.aggs.getRequestAggs();
 
         expect(sorted.shift()).to.be(terms);
         expect(sorted.shift()).to.be(histo);
@@ -185,9 +185,9 @@ define(function (require) {
     describe('#toDsl', function () {
       it('uses the sorted aggs', function () {
         var vis = new Vis(indexPattern, { type: 'histogram' });
-        sinon.spy(vis.aggs, 'getSorted');
+        sinon.spy(vis.aggs, 'getRequestAggs');
         vis.aggs.toDsl();
-        expect(vis.aggs.getSorted).to.have.property('callCount', 1);
+        expect(vis.aggs.getRequestAggs).to.have.property('callCount', 1);
       });
 
       it('calls aggConfig#toDsl() on each aggConfig and compiles the nested output', function () {

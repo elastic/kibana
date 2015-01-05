@@ -4,7 +4,7 @@ define(function (require) {
     var AggConfig = Private(require('components/vis/_agg_config'));
 
     return function getColumns(vis, minimal) {
-      var aggs = vis.aggs.getResponseValueAggs();
+      var aggs = vis.aggs.getResponseAggs();
 
       if (minimal == null) minimal = !vis.isHierarchical();
 

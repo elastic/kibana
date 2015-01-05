@@ -64,7 +64,7 @@ define(function (require) {
         });
       }
 
-      this.getSorted()
+      this.getRequestAggs()
       .filter(function (config) {
         return !config.type.hasNoDsl;
       })
@@ -100,14 +100,14 @@ define(function (require) {
       return dslTopLvl;
     };
 
-    AggConfigs.prototype.getSorted = function () {
+    AggConfigs.prototype.getRequestAggs = function () {
       return _.sortBy(this, function (agg) {
         return agg.schema.group === 'metrics' ? 1 : 0;
       });
     };
 
     /**
-     * Gets the AggConfigs (and possibly ValueAggConfigs) that
+     * Gets the AggConfigs (and possibly ResponseAggConfigs) that
      * represent the values that will be produced when all aggs
      * are run.
      *
@@ -117,9 +117,10 @@ define(function (require) {
      *
      * @return {array[AggConfig]}
      */
-    AggConfigs.prototype.getResponseValueAggs = function () {
-      return this.getSorted().reduce(function (responseValuesAggs, agg) {
-        return responseValuesAggs.concat(agg.getResponseValueAggs() || agg);
+    AggConfigs.prototype.getResponseAggs = function () {
+      return this.getRequestAggs().reduce(function (responseValuesAggs, agg) {
+        var aggs = agg.getResponseAggs();
+        return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
       }, []);
     };
 
