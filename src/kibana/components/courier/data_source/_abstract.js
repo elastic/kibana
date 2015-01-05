@@ -265,6 +265,10 @@ define(function (require) {
             };
           }
 
+          if (!flatState.body.size || flatState.body.size === 0) {
+            flatState.search_type = 'count';
+          }
+
           decorateQuery(flatState.body.query);
 
           var computedFields = flatState.index.getComputedFields();

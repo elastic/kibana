@@ -27,6 +27,7 @@ define(function (require) {
             return JSON.stringify({
               index: indexList,
               type: reqParams.type,
+              search_type: reqParams.search_type,
               ignore_unavailable: true
             })
             + '\n'
