@@ -1,4 +1,4 @@
-<div ng-if="esResp.hits.total === 0 && vis.type.name !== 'markdown'"
+<div ng-if="vis.type.requiresSearch && esResp.hits.total === 0"
   class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
@@ -7,6 +7,6 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div ng-hide="esResp.hits.total === 0 && vis.type.name !== 'markdown'" class="visualize-chart"></div>
+<div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0" class="visualize-chart"></div>
 <!-- <pre>{{chartData | json}}</pre> -->
-<visualize-spy ng-if="vis.type.name !== 'markdown'"></visualize-spy>
+<visualize-spy ng-if="vis.type.requiresSearch"></visualize-spy>

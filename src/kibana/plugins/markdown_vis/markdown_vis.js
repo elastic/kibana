@@ -17,7 +17,8 @@ define(function (require) {
       template: require('text!plugins/markdown_vis/markdown_vis.html'),
       params: {
         editor: require('text!plugins/markdown_vis/markdown_vis_params.html')
-      }
+      },
+      requiresSearch: false
     });
   };
 });

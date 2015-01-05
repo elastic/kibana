@@ -24,8 +24,8 @@ define(function (require) {
 
     $scope.visTypes = Private(require('registry/vis_types'));
     $scope.visTypeUrl = function (visType) {
-      if (visType.name === 'markdown') return '#/visualize/create?type=markdown';
-      return '#/visualize/step/2?type=' + encodeURIComponent(visType.name);
+      if (!visType.requiresSearch) return '#/visualize/create?type=' + encodeURIComponent(visType.name);
+      else return '#/visualize/step/2?type=' + encodeURIComponent(visType.name);
     };
   });
 
