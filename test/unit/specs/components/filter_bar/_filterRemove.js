@@ -29,8 +29,8 @@ define(function (require) {
 
     beforeEach(function (done) {
       var filters = [
-        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'foo' } } } },
-        { meta: { index: 'logstash-*' }, query: { match: { 'extension': { query: 'bar' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '@tags': { query: 'foo' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '@tags': { query: 'bar' } } } },
         { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
         { meta: { index: 'logstash-*', disabled: true }, missing: { field: 'host' } },
       ];
