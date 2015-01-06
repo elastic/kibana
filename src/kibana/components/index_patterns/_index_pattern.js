@@ -95,13 +95,13 @@ define(function (require) {
 
             var type = fieldTypes.byName[field.type];
             Object.defineProperties(field, {
-              scripted: {
-                // enumerable properties end up in the JSON
-                enumerable: true,
-                value: !!field.scripted
+              bucketable: {
+                value: field.indexed || field.scripted
               },
-              sortable: {
-                value: field.indexed && type.sortable
+              displayName: {
+                get: function () {
+                  return shortDotsFilter(field.name);
+                }
               },
               filterable: {
                 value: field.name === '_id' || (field.indexed && type.filterable)
@@ -112,10 +112,13 @@ define(function (require) {
                   return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
                 }
               },
-              displayName: {
-                get: function () {
-                  return shortDotsFilter(field.name);
-                }
+              sortable: {
+                value: field.indexed && type.sortable
+              },
+              scripted: {
+                // enumerable properties end up in the JSON
+                enumerable: true,
+                value: !!field.scripted
               }
             });
 

@@ -13,7 +13,8 @@ module.exports = {
       '<%= plugins %>/visualize/styles/visualization.less',
       '<%= plugins %>/visualize/styles/main.less',
       '<%= plugins %>/table_vis/table_vis.less',
-      '<%= plugins %>/metric_vis/metric_vis.less'
+      '<%= plugins %>/metric_vis/metric_vis.less',
+      '<%= plugins %>/markdown_vis/markdown_vis.less'
     ],
     expand: true,
     ext: '.css',

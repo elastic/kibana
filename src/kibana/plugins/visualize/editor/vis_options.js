@@ -17,7 +17,7 @@ define(function (require) {
         var $editor = $compile($scope.vis.type.params.editor)($scope);
         $optionContainer.append($editor);
 
-        $scope.$watch('vis.type.schemas.length', function (len) {
+        $scope.$watch('vis.type.schemas.all.length', function (len) {
           $scope.alwaysShowOptions = len === 0;
         });
       }

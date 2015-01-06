@@ -88,6 +88,17 @@ define(function (require) {
       });
     });
 
+    describe('fields', function () {
+      it('should have expected properties on fields', function () {
+        expect(indexPattern.fields[0]).to.have.property('bucketable');
+        expect(indexPattern.fields[0]).to.have.property('displayName');
+        expect(indexPattern.fields[0]).to.have.property('filterable');
+        expect(indexPattern.fields[0]).to.have.property('format');
+        expect(indexPattern.fields[0]).to.have.property('sortable');
+        expect(indexPattern.fields[0]).to.have.property('scripted');
+      });
+    });
+
     describe('getFields', function () {
       it('should return all non-scripted fields', function () {
         var indexed = _.where(mockLogstashFields, { scripted: false });
