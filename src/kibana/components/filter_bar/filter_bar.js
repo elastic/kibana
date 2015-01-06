@@ -9,6 +9,7 @@ define(function (require) {
     var filterActions = Private(require('components/filter_bar/lib/filterActions'));
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
+    var processGlobalFilters = Private(require('components/filter_bar/lib/processGlobalFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
     var filterOutTimeBasedFilter = Private(require('components/filter_bar/lib/filterOutTimeBasedFilter'));
     var changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
@@ -20,7 +21,11 @@ define(function (require) {
         state: '='
       },
       link: function ($scope, $el, attrs) {
+        // bind all the filter actions to the scope
         filterActions($scope).apply();
+
+        // update the state filters to include global filters
+        $scope.state.filters = processGlobalFilters($scope.state.filters);
 
         $scope.applyFilters = function (filters) {
           // add new filters
