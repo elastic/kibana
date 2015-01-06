@@ -73,25 +73,24 @@ define(function (require) {
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
 
-    // Manage state & url state
-    var initialQuery = $scope.searchSource.get('query');
-
     if (savedSearch.id) {
       docTitle.change(savedSearch.title);
     }
 
-    var stateDefaults = {
-      query: initialQuery || '',
-      sort: savedSearch.sort || [],
-      columns: savedSearch.columns || ['_source'],
-      index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
-      interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.get('filter'))
-    };
+    var $state = $scope.state = new AppState(getStateDefaults());
+
+    function getStateDefaults() {
+      return {
+        query: $scope.searchSource.get('query') || '',
+        sort: savedSearch.sort || [],
+        columns: savedSearch.columns || ['_source'],
+        index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
+        interval: 'auto',
+        filters: _.cloneDeep($scope.searchSource.get('filter'))
+      };
+    }
 
     var metaFields = config.get('metaFields');
-
-    var $state = $scope.state = new AppState(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
@@ -252,6 +251,9 @@ define(function (require) {
             notify.info('Saved Data Source "' + savedSearch.title + '"');
             if (savedSearch.id !== $route.current.params.id) {
               kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            } else {
+              // Update defaults so that "reload saved query" functions correctly
+              $state.setDefaults(getStateDefaults());
             }
           }
         });
