@@ -6,6 +6,7 @@ define(function (require) {
   var saveHtml = require('text!plugins/discover/partials/save_search.html');
   var loadHtml = require('text!plugins/discover/partials/load_search.html');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
+  var filterManager = require('components/filter_manager/filter_manager');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -92,6 +93,7 @@ define(function (require) {
     var metaFields = config.get('metaFields');
 
     var $state = $scope.state = new AppState(stateDefaults);
+    filterManager.init($state);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
@@ -524,61 +526,9 @@ define(function (require) {
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, values, operation) {
-      values = _.isArray(values) ? values : [values];
-
       var indexPattern = $scope.searchSource.get('index');
       indexPattern.popularizeField(field, 1);
-      var negate = operation === '-';
-
-      // Grap the filters from the searchSource and ensure it's an array
-      var filters = _.flatten([$state.filters], true);
-
-      _.each(values, function (value) {
-        var existing = _.find(filters, function (filter) {
-          if (!filter) return;
-
-          if (field === '_exists_' && filter.exists) {
-            return filter.exists.field === value;
-          }
-
-          if (field === '_missing_' && filter.missing) {
-            return filter.missing.field === value;
-          }
-
-          if (filter.query) {
-            return filter.query.match[field] && filter.query.match[field].query === value;
-          }
-        });
-
-        if (existing) {
-          if (existing.meta.negate !== negate) existing.meta.negate = negate;
-          return;
-        }
-
-        switch (field) {
-        case '_exists_':
-          filters.push({
-            exists: {
-              field: value
-            }
-          });
-          break;
-        case '_missing_':
-          filters.push({
-            missing: {
-              field: value
-            }
-          });
-          break;
-        default:
-          var filter = { meta: { negate: negate, index: $state.index }, query: { match: {} } };
-          filter.query.match[field] = { query: value, type: 'phrase' };
-          filters.push(filter);
-          break;
-        }
-      });
-
-      $state.filters = filters;
+      filterManager.add(field, values, operation, $state.index);
     };
 
     $scope.toggleField = function (name) {
