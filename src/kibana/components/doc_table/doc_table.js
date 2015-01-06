@@ -6,6 +6,7 @@ define(function (require) {
 
   require('css!components/doc_table/doc_table.css');
   require('directives/truncated');
+  require('directives/infinite_scroll');
   require('components/doc_table/components/table_header');
   require('components/doc_table/components/table_row');
 
@@ -53,12 +54,6 @@ define(function (require) {
         $scope.addRows = function () {
           $scope.limit += 50;
         };
-
-        // Set the watcher after initialization
-        $scope.$watchCollection('sorting', function (newSort, oldSort) {
-          // Don't react if sort values didn't really change
-          console.log(newSort);
-        });
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!$scope.searchSource) return;
