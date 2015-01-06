@@ -214,5 +214,15 @@ define(function (require) {
   };
   inherits(errors.NotEnoughData, KbnError);
 
+  /**
+   * error thrown when no results are returned from an elasticsearch query
+   */
+  errors.NoResults = function NoResults() {
+    KbnError.call(this,
+    'No results found',
+    errors.NoResults);
+  };
+  inherits(errors.NoResults, KbnError);
+
   return errors;
 });
