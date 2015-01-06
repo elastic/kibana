@@ -3,15 +3,18 @@ define(function (require) {
   var _ = require('lodash');
   var self = this;
 
-  // TODO: On array fields, negating does not negate the combination, rather all terms
+  this.init = function ($state) {
+    self.$state = $state;
+  };
+
   this.add =  function (field, values, operation, index) {
+
     values = _.isArray(values) ? values : [values];
 
     var negate = operation === '-';
-
-    // Grap the filters from the searchSource and ensure it's an array
     var filters = _.flatten([self.$state.filters], true);
 
+    // TODO: On array fields, negating does not negate the combination, rather all terms
     _.each(values, function (value) {
       var existing = _.find(filters, function (filter) {
         if (!filter) return;
@@ -20,37 +23,24 @@ define(function (require) {
           return filter.exists.field === value;
         }
 
-        if (field === '_missing_' && filter.missing) {
-          return filter.missing.field === value;
-        }
-
         if (filter.query) {
           return filter.query.match[field] && filter.query.match[field].query === value;
         }
       });
 
       if (existing) {
-        if (existing.meta.negate !== negate) existing.meta.negate = negate;
+        if (existing.meta.negate !== negate) {
+          existing.meta.negate = negate;
+        }
         return;
       }
 
       switch (field) {
       case '_exists_':
-        filters.push({
-          exists: {
-            field: value
-          }
-        });
-        break;
-      case '_missing_':
-        filters.push({
-          missing: {
-            field: value
-          }
-        });
+        filters.push({ meta: { negate: negate, index: index }, exists: { field: value } });
         break;
       default:
-        var filter = { meta: { negate: negate, index: index || self.$state.index }, query: { match: {} } };
+        var filter = { meta: { negate: negate, index: index }, query: { match: {} } };
         filter.query.match[field] = { query: value, type: 'phrase' };
         filters.push(filter);
         break;

@@ -6,7 +6,7 @@ define(function (require) {
   var saveHtml = require('text!plugins/discover/partials/save_search.html');
   var loadHtml = require('text!plugins/discover/partials/load_search.html');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
-  var filterState = require('components/filter_state/filter_state');
+  var filterManager = require('components/filter_manager/filter_manager');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -92,7 +92,8 @@ define(function (require) {
 
     var metaFields = config.get('metaFields');
 
-    var $state = filterState.$state = $scope.state = new AppState(stateDefaults);
+    var $state = $scope.state = new AppState(stateDefaults);
+    filterManager.init($state);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
@@ -539,7 +540,7 @@ define(function (require) {
     $scope.filterQuery = function (field, values, operation) {
       var indexPattern = $scope.searchSource.get('index');
       indexPattern.popularizeField(field, 1);
-      filterState.add(field, values, operation);
+      filterManager.add(field, values, operation, $state.index);
     };
 
     $scope.toggleField = function (name) {
