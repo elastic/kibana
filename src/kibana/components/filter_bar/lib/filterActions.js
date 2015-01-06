@@ -1,9 +1,11 @@
 define(function (require) {
   var _ = require('lodash');
   var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
+  var saveFilterState = require('components/filter_bar/lib/saveFilterState');
 
   return function (globalState) {
     return function ($scope) {
+      var saveState = saveFilterState($scope.state, globalState);
       applyGlobalFilters();
 
       var exports = {
@@ -38,7 +40,7 @@ define(function (require) {
           return filter.meta.pinned;
         }) : [];
         $scope.filters = _.union(filters, globalFilters);
-        saveState();
+        saveState($scope.filters);
       }
 
       /**
@@ -53,7 +55,7 @@ define(function (require) {
         filter.meta.disabled = disabled;
 
         // Save the filters back to the searchSource
-        saveState();
+        saveState($scope.filters);
         return filter;
       }
 
@@ -78,7 +80,7 @@ define(function (require) {
         var pinned = _.isUndefined(force) ? !filter.meta.pinned : force;
         filter.meta.pinned = !!pinned;
 
-        saveState();
+        saveState($scope.filters);
         return filter;
       }
 
@@ -102,7 +104,7 @@ define(function (require) {
         // Toggle the negate meta state
         filter.meta.negate = !filter.meta.negate;
 
-        saveState();
+        saveState($scope.filters);
         return filter;
       }
 
@@ -129,7 +131,7 @@ define(function (require) {
         var newFilters = filterAppliedAndUnwrap(filters);
         $scope.filters = _.union($scope.filters, newFilters);
 
-        saveState();
+        saveState($scope.filters);
         return $scope.filters;
       }
 
@@ -145,7 +147,7 @@ define(function (require) {
           return filter !== invalidFilter;
         });
 
-        saveState();
+        saveState($scope.filters);
         return $scope.filters;
       }
 
@@ -155,29 +157,7 @@ define(function (require) {
        */
       function removeAll() {
         $scope.filters = [];
-        saveState();
-      }
-
-      /**
-       * Save the filters back to the searchSource
-       * @returns {void}
-       */
-      function saveState() {
-        saveGlobalState();
-
-        // only save state if state exists
-        if ($scope.state) {
-          $scope.state.filters = _.union($scope.filters);
-        }
-      }
-
-      /**
-       * Save pinned filters to the globalState
-       * @returns {void}
-       */
-      function saveGlobalState() {
-        globalState.filters = _.union(_.filter($scope.filters, { meta: { pinned: true } }));
-        globalState.save();
+        saveState($scope.filters);
       }
     };
   };
