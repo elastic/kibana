@@ -82,8 +82,7 @@ define(function (require) {
 
   };
 
-
-  describe('discover table directives', function () {
+  describe('Doc Table', function () {
 
     describe('kbnTableHeader', function () {
 
