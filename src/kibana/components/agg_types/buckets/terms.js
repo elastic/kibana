@@ -68,10 +68,10 @@ define(function (require) {
               }
             };
 
-            $scope.$watch('params.orderBy', function (orderBy, prevOrderBy) {
-              var agg = $scope.aggConfig;
+            $scope.$watch('agg.params.orderBy', function (orderBy, prevOrderBy) {
+              var agg = $scope.agg;
               var aggs = agg.vis.aggs;
-              var params = $scope.params;
+              var params = agg.params;
 
               if (orderBy === prevOrderBy && !orderBy) {
                 params.orderBy = (_.first(aggs.bySchemaGroup.metrics) || { id: 'custom' }).id;
