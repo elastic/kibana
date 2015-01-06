@@ -23,8 +23,6 @@ define(function (require) {
   require('services/timefilter');
   require('components/highlight/highlight_tags');
 
-  require('plugins/discover/directives/table');
-
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',

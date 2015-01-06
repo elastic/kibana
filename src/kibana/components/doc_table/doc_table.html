@@ -1,4 +1,3 @@
-{{hits.length}}
 <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
   <table class="kbn-table table" ng-if="indexPattern">
     <thead
@@ -13,6 +12,7 @@
         columns="columns"
         sorting="sorting"
         index-pattern="indexPattern"
+        filter="filter"
         class="discover-table-row"></tr>
     </tbody>
   </table>
@@ -31,6 +31,7 @@
       columns="columns"
       sorting="sorting"
       index-pattern="indexPattern"
+      filter="filter"
       class="discover-table-row"></tr>
   </tbody>
 </table>

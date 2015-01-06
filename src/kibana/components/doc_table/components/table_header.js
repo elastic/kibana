@@ -46,11 +46,19 @@ define(function (require) {
         };
 
         $scope.sort = function (column) {
-          if (!sortableField(column)) return;
+          if (!column || !sortableField(column)) return;
 
-          var sorting = $scope.sorting || [];
+          var sorting = $scope.sorting = $scope.sorting || [];
+
+          var direction = sorting[1] || 'asc';
+          if (sorting[0] !== column) {
+            direction = 'asc';
+          } else {
+            direction = sorting[1] === 'asc' ? 'desc' : 'asc';
+          }
+
           $scope.sorting[0] = column;
-          $scope.sorting[1] = (sorting[0] === column && sorting[1] === 'asc') ? 'desc' : 'asc';
+          $scope.sorting[1] = direction;
         };
       }
     };
