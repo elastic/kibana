@@ -1,33 +1,16 @@
 define(function (require) {
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
   var filterActions;
-  var $rootScope, globalStateStub;
+  var $rootScope;
 
-  describe('Filter Bar Actions', function () {
+  describe.only('Filter Bar Actions', function () {
+
+    beforeEach(module('kibana'));
 
     beforeEach(function () {
-      module('kibana', function ($provide) {
-        $provide.service('globalState', function () {
-          globalStateStub = {};
-          globalStateStub.on = globalStateStub.off = _.noop;
-          globalStateStub.save = sinon.stub();
-
-          return globalStateStub;
-        });
-      });
-
       inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
         filterActions = Private(require('components/filter_bar/lib/filterActions'));
-      });
-    });
-
-
-    describe('initialize', function () {
-      it('should call save on global state', function () {
-        var actions = filterActions($rootScope);
-        expect(globalStateStub.save.callCount).to.be(1);
       });
     });
 

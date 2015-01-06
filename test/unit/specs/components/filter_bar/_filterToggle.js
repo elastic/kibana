@@ -17,15 +17,14 @@ define(function (require) {
     });
 
     beforeEach(inject(function (_Promise_, _$rootScope_, Private) {
-        Promise = _Promise_;
-        $rootScope = _$rootScope_;
-        filterActions = Private(require('components/filter_bar/lib/filterActions'));
-        mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      Promise = _Promise_;
+      $rootScope = _$rootScope_;
+      filterActions = Private(require('components/filter_bar/lib/filterActions'));
+      mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
+      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
-      })
-    );
+      getIndexPatternStub.returns(Promise.resolve(indexPattern));
+    }));
 
     beforeEach(function () {
       var filters = [
@@ -37,7 +36,7 @@ define(function (require) {
 
       Promise.map(filters, mapFilter)
       .then(function (filters) {
-        $rootScope.state = { filters: filters };
+        $rootScope.filters = filters;
       });
       $rootScope.$digest();
     });
@@ -50,7 +49,7 @@ define(function (require) {
       });
 
       it('should toggle filters on and off', function () {
-        var filter = fn($rootScope.state.filters[0]);
+        var filter = fn($rootScope.filters[0]);
         expect(filter.meta).to.have.property('disabled', true);
       });
     });
@@ -67,21 +66,21 @@ define(function (require) {
       };
 
       it('should toggle all the filters', function () {
-        expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(1);
+        expect(_.filter($rootScope.filters, pickDisabled)).to.have.length(1);
         fn();
-        expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(3);
+        expect(_.filter($rootScope.filters, pickDisabled)).to.have.length(3);
       });
 
       it('should disable all the filters', function () {
-        expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(1);
+        expect(_.filter($rootScope.filters, pickDisabled)).to.have.length(1);
         fn(true);
-        expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(4);
+        expect(_.filter($rootScope.filters, pickDisabled)).to.have.length(4);
       });
 
       it('should enable all the filters', function () {
-        expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(1);
+        expect(_.filter($rootScope.filters, pickDisabled)).to.have.length(1);
         fn(false);
-        expect(_.filter($rootScope.state.filters, pickDisabled)).to.have.length(0);
+        expect(_.filter($rootScope.filters, pickDisabled)).to.have.length(0);
       });
     });
   }];

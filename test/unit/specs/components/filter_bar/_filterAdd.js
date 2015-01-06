@@ -39,7 +39,7 @@ define(function (require) {
 
       Promise.map(filters, mapFilter)
       .then(function (filters) {
-        $rootScope.state = { filters: filters };
+        $rootScope = { filters: filters };
       });
       $rootScope.$digest();
     });
@@ -58,26 +58,26 @@ define(function (require) {
       });
 
       it('should add only applied filters', function () {
-        expect($rootScope.state.filters.length).to.be(4);
+        expect($rootScope.filters.length).to.be(4);
         fn(newFilters);
-        expect($rootScope.state.filters.length).to.be(6);
-        expect($rootScope.state.filters[4]).to.eql(newFilters[0]);
-        expect($rootScope.state.filters[5]).to.eql(newFilters[2]);
+        expect($rootScope.filters.length).to.be(6);
+        expect($rootScope.filters[4]).to.eql(newFilters[0]);
+        expect($rootScope.filters[5]).to.eql(newFilters[2]);
       });
 
       it('should add filter object', function () {
-        expect($rootScope.state.filters.length).to.be(4);
+        expect($rootScope.filters.length).to.be(4);
         var filter = newFilters[0];
         fn(filter);
-        expect($rootScope.state.filters.length).to.be(5);
-        expect($rootScope.state.filters[4]).to.eql(newFilters[0]);
+        expect($rootScope.filters.length).to.be(5);
+        expect($rootScope.filters[4]).to.eql(newFilters[0]);
       });
 
       it('should not add filters that are not applied', function () {
-        expect($rootScope.state.filters.length).to.be(4);
+        expect($rootScope.filters.length).to.be(4);
         var filter = newFilters[1];
         fn(filter);
-        expect($rootScope.state.filters.length).to.be(4);
+        expect($rootScope.filters.length).to.be(4);
       });
     });
 

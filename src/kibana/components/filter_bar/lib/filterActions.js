@@ -6,7 +6,6 @@ define(function (require) {
   return function (globalState) {
     return function ($scope) {
       var saveState = saveFilterState($scope.state, globalState);
-      applyGlobalFilters();
 
       var exports = {
         toggleFilter: toggleFilter,
@@ -27,21 +26,6 @@ define(function (require) {
           });
         },
       }, exports);
-
-      /**
-       * Reads filters from global state and applies them to the scope state
-       * @returns {void}
-       */
-      function applyGlobalFilters() {
-        var filters = ($scope.state && $scope.state.filters) ? $scope.state.filters.filter(function (filter) {
-          return !filter.meta.pinned;
-        }) : [];
-        var globalFilters = (globalState.filters) ? globalState.filters.filter(function (filter) {
-          return filter.meta.pinned;
-        }) : [];
-        $scope.filters = _.union(filters, globalFilters);
-        saveState($scope.filters);
-      }
 
       /**
        * Toggles the filter between enabled/disabled.

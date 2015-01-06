@@ -40,7 +40,7 @@ define(function (require) {
 
       Promise.map(filters, mapFilter)
       .then(function (filters) {
-        $rootScope.state = { filters: filters };
+        $rootScope = { filters: filters };
       });
       $rootScope.$digest();
     });
@@ -53,14 +53,14 @@ define(function (require) {
       });
 
       it('should negate filter', function () {
-        var filter = $rootScope.state.filters[0];
+        var filter = $rootScope.filters[0];
         expect(filter.meta).to.have.property('negate', false);
         filter = fn(filter);
         expect(filter.meta).to.have.property('negate', true);
       });
 
       it('should de-negate filter', function () {
-        var filter = $rootScope.state.filters[1];
+        var filter = $rootScope.filters[1];
         expect(filter.meta).to.have.property('negate', true);
         filter = fn(filter);
         expect(filter.meta).to.have.property('negate', false);
@@ -79,9 +79,9 @@ define(function (require) {
       };
 
       it('should toggle all the filters', function () {
-        expect(_.filter($rootScope.state.filters, pickNegated)).to.have.length(1);
+        expect(_.filter($rootScope.filters, pickNegated)).to.have.length(1);
         fn();
-        expect(_.filter($rootScope.state.filters, pickNegated)).to.have.length(4);
+        expect(_.filter($rootScope.filters, pickNegated)).to.have.length(4);
       });
     });
   }];
