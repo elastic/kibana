@@ -8,5 +8,10 @@ define(function (require) {
     this.save = sinon.stub();
   }
 
+  GlobalState.prototype.resetStub = function () {
+    this.save = sinon.stub();
+    return this;
+  };
+
   return new GlobalState();
 });
