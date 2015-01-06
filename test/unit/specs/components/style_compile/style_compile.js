@@ -19,6 +19,7 @@ define(function (require) {
       expect($style.html().trim()).to.be([
         '.truncate-by-height {',
         '  max-height: none;',
+        '  display: inline-block;',
         '}',
         '.truncate-by-height::before {',
         '  top: -15px;',
@@ -30,6 +31,7 @@ define(function (require) {
       expect($style.html().trim()).to.be([
         '.truncate-by-height {',
         '  max-height: 15px !important;',
+        '  display: inline-block;',
         '}',
         '.truncate-by-height::before {',
         '  top: 0px;',
