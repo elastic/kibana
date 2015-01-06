@@ -124,7 +124,13 @@ define(function (require) {
                 try {
                   state = JSON.parse(meta.searchSourceJSON);
                 } catch (e) {}
-                self.searchSource.set(state);
+
+                var oldState = self.searchSource.toJSON();
+                var fnProps = _.transform(oldState, function (dynamic, val, name) {
+                  if (_.isFunction(val)) dynamic[name] = val;
+                }, {});
+
+                self.searchSource.set(_.defaults(state, fnProps));
               }
             })
             .then(hydrateIndexPattern)

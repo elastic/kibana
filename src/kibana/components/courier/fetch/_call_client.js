@@ -67,7 +67,15 @@ define(function (require) {
 
       // Now that all of THAT^^^ is out of the way, lets actually
       // call out to elasticsearch
-      Promise.resolve(strategy.convertReqsToBody(executable))
+      Promise.map(executable, function (req) {
+        return Promise.try(req.getFetchParams, void 0, req)
+        .then(function (fetchParams) {
+          return (req.fetchParams = fetchParams);
+        });
+      })
+      .then(function (reqsFetchParams) {
+        return strategy.reqsFetchParamsToBody(reqsFetchParams);
+      })
       .then(function (body) {
         // while the strategy was converting, our request was aborted
         if (esPromise === ABORTED) {
