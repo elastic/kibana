@@ -9,7 +9,7 @@ define(function (require) {
   var $route;
   var $location;
   var $rootScope;
-  var globalStateMock;
+  var globalStateMock = require('fixtures/global_state');
 
   require('components/url/url');
 
@@ -22,8 +22,6 @@ define(function (require) {
       });
 
       $provide.service('globalState', function () {
-        globalStateMock = {};
-        globalStateMock.on = globalStateMock.off = _.noop;
         globalStateMock.removeFromUrl = function (url) {
           return url;
         };
