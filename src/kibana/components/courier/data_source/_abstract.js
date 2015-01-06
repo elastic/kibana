@@ -265,7 +265,7 @@ define(function (require) {
             };
           }
 
-          if (!flatState.body.size || flatState.body.size === 0) {
+          if (flatState.body.size === 0) {
             flatState.search_type = 'count';
           }
 
