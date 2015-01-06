@@ -3,7 +3,7 @@ define(function (require) {
   var filterActions;
   var $rootScope;
 
-  describe.only('Filter Bar Actions', function () {
+  describe('Filter Bar Actions', function () {
 
     beforeEach(module('kibana'));
 
