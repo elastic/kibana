@@ -769,7 +769,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
                 '<i class="icon-circle" style="color:'+item.series.color+';"></i>' + ' ' +
-                (item.series.info.alias || item.series.info.query)+
+                kbn.xmlEnt(item.series.info.alias || item.series.info.query)+
               '</small><br>';
             } else {
               group = kbn.query_color_dot(item.series.color, 15) + ' ';
