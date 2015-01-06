@@ -197,66 +197,6 @@ define(function (require) {
       });
     });
 
-    describe('kbnTable', function () {
-
-      var $elem = angular.element(
-        '<kbn-table ' +
-        'columns="columns" ' +
-        'rows="rows" ' +
-        'sorting="sorting"' +
-        'filter="filtering"' +
-        'maxLength=maxLength ' +
-        'index-pattern="indexPattern"' +
-        '></thead>'
-      );
-
-      beforeEach(function () {
-
-        // A tiny window
-        sinon.stub($.prototype, 'height', function () { return 100; });
-
-        // Convince the infinite scroll that there's still a lot of room left.
-        sinon.stub($.prototype, 'scrollTop', function () { return -200; });
-
-        var rows = _.times(200, function (i) {
-          return getFakeRow(i, mapping);
-        });
-        init($elem, {
-          columns: ['bytes'],
-          rows: rows,
-          sorting: [],
-          filtering: sinon.spy(),
-          maxLength: 50,
-        });
-      });
-      afterEach(function () {
-        destroy();
-      });
-
-      it('should have a header and a table element', function (done) {
-        expect($elem.find('thead').length).to.be(1);
-        expect($elem.find('table').length).to.be(1);
-
-        done();
-      });
-
-      it('should have 50 rows to start', function (done) {
-        var tr = $elem.find('.discover-table-row');
-        expect(tr.length).to.be(50);
-        done();
-      });
-
-      it('should have an addRows function that adds 50 rows', function (done) {
-        expect($scope.addRows).to.be.a(Function);
-        $scope.addRows();
-        $elem.scope().$digest();
-
-        var tr = $elem.find('.discover-table-row');
-        expect(tr.length).to.be(100);
-        done();
-      });
-    });
-
     describe('kbnTableRow', function () {
       var $elem = angular.element(
         '<tr kbn-table-row="row" ' +
