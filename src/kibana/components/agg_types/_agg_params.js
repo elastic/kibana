@@ -4,19 +4,21 @@ define(function (require) {
     var _ = require('lodash');
     var IndexedArray = require('utils/indexed_array/index');
 
-    var BaseAggParam = Private(require('components/agg_types/param_types/base'));
-    var FieldAggParam = Private(require('components/agg_types/param_types/field'));
-    var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
-    var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
-    var StringAggParam = Private(require('components/agg_types/param_types/string'));
-    var RawJSONAggParam = Private(require('components/agg_types/param_types/raw_json'));
+    var paramTypeMap = {
+      field: Private(require('components/agg_types/param_types/field')),
+      optioned: Private(require('components/agg_types/param_types/optioned')),
+      regex: Private(require('components/agg_types/param_types/regex')),
+      string: Private(require('components/agg_types/param_types/string')),
+      json: Private(require('components/agg_types/param_types/raw_json')),
+      _default: Private(require('components/agg_types/param_types/base'))
+    };
 
     /**
      * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
      *
      * used to create:
-     *   - `OptionedAggParam` – When the config has an array of `options: []`
      *   - `FieldAggParam` – When the config has `name: "field"`
+     *   - `*AggParam` – When the type matches something in the map above
      *   - `BaseAggParam` – All other params
      *
      * @class AggParams
@@ -26,42 +28,19 @@ define(function (require) {
      */
     _(AggParams).inherits(IndexedArray);
     function AggParams(params) {
-      if (_.isPlainObject(params)) {
-        // convert the names: details format into details[].name
-        params = _.map(params, function (param, name) {
-          param.name = name;
-          return param;
-        });
-      }
-
-      // always append the raw JSON param
-      params.push({
-        name: 'json',
-        type: 'json',
-        advanced: true
-      });
-
       AggParams.Super.call(this, {
         index: ['name'],
-        initialSet: params.map(function (param) {
-          if (param.name === 'field') {
-            return new FieldAggParam(param);
+        initialSet: params.map(function (config) {
+          var type = config.name === 'field' ? config.name : config.type;
+          var Class = paramTypeMap[type] || paramTypeMap._default;
+          var param = new Class(config);
+
+          // recursively init sub params
+          if (param.params && !(params.params instanceof AggParams)) {
+            param.params = new AggParams(param.params);
           }
-          else if (param.type === 'optioned') {
-            return new OptionedAggParam(param);
-          }
-          else if (param.type === 'regex') {
-            return new RegexAggParam(param);
-          }
-          else if (param.type === 'string') {
-            return new StringAggParam(param);
-          }
-          else if (param.type === 'json') {
-            return new RawJSONAggParam(param);
-          }
-          else {
-            return new BaseAggParam(param);
-          }
+
+          return param;
         })
       });
     }
