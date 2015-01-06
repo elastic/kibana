@@ -1,16 +1,16 @@
 define(function (require) {
   require('modules')
   .get('app/visualize', ['ui.select'])
-  .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
+  .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
+    require('angular-ui-select');
+    require('filters/field_type');
+    require('plugins/visualize/editor/agg_params');
+
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-    require('angular-ui-select');
-
-    require('plugins/visualize/editor/agg_params');
-    require('filters/match_any');
 
     var notify = new Notifier({
       location: 'visAggGroup'

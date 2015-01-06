@@ -1,7 +1,7 @@
 define(function (require) {
   require('modules')
   .get('app/visualize', ['ui.select'])
-  .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier) {
+  .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
@@ -55,6 +55,9 @@ define(function (require) {
             $aggParamEditorsScope = null;
           }
 
+          // create child scope, used in the editors
+          $aggParamEditorsScope = $scope.$new();
+
           var agg = $scope.agg;
           if (!agg) return;
 
@@ -82,6 +85,11 @@ define(function (require) {
             if (aggParam = getAggParamHTML(param, i)) {
               aggParamHTML[type].push(aggParam);
             }
+
+            // if field param exists, compute allowed fields
+            if (param.name === 'field') {
+              $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+            }
           });
 
           // compile the paramEditors html elements
@@ -92,7 +100,6 @@ define(function (require) {
             paramEditors = paramEditors.concat(aggParamHTML.advanced);
           }
 
-          $aggParamEditorsScope = $scope.$new();
           $aggParamEditors = $(paramEditors).appendTo($el);
           $compile($aggParamEditors)($aggParamEditorsScope);
         });
@@ -104,11 +111,7 @@ define(function (require) {
             return;
           }
 
-          var attrs = {
-            'agg-type': 'agg.type',
-            'agg-config': 'agg',
-            'params': 'agg.params'
-          };
+          var attrs = {};
 
           attrs['agg-param'] = 'agg.type.params[' + idx + ']';
           if (param.advanced) {
@@ -119,6 +122,19 @@ define(function (require) {
           .attr(attrs)
           .append(param.editor)
           .get(0);
+        }
+
+        function getIndexedFields(param) {
+          var fields = $scope.agg.vis.indexPattern.fields.raw;
+          var fieldTypes = param.filterFieldTypes;
+
+          if (fieldTypes) {
+            fields = $filter('fieldType')(fields, fieldTypes);
+            fields = $filter('filter')(fields, { bucketable: true });
+            fields = $filter('orderBy')(fields, ['type', 'name']);
+          }
+
+          return fields;
         }
 
         // generic child scope creation, for both schema and agg

@@ -1,6 +1,7 @@
 define(function (require) {
   return function HandlerBaseClass(d3, Private) {
     var _ = require('lodash');
+    var errors = require('errors');
 
     var Data = Private(require('components/vislib/lib/data'));
     var Layout = Private(require('components/vislib/lib/layout/layout'));
@@ -20,6 +21,7 @@ define(function (require) {
       }
 
       this.data = opts.data || new Data(vis.data, vis._attr);
+
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -50,6 +52,21 @@ define(function (require) {
     }
 
     /**
+     * Validates whether data is actually present in the data object
+     * used to render the Vis. Throws a no results error if data is not
+     * present.
+     *
+     * @private
+     */
+    Handler.prototype._validateData = function () {
+      var dataType = this.data.type;
+
+      if (!dataType) {
+        throw new errors.NoResults();
+      }
+    };
+
+    /**
      * Renders the constructors that create the visualization,
      * including the chart constructor
      *
@@ -60,6 +77,7 @@ define(function (require) {
       var self = this;
       var charts = this.charts = [];
 
+      this._validateData();
       this.renderArray.forEach(function (property) {
         if (typeof property.render === 'function') {
           property.render();
@@ -153,13 +171,25 @@ define(function (require) {
     Handler.prototype.error = function (message) {
       this.removeAll(this.el);
 
-      return d3.select(this.el)
+      var div = d3.select(this.el)
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
-      .attr('class', 'visualize-error chart error')
-      .append('h4')
-      .text(message);
+      .attr('class', 'visualize-error chart error');
+
+      if (message === 'No results found') {
+        div.append('div')
+        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+        .append('div').attr('class', 'item top')
+        .append('div').attr('class', 'item')
+        .append('h2').html('<i class="fa fa-meh-o"></i>')
+        .append('h4').text(message);
+
+        div.append('div').attr('class', 'item bottom');
+        return div;
+      }
+
+      return div.append('h4').text(message);
     };
 
     /**

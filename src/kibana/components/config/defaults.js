@@ -27,6 +27,10 @@ define(function (require) {
       value: 10,
       description: 'The top N most popular fields to show',
     },
+    'format:numberPrecision': {
+      value: 3,
+      description: 'Round numbers to this many decimal places',
+    },
     'histogram:barTarget': {
       value: 50,
       description: 'Attempt to generate around this many bar when using "auto" interval in date histograms',

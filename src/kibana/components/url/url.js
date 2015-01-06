@@ -5,7 +5,7 @@ define(function (require) {
   var rison = require('utils/rison');
   var location = require('modules').get('kibana/url');
 
-  location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse) {
+  location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse, getAppState) {
     var self = this;
     var reloading;
     var unbindListener;
@@ -42,6 +42,8 @@ define(function (require) {
       };
 
       if (self.shouldAutoReload(next, prev)) {
+        var appState = getAppState();
+        appState.destroy();
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
           // call the "unlisten" function returned by $on
           reloading();

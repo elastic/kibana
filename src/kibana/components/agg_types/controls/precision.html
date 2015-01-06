@@ -4,7 +4,7 @@
     <div class="vis-editor-agg-form-row">
       <input
         name="precision"
-        ng-model="params.precision"
+        ng-model="agg.params.precision"
         required
         class="form-control"
         type="range"
@@ -12,7 +12,7 @@
         max="{{config.get('visualization:tileMap:maxPrecision')}}"
         >
       <div class="form-group vis-editor-agg-form-value">
-        {{params.precision}}
+        {{agg.params.precision}}
       </div>
     </div>
   </div>

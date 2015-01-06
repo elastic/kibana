@@ -82,11 +82,13 @@ define(function (require) {
 
         function setFormattedColumns(table) {
           $scope.formattedColumns = table.columns.map(function (col, i) {
+            var agg = $scope.table.aggConfig(col);
+            var field = agg.field();
             var formattedColumn = {
-              title: col.title
+              title: col.title,
+              filterable: field && field.filterable && agg.schema.group === 'buckets'
             };
 
-            var agg = $scope.table.aggConfig(col);
             var last = i === (table.columns.length - 1);
 
             if (last || (agg.schema.group === 'metrics')) {
@@ -98,16 +100,7 @@ define(function (require) {
         }
 
         function setFormattedRows(table) {
-          var formatters = table.columns.map(function (col) {
-            return table.fieldFormatter(col);
-          });
-
-          // format all row values
-          $scope.formattedRows = (table.rows).map(function (row) {
-            return row.map(function (cell, i) {
-              return formatters[i](cell);
-            });
-          });
+          $scope.rows = table.rows;
 
           // update the csv file's title
           self.csv.filename = (table.title() || 'table') + '.csv';
