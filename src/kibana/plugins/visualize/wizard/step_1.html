@@ -7,9 +7,25 @@
 <ul class="visualizations list-group list-group-menu">
   <a class="visualization list-group-item list-group-menu-item"
      ng-repeat="type in visTypes.inTitleOrder"
-     ng-href="{{ visTypeUrl(type) }}">
+     ng-href="{{ visTypeUrl(type) }}"
+     ng-mouseenter="showDescription=true" ng-mouseleave="showDescription=false">
     <li>
-      <i class="fa" ng-class="type.icon"></i>{{type.title}}
+      <!--
+      <div>
+        <i class="fa" ng-class="type.icon"></i>
+      </div>
+      <div>
+        {{type.title}}<br>
+        <small class="text-small">{{type.description}}</small>
+      </div>
+      -->
+      <div class="media">
+          <i class="media-left fa" ng-class="type.icon"></i>
+        <div class="media-body">
+          <h4 class="media-heading">{{type.title}}</h4>
+          <span ng-show="showDescription">{{type.description}}</span>
+        </div>
+      </div>
     </li>
   </a>
 </ul>
