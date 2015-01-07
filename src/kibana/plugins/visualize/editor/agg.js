@@ -16,7 +16,6 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      replace: true,
       template: require('text!plugins/visualize/editor/agg.html'),
       link: function ($scope, $el) {
         $scope.editorOpen = $scope.agg.brandNew;

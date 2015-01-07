@@ -10,7 +10,6 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/sidebar.html'),
-      replace: true,
       scope: true,
       link: function ($scope) {
         $scope.$bind('vis', 'editableVis');

@@ -11,7 +11,6 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/agg_group.html'),
-      replace: true,
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;

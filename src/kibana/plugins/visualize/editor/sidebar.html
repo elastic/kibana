@@ -1,39 +1,37 @@
-<div class="vis-editor-sidebar">
-  <div class="sidebar-container">
-    <form class="sidebar-list"
-          ng-class="{'hide-errors': hideErrors}"
-          ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
-          name="visualizeEditor">
-      <ul class="list-unstyled">
-        <!-- metrics -->
-        <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
+<div class="sidebar-container">
+  <form class="sidebar-list"
+        ng-class="{'hide-errors': hideErrors}"
+        ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
+        name="visualizeEditor">
+    <ul class="list-unstyled">
+      <!-- metrics -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
 
-        <!-- buckets -->
-        <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+      <!-- buckets -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
 
-        <!-- vis options -->
-        <vis-editor-vis-options
-          vis="vis"
-          >
-        </vis-editor-vis-options>
+      <!-- vis options -->
+      <vis-editor-vis-options
+        vis="vis"
+        >
+      </vis-editor-vis-options>
 
-        <!-- apply/discard -->
-        <li class="vis-editor-sidebar-buttons sidebar-item">
-          <button
-            ng-disabled="!vis.dirty || visualizeEditor.$invalid"
-            type="submit"
-            class="sidebar-item-button success">
-            Apply
-          </button>
-          <button
-            ng-disabled="!vis.dirty"
-            type="button"
-            ng-click="resetEditableVis()"
-            class="sidebar-item-button warn">
-            Discard
-          </button>
-        </li>
-      </ul>
-    </form>
-  </div>
+      <!-- apply/discard -->
+      <li class="vis-editor-sidebar-buttons sidebar-item">
+        <button
+          ng-disabled="!vis.dirty || visualizeEditor.$invalid"
+          type="submit"
+          class="sidebar-item-button success">
+          Apply
+        </button>
+        <button
+          ng-disabled="!vis.dirty"
+          type="button"
+          ng-click="resetEditableVis()"
+          class="sidebar-item-button warn">
+          Discard
+        </button>
+      </li>
+    </ul>
+  </form>
 </div>
