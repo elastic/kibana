@@ -32,7 +32,7 @@ define(function (require) {
 
         if ($scope.agg.schema.editor) {
           $schemaEditor.append($scope.agg.schema.editor);
-          $compile($schemaEditor)(editorScope());
+          $compile($schemaEditor)($scope.$new());
         }
 
         // allow selection of an aggregation
@@ -133,17 +133,6 @@ define(function (require) {
           }
 
           return fields;
-        }
-
-        // generic child scope creation, for both schema and agg
-        function editorScope() {
-          var $editorScope = $scope.$new();
-
-          setupBoundProp($editorScope, 'agg.type', 'aggType');
-          setupBoundProp($editorScope, 'agg', 'aggConfig');
-          setupBoundProp($editorScope, 'agg.params', 'params');
-
-          return $editorScope;
         }
 
         // bind a property from our scope a child scope, with one-way binding
