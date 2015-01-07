@@ -6,6 +6,7 @@ define(function (require) {
   var saveHtml = require('text!plugins/discover/partials/save_search.html');
   var loadHtml = require('text!plugins/discover/partials/load_search.html');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
+  var filterManager = require('components/filter_manager/filter_manager');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -92,6 +93,7 @@ define(function (require) {
     var metaFields = config.get('metaFields');
 
     var $state = $scope.state = new AppState(stateDefaults);
+    filterManager.init($state);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
@@ -316,7 +318,7 @@ define(function (require) {
 
       $scope.updateTime();
 
-      segmented.setDirection(sortBy === 'time' ? sort[1] : 'desc');
+      segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
 
       // triggered when the status updated
       segmented.on('status', function (status) {
@@ -443,10 +445,11 @@ define(function (require) {
       .size($scope.opts.sampleSize)
       .sort(function () {
         var sort = {};
-        if (_.isArray($state.sort)) {
+        if (_.isArray($state.sort) && $state.sort.length === 2) {
           sort[$state.sort[0]] = $state.sort[1];
-        } else if (indexPattern.timeFieldName) {
-          sort[indexPattern.timeFieldName] = 'desc';
+        } else if ($scope.indexPattern.timeFieldName) {
+          // Use the watcher to set sort in this case, the above `if` will now be true
+          $state.sort = [$scope.indexPattern.timeFieldName, 'desc'];
         } else {
           sort._score = 'desc';
         }
@@ -460,38 +463,25 @@ define(function (require) {
       })
       .set('filter', $state.filters || []);
 
-      // get the current indexPattern
-      var indexPattern = $scope.indexPattern = $scope.searchSource.get('index');
-
-      // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
-      // is not equal to the $scope.opts.index then either clean or
-      if (
-        Boolean($scope.opts.index) !== Boolean(indexPattern)
-        || (indexPattern && indexPattern.id) !== $scope.opts.index
-      ) {
-        $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
-        indexPattern = courier.indexPatterns.get($scope.opts.index);
-      }
-
-      $scope.opts.timefield = indexPattern.timeFieldName;
-
-      return Promise.cast(indexPattern)
-      .then(function (indexPattern) {
-        $scope.opts.timefield = indexPattern.timeFieldName;
+      $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
+      return courier.indexPatterns.get($scope.opts.index).then(function (pattern) {
+        $scope.indexPattern = pattern;
+        $scope.opts.timefield = $scope.indexPattern.timeFieldName;
 
         // did we update the index pattern?
-        var refresh = indexPattern !== $scope.searchSource.get('index');
+        var refresh = $scope.indexPattern !== $scope.searchSource.get('index');
 
         // make sure the pattern is set on the "leaf" searchSource, not just the root
-        $scope.searchSource.set('index', indexPattern);
+        $scope.searchSource.set('index', pattern);
 
         if (refresh) {
-          $scope.indexPattern = indexPattern;
+          delete $state.sort;
           delete $scope.fields;
           delete $scope.columns;
           setFields();
         }
       });
+
     };
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
@@ -536,61 +526,9 @@ define(function (require) {
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, values, operation) {
-      values = _.isArray(values) ? values : [values];
-
       var indexPattern = $scope.searchSource.get('index');
       indexPattern.popularizeField(field, 1);
-      var negate = operation === '-';
-
-      // Grap the filters from the searchSource and ensure it's an array
-      var filters = _.flatten([$state.filters], true);
-
-      _.each(values, function (value) {
-        var existing = _.find(filters, function (filter) {
-          if (!filter) return;
-
-          if (field === '_exists_' && filter.exists) {
-            return filter.exists.field === value;
-          }
-
-          if (field === '_missing_' && filter.missing) {
-            return filter.missing.field === value;
-          }
-
-          if (filter.query) {
-            return filter.query.match[field] && filter.query.match[field].query === value;
-          }
-        });
-
-        if (existing) {
-          if (existing.meta.negate !== negate) existing.meta.negate = negate;
-          return;
-        }
-
-        switch (field) {
-        case '_exists_':
-          filters.push({
-            exists: {
-              field: value
-            }
-          });
-          break;
-        case '_missing_':
-          filters.push({
-            missing: {
-              field: value
-            }
-          });
-          break;
-        default:
-          var filter = { meta: { negate: negate, index: $state.index }, query: { match: {} } };
-          filter.query.match[field] = { query: value, type: 'phrase' };
-          filters.push(filter);
-          break;
-        }
-      });
-
-      $state.filters = filters;
+      filterManager.add(field, values, operation, $state.index);
     };
 
     $scope.toggleField = function (name) {
