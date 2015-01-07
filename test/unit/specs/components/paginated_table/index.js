@@ -212,12 +212,39 @@ define(function (require) {
         expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).to.be('zzzz');
       });
 
-      it('should handle sorting on columns with the same name', function () {
-        data.columns = [];
-        for (var i = 0; i < data.rows[0].length; i++) {
-          data.columns.push({ title: 'test row' });
-        }
+    });
 
+    describe('sorting duplicate columns', function () {
+      var data;
+      var paginatedTable;
+      var colText = 'test row';
+
+      beforeEach(function () {
+        var cols = [
+          { title: colText },
+          { title: colText },
+          { title: colText }
+        ];
+        var rows = [
+          ['bbbb', 'aaaa', 'zzzz'],
+          ['cccc', 'cccc', 'aaaa'],
+          ['zzzz', 'bbbb', 'bbbb'],
+          ['aaaa', 'zzzz', 'cccc'],
+        ];
+        data = makeData(cols, rows);
+
+        renderTable(data.columns, data.rows);
+        paginatedTable = $el.isolateScope().paginatedTable;
+      });
+
+      it('should should have duplicate column titles', function () {
+        var columns = $el.find('thead th span');
+        columns.each(function () {
+          expect(this.innerText).to.be(colText);
+        });
+      });
+
+      it('should handle sorting on columns with the same name', function () {
         // sort by the last column
         paginatedTable.sortColumn(2);
         $scope.$digest();
@@ -230,6 +257,17 @@ define(function (require) {
         expect(tableRows.eq(2).find('td').eq(2).text()).to.be('cccc');
         expect(tableRows.eq(3).find('td').eq(2).text()).to.be('zzzz');
       });
+
+      it('should not sort duplicate columns', function () {
+        paginatedTable.sortColumn(1);
+        $scope.$digest();
+
+        var sorters = $el.find('thead th i');
+        expect(sorters.eq(0).hasClass('fa-sort')).to.be(true);
+        expect(sorters.eq(1).hasClass('fa-sort')).to.be(false);
+        expect(sorters.eq(2).hasClass('fa-sort')).to.be(true);
+      });
+
     });
 
     describe('custom sorting', function () {
