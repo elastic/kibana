@@ -101,6 +101,9 @@ define(function (require) {
     });
 
     it('should have a header and a table element', function () {
+      searchSource.crankResults();
+      $scope.$digest();
+
       expect($elem.find('thead').length).to.be(1);
       expect($elem.find('table').length).to.be(1);
     });
