@@ -1,7 +1,7 @@
 define(function (require) {
   require('modules')
   .get('app/visualize', ['ui.select'])
-  .directive('visEditorAggParams', function ($compile, $parse, $filter, Private, Notifier) {
+  .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
@@ -128,7 +128,7 @@ define(function (require) {
 
           if (fieldTypes) {
             fields = $filter('fieldType')(fields, fieldTypes);
-            fields = $filter('matchAny')(fields, [{ indexed: true }, { scripted: true }]);
+            fields = $filter('filter')(fields, { bucketable: true });
             fields = $filter('orderBy')(fields, ['type', 'name']);
           }
 

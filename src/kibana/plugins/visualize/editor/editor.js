@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   require('plugins/visualize/saved_visualizations/saved_visualizations');
   require('plugins/visualize/editor/sidebar');
   require('plugins/visualize/editor/agg_filter');
@@ -14,8 +15,10 @@ define(function (require) {
   .when('/visualize/create', {
     template: require('text!plugins/visualize/editor/editor.html'),
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route) {
-        if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
+      savedVis: function (savedVisualizations, courier, $route, Private) {
+        var visTypes = Private(require('registry/vis_types'));
+        var visType = _.find(visTypes, {name: $route.current.params.type});
+        if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
           throw new Error('You must provide either an indexPattern or a savedSearchId');
         }
 
@@ -202,7 +205,7 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', $state.filters);
       if (!$scope.linked) searchSource.set('query', $state.query);
-      courier.fetch();
+      if ($scope.vis.type.requiresSearch) courier.fetch();
     };
 
 

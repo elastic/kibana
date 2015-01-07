@@ -60,7 +60,7 @@ define(function (require) {
               field
               && (field.type === 'number' || field.type === 'date')
             ) {
-              return true;
+              return aggConfig.params.min_doc_count;
             }
           }
         }
