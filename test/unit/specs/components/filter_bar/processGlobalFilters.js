@@ -28,6 +28,10 @@ define(function (require) {
       });
     });
 
+    afterEach(function () {
+      delete globalStateStub.filters;
+    });
+
     it('should remove pinned filters', function () {
       var processedFilters = processGlobalFilters(filters);
       expect(processedFilters).to.have.length(2);
