@@ -2,16 +2,17 @@
   <table class="kbn-table table" ng-if="indexPattern">
     <thead
       kbn-table-header
-      columns="persist.columns"
+      columns="columns"
       index-pattern="indexPattern"
-      sorting="persist.sorting">
+      sorting="sorting">
     </thead>
     <tbody>
       <tr ng-repeat="row in page|limitTo:limit track by row._index+row._id"
         kbn-table-row="row"
-        columns="persist.columns"
-        sorting="persist.sorting"
+        columns="columns"
+        sorting="sorting"
         index-pattern="indexPattern"
+        filter="filter"
         class="discover-table-row"></tr>
     </tbody>
   </table>
@@ -20,16 +21,17 @@
 <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
   <thead
     kbn-table-header
-    columns="persist.columns"
+    columns="columns"
     index-pattern="indexPattern"
-    sorting="persist.sorting">
+    sorting="sorting">
   </thead>
   <tbody>
     <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._id"
       kbn-table-row="row"
-      columns="persist.columns"
-      sorting="persist.sorting"
+      columns="columns"
+      sorting="sorting"
       index-pattern="indexPattern"
+      filter="filter"
       class="discover-table-row"></tr>
   </tbody>
 </table>
