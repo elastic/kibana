@@ -68,8 +68,14 @@ define(function (require) {
             return orderAgg.toJSON();
           },
           deserialize: function (state, agg) {
+            return this.makeOrderAgg(agg, state);
+          },
+          makeOrderAgg: function (termsAgg, state) {
+            state = state || {};
             state.schema = orderAggSchema;
-            return new AggConfig(agg.vis, state);
+            var orderAgg = new AggConfig(termsAgg.vis, state);
+            orderAgg.id = termsAgg.id + '-orderAgg';
+            return orderAgg;
           },
           controller: function ($scope) {
             $scope.safeMakeLabel = function (agg) {
@@ -91,6 +97,7 @@ define(function (require) {
               var aggs = agg.vis.aggs;
               var params = agg.params;
               var orderBy = params.orderBy;
+              var paramDef = agg.type.params.byName.orderAgg;
 
               // setup the initial value of orderBy
               if (!orderBy && prevOrderBy === INIT) {
@@ -113,9 +120,7 @@ define(function (require) {
                 return;
               }
 
-              params.orderAgg = params.orderAgg || new AggConfig(agg.vis, {
-                schema: orderAggSchema
-              });
+              params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
             }
           },
           write: function (agg, output) {
