@@ -1,0 +1,15 @@
+<div class="form-group" ng-controller="agg.type.params.byName.metrics.controller">
+  <label for="field">
+    Metrics
+  </label>
+  <p class="text-danger" ng-if="aggForm.metric.$invalid">
+    select at least one metric
+  </p>
+  <input type="hidden" ng-model="agg.params.metrics[0]" name="metric" required>
+  <ui-select multiple ng-model="agg.params.metrics">
+    <ui-select-match>{{ $item }}</ui-select-match>
+    <ui-select-choices repeat="metric in metrics | filter:$select.search">
+      {{ metric }}
+    </ui-select>
+  </ui-select>
+</div>
