@@ -1,5 +1,6 @@
 define(function (require) {
   var moment = require('moment');
+  var filterManager = require('components/filter_manager/filter_manager');
   var $ = require('jquery');
   require('modules')
   .get('app/dashboard')
@@ -31,6 +32,12 @@ define(function (require) {
             $scope.savedObj = panelConfig.savedObj;
             $scope.edit = panelConfig.edit;
             $scope.$on('$destroy', panelConfig.savedObj.destroy);
+
+            filterManager.init($state);
+            $scope.filter = function (field, value, operator) {
+              var index = $scope.savedObj.searchSource.get('index').id;
+              filterManager.add(field, value, operator, index);
+            };
           }).catch(function (e) {
             $scope.error = e.message;
           });
