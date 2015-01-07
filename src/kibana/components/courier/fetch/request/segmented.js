@@ -32,8 +32,6 @@ define(function (require) {
      *********/
 
     SegmentedReq.prototype.start = function () {
-      this._createQueue();
-      this._all = this._queue.slice(0);
       this._complete = [];
       this._active = null;
       this._segments = [];
@@ -50,6 +48,8 @@ define(function (require) {
       // give the request consumer a chance to receive each segment and set
       // parameters via the handle
       if (_.isFunction(this._initFn)) this._initFn(this._handle);
+      this._createQueue();
+      this._all = this._queue.slice(0);
 
       // Send the initial fetch status
       this._reportStatus();
@@ -70,6 +70,12 @@ define(function (require) {
         var index = self._active = self._queue.shift();
 
         params.index = index;
+
+        // Only subtract from remaining size if dealing with the indexPattern's timefield
+        var timefield = self.source.get('index').timeFieldName;
+        if (_.keys(params.body.sort)[0] !== timefield) {
+          self._remainingSize = false;
+        }
 
         if (self._remainingSize !== false) {
           params.body.size = self._remainingSize;

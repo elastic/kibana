@@ -10,6 +10,7 @@ define(function (require) {
   var $location;
   var $rootScope;
   var globalStateMock = require('fixtures/global_state');
+  var appState;
 
   require('components/url/url');
 
@@ -18,6 +19,13 @@ define(function (require) {
       $provide.service('$route', function () {
         return {
           reload: _.noop
+        };
+      });
+
+      appState = { destroy: sinon.stub() };
+      $provide.service('getAppState', function () {
+        return function () {
+          return appState;
         };
       });
 
@@ -39,6 +47,7 @@ define(function (require) {
   }
 
   describe('kbnUrl', function () {
+
     beforeEach(function () {
       init();
     });
@@ -56,6 +65,7 @@ define(function (require) {
 
         expect($rootScope.$on.callCount).to.be(0);
         kbnUrl.change('/url');
+        sinon.assert.calledOnce(appState.destroy);
         expect($rootScope.$on.callCount).to.be(1);
         expect($rootScope.$on.firstCall.args[0]).to.be('$locationChangeSuccess');
       });

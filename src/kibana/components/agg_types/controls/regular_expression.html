@@ -3,7 +3,7 @@
   <input
     type="text"
     class="form-control"
-    ng-model="params[aggParam.name].pattern"
+    ng-model="agg.params[aggParam.name].pattern"
   >
 </div>
 <div class="form-group regex">
@@ -15,7 +15,7 @@
     </label>
     <ui-select
       multiple
-      ng-model="params[aggParam.name].flags">
+      ng-model="agg.params[aggParam.name].flags">
       <ui-select-match>{{ $item }}</ui-select-match>
       <ui-select-choices repeat="label in aggParam.flags">
         {{ label }}

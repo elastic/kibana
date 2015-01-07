@@ -11,29 +11,24 @@ define(function (require) {
        * @param  {array} requests - the requests to serialize
        * @return {string} - the request body
        */
-      convertReqsToBody: function (reqs) {
-        return Promise.map(reqs, function (req) {
-          return req.getFetchParams();
-        })
-        .then(function (reqsParams) {
-          return reqsParams.map(function (reqParams) {
-            var indexList = reqParams.index;
+      reqsFetchParamsToBody: function (reqsFetchParams) {
+        return reqsFetchParams.map(function (fetchParams) {
+          var indexList = fetchParams.index;
 
-            if (_.isFunction(_.deepGet(indexList, 'toIndexList'))) {
-              var timeBounds = timefilter.getBounds();
-              indexList = indexList.toIndexList(timeBounds.min, timeBounds.max);
-            }
+          if (_.isFunction(_.deepGet(indexList, 'toIndexList'))) {
+            var timeBounds = timefilter.getBounds();
+            indexList = indexList.toIndexList(timeBounds.min, timeBounds.max);
+          }
 
-            return JSON.stringify({
-              index: indexList,
-              type: reqParams.type,
-              ignore_unavailable: true
-            })
-            + '\n'
-            + JSON.stringify(reqParams.body || {});
-
-          }).join('\n') + '\n';
-        });
+          return JSON.stringify({
+            index: indexList,
+            type: fetchParams.type,
+            search_type: fetchParams.search_type,
+            ignore_unavailable: true
+          })
+          + '\n'
+          + JSON.stringify(fetchParams.body || {});
+        }).join('\n') + '\n';
       },
 
       /**

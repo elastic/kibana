@@ -48,7 +48,8 @@
     "require-css": "~0.1.2",
     "requirejs": "~2.1.10",
     "requirejs-text": "~2.0.10",
-    "lodash-deep": "spenceralger/lodash-deep#a2768a72d7"
+    "lodash-deep": "spenceralger/lodash-deep#a2768a72d7",
+    "marked": "~0.3.2"
   },
   "devDependencies": {}
 }
