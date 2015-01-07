@@ -43,6 +43,7 @@ define(function (require) {
             sortDirection = directions[self.sort.direction];
           }
 
+          self.sort.columnIndex = colIndex;
           self.sort.columnName = col.title;
           self.sort.direction = sortDirection;
           self._setSortGetter(colIndex);
