@@ -134,6 +134,126 @@ define(function (require) {
           }
         ]
       };
+      var dataColumns = {
+        columns: [
+          {
+            hits      : 621,
+            label     : '',
+            ordered   : {
+              date    : true,
+              interval: 30000,
+              max     : 1408734982458,
+              min     : 1408734082458
+            },
+            series    : [
+              {
+                values: [
+                  {
+                    x: 1408734060000,
+                    y: 8
+                  },
+                  {
+                    x: 1408734090000,
+                    y: 23
+                  },
+                  {
+                    x: 1408734120000,
+                    y: 30
+                  },
+                  {
+                    x: 1408734150000,
+                    y: 28
+                  },
+                  {
+                    x: 1408734180000,
+                    y: 36
+                  },
+                  {
+                    x: 1408734210000,
+                    y: 30
+                  },
+                  {
+                    x: 1408734240000,
+                    y: 26
+                  },
+                  {
+                    x: 1408734270000,
+                    y: 22
+                  },
+                  {
+                    x: 1408734300000,
+                    y: 29
+                  },
+                  {
+                    x: 1408734330000,
+                    y: 24
+                  }
+                ]
+              }
+            ],
+            xAxisLabel: 'Date Histogram',
+            yAxisLabel: 'Count'
+          },
+          {
+            hits      : 621,
+            label     : '',
+            ordered   : {
+              date    : true,
+              interval: 30000,
+              max     : 1408734982458,
+              min     : 1408734082458
+            },
+            series    : [
+              {
+                values: [
+                  {
+                    x: 1408734060000,
+                    y: 8
+                  },
+                  {
+                    x: 1408734090000,
+                    y: 23
+                  },
+                  {
+                    x: 1408734120000,
+                    y: 30
+                  },
+                  {
+                    x: 1408734150000,
+                    y: 28
+                  },
+                  {
+                    x: 1408734180000,
+                    y: 36
+                  },
+                  {
+                    x: 1408734210000,
+                    y: 30
+                  },
+                  {
+                    x: 1408734240000,
+                    y: 26
+                  },
+                  {
+                    x: 1408734270000,
+                    y: 22
+                  },
+                  {
+                    x: 1408734300000,
+                    y: 29
+                  },
+                  {
+                    x: 1408734330000,
+                    y: 24
+                  }
+                ]
+              }
+            ],
+            xAxisLabel: 'Date Histogram',
+            yAxisLabel: 'Count'
+          }
+        ]
+      };
 
       beforeEach(function () {
         module('ChartSplitFactory');
@@ -184,29 +304,43 @@ define(function (require) {
       describe('chart title split function', function () {
         var newEl;
         var fixture;
+        var secondVis;
 
         beforeEach(function () {
           inject(function (d3) {
             el.append('div').attr('class', 'x-axis-chart-title');
             el.append('div').attr('class', 'y-axis-chart-title');
-            d3.select('.x-axis-chart-title').call(chartTitleSplit);
-            d3.select('.y-axis-chart-title').call(chartTitleSplit);
+            console.log(el[0][0]);
+            el.select('.x-axis-chart-title').call(chartTitleSplit, el);
+            el.select('.y-axis-chart-title').call(chartTitleSplit, el);
 
+            // Tests that no chart titles are appended
             newEl = d3.select('body').append('div')
               .attr('class', 'series')
               .datum({ series: []});
 
             newEl.append('div').attr('class', 'x-axis-chart-title');
             newEl.append('div').attr('class', 'y-axis-chart-title');
-            newEl.select('.x-axis-chart-title').call(chartTitleSplit);
-            newEl.select('.y-axis-chart-title').call(chartTitleSplit);
+            newEl.select('.x-axis-chart-title').call(chartTitleSplit, newEl);
+            newEl.select('.y-axis-chart-title').call(chartTitleSplit, newEl);
 
             fixture = newEl.selectAll(this.childNodes)[0].length;
+
+            // Tests that only chart titles are removed from the correct visualization
+            secondVis = d3.select('body').append('div')
+              .attr('class', 'visualization')
+              .datum(dataColumns);
+
+            secondVis.append('div').attr('class', 'x-axis-chart-title');
+            secondVis.append('div').attr('class', 'y-axis-chart-title');
+            secondVis.select('.x-axis-chart-title').call(chartTitleSplit, secondVis);
+            secondVis.select('.y-axis-chart-title').call(chartTitleSplit, secondVis);
           });
         });
 
         afterEach(function () {
           newEl.remove();
+          secondVis.remove();
         });
 
         it('should append the correct number of divs', function () {
@@ -220,6 +354,10 @@ define(function (require) {
 
         it('should remove all chart title divs when only one chart is rendered', function () {
           expect(fixture).to.be(0);
+        });
+
+        it('should not remove chart titles from another visualization', function () {
+          expect();
         });
       });
 
