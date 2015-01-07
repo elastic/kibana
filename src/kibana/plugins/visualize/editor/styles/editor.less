@@ -245,8 +245,6 @@
     .display(flex);
     .flex-direction(column);
     overflow: auto;
-    min-height: 0;
-    min-width: 0;
 
     &.embedded {
       .flex-shrink(1);
@@ -266,14 +264,12 @@
 
     visualize {
       .flex-parent();
-      .flex(1, 0, auto);
+      .flex(1, 1, 100%);
     }
 
     .visualize-chart {
-      .flex(1, 0, 100%);
+      .flex(1, 1, 100%);
       position: relative;
-      min-height: 0;
-      min-width: 0;
     }
   }
 }
