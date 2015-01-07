@@ -133,7 +133,8 @@ define(function (require) {
      * @return {AggConfig}
      */
     AggConfigs.prototype.getResponseAggById = function (id) {
-      var parts = String(id).split('.');
+      id = String(id);
+      var parts = id.split('.');
       if (parts.length === 1) {
         return this.byId[id];
       }

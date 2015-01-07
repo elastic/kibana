@@ -130,7 +130,7 @@ define(function (require) {
 
             var orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
 
-            if (orderAgg.type.name === 'count') {
+            if (!orderAgg || orderAgg.type.name === 'count') {
               order._count = dir;
               return;
             }
