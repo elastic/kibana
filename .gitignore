@@ -9,4 +9,5 @@ target
 .jruby
 .idea
 *.iml
+*.log
 esvm
