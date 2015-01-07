@@ -92,7 +92,7 @@ define(function (require) {
             } else {
               return key;
             }
-          }).flatten().value().sort();
+          }).flatten().uniq().value().sort();
 
           var matches = all.filter(function (existingIndex) {
             var parsed = moment(existingIndex, indexPattern.id);
