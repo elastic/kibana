@@ -23,8 +23,6 @@ define(function (require) {
   require('services/timefilter');
   require('components/highlight/highlight_tags');
 
-  require('plugins/discover/directives/table');
-
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',
@@ -162,7 +160,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('state.sort', function (sort) {
+        $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
