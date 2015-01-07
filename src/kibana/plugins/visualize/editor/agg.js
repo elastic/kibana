@@ -3,6 +3,7 @@ define(function (require) {
   .get('app/visualize', ['ui.select'])
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
     require('plugins/visualize/editor/agg_params');
+    require('plugins/visualize/editor/agg_add');
 
     var _ = require('lodash');
     var $ = require('jquery');

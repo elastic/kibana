@@ -14,35 +14,9 @@
       </nesting-indicator>
 
       <!-- agg.html - controls for aggregation -->
-      <vis-editor-agg></vis-editor-agg>
+      <vis-editor-agg class="vis-editor-agg"></vis-editor-agg>
     </div>
 
-    <div ng-if="addForm.visible" class="vis-editor-agg-add-form form-group">
-      <label>Select {{ groupName }} type</label>
-      <button
-        ng-repeat="schema in availableSchema"
-        ng-click="createUsingSchema(schema)"
-        class="btn-default">
-        <i ng-show="schema.icon" ng-class="schema.icon"></i>
-        {{schema.title}}
-      </button>
-    </div>
-
-    <button
-      ng-if="stats.count < stats.max"
-      type="button"
-      ng-click="addForm.visible = !addForm.visible"
-      class="vis-editor-agg-wide-btn btn btn-xs btn-default" >
-
-      <div ng-if="!addForm.visible">
-        <span ng-if="groupName !== 'buckets' || (!group.length || group.length === 0)">
-          <i class="fa fa-plus"></i> Add Aggregation
-        </span>
-        <span ng-if="groupName === 'buckets' && group.length >= 1">
-          <i class="fa fa-code-fork"></i> Add Sub Aggregation
-        </span>
-      </div>
-      <span ng-if="addForm.visible">cancel</span>
-    </button>
+    <vis-editor-agg-add ng-if="stats.count === 0" class="vis-editor-agg-add"></vis-editor-agg-add>
   </div>
 </li>

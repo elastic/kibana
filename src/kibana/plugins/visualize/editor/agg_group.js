@@ -3,10 +3,8 @@ define(function (require) {
   .get('app/visualize')
   .directive('visEditorAggGroup', function (Private) {
     require('plugins/visualize/editor/agg');
+    require('plugins/visualize/editor/agg_add');
     require('plugins/visualize/editor/nesting_indicator');
-
-    var eachGroupHtml = require('text!plugins/visualize/editor/agg_group.html');
-    var AggConfig = Private(require('components/vis/_agg_config'));
 
     return {
       restrict: 'E',
@@ -17,12 +15,9 @@ define(function (require) {
         $scope.$bind('group', 'vis.aggs.bySchemaGroup["' + $scope.groupName + '"]');
         $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
 
-        // "sub-scope" for the add form to use
-        $scope.addForm = {};
-
         $scope.$watchMulti([
           'schemas',
-          'group.length'
+          '[]group'
         ], function () {
           var stats = $scope.stats = {
             min: 0,
@@ -36,9 +31,7 @@ define(function (require) {
             stats.min += schema.min;
             stats.max += schema.max;
           });
-        });
 
-        $scope.$watchCollection('group', function () {
           $scope.availableSchema = $scope.schemas.filter(function (schema) {
             var count = 0;
 
@@ -52,16 +45,6 @@ define(function (require) {
             if (count < schema.max) return true;
           });
         });
-
-        $scope.createUsingSchema = function (schema) {
-          $scope.addForm = {};
-
-          var aggConfig = new AggConfig($scope.vis, {
-            schema: schema
-          });
-          aggConfig.brandNew = true;
-          $scope.vis.aggs.push(aggConfig);
-        };
       }
     };
 
