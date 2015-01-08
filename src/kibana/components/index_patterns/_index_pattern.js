@@ -104,7 +104,7 @@ define(function (require) {
                 }
               },
               filterable: {
-                value: field.name === '_id' || (field.indexed && type.filterable)
+                value: field.name === '_id' || ((field.indexed && type.filterable) || field.scripted)
               },
               format: {
                 get: function () {
