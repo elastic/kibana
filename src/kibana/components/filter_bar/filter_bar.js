@@ -79,7 +79,9 @@ define(function (require) {
 
         $scope.$watch('state.filters', function (filters) {
           mapAndFlattenFilters(filters).then(function (results) {
-            $scope.filters = results;
+            $scope.filters = _.sortBy(results, function (filter) {
+              return !filter.meta.pinned;
+            });
           });
         });
       }
