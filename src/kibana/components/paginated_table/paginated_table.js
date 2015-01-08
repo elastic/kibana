@@ -20,7 +20,7 @@ define(function (require) {
       controller: function ($scope) {
         var self = this;
         self.sort = {
-          columnName: null,
+          columnIndex: null,
           direction: null
         };
 
@@ -44,7 +44,6 @@ define(function (require) {
           }
 
           self.sort.columnIndex = colIndex;
-          self.sort.columnName = col.title;
           self.sort.direction = sortDirection;
           self._setSortGetter(colIndex);
         };
