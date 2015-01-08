@@ -4,31 +4,17 @@
   <span class="label label-default visible-xs">Step 1</span>
 </h1>
 
-<ul class="visualizations list-group list-group-menu">
-  <a class="visualization list-group-item list-group-menu-item"
+<div class="wizard-vis-types">
+  <a class="wizard-vis-type"
      ng-repeat="type in visTypes.inTitleOrder"
-     ng-href="{{ visTypeUrl(type) }}"
-     ng-mouseenter="showDescription=true" ng-mouseleave="showDescription=false">
-    <li>
-      <!--
-      <div>
-        <i class="fa" ng-class="type.icon"></i>
-      </div>
-      <div>
-        {{type.title}}<br>
-        <small class="text-small">{{type.description}}</small>
-      </div>
-      -->
-      <div class="media">
-          <i class="media-left fa" ng-class="type.icon"></i>
-        <div class="media-body">
-          <h4 class="media-heading">{{type.title}}</h4>
-          <span ng-show="showDescription">{{type.description}}</span>
-        </div>
-      </div>
-    </li>
+     ng-href="{{ visTypeUrl(type) }}">
+    <div class="wizard-vis-type-heading">
+      <i class="fa" ng-class="type.icon"></i>
+      <h4>{{type.title}}</h4>
+    </div>
+    <span class="wizard-vis-type-description">{{type.description}}</span>
   </a>
-</ul>
+</div>
 
 <h1>Or, open a saved visualization</h1>
 

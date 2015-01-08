@@ -9,7 +9,7 @@
         <tr bindonce>
           <th
             ng-repeat="col in columns"
-            ng-click="paginatedTable.sortColumn(col)"
+            ng-click="paginatedTable.sortColumn($index)"
             class="{{ col.class }}">
             <span bo-text="col.title"></span>
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
@@ -17,9 +17,9 @@
               ng-if="col.sortable !== false"
               class="fa"
               ng-class="{
-                'fa-sort-asc': paginatedTable.sort.columnName === col.title && paginatedTable.sort.direction === 'asc',
-                'fa-sort-desc': paginatedTable.sort.columnName === col.title && paginatedTable.sort.direction === 'desc',
-                'fa-sort': paginatedTable.sort.direction === null || paginatedTable.sort.columnName !== col.title
+                'fa-sort-asc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'asc',
+                'fa-sort-desc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'desc',
+                'fa-sort': paginatedTable.sort.columnIndex !== $index || paginatedTable.sort.direction === null
               }">
             </i>
             <i ng-if="col.filterable" class="fa fa-search" ng-click="$event.stopPropagation()" tooltip="Click on a cell to filter"></i>
