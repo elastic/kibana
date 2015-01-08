@@ -1,11 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
   var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
   var saveFilterState = require('components/filter_bar/lib/saveFilterState');
 
   return function (globalState) {
     return function ($scope) {
-      var saveState = saveFilterState($scope.state, globalState);
+      var saver = saveFilterState($scope.state, globalState);
+      var saveState = function () {
+        $scope.filters = saver($scope.filters);
+      };
 
       var exports = {
         toggleFilter: toggleFilter,
@@ -39,7 +43,7 @@ define(function (require) {
         filter.meta.disabled = disabled;
 
         // Save the filters back to the searchSource
-        saveState($scope.filters);
+        saveState();
         return filter;
       }
 
@@ -62,9 +66,17 @@ define(function (require) {
        */
       function pinFilter(filter, force) {
         var pinned = _.isUndefined(force) ? !filter.meta.pinned : force;
-        filter.meta.pinned = !!pinned;
 
-        saveState($scope.filters);
+        if (!pinned) {
+          filter.meta.pinned = !filter.meta.pinned;
+        } else {
+          // var pinnedFilter = _.cloneDeep(filter);
+          var pinnedFilter = _.cloneDeep(angular.extend({}, filter));
+          pinnedFilter.meta.pinned = !!pinned;
+          $scope.filters.push(pinnedFilter);
+        }
+
+        saveState();
         return filter;
       }
 
@@ -88,7 +100,7 @@ define(function (require) {
         // Toggle the negate meta state
         filter.meta.negate = !filter.meta.negate;
 
-        saveState($scope.filters);
+        saveState();
         return filter;
       }
 
@@ -111,11 +123,10 @@ define(function (require) {
         if (!_.isArray(filters)) {
           filters = [filters];
         }
+        if (filters.length === 0) return;
 
-        var newFilters = filterAppliedAndUnwrap(filters);
-        $scope.filters = _.union($scope.filters, newFilters);
-
-        saveState($scope.filters);
+        $scope.filters = $scope.filters.concat(filterAppliedAndUnwrap(filters));
+        saveState();
         return $scope.filters;
       }
 
@@ -131,7 +142,7 @@ define(function (require) {
           return filter !== invalidFilter;
         });
 
-        saveState($scope.filters);
+        saveState();
         return $scope.filters;
       }
 
@@ -141,7 +152,7 @@ define(function (require) {
        */
       function removeAll() {
         $scope.filters = [];
-        saveState($scope.filters);
+        saveState();
       }
     };
   };
