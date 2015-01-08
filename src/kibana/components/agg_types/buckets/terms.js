@@ -99,6 +99,13 @@ define(function (require) {
               orderAgg = agg.vis.aggs.byId[agg.params.orderBy];
             }
 
+            // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
+            // thus causing issues with filtering. This probably causes other issues since float might not
+            // be able to contain the number on the elasticsearch side
+            if (output.params.script) {
+              output.params.valueType = agg.field().type === 'number' ? 'float' : agg.field().type;
+            }
+
             if (orderAgg.type.name === 'count') {
               order._count = dir;
             } else {
