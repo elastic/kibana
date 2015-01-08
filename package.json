@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "body-parser": "~1.10.1",
+    "commander": "^2.6.0",
     "compression": "^1.3.0",
     "cookie-parser": "~1.3.3",
     "debug": "~2.1.1",

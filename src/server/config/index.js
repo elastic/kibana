@@ -20,7 +20,7 @@ var config = module.exports = {
   quiet                   : false,
   public_folder           : public_folder,
   external_plugins_folder : process.env.PLUGINS_FOLDER || null,
-  bundled_plugins_folder    : path.resolve(public_folder, 'plugins'),
+  bundled_plugins_folder  : path.resolve(public_folder, 'plugins'),
   kibana                  : kibana
 };
 

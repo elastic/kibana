@@ -5,6 +5,10 @@ var _ = require('lodash');
 
 router.get('/config', function (req, res, next) {
   var excludedKeys = [
+    'port',
+    'host',
+    'verify_ssl',
+    'request_timeout',
     'elasticsearch_url',
     'elasticsearch_username',
     'elasticsearch_password',

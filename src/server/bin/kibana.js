@@ -1,65 +1,59 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
+var program = require('commander');
+var env = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'development';
+var path = require('path');
+var packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
+if (env !== 'development') {
+  packagePath = path.resolve(__dirname, '..', 'package.json');
+}
+var package = require(packagePath);
 
-var app = require('../app');
-var debug = require('debug')('node-server:server');
-var http = require('http');
+
+program.description('Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch.');
+program.version(package.version);
+program.option('-e, --elasticsearch <uri>', 'Elasticsearch instance');
+program.option('-c, --config <path>', 'Path to the config file');
+program.option('-p, --port <port>', 'The port to bind to', parseInt);
+program.option('-q, --quiet', 'Turns off logging');
+program.option('-H, --host <host>', 'The host to bind to');
+program.option('--plugins <path>', 'Path to scan for plugins');
+program.parse(process.argv);
+
+// This needs to be set before the config is loaded. CONFIG_PATH is used to
+// override the kibana.yml config path which gets read when the config/index.js
+// is parsed for the first time.
+if (program.config) {
+  process.env.CONFIG_PATH = program.config;
+}
+
+// This needs to be set before the config is loaded. PLUGINS_PATH is used to
+// set the external plugins folder.
+if (program.plugins) {
+  process.env.PLUGINS_FOLDER = program.plugins;
+}
+
+// Load the config
 var config = require('../config');
 
-/**
- * Get port from environment and store in Express.
- */
-
-var port = parseInt(process.env.PORT, 10) || config.port || 3000;
-var host = process.env.HOST || config.host || '127.0.0.1';
-app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port, host);
-server.on('error', onError);
-server.on('listening', onListening);
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error('Port ' + port + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error('Port ' + port + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+if (program.elasticsearch) {
+  config.elasticsearch = program.elasticsearch;
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  var address = server.address();
-  debug('Listening on ' + address.address + ':' + address.port);
+if (program.port) {
+  config.port = program.port;
 }
+
+if (program.quiet) {
+  config.quiet = program.quiet;
+}
+
+if (program.host) {
+  config.host = program.host;
+}
+
+
+// Load and start the server. This must happen after all the config changes
+// have been made since the server also requires the config.
+var server = require('../');
+server.start();

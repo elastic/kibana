@@ -18,7 +18,7 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
+if (!config.quiet) app.use(logger('dev'));
 
 // The proxy must be set up before all the other middleware.
 // TODO: WE might want to move the middleware to each of the individual routes
@@ -31,6 +31,7 @@ app.use(cookieParser());
 app.use(compression());
 // app.use(require('less-middleware')(config.public_folder));
 app.use(express.static(config.public_folder));
+if (config.external_plugins_folder) app.use('/plugins', express.static(config.external_plugins_folder));
 
 app.use('/', routes);
 
