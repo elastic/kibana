@@ -1,6 +1,8 @@
 // Adds a filter to a passed state
 define(function (require) {
   var _ = require('lodash');
+  var buildPhraseQuery = require('components/filter_manager/lib/phrase');
+
   var self = this;
 
   this.init = function ($state) {
@@ -44,23 +46,9 @@ define(function (require) {
         filters.push({ meta: { negate: negate, index: index }, exists: { field: value } });
         break;
       default:
-        var filter;
-        if (field.scripted) {
-          filter = {
-            meta: { negate: negate, index: index, field: fieldName },
-            script: {
-              script: '(' + field.script + ') == value',
-              params: {
-                value: value
-              }
-            }
-          };
-        } else {
-          filter = { meta: { negate: negate, index: index }, query: { match: {} } };
-          filter.query.match[fieldName] = { query: value, type: 'phrase' };
-        }
+        var filter = buildPhraseQuery(field, value);
+        filter.meta.negate = negate;
         filters.push(filter);
-
         break;
       }
     });
