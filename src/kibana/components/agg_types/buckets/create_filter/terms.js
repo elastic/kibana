@@ -1,13 +1,8 @@
 define(function (require) {
+  var buildPhraseQuery = require('components/filter_manager/lib/phrase');
   return function createTermsFilterProvider(Private) {
     return function (aggConfig, key) {
-      var filter = { meta: {}, query: { match: {} } };
-      filter.query.match[aggConfig.params.field.name] = {
-        query: key,
-        type: 'phrase'
-      };
-      filter.meta.index = aggConfig.vis.indexPattern.id;
-      return filter;
+      return buildPhraseQuery(aggConfig.params.field, key);
     };
   };
 });
