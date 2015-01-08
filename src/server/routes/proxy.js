@@ -24,11 +24,10 @@ proxy.on('proxyReq', function (proxyReq, req, res, options) {
 
 // Error handling for the proxy
 proxy.on('error', function (err, req, res) {
-  console.log(err.code, err.message);
   var code = 502;
   var body = { message: 'Bad Gateway' };
 
-  if (err.message === 'ECONNREFUSED') {
+  if (err.code === 'ECONNREFUSED') {
     body.message = 'Unable to connect to Elasticsearch';
   }
 
