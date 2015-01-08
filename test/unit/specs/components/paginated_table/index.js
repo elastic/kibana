@@ -258,6 +258,30 @@ define(function (require) {
         expect(tableRows.eq(3).find('td').eq(2).text()).to.be('zzzz');
       });
 
+      it('should sort correctly between columns', function () {
+        // sort by the last column
+        paginatedTable.sortColumn(2);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('aaaa');
+
+        // sort by the first column
+        paginatedTable.sortColumn(0);
+        $scope.$digest();
+
+        tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('aaaa');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('zzzz');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('cccc');
+
+        expect(tableRows.eq(1).find('td').eq(0).text()).to.be('bbbb');
+        expect(tableRows.eq(2).find('td').eq(0).text()).to.be('cccc');
+        expect(tableRows.eq(3).find('td').eq(0).text()).to.be('zzzz');
+      });
+
       it('should not sort duplicate columns', function () {
         paginatedTable.sortColumn(1);
         $scope.$digest();

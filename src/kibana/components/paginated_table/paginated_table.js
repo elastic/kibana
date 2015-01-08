@@ -32,7 +32,7 @@ define(function (require) {
 
           var sortDirection;
 
-          if (self.sort.columnName !== col.title) {
+          if (self.sort.columnIndex !== colIndex) {
             sortDirection = 'asc';
           } else {
             var directions = {
