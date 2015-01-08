@@ -1,8 +1,24 @@
 <div class="form-group">
-  <input
-    ng-model="agg.params.percents"
-    required
-    percent-list
-    class="form-control"
-    name="filter{{$index}}">
+  <label>Percents</label>
+  <div
+    ng-repeat="value in agg.params.percents track by $index"
+    class="form-group vis-editor-agg-form-row vis-editor-agg-form-row">
+
+    <input
+      ng-model="agg.params.percents[$index]"
+      percent-list="agg.params.percents"
+      input-focus
+      class="form-control">
+
+    <button type="button" ng-click="remove()" class="btn btn-danger btn-xs">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
 </div>
+
+<button
+  ng-click="agg.params.percents.push(_.last(agg.params.percents) + 1)"
+  type="button"
+  class="sidebar-item-button primary">
+  <i class="fa fa-plus"></i> Add Percent
+</button>
