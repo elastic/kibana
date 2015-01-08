@@ -73,9 +73,7 @@ define(function (require) {
               return filters;
             })
             .then(filterOutTimeBasedFilter)
-            .then(function (filters) {
-              $scope.state.filters = _.union($scope.state.filters, filters);
-            });
+            .then($scope.addFilters);
           }
         });
 
