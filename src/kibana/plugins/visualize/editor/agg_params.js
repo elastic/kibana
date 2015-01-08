@@ -1,4 +1,6 @@
 define(function (require) {
+  var IndexedArray = require('utils/indexed_array/index');
+
   require('modules')
   .get('app/visualize', ['ui.select'])
   .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
@@ -134,7 +136,19 @@ define(function (require) {
             fields = $filter('orderBy')(fields, ['type', 'name']);
           }
 
-          return fields;
+          return new IndexedArray({
+
+            /**
+             * @type {Array}
+             */
+            index: ['name'],
+
+            /**
+             * [group description]
+             * @type {Array}
+             */
+            initialSet: fields
+          });
         }
 
         // generic child scope creation, for both schema and agg
