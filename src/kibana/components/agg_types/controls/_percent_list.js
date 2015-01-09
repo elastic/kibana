@@ -13,6 +13,7 @@ define(function (require) {
       restrict: 'A',
       require: 'ngModel',
       link: function ($scope, $el, attrs, ngModelController) {
+        var $setModel = $parse(attrs.ngModel).assign;
         var $repeater = $el.closest('[ng-repeat]');
         var $listGetter = $parse(attrs.percentList);
 
@@ -73,7 +74,11 @@ define(function (require) {
 
           if (dec < 0 || dec > 9) {
             int += Math.floor(dec / 10);
-            dec = dec % 10;
+            if (dec < 0) {
+              dec = 10 + (dec % 10);
+            } else {
+              dec = dec % 10;
+            }
           }
 
           return parse(int + '.' + dec);
@@ -138,12 +143,21 @@ define(function (require) {
           ngModelController.$setValidity('percentList', valid);
         });
 
-        ngModelController.$parsers.push(function (viewValue) {
-          var value = parse(viewValue);
-          var valid = value !== INVALID;
-          ngModelController.$setValidity('percentList', valid);
-          return valid ? value : void 0;
-        });
+        function validate(then) {
+          return function (input) {
+            var value = parse(input);
+            var valid = value !== INVALID;
+            value = valid ? value : void 0;
+            ngModelController.$setValidity('percentList', valid);
+            then && then(input, value);
+            return value;
+          };
+        }
+
+        ngModelController.$parsers.push(validate());
+        ngModelController.$formatters.push(validate(function (input, value) {
+          if (input !== value) $setModel($scope, value);
+        }));
       }
     };
   });
