@@ -10,7 +10,7 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src');
-  _.mixin(require('lodash-deep'));
+  require('lodash-deep')(_);
   _.mixin(require('utils/_mixins_chainable'), { chain: true });
   _.mixin(require('utils/_mixins_notchainable'), { chain: false });
 

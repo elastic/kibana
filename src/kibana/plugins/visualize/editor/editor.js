@@ -138,6 +138,17 @@ define(function (require) {
         return editableVis.getState();
       }, function (newState) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
+
+        $scope.responseValueAggs = null;
+        try {
+          $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
+            return _.deepGet(agg, 'schema.group') === 'metrics';
+          });
+        } catch (e) {
+          // this can fail when the agg.type is changed but the
+          // params have not been set yet. watcher will trigger again
+          // when the params update
+        }
       }, true);
 
       $state.replace();

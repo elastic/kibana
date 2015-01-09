@@ -2,7 +2,7 @@
 
   <navbar ng-if="!appEmbedded">
     <div class="fill bitty-modal-container">
-      <div ng-if="linked && !unlinking"
+      <div ng-if="vis.type.requiresSearch && linked && !unlinking"
         ng-dblclick="unlink()"
         tooltip="Double click to unlink this visualization from the saved search"
         class="bitty-modal visualize-linked">
@@ -12,11 +12,11 @@
         <b>{{ savedVis.savedSearchId | json}}</b>
       </div>
 
-      <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
+      <div ng-if="vis.type.requiresSearch && linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
         <i class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-if="linked" class="inline-form" name="queryInput">
+      <form ng-if="vis.type.requiresSearch && linked" class="inline-form" name="queryInput">
         <div class="typeahead">
           <div class="input-group">
             <input
@@ -33,7 +33,7 @@
         </div>
       </form>
 
-      <form ng-if="!linked" ng-submit="fetch()" class="inline-form" name="queryInput">
+      <form ng-if="vis.type.requiresSearch && !linked" ng-submit="fetch()" class="inline-form" name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
             ng-class="queryInput.$invalid ? 'has-error' : ''">
@@ -97,12 +97,7 @@
 
   <div class="vis-editor-content">
 
-    <vis-editor-sidebar
-      ng-if="!appEmbedded"
-      vis="editableVis"
-      apply="stageEditableVis();"
-      reset="resetEditableVis();">
-    </vis-editor-sidebar>
+    <vis-editor-sidebar class="vis-editor-sidebar" ng-if="!appEmbedded"></vis-editor-sidebar>
 
     <div class="vis-editor-canvas" ng-class="{ embedded: appEmbedded }">
       <div class="visualize-info" ng-if="savedVis.id">

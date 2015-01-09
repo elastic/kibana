@@ -14,6 +14,7 @@ define(function (require) {
   require('components/tooltip/tooltip');
   require('components/style_compile/style_compile');
   require('components/watch_multi');
+  require('components/bind');
   require('components/listen');
   require('directives/click_focus');
   require('directives/info');

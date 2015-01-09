@@ -8,7 +8,7 @@
         sorting="sorting">
       </thead>
       <tbody>
-        <tr ng-repeat="row in page|limitTo:limit track by row._index+row._id"
+        <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id"
           kbn-table-row="row"
           columns="columns"
           sorting="sorting"
@@ -27,7 +27,7 @@
       sorting="sorting">
     </thead>
     <tbody>
-      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._id"
+      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id"
         kbn-table-row="row"
         columns="columns"
         sorting="sorting"
