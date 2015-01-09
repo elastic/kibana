@@ -30,7 +30,7 @@ define(function (require) {
       var route = $location.path().split(/\//);
       var app = $rootScope.activeApp = _.find($scope.apps, { id: route[1] });
 
-      if (!app) return;
+      if (!app || $scope.appEmbedded) return;
 
       // Record the last URL w/ state of the app, use for tab.
       setLastPath(app, globalState.removeFromUrl($location.url()));
