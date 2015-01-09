@@ -80,7 +80,7 @@ define(function (require) {
           return 'color ' + self.colorToClass(args.color(d));
         })
         .html(function (d) {
-          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
+          return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
         });
     };
 
@@ -136,6 +136,10 @@ define(function (require) {
         var liClass = '.' + self.colorToClass(self.color(d));
         visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
 
+        var eventEl =  d3.select(this);
+        eventEl.style('white-space', 'inherit');
+        eventEl.style('word-break', 'break-all');
+
         // select series on chart
         visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
       })
@@ -147,6 +151,10 @@ define(function (require) {
         visEl.selectAll('.chart')
         .selectAll('.color')
         .style('opacity', self._attr.defaultOpacity);
+
+        var eventEl =  d3.select(this);
+        eventEl.style('white-space', 'nowrap');
+        eventEl.style('word-break', 'inherit');
 
         // Legend values should always return to their default opacity of 1
         visEl.select('.legend-ul')

@@ -1,3 +1,8 @@
-<span class="btn btn-xs btn-default legend-toggle">
-  <i class="fa fa-chevron-<%= (isOpen) ? 'right' : 'left' %>"></i>
-</span>
+<div class="legend-toggle">
+  <strong>
+    <%= (isOpen) ?
+      '<span class="legend-open">Legend <i class="fa fa-arrow-circle-right"></i></span>' :
+      '<span class="legend-closed"><i class="fa fa-arrow-circle-left"></i></span>'
+    %>
+  </strong>
+</div>

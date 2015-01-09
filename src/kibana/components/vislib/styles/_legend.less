@@ -5,29 +5,40 @@
   z-index: 10;
   overflow-x: hidden;
   overflow-y: auto;
-  min-width: 40px;
   min-height: 0;
 
-  .header {
-    width: 100%;
-    height: 26px;
-    margin: 0 0 14px 0;
-    visibility: visible;
+  .legend-toggle {
+    cursor: pointer;
+    opacity: 0.75;
+    white-space: nowrap;
+    font-size: 0.9em;
+
+    .legend-open {
+      margin-right: 20px;
+    }
+
+    .legend-closed {
+      font-size: 1.5em;
+      padding: 0 5px;
+    }
+  }
+
+  .column-labels {
+    text-align: right;
   }
 
   .legend-ul {
     list-style-type: none;
-    margin: 0 0 0 14px;
     padding: 0;
     visibility: visible;
     .display(flex);
     .flex-direction(column);
     min-height: 0;
-    min-width: 0;
+    min-width: 60px;
+    margin-right: 5px;
 
     li.color {
       min-height: 22px;
-      margin: 0 18px 0 18px;
       padding: 3px 0 3px 0;
       text-align: left;
       font-size: 12px;
@@ -36,15 +47,13 @@
       cursor: default;
       text-align: left;
       .flex-grow(2);
-      word-wrap: break-word;
+      white-space: nowrap;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
       max-width: 150px;
 
       .dots {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        float: left;
-        margin: 1px 0 0 -14px;
+        padding-right: 5px;
       }
     }
   }
@@ -54,9 +63,5 @@
   }
 
   .legend-toggle {
-    position: relative;
-    float: right;
-    right: 9px;
-    top: 9px;
   }
 }
