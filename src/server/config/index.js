@@ -7,9 +7,13 @@ var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibana.yml');
 var kibana = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
 var env = process.env.NODE_ENV || 'development';
 
-var public_folder = path.resolve(__dirname, '..', '..', 'kibana');
-if (env !== 'development') {
-  public_folder = path.resolve(__dirname, '..', 'public');
+// Check if the local public folder is present. This means we are running in
+// the NPM module. If it's not there then we are running in the git root.
+var public_folder = path.resolve(__dirname, '..', 'public');
+try {
+  fs.fstatSync(public_folder);
+} catch (err) {
+  public_folder = path.resolve(__dirname, '..', '..', 'kibana');
 }
 
 var config = module.exports = {
