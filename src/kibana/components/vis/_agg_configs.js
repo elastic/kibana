@@ -133,9 +133,11 @@ define(function (require) {
      * @return {AggConfig}
      */
     AggConfigs.prototype.getResponseAggById = function (id) {
+      id = String(id);
       var reqAgg = _.find(this.getRequestAggs(), function (agg) {
-        return id.substr(0, agg.id.length) === agg.id;
+        return id.substr(0, String(agg.id).length) === agg.id;
       });
+      if (!reqAgg) return;
       return _.find(reqAgg.getResponseAggs(), { id: id });
     };
 
