@@ -1,6 +1,7 @@
 define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
+  var keyMap = require('utils/key_map');
 
   var INVALID = {}; // invalid flag
   var FLOATABLE = /^[\d\.e\-\+]+$/i;
@@ -15,35 +16,29 @@ define(function (require) {
         var $repeater = $el.closest('[ng-repeat]');
         var $listGetter = $parse(attrs.percentList);
 
-        var namedKeys = {
-          13: 'enter',
-          38: 'up',
-          40: 'down',
-          9: 'tab',
-          8: 'delete',
-          46: 'delete'
-        };
-
         var handlers = {
-          'up': change(add, 1),
+          up: change(add, 1),
           'shift-up': change(addTenth, 1),
 
-          'down': change(add, -1),
+          down: change(add, -1),
           'shift-down': change(addTenth, -1),
 
-          'tab': go('next'),
+          tab: go('next'),
           'shift-tab': go('prev'),
 
-          'delete': function (event) {
-            if ($el.val() === '') {
-              $get('prev').focus();
-              $scope.remove($scope.$index);
-              event.preventDefault();
-            }
-
-            return false;
-          }
+          backspace: removeIfEmpty,
+          delete: removeIfEmpty
         };
+
+        function removeIfEmpty(event) {
+          if ($el.val() === '') {
+            $get('prev').focus();
+            $scope.remove($scope.$index);
+            event.preventDefault();
+          }
+
+          return false;
+        }
 
         function $get(dir) {
           return $repeater[dir]().find('[percent-list]');
@@ -63,7 +58,7 @@ define(function (require) {
           if (event.shiftKey) id.push('shift');
           if (event.metaKey) id.push('meta');
           if (event.altKey) id.push('alt');
-          id.push(namedKeys[event.keyCode] || event.keyCode);
+          id.push(keyMap[event.keyCode] || event.keyCode);
           return id.join('-');
         }
 
