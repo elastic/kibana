@@ -19,7 +19,7 @@ define(function (require) {
       }).join(' && ');
 
       var value = _.map(params, function (val, key) {
-        return '+' + operators[key] + field.format.convert(val);
+        return operators[key] + field.format.convert(val);
       }).join(' ');
 
       filter.script = { script: script, params: params };
