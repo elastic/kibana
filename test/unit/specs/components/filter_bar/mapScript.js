@@ -25,11 +25,11 @@ define(function (require) {
 
       it('should return the key and value for matching filters', function (done) {
         var filter = {
-          meta: { index: 'logstash-*', field: 'scritped number' },
-          script: { script: 'doc["scritped number"].value * 5', params: { value: 35}}
+          meta: { index: 'logstash-*', field: 'script number' },
+          script: { script: 'doc["script number"].value * 5', params: { value: 35}}
         };
         mapScript(filter).then(function (result) {
-          expect(result).to.have.property('key', 'scritped number');
+          expect(result).to.have.property('key', 'script number');
           expect(result).to.have.property('value', 35);
           done();
         });
