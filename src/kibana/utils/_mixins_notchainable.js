@@ -13,17 +13,16 @@ define(function (require) {
 
   return {
     /**
-     * Setup Class-like inheritance between two constructors.
-     * Exposes the Super class at SubClass.Super;
+     * Check if an object or class implements a behavior
      *
-     * @param  {Constructor} Sub - The "Class" that should be extended
-     * @param  {Constructor} Super - The parent "Class"
-     * @return {Constructor} - the sub argument;
+     * @param  {Class|obj} instClass - Class or instance to test
+     * @param  {behavior} behavior - behavior to test for
+     * @return {Boolean}
      */
-    inherits: function (Sub, Super) {
-      Sub.prototype = _.create(Super.prototype, { 'constructor': Sub });
-      Sub.Super = Super;
-      return Sub;
+    hasBehavior: function (instClass, behavior) {
+      if (_.isObject(instClass)) instClass = instClass.constructor;
+      if (!_.isFunction(instClass) || !behavior) return;
+      return _.contains(instClass.$$_behaviors, behavior);
     },
 
     /**

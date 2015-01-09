@@ -20,19 +20,19 @@ define(function (require) {
       controller: function ($scope) {
         var self = this;
         self.sort = {
-          columnName: null,
+          columnIndex: null,
           direction: null
         };
 
-        self.sortColumn = function (col) {
+        self.sortColumn = function (colIndex) {
+          var col = $scope.columns[colIndex];
+
+          if (!col) return;
           if (col.sortable === false) return;
+
           var sortDirection;
-          var cols = _.pluck($scope.columns, 'title');
-          var index = cols.indexOf(col.title);
 
-          if (index === -1) return;
-
-          if (self.sort.columnName !== col.title) {
+          if (self.sort.columnIndex !== colIndex) {
             sortDirection = 'asc';
           } else {
             var directions = {
@@ -43,9 +43,9 @@ define(function (require) {
             sortDirection = directions[self.sort.direction];
           }
 
-          self.sort.columnName = col.title;
+          self.sort.columnIndex = colIndex;
           self.sort.direction = sortDirection;
-          self._setSortGetter(index);
+          self._setSortGetter(colIndex);
         };
 
         self._setSortGetter = function (index) {

@@ -23,6 +23,7 @@ define(function (require) {
           return JSON.stringify({
             index: indexList,
             type: fetchParams.type,
+            search_type: fetchParams.search_type,
             ignore_unavailable: true
           })
           + '\n'

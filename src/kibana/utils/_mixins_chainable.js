@@ -13,6 +13,37 @@ define(function (require) {
 
   return {
     /**
+     * Setup Class-like inheritance between two constructors.
+     * Exposes the Super class at SubClass.Super;
+     *
+     * @param  {Constructor} Sub - The "Class" that should be extended
+     * @param  {Constructor} Super - The parent "Class"
+     * @return {Constructor} - the sub argument;
+     */
+    inherits: function (Sub, Super) {
+      Sub.prototype = Object.create(Super.prototype, {
+        constructor: {
+          value: Sub
+        },
+        superConstructor: Sub.Super = Super
+      });
+      return Sub;
+    },
+
+    /**
+     * Add a behavior to a Class, and track the behavior to enable _.hasBehavior
+     *
+     * @param  {Constructor} Class - The "Class" that should be extended
+     * @param  {object} behavior - The behavior that should be mixed into to the Class
+     * @return {Constructor} - Class;
+     */
+    addBehavior: function (Class, behavior) {
+      Class.$$_behaviors = (Class.$$_behaviors || []).concat(behavior);
+      _.merge(Class.prototype, behavior);
+      return Class;
+    },
+
+    /**
      * Remove an element at a specific index from an array
      *
      * @param  {array} arr

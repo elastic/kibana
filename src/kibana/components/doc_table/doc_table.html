@@ -1,36 +1,44 @@
-<paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
-  <table class="kbn-table table" ng-if="indexPattern">
+<div ng-if="hits.length">
+  <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
+    <table class="kbn-table table" ng-if="indexPattern">
+      <thead
+        kbn-table-header
+        columns="columns"
+        index-pattern="indexPattern"
+        sorting="sorting">
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id"
+          kbn-table-row="row"
+          columns="columns"
+          sorting="sorting"
+          index-pattern="indexPattern"
+          filter="filter"
+          class="discover-table-row"></tr>
+      </tbody>
+    </table>
+  </paginate>
+
+  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
     <thead
       kbn-table-header
-      columns="persist.columns"
+      columns="columns"
       index-pattern="indexPattern"
-      sorting="persist.sorting">
+      sorting="sorting">
     </thead>
     <tbody>
-      <tr ng-repeat="row in page|limitTo:limit track by row._index+row._id"
+      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id"
         kbn-table-row="row"
-        columns="persist.columns"
-        sorting="persist.sorting"
+        columns="columns"
+        sorting="sorting"
         index-pattern="indexPattern"
+        filter="filter"
         class="discover-table-row"></tr>
     </tbody>
   </table>
-</paginate>
-
-<table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
-  <thead
-    kbn-table-header
-    columns="persist.columns"
-    index-pattern="indexPattern"
-    sorting="persist.sorting">
-  </thead>
-  <tbody>
-    <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._id"
-      kbn-table-row="row"
-      columns="persist.columns"
-      sorting="persist.sorting"
-      index-pattern="indexPattern"
-      class="discover-table-row"></tr>
-  </tbody>
-</table>
-<kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
+  <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
+</div>
+  <div ng-if="!hits.length" class="table-vis-error">
+    <h2><i class="fa fa-meh-o"></i></h2>
+    <h4>No results found</h4>
+  </div>

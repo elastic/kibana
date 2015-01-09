@@ -188,6 +188,10 @@
           color: @link-color;
         }
       }
+
+      &-advanced-toggle {
+        text-align: right;
+      }
     }
 
     &-form-row {
@@ -227,6 +231,13 @@
         margin: 0 0 5px 0;
       }
     }
+
+    &-order-agg {
+      border: 2px solid @gray-lighter;
+      border-radius: @border-radius-base;
+      margin: @vis-editor-agg-editor-spacing;
+      padding: @vis-editor-agg-editor-spacing;
+    }
   }
 
   &-canvas {
@@ -253,11 +264,11 @@
 
     visualize {
       .flex-parent();
-      .flex(1, 0, auto);
+      .flex(1, 1, 100%);
     }
 
     .visualize-chart {
-      .flex(1, 0, 100%);
+      .flex(1, 1, 100%);
       position: relative;
     }
   }
