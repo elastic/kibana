@@ -57,30 +57,16 @@ define(function (require) {
         vis = null;
       });
 
-      describe('checkIfEnoughData method', function () {
-        var errorVis;
-        var goodVis;
+      describe('checkIfEnoughData method throws an error when not enough data', function () {
         var notEnoughData;
-        var enoughData;
 
         beforeEach(function () {
-          inject(function (d3, Private) {
-            errorVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-            goodVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-            enoughData = require('vislib_fixtures/mock_data/date_histogram/_series');
+          inject(function () {
             notEnoughData = require('vislib_fixtures/mock_data/not_enough_data/_one_point');
             require('css!components/vislib/styles/main');
 
-            errorVis.render(notEnoughData);
-            goodVis.render(enoughData);
+            vis.render(notEnoughData);
           });
-        });
-
-        afterEach(function () {
-          $(errorVis.el).remove();
-          $(goodVis.el).remove();
-          errorVis = null;
-          goodVis = null;
         });
 
         it('should throw a Not Enough Data Error', function () {
@@ -89,12 +75,25 @@ define(function (require) {
           };
 
           expect(function () {
-            errorVis.handler.ChartClass.prototype.checkIfEnoughData.apply(chart);
+            vis.handler.ChartClass.prototype.checkIfEnoughData.apply(chart);
           }).to.throwError();
+        });
+      });
+
+      describe('checkIfEnoughData method should not throw an error when enough data', function () {
+        var enoughData;
+
+        beforeEach(function () {
+          inject(function () {
+            enoughData = require('vislib_fixtures/mock_data/date_histogram/_series');
+            require('css!components/vislib/styles/main');
+
+            vis.render(enoughData);
+          });
         });
 
         it('should not throw a Not Enough Data Error', function () {
-          goodVis.handler.charts.forEach(function (chart) {
+          vis.handler.charts.forEach(function (chart) {
             expect(function () {
               chart.checkIfEnoughData();
             }).to.not.throwError();
