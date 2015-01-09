@@ -112,9 +112,6 @@ define(function (require) {
                   return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
                 }
               },
-              indexPattern: {
-                value: self
-              },
               sortable: {
                 value: field.indexed && type.sortable
               },

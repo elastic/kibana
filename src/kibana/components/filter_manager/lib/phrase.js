@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
-  return function buildPhraseFilter(field, value) {
-    var filter = { meta: { index: field.indexPattern.id} };
+  return function buildPhraseFilter(field, value, indexPattern) {
+    var filter = { meta: { index: indexPattern.id} };
 
     if (field.scripted) {
       filter.script = {

@@ -1,5 +1,5 @@
 define(function (require) {
-  var buildFilterQuery = require('components/filter_manager/lib/query');
+  var buildQueryFilter = require('components/filter_manager/lib/query');
   var _ = require('lodash');
   return function CreateFilterFiltersProvider(Private) {
     return function (aggConfig, key) {
@@ -8,7 +8,7 @@ define(function (require) {
       var filter = dslFilters[key];
 
       if (filter) {
-        return buildFilterQuery(filter.query, aggConfig.vis.indexPattern.id);
+        return buildQueryFilter(filter.query, aggConfig.vis.indexPattern.id);
       }
     };
   };

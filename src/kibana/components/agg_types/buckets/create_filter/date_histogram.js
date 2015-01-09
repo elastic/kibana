@@ -12,7 +12,7 @@ define(function (require) {
       return buildRangeFilter(aggConfig.params.field, {
         gte: parseInt(key, 10),
         lte: date.valueOf()
-      });
+      }, aggConfig.vis.indexPattern);
     };
 
   };

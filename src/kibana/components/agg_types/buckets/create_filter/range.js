@@ -8,7 +8,7 @@ define(function (require) {
       return buildRangeFilter(aggConfig.params.field, {
         gte: gte,
         lte: lte
-      });
+      }, aggConfig.vis.indexPattern);
     };
   };
 });

@@ -8,7 +8,7 @@ define(function (require) {
       return buildRangeFilter(aggConfig.params.field, {
         gte: value,
         lt: value + aggConfig.params.interval
-      });
+      }, aggConfig.vis.indexPattern);
     };
   };
 });
