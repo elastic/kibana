@@ -19,6 +19,7 @@ define(function (require) {
           13: 'enter',
           38: 'up',
           40: 'down',
+          9: 'tab',
           8: 'delete',
           46: 'delete'
         };
@@ -30,25 +31,13 @@ define(function (require) {
           'down': change(add, -1),
           'shift-down': change(addTenth, -1),
 
-          'enter': function () {
-            var $next = $get('next').focus();
-            if ($next.size()) return;
-
-            var list = $listGetter($scope);
-            var next = parse(parse(_.last(list)) + 1);
-            if (next === INVALID) return;
-
-            list.push(next);
-          },
-          'shift-enter': function () {
-            $get('prev').focus();
-          },
+          'tab': go('next'),
+          'shift-tab': go('prev'),
 
           'delete': function (event) {
             if ($el.val() === '') {
               $get('prev').focus();
-              var list = $listGetter($scope);
-              list.splice($scope.$index, 1);
+              $scope.remove($scope.$index);
               event.preventDefault();
             }
 
@@ -58,6 +47,14 @@ define(function (require) {
 
         function $get(dir) {
           return $repeater[dir]().find('[percent-list]');
+        }
+
+        function go(dir) {
+          return function () {
+            var $to = $get(dir);
+            if ($to.size()) $to.focus();
+            else return false;
+          };
         }
 
         function idKey(event) {
