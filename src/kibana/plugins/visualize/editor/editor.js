@@ -112,9 +112,6 @@ define(function (require) {
       $scope.state = $state;
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
-      $scope.toggleShare = _.bindKey(configTemplate, 'toggle', 'share');
-      $scope.toggleSave = _.bindKey(configTemplate, 'toggle', 'save');
-      $scope.toggleLoad = _.bindKey(configTemplate, 'toggle', 'load');
 
       $scope.linked = !!savedVis.savedSearchId;
       if ($scope.linked) {
