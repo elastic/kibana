@@ -2,7 +2,7 @@
 
   <navbar ng-if="!appEmbedded">
     <div class="fill bitty-modal-container">
-      <div ng-if="vis.type.requiresSearch && linked && !unlinking"
+      <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
         ng-dblclick="unlink()"
         tooltip="Double click to unlink this visualization from the saved search"
         class="bitty-modal visualize-linked">
@@ -12,11 +12,14 @@
         <b>{{ savedVis.savedSearchId | json}}</b>
       </div>
 
-      <div ng-if="vis.type.requiresSearch && linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
+      <div
+        ng-if="vis.type.requiresSearch && unlinking"
+        ng-click="clearUnlinking()"
+        class="bitty-modal">
         <i class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-if="vis.type.requiresSearch && linked" class="inline-form" name="queryInput">
+      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form" name="queryInput">
         <div class="typeahead">
           <div class="input-group">
             <input
@@ -33,7 +36,11 @@
         </div>
       </form>
 
-      <form ng-if="vis.type.requiresSearch && !linked" ng-submit="fetch()" class="inline-form" name="queryInput">
+      <form
+        ng-if="vis.type.requiresSearch && !$state.linked"
+        ng-submit="fetch()"
+        class="inline-form"
+        name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
             ng-class="queryInput.$invalid ? 'has-error' : ''">
