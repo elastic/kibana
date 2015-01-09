@@ -29,7 +29,7 @@ require.config({
     jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
     lodash_src: 'bower_components/lodash/dist/lodash',
-    'lodash-deep': 'bower_components/lodash-deep/lodash-deep',
+    'lodash-deep': 'bower_components/lodash-deep/factory',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
