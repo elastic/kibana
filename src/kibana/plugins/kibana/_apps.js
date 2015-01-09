@@ -28,12 +28,16 @@ define(function (require) {
 
     function onRouteChange() {
       var route = $location.path().split(/\//);
-      var app = $rootScope.activeApp = _.find($scope.apps, { id: route[1] });
+      $scope.apps.forEach(function (app) {
+        if (app.active = app.id === route[1]) {
+          $rootScope.activeApp = app;
+        }
+      });
 
-      if (!app || $scope.appEmbedded) return;
+      if (!$rootScope.activeApp || $scope.appEmbedded) return;
 
       // Record the last URL w/ state of the app, use for tab.
-      setLastPath(app, globalState.removeFromUrl($location.url()));
+      setLastPath($rootScope.activeApp, globalState.removeFromUrl($location.url()));
     }
 
     $rootScope.$on('$routeChangeSuccess', onRouteChange);

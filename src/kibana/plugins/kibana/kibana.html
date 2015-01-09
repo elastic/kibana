@@ -18,8 +18,8 @@
       <!-- Full navbar -->
       <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
         <ul class="nav navbar-nav">
-          <li ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}">
-            <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
+          <li ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: app.active}">
+            <a ng-href="#{{app.active ? app.id : app.lastPath}}" bo-text="app.name"></a>
           </li>
         </ul>
 
