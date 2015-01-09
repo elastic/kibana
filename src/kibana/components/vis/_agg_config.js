@@ -6,7 +6,7 @@ define(function (require) {
     function AggConfig(vis, opts) {
       var self = this;
 
-      self.id = opts.id || AggConfig.nextId(vis.aggs);
+      self.id = String(opts.id || AggConfig.nextId(vis.aggs));
       self.vis = vis;
       self._opts = opts = (opts || {});
 
@@ -42,7 +42,7 @@ define(function (require) {
 
       var nextId = AggConfig.nextId(have);
       haveNot.forEach(function (obj) {
-        obj.id = nextId++;
+        obj.id = String(nextId++);
       });
 
       return list;
@@ -55,7 +55,7 @@ define(function (require) {
      */
     AggConfig.nextId = function (list) {
       return 1 + list.reduce(function (max, obj) {
-        return Math.max(max, obj.id || 0);
+        return Math.max(max, +obj.id || 0);
       }, 0);
     };
 
@@ -187,6 +187,15 @@ define(function (require) {
         (this.type) ? this.type.params.raw : [],
         (this.schema) ? this.schema.params.raw : []
       );
+    };
+
+    AggConfig.prototype.getResponseAggs = function () {
+      if (!this.type) return;
+      return this.type.getResponseAggs(this) || this;
+    };
+
+    AggConfig.prototype.getValue = function (bucket) {
+      return this.type.getValue(this, bucket);
     };
 
     AggConfig.prototype.makeLabel = function () {

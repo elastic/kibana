@@ -10,9 +10,8 @@ define(function (require) {
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
     require('angular-ui-select');
-
-    require('plugins/visualize/editor/agg_param');
     require('filters/match_any');
+    require('plugins/visualize/editor/agg_param');
 
     var notify = new Notifier({
       location: 'visAggGroup'
@@ -21,11 +20,11 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/agg_params.html'),
-      scope: {
-        agg: '=',
-        groupName: '='
-      },
-      link: function ($scope, $el) {
+      scope: true,
+      link: function ($scope, $el, attr) {
+        $scope.$bind('agg', attr.agg);
+        $scope.$bind('groupName', attr.groupName);
+
         $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
         $scope.advancedToggled = false;
 
@@ -35,7 +34,7 @@ define(function (require) {
 
         if ($scope.agg.schema.editor) {
           $schemaEditor.append($scope.agg.schema.editor);
-          $compile($schemaEditor)(editorScope());
+          $compile($schemaEditor)($scope.$new());
         }
 
         // allow selection of an aggregation
@@ -114,7 +113,6 @@ define(function (require) {
           }
 
           var attrs = {};
-
           attrs['agg-param'] = 'agg.type.params[' + idx + ']';
           if (param.advanced) {
             attrs['ng-show'] = 'advancedToggled';
@@ -149,17 +147,6 @@ define(function (require) {
              */
             initialSet: fields
           });
-        }
-
-        // generic child scope creation, for both schema and agg
-        function editorScope() {
-          var $editorScope = $scope.$new();
-
-          setupBoundProp($editorScope, 'agg.type', 'aggType');
-          setupBoundProp($editorScope, 'agg', 'aggConfig');
-          setupBoundProp($editorScope, 'agg.params', 'params');
-
-          return $editorScope;
         }
 
         // bind a property from our scope a child scope, with one-way binding

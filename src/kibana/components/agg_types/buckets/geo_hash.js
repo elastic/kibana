@@ -2,7 +2,7 @@ define(function (require) {
   return function GeoHashAggDefinition(Private, config) {
     var _ = require('lodash');
     var moment = require('moment');
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var defaultPrecision = 3;
 
     function getPrecision(precision) {
@@ -21,7 +21,7 @@ define(function (require) {
       return precision;
     }
 
-    return new AggType({
+    return new BucketAggType({
       name: 'geohash_grid',
       title: 'Geohash',
       ordered: {},
