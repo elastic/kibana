@@ -14,12 +14,12 @@ define(function (require) {
         lt: '<',
       };
 
-      var script = _.map(params, function (value, key) {
+      var script = _.map(params, function (val, key) {
         return '(' + field.script + ')' + operators[key] + key;
       }).join(' && ');
 
-      var value = _.map(params, function (value, key) {
-        return '+' + operators[key] + value;
+      var value = _.map(params, function (val, key) {
+        return '+' + operators[key] + field.format.convert(val);
       }).join(' ');
 
       filter.script = { script: script, params: params };
