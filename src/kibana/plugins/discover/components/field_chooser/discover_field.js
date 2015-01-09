@@ -32,7 +32,7 @@ define(function (require) {
               warnings.push('Doc values are not enabled on this field. This may lead to excess heap consumption when visualizing.');
             }
 
-            if (field.analyzed) {
+            if (field.analyzed && field.type === 'string') {
               warnings.push('This is an analyzed string field.' +
                 ' Analyzed strings are highly unique and can use a lot of memory to visualize.');
             }

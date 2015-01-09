@@ -30,7 +30,13 @@ define(function (require) {
       function ResponseAggConfig(key) {
         this.key = key;
         this.parentId = this.id;
-        this.id = this.parentId + '.' + key;
+
+        var subId = String(key);
+        if (subId.indexOf('.') > -1) {
+          this.id = this.parentId + '[\'' + subId.replace(/'/g, '\\\'') + '\']';
+        } else {
+          this.id = this.parentId + '.' + subId;
+        }
       }
 
       ResponseAggConfig.prototype = Object.create(parentAgg, {

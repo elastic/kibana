@@ -14,6 +14,7 @@ define(function (require) {
       name: 'markdown',
       title: 'Markdown widget',
       icon: 'fa-code',
+      description: 'Useful for displaying explanations or instructions for dashboards.',
       template: require('text!plugins/markdown_vis/markdown_vis.html'),
       params: {
         editor: require('text!plugins/markdown_vis/markdown_vis_params.html')

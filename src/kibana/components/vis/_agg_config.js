@@ -191,7 +191,7 @@ define(function (require) {
 
     AggConfig.prototype.getResponseAggs = function () {
       if (!this.type) return;
-      return this.type.getResponseAggs(this) || this;
+      return this.type.getResponseAggs(this) || [this];
     };
 
     AggConfig.prototype.getValue = function (bucket) {

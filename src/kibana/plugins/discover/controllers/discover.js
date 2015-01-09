@@ -23,8 +23,6 @@ define(function (require) {
   require('services/timefilter');
   require('components/highlight/highlight_tags');
 
-  require('plugins/discover/directives/table');
-
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',
@@ -74,25 +72,24 @@ define(function (require) {
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
 
-    // Manage state & url state
-    var initialQuery = $scope.searchSource.get('query');
-
     if (savedSearch.id) {
       docTitle.change(savedSearch.title);
     }
 
-    var stateDefaults = {
-      query: initialQuery || '',
-      sort: savedSearch.sort || [],
-      columns: savedSearch.columns || ['_source'],
-      index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
-      interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.get('filter'))
-    };
+    var $state = $scope.state = new AppState(getStateDefaults());
+
+    function getStateDefaults() {
+      return {
+        query: $scope.searchSource.get('query') || '',
+        sort: savedSearch.sort || [],
+        columns: savedSearch.columns || ['_source'],
+        index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
+        interval: 'auto',
+        filters: _.cloneDeep($scope.searchSource.get('filter'))
+      };
+    }
 
     var metaFields = config.get('metaFields');
-
-    var $state = $scope.state = new AppState(stateDefaults);
     filterManager.init($state);
 
     if (!_.contains(indexPatternList, $state.index)) {
@@ -162,7 +159,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('state.sort', function (sort) {
+        $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
@@ -254,6 +251,9 @@ define(function (require) {
             notify.info('Saved Data Source "' + savedSearch.title + '"');
             if (savedSearch.id !== $route.current.params.id) {
               kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            } else {
+              // Update defaults so that "reload saved query" functions correctly
+              $state.setDefaults(getStateDefaults());
             }
           }
         });

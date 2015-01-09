@@ -85,7 +85,14 @@ define(function (require) {
           index: patternToWildcard(indexPattern.id)
         })
         .then(function (resp) {
-          var all = Object.keys(resp).sort();
+          // var all = Object.keys(resp).sort();
+          var all = _(resp).map(function (index, key) {
+            if (index.aliases) {
+              return [Object.keys(index.aliases), key];
+            } else {
+              return key;
+            }
+          }).flatten().uniq().value().sort();
 
           var matches = all.filter(function (existingIndex) {
             var parsed = moment(existingIndex, indexPattern.id);

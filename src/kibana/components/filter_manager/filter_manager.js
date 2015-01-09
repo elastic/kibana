@@ -11,6 +11,10 @@ define(function (require) {
 
     values = _.isArray(values) ? values : [values];
 
+    // Have we been passed a simple name or an actual field object?
+
+    var fieldName = _.isObject(field) ? field.name : field;
+
     var negate = operation === '-';
     var filters = _.flatten([self.$state.filters], true);
 
@@ -19,12 +23,12 @@ define(function (require) {
       var existing = _.find(filters, function (filter) {
         if (!filter) return;
 
-        if (field === '_exists_' && filter.exists) {
+        if (fieldName === '_exists_' && filter.exists) {
           return filter.exists.field === value;
         }
 
         if (filter.query) {
-          return filter.query.match[field] && filter.query.match[field].query === value;
+          return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
         }
       });
 
@@ -35,14 +39,28 @@ define(function (require) {
         return;
       }
 
-      switch (field) {
+      switch (fieldName) {
       case '_exists_':
         filters.push({ meta: { negate: negate, index: index }, exists: { field: value } });
         break;
       default:
-        var filter = { meta: { negate: negate, index: index }, query: { match: {} } };
-        filter.query.match[field] = { query: value, type: 'phrase' };
+        var filter;
+        if (field.scripted) {
+          filter = {
+            meta: { negate: negate, index: index, field: fieldName },
+            script: {
+              script: '(' + field.script + ') == value',
+              params: {
+                value: value
+              }
+            }
+          };
+        } else {
+          filter = { meta: { negate: negate, index: index }, query: { match: {} } };
+          filter.query.match[fieldName] = { query: value, type: 'phrase' };
+        }
         filters.push(filter);
+
         break;
       }
     });
