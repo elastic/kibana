@@ -12,9 +12,6 @@ module.exports = function (grunt) {
     'requirejs',
     'clean:unneeded_source_in_build',
     'copy:server_src',
-    'download_jruby',
-    'install_gems',
-    'warble',
     'replace:dist',
     'copy:dist',
     'compile_dist_readme',
@@ -22,6 +19,8 @@ module.exports = function (grunt) {
     'make_plugin_dir',
     'copy:plugin_readme',
     'describe_bundled_plugins',
+    'npm_install_kibana',
+    'download_node_binaries',
     'copy:versioned_dist',
     'create_packages'
   ]);

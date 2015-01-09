@@ -10,22 +10,26 @@ module.exports = function (grunt) {
     var target = grunt.config.get('target');
     var packageName = grunt.config.get('pkg.name');
     var version = grunt.config.get('pkg.version');
-    var archiveName = join(target, packageName + '-' + version);
     var distPath = join(grunt.config.get('build'), 'dist');
+    var platforms = grunt.config.get('platforms');
 
-    var tgzCmd = 'tar -zcvf ' + archiveName + '.tar.gz kibana-' + version;
-    var zipCmd = 'zip -r ' + archiveName + '.zip kibana-' + version;
+    var createPackage = function (platform) {
+      var options = { cwd: distPath };
+      var name = packageName + '-' + version + '-' + platform;
+      var archiveName = join(target, name);
+      var tgzCmd = 'tar -zcf ' + archiveName + '.tar.gz ' + name;
+      var zipCmd = 'zip -rq ' + archiveName + '.zip ' + name;
 
-    var options = { cwd: distPath };
+      return mkdirp.mkdirpAsync(target)
+        .then(function (arg) {
+          return exec(tgzCmd, options);
+        })
+        .then(function (arg) {
+          return exec(zipCmd, options);
+        });
+    };
 
-    mkdirp.mkdirpAsync(target)
-      .then(function (arg) {
-        return exec(tgzCmd, options);
-      })
-      .then(function (arg) {
-        return exec(zipCmd, options);
-      })
-      .finally(done);
+    Promise.map(platforms, createPackage).finally(done);
 
   });
 };
