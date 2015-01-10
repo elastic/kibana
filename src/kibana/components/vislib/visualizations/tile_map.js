@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private) {
+  return function TileMapFactory(d3, Private, config) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -71,12 +71,12 @@ define(function (require) {
           }
 
           var featureLayer;
-          var tileLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
-            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-              'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            subdomains: '1234'
-          });
+          var tileLayer;
+          if (config.get('visualization:tileMap:wms')) {
+            tileLayer = L.tileLayer.wms(config.get('visualization:tileMap:url'), config.get('visualization:tileMap:options'));
+          } else {
+            tileLayer = L.tileLayer(config.get('visualization:tileMap:url'), config.get('visualization:tileMap:options'));
+          }
 
           var mapOptions = {
             minZoom: 2,

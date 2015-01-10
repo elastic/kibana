@@ -43,6 +43,21 @@ define(function (require) {
       value: 6,
       description: 'The maximum geoHash size allowed in a tile map',
     },
+    'visualization:tileMap:wms': {
+      value: false,
+      description: 'Set for WMS mapping provider'
+    },
+    'visualization:tileMap:url': {
+      value: 'http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
+      description: 'URL of mapping provider'
+    },
+    'visualization:tileMap:options': {
+      value: '{ "attribution": "Tiles by <a href=\\"http://www.mapquest.com/\\">MapQuest</a> &mdash; ' +
+        'Map data &copy; <a href=\\"http://openstreetmap.org\\">OpenStreetMap</a> contributors, ' +
+        '<a href=\\"http://creativecommons.org/licenses/by-sa/2.0/\\">CC-BY-SA</a>", "subdomains": "1234" }',
+      description: 'TileLayer options, see leafletjs documentation',
+      type: 'json'
+    },
     'csv:separator': {
       value: ',',
       description: 'Separate exported values with this string',
