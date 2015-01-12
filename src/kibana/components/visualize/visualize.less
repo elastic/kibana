@@ -52,7 +52,6 @@ visualize-spy {
   .display(flex);
 
   overflow: auto;
-  padding-top: 10px;
 
   &.visible {
     display: block;
@@ -89,6 +88,10 @@ visualize-spy {
     }
   }
 
+  .visualize-spy-fill {
+    margin-right: 5px;
+  }
+
   .visualize-spy-container {
     .flex(1, 0, auto);
 
@@ -96,7 +99,6 @@ visualize-spy {
     .flex-direction(column);
 
     height: 482px;
-    padding: 10px 10px 0;
     overflow-y: auto;
 
     header {
@@ -117,8 +119,6 @@ visualize-spy {
   }
 
   .visualize-spy-nav {
-    margin-top: 10px;
-    margin-bottom: 10px;
     .flex(0, 0, auto);
 
     a.btn {
