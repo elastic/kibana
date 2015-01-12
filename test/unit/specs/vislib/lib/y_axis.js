@@ -204,12 +204,10 @@ define(function (require) {
 
       beforeEach(function () {
         val = yAxis.formatAxisLabel(num);
-        str = val.match(re);
       });
 
       it('should return a string with suffix B', function () {
-        console.log(str);
-        expect(str).to.be('B');
+        expect(val).to.be('1B');
       });
     });
 
