@@ -72,7 +72,7 @@ define(function (require) {
         } else if (obj.slices) {
           type = 'slices';
         } else if (obj.geoJson) {
-          type = 'goeJson';
+          type = 'geoJson';
         }
       });
 
