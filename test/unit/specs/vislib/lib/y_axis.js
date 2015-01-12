@@ -196,6 +196,23 @@ define(function (require) {
       });
     });
 
+    describe('formatAxisLabel method', function () {
+      var num = 1e9;
+      var re = /B/i;
+      var val;
+      var str;
+
+      beforeEach(function () {
+        val = yAxis.formatAxisLabel(num);
+        str = val.match(re);
+      });
+
+      it('should return a string with suffix B', function () {
+        console.log(str);
+        expect(str).to.be('B');
+      });
+    });
+
     describe('getYAxis method', function () {
       var mode, yMax, yScale;
       beforeEach(function () {
