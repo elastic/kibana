@@ -71,7 +71,7 @@
 
       <kbn-tooltip text="Save Visualization" placement="bottom" append-to-body="1">
         <!-- normal save -->
-        <button ng-if="!editableVis.dirty" ng-click="toggleSave()">
+        <button ng-if="!editableVis.dirty" ng-click="configTemplate.toggle('save')">
           <i class="fa fa-save"></i>
         </button>
 
@@ -82,10 +82,10 @@
       </kbn-tooltip>
 
       <kbn-tooltip text="Load Saved Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="toggleLoad()"><i class="fa fa-folder-open-o"></i></button>
+        <button ng-click="configTemplate.toggle('load')"><i class="fa fa-folder-open-o"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Share Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="toggleShare()"><i class="fa fa-external-link"></i></button>
+        <button ng-click="configTemplate.toggle('share')"><i class="fa fa-external-link"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Refresh" placement="bottom" append-to-body="1">
         <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
