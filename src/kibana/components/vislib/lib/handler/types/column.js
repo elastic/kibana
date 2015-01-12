@@ -31,6 +31,7 @@ define(function (require) {
         }),
         yAxis: new YAxis({
           el   : vis.el,
+          yMin: data.getYMinValue(),
           yMax : data.getYMaxValue(),
           _attr: vis._attr
         })

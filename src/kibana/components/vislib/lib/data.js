@@ -59,6 +59,9 @@ define(function (require) {
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
           .offset(offset || 'zero')
+          .order(function (a, b) {
+            return a.y - b.y;
+          })
       });
     }
 
@@ -222,6 +225,48 @@ define(function (require) {
     };
 
     /**
+     * Calculates the min y value from this.dataArray
+     * for each object in the dataArray.
+     *
+     * @method getYMinValue
+     * @returns {Number} Min y axis value
+     */
+    Data.prototype.getYMinValue = function () {
+      // 0 default option
+      // custom min option - where they select the min value
+
+      var self = this;
+      var arr = [];
+      var grouped = (self._attr.mode === 'grouped');
+
+      if (self._attr.mode === 'percentage') {
+        return 0;
+      }
+
+      // Default y axis min value of 0
+      if (self._attr.defaultYMin) {
+        return 0;
+      }
+
+      // User defined y axis min value
+      if (self._attr.userDefinedYMin) {
+        return self._attr.userDefinedYMin;
+      }
+
+      // Calculate the min value of the dataArray
+      // for each object in the dataArray,
+      // push the calculated y value to the initialized array (arr)
+      _.forEach(this.flatten(), function (series) {
+        if (self.shouldBeStacked(series) && !grouped) {
+          return arr.push(self.getYStackMin(series));
+        }
+        return arr.push(self.getYMin(series));
+      });
+
+      return _.min(arr);
+    };
+
+    /**
      * Calculate the max y value from this.dataArray
      * for each object in the dataArray,
      * push the calculated y value to the initialized array (arr)
@@ -263,6 +308,29 @@ define(function (require) {
     };
 
     /**
+     * Calculates the smallest y stack value among all data objects
+     *
+     * @method getYStackMin
+     * @param series {Array} Array of data objects
+     * @returns {Number} Y stack max value
+     */
+    Data.prototype.getYStackMin = function (series) {
+      var isOrdered = (this.data.ordered && this.data.ordered.date);
+      var minDate = isOrdered ? this.data.ordered.min : undefined;
+      var maxDate = isOrdered ? this.data.ordered.max : undefined;
+
+      return d3.min(this.stackData(series), function (data) {
+        return d3.min(data, function (d) {
+          if (isOrdered) {
+            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
+          }
+
+          return d.y0 + d.y;
+        });
+      });
+    };
+
+    /**
      * Calculates the largest y stack value among all data objects
      *
      * @method getYStackMax
@@ -286,9 +354,32 @@ define(function (require) {
     };
 
     /**
+     * Calculates the Y domain min value
+     *
+     * @method getYMin
+     * @param series {Array} Array of data objects
+     * @returns {Number} Y domain min value
+     */
+    Data.prototype.getYMin = function (series) {
+      var isOrdered = (this.data.ordered && this.data.ordered.date);
+      var minDate = isOrdered ? this.data.ordered.min : undefined;
+      var maxDate = isOrdered ? this.data.ordered.max : undefined;
+
+      return d3.min(series, function (data) {
+        return d3.min(data, function (d) {
+          if (isOrdered) {
+            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
+          }
+
+          return d.y;
+        });
+      });
+    };
+
+    /**
      * Calculates the Y domain max value
      *
-     * @method getMax
+     * @method getYMax
      * @param series {Array} Array of data objects
      * @returns {Number} Y domain max value
      */
