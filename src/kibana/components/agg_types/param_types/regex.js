@@ -25,7 +25,15 @@ define(function (require) {
     }
 
     RegexAggParam.prototype.editor = editorHtml;
-    RegexAggParam.prototype.disabled = _.noop;
+
+    /**
+     * Disabled state of the agg param
+     *
+     * @return {bool}
+     */
+    RegexAggParam.prototype.disabled = function () {
+      return false;
+    };
 
     /**
      * Write the aggregation parameter.
