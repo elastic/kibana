@@ -25,13 +25,13 @@
         <button ng-click="newQuery()"><i class="fa fa-file-new-o"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
-        <button ng-click="toggleSave()"><i class="fa fa-save"></i></button>
+        <button ng-click="configTemplate.toggle('save')"><i class="fa fa-save"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
-        <button ng-click="toggleLoad()"><i class="fa fa-folder-open-o"></i></button>
+        <button ng-click="configTemplate.toggle('load')"><i class="fa fa-folder-open-o"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Settings" placement="bottom" append-to-body="1">
-        <button ng-click="toggleConfig()"><i class="fa fa-gear"></i></button>
+        <button ng-click="configTemplate.toggle('config')"><i class="fa fa-gear"></i></button>
       </kbn-tooltip>
     </div>
   </navbar>

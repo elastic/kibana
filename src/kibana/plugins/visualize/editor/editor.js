@@ -113,9 +113,6 @@ define(function (require) {
       $scope.state = $state;
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
-      $scope.toggleShare = _.bindKey(configTemplate, 'toggle', 'share');
-      $scope.toggleSave = _.bindKey(configTemplate, 'toggle', 'save');
-      $scope.toggleLoad = _.bindKey(configTemplate, 'toggle', 'load');
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -213,12 +210,13 @@ define(function (require) {
 
       savedVis.save()
       .then(function (id) {
+        configTemplate.close('save');
+
         if (id) {
           notify.info('Saved Visualization "' + savedVis.title + '"');
           if (savedVis.id === $route.current.params.id) return;
           kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
         }
-        configTemplate.close('save');
       }, notify.fatal);
     };
 
