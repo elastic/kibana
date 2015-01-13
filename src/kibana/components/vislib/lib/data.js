@@ -21,6 +21,7 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var self = this;
       var offset;
 
       if (attr.mode === 'stacked') {
@@ -59,9 +60,6 @@ define(function (require) {
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
           .offset(offset || 'zero')
-          .order(function (a, b) {
-            return a.y - b.y;
-          })
       });
     }
 
@@ -221,7 +219,21 @@ define(function (require) {
       var isOverlapping = (this._attr.mode === 'overlap');
 
       // Series should be an array
-      return (isHistogram || isArea && !isOverlapping && series.length > 1);
+      return (isHistogram && series.length > 1 || isArea && !isOverlapping && series.length > 1);
+    };
+
+    /**
+     * Validates that the Y axis min value defined by user input
+     * is a number.
+     *
+     * @param val {Number} Y axis min value
+     * @returns {Number} Y axis min value
+     */
+    Data.prototype.validateUserDefinedYMin = function (val) {
+      if (!_.isNumber(val)) {
+        throw new Error('validateUserDefinedYMin expects a number');
+      }
+      return val;
     };
 
     /**
@@ -237,20 +249,20 @@ define(function (require) {
 
       var self = this;
       var arr = [];
-      var grouped = (self._attr.mode === 'grouped');
+      var grouped = (this._attr.mode === 'grouped');
 
-      if (self._attr.mode === 'percentage') {
+      if (this._attr.mode === 'percentage') {
         return 0;
       }
 
       // Default y axis min value of 0
-      if (self._attr.defaultYMin) {
+      if (this._attr.defaultYMin) {
         return 0;
       }
 
       // User defined y axis min value
-      if (self._attr.userDefinedYMin) {
-        return self._attr.userDefinedYMin;
+      if (this._attr.userDefinedYMin) {
+        return this.validateUserDefinedYMin(this._attr.userDefinedYMin);
       }
 
       // Calculate the min value of the dataArray

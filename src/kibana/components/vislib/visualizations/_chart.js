@@ -35,9 +35,7 @@ define(function (require) {
 
       }
 
-      this._attr = _.defaults(handler._attr || {}, {
-        defaultYMin: true
-      });
+      this._attr = _.defaults(handler._attr || {}, {});
     }
 
     /**
