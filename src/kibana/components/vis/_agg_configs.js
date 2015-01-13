@@ -64,7 +64,7 @@ define(function (require) {
         });
       }
 
-      this.getSorted()
+      this.getRequestAggs()
       .filter(function (config) {
         return !config.type.hasNoDsl;
       })
@@ -100,10 +100,45 @@ define(function (require) {
       return dslTopLvl;
     };
 
-    AggConfigs.prototype.getSorted = function () {
+    AggConfigs.prototype.getRequestAggs = function () {
       return _.sortBy(this, function (agg) {
         return agg.schema.group === 'metrics' ? 1 : 0;
       });
+    };
+
+    /**
+     * Gets the AggConfigs (and possibly ResponseAggConfigs) that
+     * represent the values that will be produced when all aggs
+     * are run.
+     *
+     * With multi-value metric aggs it is possible for a single agg
+     * request to result in multiple agg values, which is why the length
+     * of a vis' responseValuesAggs may be different than the vis' aggs
+     *
+     * @return {array[AggConfig]}
+     */
+    AggConfigs.prototype.getResponseAggs = function () {
+      return this.getRequestAggs().reduce(function (responseValuesAggs, agg) {
+        var aggs = agg.getResponseAggs();
+        return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
+      }, []);
+    };
+
+
+    /**
+     * Find a response agg by it's id. This may be an agg in the aggConfigs, or one
+     * created specifically for a response value
+     *
+     * @param  {string} id - the id of the agg to find
+     * @return {AggConfig}
+     */
+    AggConfigs.prototype.getResponseAggById = function (id) {
+      id = String(id);
+      var reqAgg = _.find(this.getRequestAggs(), function (agg) {
+        return id.substr(0, String(agg.id).length) === agg.id;
+      });
+      if (!reqAgg) return;
+      return _.find(reqAgg.getResponseAggs(), { id: id });
     };
 
     return AggConfigs;

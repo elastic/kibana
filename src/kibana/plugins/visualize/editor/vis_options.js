@@ -8,7 +8,6 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/vis_options.html'),
-      replace: true,
       scope: {
         vis: '=',
       },

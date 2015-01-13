@@ -1,11 +1,22 @@
 define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
+    var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
     var AggConfig = Private(require('components/vis/_agg_config'));
+    var Schemas = Private(require('plugins/vis_types/_schemas'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
 
-    return new AggType({
+    var orderAggSchema = (new Schemas([
+      {
+        group: 'none',
+        name: 'orderAgg',
+        title: 'Order Agg',
+        aggFilter: '!percentiles'
+      }
+    ])).all[0];
+
+    return new BucketAggType({
       name: 'terms',
       title: 'Terms',
       makeLabel: function (agg) {
@@ -56,8 +67,15 @@ define(function (require) {
           serialize: function (orderAgg) {
             return orderAgg.toJSON();
           },
-          deserialize: function (stateJSON, aggConfig) {
-            return new AggConfig(aggConfig.vis, stateJSON);
+          deserialize: function (state, agg) {
+            return this.makeOrderAgg(agg, state);
+          },
+          makeOrderAgg: function (termsAgg, state) {
+            state = state || {};
+            state.schema = orderAggSchema;
+            var orderAgg = new AggConfig(termsAgg.vis, state);
+            orderAgg.id = termsAgg.id + '-orderAgg';
+            return orderAgg;
           },
           controller: function ($scope) {
             $scope.safeMakeLabel = function (agg) {
@@ -68,43 +86,69 @@ define(function (require) {
               }
             };
 
-            $scope.$watch('agg.params.orderBy', function (orderBy, prevOrderBy) {
+            var INIT = {}; // flag to know when prevOrderBy has changed
+            var prevOrderBy = INIT;
+
+            $scope.$watch('responseValueAggs', updateOrderAgg);
+            $scope.$watch('agg.params.orderBy', updateOrderAgg);
+
+            function updateOrderAgg() {
               var agg = $scope.agg;
               var aggs = agg.vis.aggs;
               var params = agg.params;
+              var orderBy = params.orderBy;
+              var paramDef = agg.type.params.byName.orderAgg;
 
-              if (orderBy === prevOrderBy && !orderBy) {
-                params.orderBy = (_.first(aggs.bySchemaGroup.metrics) || { id: 'custom' }).id;
+              // setup the initial value of orderBy
+              if (!orderBy && prevOrderBy === INIT) {
+                // abort until we get the responseValueAggs
+                if (!$scope.responseValueAggs) return;
+                params.orderBy = (_.first($scope.responseValueAggs) || { id: 'custom' }).id;
                 return;
               }
 
-              if (!orderBy) return;
-              if (orderBy !== 'custom') {
+              // track the previous value
+              prevOrderBy = orderBy;
+
+              // we aren't creating a custom aggConfig
+              if (!orderBy || orderBy !== 'custom') {
                 params.orderAgg = null;
+                // ensure that orderBy is set to a valid agg
+                if (!_.find($scope.responseValueAggs, { id: orderBy })) {
+                  params.orderBy = null;
+                }
                 return;
               }
-              if (params.orderAgg) return;
 
-              params.orderAgg = new AggConfig(agg.vis, {
-                schema: _.first(agg.vis.type.schemas.metrics)
-              });
-            });
+              params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
+            }
           },
           write: function (agg, output) {
+            var vis = agg.vis;
             var dir = agg.params.order.val;
             var order = output.params.order = {};
 
-            var orderAgg = agg.params.orderAgg;
-            if (!orderAgg) {
-              orderAgg = agg.vis.aggs.byId[agg.params.orderBy];
+            var orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
+
+            // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
+            // thus causing issues with filtering. This probably causes other issues since float might not
+            // be able to contain the number on the elasticsearch side
+            if (output.params.script) {
+              output.params.valueType = agg.field().type === 'number' ? 'float' : agg.field().type;
             }
 
-            if (orderAgg.type.name === 'count') {
+            if (!orderAgg || orderAgg.type.name === 'count') {
               order._count = dir;
-            } else {
-              output.subAggs = (output.subAggs || []).concat(orderAgg);
-              order[orderAgg.id] = dir;
+              return;
             }
+
+            var orderAggId = orderAgg.id;
+            if (orderAgg.parentId) {
+              orderAgg = vis.aggs.byId[orderAgg.parentId];
+            }
+
+            output.subAggs = (output.subAggs || []).concat(orderAgg);
+            order[orderAggId] = dir;
           }
         }
       ]

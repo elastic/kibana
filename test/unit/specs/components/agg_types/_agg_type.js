@@ -94,6 +94,23 @@ define(function (require) {
             expect(AggParams.firstCall.args[0]).to.be(params);
           });
         });
+
+        describe('getResponseAggs', function () {
+          it('copies the value', function () {
+            var football = {};
+            var aggType = new AggType({
+              getResponseAggs: football
+            });
+
+            expect(aggType.getResponseAggs).to.be(football);
+          });
+
+          it('defaults to _.noop', function () {
+            var aggType = new AggType({});
+
+            expect(aggType.getResponseAggs).to.be(_.noop);
+          });
+        });
       });
 
     });

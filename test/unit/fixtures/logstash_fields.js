@@ -17,8 +17,8 @@ define(function (require) {
       { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true },
       { name: '_type',              type: 'string',     indexed: true,  analyzed: true },
       { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false },
-      { name: 'scripted string',    type: 'string',     scripted: true, script: '\'i am a string\''},
-      { name: 'scripted number',    type: 'number',     scripted: true, script: '1234'},
+      { name: 'script string',    type: 'string',     scripted: true, script: '\'i am a string\''},
+      { name: 'script number',    type: 'number',     scripted: true, script: '1234'},
     ].map(function (field) {
       field.count = field.count || 0;
       field.scripted = field.scripted || false;

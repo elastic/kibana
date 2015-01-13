@@ -14,7 +14,7 @@ define(function (require) {
      * @return {null|number}
      */
     function bucketCountBetween(aggConfigA, aggConfigB) {
-      var aggs = aggConfigA.vis.aggs.getSorted();
+      var aggs = aggConfigA.vis.aggs.getRequestAggs();
 
       var aIndex = aggs.indexOf(aggConfigA);
       var bIndex = aggs.indexOf(aggConfigB);

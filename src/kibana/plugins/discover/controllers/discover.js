@@ -2,9 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var moment = require('moment');
-  var settingsHtml = require('text!plugins/discover/partials/settings.html');
-  var saveHtml = require('text!plugins/discover/partials/save_search.html');
-  var loadHtml = require('text!plugins/discover/partials/load_search.html');
+  var ConfigTemplate = require('utils/config_template');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
   var filterManager = require('components/filter_manager/filter_manager');
 
@@ -22,8 +20,6 @@ define(function (require) {
   require('components/state_management/app_state');
   require('services/timefilter');
   require('components/highlight/highlight_tags');
-
-  require('plugins/discover/directives/table');
 
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
@@ -62,6 +58,13 @@ define(function (require) {
       location: 'Discover'
     });
 
+    // config panel templates
+    $scope.configTemplate = new ConfigTemplate({
+      config: require('text!plugins/discover/partials/settings.html'),
+      load: require('text!plugins/discover/partials/load_search.html'),
+      save: require('text!plugins/discover/partials/save_search.html')
+    });
+
     $scope.timefilter = timefilter;
 
     // the saved savedSearch
@@ -74,25 +77,24 @@ define(function (require) {
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
 
-    // Manage state & url state
-    var initialQuery = $scope.searchSource.get('query');
-
     if (savedSearch.id) {
       docTitle.change(savedSearch.title);
     }
 
-    var stateDefaults = {
-      query: initialQuery || '',
-      sort: savedSearch.sort || [],
-      columns: savedSearch.columns || ['_source'],
-      index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
-      interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
-    };
+    var $state = $scope.state = new AppState(getStateDefaults());
+
+    function getStateDefaults() {
+      return {
+        query: $scope.searchSource.get('query') || '',
+        sort: savedSearch.sort || [],
+        columns: savedSearch.columns || ['_source'],
+        index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
+        interval: 'auto',
+        filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
+      };
+    }
 
     var metaFields = config.get('metaFields');
-
-    var $state = $scope.state = new AppState(stateDefaults);
     filterManager.init($state);
 
     if (!_.contains(indexPatternList, $state.index)) {
@@ -162,7 +164,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('state.sort', function (sort) {
+        $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
@@ -250,10 +252,15 @@ define(function (require) {
 
         return savedSearch.save()
         .then(function (id) {
+          $scope.configTemplate.close('save');
+
           if (id) {
             notify.info('Saved Data Source "' + savedSearch.title + '"');
             if (savedSearch.id !== $route.current.params.id) {
               kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            } else {
+              // Update defaults so that "reload saved query" functions correctly
+              $state.setDefaults(getStateDefaults());
             }
           }
         });
@@ -401,33 +408,6 @@ define(function (require) {
         from: datemath.parse(timefilter.time.from),
         to: datemath.parse(timefilter.time.to, true)
       };
-    };
-
-    $scope.toggleConfig = function () {
-      // Close if already open
-      if ($scope.configTemplate === settingsHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = settingsHtml;
-      }
-    };
-
-    $scope.toggleSave = function () {
-      // Close if already open
-      if ($scope.configTemplate === saveHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = saveHtml;
-      }
-    };
-
-    $scope.toggleLoad = function () {
-      // Close if already open
-      if ($scope.configTemplate === loadHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = loadHtml;
-      }
     };
 
     $scope.resetQuery = function () {

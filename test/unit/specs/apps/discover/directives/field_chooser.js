@@ -86,7 +86,7 @@ define(function (require) {
 
         expect(section.popular.text()).to.contain('ssl');
         expect(section.popular.text()).to.contain('@timestamp');
-        expect(section.popular.text()).to.not.contain('ip');
+        expect(section.popular.text()).to.not.contain('ip\n');
 
         expect(section.unpopular.text()).to.contain('extension');
         expect(section.unpopular.text()).to.contain('area');
@@ -134,9 +134,8 @@ define(function (require) {
 
         indexPattern.fields.byName.request_body.display = true;
         $scope.$digest();
-
-        expect(section.selected.text()).to.contain('request_body');
-        expect(section.unpopular.text()).to.not.contain('request_body');
+        expect(section.selected.text()).to.contain('ip\n');
+        expect(section.unpopular.text()).to.not.contain('ip\n');
 
         expect(section.popular.text()).to.contain('ssl');
 

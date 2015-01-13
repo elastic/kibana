@@ -1,7 +1,6 @@
 define(function (require) {
   require('components/paginated_table/paginated_table');
   var _ = require('lodash');
-  var faker = require('faker');
   var sinon = require('sinon/sinon');
 
   describe('paginated table', function () {
@@ -14,19 +13,33 @@ define(function (require) {
     var defaultPerPage = 10;
 
     var makeData = function (colCount, rowCount) {
-      // faker.Lorem.words can generate the same word multiple times
-      // so, generate 3x the request number, use uniq, and trim down to the requested total
-      var cols = _.uniq(faker.Lorem.words(colCount * 3)).slice(0, colCount).map(function (word) {
-        return { title: word };
-      });
-
+      var columns = [];
       var rows = [];
-      _.times(rowCount, function () {
-        rows.push(faker.Lorem.words(colCount));
-      });
+
+      if (_.isNumber(colCount)) {
+        _.times(colCount, function (i) {
+          columns.push({ title: 'column' + i });
+        });
+      } else {
+        columns = colCount;
+      }
+
+      if (_.isNumber(rowCount)) {
+        _.times(rowCount, function (col) {
+          var rowItems = [];
+
+          _.times(columns.length, function (row) {
+            rowItems.push('item' + col + row);
+          });
+
+          rows.push(rowItems);
+        });
+      } else {
+        rows = rowCount;
+      }
 
       return {
-        columns: cols,
+        columns: columns,
         rows: rows
       };
     };
@@ -53,9 +66,9 @@ define(function (require) {
       $scope = $rootScope.$new();
     });
 
-    afterEach(function () {
-      $scope.$destroy();
-    });
+    // afterEach(function () {
+    //   $scope.$destroy();
+    // });
 
     describe('rendering', function () {
       it('should not display without rows', function () {
@@ -106,20 +119,21 @@ define(function (require) {
       var paginatedTable;
 
       beforeEach(function () {
-        data = makeData(3, 0);
-        data.rows.push(['bbbb', 'aaaa', 'zzzz']);
-        data.rows.push(['cccc', 'cccc', 'aaaa']);
-        data.rows.push(['zzzz', 'bbbb', 'bbbb']);
-        data.rows.push(['aaaa', 'zzzz', 'cccc']);
+        data = makeData(3, [
+          ['bbbb', 'aaaa', 'zzzz'],
+          ['cccc', 'cccc', 'aaaa'],
+          ['zzzz', 'bbbb', 'bbbb'],
+          ['aaaa', 'zzzz', 'cccc'],
+        ]);
 
         lastRowIndex = data.rows.length - 1;
         renderTable(data.columns, data.rows);
         paginatedTable = $el.isolateScope().paginatedTable;
       });
 
-      afterEach(function () {
-        $scope.$destroy();
-      });
+      // afterEach(function () {
+      //   $scope.$destroy();
+      // });
 
       it('should not sort by default', function () {
         var tableRows = $el.find('tbody tr');
@@ -127,9 +141,33 @@ define(function (require) {
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be(data.rows[lastRowIndex][0]);
       });
 
+      it('should do nothing when sorting by invalid column id', function () {
+        // sortColumn
+        paginatedTable.sortColumn(999);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
+      });
+
+      it('should do nothing when sorting by non sortable column', function () {
+        data.columns[0].sortable = false;
+
+        // sortColumn
+        paginatedTable.sortColumn(0);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
+      });
+
       it('should sort ascending on first invocation', function () {
         // sortColumn
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -139,8 +177,8 @@ define(function (require) {
 
       it('should sort descending on second invocation', function () {
         // sortColumn
-        paginatedTable.sortColumn(data.columns[0]);
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -150,9 +188,9 @@ define(function (require) {
 
       it('should clear sorting on third invocation', function () {
         // sortColumn
-        paginatedTable.sortColumn(data.columns[0]);
-        paginatedTable.sortColumn(data.columns[0]);
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
+        paginatedTable.sortColumn(0);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
@@ -162,16 +200,98 @@ define(function (require) {
 
       it('should sort new column ascending', function () {
         // sort by first column
-        paginatedTable.sortColumn(data.columns[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
+
         // sort by second column
-        paginatedTable.sortColumn(data.columns[1]);
+        paginatedTable.sortColumn(1);
         $scope.$digest();
 
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
         expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).to.be('zzzz');
       });
+
+    });
+
+    describe('sorting duplicate columns', function () {
+      var data;
+      var paginatedTable;
+      var colText = 'test row';
+
+      beforeEach(function () {
+        var cols = [
+          { title: colText },
+          { title: colText },
+          { title: colText }
+        ];
+        var rows = [
+          ['bbbb', 'aaaa', 'zzzz'],
+          ['cccc', 'cccc', 'aaaa'],
+          ['zzzz', 'bbbb', 'bbbb'],
+          ['aaaa', 'zzzz', 'cccc'],
+        ];
+        data = makeData(cols, rows);
+
+        renderTable(data.columns, data.rows);
+        paginatedTable = $el.isolateScope().paginatedTable;
+      });
+
+      it('should should have duplicate column titles', function () {
+        var columns = $el.find('thead th span');
+        columns.each(function () {
+          expect(this.innerText).to.be(colText);
+        });
+      });
+
+      it('should handle sorting on columns with the same name', function () {
+        // sort by the last column
+        paginatedTable.sortColumn(2);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('aaaa');
+        expect(tableRows.eq(1).find('td').eq(2).text()).to.be('bbbb');
+        expect(tableRows.eq(2).find('td').eq(2).text()).to.be('cccc');
+        expect(tableRows.eq(3).find('td').eq(2).text()).to.be('zzzz');
+      });
+
+      it('should sort correctly between columns', function () {
+        // sort by the last column
+        paginatedTable.sortColumn(2);
+        $scope.$digest();
+
+        var tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('cccc');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('aaaa');
+
+        // sort by the first column
+        paginatedTable.sortColumn(0);
+        $scope.$digest();
+
+        tableRows = $el.find('tbody tr');
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be('aaaa');
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be('zzzz');
+        expect(tableRows.eq(0).find('td').eq(2).text()).to.be('cccc');
+
+        expect(tableRows.eq(1).find('td').eq(0).text()).to.be('bbbb');
+        expect(tableRows.eq(2).find('td').eq(0).text()).to.be('cccc');
+        expect(tableRows.eq(3).find('td').eq(0).text()).to.be('zzzz');
+      });
+
+      it('should not sort duplicate columns', function () {
+        paginatedTable.sortColumn(1);
+        $scope.$digest();
+
+        var sorters = $el.find('thead th i');
+        expect(sorters.eq(0).hasClass('fa-sort')).to.be(true);
+        expect(sorters.eq(1).hasClass('fa-sort')).to.be(false);
+        expect(sorters.eq(2).hasClass('fa-sort')).to.be(true);
+      });
+
     });
 
     describe('custom sorting', function () {
@@ -197,7 +317,7 @@ define(function (require) {
       // TODO: This is failing randomly
       it('should allow custom sorting handler', function () {
         var columnIndex = 1;
-        paginatedTable.sortColumn(data.columns[columnIndex]);
+        paginatedTable.sortColumn(columnIndex);
         $scope.$digest();
         expect(sortHandler.callCount).to.be(1);
         expect(sortHandler.getCall(0).args[0]).to.be(columnIndex);
@@ -233,7 +353,7 @@ define(function (require) {
       });
 
       it('should sort using object value', function () {
-        paginatedTable.sortColumn(cols[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
         var tableRows = $el.find('tbody tr');
         expect(tableRows.eq(0).find('h1').size()).to.be(0);
@@ -241,7 +361,7 @@ define(function (require) {
         // html row should be the last row
         expect(tableRows.eq(2).find('h1').size()).to.be(1);
 
-        paginatedTable.sortColumn(cols[0]);
+        paginatedTable.sortColumn(0);
         $scope.$digest();
         tableRows = $el.find('tbody tr');
         // html row should be the first row

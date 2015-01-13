@@ -15,9 +15,11 @@ define(function (require) {
       var result = { $parent: datum.aggConfigResult };
       while ((result = result.$parent) && result.aggConfig) {
         var agg = result.aggConfig;
+        var value = result.value;
+        if (agg === datum.aggConfigResult.aggConfig && datum.yScale != null) value *= datum.yScale;
 
         details.push({
-          value: agg.fieldFormatter()(result.value),
+          value: agg.fieldFormatter()(value),
           label: agg.makeLabel()
         });
       }

@@ -65,7 +65,7 @@
             </div>
 
             <div class="alert alert-info" ng-if="index.samples">
-              Attempted to match the following indices:
+              Attempted to match the following indices and aliases:
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
@@ -75,7 +75,7 @@
             </div>
 
             <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
-              Pattern matches {{index.existing.matchPercent}} of existing indices
+              Pattern matches {{index.existing.matchPercent}} of existing indices and aliases
               <ul>
                 <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -87,8 +87,8 @@
               </button>
             </div>
 
-            <div class="alert alert-danger" ng-if="index.existing.failures.length">
-              Indices that were found, but did not match the pattern:
+            <div class="alert alert-info" ng-if="index.existing.failures.length">
+              Indices and aliases that were found, but did not match the pattern:
               <ul>
                 <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
               </ul>

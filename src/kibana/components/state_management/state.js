@@ -13,7 +13,7 @@ define(function (require) {
       State.Super.call(this);
 
       var self = this;
-      self._defaults = defaults || {};
+      self.setDefaults(defaults);
       self._urlParam = urlParam || '_s';
 
       // When the URL updates we need to fetch the values from the URL
@@ -138,6 +138,10 @@ define(function (require) {
     State.prototype.destroy = function () {
       this.off(); // removes all listners
       this._cleanUpListeners(); // Removes the $routeUpdate listner
+    };
+
+    State.prototype.setDefaults = function (defaults) {
+      this._defaults = defaults || {};
     };
 
     return State;

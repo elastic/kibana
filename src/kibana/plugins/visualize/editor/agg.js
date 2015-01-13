@@ -2,9 +2,8 @@ define(function (require) {
   require('modules')
   .get('app/visualize', ['ui.select'])
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
-    require('angular-ui-select');
-    require('filters/field_type');
     require('plugins/visualize/editor/agg_params');
+    require('plugins/visualize/editor/agg_add');
 
     var _ = require('lodash');
     var $ = require('jquery');
@@ -18,16 +17,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      replace: true,
       template: require('text!plugins/visualize/editor/agg.html'),
-      scope: {
-        vis: '=',
-        agg: '=',
-        $index: '=',
-        group: '=',
-        groupName: '=',
-        groupMin: '='
-      },
       link: function ($scope, $el) {
         $scope.editorOpen = $scope.agg.brandNew;
 
@@ -35,9 +25,6 @@ define(function (require) {
           '$index',
           'group.length'
         ], function () {
-          var i = $scope.$index;
-          $scope.$first = i === 0;
-          $scope.$last = i === $scope.group.length - 1;
           $scope.aggIsTooLow = calcAggIsTooLow();
         });
 
