@@ -91,6 +91,25 @@ define(function (require) {
     },
 
     /**
+     * Checks to see if an input value is number-like, this
+     * includes strings that parse into valid numbers and objects
+     * that don't have a type of number but still parse properly
+     * via-some sort of valueOf magic
+     *
+     * @param  {Object} obj1 - base object
+     * @param  {Object} obj2 - object to compare to base object
+     * @return {Boolean}
+     */
+    isDeepEqual: function (obj1, obj2) {
+      if (!_.isObject(obj1)) return _.isEqual(obj1, obj2);
+
+      var flatObj1 = _.flattenWith('.', _.assign({}, obj1));
+      var flatObj2 = _.flattenWith('.', _.assign({}, obj2));
+
+      return _.isEqual(flatObj1, flatObj2);
+    },
+
+    /**
      * Create a method that wraps another method which expects a callback as it's last
      * argument. The wrapper method will call the wrapped function only once (the first
      * time it is called), but will always call the callbacks passed to it. This has a
