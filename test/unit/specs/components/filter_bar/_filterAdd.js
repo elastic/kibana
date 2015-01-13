@@ -57,14 +57,6 @@ define(function (require) {
         ];
       });
 
-      it('should add only applied filters', function () {
-        expect($rootScope.filters.length).to.be(4);
-        fn(newFilters);
-        expect($rootScope.filters.length).to.be(6);
-        expect($rootScope.filters[4]).to.eql(newFilters[0]);
-        expect($rootScope.filters[5]).to.eql(newFilters[2]);
-      });
-
       it('should add filter object', function () {
         expect($rootScope.filters.length).to.be(4);
         var filter = newFilters[0];
@@ -73,12 +65,14 @@ define(function (require) {
         expect($rootScope.filters[4]).to.eql(newFilters[0]);
       });
 
-      it('should not add filters that are not applied', function () {
+      it('should ignore the apply param', function () {
         expect($rootScope.filters.length).to.be(4);
-        var filter = newFilters[1];
-        fn(filter);
-        expect($rootScope.filters.length).to.be(4);
+        newFilters.forEach(function (filter) {
+          fn(filter);
+        });
+        expect($rootScope.filters.length).to.be(7);
       });
+
     });
 
   }];

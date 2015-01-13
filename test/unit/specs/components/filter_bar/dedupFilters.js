@@ -3,7 +3,6 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('dedupFilters(existing, filters)', function () {
 
-
       it('should return only filters which are not in the existing', function () {
         var existing = [
           { range: { bytes: { from: 0, to: 1024 } } },
