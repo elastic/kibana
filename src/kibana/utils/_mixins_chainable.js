@@ -106,6 +106,28 @@ define(function (require) {
     },
 
     /**
+     * Filter out duplicate items in an array, using deep evaluation of objects.
+     *
+     * @param  {array} arr - array of objects to filter
+     * @return {array}
+     */
+    deepUniq: function (arr) {
+      var seenItems = [];
+      var result = [];
+
+      _.each(arr, function (item) {
+        for (var n = 0; n < seenItems.length; n++) {
+          if (_.isDeepEqual(seenItems[n], item)) return;
+        }
+
+        seenItems.push(item);
+        result.push(item);
+      });
+
+      return result;
+    },
+
+    /**
      * assign the properties of an object's subObject to the parent object.
      *
      * var obj = { prop: { a: 1} };
