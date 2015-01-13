@@ -49,11 +49,11 @@
 }
 
 /* Small devices (tablets, 768px and smaller) */
-@media (max-width: @screen-sm-min) { 
+@media (max-width: @screen-sm-min) {
   .btn {
     /* Fixes an issue with buttons not respecting the bounds of the screen */
     white-space: normal;
-  } 
+  }
 }
 
 // Typography =================================================================
@@ -221,6 +221,14 @@ input, {
       background-color: @pagination-disabled-bg;
     }
   }
+}
+
+
+// Panel =================================================================
+
+.panel {
+  border-radius: 0;
+  .box-shadow(0 0 0 rgba(0,0,0,0));
 }
 
 // Indicators =================================================================

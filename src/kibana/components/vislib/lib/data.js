@@ -72,6 +72,8 @@ define(function (require) {
           type = 'series';
         } else if (obj.slices) {
           type = 'slices';
+        } else if (obj.geoJson) {
+          type = 'geoJson';
         }
       });
 

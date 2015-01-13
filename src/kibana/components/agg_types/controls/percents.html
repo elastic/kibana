@@ -1,0 +1,29 @@
+<div class="form-group" ng-controller="agg.type.params.byName.percents.controller">
+  <label>Percentiles</label>
+  <div
+    ng-repeat="value in agg.params.percents track by $index"
+    class="form-group vis-editor-agg-form-row vis-editor-agg-form-row">
+
+    <input
+      ng-model="agg.params.percents[$index]"
+      percent-list="agg.params.percents"
+      input-focus
+      class="form-control">
+
+    <button type="button" ng-click="remove($index, 1)" class="btn btn-danger btn-xs">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <input ng-model="validLength" name="validLength" required type="hidden">
+  <p ng-show="aggForm.validLength.$invalid" class="text-danger text-center">
+    You mush specify at least one percentile
+  </p>
+
+  <button
+    ng-click="add()"
+    type="button"
+    class="sidebar-item-button primary">
+    <i class="fa fa-plus"></i> Add Percent
+  </button>
+</div>

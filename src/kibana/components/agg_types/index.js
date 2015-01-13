@@ -3,7 +3,15 @@ define(function (require) {
     var IndexedArray = require('utils/indexed_array/index');
 
     var aggs = {
-      metrics: Private(require('components/agg_types/metric_aggs')),
+      metrics: [
+        Private(require('components/agg_types/metrics/count')),
+        Private(require('components/agg_types/metrics/avg')),
+        Private(require('components/agg_types/metrics/sum')),
+        Private(require('components/agg_types/metrics/min')),
+        Private(require('components/agg_types/metrics/max')),
+        Private(require('components/agg_types/metrics/cardinality')),
+        Private(require('components/agg_types/metrics/percentiles'))
+      ],
       buckets: [
         Private(require('components/agg_types/buckets/date_histogram')),
         Private(require('components/agg_types/buckets/histogram')),

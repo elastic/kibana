@@ -2,10 +2,10 @@ define(function (require) {
   return function HistogramAggDefinition(Private) {
     var _ = require('lodash');
     var moment = require('moment');
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/histogram'));
 
-    return new AggType({
+    return new BucketAggType({
       name: 'histogram',
       title: 'Histogram',
       ordered: {},
@@ -60,7 +60,7 @@ define(function (require) {
               field
               && (field.type === 'number' || field.type === 'date')
             ) {
-              return true;
+              return aggConfig.params.min_doc_count;
             }
           }
         }

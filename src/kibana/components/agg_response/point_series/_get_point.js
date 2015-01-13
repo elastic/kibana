@@ -8,7 +8,8 @@ define(function (require) {
       var point = {
         x: unwrap(row[x.i], '_all'),
         y: unwrap(row[y.i]),
-        aggConfigResult: row[y.i]
+        aggConfigResult: row[y.i],
+        yScale: yScale
       };
 
       if (series) {

@@ -6,12 +6,20 @@
     class="form-control"
     name="field"
     required
-    ng-model="params.field"
-    ng-options="
-      field as field.displayName group by field.type for field in aggConfig.vis.indexPattern.fields.raw
-      | fieldType: aggParam.filterFieldTypes
-      | matchAny: [{ indexed: true }, { scripted: true }]
-      | orderBy: ['type', 'name']
-    ">
+    ng-model="agg.params.field"
+    ng-options="field as field.displayName group by field.type for field in indexedFields">
   </select>
+  <span ng-show="agg.params.field.analyzed">
+    <p>
+      <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
+    </p>
+
+    <p ng-show="indexedFields.byName[agg.params.field.name + '.raw'].analyzed == false">
+      <strong>Tip:</strong> <i>{{agg.params.field.name + '.raw'}}</i> may be a <i>not_analyzed</i> version of this field.
+    </p>
+  </span>
+
+
+  </p>
+
 </div>

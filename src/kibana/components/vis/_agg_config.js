@@ -1,20 +1,19 @@
 define(function (require) {
   return function AggConfigFactory(Private) {
     var _ = require('lodash');
-    var aggTypes = Private(require('components/agg_types/index'));
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
 
     function AggConfig(vis, opts) {
       var self = this;
 
-      self.id = opts.id || AggConfig.nextId(vis.aggs);
+      self.id = String(opts.id || AggConfig.nextId(vis.aggs));
       self.vis = vis;
       self._opts = opts = (opts || {});
 
       // get the config type
       self.type = opts.type;
       if (_.isString(self.type)) {
-        self.type = aggTypes.byName[self.type];
+        self.type = AggConfig.aggTypes.byName[self.type];
       }
 
       // get the config schema
@@ -43,7 +42,7 @@ define(function (require) {
 
       var nextId = AggConfig.nextId(have);
       haveNot.forEach(function (obj) {
-        obj.id = nextId++;
+        obj.id = String(nextId++);
       });
 
       return list;
@@ -56,7 +55,7 @@ define(function (require) {
      */
     AggConfig.nextId = function (list) {
       return 1 + list.reduce(function (max, obj) {
-        return Math.max(max, obj.id || 0);
+        return Math.max(max, +obj.id || 0);
       }, 0);
     };
 
@@ -81,8 +80,13 @@ define(function (require) {
         }
 
         if (aggParam.deserialize) {
-          if (!_.isObject(val)) {
-            // only deserialize if we have a scalar value
+          var isTyped = _.isFunction(aggParam.type);
+
+          var isType = isTyped && (val instanceof aggParam.type);
+          var isObject = !isTyped && _.isObject(val);
+          var isDeserialized = (isType || isObject);
+
+          if (!isDeserialized) {
             val = aggParam.deserialize(val, self);
           }
 
@@ -183,6 +187,15 @@ define(function (require) {
         (this.type) ? this.type.params.raw : [],
         (this.schema) ? this.schema.params.raw : []
       );
+    };
+
+    AggConfig.prototype.getResponseAggs = function () {
+      if (!this.type) return;
+      return this.type.getResponseAggs(this) || [this];
+    };
+
+    AggConfig.prototype.getValue = function (bucket) {
+      return this.type.getValue(this, bucket);
     };
 
     AggConfig.prototype.makeLabel = function () {

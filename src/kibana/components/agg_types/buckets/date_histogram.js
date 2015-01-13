@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var interval = require('utils/interval');
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var calculateInterval = Private(require('components/agg_types/param_types/_calculate_interval'));
 
     var createFilter = Private(require('components/agg_types/buckets/create_filter/date_histogram'));
@@ -15,7 +15,7 @@ define(function (require) {
       return interval.calculate(bounds.min, bounds.max, targetBuckets);
     };
 
-    return new AggType({
+    return new BucketAggType({
       name: 'date_histogram',
       title: 'Date Histogram',
       ordered: {

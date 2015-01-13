@@ -17,6 +17,7 @@ define(function (require) {
       controller: function ($scope) {
 
         var sortableField = function (field) {
+          if (!$scope.indexPattern) return;
           return $scope.indexPattern.fields.byName[field].sortable;
         };
 
@@ -45,10 +46,19 @@ define(function (require) {
         };
 
         $scope.sort = function (column) {
-          if (!sortableField(column)) return;
+          if (!column || !sortableField(column)) return;
 
-          var sorting = $scope.sorting || [];
-          $scope.sorting = [column, (sorting[0] === column && sorting[1] === 'asc') ? 'desc' : 'asc'];
+          var sorting = $scope.sorting = $scope.sorting || [];
+
+          var direction = sorting[1] || 'asc';
+          if (sorting[0] !== column) {
+            direction = 'asc';
+          } else {
+            direction = sorting[1] === 'asc' ? 'desc' : 'asc';
+          }
+
+          $scope.sorting[0] = column;
+          $scope.sorting[1] = direction;
         };
       }
     };

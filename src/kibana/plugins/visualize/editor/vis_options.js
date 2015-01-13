@@ -8,7 +8,6 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/vis_options.html'),
-      replace: true,
       scope: {
         vis: '=',
       },
@@ -17,7 +16,7 @@ define(function (require) {
         var $editor = $compile($scope.vis.type.params.editor)($scope);
         $optionContainer.append($editor);
 
-        $scope.$watch('vis.type.schemas.length', function (len) {
+        $scope.$watch('vis.type.schemas.all.length', function (len) {
           $scope.alwaysShowOptions = len === 0;
         });
       }

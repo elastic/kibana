@@ -1,9 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
-  var rison = require('utils/rison');
-  var angular = require('angular');
-
   return function BaseObjectProvider() {
+    var _ = require('lodash');
+    var rison = require('utils/rison');
+    var angular = require('angular');
 
     function BaseObject(attributes) {
       // Set the attributes or default to an empty object
@@ -40,7 +39,5 @@ define(function (require) {
     };
 
     return BaseObject;
-
-
   };
 });

@@ -79,10 +79,29 @@ define(function (require) {
        * @property params
        * @type {AggParams}
        */
-      var params = this.params = config.params || [];
-      if (!(params instanceof AggParams)) {
-        params = this.params = new AggParams(params);
+      this.params = config.params || [];
+      if (!(this.params instanceof AggParams)) {
+        // always append the raw JSON param
+        this.params.push({
+          name: 'json',
+          type: 'json',
+          advanced: true
+        });
+
+        this.params = new AggParams(this.params);
       }
+
+      /**
+       * Designed for multi-value metric aggs, this method can return a
+       * set of AggConfigs that should replace this aggConfig in result sets
+       * that walk the AggConfig set.
+       *
+       * @method getResponseAggs
+       * @returns {array[AggConfig]|undefined} - an array of aggConfig objects
+       *                                         that should replace this one,
+       *                                         or undefined
+       */
+      this.getResponseAggs = config.getResponseAggs || _.noop;
     }
 
     return AggType;
