@@ -267,6 +267,12 @@ define(function (require) {
         return this.validateUserDefinedYMin(this._attr.userDefinedYMin);
       }
 
+      // When there is only one data point,
+      // the yMin should default to zero.
+      if (this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y > 0) {
+        return 0;
+      }
+
       // Calculate the min value of the dataArray
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
@@ -296,6 +302,12 @@ define(function (require) {
 
       if (self._attr.mode === 'percentage') {
         return 1;
+      }
+
+      // if there is only one data point and its less than zero,
+      // return 0 as the yMax value.
+      if (this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y < 0) {
+        return 0;
       }
 
       // for each object in the dataArray,
