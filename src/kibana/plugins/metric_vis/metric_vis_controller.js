@@ -16,7 +16,7 @@ define(function (require) {
         var agg = $scope.vis.aggs[0];
         metric.label = agg.makeLabel();
         if (agg.type.name === 'count') metric.value = resp.hits.total;
-        else metric.value = resp.aggregations[agg.id].value;
+        else metric.value = agg.fieldFormatter()(resp.aggregations[agg.id].value);
       }
     });
   });
