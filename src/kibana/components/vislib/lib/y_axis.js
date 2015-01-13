@@ -2,6 +2,7 @@ define(function (require) {
   return function YAxisFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var numeral = require('numeral');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
@@ -58,11 +59,7 @@ define(function (require) {
      * @returns {*}
      */
     YAxis.prototype.formatAxisLabel = function (d) {
-      var formatNumber = d3.format('s');
-      var str = formatNumber(d);
-      var replaceG = str.replace(/G/i, 'B');
-
-      return (d >= 1e9 && d < 1e12) ? replaceG : str;
+      return numeral(d).format('0.[0]a');
     };
 
     /**

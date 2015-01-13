@@ -198,16 +198,14 @@ define(function (require) {
 
     describe('formatAxisLabel method', function () {
       var num = 1e9;
-      var re = /B/i;
       var val;
-      var str;
 
       beforeEach(function () {
         val = yAxis.formatAxisLabel(num);
       });
 
       it('should return a string with suffix B', function () {
-        expect(val).to.be('1B');
+        expect(val).to.be('1b');
       });
     });
 
