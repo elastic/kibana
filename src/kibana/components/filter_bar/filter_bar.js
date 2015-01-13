@@ -12,6 +12,7 @@ define(function (require) {
     var processGlobalFilters = Private(require('components/filter_bar/lib/processGlobalFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
     var filterOutTimeBasedFilter = Private(require('components/filter_bar/lib/filterOutTimeBasedFilter'));
+    var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
 
     return {
@@ -29,7 +30,7 @@ define(function (require) {
 
         $scope.applyFilters = function (filters) {
           // add new filters
-          $scope.addFilters(filters);
+          $scope.addFilters(filterAppliedAndUnwrap(filters));
           $scope.newFilters = [];
 
           // change time filter

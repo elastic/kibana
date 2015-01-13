@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
   var saveFilterState = require('components/filter_bar/lib/saveFilterState');
 
   return function (globalState) {
@@ -125,7 +124,7 @@ define(function (require) {
         }
         if (filters.length === 0) return;
 
-        $scope.filters = $scope.filters.concat(filterAppliedAndUnwrap(filters));
+        $scope.filters = $scope.filters.concat(filters);
         saveState();
         return $scope.filters;
       }
