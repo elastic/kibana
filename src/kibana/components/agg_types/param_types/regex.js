@@ -25,6 +25,7 @@ define(function (require) {
     }
 
     RegexAggParam.prototype.editor = editorHtml;
+    RegexAggParam.prototype.disabled = _.noop;
 
     /**
      * Write the aggregation parameter.
