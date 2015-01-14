@@ -5,6 +5,7 @@ define(function (require) {
   var ConfigTemplate = require('utils/config_template');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
   var filterManager = require('components/filter_manager/filter_manager');
+  var getSort = require('components/doc_table/lib/get_sort');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -86,7 +87,7 @@ define(function (require) {
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
-        sort: savedSearch.sort || [],
+        sort:  _.pairs(getSort(savedSearch.sort, $scope.searchSource.get('index'))).pop(),
         columns: savedSearch.columns || ['_source'],
         index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
         interval: 'auto',
