@@ -87,7 +87,7 @@ define(function (require) {
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
-        sort:  getSort(savedSearch.sort, $scope.searchSource.get('index')),
+        sort:  _.pairs(getSort(savedSearch.sort, $scope.searchSource.get('index'))).pop(),
         columns: savedSearch.columns || ['_source'],
         index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
         interval: 'auto',
