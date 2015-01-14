@@ -24,7 +24,7 @@ module.exports = function (grunt) {
 
     var tasks = [
       'jshint',
-      'ruby_server',
+      'maybe_start_kibana',
       'maybe_start_server',
       'jade',
       'less',
@@ -35,7 +35,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('quick-test', function () {
     var tasks = [
-      'ruby_server',
+      'maybe_start_kibana',
       'maybe_start_server',
       getTestTask()
     ];
@@ -44,13 +44,13 @@ module.exports = function (grunt) {
 
   grunt.registerTask('coverage', [
     'blanket',
-    'ruby_server',
+    'maybe_start_kibana',
     'maybe_start_server',
     'mocha:coverage'
   ]);
 
   grunt.registerTask('test:watch', [
-    'ruby_server',
+    'maybe_start_kibana',
     'maybe_start_server',
     'watch:test'
   ]);
