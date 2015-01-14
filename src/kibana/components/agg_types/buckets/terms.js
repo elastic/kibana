@@ -34,16 +34,16 @@ define(function (require) {
           name: 'exclude',
           type: 'regex',
           advanced: true,
-          disabled: function (agg) {
-            return agg.params.field.type !== 'string';
+          disabled: function (aggConfig) {
+            return aggConfig.params.field.type !== 'string';
           }
         },
         {
           name: 'include',
           type: 'regex',
           advanced: true,
-          disabled: function (agg) {
-            return agg.params.field.type !== 'string';
+          disabled: function (aggConfig) {
+            return aggConfig.params.field.type !== 'string';
           }
         },
         {
