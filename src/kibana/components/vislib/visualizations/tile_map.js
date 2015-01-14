@@ -45,10 +45,12 @@ define(function (require) {
      * @method render
      * @returns {HTMLElement} Contains the D3 chart
      */
-    Chart.prototype.render = function () {
+    TileMap.prototype.render = function () {
       var res = d3.select(this.chartEl).call(this.draw());
-      console.log(this.maps[0].fire('load'))
-      return res
+      if (undefined !== this.maps && undefined !== this.maps[0]) {
+        this.maps[0].fire('load');
+      }
+      return res;
     };
 
     /**
@@ -117,9 +119,7 @@ define(function (require) {
           });
 
           map.on('load', function (e) {
-            console.log(e)
-            console.log('Map loaded !!!!')
-            fitBounds()
+            fitBounds();
           });
 
           map.on('zoomend dragend', function setZoomCenter() {
