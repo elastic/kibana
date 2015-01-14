@@ -155,9 +155,17 @@ define(function (require) {
         return xScale.rangeBand();
       })
       .attr('y', function (d) {
+        if (d.y < 0) {
+          return yScale(d.y0);
+        }
+
         return yScale(d.y0 + d.y);
       })
       .attr('height', function (d) {
+        if (d.y < 0) {
+          return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
+        }
+
         return yScale(d.y0) - yScale(d.y0 + d.y);
       });
 
@@ -174,6 +182,7 @@ define(function (require) {
     ColumnChart.prototype.addGroupedBars = function (bars) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
+      var yMin = this.handler.yAxis.yMin;
       var data = this.chartData;
       var n = data.series.length;
       var height = yScale.range()[0];
@@ -207,9 +216,22 @@ define(function (require) {
         return xScale.rangeBand() / n;
       })
       .attr('y', function (d) {
+        if (d.y < 0) {
+          return yScale(0);
+        }
+
         return yScale(d.y);
       })
       .attr('height', function (d) {
+        if (d.y < 0) {
+          return Math.abs(yScale(0) - yScale(d.y));
+        }
+
+        // if there is a negative yMin value, use yScale(0) instead of height
+        if (yMin < 0) {
+          return yScale(0) - yScale(d.y);
+        }
+
         return height - yScale(d.y);
       });
 

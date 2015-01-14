@@ -253,12 +253,7 @@ define(function (require) {
       var arr = [];
       var grouped = (this._attr.mode === 'grouped');
 
-      if (this._attr.mode === 'percentage') {
-        return 0;
-      }
-
-      // Default y axis min value of 0
-      if (this._attr.defaultYMin) {
+      if (this._attr.mode === 'percentage' || this._attr.defaultYMin) {
         return 0;
       }
 
@@ -302,6 +297,11 @@ define(function (require) {
 
       if (self._attr.mode === 'percentage') {
         return 1;
+      }
+
+      // User defined y axis min value
+      if (this._attr.userDefinedYMin) {
+        return this.validateUserDefinedYMin(this._attr.userDefinedYMin);
       }
 
       // if there is only one data point and its less than zero,

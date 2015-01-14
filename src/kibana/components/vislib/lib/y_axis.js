@@ -40,6 +40,22 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
+
+      // yMin and yMax can never be equal for the axis
+      // to render. Defaults yMin to 0 if yMin === yMax
+      // and yMin is greater than or equal to zero, else
+      // defaults yMax to zero.
+      if (this.yMin === this.yMax) {
+        if (this.yMin > 0) {
+          this.yMin = 0;
+        } else if (this.yMin === 0) {
+          this.yMin = -1;
+          this.yMax = 1;
+        } else {
+          this.yMax = 0;
+        }
+      }
+
       // save reference to y scale
       this.yScale = d3.scale.linear()
       .domain([this.yMin, this.yMax])
