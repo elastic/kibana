@@ -3,9 +3,9 @@
  */
 
 var app = require('./app');
-var debug = require('debug')('node-server:server');
 var http = require('http');
 var config = require('./config');
+var logger = require('./lib/logger');
 
 
 /**
@@ -33,14 +33,15 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error('Port ' + app.get('port') + ' requires elevated privileges');
+      logger.error({ err: error }, 'Port %s requires elevated privileges', app.get('port'));
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error('Port ' + app.get('port') + ' is already in use');
+      logger.error({ err: error }, 'Port %s is already in use', app.get('port'));
       process.exit(1);
       break;
     default:
+      logger.error({ err: error });
       throw error;
   }
 }
@@ -51,7 +52,7 @@ function onError(error) {
 
 function onListening() {
   var address = server.address();
-  debug('Listening on ' + address.address + ':' + address.port);
+  logger.info('Listening on %s:%d', address.address, address.port);
 }
 
 module.exports = {
