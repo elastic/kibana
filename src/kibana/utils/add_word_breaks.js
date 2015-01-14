@@ -1,8 +1,9 @@
 define(function () {
-  return function addWordBreaks(text, minLineLength) {
+  return function addWordBreaks(text, minLineLength, separator) {
     var lineSize = 0;
     var newText = '';
     var inHtmlTag = false;
+    separator = separator || '<wbr>';
 
     for (var i = 0, len = text.length; i < len; i++) {
       var chr = text.charAt(i);
@@ -10,7 +11,6 @@ define(function () {
 
       switch (chr) {
       case ' ':
-      case '&':
       case ';':
       case ':':
       case ',':
@@ -33,7 +33,7 @@ define(function () {
         // continuous text is longer then we want,
         // so break it up with a <wbr>
         lineSize = 0;
-        newText += '<wbr>';
+        newText += separator;
       }
     }
 

@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     require('css!components/vislib/styles/main');
+    require('filters/add_word_breaks');
 
     /**
      * Add tooltip and listeners to visualization elements
