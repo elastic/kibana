@@ -18,7 +18,7 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
-if (!config.quiet) app.use(requestLogger());
+app.use(requestLogger());
 
 // The proxy must be set up before all the other middleware.
 // TODO: WE might want to move the middleware to each of the individual routes

@@ -19,23 +19,22 @@ function JSONStream (options) {
 util.inherits(JSONStream, Writable);
 
 JSONStream.prototype._write = function (entry, encoding, callback) {
+  entry = JSON.parse(entry.toString('utf8'));
+  var env = process.env.NODE_ENV || 'development';
 
-    entry = JSON.parse(entry.toString('utf8'));
-    var env = process.env.NODE_ENV || 'development';
+  var output = {
+    '@timestamp': entry.time,
+    'level': levels[entry.level],
+    'message': entry.msg,
+    'node_env': env,
+    'request': entry.req,
+    'response': entry.res
+  };
 
-    var output = {
-      '@timestamp': entry.time,
-      'level': levels[entry.level],
-      'message': entry.msg,
-      'node_env': env,
-      'request': entry.req,
-      'response': entry.res
-    };
+  if (entry.error) output.error = entry.err;
 
-    if (entry.error) output.error = entry.err;
-
-    process.stdout.write(JSON.stringify(output) + "\n");
-    callback();
+  process.stdout.write(JSON.stringify(output) + "\n");
+  callback();
 };
 
 module.exports = JSONStream;
