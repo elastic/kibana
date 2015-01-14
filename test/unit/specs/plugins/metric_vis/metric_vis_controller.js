@@ -16,6 +16,27 @@ define(function (require) {
       schema: 'metric',
       makeLabel: function () {
         return 'Average bytes';
+      },
+      fieldFormatter: function () {
+        return function (val) {
+          return val;
+        };
+      }
+    }]
+  };
+
+  var fieldFormatterVis = {
+    aggs: [{
+      id: 'agg',
+      type: {name: 'average'},
+      schema: 'metric',
+      makeLabel: function () {
+        return 'Average bytes';
+      },
+      fieldFormatter: function () {
+        return function (val) {
+          return val.toFixed(3);
+        };
       }
     }]
   };
@@ -56,6 +77,18 @@ define(function (require) {
 
       expect($scope.metric.label).to.be('Average bytes');
       expect($scope.metric.value).to.be($scope.esResponse.aggregations.agg.value);
+    });
+
+    it('should use the field formatter', function () {
+      expect($scope.metric.label).to.not.be.ok();
+      expect($scope.metric.value).to.not.be.ok();
+
+      $scope.vis = fieldFormatterVis;
+      $scope.esResponse = {hits: {total: 4826}, aggregations: {agg: {value: 1234.12345}}};
+      $scope.$digest();
+
+      expect($scope.metric.label).to.be('Average bytes');
+      expect($scope.metric.value).to.be($scope.esResponse.aggregations.agg.value.toFixed(3));
     });
   });
 });
