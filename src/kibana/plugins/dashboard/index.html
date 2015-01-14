@@ -41,7 +41,7 @@
           <button ng-click="configTemplate.toggle('share')"><i class="fa fa-external-link"></i></button>
         </kbn-tooltip>
         <kbn-tooltip text="Add Visualization" placement="bottom" append-to-body="1">
-          <button ng-click="configTemplate.toggle('add')"><i class="fa fa-plus-circle"></i></button>
+          <button ng-click="configTemplate.toggle('pickVis')"><i class="fa fa-plus-circle"></i></button>
         </kbn-tooltip>
       </div>
     </navbar>
@@ -53,7 +53,7 @@
 
   <div ng-show="!state.panels.length" class="text-center start-screen">
     <h2>Ready to get started?</h2>
-    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="configTemplate.open('add')"><i class="fa fa-plus-circle"></i></a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit the <a href="#/visualize">"Visualize"</a> tab to create your first visualization.</p>
+    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="configTemplate.open('pickVis')"><i class="fa fa-plus-circle"></i></a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit the <a href="#/visualize">"Visualize"</a> tab to create your first visualization.</p>
   </div>
 
   <dashboard-grid></dashboard-grid>
