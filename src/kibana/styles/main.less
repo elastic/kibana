@@ -114,12 +114,20 @@ ul.navbar-inline li {
 }
 
 .top-fixed {
-  position:fixed;
-  bottom:0px;
+  position: fixed;
+  bottom: 0px;
 }
 
-.checkbox input[type="checkbox"] {
-  float: none;
+.checkbox label {
+  .display(flex);
+  .align-items(center);
+  padding-left: 0;
+
+  input[type="checkbox"] {
+    float: none;
+    margin: 0 4px;
+    position: static;
+  }
 }
 
 notifications {

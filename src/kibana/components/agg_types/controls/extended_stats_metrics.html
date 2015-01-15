@@ -6,10 +6,9 @@
     select at least one metric
   </p>
   <input type="hidden" ng-model="agg.params.metrics[0]" name="metric" required>
-  <ui-select multiple ng-model="agg.params.metrics">
-    <ui-select-match>{{ $item }}</ui-select-match>
-    <ui-select-choices repeat="metric in metrics | filter:$select.search">
-      {{ metric }}
-    </ui-select>
-  </ui-select>
+  <div ng-repeat="metric in metrics" class="checkbox">
+    <label>
+      <input ng-model="values[metric]" type="checkbox"> {{metric}}
+    </label>
+  </div>
 </div>
