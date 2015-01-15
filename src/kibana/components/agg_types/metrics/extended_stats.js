@@ -43,8 +43,8 @@ define(function (require) {
             });
 
             function objToArray(obj) {
-              return _.transform(obj, function (keys, value, key) {
-                if (value) keys.push(key);
+              return _.transform($scope.metrics, function (keys, key) {
+                if (obj[key]) keys.push(key);
               }, []);
             }
 
