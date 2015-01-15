@@ -253,7 +253,9 @@ define(function (require) {
       var arr = [];
       var grouped = (this._attr.mode === 'grouped');
 
-      if (this._attr.mode === 'percentage' || this._attr.defaultYMin) {
+      if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
+        this._attr.mode === 'silhouette' || this._attr.defaultYMin) {
+
         return 0;
       }
 

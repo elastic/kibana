@@ -96,7 +96,7 @@ define(function (require) {
       .enter()
         .append('circle')
         .attr('class', function circleClass(d) {
-          return self.colorToClass(color(d.label));
+          return 'circle ' + self.colorToClass(color(d.label));
         })
         .attr('fill', function (d) {
           return color(d.label);
@@ -217,8 +217,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
-      var xScale = this.handler.xAxis.xScale;
-      var chartToSmallError = 'The height and/or width of this container is too small for this chart.';
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
       var startLineX = 0;
@@ -261,6 +261,18 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+          if (yMin < 0) {
+
+            // Draw line at yScale 0 value
+            svg.append('line')
+              .attr('x1', 0)
+              .attr('y1', yScale(0))
+              .attr('x2', width)
+              .attr('y2', yScale(0))
+              .style('stroke', '#ddd')
+              .style('stroke-width', 1);
+          }
+
           self.addClipPath(svg, width, height);
           lines = self.addLines(svg, data.series);
           circles = self.addCircles(svg, layers);
@@ -274,6 +286,7 @@ define(function (require) {
           .attr('y2', height)
           .style('stroke', '#ddd')
           .style('stroke-width', lineStrokeWidth);
+
 
           return svg;
         });

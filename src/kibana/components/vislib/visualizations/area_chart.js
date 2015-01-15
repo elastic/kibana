@@ -95,11 +95,12 @@ define(function (require) {
       })
       .y0(function (d) {
         if (isOverlapping) {
-          if (d.y < 0) {
+          if (d.y < 0 && !self._attr.defaultYMin) {
             return yScale(0);
           }
           return height;
         }
+
         return yScale(d.y0);
       })
       .y1(function (d) {
@@ -294,6 +295,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
       var div;
@@ -332,6 +335,18 @@ define(function (require) {
 
           // add path
           path = self.addPath(svg, layers);
+
+          if (yMin < 0 && self._attr.mode !== 'wiggle' && self._attr.mode !== 'silhouette') {
+
+            // Draw line at yScale 0 value
+            svg.append('line')
+              .attr('x1', 0)
+              .attr('y1', yScale(0))
+              .attr('x2', width)
+              .attr('y2', yScale(0))
+              .style('stroke', '#ddd')
+              .style('stroke-width', 1);
+          }
 
           // add circles
           circles = self.addCircles(svg, layers);
