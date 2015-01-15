@@ -4,12 +4,16 @@ define(function (require) {
 
     var BaseAggParam;
     var RegexAggParam;
+    var Vis;
+    var indexPattern;
 
     beforeEach(module('kibana'));
     // fetch out deps
     beforeEach(inject(function (Private) {
       BaseAggParam = Private(require('components/agg_types/param_types/base'));
       RegexAggParam = Private(require('components/agg_types/param_types/regex'));
+      Vis = Private(require('components/vis/vis'));
+      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 
     describe('constructor', function () {
@@ -26,11 +30,19 @@ define(function (require) {
 
     describe('write results', function () {
       var aggParam;
-      var aggConfig = { params: {} };
+      var aggConfig;
       var output = { params: {} };
       var paramName = 'exclude';
 
       beforeEach(function () {
+        var vis = new Vis(indexPattern, {
+          type: 'pie',
+          aggs: [
+            { type: 'terms', schema: 'split', params: { field: 'extension' }},
+          ]
+        });
+        aggConfig = vis.aggs[0];
+
         aggParam = new RegexAggParam({
           name: paramName,
           type: 'regex'
