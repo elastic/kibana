@@ -19,7 +19,6 @@ define(function (require) {
 
     var notify = new Notifier();
     var $state = $scope.state = new AppState();
-    var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
 
     $scope.indexPattern = $route.current.locals.indexPattern;

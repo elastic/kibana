@@ -2,9 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var moment = require('moment');
-  var settingsHtml = require('text!plugins/discover/partials/settings.html');
-  var saveHtml = require('text!plugins/discover/partials/save_search.html');
-  var loadHtml = require('text!plugins/discover/partials/load_search.html');
+  var ConfigTemplate = require('utils/config_template');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
   var filterManager = require('components/filter_manager/filter_manager');
 
@@ -58,6 +56,13 @@ define(function (require) {
 
     var notify = new Notifier({
       location: 'Discover'
+    });
+
+    // config panel templates
+    $scope.configTemplate = new ConfigTemplate({
+      config: require('text!plugins/discover/partials/settings.html'),
+      load: require('text!plugins/discover/partials/load_search.html'),
+      save: require('text!plugins/discover/partials/save_search.html')
     });
 
     $scope.timefilter = timefilter;
@@ -247,6 +252,8 @@ define(function (require) {
 
         return savedSearch.save()
         .then(function (id) {
+          $scope.configTemplate.close('save');
+
           if (id) {
             notify.info('Saved Data Source "' + savedSearch.title + '"');
             if (savedSearch.id !== $route.current.params.id) {
@@ -401,33 +408,6 @@ define(function (require) {
         from: datemath.parse(timefilter.time.from),
         to: datemath.parse(timefilter.time.to, true)
       };
-    };
-
-    $scope.toggleConfig = function () {
-      // Close if already open
-      if ($scope.configTemplate === settingsHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = settingsHtml;
-      }
-    };
-
-    $scope.toggleSave = function () {
-      // Close if already open
-      if ($scope.configTemplate === saveHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = saveHtml;
-      }
-    };
-
-    $scope.toggleLoad = function () {
-      // Close if already open
-      if ($scope.configTemplate === loadHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = loadHtml;
-      }
     };
 
     $scope.resetQuery = function () {

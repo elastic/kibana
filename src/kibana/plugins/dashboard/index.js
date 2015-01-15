@@ -82,10 +82,6 @@ define(function (require) {
           pickVis: require('text!plugins/dashboard/partials/pick_visualization.html')
         });
 
-        $scope.openSave = _.partial($scope.configTemplate.toggle, 'save');
-        $scope.openShare = _.partial($scope.configTemplate.toggle, 'share');
-        $scope.openLoad = _.partial($scope.configTemplate.toggle, 'load');
-        $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
         $scope.refresh = _.bindKey(courier, 'fetch');
 
         timefilter.enabled = true;
@@ -141,6 +137,7 @@ define(function (require) {
 
           dash.save()
           .then(function (id) {
+            $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
               if (dash.id !== $routeParams.id) {

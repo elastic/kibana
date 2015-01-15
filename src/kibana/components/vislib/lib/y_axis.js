@@ -2,6 +2,7 @@ define(function (require) {
   return function YAxisFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var numeral = require('numeral');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
@@ -48,6 +49,20 @@ define(function (require) {
     };
 
     /**
+     * By default, d3.format('s') returns billion values
+     * with a `G` instead of a `B`. @method formatAxisLabel returns
+     * billion values with a B instead of a G. Else, it defaults
+     * to the d3.format('s') value.
+     *
+     * @method formatAxisLabel
+     * @param d {Number}
+     * @returns {*}
+     */
+    YAxis.prototype.formatAxisLabel = function (d) {
+      return numeral(d).format('0.[0]a');
+    };
+
+    /**
      * Creates the d3 y axis function
      *
      * @method getYAxis
@@ -64,7 +79,7 @@ define(function (require) {
       } else if (this.yMax <= 100 && !isPercentage) {
         tickFormat = d3.format('n');
       } else {
-        tickFormat = d3.format('s');
+        tickFormat = this.formatAxisLabel;
       }
 
       // y scale should never be `NaN`
