@@ -12,6 +12,10 @@ define(function (require) {
         yScale: yScale
       };
 
+      if (point.y === 'NaN') {
+        return;
+      }
+
       if (series) {
         point.series = unwrap(row[series.i]);
       }
