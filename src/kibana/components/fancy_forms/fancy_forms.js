@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
 
   var KbnFormController = require('components/fancy_forms/kbn_form');
+  var KbnModelController = require('components/fancy_forms/kbn_model');
 
   require('modules')
   .get('kibana')
@@ -39,5 +40,6 @@ define(function (require) {
 
     $provide.decorator('formDirective', decorateDirectiveController(KbnFormController));
     $provide.decorator('ngFormDirective', decorateDirectiveController(KbnFormController));
+    $provide.decorator('ngModelDirective', decorateDirectiveController(KbnModelController));
   });
 });
