@@ -100,7 +100,7 @@ define(function (require) {
         return;
 
       case 'buckets':
-        write.cell('', function () {
+        write.cell(agg, '', function () {
           passEmptyBuckets(write, bucket, key);
         });
       }

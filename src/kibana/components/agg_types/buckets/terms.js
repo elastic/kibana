@@ -33,12 +33,18 @@ define(function (require) {
         {
           name: 'exclude',
           type: 'regex',
-          advanced: true
+          advanced: true,
+          disabled: function (aggConfig) {
+            return aggConfig.params.field.type !== 'string';
+          }
         },
         {
           name: 'include',
           type: 'regex',
-          advanced: true
+          advanced: true,
+          disabled: function (aggConfig) {
+            return aggConfig.params.field.type !== 'string';
+          }
         },
         {
           name: 'size',

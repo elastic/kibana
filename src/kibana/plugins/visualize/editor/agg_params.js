@@ -112,8 +112,10 @@ define(function (require) {
             return;
           }
 
-          var attrs = {};
-          attrs['agg-param'] = 'agg.type.params[' + idx + ']';
+          var attrs = {
+            'agg-param': 'agg.type.params[' + idx + ']'
+          };
+
           if (param.advanced) {
             attrs['ng-show'] = 'advancedToggled';
           }
