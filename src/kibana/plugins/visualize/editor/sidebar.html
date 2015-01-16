@@ -18,6 +18,11 @@
 
       <!-- apply/discard -->
       <li class="vis-editor-sidebar-buttons sidebar-item">
+        <div
+          ng-if="visualizeEditor.$invalid"
+          class="text-center text-danger sidebar-item-button">
+          <i class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
+        </div>
         <button
           ng-disabled="!vis.dirty || visualizeEditor.$invalid"
           type="submit"
