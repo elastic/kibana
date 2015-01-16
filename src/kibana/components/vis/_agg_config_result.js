@@ -36,5 +36,9 @@ define(function (require) {
     return this.aggConfig.fieldFormatter()(this.value);
   };
 
+  AggConfigResult.prototype.valueOf = function () {
+    return this.value;
+  };
+
   return AggConfigResult;
 });
