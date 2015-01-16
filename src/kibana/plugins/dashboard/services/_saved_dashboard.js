@@ -22,7 +22,8 @@ define(function (require) {
           title: 'string',
           hits: 'integer',
           description: 'string',
-          panelsJSON: 'string'
+          panelsJSON: 'string',
+          version: 'integer'
         },
 
         // defeult values to assign to the doc
@@ -30,7 +31,8 @@ define(function (require) {
           title: 'New Dashboard',
           hits: 0,
           description: '',
-          panelsJSON: '[]'
+          panelsJSON: '[]',
+          version: 1
         },
 
         searchSource: true,
