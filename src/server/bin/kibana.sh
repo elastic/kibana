@@ -17,5 +17,5 @@ DIR=$(dirname "${SCRIPT}")/..
 NODE=${DIR}/node/bin/node
 SERVER=${DIR}/src/bin/kibana.js
 
-NODE_ENV="production" exec "${NODE}" ${SERVER} --config ${DIR}/config/kibana.yml
+CONFIG_PATH="${DIR}/config/kibana.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
 

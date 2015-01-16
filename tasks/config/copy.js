@@ -100,7 +100,7 @@ module.exports = function (grunt) {
     });
     config.versioned_dist.files.push({
       expand: true,
-      cwd: '<%= build %>/node_binaries/' + platform,
+      cwd: '<%= root %>/.node_binaries/' + platform,
       src: '**',
       dest: '<%= build %>/dist/kibana-' + version + '-' + platform + '/node'
     });

@@ -13,7 +13,7 @@ module.exports = function (grunt) {
   grunt.registerTask('download_node_binaries', 'Download the node.js binaries', function () {
     var done = this.async();
     var platforms = _.without(grunt.config.get('platforms'), 'windows');
-    var buildPath = grunt.config.get('build');
+    var rootPath = grunt.config.get('root');
     var version = grunt.config.get('nodeVersion');
 
     var handle404 = function (response) {
@@ -23,30 +23,36 @@ module.exports = function (grunt) {
     };
 
     var downloadWindows = function (cb) {
-      var dest = join(buildPath, 'node_binaries', 'windows');
-      var url = urlPattern({ version: version, file: 'node.exe'});
-      mkdirp(dest, function (err) {
-        if (err) return cb(err);
-        var out = fs.createWriteStream(join(dest, 'node.exe'));
-        out.on('close', cb).on('error', cb);
-        var req = request.get(url);
-        req.on('response', handle404);
-        req.pipe(out);
+      var dest = join(rootPath, '.node_binaries', 'windows');
+      fs.stat(dest, function (err) {
+        if (!err) return cb(); // skip downloading if we already have them
+        var url = urlPattern({ version: version, file: 'node.exe'});
+        mkdirp(dest, function (err) {
+          if (err) return cb(err);
+          var out = fs.createWriteStream(join(dest, 'node.exe'));
+          out.on('close', cb).on('error', cb);
+          var req = request.get(url);
+          req.on('response', handle404);
+          req.pipe(out);
+        });
       });
     };
 
     var download = function (platform, cb) {
-      var dest = join(buildPath, 'node_binaries', platform);
-      var file = filesPatern({ version: version, platform: platform });
-      var url = urlPattern({ version: version, file: file });
-      mkdirp(dest, function (err) {
-        if (err) return cb(err);
-        var unzip = zlib.createGunzip();
-        var out = tar.Extract({ path: dest, strip: 1 });
-        out.on('close', cb).on('error', cb);
-        var req = request.get(url);
-        req.on('response', handle404);
-        req.pipe(unzip).pipe(out);
+      var dest = join(rootPath, '.node_binaries', platform);
+      fs.stat(dest, function (err) {
+        if (!err) return cb(); // skip downloading if we already have them
+        var file = filesPatern({ version: version, platform: platform });
+        var url = urlPattern({ version: version, file: file });
+        mkdirp(dest, function (err) {
+          if (err) return cb(err);
+          var unzip = zlib.createGunzip();
+          var out = tar.Extract({ path: dest, strip: 1 });
+          out.on('close', cb).on('error', cb);
+          var req = request.get(url);
+          req.on('response', handle404);
+          req.pipe(unzip).pipe(out);
+        });
       });
     };
 
