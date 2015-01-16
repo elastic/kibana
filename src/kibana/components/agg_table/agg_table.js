@@ -39,12 +39,13 @@ define(function (require) {
         };
 
         self.toCsv = function (formatted) {
-          var rows = formatted ? $scope.formattedRows : $scope.table.rows;
+          var rows = $scope.table.rows;
           var columns = formatted ? $scope.formattedColumns : $scope.table.columns;
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
           var allDoubleQuoteRE = /"/g;
 
           function escape(val) {
+            if (!formatted && _.isObject(val)) val = val.valueOf();
             val = String(val);
             if (self.csv.quoteValues && nonAlphaNumRE.test(val)) {
               val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
