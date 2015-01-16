@@ -22,7 +22,7 @@ define(function (require) {
           hits: 'integer',
           columns: 'string',
           sort: 'string',
-          version: 'number'
+          version: 'integer'
         },
 
         defaults: {
