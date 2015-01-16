@@ -6,7 +6,7 @@ define(function (require) {
       require('specs/components/agg_types/_bucket_count_between'),
       require('specs/components/agg_types/buckets/_histogram'),
       require('specs/components/agg_types/buckets/_date_histogram'),
-      require('specs/components/agg_types/_metric_aggs')
+      require('specs/components/agg_types/metrics/_extended_stats')
     ].forEach(function (s) {
       describe(s[0], s[1]);
     });
