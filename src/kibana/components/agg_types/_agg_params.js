@@ -33,14 +33,7 @@ define(function (require) {
         initialSet: params.map(function (config) {
           var type = config.name === 'field' ? config.name : config.type;
           var Class = paramTypeMap[type] || paramTypeMap._default;
-          var param = new Class(config);
-
-          // recursively init sub params
-          if (param.params && !(params.params instanceof AggParams)) {
-            param.params = new AggParams(param.params);
-          }
-
-          return param;
+          return new Class(config);
         })
       });
     }

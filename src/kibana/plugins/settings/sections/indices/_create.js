@@ -49,7 +49,7 @@ define(function (require) {
         var matches = existing.matches;
         if (all.length) {
           index.existing = {
-            class: all.length === matches.length ? 'success' : 'warning',
+            class: 'success',
             all: all,
             matches: matches,
             matchPercent: Math.round((matches.length / all.length) * 100) + '%',

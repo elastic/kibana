@@ -9,7 +9,7 @@
   <tbody>
     <tr ng-repeat="row in rows track by $index">
       <td><span ng-bind-html="row.spacer"></span>{{row.field}}</td>
-      <td>{{row.bucket}}</td>
+      <td class="row-bucket">{{row.bucket}}</td>
       <td>{{row.metric}}</td>
     </tr>
   </tbody>

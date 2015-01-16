@@ -127,6 +127,7 @@
       .display(flex);
       .align-items(center);
       .flex(1, 0, auto);
+      margin-bottom: @vis-editor-agg-editor-spacing;
 
       &-toggle {
         .flex(0, 0, auto);
@@ -168,8 +169,6 @@
     }
 
     &-editor {
-      margin-top: @vis-editor-agg-editor-spacing;
-
       &-ranges {
         td {
           padding: 0 @vis-editor-agg-editor-spacing @vis-editor-agg-editor-spacing 0;
@@ -221,14 +220,17 @@
       .border-radius(0);
     }
 
-    &-add-form {
-      margin: @vis-editor-agg-editor-spacing * 3;
-      padding: @vis-editor-agg-editor-spacing;
-      > button {
-        display: block;
-        text-align: left;
-        width: 100%;
-        margin: 0 0 5px 0;
+    &-add {
+      .flex-parent();
+
+      &-subagg {
+        margin-bottom: -@vis-editor-agg-editor-spacing - 1; // extra one pixel covers the aggs bottom border
+        margin-right: -@vis-editor-agg-editor-spacing;
+        margin-left: -@vis-editor-agg-editor-spacing;
+      }
+
+      &-schemas {
+        margin: @vis-editor-agg-editor-spacing * 3;
       }
     }
 
@@ -274,6 +276,14 @@
   }
 }
 
+vis-editor,
+vis-editor-agg-group,
+vis-editor-agg,
+vis-editor-agg-params,
+vis-editor-agg-param,
+vis-editor-vis-options {
+  .flex-parent();
+}
 
 form.vis-share {
   div.form-control {

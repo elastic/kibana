@@ -1,14 +1,14 @@
 define(function (require) {
+  var buildRangeFilter = require('components/filter_manager/lib/range');
+
   return function createHistogramFitlerProvider(Private) {
     return function (aggConfig, key) {
       var value = parseInt(key, 10);
-      var filter = { meta: {}, range: {} };
-      filter.range[aggConfig.params.field.name] = {
+
+      return buildRangeFilter(aggConfig.params.field, {
         gte: value,
         lt: value + aggConfig.params.interval
-      };
-      filter.meta.index = aggConfig.vis.indexPattern.id;
-      return filter;
+      }, aggConfig.vis.indexPattern);
     };
   };
 });

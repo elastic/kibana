@@ -1,54 +1,163 @@
 define(function (require) {
+  var $ = require('jquery');
   var _ = require('lodash');
+  var keyMap = require('utils/key_map');
 
   var INVALID = {}; // invalid flag
   var FLOATABLE = /^[\d\.e\-\+]+$/i;
 
   require('modules')
   .get('kibana')
-  .directive('percentList', function () {
+  .directive('percentList', function ($parse) {
     return {
       restrict: 'A',
       require: 'ngModel',
-      link: function ($scope, $el, attrs, ngModelCntr) {
-        function parse(viewValue) {
-          if (!_.isString(viewValue)) return INVALID;
+      link: function ($scope, $el, attrs, ngModelController) {
+        var $setModel = $parse(attrs.ngModel).assign;
+        var $repeater = $el.closest('[ng-repeat]');
+        var $listGetter = $parse(attrs.percentList);
 
-          var nums = _(viewValue.split(','))
-          .invoke('trim')
-          .filter(Boolean)
-          .map(function (num) {
-            // prevent '100 boats' from passing
-            return FLOATABLE.test(num) ? parseFloat(num) : NaN;
-          });
+        var handlers = {
+          up: change(add, 1),
+          'shift-up': change(addTenth, 1),
 
-          var ration = nums.none(_.isNaN);
-          var ord = ration && nums.isOrdinal();
-          var range = ord && nums.min() >= 0 && nums.max() <= 100;
+          down: change(add, -1),
+          'shift-down': change(addTenth, -1),
 
-          return range ? nums.value() : INVALID;
+          tab: go('next'),
+          'shift-tab': go('prev'),
+
+          backspace: removeIfEmpty,
+          delete: removeIfEmpty
+        };
+
+        function removeIfEmpty(event) {
+          if ($el.val() === '') {
+            $get('prev').focus();
+            $scope.remove($scope.$index);
+            event.preventDefault();
+          }
+
+          return false;
         }
 
-        function makeString(list) {
-          if (!_.isArray(list)) return INVALID;
-          return list.join(', ');
+        function $get(dir) {
+          return $repeater[dir]().find('[percent-list]');
         }
 
-        function converter(/* fns... */) {
-          var fns = _.toArray(arguments);
-          return function (input) {
-            var value = input;
-            var valid = fns.every(function (fn) {
-              return (value = fn(value)) !== INVALID;
-            });
-
-            ngModelCntr.$setValidity('listInput', valid);
-            return valid ? value : void 0;
+        function go(dir) {
+          return function () {
+            var $to = $get(dir);
+            if ($to.size()) $to.focus();
+            else return false;
           };
         }
 
-        ngModelCntr.$parsers.push(converter(parse));
-        ngModelCntr.$formatters.push(converter(makeString));
+        function idKey(event) {
+          var id = [];
+          if (event.ctrlKey) id.push('ctrl');
+          if (event.shiftKey) id.push('shift');
+          if (event.metaKey) id.push('meta');
+          if (event.altKey) id.push('alt');
+          id.push(keyMap[event.keyCode] || event.keyCode);
+          return id.join('-');
+        }
+
+        function add(n, val) {
+          return parse(val + n);
+        }
+
+        function addTenth(n, val, str) {
+          var int = Math.floor(val);
+          var dec = parseInt(str.split('.')[1] || 0, 10);
+          dec = dec + parseInt(n, 10);
+
+          if (dec < 0 || dec > 9) {
+            int += Math.floor(dec / 10);
+            if (dec < 0) {
+              dec = 10 + (dec % 10);
+            } else {
+              dec = dec % 10;
+            }
+          }
+
+          return parse(int + '.' + dec);
+        }
+
+        function change(using, mod) {
+          return function () {
+            var str = String(ngModelController.$viewValue);
+            var val = parse(str);
+            if (val === INVALID) return;
+
+            var next = using(mod, val, str);
+            if (next === INVALID) return;
+
+            $el.val(next);
+            ngModelController.$setViewValue(next);
+          };
+        }
+
+        function onKeydown(event) {
+          var handler = handlers[idKey(event)];
+          if (!handler) return;
+
+          if (handler(event) !== false) {
+            event.preventDefault();
+          }
+
+          $scope.$apply();
+        }
+
+        $el.on('keydown', onKeydown);
+        $scope.$on('$destroy', function () {
+          $el.off('keydown', onKeydown);
+        });
+
+        function parse(viewValue) {
+          viewValue = String(viewValue || 0);
+          var num = viewValue.trim();
+          if (!FLOATABLE.test(num)) return INVALID;
+          num = parseFloat(num);
+          if (isNaN(num)) return INVALID;
+
+          var list = $listGetter($scope);
+          var min = list[$scope.$index - 1] || 0;
+          var max = list[$scope.$index + 1] || 100;
+
+          if (num <= min || num >= max) return INVALID;
+
+          return num;
+        }
+
+        $scope.$watchMulti([
+          '$index',
+          {
+            fn: $scope.$watchCollection,
+            get: function () {
+              return $listGetter($scope);
+            }
+          }
+        ], function () {
+          var valid = parse(ngModelController.$viewValue) !== INVALID;
+          ngModelController.$setValidity('percentList', valid);
+        });
+
+        function validate(then) {
+          return function (input) {
+            var value = parse(input);
+            var valid = value !== INVALID;
+            value = valid ? value : void 0;
+            ngModelController.$setValidity('percentList', valid);
+            then && then(input, value);
+            return value;
+          };
+        }
+
+        ngModelController.$parsers.push(validate());
+        ngModelController.$formatters.push(validate(function (input, value) {
+          if (input !== value) $setModel($scope, value);
+        }));
       }
     };
   });
