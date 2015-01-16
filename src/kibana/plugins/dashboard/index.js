@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
+  var angular = require('angular');
   var ConfigTemplate = require('utils/config_template');
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
@@ -133,7 +134,7 @@ define(function (require) {
         $scope.save = function () {
           $state.title = dash.id = dash.title;
           $state.save();
-          dash.panelsJSON = JSON.stringify($state.panels);
+          dash.panelsJSON = angular.toJson($state.panels);
 
           dash.save()
           .then(function (id) {
