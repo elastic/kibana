@@ -7,24 +7,24 @@ define(function (require) {
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
   var termsColumns = require('vislib_fixtures/mock_data/terms/_columns');
-  var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
+  //var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
   var dataArray = [
     series,
     termsColumns,
-    histogramRows,
+    //histogramRows,
     stackedSeries
   ];
   var names = [
     'series',
     'terms columns',
-    'histogram rows',
+    //'histogram rows',
     'stackedSeries'
   ];
   var modes = [
     'stacked',
     'grouped',
-    'percentage',
+    //'percentage',
     'stacked'
   ];
 
