@@ -7,7 +7,7 @@ define(function (require) {
       title: 'Count',
       hasNoDsl: true,
       makeLabel: function (aggConfig) {
-        return 'Count of documents';
+        return 'Count';
       },
       getValue: function (agg, bucket) {
         return bucket.doc_count;

@@ -21,18 +21,18 @@ define(function (require) {
 
           $scope.toggleDisplay = function () {
             $scope.showPageToggle = !$scope.fullScreenSpy;
-            $scope.setSpyMode($scope.spyMode ? null : defaultMode);
+            $scope.setSpyMode($scope.spy.mode ? null : defaultMode);
           };
 
           $scope.toggleFullPage = function () {
-            fullPageSpy = $scope.spyMode.fill = !fullPageSpy;
+            fullPageSpy = $scope.spy.mode.fill = !fullPageSpy;
           };
 
           $scope.setSpyMode = function (newMode) {
             // allow passing in a mode name
             if (_.isString(newMode)) newMode = modes.byName[newMode];
 
-            var current = $scope.spyMode;
+            var current = $scope.spy.mode;
             var change = false;
 
             // no change
@@ -42,16 +42,13 @@ define(function (require) {
             if (current) {
               current.$container.remove();
               current.$scope.$destroy();
-              delete $scope.spyMode;
-              current = null;
-              change = true;
+              delete $scope.spy.mode;
             }
 
             // no further changes
             if (!newMode) return;
 
-            change = true;
-            current = $scope.spyMode = {
+            current = $scope.spy.mode = {
               // copy a couple values over
               name: newMode.name,
               display: newMode.display,

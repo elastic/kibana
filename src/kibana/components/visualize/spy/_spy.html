@@ -1,23 +1,23 @@
 <div ng-click="toggleDisplay()" class="visualize-show-spy">
-  <small>
-    <i class="fa" ng-class="spyMode ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-  </small>
+  <div class="visualize-show-spy-tab">
+    <i class="fa" ng-class="spy.mode ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+  </div>
 </div>
-<div ng-show="spyMode" class="visualize-spy-container">
+<div ng-show="spy.mode" class="visualize-spy-container">
   <header class="control-group">
     <div class="fill visualize-spy-nav">
       <a
         class="btn btn-default"
         ng-repeat="mode in modes.inOrder"
-        ng-class="{ active: spyMode.name === mode.name }"
+        ng-class="{ active: spy.mode.name === mode.name }"
         ng-click="setSpyMode(mode)">
         {{mode.display}}
       </a>
     </div>
-    <div class="button-group">
+    <div class="button-group visualize-spy-fill">
       <a ng-if="!fullScreenSpy" ng-click="toggleFullPage()">
-        <i ng-if="!spyMode.fill" class="fa fa-expand"></i>
-        <i ng-if="spyMode.fill" class="fa fa-compress"></i>
+        <i ng-if="!spy.mode.fill" class="fa fa-expand"></i>
+        <i ng-if="spy.mode.fill" class="fa fa-compress"></i>
       </a>
     </div>
   </header>

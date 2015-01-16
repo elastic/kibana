@@ -1,26 +1,26 @@
 define(function (require) {
+  var _ = require('lodash');
 
   function ConfigTemplate(templates) {
     var template = this;
     template.current = null;
+    template.toggle = _.partial(update, null);
+    template.open = _.partial(update, true);
+    template.close = _.partial(update, false);
 
-    template.toggle = function (name) {
-      var toSwitch = templates[name];
-      if (template.current === toSwitch) {
-        template.current = null;
-        return false;
+    function update(newState, name) {
+      var toUpdate = templates[name];
+      var curState = template.current === toUpdate;
+      if (newState == null) newState = !curState;
+
+      if (newState) {
+        template.current = toUpdate;
       } else {
-        template.current = toSwitch;
-        return true;
-      }
-    };
-
-    template.close = function (name) {
-      var toClose = templates[name];
-      if (template.current === toClose) {
         template.current = null;
       }
-    };
+
+      return newState;
+    }
 
     template.toString = function () {
       return template.current;

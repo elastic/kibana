@@ -52,7 +52,6 @@ visualize-spy {
   .display(flex);
 
   overflow: auto;
-  padding-top: 10px;
 
   &.visible {
     display: block;
@@ -65,12 +64,32 @@ visualize-spy {
 
   .visualize-show-spy {
     .flex(0, 0, auto);
-    background-color: @well-bg;
+
+    border-top: 1px solid #ecf0f1;
+    margin-bottom: 3px;
+
+    &-tab {
+      margin: 0px auto;
+      margin-top: -1px;
+
+      border: 1px solid #ecf0f1;
+      border-top: 0px;
+      border-width: 0px 1px 1px 1px;
+      border-bottom-left-radius: @border-radius-base;
+      border-bottom-right-radius: @border-radius-base;
+      width: 50px;
+      background: @body-bg;
+
     text-align: center;
+    }
 
     i {
       padding: 0 10px;
     }
+  }
+
+  .visualize-spy-fill {
+    margin-right: 5px;
   }
 
   .visualize-spy-container {
@@ -80,7 +99,6 @@ visualize-spy {
     .flex-direction(column);
 
     height: 482px;
-    padding: 10px 10px 0;
     overflow-y: auto;
 
     header {
@@ -101,8 +119,6 @@ visualize-spy {
   }
 
   .visualize-spy-nav {
-    margin-top: 10px;
-    margin-bottom: 10px;
     .flex(0, 0, auto);
 
     a.btn {

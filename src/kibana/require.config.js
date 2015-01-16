@@ -34,7 +34,8 @@ require.config({
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
-    marked: 'bower_components/marked/lib/marked'
+    marked: 'bower_components/marked/lib/marked',
+    numeral: 'bower_components/numeral/numeral'
   },
   shim: {
     angular: {
