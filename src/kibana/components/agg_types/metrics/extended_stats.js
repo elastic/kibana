@@ -29,7 +29,8 @@ define(function (require) {
       },
       params: [
         {
-          name: 'field'
+          name: 'field',
+          filterFieldTypes: 'number'
         },
         {
           name: 'names',
