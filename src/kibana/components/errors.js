@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
   var inherits = require('lodash').inherits;
 
   var canStack = (function () {
@@ -55,7 +56,7 @@ define(function (require) {
     err = err || false;
 
     KbnError.call(this,
-      'Request to Elasticsearch failed: ' + JSON.stringify(resp || err.message),
+      'Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
       errors.RequestFailure);
 
     this.origError = err;
@@ -70,7 +71,7 @@ define(function (require) {
    */
   errors.FetchFailure = function FetchFailure(resp) {
     KbnError.call(this,
-      'Failed to get the doc: ' + JSON.stringify(resp),
+      'Failed to get the doc: ' + angular.toJson(resp),
       errors.FetchFailure);
 
     this.resp = resp;

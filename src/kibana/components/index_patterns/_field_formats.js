@@ -31,12 +31,13 @@ Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/bl
 define(function (require) {
   return function FieldFormattingService($rootScope, config) {
     var _ = require('lodash');
+    var angular = require('angular');
     var moment = require('moment');
 
     function stringConverter(val) {
       return formatField(val, function (val) {
         if (_.isObject(val)) {
-          return JSON.stringify(val);
+          return angular.toJson(val);
         }
         else if (val == null) {
           return '';
@@ -123,7 +124,7 @@ define(function (require) {
         if (value.length === 1) {
           return fn(value[0]);
         } else {
-          return JSON.stringify(_.map(value, fn));
+          return angular.toJson(_.map(value, fn));
         }
       } else {
         return fn(value);
