@@ -347,17 +347,8 @@ define(function (require) {
           expect($('.chart-title').length).to.be(2);
         });
 
-        it('should remove the correct div', function () {
-          expect($('.y-axis-chart-title').length).to.be(1);
-          expect($('.x-axis-chart-title').length).to.be(0);
-        });
-
         it('should remove all chart title divs when only one chart is rendered', function () {
           expect(fixture).to.be(0);
-        });
-
-        it('should not remove chart titles from another visualization', function () {
-          expect();
         });
       });
 
