@@ -2,7 +2,7 @@
 
   <navbar ng-if="!appEmbedded">
     <div class="fill bitty-modal-container">
-      <div ng-if="linked && !unlinking"
+      <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
         ng-dblclick="unlink()"
         tooltip="Double click to unlink this visualization from the saved search"
         class="bitty-modal visualize-linked">
@@ -12,11 +12,14 @@
         <b>{{ savedVis.savedSearchId | json}}</b>
       </div>
 
-      <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
+      <div
+        ng-if="vis.type.requiresSearch && unlinking"
+        ng-click="clearUnlinking()"
+        class="bitty-modal">
         <i class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-if="linked" class="inline-form" name="queryInput">
+      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form" name="queryInput">
         <div class="typeahead">
           <div class="input-group">
             <input
@@ -33,7 +36,11 @@
         </div>
       </form>
 
-      <form ng-if="!linked" ng-submit="fetch()" class="inline-form" name="queryInput">
+      <form
+        ng-if="vis.type.requiresSearch && !$state.linked"
+        ng-submit="fetch()"
+        class="inline-form"
+        name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
             ng-class="queryInput.$invalid ? 'has-error' : ''">
@@ -64,7 +71,7 @@
 
       <kbn-tooltip text="Save Visualization" placement="bottom" append-to-body="1">
         <!-- normal save -->
-        <button ng-if="!editableVis.dirty" ng-click="toggleSave()">
+        <button ng-if="!editableVis.dirty" ng-click="configTemplate.toggle('save')">
           <i class="fa fa-save"></i>
         </button>
 
@@ -75,10 +82,10 @@
       </kbn-tooltip>
 
       <kbn-tooltip text="Load Saved Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="toggleLoad()"><i class="fa fa-folder-open-o"></i></button>
+        <button ng-click="configTemplate.toggle('load')"><i class="fa fa-folder-open-o"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Share Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="toggleShare()"><i class="fa fa-external-link"></i></button>
+        <button ng-click="configTemplate.toggle('share')"><i class="fa fa-external-link"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Refresh" placement="bottom" append-to-body="1">
         <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
@@ -97,12 +104,7 @@
 
   <div class="vis-editor-content">
 
-    <vis-editor-sidebar
-      ng-if="!appEmbedded"
-      vis="editableVis"
-      apply="stageEditableVis();"
-      reset="resetEditableVis();">
-    </vis-editor-sidebar>
+    <vis-editor-sidebar class="vis-editor-sidebar" ng-if="!appEmbedded"></vis-editor-sidebar>
 
     <div class="vis-editor-canvas" ng-class="{ embedded: appEmbedded }">
       <div class="visualize-info" ng-if="savedVis.id">

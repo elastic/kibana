@@ -3,10 +3,10 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var angular = require('angular');
-    var AggType = Private(require('components/agg_types/_agg_type'));
+    var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/range'));
 
-    return new AggType({
+    return new BucketAggType({
       name: 'range',
       title: 'Range',
       createFilter: createFilter,

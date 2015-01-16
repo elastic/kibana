@@ -30,11 +30,10 @@ define(function (require) {
      */
     function collectBucket(write, bucket, key) {
       var agg = write.aggStack.shift();
-      var aggResp = bucket[agg.id];
 
       switch (agg.schema.group) {
       case 'buckets':
-        var buckets = new Buckets(aggResp);
+        var buckets = new Buckets(bucket[agg.id]);
         if (buckets.length) {
           var splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
@@ -62,7 +61,7 @@ define(function (require) {
         }
         break;
       case 'metrics':
-        var value = (agg.type.name === 'count') ? bucketCount(bucket) : metricValue(aggResp);
+        var value = agg.getValue(bucket);
         write.cell(agg, value, function () {
           if (!write.aggStack.length) {
             // row complete
@@ -101,7 +100,7 @@ define(function (require) {
         return;
 
       case 'buckets':
-        write.cell('', function () {
+        write.cell(agg, '', function () {
           passEmptyBuckets(write, bucket, key);
         });
       }

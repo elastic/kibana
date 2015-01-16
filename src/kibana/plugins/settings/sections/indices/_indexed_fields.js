@@ -4,7 +4,9 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .directive('indexedFields', function () {
-    var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
+    var nameHtml = require('text!plugins/settings/sections/indices/_field_name.html');
+    var typeHtml = require('text!plugins/settings/sections/indices/_field_type.html');
+    var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
 
     return {
       restrict: 'E',
@@ -46,7 +48,19 @@ define(function (require) {
               $scope.showPopularityControls(field);
             }
 
-            return [field.name, field.type, field.analyzed, field.indexed,
+            return [
+              {
+                markup: nameHtml,
+                scope: childScope,
+                value: field.displayName
+              },
+              {
+                markup: typeHtml,
+                scope: childScope,
+                value: field.type
+              },
+              field.analyzed,
+              field.indexed,
               {
                 markup: popularityHtml,
                 scope: childScope,

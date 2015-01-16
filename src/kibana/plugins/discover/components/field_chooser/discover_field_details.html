@@ -19,9 +19,9 @@
               <div>
                 <span ng-show="field.filterable" class="pull-right">
                   <i class="fa fa-search-minus pull-right discover-field-details-filter"
-                    ng-click="updateFilterInQuery(field.name, bucket.value, '-')"></i>
+                    ng-click="updateFilterInQuery(field, bucket.value, '-')"></i>
                   <i class="fa fa-search-plus pull-right discover-field-details-filter"
-                    ng-click="updateFilterInQuery(field.name, bucket.value, '+')"></i>
+                    ng-click="updateFilterInQuery(field, bucket.value, '+')"></i>
                 </span>
                 <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
                   {{bucket.value}}

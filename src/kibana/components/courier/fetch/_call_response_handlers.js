@@ -9,11 +9,11 @@ define(function (require) {
 
     function callResponseHandlers(requests, responses) {
       return Promise.map(requests, function (req, i) {
-        var resp = responses[i];
-
         if (req === ABORTED || req.aborted) {
           return ABORTED;
         }
+
+        var resp = responses[i];
 
         if (resp.timed_out) {
           notify.warning(new SearchTimeout());

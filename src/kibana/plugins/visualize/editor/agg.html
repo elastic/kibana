@@ -1,4 +1,4 @@
-<ng-form name="aggForm" class="vis-editor-agg">
+<ng-form name="aggForm">
 
   <!-- header -->
   <div class="vis-editor-agg-header">
@@ -30,7 +30,7 @@
     <div class="vis-editor-agg-header-controls btn-group">
       <!-- up button -->
       <button
-        ng-if="group.length > 1"
+        ng-if="stats.count > 1"
         ng-class="{ disabled: $first }"
         ng-click="moveUp(agg)"
         tooltip="Increase Priority"
@@ -42,7 +42,7 @@
 
       <!-- down button -->
       <button
-        ng-if="group.length > 1"
+        ng-if="stats.count > 1"
         ng-class="{ disabled: $last }"
         ng-click="moveDown(agg)"
         tooltip="Decrease Priority"
@@ -54,7 +54,7 @@
 
       <!-- remove button -->
       <button
-        ng-if="group.length > groupMin"
+        ng-if="stats.count > stats.min"
         ng-click="remove(agg)"
         tooltip="Remove Dimension"
         tooltip-append-to-body="true"
@@ -71,4 +71,9 @@
     ng-show="editorOpen"
     class="vis-editor-agg-editor">
   </vis-editor-agg-params>
+
+  <vis-editor-agg-add
+    ng-if="$index + 1 === stats.count"
+    class="vis-editor-agg-add vis-editor-agg-add-subagg">
+  </vis-editor-agg-add>
 </ng-form>
