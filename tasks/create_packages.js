@@ -20,6 +20,10 @@ module.exports = function (grunt) {
       var tgzCmd = 'tar -zcf ' + archiveName + '.tar.gz ' + name;
       var zipCmd = 'zip -rq ' + archiveName + '.zip ' + name;
 
+      if (platform === 'windows') {
+        zipCmd = 'zip -rq -ll ' + archiveName + '.zip ' + name;
+      }
+
       return mkdirp.mkdirpAsync(target)
         .then(function (arg) {
           return exec(tgzCmd, options);

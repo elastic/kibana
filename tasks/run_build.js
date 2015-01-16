@@ -1,3 +1,4 @@
+var os = require('os');
 module.exports = function (grunt) {
   grunt.registerTask('run_build', [
     'build',
@@ -7,12 +8,14 @@ module.exports = function (grunt) {
     'wait:built_kibana'
   ]);
 
+  var arch = os.arch();
+  var platform = os.platform();
   var join = require('path').join;
   var extract = require('./utils/spawn')(
     'tar',
     [
       '-xzf',
-      grunt.config.process('<%= pkg.name %>-<%= pkg.version %>.tar.gz')
+      grunt.config.process('<%= pkg.name %>-<%= pkg.version %>-' + platform + '-' + arch + '.tar.gz')
     ],
     join(__dirname, '../target')
   );

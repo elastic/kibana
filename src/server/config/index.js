@@ -11,7 +11,7 @@ var env = process.env.NODE_ENV || 'development';
 // the NPM module. If it's not there then we are running in the git root.
 var public_folder = path.resolve(__dirname, '..', 'public');
 try {
-  fs.fstatSync(public_folder);
+  fs.statSync(public_folder);
 } catch (err) {
   public_folder = path.resolve(__dirname, '..', '..', 'kibana');
 }

@@ -11,8 +11,9 @@ var plugins = function (dir) {
 };
 
 module.exports = function (config) {
+  var bundled_plugin_ids = config.kibana.bundled_plugin_ids || [];
 	var bundled_plugins = plugins(config.bundled_plugins_folder);
 	var external_plugins = plugins(config.external_plugins_folder);
-	return bundled_plugins.concat(external_plugins);
+	return bundled_plugin_ids.concat(bundled_plugins, external_plugins);
 };
 

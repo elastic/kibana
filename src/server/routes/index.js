@@ -12,7 +12,8 @@ router.get('/config', function (req, res, next) {
     'elasticsearch_url',
     'elasticsearch_username',
     'elasticsearch_password',
-    'elasticsearch_preserve_host'
+    'elasticsearch_preserve_host',
+    'bundled_plugin_ids'
   ];
   var data = _.omit(config.kibana, excludedKeys);
   data.plugins = config.plugins;

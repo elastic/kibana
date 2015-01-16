@@ -16,14 +16,21 @@ module.exports = function (grunt) {
     var buildPath = grunt.config.get('build');
     var version = grunt.config.get('nodeVersion');
 
+    var handle404 = function (response) {
+      if (response.statusCode !== 200) {
+        throw new Error(response.request.href + ' failed with a ' + response.statusCode);
+      }
+    };
+
     var downloadWindows = function (cb) {
       var dest = join(buildPath, 'node_binaries', 'windows');
-      var url = urlPattern({ version: version, file: 'nodex.exe'});
+      var url = urlPattern({ version: version, file: 'node.exe'});
       mkdirp(dest, function (err) {
         if (err) return cb(err);
         var out = fs.createWriteStream(join(dest, 'node.exe'));
         out.on('close', cb).on('error', cb);
         var req = request.get(url);
+        req.on('response', handle404);
         req.pipe(out);
       });
     };
@@ -38,6 +45,7 @@ module.exports = function (grunt) {
         var out = tar.Extract({ path: dest, strip: 1 });
         out.on('close', cb).on('error', cb);
         var req = request.get(url);
+        req.on('response', handle404);
         req.pipe(unzip).pipe(out);
       });
     };
