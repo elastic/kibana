@@ -1,0 +1,17 @@
+<div class="form-group" ng-controller="aggParam.controller">
+  <label for="field">
+    Metrics
+  </label>
+
+  <!-- validate that there is atleast one checkbox selected -->
+  <input type="hidden" ng-model="names[0]" name="first" required>
+  <p class="text-danger" ng-if="aggForm.first.$invalid">
+    select at least one stat
+  </p>
+
+  <div ng-repeat="stat in statNames" class="checkbox">
+    <label>
+      <input ng-model="map[stat]" type="checkbox"> {{stat}}
+    </label>
+  </div>
+</div>

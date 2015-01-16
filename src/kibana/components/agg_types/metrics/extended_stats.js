@@ -10,7 +10,18 @@ define(function (require) {
       }
     };
 
-    return new MetricAggType({
+    var statNames = [
+      'count',
+      'min',
+      'max',
+      'avg',
+      'sum',
+      'sum_of_squares',
+      'variance',
+      'std_deviation'
+    ];
+
+    var exStatsType = new MetricAggType({
       name: 'extended_stats',
       title: 'Extended Stats',
       makeLabel: function (agg) {
@@ -21,44 +32,43 @@ define(function (require) {
           name: 'field'
         },
         {
-          name: 'metrics',
-          editor: require('text!components/agg_types/controls/extended_stats_metrics.html'),
-          default: [
-            'count',
-            'min',
-            'max',
-            'avg',
-            'sum',
-            'sum_of_squares',
-            'variance',
-            'std_deviation'
-          ],
+          name: 'names',
+          editor: require('text!components/agg_types/controls/extended_stats.html'),
+          default: statNames.slice(),
           write: _.noop,
           controller: function ($scope) {
-            $scope.$bind('metrics', 'agg.type.params.byName.metrics.default');
+            $scope.map = mapList();
+            $scope.names = listMap();
+            $scope.statNames = statNames;
 
-            $scope.values = arrayToObj($scope.agg.params.metrics || []);
-            $scope.$watchCollection('values', function () {
-              $scope.agg.params.metrics = objToArray($scope.values);
+            $scope.$watchCollection('agg.params.names', function (names) {
+              if (names === $scope.names) return;
+
+              $scope.names = _.intersection(statNames, names || []);
+              $scope.map = mapList();
             });
 
-            function objToArray(obj) {
-              return _.transform($scope.metrics, function (keys, key) {
-                if (obj[key]) keys.push(key);
-              }, []);
+            $scope.$watchCollection('map', function () {
+              $scope.names = $scope.agg.params.names = listMap();
+            });
+
+            function mapList() {
+              return _.transform($scope.names, function (map, key) {
+                map[key] = true;
+              }, {});
             }
 
-            function arrayToObj(arr) {
-              return _.transform(arr, function (presence, value) {
-                return presence[value] = true;
-              }, {});
+            function listMap() {
+              return _.transform(statNames, function (list, stat) {
+                if ($scope.map[stat]) list.push(stat);
+              }, []);
             }
           }
         }
       ],
       getResponseAggs: function (agg) {
         var ValueAggConfig = getResponseAggConfig(agg, valueProps);
-        return _.map(agg.params.metrics, function (name) {
+        return _.map(agg.params.names, function (name) {
           return new ValueAggConfig(name);
         });
       },
@@ -66,5 +76,8 @@ define(function (require) {
         return bucket[agg.parentId][agg.key];
       }
     });
+
+    exStatsType.statNames = statNames;
+    return exStatsType;
   };
 });
