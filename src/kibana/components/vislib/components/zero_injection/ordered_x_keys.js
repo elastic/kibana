@@ -16,8 +16,9 @@ define(function (require) {
       }
 
       var objKeys = getUniqKeys(obj);
+      var interval = _.deepGet(obj, 'ordered.interval');
 
-      return _.chain(objKeys)
+      return _(objKeys)
       .pairs()
       .sortBy(function (d) {
         if (d[1].isDate || d[1].isOrdered) {
@@ -25,9 +26,25 @@ define(function (require) {
         }
         return d[1].index;
       })
-      .map(function (d) {
-        return d[1].isNumber ? +d[0] : d[0];
+      .map(function (d, i, list) {
+        if (!d[1].isNumber) return d[0];
+
+        var val = +d[0];
+        if (interval == null) return val;
+
+        var gapEdge = parseFloat(_.deepGet(list, [i + 1, 0]));
+        if (isNaN(gapEdge)) return val;
+
+        var next = val;
+        var vals = [];
+        while (next < gapEdge) {
+          vals.push(next);
+          next += interval;
+        }
+
+        return vals;
       })
+      .flatten(true)
       .value();
     };
   };
