@@ -171,10 +171,10 @@ define(function (require) {
 
         // for split bars or for one series,
         // last series will have d.y0 = 0
-        //
-        if (d.y0 === 0) {
+        if (d.y0 === 0 && yMin > 0) {
           return yScale(yMin) - yScale(d.y);
         }
+
         return yScale(d.y0) - yScale(d.y0 + d.y);
       });
 

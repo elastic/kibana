@@ -26,7 +26,7 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
-        defaultYMin: true
+        defaultYMin: false
       });
       this.eventTypes = {
         enabled: []

@@ -95,7 +95,7 @@ define(function (require) {
       })
       .y0(function (d) {
         if (isOverlapping) {
-          if (d.y < 0 && !self._attr.defaultYMin) {
+          if (!self._attr.defaultYMin) {
             return yScale(0);
           }
           return height;
