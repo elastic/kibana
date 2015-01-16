@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
 
   return function LocalCacheFactory() {
     function LocalCache(opts) {
@@ -15,7 +16,7 @@ define(function (require) {
       this.set = function (obj, val) {
         var id = _id(obj);
         var clean = !_cache.hasOwnProperty(id);
-        _cache[id] = JSON.stringify(val);
+        _cache[id] = angular.toJson(val);
         return clean;
       };
 

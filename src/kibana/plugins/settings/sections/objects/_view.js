@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
   var inflection = require('inflection');
   var rison = require('utils/rison');
   var registry = require('plugins/settings/saved_object_registry');
@@ -44,7 +45,7 @@ define(function (require) {
 
           if (_.isString(field.value)) {
             try {
-              field.value = JSON.stringify(JSON.parse(field.value), null, '  ');
+              field.value = angular.toJson(JSON.parse(field.value), null, '  ');
               field.type = 'json';
             } catch (err) {
               field.value = field.value;
@@ -53,7 +54,7 @@ define(function (require) {
             field.type = 'number';
           } else if (_.isArray(field.value)) {
             field.type = 'array';
-            field.value = JSON.stringify(field.value, null, ' ');
+            field.value = angular.toJson(field.value, null, ' ');
           } else if (_.isPlainObject(field.value)) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
