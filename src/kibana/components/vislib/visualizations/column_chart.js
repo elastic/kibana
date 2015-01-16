@@ -136,6 +136,7 @@ define(function (require) {
       var data = this.chartData;
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
+      var yMin = this.handler.yAxis.yScale.domain()[0];
       var self = this;
 
       // update
@@ -167,6 +168,12 @@ define(function (require) {
           return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
         }
 
+        // for split bars or for one series,
+        // last series will have d.y0 = 0
+        //
+        if (d.y0 === 0) {
+          return yScale(yMin) - yScale(d.y);
+        }
         return yScale(d.y0) - yScale(d.y0 + d.y);
       });
 
