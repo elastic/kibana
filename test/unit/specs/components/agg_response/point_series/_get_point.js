@@ -33,7 +33,6 @@ define(function (require) {
     it('ignores points with a y value of NaN', function () {
       var row = [ { value: 1 }, { value: 'NaN' }];
       var point = getPoint({ i: 0 }, null, 5, row, { i: 1 });
-
       expect(point).to.be(void 0);
     });
   }];
