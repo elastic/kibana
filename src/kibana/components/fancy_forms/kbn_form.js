@@ -18,7 +18,7 @@ define(function (require) {
 
     self.describeErrors = function () {
       var count = self.errorCount();
-      return count + ' Error' + (count > 1 ? 's' : '');
+      return count + ' Error' + (count === 1 ? '' : 's');
     };
   }
 
