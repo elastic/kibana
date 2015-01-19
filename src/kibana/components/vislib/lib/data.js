@@ -255,7 +255,6 @@ define(function (require) {
 
       if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
         this._attr.mode === 'silhouette' || this._attr.defaultYMin) {
-
         return 0;
       }
 
