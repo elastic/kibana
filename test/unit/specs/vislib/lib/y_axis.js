@@ -137,9 +137,12 @@ define(function (require) {
       yAxisDiv = el.append('div')
         .attr('class', 'y-axis-div');
 
-      dataObj = new Data(data, {});
+      dataObj = new Data(data, {
+        defaultYMin: true
+      });
       yAxis = new YAxis({
         el: node,
+        yMin: dataObj.getYMinValue(),
         yMax: dataObj.getYMaxValue(),
         _attr: {
           margin: { top: 0, right: 0, bottom: 0, left: 0 }
