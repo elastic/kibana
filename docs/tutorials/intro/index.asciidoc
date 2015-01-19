@@ -126,4 +126,4 @@ Congratulations, you've installed and configured kibana and dipped your
 toes in the water. Next, check out some of our videos and other
 tutorials for more advanced usage. Now you can try adding your own panels
 to a blank dashboard. For more information on queries see
-link:./rows-and-panels.html[Rows and Panels]
+link:./working-with-queries-and-filters.html[Queries and Filters]
