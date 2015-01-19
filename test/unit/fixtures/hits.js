@@ -7,10 +7,10 @@ define(function (require) {
     {_source: {timestamp: 3, bytes: 30, request: 'baz'}},
     {_source: {timestamp: 4, bytes: 30, request: 'baz'}},
     {_source: {timestamp: 5, bytes: 30, request: 'baz'}},
-    {_source: {timestamp: 6, bytes: 40, request: 'bat'}},
-    {_source: {timestamp: 7, bytes: 40, request: 'bat'}},
-    {_source: {timestamp: 8, bytes: 40, request: 'bat'}},
-    {_source: {timestamp: 9, bytes: 40, request: 'bat'}},
+    {_source: {timestamp: 6, bytes: 40.1415926535, request: 'bat'}},
+    {_source: {timestamp: 7, bytes: 40.1415926535, request: 'bat'}},
+    {_source: {timestamp: 8, bytes: 40.1415926535, request: 'bat'}},
+    {_source: {timestamp: 9, bytes: 40.1415926535, request: 'bat'}},
   ], function (p, i) {
     return _.merge({}, p, {
       _score: 1,

@@ -82,7 +82,7 @@ define(function (require) {
       if (_.isArray(value) && !params.grouped) {
         k = value;
       } else {
-        k = _.isUndefined(value) || _.isNull(value) ? undefined : [value.toString()];
+        k = value == null ? undefined : [value];
       }
 
       /* jshint -W083 */

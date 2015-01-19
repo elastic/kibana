@@ -16,6 +16,7 @@ define(function (require) {
   require('components/watch_multi');
   require('components/bind');
   require('components/listen');
+  require('components/fancy_forms/fancy_forms');
   require('directives/click_focus');
   require('directives/info');
   require('directives/spinner');

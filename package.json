@@ -54,12 +54,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:elasticsearch/kibana4.git"
+    "url": "git@github.com:elasticsearch/kibana.git"
   },
   "author": "",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/elasticsearch/kibana4/issues"
+    "url": "https://github.com/elasticsearch/kibana/issues"
   },
-  "homepage": "https://github.com/elasticsearch/kibana4"
+  "homepage": "https://www.elasticsearch.org/overview/kibana"
 }

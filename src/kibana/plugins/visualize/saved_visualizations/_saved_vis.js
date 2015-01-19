@@ -24,7 +24,8 @@ define(function (require) {
           title: 'string',
           visState: 'json',
           description: 'string',
-          savedSearchId: 'string'
+          savedSearchId: 'string',
+          version: 'integer'
         },
 
         defaults: {
@@ -36,7 +37,8 @@ define(function (require) {
             return def;
           }()),
           description: '',
-          savedSearchId: opts.savedSearchId
+          savedSearchId: opts.savedSearchId,
+          version: 1
         },
 
         searchSource: true,

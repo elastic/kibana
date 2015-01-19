@@ -23,7 +23,7 @@
 
     <!-- error -->
     <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger">
-      {{ describeError() }}
+      {{ aggForm.describeErrors() }}
     </span>
 
     <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
