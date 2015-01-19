@@ -9,6 +9,7 @@ define(function (require) {
         Private(require('components/agg_types/metrics/sum')),
         Private(require('components/agg_types/metrics/min')),
         Private(require('components/agg_types/metrics/max')),
+        Private(require('components/agg_types/metrics/extended_stats')),
         Private(require('components/agg_types/metrics/cardinality')),
         Private(require('components/agg_types/metrics/percentiles'))
       ],

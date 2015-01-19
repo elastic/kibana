@@ -38,18 +38,6 @@ define(function (require) {
           return label ? label : '';
         };
 
-        /**
-         * Describe the errors in this agg
-         * @return {[type]} [description]
-         */
-        $scope.describeError = function () {
-          var count = _.reduce($scope.aggForm.$error, function (count, controls, errorType) {
-            return count + _.size(controls);
-          }, 0);
-
-          return count + ' Error' + (count > 1 ? 's' : '');
-        };
-
         function move(below, agg) {
           _.move($scope.vis.aggs, agg, below, function (otherAgg) {
             return otherAgg.schema.group === agg.schema.group;

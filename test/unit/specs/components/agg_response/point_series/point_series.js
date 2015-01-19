@@ -4,7 +4,7 @@ define(function (require) {
     run(require('specs/components/agg_response/point_series/_add_to_siri'));
     run(require('specs/components/agg_response/point_series/_fake_x_aspect'));
     run(require('specs/components/agg_response/point_series/_get_aspects'));
-    run(require('specs/components/agg_response/point_series/_get_points'));
+    run(require('specs/components/agg_response/point_series/_get_point'));
     run(require('specs/components/agg_response/point_series/_get_series'));
     run(require('specs/components/agg_response/point_series/_init_x_axis'));
     run(require('specs/components/agg_response/point_series/_init_y_axis'));
