@@ -13,11 +13,6 @@ var logger = require('./lib/logger');
  */
 
 var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
 server.on('error', onError);
 server.on('listening', onListening);
 
