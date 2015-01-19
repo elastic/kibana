@@ -5,11 +5,7 @@
 
   "globals": {
     "define": true,
-    "require": true,
-    "console": true,
-    "module": true,
-    "__dirname": true,
-    "process": true
+    "require": true
   },
 
   "camelcase": false,
