@@ -19,6 +19,10 @@ app.set('view engine', 'jade');
 app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 app.use(requestLogger());
 
+if (app.get('env') === 'development') {
+  require('./dev')(app);
+}
+
 // The proxy must be set up before all the other middleware.
 // TODO: WE might want to move the middleware to each of the individual routes
 // so we don't have weird conflicts in the future.

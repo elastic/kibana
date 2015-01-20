@@ -39,11 +39,6 @@ module.exports = function (grunt) {
       req.end();
     };
   };
-  grunt.registerTask('maybe_start_server', maybeStartServer({
-    name: 'connect-server',
-    port: 8000,
-    tasks: ['server']
-  }));
   grunt.registerTask('maybe_start_kibana', maybeStartServer({
     name: 'kibana-server',
     port: 5601,
