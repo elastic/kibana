@@ -1,5 +1,4 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var d3 = require('d3');
   var $ = require('jquery');
@@ -116,7 +115,7 @@ define(function (require) {
       yAxisLabel: 'Count'
     };
 
-    beforeEach(module('YAxisFactory'));
+    beforeEach(module('kibana'));
     beforeEach(inject(function (d3, Private) {
       Data = Private(require('components/vislib/lib/data'));
       YAxis = Private(require('components/vislib/lib/y_axis'));
