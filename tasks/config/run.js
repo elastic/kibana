@@ -2,6 +2,9 @@ module.exports = function (grunt) {
   var jrubyPath = grunt.config.get('jrubyPath');
   var jruby = jrubyPath + '/bin/jruby';
   var cmd =  grunt.config.get('src') + '/server/bin/initialize';
+  var os = require('os');
+  var arch = os.arch();
+  var platform = os.platform();
 
   // config:
   // wait: should task wait until the script exits before finishing
@@ -36,7 +39,7 @@ module.exports = function (grunt) {
         quiet: true,
         failOnError: false
       },
-      cmd: './target/<%= pkg.name + "-" + pkg.version %>/bin/kibana',
+      cmd: './target/<%= pkg.name + "-" + pkg.version %>-' + platform + '-' + arch + '/bin/kibana',
       args: args
     }
   };
