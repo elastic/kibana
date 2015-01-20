@@ -21,7 +21,6 @@ define(function (require) {
         return new Data(data, attr);
       }
 
-      var self = this;
       var offset;
 
       if (attr.mode === 'stacked') {
@@ -113,41 +112,6 @@ define(function (require) {
       }
 
       return visData;
-    };
-
-    /**
-     * Function to determine whether to display the legend or not
-     * Displays legend when more than one series of data present
-     *
-     * @method isLegendShown
-     * @returns {boolean}
-     */
-    Data.prototype.isLegendShown = function () {
-      var isLegend = false;
-      var visData = this.getVisData();
-      var sameSeriesLabel = true;
-      var seriesLabel;
-
-      _.forEach(visData, function countSeriesLength(obj) {
-        var rootSeries = obj.series || (obj.slices && obj.slices.children);
-        var dataLength = rootSeries ? rootSeries.length : 0;
-        var label = dataLength === 1 ? rootSeries[0].label || rootSeries[0].name : undefined;
-        var children = (obj.slices && obj.slices.children && obj.slices.children[0] && obj.slices.children[0].children);
-
-        if (!seriesLabel) {
-          seriesLabel = label;
-        }
-
-        if (seriesLabel !== label) {
-          sameSeriesLabel = false;
-        }
-
-        if (dataLength > 1 || children || !sameSeriesLabel) {
-          isLegend = true;
-        }
-      });
-
-      return isLegend;
     };
 
     /**
