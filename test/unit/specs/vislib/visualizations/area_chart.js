@@ -4,20 +4,26 @@ define(function (require) {
   var $ = require('jquery');
 
   // Data
-  var series = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var seriesPos = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var seriesPosNeg = require('vislib_fixtures/mock_data/date_histogram/_series_pos_neg');
+  var seriesNeg = require('vislib_fixtures/mock_data/date_histogram/_series_neg');
   var termColumns = require('vislib_fixtures/mock_data/terms/_columns');
   var rangeRows = require('vislib_fixtures/mock_data/range/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
 
   var dataArray = [
-    series,
+    seriesPos,
+    seriesPosNeg,
+    seriesNeg,
     termColumns,
     rangeRows,
     stackedSeries,
   ];
 
   var names = [
-    'series',
+    'series pos',
+    'series pos neg',
+    'series neg',
     'term columns',
     'range rows',
     'stackedSeries',
@@ -53,8 +59,8 @@ define(function (require) {
       });
 
       afterEach(function () {
-        $(vis.el).remove();
-        vis = null;
+        //$(vis.el).remove();
+        //vis = null;
       });
 
       describe('checkIfEnoughData method throws an error when not enough data', function () {
@@ -199,6 +205,25 @@ define(function (require) {
         it('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
             expect(_.isFunction(chart.draw())).to.be(true);
+          });
+        });
+
+        it('should return a yMin and yMax', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            expect(yAxis.yMin).to.not.be(undefined);
+            expect(yAxis.yMax).to.not.be(undefined);
+          });
+        });
+
+        it('should render a zero axis line', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            if (yAxis.yMin < 0 && yAxis.yMax > 0) {
+              expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
+            }
           });
         });
       });

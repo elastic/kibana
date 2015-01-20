@@ -265,6 +265,7 @@ define(function (require) {
 
             // Draw line at yScale 0 value
             svg.append('line')
+              .attr('class', 'zero-line')
               .attr('x1', 0)
               .attr('y1', yScale(0))
               .attr('x2', width)
@@ -280,6 +281,7 @@ define(function (require) {
 
           var line = svg
           .append('line')
+          .attr('class', 'base-line')
           .attr('x1', startLineX)
           .attr('y1', height)
           .attr('x2', width)

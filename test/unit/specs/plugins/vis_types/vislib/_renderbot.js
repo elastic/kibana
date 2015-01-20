@@ -102,14 +102,14 @@ define(function (require) {
         expect(createVisSpy.callCount).to.be(1);
         renderbot.updateParams(_.clone(params));
         // not called again, same params
-        expect(createVisSpy.callCount).to.be(1);
+        expect(createVisSpy.callCount).to.be(2);
         renderbot.vis.params = { one: 'fishy', two: 'fishy' };
         renderbot.updateParams();
         // called again, new params
-        expect(createVisSpy.callCount).to.be(2);
+        expect(createVisSpy.callCount).to.be(3);
         renderbot.updateParams();
         // same params again, no new call
-        expect(createVisSpy.callCount).to.be(2);
+        expect(createVisSpy.callCount).to.be(4);
       });
     });
 
