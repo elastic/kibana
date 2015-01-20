@@ -3,7 +3,27 @@ define(function (require) {
   var d3 = require('d3');
   var $ = require('jquery');
 
-  angular.module('YAxisFactory', ['kibana']);
+  var timeSeries = [
+    1408734060000,
+    1408734090000,
+    1408734120000,
+    1408734150000,
+    1408734180000,
+    1408734210000,
+    1408734240000,
+    1408734270000,
+    1408734300000,
+    1408734330000
+  ];
+
+  function makeSeriesData(data) {
+    return timeSeries.map(function (timestamp, i) {
+      return {
+        x: timestamp,
+        y: data[i] || 0
+      };
+    });
+  }
 
   describe('Vislib yAxis Class Test Suite', function () {
     var YAxis;
@@ -12,6 +32,7 @@ define(function (require) {
     var el;
     var yAxisDiv;
     var dataObj;
+
     var data = {
       hits: 621,
       label: 'test',
@@ -22,94 +43,9 @@ define(function (require) {
         min: 1408734082458
       },
       series: [
-        {
-          values: [
-            {
-              x: 1408734060000,
-              y: 8
-            },
-            {
-              x: 1408734090000,
-              y: 23
-            },
-            {
-              x: 1408734120000,
-              y: 30
-            },
-            {
-              x: 1408734150000,
-              y: 28
-            },
-            {
-              x: 1408734180000,
-              y: 36
-            },
-            {
-              x: 1408734210000,
-              y: 30
-            },
-            {
-              x: 1408734240000,
-              y: 26
-            },
-            {
-              x: 1408734270000,
-              y: 22
-            },
-            {
-              x: 1408734300000,
-              y: 29
-            },
-            {
-              x: 1408734330000,
-              y: 24
-            }
-          ]
-        },
-        {
-          values: [
-            {
-              x: 1408734060000,
-              y: 8
-            },
-            {
-              x: 1408734090000,
-              y: 23
-            },
-            {
-              x: 1408734120000,
-              y: 30
-            },
-            {
-              x: 1408734150000,
-              y: 28
-            },
-            {
-              x: 1408734180000,
-              y: 36
-            },
-            {
-              x: 1408734210000,
-              y: 30
-            },
-            {
-              x: 1408734240000,
-              y: 26
-            },
-            {
-              x: 1408734270000,
-              y: 22
-            },
-            {
-              x: 1408734300000,
-              y: 29
-            },
-            {
-              x: 1408734330000,
-              y: 24
-            }
-          ]
-        }
+        { values: makeSeriesData([ 8, 23, 30, 28, 36, 30, 26, 22, 29, 24 ]) },
+        { values: makeSeriesData([ 2, 13, 20, 18, 26, 20, 16, 12, 19, 14 ]) },
+        { values: makeSeriesData([ 22, 8, -30, -4, 0, 0, 3, -22, 14, 24 ]) }
       ],
       xAxisLabel: 'Date Histogram',
       yAxisLabel: 'Count'
