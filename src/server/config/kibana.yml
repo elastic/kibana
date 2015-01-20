@@ -22,15 +22,13 @@ kibana_index: ".kibana"
 # The default application to load.
 default_app_id: "discover"
 
-# Time in seconds to wait for responses from the back end or elasticsearch.
-# Note this should always be higher than "shard_timeout".
+# Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
-request_timeout: 60
+request_timeout: 500000
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards.
-# Note this should always be lower than "request_timeout".
-# Set to 0 to disable (not recommended).
-shard_timeout: 30000
+# Set to 0 to disable.
+shard_timeout: 0
 
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
