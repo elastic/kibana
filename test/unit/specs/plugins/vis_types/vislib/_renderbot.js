@@ -99,7 +99,7 @@ define(function (require) {
       it('should create a new Vis object when params change', function () {
         // called on init
         expect(createVisSpy.callCount).to.be(1);
-        renderbot.updateParams();
+        renderbot.updateParams(_.clone(params));
         // not called again, same params
         expect(createVisSpy.callCount).to.be(1);
         renderbot.vis.params = { one: 'fishy', two: 'fishy' };
