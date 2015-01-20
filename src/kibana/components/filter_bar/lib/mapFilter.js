@@ -23,6 +23,7 @@ define(function (require) {
     var mappers = [
       Private(require('./mapTerms')),
       Private(require('./mapRange')),
+      Private(require('./mapGeoBoundingBox')),
       Private(require('./mapExists')),
       Private(require('./mapMissing')),
       Private(require('./mapQueryString')),

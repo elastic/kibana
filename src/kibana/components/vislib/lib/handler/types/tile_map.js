@@ -7,7 +7,7 @@ define(function (require) {
 
     return function (vis) {
       var data = new Data(vis.data, vis._attr);
-
+      data.color = function (label) {return '#ff6128'; };
       var MapHandler = new Handler(vis, {
         data: data
       });
