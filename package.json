@@ -24,11 +24,10 @@
     "Lukas Olson <lukas.olson@elasticsearch.com>"
   ],
   "scripts": {
+    "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
-    "test": "grunt test --use-jruby",
-    "server": "grunt server",
-    "precommit": "grunt hintStagedFiles",
-    "prepush": "echo"
+    "server": "node ./src/server/bin/kibana.js",
+    "precommit": "grunt hintStagedFiles"
   },
   "repository": {
     "type": "git",
@@ -93,17 +92,6 @@
     "simple-git": "^0.11.0",
     "tar": "^1.0.1"
   },
-  "scripts": {
-    "test": "grunt test --use-jruby",
-    "server": "grunt server",
-    "precommit": "grunt hintStagedFiles",
-    "prepush": "echo"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:elasticsearch/kibana.git"
-  },
-  "author": "",
   "license": "Apache 2.0",
   "bugs": {
     "url": "https://github.com/elasticsearch/kibana/issues"
