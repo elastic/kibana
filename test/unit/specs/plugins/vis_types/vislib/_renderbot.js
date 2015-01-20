@@ -24,7 +24,6 @@ define(function (require) {
         Renderbot = Private(require('plugins/vis_types/_renderbot'));
         VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
         normalizeChartData = Private(require('components/agg_response/index'));
-
       });
     }
 
@@ -100,7 +99,7 @@ define(function (require) {
       it('should create a new Vis object when params change', function () {
         // called on init
         expect(createVisSpy.callCount).to.be(1);
-        renderbot.updateParams(_.clone(params));
+        renderbot.updateParams();
         // not called again, same params
         expect(createVisSpy.callCount).to.be(1);
         renderbot.vis.params = { one: 'fishy', two: 'fishy' };
