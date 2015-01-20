@@ -218,13 +218,8 @@ define(function (require) {
       var grouped = (this._attr.mode === 'grouped');
 
       if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
-        this._attr.mode === 'silhouette' || this._attr.defaultYMin) {
+        this._attr.mode === 'silhouette') {
         return 0;
-      }
-
-      // User defined y axis min value
-      if (this._attr.userDefinedYMin) {
-        return this.validateUserDefinedYMin(this._attr.userDefinedYMin);
       }
 
       // When there is only one data point,
@@ -262,11 +257,6 @@ define(function (require) {
 
       if (self._attr.mode === 'percentage') {
         return 1;
-      }
-
-      // User defined y axis min value
-      if (this._attr.userDefinedYMin) {
-        return this.validateUserDefinedYMin(this._attr.userDefinedYMin);
       }
 
       // if there is only one data point and its less than zero,

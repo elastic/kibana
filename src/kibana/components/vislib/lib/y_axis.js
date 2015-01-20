@@ -56,6 +56,18 @@ define(function (require) {
         }
       }
 
+      if (!this._attr.defaultYExtents) {
+        // if yMin and yMax are both positive, then yMin should be zero
+        if (this.yMin > 0 && this.yMax > 0) {
+          this.yMin = 0;
+        }
+
+        // if yMin and yMax are both negative, then yMax should be zero
+        if (this.yMin < 0 && this.yMax < 0) {
+          this.yMax = 0;
+        }
+      }
+
       // save reference to y scale
       this.yScale = d3.scale.linear()
       .domain([this.yMin, this.yMax])

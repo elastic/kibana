@@ -83,7 +83,6 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var height = yScale.range()[0];
       var defaultOpacity = this._attr.defaultOpacity;
 
       var area = d3.svg.area()
@@ -95,10 +94,7 @@ define(function (require) {
       })
       .y0(function (d) {
         if (isOverlapping) {
-          if (!self._attr.defaultYMin) {
-            return yScale(0);
-          }
-          return height;
+          return yScale(0);
         }
 
         return yScale(d.y0);

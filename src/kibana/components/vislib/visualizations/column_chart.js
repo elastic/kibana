@@ -158,14 +158,14 @@ define(function (require) {
         return xScale.rangeBand();
       })
       .attr('y', function (d) {
-        if (d.y < 0 && !self._attr.defaultYMin) {
+        if (d.y < 0) {
           return yScale(d.y0);
         }
 
         return yScale(d.y0 + d.y);
       })
       .attr('height', function (d) {
-        if (d.y < 0 && !self._attr.defaultYMin) {
+        if (d.y < 0) {
           return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
         }
 
@@ -198,7 +198,6 @@ define(function (require) {
       var groupSpacingPercentage = 0.15;
       var isTimeScale = (data.ordered && data.ordered.date);
       var minWidth = 1;
-      var self = this;
       var barWidth;
 
       // update
@@ -226,14 +225,14 @@ define(function (require) {
         return xScale.rangeBand() / n;
       })
       .attr('y', function (d) {
-        if (d.y < 0 && !self._attr.defaultYMin) {
+        if (d.y < 0) {
           return yScale(0);
         }
 
         return yScale(d.y);
       })
       .attr('height', function (d) {
-        if (d.y < 0 && !self._attr.defaultYMin) {
+        if (d.y < 0) {
           return Math.abs(yScale(0) - yScale(d.y));
         }
 
