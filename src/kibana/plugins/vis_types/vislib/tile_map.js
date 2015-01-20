@@ -26,6 +26,7 @@ define(function (require) {
           title: 'Value',
           min: 1,
           max: 1,
+          aggFilter: '!std_deviation',
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
