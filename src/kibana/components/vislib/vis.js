@@ -25,8 +25,8 @@ define(function (require) {
       Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
-      this._attr = _.defaults(config || {}, {
-        defaultYMin: false
+      this._attr = _.defaults({}, config || {}, {
+        defaultYMin: true
       });
       this.eventTypes = {
         enabled: []
