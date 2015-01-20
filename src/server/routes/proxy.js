@@ -1,10 +1,11 @@
+var logger = require('../lib/logger');
 var express = require('express');
 var router = module.exports = express.Router();
 var httpProxy = require('http-proxy');
 var config = require('../config');
 var url = require('url');
 var target = url.parse(config.elasticsearch);
-var proxy = new httpProxy.createProxyServer();
+var proxy = new httpProxy.createProxyServer({});
 var buffer = require('buffer');
 
 proxy.on('proxyReq', function (proxyReq, req, res, options) {
@@ -43,7 +44,8 @@ router.use(function (req, res, next) {
   var options = {
     target: config.elasticsearch,
     secure: config.kibana.verify_ssl,
-    xfwd: true
+    xfwd: true,
+    timeout: (config.kibana.request_timeout) * 1000
   };
   proxy.web(req, res, options);
 });
