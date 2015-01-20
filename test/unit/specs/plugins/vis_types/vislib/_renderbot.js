@@ -84,7 +84,7 @@ define(function (require) {
           }
         }, mockVisType)
       };
-      var $el = 'element';
+      var $el = $('<div>testing</div>');
       var createVisSpy;
       var getParamsStub;
       var renderbot;
