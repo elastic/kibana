@@ -59,8 +59,8 @@ define(function (require) {
       });
 
       afterEach(function () {
-        //$(vis.el).remove();
-        //vis = null;
+        $(vis.el).remove();
+        vis = null;
       });
 
       describe('checkIfEnoughData method throws an error when not enough data', function () {
