@@ -5,7 +5,8 @@
 
   "globals": {
     "define": true,
-    "require": true
+    "require": true,
+    "console": true
   },
 
   "camelcase": false,
