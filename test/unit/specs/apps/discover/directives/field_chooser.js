@@ -188,6 +188,15 @@ define(function (require) {
         done();
       });
 
+      it('should create buckets with formatted and raw values', function (done) {
+        $scope.details(field);
+        expect(field.details.buckets).to.not.be(undefined);
+        expect(field.details.buckets[0].value).to.be(40.1415926535);
+        expect(field.details.buckets[0].display).to.be(40.142);
+        done();
+      });
+
+
       it('should recalculate the details on open fields if the data changes', function () {
         $scope.details(field);
         sinon.stub($scope, 'details');

@@ -169,6 +169,9 @@ define(function (require) {
               count: 5,
               grouped: false
             });
+            _.each(field.details.buckets, function (bucket) {
+              bucket.display = field.format.convert(bucket.value);
+            });
             $scope.increaseFieldCounter(field, 1);
           } else {
             delete field.details;

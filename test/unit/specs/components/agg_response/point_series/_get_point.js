@@ -8,7 +8,7 @@ define(function (require) {
       getPoint = Private(require('components/agg_response/point_series/_get_point'));
     }));
 
-    it('properly unwraps and scales values without the a series', function () {
+    it('properly unwraps and scales values without a series', function () {
       var row = [ { value: 1 }, { value: 2 }];
       var point = getPoint({ i: 0 }, null, 5, row, { i: 1 });
 
@@ -28,6 +28,12 @@ define(function (require) {
         .and.have.property('series', 2)
         .and.have.property('y', 3)
         .and.have.property('aggConfigResult', row[2]);
+    });
+
+    it('ignores points with a y value of NaN', function () {
+      var row = [ { value: 1 }, { value: 'NaN' }];
+      var point = getPoint({ i: 0 }, null, 5, row, { i: 1 });
+      expect(point).to.be(void 0);
     });
   }];
 });

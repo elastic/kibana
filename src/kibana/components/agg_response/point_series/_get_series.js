@@ -15,12 +15,14 @@ define(function (require) {
 
         if (!multiY) {
           var point = partGetPoint(row, aspects.y);
-          addToSiri(series, point, point.series);
+          if (point) addToSiri(series, point, point.series);
           return;
         }
 
         aspects.y.forEach(function (y) {
           var point = partGetPoint(row, y);
+          if (!point) return;
+
           var prefix = point.series ? point.series + ': ' : '';
           var seriesId = prefix + y.agg.id;
           var seriesLabel = prefix + y.col.title;
