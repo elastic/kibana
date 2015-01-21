@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  var config = require('../src/server/config');
+  var config = require('./utils/server-config');
 
   var maybeStartServer = function (options) {
     return function () {
