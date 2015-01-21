@@ -10,6 +10,7 @@ var join = path.join;
 var rel = join.bind(null, __dirname);
 var ROOT = rel('../../../');
 var SRC = join(ROOT, 'src');
+var NODE_MODULES = join(ROOT, 'node_modules');
 var APP = join(SRC, 'kibana');
 var TEST = join(ROOT, 'test');
 
@@ -39,6 +40,8 @@ module.exports = function (app) {
   }));
 
   app.use('/test', express.static(TEST));
+  app.use('/src', express.static(SRC));
+  app.use('/node_modules', express.static(NODE_MODULES));
   app.use('/specs', function (req, res) {
     var unit = join(ROOT, '/test/unit/');
     glob(join(unit, 'specs/**/*.js'), function (er, files) {
