@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+
   describe('IndexPattern#flattenSearchResponse()', function () {
 
     var indexPattern = {
@@ -16,8 +17,6 @@ define(function (require) {
       }
     };
 
-    indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);
-
     var fixture = {
       message: 'Hello World',
       geo: {
@@ -32,7 +31,7 @@ define(function (require) {
     };
 
     it('should flatten keys as far down as the mapping goes', function () {
-      var obj = indexPattern.flattenSearchResponse(fixture);
+      var obj = flattenSearchResponse(indexPattern, fixture);
       expect(obj).to.have.property('geo.coordinates', fixture.geo.coordinates);
       expect(obj).to.not.have.property('geo.coordinates.lat');
       expect(obj).to.not.have.property('geo.coordinates.lon');
@@ -44,12 +43,12 @@ define(function (require) {
     });
 
     it('should flatten keys not in the mapping', function () {
-      var obj = indexPattern.flattenSearchResponse(fixture);
+      var obj = flattenSearchResponse(indexPattern, fixture);
       expect(obj).to.have.property('noMapping', true);
     });
 
     it('should preserve objects in arrays', function () {
-      var obj = indexPattern.flattenSearchResponse(fixture);
+      var obj = flattenSearchResponse(indexPattern, fixture);
       expect(obj).to.have.property('tags', fixture['tags']);
     });
   });
