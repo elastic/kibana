@@ -7,7 +7,7 @@ module.exports = {
   unit: {
     options: {
       urls: [
-        'http://localhost:8000/test/unit/'
+        'http://localhost:5601/test/unit/'
       ]
     }
   }
