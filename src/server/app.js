@@ -30,6 +30,7 @@ if (app.get('env') === 'development') {
 // TODO: WE might want to move the middleware to each of the individual routes
 // so we don't have weird conflicts in the future.
 app.use('/elasticsearch', proxy);
+app.use('/enforcer', require('./lib/enforce'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,6 +40,7 @@ app.use(express.static(config.public_folder));
 if (config.external_plugins_folder) app.use('/plugins', express.static(config.external_plugins_folder));
 
 app.use('/', routes);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
