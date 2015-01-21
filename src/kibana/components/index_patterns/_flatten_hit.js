@@ -2,20 +2,30 @@
 // returns a flattened version
 define(function (require) {
   var _ = require('lodash');
-  return function (hit) {
+  var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+
+  return function flattenHit(indexPattern, hit) {
     if (hit.$$_flattened) return hit.$$_flattened;
 
-    var self = this;
-    var source = self.flattenSearchResponse(hit._source);
-    var fields = _.omit(self.flattenSearchResponse(hit.fields), function (val, name) {
-      var field = self.fields.byName[name];
-      if (field && !field.scripted && !_.has(source, name)) {
+    var fields = indexPattern.fields;
+    var flatSource = flattenSearchResponse(indexPattern, hit._source);
+    var flatFields = _(flattenSearchResponse(indexPattern, hit.fields))
+    .omit(function (val, name) {
+      var field = fields.byName[name];
+      if (field && !field.scripted && !_.has(flatSource, name)) {
         return true;
       } else {
         return false;
       }
-    });
+    })
+    .value();
 
-    return hit.$$_flattened = _.merge(source, fields, _.pick(hit, self.metaFields));
+    hit.$$_flattened = _.merge(
+      flatSource,
+      flatFields,
+      _.pick(hit, indexPattern.metaFields)
+    );
+
+    return hit.$$_flattened;
   };
 });
