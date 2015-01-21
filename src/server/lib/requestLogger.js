@@ -4,7 +4,7 @@ module.exports = function (options) {
   return function (req, res, next) {
     var startTime = new Date();
     var end = res.end;
-    var _req = _.pick(req, ['url', 'headers']);
+    var _req = _.pick(req, ['url', 'headers', 'method']);
     _req.connection = _.pick(req.connection, ['remoteAddress', 'remotePort']);
     res.end = function (chunk, encoding) {
       var contentLength = parseInt(res._header['content-length'], 10);
