@@ -6,22 +6,30 @@ define(function (require) {
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var seriesPosNeg = require('vislib_fixtures/mock_data/date_histogram/_series_pos_neg');
+  var seriesNeg = require('vislib_fixtures/mock_data/date_histogram/_series_neg');
   var termsColumns = require('vislib_fixtures/mock_data/terms/_columns');
   var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
   var dataArray = [
     series,
+    seriesPosNeg,
+    seriesNeg,
     termsColumns,
     histogramRows,
     stackedSeries
   ];
   var names = [
     'series',
+    'series with positive and negative values',
+    'series with negative values',
     'terms columns',
     'histogram rows',
     'stackedSeries'
   ];
   var modes = [
+    'stacked',
+    'stacked',
     'stacked',
     'grouped',
     'percentage',
@@ -156,6 +164,25 @@ define(function (require) {
         it('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
             expect(_.isFunction(chart.draw())).to.be(true);
+          });
+        });
+
+        it('should return a yMin and yMax', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            expect(yAxis.yMin).to.not.be(undefined);
+            expect(yAxis.yMax).to.not.be(undefined);
+          });
+        });
+
+        it('should render a zero axis line', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            if (yAxis.yMin < 0 && yAxis.yMax > 0) {
+              expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
+            }
           });
         });
       });
