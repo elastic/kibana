@@ -17,8 +17,9 @@ module.exports = function (grunt) {
 
       function onResponse(res) {
         grunt.log.debug('Server responded with', res.statusCode);
+        var app = res.headers['x-app-name'];
 
-        if (res.statusCode === 200) {
+        if (res.statusCode === 200 && app && app === 'kibana') {
           grunt.log.ok('Kibana server already started on port', options.port);
         } else {
           grunt.log.error('Another server is already running on port', options.port);
