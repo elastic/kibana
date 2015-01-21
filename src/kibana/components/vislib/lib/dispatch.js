@@ -141,10 +141,10 @@ define(function (require) {
       var self = this;
       var addEvent = this.addEvent;
       function load() {
-        console.log("load event dispatched")
+        console.log('load event dispatched');
       }
       return addEvent('load', load);
-    }
+    };
 
     /**
      * Determine if we will allow brushing

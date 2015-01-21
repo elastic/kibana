@@ -158,7 +158,6 @@ define(function (require) {
           }
 
           function fitBounds() {
-            console.log('fitting Bounds')
             map.fitBounds(featureLayer.getBounds());
           }
 
