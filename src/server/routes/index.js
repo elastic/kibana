@@ -4,18 +4,12 @@ var config = require('../config');
 var _ = require('lodash');
 
 router.get('/config', function (req, res, next) {
-  var excludedKeys = [
-    'port',
-    'host',
-    'verify_ssl',
-    'request_timeout',
-    'elasticsearch_url',
-    'elasticsearch_username',
-    'elasticsearch_password',
-    'elasticsearch_preserve_host',
-    'bundled_plugin_ids'
+  var keys = [
+    'kibana_index',
+    'default_app_id',
+    'shard_timeout'
   ];
-  var data = _.omit(config.kibana, excludedKeys);
+  var data = _.pick(config.kibana, keys);
   data.plugins = config.plugins;
   res.json(data);
 });
