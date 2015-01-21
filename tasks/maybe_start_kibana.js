@@ -23,6 +23,7 @@ module.exports = function (grunt) {
           grunt.log.ok('Kibana server already started on port', options.port);
         } else {
           grunt.log.error('Another server is already running on port', options.port);
+          process.exit(1);
         }
         done(res);
       }
