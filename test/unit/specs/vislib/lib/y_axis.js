@@ -120,26 +120,89 @@ define(function (require) {
 
     describe('getYScale Method', function () {
       var yScale;
+      var graphData;
       var height = 50;
 
-      beforeEach(function () {
-        yScale = yAxis.getYScale(height);
-      });
+      function checkDomain(min, max) {
+        var domain = yScale.domain();
+        expect(domain[0]).to.be.lessThan(min + 1);
+        expect(domain[1]).to.be.greaterThan(max - 1);
+        return domain;
+      }
 
-      it('should return a function', function () {
-        expect(_.isFunction(yScale)).to.be(true);
-      });
-
-      it('should return the correct domain', function () {
-        expect(yScale.domain()[0]).to.be(0);
-        // Should be greater than 36 since we are using .nice()
-        expect(yScale.domain()[1]).to.be.greaterThan(36);
-      });
-
-      it('should return the correct range', function () {
+      function checkRange() {
         expect(yScale.range()[0]).to.be(height);
-        // The yScale range should always start from 0
         expect(yScale.range()[1]).to.be(0);
+      }
+
+      describe('API', function () {
+        beforeEach(function () {
+          createData(defaultGraphData);
+          yScale = yAxis.getYScale(height);
+        });
+
+        it('should return a function', function () {
+          expect(_.isFunction(yScale)).to.be(true);
+        });
+      });
+
+      describe('positive values', function () {
+        beforeEach(function () {
+          graphData = defaultGraphData;
+          createData(graphData);
+          yScale = yAxis.getYScale(height);
+        });
+
+
+        it('should have domain between 0 and max value', function () {
+          var min = 0;
+          var max = _.max(_.flatten(graphData));
+          var domain = checkDomain(min, max);
+          expect(domain[1]).to.be.greaterThan(0);
+          checkRange();
+        });
+      });
+
+      describe('negative values', function () {
+        beforeEach(function () {
+          graphData = [
+            [ -8, -23, -30, -28, -36, -30, -26, -22, -29, -24 ],
+            [ -22, -8, -30, -4, 0, 0, -3, -22, -14, -24 ]
+          ];
+          createData(graphData);
+          yScale = yAxis.getYScale(height);
+        });
+
+
+        it('should have domain between min value and 0', function () {
+          var min = _.min(_.flatten(graphData));
+          var max = 0;
+          var domain = checkDomain(min, max);
+          expect(domain[0]).to.be.lessThan(0);
+          checkRange();
+        });
+
+      });
+
+      describe('positive and negative values', function () {
+        beforeEach(function () {
+          graphData = [
+            [ 8, 23, 30, 28, 36, 30, 26, 22, 29, 24 ],
+            [ 22, 8, -30, -4, 0, 0, 3, -22, 14, 24 ]
+          ];
+          createData(graphData);
+          yScale = yAxis.getYScale(height);
+        });
+
+
+        it('should have domain between min and max values', function () {
+          var min = _.min(_.flatten(graphData));
+          var max = _.max(_.flatten(graphData));
+          var domain = checkDomain(min, max);
+          expect(domain[0]).to.be.lessThan(0);
+          expect(domain[1]).to.be.greaterThan(0);
+          checkRange();
+        });
       });
     });
 
