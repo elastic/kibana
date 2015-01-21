@@ -17,7 +17,7 @@ define(function (require) {
       this.el = args.el;
       this.yMin = args.yMin;
       this.yMax = args.yMax;
-      this._attr = _.defaults(args._attr || {}, {});
+      this._attr = args._attr || {};
     }
 
     _(YAxis.prototype).extend(ErrorHandler.prototype);
