@@ -1,3 +1,5 @@
+var config = require('../utils/server-config');
+var unitTestUrl = require('util').format('http://localhost:%d/test/unit/?saucelabs=true', config.kibana.port);
 var buildId = 'test build';
 if (process.env.TRAVIS_BUILD_ID) {
   buildId = 'travis build #' + process.env.TRAVIS_BUILD_ID;
@@ -8,7 +10,7 @@ module.exports = {
     options: {
       username: 'kibana',
       key: process.env.SAUCE_ACCESS_KEY,
-      urls: ['http://localhost:8000/test/unit/?saucelabs=true'],
+      urls: [ unitTestUrl ],
       testname: 'Kibana Browser Tests',
       build: buildId,
       concurrency: 10,
