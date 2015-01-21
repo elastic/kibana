@@ -1,25 +1,36 @@
 module.exports = function (grunt) {
+  var config = require('../src/server/config');
+
   var maybeStartServer = function (options) {
     return function () {
       var http = require('http');
-
-      var req = http.request({
+      var opts = {
         method: 'HEAD',
         path: '/',
         host: 'localhost',
         port: options.port
-      });
+      };
+
+      grunt.log.debug('checking for server', JSON.stringify(opts));
+
+      var req = http.request(opts);
 
       function onResponse(res) {
+        grunt.log.debug('Server responded with', res.statusCode);
+
         if (res.statusCode === 200) {
-          grunt.log.writeln('server already started');
+          grunt.log.ok('Kibana server already started on port', options.port);
         } else {
-          grunt.log.error('another server is already running at localhost:8000!');
+          grunt.log.error('Another server is already running on port', options.port);
         }
         done(res);
       }
 
-      function onError() {
+      function onError(err) {
+        if (err.code !== 'ECONNREFUSED') {
+          grunt.log.error('Kibana server check failed', err);
+        }
+
         grunt.config.set(options.name, true);
         grunt.task.run(options.tasks);
         done();
@@ -39,9 +50,10 @@ module.exports = function (grunt) {
       req.end();
     };
   };
+
   grunt.registerTask('maybe_start_kibana', maybeStartServer({
     name: 'kibana-server',
-    port: 8000,
+    port: config.kibana.port,
     tasks: ['kibana_server']
   }));
 };
