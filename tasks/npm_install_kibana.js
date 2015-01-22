@@ -1,13 +1,11 @@
 var child_process = require('child_process');
 var join = require('path').join;
 module.exports = function (grunt) {
-  grunt.registerTask('warble', 'Creates an executable jar.', function () {
+  grunt.registerTask('npm_install_kibana', 'NPM isntall kibana server into dist', function () {
     var done = this.async();
-    var jrubyPath = grunt.config.get('jrubyPath');
-    var command = jrubyPath + '/bin/jruby -S warble';
-    var options = {
-      cwd: join(grunt.config.get('build'), 'kibana')
-    };
+    var cwd = join(grunt.config.get('build'), 'dist', 'kibana', 'src');
+    var command = 'npm install  --production';
+    var options = { cwd: cwd };
     child_process.exec(command, options, function (err, stdout, stderr) {
       if (err) {
         grunt.log.error(stderr);
@@ -18,3 +16,5 @@ module.exports = function (grunt) {
     });
   });
 };
+
+

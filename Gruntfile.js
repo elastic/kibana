@@ -14,8 +14,8 @@ module.exports = function (grunt) {
     buildApp: __dirname + '/build/kibana', // build directory for the app
     configFile: __dirname + '/src/server/config/kibana.yml',
 
-    jrubyVersion: '1.7.14',
-    jrubyPath: __dirname + '/.jruby',
+    nodeVersion: '0.10.35',
+    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
 
     unitTestDir: __dirname + '/test/unit',
     testUtilsDir: __dirname + '/test/utils',

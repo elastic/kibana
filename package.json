@@ -1,10 +1,56 @@
 {
   "name": "kibana",
-  "private": true,
+  "description": "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "keywords": [
+    "kibana",
+    "elasticsearch",
+    "logstash",
+    "analytics",
+    "visualizations",
+    "dashboards",
+    "dashboarding"
+  ],
+  "private": false,
   "version": "4.0.0-beta3",
-  "description": "Kibana 4",
-  "main": "Gulpfile.js",
-  "dependencies": {},
+  "main": "src/server/app.js",
+  "homepage": "http://www.elasticsearch.org/overview/kibana/",
+  "bugs": "https://github.com/elasticsearch/kibana/issues",
+  "license": "Apache-2.0",
+  "author": "Rashid Khan <rashid.khan@elasticsearch.com>",
+  "contributors": [
+    "Spencer Alger <spencer.alger@elasticsearch.com>",
+    "Chris Cowan <chris.cowan@elasticsearch.com>",
+    "Joe Fleming <joe.fleming@elasticsearch.com>",
+    "Lukas Olson <lukas.olson@elasticsearch.com>"
+  ],
+  "scripts": {
+    "test": "grunt test",
+    "start": "node ./src/server/bin/kibana.js",
+    "server": "node ./src/server/bin/kibana.js",
+    "precommit": "grunt hintStagedFiles"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elasticsearch/kibana.git"
+  },
+  "dependencies": {
+    "ansicolors": "^0.3.2",
+    "body-parser": "~1.10.1",
+    "bunyan": "^1.2.3",
+    "commander": "^2.6.0",
+    "compression": "^1.3.0",
+    "cookie-parser": "~1.3.3",
+    "debug": "~2.1.1",
+    "express": "~4.10.6",
+    "glob": "^4.3.2",
+    "http-proxy": "^1.8.1",
+    "jade": "~1.8.2",
+    "js-yaml": "^3.2.5",
+    "less-middleware": "1.0.x",
+    "lodash": "^2.4.1",
+    "morgan": "~1.5.1",
+    "serve-favicon": "~2.2.0"
+  },
   "devDependencies": {
     "bluebird": "~2.0.7",
     "connect": "~2.19.5",
@@ -27,7 +73,7 @@
     "grunt-s3": "~0.2.0-alpha.3",
     "grunt-saucelabs": "~8.3.2",
     "html-entities": "^1.1.1",
-    "http-proxy": "~1.1.4",
+    "http-proxy": "~1.8.1",
     "husky": "~0.6.0",
     "istanbul": "~0.2.4",
     "load-grunt-config": "~0.7.0",
@@ -46,20 +92,8 @@
     "simple-git": "^0.11.0",
     "tar": "^1.0.1"
   },
-  "scripts": {
-    "test": "grunt test --use-jruby",
-    "server": "grunt server",
-    "precommit": "grunt hintStagedFiles",
-    "prepush": "echo"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:elasticsearch/kibana.git"
-  },
-  "author": "",
   "license": "Apache 2.0",
   "bugs": {
     "url": "https://github.com/elasticsearch/kibana/issues"
-  },
-  "homepage": "https://www.elasticsearch.org/overview/kibana"
+  }
 }

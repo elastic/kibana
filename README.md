@@ -18,9 +18,8 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 
 ## Requirements
 
-- Java
 - Elasticsearch version 1.4.0 or later
-- ...and nothing else
+- Kibana binary package
 
 *Note:* Groovy scripting must be enabled in Elasticsearch
 
