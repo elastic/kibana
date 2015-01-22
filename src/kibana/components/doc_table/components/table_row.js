@@ -211,7 +211,7 @@ define(function (require) {
          * Create the $$_formatted key on a row
          */
         function _formatRow(row) {
-          row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
+          $scope.indexPattern.flattenHit(row);
           row.$$_formatted = row.$$_formatted || _.mapValues(row.$$_flattened, _formatField);
           return row.$$_formatted;
         }

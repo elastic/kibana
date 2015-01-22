@@ -368,7 +368,7 @@ define(function (require) {
 
           // Flatten the fields
           var indexPattern = $scope.searchSource.get('index');
-          hit.$$_flattened = indexPattern.flattenHit(hit);
+          var flatHit = indexPattern.flattenHit(hit);
 
           var formatAndCount = function (value, name) {
             // add up the counts for each field name
@@ -381,7 +381,7 @@ define(function (require) {
             return formatter.convert(value);
           };
 
-          hit.$$_formatted = _.mapValues(hit.$$_flattened, formatAndCount);
+          hit.$$_formatted = _.mapValues(flatHit, formatAndCount);
         });
 
         // apply the field counts to the field list
