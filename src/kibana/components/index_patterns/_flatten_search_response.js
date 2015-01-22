@@ -1,23 +1,28 @@
 define(function (require) {
   var _ = require('lodash');
   return function (indexPattern, nestedObj) {
-    var key; // original key
-    var stack = []; // track key stack
+    var keys = []; // track key stack
     var flatObj = {};
     var fields = indexPattern.fields;
 
     (function flattenObj(obj) {
-      _.keys(obj).forEach(function (key) {
-        stack.push(key);
-        var flattenKey = stack.join('.');
+      _.forOwn(obj, function (val, key) {
+        keys.push(key);
 
-        if ((fields.byName[flattenKey] || _.isArray(obj[key]) || !_.isObject(obj[key]))) {
-          flatObj[flattenKey] = obj[key];
-        } else if (_.isObject(obj[key])) {
-          flattenObj(obj[key]);
+        var keyPath = keys.join('.');
+        var field = fields.byName[keyPath];
+
+        if (field && field.scripted) {
+          val = val[0];
         }
 
-        stack.pop();
+        if (!field && _.isPlainObject(val)) {
+          flattenObj(val);
+        } else {
+          flatObj[keyPath] = val;
+        }
+
+        keys.pop();
       });
     }(nestedObj));
 
