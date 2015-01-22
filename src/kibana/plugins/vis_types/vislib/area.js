@@ -20,7 +20,7 @@ define(function (require) {
           defaultYExtents: false
         },
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
-        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
+        editor: require('text!plugins/vis_types/vislib/editors/area.html')
       },
       schemas: new Schemas([
         {
