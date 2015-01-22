@@ -45,6 +45,21 @@
       </tbody>
     </table>
 
-    <div id="json-ace" ng-show="mode == 'json'" readonly ui-ace="{ useWrapMode: true, advanced: { highlightActiveLine: false }, rendererOptions: { showPrintMargin: false, maxLines: 4294967296 }, mode: 'json' }" ng-model="hit_json"></div>
+    <div
+      id="json-ace"
+      ng-show="mode == 'json'"
+      ng-model="hitJson"
+      readonly
+      ui-ace="{
+        useWrapMode: true,
+        advanced: {
+          highlightActiveLine: false
+        },
+        rendererOptions: {
+          showPrintMargin: false,
+          maxLines: 4294967296
+        },
+        mode: 'json'
+      }"></div>
   </div>
 </div>
