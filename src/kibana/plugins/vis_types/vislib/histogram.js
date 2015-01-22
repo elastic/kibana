@@ -18,7 +18,7 @@ define(function (require) {
           defaultYExtents: false
         },
         modes: ['stacked', 'percentage', 'grouped'],
-        editor: require('text!plugins/vis_types/vislib/editors/histogram.html')
+        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },
       schemas: new Schemas([
         {

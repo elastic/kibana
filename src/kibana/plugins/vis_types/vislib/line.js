@@ -16,7 +16,7 @@ define(function (require) {
           addLegend: true,
           defaultYExtents: false
         },
-        editor: require('text!plugins/vis_types/vislib/editors/line.html')
+        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },
       schemas: new Schemas([
         {
