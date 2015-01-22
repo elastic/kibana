@@ -8,24 +8,24 @@ define(function (require) {
     if (hit.$$_flattened) return hit.$$_flattened;
 
     var fields = indexPattern.fields;
-    var flatSource = flattenSearchResponse(indexPattern, hit._source);
-    var flatFields = _(flattenSearchResponse(indexPattern, hit.fields))
-    .omit(function (val, name) {
-      var field = fields.byName[name];
-      if (field && !field.scripted && !_.has(flatSource, name)) {
-        return true;
-      } else {
-        return false;
-      }
-    })
-    .value();
+    var flat = _({});
 
-    hit.$$_flattened = _.merge(
-      flatSource,
-      flatFields,
-      _.pick(hit, indexPattern.metaFields)
+    // start with the _source values
+    flat.assign(flattenSearchResponse(indexPattern, hit._source));
+
+    // mix in scripted fields and stuff not in the mapping
+    flat.assign(
+      flattenSearchResponse(indexPattern, hit.fields)
+      .pick(function (val, name) {
+        var field = fields.byName[name];
+        return (field && field.scripted) || !flat.has(name);
+      })
     );
 
-    return hit.$$_flattened;
+    // add the metaFields (id, type, etc.)
+    flat.assign(_.pick(hit, indexPattern.metaFields));
+
+    // cache the result
+    return (hit.$$_flattened = flat.value());
   };
 });
