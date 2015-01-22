@@ -32,7 +32,8 @@ define(function (require) {
   var visLibParams = {
     type: 'area',
     addLegend: true,
-    addTooltip: true
+    addTooltip: true,
+    defaultYExtents: false
   };
 
   angular.module('AreaChartFactory', ['kibana']);
@@ -239,6 +240,23 @@ define(function (require) {
             expect(function () {
               chart.render();
             }).to.throwError();
+          });
+        });
+      });
+
+      describe('defaultYExtents is true', function () {
+        beforeEach(function () {
+          vis._attr.defaultYExtents = true;
+          vis.render(data);
+        });
+
+        it('should return yAxis extents equal to data extents', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+            var yVals = [vis.handler.data.getYMinValue(), vis.handler.data.getYMaxValue()];
+
+            expect(yAxis.yMin).to.equal(yVals[0]);
+            expect(yAxis.yMax).to.equal(yVals[1]);
           });
         });
       });
