@@ -5,19 +5,9 @@ define(function (require) {
 
   function flattenHit(indexPattern, hit) {
     var flat = {};
-    var fields = indexPattern.fields.byName;
-
-    // assign the meta fields
-    _.each(indexPattern.metaFields, function (meta) {
-      flat[meta] = hit[meta];
-    });
-
-    // unwrap computed fields
-    _.forOwn(hit.fields, function (val, key) {
-      flat[key] = val[0];
-    });
 
     // recursively merge _source
+    var fields = indexPattern.fields.byName;
     (function flatten(obj, keyPrefix) {
       keyPrefix = keyPrefix ? keyPrefix + '.' : '';
       _.forOwn(obj, function (val, key) {
@@ -32,6 +22,16 @@ define(function (require) {
         flatten(val, key);
       });
     }(hit._source));
+
+    // unwrap computed fields
+    _.forOwn(hit.fields, function (val, key) {
+      flat[key] = val[0];
+    });
+
+    // assign the meta fields
+    _.each(indexPattern.metaFields, function (meta) {
+      flat[meta] = hit[meta];
+    });
 
     return flat;
   }
