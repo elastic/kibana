@@ -81,8 +81,8 @@ define(function (require) {
       expect(flat).to.have.property('delta', 42);
     });
 
-    it('merges in other fields as-is', function () {
-      expect(flat).to.have.property('random', hit.fields.random);
+    it('assumes that all fields are "computed fields"', function () {
+      expect(flat).to.have.property('random', 0.12345);
     });
   });
 });
