@@ -45,7 +45,7 @@ router.use(function (req, res, next) {
     target: config.elasticsearch,
     secure: config.kibana.verify_ssl,
     xfwd: true,
-    timeout: (config.kibana.request_timeout) * 1000
+    timeout: (config.kibana.request_timeout)
   };
   proxy.web(req, res, options);
 });
