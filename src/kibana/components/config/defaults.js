@@ -79,6 +79,42 @@ define(function (require) {
     'truncate:maxHeight': {
       value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
+    },
+    'deafultFormat:ip': {
+      value: 'string',
+      description: 'The default format to be used for fields of type ip.'
+    },
+    'deafultFormat:date': {
+      value: 'string',
+      description: 'The default format to be used for fields of type date.'
+    },
+    'deafultFormat:string': {
+      value: 'string',
+      description: 'The default format to be used for fields of type string.'
+    },
+    'deafultFormat:number': {
+      value: 'string',
+      description: 'The default format to be used for fields of type number.'
+    },
+    'deafultFormat:boolean': {
+      value: 'string',
+      description: 'The default format to be used for fields of type boolean.'
+    },
+    'deafultFormat:conflict': {
+      value: 'string',
+      description: 'The default format to be used for fields of type conflict.'
+    },
+    'deafultFormat:geo_point': {
+      value: 'string',
+      description: 'The default format to be used for fields of type geo_point.'
+    },
+    'deafultFormat:geo_shape': {
+      value: 'string',
+      description: 'The default format to be used for fields of type geo_shape.'
+    },
+    'deafultFormat:attachment': {
+      value: 'string',
+      description: 'The default format to be used for fields of type attachment.'
     }
   };
 });
