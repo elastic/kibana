@@ -271,8 +271,8 @@ define(function (require) {
       };
 
       self.metaFields = config.get('metaFields');
-      self.flattenSearchResponse = flattenSearchResponse.bind(self);
-      self.flattenHit = flattenHit.bind(self);
+      self.flattenSearchResponse = _.partial(flattenSearchResponse, self);
+      self.flattenHit = _.partial(flattenHit, self);
       self.getComputedFields = getComputedFields.bind(self);
 
 
