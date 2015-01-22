@@ -21,8 +21,8 @@ define(function (require) {
     var indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
 
     indexPattern.getComputedFields = _.bind(getComputedFields, indexPattern);
-    indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);
-    indexPattern.flattenHit = _.bind(flattenHit, indexPattern);
+    indexPattern.flattenSearchResponse = _.partial(flattenSearchResponse, indexPattern);
+    indexPattern.flattenHit = _.partial(flattenHit, indexPattern);
     indexPattern.metaFields = ['_id', '_type', '_source'];
     indexPattern.id = 'logstash-*';
 
