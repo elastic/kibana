@@ -43,7 +43,6 @@ define(function (require) {
         $el.empty();
 
         var init = function () {
-          _formatRow($scope.row);
           createSummaryRow($scope.row, $scope.row._id);
         };
 
@@ -92,15 +91,17 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {
+          var indexPattern = $scope.indexPattern;
+
           // We just create a string here because its faster.
           var newHtmls = [
             openRowHtml
           ];
 
-          if ($scope.indexPattern.timeFieldName) {
+          if (indexPattern.timeFieldName) {
             newHtmls.push(cellTemplate({
               timefield: true,
-              formatted: _displayField(row, $scope.indexPattern.timeFieldName)
+              formatted: _displayField(row, indexPattern.timeFieldName)
             }));
           }
 
@@ -109,14 +110,11 @@ define(function (require) {
 
             var sources = _.extend({}, row.$$_formatted, row.highlight);
             if (column === '_source') {
-              var sourceConfig = {
-                source: _.mapValues(sources, function (val, field) {
-                  return _displayField(row, field, false);
-                }),
+              formatted = sourceTemplate({
+                source: indexPattern.formatHit(row),
                 highlight: row.highlight,
                 shortDotsFilter: shortDotsFilter
-              };
-              formatted = sourceTemplate(sourceConfig);
+              });
             } else {
               formatted = _displayField(row, column, true);
             }
@@ -165,7 +163,7 @@ define(function (require) {
          * Fill an element with the value of a field
          */
         function _displayField(row, field, breakWords) {
-          var text = _getValForField(row, field);
+          var text = _.asString($scope.indexPattern.formatHit(row)[field]);
           text = highlightFilter(text, row.highlight && row.highlight[field]);
 
           if (breakWords) {
@@ -179,56 +177,6 @@ define(function (require) {
           }
 
           return text;
-        }
-
-        /**
-         * get the value of a field from a row, serialize it to a string
-         * and truncate it if necessary
-         *
-         * @param  {object} row - the row to pull the value from
-         * @param  {string} field - the name of the field (dot-seperated paths are accepted)
-         * @return {[type]} a string, which should be inserted as text, or an element
-         */
-        function _getValForField(row, field) {
-          var val;
-
-          if (row.highlight && row.highlight[field]) {
-            // Strip out the highlight tags so we have the "original" value
-            var untagged = _.map(row.highlight[field], function (value) {
-              return value
-                .split(highlightTags.pre).join('')
-                .split(highlightTags.post).join('');
-            });
-            return _formatField(untagged, field);
-          }
-
-          // discover formats all of the values and puts them in $$_formatted for display
-          val = (row.$$_formatted || _formatRow(row))[field];
-
-          // undefined and null should just be an empty string
-          val = (val == null) ? '' : val;
-
-          return val;
-        }
-
-        /*
-         * Format a field with the index pattern on scope.
-         */
-        function _formatField(value, name) {
-          var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-          var field = $scope.indexPattern.fields.byName[name];
-          var formatter = (field && field.format) ? field.format : defaultFormat;
-
-          return formatter.convert(value);
-        }
-
-        /*
-         * Create the $$_formatted key on a row
-         */
-        function _formatRow(row) {
-          $scope.indexPattern.flattenHit(row);
-          row.$$_formatted = row.$$_formatted || _.mapValues(row.$$_flattened, _formatField);
-          return row.$$_formatted;
         }
 
         init();
