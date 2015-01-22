@@ -2,30 +2,41 @@
 // returns a flattened version
 define(function (require) {
   var _ = require('lodash');
-  var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
 
-  return function flattenHit(indexPattern, hit) {
-    if (hit.$$_flattened) return hit.$$_flattened;
+  function flattenHit(indexPattern, hit) {
+    var flat = {};
+    var fields = indexPattern.fields.byName;
 
-    var fields = indexPattern.fields;
-    var flat = _({});
+    // assign the meta fields
+    _.each(indexPattern.metaFields, function (meta) {
+      flat[meta] = hit[meta];
+    });
 
-    // start with the _source values
-    flat.assign(flattenSearchResponse(indexPattern, hit._source));
+    // unwrap computed fields
+    _.forOwn(hit.fields, function (val, key) {
+      flat[key] = val[0];
+    });
 
-    // mix in scripted fields and stuff not in the mapping
-    flat.assign(
-      flattenSearchResponse(indexPattern, hit.fields)
-      .pick(function (val, name) {
-        var field = fields.byName[name];
-        return (field && field.scripted) || !flat.has(name);
-      })
-    );
+    // recursively merge _source
+    (function flatten(obj, keyPrefix) {
+      keyPrefix = keyPrefix ? keyPrefix + '.' : '';
+      _.forOwn(obj, function (val, key) {
+        key = keyPrefix + key;
 
-    // add the metaFields (id, type, etc.)
-    flat.assign(_.pick(hit, indexPattern.metaFields));
+        if (flat[key] !== void 0) return;
+        if (fields[key] || !_.isPlainObject(val)) {
+          flat[key] = val;
+          return;
+        }
 
-    // cache the result
-    return (hit.$$_flattened = flat.value());
+        flatten(val, key);
+      });
+    }(hit._source));
+
+    return flat;
+  }
+
+  return function cachedFlatten(indexPattern, hit) {
+    return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
   };
 });

@@ -9,7 +9,6 @@ define(function (require) {
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
-    var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
@@ -271,7 +270,6 @@ define(function (require) {
       };
 
       self.metaFields = config.get('metaFields');
-      self.flattenSearchResponse = _.partial(flattenSearchResponse, self);
       self.flattenHit = _.partial(flattenHit, self);
       self.getComputedFields = getComputedFields.bind(self);
 
