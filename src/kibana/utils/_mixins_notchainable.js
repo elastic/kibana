@@ -10,6 +10,7 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src');
+  var angular = require('angular');
 
   return {
     /**
@@ -181,6 +182,18 @@ define(function (require) {
      */
     callEach: function (arr) {
       _.invoke(arr, 'call');
+    },
+
+    asString: function (val) {
+      if (_.isObject(val)) {
+        return angular.toJson(val);
+      }
+      else if (val == null) {
+        return '';
+      }
+      else {
+        return _.escape('' + val);
+      }
     }
   };
 });
