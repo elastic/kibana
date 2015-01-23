@@ -80,39 +80,39 @@ define(function (require) {
       value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
     },
-    'deafultFormat:ip': {
-      value: 'string',
+    'defaultFormat:ip': {
+      value: 'ip',
       description: 'The default format to be used for fields of type ip.'
     },
-    'deafultFormat:date': {
-      value: 'string',
+    'defaultFormat:date': {
+      value: 'date',
       description: 'The default format to be used for fields of type date.'
     },
-    'deafultFormat:string': {
+    'defaultFormat:string': {
       value: 'string',
       description: 'The default format to be used for fields of type string.'
     },
-    'deafultFormat:number': {
-      value: 'string',
+    'defaultFormat:number': {
+      value: 'number',
       description: 'The default format to be used for fields of type number.'
     },
-    'deafultFormat:boolean': {
+    'defaultFormat:boolean': {
       value: 'string',
       description: 'The default format to be used for fields of type boolean.'
     },
-    'deafultFormat:conflict': {
+    'defaultFormat:conflict': {
       value: 'string',
       description: 'The default format to be used for fields of type conflict.'
     },
-    'deafultFormat:geo_point': {
+    'defaultFormat:geo_point': {
       value: 'string',
       description: 'The default format to be used for fields of type geo_point.'
     },
-    'deafultFormat:geo_shape': {
+    'defaultFormat:geo_shape': {
       value: 'string',
       description: 'The default format to be used for fields of type geo_shape.'
     },
-    'deafultFormat:attachment': {
+    'defaultFormat:attachment': {
       value: 'string',
       description: 'The default format to be used for fields of type attachment.'
     }

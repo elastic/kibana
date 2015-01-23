@@ -3,10 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('sinon/sinon');
     var IndexedArray = require('utils/indexed_array/index');
-    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    var fieldFormats = Private(require('registry/field_formats'));
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
-
 
     function StubIndexPattern(pattern, timeField, fields) {
       this.popularizeField = sinon.spy();
@@ -21,7 +20,7 @@ define(function (require) {
           Object.defineProperty(field, 'format', {
             enumerable: false,
             get: function () {
-              return fieldFormats.defaultByType[field.type];
+              return fieldFormats.defaultFor(field.type);
             }
           });
 

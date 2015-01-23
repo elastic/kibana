@@ -192,7 +192,7 @@ define(function (require) {
         return '';
       }
       else {
-        return _.escape('' + val);
+        return '' + val;
       }
     }
   };

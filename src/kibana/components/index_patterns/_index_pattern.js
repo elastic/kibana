@@ -6,7 +6,7 @@ define(function (require) {
 
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
-    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    var fieldFormats = Private(require('registry/field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var flattenHit = require('components/index_patterns/_flatten_hit');
@@ -109,7 +109,12 @@ define(function (require) {
               format: {
                 get: function () {
                   var formatName = self.customFormats && self.customFormats[field.name];
-                  return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
+                  return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultFor(field.type);
+                }
+              },
+              formatter: {
+                get: function () {
+                  return field.format.convert;
                 }
               },
               sortable: {

@@ -2,6 +2,7 @@ define(function (require) {
   return function MetricAggTypeProvider(Private, indexPatterns) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var fieldFormats = Private(require('registry/field_formats'));
 
     _(MetricAggType).inherits(AggType);
     function MetricAggType(config) {
@@ -26,7 +27,7 @@ define(function (require) {
       if (field && field.type === 'date' && field.format) {
         return field.format;
       } else {
-        return indexPatterns.fieldFormats.byName.number;
+        return fieldFormats.converterFor('number');
       }
     };
 

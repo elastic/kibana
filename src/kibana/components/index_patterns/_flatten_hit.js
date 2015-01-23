@@ -25,6 +25,7 @@ define(function (require) {
 
     // assign the meta fields
     _.each(indexPattern.metaFields, function (meta) {
+      if (meta === '_source') return;
       flat[meta] = hit[meta];
     });
 
