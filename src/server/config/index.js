@@ -16,6 +16,13 @@ try {
   public_folder = path.resolve(__dirname, '..', '..', 'kibana');
 }
 
+var packagePath = path.resolve(__dirname, '..', 'package.json');
+try {
+  fs.statSync(packagePath);
+} catch (err) {
+  packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
+}
+
 var config = module.exports = {
   port                    : kibana.port || 5601,
   host                    : kibana.host || '0.0.0.0',
@@ -25,7 +32,8 @@ var config = module.exports = {
   public_folder           : public_folder,
   external_plugins_folder : process.env.PLUGINS_FOLDER || null,
   bundled_plugins_folder  : path.resolve(public_folder, 'plugins'),
-  kibana                  : kibana
+  kibana                  : kibana,
+  package                 : require(packagePath)
 };
 
 config.plugins = listPlugins(config);

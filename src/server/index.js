@@ -6,6 +6,8 @@ var app = require('./app');
 var http = require('http');
 var config = require('./config');
 var logger = require('./lib/logger');
+var Promise = require('bluebird');
+var initialization = require('./lib/serverInitialization');
 
 
 /**
@@ -50,13 +52,18 @@ function onListening() {
   logger.info('Listening on %s:%d', address.address, address.port);
 }
 
+function start() {
+  var port = parseInt(process.env.PORT, 10) || config.port || 3000;
+  var host = process.env.HOST || config.host || '127.0.0.1';
+  var listen = Promise.promisify(server.listen.bind(server));
+  app.set('port', port);
+  return listen(port, host);
+}
+
 module.exports = {
   server: server,
   start: function (cb) {
-    var port = parseInt(process.env.PORT, 10) || config.port || 3000;
-    var host = process.env.HOST || config.host || '127.0.0.1';
-    app.set('port', port);
-    server.listen(port, host, cb);
+    return initialization().then(start).nodeify(cb);
   }
 };
 
