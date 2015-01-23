@@ -4,7 +4,7 @@ define(function (require) {
 
   require('filters/short_dots');
 
-  module.directive('kbnTableHeader', function () {
+  module.directive('kbnTableHeader', function (shortDotsFilter) {
     var headerHtml = require('text!components/doc_table/components/table_header.html');
     return {
       restrict: 'A',
@@ -19,6 +19,10 @@ define(function (require) {
         var sortableField = function (field) {
           if (!$scope.indexPattern) return;
           return $scope.indexPattern.fields.byName[field].sortable;
+        };
+
+        $scope.tooltip = function (column) {
+          if (!sortableField(column)) return ''; else return 'Sort by ' + shortDotsFilter(column);
         };
 
         $scope.headerClass = function (column) {
