@@ -31,6 +31,7 @@ module.exports = function (grunt) {
       'less'
     ];
     addTestTask(tasks);
+    if (process.env.TRAVIS) tasks.shift('esvm:dev');
     grunt.task.run(tasks);
   });
 
