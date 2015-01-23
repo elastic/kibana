@@ -1,0 +1,18 @@
+define(function (require) {
+  var module = require('modules').get('kibana');
+
+  module.directive('inputWholeNumber', function () {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function ($scope, $elem, attrs, ngModel) {
+        ngModel.$parsers.push(checkWholeNumber);
+        ngModel.$formatters.push(checkWholeNumber);
+
+        function checkWholeNumber(value) {
+          ngModel.$setValidity('whole', value % 1 === 0);
+        }
+      }
+    };
+  });
+});
