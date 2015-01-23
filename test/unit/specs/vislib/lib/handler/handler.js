@@ -106,29 +106,6 @@ define(function (require) {
 
       });
 
-      describe('removeAll Method', function () {
-        beforeEach(function () {
-          inject(function () {
-            vis.handler.removeAll(vis.el);
-          });
-        });
-
-        it('should remove all DOM elements from the el', function () {
-          expect($(vis.el).children().length).to.be(0);
-        });
-      });
-
-      describe('error Method', function () {
-        beforeEach(function () {
-          vis.handler.error('This is an error!');
-        });
-
-        it('should return an error classed DOM element with a text message', function () {
-          expect($(vis.el).find('.error').length).to.be(1);
-          expect($('.error h4').html()).to.be('This is an error!');
-        });
-      });
-
       describe('destroy Method', function () {
         beforeEach(function () {
           vis.handler.destroy();

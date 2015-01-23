@@ -6,6 +6,7 @@ define(function (require) {
     var orderKeys = Private(require('components/vislib/components/zero_injection/ordered_x_keys'));
     var getLabels = Private(require('components/vislib/components/labels/labels'));
     var color = Private(require('components/vislib/components/color/color'));
+    var errors = require('errors');
 
     /**
      * Provides an API for pulling values off the data
@@ -236,6 +237,7 @@ define(function (require) {
       var self = this;
       var arr = [];
       var grouped = (self._attr.mode === 'grouped');
+      var isUndefined;
 
       if (self._attr.mode === 'percentage') {
         return 1;
@@ -250,7 +252,18 @@ define(function (require) {
         return arr.push(self.getYMax(series));
       });
 
-      return _.max(arr);
+      // when all values in the arr are undefined, it signifies that
+      // there are no data values. In this case, we want to throw a
+      // no results error.
+      isUndefined = arr.every(function (val) {
+        return val === undefined;
+      });
+
+      if (!isUndefined) {
+        return _.max(arr);
+      } else {
+        throw new errors.NoResults();
+      }
     };
 
     /**
