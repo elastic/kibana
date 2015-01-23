@@ -1,0 +1,22 @@
+[[kibana-guide]]
+= Kibana User Guide
+
+
+include::introduction.asciidoc[]
+
+include::setup.asciidoc[]
+
+include::access.asciidoc[]
+
+include::discover.asciidoc[]
+
+include::visualize.asciidoc[]
+
+include::dashboard.asciidoc[]
+
+include::settings.asciidoc[]
+
+
+
+
+

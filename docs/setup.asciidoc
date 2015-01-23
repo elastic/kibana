@@ -1,0 +1,2 @@
+[[setup]]
+== Getting Kibana Up and Running
