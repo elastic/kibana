@@ -10,59 +10,49 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsAdvanced', function (config, Notifier, Private) {
+  .directive('kbnSettingsAdvanced', function (config, Notifier, Private, $rootScope) {
     return {
       restrict: 'E',
       link: function ($scope) {
-        var notify = new Notifier();
-        var configVals = config._vals();
         var keyCodes = {
           ESC: 27
         };
 
-        // determine if a value is too complex to be edditted (at this time)
-        var tooComplex = function (conf) {
-          // get the type of the current value or the default
-          switch (conf.type) {
-          case 'string':
-          case 'number':
-          case 'null':
-          case 'undefined':
-            conf.normal = true;
-            break;
-          case 'json':
-            conf.json = true;
-            break;
-          default:
-            if (_.isArray(config.get(conf.name))) {
-              conf.array = true;
-            } else if (typeof config.get(conf.name) === 'boolean') {
-              conf.bool = true;
-            } else {
-              conf.tooComplex = true;
-            }
-          }
-        };
+        function getEditorType(conf) {
+          if (_.contains('number string null undefined', conf.type)) return 'normal';
+          if (_.contains('json array boolean', conf.type)) return conf.type;
+        }
 
-        $scope.configs = _.map(configDefaults, function (def, name) {
-          var conf = {
-            name: name,
-            defVal: def.value,
-            type: (def.type ||  typeof config.get(name)),
-            description: def.description,
-            value: configVals[name]
-          };
+        function isTypeComplex(conf) {
+          return !(conf.json || conf.array || conf.bool || conf.normal);
+        }
 
-          tooComplex(conf);
+        function readConfigVals() {
+          var configVals = config._vals();
 
-          $scope.$on('change:config.' + name, function () {
-            configVals = config._vals();
-            conf.value = configVals[name];
-            tooComplex(conf);
+          $scope.configs = _.map(configDefaults, function (def, name) {
+            var val = configVals[name];
+            var conf = {
+              name: name,
+              defVal: def.value,
+              type: (def.type || _.isArray(val) || typeof val),
+              description: def.description,
+              value: val,
+            };
+
+            var editorType  = getEditorType(conf);
+            conf.json       = editorType === 'json';
+            conf.bool       = editorType === 'bool';
+            conf.array      = editorType === 'array';
+            conf.normal     = editorType === 'normal';
+            conf.tooComplex = !editorType;
+
+            return conf;
           });
+        }
 
-          return conf;
-        });
+        readConfigVals();
+        $rootScope.$on('change:config', readConfigVals);
       }
     };
   });

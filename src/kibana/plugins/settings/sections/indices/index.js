@@ -15,7 +15,7 @@ define(function (require) {
 
   // wrapper directive, which sets some global stuff up like the left nav
   require('modules').get('apps/settings')
-  .directive('kbnSettingsIndices', function ($route, config, kbnUrl) {
+  .directive('kbnSettingsIndices', function ($route, config, kbnUrl, $rootScope) {
     return {
       restrict: 'E',
       transclude: true,
@@ -23,7 +23,7 @@ define(function (require) {
       link: function ($scope) {
         $scope.edittingId = $route.current.params.id;
         $scope.defaultIndex = config.get('defaultIndex');
-        $scope.$on('change:config.defaultIndex', function () {
+        $rootScope.$on('change:config.defaultIndex', function () {
           $scope.defaultIndex = config.get('defaultIndex');
         });
 
