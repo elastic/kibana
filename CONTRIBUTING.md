@@ -17,31 +17,16 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install 0.10
   ```
 
-- Install ruby *1.9.3* (we recommend using [rbenv](https://github.com/sstephenson/rbenv))
-  - See [rbenv docs](https://github.com/sstephenson/rbenv#installation) for installation assistance
-  
-    ```sh
-    ## install ruby and ruby-build using your local package manager (apt, brew, etc)
-    brew install rbenv ruby-build
-    ```
-    
-  - Run `rbenv init` and add `eval "$(rbenv init -)"` to your shell (ex. .bashrc/.bash_profile)
-  - Run `rbenv install` to install the required version
-  - Run `ruby -v` and make sure you are using 1.9.3
-    - Check the installation docs if you have issues getting the correct version
-  - Install bundler by running `gem install bundler`
-  - Install local gems by running `bundle`
-
-- Install grunt and bower globally
+- Install grunt and bower globally (as root)
 
   ```sh
   npm install -g grunt-cli bower
   ```
 
-- Install node, bower, and ruby dependencies
+- Install node and bower dependencies
 
   ```sh
-  npm install && bower install && bundle
+  npm install && bower install
   ```
 
 - Start the development server.
