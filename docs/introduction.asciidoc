@@ -1,2 +1,17 @@
 [[introduction]]
 == Introduction
+
+Kibana is an open source (Apache Licensed) analytics and visualization tool 
+for Elasticsearch. You use Kibana to search, view, and interact with data in
+Elasticsearch indexes. You can easily perform time-based comparisons and 
+visualize your data using a variety of charts, tables, and maps. 
+
+Kibana makes it easy to understand large volumes of data. Its simple,
+browser-based interface enables you to quickly create and share dynamic
+dashboards that display changes to Elasticsearch queries in real time.
+
+Setting up Kibana is a snap. You can install Kibana and start exploring your
+Elasticsearch indexes in minutes--no code, no additional infrastructure required. 
+
+=== Data Discovery and Visualization
+

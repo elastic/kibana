@@ -1,2 +1,10 @@
 [[settings]]
 == Configuring Kibana
+
+To use Kibana, you need to tell it about the Elasticsearch indexes that you want to 
+
+[[settings-create-pattern]]
+=== Create an Index Pattern to Connect to Elasticsearch
+=== Delete an Index Pattern
+=== Controlling Access to Kibana
+=== Setting Advanced Options
