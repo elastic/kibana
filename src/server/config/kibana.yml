@@ -10,6 +10,8 @@ elasticsearch_url: "http://localhost:9200"
 # If your Elasticsearch is protected with basic auth:
 # elasticsearch_username: user
 # elasticsearch_password: pass
+# elasticsearch_username: test
+# elasticsearch_password: test
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
@@ -33,4 +35,8 @@ shard_timeout: 0
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
 verify_ssl: true
+
+# If you need to provide a CA certificate for your Elasticsarech instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
 
