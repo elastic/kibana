@@ -1,8 +1,15 @@
 var config = require('../config');
 var elasticsearch = require('elasticsearch');
 var upgrade = require('./upgradeConfig');
+var util = require('util');
+var url = require('url');
+var uri = url.parse(config.elasticsearch);
+if (config.kibana.elasticsearch_username && config.kibana.elasticsearch_password) {
+  uri.auth = util.format('%s:%s', config.kibana.elasticsearch_username, config.kibana.elasticsearch_password);
+}
+console.log(url.format(uri));
 var client = new elasticsearch.Client({
-  host: config.elasticsearch
+  host: url.format(uri)
 });
 
 module.exports = function () {
@@ -24,6 +31,10 @@ module.exports = function () {
     }
   };
 
-  return client.search(options).then(upgrade);
+  return client.search(options)
+  .then(upgrade)
+  .catch(function (err) {
+    if (!/^IndexMissingException/.test(err.message)) throw err;
+  });
 };
 
