@@ -52,9 +52,7 @@ define(function (require) {
       description: 'URL of mapping provider'
     },
     'visualization:tileMap:options': {
-      value: '{ "attribution": "Tiles by <a href=\\"http://www.mapquest.com/\\">MapQuest</a> &mdash; ' +
-        'Map data &copy; <a href=\\"http://openstreetmap.org\\">OpenStreetMap</a> contributors, ' +
-        '<a href=\\"http://creativecommons.org/licenses/by-sa/2.0/\\">CC-BY-SA</a>", "subdomains": "1234" }',
+      value: null,
       description: 'TileLayer options, see leafletjs documentation',
       type: 'json'
     },
