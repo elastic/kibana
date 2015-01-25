@@ -40,9 +40,9 @@ router.use(function (req, res, next) {
 
   var uri = _.defaults({}, target);
   var options = {
-    url: uri.protocol + '//' + uri.host + req.path,
+    url: uri.protocol + '//' + uri.host + req.url,
     method: req.method,
-    headers: { },
+    headers: _.defaults({ host: target.hostname }, req.headers),
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
@@ -53,14 +53,8 @@ router.use(function (req, res, next) {
   }
 
   // Only send the body if it's a PATCH, PUT, or POST
-  if (_.contains(['PATCH', 'PUT', 'POST'], options.method) && req.rawBody) {
+  if (req.rawBody) {
     options.body = req.rawBody;
-  }
-
-  // If there is a query string we need to stringify it and send it with
-  // the request
-  if (Object.keys(req.query).length !== 0) {
-    options.url += '?' + querystring.stringify(req.query);
   }
 
   // Support for handling basic auth
