@@ -34,3 +34,6 @@ shard_timeout: 0
 # certificate.
 verify_ssl: true
 
+# SSL for outgoing requests from the Kibana Server (PEM formatted)
+# ssl_key_file: /path/to/your/server.key
+# ssl_cert_file: /path/to/your/server.crt

@@ -3,16 +3,23 @@
  */
 
 var app = require('./app');
-var http = require('http');
+var fs = require('fs');
 var config = require('./config');
 var logger = require('./lib/logger');
 
 
 /**
- * Create HTTP server.
+ * Create HTTPS/HTTP server.
  */
-
-var server = http.createServer(app);
+var server;
+if (config.kibana.ssl_key_file && config.kibana.ssl_cert_file) {
+  server = require('https').createServer({
+    key: fs.readFileSync(config.kibana.ssl_key_file, 'utf8'),
+    cert: fs.readFileSync(config.kibana.ssl_cert_file, 'utf8')
+  }, app);
+} else {
+  server = require('http').createServer(app);
+}
 server.on('error', onError);
 server.on('listening', onListening);
 
