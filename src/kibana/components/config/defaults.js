@@ -45,17 +45,17 @@ define(function (require) {
     },
     'visualization:tileMap:wms': {
       value: false,
-      description: 'Set for a WMS mapping provider, see <a href="http://leafletjs.com/reference.html#tilelayer-wms">leafletjs reference</a>'
+      description: 'Enable if using a WMS mapping provider'
     },
     'visualization:tileMap:url': {
       value: 'http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
-      description: 'URL of mapping provider, see <a href="http://leafletjs.com/reference.html#tilelayer">leafletjs reference</a>' +
-        ' or <a href="http://leaflet-extras.github.io/leaflet-providers/preview/">provider demos</a>'
+      description: 'URL of mapping provider, see <a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">leafletjs ' +
+        'reference</a> or <a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">provider demos</a>'
     },
     'visualization:tileMap:options': {
       value: null,
-      description: 'TileLayer options, see <a href="http://leafletjs.com/reference.html#tilelayer">leafletjs reference</a>' +
-        ' or <a href="http://leaflet-extras.github.io/leaflet-providers/preview/">provider demos</a>',
+      description: 'TileLayer options, see leafletjs <a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">' +
+        'TileLayer</a> or <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">TileLayer.WMS</a>',
       type: 'json'
     },
     'csv:separator': {
