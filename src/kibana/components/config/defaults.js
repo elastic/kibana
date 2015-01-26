@@ -82,39 +82,39 @@ define(function (require) {
     },
     'defaultFormat:ip': {
       value: 'ip',
-      description: 'The default format to be used for fields of type ip.'
+      description: 'The default format to be used for fields of type "ip".'
     },
     'defaultFormat:date': {
       value: 'date',
-      description: 'The default format to be used for fields of type date.'
+      description: 'The default format to be used for fields of type "date".'
     },
     'defaultFormat:string': {
       value: 'string',
-      description: 'The default format to be used for fields of type string.'
+      description: 'The default format to be used for fields of type "string".'
     },
     'defaultFormat:number': {
       value: 'number',
-      description: 'The default format to be used for fields of type number.'
+      description: 'The default format to be used for fields of type "number".'
     },
     'defaultFormat:boolean': {
       value: 'string',
-      description: 'The default format to be used for fields of type boolean.'
+      description: 'The default format to be used for fields of type "boolean".'
     },
     'defaultFormat:conflict': {
       value: 'string',
-      description: 'The default format to be used for fields of type conflict.'
+      description: 'The default format to be used for fields of type "conflict".'
     },
     'defaultFormat:geo_point': {
       value: 'string',
-      description: 'The default format to be used for fields of type geo_point.'
+      description: 'The default format to be used for fields of type "geo_point".'
     },
     'defaultFormat:geo_shape': {
       value: 'string',
-      description: 'The default format to be used for fields of type geo_shape.'
+      description: 'The default format to be used for fields of type "geo_shape".'
     },
     'defaultFormat:attachment': {
       value: 'string',
-      description: 'The default format to be used for fields of type attachment.'
+      description: 'The default format to be used for fields of type "attachment".'
     }
   };
 });

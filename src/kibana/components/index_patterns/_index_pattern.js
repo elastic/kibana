@@ -1,19 +1,16 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config, Promise) {
+  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, config, Promise, $rootScope) {
     var _ = require('lodash');
     var angular = require('angular');
     var errors = require('errors');
 
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
-    var fieldFormats = Private(require('registry/field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
-    var fieldTypes = Private(require('components/index_patterns/_field_types'));
+    var fieldSetup = Private(require('components/index_patterns/_field_setup'));
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var formatHit = require('components/index_patterns/_format_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
-
-
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
     var IndexedArray = require('utils/indexed_array/index');
@@ -26,7 +23,6 @@ define(function (require) {
       title: 'string',
       timeFieldName: 'string',
       intervalName: 'string',
-      customFormats: 'json',
       fields: 'json'
     });
 
@@ -36,7 +32,6 @@ define(function (require) {
       // set defaults
       self.id = id;
       self.title = id;
-      self.customFormats = {};
 
       var docSource = new DocSource();
 
@@ -46,6 +41,11 @@ define(function (require) {
         .index(configFile.kibana_index)
         .type(type)
         .id(self.id);
+
+        // listen for config changes and update field list
+        $rootScope.$on('change:config', function () {
+          initFields();
+        });
 
         return mappingSetup.isDefined(type)
         .then(function (defined) {
@@ -84,54 +84,13 @@ define(function (require) {
         });
       };
 
-      function setIndexedValue(key, value) {
-        value = value || self[key];
-        self[key] = new IndexedArray({
+      function initFields(fields) {
+        fields = fields || self.fields;
+        self.fields = new IndexedArray({
           index: ['name'],
           group: ['type'],
-          initialSet: value.map(function (field) {
-            field.count = field.count || 0;
-            if (field.hasOwnProperty('format')) return field;
-
-            var type = fieldTypes.byName[field.type];
-            Object.defineProperties(field, {
-              bucketable: {
-                value: field.indexed || field.scripted
-              },
-              displayName: {
-                get: function () {
-                  return shortDotsFilter(field.name);
-                }
-              },
-              filterable: {
-                value: field.name === '_id' || ((field.indexed && type.filterable) || field.scripted)
-              },
-              format: {
-                get: function () {
-                  var formatName = self.customFormats && self.customFormats[field.name];
-                  return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultFor(field.type);
-                }
-              },
-              formatter: {
-                get: function () {
-                  return field.format.convert;
-                }
-              },
-              sortable: {
-                value: field.indexed && type.sortable
-              },
-              scripted: {
-                // enumerable properties end up in the JSON
-                enumerable: true,
-                value: !!field.scripted
-              },
-              lang: {
-                enumerable: true,
-                value: field.scripted ? field.lang || 'expression' : undefined
-              }
-            });
-
-            return field;
+          initialSet: fields.map(function (field) {
+            return fieldSetup(self, field);
           })
         });
       }
@@ -141,7 +100,7 @@ define(function (require) {
           if (!self.fields) {
             return self.refreshFields();
           } else {
-            setIndexedValue('fields');
+            initFields();
           }
         }
       };
@@ -228,7 +187,6 @@ define(function (require) {
         // clear the indexPattern list cache
         getIds.clearCache();
         return body;
-
       };
 
       // index the document
@@ -268,7 +226,7 @@ define(function (require) {
         .then(function (fields) {
           // append existing scripted fields
           fields = fields.concat(self.getFields('scripted'));
-          setIndexedValue('fields', fields);
+          initFields(fields);
         });
       };
 
@@ -284,8 +242,6 @@ define(function (require) {
       self.flattenHit = _.partial(flattenHit, self);
       self.formatHit = _.partial(formatHit, self);
       self.getComputedFields = getComputedFields.bind(self);
-
-
     }
     return IndexPattern;
   };

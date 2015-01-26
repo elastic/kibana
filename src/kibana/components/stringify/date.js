@@ -1,7 +1,7 @@
 define(function (require) {
-  return function DateFormatProvider(config, $rootScope) {
+  return function DateFormatProvider(Private, config, $rootScope) {
     var _ = require('lodash');
-    var format = require('components/stringify/_format');
+    var format = Private(require('components/stringify/_format'));
     var moment = require('moment');
 
     function converter(val) {

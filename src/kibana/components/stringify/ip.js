@@ -1,6 +1,6 @@
 define(function (require) {
-  return function IpFormatProvider() {
-    var format = require('components/stringify/_format');
+  return function IpFormatProvider(Private) {
+    var format = Private(require('components/stringify/_format'));
 
     return {
       name: 'ip',

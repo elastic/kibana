@@ -1,7 +1,7 @@
 define(function (require) {
-  return function StringFormatProvider() {
+  return function StringFormatProvider(Private) {
     var _ = require('lodash');
-    var format = require('components/stringify/_format');
+    var format = Private(require('components/stringify/_format'));
 
     return {
       name: 'string',

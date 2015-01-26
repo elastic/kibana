@@ -1,6 +1,6 @@
 define(function (require) {
-  return function BytesFormatProvider(Private) {
+  return function PercentageFormatProvider(Private) {
     var numFormat = Private(require('components/stringify/_num_format'));
-    return numFormat('number', '0[]b');
+    return numFormat('percentage', '0[]%');
   };
 });

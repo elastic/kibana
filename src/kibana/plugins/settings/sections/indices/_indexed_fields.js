@@ -20,6 +20,7 @@ define(function (require) {
         $scope.columns = [
           { title: 'name' },
           { title: 'type' },
+          { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
           { title: 'popularity', info: 'A gauge of how often this field is used' }
@@ -44,6 +45,7 @@ define(function (require) {
                 scope: childScope,
                 value: field.type
               },
+              field.format.name,
               field.analyzed,
               field.indexed,
               {
