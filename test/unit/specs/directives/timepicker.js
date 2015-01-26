@@ -153,8 +153,8 @@ define(function (require) {
         $scope.$digest();
       });
 
-      it('should contain 3 lists of options', function (done) {
-        expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(3);
+      it('should contain 4 lists of options', function (done) {
+        expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(4);
         done();
       });
 

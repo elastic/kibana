@@ -208,10 +208,10 @@ define(function (require) {
         selection.each(function () {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
-          if (!ordered || ordered === undefined) {
-            axis.call(self.rotateAxisLabels());
-          } else {
+          if (ordered && ordered.date) {
             axis.call(self.filterAxisLabels());
+          } else {
+            axis.call(self.rotateAxisLabels());
           }
         });
 
