@@ -1,7 +1,6 @@
 var config = require('../config');
 var httpAuth = require('http-auth');
 module.exports = function () {
-  console.log(config.htpasswd);
   var basic;
   if (config.htpasswd) {
     basic = httpAuth.basic({ file: config.htpasswd });
