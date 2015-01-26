@@ -35,6 +35,12 @@ router.use(function (req, res, next) {
   req.on('end', next);
 });
 
+function getPort(req) {
+  var matches = req.headers.host.match(/:(\d+)/);
+  if (matches[1]) return matches[1];
+  return req.connection.pair ? '443' : '80';
+}
+
 // Create the proxy middleware
 router.use(function (req, res, next) {
 
@@ -46,6 +52,11 @@ router.use(function (req, res, next) {
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
+
+
+  options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
+  options.headers['x-forward-port'] = getPort(req);
+  options.headers['x-forward-proto'] = req.connection.pair ? 'https' : 'http';
 
   // If the server has a custom CA we need to add it to the agent options
   if (hasCustomCA) {
