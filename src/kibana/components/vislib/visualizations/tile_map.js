@@ -72,12 +72,12 @@ define(function (require) {
 
           var featureLayer;
           var tileLayer;
-          var tileOptions = config.get('visualization:tileMap:options', JSON.stringify({
+          var tileOptions = config.get('visualization:tileMap:options', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
-          }));
+          });
           if (config.get('visualization:tileMap:wms')) {
             tileLayer = L.tileLayer.wms(config.get('visualization:tileMap:url'), tileOptions);
           } else {

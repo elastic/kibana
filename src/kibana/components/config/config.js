@@ -97,7 +97,7 @@ define(function (require) {
         keyVal = vals[key];
       }
 
-      if (defaults[key] && defaults[key].type === 'json') {
+      if (defaults[key] && defaults[key].type === 'json' && !_.isObject(keyVal)) {
         return JSON.parse(keyVal);
       }
       return keyVal;
