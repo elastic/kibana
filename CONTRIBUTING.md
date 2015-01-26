@@ -17,7 +17,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install 0.10
   ```
 
-- Install grunt and bower globally (as root)
+- Install grunt and bower globally (as root if not using nvm)
 
   ```sh
   npm install -g grunt-cli bower
