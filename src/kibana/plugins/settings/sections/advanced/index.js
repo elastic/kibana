@@ -18,9 +18,12 @@ define(function (require) {
           ESC: 27
         };
 
+        var NAMED_EDITORS = ['json', 'array', 'boolean'];
+        var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
+
         function getEditorType(conf) {
-          if (_.contains('number string null undefined', conf.type)) return 'normal';
-          if (_.contains('json array boolean', conf.type)) return conf.type;
+          if (_.contains(NORMAL_EDITOR, conf.type)) return 'normal';
+          if (_.contains(NAMED_EDITORS, conf.type)) return conf.type;
         }
 
         function isTypeComplex(conf) {
@@ -40,12 +43,12 @@ define(function (require) {
               value: val,
             };
 
-            var editorType  = getEditorType(conf);
-            conf.json       = editorType === 'json';
-            conf.bool       = editorType === 'bool';
-            conf.array      = editorType === 'array';
-            conf.normal     = editorType === 'normal';
-            conf.tooComplex = !editorType;
+            var editor = getEditorType(conf);
+            conf.json = editor === 'json';
+            conf.bool = editor === 'bool';
+            conf.array = editor === 'array';
+            conf.normal = editor === 'normal';
+            conf.tooComplex = !editor;
 
             return conf;
           });
