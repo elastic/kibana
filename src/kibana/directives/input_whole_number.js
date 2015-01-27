@@ -11,6 +11,7 @@ define(function (require) {
 
         function checkWholeNumber(value) {
           ngModel.$setValidity('whole', value % 1 === 0);
+          return value;
         }
       }
     };
