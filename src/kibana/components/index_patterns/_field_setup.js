@@ -10,22 +10,22 @@ define(function (require) {
     function writable(v) { return { enumerable: true, writable: true, value: v }; }
 
     function fieldSetup(indexPattern, spec) {
-      if (_.isObject(spec.indexPattern)) spec = Object.getPrototypeOf(spec);
       var type = fieldTypes.byName[spec.type];
       if (!type) throw new TypeError('unknown field type :' + spec.type);
 
-      var format = fieldFormats[spec.formatName] || fieldFormats.defaultFor(spec.type);
+      var format = fieldFormats.byName[spec.formatName] || fieldFormats.defaultFor(spec.type);
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
       var sortable = indexed && type.sortable;
       var bucketable = indexed || scripted;
       var filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
 
-      return Object.create(spec, {
+      return Object.create(Object.prototype, {
         // basic field properties
         name: saved(spec.name),
         type: saved(spec.type),
         count: writable(spec.count || 0),
+        formatName: writable(spec.formatName),
 
         // scripted fields
         scripted: saved(scripted),
@@ -38,7 +38,6 @@ define(function (require) {
         doc_values: saved(!!spec.doc_values),
 
         // usage flags, read-only and won't be saved
-        spec: readonly(spec),
         format: readonly(format),
         sortable: readonly(sortable),
         bucketable: readonly(bucketable),

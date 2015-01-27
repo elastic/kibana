@@ -9,7 +9,7 @@ define(function (require) {
   return require('registry/_registry')({
     name: 'fieldFormats',
     index: ['name'],
-    group: ['compatability'],
+    group: ['fieldType'],
 
 
     constructor: function (config) {

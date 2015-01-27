@@ -464,7 +464,19 @@ style-compile {
 
 @import '../components/filter_bar/filter_bar.less';
 
+
+.cell-hover {
+  background-color: white;
+  &-show {
+    // so that the cell doesn't change size on hover
+    visibility: hidden;
+  }
+}
 .cell-hover:hover {
   background-color: @gray-lighter;
+
+  .cell-hover-show {
+    visibility: visible;
+  }
 }
 

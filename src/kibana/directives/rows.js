@@ -29,7 +29,6 @@ define(function (require) {
             return $compile($cell)($cell.scope);
           };
 
-
           if (contents instanceof AggConfigResult) {
             if (contents.type === 'bucket' && contents.aggConfig.field() && contents.aggConfig.field().filterable) {
               $cell = createAggConfigResultCell(contents);
@@ -38,10 +37,18 @@ define(function (require) {
           }
 
           if (_.isObject(contents)) {
+            if (contents.attr) {
+              $cell.attr(contents.attr);
+            }
+
+            if (contents.class) {
+              $cell.addClass(contents.class);
+            }
+
             if (contents.scope) {
-              $cell.html($compile(contents.markup)(contents.scope));
+              $cell = $compile($cell.html(contents.markup))(contents.scope);
             } else {
-              $cell.html($(contents.markup));
+              $cell.html(contents.markup);
             }
           } else {
             if (contents === '') {

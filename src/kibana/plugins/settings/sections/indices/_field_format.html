@@ -1,0 +1,8 @@
+<span ng-show="$parent.editFormat !== field.name">{{field.format.name}}</span>
+<i class="fa fa-pencil text-muted pull-right cell-hover-show"></i>
+<select
+  ng-show="$parent.editFormat === field.name"
+  ng-click="$event.stopPropagation()"
+  ng-options="name for name in formatOptionNames"
+  ng-model="selectedFormat">
+</select>

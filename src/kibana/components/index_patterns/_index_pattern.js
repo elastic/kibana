@@ -125,6 +125,13 @@ define(function (require) {
         self.save();
       };
 
+      self.setFieldFormat = function (field, format) {
+        if (format) field.formatName = format.name;
+        else delete field.formatName;
+        initFields();
+        return self.save().then(_.ary(initFields));
+      };
+
       self.removeScriptedField = function (name) {
         var fieldIndex = _.findIndex(self.fields, {
           name: name,

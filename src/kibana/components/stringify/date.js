@@ -24,7 +24,7 @@ define(function (require) {
 
     return {
       name: 'date',
-      fieldTypes: 'date',
+      fieldType: 'date',
       convert: format(function (val) {
         // don't give away our ref to memoizedConverter so
         // we can hot-swap when config changes

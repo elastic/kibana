@@ -38,7 +38,7 @@ define(function (require) {
 
     // setup indices
     this._indexNames = _.union(
-      this._setupIndices(config.group, inflectIndex, _.groupBy),
+      this._setupIndices(config.group, inflectIndex, _.organizeBy),
       this._setupIndices(config.index, inflectIndex, _.indexBy),
       this._setupIndices(config.order, inflectOrder, _.sortBy)
     );
