@@ -152,25 +152,18 @@ define(function (require) {
      * @param  {number} count - the number of args to accept
      * @return {Function}
      */
-    limit: function (context, fn, count) {
-      // syntax without context limit(fn, 1)
-      if (count == null && _.isNumeric(fn)) {
-        count = fn;
-        fn = context;
-        context = null;
-      }
-
+    ary: function (fn, count) {
       count = count || 0;
 
       // shortcuts for common paths
       // !!!! PLEASE don't use more than two arg
-      if (count === 0) return function () { return fn.call(context); };
-      if (count === 1) return function (a) { return fn.call(context, a); };
-      if (count === 2) return function (a, b) { return fn.call(context, a, b); };
+      if (count === 0) return function () { return fn.call(this); };
+      if (count === 1) return function (a) { return fn.call(this, a); };
+      if (count === 2) return function (a, b) { return fn.call(this, a, b); };
 
       // catch all version
       return function () {
-        return fn.apply(context, [].slice.call(arguments, 0, count));
+        return fn.apply(this, _.first(arguments, count));
       };
     },
 

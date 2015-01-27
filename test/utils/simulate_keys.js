@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var Promise = require('bluebird');
   var keyMap = require('utils/key_map');
-  var reverseKeyMap = _.mapValues(_.invert(keyMap), _.limit(_.parseInt, 1));
+  var reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
   var KeyboardEvent = window.KeyboardEvent;
 
   /**
