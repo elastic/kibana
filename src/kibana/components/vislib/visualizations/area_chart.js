@@ -187,8 +187,10 @@ define(function (require) {
       // Append the bars
       circles = layer
       .selectAll('rect')
-      .data(function appendData(d) {
-        return d;
+      .data(function appendData(data) {
+        return data.filter(function isNotZero(d) {
+          return d.y !== 0;
+        });
       });
 
       // exit
