@@ -83,7 +83,6 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var height = yScale.range()[0];
       var defaultOpacity = this._attr.defaultOpacity;
 
       var area = d3.svg.area()
@@ -95,8 +94,9 @@ define(function (require) {
       })
       .y0(function (d) {
         if (isOverlapping) {
-          return height;
+          return yScale(0);
         }
+
         return yScale(d.y0);
       })
       .y1(function (d) {
@@ -199,6 +199,9 @@ define(function (require) {
       .enter()
       .append('circle')
       .attr('class', function circleClass(d) {
+        if (d.y === 0) {
+          return d.label + ' zero-circle';
+        }
         return d.label;
       })
       .attr('fill', function (d) {
@@ -230,6 +233,20 @@ define(function (require) {
         circles.call(tooltip.render());
       }
 
+      return circles;
+    };
+
+    /**
+     * Removes SVG circles where d.y === 0 from area chart
+     *
+     * @method removeZeroCircles
+     * @param svg {HTMLElement} SVG to which circles are appended
+     * @returns {D3.UpdateSelection} SVG with circles
+     */
+    AreaChart.prototype.removeZeroCircles = function (svg) {
+      var layer = svg.selectAll('.points');
+      var zeros = layer.selectAll('.zero-circle').remove();
+      var circles = layer.selectAll('circle');
       return circles;
     };
 
@@ -291,6 +308,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
       var div;
@@ -330,14 +349,31 @@ define(function (require) {
           // add path
           path = self.addPath(svg, layers);
 
+          if (yMin < 0 && self._attr.mode !== 'wiggle' && self._attr.mode !== 'silhouette') {
+
+            // Draw line at yScale 0 value
+            svg.append('line')
+              .attr('class', 'zero-line')
+              .attr('x1', 0)
+              .attr('y1', yScale(0))
+              .attr('x2', width)
+              .attr('y2', yScale(0))
+              .style('stroke', '#ddd')
+              .style('stroke-width', 1);
+          }
+
           // add circles
           circles = self.addCircles(svg, layers);
+
+          // remove 'phantom' zero points
+          circles = self.removeZeroCircles(svg);
 
           // add click and hover events to circles
           self.addCircleEvents(circles, svg);
 
           // chart base line
           var line = svg.append('line')
+          .attr('class', 'base-line')
           .attr('x1', 0)
           .attr('y1', height)
           .attr('x2', width)
