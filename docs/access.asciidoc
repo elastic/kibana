@@ -1,2 +1,7 @@
 [[access]]
 == Accessing Kibana
+
+Kibana is a web application that you access through port 5601. All you need to 
+do is point your web browser at the machine where Kibana is running and 
+specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
+

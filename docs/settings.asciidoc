@@ -1,10 +1,29 @@
 [[settings]]
 == Configuring Kibana
 
-To use Kibana, you need to tell it about the Elasticsearch indexes that you want to 
+To use Kibana, you have to tell it about the Elasticsearch indexes that you 
+want to explore by configuring one or more index patterns. You can also:
+
+* Create scripted fields that are computed on the fly from your data. You can 
+browse and visualize scripted fields, but you cannot search them.
+* Control access to Kibana using Elasticsearch Shield.
+* Set advanced options such as the number of rows to show in a table and 
+how many of the most popular fields to show. (Use caution when modifying advanced options,
+as it's possible to set values that are incompatible with one another.)
 
 [[settings-create-pattern]]
 === Create an Index Pattern to Connect to Elasticsearch
+An _index pattern_ identifies one or more Elasticsearch indexes that you want to 
+explore with Kibana. Kibana looks for index names that match the specified pattern.
+For example, the pattern `logstash-*` matches all indexes whose names start with
+`logstash-`. An asterisk (*) in the pattern matches zero or more characters. 
+Patterns can also contain xxx. 
+
+=== Set the Default Index Pattern
+=== Update an Index Pattern
 === Delete an Index Pattern
-=== Controlling Access to Kibana
-=== Setting Advanced Options
+=== Create a Scripted Field
+=== Update a Scripted Field
+=== Delete a Scripted Field
+=== Control Access to Kibana
+=== Set Advanced Options

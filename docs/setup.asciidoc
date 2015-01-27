@@ -26,10 +26,11 @@ To configure the Elasticsearch index(es) you want to access with Kibana:
 . Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 // image::images/kibana-start.jpg[Kibana start page]
 . Specify an index pattern that matches the name of one or more of your Elasticsearch indexes. By default, Kibana guesses that you're you're working with log data being fed into Elasticsearch by Logstash. If that's the case, you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more characters in an index's name. If your Elasticsearch indexes follow some other naming convention, enter an appropriate pattern.  (The "pattern" can also simply be the name of a single index.)
-. Select the index field that contains the timestamp you want to use. Kibana reads the index mapping to find fields that contain a timestamp. 
-. Click *Create* to add the index pattern.
+. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index contains time-based events* option and select the index field that contains the timestamp. (Kibana reads the index mapping to list all of the fields that contain a timestamp.)
+. If new indexes are generated periodically and have a timestamp appended to the name, select the *Use event times to create index names* option and select the *Index pattern interval*. This enables Kibana to search only those indices that could possibly contain data in the time range you specify. (This is primarily applicable if you are using Logstash to feed data in to Elasticsearch.)
+. Click *Create* to add the index pattern. This first pattern is automatically configured as the default. When you have more than one index pattern, you can designate which one to use as the default from **Settings > Indices**. 
 
-Voila! Kibana is now connected to your Elasticsearch data.
+Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for the matching index.
 
 === Start Exploring your Data!
 You're ready to dive in to your data:
