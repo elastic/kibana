@@ -187,8 +187,10 @@ define(function (require) {
       // Append the bars
       circles = layer
       .selectAll('rect')
-      .data(function appendData(d) {
-        return d;
+      .data(function appendData(data) {
+        return data.filter(function isNotZero(d) {
+          return d.y !== 0;
+        });
       });
 
       // exit
@@ -230,20 +232,6 @@ define(function (require) {
         circles.call(tooltip.render());
       }
 
-      return circles;
-    };
-
-    /**
-     * Removes SVG circles where d.y === 0 from area chart
-     *
-     * @method removeZeroCircles
-     * @param svg {HTMLElement} SVG to which circles are appended
-     * @returns {D3.UpdateSelection} SVG with circles
-     */
-    AreaChart.prototype.removeZeroCircles = function (svg) {
-      var layer = svg.selectAll('.points');
-      var zeros = layer.selectAll('.zero-circle').remove();
-      var circles = layer.selectAll('circle');
       return circles;
     };
 
@@ -346,9 +334,6 @@ define(function (require) {
 
           // add circles
           circles = self.addCircles(svg, layers);
-
-          // remove 'phantom' circles
-          circles = self.removeZeroCircles(svg);
 
           // add click and hover events to circles
           self.addCircleEvents(circles, svg);
