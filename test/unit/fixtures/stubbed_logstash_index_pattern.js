@@ -4,6 +4,7 @@ define(function (require) {
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var mockLogstashFields = Private(require('fixtures/logstash_fields'));
     var flattenHit = require('components/index_patterns/_flatten_hit');
+    var formatHit = require('components/index_patterns/_format_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
     var _ = require('lodash');
@@ -21,6 +22,7 @@ define(function (require) {
 
     indexPattern.getComputedFields = _.bind(getComputedFields, indexPattern);
     indexPattern.flattenHit = _.partial(flattenHit, indexPattern);
+    indexPattern.formatHit = _.partial(formatHit, indexPattern);
     indexPattern.metaFields = ['_id', '_type', '_source'];
     indexPattern.id = 'logstash-*';
 

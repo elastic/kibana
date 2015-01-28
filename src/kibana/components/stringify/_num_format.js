@@ -21,7 +21,7 @@ define(function (require) {
         name: name,
         fieldType: 'number',
         convert: format(function (val) {
-          return nu.set(val).format(nuFormat);
+          return nu.set(val || 0).format(nuFormat);
         })
       };
     };

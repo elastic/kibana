@@ -200,7 +200,7 @@ define(function (require) {
         $scope.details(field);
         expect(field.details.buckets).to.not.be(undefined);
         expect(field.details.buckets[0].value).to.be(40.1415926535);
-        expect(field.details.buckets[0].display).to.be(40.142);
+        expect(field.details.buckets[0].display).to.be('40.142');
         done();
       });
 

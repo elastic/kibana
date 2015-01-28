@@ -101,15 +101,15 @@ define(function (require) {
 
     describe('getFields', function () {
       it('should return all non-scripted fields', function () {
-        var expected = _.pluck(_.where(mockLogstashFields, { scripted: false }), name).sort();
-        var result = _.pluck(indexPattern.getFields(), name).sort();
-
-        expect(result).to.eql(expected);
+        var notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
+        var respNames = _.pluck(indexPattern.getFields(), 'name');
+        expect(respNames).to.eql(notScriptedNames);
       });
 
       it('should return all scripted fields', function () {
-        var scripted = _.where(mockLogstashFields, { scripted: true });
-        expect(indexPattern.getFields('scripted')).to.eql(scripted);
+        var scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
+        var respNames = _.pluck(indexPattern.getFields('scripted'), 'name');
+        expect(respNames).to.eql(scriptedNames);
       });
     });
 
@@ -164,7 +164,8 @@ define(function (require) {
           expect(getFieldsSpy.callCount).to.equal(1);
 
           var scripted = _.where(mockLogstashFields, { scripted: true });
-          expect(_.filter(indexPattern.fields, { scripted: true })).to.eql(scripted);
+          var expected = _.filter(indexPattern.fields, { scripted: true });
+          expect(_.pluck(expected, 'name')).to.eql(_.pluck(scripted, 'name'));
         });
       });
     });
