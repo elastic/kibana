@@ -21,7 +21,15 @@ define(function (require) {
         name: name,
         fieldType: 'number',
         convert: format(function (val) {
-          return nu.set(val || 0).format(nuFormat);
+          if (typeof val !== 'number') {
+            val === parseFloat(val);
+          }
+
+          if (isNaN(val)) {
+            return '';
+          } else {
+            return nu.set(val).format(nuFormat);
+          }
         })
       };
     };
