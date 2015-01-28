@@ -13,7 +13,7 @@ define(function (require) {
   }
 
   return function cachedFormat(indexPattern, hit) {
-    return hit.$$_formated || (hit.$$_formated = formatHit(indexPattern, hit));
+    return hit.$$_formatted || (hit.$$_formatted = formatHit(indexPattern, hit));
   };
 
 });
