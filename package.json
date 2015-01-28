@@ -43,13 +43,14 @@
     "debug": "~2.1.1",
     "express": "~4.10.6",
     "glob": "^4.3.2",
-    "http-proxy": "^1.8.1",
     "jade": "~1.8.2",
     "js-yaml": "^3.2.5",
     "less-middleware": "1.0.x",
     "lodash": "^2.4.1",
     "morgan": "~1.5.1",
-    "serve-favicon": "~2.2.0"
+    "request": "^2.40.0",
+    "serve-favicon": "~2.2.0",
+    "ssl-root-cas": "^1.1.7"
   },
   "devDependencies": {
     "bluebird": "~2.0.7",
@@ -86,7 +87,6 @@
     "opn": "~1.0.0",
     "path-browserify": "0.0.0",
     "progress": "^1.1.8",
-    "request": "^2.40.0",
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
     "simple-git": "^0.11.0",
