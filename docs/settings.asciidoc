@@ -6,24 +6,276 @@ want to explore by configuring one or more index patterns. You can also:
 
 * Create scripted fields that are computed on the fly from your data. You can 
 browse and visualize scripted fields, but you cannot search them.
-* Control access to Kibana using Elasticsearch Shield.
 * Set advanced options such as the number of rows to show in a table and 
 how many of the most popular fields to show. (Use caution when modifying advanced options,
 as it's possible to set values that are incompatible with one another.)
+* Configure Kibana for a production environment
+
 
 [[settings-create-pattern]]
 === Create an Index Pattern to Connect to Elasticsearch
 An _index pattern_ identifies one or more Elasticsearch indexes that you want to 
 explore with Kibana. Kibana looks for index names that match the specified pattern.
-For example, the pattern `logstash-*` matches all indexes whose names start with
-`logstash-`. An asterisk (*) in the pattern matches zero or more characters. 
-Patterns can also contain xxx. 
+An asterisk (*) in the pattern matches zero or more characters. For example, the pattern 
+`myindex-*` matches all indexes whose names start with `myindex-`, such as `myindex-1` 
+and `myindex-2`. 
+
+If you use event times to create index names (for example, if you're pushing data
+into Elasticsearch from Logstash), the index pattern can also contain a date format.
+In this case, the static text in the pattern must be enclosed in brackets, and you 
+specify the date format using the tokens described in <<date-format-tokens>>.
+
+For example, `[logstash-]YYYY.MM.DD` matches all indexes whose names have a 
+timestamp of the form `YYYY.MM.DD` appended to the prefix `logstash-`, such as 
+`logstash-2015.01.31` and `logstash-2015-02-01`.
+
+An index pattern can also simply be the name of a single index.
+
+To create an index pattern to connect to Elasticsearch:
+
+. Go to the *Settings > Indices* tab.
+. Specify an index pattern that matches the name of one or more of your Elasticsearch 
+indexes. (By default, Kibana guesses that you're you're working with log data being 
+fed into Elasticsearch by Logstash.)
+NOTE: When you switch between top-level tabs, Kibana remembers where you were at.
+For example, if you view a particular index pattern from the Settings tab, switch
+to the Discover tab, and then go back to the Settings tab, Kibana displays the
+index pattern you last looked at. To get to the create new pattern form, click 
+the *Add New* button in the Index Patterns list.
+. If your index contains a timestamp field that you want to use to perform 
+time-based comparisons, select the *Index contains time-based events* option 
+and select the index field that contains the timestamp. (Kibana reads the 
+index mapping to list all of the fields that contain a timestamp.)
+. If new indexes are generated periodically and have a timestamp appended to 
+the name, select the *Use event times to create index names* option and select 
+the *Index pattern interval*. This enables Kibana to search only those indices 
+that could possibly contain data in the time range you specify. (This is 
+primarily applicable if you are using Logstash to feed data in to Elasticsearch.)
+. Click *Create* to add the index pattern. 
+. To designate the new pattern as the default pattern to load when you view
+the Discover tab, click the *favorite* button. 
+
+
+[[date-format-tokens]]
+.Date Format Tokens
+M::	Month - cardinal: 1 2 3 ... 12
+Mo:: Month - ordinal:	1st 2nd 3rd ... 12th
+MM:: Month - two digit: 	01 02 03 ... 12
+MMM:: Month - abbreviation: Jan Feb Mar ... Dec
+MMMM:: Month - full: January February March ... December
+Q::	Quarter: 1 2 3 4
+D::	Day of Month - cardinal: 1 2 3 ... 31
+Do:: Day of Month - ordinal: 1st 2nd 3rd ... 31st
+DD:: Day of Month - two digit:	01 02 03 ... 31
+DDD:: Day of Year - cardinal: 1 2 3 ... 365
+DDDo:: Day of Year - ordinal:	1st 2nd 3rd ... 365th
+DDDD:: Day of Year - three digit: 001 002 ... 364 365
+d::	Day of Week - cardinal: 0 1 3 ... 6
+do:: Day of Week - ordinal:	0th 1st 2nd ... 6th
+dd:: Day of Week - 2-letter abbreviation:	Su Mo Tu ... Sa
+ddd:: Day of Week - 3-letter abbreviation: Sun Mon Tue ... Sat
+dddd:: Day of Week - full: Sunday Monday Tuesday ... Saturday
+e::	Day of Week (locale): 0 1 2 ... 6
+E::	Day of Week (ISO): 1 2 3 ... 7
+w::	Week of Year - cardinal (locale): 1 2 3 ... 53
+wo:: Week of Year - ordinal (locale): 1st 2nd 3rd ... 53rd
+ww:: Week of Year - 2-digit (locale): 01 02 03 ... 53
+W::	Week of Year - cardinal (ISO): 1 2 3 ... 53
+Wo:: Week of Year - ordinal (ISO): 1st 2nd 3rd ... 53rd
+WW:: Week of Year - two-digit (ISO): 01 02 03 ... 53
+YY:: Year - two digit:	70 71 72 ... 30
+YYYY:: Year - four digit: 1970 1971 1972 ... 2030
+gg:: Week Year - two digit (locale):	70 71 72 ... 30
+gggg:: Week Year - four digit (locale):	1970 1971 1972 ... 2030
+GG:: Week Year - two digit (ISO):	70 71 72 ... 30
+GGGG::	Week Year - four digit (ISO): 1970 1971 1972 ... 2030
+A::	AM/PM: AM PM
+a::	am/pm: am pm
+H::	Hour: 0 1 2 ... 23
+HH:: Hour - two digit: 00 01 02 ... 23
+h::	Hour - 12-hour clock: 1 2 3 ... 12
+hh:: Hour - 12-hour clock, 2 digit:	01 02 03 ... 12
+m::	Minute: 0 1 2 ... 59
+mm:: Minute - two-digit:	00 01 02 ... 59
+s::	Second: 0 1 2 ...  59
+ss:: Second - two-digit: 00 01 02 ... 59
+S::	Fractional Second - 10ths: 0 1 2 ... 9
+SS:: Fractional Second - 100ths: 	0 1 ... 98 99
+SSS:: Fractional Seconds - 1000ths:	0 1 ... 998 999
+Z::	Timezone - zero UTC offset (hh:mm format): -07:00 -06:00 -05:00 .. +07:00
+ZZ:: Timezone - zero UTC offset (hhmm format):	-0700 -0600 -0500 ... +0700
+X:: Unix Timestamp:	1360013296
+x::	Unix Millisecond Timestamp: 1360013296123
 
 === Set the Default Index Pattern
-=== Update an Index Pattern
+The default index pattern is loaded by automatically when you view the *Discover* tab. 
+Kibana displays a star to the left of the name of the default pattern in the Index Patterns list 
+on the *Settings > Indices* tab. The first pattern you create is automatically
+designated as the default pattern.
+
+To set a different pattern as the default index pattern:
+
+. Go to the *Settings > Indices* tab.
+. Select the pattern you want to set as the default in the Index Patterns list.
+. Click the pattern's *Favorite* button. 
+
+NOTE: You can also manually set the default index pattern in *Advanced > Settings*. 
+
 === Delete an Index Pattern
+To delete an index pattern:
+
+. Go to the *Settings > Indices* tab.
+. Select the pattern you want to remove in the Index Patterns list.
+. Click the pattern's *Delete* button.
+. Confirm that you want to remove the index pattern.
+
 === Create a Scripted Field
+Scripted fields compute data on the fly from the data in your
+Elasticsearch indexes. Scripted field data is shown on the Discover tab as 
+part of the document data, and you can use scripted fields in your visualizations.
+(Scripted field values are computed at query time so they aren't indexed and
+cannot be searched.)
+
+WARNING: Computing data on the fly with scripted fields can be very resource 
+intensive and can have a direct impact on Kibana's performance. Keep in mind 
+that there's no built-in validation of a scripted field. If your scripts are 
+buggy, you'll get exceptions whenever you try to view the dynamically generated
+data.
+
+When creating scripted fields in Kibana, you use http://groovy.codehaus.org/[Groovy].
+Elasticsearch sandboxes Groovy scripts used by scripted fields to ensure they don’t 
+perform unwanted actions. 
+
+You can reference the value of any index field in your Groovy scripts. Generally,
+the best way to get a field value is:
+
+----
+doc['field_name'].value
+----
+
+This loads the field value directly from the Elasticsearch index. You can also
+load field values from the source (`_source.field_name`) or from a stored field
+(`_fields['field_name']`), but both techniques are significantly slower. You might
+want to load a field value from the source to get the unanalyzed data, but it's
+an I/O intensive operation that is often subject to timeouts. To load a field
+value from a stored field, the Elasticsearch mapping must designate the field
+as a stored field. While this is slightly less resource intensive than loading
+values from the source, it's not as fast as loading the field value from the 
+index.
+
+To create a scripted field:
+
+. Go to *Settings > Indices*
+. Select the index pattern you want to add a scripted field to.
+. Go to the pattern's *Scripted Fields* tab.
+. Click *Add Scripted Field*. 
+TIP: If you are just getting started with scripted fields, you can click 
+*create a few examples from your date fields* to add some scripted fields
+you can use as a starting point.
+. Enter a name for the scripted field.
+. Enter the Groovy script that you want to run to compute a value on the fly 
+from your index data.
+. Select the type of data returned by your Groovy script: IP address, date, 
+string, number, Boolean, conflict, geo_point, geo_shape, or attachment. The 
+return type you select must match the type actually returned by your script, 
+or you will get an error when the script is run.
+. Click *Save Scripted Field*.
+
+For more information about scripted fields in Elasticsearch, see 
+http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+
 === Update a Scripted Field
+To modify a scripted field:
+
+. Go to *Settings > Indices*
+. Click the *Edit* button for the scripted field you want to change.
+. Make your changes and then click *Save Scripted Field* to update the field.
+
+WARNING: Keep in mind 
+that there's no built-in validation of a scripted field. If your scripts are 
+buggy, you'll get exceptions whenever you try to view the dynamically generated
+data.
+
 === Delete a Scripted Field
-=== Control Access to Kibana
+To delete a scripted field:
+
+. Go to *Settings > Indices*
+. Click the *Delete* button for the scripted field you want to remove.
+. Confirm that you really want to delete the field.
+
 === Set Advanced Options
+
+
+=== Using Kibana in a Production Environment
+When you set up Kibana in a production environment, rather than on your local
+machine, you need to consider:
+
+* Where you are going to run Kibana.
+* Whether you need to encrypt communications to and from Kibana.
+* If you need to control access to your data.
+
+==== Deployment Considerations
+How you deploy Kibana largely depends on your use case. If you are the only user,
+you can run Kibana on your local machine and configure it to point to whatever 
+Elasticsearch instance you want to interact with. Conversely, if you have a large 
+number of heavy Kibana users, you might need to load balance across multiple
+Kibana instances that are all connected to the same Elasticsearch instance.
+
+While Kibana isn't terribly resource intensive, we still recommend running Kibana 
+on its own node, rather than on one of your Elasticsearch nodes. 
+
+==== Enabling SSL
+Kibana supports SSL encryption for both incoming requests and the requests it 
+sends to Elasticsearch.
+
+To enable SSL for incoming requests, you need to configure an `ssl_key_file`
+and `ssl_cert_file` for Kibana in `kibana.yml`. For example:
+----
+# SSL for outgoing requests from the Kibana Server (PEM formatted)
+ssl_key_file: /path/to/your/server.key
+ssl_cert_file: /path/to/your/server.crt
+----
+
+To encrypt the requests that Kibana sends to Elasticsearch, you specify the HTTPS
+protocol when you configure the Elasticsearch URL in `kibana.yml`. For example:
+
+----
+elasticsearch: "https://<your_elasticsearch_host>.com:9200"
+----
+
+==== Controlling access
+You can use http://www.elasticsearch.org/overview/shield/[Elasticsearch Shield] 
+(Shield) to control what Elasticsearch data users can access through Kibana. 
+Shield provides index-level access control. If a user isn't authorized to run 
+the query that populates a Kibana visualization, the user just sees an empty 
+visualization. 
+
+To configure access to Kibana using Shield, you create one or more Shield roles 
+for Kibana using the `kibana4` default role as a starting point. For example, 
+the following role grants access to the `logstash-*` indices from Kibana:
+
+----
+kibana-log-analysis:
+  cluster: cluster:monitor/nodes/info, cluster:monitor/health
+  indices:
+    'logstash-*':
+      - indices:admin/mappings/fields/get
+      - indices:admin/validate/query
+      - indices:data/read/search
+      - indices:data/read/msearch
+      - indices:admin/get 
+    '.kibana':
+      - indices:admin/exists
+      - indices:admin/mapping/put
+      - indices:admin/mappings/fields/get
+      - indices:admin/refresh
+      - indices:admin/validate/query
+      - indices:data/read/get
+      - indices:data/read/mget
+      - indices:data/read/search
+      - indices:data/write/delete
+      - indices:data/write/index
+      - indices:data/write/update
+----
+
+

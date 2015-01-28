@@ -5,6 +5,9 @@ All you need is:
 
 * Elasticsearch 1.4.0 or later
 * An up-to-date web browser 
+* Information about your Elasticsearch installation: 
+** URL of the Elasticsearch instance you want to connect to.
+** Which index(es) you want to search. You can use the Elasticsearch http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/cat-indices.html[`_cat/indices/`] command to list your indices.
 
 === Install and Start Kibana
 To get Kibana up and running:
@@ -13,7 +16,10 @@ To get Kibana up and running:
 . Extract the `.zip` or `tar.gz` archive file.
 . Run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin/kibana.bat` (Windows).
 
-That's it! Kibana is now running on port 5601.
+That's it! Kibana is now running on port 5601. 
+
+TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a different Elasticsearch instance,
+modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. 
 
 === Connect Kibana with Elasticsearch 	
 Before you can start using Kibana, you need to tell it which Elasticsearch index(es) you want to explore. The first time
