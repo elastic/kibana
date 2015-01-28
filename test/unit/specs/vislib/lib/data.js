@@ -271,8 +271,24 @@ define(function (require) {
           stackedVisData = new Data(stackedDataSeries, {});
           series = visData.flatten();
           stackedSeries = stackedVisData.flatten();
-          maxValue = 25;
-          stackedMaxValue = 60;
+          maxValue = _.chain(series)
+            .flatten()
+            .map(function (d) {
+              return d.y;
+            })
+            .max()
+            .value();
+
+          console.log(stackedDataSeries.ordered.min, stackedDataSeries.ordered.interval);
+          console.log(stackedSeries[0][4]);
+
+          stackedMaxValue = _.chain(stackedSeries[0][4])
+            .flatten()
+            .map(function (d) {
+              return d.y0 + d.y;
+            })
+            .max()
+            .value();
         });
       });
 
@@ -283,6 +299,7 @@ define(function (require) {
         series.forEach(function (data) {
           expect(visData.getYMax(data)).to.be(maxValue);
         });
+
         stackedSeries.forEach(function (data) {
           expect(stackedVisData.getYStackMax(data)).to.be(stackedMaxValue);
         });
