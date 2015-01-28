@@ -97,7 +97,7 @@ router.use(function (req, res, next) {
     }
 
     body.err = err.message;
-    res.json(body);
+    res.status(code).json(body);
   });
   esRequest.pipe(res);
 });
