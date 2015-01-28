@@ -225,5 +225,16 @@ define(function (require) {
   };
   inherits(errors.NoResults, KbnError);
 
+  /**
+   * error thrown when no results are returned from an elasticsearch query within
+   * the time range selected.
+   */
+  errors.NoResultsWithinTimeRange = function NoResultsWithinTimeRange() {
+    KbnError.call(this,
+      'No results were found within the time range selected',
+      errors.NoResultsWithinTimeRange);
+  };
+  inherits(errors.NoResultsWithinTimeRange, KbnError);
+
   return errors;
 });

@@ -81,7 +81,8 @@ define(function (require) {
       // Because we have to wait for the DOM element to initialize, we do not
       // want to throw an error when the DOM `el` is zero
       if (error instanceof errors.NotEnoughData ||
-        error instanceof errors.NoResults) {
+        error instanceof errors.NoResults ||
+        error instanceof errors.NoResultsWithinTimeRange) {
         return this.error(error.message);
       } else {
         throw error;
@@ -150,7 +151,9 @@ define(function (require) {
         // to continuously call render on resize
         .attr('class', 'visualize-error chart error');
 
-      if (message === 'No results found') {
+      if (message === 'No results found' ||
+        message === 'No results were found within the time range selected') {
+
         div.append('div')
           .attr('class', 'text-center visualize-error visualize-chart ng-scope')
           .append('div').attr('class', 'item top')

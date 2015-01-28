@@ -262,7 +262,7 @@ define(function (require) {
       if (!isUndefined) {
         return _.max(arr);
       } else {
-        throw new errors.NoResults();
+        throw new errors.NoResultsWithinTimeRange();
       }
     };
 
