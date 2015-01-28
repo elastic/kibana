@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   var join = require('path').join;
   var rel = require('path').join.bind(null, grunt.config.get('root'));
-  var directory = join(__dirname, '../../', 'esvm');
+  var directory = join(grunt.config.get('root'), 'esvm');
 
   return {
     options: {
@@ -13,7 +13,8 @@ module.exports = function (grunt) {
       config: {
         path: {
           home: rel('1.4.2'),
-          config: rel('1.4.2/config'),
+          bin: rel('1.4.2/bin'),
+          conf: rel('1.4.2/config'),
           data: rel('data_dir'),
           logs: rel('logs'),
           plugins: rel('1.4.2/plugins')
