@@ -6,16 +6,26 @@ var app = require('./app');
 var fs = require('fs');
 var config = require('./config');
 var logger = require('./lib/logger');
+var key, cert;
+try {
+  key = fs.readFileSync(config.kibana.ssl_key_file, 'utf8');
+  cert = fs.readFileSync(config.kibana.ssl_cert_file, 'utf8');
+} catch (err) {
+  if (err.code === 'ENOENT') {
+    logger.fatal('Failed to read %s', err.path);
+    process.exit(1);
+  }
+}
 
 
 /**
  * Create HTTPS/HTTP server.
  */
 var server;
-if (config.kibana.ssl_key_file && config.kibana.ssl_cert_file) {
+if (key && cert) {
   server = require('https').createServer({
-    key: fs.readFileSync(config.kibana.ssl_key_file, 'utf8'),
-    cert: fs.readFileSync(config.kibana.ssl_cert_file, 'utf8')
+    key: key,
+    cert: cert
   }, app);
 } else {
   server = require('http').createServer(app);
