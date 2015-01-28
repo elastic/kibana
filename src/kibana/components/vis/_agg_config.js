@@ -76,7 +76,13 @@ define(function (require) {
 
         if (val == null) {
           if (aggParam.default == null) return;
-          else val = aggParam.default;
+
+          if (!_.isFunction(aggParam.default)) {
+            val = aggParam.default;
+          } else {
+            val = aggParam.default(self);
+            if (val == null) return;
+          }
         }
 
         if (aggParam.deserialize) {
