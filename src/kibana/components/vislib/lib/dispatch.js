@@ -17,7 +17,7 @@ define(function (require) {
 
       this.handler = handler;
       this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover');
+        'mousedown', 'mouseover', 'load');
     }
 
     /**
@@ -89,6 +89,8 @@ define(function (require) {
       };
     };
 
+
+
     /**
      *
      * @method addHoverEvent
@@ -128,6 +130,20 @@ define(function (require) {
       }
 
       return addEvent('click', click);
+    };
+
+    /**
+     *
+     * @method addLoadEvent
+     * @returns {Function}
+     */
+    Dispatch.prototype.addLoadEvent = function () {
+      var self = this;
+      var addEvent = this.addEvent;
+      function load() {
+        console.log('load event dispatched');
+      }
+      return addEvent('load', load);
     };
 
     /**

@@ -40,6 +40,20 @@ define(function (require) {
     }
 
     /**
+     * Renders the chart(s)
+     *
+     * @method render
+     * @returns {HTMLElement} Contains the D3 chart
+     */
+    TileMap.prototype.render = function () {
+      var res = d3.select(this.chartEl).call(this.draw());
+      if (undefined !== this.maps && undefined !== this.maps[0]) {
+        this.maps[0].fire('load');
+      }
+      return res;
+    };
+
+    /**
      * Renders tile map
      *
      * @method draw
@@ -57,6 +71,9 @@ define(function (require) {
       _.invoke(self.maps, 'destroy');
       // create a new maps array
       self.maps = [];
+
+      var events = this.events;
+      events.addLoadEvent();
 
       return function (selection) {
         selection.each(function (data) {
@@ -92,6 +109,7 @@ define(function (require) {
           };
 
           var map = L.map(div[0], mapOptions);
+
           self.maps.push(map);
 
           tileLayer.on('tileload', saturateTiles);
@@ -100,10 +118,15 @@ define(function (require) {
             tileLayer.off('tileload', saturateTiles);
           });
 
+          map.on('load', function (e) {
+            fitBounds();
+          });
+
           map.on('zoomend dragend', function setZoomCenter() {
             mapZoom = self._attr.lastZoom = map.getZoom();
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
+
 
           if (data.geoJson) {
             if (self._attr.mapType === 'Scaled Circle Markers') {
@@ -385,7 +408,7 @@ define(function (require) {
     TileMap.prototype.bindPopup = function (feature, layer) {
       var props = feature.properties;
       var popup = L.popup({
-        autoPan: false
+        autoPan: true
       })
       .setContent(
         'Geohash: ' + props.geohash + '<br>' +
