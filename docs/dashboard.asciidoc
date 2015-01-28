@@ -1,0 +1,2 @@
+[[dashboard]]
+== Working with Dashboards

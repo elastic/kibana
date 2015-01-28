@@ -3,6 +3,8 @@ define(function (require) {
   var moment = require('moment');
   var datemath = require('utils/datemath');
 
+  require('directives/input_whole_number');
+
   /**
     * Calculate a graph interval
     *
