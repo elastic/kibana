@@ -34,3 +34,5 @@ shard_timeout: 0
 # certificate.
 verify_ssl: true
 
+# Set the path to where you would like the process id file to be created.
+# pid_file: /var/run/kibana.pid
