@@ -34,3 +34,7 @@ shard_timeout: 0
 # certificate.
 verify_ssl: true
 
+# If you need to provide a CA certificate for your Elasticsarech instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
+

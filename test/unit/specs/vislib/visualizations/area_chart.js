@@ -183,6 +183,23 @@ define(function (require) {
             expect($(chart.chartEl).find('circle').length).to.be.greaterThan(0);
           });
         });
+
+        it('should not draw circles where d.y === 0', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var series = chart.chartData.series;
+            var isZero = series.some(function (d) {
+              return d.y === 0;
+            });
+            var circles = $.makeArray($(chart.chartEl).find('circle'));
+            var isNotDrawn = circles.some(function (d) {
+              return d.__data__.y === 0;
+            });
+
+            if (isZero) {
+              expect(isNotDrawn).to.be(false);
+            }
+          });
+        });
       });
 
       // Cannot seem to get these tests to work on the box
