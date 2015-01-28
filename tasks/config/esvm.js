@@ -11,14 +11,6 @@ module.exports = function (grunt) {
         'elasticsearch/marvel/latest'
       ],
       config: {
-        path: {
-          home: rel('1.4.2'),
-          bin: rel('1.4.2/bin'),
-          conf: rel('1.4.2/config'),
-          data: rel('data_dir'),
-          logs: rel('logs'),
-          plugins: rel('1.4.2/plugins')
-        },
         network: {
           host: '127.0.0.1'
         },
