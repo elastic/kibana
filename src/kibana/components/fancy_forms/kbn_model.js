@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var SVV_CHECKSUM = require('text!components/fancy_forms/_set_view_value.checksum');
+  var angular = require('angular');
   var PRISTINE_CLASS = 'ng-pristine';
   var DIRTY_CLASS = 'ng-dirty';
 
@@ -24,8 +24,8 @@ define(function (require) {
     var ngModel = this;
 
     // verify that angular works the way we are assuming it does
-    if (String(ngModel.$setViewValue).replace(/\s+/g, '') !== SVV_CHECKSUM) {
-      throw new Error('ngModelController.$setViewValue has updated but KbnModelController has not!');
+    if (angular.version !== '1.2.27') {
+      throw new Error('angular version has updated but KbnModelController has not!');
     }
 
     /**
