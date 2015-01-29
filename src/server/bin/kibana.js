@@ -4,6 +4,7 @@ var program = require('commander');
 var env = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'development';
 var path = require('path');
 var packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
+var fs = require('fs');
 if (env !== 'development') {
   packagePath = path.resolve(__dirname, '..', 'package.json');
 }
@@ -56,4 +57,14 @@ if (program.host) {
 // Load and start the server. This must happen after all the config changes
 // have been made since the server also requires the config.
 var server = require('../');
-server.start();
+var logger = require('../lib/logger');
+server.start(function (err) {
+  if (!err && config.kibana.pid_file) {
+    fs.writeFile(config.kibana.pid_file, process.pid, function (err) {
+      if (err) {
+        logger.fatal('Failed to write PID file to %s', config.kibana.pid_file);
+        process.exit(1);
+      }
+    });
+  }
+});
