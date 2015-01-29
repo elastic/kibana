@@ -7,7 +7,6 @@ bower_components
 trash
 build
 target
-.jruby
 .idea
 *.iml
 *.log
