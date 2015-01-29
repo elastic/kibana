@@ -1,7 +1,8 @@
-var isUpgradeable = require('../../../../src/server/lib/isUpgradeable');
+var root = require('requirefrom')('');
+var isUpgradeable = root('src/server/lib/isUpgradeable');
 var expect = require('expect.js');
 var util = require('util');
-var package = require('../../../../package.json');
+var package = root('package.json');
 
 describe('lib/isUpgradeable', function () {
 
