@@ -7,7 +7,6 @@ var uri = url.parse(config.elasticsearch);
 if (config.kibana.elasticsearch_username && config.kibana.elasticsearch_password) {
   uri.auth = util.format('%s:%s', config.kibana.elasticsearch_username, config.kibana.elasticsearch_password);
 }
-console.log(url.format(uri));
 var client = new elasticsearch.Client({
   host: url.format(uri)
 });
