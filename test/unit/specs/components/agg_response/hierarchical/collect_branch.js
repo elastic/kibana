@@ -11,18 +11,18 @@ define(function (require) {
       results = collectBranch({
         name: 'bucket3',
         depth: 3,
-        value: 6,
+        size: 6,
         field: { format: { convert: convert } },
         aggConfig: { params: { field: { displayName: 'field3' } }, fieldFormatter: _.constant(String) },
         parent: {
           name: 'bucket2',
           depth: 2,
-          value: 12,
+          size: 12,
           aggConfig: { label: 'field2', fieldFormatter: _.constant(String) },
           parent: {
             name: 'bucket1',
             depth: 1,
-            value: 24,
+            size: 24,
             parent: {}
           }
         }
