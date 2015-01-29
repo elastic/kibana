@@ -34,9 +34,14 @@ shard_timeout: 0
 # certificate.
 verify_ssl: true
 
-# Set the path to where you would like the process id file to be created.
-# pid_file: /var/run/kibana.pid
-
 # If you need to provide a CA certificate for your Elasticsarech instance, put
 # the path of the pem file here.
 # ca: /path/to/your/CA.pem
+
+# SSL for outgoing requests from the Kibana Server (PEM formatted)
+# ssl_key_file: /path/to/your/server.key
+# ssl_cert_file: /path/to/your/server.crt
+
+# Set the path to where you would like the process id file to be created.
+# pid_file: /var/run/kibana.pid
+

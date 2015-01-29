@@ -76,7 +76,13 @@ define(function (require) {
 
         if (val == null) {
           if (aggParam.default == null) return;
-          else val = aggParam.default;
+
+          if (!_.isFunction(aggParam.default)) {
+            val = aggParam.default;
+          } else {
+            val = aggParam.default(self);
+            if (val == null) return;
+          }
         }
 
         if (aggParam.deserialize) {
@@ -104,8 +110,8 @@ define(function (require) {
      * @return {object} the new params object
      */
     AggConfig.prototype.resetParams = function () {
-      // We need to ensure that row doesn't get overriden.
-      return this.fillDefaults(_.pick(this.params, 'row'));
+      // We need to ensure that row and field don't get overriden.
+      return this.fillDefaults(_.pick(this.params, 'row', 'field'));
     };
 
     AggConfig.prototype.write = function () {
