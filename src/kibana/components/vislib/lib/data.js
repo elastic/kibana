@@ -288,11 +288,18 @@ define(function (require) {
       var isOrdered = (this.data.ordered && this.data.ordered.date);
       var minDate = isOrdered ? this.data.ordered.min : undefined;
       var maxDate = isOrdered ? this.data.ordered.max : undefined;
+      var interval = isOrdered ? this.data.ordered.interval : undefined;
 
       return d3.max(this.stackData(series), function (data) {
         return d3.max(data, function (d) {
+          var bucket = d.x + interval;
+
           if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
+            if (d.x <= minDate && bucket >= maxDate) {
+              return d.y0 + d.y;
+            }
+
+            return (bucket >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
           }
 
           return d.y0 + d.y;
@@ -311,11 +318,18 @@ define(function (require) {
       var isOrdered = (this.data.ordered && this.data.ordered.date);
       var minDate = isOrdered ? this.data.ordered.min : undefined;
       var maxDate = isOrdered ? this.data.ordered.max : undefined;
+      var interval = isOrdered ? this.data.ordered.interval : undefined;
 
       return d3.max(series, function (data) {
         return d3.max(data, function (d) {
+          var bucket = d.x + interval;
+
           if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
+            if (d.x <= minDate && bucket >= maxDate) {
+              return d.y0 + d.y;
+            }
+
+            return (bucket >= minDate && d.x <= maxDate) ? d.y : undefined;
           }
 
           return d.y;
