@@ -4,6 +4,7 @@ var rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
 module.exports = function (doc) {
   if (/beta|snapshot/i.test(doc._id)) return false;
+  if (!doc._id) return false;
   if (doc._id === config.package.version) return false;
 
   var packageRcRelease = Infinity;
@@ -23,6 +24,10 @@ module.exports = function (doc) {
     packageRcRelease = parseInt(packageMatches[2], 10);
   }
 
-  if (semver.gte(version, packageVersion) && rcRelease >= packageRcRelease) return false;
+  try {
+    if (semver.gte(version, packageVersion) && rcRelease >= packageRcRelease) return false;
+  } catch (e) {
+    return false;
+  }
   return true;
 };

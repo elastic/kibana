@@ -24,4 +24,31 @@ describe('lib/isUpgradeable', function () {
   upgradeDoc('4.0.0-rc1-snapshot', '4.0.0', false);
   upgradeDoc('4.1.0-rc1-snapshot', '4.1.0-rc1', false);
 
+  it('should handle missing _id field', function () {
+    var doc = {
+      '_index': '.kibana',
+      '_type': 'config',
+      '_score': 1,
+      '_source': {
+        'buildNum': 1.7976931348623157e+308,
+        'defaultIndex': '[logstash-]YYYY.MM.DD'
+      }
+    };
+    expect(isUpgradeable(doc)).to.be(false);
+  });
+
+  it('should handle _id of @@version', function () {
+    var doc = {
+      '_index': '.kibana',
+      '_type': 'config',
+      '_id': '@@version',
+      '_score': 1,
+      '_source': {
+        'buildNum': 1.7976931348623157e+308,
+        'defaultIndex': '[logstash-]YYYY.MM.DD'
+      }
+    };
+    expect(isUpgradeable(doc)).to.be(false);
+  });
+
 });
