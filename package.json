@@ -47,6 +47,7 @@
     "elasticsearch": "^3.1.1",
     "express": "~4.10.6",
     "glob": "^4.3.2",
+    "http-auth": "^2.2.5",
     "jade": "~1.8.2",
     "js-yaml": "^3.2.5",
     "less-middleware": "1.0.x",

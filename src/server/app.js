@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var requestLogger = require('./lib/requestLogger');
+var auth = require('./lib/auth');
 var appHeaders = require('./lib/appHeaders');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -18,9 +19,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('x-powered-by', false);
 
-app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 app.use(requestLogger());
+app.use(auth());
 app.use(appHeaders());
+app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 
 if (app.get('env') === 'development') {
   require('./dev')(app);
