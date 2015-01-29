@@ -97,6 +97,7 @@ define(function (require) {
         var vis;
         beforeEach(function () {
           vis = {
+            indexPattern: indexPattern,
             type: {
               schemas: new Schemas([
                 {
@@ -140,7 +141,7 @@ define(function (require) {
         it('should NOT set the defaults defined in the schema when some exist', function () {
           var ac = new AggConfigs(vis, [{ schema: 'segment', type: 'date_histogram' }]);
           expect(ac).to.have.length(3);
-          expect(ac.bySchemaName['segment'][0].type.name).to.equal('date_histogram');
+          expect(ac.bySchemaName.segment[0].type.name).to.equal('date_histogram');
         });
       });
     });
