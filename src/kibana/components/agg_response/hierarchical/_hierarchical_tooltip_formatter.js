@@ -25,7 +25,7 @@ define(function (require) {
         // Map those values to what the tooltipSource.rows format.
         $tooltipScope.rows = _.map(rows, function (row) {
           row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
-          row.metric = row.metric + ' (' + Math.round((row.metric / sum) * 100) + '%)';
+          row.metric = row.metric + ' (' + Math.round((Math.abs(row.metric) / sum) * 100) + '%)';
           return row;
         });
 
