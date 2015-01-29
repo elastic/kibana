@@ -14,8 +14,10 @@
   "version": "4.0.0-beta3",
   "main": "src/server/app.js",
   "homepage": "http://www.elasticsearch.org/overview/kibana/",
-  "bugs": "https://github.com/elasticsearch/kibana/issues",
-  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/elasticsearch/kibana/issues"
+  },
+  "license": "Apache 2.0",
   "author": "Rashid Khan <rashid.khan@elasticsearch.com>",
   "contributors": [
     "Spencer Alger <spencer.alger@elasticsearch.com>",
@@ -43,13 +45,15 @@
     "debug": "~2.1.1",
     "express": "~4.10.6",
     "glob": "^4.3.2",
-    "http-proxy": "^1.8.1",
+    "http-auth": "^2.2.5",
     "jade": "~1.8.2",
     "js-yaml": "^3.2.5",
     "less-middleware": "1.0.x",
     "lodash": "^2.4.1",
     "morgan": "~1.5.1",
-    "serve-favicon": "~2.2.0"
+    "request": "^2.40.0",
+    "serve-favicon": "~2.2.0",
+    "ssl-root-cas": "^1.1.7"
   },
   "devDependencies": {
     "bluebird": "~2.0.7",
@@ -86,14 +90,9 @@
     "opn": "~1.0.0",
     "path-browserify": "0.0.0",
     "progress": "^1.1.8",
-    "request": "^2.40.0",
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
     "simple-git": "^0.11.0",
     "tar": "^1.0.1"
-  },
-  "license": "Apache 2.0",
-  "bugs": {
-    "url": "https://github.com/elasticsearch/kibana/issues"
   }
 }

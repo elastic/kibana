@@ -25,7 +25,15 @@ define(function (require) {
     { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 2 },
     { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 2 },
     { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 2 },
-    { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 2 },
+
+    { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 3 },
+    { from: 'now-60d',  to: 'now',      display: 'Last 60 days',          section: 3 },
+    { from: 'now-90d',  to: 'now',      display: 'Last 90 days',          section: 3 },
+    { from: 'now-6M',   to: 'now',      display: 'Last 6 months',         section: 3 },
+    { from: 'now-1y',   to: 'now',      display: 'Last 1 year',           section: 3 },
+    { from: 'now-2y',   to: 'now',      display: 'Last 2 years',          section: 3 },
+    { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 3 },
+
   ]);
 
 });

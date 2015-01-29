@@ -7,7 +7,7 @@ define(function (require) {
 
       $('body').append('<div class=visualize-chart></div>');
 
-      var $el = $('.visualize-chart');
+      var $el = $('.visualize-chart:last');
 
       $el.width(1024);
       $el.height(300);

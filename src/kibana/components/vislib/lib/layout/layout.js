@@ -91,7 +91,7 @@ define(function (require) {
       }
 
       if (obj.splits) {
-        d3.select(this.el).select('.' + obj.class).call(obj.splits);
+        d3.select(this.el).select('.' + obj.class).call(obj.splits, obj.parent);
       }
 
       if (obj.children) {

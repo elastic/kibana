@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   grunt.registerTask('npm_install_kibana', 'NPM isntall kibana server into dist', function () {
     var done = this.async();
     var cwd = join(grunt.config.get('build'), 'dist', 'kibana', 'src');
-    var command = 'npm install  --production';
+    var command = 'npm install  --production --no-optional';
     var options = { cwd: cwd };
     child_process.exec(command, options, function (err, stdout, stderr) {
       if (err) {

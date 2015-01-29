@@ -38,7 +38,10 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          filterFieldTypes: 'date'
+          filterFieldTypes: 'date',
+          default: function (aggConfig) {
+            return aggConfig.vis.indexPattern.timeFieldName;
+          }
         },
 
         {
