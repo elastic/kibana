@@ -16,6 +16,13 @@ define(function (require) {
       }
     ])).all[0];
 
+    function isType(type) {
+      return function (agg) {
+        var field = agg.params.field;
+        return !field || field.type !== 'string';
+      };
+    }
+
     return new BucketAggType({
       name: 'terms',
       title: 'Terms',
@@ -34,17 +41,13 @@ define(function (require) {
           name: 'exclude',
           type: 'regex',
           advanced: true,
-          disabled: function (aggConfig) {
-            return aggConfig.params.field.type !== 'string';
-          }
+          disabled: isType('string')
         },
         {
           name: 'include',
           type: 'regex',
           advanced: true,
-          disabled: function (aggConfig) {
-            return aggConfig.params.field.type !== 'string';
-          }
+          disabled: isType('string')
         },
         {
           name: 'size',
