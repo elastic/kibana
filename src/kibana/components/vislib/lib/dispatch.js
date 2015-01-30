@@ -158,6 +158,7 @@ define(function (require) {
      */
     Dispatch.prototype.addBrushEvent = function (svg) {
       if (!this.isBrushable()) return;
+
       var xScale = this.handler.xAxis.xScale;
       var brush = this.createBrush(xScale, svg);
 
@@ -203,11 +204,10 @@ define(function (require) {
       var attr = this.handler._attr;
       var height = attr.height;
       var margin = attr.margin;
-      var ordered = this.handler.xAxis.ordered;
 
       // Brush scale
       var brush = d3.svg.brush()
-      .x(xScale.range([xScale(ordered.min), xScale(ordered.max)]).domain([ordered.min, ordered.max]))
+      .x(xScale)
       .on('brushend', function brushEnd() {
 
         // Assumes data is selected at the chart level
