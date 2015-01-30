@@ -11,7 +11,7 @@ define(function (require) {
         return aggResponse.hierarchical(vis, esResponse);
       }
 
-      var tableGroup = aggResponse.tabify(this.vis, esResponse, {
+      var tableGroup = aggResponse.tabify(vis, esResponse, {
         canSplit: true,
         asAggConfigResults: true
       });
@@ -58,7 +58,7 @@ define(function (require) {
       });
 
       if (!tables.length) {
-        return;
+        return {};
       }
 
       return out;
