@@ -11,6 +11,20 @@ define(function (require) {
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
       description: 'When displaying a pretty formatted date, use this format',
     },
+    'dateFormat:scaled': {
+      value: [
+        ['', 'hh:mm:ss.SSS'],
+        ['PT1S', 'HH:mm:ss'],
+        ['PT1M', 'HH:mm'],
+        ['PT1H', 'YYYY-MM-DD HH:mm'],
+        ['P1DT', 'YYYY-MM-DD'],
+        ['P1YT', 'YYYY']
+      ],
+      description: 'Values that define the format used in situations where timebased' +
+      ' data is rendered in order, and formatted timestamps should adapt to the' +
+      ' interval between measurements. Keys are ISO 8601 intervals:' +
+      ' http://en.wikipedia.org/wiki/ISO_8601#Time_intervals'
+    },
     'defaultIndex': {
       value: null,
       description: 'The index to access if no index is set',

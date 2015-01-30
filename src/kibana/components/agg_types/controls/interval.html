@@ -1,5 +1,14 @@
 <div class="form-group">
-  <label>Interval</label>
+  <label>
+    Interval
+    <kbn-tooltip
+      ng-show="agg.params.buckets.getInterval().scaled"
+      text="This interval creates too many buckets or buckets that are too large to show in the selected time range, so they are being scaled."
+      placement="right"
+      class="text-warning">
+      <i class="fa fa-warning"></i>
+    </kbn-tooltip>
+  </label>
   <select
     ng-if="aggParam.options"
     ng-model="agg.params.interval"

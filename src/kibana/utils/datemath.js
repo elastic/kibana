@@ -2,8 +2,14 @@ define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
 
+  var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+  var unitsAsc = _.sortBy(units, function (unit) {
+    return moment.duration(1, unit).valueOf();
+  });
+  var unitsDesc = unitsAsc.reverse();
+
 /* This is a simplified version of elasticsearch's date parser */
-  var parse = function (text, roundUp) {
+  function parse(text, roundUp) {
     if (!text) return undefined;
     if (moment.isMoment(text)) return text;
     if (_.isDate(text)) return moment(text);
@@ -33,11 +39,10 @@ define(function (require) {
     }
 
     return parseDateMath(mathString, time, roundUp);
-  };
+  }
 
-  var parseDateMath = function (mathString, time, roundUp) {
-    var dateTime = time,
-      spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+  function parseDateMath(mathString, time, roundUp) {
+    var dateTime = time;
 
     for (var i = 0; i < mathString.length;) {
       var c = mathString.charAt(i++),
@@ -71,22 +76,26 @@ define(function (require) {
       }
       unit = mathString.charAt(i++);
 
-      if (!_.contains(spans, unit)) {
+      if (!_.contains(units, unit)) {
         return undefined;
       } else {
         if (type === 0) {
           roundUp ? dateTime.endOf(unit) : dateTime.startOf(unit);
         } else if (type === 1) {
-          dateTime.add(unit, num);
+          dateTime.add(num, unit);
         } else if (type === 2) {
-          dateTime.subtract(unit, num);
+          dateTime.subtract(num, unit);
         }
       }
     }
     return dateTime;
-  };
+  }
 
   return {
-    parse: parse
+    parse: parse,
+
+    units: Object.freeze(units),
+    unitsAsc: Object.freeze(unitsAsc),
+    unitsDesc: Object.freeze(unitsDesc)
   };
 });

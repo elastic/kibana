@@ -1,32 +1,24 @@
 define(function (require) {
   return function PointSeriesOrderedDateAxis(timefilter) {
     var moment = require('moment');
-    var interval = require('utils/interval');
 
-    return function orderedDateAxis(vis, table, chart) {
+    return function orderedDateAxis(vis, chart) {
       var aspects = chart.aspects;
-      var bounds = timefilter.getBounds();
-      var format = interval.calculate(
-        moment(bounds.min.valueOf()),
-        moment(bounds.max.valueOf()),
-        table.rows.length
-      ).format;
+      var buckets = aspects.x.agg.params.buckets;
+      var format = buckets.getScaledDateFormat();
 
       chart.xAxisFormatter = function (val) {
         return moment(val).format(format);
       };
 
-      var xAggOutput = aspects.x.agg.write();
+      var bounds = buckets.getBounds();
+      var interval = buckets.getInterval();
       chart.ordered = {
         date: true,
-        interval: interval.toMs(xAggOutput.params.interval)
+        interval: interval,
+        min: bounds.min,
+        max: bounds.max
       };
-
-      if (vis.indexPattern.timeFieldName) {
-        var timeBounds = timefilter.getBounds();
-        chart.ordered.min = timeBounds.min.valueOf();
-        chart.ordered.max = timeBounds.max.valueOf();
-      }
     };
   };
 });

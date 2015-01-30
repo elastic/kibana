@@ -148,10 +148,17 @@ define(function (require) {
     AggConfig.prototype.toDsl = function () {
       if (this.type.hasNoDsl) return;
 
-      var output = this.write();
+      var self = this;
+      self.type.params.forEach(function (param) {
+        if (param.onRequest) {
+          param.onRequest(self);
+        }
+      });
+
+      var output = self.write();
 
       var configDsl = {};
-      configDsl[this.type.name] = output.params;
+      configDsl[self.type.name] = output.params;
 
       // if the config requires subAggs, write them to the dsl as well
       if (output.subAggs) {
