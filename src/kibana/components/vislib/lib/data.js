@@ -115,41 +115,6 @@ define(function (require) {
     };
 
     /**
-     * Function to determine whether to display the legend or not
-     * Displays legend when more than one series of data present
-     *
-     * @method isLegendShown
-     * @returns {boolean}
-     */
-    Data.prototype.isLegendShown = function () {
-      var isLegend = false;
-      var visData = this.getVisData();
-      var sameSeriesLabel = true;
-      var seriesLabel;
-
-      _.forEach(visData, function countSeriesLength(obj) {
-        var rootSeries = obj.series || (obj.slices && obj.slices.children);
-        var dataLength = rootSeries ? rootSeries.length : 0;
-        var label = dataLength === 1 ? rootSeries[0].label || rootSeries[0].name : undefined;
-        var children = (obj.slices && obj.slices.children && obj.slices.children[0] && obj.slices.children[0].children);
-
-        if (!seriesLabel) {
-          seriesLabel = label;
-        }
-
-        if (seriesLabel !== label) {
-          sameSeriesLabel = false;
-        }
-
-        if (dataLength > 1 || children || !sameSeriesLabel) {
-          isLegend = true;
-        }
-      });
-
-      return isLegend;
-    };
-
-    /**
      * Returns array of chart data objects for pie data objects
      *
      * @method pieData
@@ -245,9 +210,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self.getYStackMax(series));
+          return arr.push(self.getYExtents(series, self.getYStackMax));
         }
-        return arr.push(self.getYMax(series));
+        return arr.push(self.getYExtents(series, self.getYMax));
       });
 
       return _.max(arr);
@@ -265,49 +230,37 @@ define(function (require) {
     };
 
     /**
+     *
+     * @param series
+     * @param callback
+     * @returns {*}
+     */
+    Data.prototype.getYExtents = function (series, calculation) {
+      return d3.max(this.stackData(series), function (data) {
+        return d3.max(data, calculation);
+      });
+    };
+
+    /**
      * Calculates the largest y stack value among all data objects
      *
      * @method getYStackMax
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y stack max value
+     * @param d {Object} data object
+     * @returns {Number} Y stack value
      */
-    Data.prototype.getYStackMax = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
-
-      return d3.max(this.stackData(series), function (data) {
-        return d3.max(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
-          }
-
-          return d.y0 + d.y;
-        });
-      });
+    Data.prototype.getYStackMax = function (d) {
+      return d.y0 + d.y;
     };
 
     /**
      * Calculates the Y domain max value
      *
      * @method getMax
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y domain max value
+     * @param d {Object} data object
+     * @returns {Number} Y value
      */
-    Data.prototype.getYMax = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
-
-      return d3.max(series, function (data) {
-        return d3.max(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
-          }
-
-          return d.y;
-        });
-      });
+    Data.prototype.getYMax = function (d) {
+      return d.y;
     };
 
     /**

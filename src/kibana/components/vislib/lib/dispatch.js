@@ -203,38 +203,39 @@ define(function (require) {
       var attr = this.handler._attr;
       var height = attr.height;
       var margin = attr.margin;
+      var ordered = this.handler.xAxis.ordered;
 
       // Brush scale
       var brush = d3.svg.brush()
-        .x(xScale)
-        .on('brushend', function brushEnd() {
+      .x(xScale.range([xScale(ordered.min), xScale(ordered.max)]).domain([ordered.min, ordered.max]))
+      .on('brushend', function brushEnd() {
 
-          // Assumes data is selected at the chart level
-          // In this case, the number of data objects should always be 1
-          var data = d3.select(this).data()[0];
-          var isTimeSeries = (data.ordered && data.ordered.date);
+        // Assumes data is selected at the chart level
+        // In this case, the number of data objects should always be 1
+        var data = d3.select(this).data()[0];
+        var isTimeSeries = (data.ordered && data.ordered.date);
 
-          // Allows for brushing on d3.scale.ordinal()
-          var selected = xScale.domain().filter(function (d) {
-            return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
-          });
-          var range = isTimeSeries ? brush.extent() : selected;
-
-          return dispatch.brush({
-            range: range,
-            config: attr,
-            e: d3.event,
-            data: data
-          });
+        // Allows for brushing on d3.scale.ordinal()
+        var selected = xScale.domain().filter(function (d) {
+          return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
         });
+        var range = isTimeSeries ? brush.extent() : selected;
+
+        return dispatch.brush({
+          range: range,
+          config: attr,
+          e: d3.event,
+          data: data
+        });
+      });
 
       // if `addBrushing` is true, add brush canvas
       if (dispatch.on('brush')) {
         svg.insert('g', 'g')
-          .attr('class', 'brush')
-          .call(brush)
-          .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
+        .attr('class', 'brush')
+        .call(brush)
+        .selectAll('rect')
+        .attr('height', height - margin.top - margin.bottom);
 
         return brush;
       }

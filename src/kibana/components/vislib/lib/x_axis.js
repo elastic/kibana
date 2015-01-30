@@ -42,10 +42,11 @@ define(function (require) {
      * If time, return time scale, else return d3 ordinal scale for nominal data
      *
      * @method getScale
-     * @param ordered {Object|*} Time information
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getScale = function (ordered) {
+    XAxis.prototype.getScale = function () {
+      var ordered = this.ordered;
+
       if (ordered && ordered.date) {
         return d3.time.scale.utc();
       }
@@ -59,12 +60,13 @@ define(function (require) {
      *
      * @method getDomain
      * @param scale {Function} D3 scale
-     * @param ordered {Object} Time information
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getDomain = function (scale, ordered) {
+    XAxis.prototype.getDomain = function (scale) {
+      var ordered = this.ordered;
+
       if (ordered && ordered.date) {
-        return this.getTimeDomain(scale, ordered);
+        return this.getTimeDomain(scale, this.xValues);
       }
       return this.getOrdinalDomain(scale, this.xValues);
     };
@@ -74,11 +76,29 @@ define(function (require) {
      *
      * @method getTimeDomain
      * @param scale {Function} D3 scale function
-     * @param ordered {Object} Time information
+     * @param data {Array}
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getTimeDomain = function (scale, ordered) {
-      return scale.domain([ordered.min, ordered.max]);
+    XAxis.prototype.getTimeDomain = function (scale, data) {
+      return scale.domain([this._getXExtents(data, 'min'), this._getXExtents(data, 'max')]);
+      //return scale.domain([ordered.min, ordered.max]);
+    };
+
+    /**
+     *
+     * @param data
+     * @param extent
+     */
+    XAxis.prototype._getXExtents = function (data, extent) {
+      var ordered = this.ordered;
+
+      return d3[extent](data, function (d) {
+        if (extent === 'max') {
+          return d + ordered.interval;
+        }
+
+        return d;
+      });
     };
 
     /**
@@ -99,29 +119,29 @@ define(function (require) {
      *
      * @method getRange
      * @param scale {Function} D3 scale function
-     * @param ordered {Object} Time information
      * @param width {Number} HTML Element width
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getRange = function (scale, ordered, width) {
+    XAxis.prototype.getRange = function (domain, width) {
+      var ordered = this.ordered;
+
       if (ordered && ordered.date) {
-        return scale.range([0, width]);
+        return domain.range([0, width]);
       }
-      return scale.rangeBands([0, width], 0.1);
+      return domain.rangeBands([0, width], 0.1);
     };
 
     /**
      * Return the x axis scale
      *
      * @method getXScale
-     * @param ordered {Object} Time information
      * @param width {Number} HTML Element width
      * @returns {*} D3 x scale function
      */
-    XAxis.prototype.getXScale = function (ordered, width) {
-      var scale = this.getScale(ordered);
-      var domain = this.getDomain(scale, ordered);
-      return this.getRange(domain, ordered, width);
+    XAxis.prototype.getXScale = function (width) {
+      var domain = this.getDomain(this.getScale());
+
+      return this.getRange(domain, width);
     };
 
     /**
@@ -131,7 +151,9 @@ define(function (require) {
      * @param width {Number} HTML Element width
      */
     XAxis.prototype.getXAxis = function (width) {
-      this.xScale = this.getXScale(this.ordered, width);
+      var ordered = this.ordered;
+
+      this.xScale = this.getXScale(width);
 
       if (!this.xScale || _.isNaN(this.xScale)) {
         throw new Error('xScale is ' + this.xScale);
