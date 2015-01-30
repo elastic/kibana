@@ -1,6 +1,6 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-  function getTestTask() {
+  function addTestTask(tasks) {
     var testTask = 'mocha:unit';
 
     if (grunt.option('use-sauce') || process.env.TRAVIS) {
@@ -12,6 +12,8 @@ module.exports = function (grunt) {
         testTask = 'saucelabs-mocha:unit';
       }
     }
+
+    tasks.push('simplemocha:all', testTask);
 
     return testTask;
   }
@@ -26,19 +28,18 @@ module.exports = function (grunt) {
       'jshint',
       'maybe_start_kibana',
       'jade',
-      'less',
-      getTestTask()
+      'less'
     ];
-
-    if (process.env.TRAVIS) tasks.shift('esvm:dev');
+    addTestTask(tasks);
+    if (process.env.TRAVIS) tasks.unshift('esvm:dev');
     grunt.task.run(tasks);
   });
 
   grunt.registerTask('quick-test', function () {
     var tasks = [
-      'maybe_start_kibana',
-      getTestTask()
+      'maybe_start_kibana'
     ];
+    addTestTask(tasks);
     grunt.task.run(tasks);
   });
 
