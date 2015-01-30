@@ -81,7 +81,6 @@ define(function (require) {
      */
     XAxis.prototype.getTimeDomain = function (scale, data) {
       return scale.domain([this._getXExtents(data, 'min'), this._getXExtents(data, 'max')]);
-      //return scale.domain([ordered.min, ordered.max]);
     };
 
     /**
@@ -151,8 +150,6 @@ define(function (require) {
      * @param width {Number} HTML Element width
      */
     XAxis.prototype.getXAxis = function (width) {
-      var ordered = this.ordered;
-
       this.xScale = this.getXScale(width);
 
       if (!this.xScale || _.isNaN(this.xScale)) {
