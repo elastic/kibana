@@ -15,3 +15,39 @@ Elasticsearch indexes in minutes--no code, no additional infrastructure required
 
 === Data Discovery and Visualization
 
+Let's take a look at how you might use Kibana to explore and visualize data. 
+We've indexed some data from Transport for London (TFL) that shows a week's 
+worth of transit (Oyster) card usage.
+
+From Kibana's Discover page, we can submit search queries, filter the results, and 
+examine the data in the returned documents. For example, we could search for all
+of the trips that ended at the Baker Street station:
+
+image::images/TFL-BakerStreet.jpg[Discover]
+
+Right away, we can see that more people exit at Baker Street between 10:00 PM and 1:00 AM
+than any other time of day. By default, the Discover page shows a time-series chart
+and the first 500 entries that match the search criteria. You can change the time
+filter, interact with the chart to drill down into the data, and view the details 
+of particular documents. For more information about exploring your data from the
+Discover page, see <<discover>>.
+
+You can construct visualizations of your search results from the Visualization page.
+Each visualization is associated with a search. For example, we can create a histogram
+that shows the weekly London commute traffic via tube using a a search that excludes 
+incomplete trips and trips by bus. The Y-axis is the number of trips. The X-axis shows
+the day and time. By adding a sub-aggregation, we can see the top 3 end stations during
+each hour:
+
+image::images/TFL-CommuteHistogram.jpg[Visualize]
+
+You can save and share visualizations and add them to dashboards to make it easy
+to monitor and share particular metrics. For example, we could create a dashboard
+that displays several visualizations of the TFL data:
+
+image::images/TFL-Dashboard.jpg[Dashboard]
+
+For more information about creating and sharing visualizations, see <<visualize>>. 
+For more information about working with Dashboards, see <<dashboard>>.
+
+
