@@ -2,7 +2,6 @@ define(function (require) {
   return ['orderedDateAxis', function () {
     var moment = require('moment');
     var _ = require('lodash');
-    var interval = require('utils/interval');
 
     var baseArgs = {
       vis: {
@@ -65,7 +64,7 @@ define(function (require) {
       it('sets interval after parsing the output of the x.agg', function () {
         var args = _.cloneDeep(baseArgs);
         orderedDateAxis(args.vis, args.table, args.chart);
-        expect(args.chart.ordered.interval).to.be(interval.toMs('10m'));
+        expect(args.chart.ordered.interval).to.be(moment.duration(10, 'm'));
       });
 
       it('sets the min and max when the indexPattern has a timeField', function () {
