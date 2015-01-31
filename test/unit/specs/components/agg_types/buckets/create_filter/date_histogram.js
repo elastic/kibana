@@ -1,55 +1,102 @@
 define(function (require) {
-  var _ = require('lodash');
-  var moment = require('moment');
   describe('AggConfig Filters', function () {
-    describe('date_historgram', function () {
-      var AggConfig;
-      var indexPattern;
-      var Vis;
-      var createFilter;
+    describe('date_histogram', function () {
+      var _ = require('lodash');
+      var moment = require('moment');
+      var sinon = require('test_utils/auto_release_sinon');
+      var aggResp = require('fixtures/agg_resp/date_histogram');
+
+      var vis;
+      var agg;
+      var field;
+      var filter;
+      var bucketKey;
+      var bucketStart;
+      var getIntervalStub;
+      var intervalOptions;
+
+      var init;
 
       beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
-        Vis = Private(require('components/vis/vis'));
-        AggConfig = Private(require('components/vis/_agg_config'));
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        createFilter = Private(require('components/agg_types/buckets/create_filter/date_histogram'));
-      }));
+      beforeEach(inject(function (Private, $injector) {
+        var Vis = Private(require('components/vis/vis'));
+        var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        var createFilter = Private(require('components/agg_types/buckets/create_filter/date_histogram'));
+        var TimeBuckets = Private(require('components/time_buckets/time_buckets'));
+        intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
 
-      var runTest = function (intervalString, interval) {
-        it('should return a range filter for ' + intervalString, function () {
-          var vis = new Vis(indexPattern, {
+        init = function (interval, duration) {
+          interval = interval || 'auto';
+          duration = duration || moment.duration(15, 'minutes');
+
+          bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
+          bucketStart = moment(bucketKey);
+
+          var timePad = moment.duration(duration / 2);
+          var timeBuckets = new TimeBuckets();
+          timeBuckets.setBounds({
+            min: bucketStart.clone().subtract(timePad),
+            max: bucketStart.clone().add(timePad),
+          });
+          timeBuckets.setInterval(interval);
+
+          field = _.sample(indexPattern.fields.byType.date);
+          vis = new Vis(indexPattern, {
             type: 'histogram',
             aggs: [
               {
                 type: 'date_histogram',
                 schema: 'segment',
-                params: { field: '@timestamp', interval: intervalString }
+                params: { field: field.name, interval: interval, buckets: timeBuckets }
               }
             ]
           });
-          var aggConfig = vis.aggs.byTypeName.date_histogram[0];
-          var date = moment('2014-01-01 12:00');
-          var max = date.clone().add(interval, 'ms');
-          var filter = createFilter(aggConfig, date.valueOf());
-          expect(filter).to.have.property('range');
-          expect(filter).to.have.property('meta');
-          expect(filter.range).to.have.property('@timestamp');
-          expect(filter.range['@timestamp']).to.have.property('gte', date.valueOf());
-          expect(filter.range['@timestamp']).to.have.property('lte', max.valueOf());
-          expect(filter.meta).to.have.property('index', indexPattern.id);
+
+          agg = vis.aggs[0];
+          filter = createFilter(agg, bucketKey);
+        };
+      }));
+
+      it('creates a valid range filter', function () {
+        init();
+
+        expect(filter).to.have.property('range');
+        expect(filter.range).to.have.property(field.name);
+
+        var fieldParams = filter.range[field.name];
+        expect(fieldParams).to.have.property('gte');
+        expect(fieldParams.gte).to.be.a('number');
+
+        expect(fieldParams).to.have.property('lte');
+        expect(fieldParams.lte).to.be.a('number');
+
+        expect(fieldParams.gte).to.be.lessThan(fieldParams.lte);
+
+        expect(filter).to.have.property('meta');
+        expect(filter.meta).to.have.property('index', vis.indexPattern.id);
+      });
+
+
+      it('extends the filter edge to 1ms before the next bucket for all interval options', function () {
+        intervalOptions.forEach(function (option) {
+          var duration;
+          if (moment(1, option.val).isValid()) {
+            duration = moment.duration(10, option.val);
+
+            if (+duration < 10) {
+              throw new Error('unable to create interval for ' + option.val);
+            }
+          }
+
+          init(option.val, duration);
+
+          var interval = agg.params.buckets.getInterval();
+          var params = filter.range[field.name];
+
+          expect(params.gte).to.be(+bucketStart);
+          expect(params.lte).to.be(+bucketStart.clone().add(interval).subtract(1, 'ms'));
         });
-      };
-
-      runTest('auto', 30000);
-      runTest('second', 10000);
-      runTest('minute', 60000);
-      runTest('hour', 3600000);
-      runTest('day', 86400000);
-      runTest('week', 604800000);
-      runTest('month', 2592000000);
-      runTest('year', 31536000000);
-
+      });
     });
   });
 });
