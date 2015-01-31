@@ -57,8 +57,8 @@ define(function (require) {
         if (interval < target) return interval;
       }),
 
-      atLeast: find(roundingRules, function atLeast(bound, interval, target) {
-        if (interval >= target) return interval;
+      atLeast: find(revRoundingRules, function atLeast(bound, interval, target) {
+        if (interval <= target) return interval;
       }),
     };
   };
