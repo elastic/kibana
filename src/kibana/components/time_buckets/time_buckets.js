@@ -274,6 +274,8 @@ define(function (require) {
           return rule[1];
         }
       }
+
+      return config.get('dateFormat');
     };
 
     /**
