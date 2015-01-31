@@ -16,7 +16,7 @@ module.exports = function (response) {
   // Look for upgradeable configs. If none of them are upgradeable
   // then resolve with null.
   var body = _.find(response.hits.hits, isUpgradeable);
-  if (body) return Promise.resolve();
+  if (!body) return Promise.resolve();
 
   return client.create({
     index: '.kibana',
