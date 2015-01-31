@@ -43,11 +43,15 @@ define(function (require) {
           options: Private(require('components/agg_types/buckets/_interval_options')),
           editor: require('text!components/agg_types/controls/interval.html'),
           onRequest: function (agg) {
-            // only update the bucket bounds on request, so that we have exactly
-            // the same bounds until the next request is issued
+            // flag that prevents us from clobbering on subsequest calls to write()
+            agg.buckets._sentToEs = true;
             agg.buckets.setBounds(timefilter.getActiveBounds());
           },
           write: function (agg, output) {
+            if (!agg.buckets._sentToEs) {
+              agg.buckets.setBounds(timefilter.getActiveBounds());
+            }
+
             agg.buckets.setInterval(agg.params.interval);
 
             var interval = agg.buckets.getInterval();
