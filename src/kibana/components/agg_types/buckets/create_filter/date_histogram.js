@@ -4,16 +4,12 @@ define(function (require) {
     var buildRangeFilter = require('components/filter_manager/lib/range');
 
     return function (aggConfig, key) {
+      var start = moment(key);
       var interval = aggConfig.params.buckets.getInterval();
 
-      var intNotation = interval.toJSON();
-      var time = moment(key);
-      var start = +time;
-      var end = +time.add(interval).subtract(1, 'ms');
-
       return buildRangeFilter(aggConfig.params.field, {
-        gte: start,
-        lte: end
+        gte: start.valueOf(),
+        lte: start.add(interval).subtract(1, 'ms').valueOf()
       }, aggConfig.vis.indexPattern);
     };
 
