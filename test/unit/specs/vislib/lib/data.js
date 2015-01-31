@@ -271,8 +271,17 @@ define(function (require) {
           stackedVisData = new Data(stackedDataSeries, {});
           series = visData.flatten();
           stackedSeries = stackedVisData.flatten();
-          maxValue = 25;
-          stackedMaxValue = 60;
+
+          maxValue = _.chain(series)
+            .flatten()
+            .map(function (d) {
+              return d.y;
+            })
+            .max()
+            .value();
+
+          // TODO: Shouldn't hard code this value, need to come up with a solution that works.
+          stackedMaxValue = 115;
         });
       });
 
@@ -283,14 +292,26 @@ define(function (require) {
         series.forEach(function (data) {
           expect(visData.getYMax(data)).to.be(maxValue);
         });
+
         stackedSeries.forEach(function (data) {
           expect(stackedVisData.getYStackMax(data)).to.be(stackedMaxValue);
         });
       });
 
-      it('should have a minimum date value that is greater than the max value within the date range', function () {
-        expect(_.min(series, function (d) { return d.x; })).to.be.greaterThan(maxValue);
-        expect(_.min(stackedSeries, function (d) { return d.x; })).to.be.greaterThan(stackedMaxValue);
+      it('should be a bar that is partially drawn', function () {
+        var minDate = dataSeries.ordered.min;
+        var stackedMinDate = stackedDataSeries.ordered.min;
+        var interval = dataSeries.ordered.interval;
+        var stackedInterval = stackedDataSeries.ordered.interval;
+        var startTime = dataSeries.series[0].values[0].x;
+        var stackedStartTime = stackedDataSeries.series[4].values[0].x;
+        var endTime = startTime + interval;
+        var stackedEndTime = stackedStartTime + stackedInterval;
+
+        expect(startTime).to.be.lessThan(minDate);
+        expect(endTime).to.be.greaterThan(minDate);
+        expect(stackedStartTime).to.be.lessThan(stackedMinDate);
+        expect(stackedEndTime).to.be.greaterThan(stackedMinDate);
       });
     });
 

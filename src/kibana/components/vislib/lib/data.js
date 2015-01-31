@@ -265,7 +265,7 @@ define(function (require) {
     };
 
     /**
-     * Calculates the largest y stack value among all data objects
+     * Calculates the largest y stack value among all data objects.
      *
      * @method getYStackMax
      * @param series {Array} Array of data objects
@@ -275,11 +275,20 @@ define(function (require) {
       var isOrdered = (this.data.ordered && this.data.ordered.date);
       var minDate = isOrdered ? this.data.ordered.min : undefined;
       var maxDate = isOrdered ? this.data.ordered.max : undefined;
+      var interval = isOrdered ? this.data.ordered.interval : undefined;
 
       return d3.max(this.stackData(series), function (data) {
         return d3.max(data, function (d) {
+
+          // Calculates the end time for each x value to compare against the
+          // minDate. If the start time of the bar is outside of the date range selected,
+          // but the end time is within the date range selected, the bar will still
+          // appear in the chart and thus its y value needs to be included in
+          // the y max value calculation so as not to cause bars going off the y scale.
+          var bucket = d.x + interval;
+
           if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
+            return (bucket >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
           }
 
           return d.y0 + d.y;
@@ -298,11 +307,20 @@ define(function (require) {
       var isOrdered = (this.data.ordered && this.data.ordered.date);
       var minDate = isOrdered ? this.data.ordered.min : undefined;
       var maxDate = isOrdered ? this.data.ordered.max : undefined;
+      var interval = isOrdered ? this.data.ordered.interval : undefined;
 
       return d3.max(series, function (data) {
         return d3.max(data, function (d) {
+
+          // Calculates the end time for each x value to compare against the
+          // minDate. If the start time of the bar is outside of the date range selected,
+          // but the end time is within the date range selected, the bar will still
+          // appear in the chart and thus its y value needs to be included in
+          // the y max value calculation so as not to cause bars going off the y scale.
+          var bucket = d.x + interval;
+
           if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
+            return (bucket >= minDate && d.x <= maxDate) ? d.y : undefined;
           }
 
           return d.y;
