@@ -5,50 +5,99 @@ define(function (require) {
 
     describe('params', function () {
       var paramWriter;
+      var aggTypes;
+      var AggConfig;
+      var setTimeBounds;
 
       beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(inject(function (Private, $injector) {
         var AggParamWriter = Private(require('test_utils/agg_param_writer'));
+        var timefilter = $injector.get('timefilter');
+
+        aggTypes = Private(require('components/agg_types/index'));
+        AggConfig = Private(require('components/vis/_agg_config'));
+
         paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
+
+        var now = moment();
+        setTimeBounds = function (n, units) {
+          timefilter.enabled = true;
+          timefilter.getBounds = _.constant({
+            min: now.clone().subtract(n, units),
+            max: now.clone()
+          });
+        };
       }));
 
       describe('interval', function () {
         it('should accept a valid interval', function () {
           var output = paramWriter.write({ interval: 'day' });
-          expect(output.params).to.have.property('interval', '86400000ms');
+          expect(output.params).to.have.property('interval', '1d');
         });
 
-        it('should throw an error if an invalid interval is given', function () {
-          expect(function () {
-            paramWriter.write({ interval: 'foo' });
-          }).to.throwError();
+        it('should ignore invalid intervals', function () {
+          var output = paramWriter.write({ interval: 'foo' });
+          expect(output.params).to.have.property('interval', '0ms');
         });
 
         it('should automatically pick an interval', function () {
+          setTimeBounds(15, 'minutes');
           var output = paramWriter.write({ interval: 'auto' });
-          expect(output.params.interval).to.be('30000ms');
-          expect(output.metricScaleText).to.be('30 sec');
+          expect(output.params.interval).to.be('30s');
         });
 
-        it('should scale if there are too many buckets', function () {
+        it('should scale up the interval if it will make too many buckets', function () {
+          setTimeBounds(30, 'minutes');
           var output = paramWriter.write({ interval: 'second' });
-          expect(output.params.interval).to.be('10000ms');
+          expect(output.params.interval).to.be('10s');
           expect(output.metricScaleText).to.be('second');
           expect(output.metricScale).to.be(0.1);
         });
 
-        it('should not scale if there are too many buckets and the metric is not sum or count', function () {
-          paramWriter.vis.aggs.bySchemaGroup.metrics[0].type.name = 'average';
-          var output = paramWriter.write({ interval: 'second' });
-          expect(output).to.not.have.property('metricScale');
+        it('should scale down the interval if it will not make enough buckets', function () {
+          setTimeBounds(1, 'minutes');
+          var output = paramWriter.write({ interval: 'hour' });
+          expect(output.params.interval).to.be('1m');
+          expect(output.metricScaleText).to.be(undefined);
+          expect(output.metricScale).to.be(undefined);
+        });
 
-          paramWriter.vis.aggs.bySchemaGroup.metrics[0].type.name = 'max';
-          output = paramWriter.write({ interval: 'second' });
-          expect(output).to.not.have.property('metricScale');
+        describe('only scales when all metrics are sum or count', function () {
+          var tests = [
+            [ false, 'avg', 'count', 'sum' ],
+            [ true, 'count', 'sum' ],
+            [ false, 'count', 'cardinality' ]
+          ];
 
-          paramWriter.vis.aggs.bySchemaGroup.metrics[0].type.name = 'sum';
-          output = paramWriter.write({ interval: 'second' });
-          expect(output).to.have.property('metricScale');
+          tests.forEach(function (test) {
+            var should = test.shift();
+            var typeNames = test.slice();
+
+            it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
+              setTimeBounds(1, 'year');
+
+              var vis = paramWriter.vis;
+              vis.aggs.splice(0);
+
+              var histoConfig = new AggConfig(vis, {
+                type: aggTypes.byName.date_histogram,
+                schema: 'segment',
+                params: { interval: 'second' }
+              });
+
+              vis.aggs.push(histoConfig);
+
+              typeNames.forEach(function (type) {
+                vis.aggs.push(new AggConfig(vis, {
+                  type: aggTypes.byName[type],
+                  schema: 'metric'
+                }));
+              });
+
+              var output = histoConfig.write();
+              expect(_.has(output, 'metricScale')).to.be(should);
+            });
+          });
         });
       });
 
