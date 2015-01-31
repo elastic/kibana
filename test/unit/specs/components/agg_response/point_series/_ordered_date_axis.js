@@ -14,12 +14,10 @@ define(function (require) {
         aspects: {
           x: {
             agg: {
-              params: {
-                buckets: {
-                  getScaledDateFormat: _.constant('hh:mm:ss'),
-                  getInterval: _.constant(moment.duration(15, 'm')),
-                  getBounds: _.constant({ min: moment().subtract(15, 'm'), max: moment() })
-                }
+              buckets: {
+                getScaledDateFormat: _.constant('hh:mm:ss'),
+                getInterval: _.constant(moment.duration(15, 'm')),
+                getBounds: _.constant({ min: moment().subtract(15, 'm'), max: moment() })
               }
             }
           }
@@ -65,9 +63,9 @@ define(function (require) {
           .to.have.property('date', true);
       });
 
-      it('relies on params.buckets for the interval', function () {
+      it('relies on agg.buckets for the interval', function () {
         var args = _.cloneDeep(baseArgs);
-        var spy = sinon.spy(args.chart.aspects.x.agg.params.buckets, 'getInterval');
+        var spy = sinon.spy(args.chart.aspects.x.agg.buckets, 'getInterval');
         orderedDateAxis(args.vis, args.chart);
         expect(spy).to.have.property('callCount', 1);
       });
@@ -81,7 +79,7 @@ define(function (require) {
 
       it('does not set the min/max when the buckets are unbounded', function () {
         var args = _.cloneDeep(baseArgs);
-        args.chart.aspects.x.agg.params.buckets.getBounds = _.constant();
+        args.chart.aspects.x.agg.buckets.getBounds = _.constant();
         orderedDateAxis(args.vis, args.chart);
         expect(args.chart.ordered).to.not.have.property('min');
         expect(args.chart.ordered).to.not.have.property('max');

@@ -102,6 +102,12 @@ define(function (require) {
        *                                         or undefined
        */
       this.getResponseAggs = config.getResponseAggs || _.noop;
+
+      /**
+       * A function that will be called each time an aggConfig of this type
+       * is created, giving the agg type a chance to modify the agg config
+       */
+      this.decorateAggConfig = config.decorateAggConfig || _.noop;
     }
 
     return AggType;

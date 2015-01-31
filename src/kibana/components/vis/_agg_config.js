@@ -16,6 +16,10 @@ define(function (require) {
         self.type = AggConfig.aggTypes.byName[self.type];
       }
 
+      if (self.type) {
+        self.type.decorateAggConfig(self);
+      }
+
       // get the config schema
       self.schema = opts.schema;
       if (_.isString(self.schema)) {
@@ -180,8 +184,8 @@ define(function (require) {
 
         // don't serialize undefined/null values
         if (val == null) return;
-
         if (aggParam.serialize) val = aggParam.serialize(val, self);
+        if (val == null) return;
 
         // to prevent accidental leaking, we will clone all complex values
         out[aggParam.name] = _.cloneDeep(val);

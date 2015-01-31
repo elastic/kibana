@@ -90,7 +90,7 @@ define(function (require) {
 
           init(option.val, duration);
 
-          var interval = agg.params.buckets.getInterval();
+          var interval = agg.buckets.getInterval();
           var params = filter.range[field.name];
 
           expect(params.gte).to.be(+bucketStart);

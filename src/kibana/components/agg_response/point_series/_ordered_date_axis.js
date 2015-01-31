@@ -4,7 +4,7 @@ define(function (require) {
 
     return function orderedDateAxis(vis, chart) {
       var aspects = chart.aspects;
-      var buckets = aspects.x.agg.params.buckets;
+      var buckets = aspects.x.agg.buckets;
       var format = buckets.getScaledDateFormat();
 
       chart.xAxisFormatter = function (val) {

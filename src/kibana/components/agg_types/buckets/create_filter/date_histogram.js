@@ -3,14 +3,14 @@ define(function (require) {
     var moment = require('moment');
     var buildRangeFilter = require('components/filter_manager/lib/range');
 
-    return function (aggConfig, key) {
+    return function (agg, key) {
       var start = moment(key);
-      var interval = aggConfig.params.buckets.getInterval();
+      var interval = agg.buckets.getInterval();
 
-      return buildRangeFilter(aggConfig.params.field, {
+      return buildRangeFilter(agg.params.field, {
         gte: start.valueOf(),
         lte: start.add(interval).subtract(1, 'ms').valueOf()
-      }, aggConfig.vis.indexPattern);
+      }, agg.vis.indexPattern);
     };
 
   };

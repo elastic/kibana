@@ -22,6 +22,11 @@ define(function (require) {
         return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
       },
       createFilter: createFilter,
+      decorateAggConfig: function (agg) {
+        agg.buckets = new TimeBuckets();
+        agg.buckets.setInterval(_.get(agg, ['params', 'interval']));
+        agg.buckets.setBounds(timefilter.getActiveBounds());
+      },
       params: [
         {
           name: 'field',
@@ -37,33 +42,15 @@ define(function (require) {
           default: 'auto',
           options: Private(require('components/agg_types/buckets/_interval_options')),
           editor: require('text!components/agg_types/controls/interval.html'),
-          write: _.noop
-        },
-
-        {
-          name: 'buckets',
-          type: TimeBuckets,
-          default: function (agg) {
-            var buckets = new TimeBuckets();
-            buckets.setInterval(_.get(agg, ['params', 'interval']));
-            buckets.setBounds(timefilter.getActiveBounds());
-            return buckets;
-          },
-          deserialize: function (state) {
-            var buckets = new TimeBuckets(state);
-            buckets.setBounds(timefilter.getActiveBounds());
-            return buckets;
-          },
-          serialize: function (val, agg) {
-            return agg.params.buckets.toJSON();
-          },
           onRequest: function (agg) {
-            agg.params.buckets.setBounds(timefilter.getActiveBounds());
+            // only update the bucket bounds on request, so that we have exactly
+            // the same bounds until the next request is issued
+            agg.buckets.setBounds(timefilter.getActiveBounds());
           },
           write: function (agg, output) {
-            agg.params.buckets.setInterval(agg.params.interval);
+            agg.buckets.setInterval(agg.params.interval);
 
-            var interval = agg.params.buckets.getInterval();
+            var interval = agg.buckets.getInterval();
             output.bucketInterval = interval;
             output.params.interval = interval.expression;
             output.params.pre_zone = tzOffset;

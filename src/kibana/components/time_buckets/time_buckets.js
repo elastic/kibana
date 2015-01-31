@@ -19,8 +19,10 @@ define(function (require) {
      * @param {state} object - one of ""
      * @param {[type]} display [description]
      */
-    function TimeBuckets(state) {
-      this._setState(state);
+    function TimeBuckets() {
+      this._i = null;
+      this._lb = null;
+      this._ub = null;
     }
 
     /****
@@ -59,8 +61,8 @@ define(function (require) {
         throw new Error('invalid bounds set: ' + input);
       }
 
-      this._state.lb = moments.shift();
-      this._state.ub = moments.pop();
+      this._lb = moments.shift();
+      this._ub = moments.pop();
       if (this.getDuration().asSeconds() < 0) {
         throw new TypeError('Intervals must be positive');
       }
@@ -72,8 +74,7 @@ define(function (require) {
      * @return {undefined}
      */
     TimeBuckets.prototype.clearBounds = function () {
-      delete this._state.lb;
-      delete this._state.ub;
+      this._lb = this._ub = null;
     };
 
     /**
@@ -82,7 +83,7 @@ define(function (require) {
      * @return {Boolean}
      */
     TimeBuckets.prototype.hasBounds = function () {
-      return isValidMoment(this._state.ub) && isValidMoment(this._state.lb);
+      return isValidMoment(this._ub) && isValidMoment(this._lb);
     };
 
     /**
@@ -102,8 +103,8 @@ define(function (require) {
     TimeBuckets.prototype.getBounds = function () {
       if (!this.hasBounds()) return;
       return {
-        min: this._state.lb,
-        max: this._state.ub
+        min: this._lb,
+        max: this._ub
       };
     };
 
@@ -116,7 +117,7 @@ define(function (require) {
      */
     TimeBuckets.prototype.getDuration = function () {
       if (!this.hasBounds()) return;
-      return moment.duration(this._state.ub - this._state.lb, 'ms');
+      return moment.duration(this._ub - this._lb, 'ms');
     };
 
     /**
@@ -140,7 +141,7 @@ define(function (require) {
       }
 
       if (!interval || interval === 'auto') {
-        this._state.i = 'auto';
+        this._i = 'auto';
         return;
       }
 
@@ -159,7 +160,7 @@ define(function (require) {
         throw new TypeError('can\'t convert input ' + input + ' to a moment.duration');
       }
 
-      this._state.i = interval;
+      this._i = interval;
     };
 
     /**
@@ -202,7 +203,7 @@ define(function (require) {
 
       // either pull the interval from state or calculate the auto-interval
       function readInterval() {
-        var interval = self._state.i;
+        var interval = self._i;
         if (moment.isDuration(interval)) return interval;
         return calcAuto.near(config.get('histogram:barTarget'), self.getDuration());
       }
@@ -276,33 +277,6 @@ define(function (require) {
       }
 
       return config.get('dateFormat');
-    };
-
-    /**
-     * Return a JSON serializable version of the TimeBuckets
-     * object. Pass this object back into the TimeBuckets
-     * constructor to recreate an object in a nearly identical
-     * state.
-     *
-     * @return {object}
-     */
-    TimeBuckets.prototype.toJSON = function () {
-      return this._toState();
-    };
-
-
-    /***
-     *  PRIVATE API
-     ***/
-    TimeBuckets.prototype._toState = function () {
-      return JSON.parse(JSON.stringify(this._state));
-    };
-
-    TimeBuckets.prototype._setState = function (state) {
-      this._state = {};
-      if (!state) return;
-      this.setBounds([state.lb, state.ub]);
-      this.setInterval(state.i);
     };
 
     return TimeBuckets;
