@@ -8,6 +8,10 @@ define(function (require) {
     var calcEsInterval = Private(require('components/time_buckets/calc_es_interval'));
     var tzOffset = moment().format('Z');
 
+    function isValidMoment(m) {
+      return m && ('isValid' in m) && m.isValid();
+    }
+
     /**
      * Helper class for wrapping the concept of an "Interval",
      * which describes a timespan that will seperate moments.
@@ -16,43 +20,57 @@ define(function (require) {
      * @param {[type]} display [description]
      */
     function TimeBuckets(state) {
-      this._state = _.pick(state || {}, 'i', 'lb', 'ub');
+      this._setState(state);
     }
-
 
     /****
      *  PUBLIC API
      ****/
 
-    TimeBuckets.prototype.setBounds = function (bounds) {
-      if (!_.isArray(bounds)) {
-        bounds = [bounds.min, bounds.max];
+    TimeBuckets.prototype.setBounds = function (input) {
+      if (!input) return this.clearBounds();
+
+      var bounds;
+      if (_.isPlainObject(input)) {
+        // accept the response from timefilter.getActiveBounds()
+        bounds = [input.min, input.max];
+      } else {
+        bounds = _.isArray(input) ? input : [];
       }
 
-      bounds = _.compact(bounds).map(function (time) {
-        return moment(time);
-      });
+      var moments = bounds.map(function (time) { return moment(time); });
+      var valid = moments.length === 2 && moments.every(isValidMoment);
+      if (!valid) {
+        console.error(new Error('invalid bounds set: ' + input));
+        return this.clearBounds();
+      }
 
-      if (bounds.length !== 2) return;
-
-      this._state.lb = bounds[0];
-      this._state.ub = bounds[1];
-
+      this._state.lb = moments[0];
+      this._state.ub = moments[1];
       if (this.getDuration().asSeconds() < 0) {
         throw new TypeError('Intervals must be positive');
       }
     };
 
+    TimeBuckets.prototype.clearBounds = function () {
+      delete this._state.lb;
+      delete this._state.ub;
+    };
+
+    TimeBuckets.prototype.hasBounds = function () {
+      return isValidMoment(this._state.ub) && isValidMoment(this._state.lb);
+    };
 
     TimeBuckets.prototype.getBounds = function () {
+      if (!this.hasBounds()) return;
       return {
         min: this._state.lb,
         max: this._state.ub
       };
     };
 
-
     TimeBuckets.prototype.getDuration = function () {
+      if (!this.hasBounds()) return;
       return moment.duration(this._state.ub - this._state.lb, 'ms');
     };
 
@@ -132,6 +150,11 @@ define(function (require) {
 
       function maybeScaleInterval(interval) {
         var duration = self.getDuration();
+        if (duration == null) {
+          // we can't scale unless we know the timespan of the request
+          return interval;
+        }
+
         var maxLength = config.get('histogram:maxBars');
 
         var approxLen = duration / interval;
@@ -156,6 +179,8 @@ define(function (require) {
       }
 
       function decorateInterval(interval) {
+        if (!interval) return;
+
         var esInterval = calcEsInterval(interval);
         interval.esValue = esInterval.value;
         interval.esUnit = esInterval.unit;
@@ -197,8 +222,10 @@ define(function (require) {
     };
 
     TimeBuckets.prototype._setState = function (state) {
+      this._state = {};
+      if (!state) return;
+      this.setBounds([state.lb, state.ub]);
       this.setInterval(state.i);
-      this.setBounds(state.b);
     };
 
     return TimeBuckets;

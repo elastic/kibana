@@ -11,14 +11,16 @@ define(function (require) {
         return moment(val).format(format);
       };
 
-      var bounds = buckets.getBounds();
-      var interval = buckets.getInterval();
       chart.ordered = {
         date: true,
-        interval: interval,
-        min: bounds.min,
-        max: bounds.max
+        interval: buckets.getInterval(),
       };
+
+      var bounds = buckets.getBounds();
+      if (bounds) {
+        chart.ordered.min = bounds.min;
+        chart.ordered.max = bounds.max;
+      }
     };
   };
 });

@@ -46,19 +46,19 @@ define(function (require) {
           default: function (agg) {
             var buckets = new TimeBuckets();
             buckets.setInterval(_.get(agg, ['params', 'interval']));
-            buckets.setBounds(timefilter.getBounds());
+            buckets.setBounds(timefilter.getActiveBounds());
             return buckets;
           },
           deserialize: function (state) {
             var buckets = new TimeBuckets(state);
-            buckets.setBounds(timefilter.getBounds());
+            buckets.setBounds(timefilter.getActiveBounds());
             return buckets;
           },
           serialize: function (val, agg) {
             return agg.params.buckets.toJSON();
           },
           onRequest: function (agg) {
-            agg.params.buckets.setBounds(timefilter.getBounds());
+            agg.params.buckets.setBounds(timefilter.getActiveBounds());
             console.log('bounds updated');
           },
           write: function (agg, output) {
@@ -104,11 +104,15 @@ define(function (require) {
                 min: moment(val.min).valueOf(),
                 max: moment(val.max).valueOf()
               };
-            } else if (agg.vis.indexPattern.timeFieldName) {
-              var tfBounds = timefilter.getBounds();
+
+              return;
+            }
+
+            var bounds = timefilter.getActiveBounds();
+            if (bounds) {
               output.params.extended_bounds = {
-                min: moment(tfBounds.min).valueOf(),
-                max: moment(tfBounds.max).valueOf()
+                min: moment(bounds.min).valueOf(),
+                max: moment(bounds.max).valueOf()
               };
             }
           }
