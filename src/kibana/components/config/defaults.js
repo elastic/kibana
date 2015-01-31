@@ -12,14 +12,17 @@ define(function (require) {
       description: 'When displaying a pretty formatted date, use this format',
     },
     'dateFormat:scaled': {
-      value: [
-        ['', 'hh:mm:ss.SSS'],
-        ['PT1S', 'HH:mm:ss'],
-        ['PT1M', 'HH:mm'],
-        ['PT1H', 'YYYY-MM-DD HH:mm'],
-        ['P1DT', 'YYYY-MM-DD'],
-        ['P1YT', 'YYYY']
-      ],
+      type: 'json',
+      value:
+        '[\n' +
+        '  ["", "hh:mm:ss.SSS"],\n' +
+        '  ["PT1S", "HH:mm:ss"],\n' +
+        '  ["PT1M", "HH:mm"],\n' +
+        '  ["PT1H",\n' +
+        '      "YYYY-MM-DD HH:mm"],\n' +
+        '  ["P1DT", "YYYY-MM-DD"],\n' +
+        '  ["P1YT", "YYYY"]\n' +
+        ']',
       description: 'Values that define the format used in situations where timebased' +
       ' data is rendered in order, and formatted timestamps should adapt to the' +
       ' interval between measurements. Keys are ISO 8601 intervals:' +
