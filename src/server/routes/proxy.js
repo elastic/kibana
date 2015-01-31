@@ -37,7 +37,7 @@ router.use(function (req, res, next) {
 
 function getPort(req) {
   var matches = req.headers.host.match(/:(\d+)/);
-  if (matches[1]) return matches[1];
+  if (matches) return matches[1];
   return req.connection.pair ? '443' : '80';
 }
 
