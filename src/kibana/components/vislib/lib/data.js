@@ -21,6 +21,7 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var self = this;
       var offset;
 
       if (attr.mode === 'stacked') {
@@ -59,8 +60,50 @@ define(function (require) {
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
           .offset(offset || 'zero')
+          .out(function (d, y0, y) {
+            if (attr.mode === 'stacked') return self._stackNegAndPosVals(d, y0, y);
+            return;
+          })
       });
     }
+
+    Data.prototype._isPositive = function (num) {
+      return num >= 0;
+    };
+
+    Data.prototype._isNegative = function (num) {
+      return num < 0;
+    };
+
+    Data.prototype._addVals = function (a, b) {
+      return a + b;
+    };
+
+    Data.prototype._sumYs = function (arr, callback) {
+      return arr.filter(callback).length ? arr.reduce(this._addVals) : 0;
+    };
+
+    Data.prototype._calcYZero = function (y, arr) {
+      if (y >= 0) return this._sumYs(arr, this._isPositive);
+      return this._sumYs(arr, this._isNegative);
+    };
+
+    Data.prototype._stackNegAndPosVals = function (d, y0, y) {
+      var stack = this._stackNegAndPosVals;
+      var data = this.chartData();
+
+      if (!stack.cache || stack.cache.j === stack.cache.n) {
+        stack.cache = {
+          j: 0,
+          n: data.series ? data[0].series.length : data[0].series.length,
+          arr: []
+        };
+      }
+
+      ++stack.cache.j;
+      d.y0 = this._calcYZero(y, stack.cache.arr);
+      stack.cache.arr.push(y);
+    };
 
     Data.prototype.getDataType = function () {
       var data = this.getVisData();
