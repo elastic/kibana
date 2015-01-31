@@ -20,9 +20,7 @@ define(function (require) {
      * @param {[type]} display [description]
      */
     function TimeBuckets() {
-      this._i = null;
-      this._lb = null;
-      this._ub = null;
+      return TimeBuckets.__cached__(this);
     }
 
     /****
@@ -277,6 +275,94 @@ define(function (require) {
       }
 
       return config.get('dateFormat');
+    };
+
+
+    TimeBuckets.__cached__ = function (self) {
+      var cache = {};
+
+      function cachedGetter(prop) {
+        return {
+          value: function cachedGetter() {
+            if (cache.hasOwnProperty(prop)) {
+              return cache[prop];
+            }
+
+            return cache[prop] = self[prop]();
+          }
+        };
+      }
+
+      function cacheBreaker(prop) {
+        var breaker = breakers[prop];
+        var setup = breaker.setup;
+        var changes = breaker.changes;
+        var deps = breaker.deps;
+        var fn = self[prop];
+
+        return {
+          value: function cacheBreaker(input) {
+            var prev = setup.call(self);
+            var ret = fn.apply(self, arguments);
+
+            if (changes.call(self, prev)) {
+              cache = _.omit(cache, deps);
+            }
+
+            return ret;
+          }
+        };
+      }
+
+      function same(checkType) {
+        return function (a, b) {
+          if (a === b) return true;
+          if (checkType(a) === checkType(b)) return +a === +b;
+          return false;
+        };
+      }
+
+      var sameMoment = same(moment.isMoment);
+      var sameDuration = same(moment.isDuration);
+
+      var desc = {
+        __cached__: {
+          value: self
+        },
+      };
+
+      var breakers = {
+        setBounds: {
+          deps: ['getBounds', 'hasBounds', 'getDuration', 'getInterval', 'getScaledDateFormat'],
+          setup: function () {
+            return [self._lb, self._ub];
+          },
+          changes: function (prev) {
+            return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
+          }
+        },
+        setInterval: {
+          deps: ['getInterval', 'getScaledDateFormat'],
+          setup: function () {
+            return self._i;
+          },
+          changes: function (prev) {
+            return !sameDuration(prev, this._i);
+          }
+        }
+      };
+
+      _.forOwn(TimeBuckets.prototype, function (fn, prop) {
+        if (prop[0] === '_') return;
+
+        if (breakers.hasOwnProperty(prop)) {
+          desc[prop] = cacheBreaker(prop);
+        } else {
+          desc[prop] = cachedGetter(prop);
+        }
+      });
+
+      return Object.create(self, desc);
     };
 
     return TimeBuckets;
