@@ -59,7 +59,6 @@ define(function (require) {
           },
           onRequest: function (agg) {
             agg.params.buckets.setBounds(timefilter.getActiveBounds());
-            console.log('bounds updated');
           },
           write: function (agg, output) {
             agg.params.buckets.setInterval(agg.params.interval);
