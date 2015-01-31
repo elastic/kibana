@@ -19,7 +19,7 @@ module.exports = function (response) {
   if (body) return Promise.resolve();
 
   return client.create({
-    index: '.kibana',
+    index: config.kibana.kibana_index,
     type: 'config',
     id: config.package.version,
     body: body
