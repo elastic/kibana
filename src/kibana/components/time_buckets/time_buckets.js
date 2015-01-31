@@ -27,6 +27,17 @@ define(function (require) {
      *  PUBLIC API
      ****/
 
+    /**
+     * Set the bounds that these buckets are expected to cover.
+     * This is required to support interval "auto" as well
+     * as interval scaling.
+     *
+     * @param {object} input - an object with properties min and max,
+     *                       representing the edges for the time span
+     *                       we should cover
+     *
+     * @returns {undefined}
+     */
     TimeBuckets.prototype.setBounds = function (input) {
       if (!input) return this.clearBounds();
 
@@ -38,29 +49,56 @@ define(function (require) {
         bounds = _.isArray(input) ? input : [];
       }
 
-      var moments = bounds.map(function (time) { return moment(time); });
-      var valid = moments.length === 2 && moments.every(isValidMoment);
+      var moments = _(bounds)
+        .map(function (time) { return moment(time); })
+        .sortBy(Number);
+
+      var valid = moments.size() === 2 && moments.every(isValidMoment);
       if (!valid) {
-        console.error(new Error('invalid bounds set: ' + input));
-        return this.clearBounds();
+        this.clearBounds();
+        throw new Error('invalid bounds set: ' + input);
       }
 
-      this._state.lb = moments[0];
-      this._state.ub = moments[1];
+      this._state.lb = moments.shift();
+      this._state.ub = moments.pop();
       if (this.getDuration().asSeconds() < 0) {
         throw new TypeError('Intervals must be positive');
       }
     };
 
+    /**
+     * Clear the stored bounds
+     *
+     * @return {undefined}
+     */
     TimeBuckets.prototype.clearBounds = function () {
       delete this._state.lb;
       delete this._state.ub;
     };
 
+    /**
+     * Check to see if we have received bounds yet
+     *
+     * @return {Boolean}
+     */
     TimeBuckets.prototype.hasBounds = function () {
       return isValidMoment(this._state.ub) && isValidMoment(this._state.lb);
     };
 
+    /**
+     * Return the current bounds, if we have any.
+     *
+     * THIS DOES NOT CLONE THE BOUNDS, so editting them
+     * may have unexpected side-effects. Always
+     * call bounds.min.clone() before editting
+     *
+     * @return {object|undefined} - If bounds are not defined, this
+     *                      returns undefined, else it returns the bounds
+     *                      for these buckets. This object has two props,
+     *                      min and max. Each property will be a moment()
+     *                      object
+     *
+     */
     TimeBuckets.prototype.getBounds = function () {
       if (!this.hasBounds()) return;
       return {
@@ -69,32 +107,56 @@ define(function (require) {
       };
     };
 
+    /**
+     * Get a moment duration object representing
+     * the distance between the bounds, if the bounds
+     * are set.
+     *
+     * @return {moment.duration|undefined}
+     */
     TimeBuckets.prototype.getDuration = function () {
       if (!this.hasBounds()) return;
       return moment.duration(this._state.ub - this._state.lb, 'ms');
     };
 
-    TimeBuckets.prototype.setInterval = function (interval) {
+    /**
+     * Update the interval at which buckets should be
+     * generated.
+     *
+     * Input can be one of the following:
+     *  - Any object from src/kibana/components/agg_types/buckets/_interval_options.js
+     *  - "auto"
+     *  - Pass a valid moment unit
+     *  - a moment.duration object.
+     *
+     * @param {object|string|moment.duration} input - see desc
+     */
+    TimeBuckets.prototype.setInterval = function (input) {
+      var interval = input;
+
       // selection object -> val
-      if (_.isObject(interval)) {
-        interval = interval.val;
+      if (_.isObject(input)) {
+        interval = input.val;
       }
 
-      // check for no val or 'auto'
       if (!interval || interval === 'auto') {
         this._state.i = 'auto';
         return;
       }
 
-      // convert "second", "hour" to durations
       if (_.isString(interval)) {
+        input = interval;
         interval = moment.duration(1, interval);
+        if (+interval === 0) {
+          interval = null;
+          input += ' (not a valid moment unit)';
+        }
       }
 
       // if the value wasn't converted to a duration, and isn't
       // already a duration, we have a problem
       if (!moment.isDuration(interval)) {
-        throw new TypeError('can\'t convert interval ' + interval + ' to moment.duration');
+        throw new TypeError('can\'t convert input ' + input + ' to a moment.duration');
       }
 
       this._state.i = interval;
@@ -138,23 +200,18 @@ define(function (require) {
       var self = this;
       return decorateInterval(maybeScaleInterval(readInterval()));
 
+      // either pull the interval from state or calculate the auto-interval
       function readInterval() {
         var interval = self._state.i;
-
-        if (moment.isDuration(interval)) {
-          return interval;
-        }
-
+        if (moment.isDuration(interval)) return interval;
         return calcAuto.near(config.get('histogram:barTarget'), self.getDuration());
       }
 
+      // check to see if the interval should be scaled, and scale it if so
       function maybeScaleInterval(interval) {
-        var duration = self.getDuration();
-        if (duration == null) {
-          // we can't scale unless we know the timespan of the request
-          return interval;
-        }
+        if (!self.hasBounds()) return interval;
 
+        var duration = self.getDuration();
         var maxLength = config.get('histogram:maxBars');
 
         var approxLen = duration / interval;
@@ -178,9 +235,8 @@ define(function (require) {
         });
       }
 
+      // append some TimeBuckets specific props to the interval
       function decorateInterval(interval) {
-        if (!interval) return;
-
         var esInterval = calcEsInterval(interval);
         interval.esValue = esInterval.value;
         interval.esUnit = esInterval.unit;
@@ -197,6 +253,17 @@ define(function (require) {
       }
     };
 
+    /**
+     * Get a date format string that will represent dates that
+     * progress at our interval.
+     *
+     * Since our interval can be as small as 1ms, the default
+     * date format is usually way too much. with `dateFormat:scaled`
+     * users can modify how dates are formatted within series
+     * produced by TimeBuckets
+     *
+     * @return {string}
+     */
     TimeBuckets.prototype.getScaledDateFormat = function () {
       var interval = this.getInterval();
       var rules = config.get('dateFormat:scaled');
@@ -209,6 +276,14 @@ define(function (require) {
       }
     };
 
+    /**
+     * Return a JSON serializable version of the TimeBuckets
+     * object. Pass this object back into the TimeBuckets
+     * constructor to recreate an object in a nearly identical
+     * state.
+     *
+     * @return {object}
+     */
     TimeBuckets.prototype.toJSON = function () {
       return this._toState();
     };
