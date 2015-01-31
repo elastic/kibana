@@ -80,7 +80,9 @@ define(function (require) {
     };
 
     Data.prototype._sumYs = function (arr, callback) {
-      return arr.filter(callback).length ? arr.reduce(this._addVals) : 0;
+      var filteredArray = arr.filter(callback).length;
+
+      return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
     };
 
     Data.prototype._calcYZero = function (y, arr) {
@@ -95,13 +97,14 @@ define(function (require) {
       if (!stack.cache || stack.cache.j === stack.cache.n) {
         stack.cache = {
           j: 0,
-          n: data.series ? data[0].series.length : data[0].series.length,
+          n: data[0].series.length,
           arr: []
         };
       }
 
-      ++stack.cache.j;
       d.y0 = this._calcYZero(y, stack.cache.arr);
+
+      ++stack.cache.j;
       stack.cache.arr.push(y);
     };
 
