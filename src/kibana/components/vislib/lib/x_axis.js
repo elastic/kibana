@@ -160,8 +160,6 @@ define(function (require) {
      * @param width {Number} HTML Element width
      */
     XAxis.prototype.getXAxis = function (width) {
-      var ordered = this.ordered;
-
       this.xScale = this.getXScale(width);
 
       if (!this.xScale || _.isNaN(this.xScale)) {
