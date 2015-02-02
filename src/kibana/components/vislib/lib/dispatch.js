@@ -159,7 +159,9 @@ define(function (require) {
     Dispatch.prototype.addBrushEvent = function (svg) {
       if (!this.isBrushable()) return;
       var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.xAxis.xScale;
       var brush = this.createBrush(xScale, svg);
+      var endZones = this.createEndZones(xScale, yScale, svg);
 
       function brushEnd() {
         var bar = d3.select(this);
@@ -240,6 +242,71 @@ define(function (require) {
         return brush;
       }
     };
+
+    /**
+     * Creates rects to show buckets outside of the ordered.min and max, returns rects
+     *
+     * @param xScale {Function} D3 xScale function
+     * @param svg {HTMLElement} Reference to SVG
+     * @method createEndZones
+     * @returns {D3.Selection}
+     */
+    Dispatch.prototype.createEndZones = function (xScale, yScale, svg) {
+      var attr = this.handler._attr;
+      var height = attr.height;
+      var width = attr.width;
+      var margin = attr.margin;
+      var ordered = this.handler.xAxis.ordered;
+      var xVals = this.handler.xAxis.xValues;
+      var color = '#004c99';
+      var data = [
+        {
+          x: 0,
+          w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
+        },
+        {
+          x: xScale(ordered.max),
+          w: width - xScale(ordered.max) > 0 ? width - xScale(ordered.max) : 0
+        }
+      ];
+
+      // svg diagonal line pattern
+      var pattern = svg.append('defs')
+        .append('pattern')
+        .attr('id', 'DiagonalLines')
+        .attr('patternUnits', 'userSpaceOnUse')
+        .attr('patternTransform', 'rotate(45)')
+        .attr('x', '0')
+        .attr('y', '0')
+        .attr('width', '4')
+        .attr('height', '4')
+        .append('rect')
+        .attr('stroke', 'none')
+        .attr('fill', color)
+        .attr('width', 2)
+        .attr('height', 4);
+
+      var endzones = svg.selectAll('.layer');
+      endzones
+      .data(data)
+      .enter()
+      .insert('g', '.brush')
+      .attr('class', 'endzone')
+      .append('rect')
+      .attr('class', 'zone')
+      .attr('x', function (d) {
+        return d.x;
+      })
+      .attr('y', 0)
+      .attr('height', height - margin.top - margin.bottom)
+      .attr('width', function (d) {
+        return d.w;
+      })
+      .attr('fill', 'url(#DiagonalLines)');
+
+      return endzones;
+    };
+
 
     return Dispatch;
   };
