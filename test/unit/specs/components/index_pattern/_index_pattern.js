@@ -101,8 +101,10 @@ define(function (require) {
 
     describe('getFields', function () {
       it('should return all non-scripted fields', function () {
-        var indexed = _.where(mockLogstashFields, { scripted: false });
-        expect(indexPattern.getFields().length).to.eql(indexed.length);
+        var expected = _.pluck(_.where(mockLogstashFields, { scripted: false }), name).sort();
+        var result = _.pluck(indexPattern.getFields(), name).sort();
+
+        expect(result).to.eql(expected);
       });
 
       it('should return all scripted fields', function () {
