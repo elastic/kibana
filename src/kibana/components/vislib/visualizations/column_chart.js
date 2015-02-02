@@ -2,6 +2,7 @@ define(function (require) {
   return function ColumnChartFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var moment = require('moment');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
@@ -137,22 +138,22 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
 
+      var barWidth;
+      if (data.ordered && data.ordered.date) {
+        var start = data.ordered.min;
+        var end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+
+        barWidth = xScale(end) - xScale(start);
+        barWidth = barWidth - Math.min(barWidth * 0.25, 15);
+      }
+
       // update
       bars
       .attr('x', function (d) {
         return xScale(d.x);
       })
       .attr('width', function () {
-        var barWidth;
-        var barSpacing;
-
-        if (data.ordered && data.ordered.date) {
-          barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
-          barSpacing = barWidth * 0.25;
-
-          return barWidth - barSpacing;
-        }
-        return xScale.rangeBand();
+        return barWidth || xScale.rangeBand();
       })
       .attr('y', function (d) {
         return yScale(d.y0 + d.y);

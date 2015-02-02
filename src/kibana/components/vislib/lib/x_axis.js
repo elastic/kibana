@@ -2,6 +2,7 @@ define(function (require) {
   return function XAxisFactory(d3, Private) {
     var $ = require('jquery');
     var _ = require('lodash');
+    var moment = require('moment');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
@@ -90,14 +91,23 @@ define(function (require) {
      */
     XAxis.prototype._getXExtents = function (data, extent) {
       var ordered = this.ordered;
+      var opts = [ordered[extent]];
 
-      return d3[extent](data, function (d) {
-        if (extent === 'max') {
-          return d + ordered.interval;
+      var point = d3[extent](data);
+      if (extent === 'max') {
+        if (ordered.date) {
+          point = moment(point).add(ordered.interval).valueOf();
+        } else {
+          point += ordered.interval;
         }
+      }
+      opts.push(point);
 
-        return d;
-      });
+      return d3[extent](opts.reduce(function (opts, v) {
+        if (!_.isNumber(v)) v = +v;
+        if (!isNaN(v)) opts.push(v);
+        return opts;
+      }, []));
     };
 
     /**
