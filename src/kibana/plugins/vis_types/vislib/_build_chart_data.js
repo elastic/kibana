@@ -11,11 +11,17 @@ define(function (require) {
         return aggResponse.hierarchical(vis, esResponse);
       }
 
-      var tableGroup = aggResponse.tabify(this.vis, esResponse, {
+      var tableGroup = aggResponse.tabify(vis, esResponse, {
         canSplit: true,
         asAggConfigResults: true
       });
+
       var converted = convertTableGroup(vis, tableGroup);
+      if (!converted.rows && !converted.series) {
+        // mimic a row of tables that doesn't have any tables
+        // https://github.com/elasticsearch/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
+        converted.rows = [];
+      }
 
       converted.hits = esResponse.hits.total;
 
@@ -45,13 +51,14 @@ define(function (require) {
           outList = out[direction] = [];
         }
 
-        outList.push(convertTableGroup(vis, table));
+        var output;
+        if (output = convertTableGroup(vis, table)) {
+          outList.push(output);
+        }
       });
 
       if (!tables.length) {
-        // mimic a row of tables that doesn't have any tables
-        // https://github.com/elasticsearch/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
-        out.rows = [];
+        return {};
       }
 
       return out;
