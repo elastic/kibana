@@ -54,11 +54,14 @@ define(function (require) {
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
-
-        // d3 stack function
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
-          .y(function (d) { return d.y; })
+          .y(function (d) {
+            if (offset === 'expand') {
+              return Math.abs(d.y);
+            }
+            return d.y;
+          })
           .offset(offset || 'zero')
       });
 
@@ -105,7 +108,6 @@ define(function (require) {
       }
 
       d.y0 = this._calcYZero(y, stack.cache.arr);
-
       ++stack.cache.j;
       stack.cache.arr.push(y);
     };
