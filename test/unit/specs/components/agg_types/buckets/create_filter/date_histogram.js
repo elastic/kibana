@@ -28,18 +28,6 @@ define(function (require) {
         init = function (interval, duration) {
           interval = interval || 'auto';
           duration = duration || moment.duration(15, 'minutes');
-
-          bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
-          bucketStart = moment(bucketKey);
-
-          var timePad = moment.duration(duration / 2);
-          var timeBuckets = new TimeBuckets();
-          timeBuckets.setBounds({
-            min: bucketStart.clone().subtract(timePad),
-            max: bucketStart.clone().add(timePad),
-          });
-          timeBuckets.setInterval(interval);
-
           field = _.sample(indexPattern.fields.byType.date);
           vis = new Vis(indexPattern, {
             type: 'histogram',
@@ -47,12 +35,22 @@ define(function (require) {
               {
                 type: 'date_histogram',
                 schema: 'segment',
-                params: { field: field.name, interval: interval, buckets: timeBuckets }
+                params: { field: field.name, interval: interval }
               }
             ]
           });
 
           agg = vis.aggs[0];
+          bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
+          bucketStart = moment(bucketKey);
+
+          var timePad = moment.duration(duration / 2);
+          agg.buckets.setBounds({
+            min: bucketStart.clone().subtract(timePad),
+            max: bucketStart.clone().add(timePad),
+          });
+          agg.buckets.setInterval(interval);
+
           filter = createFilter(agg, bucketKey);
         };
       }));
