@@ -96,7 +96,6 @@ define(function (require) {
         if (isOverlapping) {
           return yScale(0);
         }
-
         return yScale(d.y0);
       })
       .y1(function (d) {

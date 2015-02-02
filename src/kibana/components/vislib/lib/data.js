@@ -60,11 +60,13 @@ define(function (require) {
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
           .offset(offset || 'zero')
-          .out(function (d, y0, y) {
-            if (attr.mode === 'stacked') return self._stackNegAndPosVals(d, y0, y);
-            return;
-          })
       });
+
+      if (attr.mode === 'stacked') {
+        this._attr.stack.out(function (d, y0, y) {
+          return self._stackNegAndPosVals(d, y0, y);
+        });
+      }
     }
 
     Data.prototype._isPositive = function (num) {
@@ -80,7 +82,7 @@ define(function (require) {
     };
 
     Data.prototype._sumYs = function (arr, callback) {
-      var filteredArray = arr.filter(callback).length;
+      var filteredArray = arr.filter(callback);
 
       return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
     };
