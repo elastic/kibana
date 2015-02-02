@@ -12,14 +12,9 @@ var join = require('path').join;
 
 // If the target is backed by an SSL and a CA is provided via the config
 // then we need to inject the CA
-var hasCustomCA = false;
+var customCA;
 if (/^https/.test(target.protocol) && config.kibana.ca) {
-  var sslRootCAs = require('ssl-root-cas/latest');
-  sslRootCAs.inject();
-  var ca = fs.readFileSync(config.kibana.ca, 'utf8');
-  var https = require('https');
-  https.globalAgent.options.ca.push(ca);
-  hasCustomCA = true;
+  customCA = fs.readFileSync(config.kibana.ca, 'utf8');
 }
 
 // Create the router
@@ -59,8 +54,8 @@ router.use(function (req, res, next) {
   options.headers['x-forward-proto'] = req.connection.pair ? 'https' : 'http';
 
   // If the server has a custom CA we need to add it to the agent options
-  if (hasCustomCA) {
-    options.agentOptions = { ca: https.globalAgent.options.ca };
+  if (customCA) {
+    options.agentOptions = { ca: [customCA] };
   }
 
   // Only send the body if it's a PATCH, PUT, or POST
