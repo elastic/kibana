@@ -77,7 +77,7 @@ define(function (require) {
       .data(layers)
       .enter().append('g')
       .attr('class', function (d, i) {
-        return i;
+        return 'series ' + i;
       });
 
       bars = layer.selectAll('rect')
