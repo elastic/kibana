@@ -96,12 +96,22 @@ define(function (require) {
         if (isOverlapping) {
           return yScale(0);
         }
+
+        if (d.y < 0) {
+          return yScale(d.y0 + d.y);
+        }
+
         return yScale(d.y0);
       })
       .y1(function (d) {
         if (isOverlapping) {
           return yScale(d.y);
         }
+
+        if (d.y < 0) {
+          return yScale(d.y0);
+        }
+
         return yScale(d.y0 + d.y);
       });
 

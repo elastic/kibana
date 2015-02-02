@@ -105,7 +105,7 @@ define(function (require) {
 
       if (isPercentage) {
         tickFormat = d3.format('%');
-      } else if (this.yMax <= 100 && !isPercentage) {
+      } else if (this.yMax <= 100 && this.yMin >= 0 && !isPercentage) {
         tickFormat = d3.format('n');
       } else {
         tickFormat = this.formatAxisLabel;
