@@ -13,7 +13,7 @@ var client = new elasticsearch.Client({
 
 module.exports = function () {
   var options =  {
-    index: '.kibana',
+    index: config.kibana.kibana_index,
     type: 'config',
     body: {
       size: 1000,
