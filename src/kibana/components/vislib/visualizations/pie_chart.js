@@ -61,7 +61,7 @@ define(function (require) {
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
-        return d.size;
+        return Math.abs(d.size);
       });
       var x = d3.scale.linear()
       .range([0, 2 * Math.PI]);
