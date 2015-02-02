@@ -17,10 +17,10 @@ define(function (require) {
       });
 
       var converted = convertTableGroup(vis, tableGroup);
-      if (!converted.rows && !converted.series) {
+      if (!converted) {
         // mimic a row of tables that doesn't have any tables
         // https://github.com/elasticsearch/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
-        converted.rows = [];
+        converted = { rows: [] };
       }
 
       converted.hits = esResponse.hits.total;
@@ -41,6 +41,7 @@ define(function (require) {
         return chart;
       }
 
+      if (!tables.length) return;
       var out = {};
       var outList;
 
@@ -56,10 +57,6 @@ define(function (require) {
           outList.push(output);
         }
       });
-
-      if (!tables.length) {
-        return {};
-      }
 
       return out;
     }
