@@ -37,75 +37,81 @@ To create an index pattern to connect to Elasticsearch:
 . Specify an index pattern that matches the name of one or more of your Elasticsearch 
 indexes. (By default, Kibana guesses that you're you're working with log data being 
 fed into Elasticsearch by Logstash.)
++
 NOTE: When you switch between top-level tabs, Kibana remembers where you were at.
 For example, if you view a particular index pattern from the Settings tab, switch
 to the Discover tab, and then go back to the Settings tab, Kibana displays the
 index pattern you last looked at. To get to the create new pattern form, click 
 the *Add New* button in the Index Patterns list.
+
 . If your index contains a timestamp field that you want to use to perform 
 time-based comparisons, select the *Index contains time-based events* option 
 and select the index field that contains the timestamp. (Kibana reads the 
 index mapping to list all of the fields that contain a timestamp.)
+
 . If new indexes are generated periodically and have a timestamp appended to 
 the name, select the *Use event times to create index names* option and select 
 the *Index pattern interval*. This enables Kibana to search only those indices 
 that could possibly contain data in the time range you specify. (This is 
 primarily applicable if you are using Logstash to feed data in to Elasticsearch.)
+
 . Click *Create* to add the index pattern. 
+
 . To designate the new pattern as the default pattern to load when you view
 the Discover tab, click the *favorite* button. 
 
 
 [[date-format-tokens]]
 .Date Format Tokens
-M::	Month - cardinal: 1 2 3 ... 12
-Mo:: Month - ordinal:	1st 2nd 3rd ... 12th
-MM:: Month - two digit: 	01 02 03 ... 12
-MMM:: Month - abbreviation: Jan Feb Mar ... Dec
-MMMM:: Month - full: January February March ... December
-Q::	Quarter: 1 2 3 4
-D::	Day of Month - cardinal: 1 2 3 ... 31
-Do:: Day of Month - ordinal: 1st 2nd 3rd ... 31st
-DD:: Day of Month - two digit:	01 02 03 ... 31
-DDD:: Day of Year - cardinal: 1 2 3 ... 365
-DDDo:: Day of Year - ordinal:	1st 2nd 3rd ... 365th
-DDDD:: Day of Year - three digit: 001 002 ... 364 365
-d::	Day of Week - cardinal: 0 1 3 ... 6
-do:: Day of Week - ordinal:	0th 1st 2nd ... 6th
-dd:: Day of Week - 2-letter abbreviation:	Su Mo Tu ... Sa
-ddd:: Day of Week - 3-letter abbreviation: Sun Mon Tue ... Sat
-dddd:: Day of Week - full: Sunday Monday Tuesday ... Saturday
-e::	Day of Week (locale): 0 1 2 ... 6
-E::	Day of Week (ISO): 1 2 3 ... 7
-w::	Week of Year - cardinal (locale): 1 2 3 ... 53
-wo:: Week of Year - ordinal (locale): 1st 2nd 3rd ... 53rd
-ww:: Week of Year - 2-digit (locale): 01 02 03 ... 53
-W::	Week of Year - cardinal (ISO): 1 2 3 ... 53
-Wo:: Week of Year - ordinal (ISO): 1st 2nd 3rd ... 53rd
-WW:: Week of Year - two-digit (ISO): 01 02 03 ... 53
-YY:: Year - two digit:	70 71 72 ... 30
-YYYY:: Year - four digit: 1970 1971 1972 ... 2030
-gg:: Week Year - two digit (locale):	70 71 72 ... 30
-gggg:: Week Year - four digit (locale):	1970 1971 1972 ... 2030
-GG:: Week Year - two digit (ISO):	70 71 72 ... 30
-GGGG::	Week Year - four digit (ISO): 1970 1971 1972 ... 2030
-A::	AM/PM: AM PM
-a::	am/pm: am pm
-H::	Hour: 0 1 2 ... 23
-HH:: Hour - two digit: 00 01 02 ... 23
-h::	Hour - 12-hour clock: 1 2 3 ... 12
-hh:: Hour - 12-hour clock, 2 digit:	01 02 03 ... 12
-m::	Minute: 0 1 2 ... 59
-mm:: Minute - two-digit:	00 01 02 ... 59
-s::	Second: 0 1 2 ...  59
-ss:: Second - two-digit: 00 01 02 ... 59
-S::	Fractional Second - 10ths: 0 1 2 ... 9
-SS:: Fractional Second - 100ths: 	0 1 ... 98 99
-SSS:: Fractional Seconds - 1000ths:	0 1 ... 998 999
-Z::	Timezone - zero UTC offset (hh:mm format): -07:00 -06:00 -05:00 .. +07:00
-ZZ:: Timezone - zero UTC offset (hhmm format):	-0700 -0600 -0500 ... +0700
-X:: Unix Timestamp:	1360013296
-x::	Unix Millisecond Timestamp: 1360013296123
+[horizontal]
+`M`::	Month - cardinal: 1 2 3 ... 12
+`Mo`:: Month - ordinal:	1st 2nd 3rd ... 12th
+`MM`:: Month - two digit: 	01 02 03 ... 12
+`MMM`:: Month - abbreviation: Jan Feb Mar ... Dec
+`MMMM`:: Month - full: January February March ... December
+`Q`::	Quarter: 1 2 3 4
+`D`::	Day of Month - cardinal: 1 2 3 ... 31
+`Do`:: Day of Month - ordinal: 1st 2nd 3rd ... 31st
+`DD`:: Day of Month - two digit:	01 02 03 ... 31
+`DDD`:: Day of Year - cardinal: 1 2 3 ... 365
+`DDDo`:: Day of Year - ordinal:	1st 2nd 3rd ... 365th
+`DDDD`:: Day of Year - three digit: 001 002 ... 364 365
+`d`::	Day of Week - cardinal: 0 1 3 ... 6
+`do`:: Day of Week - ordinal:	0th 1st 2nd ... 6th
+`dd`:: Day of Week - 2-letter abbreviation:	Su Mo Tu ... Sa
+`ddd`:: Day of Week - 3-letter abbreviation: Sun Mon Tue ... Sat
+`dddd`:: Day of Week - full: Sunday Monday Tuesday ... Saturday
+`e`::	Day of Week (locale): 0 1 2 ... 6
+`E`::	Day of Week (ISO): 1 2 3 ... 7
+`w`::	Week of Year - cardinal (locale): 1 2 3 ... 53
+`wo`:: Week of Year - ordinal (locale): 1st 2nd 3rd ... 53rd
+`ww`:: Week of Year - 2-digit (locale): 01 02 03 ... 53
+`W`::	Week of Year - cardinal (ISO): 1 2 3 ... 53
+`Wo`:: Week of Year - ordinal (ISO): 1st 2nd 3rd ... 53rd
+`WW`:: Week of Year - two-digit (ISO): 01 02 03 ... 53
+`YY`:: Year - two digit:	70 71 72 ... 30
+`YYYY`:: Year - four digit: 1970 1971 1972 ... 2030
+`gg`:: Week Year - two digit (locale):	70 71 72 ... 30
+`gggg`:: Week Year - four digit (locale):	1970 1971 1972 ... 2030
+`GG`:: Week Year - two digit (ISO):	70 71 72 ... 30
+`GGGG`::	Week Year - four digit (ISO): 1970 1971 1972 ... 2030
+`A`::	AM/PM: AM PM
+`a`::	am/pm: am pm
+`H`::	Hour: 0 1 2 ... 23
+`HH`:: Hour - two digit: 00 01 02 ... 23
+`h`::	Hour - 12-hour clock: 1 2 3 ... 12
+`hh`:: Hour - 12-hour clock, 2 digit:	01 02 03 ... 12
+`m`::	Minute: 0 1 2 ... 59
+`mm`:: Minute - two-digit:	00 01 02 ... 59
+`s`::	Second: 0 1 2 ...  59
+`ss`:: Second - two-digit: 00 01 02 ... 59
+`S`::	Fractional Second - 10ths: 0 1 2 ... 9
+`SS`:: Fractional Second - 100ths: 	0 1 ... 98 99
+`SSS`:: Fractional Seconds - 1000ths:	0 1 ... 998 999
+`Z`::	Timezone - zero UTC offset (hh:mm format): -07:00 -06:00 -05:00 .. +07:00
+`ZZ`:: Timezone - zero UTC offset (hhmm format):	-0700 -0600 -0500 ... +0700
+`X`:: Unix Timestamp:	1360013296
+`x`::	Unix Millisecond Timestamp: 1360013296123
 
 === Set the Default Index Pattern
 The default index pattern is loaded by automatically when you view the *Discover* tab. 
@@ -169,9 +175,11 @@ To create a scripted field:
 . Select the index pattern you want to add a scripted field to.
 . Go to the pattern's *Scripted Fields* tab.
 . Click *Add Scripted Field*. 
++
 TIP: If you are just getting started with scripted fields, you can click 
 *create a few examples from your date fields* to add some scripted fields
 you can use as a starting point.
+
 . Enter a name for the scripted field.
 . Enter the Groovy script that you want to run to compute a value on the fly 
 from your index data.
@@ -204,8 +212,60 @@ To delete a scripted field:
 . Confirm that you really want to delete the field.
 
 === Set Advanced Options
+The Advanced Settings page enables you to directly edit settings that control
+the behavior of the Kibana application. For example, you can change the format
+used to display dates, specify the default index pattern, and set the precision
+for displayed decimal values. 
+
+WARNING: Changing advanced settings can have unintended consequences. If you aren't
+sure what you're doing, it's best to leave these settings as-is.
+
+To set advanced options:
+
+. Go to *Settings > Advanced*.
+. Click the *Edit* button for the option you want to modify.
+. Enter a new value for the option. 
+. Click the *Save* button.
+
+=== Managing Saved Searches, Visualizations, and Dashboards ===
+You can view, edit, and delete saved searches, visualizations,
+and dashboards from *Settings > Objects*. 
+
+Viewing a saved object displays the selected item in the *Discover*, *Visualize*, 
+or *Dashboard* page. To view a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to view. 
+. Click the *View* button.
+. Click the *Save* button.
+
+Editing a saved object enables you to directly modify the object definition. 
+You can change the name of the object, add a description, and modify the
+JSON that defines the object's properties. 
+
+WARNING: No validation is performed for object properties. Submitting invalid 
+changes will render the object unusable. Generally, you should use the 
+*Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of 
+directly editing existing ones. 
+
+To edit a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to edit. 
+. Click the *Edit* button.
+. Make your changes to the object definition.
+. Click the *Save Object* button.
+
+To delete a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to delete. 
+. Click the *Delete* button.
+. Confirm that you really want to delete the object.
 
 
+
+[[production]]
 === Using Kibana in a Production Environment
 When you set up Kibana in a production environment, rather than on your local
 machine, you need to consider:

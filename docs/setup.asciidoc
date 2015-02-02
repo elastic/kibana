@@ -19,7 +19,7 @@ To get Kibana up and running:
 That's it! Kibana is now running on port 5601. 
 
 TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a different Elasticsearch instance,
-modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. 
+modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
 
 === Connect Kibana with Elasticsearch 	
 Before you can start using Kibana, you need to tell it which Elasticsearch index(es) you want to explore. The first time
