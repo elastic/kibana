@@ -21,9 +21,9 @@ define(function (require) {
       return _(charts ? charts : [obj])
       .pluck('series')
       .flatten()
-      .filter(Boolean)
       .pluck('values')
       .flatten()
+      .filter(Boolean)
       .value();
     };
   };
