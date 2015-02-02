@@ -33,7 +33,7 @@ module.exports = function () {
   return client.search(options)
   .then(upgrade)
   .catch(function (err) {
-    if (!/No mapping found for \[buildNum\]|^IndexMissingException/.test(err.message)) throw err;
+    if (!/SearchParseException.+mapping.+\[buildNum\]|^IndexMissingException/.test(err.message)) throw err;
   });
 };
 
