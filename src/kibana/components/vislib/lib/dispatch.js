@@ -286,8 +286,7 @@ define(function (require) {
         .attr('width', 2)
         .attr('height', 4);
 
-      var endzones = svg.selectAll('.layer');
-      endzones
+      var endzones = svg.selectAll('.layer')
       .data(data)
       .enter()
       .insert('g', '.brush')
