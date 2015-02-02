@@ -6,6 +6,7 @@ define(function (require) {
 
     var SearchTimeout = require('errors').SearchTimeout;
     var RequestFailure = require('errors').RequestFailure;
+    var ShardFailure = require('errors').ShardFailure;
 
     function callResponseHandlers(requests, responses) {
       return Promise.map(requests, function (req, i) {
@@ -17,6 +18,10 @@ define(function (require) {
 
         if (resp.timed_out) {
           notify.warning(new SearchTimeout());
+        }
+
+        if (resp._shards && resp._shards.failed) {
+          notify.warning(new ShardFailure(resp));
         }
 
         function progress() {

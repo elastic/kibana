@@ -78,6 +78,18 @@ define(function (require) {
   };
   inherits(errors.FetchFailure, KbnError);
 
+  /**
+   * ShardFailure Error - when one or more shards fail
+   * @param {String} [msg] - An error message that will probably end up in a log.
+   */
+  errors.ShardFailure = function ShardFailure(resp) {
+    KbnError.call(this, resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
+      errors.ShardFailure);
+
+    this.resp = resp;
+  };
+  inherits(errors.ShardFailure, KbnError);
+
 
   /**
    * A doc was re-indexed but it was out of date.
