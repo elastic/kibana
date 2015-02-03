@@ -210,9 +210,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self.getYExtents(series, self.getYStackMax));
+          return arr.push(self._getYMax(series, self._getYStack));
         }
-        return arr.push(self.getYExtents(series, self.getYMax));
+        return arr.push(self._getYMax(series, self._getY));
       });
 
       return _.max(arr);
@@ -230,36 +230,26 @@ define(function (require) {
     };
 
     /**
-     *
-     * @param series
-     * @param callback
-     * @returns {*}
+     * Returns the max Y axis value for a `series` array based on
+     * a specified callback function (calculation).
      */
-    Data.prototype.getYExtents = function (series, calculation) {
+    Data.prototype._getYMax = function (series, calculation) {
       return d3.max(this.stackData(series), function (data) {
         return d3.max(data, calculation);
       });
     };
 
     /**
-     * Calculates the largest y stack value among all data objects
-     *
-     * @method getYStackMax
-     * @param d {Object} data object
-     * @returns {Number} Y stack value
+     * Calculates the y stack value for each data object
      */
-    Data.prototype.getYStackMax = function (d) {
+    Data.prototype._getYStack = function (d) {
       return d.y0 + d.y;
     };
 
     /**
-     * Calculates the Y domain max value
-     *
-     * @method getMax
-     * @param d {Object} data object
-     * @returns {Number} Y value
+     * Calculates the Y max value
      */
-    Data.prototype.getYMax = function (d) {
+    Data.prototype._getY = function (d) {
       return d.y;
     };
 

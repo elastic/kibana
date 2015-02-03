@@ -281,10 +281,10 @@ define(function (require) {
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain max value', function () {
         series.forEach(function (data) {
-          expect(visData.getYExtents(data, visData.getYMax)).to.be(maxValue);
+          expect(visData._getYMax(data, visData._getY)).to.be(maxValue);
         });
         stackedSeries.forEach(function (data) {
-          expect(stackedVisData.getYExtents(data, visData.getYStackMax)).to.be(stackedMaxValue);
+          expect(stackedVisData._getYMax(data, visData._getYStack)).to.be(stackedMaxValue);
         });
       });
 
