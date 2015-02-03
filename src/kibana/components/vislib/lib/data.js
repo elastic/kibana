@@ -72,47 +72,73 @@ define(function (require) {
       }
     }
 
+    /**
+     * Returns true for positive numbers
+     */
     Data.prototype._isPositive = function (num) {
       return num >= 0;
     };
 
+    /**
+     * Returns true for negative numbers
+     */
     Data.prototype._isNegative = function (num) {
       return num < 0;
     };
 
+    /**
+     * Adds two input values
+     */
     Data.prototype._addVals = function (a, b) {
       return a + b;
     };
 
+    /**
+     * Returns the results of the addition of numbers in a filtered array.
+     */
     Data.prototype._sumYs = function (arr, callback) {
       var filteredArray = arr.filter(callback);
 
       return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
     };
 
+    /**
+     * Calculates the d.y0 value for stacked data in D3.
+     */
     Data.prototype._calcYZero = function (y, arr) {
       if (y >= 0) return this._sumYs(arr, this._isPositive);
       return this._sumYs(arr, this._isNegative);
     };
 
+    /**
+     * Stacking function passed to the D3 Stack Layout `.out` API.
+     * See: https://github.com/mbostock/d3/wiki/Stack-Layout
+     * It is responsible for calculating the correct d.y0 value for
+     * mixed datasets containing both positive and negative values.
+     */
     Data.prototype._stackNegAndPosVals = function (d, y0, y) {
       var stack = this._stackNegAndPosVals;
       var data = this.chartData();
 
+      // Using function memoization to store counters and data characteristics
+      // needed to stack values properly
       if (!stack.cache) {
         stack.cache = {
           i: 0, // charts counter
           j: 0, // stacks counter
           k: 0, // values counter
-          arr: []
+          arr: [] // stores y values
         };
 
+        // Data characteristics
         stack.cache.m = data.length; // number of charts
         stack.cache.n = data[stack.cache.i].series.length; // number of stack layers
         stack.cache.o = data[stack.cache.i].series[stack.cache.j].length; // number of values
       }
 
-      // Chart loop
+      // Chart loop. Each time the function gets to the last value in the data array,
+      // reset the counters (except for the charts counter) and the data characteristics
+      // values (except for the number of charts). Increment the charts counter.
       if (stack.cache.k === stack.cache.o) {
         stack.cache.k = 0;
         stack.cache.j = 0;
@@ -121,13 +147,17 @@ define(function (require) {
         ++stack.cache.i;
       }
 
-      // Layer loop
+      // Layer loop. Each time the function reaches the last layer for one bar
+      // in a chart, reset the layers counter and y array. Increment the values
+      // counter.
       if (stack.cache.j === stack.cache.n) {
         stack.cache.j = 0;
         stack.cache.arr = [];
         ++stack.cache.k;
       }
 
+      // Calculate the d.y0 value for each value in a dataset, except when you've
+      // reached the last chart.
       if (stack.cache.i < stack.cache.m) {
         d.y0 = this._calcYZero(y, stack.cache.arr);
         ++stack.cache.j;
