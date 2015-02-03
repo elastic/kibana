@@ -160,7 +160,7 @@ define(function (require) {
       if (!this.isBrushable()) return;
 
       var xScale = this.handler.xAxis.xScale;
-      var yScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.xAxis.yScale;
       var brush = this.createBrush(xScale, svg);
       var endZones = this.createEndZones(xScale, yScale, svg);
 
