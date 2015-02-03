@@ -162,17 +162,24 @@ define(function (require) {
       // listen for changes, and relisten everytime something happens
       $scope.$listen($state, 'fetch_with_changes', updateFields);
       $scope.$listen($state, 'reset_with_changes', updateFields);
-      function updateFields(changed) {
-        if (_.contains(changed, 'columns')) {
+      function updateFields(changes) {
+        var newColumns = _.contains(changes, 'columns');
+        var newIndex = _.contains(changes, 'index');
+        var otherChanges = _.pull(changes, 'index', 'columns');
+
+        if (newIndex) {
+          // we will be reloading, don't need to juggle state
+          return;
+        }
+
+        if (newColumns) {
           $scope.fields.forEach(function (field) {
             field.display = _.contains($state.columns, field.name);
           });
           refreshColumns();
         }
 
-        var changesHandledElsewhere = ['columns', 'index'];
-        var ourChangesToHandle = _.difference(changed, changesHandledElsewhere);
-        if (_.size(ourChangesToHandle)) $scope.fetch();
+        if (otherChanges.length) $scope.fetch();
       }
 
       $scope.updateDataSource()
@@ -192,10 +199,13 @@ define(function (require) {
         });
 
         $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (newFilters === oldFilters) return;
+
           if (onlyDisabled(newFilters, oldFilters)) {
             $state.save();
             return;
           }
+
           $scope.fetch();
         });
 
@@ -204,7 +214,7 @@ define(function (require) {
         });
 
         $scope.$watch('opts.index', changeIndexPattern($scope.opts, $state));
-        $scope.$watch('state.index', changeIndexPattern($scope.opts, $state));
+        $scope.$watch('state.index', changeIndexPattern($state, $scope.opts));
         function changeIndexPattern(from, to) {
           return function () {
             if (from.index === to.index) return;
@@ -449,11 +459,7 @@ define(function (require) {
     $scope.updateDataSource = Promise.method(function () {
       $scope.searchSource
       .size($scope.opts.sampleSize)
-      .sort(function () {
-        var sort = getSort($state.sort, $scope.indexPattern);
-        $state.sort = _.pairs(sort)[0];
-        return sort;
-      })
+      .sort(getSort($state.sort, $scope.indexPattern))
       .query(!$state.query ? null : $state.query)
       .highlight({
         pre_tags: [highlightTags.pre],
@@ -518,8 +524,9 @@ define(function (require) {
         return;
       }
 
-      // if this commit results in something besides the columns changing, a fetch will be executed.
-      $state.save();
+      if (init.complete) {
+        $state.save();
+      }
     }
 
     // TODO: Move to utility class
