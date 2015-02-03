@@ -105,13 +105,15 @@ define(function (require) {
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
-        sort: _(getSort(savedSearch.sort, $scope.indexPattern)).pairs().pop(),
+        sort: getSort.array(savedSearch.sort, $scope.indexPattern),
         columns: savedSearch.columns || ['_source'],
         index: $scope.indexPattern.id,
         interval: 'auto',
         filters: _.cloneDeep($scope.searchSource.get('filter'))
       };
     }
+
+    $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
     // force the index pattern based on what we could fetch
     $scope.searchSource.set('index', $scope.indexPattern);
