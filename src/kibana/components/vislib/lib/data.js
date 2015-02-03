@@ -111,6 +111,17 @@ define(function (require) {
     };
 
     /**
+     *
+     */
+    Data.prototype.resetCache = function () {
+      var data = this.chartData();
+
+      return {
+
+      };
+    };
+
+    /**
      * Stacking function passed to the D3 Stack Layout `.out` API.
      * See: https://github.com/mbostock/d3/wiki/Stack-Layout
      * It is responsible for calculating the correct d.y0 value for
@@ -133,7 +144,16 @@ define(function (require) {
         // Data characteristics
         stack.cache.m = data.length; // number of charts
         stack.cache.n = data[stack.cache.i].series.length; // number of stack layers
-        stack.cache.o = data[stack.cache.i].series[stack.cache.j].length; // number of values
+        stack.cache.o = data[stack.cache.i].series[stack.cache.j].values.length; // number of values
+      }
+
+      // Calculate the d.y0 value for each value in a dataset, except when you've
+      // reached the last chart.
+      d.y0 = this._calcYZero(y, stack.cache.arr);
+
+      if (stack.cache.i < stack.cache.m) {
+        ++stack.cache.j;
+        stack.cache.arr.push(y);
       }
 
       // Chart loop. Each time the function gets to the last value in the data array,
@@ -142,9 +162,10 @@ define(function (require) {
       if (stack.cache.k === stack.cache.o) {
         stack.cache.k = 0;
         stack.cache.j = 0;
-        stack.cache.n = data[stack.cache.i].series.length;
-        stack.cache.o = data[stack.cache.i].series[stack.cache.j].length;
         ++stack.cache.i;
+
+        stack.cache.n = data[stack.cache.i].series.length - 1;
+        stack.cache.o = data[stack.cache.i].series[stack.cache.j].values.length - 1;
       }
 
       // Layer loop. Each time the function reaches the last layer for one bar
@@ -154,14 +175,6 @@ define(function (require) {
         stack.cache.j = 0;
         stack.cache.arr = [];
         ++stack.cache.k;
-      }
-
-      // Calculate the d.y0 value for each value in a dataset, except when you've
-      // reached the last chart.
-      if (stack.cache.i < stack.cache.m) {
-        d.y0 = this._calcYZero(y, stack.cache.arr);
-        ++stack.cache.j;
-        stack.cache.arr.push(y);
       }
     };
 
