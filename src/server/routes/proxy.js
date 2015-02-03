@@ -41,13 +41,12 @@ router.use(function (req, res, next) {
 
   var uri = _.defaults({}, target);
   var options = {
-    url: uri.protocol + '//' + uri.host + req.url,
+    url: uri.protocol + '//' + uri.host + join(uri.path, req.url),
     method: req.method,
     headers: _.defaults({ host: target.hostname }, req.headers),
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
-
 
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
   options.headers['x-forward-port'] = getPort(req);
