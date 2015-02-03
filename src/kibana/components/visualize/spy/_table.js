@@ -27,7 +27,8 @@ define(function (require) {
 
             $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, {
               canSplit: false,
-              asAggConfigResults: true
+              asAggConfigResults: true,
+              partialRows: true
             });
           }
         });

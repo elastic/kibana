@@ -16,10 +16,10 @@ define(function (require) {
       }
     ])).all[0];
 
-    function isType(type) {
+    function isNotType(type) {
       return function (agg) {
         var field = agg.params.field;
-        return !field || field.type !== 'string';
+        return !field || field.type !== type;
       };
     }
 
@@ -41,13 +41,13 @@ define(function (require) {
           name: 'exclude',
           type: 'regex',
           advanced: true,
-          disabled: isType('string')
+          disabled: isNotType('string')
         },
         {
           name: 'include',
           type: 'regex',
           advanced: true,
-          disabled: isType('string')
+          disabled: isNotType('string')
         },
         {
           name: 'size',

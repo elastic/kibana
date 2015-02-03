@@ -65,7 +65,7 @@ define(function (require) {
         return;
       }
 
-      if (_.isFunction(this.handler.resize)) {
+      if (this.handler && _.isFunction(this.handler.resize)) {
         this._runOnHandler('resize');
       } else {
         this.render(this.data);
