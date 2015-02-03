@@ -151,7 +151,7 @@ define(function (require) {
         // clone the field with Object.create so that it's getters
         // and non-enumerable props are preserved
         var clone = Object.create(field);
-        clone.display = _.contains($scope.columns, field.name);
+        clone.display = _.contains($state.columns, field.name);
         clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
         fields.push(clone);
       }, [])
