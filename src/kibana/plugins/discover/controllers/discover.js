@@ -133,9 +133,10 @@ define(function (require) {
       $scope.showLessFailures = function () {
         $scope.failuresShown = showTotal;
       };
-      return $scope.updateDataSource()
+
+      setupIndexPattern()
+      .then($scope.updateDataSource)
       .then(function () {
-        setFields();
 
         // state fields that shouldn't trigger a fetch when changed
         var ignoreStateChanges = ['columns', 'index'];
@@ -429,8 +430,7 @@ define(function (require) {
       kbnUrl.change('/discover');
     };
 
-    $scope.updateDataSource = function () {
-      var chartOptions;
+    $scope.updateDataSource = Promise.method(function () {
       $scope.searchSource
       .size($scope.opts.sampleSize)
       .sort(function () {
@@ -445,27 +445,7 @@ define(function (require) {
         fields: {'*': {}}
       })
       .set('filter', $state.filters || []);
-
-      $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
-      return courier.indexPatterns.get($scope.opts.index).then(function (pattern) {
-        $scope.indexPattern = pattern;
-        $scope.opts.timefield = $scope.indexPattern.timeFieldName;
-
-        // did we update the index pattern?
-        var refresh = $scope.indexPattern !== $scope.searchSource.get('index');
-
-        // make sure the pattern is set on the "leaf" searchSource, not just the root
-        $scope.searchSource.set('index', pattern);
-
-        if (refresh) {
-          delete $state.sort;
-          delete $scope.fields;
-          delete $scope.columns;
-          setFields();
-        }
-      });
-
-    };
+    });
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
     function arrayToKeys(array, value) {
@@ -476,35 +456,32 @@ define(function (require) {
       return obj;
     }
 
-    function setFields() {
-      var indexPattern = $scope.searchSource.get('index');
-      var currentState = _.transform($scope.fields || [], function (current, field) {
-        current[field.name] = {
-          display: field.display
-        };
-      }, {});
+    function setupIndexPattern() {
+      return courier.indexPatterns.get($state.index)
+      .then(function (indexPattern) {
+        $scope.indexPattern = indexPattern;
+        $scope.opts.index = indexPattern.id;
+        $scope.opts.timefield = $scope.indexPattern.timeFieldName;
+        $scope.fields = [];
+        $scope.fieldsByName = {};
 
-      var columnObjects = arrayToKeys($state.columns);
+        // make sure the indexPattern is set on the "leaf" searchSource, not just the root
+        $scope.searchSource.set('index', indexPattern);
+        var columnObjects = arrayToKeys($state.columns);
 
-      $scope.fields = [];
-      $scope.fieldsByName = {};
+        _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
+          // clone the field with Object.create so that it's getters
+          // and non-enumerable props are preserved
+          var clone = Object.create(field);
+          clone.display = columnObjects[field.name] || false;
+          clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
 
-      if (!indexPattern) return;
+          $scope.fields.push(clone);
+          $scope.fieldsByName[field.name] = clone;
+        });
 
-      _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
-        _.defaults(field, currentState[field.name]);
-
-        // clone the field with Object.create so that it's getters
-        // and non-enumerable props are preserved
-        var clone = Object.create(field);
-        clone.display = columnObjects[field.name] || false;
-        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
-
-        $scope.fields.push(clone);
-        $scope.fieldsByName[field.name] = clone;
+        refreshColumns();
       });
-
-      refreshColumns();
     }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -543,13 +520,10 @@ define(function (require) {
 
     function refreshColumns() {
       // Get all displayed field names;
-      var fields = _.pluck(_.filter($scope.fields, function (field) {
-        return field.display;
-      }), 'name');
+      var fields = _($scope.fields).filter('display').pluck('name').value();
 
       // Make sure there are no columns added that aren't in the displayed field list.
       $state.columns = _.intersection($state.columns, fields);
-
 
       // If no columns remain, use _source
       if (!$state.columns.length) {
