@@ -118,12 +118,7 @@ define(function (require) {
       // Index to match
       index: $state.index,
       savedSearch: savedSearch,
-      indexPatternList: indexPatternList,
-      changeIndexAndReload: function () {
-        $state.index = $scope.opts.index;
-        $state.save();
-        $route.reload();
-      }
+      indexPatternList: indexPatternList
     };
 
     // stores the complete list of fields
@@ -143,7 +138,7 @@ define(function (require) {
         setFields();
 
         // state fields that shouldn't trigger a fetch when changed
-        var ignoreStateChanges = ['columns'];
+        var ignoreStateChanges = ['columns', 'index'];
 
         // listen for changes, and relisten everytime something happens
         $scope.$listen($state, 'fetch_with_changes', updateFields);
@@ -186,6 +181,20 @@ define(function (require) {
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
         });
+
+        $scope.$watch('opts.index', changeIndexPattern($scope.opts, $state));
+        $scope.$watch('state.index', changeIndexPattern($scope.opts, $state));
+
+        function changeIndexPattern(from, to) {
+          return function () {
+            if (from.index === to.index) return;
+
+            to.index = from.index;
+            if (to === $state) $state.save();
+            $route.reload();
+          };
+        }
+
 
         $scope.$watchMulti([
           'rows',
