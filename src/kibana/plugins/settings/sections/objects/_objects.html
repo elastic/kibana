@@ -23,7 +23,7 @@
       </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
-          <li class="item" ng-repeat="item in service.data">
+          <li class="item" ng-repeat="item in service.data | orderBy:'title'">
             <div class="actions pull-right">
               <button
                 ng-click="edit(service, item)"

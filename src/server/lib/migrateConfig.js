@@ -13,7 +13,7 @@ var client = new elasticsearch.Client({
 
 module.exports = function () {
   var options =  {
-    index: '.kibana',
+    index: config.kibana.kibana_index,
     type: 'config',
     body: {
       size: 1000,
@@ -33,7 +33,7 @@ module.exports = function () {
   return client.search(options)
   .then(upgrade)
   .catch(function (err) {
-    if (!/^IndexMissingException/.test(err.message)) throw err;
+    if (!/SearchParseException.+mapping.+\[buildNum\]|^IndexMissingException/.test(err.message)) throw err;
   });
 };
 

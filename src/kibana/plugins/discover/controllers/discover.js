@@ -425,15 +425,8 @@ define(function (require) {
       $scope.searchSource
       .size($scope.opts.sampleSize)
       .sort(function () {
-        var sort = {};
-        if (_.isArray($state.sort) && $state.sort.length === 2) {
-          sort[$state.sort[0]] = $state.sort[1];
-        } else if ($scope.indexPattern.timeFieldName) {
-          // Use the watcher to set sort in this case, the above `if` will now be true
-          $state.sort = [$scope.indexPattern.timeFieldName, 'desc'];
-        } else {
-          sort._score = 'desc';
-        }
+        var sort = getSort($state.sort, $scope.indexPattern);
+        $state.sort = _.pairs(sort)[0];
         return sort;
       })
       .query(!$state.query ? null : $state.query)

@@ -12,14 +12,9 @@ var join = require('path').join;
 
 // If the target is backed by an SSL and a CA is provided via the config
 // then we need to inject the CA
-var hasCustomCA = false;
+var customCA;
 if (/^https/.test(target.protocol) && config.kibana.ca) {
-  var sslRootCAs = require('ssl-root-cas/latest');
-  sslRootCAs.inject();
-  var ca = fs.readFileSync(config.kibana.ca, 'utf8');
-  var https = require('https');
-  https.globalAgent.options.ca.push(ca);
-  hasCustomCA = true;
+  customCA = fs.readFileSync(config.kibana.ca, 'utf8');
 }
 
 // Create the router
@@ -37,7 +32,7 @@ router.use(function (req, res, next) {
 
 function getPort(req) {
   var matches = req.headers.host.match(/:(\d+)/);
-  if (matches[1]) return matches[1];
+  if (matches) return matches[1];
   return req.connection.pair ? '443' : '80';
 }
 
@@ -45,22 +40,26 @@ function getPort(req) {
 router.use(function (req, res, next) {
 
   var uri = _.defaults({}, target);
+
+  // Add a slash to the end of the URL so resolve doesn't remove it.
+  var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
+  path = url.resolve(path, '.' + req.url);
+
   var options = {
-    url: uri.protocol + '//' + uri.host + req.url,
+    url: uri.protocol + '//' + uri.host + path,
     method: req.method,
     headers: _.defaults({ host: target.hostname }, req.headers),
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
 
-
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
   options.headers['x-forward-port'] = getPort(req);
   options.headers['x-forward-proto'] = req.connection.pair ? 'https' : 'http';
 
   // If the server has a custom CA we need to add it to the agent options
-  if (hasCustomCA) {
-    options.agentOptions = { ca: https.globalAgent.options.ca };
+  if (customCA) {
+    options.agentOptions = { ca: [customCA] };
   }
 
   // Only send the body if it's a PATCH, PUT, or POST
