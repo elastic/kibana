@@ -40,14 +40,18 @@ function getPort(req) {
 router.use(function (req, res, next) {
 
   var uri = _.defaults({}, target);
+
+  // Add a slash to the end of the URL so resolve doesn't remove it.
+  var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
+  path = url.resolve(path, '.' + req.url);
+
   var options = {
-    url: uri.protocol + '//' + uri.host + req.url,
+    url: uri.protocol + '//' + uri.host + path,
     method: req.method,
     headers: _.defaults({ host: target.hostname }, req.headers),
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
-
 
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
   options.headers['x-forward-port'] = getPort(req);
