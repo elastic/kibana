@@ -65,7 +65,7 @@ define(function (require) {
           .offset(offset || 'zero')
       });
 
-      if (attr.mode === 'stacked') {
+      if (attr.mode === 'stacked' && attr.type === 'histogram') {
         this._attr.stack.out(function (d, y0, y) {
           return self._stackNegAndPosVals(d, y0, y);
         });
