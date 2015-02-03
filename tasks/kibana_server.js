@@ -5,7 +5,8 @@ module.exports = function (grunt) {
     config.quiet = true;
     var server = require('../src/server');
 
-    server.start(function () {
+    server.start(function (err) {
+      if (err) return done(err);
       grunt.log.ok('Server started on port', config.kibana.port);
       if (keepalive !== 'keepalive') done();
     });
