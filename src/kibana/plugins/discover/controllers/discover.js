@@ -42,14 +42,15 @@ define(function (require) {
           try { state = rison.decode(stateRison); } catch (e) {}
           state = state || {};
 
+          var specified = !!state.index;
           var exists = _.contains(list, state.index);
           var id = exists ? state.index : config.get('defaultIndex');
 
           return Promise.props({
-            id: id,
             list: list,
-            pattern: courier.indexPatterns.get(id),
-            didNotExist: exists ? false : state.index
+            loaded: courier.indexPatterns.get(id),
+            stateVal: state.index,
+            stateValFound: specified && exists
           });
         });
       },
@@ -90,14 +91,8 @@ define(function (require) {
 
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
-
-    $scope.indexPattern = $route.current.locals.ip.pattern;
-    if ($route.current.locals.ip.didNotExist) {
-      notify.warning(
-        '"' + $route.current.locals.ip.didNotExist + '" is not a configured pattern. Using the ' +
-        'default instead: "' + $scope.indexPattern.id + '"'
-      );
-    }
+    $scope.indexPattern = resolveIndexPatternLoading();
+    $scope.searchSource.set('index', $scope.indexPattern);
 
     if (savedSearch.id) {
       docTitle.change(savedSearch.title);
@@ -611,6 +606,27 @@ define(function (require) {
 
       return loadingVis;
     };
+
+    function resolveIndexPatternLoading() {
+      var props = $route.current.locals.ip;
+      var loaded = props.loaded;
+      var stateVal = props.stateVal;
+      var stateValFound = props.stateValFound;
+
+      var own = $scope.searchSource.getOwn('index');
+
+      if (own && !stateVal) return own;
+      if (stateVal && !stateValFound) {
+        var err = '"' + stateVal + '" is not a configured pattern. ';
+        if (own) {
+          notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
+          return own;
+        }
+
+        notify.warning(err + ' Using the default index pattern: "' + loaded.id + '"');
+      }
+      return loaded;
+    }
 
     init();
   });
