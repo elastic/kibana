@@ -37,8 +37,10 @@ define(function (require) {
       ip: function (Promise, courier, config, $location) {
         return courier.indexPatterns.getIds()
         .then(function (list) {
-          var state = $location.search()._a;
-          try { state = rison.decode(state); } catch (e) {}
+          var stateRison = $location.search()._a;
+          var state;
+          try { state = rison.decode(stateRison); } catch (e) {}
+          state = state || {};
 
           var exists = _.contains(list, state.index);
           var id = exists ? state.index : config.get('defaultIndex');
