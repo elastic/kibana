@@ -197,28 +197,25 @@ define(function (require) {
      */
     TimeBuckets.prototype.getInterval = function () {
       var self = this;
+      var duration = self.getDuration();
       return decorateInterval(maybeScaleInterval(readInterval()));
 
       // either pull the interval from state or calculate the auto-interval
       function readInterval() {
         var interval = self._i;
         if (moment.isDuration(interval)) return interval;
-        return calcAuto.near(config.get('histogram:barTarget'), self.getDuration());
+        return calcAuto.near(config.get('histogram:barTarget'), duration);
       }
 
       // check to see if the interval should be scaled, and scale it if so
       function maybeScaleInterval(interval) {
         if (!self.hasBounds()) return interval;
 
-        var duration = self.getDuration();
         var maxLength = config.get('histogram:maxBars');
-
         var approxLen = duration / interval;
         var scaled;
 
-        if (approxLen < 1) {
-          scaled = calcAuto.atLeast(1, duration);
-        } else if (approxLen > maxLength) {
+        if (approxLen > maxLength) {
           scaled = calcAuto.lessThan(maxLength, duration);
         } else {
           return interval;
@@ -240,6 +237,7 @@ define(function (require) {
         interval.esValue = esInterval.value;
         interval.esUnit = esInterval.unit;
         interval.expression = esInterval.expression;
+        interval.overflow = duration > interval ? moment.duration(interval - duration) : false;
 
         var prettyUnits = moment.normalizeUnits(esInterval.unit);
         if (esInterval.value === 1) {
