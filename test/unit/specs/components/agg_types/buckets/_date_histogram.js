@@ -30,23 +30,23 @@ define(function (require) {
       }));
 
       describe('interval', function () {
-        it('should accept a valid interval', function () {
+        it('accepts a valid interval', function () {
           var output = paramWriter.write({ interval: 'day' });
           expect(output.params).to.have.property('interval', '1d');
         });
 
-        it('should ignore invalid intervals', function () {
+        it('ignores invalid intervals', function () {
           var output = paramWriter.write({ interval: 'foo' });
           expect(output.params).to.have.property('interval', '0ms');
         });
 
-        it('should automatically pick an interval', function () {
+        it('automatically picks an interval', function () {
           setTimeBounds(15, 'minutes');
           var output = paramWriter.write({ interval: 'auto' });
           expect(output.params.interval).to.be('30s');
         });
 
-        it('should scale up the interval if it will make too many buckets', function () {
+        it('scales up the interval if it will make too many buckets', function () {
           setTimeBounds(30, 'minutes');
           var output = paramWriter.write({ interval: 'second' });
           expect(output.params.interval).to.be('10s');
@@ -54,10 +54,10 @@ define(function (require) {
           expect(output.metricScale).to.be(0.1);
         });
 
-        it('should scale down the interval if it will not make enough buckets', function () {
+        it('does not scale down the interval', function () {
           setTimeBounds(1, 'minutes');
           var output = paramWriter.write({ interval: 'hour' });
-          expect(output.params.interval).to.be('1m');
+          expect(output.params.interval).to.be('1h');
           expect(output.metricScaleText).to.be(undefined);
           expect(output.metricScale).to.be(undefined);
         });
