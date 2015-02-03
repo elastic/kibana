@@ -99,17 +99,40 @@ define(function (require) {
       var stack = this._stackNegAndPosVals;
       var data = this.chartData();
 
-      if (!stack.cache || stack.cache.j === stack.cache.n) {
+      if (!stack.cache) {
         stack.cache = {
-          j: 0,
-          n: data[0].series.length,
+          i: 0, // charts counter
+          j: 0, // stacks counter
+          k: 0, // values counter
           arr: []
         };
+
+        stack.cache.m = data.length; // number of charts
+        stack.cache.n = data[stack.cache.i].series.length; // number of stack layers
+        stack.cache.o = data[stack.cache.i].series[stack.cache.j].length; // number of values
       }
 
-      d.y0 = this._calcYZero(y, stack.cache.arr);
-      ++stack.cache.j;
-      stack.cache.arr.push(y);
+      // Chart loop
+      if (stack.cache.k === stack.cache.o) {
+        stack.cache.k = 0;
+        stack.cache.j = 0;
+        stack.cache.n = data[stack.cache.i].series.length;
+        stack.cache.o = data[stack.cache.i].series[stack.cache.j].length;
+        ++stack.cache.i;
+      }
+
+      // Layer loop
+      if (stack.cache.j === stack.cache.n) {
+        stack.cache.j = 0;
+        stack.cache.arr = [];
+        ++stack.cache.k;
+      }
+
+      if (stack.cache.i < stack.cache.m) {
+        d.y0 = this._calcYZero(y, stack.cache.arr);
+        ++stack.cache.j;
+        stack.cache.arr.push(y);
+      }
     };
 
     Data.prototype.getDataType = function () {
