@@ -226,6 +226,8 @@ define(function (require) {
      * @returns {*} Array of data objects with x, y, y0 keys
      */
     Data.prototype.stackData = function (series) {
+      // SHould not stack values on line chart
+      if (this._attr.type === 'line') return series;
       return this._attr.stack(series);
     };
 
