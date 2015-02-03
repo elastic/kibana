@@ -18,11 +18,12 @@ define(function (require) {
         charts = obj.rows ? obj.rows : obj.columns;
       }
 
-      return _.chain(charts ? charts : [obj])
+      return _(charts ? charts : [obj])
       .pluck('series')
       .flatten()
       .pluck('values')
       .flatten()
+      .filter(Boolean)
       .value();
     };
   };
