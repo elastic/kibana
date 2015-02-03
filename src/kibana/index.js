@@ -28,7 +28,7 @@ define(function (require) {
     .constant('kbnVersion', window.KIBANA_VERSION)
     // The build number is placed by grunt, represents a sequence to provide nothing really but order.
     // If NaN, use the max value of a JS number, that way we always have a number here, even in dev
-    .constant('buildNum', _.parseInt(window.KIBANA_BUILD_NUM) || Number.MAX_VALUE)
+    .constant('buildNum', _.parseInt(window.KIBANA_BUILD_NUM) || Number.MAX_SAFE_INTEGER)
     // This stores the build number, @REV@ is replaced by grunt.
     .constant('commitSha', window.KIBANA_COMMIT_SHA)
     // Use this for cache busting partials
