@@ -132,7 +132,7 @@ define(function (require) {
         i: 0, // charts counter
         j: 0, // stacks counter
         k: 0, // values counter
-        yValArr: [] // stores y values
+        yValsArr: [] // stores y values
       };
       var counts = this._getCounts(cache.i, cache.j);
 
@@ -150,37 +150,33 @@ define(function (require) {
      * mixed datasets containing both positive and negative values.
      */
     Data.prototype._stackNegAndPosVals = function (d, y0, y) {
-      var stack = this._stackNegAndPosVals;
       var data = this.chartData();
 
       // Storing counters and data characteristics needed to stack values properly
-      if (!stack.cache) {
-        stack.cache = this._createCache();
+      if (!this._cache) {
+        this._cache = this._createCache();
       }
 
       // Layer loop. Each time the function reaches the last layer for one bar
       // in a chart, reset the layers counter and y array. Increment the values
       // counter.
-      if (stack.cache.j === stack.cache.n) {
-        stack.cache.j = 0;
-        stack.cache.yValArr = [];
-        ++stack.cache.k;
+      if (this._cache.j === this._cache.n) {
+        this._cache.j = 0;
+        this._cache.yValsArr = [];
       }
 
       // Chart loop. Each time the function gets to the last value in the data array,
       // reset the counters (except for the charts counter) and the data characteristics
       // values (except for the number of charts). Increment the charts counter.
-      //if (stack.cache.k === stack.cache.o) {
-        //  stack.cache.j = 0;
-        //  stack.cache.k = 0;
-        //  ++stack.cache.i;
-        //  stack.cache.n = data[stack.cache.i].series.length; // number of stack layers
-        //  stack.cache.o = data[stack.cache.i].series[stack.cache.j].values.length; // number of values
-      //}
+      if (this._cache.k === this._cache.o) {
+        ++this._cache.i;
+        this._cache.n = data[this._cache.i].series.length; // number of stack layers
+        this._cache.o = data[this._cache.i].series[this._cache.j].values.length; // number of values
+      }
 
-      d.y0 = this._calcYZero(y, stack.cache.yValArr);
-      ++stack.cache.j;
-      stack.cache.yValArr.push(y);
+      d.y0 = this._calcYZero(y, this._cache.yValsArr);
+      ++this._cache.j;
+      this._cache.yValsArr.push(y);
     };
 
     Data.prototype.getDataType = function () {
