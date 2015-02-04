@@ -127,7 +127,7 @@ define(function (require) {
     /**
      *
      */
-    Data.prototype._createCache = function () {
+    Data.prototype._createCache = _.memoize(function () {
       var cache = {
         i: 0, // charts counter
         j: 0, // stacks counter
@@ -141,7 +141,7 @@ define(function (require) {
       cache.o = counts['o']; // number of values
 
       return cache;
-    };
+    });
 
     /**
      * Stacking function passed to the D3 Stack Layout `.out` API.
@@ -160,7 +160,7 @@ define(function (require) {
       // Layer loop. Each time the function reaches the last layer for one bar
       // in a chart, reset the layers counter and y array. Increment the values
       // counter.
-      if (this._cache.j === this._cache.n) {
+      if (this._cache.j === this._cache.n && this._cache.k === this._cache.o) {
         this._cache.j = 0;
         this._cache.yValsArr = [];
       }
@@ -168,12 +168,12 @@ define(function (require) {
       // Chart loop. Each time the function gets to the last value in the data array,
       // reset the counters (except for the charts counter) and the data characteristics
       // values (except for the number of charts). Increment the charts counter.
-      if (this._cache.k === this._cache.o) {
-        this._cache = this._createCache();
-        ++this._cache.i;
-        this._cache.n = data[this._cache.i].series.length; // number of stack layers
-        this._cache.o = data[this._cache.i].series[this._cache.j].values.length; // number of values
-      }
+      //if (this._cache.k === this._cache.o) {
+      //  this._cache = this._createCache();
+      //  ++this._cache.i;
+      //  this._cache.n = data[this._cache.i].series.length; // number of stack layers
+      //  this._cache.o = data[this._cache.i].series[this._cache.j].values.length; // number of values
+      //}
 
       d.y0 = this._calcYZero(y, this._cache.yValsArr);
       ++this._cache.j;
