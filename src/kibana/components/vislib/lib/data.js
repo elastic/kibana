@@ -115,41 +115,6 @@ define(function (require) {
     };
 
     /**
-     * Function to determine whether to display the legend or not
-     * Displays legend when more than one series of data present
-     *
-     * @method isLegendShown
-     * @returns {boolean}
-     */
-    Data.prototype.isLegendShown = function () {
-      var isLegend = false;
-      var visData = this.getVisData();
-      var sameSeriesLabel = true;
-      var seriesLabel;
-
-      _.forEach(visData, function countSeriesLength(obj) {
-        var rootSeries = obj.series || (obj.slices && obj.slices.children);
-        var dataLength = rootSeries ? rootSeries.length : 0;
-        var label = dataLength === 1 ? rootSeries[0].label || rootSeries[0].name : undefined;
-        var children = (obj.slices && obj.slices.children && obj.slices.children[0] && obj.slices.children[0].children);
-
-        if (!seriesLabel) {
-          seriesLabel = label;
-        }
-
-        if (seriesLabel !== label) {
-          sameSeriesLabel = false;
-        }
-
-        if (dataLength > 1 || children || !sameSeriesLabel) {
-          isLegend = true;
-        }
-      });
-
-      return isLegend;
-    };
-
-    /**
      * Returns array of chart data objects for pie data objects
      *
      * @method pieData
@@ -245,9 +210,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self.getYStackMax(series));
+          return arr.push(self._getYMax(series, self._getYStack));
         }
-        return arr.push(self.getYMax(series));
+        return arr.push(self._getYMax(series, self._getY));
       });
 
       return _.max(arr);
@@ -261,53 +226,33 @@ define(function (require) {
      * @returns {*} Array of data objects with x, y, y0 keys
      */
     Data.prototype.stackData = function (series) {
+      // SHould not stack values on line chart
+      if (this._attr.type === 'line') return series;
       return this._attr.stack(series);
     };
 
     /**
-     * Calculates the largest y stack value among all data objects
-     *
-     * @method getYStackMax
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y stack max value
+     * Returns the max Y axis value for a `series` array based on
+     * a specified callback function (calculation).
      */
-    Data.prototype.getYStackMax = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
-
+    Data.prototype._getYMax = function (series, calculation) {
       return d3.max(this.stackData(series), function (data) {
-        return d3.max(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
-          }
-
-          return d.y0 + d.y;
-        });
+        return d3.max(data, calculation);
       });
     };
 
     /**
-     * Calculates the Y domain max value
-     *
-     * @method getMax
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y domain max value
+     * Calculates the y stack value for each data object
      */
-    Data.prototype.getYMax = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
+    Data.prototype._getYStack = function (d) {
+      return d.y0 + d.y;
+    };
 
-      return d3.max(series, function (data) {
-        return d3.max(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
-          }
-
-          return d.y;
-        });
-      });
+    /**
+     * Calculates the Y max value
+     */
+    Data.prototype._getY = function (d) {
+      return d.y;
     };
 
     /**
