@@ -61,6 +61,7 @@ define(function (require) {
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
+        if (d.size === 0) return;
         return Math.abs(d.size);
       });
       var x = d3.scale.linear()
@@ -119,7 +120,18 @@ define(function (require) {
       return path;
     };
 
-    PieChart.prototype.checkForZeros = function () {};
+    PieChart.prototype.checkForZeros = function () {
+      var isZero = _.findKey(this.chartData, function (obj) {
+        if (obj.parent) {
+          return _.findKey(obj.parent, 'size');
+        }
+        return obj.size === 0;
+      });
+
+      if (isZero) {
+        throw new errors.AllZeroErrorPieChart();
+      }
+    };
 
     /**
      * Renders d3 visualization
