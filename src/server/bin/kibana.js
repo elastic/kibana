@@ -68,13 +68,10 @@ server.start(function (err) {
     });
   }
 
-  // If we get here then things have gone sideways. Let's wait 2 milliseconds
-  // for the logger to flush before exiting.
+  // If we get here then things have gone sideways.
   if (err) {
     logger.fatal({ err: err });
-    setTimeout(function () {
-      process.exit(1);
-    }, 2);
+    process.exit(1);
   }
 
 });
