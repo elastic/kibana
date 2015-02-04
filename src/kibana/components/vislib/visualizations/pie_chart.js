@@ -109,7 +109,6 @@ define(function (require) {
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
-
           return color(format(d, d.name));
         });
 
@@ -119,6 +118,8 @@ define(function (require) {
 
       return path;
     };
+
+    PieChart.prototype.checkForZeros = function () {};
 
     /**
      * Renders d3 visualization
