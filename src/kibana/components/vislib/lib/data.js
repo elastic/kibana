@@ -169,6 +169,7 @@ define(function (require) {
       // reset the counters (except for the charts counter) and the data characteristics
       // values (except for the number of charts). Increment the charts counter.
       if (this._cache.k === this._cache.o) {
+        this._cache = this._createCache();
         ++this._cache.i;
         this._cache.n = data[this._cache.i].series.length; // number of stack layers
         this._cache.o = data[this._cache.i].series[this._cache.j].values.length; // number of values
