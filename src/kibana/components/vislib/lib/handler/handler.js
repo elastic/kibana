@@ -149,50 +149,6 @@ define(function (require) {
     };
 
     /**
-     * Removes all DOM elements from the HTML element provided
-     *
-     * @method removeAll
-     * @param el {HTMLElement} Reference to the HTML Element that
-     * contains the chart
-     * @returns {D3.Selection|D3.Transition.Transition} With the chart
-     * child element removed
-     */
-    Handler.prototype.removeAll = function (el) {
-      return d3.select(el).selectAll('*').remove();
-    };
-
-    /**
-     * Displays an error message in the DOM
-     *
-     * @method error
-     * @param message {String} Error message to display
-     * @returns {HTMLElement} Displays the input message
-     */
-    Handler.prototype.error = function (message) {
-      this.removeAll(this.el);
-
-      var div = d3.select(this.el)
-      .append('div')
-      // class name needs `chart` in it for the polling checkSize function
-      // to continuously call render on resize
-      .attr('class', 'visualize-error chart error');
-
-      if (message === 'No results found') {
-        div.append('div')
-        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
-        .append('div').attr('class', 'item top')
-        .append('div').attr('class', 'item')
-        .append('h2').html('<i class="fa fa-meh-o"></i>')
-        .append('h4').text(message);
-
-        div.append('div').attr('class', 'item bottom');
-        return div;
-      }
-
-      return div.append('h4').text(message);
-    };
-
-    /**
      * Destroys all the charts in the visualization
      *
      * @method destroy

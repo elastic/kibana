@@ -43,15 +43,12 @@ define(function (require) {
      * @param data {Object} Elasticsearch query results
      */
     Vis.prototype.render = function (data) {
-      var chartType = this._attr.type;
-
       if (!data) {
         throw new Error('No valid data!');
       }
 
       this.data = data;
-      this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
-      this._runOnHandler('render');
+      this._instantiateHandler();
     };
 
     /**
@@ -72,21 +69,103 @@ define(function (require) {
       }
     };
 
+    /**
+     * Handles errors that are bubbled up from the Handler constructor.
+     *
+     * @param error
+     * @returns {HTMLElement}
+     * @private
+     */
+    Vis.prototype._errorHandler = function (error) {
+      // If involving height and width of the container, log error to screen.
+      // Because we have to wait for the DOM element to initialize, we do not
+      // want to throw an error when the DOM `el` is zero
+      if (error instanceof errors.NotEnoughData ||
+        error instanceof errors.NoResults ||
+        error instanceof errors.NoResultsWithinTimeRange) {
+        return this.error(error.message);
+      } else {
+        throw error;
+      }
+    };
+
+    /**
+     * Calls methods on the Handler.
+     *
+     * @param method {String} Handler method
+     * @returns {*}
+     * @private
+     */
     Vis.prototype._runOnHandler = function (method) {
       try {
         this.handler[method]();
       } catch (error) {
-        // If involving height and width of the container, log error to screen.
-        // Because we have to wait for the DOM element to initialize, we do not
-        // want to throw an error when the DOM `el` is zero
-        if (error instanceof errors.ContainerTooSmall ||
-          error instanceof errors.NotEnoughData ||
-          error instanceof errors.NoResults) {
-          this.handler.error(error.message);
-        } else {
-          throw error;
-        }
+        return this._errorHandler(error);
       }
+    };
+
+    /**
+     * Instantiates the Handler
+     *
+     * @returns {HTMLElement}
+     * @private
+     */
+    Vis.prototype._instantiateHandler = function () {
+      var chartType = this._attr.type;
+
+      try {
+        this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
+      } catch (error) {
+        return this._errorHandler(error);
+      }
+
+      this._runOnHandler('render');
+    };
+
+    /**
+     * Removes all DOM elements from the HTML element provided
+     *
+     * @method removeAll
+     * @param el {HTMLElement} Reference to the HTML Element that
+     * contains the chart
+     * @returns {D3.Selection} With the chart
+     * child element removed
+     */
+    Vis.prototype.removeAll = function (el) {
+      return d3.select(el).selectAll('*').remove();
+    };
+
+    /**
+     * Displays an error message in the DOM
+     *
+     * @method error
+     * @param message {String} Error message to display
+     * @returns {HTMLElement} Displays the input message
+     */
+    Vis.prototype.error = function (message) {
+      this.removeAll(this.el);
+
+      var div = d3.select(this.el)
+        .append('div')
+        // class name needs `chart` in it for the polling checkSize function
+        // to continuously call render on resize
+        .attr('class', 'visualize-error chart error');
+
+      if (message === 'No results found' ||
+        message === 'No results were found within the time range selected') {
+
+        div.append('div')
+          .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+          .append('div').attr('class', 'item top')
+          .append('div').attr('class', 'item')
+          .append('h2').html('<i class="fa fa-meh-o"></i>')
+          .append('h4').text(message);
+
+        div.append('div').attr('class', 'item bottom');
+        return div;
+      }
+
+      return div.append('h4').text(message);
     };
 
     /**
