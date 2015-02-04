@@ -23,6 +23,7 @@ define(function (require) {
       this.xValues = args.xValues;
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
+      this.extendOneInterval = args.extendOneInterval == null ? true : args.extendOneInterval;
       this._attr = _.defaults(args._attr || {});
     }
 
@@ -94,7 +95,7 @@ define(function (require) {
       var opts = [ordered[extent]];
 
       var point = d3[extent](data);
-      if (extent === 'max') {
+      if (this.extendOneInterval && extent === 'max') {
         if (ordered.date) {
           point = moment(point).add(ordered.interval).valueOf();
         } else {
