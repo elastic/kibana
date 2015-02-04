@@ -282,18 +282,18 @@ define(function (require) {
       it('should return the Y domain min value', function () {
         series.forEach(function (data) {
           if (!visData.shouldBeStacked(data)) {
-            expect(visData.getYMinValue(data)).to.be(minValue);
+            expect(visData.getYMinValue()).to.be(minValue);
           } else {
-            expect(visData.getYMinValue(data)).to.be(stackedMinValue);
+            expect(visData.getYMinValue()).to.be(stackedMinValue);
           }
         });
 
         series.forEach(function (data) {
-          expect(visData.getYMin(data)).to.be(minValue);
+          expect(visData._getYExtent(data, visData._getY, 'min')).to.be(minValue);
         });
 
         stackedSeries.forEach(function (data) {
-          expect(stackedVisData.getYStackMin(data)).to.be(stackedMinValue);
+          expect(stackedVisData._getYExtent(data, visData._getYStack, 'min')).to.be(stackedMinValue);
         });
       });
 
@@ -337,10 +337,10 @@ define(function (require) {
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain max value', function () {
         series.forEach(function (data) {
-          expect(visData._getYMax(data, visData._getY)).to.be(maxValue);
+          expect(visData._getYExtent(data, visData._getY, 'max')).to.be(maxValue);
         });
         stackedSeries.forEach(function (data) {
-          expect(stackedVisData._getYMax(data, visData._getYStack)).to.be(stackedMaxValue);
+          expect(stackedVisData._getYExtent(data, visData._getYStack, 'max')).to.be(stackedMaxValue);
         });
       });
 

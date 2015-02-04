@@ -328,9 +328,6 @@ define(function (require) {
      * @returns {Number} Min y axis value
      */
     Data.prototype.getYMinValue = function () {
-      // 0 default option
-      // custom min option - where they select the min value
-
       var self = this;
       var arr = [];
       var grouped = (this._attr.mode === 'grouped');
@@ -351,9 +348,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self.getYStackMin(series));
+          return arr.push(self._getYExtent(series, self._getYStack, 'min'));
         }
-        return arr.push(self.getYMin(series));
+        return arr.push(self._getYExtent(series, self._getY, 'min'));
       });
 
       return _.min(arr);
@@ -387,9 +384,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self._getYMax(series, self._getYStack));
+          return arr.push(self._getYExtent(series, self._getYStack, 'max'));
         }
-        return arr.push(self._getYMax(series, self._getY));
+        return arr.push(self._getYExtent(series, self._getY, 'max'));
       });
 
       return _.max(arr);
@@ -412,9 +409,9 @@ define(function (require) {
      * Returns the max Y axis value for a `series` array based on
      * a specified callback function (calculation).
      */
-    Data.prototype._getYMax = function (series, calculation) {
-      return d3.max(this.stackData(series), function (data) {
-        return d3.max(data, calculation);
+    Data.prototype._getYExtent = function (series, calculation, extent) {
+      return d3[extent](this.stackData(series), function (data) {
+        return d3[extent](data, calculation);
       });
     };
 

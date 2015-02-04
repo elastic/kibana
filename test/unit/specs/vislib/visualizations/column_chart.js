@@ -207,6 +207,7 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var yAxis = chart.handler.yAxis;
             var yVals = [vis.handler.data.getYMinValue(), vis.handler.data.getYMaxValue()];
+            console.log(yAxis, yVals, vis);
 
             expect(yAxis.yMin).to.equal(yVals[0]);
             expect(yAxis.yMax).to.equal(yVals[1]);
