@@ -4,7 +4,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
-    var touchdownHtml = require('text!components/vislib/partials/touchdown.html');
+    var touchdownTmpl = _.template(require('text!components/vislib/partials/touchdown.tmpl.html'));
 
     _(PointSeriesChart).inherits(Chart);
     function PointSeriesChart(handler, chartEl, chartData) {
@@ -48,28 +48,41 @@ define(function (require) {
      * @returns {D3.Selection}
      */
     PointSeriesChart.prototype.createEndZones = function (svg) {
-      var xScale = this.handler.xAxis.xScale;
-      var yScale = this.handler.xAxis.yScale;
-      var addEvent = this.addEvent;
+      var xAxis = this.handler.xAxis;
+      var xScale = xAxis.xScale;
+      var yScale = xAxis.yScale;
+      var ordered = xAxis.ordered;
+      var lastX = _.last(xAxis.xValues);
+
+      if (!ordered || ordered.min == null || ordered.max == null) return;
+
       var attr = this.handler._attr;
       var height = attr.height;
       var width = attr.width;
       var margin = attr.margin;
-      var ordered = this.handler.xAxis.ordered;
-      var xVals = this.handler.xAxis.xValues;
       var color = '#004c99';
-
-      if (!ordered || ordered.min == null || ordered.max == null) return;
 
       var leftEndzone = {
         x: 0,
         w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
       };
 
-      var rightEndzone = {
-        x: xScale(ordered.max),
-        w: width - xScale(ordered.max) > 0 ? width - xScale(ordered.max) : 0
-      };
+      var rightEndzone;
+      if (xAxis.extendOneInterval) {
+        // the last data point extends to the edge of the interval,
+        // so start the right endzone right at the max
+        rightEndzone = {
+          x: xScale(ordered.max),
+          w: width - xScale(ordered.max) > 0 ? width - xScale(ordered.max) : 0
+        };
+      } else {
+        // the x-axis does not extend (much) past the last point,
+        // so start at the point and
+        rightEndzone = {
+          x: xScale(lastX),
+          w: xScale(xAxis.addInterval(lastX)) - xScale(lastX)
+        };
+      }
 
       // svg diagonal line pattern
       this.pattern = svg.append('defs')
@@ -104,12 +117,21 @@ define(function (require) {
       })
       .attr('fill', 'url(#DiagonalLines)');
 
-      var touchdown = _.constant(touchdownHtml);
-      var endzoneTT = this.endzoneTT = new Tooltip('endzones', this.handler.el, touchdown, null);
+      function callPlay(event) {
+        var boundData = event.target.__data__;
+        var wholeBucket = boundData && boundData.x != null;
+        var x = wholeBucket ? xScale(boundData.x) : event.offsetX;
+        return { wholeBucket: wholeBucket, touchdown: (x <= leftEndzone.w) || (x >= rightEndzone.x) };
+      }
+
+      function textFormatter() {
+        return touchdownTmpl(callPlay(d3.event));
+      }
+
+      var endzoneTT = this.endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
       endzoneTT.order = 0;
       endzoneTT.showCondition = function inEndzone() {
-        var x = d3.event.offsetX;
-        return (x < leftEndzone.w) || (x > rightEndzone.x);
+        return callPlay(d3.event).touchdown;
       };
       endzoneTT.render()(svg);
     };
