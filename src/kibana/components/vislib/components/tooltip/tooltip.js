@@ -18,12 +18,14 @@ define(function (require) {
       if (!(this instanceof Tooltip)) {
         return new Tooltip(el, formatter, events);
       }
+
       this.el = el;
       this.formatter = formatter;
       this.events = events;
       this.containerClass = 'vis-wrapper';
       this.tooltipClass = 'vis-tooltip';
       this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
+      this.showCondition = _.constant(true);
 
       this.$window = $(window);
       this.$chart = $(el).find('.' + this.containerClass);
@@ -83,12 +85,17 @@ define(function (require) {
           var element = d3.select(this);
 
           function show() {
+            if (!self.showCondition.call(element, d, i)) {
+              return hide();
+            }
+
+            var event = d3.event;
             var placement = self.previousPlacement = self.getTooltipPlacement({
               $window: self.$window,
               $chart: self.$chart,
               $el: $tooltip,
               $sizer: $sizer,
-              event: d3.event,
+              event: event,
               prev: self.previousPlacement
             });
             if (!placement) return;

@@ -32,7 +32,6 @@ define(function (require) {
 
         // Add tooltip
         this.tooltip = new Tooltip($el, formatter, events);
-
       }
 
       this._attr = _.defaults(handler._attr || {}, {});
