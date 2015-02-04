@@ -2,11 +2,7 @@ var Promise = require('bluebird');
 var isUpgradeable = require('./isUpgradeable');
 var config = require('../config');
 var _ = require('lodash');
-var elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-  host: config.elasticsearch
-});
-
+var client = require('./elasticsearch_client');
 module.exports = function (response) {
   var newConfig = {};
   // Check to see if there are any doc. If not then we can assume

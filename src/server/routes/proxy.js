@@ -8,6 +8,7 @@ var fs = require('fs');
 var url = require('url');
 var target = url.parse(config.elasticsearch);
 var join = require('path').join;
+var logger = require('../lib/logger');
 
 
 // If the target is backed by an SSL and a CA is provided via the config
@@ -48,7 +49,6 @@ router.use(function (req, res, next) {
     timeout: config.kibana.request_timeout
   };
 
-
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
   options.headers['x-forward-port'] = getPort(req);
   options.headers['x-forward-proto'] = req.connection.pair ? 'https' : 'http';
@@ -63,13 +63,6 @@ router.use(function (req, res, next) {
     options.body = req.rawBody;
   }
 
-  // Support for handling basic auth
-  if (config.kibana.elasticsearch_username && config.kibana.elasticsearch_password) {
-    var code = new buffer.Buffer(config.kibana.elasticsearch_username + ':' + config.kibana.elasticsearch_password);
-    var auth = 'Basic ' + code.toString('base64');
-    options.headers.authorization = auth;
-  }
-
   // To support the elasticsearch_preserve_host feature we need to change the
   // host header to the target host header. I don't quite understand the value
   // of this... but it's a feature we had before so I guess we are keeping it.
@@ -80,6 +73,7 @@ router.use(function (req, res, next) {
   // Create the request and pipe the response
   var esRequest = request(options);
   esRequest.on('error', function (err) {
+    logger.error({ err: err });
     var code = 502;
     var body = { message: 'Bad Gateway' };
 
@@ -92,7 +86,7 @@ router.use(function (req, res, next) {
     }
 
     body.err = err.message;
-    res.status(code).json(body);
+    if (!res.headersSent) res.status(code).json(body);
   });
   esRequest.pipe(res);
 });
