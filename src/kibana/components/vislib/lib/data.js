@@ -113,12 +113,34 @@ define(function (require) {
     /**
      *
      */
-    Data.prototype.resetCache = function () {
+    Data.prototype._getCounts = function (i, j) {
       var data = this.chartData();
+      var dataLengths = {};
 
-      return {
+      dataLengths.m = data.length;
+      dataLengths.n = data[i].series.length;
+      dataLengths.o = data[i].series[j].values.length;
 
+      return dataLengths;
+    };
+
+    /**
+     *
+     */
+    Data.prototype._createCache = function () {
+      var cache = {
+        i: 0, // charts counter
+        j: 0, // stacks counter
+        k: 0, // values counter
+        yValArr: [] // stores y values
       };
+      var counts = this._getCounts(cache.i, cache.j);
+
+      cache.m = counts['m']; // number of charts
+      cache.n = counts['n']; // number of stack layers
+      cache.o = counts['o']; // number of values
+
+      return cache;
     };
 
     /**
@@ -131,41 +153,9 @@ define(function (require) {
       var stack = this._stackNegAndPosVals;
       var data = this.chartData();
 
-      // Using function memoization to store counters and data characteristics
-      // needed to stack values properly
+      // Storing counters and data characteristics needed to stack values properly
       if (!stack.cache) {
-        stack.cache = {
-          i: 0, // charts counter
-          j: 0, // stacks counter
-          k: 0, // values counter
-          arr: [] // stores y values
-        };
-
-        // Data characteristics
-        stack.cache.m = data.length; // number of charts
-        stack.cache.n = data[stack.cache.i].series.length; // number of stack layers
-        stack.cache.o = data[stack.cache.i].series[stack.cache.j].values.length; // number of values
-      }
-
-      // Calculate the d.y0 value for each value in a dataset, except when you've
-      // reached the last chart.
-      d.y0 = this._calcYZero(y, stack.cache.arr);
-
-      if (stack.cache.i < stack.cache.m) {
-        ++stack.cache.j;
-        stack.cache.arr.push(y);
-      }
-
-      // Chart loop. Each time the function gets to the last value in the data array,
-      // reset the counters (except for the charts counter) and the data characteristics
-      // values (except for the number of charts). Increment the charts counter.
-      if (stack.cache.k === stack.cache.o) {
-        stack.cache.k = 0;
-        stack.cache.j = 0;
-        ++stack.cache.i;
-
-        stack.cache.n = data[stack.cache.i].series.length - 1;
-        stack.cache.o = data[stack.cache.i].series[stack.cache.j].values.length - 1;
+        stack.cache = this._createCache();
       }
 
       // Layer loop. Each time the function reaches the last layer for one bar
@@ -173,9 +163,24 @@ define(function (require) {
       // counter.
       if (stack.cache.j === stack.cache.n) {
         stack.cache.j = 0;
-        stack.cache.arr = [];
+        stack.cache.yValArr = [];
         ++stack.cache.k;
       }
+
+      // Chart loop. Each time the function gets to the last value in the data array,
+      // reset the counters (except for the charts counter) and the data characteristics
+      // values (except for the number of charts). Increment the charts counter.
+      //if (stack.cache.k === stack.cache.o) {
+        //  stack.cache.j = 0;
+        //  stack.cache.k = 0;
+        //  ++stack.cache.i;
+        //  stack.cache.n = data[stack.cache.i].series.length; // number of stack layers
+        //  stack.cache.o = data[stack.cache.i].series[stack.cache.j].values.length; // number of values
+      //}
+
+      d.y0 = this._calcYZero(y, stack.cache.yValArr);
+      ++stack.cache.j;
+      stack.cache.yValArr.push(y);
     };
 
     Data.prototype.getDataType = function () {
