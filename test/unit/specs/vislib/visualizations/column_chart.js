@@ -98,11 +98,7 @@ define(function (require) {
             numOfSeries = chart.chartData.series.length;
             numOfValues = chart.chartData.series[0].values.length;
             product = numOfSeries * numOfValues;
-
-            // remove brushing el before counting rects
-            $(chart.chartEl).find('g.brush').remove();
-
-            expect($(chart.chartEl).find('rect')).to.have.length(product);
+            expect($(chart.chartEl).find('.series rect')).to.have.length(product);
           });
         });
       });
@@ -120,13 +116,12 @@ define(function (require) {
 
       describe('addBarEvents method', function () {
         function checkChart(chart) {
-          var rect = $(chart.chartEl).find('rect')[4];
-          var d3selectedRect = d3.select(rect)[0][0];
+          var rect = $(chart.chartEl).find('.series rect').get(0);
 
           // check for existance of stuff and things
           return {
-            click: !!d3selectedRect.__onclick,
-            mouseOver: !!d3selectedRect.__onmouseover,
+            click: !!rect.__onclick,
+            mouseOver: !!rect.__onmouseover,
             // D3 brushing requires that a g element is appended that
             // listens for mousedown events. This g element includes
             // listeners, however, I was not able to test for the listener

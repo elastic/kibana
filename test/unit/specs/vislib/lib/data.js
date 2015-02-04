@@ -327,8 +327,8 @@ define(function (require) {
           stackedVisData = new Data(stackedDataSeries, {});
           series = visData.flatten();
           stackedSeries = stackedVisData.flatten();
-          maxValue = 25;
-          stackedMaxValue = 60;
+          maxValue = 41;
+          stackedMaxValue = 115;
         });
       });
 
@@ -337,10 +337,10 @@ define(function (require) {
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain max value', function () {
         series.forEach(function (data) {
-          expect(visData.getYMax(data)).to.be(maxValue);
+          expect(visData._getYMax(data, visData._getY)).to.be(maxValue);
         });
         stackedSeries.forEach(function (data) {
-          expect(stackedVisData.getYStackMax(data)).to.be(stackedMaxValue);
+          expect(stackedVisData._getYMax(data, visData._getYStack)).to.be(stackedMaxValue);
         });
       });
 

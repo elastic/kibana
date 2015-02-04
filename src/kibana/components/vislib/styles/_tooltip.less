@@ -1,12 +1,14 @@
 @import (reference) "../../../styles/main";
 
+@tooltip-padding: 8px;
+
 .vis-tooltip,
 .vis-tooltip-sizing-clone {
   visibility: hidden;
   line-height: 1.1;
   font-size: 12px;
   font-weight: normal;
-  padding: 8px;
+  padding: 0 @tooltip-padding @tooltip-padding;
   background: rgba(70, 82, 93, 0.95);
   color: @gray-lighter;
   border-radius: 4px;
@@ -14,8 +16,11 @@
   z-index: 120;
   word-wrap: break-word;
   max-width: 40%;
+  overflow: hidden;
 
   table {
+    margin: @tooltip-padding 0 0;
+
     td,th {
       padding: 2px 4px;
 
@@ -37,6 +42,16 @@
         border-top: none;
       }
     }
+  }
+}
+
+.vis-tooltip-header {
+  margin: 0 (@tooltip-padding * -1);
+  padding: (@tooltip-padding / 2) @tooltip-padding;
+  text-align: center;
+
+  &:last-child {
+    margin-bottom: (@tooltip-padding * -1);
   }
 }
 
