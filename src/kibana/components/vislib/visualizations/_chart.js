@@ -31,7 +31,7 @@ define(function (require) {
         var formatter = this.handler.data.get('tooltipFormatter');
 
         // Add tooltip
-        this.tooltip = new Tooltip($el, formatter, events);
+        this.tooltip = new Tooltip('chart', $el, formatter, events);
       }
 
       this._attr = _.defaults(handler._attr || {}, {});

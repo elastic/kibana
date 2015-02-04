@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
+    var allContents = [];
+
     require('css!components/vislib/styles/main');
 
     /**
@@ -14,12 +16,14 @@ define(function (require) {
      * @param formatter {Function} Tooltip formatter
      * @param events {Constructor} Allows tooltip to return event response data
      */
-    function Tooltip(el, formatter, events) {
+    function Tooltip(id, el, formatter, events) {
       if (!(this instanceof Tooltip)) {
-        return new Tooltip(el, formatter, events);
+        return new Tooltip(id, el, formatter, events);
       }
 
+      this.id = id; // unique id for this tooltip type
       this.el = el;
+      this.order = 100; // higher ordered contents are rendered below the others
       this.formatter = formatter;
       this.events = events;
       this.containerClass = 'vis-wrapper';
@@ -65,6 +69,9 @@ define(function (require) {
       return function (selection) {
         var $tooltip = self.$get();
         var $sizer = self.$getSizer();
+        var id = self.id;
+        var order = self.order;
+
         var tooltipSelection = d3.select($tooltip.get(0));
 
         if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
@@ -78,49 +85,71 @@ define(function (require) {
 
           // only clear when we leave the chart, so that
           // moving between points doesn't make it reposition
-          self.previousPlacement = null;
+          self.$chart.removeData('previousPlacement');
         });
 
         selection.each(function (d, i) {
           var element = d3.select(this);
 
-          function show() {
+          function render(html, placement) {
+            allContents = _.filter(allContents, function (content) {
+              return content.id !== id;
+            });
+
+            if (html) allContents.push({ id: id, html: html, order: order });
+
+            var allHtml = _(allContents)
+            .sortBy('order')
+            .pluck('html')
+            .compact()
+            .join('\n');
+
+            if (allHtml) {
+              $tooltip.html(allHtml).css('visibility', 'visible');
+            } else {
+              $tooltip.css({
+                visibility: 'hidden',
+                left: '-500px',
+                top: '-500px'
+              });
+            }
+
+            if (placement) {
+              $tooltip.css({
+                left: placement.left + 'px',
+                top: placement.top + 'px'
+              });
+            }
+          }
+
+          element
+          .on('mousemove.tip', function update() {
             if (!self.showCondition.call(element, d, i)) {
-              return hide();
+              return render();
             }
 
             var event = d3.event;
-            var placement = self.previousPlacement = self.getTooltipPlacement({
+            var placement = self.getTooltipPlacement({
               $window: self.$window,
               $chart: self.$chart,
               $el: $tooltip,
               $sizer: $sizer,
               event: event,
-              prev: self.previousPlacement
+              prev: self.$chart.data('previousPlacement')
             });
+
+            self.$chart.data('previousPlacement', placement);
             if (!placement) return;
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
             var html = tooltipFormatter(events);
-            if (!html) return hide();
+            if (!html) return render();
 
-            // return text and position for tooltip
-            return tooltipSelection
-            .html(html)
-            .style('visibility', 'visible')
-            .style('left', placement.left + 'px')
-            .style('top', placement.top + 'px');
-          }
-
-          function hide() {
-            return tooltipSelection.style('visibility', 'hidden')
-              .style('left', '-500px')
-              .style('top', '-500px');
-          }
-
-          element
-          .on('mousemove.tip', show)
-          .on('mouseout.tip', hide);
+            render(html, placement);
+          })
+          .on('mouseout.tip', function () {
+            render();
+          });
         });
       };
     };

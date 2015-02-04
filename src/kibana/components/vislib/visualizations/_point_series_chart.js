@@ -4,6 +4,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
+    var touchdownHtml = require('text!components/vislib/partials/touchdown.html');
 
     _(PointSeriesChart).inherits(Chart);
     function PointSeriesChart(handler, chartEl, chartData) {
@@ -103,8 +104,9 @@ define(function (require) {
       })
       .attr('fill', 'url(#DiagonalLines)');
 
-      var touchdown = _.constant('This area is outside of the selected time range');
-      var endzoneTT = this.endzoneTT = new Tooltip(this.handler.el, touchdown, null);
+      var touchdown = _.constant(touchdownHtml);
+      var endzoneTT = this.endzoneTT = new Tooltip('endzones', this.handler.el, touchdown, null);
+      endzoneTT.order = 0;
       endzoneTT.showCondition = function inEndzone() {
         var x = d3.event.offsetX;
         return (x < leftEndzone.w) || (x > rightEndzone.x);
