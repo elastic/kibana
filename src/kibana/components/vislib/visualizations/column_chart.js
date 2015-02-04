@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
     var moment = require('moment');
 
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -18,7 +18,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(ColumnChart).inherits(Chart);
+    _(ColumnChart).inherits(PointSeriesChart);
     function ColumnChart(handler, chartEl, chartData) {
       if (!(this instanceof ColumnChart)) {
         return new ColumnChart(handler, chartEl, chartData);
@@ -32,30 +32,6 @@ define(function (require) {
         yValue: function (d) { return d.y; }
       });
     }
-
-    /**
-     * Stacks chart data values
-     *
-     * @method stackData
-     * @param data {Object} Elasticsearch query result for this chart
-     * @returns {Array} Stacked data objects with x, y, and y0 values
-     */
-    // TODO: refactor so that this is called from the data module
-    ColumnChart.prototype.stackData = function (data) {
-      var self = this;
-
-      return this._attr.stack(data.series.map(function (d) {
-        var label = d.label;
-        return d.values.map(function (e, i) {
-          return {
-            _input: e,
-            label: label,
-            x: self._attr.xValue.call(d.values, e, i),
-            y: self._attr.yValue.call(d.values, e, i)
-          };
-        });
-      }));
-    };
 
     /**
      * Adds SVG rect to Vertical Bar Chart
@@ -283,6 +259,7 @@ define(function (require) {
           .attr('transform', 'translate(0,' + margin.top + ')');
 
           bars = self.addBars(svg, layers);
+          self.createEndZones(svg);
 
           // Adds event listeners
           self.addBarEvents(bars, svg);

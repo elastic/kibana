@@ -1,5 +1,5 @@
 define(function (require) {
-  return function AggConfigFactory(Private) {
+  return function AggConfigFactory(Private, fieldTypeFilter) {
     var _ = require('lodash');
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
 
@@ -133,8 +133,16 @@ define(function (require) {
      * @return {object} the new params object
      */
     AggConfig.prototype.resetParams = function () {
-      // We need to ensure that row and field don't get overriden.
-      return this.fillDefaults(_.pick(this.params, 'row', 'field'));
+      var fieldParam = this.type && this.type.params.byName.field;
+      var field;
+
+      if (fieldParam) {
+        var prevField = this.params.field;
+        var fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, fieldParam.filterFieldTypes);
+        field = _.contains(fieldOpts, prevField) ? prevField : null;
+      }
+
+      return this.fillDefaults({ row: this.params.row, field: field });
     };
 
     AggConfig.prototype.write = function () {
