@@ -96,11 +96,7 @@ define(function (require) {
 
       var point = d3[extent](data);
       if (this.extendOneInterval && extent === 'max') {
-        if (ordered.date) {
-          point = moment(point).add(ordered.interval).valueOf();
-        } else {
-          point += ordered.interval;
-        }
+        point = this.addInterval(point);
       }
       opts.push(point);
 
@@ -109,6 +105,24 @@ define(function (require) {
         if (!isNaN(v)) opts.push(v);
         return opts;
       }, []));
+    };
+
+    /**
+     * Add the interval to a point on the x axis,
+     * this properly adds dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @returns {number} - x + the ordered interval
+     */
+    XAxis.prototype.addInterval = function (x) {
+      var ordered = this.ordered;
+      if (!ordered) return x;
+
+      if (ordered.date) {
+        return moment(x).add(ordered.interval).valueOf();
+      } else {
+        return x += ordered.interval;
+      }
     };
 
     /**
