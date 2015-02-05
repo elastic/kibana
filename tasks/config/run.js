@@ -22,7 +22,7 @@ module.exports = function (grunt) {
     built_kibana: {
       options: {
         wait: false,
-        ready: /kibana server started/i,
+        ready: /Listening/i,
         quiet: true,
         failOnError: false
       },
