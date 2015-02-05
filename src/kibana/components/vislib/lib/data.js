@@ -359,7 +359,7 @@ define(function (require) {
 
       // When there is only one data point,
       // the yMin should default to zero.
-      if (this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y > 0) {
+      if (!this.flatten().length || this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y > 0) {
         return 0;
       }
 
@@ -396,7 +396,7 @@ define(function (require) {
 
       // if there is only one data point and its less than zero,
       // return 0 as the yMax value.
-      if (this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y < 0) {
+      if (!this.flatten().length || this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y < 0) {
         return 0;
       }
 
