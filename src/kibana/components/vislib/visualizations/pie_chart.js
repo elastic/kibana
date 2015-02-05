@@ -24,8 +24,11 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+      // Check whether pie chart should be rendered.
+      this._validatePieData();
+
       this._attr = _.defaults(handler._attr || {}, {
-        isDonut: handler._attr.isDonut || false,
+        isDonut: handler._attr.isDonut || false
       });
     }
 
@@ -61,6 +64,7 @@ define(function (require) {
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
+        if (d.size === 0) return;
         return Math.abs(d.size);
       });
       var x = d3.scale.linear()
@@ -109,7 +113,6 @@ define(function (require) {
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
-
           return color(format(d, d.name));
         });
 
@@ -118,6 +121,29 @@ define(function (require) {
       }
 
       return path;
+    };
+
+    /**
+     * Checks whether all pie slices have zero values.
+     * If so, an error is thrown.
+     */
+    PieChart.prototype._validatePieData = function () {
+      this.chartData.slices = (function withoutZeroSlices(slices) {
+        if (!slices.children) return slices;
+
+        slices = _.clone(slices);
+        slices.children = slices.children.reduce(function (children, child) {
+          if (child.size !== 0) {
+            children.push(withoutZeroSlices(child));
+          }
+          return children;
+        }, []);
+        return slices;
+      }(this.chartData.slices));
+
+      if (this.chartData.slices.children.length === 0) {
+        throw new errors.PieContainsAllZeros();
+      }
     };
 
     /**
