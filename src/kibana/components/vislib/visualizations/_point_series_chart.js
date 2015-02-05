@@ -4,7 +4,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
-    var touchdownHtml = require('text!components/vislib/partials/touchdown.html');
+    var touchdownTmpl = _.template(require('text!components/vislib/partials/touchdown.tmpl.html'));
 
     _(PointSeriesChart).inherits(Chart);
     function PointSeriesChart(handler, chartEl, chartData) {
@@ -48,27 +48,30 @@ define(function (require) {
      * @returns {D3.Selection}
      */
     PointSeriesChart.prototype.createEndZones = function (svg) {
-      var xScale = this.handler.xAxis.xScale;
-      var yScale = this.handler.xAxis.yScale;
-      var addEvent = this.addEvent;
+      var xAxis = this.handler.xAxis;
+      var xScale = xAxis.xScale;
+      var yScale = xAxis.yScale;
+      var ordered = xAxis.ordered;
+
+      if (!ordered || ordered.min == null || ordered.max == null) return;
+
       var attr = this.handler._attr;
       var height = attr.height;
       var width = attr.width;
       var margin = attr.margin;
-      var ordered = this.handler.xAxis.ordered;
-      var xVals = this.handler.xAxis.xValues;
       var color = '#004c99';
 
-      if (!ordered || ordered.min == null || ordered.max == null) return;
-
+      // points on this axis represent the amount of time they cover,
+      // so draw the endzones at the actual time bounds
       var leftEndzone = {
         x: 0,
         w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
       };
 
+      var rightStart = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
       var rightEndzone = {
-        x: xScale(ordered.max),
-        w: width - xScale(ordered.max) > 0 ? width - xScale(ordered.max) : 0
+        x: xScale(rightStart),
+        w: xScale(xAxis.addInterval(rightStart))
       };
 
       // svg diagonal line pattern
@@ -104,12 +107,32 @@ define(function (require) {
       })
       .attr('fill', 'url(#DiagonalLines)');
 
-      var touchdown = _.constant(touchdownHtml);
-      var endzoneTT = this.endzoneTT = new Tooltip('endzones', this.handler.el, touchdown, null);
+      function callPlay(event) {
+        var boundData = event.target.__data__;
+        var wholeBucket = boundData && boundData.x != null;
+        var x = wholeBucket ? boundData.x : event.offsetX;
+
+        if (wholeBucket) {
+          return {
+            wholeBucket: true,
+            touchdown: (x < ordered.min) || (xAxis.addInterval(x) > ordered.max)
+          };
+        } else {
+          return {
+            wholeBucket: false,
+            touchdown: x <= leftEndzone.w || x >= rightEndzone.x
+          };
+        }
+      }
+
+      function textFormatter() {
+        return touchdownTmpl(callPlay(d3.event));
+      }
+
+      var endzoneTT = this.endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
       endzoneTT.order = 0;
       endzoneTT.showCondition = function inEndzone() {
-        var x = d3.event.offsetX;
-        return (x < leftEndzone.w) || (x > rightEndzone.x);
+        return callPlay(d3.event).touchdown;
       };
       endzoneTT.render()(svg);
     };

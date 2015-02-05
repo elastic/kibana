@@ -1,6 +1,7 @@
 define(function (require) {
   return function OrderedXKeysUtilService(Private) {
     var _ = require('lodash');
+    var moment = require('moment');
     var getUniqKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
 
     /*
@@ -17,6 +18,7 @@ define(function (require) {
 
       var objKeys = getUniqKeys(obj);
       var interval = _.deepGet(obj, 'ordered.interval');
+      var dateInterval = moment.isDuration(interval) ? interval : false;
 
       return _(objKeys)
       .pairs()
@@ -35,11 +37,20 @@ define(function (require) {
         var gapEdge = parseFloat(_.deepGet(list, [i + 1, 0]));
         if (isNaN(gapEdge)) return val;
 
-        var next = val;
         var vals = [];
-        while (next < gapEdge) {
-          vals.push(next);
-          next += interval;
+        var next = val;
+
+        if (dateInterval) {
+          next = moment(val);
+          while (next < gapEdge) {
+            vals.push(next.valueOf());
+            next.add(dateInterval);
+          }
+        } else {
+          while (next < gapEdge) {
+            vals.push(next);
+            next += interval;
+          }
         }
 
         return vals;
