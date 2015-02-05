@@ -166,6 +166,8 @@ define(function (require) {
       var brush = this.createBrush(xScale, svg);
 
       function brushEnd() {
+        if (!validBrushClick(d3.event)) return;
+
         var bar = d3.select(this);
         var startX = d3.mouse(svg.node());
         var startXInv = xScale.invert(startX[0]);
@@ -237,12 +239,24 @@ define(function (require) {
         svg.insert('g', 'g')
         .attr('class', 'brush')
         .call(brush)
+        .call(function (brushG) {
+          // hijack the brush start event to filter out right/middle clicks
+          var brushHandler = brushG.on('mousedown.brush');
+          if (!brushHandler) return; // touch events in use
+          brushG.on('mousedown.brush', function () {
+            if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
+          });
+        })
         .selectAll('rect')
         .attr('height', height - margin.top - margin.bottom);
 
         return brush;
       }
     };
+
+    function validBrushClick(event) {
+      return event.button === 0;
+    }
 
 
     return Dispatch;
