@@ -127,7 +127,7 @@ define(function (require) {
     /**
      *
      */
-    Data.prototype._createCache = _.memoize(function () {
+    Data.prototype._createCache = function () {
       var cache = {
         index: {
           chart: 0,
@@ -140,7 +140,7 @@ define(function (require) {
       cache.count = this._getCounts(cache.index.chart, cache.index.stack);
 
       return cache;
-    });
+    };
 
     /**
      * Stacking function passed to the D3 Stack Layout `.out` API.
@@ -162,7 +162,7 @@ define(function (require) {
 
 
       // last stack, or last value, reset the stack count and y value array
-      var lastStack = (this._cache.index.stack === this._cache.count.stacks);
+      var lastStack = (this._cache.index.stack >= this._cache.count.stacks);
       if (lastStack) {
         this._cache.index.stack = 0;
         ++this._cache.index.value;
@@ -173,13 +173,13 @@ define(function (require) {
       }
 
       // last value, prepare for the next chart, if one exists
-      var lastValue = (this._cache.index.value === this._cache.count.values);
+      var lastValue = (this._cache.index.value >= this._cache.count.values);
       if (lastValue) {
         this._cache.index.value = 0;
         ++this._cache.index.chart;
 
         // no more charts, reset the queue and finish
-        if (this._cache.index.chart === this._cache.count.charts) {
+        if (this._cache.index.chart >= this._cache.count.charts) {
           this._cache = this._createCache();
           return;
         }
