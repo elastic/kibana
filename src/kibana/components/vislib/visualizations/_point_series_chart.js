@@ -61,25 +61,18 @@ define(function (require) {
       var margin = attr.margin;
       var color = '#004c99';
 
-      var rightEndzone;
-      var leftEndzone;
-      if (xAxis.expandLastBucket) {
-        // points on this axis represent the amount of time they cover,
-        // so draw the endzones at the actual time bounds
-        leftEndzone = {
-          x: 0,
-          w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
-        };
-        rightEndzone = {
-          x: xScale(ordered.max),
-          w: width - xScale(ordered.max) > 0 ? width - xScale(ordered.max) : 0
-        };
-      } else {
-        // points on this axis are simply one-pixel points and so we will draw
-        // endzones covering the entire bucket
-        leftEndzone = spanBucket(xAxis.minExtent());
-        rightEndzone = spanBucket(xAxis.subtractInterval(xAxis.maxExtent()));
-      }
+      // points on this axis represent the amount of time they cover,
+      // so draw the endzones at the actual time bounds
+      var leftEndzone = {
+        x: 0,
+        w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
+      };
+
+      var rightStart = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
+      var rightEndzone = {
+        x: xScale(rightStart),
+        w: xScale(xAxis.addInterval(rightStart))
+      };
 
       // svg diagonal line pattern
       this.pattern = svg.append('defs')
@@ -113,13 +106,6 @@ define(function (require) {
         return d.w;
       })
       .attr('fill', 'url(#DiagonalLines)');
-
-      function spanBucket(x) {
-        return {
-          x: xScale(x),
-          w: xScale(xAxis.addInterval(x)) - xScale(x)
-        };
-      }
 
       function callPlay(event) {
         var boundData = event.target.__data__;

@@ -32,7 +32,7 @@ define(function (require) {
             xValues           : data.xValues(),
             ordered           : data.get('ordered'),
             xAxisFormatter    : data.get('xAxisFormatter'),
-            expandLastBucket : expandLastBucket,
+            expandLastBucket  : expandLastBucket,
             _attr             : vis._attr
           }),
           yAxis: new YAxis({
