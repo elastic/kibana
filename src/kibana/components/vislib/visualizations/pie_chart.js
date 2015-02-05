@@ -139,18 +139,15 @@ define(function (require) {
 
     /**
      *
-     * @param arr
-     * @returns {Array}
-     * @private
      */
-    PieChart.prototype._getZeros = function (arr) {
+    PieChart.prototype._getSizes = function (arr) {
       var self = this;
       var sizes = [];
 
       arr.forEach(function (obj) {
         if (obj.children) {
           // Get sizes of slices from objects in children's array
-          var childSizes = self._getZeros(obj.children);
+          var childSizes = self._getSizes(obj.children);
 
           childSizes.forEach(function (num) {
             sizes.push(num);
@@ -166,11 +163,27 @@ define(function (require) {
     };
 
     /**
-     * Returns true if all sizes for pie slices are zero.
+     * Accepts an array of numbers. Returns true if all
+     * sizes for pie slices are zero.
      */
-    PieChart.prototype._checkForAllZeros = function (arr) {
-      var values = this._getZeros(arr);
-      return values.every(this._isZero);
+    PieChart.prototype._checkForAllZeros = function (sizes) {
+      return sizes.every(this._isZero);
+    };
+
+    /**
+     * Accepts an array of numbers. Returns true if some
+     * sizes for pie slices are zero.
+     */
+    PieChart.prototype._checkForSomeZeros = function (sizes) {
+      return sizes.some(this._isZero);
+    };
+
+    PieChart.prototype._removeZeroNodes = function () {
+      // use the this.chartData
+      // traverse the parent child objects
+      // check whether size is zero
+      // if zero, remove object
+      // return modified data
     };
 
     /**
@@ -178,10 +191,17 @@ define(function (require) {
      * If so, an error is thrown.
      */
     PieChart.prototype._validatePieData = function () {
-      var arr = this.chartData.slices.children;
-      var isAllZeros = this._checkForAllZeros(arr);
+      var slices = this.chartData.slices.children;
+      var sizes = this._getSizes(slices);
+      var isAllZeros = this._checkForAllZeros(sizes);
+      var isSomeZeros = this._checkForSomeZeros(sizes);
 
-      if (!isAllZeros) { return; }
+      if (!isAllZeros && !isSomeZeros) { return; }
+
+      if (isSomeZeros) {
+        this._removeZeroNodes();
+      }
+
       throw new errors.PieContainsAllZeros();
     };
 
