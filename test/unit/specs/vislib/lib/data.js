@@ -230,20 +230,68 @@ define(function (require) {
         colOut = colIn.flatten();
       });
 
-      it('should return an array of arrays', function () {
-        expect(_.isArray(serOut)).to.be(true);
+      it('should return an array of value objects from every series', function () {
+        expect(serOut.every(_.isObject)).to.be(true);
       });
 
-      it('should return array length 3', function () {
-        expect(serOut[0][0].length).to.be(3);
+      function testLength(inputData) {
+        return function () {
+          var data = new dataFactory(inputData, {});
+          var len = _.reduce(data.chartData(), function (sum, chart) {
+            return sum + chart.series.reduce(function (sum, series) {
+              return sum + series.values.length;
+            }, 0);
+          }, 0);
+
+          expect(data.flatten()).to.have.length(len);
+        };
+      }
+
+      it('should return all points from every series', testLength(seriesData));
+      it('should return all points from every series', testLength(rowsData));
+      it('should return all points from every series', testLength(colsData));
+    });
+
+    describe('getYMinValue method', function () {
+      var Data;
+      var dataSeries;
+      var stackedDataSeries;
+      var visData;
+      var stackedVisData;
+      var series;
+      var stackedSeries;
+      var minValue;
+      var stackedMinValue;
+
+      beforeEach(function () {
+        module('DataFactory');
       });
 
-      it('should return array length 3', function () {
-        expect(rowOut[0][0].length).to.be(3);
+      beforeEach(function () {
+        inject(function (d3, Private) {
+          Data = Private(require('components/vislib/lib/data'));
+          dataSeries = require('vislib_fixtures/mock_data/date_histogram/_series');
+          stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
+          visData = new Data(dataSeries, {});
+          stackedVisData = new Data(stackedDataSeries, { type: 'histogram' });
+          series = _.pluck(visData.chartData(), 'series');
+          stackedSeries = _.pluck(stackedVisData.chartData(), 'series');
+          minValue = 4;
+          stackedMinValue = 15;
+        });
       });
 
-      it('should return array length 3', function () {
-        expect(colOut[0][0].length).to.be(3);
+      // The first value in the time series is less than the min date in the
+      // date range. It also has the largest y value. This value should be excluded
+      // when calculating the Y max value since it falls outside of the range.
+      it('should return the Y domain min value', function () {
+        expect(visData.getYMinValue()).to.be(minValue);
+        expect(stackedVisData.getYMinValue()).to.be(stackedMinValue);
+      });
+
+      it('should have a minimum date value that is greater than the max value within the date range', function () {
+        expect(_.min(series.values, function (d) { return d.x; })).to.be.greaterThan(minValue);
+        expect(_.min(stackedSeries.values, function (d) { return d.x; })).to.be.greaterThan(stackedMinValue);
       });
     });
 
@@ -268,9 +316,9 @@ define(function (require) {
           dataSeries = require('vislib_fixtures/mock_data/date_histogram/_series');
           stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
           visData = new Data(dataSeries, {});
-          stackedVisData = new Data(stackedDataSeries, {});
-          series = visData.flatten();
-          stackedSeries = stackedVisData.flatten();
+          stackedVisData = new Data(stackedDataSeries, { type: 'histogram' });
+          series = _.pluck(visData.chartData(), 'series');
+          stackedSeries = _.pluck(stackedVisData.chartData(), 'series');
           maxValue = 41;
           stackedMaxValue = 115;
         });
@@ -279,13 +327,9 @@ define(function (require) {
       // The first value in the time series is less than the min date in the
       // date range. It also has the largest y value. This value should be excluded
       // when calculating the Y max value since it falls outside of the range.
-      it('should return the Y domain max value', function () {
-        series.forEach(function (data) {
-          expect(visData._getYMax(data, visData._getY)).to.be(maxValue);
-        });
-        stackedSeries.forEach(function (data) {
-          expect(stackedVisData._getYMax(data, visData._getYStack)).to.be(stackedMaxValue);
-        });
+      it('should return the Y domain min value', function () {
+        expect(visData.getYMaxValue()).to.be(maxValue);
+        expect(stackedVisData.getYMaxValue()).to.be(stackedMaxValue);
       });
 
       it('should have a minimum date value that is greater than the max value within the date range', function () {

@@ -24,7 +24,6 @@ define(function (require) {
         Renderbot = Private(require('plugins/vis_types/_renderbot'));
         VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
         normalizeChartData = Private(require('components/agg_response/index'));
-
       });
     }
 
@@ -85,7 +84,7 @@ define(function (require) {
           }
         }, mockVisType)
       };
-      var $el = 'element';
+      var $el = $('<div>testing</div>');
       var createVisSpy;
       var getParamsStub;
       var renderbot;
