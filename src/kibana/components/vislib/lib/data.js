@@ -287,15 +287,12 @@ define(function (require) {
      * @returns {Array} Value objects
      */
     Data.prototype.flatten = function () {
-      var data = this.chartData();
-      var series = _.chain(data).pluck('series').pluck().value();
-      var values = [];
-
-      series.forEach(function (d) {
-        values.push(_.chain(d).flatten().pluck('values').value());
-      });
-
-      return values;
+      return _(this.chartData())
+      .pluck('series')
+      .flatten()
+      .pluck('values')
+      .flatten()
+      .value();
     };
 
     /**
@@ -303,16 +300,18 @@ define(function (require) {
      * TODO: need to make this more generic
      *
      * @method shouldBeStacked
-     * @param series {Array} Array of data objects
      * @returns {boolean}
      */
-    Data.prototype.shouldBeStacked = function (series) {
+    Data.prototype.shouldBeStacked = function () {
       var isHistogram = (this._attr.type === 'histogram');
       var isArea = (this._attr.type === 'area');
       var isOverlapping = (this._attr.mode === 'overlap');
+      var grouped = (this._attr.mode === 'grouped');
 
-      // Series should be an array
-      return (isHistogram && series.length > 1 || isArea && !isOverlapping && series.length > 1);
+      var stackedHisto = isHistogram && !grouped;
+      var stackedArea = isArea && !isOverlapping;
+
+      return stackedHisto || stackedArea;
     };
 
     /**
@@ -339,30 +338,28 @@ define(function (require) {
     Data.prototype.getYMinValue = function () {
       var self = this;
       var arr = [];
-      var grouped = (this._attr.mode === 'grouped');
 
       if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
         this._attr.mode === 'silhouette') {
         return 0;
       }
 
-      // When there is only one data point,
-      // the yMin should default to zero.
-      if (!this.flatten().length || this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y > 0) {
+      var flat = this.flatten();
+      // if there is only one data point and its less than zero,
+      // return 0 as the yMax value.
+      if (!flat.length || flat.length === 1 && flat[0].y > 0) {
         return 0;
       }
 
-      // Calculate the min value of the dataArray
+      var min = Infinity;
+
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
-      _.forEach(this.flatten(), function (series) {
-        if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self._getYExtent(series, self._getYStack, 'min'));
-        }
-        return arr.push(self._getYExtent(series, self._getY, 'min'));
+      _.each(this.chartData(), function (chart) {
+        min = Math.min(min, self._getYExtent(chart, 'min'));
       });
 
-      return _.min(arr);
+      return min;
     };
 
     /**
@@ -377,28 +374,27 @@ define(function (require) {
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
-      var grouped = (self._attr.mode === 'grouped');
 
       if (self._attr.mode === 'percentage') {
         return 1;
       }
 
+      var flat = this.flatten();
       // if there is only one data point and its less than zero,
       // return 0 as the yMax value.
-      if (!this.flatten().length || this.flatten()[0][0].length === 1 && this.flatten()[0][0][0].y < 0) {
+      if (!flat.length || flat.length === 1 && flat[0].y < 0) {
         return 0;
       }
 
+      var max = -Infinity;
+
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
-      _.forEach(this.flatten(), function (series) {
-        if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self._getYExtent(series, self._getYStack, 'max'));
-        }
-        return arr.push(self._getYExtent(series, self._getY, 'max'));
+      _.each(this.chartData(), function (chart) {
+        max = Math.max(max, self._getYExtent(chart, 'max'));
       });
 
-      return _.max(arr);
+      return max;
     };
 
     /**
@@ -418,10 +414,21 @@ define(function (require) {
      * Returns the max Y axis value for a `series` array based on
      * a specified callback function (calculation).
      */
-    Data.prototype._getYExtent = function (series, calculation, extent) {
-      return d3[extent](this.stackData(series), function (data) {
-        return d3[extent](data, calculation);
-      });
+    Data.prototype._getYExtent = function (chart, extent) {
+      var calculation = this._getY;
+
+      if (this.shouldBeStacked()) {
+        this.stackData(_.pluck(chart.series, 'values'));
+        calculation = this._getYStack;
+      }
+
+      var points = chart.series
+      .reduce(function (points, series) {
+        return points.concat(series.values);
+      }, [])
+      .map(calculation);
+
+      return d3[extent](points);
     };
 
     /**
