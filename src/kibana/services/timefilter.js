@@ -86,6 +86,10 @@ define(function (require) {
       };
     };
 
+    Timefilter.prototype.getActiveBounds = function () {
+      if (this.enabled) return this.getBounds();
+    };
+
     return new Timefilter();
   });
 

@@ -50,11 +50,10 @@ define(function (require) {
     /**
      * Calculates values for the tooltip placement
      *
-     * @method getTooltipPlacement
      * @param event {Object} D3 Events Object
      * @returns {{Object}} Coordinates for tooltip
      */
-    Tooltip.prototype.getTooltipPlacement = require('components/vislib/components/tooltip/_position_tooltip');
+    var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
 
     /**
      * Renders tooltip
@@ -91,7 +90,7 @@ define(function (require) {
         selection.each(function (d, i) {
           var element = d3.select(this);
 
-          function render(html, placement) {
+          function render(html) {
             allContents = _.filter(allContents, function (content) {
               return content.id !== id;
             });
@@ -105,19 +104,26 @@ define(function (require) {
             .join('\n');
 
             if (allHtml) {
-              $tooltip.html(allHtml).css('visibility', 'visible');
+              var placement = positionTooltip({
+                $window: self.$window,
+                $chart: self.$chart,
+                $el: $tooltip,
+                $sizer: $sizer,
+                event: event
+              }, allHtml);
+
+              $tooltip
+              .html(allHtml)
+              .css({
+                visibility: 'visible',
+                left: placement.left,
+                top: placement.top
+              });
             } else {
               $tooltip.css({
                 visibility: 'hidden',
                 left: '-500px',
                 top: '-500px'
-              });
-            }
-
-            if (placement) {
-              $tooltip.css({
-                left: placement.left + 'px',
-                top: placement.top + 'px'
               });
             }
           }
@@ -128,24 +134,8 @@ define(function (require) {
               return render();
             }
 
-            var event = d3.event;
-            var placement = self.getTooltipPlacement({
-              $window: self.$window,
-              $chart: self.$chart,
-              $el: $tooltip,
-              $sizer: $sizer,
-              event: event,
-              prev: self.$chart.data('previousPlacement')
-            });
-
-            self.$chart.data('previousPlacement', placement);
-            if (!placement) return;
-
             var events = self.events ? self.events.eventResponse(d, i) : d;
-            var html = tooltipFormatter(events);
-            if (!html) return render();
-
-            render(html, placement);
+            return render(tooltipFormatter(events));
           })
           .on('mouseout.tip', function () {
             render();

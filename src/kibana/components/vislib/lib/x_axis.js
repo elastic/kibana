@@ -23,6 +23,7 @@ define(function (require) {
       this.xValues = args.xValues;
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
+      this.expandLastBucket = args.expandLastBucket == null ? true : args.expandLastBucket;
       this._attr = _.defaults(args._attr || {});
     }
 
@@ -81,7 +82,15 @@ define(function (require) {
      * @returns {*} D3 scale function
      */
     XAxis.prototype.getTimeDomain = function (scale, data) {
-      return scale.domain([this._getXExtents(data, 'min'), this._getXExtents(data, 'max')]);
+      return scale.domain([this.minExtent(data), this.maxExtent(data)]);
+    };
+
+    XAxis.prototype.minExtent = function (data) {
+      return this._calculateExtent(data || this.xValues, 'min');
+    };
+
+    XAxis.prototype.maxExtent = function (data) {
+      return this._calculateExtent(data || this.xValues, 'max');
     };
 
     /**
@@ -89,17 +98,13 @@ define(function (require) {
      * @param data
      * @param extent
      */
-    XAxis.prototype._getXExtents = function (data, extent) {
+    XAxis.prototype._calculateExtent = function (data, extent) {
       var ordered = this.ordered;
       var opts = [ordered[extent]];
 
       var point = d3[extent](data);
-      if (extent === 'max') {
-        if (ordered.date) {
-          point = moment(point).add(ordered.interval).valueOf();
-        } else {
-          point += ordered.interval;
-        }
+      if (this.expandLastBucket && extent === 'max') {
+        point = this.addInterval(point);
       }
       opts.push(point);
 
@@ -108,6 +113,56 @@ define(function (require) {
         if (!isNaN(v)) opts.push(v);
         return opts;
       }, []));
+    };
+
+    /**
+     * Add the interval to a point on the x axis,
+     * this properly adds dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @returns {number} - x + the ordered interval
+     */
+    XAxis.prototype.addInterval = function (x) {
+      return this.modByInterval(x, +1);
+    };
+
+    /**
+     * Subtract the interval to a point on the x axis,
+     * this properly subtracts dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @returns {number} - x - the ordered interval
+     */
+    XAxis.prototype.subtractInterval = function (x) {
+      return this.modByInterval(x, -1);
+    };
+
+    /**
+     * Modify the x value by n intervals, properly
+     * handling dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @param {number} n - the number of intervals
+     * @returns {number} - x + n intervals
+     */
+    XAxis.prototype.modByInterval = function (x, n) {
+      var ordered = this.ordered;
+      if (!ordered) return x;
+      var interval = ordered.interval;
+      if (!interval) return x;
+
+      if (!ordered.date) {
+        return x += (ordered.interval * n);
+      }
+
+      var y = moment(x);
+      var method = n > 0 ? 'add' : 'subtract';
+
+      _.times(Math.abs(n), function () {
+        y[method](interval);
+      });
+
+      return y.valueOf();
     };
 
     /**

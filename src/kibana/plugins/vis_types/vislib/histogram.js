@@ -14,7 +14,8 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
-          mode: 'stacked'
+          mode: 'stacked',
+          defaultYExtents: false
         },
         modes: ['stacked', 'percentage', 'grouped'],
         editor: require('text!plugins/vis_types/vislib/editors/histogram.html')
