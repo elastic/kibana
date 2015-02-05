@@ -117,9 +117,9 @@ define(function (require) {
       var data = this.chartData();
       var dataLengths = {};
 
-      dataLengths.m = data.length;
-      dataLengths.n = data[i].series.length;
-      dataLengths.o = data[i].series[j].values.length;
+      dataLengths.charts = data.length;
+      dataLengths.stacks = data[i].series.length;
+      dataLengths.values = data[i].series[j].values.length;
 
       return dataLengths;
     };
@@ -129,16 +129,15 @@ define(function (require) {
      */
     Data.prototype._createCache = function () {
       var cache = {
-        i: 0, // charts counter
-        j: 0, // stacks counter
-        k: 0, // values counter
-        yValsArr: [] // stores y values
+        index: {
+          chart: 0,
+          stack: 0,
+          value: 0
+        },
+        yValsArr: []
       };
-      var counts = this._getCounts(cache.i, cache.j);
 
-      cache.m = counts['m']; // number of charts
-      cache.n = counts['n']; // number of stack layers
-      cache.o = counts['o']; // number of values
+      cache.count = this._getCounts(cache.index.chart, cache.index.stack);
 
       return cache;
     };
@@ -149,6 +148,7 @@ define(function (require) {
      * It is responsible for calculating the correct d.y0 value for
      * mixed datasets containing both positive and negative values.
      */
+    var dataCache = {};
     Data.prototype._stackNegAndPosVals = function (d, y0, y) {
       var data = this.chartData();
 
@@ -157,27 +157,44 @@ define(function (require) {
         this._cache = this._createCache();
       }
 
-      // Layer loop. Each time the function reaches the last layer for one bar
-      // in a chart, reset the layers counter and y array. Increment the values
-      // counter.
-      if (this._cache.j === this._cache.n) {
-        this._cache.j = 0;
-        this._cache.yValsArr = [];
-      }
-
-      // Chart loop. Each time the function gets to the last value in the data array,
-      // reset the counters (except for the charts counter) and the data characteristics
-      // values (except for the number of charts). Increment the charts counter.
-      if (this._cache.k === this._cache.o) {
-        this._cache = this._createCache();
-        ++this._cache.i;
-        this._cache.n = data[this._cache.i].series.length; // number of stack layers
-        this._cache.o = data[this._cache.i].series[this._cache.j].values.length; // number of values
+      // debugging
+      var da = data[this._cache.index.chart].series[this._cache.index.stack].values[this._cache.index.value];
+      if (da && da.y !== 0) {
+        dataCache[da.x] = dataCache[da.x] || [];
+        dataCache[da.x].push(da);
       }
 
       d.y0 = this._calcYZero(y, this._cache.yValsArr);
-      ++this._cache.j;
-      this._cache.yValsArr.push(y);
+      ++this._cache.index.stack;
+
+
+      // last stack, or last value, reset the stack count and y value array
+      var lastStack = (this._cache.index.stack === this._cache.count.stacks);
+      if (lastStack) {
+        this._cache.index.stack = 0;
+        ++this._cache.index.value;
+        this._cache.yValsArr = [];
+      // still building the stack collection, push v value to array
+      } else if (y !== 0) {
+        this._cache.yValsArr.push(y);
+      }
+
+      // last value, prepare for the next chart, if one exists
+      var lastValue = (this._cache.index.value === this._cache.count.values);
+      if (lastValue) {
+        this._cache.index.value = 0;
+        ++this._cache.index.chart;
+
+        // no more charts, reset the queue and finish
+        if (this._cache.index.chart === this._cache.count.charts) {
+          this._cache = this._createCache();
+          return;
+        }
+
+        // get stack and value count for next chart
+        this._cache.count.stacks = data[this._cache.index.chart].series.length; // number of stack layers
+        this._cache.count.values = data[this._cache.index.chart].series[this._cache.index.stack].values.length; // number of values
+      }
     };
 
     Data.prototype.getDataType = function () {
