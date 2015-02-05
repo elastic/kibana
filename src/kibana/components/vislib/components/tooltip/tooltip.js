@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
+    var allContents = [];
+
     require('css!components/vislib/styles/main');
 
     /**
@@ -14,16 +16,20 @@ define(function (require) {
      * @param formatter {Function} Tooltip formatter
      * @param events {Constructor} Allows tooltip to return event response data
      */
-    function Tooltip(el, formatter, events) {
+    function Tooltip(id, el, formatter, events) {
       if (!(this instanceof Tooltip)) {
-        return new Tooltip(el, formatter, events);
+        return new Tooltip(id, el, formatter, events);
       }
+
+      this.id = id; // unique id for this tooltip type
       this.el = el;
+      this.order = 100; // higher ordered contents are rendered below the others
       this.formatter = formatter;
       this.events = events;
       this.containerClass = 'vis-wrapper';
       this.tooltipClass = 'vis-tooltip';
       this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
+      this.showCondition = _.constant(true);
 
       this.$window = $(window);
       this.$chart = $(el).find('.' + this.containerClass);
@@ -44,11 +50,10 @@ define(function (require) {
     /**
      * Calculates values for the tooltip placement
      *
-     * @method getTooltipPlacement
      * @param event {Object} D3 Events Object
      * @returns {{Object}} Coordinates for tooltip
      */
-    Tooltip.prototype.getTooltipPlacement = require('components/vislib/components/tooltip/_position_tooltip');
+    var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
 
     /**
      * Renders tooltip
@@ -63,6 +68,9 @@ define(function (require) {
       return function (selection) {
         var $tooltip = self.$get();
         var $sizer = self.$getSizer();
+        var id = self.id;
+        var order = self.order;
+
         var tooltipSelection = d3.select($tooltip.get(0));
 
         if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
@@ -76,44 +84,62 @@ define(function (require) {
 
           // only clear when we leave the chart, so that
           // moving between points doesn't make it reposition
-          self.previousPlacement = null;
+          self.$chart.removeData('previousPlacement');
         });
 
         selection.each(function (d, i) {
           var element = d3.select(this);
 
-          function show() {
-            var placement = self.previousPlacement = self.getTooltipPlacement({
-              $window: self.$window,
-              $chart: self.$chart,
-              $el: $tooltip,
-              $sizer: $sizer,
-              event: d3.event,
-              prev: self.previousPlacement
+          function render(html) {
+            allContents = _.filter(allContents, function (content) {
+              return content.id !== id;
             });
-            if (!placement) return;
 
-            var events = self.events ? self.events.eventResponse(d, i) : d;
-            var html = tooltipFormatter(events);
-            if (!html) return hide();
+            if (html) allContents.push({ id: id, html: html, order: order });
 
-            // return text and position for tooltip
-            return tooltipSelection
-            .html(html)
-            .style('visibility', 'visible')
-            .style('left', placement.left + 'px')
-            .style('top', placement.top + 'px');
-          }
+            var allHtml = _(allContents)
+            .sortBy('order')
+            .pluck('html')
+            .compact()
+            .join('\n');
 
-          function hide() {
-            return tooltipSelection.style('visibility', 'hidden')
-              .style('left', '-500px')
-              .style('top', '-500px');
+            if (allHtml) {
+              var placement = positionTooltip({
+                $window: self.$window,
+                $chart: self.$chart,
+                $el: $tooltip,
+                $sizer: $sizer,
+                event: event
+              }, allHtml);
+
+              $tooltip
+              .html(allHtml)
+              .css({
+                visibility: 'visible',
+                left: placement.left,
+                top: placement.top
+              });
+            } else {
+              $tooltip.css({
+                visibility: 'hidden',
+                left: '-500px',
+                top: '-500px'
+              });
+            }
           }
 
           element
-          .on('mousemove.tip', show)
-          .on('mouseout.tip', hide);
+          .on('mousemove.tip', function update() {
+            if (!self.showCondition.call(element, d, i)) {
+              return render();
+            }
+
+            var events = self.events ? self.events.eventResponse(d, i) : d;
+            return render(tooltipFormatter(events));
+          })
+          .on('mouseout.tip', function () {
+            render();
+          });
         });
       };
     };

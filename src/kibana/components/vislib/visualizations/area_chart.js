@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -18,7 +18,7 @@ define(function (require) {
      * @param chartData {Object} Elasticsearch query results for this specific
      * chart
      */
-    _(AreaChart).inherits(Chart);
+    _(AreaChart).inherits(PointSeriesChart);
     function AreaChart(handler, chartEl, chartData) {
       if (!(this instanceof AreaChart)) {
         return new AreaChart(handler, chartEl, chartData);
@@ -41,31 +41,6 @@ define(function (require) {
         yValue: function (d) { return d.y; }
       });
     }
-
-    /**
-     * Stacks chart data values
-     * TODO: refactor so that this is called from the data module
-     *
-     * @method stackData
-     * @param data {Object} Elasticsearch query result for this chart
-     * @returns {Array} Stacked data objects with x, y, and y0 values
-     */
-    AreaChart.prototype.stackData = function (data) {
-      var self = this;
-      var stack = this._attr.stack;
-
-      return stack(data.series.map(function (d) {
-        var label = d.label;
-        return d.values.map(function (e, i) {
-          return {
-            _input: e,
-            label: label,
-            x: self._attr.xValue.call(d.values, e, i),
-            y: self._attr.yValue.call(d.values, e, i)
-          };
-        });
-      }));
-    };
 
     /**
      * Adds SVG path to area chart
@@ -339,6 +314,7 @@ define(function (require) {
 
           // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
+          self.createEndZones(svg);
 
           // add path
           path = self.addPath(svg, layers);

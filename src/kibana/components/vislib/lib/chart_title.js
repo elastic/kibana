@@ -20,7 +20,7 @@ define(function (require) {
       }
 
       this.el = el;
-      this.tooltip = new Tooltip(el, function (d) {
+      this.tooltip = new Tooltip('chart-title', el, function (d) {
         return d.label;
       });
     }

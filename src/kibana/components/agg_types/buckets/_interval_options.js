@@ -1,6 +1,7 @@
 define(function (require) {
   return function IntervalOptionsService(Private) {
     var moment = require('moment');
+    require('directives/input_whole_number');
 
     // shorthand
     var ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
@@ -15,38 +16,31 @@ define(function (require) {
       },
       {
         display: 'Second',
-        val: 'second',
-        ms: ms('second')
+        val: 'second'
       },
       {
         display: 'Minute',
-        val: 'minute',
-        ms: ms('minute')
+        val: 'minute'
       },
       {
         display: 'Hourly',
-        val: 'hour',
-        ms: ms('hour')
+        val: 'hour'
       },
       {
         display: 'Daily',
-        val: 'day',
-        ms: ms('day')
+        val: 'day'
       },
       {
         display: 'Weekly',
-        val: 'week',
-        ms: ms('week')
+        val: 'week'
       },
       {
         display: 'Monthly',
-        val: 'month',
-        ms: ms('month')
+        val: 'month'
       },
       {
         display: 'Yearly',
-        val: 'year',
-        ms: ms('year')
+        val: 'year'
       }
     ];
   };
