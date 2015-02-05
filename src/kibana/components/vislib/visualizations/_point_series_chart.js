@@ -52,7 +52,6 @@ define(function (require) {
       var xScale = xAxis.xScale;
       var yScale = xAxis.yScale;
       var ordered = xAxis.ordered;
-      var lastX = _.last(xAxis.xValues);
 
       if (!ordered || ordered.min == null || ordered.max == null) return;
 
@@ -62,26 +61,24 @@ define(function (require) {
       var margin = attr.margin;
       var color = '#004c99';
 
-      var leftEndzone = {
-        x: 0,
-        w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
-      };
-
       var rightEndzone;
-      if (xAxis.extendOneInterval) {
-        // the last data point extends to the edge of the interval,
-        // so start the right endzone right at the max
+      var leftEndzone;
+      if (xAxis.expandLastBucket) {
+        // points on this axis represent the amount of time they cover,
+        // so draw the endzones at the actual time bounds
+        leftEndzone = {
+          x: 0,
+          w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
+        };
         rightEndzone = {
           x: xScale(ordered.max),
           w: width - xScale(ordered.max) > 0 ? width - xScale(ordered.max) : 0
         };
       } else {
-        // the x-axis does not extend (much) past the last point,
-        // so start at the point and
-        rightEndzone = {
-          x: xScale(lastX),
-          w: xScale(xAxis.addInterval(lastX)) - xScale(lastX)
-        };
+        // points on this axis are simply one-pixel points and so we will draw
+        // endzones covering the entire bucket
+        leftEndzone = spanBucket(xAxis.minExtent());
+        rightEndzone = spanBucket(xAxis.subtractInterval(xAxis.maxExtent()));
       }
 
       // svg diagonal line pattern
@@ -117,11 +114,29 @@ define(function (require) {
       })
       .attr('fill', 'url(#DiagonalLines)');
 
+      function spanBucket(x) {
+        return {
+          x: xScale(x),
+          w: xScale(xAxis.addInterval(x)) - xScale(x)
+        };
+      }
+
       function callPlay(event) {
         var boundData = event.target.__data__;
         var wholeBucket = boundData && boundData.x != null;
-        var x = wholeBucket ? xScale(boundData.x) : event.offsetX;
-        return { wholeBucket: wholeBucket, touchdown: (x <= leftEndzone.w) || (x >= rightEndzone.x) };
+        var x = wholeBucket ? boundData.x : event.offsetX;
+
+        if (wholeBucket) {
+          return {
+            wholeBucket: true,
+            touchdown: (x < ordered.min) || (xAxis.addInterval(x) > ordered.max)
+          };
+        } else {
+          return {
+            wholeBucket: false,
+            touchdown: x <= leftEndzone.w || x >= rightEndzone.x
+          };
+        }
       }
 
       function textFormatter() {

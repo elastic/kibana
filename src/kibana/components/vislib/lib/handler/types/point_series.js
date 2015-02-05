@@ -13,7 +13,7 @@ define(function (require) {
      * Create handlers for Area, Column, and Line charts which
      * are all nearly the same minus a few details
      */
-    function create(zeroFill, extendOneInterval) {
+    function create(zeroFill, expandLastBucket) {
       return function (vis) {
         var data;
         if (zeroFill) {
@@ -32,7 +32,7 @@ define(function (require) {
             xValues           : data.xValues(),
             ordered           : data.get('ordered'),
             xAxisFormatter    : data.get('xAxisFormatter'),
-            extendOneInterval : extendOneInterval,
+            expandLastBucket : expandLastBucket,
             _attr             : vis._attr
           }),
           yAxis: new YAxis({
