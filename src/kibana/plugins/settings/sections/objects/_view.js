@@ -45,7 +45,7 @@ define(function (require) {
 
           if (_.isString(field.value)) {
             try {
-              field.value = angular.toJson(JSON.parse(field.value), null, '  ');
+              field.value = angular.toJson(JSON.parse(field.value), true);
               field.type = 'json';
             } catch (err) {
               field.value = field.value;
@@ -54,7 +54,7 @@ define(function (require) {
             field.type = 'number';
           } else if (_.isArray(field.value)) {
             field.type = 'array';
-            field.value = angular.toJson(field.value, null, ' ');
+            field.value = angular.toJson(field.value, true);
           } else if (_.isPlainObject(field.value)) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
