@@ -1,6 +1,8 @@
 define(function (require) {
-  return function DispatchClass(d3) {
+  return function DispatchClass(d3, Private) {
     var _ = require('lodash');
+    var $ = require('jquery');
+    var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
 
     /**
      * Handles event responses
@@ -158,7 +160,9 @@ define(function (require) {
      */
     Dispatch.prototype.addBrushEvent = function (svg) {
       if (!this.isBrushable()) return;
+
       var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.xAxis.yScale;
       var brush = this.createBrush(xScale, svg);
 
       function brushEnd() {
@@ -206,39 +210,40 @@ define(function (require) {
 
       // Brush scale
       var brush = d3.svg.brush()
-        .x(xScale)
-        .on('brushend', function brushEnd() {
+      .x(xScale)
+      .on('brushend', function brushEnd() {
 
-          // Assumes data is selected at the chart level
-          // In this case, the number of data objects should always be 1
-          var data = d3.select(this).data()[0];
-          var isTimeSeries = (data.ordered && data.ordered.date);
+        // Assumes data is selected at the chart level
+        // In this case, the number of data objects should always be 1
+        var data = d3.select(this).data()[0];
+        var isTimeSeries = (data.ordered && data.ordered.date);
 
-          // Allows for brushing on d3.scale.ordinal()
-          var selected = xScale.domain().filter(function (d) {
-            return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
-          });
-          var range = isTimeSeries ? brush.extent() : selected;
-
-          return dispatch.brush({
-            range: range,
-            config: attr,
-            e: d3.event,
-            data: data
-          });
+        // Allows for brushing on d3.scale.ordinal()
+        var selected = xScale.domain().filter(function (d) {
+          return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
         });
+        var range = isTimeSeries ? brush.extent() : selected;
+
+        return dispatch.brush({
+          range: range,
+          config: attr,
+          e: d3.event,
+          data: data
+        });
+      });
 
       // if `addBrushing` is true, add brush canvas
       if (dispatch.on('brush')) {
         svg.insert('g', 'g')
-          .attr('class', 'brush')
-          .call(brush)
-          .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
+        .attr('class', 'brush')
+        .call(brush)
+        .selectAll('rect')
+        .attr('height', height - margin.top - margin.bottom);
 
         return brush;
       }
     };
+
 
     return Dispatch;
   };
