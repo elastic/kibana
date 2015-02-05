@@ -7,7 +7,6 @@ define(function (require) {
   var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
 
-  var interval = require('utils/interval');
   var datemath = require('utils/datemath');
 
   require('components/notify/notify');

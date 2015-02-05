@@ -247,6 +247,14 @@ define(function (require) {
       });
 
       return buckets;
-    }
+    },
+
+    /**
+     * Shortcut for the simple version of _.deepGet
+     * @return {any}
+     */
+    get: function (obj, path) {
+      return _.deepGet(obj, path);
+    },
   };
 });

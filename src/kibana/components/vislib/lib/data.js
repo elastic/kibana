@@ -21,6 +21,7 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var self = this;
       var offset;
 
       if (attr.mode === 'stacked') {
@@ -53,14 +54,140 @@ define(function (require) {
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
-
-        // d3 stack function
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
-          .y(function (d) { return d.y; })
+          .y(function (d) {
+            if (offset === 'expand') {
+              return Math.abs(d.y);
+            }
+            return d.y;
+          })
           .offset(offset || 'zero')
       });
+
+      if (attr.mode === 'stacked' && attr.type === 'histogram') {
+        this._attr.stack.out(function (d, y0, y) {
+          return self._stackNegAndPosVals(d, y0, y);
+        });
+      }
     }
+
+    /**
+     * Returns true for positive numbers
+     */
+    Data.prototype._isPositive = function (num) {
+      return num >= 0;
+    };
+
+    /**
+     * Returns true for negative numbers
+     */
+    Data.prototype._isNegative = function (num) {
+      return num < 0;
+    };
+
+    /**
+     * Adds two input values
+     */
+    Data.prototype._addVals = function (a, b) {
+      return a + b;
+    };
+
+    /**
+     * Returns the results of the addition of numbers in a filtered array.
+     */
+    Data.prototype._sumYs = function (arr, callback) {
+      var filteredArray = arr.filter(callback);
+
+      return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
+    };
+
+    /**
+     * Calculates the d.y0 value for stacked data in D3.
+     */
+    Data.prototype._calcYZero = function (y, arr) {
+      if (y >= 0) return this._sumYs(arr, this._isPositive);
+      return this._sumYs(arr, this._isNegative);
+    };
+
+    /**
+     *
+     */
+    Data.prototype._getCounts = function (i, j) {
+      var data = this.chartData();
+      var dataLengths = {};
+
+      dataLengths.charts = data.length;
+      dataLengths.stacks = data[i].series.length;
+      dataLengths.values = data[i].series[j].values.length;
+
+      return dataLengths;
+    };
+
+    /**
+     *
+     */
+    Data.prototype._createCache = function () {
+      var cache = {
+        index: {
+          chart: 0,
+          stack: 0,
+          value: 0
+        },
+        yValsArr: []
+      };
+
+      cache.count = this._getCounts(cache.index.chart, cache.index.stack);
+
+      return cache;
+    };
+
+    /**
+     * Stacking function passed to the D3 Stack Layout `.out` API.
+     * See: https://github.com/mbostock/d3/wiki/Stack-Layout
+     * It is responsible for calculating the correct d.y0 value for
+     * mixed datasets containing both positive and negative values.
+     */
+    Data.prototype._stackNegAndPosVals = function (d, y0, y) {
+      var data = this.chartData();
+
+      // Storing counters and data characteristics needed to stack values properly
+      if (!this._cache) {
+        this._cache = this._createCache();
+      }
+
+      d.y0 = this._calcYZero(y, this._cache.yValsArr);
+      ++this._cache.index.stack;
+
+
+      // last stack, or last value, reset the stack count and y value array
+      var lastStack = (this._cache.index.stack >= this._cache.count.stacks);
+      if (lastStack) {
+        this._cache.index.stack = 0;
+        ++this._cache.index.value;
+        this._cache.yValsArr = [];
+      // still building the stack collection, push v value to array
+      } else if (y !== 0) {
+        this._cache.yValsArr.push(y);
+      }
+
+      // last value, prepare for the next chart, if one exists
+      var lastValue = (this._cache.index.value >= this._cache.count.values);
+      if (lastValue) {
+        this._cache.index.value = 0;
+        ++this._cache.index.chart;
+
+        // no more charts, reset the queue and finish
+        if (this._cache.index.chart >= this._cache.count.charts) {
+          this._cache = this._createCache();
+          return;
+        }
+
+        // get stack and value count for next chart
+        this._cache.count.stacks = data[this._cache.index.chart].series.length; // number of stack layers
+        this._cache.count.values = data[this._cache.index.chart].series[this._cache.index.stack].values.length; // number of values
+      }
+    };
 
     Data.prototype.getDataType = function () {
       var data = this.getVisData();
@@ -160,15 +287,12 @@ define(function (require) {
      * @returns {Array} Value objects
      */
     Data.prototype.flatten = function () {
-      var data = this.chartData();
-      var series = _.chain(data).pluck('series').pluck().value();
-      var values = [];
-
-      series.forEach(function (d) {
-        values.push(_.chain(d).flatten().pluck('values').value());
-      });
-
-      return values;
+      return _(this.chartData())
+      .pluck('series')
+      .flatten()
+      .pluck('values')
+      .flatten()
+      .value();
     };
 
     /**
@@ -176,16 +300,66 @@ define(function (require) {
      * TODO: need to make this more generic
      *
      * @method shouldBeStacked
-     * @param series {Array} Array of data objects
      * @returns {boolean}
      */
-    Data.prototype.shouldBeStacked = function (series) {
+    Data.prototype.shouldBeStacked = function () {
       var isHistogram = (this._attr.type === 'histogram');
       var isArea = (this._attr.type === 'area');
       var isOverlapping = (this._attr.mode === 'overlap');
+      var grouped = (this._attr.mode === 'grouped');
 
-      // Series should be an array
-      return (isHistogram || isArea && !isOverlapping && series.length > 1);
+      var stackedHisto = isHistogram && !grouped;
+      var stackedArea = isArea && !isOverlapping;
+
+      return stackedHisto || stackedArea;
+    };
+
+    /**
+     * Validates that the Y axis min value defined by user input
+     * is a number.
+     *
+     * @param val {Number} Y axis min value
+     * @returns {Number} Y axis min value
+     */
+    Data.prototype.validateUserDefinedYMin = function (val) {
+      if (!_.isNumber(val)) {
+        throw new Error('validateUserDefinedYMin expects a number');
+      }
+      return val;
+    };
+
+    /**
+     * Calculates the min y value from this.dataArray
+     * for each object in the dataArray.
+     *
+     * @method getYMinValue
+     * @returns {Number} Min y axis value
+     */
+    Data.prototype.getYMinValue = function () {
+      var self = this;
+      var arr = [];
+
+      if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
+        this._attr.mode === 'silhouette') {
+        return 0;
+      }
+
+      var flat = this.flatten();
+      // if there is only one data point and its less than zero,
+      // return 0 as the yMax value.
+      if (!flat.length || flat.length === 1 && flat[0].y > 0) {
+        return 0;
+      }
+
+      var min = Infinity;
+
+      // for each object in the dataArray,
+      // push the calculated y value to the initialized array (arr)
+      _.each(this.chartData(), function (chart) {
+        min = Math.min(min, self._getYExtent(chart, 'min'));
+      });
+
+      return min;
     };
 
     /**
@@ -200,22 +374,27 @@ define(function (require) {
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
-      var grouped = (self._attr.mode === 'grouped');
 
       if (self._attr.mode === 'percentage') {
         return 1;
       }
 
+      var flat = this.flatten();
+      // if there is only one data point and its less than zero,
+      // return 0 as the yMax value.
+      if (!flat.length || flat.length === 1 && flat[0].y < 0) {
+        return 0;
+      }
+
+      var max = -Infinity;
+
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
-      _.forEach(this.flatten(), function (series) {
-        if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self._getYMax(series, self._getYStack));
-        }
-        return arr.push(self._getYMax(series, self._getY));
+      _.each(this.chartData(), function (chart) {
+        max = Math.max(max, self._getYExtent(chart, 'max'));
       });
 
-      return _.max(arr);
+      return max;
     };
 
     /**
@@ -235,10 +414,21 @@ define(function (require) {
      * Returns the max Y axis value for a `series` array based on
      * a specified callback function (calculation).
      */
-    Data.prototype._getYMax = function (series, calculation) {
-      return d3.max(this.stackData(series), function (data) {
-        return d3.max(data, calculation);
-      });
+    Data.prototype._getYExtent = function (chart, extent) {
+      var calculation = this._getY;
+
+      if (this.shouldBeStacked()) {
+        this.stackData(_.pluck(chart.series, 'values'));
+        calculation = this._getYStack;
+      }
+
+      var points = chart.series
+      .reduce(function (points, series) {
+        return points.concat(series.values);
+      }, [])
+      .map(calculation);
+
+      return d3[extent](points);
     };
 
     /**

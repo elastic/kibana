@@ -130,12 +130,8 @@ define(function (require) {
 
         beforeEach(function () {
           listeners = [];
-          listener1 = function (e) {
-            console.log(e, 'listener1');
-          };
-          listener2 = function (e) {
-            console.log(e, 'listener2');
-          };
+          listener1 = function () {};
+          listener2 = function () {};
           listeners.push(listener1);
           listeners.push(listener2);
 
@@ -198,12 +194,8 @@ define(function (require) {
 
         beforeEach(function () {
           listeners = [];
-          listener1 = function (e) {
-            console.log(e, 'listener1');
-          };
-          listener2 = function (e) {
-            console.log(e, 'listener2');
-          };
+          listener1 = function () {};
+          listener2 = function () {};
           listeners.push(listener1);
           listeners.push(listener2);
 

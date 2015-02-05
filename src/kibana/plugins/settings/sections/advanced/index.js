@@ -22,8 +22,8 @@ define(function (require) {
         var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
         function getEditorType(conf) {
-          if (_.contains(NORMAL_EDITOR, conf.type)) return 'normal';
           if (_.contains(NAMED_EDITORS, conf.type)) return conf.type;
+          if (_.contains(NORMAL_EDITOR, conf.type)) return 'normal';
         }
 
         function isTypeComplex(conf) {
