@@ -59,12 +59,19 @@ if (program.host) {
 var server = require('../');
 var logger = require('../lib/logger');
 server.start(function (err) {
-  if (!err && config.kibana.pid_file) {
-    fs.writeFile(config.kibana.pid_file, process.pid, function (err) {
+  // If we get here then things have gone sideways and we need to give up.
+  if (err) {
+    logger.fatal({ err: err });
+    process.exit(1);
+  }
+
+  if (config.kibana.pid_file) {
+    return fs.writeFile(config.kibana.pid_file, process.pid, function (err) {
       if (err) {
         logger.fatal('Failed to write PID file to %s', config.kibana.pid_file);
         process.exit(1);
       }
     });
   }
+
 });
