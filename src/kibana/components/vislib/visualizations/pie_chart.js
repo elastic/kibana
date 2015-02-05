@@ -178,12 +178,10 @@ define(function (require) {
       return sizes.some(this._isZero);
     };
 
-    PieChart.prototype._removeZeroNodes = function () {
-      // use the this.chartData
-      // traverse the parent child objects
-      // check whether size is zero
-      // if zero, remove object
-      // return modified data
+    PieChart.prototype._removeZeroNodes = function (arr) {
+      return arr.filter(function (obj) {
+        return (obj.size !== 0);
+      });
     };
 
     /**
@@ -199,7 +197,7 @@ define(function (require) {
       if (!isAllZeros && !isSomeZeros) { return; }
 
       if (isSomeZeros) {
-        this._removeZeroNodes();
+        return this._removeZeroNodes();
       }
 
       throw new errors.PieContainsAllZeros();
