@@ -22,10 +22,21 @@ define(function (require) {
         return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
       },
       createFilter: createFilter,
-      decorateAggConfig: function (agg) {
-        agg.buckets = new TimeBuckets();
-        agg.buckets.setInterval(_.get(agg, ['params', 'interval']));
-        agg.buckets.setBounds(timefilter.getActiveBounds());
+      decorateAggConfig: function () {
+        var buckets;
+        return {
+          buckets: {
+            configurable: true,
+            get: function () {
+              if (buckets) return buckets;
+
+              buckets = new TimeBuckets();
+              buckets.setInterval(_.get(this, ['params', 'interval']));
+              buckets.setBounds(timefilter.getActiveBounds());
+              return buckets;
+            }
+          }
+        };
       },
       params: [
         {

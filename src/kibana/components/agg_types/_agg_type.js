@@ -107,7 +107,7 @@ define(function (require) {
        * A function that will be called each time an aggConfig of this type
        * is created, giving the agg type a chance to modify the agg config
        */
-      this.decorateAggConfig = config.decorateAggConfig || _.noop;
+      this.decorateAggConfig = config.decorateAggConfig || null;
     }
 
     return AggType;
