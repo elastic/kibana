@@ -7,7 +7,7 @@ define(function (require) {
    * @param {object} indexPattern used for determining default sort
    * @returns {object} a sort object suitable for returning to elasticsearch
    */
-  return function (sort, indexPattern) {
+  function getSort(sort, indexPattern) {
     var sortObj = {};
     var field, direction;
 
@@ -33,5 +33,11 @@ define(function (require) {
 
 
     return sortObj;
+  }
+
+  getSort.array = function (sort, indexPattern) {
+    return _(getSort(sort, indexPattern)).pairs().pop();
   };
+
+  return getSort;
 });
