@@ -24,8 +24,11 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+      // Check whether pie chart should be rendered.
+      this._validatePieData();
+
       this._attr = _.defaults(handler._attr || {}, {
-        isDonut: handler._attr.isDonut || false,
+        isDonut: handler._attr.isDonut || false
       });
     }
 
@@ -120,17 +123,66 @@ define(function (require) {
       return path;
     };
 
-    PieChart.prototype.checkForZeros = function () {
-      var isZero = _.findKey(this.chartData, function (obj) {
-        if (obj.parent) {
-          return _.findKey(obj.parent, 'size');
+    /**
+     * Returns the size value from a data object.
+     */
+    PieChart.prototype._getSize = function (obj) {
+      return obj.size;
+    };
+
+    /**
+     * Returns true if num is Zero else false.
+     */
+    PieChart.prototype._isZero = function (num) {
+      return num === 0;
+    };
+
+    /**
+     *
+     * @param arr
+     * @returns {Array}
+     * @private
+     */
+    PieChart.prototype._getZeros = function (arr) {
+      var self = this;
+      var sizes = [];
+
+      arr.forEach(function (obj) {
+        if (obj.children) {
+          // Get sizes of slices from objects in children's array
+          var childSizes = self._getZeros(obj.children);
+
+          childSizes.forEach(function (num) {
+            sizes.push(num);
+          });
         }
-        return obj.size === 0;
+
+        // Get sizes of slices from current object
+        // and push to sizes array.
+        sizes.push(self._getSize(obj));
       });
 
-      if (isZero) {
-        throw new errors.AllZeroErrorPieChart();
-      }
+      return sizes;
+    };
+
+    /**
+     * Returns true if all sizes for pie slices are zero.
+     */
+    PieChart.prototype._checkForAllZeros = function (arr) {
+      var values = this._getZeros(arr);
+      return values.every(this._isZero);
+    };
+
+    /**
+     * Checks whether all pie slices have zero values.
+     * If so, an error is thrown.
+     */
+    PieChart.prototype._validatePieData = function () {
+      var arr = this.chartData.slices.children;
+      var isAllZeros = this._checkForAllZeros(arr);
+
+      if (!isAllZeros) { return; }
+      throw new errors.PieContainsAllZeros();
     };
 
     /**
