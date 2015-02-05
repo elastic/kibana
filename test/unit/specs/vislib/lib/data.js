@@ -273,7 +273,7 @@ define(function (require) {
           dataSeries = require('vislib_fixtures/mock_data/date_histogram/_series');
           stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
           visData = new Data(dataSeries, {});
-          stackedVisData = new Data(stackedDataSeries, {});
+          stackedVisData = new Data(stackedDataSeries, { type: 'histogram' });
           series = _.pluck(visData.chartData(), 'series');
           stackedSeries = _.pluck(stackedVisData.chartData(), 'series');
           minValue = 4;
@@ -286,7 +286,7 @@ define(function (require) {
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain min value', function () {
         expect(visData.getYMinValue()).to.be(minValue);
-        expect(stackedSeries.getYMinValue()).to.be(stackedMinValue);
+        expect(stackedVisData.getYMinValue()).to.be(stackedMinValue);
       });
 
       it('should have a minimum date value that is greater than the max value within the date range', function () {
@@ -316,11 +316,11 @@ define(function (require) {
           dataSeries = require('vislib_fixtures/mock_data/date_histogram/_series');
           stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
           visData = new Data(dataSeries, {});
-          stackedVisData = new Data(stackedDataSeries, {});
+          stackedVisData = new Data(stackedDataSeries, { type: 'histogram' });
           series = _.pluck(visData.chartData(), 'series');
           stackedSeries = _.pluck(stackedVisData.chartData(), 'series');
           maxValue = 41;
-          stackedMaxValue = 110;
+          stackedMaxValue = 115;
         });
       });
 
