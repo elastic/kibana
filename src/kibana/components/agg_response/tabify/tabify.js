@@ -77,16 +77,6 @@ define(function (require) {
       write.aggStack.unshift(agg);
     }
 
-    // read the metric value from a metric response
-    function metricValue(aggResp) {
-      return aggResp.value == null ? 0 : aggResp.value;
-    }
-
-    // read the bucket count from an agg bucket
-    function bucketCount(bucket) {
-      return bucket.doc_count;
-    }
-
     // write empty values for each bucket agg, then write
     // the metrics from the initial bucket using collectBucket()
     function passEmptyBuckets(write, bucket, key) {
