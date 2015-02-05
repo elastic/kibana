@@ -148,7 +148,6 @@ define(function (require) {
      * It is responsible for calculating the correct d.y0 value for
      * mixed datasets containing both positive and negative values.
      */
-    var dataCache = {};
     Data.prototype._stackNegAndPosVals = function (d, y0, y) {
       var data = this.chartData();
 
