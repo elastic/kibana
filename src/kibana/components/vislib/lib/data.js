@@ -127,7 +127,7 @@ define(function (require) {
     /**
      *
      */
-    Data.prototype._createCache = function () {
+    Data.prototype._createCache = _.memoize(function () {
       var cache = {
         index: {
           chart: 0,
@@ -140,7 +140,7 @@ define(function (require) {
       cache.count = this._getCounts(cache.index.chart, cache.index.stack);
 
       return cache;
-    };
+    });
 
     /**
      * Stacking function passed to the D3 Stack Layout `.out` API.
@@ -155,13 +155,6 @@ define(function (require) {
       // Storing counters and data characteristics needed to stack values properly
       if (!this._cache) {
         this._cache = this._createCache();
-      }
-
-      // debugging
-      var da = data[this._cache.index.chart].series[this._cache.index.stack].values[this._cache.index.value];
-      if (da && da.y !== 0) {
-        dataCache[da.x] = dataCache[da.x] || [];
-        dataCache[da.x].push(da);
       }
 
       d.y0 = this._calcYZero(y, this._cache.yValsArr);
@@ -345,9 +338,6 @@ define(function (require) {
      * @returns {Number} Min y axis value
      */
     Data.prototype.getYMinValue = function () {
-      // 0 default option
-      // custom min option - where they select the min value
-
       var self = this;
       var arr = [];
       var grouped = (this._attr.mode === 'grouped');
@@ -368,9 +358,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self.getYStackMin(series));
+          return arr.push(self._getYExtent(series, self._getYStack, 'min'));
         }
-        return arr.push(self.getYMin(series));
+        return arr.push(self._getYExtent(series, self._getY, 'min'));
       });
 
       return _.min(arr);
@@ -404,9 +394,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self._getYMax(series, self._getYStack));
+          return arr.push(self._getYExtent(series, self._getYStack, 'max'));
         }
-        return arr.push(self._getYMax(series, self._getY));
+        return arr.push(self._getYExtent(series, self._getY, 'max'));
       });
 
       return _.max(arr);
@@ -426,58 +416,12 @@ define(function (require) {
     };
 
     /**
-     * Calculates the smallest y stack value among all data objects
-     *
-     * @method getYStackMin
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y stack max value
-     */
-    Data.prototype.getYStackMin = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
-
-      return d3.min(this.stackData(series), function (data) {
-        return d3.min(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
-          }
-
-          return d.y0 + d.y;
-        });
-      });
-    };
-
-    /**
      * Returns the max Y axis value for a `series` array based on
      * a specified callback function (calculation).
      */
-    Data.prototype._getYMax = function (series, calculation) {
-      return d3.max(this.stackData(series), function (data) {
-        return d3.max(data, calculation);
-      });
-    };
-
-    /**
-     * Calculates the Y domain min value
-     *
-     * @method getYMin
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y domain min value
-     */
-    Data.prototype.getYMin = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
-
-      return d3.min(series, function (data) {
-        return d3.min(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
-          }
-
-          return d.y;
-        });
+    Data.prototype._getYExtent = function (series, calculation, extent) {
+      return d3[extent](this.stackData(series), function (data) {
+        return d3[extent](data, calculation);
       });
     };
 
