@@ -70,7 +70,7 @@ define(function (require) {
           var w = sinon.spy($.fn, 'outerWidth');
           var h = sinon.spy($.fn, 'outerHeight');
 
-          posTT.getTtSize($tooltip, $sizer);
+          posTT.getTtSize($tooltip.html(), $sizer);
 
           [w, h].forEach(function (spy) {
             expect(spy).to.have.property('callCount', 1);
@@ -84,7 +84,7 @@ define(function (require) {
 
       describe('getBasePosition()', function () {
         it('calculates the offset values for the four positions', function () {
-          var size = posTT.getTtSize($tooltip, $sizer);
+          var size = posTT.getTtSize($tooltip.html(), $sizer);
           var pos = posTT.getBasePosition(size, makeEvent());
 
           positions.forEach(function (p) {
@@ -114,7 +114,7 @@ define(function (require) {
           // size the tooltip very small so it won't collide with the edges
           $tooltip.css({ width: 15, height: 15 });
           $sizer.css({ width: 15, height: 15 });
-          var size = posTT.getTtSize($tooltip, $sizer);
+          var size = posTT.getTtSize($tooltip.html(), $sizer);
           expect(size).to.have.property('width', 15);
           expect(size).to.have.property('height', 15);
 
@@ -131,7 +131,7 @@ define(function (require) {
         });
 
         it('identifies an overflow with a positive value in that direction', function () {
-          var size = posTT.getTtSize($tooltip, $sizer);
+          var size = posTT.getTtSize($tooltip.html(), $sizer);
 
           // position the element based on a mouse that is in the bottom right hand courner of the chart
           var pos = posTT.getBasePosition(size, makeEvent(0.99, 0.99));
