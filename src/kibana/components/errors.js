@@ -247,5 +247,17 @@ define(function (require) {
   };
   inherits(errors.PieContainsAllZeros, KbnError);
 
+  /**
+   * error thrown when a stacked area chart is called with mixed data values,
+   * i.e. positive and negative values
+   */
+  errors.ShouldNotDisplayArea = function ShouldNotDisplayArea() {
+    KbnError.call(this,
+      'An area chart cannot be displayed with mixed data types. Please try using' +
+      ' a Vertical Bar Chart',
+      errors.ShouldNotDisplayArea);
+  };
+  inherits(errors.ShouldNotDisplayArea, KbnError);
+
   return errors;
 });

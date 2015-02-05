@@ -35,12 +35,31 @@ define(function (require) {
       }
 
       this.checkIfEnoughData();
+      this._checkForProperDisplay();
 
       this._attr = _.defaults(handler._attr || {}, {
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
       });
     }
+
+    /**
+     * Checks whether a stacked area chart is being rendered with positive
+     * and negative values. If so, an error is thrown.
+     */
+    AreaChart.prototype._checkForProperDisplay = function () {
+      var yMinVal = this.handler.yAxis.yMin;
+      var yMaxVal = this.handler.yAxis.yMax;
+      var isStacked = (this.chartData.series.length > 1);
+
+      if (!isStacked) return;
+
+      if (yMinVal < 0 && yMaxVal > 0 && isStacked) {
+        throw new errors.ShouldNotDisplayArea();
+      }
+
+      return;
+    };
 
     /**
      * Adds SVG path to area chart
