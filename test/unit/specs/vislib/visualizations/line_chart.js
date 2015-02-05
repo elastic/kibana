@@ -47,9 +47,7 @@ define(function (require) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
 
-          vis.on('brush', function (e) {
-            console.log(e);
-          });
+          vis.on('brush', _.noop);
 
           vis.render(data);
         });
