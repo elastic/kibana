@@ -2,6 +2,21 @@
   <label for="field">
     Field
   </label>
+
+  <span class="pull-right text-warning hintbox-label" ng-show="agg.params.field.analyzed"
+      ng-click="showAnalyzedFieldWarning = !showAnalyzedFieldWarning">
+    <i class="fa fa-warning"></i> Analyzed Field
+  </span>
+  <div class="hintbox" ng-show="showAnalyzedFieldWarning">
+    <p>
+    <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
+    </p>
+
+    <p ng-show="indexedFields.byName[agg.params.field.name + '.raw'].analyzed == false">
+      <strong>Tip:</strong> <i>{{agg.params.field.name + '.raw'}}</i> may be a <i>not_analyzed</i> version of this field.
+    </p>
+  </div>
+
   <select
     class="form-control"
     name="field"
@@ -9,17 +24,5 @@
     ng-model="agg.params.field"
     ng-options="field as field.displayName group by field.type for field in indexedFields">
   </select>
-  <span ng-show="agg.params.field.analyzed">
-    <p>
-      <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
-    </p>
-
-    <p ng-show="indexedFields.byName[agg.params.field.name + '.raw'].analyzed == false">
-      <strong>Tip:</strong> <i>{{agg.params.field.name + '.raw'}}</i> may be a <i>not_analyzed</i> version of this field.
-    </p>
-  </span>
-
-
-  </p>
 
 </div>
