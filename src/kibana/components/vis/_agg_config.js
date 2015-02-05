@@ -10,17 +10,9 @@ define(function (require) {
       self.vis = vis;
       self._opts = opts = (opts || {});
 
-      // get the config type
+      // setters
       self.type = opts.type;
-      if (_.isString(self.type)) {
-        self.type = AggConfig.aggTypes.byName[self.type];
-      }
-
-      // get the config schema
       self.schema = opts.schema;
-      if (_.isString(self.schema)) {
-        self.schema = self.vis.type.schemas.all.byName[self.schema];
-      }
 
       // resolve the params
       self.fillDefaults(opts.params);
@@ -58,6 +50,44 @@ define(function (require) {
         return Math.max(max, +obj.id || 0);
       }, 0);
     };
+
+    Object.defineProperties(AggConfig.prototype, {
+      type: {
+        get: function () {
+          return this.__type;
+        },
+        set: function (type) {
+          if (this.__typeDecorations) {
+            _.forOwn(this.__typeDecorations, function (prop, name) {
+              delete this[name];
+            }, this);
+          }
+
+          if (_.isString(type)) {
+            type = AggConfig.aggTypes.byName[type];
+          }
+
+          if (type && _.isFunction(type.decorateAggConfig)) {
+            this.__typeDecorations = type.decorateAggConfig();
+            Object.defineProperties(this, this.__typeDecorations);
+          }
+
+          this.__type = type;
+        }
+      },
+      schema: {
+        get: function () {
+          return this.__schema;
+        },
+        set: function (schema) {
+          if (_.isString(schema)) {
+            schema = this.vis.type.schemas.all.byName[schema];
+          }
+
+          this.__schema = schema;
+        }
+      }
+    });
 
     /**
      * Write the current values to this.params, filling in the defaults as we go
@@ -156,10 +186,17 @@ define(function (require) {
     AggConfig.prototype.toDsl = function () {
       if (this.type.hasNoDsl) return;
 
-      var output = this.write();
+      var self = this;
+      self.type.params.forEach(function (param) {
+        if (param.onRequest) {
+          param.onRequest(self);
+        }
+      });
+
+      var output = self.write();
 
       var configDsl = {};
-      configDsl[this.type.name] = output.params;
+      configDsl[self.type.name] = output.params;
 
       // if the config requires subAggs, write them to the dsl as well
       if (output.subAggs) {
@@ -181,8 +218,8 @@ define(function (require) {
 
         // don't serialize undefined/null values
         if (val == null) return;
-
         if (aggParam.serialize) val = aggParam.serialize(val, self);
+        if (val == null) return;
 
         // to prevent accidental leaking, we will clone all complex values
         out[aggParam.name] = _.cloneDeep(val);

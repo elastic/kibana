@@ -5,26 +5,27 @@ define(function (require) {
   var OFFSET = 10;
   var $clone;
 
-  function positionTooltip(opts) {
+  function positionTooltip(opts, html) {
     if (!opts) return;
     var $chart = $(opts.$chart);
     var $el = $(opts.$el);
     var $window = $(opts.$window || window);
     var $sizer = $(opts.$sizer);
-    var prev = opts.prev || {};
+    var prev = $chart.data('previousPlacement') || {};
     var event = opts.event;
 
     if (!$chart.size() || !$el.size()) return;
 
-    var size = getTtSize($el, $sizer);
+    var size = getTtSize(html || $el.html(), $sizer);
     var pos = getBasePosition(size, event);
     var overflow = getOverflow(size, pos, [$chart, $window]);
 
-    return placeToAvoidOverflow(pos, prev, overflow);
+    var placement = placeToAvoidOverflow(pos, prev, overflow);
+    $chart.data('previousPlacement', placement);
+    return placement;
   }
 
-  function getTtSize($el, $sizer) {
-    var ttHtml = $el.html();
+  function getTtSize(ttHtml, $sizer) {
     if ($sizer.html() !== ttHtml) {
       $sizer.html(ttHtml);
     }

@@ -404,9 +404,9 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series) && !grouped) {
-          return arr.push(self.getYStackMax(series));
+          return arr.push(self._getYMax(series, self._getYStack));
         }
-        return arr.push(self.getYMax(series));
+        return arr.push(self._getYMax(series, self._getY));
       });
 
       return _.max(arr);
@@ -420,6 +420,8 @@ define(function (require) {
      * @returns {*} Array of data objects with x, y, y0 keys
      */
     Data.prototype.stackData = function (series) {
+      // SHould not stack values on line chart
+      if (this._attr.type === 'line') return series;
       return this._attr.stack(series);
     };
 
@@ -447,25 +449,12 @@ define(function (require) {
     };
 
     /**
-     * Calculates the largest y stack value among all data objects
-     *
-     * @method getYStackMax
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y stack max value
+     * Returns the max Y axis value for a `series` array based on
+     * a specified callback function (calculation).
      */
-    Data.prototype.getYStackMax = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
-
+    Data.prototype._getYMax = function (series, calculation) {
       return d3.max(this.stackData(series), function (data) {
-        return d3.max(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
-          }
-
-          return d.y0 + d.y;
-        });
+        return d3.max(data, calculation);
       });
     };
 
@@ -493,26 +482,17 @@ define(function (require) {
     };
 
     /**
-     * Calculates the Y domain max value
-     *
-     * @method getYMax
-     * @param series {Array} Array of data objects
-     * @returns {Number} Y domain max value
+     * Calculates the y stack value for each data object
      */
-    Data.prototype.getYMax = function (series) {
-      var isOrdered = (this.data.ordered && this.data.ordered.date);
-      var minDate = isOrdered ? this.data.ordered.min : undefined;
-      var maxDate = isOrdered ? this.data.ordered.max : undefined;
+    Data.prototype._getYStack = function (d) {
+      return d.y0 + d.y;
+    };
 
-      return d3.max(series, function (data) {
-        return d3.max(data, function (d) {
-          if (isOrdered) {
-            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
-          }
-
-          return d.y;
-        });
-      });
+    /**
+     * Calculates the Y max value
+     */
+    Data.prototype._getY = function (d) {
+      return d.y;
     };
 
     /**

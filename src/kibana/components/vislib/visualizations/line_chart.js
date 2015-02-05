@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
     var errors = require('errors');
 
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     require('css!components/vislib/styles/main');
 
     /**
@@ -17,7 +17,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(LineChart).inherits(Chart);
+    _(LineChart).inherits(PointSeriesChart);
     function LineChart(handler, chartEl, chartData) {
       if (!(this instanceof LineChart)) {
         return new LineChart(handler, chartEl, chartData);
@@ -278,6 +278,7 @@ define(function (require) {
           lines = self.addLines(svg, data.series);
           circles = self.addCircles(svg, layers);
           self.addCircleEvents(circles, svg);
+          self.createEndZones(svg);
 
           var line = svg
           .append('line')

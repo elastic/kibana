@@ -2,8 +2,9 @@ define(function (require) {
   return function ColumnChartFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var moment = require('moment');
 
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -17,7 +18,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(ColumnChart).inherits(Chart);
+    _(ColumnChart).inherits(PointSeriesChart);
     function ColumnChart(handler, chartEl, chartData) {
       if (!(this instanceof ColumnChart)) {
         return new ColumnChart(handler, chartEl, chartData);
@@ -31,30 +32,6 @@ define(function (require) {
         yValue: function (d) { return d.y; }
       });
     }
-
-    /**
-     * Stacks chart data values
-     *
-     * @method stackData
-     * @param data {Object} Elasticsearch query result for this chart
-     * @returns {Array} Stacked data objects with x, y, and y0 values
-     */
-    // TODO: refactor so that this is called from the data module
-    ColumnChart.prototype.stackData = function (data) {
-      var self = this;
-
-      return this._attr.stack(data.series.map(function (d) {
-        var label = d.label;
-        return d.values.map(function (e, i) {
-          return {
-            _input: e,
-            label: label,
-            x: self._attr.xValue.call(d.values, e, i),
-            y: self._attr.yValue.call(d.values, e, i)
-          };
-        });
-      }));
-    };
 
     /**
      * Adds SVG rect to Vertical Bar Chart
@@ -76,7 +53,7 @@ define(function (require) {
       .data(layers)
       .enter().append('g')
       .attr('class', function (d, i) {
-        return i;
+        return 'series ' + i;
       });
 
       bars = layer.selectAll('rect')
@@ -140,22 +117,22 @@ define(function (require) {
       var yMin = this.handler.yAxis.yScale.domain()[0];
       var self = this;
 
+      var barWidth;
+      if (data.ordered && data.ordered.date) {
+        var start = data.ordered.min;
+        var end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+
+        barWidth = xScale(end) - xScale(start);
+        barWidth = barWidth - Math.min(barWidth * 0.25, 15);
+      }
+
       // update
       bars
       .attr('x', function (d) {
         return xScale(d.x);
       })
       .attr('width', function () {
-        var barWidth;
-        var barSpacing;
-
-        if (data.ordered && data.ordered.date) {
-          barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
-          barSpacing = barWidth * 0.25;
-
-          return barWidth - barSpacing;
-        }
-        return xScale.rangeBand();
+        return barWidth || xScale.rangeBand();
       })
       .attr('y', function (d) {
         if (d.y < 0) {
@@ -315,6 +292,7 @@ define(function (require) {
           .attr('transform', 'translate(0,' + margin.top + ')');
 
           bars = self.addBars(svg, layers);
+          self.createEndZones(svg);
 
           // Adds event listeners
           self.addBarEvents(bars, svg);

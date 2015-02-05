@@ -48,7 +48,7 @@ define(function (require) {
           $el.toggleClass('only-visualization', !$scope.spy.mode);
           $el.toggleClass('visualization-and-spy', $scope.spy.mode && !fullSpy);
           $el.toggleClass('only-spy', Boolean(fullSpy));
-          $spyEl.toggleClass('only', Boolean(fullSpy));
+          if ($spyEl) $spyEl.toggleClass('only', Boolean(fullSpy));
 
           // internal
           $visEl.toggleClass('spy-visible', Boolean($scope.spy.mode));
