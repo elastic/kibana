@@ -26,7 +26,7 @@
     "angular-elastic": "~2.3.3",
     "angular-mocks": "~1.2.14",
     "angular-route": "~1.2.14",
-    "angular-ui-ace": "bower",
+    "angular-ui-ace": "~0.2.3",
     "angular-ui-select": "~0.9.3",
     "async": "~0.2.10",
     "bluebird": "~2.1.3",
