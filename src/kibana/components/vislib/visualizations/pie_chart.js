@@ -124,83 +124,26 @@ define(function (require) {
     };
 
     /**
-     * Returns the size value from a data object.
-     */
-    PieChart.prototype._getSize = function (obj) {
-      return obj.size;
-    };
-
-    /**
-     * Returns true if num is Zero else false.
-     */
-    PieChart.prototype._isZero = function (num) {
-      return num === 0;
-    };
-
-    /**
-     *
-     */
-    PieChart.prototype._getSizes = function (arr) {
-      var self = this;
-      var sizes = [];
-
-      arr.forEach(function (obj) {
-        if (obj.children) {
-          // Get sizes of slices from objects in children's array
-          var childSizes = self._getSizes(obj.children);
-
-          childSizes.forEach(function (num) {
-            sizes.push(num);
-          });
-        }
-
-        // Get sizes of slices from current object
-        // and push to sizes array.
-        sizes.push(self._getSize(obj));
-      });
-
-      return sizes;
-    };
-
-    /**
-     * Accepts an array of numbers. Returns true if all
-     * sizes for pie slices are zero.
-     */
-    PieChart.prototype._checkForAllZeros = function (sizes) {
-      return sizes.every(this._isZero);
-    };
-
-    /**
-     * Accepts an array of numbers. Returns true if some
-     * sizes for pie slices are zero.
-     */
-    PieChart.prototype._checkForSomeZeros = function (sizes) {
-      return sizes.some(this._isZero);
-    };
-
-    PieChart.prototype._removeZeroNodes = function (arr) {
-      return arr.filter(function (obj) {
-        return (obj.size !== 0);
-      });
-    };
-
-    /**
      * Checks whether all pie slices have zero values.
      * If so, an error is thrown.
      */
     PieChart.prototype._validatePieData = function () {
-      var slices = this.chartData.slices.children;
-      var sizes = this._getSizes(slices);
-      var isAllZeros = this._checkForAllZeros(sizes);
-      var isSomeZeros = this._checkForSomeZeros(sizes);
+      this.chartData.slices = (function withoutZeroSlices(slices) {
+        if (!slices.children) return slices;
 
-      if (!isAllZeros && !isSomeZeros) { return; }
+        slices = _.clone(slices);
+        slices.children = slices.children.reduce(function (children, child) {
+          if (child.size !== 0) {
+            children.push(withoutZeroSlices(child));
+          }
+          return children;
+        }, []);
+        return slices;
+      }(this.chartData.slices));
 
-      if (isSomeZeros) {
-        return this._removeZeroNodes();
+      if (this.chartData.slices.children.length === 0) {
+        throw new errors.PieContainsAllZeros();
       }
-
-      throw new errors.PieContainsAllZeros();
     };
 
     /**
