@@ -111,10 +111,6 @@ define(function (require) {
 
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
-    // force the index pattern based on what we could fetch
-    $scope.searchSource.set('index', $scope.indexPattern);
-    $state.index = $scope.indexPattern.id;
-
     var metaFields = config.get('metaFields');
     filterManager.init($state);
 
@@ -442,8 +438,7 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $state.reset();
-      $scope.fetch();
+      kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
     };
 
     $scope.newQuery = function () {
