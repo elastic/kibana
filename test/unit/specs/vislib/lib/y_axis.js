@@ -72,8 +72,8 @@ define(function (require) {
 
     yAxis = new YAxis({
       el: node,
-      yMin: dataObj.getYMinValue(),
-      yMax: dataObj.getYMaxValue(),
+      yMin: dataObj.getYMin(),
+      yMax: dataObj.getYMax(),
       _attr: {
         margin: { top: 0, right: 0, bottom: 0, left: 0 }
       }

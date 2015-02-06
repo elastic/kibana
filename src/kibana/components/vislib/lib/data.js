@@ -329,13 +329,16 @@ define(function (require) {
     };
 
     /**
-     * Calculates the min y value from this.dataArray
-     * for each object in the dataArray.
+     * Calculates the lowest Y value across all charts, taking
+     * stacking into consideration.
      *
-     * @method getYMinValue
+     * @method getYMin
+     * @param {function} [getValue] - optional getter that will receive a
+     *                              point and should return the value that should
+     *                              be considered
      * @returns {Number} Min y axis value
      */
-    Data.prototype.getYMinValue = function () {
+    Data.prototype.getYMin = function (getValue) {
       var self = this;
       var arr = [];
 
@@ -356,22 +359,23 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        min = Math.min(min, self._getYExtent(chart, 'min'));
+        min = Math.min(min, self._getYExtent(chart, 'min', getValue));
       });
 
       return min;
     };
 
     /**
-     * Calculate the max y value from this.dataArray
-     * for each object in the dataArray,
-     * push the calculated y value to the initialized array (arr)
-     * return the largest value from the array
+     * Calculates the highest Y value across all charts, taking
+     * stacking into consideration.
      *
-     * @method getYMaxValue
+     * @method getYMax
+     * @param {function} [getValue] - optional getter that will receive a
+     *                              point and should return the value that should
+     *                              be considered
      * @returns {Number} Max y axis value
      */
-    Data.prototype.getYMaxValue = function () {
+    Data.prototype.getYMax = function (getValue) {
       var self = this;
       var arr = [];
 
@@ -391,7 +395,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        max = Math.max(max, self._getYExtent(chart, 'max'));
+        max = Math.max(max, self._getYExtent(chart, 'max', getValue));
       });
 
       return max;
@@ -413,20 +417,24 @@ define(function (require) {
     /**
      * Returns the max Y axis value for a `series` array based on
      * a specified callback function (calculation).
+     * @param {function} [getValue] - Optional getter that will be used to read
+     *                              values from points when calculating the extent.
+     *                              default is either this._getYStack or this.getY
+     *                              based on this.shouldBeStacked().
      */
-    Data.prototype._getYExtent = function (chart, extent) {
-      var calculation = this._getY;
-
+    Data.prototype._getYExtent = function (chart, extent, getValue) {
       if (this.shouldBeStacked()) {
         this.stackData(_.pluck(chart.series, 'values'));
-        calculation = this._getYStack;
+        getValue = getValue || this._getYStack;
+      } else {
+        getValue = getValue || this._getY;
       }
 
       var points = chart.series
       .reduce(function (points, series) {
         return points.concat(series.values);
       }, [])
-      .map(calculation);
+      .map(getValue);
 
       return d3[extent](points);
     };
@@ -612,6 +620,18 @@ define(function (require) {
       });
       var extents = [_.min(values), _.max(values)];
       return extents;
+    };
+
+    /**
+     * Get the maximum number of series, considering each chart
+     * individually.
+     *
+     * @return {number} - the largest number of series from all charts
+     */
+    Data.prototype.maxNumberOfSeries = function () {
+      return this.chartData().reduce(function (max, chart) {
+        return Math.max(max, chart.series.length);
+      }, 0);
     };
 
     return Data;
