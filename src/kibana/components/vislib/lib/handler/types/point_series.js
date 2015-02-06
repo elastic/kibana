@@ -43,8 +43,8 @@ define(function (require) {
           alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
             el   : vis.el,
-            yMin : data.getYMinValue(),
-            yMax : data.getYMaxValue(),
+            yMin : data.gitYMin(),
+            yMax : data.gitYMax(),
             _attr: vis._attr
           })
         });
@@ -67,7 +67,7 @@ define(function (require) {
             msg: 'Positive and negative values are not accurately represented by stacked ' +
                  'area charts. The line chart is better suited for this type of data.',
             test: function (vis, data) {
-              return vis._attr.mode === 'stacked' && data.getYMaxValue() > 0 && data.getYMinValue() < 0;
+              return vis._attr.mode === 'stacked' && data.gitYMax() > 0 && data.gitYMin() < 0;
             }
           }
         ]

@@ -252,7 +252,7 @@ define(function (require) {
       it('should return all points from every series', testLength(colsData));
     });
 
-    describe('getYMinValue method', function () {
+    describe('gitYMin method', function () {
       var Data;
       var dataSeries;
       var stackedDataSeries;
@@ -285,8 +285,8 @@ define(function (require) {
       // date range. It also has the largest y value. This value should be excluded
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain min value', function () {
-        expect(visData.getYMinValue()).to.be(minValue);
-        expect(stackedVisData.getYMinValue()).to.be(stackedMinValue);
+        expect(visData.gitYMin()).to.be(minValue);
+        expect(stackedVisData.gitYMin()).to.be(stackedMinValue);
       });
 
       it('should have a minimum date value that is greater than the max value within the date range', function () {
@@ -295,7 +295,7 @@ define(function (require) {
       });
     });
 
-    describe('getYMaxValue method', function () {
+    describe('gitYMax method', function () {
       var Data;
       var dataSeries;
       var stackedDataSeries;
@@ -328,8 +328,8 @@ define(function (require) {
       // date range. It also has the largest y value. This value should be excluded
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain min value', function () {
-        expect(visData.getYMaxValue()).to.be(maxValue);
-        expect(stackedVisData.getYMaxValue()).to.be(stackedMaxValue);
+        expect(visData.gitYMax()).to.be(maxValue);
+        expect(stackedVisData.gitYMax()).to.be(stackedMaxValue);
       });
 
       it('should have a minimum date value that is greater than the max value within the date range', function () {

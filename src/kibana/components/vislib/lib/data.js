@@ -329,13 +329,13 @@ define(function (require) {
     };
 
     /**
-     * Calculates the min y value from this.dataArray
-     * for each object in the dataArray.
+     * Calculates the lowest Y value across all charts, taking
+     * stacking into consideration.
      *
-     * @method getYMinValue
+     * @method gitYMin
      * @returns {Number} Min y axis value
      */
-    Data.prototype.getYMinValue = function () {
+    Data.prototype.gitYMin = function () {
       var self = this;
       var arr = [];
 
@@ -363,15 +363,13 @@ define(function (require) {
     };
 
     /**
-     * Calculate the max y value from this.dataArray
-     * for each object in the dataArray,
-     * push the calculated y value to the initialized array (arr)
-     * return the largest value from the array
+     * Calculates the highest Y value across all charts, taking
+     * stacking into consideration.
      *
-     * @method getYMaxValue
+     * @method gitYMax
      * @returns {Number} Max y axis value
      */
-    Data.prototype.getYMaxValue = function () {
+    Data.prototype.gitYMax = function () {
       var self = this;
       var arr = [];
 
