@@ -22,6 +22,12 @@
 
     .navbar-nav > .active > a {
 
+      @media (max-width: @screen-sm-min) {
+        &:before {
+          display: none !important;
+        }
+      }
+
       &:before {
         content:"";
         display:inline-block;
@@ -41,12 +47,24 @@
 
   &-inverse {
 
+    .logo {
+      background-image: url('../images/no_border.png');
+      height: @navbar-height;
+      width: @navbar-height;
+    }
+
     .badge {
       background-color: #fff;
       color: lighten(@navbar-inverse-bg, 10%);
     }
 
     .navbar-nav > .active > a {
+
+      @media (max-width: @screen-sm-min) {
+        &:before {
+          display: none !important;
+        }
+      }
 
       &:before {
         content:"";
@@ -66,6 +84,7 @@
   }
 
   &-brand {
+
     font-size: 1.8em;
     background-color: lighten(@navbar-inverse-bg, 10%);
 

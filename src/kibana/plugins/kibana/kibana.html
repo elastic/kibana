@@ -16,12 +16,8 @@
     <!-- Full navbar -->
     <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
       <ul class="nav navbar-nav">
-        <li style="
-          background-image: url('images/no_border.png');
-          height: 45px;
-          width: 45px;">
-        </li>
-        <li class="navbar-brand">Kibana</li>
+        <li class="logo hidden-xs"></li>
+        <li class="navbar-brand hidden-xs">Kibana</li>
         <li ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}">
           <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
         </li>
