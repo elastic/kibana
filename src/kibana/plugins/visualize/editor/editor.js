@@ -65,8 +65,15 @@ define(function (require) {
     });
 
     var savedVis = $route.current.locals.savedVis;
+
     var vis = savedVis.vis;
     var editableVis = vis.clone();
+    vis.requesting = function () {
+      var requesting = editableVis.requesting;
+      requesting.call(vis);
+      requesting.call(editableVis);
+    };
+
     var searchSource = savedVis.searchSource;
 
     // config panel templates
