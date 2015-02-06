@@ -1,5 +1,5 @@
 {
-  "extends": "../src/.jshintrc",
+  "extends": "../.browser.jshintrc",
 
   "globals": {
     "module": false,
