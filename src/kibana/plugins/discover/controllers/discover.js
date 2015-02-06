@@ -442,8 +442,7 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $state.reset();
-      $scope.fetch();
+      kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
     };
 
     $scope.newQuery = function () {
