@@ -20,6 +20,38 @@ define(function (require) {
       this.vis = vis;
       this.data = data;
       this.alertDefs = alertDefs || [];
+
+      $(vis.el).on('mouseenter', '.vis-alerts-tray', function () {
+        var $tray = $(this);
+        hide();
+        $(vis.el).on('mousemove', checkForExit);
+
+        function hide() {
+          $tray.css({
+            'pointer-events': 'none',
+            opacity: 0.3
+          });
+        }
+
+        function show() {
+          $(vis.el).off('mousemove', checkForExit);
+          $tray.css({
+            'pointer-events': 'auto',
+            opacity: 1
+          });
+        }
+
+        function checkForExit(event) {
+          var pos = $tray.offset();
+          if (pos.top > event.clientY || pos.left > event.clientX) return show();
+
+          var bottom = pos.top + $tray.height();
+          if (event.clientY > bottom) return show();
+
+          var right = pos.left + $tray.width();
+          if (event.clientX > right) return show();
+        }
+      });
     }
 
     /**
