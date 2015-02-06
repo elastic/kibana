@@ -1,5 +1,7 @@
 define(function (require) {
   return function ColumnHandler(d3, Private) {
+    var $ = require('jquery');
+
     var injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
     var Handler = Private(require('components/vislib/lib/handler/handler'));
     var Data = Private(require('components/vislib/lib/data'));
@@ -8,15 +10,18 @@ define(function (require) {
     var YAxis = Private(require('components/vislib/lib/y_axis'));
     var AxisTitle = Private(require('components/vislib/lib/axis_title'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
+    var Alerts = Private(require('components/vislib/lib/alerts'));
 
     /*
      * Create handlers for Area, Column, and Line charts which
      * are all nearly the same minus a few details
      */
-    function create(zeroFill, expandLastBucket) {
+    function create(opts) {
+      opts = opts || {};
+
       return function (vis) {
         var data;
-        if (zeroFill) {
+        if (opts.zeroFill) {
           data = new Data(injectZeros(vis.data), vis._attr);
         } else {
           data = new Data(vis.data, vis._attr);
@@ -32,9 +37,10 @@ define(function (require) {
             xValues           : data.xValues(),
             ordered           : data.get('ordered'),
             xAxisFormatter    : data.get('xAxisFormatter'),
-            expandLastBucket  : expandLastBucket,
+            expandLastBucket  : opts.expandLastBucket,
             _attr             : vis._attr
           }),
+          alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
             el   : vis.el,
             yMin : data.getYMinValue(),
@@ -46,9 +52,26 @@ define(function (require) {
     }
 
     return {
-      line: create(false, false),
-      area: create(true, false),
-      column: create(true, true)
+      line: create(),
+
+      column: create({
+        zeroFill: true,
+        expandLastBucket: true
+      }),
+
+      area: create({
+        zeroFill: true,
+        alerts: [
+          {
+            type: 'warning',
+            msg: 'Positive and negative values are not accurately represented by stacked ' +
+                 'area charts. The line chart is better suited for this type of data.',
+            test: function (vis, data) {
+              return vis._attr.mode === 'stacked' && data.getYMaxValue() > 0 && data.getYMinValue() < 0;
+            }
+          }
+        ]
+      })
     };
   };
 });

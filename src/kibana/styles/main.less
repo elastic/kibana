@@ -82,6 +82,10 @@ button {
   color: @brand-danger;
 }
 
+// alias for alert types - allows class="fa fa-{{alertType}}"
+.fa-success:before { content: @fa-var-check; }
+.fa-danger:before { content: @fa-var-exclamation-circle; }
+
 ul.navbar-inline li {
   display: inline;
 }
