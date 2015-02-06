@@ -622,6 +622,18 @@ define(function (require) {
       return extents;
     };
 
+    /**
+     * Get the maximum number of series, considering each chart
+     * individually.
+     *
+     * @return {number} - the largest number of series from all charts
+     */
+    Data.prototype.maxNumberOfSeries = function () {
+      return this.chartData().reduce(function (max, chart) {
+        return Math.max(max, chart.series.length);
+      }, 0);
+    };
+
     return Data;
   };
 });

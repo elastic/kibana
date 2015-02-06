@@ -67,7 +67,11 @@ define(function (require) {
             msg: 'Positive and negative values are not accurately represented by stacked ' +
                  'area charts. The line chart is better suited for this type of data.',
             test: function (vis, data) {
-              return vis._attr.mode === 'stacked' && data.gitYMax(data._getY) > 0 && data.gitYMin(data._getY) < 0;
+              if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
+
+              var hasPos = data.getYMax(data._getY) > 0;
+              var hasNeg = data.getYMin(data._getY) < 0;
+              return (hasPos && hasNeg);
             }
           }
         ]
