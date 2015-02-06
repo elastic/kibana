@@ -403,9 +403,10 @@
 @navbar-inverse-link-disabled-bg:           transparent;
 
 // Inverted navbar brand label
-@navbar-inverse-brand-color:                @navbar-inverse-link-color;
-@navbar-inverse-brand-hover-color:          @navbar-inverse-link-hover-color;
-@navbar-inverse-brand-hover-bg:             transparent;
+@navbar-inverse-brand-color:                white;
+@navbar-inverse-brand-bg:                   lighten(@navbar-inverse-bg, 10%);
+@navbar-inverse-brand-hover-color:          @navbar-inverse-brand-color;
+@navbar-inverse-brand-hover-bg:             @navbar-inverse-brand-bg;
 
 // Inverted navbar toggle
 @navbar-inverse-toggle-hover-bg:            darken(@navbar-inverse-bg, 10%);

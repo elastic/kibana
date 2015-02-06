@@ -46,7 +46,6 @@
   }
 
   &-inverse {
-
     .logo {
       background-image: url('../images/no_border.png');
       height: @navbar-height;
@@ -84,13 +83,10 @@
   }
 
   &-brand {
-
+    cursor: default;
     font-size: 1.8em;
-    background-color: lighten(@navbar-inverse-bg, 10%);
-
-    &:hover {
-      background-color: lighten(@navbar-inverse-bg, 10%) !important;
-    }
+    background-color: @navbar-inverse-brand-bg;
+    .user-select(none);
   }
 
   &-nav {
