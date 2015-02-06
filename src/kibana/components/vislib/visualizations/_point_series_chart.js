@@ -68,7 +68,19 @@ define(function (require) {
         w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
       };
 
-      var rightStart = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
+      var rightStart = ordered.max;
+      if (!xAxis.expandLastBucket) {
+        // if this vis doesn't expand buckets visually, and the last data point
+        // represents a partial bucket, we want to move the start of the right
+        // endzone to the last data point.
+        var lastPoint = _.last(xAxis.xValues);
+        var endOfLastPoint = xAxis.addInterval(lastPoint);
+        if (endOfLastPoint > ordered.max) {
+          // last bucket is "partial"
+          rightStart = lastPoint;
+        }
+      }
+
       var rightEndzone = {
         x: xScale(rightStart),
         w: xScale(xAxis.addInterval(rightStart))
