@@ -589,6 +589,7 @@ define(function (require) {
       });
 
       $scope.searchSource.aggs(function () {
+        $scope.vis.requesting();
         return $scope.vis.aggs.toDsl();
       });
 

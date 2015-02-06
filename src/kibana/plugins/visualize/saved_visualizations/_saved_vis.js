@@ -61,6 +61,7 @@ define(function (require) {
       })
       .then(function (vis) {
         self.searchSource.aggs(function () {
+          self.vis.requesting();
           return self.vis.aggs.toDsl();
         });
 

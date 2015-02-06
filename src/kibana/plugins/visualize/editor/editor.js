@@ -199,7 +199,9 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', $state.filters);
       if (!$state.linked) searchSource.set('query', $state.query);
-      if ($scope.vis.type.requiresSearch) courier.fetch();
+      if ($scope.vis.type.requiresSearch) {
+        courier.fetch();
+      }
     };
 
 
