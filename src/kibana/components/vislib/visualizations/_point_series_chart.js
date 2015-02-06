@@ -71,7 +71,8 @@ define(function (require) {
       var rightStart = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
       var rightEndzone = {
         x: xScale(rightStart),
-        w: xScale(xAxis.addInterval(rightStart))
+        w: width - xScale(rightStart)
+
       };
 
       this.endzones = svg.selectAll('.layer')
