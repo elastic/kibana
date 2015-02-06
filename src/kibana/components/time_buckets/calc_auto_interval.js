@@ -28,22 +28,22 @@ define(function (require) {
     function find(rules, check, last) {
       return function (buckets, duration) {
         var target = duration / buckets;
-        var lastResp;
+
+        var prev;
+        var resp;
 
         for (var i = 0; i < rules.length; i++) {
           var rule = rules[i];
-          var resp = check(rule[0], rule[1], target);
 
-          if (resp == null) {
-            if (!last) continue;
-            if (lastResp) return lastResp;
-            break;
-          }
+          prev = resp;
+          resp = check(rule[0], rule[1], target);
 
-          if (!last) return resp;
-          lastResp = resp;
+          if (resp == null && !last) continue;
+          else break;
         }
 
+        if (last && !resp) resp = prev;
+        if (resp) return moment.duration().add(resp);
         return moment.duration(Math.floor(target), 'ms');
       };
     }
