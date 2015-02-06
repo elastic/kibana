@@ -182,7 +182,7 @@ define(function (require) {
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
             var yAxis = chart.handler.yAxis;
-            var yVals = [vis.handler.data.gitYMin(), vis.handler.data.gitYMax()];
+            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
             expect(yAxis.yMin).to.equal(yVals[0]);
             expect(yAxis.yMax).to.equal(yVals[1]);

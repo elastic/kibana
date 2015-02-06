@@ -332,13 +332,13 @@ define(function (require) {
      * Calculates the lowest Y value across all charts, taking
      * stacking into consideration.
      *
-     * @method gitYMin
+     * @method getYMin
      * @param {function} [getValue] - optional getter that will receive a
      *                              point and should return the value that should
      *                              be considered
      * @returns {Number} Min y axis value
      */
-    Data.prototype.gitYMin = function (getValue) {
+    Data.prototype.getYMin = function (getValue) {
       var self = this;
       var arr = [];
 
@@ -369,13 +369,13 @@ define(function (require) {
      * Calculates the highest Y value across all charts, taking
      * stacking into consideration.
      *
-     * @method gitYMax
+     * @method getYMax
      * @param {function} [getValue] - optional getter that will receive a
      *                              point and should return the value that should
      *                              be considered
      * @returns {Number} Max y axis value
      */
-    Data.prototype.gitYMax = function (getValue) {
+    Data.prototype.getYMax = function (getValue) {
       var self = this;
       var arr = [];
 
