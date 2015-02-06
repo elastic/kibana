@@ -32,9 +32,9 @@
         content:"";
         display:inline-block;
         position:absolute;
-        border:8px solid @body-bg;
+        border:@navbar-arrow-size solid @body-bg;
         border-color:transparent transparent @body-bg transparent;
-        top:29px;
+        top:(@navbar-height - @navbar-arrow-size*2);
         left: 0;
         right: 0;
         margin: 0 auto;
@@ -70,9 +70,9 @@
         content:"";
         display:inline-block;
         position:absolute;
-        border:8px solid @navbar-default-bg;
+        border:@navbar-arrow-size solid @navbar-default-bg;
         border-color:transparent transparent @navbar-default-bg transparent;
-        top:29px;
+        top:(@navbar-height - @navbar-arrow-size*2);
         left: 0;
         right: 0;
         margin: 0 auto;
