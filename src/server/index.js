@@ -55,7 +55,6 @@ function onError(error) {
       process.exit(1);
       break;
     default:
-      logger.error({ err: error });
       throw error;
   }
 }

@@ -14,6 +14,7 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          defaultYExtents: false
         },
         editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },

@@ -7,10 +7,6 @@ host: "0.0.0.0"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch_url: "http://localhost:9200"
 
-# If your Elasticsearch is protected with basic auth:
-# elasticsearch_username: user
-# elasticsearch_password: pass
-
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
 elasticsearch_preserve_host: true
@@ -19,12 +15,20 @@ elasticsearch_preserve_host: true
 # and dashboards. It will create a new index if it doesn't already exist.
 kibana_index: ".kibana"
 
+# If your Elasticsearch is protected with basic auth, this is the user credentials
+# used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
+# users will still need to authenticate with Elasticsearch (which is proxied thorugh
+# the Kibana server)
+# kibana_elasticsearch_username: user
+# kibana_elasticsearch_password: pass
+
+
 # The default application to load.
 default_app_id: "discover"
 
 # Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
-request_timeout: 500000
+request_timeout: 300000
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards.
 # Set to 0 to disable.

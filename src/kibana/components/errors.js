@@ -237,5 +237,15 @@ define(function (require) {
   };
   inherits(errors.NoResults, KbnError);
 
+  /**
+   * error thrown when no results are returned from an elasticsearch query
+   */
+  errors.PieContainsAllZeros = function PieContainsAllZeros() {
+    KbnError.call(this,
+      'No results displayed because all values equal 0',
+      errors.PieContainsAllZeros);
+  };
+  inherits(errors.PieContainsAllZeros, KbnError);
+
   return errors;
 });

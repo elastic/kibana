@@ -74,22 +74,6 @@ define(function (require) {
         w: xScale(xAxis.addInterval(rightStart))
       };
 
-      // svg diagonal line pattern
-      this.pattern = svg.append('defs')
-      .append('pattern')
-      .attr('id', 'DiagonalLines')
-      .attr('patternUnits', 'userSpaceOnUse')
-      .attr('patternTransform', 'rotate(45)')
-      .attr('x', '0')
-      .attr('y', '0')
-      .attr('width', '4')
-      .attr('height', '4')
-      .append('rect')
-      .attr('stroke', 'none')
-      .attr('fill', color)
-      .attr('width', 2)
-      .attr('height', 4);
-
       this.endzones = svg.selectAll('.layer')
       .data([leftEndzone, rightEndzone])
       .enter()
@@ -104,8 +88,7 @@ define(function (require) {
       .attr('height', height - margin.top - margin.bottom)
       .attr('width', function (d) {
         return d.w;
-      })
-      .attr('fill', 'url(#DiagonalLines)');
+      });
 
       function callPlay(event) {
         var boundData = event.target.__data__;
