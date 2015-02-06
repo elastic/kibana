@@ -109,6 +109,7 @@ define(function (require) {
       };
     }
 
+    $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
     var metaFields = config.get('metaFields');
