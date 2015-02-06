@@ -109,7 +109,7 @@ define(function (require) {
                 $chart: self.$chart,
                 $el: $tooltip,
                 $sizer: $sizer,
-                event: event
+                event: d3.event
               }, allHtml);
 
               $tooltip
