@@ -10,7 +10,6 @@ define(function (require) {
       'hourOfDay',
       'minuteOfDay',
       'minuteOfHour',
-      'minuteOfHour',
       'monthOfYear',
       'weekOfWeekyear',
       'weekyear',
