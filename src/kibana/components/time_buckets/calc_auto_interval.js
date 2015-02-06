@@ -26,25 +26,30 @@ define(function (require) {
     var revRoundingRules = roundingRules.slice(0).reverse();
 
     function find(rules, check, last) {
-      return function (buckets, duration) {
+      function pick(buckets, duration) {
         var target = duration / buckets;
-
-        var prev;
-        var resp;
+        var lastResp;
 
         for (var i = 0; i < rules.length; i++) {
           var rule = rules[i];
+          var resp = check(rule[0], rule[1], target);
 
-          prev = resp;
-          resp = check(rule[0], rule[1], target);
+          if (resp == null) {
+            if (!last) continue;
+            if (lastResp) return lastResp;
+            break;
+          }
 
-          if (resp == null && !last) continue;
-          else break;
+          if (!last) return resp;
+          lastResp = resp;
         }
 
-        if (last && !resp) resp = prev;
-        if (resp) return moment.duration().add(resp);
         return moment.duration(Math.floor(target), 'ms');
+      }
+
+      return function (buckets, duration) {
+        var interval = pick(buckets, duration);
+        if (interval) return moment.duration(interval._data);
       };
     }
 
