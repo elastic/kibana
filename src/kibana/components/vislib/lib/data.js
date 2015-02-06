@@ -333,9 +333,12 @@ define(function (require) {
      * stacking into consideration.
      *
      * @method gitYMin
+     * @param {function} [getValue] - optional getter that will receive a
+     *                              point and should return the value that should
+     *                              be considered
      * @returns {Number} Min y axis value
      */
-    Data.prototype.gitYMin = function () {
+    Data.prototype.gitYMin = function (getValue) {
       var self = this;
       var arr = [];
 
@@ -356,7 +359,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        min = Math.min(min, self._getYExtent(chart, 'min'));
+        min = Math.min(min, self._getYExtent(chart, 'min', getValue));
       });
 
       return min;
@@ -367,9 +370,12 @@ define(function (require) {
      * stacking into consideration.
      *
      * @method gitYMax
+     * @param {function} [getValue] - optional getter that will receive a
+     *                              point and should return the value that should
+     *                              be considered
      * @returns {Number} Max y axis value
      */
-    Data.prototype.gitYMax = function () {
+    Data.prototype.gitYMax = function (getValue) {
       var self = this;
       var arr = [];
 
@@ -389,7 +395,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        max = Math.max(max, self._getYExtent(chart, 'max'));
+        max = Math.max(max, self._getYExtent(chart, 'max', getValue));
       });
 
       return max;
@@ -411,20 +417,24 @@ define(function (require) {
     /**
      * Returns the max Y axis value for a `series` array based on
      * a specified callback function (calculation).
+     * @param {function} [getValue] - Optional getter that will be used to read
+     *                              values from points when calculating the extent.
+     *                              default is either this._getYStack or this.getY
+     *                              based on this.shouldBeStacked().
      */
-    Data.prototype._getYExtent = function (chart, extent) {
-      var calculation = this._getY;
-
+    Data.prototype._getYExtent = function (chart, extent, getValue) {
       if (this.shouldBeStacked()) {
         this.stackData(_.pluck(chart.series, 'values'));
-        calculation = this._getYStack;
+        getValue = getValue || this._getYStack;
+      } else {
+        getValue = getValue || this._getY;
       }
 
       var points = chart.series
       .reduce(function (points, series) {
         return points.concat(series.values);
       }, [])
-      .map(calculation);
+      .map(getValue);
 
       return d3[extent](points);
     };

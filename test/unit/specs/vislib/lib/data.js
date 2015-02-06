@@ -293,6 +293,12 @@ define(function (require) {
         expect(_.min(series.values, function (d) { return d.x; })).to.be.greaterThan(minValue);
         expect(_.min(stackedSeries.values, function (d) { return d.x; })).to.be.greaterThan(stackedMinValue);
       });
+
+      it('allows passing a value getter for manipulating the values considered', function () {
+        var realMin = visData.gitYMin();
+        var multiplier = 13.2;
+        expect(visData.gitYMin(function (d) { return d.y * multiplier; })).to.be(realMin * multiplier);
+      });
     });
 
     describe('gitYMax method', function () {
@@ -335,6 +341,12 @@ define(function (require) {
       it('should have a minimum date value that is greater than the max value within the date range', function () {
         expect(_.min(series, function (d) { return d.x; })).to.be.greaterThan(maxValue);
         expect(_.min(stackedSeries, function (d) { return d.x; })).to.be.greaterThan(stackedMaxValue);
+      });
+
+      it('allows passing a value getter for manipulating the values considered', function () {
+        var realMax = visData.gitYMax();
+        var multiplier = 13.2;
+        expect(visData.gitYMax(function (d) { return d.y * multiplier; })).to.be(realMax * multiplier);
       });
     });
 
