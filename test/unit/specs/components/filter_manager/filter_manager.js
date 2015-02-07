@@ -1,4 +1,3 @@
-/* global sinon */
 define(function (require) {
   var filterManager = require('components/filter_manager/filter_manager');
   var $state;

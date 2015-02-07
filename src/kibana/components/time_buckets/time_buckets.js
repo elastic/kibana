@@ -265,7 +265,7 @@ define(function (require) {
       var interval = this.getInterval();
       var rules = config.get('dateFormat:scaled');
 
-      for (var i = rules.length - 1; i >= 0; i --) {
+      for (var i = rules.length - 1; i >= 0; i--) {
         var rule = rules[i];
         if (!rule[0] || interval >= moment.duration(rule[0])) {
           return rule[1];

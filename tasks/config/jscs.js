@@ -2,12 +2,10 @@ module.exports = function (grunt) {
   return {
     // just lint the source dir
     source: {
-      files: {
-        src: '<%= lintThese %>'
-      }
+      src: '<%= lintThese %>'
     },
     options: {
-      jshintrc: true
+      config: '.jscsrc'
     }
   };
 };

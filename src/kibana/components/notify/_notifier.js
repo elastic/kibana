@@ -144,7 +144,7 @@ define(function (require) {
     return function WrappedNotifierFunction() {
       var cntx = this;
       var args = arguments;
-      
+
       return self.event(name, function () {
         return fn.apply(cntx, args);
       });

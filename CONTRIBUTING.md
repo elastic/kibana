@@ -34,7 +34,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   ```sh
   grunt dev # use the "--with-es" flag to install & start elasticsearch too
   ```
-  
+
 #### Testing and building
 
 To ensure that your changes will not break other functionality, please run the test suite and build process before submitting your pull request.
