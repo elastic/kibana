@@ -1,7 +1,5 @@
 {
-  "extends": "../.jshintrc",
-
-  "browser": false, // handled by globals list below
+  "extends": "./.jshintrc",
   "node": false,
 
   "globals": {
