@@ -116,6 +116,7 @@ define(function (require) {
       $scope.savedVis = savedVis;
       $scope.searchSource = searchSource;
       $scope.vis = vis;
+      $scope.indexPattern = vis.indexPattern;
       $scope.editableVis = editableVis;
       $scope.state = $state;
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
