@@ -65,8 +65,15 @@ define(function (require) {
     });
 
     var savedVis = $route.current.locals.savedVis;
+
     var vis = savedVis.vis;
     var editableVis = vis.clone();
+    vis.requesting = function () {
+      var requesting = editableVis.requesting;
+      requesting.call(vis);
+      requesting.call(editableVis);
+    };
+
     var searchSource = savedVis.searchSource;
 
     // config panel templates
@@ -199,7 +206,9 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', $state.filters);
       if (!$state.linked) searchSource.set('query', $state.query);
-      if ($scope.vis.type.requiresSearch) courier.fetch();
+      if ($scope.vis.type.requiresSearch) {
+        courier.fetch();
+      }
     };
 
 
