@@ -44,7 +44,9 @@ define(function (require) {
           lastResp = resp;
         }
 
-        return moment.duration(Math.floor(target), 'ms');
+        // fallback to just a number of milliseconds, ensure ms is >= 1
+        var ms = Math.max(Math.floor(target), 1);
+        return moment.duration(ms, 'ms');
       };
     }
 
