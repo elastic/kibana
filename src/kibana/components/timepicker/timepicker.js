@@ -111,6 +111,10 @@ define(function (require) {
           $scope.to = to;
         };
 
+        $scope.setToNow = function () {
+          $scope.absolute.to = moment();
+        };
+
         $scope.formatRelative = function () {
           var parsed = datemath.parse(getRelativeString());
           $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
