@@ -9,6 +9,7 @@ var url = require('url');
 var target = url.parse(config.elasticsearch);
 var join = require('path').join;
 var logger = require('../lib/logger');
+var validateRequest = require('../lib/validateRequest');
 
 
 // If the target is backed by an SSL and a CA is provided via the config
@@ -45,6 +46,11 @@ router.use(function (req, res, next) {
   // Add a slash to the end of the URL so resolve doesn't remove it.
   var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
   path = url.resolve(path, '.' + req.url);
+
+  if (!validateRequest(req)) {
+    res.sendStatus(400);
+    return;
+  }
 
   var options = {
     url: uri.protocol + '//' + uri.host + path,
