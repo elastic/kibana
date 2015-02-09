@@ -83,6 +83,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     /** https support * */
     final SSLSocketFactory sslSocketFactory;
+    volatile boolean hostnameVerification;
 
     final ClusterService clusterService;
     final ClusterName clusterName;
@@ -143,6 +144,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         dynamicSettings.addDynamicSetting(SETTINGS_HOSTS + ".*");
         dynamicSettings.addDynamicSetting(SETTINGS_TIMEOUT);
         dynamicSettings.addDynamicSetting(SETTINGS_READ_TIMEOUT);
+        dynamicSettings.addDynamicSetting(SETTINGS_SSL_HOSTNAME_VERIFICATION);
         nodeSettingsService.addListener(this);
 
         if (!settings.getByPrefix(SETTINGS_SSL_PREFIX).getAsMap().isEmpty()) {
@@ -151,6 +153,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             logger.trace("no ssl context configured");
             sslSocketFactory = null;
         }
+        hostnameVerification = settings.getAsBoolean(SETTINGS_SSL_HOSTNAME_VERIFICATION, true);
 
         logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]",
                 Utils.santizeUrlPwds(Strings.arrayToCommaDelimitedString(hosts)), indexPrefix, indexTimeFormat);
@@ -420,6 +423,9 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             if (conn instanceof HttpsURLConnection && sslSocketFactory != null) {
                 HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
                 httpsConn.setSSLSocketFactory(sslSocketFactory);
+                if (!hostnameVerification) {
+                    httpsConn.setHostnameVerifier(TrustAllHostnameVerifier.INSTANCE);
+                }
             }
 
             conn.setRequestMethod(method);
@@ -562,6 +568,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             this.hosts = newHosts;
             this.checkedAndUploadedIndexTemplate = false;
             this.boundToLocalNode = false;
+        }
+
+        Boolean newHostnameVerification = settings.getAsBoolean(SETTINGS_SSL_HOSTNAME_VERIFICATION, null);
+        if (newHostnameVerification != null) {
+            logger.info("hostname verification set to [{}]", newHostnameVerification);
+            this.hostnameVerification = newHostnameVerification;
         }
     }
 
@@ -806,7 +818,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     public static final String SETTINGS_SSL_TRUSTSTORE = SETTINGS_SSL_PREFIX + "truststore.path";
     public static final String SETTINGS_SSL_TRUSTSTORE_PASSWORD = SETTINGS_SSL_PREFIX + "truststore.password";
     public static final String SETTINGS_SSL_TRUSTSTORE_ALGORITHM = SETTINGS_SSL_PREFIX + "truststore.algorithm";
-
+    public static final String SETTINGS_SSL_HOSTNAME_VERIFICATION = SETTINGS_SSL_PREFIX + "hostname_verification";
 
     /** SSL Initialization * */
     public SSLSocketFactory createSSLSocketFactory(Settings settings) {
@@ -860,6 +872,21 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             throw new RuntimeException("[marvel.agent.exporter] failed to initialize the SSLContext", e);
         }
         return sslContext.getSocketFactory();
+    }
+
+    /**
+     * Trust all hostname verifier. This simply returns true to completely disable hostname verification
+     */
+    static class TrustAllHostnameVerifier implements HostnameVerifier {
+        static final HostnameVerifier INSTANCE = new TrustAllHostnameVerifier();
+
+        private TrustAllHostnameVerifier() {
+        }
+
+        @Override
+        public boolean verify(String s, SSLSession sslSession) {
+            return true;
+        }
     }
 }
 
