@@ -51,10 +51,6 @@
         before using scripted fields.</small></label>
           <textarea required class="form-control span12" ng-model="scriptedField.script"></textarea>
         </div>
-        <!-- div class="form-group">
-          <label>Return Type <small>This determines which aggregations this field will be available for use in. Get it wrong and elasticsearch will error out!</small></label>
-          <select class="form-control span6" ng-model="scriptedField.type" ng-options="value.name as value.name for value in fieldTypes" required></select>
-        </div -->
       </form>
       <div ng-if="namingConflict" class="alert alert-danger">
         You already have a field with the name {{ scriptedField.name }}. Naming your scripted
