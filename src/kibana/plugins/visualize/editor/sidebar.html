@@ -1,4 +1,8 @@
 <div class="sidebar-container">
+  <div ng-if="vis.type.requiresSearch" class="index-pattern">
+    {{ indexPattern.id }}
+  </div>
+
   <form class="sidebar-list"
         ng-class="{'hide-errors': hideErrors}"
         ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"

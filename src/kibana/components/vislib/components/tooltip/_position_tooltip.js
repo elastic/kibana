@@ -5,6 +5,12 @@ define(function (require) {
   var OFFSET = 10;
   var $clone;
 
+  // translate css properties into their basic direction
+  var propDirs = {
+    top: 'north',
+    left: 'west'
+  };
+
   function positionTooltip(opts, html) {
     if (!opts) return;
     var $chart = $(opts.$chart);
@@ -72,12 +78,14 @@ define(function (require) {
       });
     });
 
+    (window.overflows || (window.overflows = [])).push(overflow);
     return overflow;
   }
 
   function mergeOverflows(dest, src) {
     return _.merge(dest, src, function (a, b) {
       if (a == null || b == null) return a || b;
+      if (a < 0 && b < 0) return Math.min(a, b);
       return Math.max(a, b);
     });
   }
@@ -85,23 +93,37 @@ define(function (require) {
   function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
     var stash = '_' + prop;
 
-    // first choice
-    var first = prev[stash] || pref;
-    // second choice
-    var second = first === pref ? fallback : pref;
+    // list of directions in order of preference
+    var dirs = _.unique([prev[stash], pref, fallback].filter(Boolean));
 
-    if (overflow[first] > 0) {
-      if (overflow[second] < 0) {
-        placement[prop] = pos[second];
-        placement[stash] = second;
-      } else {
-        placement[prop] = pos[first] - overflow[first];
-        placement[stash] = first;
-      }
-    } else {
-      placement[prop] = pos[first];
-      placement[stash] = first;
+    var dir;
+    var value;
+
+    // find the first direction that doesn't overflow
+    for (var i = 0; i < dirs.length; i++) {
+      dir = dirs[i];
+      if (overflow[dir] > 0) continue;
+      value = pos[dir];
+      break;
     }
+
+    // if we don't find one that doesn't overflow, use
+    // the first choice and offset based on overflo
+    if (value == null) {
+      dir = dirs[0];
+
+      var offset = overflow[dir];
+      if (propDirs[prop] === dir) {
+        // when the property represents the same direction
+        // as dir, we flip the overflow
+        offset = offset * -1;
+      }
+
+      value = pos[dir] - offset;
+    }
+
+    placement[prop] = value;
+    placement[stash] = dir;
   }
 
   function placeToAvoidOverflow(pos, prev, overflow) {

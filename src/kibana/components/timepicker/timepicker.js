@@ -6,6 +6,7 @@ define(function (require) {
   var moment = require('moment');
 
   require('directives/input_datetime');
+  require('directives/greater_than');
   require('components/timepicker/quick_ranges');
   require('components/timepicker/refresh_intervals');
   require('components/timepicker/time_units');
@@ -109,6 +110,10 @@ define(function (require) {
         $scope.setQuick = function (from, to, description) {
           $scope.from = from;
           $scope.to = to;
+        };
+
+        $scope.setToNow = function () {
+          $scope.absolute.to = moment();
         };
 
         $scope.formatRelative = function () {
