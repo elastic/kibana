@@ -3,8 +3,9 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('scriptedFields', function (kbnUrl, Notifier) {
+  .directive('scriptedFields', function (kbnUrl, Notifier, Promise) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
+    var checkboxHtml = require('text!plugins/settings/sections/indices/_scripted_field_checkbox.html');
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
 
     var notify = new Notifier();
@@ -18,10 +19,13 @@ define(function (require) {
 
         var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
-
+        $scope.selectedScriptedFields = [];
         $scope.perPage = 25;
 
         $scope.columns = [{
+          title: '',
+          sortable: false
+        }, {
           title: 'name'
         }, {
           title: 'script'
@@ -36,18 +40,36 @@ define(function (require) {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
-          $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
+          $scope.scriptedFields = $scope.indexPattern.getFields('scripted');
+          $scope.rows = $scope.scriptedFields.map(function (field) {
             var rowScope = $scope.$new();
             var columns = [field.name, field.script, field.type];
             rowScope.field = field;
             rowScopes.push(rowScope);
 
+            // prepend checkboxes
+            columns.unshift({
+              markup: checkboxHtml,
+              scope: rowScope
+            });
+
+            // append control buttons
             columns.push({
               markup: controlsHtml,
               scope: rowScope
             });
 
             return columns;
+          });
+        });
+
+        $scope.$watchCollection(function () {
+          return $scope.scriptedFields.map(function (field) {
+            return field.checked;
+          });
+        }, function() {
+          $scope.selectedScriptedFields = $scope.scriptedFields.filter(function (field) {
+            return field.checked;
           });
         });
 
@@ -78,6 +100,14 @@ define(function (require) {
           };
 
           kbnUrl.change(fieldCreatorPath, params);
+        };
+
+        $scope.select = function(field) {
+          field.checked = !field.checked;
+        };
+
+        $scope.deleteAll = function () {
+          Promise.map($scope.selectedScriptedFields, $scope.remove);
         };
 
         $scope.edit = function (field) {
