@@ -67,7 +67,7 @@ define(function (require) {
           return $scope.scriptedFields.map(function (field) {
             return field.checked;
           });
-        }, function() {
+        }, function () {
           $scope.selectedScriptedFields = $scope.scriptedFields.filter(function (field) {
             return field.checked;
           });
@@ -102,7 +102,7 @@ define(function (require) {
           kbnUrl.change(fieldCreatorPath, params);
         };
 
-        $scope.select = function(field) {
+        $scope.select = function (field) {
           field.checked = !field.checked;
         };
 
