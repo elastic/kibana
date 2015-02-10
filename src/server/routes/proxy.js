@@ -34,7 +34,14 @@ router.use(function (req, res, next) {
 
 router.use(function (req, res, next) {
   if (validateRequest(req)) return next();
-  else res.sendStatus(400);
+
+  logger.error(
+    { req: req },
+    'Kibana only support modifying the "%s" index. ' +
+    'Requests that might modify other indicies are not sent to elasticsearch.',
+    config.kibana.kibana_index
+  );
+  res.sendStatus(400);
 });
 
 function getPort(req) {
