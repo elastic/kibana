@@ -58,8 +58,9 @@ define(function (require) {
      * @returns {D3.Selection} SVG with paths attached
      */
     PieChart.prototype.addPath = function (width, height, svg, slices) {
+      var marginFactor = 0.95;
       var isDonut = this._attr.isDonut;
-      var radius = Math.min(width, height) / 2;
+      var radius = (Math.min(width, height) / 2) * marginFactor;
       var color = this.handler.data.getPieColorFunc();
       var partition = d3.layout.partition()
       .sort(null)
