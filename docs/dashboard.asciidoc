@@ -5,7 +5,7 @@ A Kibana _dashboard_ displays a set of saved visualizations in groups that you c
 dashboard to share or reload at a later time.
 
 .Sample dashboard
-image:images/tfl-dashboard.png[Example dashboard]
+image:images/NYCTA-Dashboard.jpg[Example dashboard]
 
 [float]
 [[getting-started]]
@@ -19,7 +19,7 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 The first time you click the *Dashboard* tab, Kibana displays an empty dashboard.
 
-image:images/NewDashboard.png[New Dashboard screen]
+image:images/NewDashboard.jpg[New Dashboard screen]
 
 Build your dashboard by adding visualizations.
 
@@ -108,18 +108,24 @@ container from a dashboard does not delete the saved visualization in that conta
 To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed 
 information about the raw data replace the visualization, as in this example:
 
-[horizontal]
-*Table*:: A representation of the underlying data, presented as a paginated data grid. You can sort the items 
+.Table
+A representation of the underlying data, presented as a paginated data grid. You can sort the items 
 in the table by clicking on the table headers at the top of each column.
-image:images/NYCTA-Table.png[]
-*Request*:: The raw request used to query the server, presented in JSON format.
-image:images/NYCTA-Request.png[]
-*Response*:: The raw response from the server, presented in JSON format.
-image:images/NYCTA-Response.png[]
-*Statistics*:: A summary of the statistics related to the request and the response, presented as a data grid. The data 
+image:images/NYCTA-Table.jpg[]
+
+.Request
+The raw request used to query the server, presented in JSON format.
+image:images/NYCTA-Request.jpg[]
+
+.Response
+The raw response from the server, presented in JSON format.
+image:images/NYCTA-Response.jpg[]
+
+.Statistics
+A summary of the statistics related to the request and the response, presented as a data grid. The data 
 grid includes the query duration, the request duration, the total number of records found on the server, and the 
 index pattern used to make the query.
-image:images/NYCTA-Statistics.png[]
+image:images/NYCTA-Statistics.jpg[]
 
 [float]
 [[changing-the-visualization]]

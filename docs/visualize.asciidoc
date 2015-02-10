@@ -9,7 +9,7 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Visualizations rely on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.0. 
+Visualizations are based on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1. 
 
 [float]
 [[createvis]]
@@ -25,7 +25,7 @@ button] in the toolbar to the right of the search bar. The wizard guides you thr
 
 The New Visualization wizard starts with the following page:
 
-image:images/NewViz01.png[]
+image:images/NewViz01.jpg[]
 
 You can also load a saved visualization that you created earlier. The saved visualization selector includes a text 
 field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved 
@@ -59,7 +59,7 @@ main elements:
 2. <<aggregation-builder,Aggregation Builder>>
 3. <<preview-canvas,Preview Canvas>>
 
-image:images/VizEditor.png[]
+image:images/VizEditor.jpg[]
 
 [float]
 [[toolbar-panel]]
