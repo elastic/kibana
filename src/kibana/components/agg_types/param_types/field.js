@@ -57,6 +57,7 @@ define(function (require) {
 
       if (field.scripted) {
         output.params.script = field.script;
+        output.params.lang = 'expression';
       } else {
         output.params.field = field.name;
       }

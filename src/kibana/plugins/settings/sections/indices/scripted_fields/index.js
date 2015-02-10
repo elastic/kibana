@@ -36,7 +36,8 @@ define(function (require) {
       $scope.action = 'Edit';
       $scope.scriptedField = _.find($scope.indexPattern.fields, {
         name: scriptName,
-        scripted: true
+        scripted: true,
+        type: 'number'
       });
     }
 
