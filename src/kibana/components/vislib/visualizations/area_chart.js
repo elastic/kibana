@@ -101,7 +101,9 @@ define(function (require) {
       .style('fill', function (d) {
         return color(d[0].label);
       })
-      .style('opacity', defaultOpacity);
+      .classed('overlap_area', function () {
+        return isOverlapping;
+      });
 
       // update
       path.attr('d', function (d) {
