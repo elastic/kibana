@@ -109,9 +109,8 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
-          return self.colorToClass(color(format(d, d.name)));
+          return 'slice ' + self.colorToClass(color(format(d, d.name)));
         })
-        .attr('class', 'slice')
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }

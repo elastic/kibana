@@ -134,14 +134,14 @@ define(function (require) {
       visEl.selectAll('.color')
       .on('mouseover', function (d) {
         var liClass = '.' + self.colorToClass(self.color(d));
-        visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
+        visEl.selectAll('.color').classed('blur_shape', true);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
         eventEl.style('word-break', 'break-all');
 
         // select series on chart
-        visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
+        visEl.selectAll(liClass).classed('blur_shape', false);
       })
       .on('mouseout', function () {
         /*
@@ -150,7 +150,7 @@ define(function (require) {
          */
         visEl.selectAll('.chart')
         .selectAll('.color')
-        .style('opacity', self._attr.defaultOpacity);
+        .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'nowrap');
@@ -159,7 +159,7 @@ define(function (require) {
         // Legend values should always return to their default opacity of 1
         visEl.select('.legend-ul')
         .selectAll('.color')
-        .style('opacity', self._attr.legendDefaultOpacity);
+        .classed('blur_shape', false);
       });
     };
 
