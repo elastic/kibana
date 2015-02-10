@@ -1,4 +1,5 @@
-@tooltip-padding: 8px;
+@tooltip-space: 8px;
+@tooltip-space-tight: @tooltip-space / 2;
 
 .vis-tooltip,
 .vis-tooltip-sizing-clone {
@@ -6,7 +7,6 @@
   line-height: 1.1;
   font-size: 12px;
   font-weight: normal;
-  padding: 0 @tooltip-padding @tooltip-padding;
   background: rgba(70, 82, 93, 0.95);
   color: @gray-lighter;
   border-radius: 4px;
@@ -15,12 +15,19 @@
   word-wrap: break-word;
   max-width: 40%;
   overflow: hidden;
+  pointer-events: none;
+
+  > :last-child {
+    margin-bottom: @tooltip-space;
+  }
+
+  > * {
+    margin: @tooltip-space @tooltip-space 0;
+  }
 
   table {
-    margin: @tooltip-padding 0 0;
-
     td,th {
-      padding: 2px 4px;
+      padding: @tooltip-space-tight;
 
       &.row-bucket {
         word-break: break-all;
@@ -44,22 +51,26 @@
 }
 
 .vis-tooltip-header {
-  margin: 0 (@tooltip-padding * -1);
-  padding: (@tooltip-padding / 2) @tooltip-padding;
+  margin: 0 0 @tooltip-space 0;
+  padding: @tooltip-space-tight @tooltip-space;
   .display(flex);
   .align-items(center);
 
   &:last-child {
-    margin-bottom: (@tooltip-padding * -1);
+    margin-bottom: 0;
   }
 
   &-icon {
     .flex(0, 0, auto);
-    padding-right: @tooltip-padding;
+    padding-right: @tooltip-space;
   }
 
   &-text {
     .flex(1, 1, 200px);
+  }
+
+  + * {
+    margin-top: @tooltip-space;
   }
 }
 
