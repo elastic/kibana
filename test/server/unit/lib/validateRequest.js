@@ -97,26 +97,26 @@ describe('lib/isValid', function () {
       run('HEAD', '/.kibana', true);
       run('HEAD', '/other-index', true);
       run('GET', '/_cluster/health', true);
-      run('GET', '/.kibana/__notRealIndex__/_validate/query?q=foo:bar', true);
+      run('POST', '/.kibana/__notRealIndex__/_validate/query?q=foo:bar', true);
     });
   });
 
   describe('bulk indexing', function () {
     it('valid', function () {
       send('/_bulk', [
-        { create: { index: '.kibana', type: 'index-pattern' } },
+        { create: { _index: '.kibana', _type: 'index-pattern' } },
         { fields: [] },
-        { create: { index: '.kibana', type: 'vis' } },
+        { create: { _index: '.kibana', _type: 'vis' } },
         { aggs: [] }
       ], true);
 
       send('/.kibana/_bulk', [
         // implicit index
-        { create: { type: 'index-pattern' } },
+        { create: { _type: 'index-pattern' } },
         { fields: [] },
 
         // explicit index
-        { create: { index: '.kibana', type: 'vis' } },
+        { create: { _index: '.kibana', _type: 'vis' } },
         { aggs: [] }
 
       ], true);
@@ -125,16 +125,16 @@ describe('lib/isValid', function () {
     it('rejects bulks including even one other index', function () {
       send('/.kibana/_bulk', [
         // implicit index
-        { create: { type: 'index-pattern' } },
+        { create: { _type: 'index-pattern' } },
         { fields: [] },
         // explicit index
-        { create: { index: 'app-data', type: 'vis' } },
+        { create: { _index: 'app-data', _type: 'vis' } },
         { aggs: [] }
       ], false);
     });
 
     it('rejects malformed bulk bodies', function () {
-      send('/_bulk', '{}\n{ "index": "john" }\n', false);
+      send('/_bulk', '{}\n{ "_index": "john" }\n', false);
       send('/_bulk', '{}\n{}\n', false);
       send('/_bulk', '{ "field": "value" }', false);
       send('/_bulk', '{ "field": "v', false);
@@ -161,11 +161,11 @@ describe('lib/isValid', function () {
       ], true);
 
       send('/_msearch', [
-        { index: 'app-index', type: 'data-type' },
+        { _index: 'app-index', _type: 'data-type' },
         { query: { match_all: {} } },
-        { index: 'IT-index', type: 'logs' },
+        { _index: 'IT-index', _type: 'logs' },
         { query: { match_all: {} } },
-        { index: 'L33t', type: '?' },
+        { _index: 'L33t', _type: '?' },
         { query: { match_all: {} } },
       ], true);
     });

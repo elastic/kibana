@@ -99,7 +99,7 @@ module.exports = function (req) {
 
       if (!meta) return false;
 
-      var index = meta.index || maybeIndex;
+      var index = meta._index || maybeIndex;
       if (index !== config.kibana.kibana_index) {
         return false;
       }
