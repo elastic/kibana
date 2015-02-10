@@ -72,7 +72,7 @@ define(function (require) {
       // so draw the endzones at the actual time bounds
       var leftEndzone = {
         x: 0,
-        w: xScale(ordered.min) > 0 ? xScale() : 0
+        w: Math.max(xScale(ordered.min), 0)
       };
 
       var rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
