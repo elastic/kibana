@@ -77,6 +77,7 @@
                       required
                       ng-model="relative.count"
                       ng-change="formatRelative()"
+                      greater-than
                       type="number"
                       class="form-control">
                   </div>
@@ -136,8 +137,10 @@
 
                 <div class="kbn-timepicker-section">
                   <div>
-                    <label class="small">To: <span ng-show="!absolute.to"><i>Invalid Date</i></span>
+                    <label class="small">To:
+                      <a class="label label-default" ng-click="setToNow()">Set To Now</a>
                     </label>
+                    <span ng-show="!absolute.to"><i>Invalid Date</i></span>
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
                   </div>
                   <div>
