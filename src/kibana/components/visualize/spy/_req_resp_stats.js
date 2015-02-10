@@ -13,7 +13,7 @@ define(function (require) {
     $scope.$watchMulti([
       'entry',
       'searchSource',
-      'entry.complete'
+      '[]entry._complete'
     ], function () {
       $scope.entry = null;
 
