@@ -32,6 +32,11 @@ router.use(function (req, res, next) {
   req.on('end', next);
 });
 
+router.use(function (req, res, next) {
+  if (validateRequest(req)) return next();
+  else res.sendStatus(400);
+});
+
 function getPort(req) {
   var matches = req.headers.host.match(/:(\d+)/);
   if (matches) return matches[1];
@@ -40,17 +45,11 @@ function getPort(req) {
 
 // Create the proxy middleware
 router.use(function (req, res, next) {
-
   var uri = _.defaults({}, target);
 
   // Add a slash to the end of the URL so resolve doesn't remove it.
   var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
   path = url.resolve(path, '.' + req.url);
-
-  if (!validateRequest(req)) {
-    res.sendStatus(400);
-    return;
-  }
 
   var options = {
     url: uri.protocol + '//' + uri.host + path,

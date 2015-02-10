@@ -13,22 +13,52 @@ module.exports = function (req) {
   var add = (method === 'POST' || method === 'PUT');
   var rem = (method === 'DELETE');
 
+  // everything below this point assumes a destructive request of some sort
+  if (!add && !rem) return false;
+
   var body = req.rawBody;
   var jsonBody = body && parseJson(body);
   var bulkBody = body && parseBulk(body);
 
-  var destuctive = (add || rem);
+  // methods that accept standard json bodies
   var maybeMGet = (add && jsonBody && maybeMethod === '_mget');
+  var maybeSearch = (add && jsonBody && maybeMethod === '_search');
+  var maybeValidate = (add && jsonBody && maybeMethod === '_validate');
+
+  // methods that accept bulk bodies
   var maybeBulk = (add && bulkBody && maybeMethod === '_bulk');
   var maybeMsearch = (add && bulkBody && maybeMethod === '_msearch');
+
+  // indication that this request is against kibana
   var maybeKibanaIndex = (maybeIndex === config.kibana.kibana_index);
 
-  if (!destuctive) return false;
-  if ((maybeKibanaIndex || maybeMsearch || maybeMGet) && !maybeBulk) return true;
-  if (!maybeBulk) return false;
+  if (!maybeBulk) {
+    // allow any destructive request against the kibana index
+    if (maybeKibanaIndex) return true;
 
-  // at this point the only valid option is a bulk body
-  return validateBulkBody(bulkBody);
+    // force these requests to thave the exact json body we validated
+    if (maybeMGet || maybeSearch || maybeValidate) {
+      req.rawBody = JSON.stringify(jsonBody);
+      return true;
+    }
+
+    // force these requests to have the exact bulk body we validated
+    if (maybeMsearch) {
+      req.rawBody = stringifyBulk(bulkBody);
+      return true;
+    }
+
+    return false;
+  }
+
+  // at this point, we can assume that the request is a bulk request
+  if (validateBulkBody(bulkBody)) {
+    req.rawBody = stringifyBulk(bulkBody);
+    return true;
+  }
+
+  // catch all other scenarios
+  return false;
 
   function parseJson(str) {
     try {
@@ -53,6 +83,10 @@ module.exports = function (req) {
       body[i] = part;
     }
     return body;
+  }
+
+  function stringifyBulk(body) {
+    return body.map(JSON.stringify).join('\n') + '\n';
   }
 
   function validateBulkBody(body) {
