@@ -5,10 +5,7 @@ define(function (require) {
   require('components/clipboard/clipboard');
 
   var linkReqRespStats = function ($scope, config) {
-    $scope.$watch('searchSource.history.length', function () {
-      $scope.req = _.last(_.deepGet($scope, 'searchSource.history'));
-    });
-
+    $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
     $scope.$watchMulti([
       'req',
       'req.started',
