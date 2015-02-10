@@ -35,6 +35,12 @@ define(function (require) {
         expect(datemath.parse('now-00')).to.be(undefined);
         expect(datemath.parse('now-000')).to.be(undefined);
       });
+
+      it('should return undefined if zero', function () {
+        spans.forEach(function (span) {
+          expect(datemath.parse('now-0' + span)).to.be(undefined);
+        });
+      });
     });
 
     describe('objects and strings', function () {
