@@ -106,6 +106,13 @@ define(function (require) {
           field.checked = !field.checked;
         };
 
+        $scope.selectAll = function () {
+          var checked = ($scope.scriptedFields.length !== $scope.selectedScriptedFields.length);
+          $scope.scriptedFields.forEach(function (field) {
+            field.checked = checked;
+          });
+        };
+
         $scope.deleteAll = function () {
           Promise.map($scope.selectedScriptedFields, $scope.remove);
         };

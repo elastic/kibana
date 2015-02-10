@@ -2,6 +2,9 @@
 <p>These scripted fields are computed on the fly from your data. They can be used in visualizations and displayed in your documents, however they can not be searched. You can manage them here and add new ones as you see fit, but be careful, scripts can be tricky! If you need some examples, why not let Kibana <a ng-click="addDateScripts()"><strong>create a few examples from your date fields.</strong></a></p>
 
 <header>
+  <button type="button" ng-click="selectAll()" class="btn btn-default pull-left">
+    Select All
+  </button>
   <button type="button" ng-disabled="!selectedScriptedFields.length" ng-click="deleteAll()" class="btn btn-danger">
     <i class="fa fa-trash"></i>
     Remove Selected
