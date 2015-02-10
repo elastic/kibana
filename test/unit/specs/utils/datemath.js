@@ -29,6 +29,12 @@ define(function (require) {
         expect(datemath.parse('now/2y')).to.be(undefined);
         expect(datemath.parse('now/0.5y')).to.be(undefined);
       });
+
+      it('should not go into an infinite loop when missing a unit', function () {
+        expect(datemath.parse('now-0')).to.be(undefined);
+        expect(datemath.parse('now-00')).to.be(undefined);
+        expect(datemath.parse('now-000')).to.be(undefined);
+      });
     });
 
     describe('objects and strings', function () {
@@ -49,7 +55,7 @@ define(function (require) {
       it('should return the same moment if passed a moment', function () {
         expect(datemath.parse(mmnt)).to.eql(mmnt);
       });
-      
+
       it('should return a moment if passed a date', function () {
         expect(datemath.parse(date).format(format)).to.eql(mmnt.format(format));
       });
