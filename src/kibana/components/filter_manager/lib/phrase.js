@@ -6,6 +6,7 @@ define(function (require) {
     if (field.scripted) {
       filter.script = {
         script: '(' + field.script + ') == value',
+        lang: field.lang,
         params: {
           value: value
         }

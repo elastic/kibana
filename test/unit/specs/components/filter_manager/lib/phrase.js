@@ -31,6 +31,7 @@ define(function (require) {
         expected.meta.field = 'script number';
         expected.script = {
           script: '(' + indexPattern.fields.byName['script number'].script + ') == value',
+          lang: 'expression',
           params: {
             value: 5,
           }
