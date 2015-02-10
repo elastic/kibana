@@ -295,6 +295,23 @@ define(function (require) {
           };
 
           /**
+           * Evict Filters that doesn't match the index patterns
+           * @param {object} filter The filter to clean
+           * @returns {object}
+           */
+          var keepApplicableFilters = function (filter) {
+            if (!!(filter.index)) {
+              return filter.index === this.id;
+            } else if (!!(filter.meta) && !!(filter.meta.index)) {
+              return filter.meta.index === this.id;
+            } else if (!!(filter.geo_bounding_box)) {
+              var field = _.keys(filter.geo_bounding_box)[0];
+              return true;
+            }
+            return true;
+          };
+
+          /**
            * Clean out any invalid attributes from the filters
            * @param {object} filter The filter to clean
            * @returns {object}
@@ -317,8 +334,10 @@ define(function (require) {
                   query: flatState.body.query,
                   filter: {
                     bool: {
-                      must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
-                      must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
+                      must: _(flatState.filters).filter(filterNegate(false)).filter(keepApplicableFilters,
+                        flatState.index).map(cleanFilter).value(),
+                      must_not: _(flatState.filters).filter(filterNegate(true)).filter(keepApplicableFilters,
+                        flatState.index).map(cleanFilter).value()
                     }
                   }
                 }

@@ -144,6 +144,15 @@ define(function (require) {
             }
           }
 
+          // Adding the D3 Data and events on circleMarkers
+          map.eachLayer(function (layer) {
+            if (layer._radius !== undefined) {
+              d3.select(layer._path).datum(layer.feature.properties);
+              self.addPathEvents(d3.select(layer._path));
+            }
+          });
+          data.label = 'geo_bounding_box';
+          d3.select(map._pathRoot).datum(data);
         });
       };
     };
@@ -375,6 +384,20 @@ define(function (require) {
     };
 
     /**
+     * Adds Events to SVG paths
+     *
+     * @method addPathEvents
+     * @param element {D3.Selection} Reference to SVG path
+     * @returns {D3.Selection} SVG path with event listeners attached
+     */
+    TileMap.prototype.addPathEvents = function (element) {
+      var events = this.events;
+
+      return element
+        .call(events.addClickEvent());
+    };
+
+    /**
      * Binds popup and events to each feature on map
      *
      * @method bindPopup
@@ -383,7 +406,9 @@ define(function (require) {
      * return {undefined}
      */
     TileMap.prototype.bindPopup = function (feature, layer) {
+      var self = this;
       var props = feature.properties;
+      var events = this.events;
       var popup = L.popup({
         autoPan: false
       })
@@ -394,13 +419,14 @@ define(function (require) {
       );
 
       // TODO: tooltip-like formatter passed in?
-      layer.bindPopup(popup)
+      var marker = layer.bindPopup(popup)
       .on('mouseover', function (e) {
         layer.openPopup();
       })
       .on('mouseout', function (e) {
         layer.closePopup();
       });
+      return popup;
     };
 
     /**
