@@ -15,11 +15,14 @@
     </ul>
     <div class="tab-content">
       <div class="action-bar">
-        <input type="checkbox" ng-model="deleteAll">
+        <label>
+          <input type="checkbox" ng-model="deleteAll">
+          Select All
+        </label>
         <a ng-disabled="!deleteAllBtn"
           confirm-click="bulkDelete()"
           confirmation="Are you sure want to delete the selected {{service.title}}? This action is irreversible!"
-          class="btn btn-danger btn-xs">Delete</a>
+          class="delete-all btn btn-danger btn-xs"><i class="fa fa-trash"></i> Delete Selected</a>
       </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
