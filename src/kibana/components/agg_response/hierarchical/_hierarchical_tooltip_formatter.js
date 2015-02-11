@@ -5,19 +5,13 @@ define(function (require) {
     var $tooltip = $(require('text!components/agg_response/hierarchical/_tooltip.html'));
     var collectBranch = require('components/agg_response/hierarchical/_collect_branch');
     var $tooltipScope = $rootScope.$new();
+    var numeral = require('numeral');
+
     $compile($tooltip)($tooltipScope);
 
     return function (columns) {
       return function (event) {
         var datum = event.datum;
-        var parent;
-        var sum;
-
-        // the sum of values at all levels/generations is the same, but levels
-        // are seperated by their parents so the root is the simplest to find
-        for (parent = datum; parent; parent = parent.parent) {
-          sum = parent.value;
-        }
 
         // Collect the current leaf and parents into an array of values
         var rows = collectBranch(datum);
@@ -25,7 +19,9 @@ define(function (require) {
         // Map those values to what the tooltipSource.rows format.
         $tooltipScope.rows = _.map(rows, function (row) {
           row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
-          row.metric = row.metric + ' (' + Math.round((Math.abs(row.metric) / sum) * 100) + '%)';
+          if (row.item.percentOfGroup) {
+            row.metric += ' (' + numeral(row.item.percentOfGroup).format('0.[00]%') + ')';
+          }
           return row;
         });
 
