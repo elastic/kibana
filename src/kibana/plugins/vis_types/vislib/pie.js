@@ -38,7 +38,8 @@ define(function (require) {
           icon: 'fa fa-scissors',
           title: 'Split Slices',
           min: 0,
-          max: Infinity
+          max: Infinity,
+          aggFilter: '!geohash_grid'
         },
         {
           group: 'buckets',
@@ -47,7 +48,8 @@ define(function (require) {
           title: 'Split Chart',
           mustBeFirst: true,
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         }
       ])
     });

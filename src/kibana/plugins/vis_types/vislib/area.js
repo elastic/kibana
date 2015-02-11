@@ -38,21 +38,24 @@ define(function (require) {
           name: 'segment',
           title: 'X-Axis',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         },
         {
           group: 'buckets',
           name: 'group',
           title: 'Split Area',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         },
         {
           group: 'buckets',
           name: 'split',
           title: 'Split Chart',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         }
       ])
     });
