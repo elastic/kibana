@@ -24,24 +24,24 @@ var router = module.exports = express.Router();
 
 // We need to capture the raw body before moving on
 router.use(function (req, res, next) {
-  req.rawBody = '';
-  req.setEncoding('utf8');
+  var chunks = [];
   req.on('data', function (chunk) {
-    req.rawBody += chunk;
+    chunks.push(chunk);
   });
-  req.on('end', next);
+  req.on('end', function () {
+    req.rawBody = Buffer.concat(chunks);
+    next();
+  });
 });
 
 router.use(function (req, res, next) {
-  if (validateRequest(req)) return next();
-
-  logger.error(
-    { req: req },
-    'Kibana only support modifying the "%s" index. ' +
-    'Requests that might modify other indicies are not sent to elasticsearch.',
-    config.kibana.kibana_index
-  );
-  res.sendStatus(400);
+  try {
+    validateRequest(req);
+    return next();
+  } catch (err) {
+    logger.error({ req: req }, err.message || 'Bad Request');
+    res.status(403).send(err.message || 'Bad Request');
+  }
 });
 
 function getPort(req) {
@@ -77,7 +77,10 @@ router.use(function (req, res, next) {
 
   // Only send the body if it's a PATCH, PUT, or POST
   if (req.rawBody) {
-    options.body = req.rawBody;
+    options.headers['content-length'] = req.rawBody.length;
+    options.body = req.rawBody.toString('utf8');
+  } else {
+    options.headers['content-length'] = 0;
   }
 
   // To support the elasticsearch_preserve_host feature we need to change the

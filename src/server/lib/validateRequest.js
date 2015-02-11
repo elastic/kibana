@@ -2,7 +2,17 @@ var _ = require('lodash');
 var config = require('../config');
 var parse = require('url').parse;
 
-module.exports = function (req) {
+validate.Fail = function () {
+  this.message = 'Kibana only support modifying the "' + config.kibana.kibana_index +
+  '" index. Requests that might modify other indicies are not sent to elasticsearch.';
+};
+
+validate.BadIndex = function (index) {
+  validate.Fail.call(this);
+  this.message = 'Bad index "' + index + '" in request. ' + this.message;
+};
+
+function validate(req) {
   var method = req.method.toUpperCase();
   if (method === 'GET' || method === 'HEAD') return true;
 
@@ -14,51 +24,28 @@ module.exports = function (req) {
   var rem = (method === 'DELETE');
 
   // everything below this point assumes a destructive request of some sort
-  if (!add && !rem) return false;
+  if (!add && !rem) throw new validate.Fail();
 
-  var body = req.rawBody;
-  var jsonBody = body && parseJson(body);
-  var bulkBody = body && parseBulk(body);
+  var bodyStr = String(req.rawBody);
+  var jsonBody = bodyStr && parseJson(bodyStr);
+  var bulkBody = bodyStr && parseBulk(bodyStr);
 
   // methods that accept standard json bodies
-  var maybeMGet = (add && jsonBody && maybeMethod === '_mget');
-  var maybeSearch = (add && jsonBody && maybeMethod === '_search');
-  var maybeValidate = (add && jsonBody && maybeMethod === '_validate');
+  var maybeMGet = ('_mget' === maybeMethod && add && jsonBody);
+  var maybeSearch = ('_search' === maybeMethod && add && jsonBody);
+  var maybeValidate = ('_validate' === maybeMethod && add && jsonBody);
 
   // methods that accept bulk bodies
-  var maybeBulk = (add && bulkBody && maybeMethod === '_bulk');
-  var maybeMsearch = (add && bulkBody && maybeMethod === '_msearch');
+  var maybeBulk = ('_bulk' === maybeMethod && add && bulkBody);
+  var maybeMsearch = ('_msearch' === maybeMethod && add && bulkBody);
 
   // indication that this request is against kibana
   var maybeKibanaIndex = (maybeIndex === config.kibana.kibana_index);
 
-  if (!maybeBulk) {
-    // allow any destructive request against the kibana index
-    if (maybeKibanaIndex) return true;
+  if (!maybeBulk) validateNonBulkDestructive();
+  else validateBulkBody(bulkBody);
 
-    // force these requests to thave the exact json body we validated
-    if (maybeMGet || maybeSearch || maybeValidate) {
-      req.rawBody = JSON.stringify(jsonBody);
-      return true;
-    }
-
-    // force these requests to have the exact bulk body we validated
-    if (maybeMsearch) {
-      req.rawBody = stringifyBulk(bulkBody);
-      return true;
-    }
-
-    return false;
-  }
-
-  // at this point, we can assume that the request is a bulk request
-  if (validateBulkBody(bulkBody)) {
-    req.rawBody = stringifyBulk(bulkBody);
-    return true;
-  }
-
-  // catch all other scenarios
-  return false;
+  return true;
 
   function parseJson(str) {
     try {
@@ -79,7 +66,8 @@ module.exports = function (req) {
     var body = new Array(parts.length);
     for (var i = 0; i < parts.length; i++) {
       var part = parseJson(parts[i]);
-      if (!part) return;
+      if (!part) throw new validate.Fail();
+
       body[i] = part;
     }
     return body;
@@ -87,6 +75,19 @@ module.exports = function (req) {
 
   function stringifyBulk(body) {
     return body.map(JSON.stringify).join('\n') + '\n';
+  }
+
+  function validateNonBulkDestructive() {
+    // allow any destructive request against the kibana index
+    if (maybeKibanaIndex) return;
+
+    // allow json bodies sent to _mget _search and _validate
+    if (jsonBody && (maybeMGet || maybeSearch || maybeValidate)) return;
+
+    // allow bulk bodies sent to _msearch
+    if (bulkBody && (maybeMsearch)) return;
+
+    throw new validate.Fail();
   }
 
   function validateBulkBody(body) {
@@ -97,14 +98,14 @@ module.exports = function (req) {
       var op = _.keys(header).join('');
       var meta = header[op];
 
-      if (!meta) return false;
+      if (!meta) throw new validate.Fail();
 
       var index = meta._index || maybeIndex;
       if (index !== config.kibana.kibana_index) {
-        return false;
+        throw new validate.BadIndex(index);
       }
     }
-
-    return true;
   }
-};
+}
+
+module.exports = validate;
