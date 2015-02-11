@@ -14,14 +14,25 @@ define(function (require) {
         var datum = event.datum;
 
         // Collect the current leaf and parents into an array of values
-        var rows = collectBranch(datum);
+        $tooltipScope.rows = collectBranch(datum);
 
         // Map those values to what the tooltipSource.rows format.
-        $tooltipScope.rows = _.map(rows, function (row) {
+        _.forEachRight($tooltipScope.rows, function (row, i, rows) {
           row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
-          if (row.item.percentOfGroup) {
-            row.metric += ' (' + numeral(row.item.percentOfGroup).format('0.[00]%') + ')';
+
+          var percent;
+          if (i > 0) {
+            var parentMetric = rows[i - 1].metric;
+            percent = parentMetric / row.metric;
           }
+          else if (row.item.percentOfGroup != null) {
+            percent = row.item.percentOfGroup;
+          }
+
+          if (percent != null) {
+            row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
+          }
+
           return row;
         });
 
