@@ -131,6 +131,31 @@ visualize-spy {
     }
   }
 
+  .visualize-spy-content {
+    position: relative;
+
+    .visualize-spy-loading {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      text-align: center;
+
+      &-text {
+        display: inline-block;
+        margin: 0;
+        background: @alert-info-bg;
+        color: @alert-info-text;
+        padding: 5px 10px;
+        border-radius: @border-radius-base;
+
+        .spinner > * {
+          background-color: @alert-info-text;
+        }
+      }
+    }
+  }
+
   pre {
     word-break: break-all;
     word-wrap: break-word;

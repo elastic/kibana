@@ -69,7 +69,7 @@ define(function (require) {
         beforeEach(function () {
           inject(function (d3) {
             vis.handler.charts.forEach(function (chart) {
-              circle = $(chart.chartEl).find('circle')[0];
+              circle = $(chart.chartEl).find('.circle')[0];
               brush = $(chart.chartEl).find('.brush');
               d3selectedCircle = d3.select(circle)[0][0];
 

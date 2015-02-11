@@ -30,9 +30,6 @@ define(function (require) {
       this.tooltipClass = 'vis-tooltip';
       this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
       this.showCondition = _.constant(true);
-
-      this.$window = $(window);
-      this.$chart = $(el).find('.' + this.containerClass);
     }
 
     Tooltip.prototype.$get = _.once(function () {
@@ -65,6 +62,9 @@ define(function (require) {
       var self = this;
       var tooltipFormatter = this.formatter;
 
+      var $window = $(window);
+      var $chart = $(this.el).find('.' + this.containerClass);
+
       return function (selection) {
         var $tooltip = self.$get();
         var $sizer = self.$getSizer();
@@ -77,14 +77,10 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
-        self.$chart.on('mouseleave', function (event) {
-          // if the mouse moves fast enough, it can "leave"
-          // by entering the tooltip
-          if ($tooltip.is(event.relatedTarget)) return;
-
+        $chart.on('mouseleave', function (event) {
           // only clear when we leave the chart, so that
           // moving between points doesn't make it reposition
-          self.$chart.removeData('previousPlacement');
+          $chart.removeData('previousPlacement');
         });
 
         selection.each(function (d, i) {
@@ -105,8 +101,8 @@ define(function (require) {
 
             if (allHtml) {
               var placement = positionTooltip({
-                $window: self.$window,
-                $chart: self.$chart,
+                $window: $window,
+                $chart: $chart,
                 $el: $tooltip,
                 $sizer: $sizer,
                 event: d3.event

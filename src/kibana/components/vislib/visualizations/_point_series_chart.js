@@ -61,17 +61,25 @@ define(function (require) {
       var margin = attr.margin;
       var color = '#004c99';
 
+      // we don't want to draw endzones over our min and max values, they
+      // are still a part of the dataset. We want to start the endzones just
+      // outside of them so we will use these values rather than ordered.min/max
+      var oneUnit = (ordered.units || _.identity)(1);
+      var beyondMin = ordered.min - oneUnit;
+      var beyondMax = ordered.max + oneUnit;
+
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
       var leftEndzone = {
         x: 0,
-        w: xScale(ordered.min) > 0 ? xScale(ordered.min) : 0
+        w: Math.max(xScale(ordered.min), 0)
       };
 
-      var rightStart = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
+      var rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
+      var rightStart = rightLastVal + oneUnit;
       var rightEndzone = {
         x: xScale(rightStart),
-        w: xScale(xAxis.addInterval(rightStart))
+        w: Math.max(width - xScale(rightStart), 0)
       };
 
       this.endzones = svg.selectAll('.layer')
@@ -93,19 +101,22 @@ define(function (require) {
       function callPlay(event) {
         var boundData = event.target.__data__;
         var wholeBucket = boundData && boundData.x != null;
-        var x = wholeBucket ? boundData.x : event.offsetX;
 
+        var min = leftEndzone.w;
+        var max = rightEndzone.x;
+
+        // bounds of the cursor to consider
+        var xLeft = event.offsetX;
+        var xRight = event.offsetX;
         if (wholeBucket) {
-          return {
-            wholeBucket: true,
-            touchdown: (x < ordered.min) || (xAxis.addInterval(x) > ordered.max)
-          };
-        } else {
-          return {
-            wholeBucket: false,
-            touchdown: x <= leftEndzone.w || x >= rightEndzone.x
-          };
+          xLeft = xScale(boundData.x);
+          xRight = xScale(xAxis.addInterval(boundData.x));
         }
+
+        return {
+          wholeBucket: wholeBucket,
+          touchdown: min > xLeft || max < xRight
+        };
       }
 
       function textFormatter() {
