@@ -23,7 +23,7 @@ define(function (require) {
           var percent;
           if (i > 0) {
             var parentMetric = rows[i - 1].metric;
-            percent = parentMetric / row.metric;
+            percent = row.metric / parentMetric;
           }
           else if (row.item.percentOfGroup != null) {
             percent = row.item.percentOfGroup;
