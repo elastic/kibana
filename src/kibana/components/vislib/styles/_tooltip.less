@@ -1,4 +1,5 @@
-@import (reference) "../../../styles/main";
+@tooltip-space: 8px;
+@tooltip-space-tight: @tooltip-space / 2;
 
 .vis-tooltip,
 .vis-tooltip-sizing-clone {
@@ -6,18 +7,27 @@
   line-height: 1.1;
   font-size: 12px;
   font-weight: normal;
-  padding: 8px;
-  background: rgba(70, 82, 93, 0.95);
+  background: fadeout(@gray-darker, 7%);
   color: @gray-lighter;
   border-radius: 4px;
   position: fixed;
   z-index: 120;
   word-wrap: break-word;
   max-width: 40%;
+  overflow: hidden;
+  pointer-events: none;
+
+  > :last-child {
+    margin-bottom: @tooltip-space;
+  }
+
+  > * {
+    margin: @tooltip-space @tooltip-space 0;
+  }
 
   table {
     td,th {
-      padding: 2px 4px;
+      padding: @tooltip-space-tight;
 
       &.row-bucket {
         word-break: break-all;
@@ -37,6 +47,30 @@
         border-top: none;
       }
     }
+  }
+}
+
+.vis-tooltip-header {
+  margin: 0 0 @tooltip-space 0;
+  padding: @tooltip-space-tight @tooltip-space;
+  .display(flex);
+  .align-items(center);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &-icon {
+    .flex(0, 0, auto);
+    padding-right: @tooltip-space;
+  }
+
+  &-text {
+    .flex(1, 1, 200px);
+  }
+
+  + * {
+    margin-top: @tooltip-space;
   }
 }
 

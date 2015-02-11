@@ -28,6 +28,7 @@ define(function (require) {
       it('should return a script filter when passed a scripted field', function () {
         expected.meta.field = 'script number';
         expected.script = {
+          lang: 'expression',
           script: '(' + indexPattern.fields.byName['script number'].script + ')>=gte && (' +
             indexPattern.fields.byName['script number'].script + ')<=lte',
           params: {

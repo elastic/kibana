@@ -2,13 +2,6 @@
   "unused": false,
   "browser": false,
   "node": true,
-
-  "globals": {
-    "define": true,
-    "require": true,
-    "console": true
-  },
-
   "camelcase": false,
   "white": true,
   "bitwise": false,

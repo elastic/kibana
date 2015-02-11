@@ -6,25 +6,33 @@ define(function (require) {
 
   // Data
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var seriesPosNeg = require('vislib_fixtures/mock_data/date_histogram/_series_pos_neg');
+  var seriesNeg = require('vislib_fixtures/mock_data/date_histogram/_series_neg');
   var termsColumns = require('vislib_fixtures/mock_data/terms/_columns');
-  var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
+  //var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
   var dataArray = [
     series,
+    seriesPosNeg,
+    seriesNeg,
     termsColumns,
-    histogramRows,
+    //histogramRows,
     stackedSeries
   ];
   var names = [
     'series',
+    'series with positive and negative values',
+    'series with negative values',
     'terms columns',
-    'histogram rows',
+    //'histogram rows',
     'stackedSeries'
   ];
   var modes = [
     'stacked',
+    'stacked',
+    'stacked',
     'grouped',
-    'percentage',
+    //'percentage',
     'stacked'
   ];
 
@@ -90,11 +98,7 @@ define(function (require) {
             numOfSeries = chart.chartData.series.length;
             numOfValues = chart.chartData.series[0].values.length;
             product = numOfSeries * numOfValues;
-
-            // remove brushing el before counting rects
-            $(chart.chartEl).find('g.brush').remove();
-
-            expect($(chart.chartEl).find('rect')).to.have.length(product);
+            expect($(chart.chartEl).find('.series rect')).to.have.length(product);
           });
         });
       });
@@ -112,13 +116,12 @@ define(function (require) {
 
       describe('addBarEvents method', function () {
         function checkChart(chart) {
-          var rect = $(chart.chartEl).find('rect')[4];
-          var d3selectedRect = d3.select(rect)[0][0];
+          var rect = $(chart.chartEl).find('.series rect').get(0);
 
           // check for existance of stuff and things
           return {
-            click: !!d3selectedRect.__onclick,
-            mouseOver: !!d3selectedRect.__onmouseover,
+            click: !!rect.__onclick,
+            mouseOver: !!rect.__onmouseover,
             // D3 brushing requires that a g element is appended that
             // listens for mousedown events. This g element includes
             // listeners, however, I was not able to test for the listener
@@ -158,6 +161,25 @@ define(function (require) {
             expect(_.isFunction(chart.draw())).to.be(true);
           });
         });
+
+        it('should return a yMin and yMax', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            expect(yAxis.yMin).to.not.be(undefined);
+            expect(yAxis.yMax).to.not.be(undefined);
+          });
+        });
+
+        it('should render a zero axis line', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            if (yAxis.yMin < 0 && yAxis.yMax > 0) {
+              expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
+            }
+          });
+        });
       });
 
       describe('containerTooSmall error', function () {
@@ -171,6 +193,23 @@ define(function (require) {
             expect(function () {
               chart.render();
             }).to.throwError();
+          });
+        });
+      });
+
+      describe('defaultYExtents is true', function () {
+        beforeEach(function () {
+          vis._attr.defaultYExtents = true;
+          vis.render(data);
+        });
+
+        it('should return yAxis extents equal to data extents', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+
+            expect(yAxis.yMin).to.equal(yVals[0]);
+            expect(yAxis.yMax).to.equal(yVals[1]);
           });
         });
       });

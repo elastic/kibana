@@ -26,7 +26,7 @@ define(function (require) {
           title: 'Value',
           min: 1,
           max: 1,
-          aggFilter: '!std_deviation',
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

@@ -6,8 +6,8 @@ define(function (require) {
   var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
   var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
+  var rison = require('utils/rison');
 
-  var interval = require('utils/interval');
   var datemath = require('utils/datemath');
 
   require('components/notify/notify');
@@ -33,8 +33,25 @@ define(function (require) {
     template: require('text!plugins/discover/index.html'),
     reloadOnSearch: false,
     resolve: {
-      indexList: function (courier) {
-        return courier.indexPatterns.getIds();
+      ip: function (Promise, courier, config, $location) {
+        return courier.indexPatterns.getIds()
+        .then(function (list) {
+          var stateRison = $location.search()._a;
+          var state;
+          try { state = rison.decode(stateRison); } catch (e) {}
+          state = state || {};
+
+          var specified = !!state.index;
+          var exists = _.contains(list, state.index);
+          var id = exists ? state.index : config.get('defaultIndex');
+
+          return Promise.props({
+            list: list,
+            loaded: courier.indexPatterns.get(id),
+            stateVal: state.index,
+            stateValFound: specified && exists
+          });
+        });
       },
       savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
@@ -52,7 +69,6 @@ define(function (require) {
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
 
     var notify = new Notifier({
@@ -72,62 +88,42 @@ define(function (require) {
     var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
-    // list of indexPattern id's
-    var indexPatternList = $route.current.locals.indexList;
-
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
+    $scope.indexPattern = resolveIndexPatternLoading();
+    $scope.searchSource.set('index', $scope.indexPattern);
 
     if (savedSearch.id) {
       docTitle.change(savedSearch.title);
     }
 
     var $state = $scope.state = new AppState(getStateDefaults());
-
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
-        sort:  _.pairs(getSort(savedSearch.sort, $scope.searchSource.get('index'))).pop(),
+        sort: getSort.array(savedSearch.sort, $scope.indexPattern),
         columns: savedSearch.columns || ['_source'],
-        index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
+        index: $scope.indexPattern.id,
         interval: 'auto',
         filters: _.cloneDeep($scope.searchSource.get('filter'))
       };
     }
 
+    $state.index = $scope.indexPattern.id;
+    $state.sort = getSort.array($state.sort, $scope.indexPattern);
+
     var metaFields = config.get('metaFields');
     filterManager.init($state);
-
-    if (!_.contains(indexPatternList, $state.index)) {
-      var reason = 'The index specified in the URL is not a configured pattern. ';
-      var defaultIndex = config.get('defaultIndex');
-      if (defaultIndex) {
-        notify.warning(reason + 'Updated it to use the default: "' + defaultIndex + '"');
-        $state.index = config.get('defaultIndex');
-      } else {
-        notify.warning(reason + 'Please set a default index to continue.');
-        kbnUrl.redirect('/settings/indices');
-
-        return;
-      }
-    }
 
     $scope.opts = {
       // number of records to fetch, then paginate through
       sampleSize: config.get('discover:sampleSize'),
       // Index to match
-      index: $state.index,
+      index: $scope.indexPattern.id,
+      timefield: $scope.indexPattern.timeFieldName,
       savedSearch: savedSearch,
-      indexPatternList: indexPatternList,
-      changeIndexAndReload: function () {
-        $state.index = $scope.opts.index;
-        $state.save();
-        $route.reload();
-      }
+      indexPatternList: $route.current.locals.ip.list
     };
-
-    // stores the complete list of fields
-    $scope.fields = null;
 
     var init = _.once(function () {
       var showTotal = 5;
@@ -138,29 +134,47 @@ define(function (require) {
       $scope.showLessFailures = function () {
         $scope.failuresShown = showTotal;
       };
-      return $scope.updateDataSource()
-      .then(function () {
-        setFields();
 
-        // state fields that shouldn't trigger a fetch when changed
-        var ignoreStateChanges = ['columns'];
+      // stores the complete list of fields
+      $scope.fields = _($scope.indexPattern.fields)
+      .sortBy('name')
+      .transform(function (fields, field) {
+        // clone the field with Object.create so that it's getters
+        // and non-enumerable props are preserved
+        var clone = Object.create(field);
+        clone.display = _.contains($state.columns, field.name);
+        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
+        fields.push(clone);
+      }, [])
+      .value();
 
-        // listen for changes, and relisten everytime something happens
-        $scope.$listen($state, 'fetch_with_changes', updateFields);
-        $scope.$listen($state, 'reset_with_changes', updateFields);
+      refreshColumns();
 
-        function updateFields(changed) {
-          if (_.contains(changed, 'columns')) {
-            $scope.fields.forEach(function (field) {
-              field.display = _.contains($state.columns, field.name);
-            });
-            refreshColumns();
-          }
+      // listen for changes, and relisten everytime something happens
+      $scope.$listen($state, 'fetch_with_changes', updateFields);
+      $scope.$listen($state, 'reset_with_changes', updateFields);
+      function updateFields(changes) {
+        var newColumns = _.contains(changes, 'columns');
+        var newIndex = _.contains(changes, 'index');
+        var otherChanges = _.pull(changes, 'index', 'columns');
 
-          // if we only have ignorable changes, do nothing
-          if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
+        if (newIndex) {
+          // we will be reloading, don't need to juggle state
+          return;
         }
 
+        if (newColumns) {
+          $scope.fields.forEach(function (field) {
+            field.display = _.contains($state.columns, field.name);
+          });
+          refreshColumns();
+        }
+
+        if (otherChanges.length) $scope.fetch();
+      }
+
+      $scope.updateDataSource()
+      .then(function () {
         $scope.$listen(timefilter, 'update', function () {
           $scope.fetch();
         });
@@ -176,16 +190,31 @@ define(function (require) {
         });
 
         $scope.$watch('state.filters', function (newFilters, oldFilters) {
+          if (newFilters === oldFilters) return;
+
           if (onlyDisabled(newFilters, oldFilters)) {
             $state.save();
             return;
           }
+
           $scope.fetch();
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
         });
+
+        $scope.$watch('opts.index', changeIndexPattern($scope.opts, $state));
+        $scope.$watch('state.index', changeIndexPattern($state, $scope.opts));
+        function changeIndexPattern(from, to) {
+          return function () {
+            if (from.index === to.index) return;
+
+            to.index = from.index;
+            if (to === $state) $state.save();
+            $route.reload();
+          };
+        }
 
         $scope.$watchMulti([
           'rows',
@@ -230,17 +259,16 @@ define(function (require) {
           notify.error('An error occured with your request. Reset your inputs and try again.');
         }).catch(notify.fatal);
 
-        if ($scope.opts.timefield) {
-          setupVisualization().then(function () {
-            $scope.updateTime();
-            init.complete = true;
-            $scope.$emit('application.load');
-          });
-        } else {
-          init.complete = true;
-          $scope.$emit('application.load');
+        function initForTime() {
+          return setupVisualization().then($scope.updateTime);
         }
 
+        return Promise.resolve($scope.opts.timefield && initForTime())
+        .then(function () {
+          init.complete = true;
+          $state.replace();
+          $scope.$emit('application.load');
+        });
       });
     });
 
@@ -300,7 +328,7 @@ define(function (require) {
       if (!$scope.rows) flushResponseData();
 
       var sort = $state.sort;
-      var timeField = $scope.searchSource.get('index').timeFieldName;
+      var timeField = $scope.indexPattern.timeFieldName;
       var totalSize = $scope.size || $scope.opts.sampleSize;
 
       /**
@@ -367,15 +395,14 @@ define(function (require) {
           if (hit.$$_formatted && !sortFn) return;
 
           // Flatten the fields
-          var indexPattern = $scope.searchSource.get('index');
-          hit.$$_flattened = indexPattern.flattenHit(hit);
+          hit.$$_flattened = $scope.indexPattern.flattenHit(hit);
 
           var formatAndCount = function (value, name) {
             // add up the counts for each field name
             counts[name] = counts[name] ? counts[name] + 1 : 1;
 
             var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-            var field = indexPattern.fields.byName[name];
+            var field = $scope.indexPattern.fields.byName[name];
             var formatter = (field && field.format) ? field.format : defaultFormat;
 
             return formatter.convert(value);
@@ -412,30 +439,17 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $state.reset();
-      $scope.fetch();
+      kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
     };
 
     $scope.newQuery = function () {
       kbnUrl.change('/discover');
     };
 
-    $scope.updateDataSource = function () {
-      var chartOptions;
+    $scope.updateDataSource = Promise.method(function () {
       $scope.searchSource
       .size($scope.opts.sampleSize)
-      .sort(function () {
-        var sort = {};
-        if (_.isArray($state.sort) && $state.sort.length === 2) {
-          sort[$state.sort[0]] = $state.sort[1];
-        } else if ($scope.indexPattern.timeFieldName) {
-          // Use the watcher to set sort in this case, the above `if` will now be true
-          $state.sort = [$scope.indexPattern.timeFieldName, 'desc'];
-        } else {
-          sort._score = 'desc';
-        }
-        return sort;
-      })
+      .sort(getSort($state.sort, $scope.indexPattern))
       .query(!$state.query ? null : $state.query)
       .highlight({
         pre_tags: [highlightTags.pre],
@@ -443,27 +457,7 @@ define(function (require) {
         fields: {'*': {}}
       })
       .set('filter', $state.filters || []);
-
-      $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
-      return courier.indexPatterns.get($scope.opts.index).then(function (pattern) {
-        $scope.indexPattern = pattern;
-        $scope.opts.timefield = $scope.indexPattern.timeFieldName;
-
-        // did we update the index pattern?
-        var refresh = $scope.indexPattern !== $scope.searchSource.get('index');
-
-        // make sure the pattern is set on the "leaf" searchSource, not just the root
-        $scope.searchSource.set('index', pattern);
-
-        if (refresh) {
-          delete $state.sort;
-          delete $scope.fields;
-          delete $scope.columns;
-          setFields();
-        }
-      });
-
-    };
+    });
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
     function arrayToKeys(array, value) {
@@ -474,41 +468,9 @@ define(function (require) {
       return obj;
     }
 
-    function setFields() {
-      var indexPattern = $scope.searchSource.get('index');
-      var currentState = _.transform($scope.fields || [], function (current, field) {
-        current[field.name] = {
-          display: field.display
-        };
-      }, {});
-
-      var columnObjects = arrayToKeys($state.columns);
-
-      $scope.fields = [];
-      $scope.fieldsByName = {};
-
-      if (!indexPattern) return;
-
-      _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
-        _.defaults(field, currentState[field.name]);
-
-        // clone the field with Object.create so that it's getters
-        // and non-enumerable props are preserved
-        var clone = Object.create(field);
-        clone.display = columnObjects[field.name] || false;
-        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
-
-        $scope.fields.push(clone);
-        $scope.fieldsByName[field.name] = clone;
-      });
-
-      refreshColumns();
-    }
-
     // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, values, operation) {
-      var indexPattern = $scope.searchSource.get('index');
-      indexPattern.popularizeField(field, 1);
+      $scope.indexPattern.popularizeField(field, 1);
       filterManager.add(field, values, operation, $state.index);
     };
 
@@ -541,13 +503,10 @@ define(function (require) {
 
     function refreshColumns() {
       // Get all displayed field names;
-      var fields = _.pluck(_.filter($scope.fields, function (field) {
-        return field.display;
-      }), 'name');
+      var fields = _($scope.fields).filter('display').pluck('name').value();
 
       // Make sure there are no columns added that aren't in the displayed field list.
       $state.columns = _.intersection($state.columns, fields);
-
 
       // If no columns remain, use _source
       if (!$state.columns.length) {
@@ -555,8 +514,9 @@ define(function (require) {
         return;
       }
 
-      // if this commit results in something besides the columns changing, a fetch will be executed.
-      $state.save();
+      if (init.complete) {
+        $state.save();
+      }
     }
 
     // TODO: Move to utility class
@@ -593,7 +553,7 @@ define(function (require) {
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
       // TODO: a legit way to update the index pattern
-      $scope.vis = new Vis($scope.searchSource.get('index'), {
+      $scope.vis = new Vis($scope.indexPattern, {
         type: 'histogram',
         params: {
           addLegend: false,
@@ -625,6 +585,7 @@ define(function (require) {
       });
 
       $scope.searchSource.aggs(function () {
+        $scope.vis.requesting();
         return $scope.vis.aggs.toDsl();
       });
 
@@ -641,6 +602,27 @@ define(function (require) {
 
       return loadingVis;
     };
+
+    function resolveIndexPatternLoading() {
+      var props = $route.current.locals.ip;
+      var loaded = props.loaded;
+      var stateVal = props.stateVal;
+      var stateValFound = props.stateValFound;
+
+      var own = $scope.searchSource.getOwn('index');
+
+      if (own && !stateVal) return own;
+      if (stateVal && !stateValFound) {
+        var err = '"' + stateVal + '" is not a configured pattern. ';
+        if (own) {
+          notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
+          return own;
+        }
+
+        notify.warning(err + ' Using the default index pattern: "' + loaded.id + '"');
+      }
+      return loaded;
+    }
 
     init();
   });

@@ -5,6 +5,7 @@
     </div>
     <div class="clearfix visible-xs-block"></div>
     <input
+      input-focus
       ng-model="filter"
       ng-attr-placeholder="{{noun}} Filter"
       class="form-control"
@@ -13,7 +14,7 @@
       <span class="finder-hit-count"><strong>{{hitCount}}</strong> {{type}}</span>
   </div>
 </form>
-<paginate list="hits" per-page="5">
+<paginate list="hits | orderBy:'title'" per-page="5">
   <ul class="list-group list-group-menu">
     <a class="list-group-item list-group-menu-item"
       ng-repeat="hit in page"

@@ -76,6 +76,7 @@ define(function (require) {
           lte: bounds.max.valueOf()
         };
       }
+
       return filter;
     };
 
@@ -84,6 +85,10 @@ define(function (require) {
         min: datemath.parse(this.time.from),
         max: datemath.parse(this.time.to, true)
       };
+    };
+
+    Timefilter.prototype.getActiveBounds = function () {
+      if (this.enabled) return this.getBounds();
     };
 
     return new Timefilter();

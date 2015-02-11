@@ -20,8 +20,8 @@ define(function (require) {
       }
 
       this.el = el;
-      this.tooltip = new Tooltip(el, function (d) {
-        return d.label;
+      this.tooltip = new Tooltip('chart-title', el, function (d) {
+        return '<p>' + d.label + '</p>';
       });
     }
 

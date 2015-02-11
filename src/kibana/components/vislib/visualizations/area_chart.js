@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -18,7 +18,7 @@ define(function (require) {
      * @param chartData {Object} Elasticsearch query results for this specific
      * chart
      */
-    _(AreaChart).inherits(Chart);
+    _(AreaChart).inherits(PointSeriesChart);
     function AreaChart(handler, chartEl, chartData) {
       if (!(this instanceof AreaChart)) {
         return new AreaChart(handler, chartEl, chartData);
@@ -43,31 +43,6 @@ define(function (require) {
     }
 
     /**
-     * Stacks chart data values
-     * TODO: refactor so that this is called from the data module
-     *
-     * @method stackData
-     * @param data {Object} Elasticsearch query result for this chart
-     * @returns {Array} Stacked data objects with x, y, and y0 values
-     */
-    AreaChart.prototype.stackData = function (data) {
-      var self = this;
-      var stack = this._attr.stack;
-
-      return stack(data.series.map(function (d) {
-        var label = d.label;
-        return d.values.map(function (e, i) {
-          return {
-            _input: e,
-            label: label,
-            x: self._attr.xValue.call(d.values, e, i),
-            y: self._attr.yValue.call(d.values, e, i)
-          };
-        });
-      }));
-    };
-
-    /**
      * Adds SVG path to area chart
      *
      * @method addPath
@@ -83,7 +58,6 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var height = yScale.range()[0];
       var defaultOpacity = this._attr.defaultOpacity;
 
       var area = d3.svg.area()
@@ -95,14 +69,16 @@ define(function (require) {
       })
       .y0(function (d) {
         if (isOverlapping) {
-          return height;
+          return yScale(0);
         }
+
         return yScale(d.y0);
       })
       .y1(function (d) {
         if (isOverlapping) {
           return yScale(d.y);
         }
+
         return yScale(d.y0 + d.y);
       });
 
@@ -125,7 +101,9 @@ define(function (require) {
       .style('fill', function (d) {
         return color(d[0].label);
       })
-      .style('opacity', defaultOpacity);
+      .classed('overlap_area', function () {
+        return isOverlapping;
+      });
 
       // update
       path.attr('d', function (d) {
@@ -187,8 +165,10 @@ define(function (require) {
       // Append the bars
       circles = layer
       .selectAll('rect')
-      .data(function appendData(d) {
-        return d;
+      .data(function appendData(data) {
+        return data.filter(function isNotZero(d) {
+          return d.y !== 0;
+        });
       });
 
       // exit
@@ -291,6 +271,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
       var div;
@@ -326,9 +308,23 @@ define(function (require) {
 
           // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
+          self.createEndZones(svg);
 
           // add path
           path = self.addPath(svg, layers);
+
+          if (yMin < 0 && self._attr.mode !== 'wiggle' && self._attr.mode !== 'silhouette') {
+
+            // Draw line at yScale 0 value
+            svg.append('line')
+              .attr('class', 'zero-line')
+              .attr('x1', 0)
+              .attr('y1', yScale(0))
+              .attr('x2', width)
+              .attr('y2', yScale(0))
+              .style('stroke', '#ddd')
+              .style('stroke-width', 1);
+          }
 
           // add circles
           circles = self.addCircles(svg, layers);
@@ -338,6 +334,7 @@ define(function (require) {
 
           // chart base line
           var line = svg.append('line')
+          .attr('class', 'base-line')
           .attr('x1', 0)
           .attr('y1', height)
           .attr('x2', width)

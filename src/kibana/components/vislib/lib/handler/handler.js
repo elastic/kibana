@@ -21,7 +21,6 @@ define(function (require) {
       }
 
       this.data = opts.data || new Data(vis.data, vis._attr);
-
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -36,6 +35,7 @@ define(function (require) {
       this.yAxis = opts.yAxis;
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
+      this.alerts = opts.alerts;
 
       if (this._attr.addLegend) {
         this.legend = opts.legend;
@@ -46,6 +46,7 @@ define(function (require) {
         this.legend,
         this.axisTitle,
         this.chartTitle,
+        this.alerts,
         this.xAxis,
         this.yAxis
       ], Boolean);

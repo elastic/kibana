@@ -25,7 +25,7 @@ define(function (require) {
       Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
-      this._attr = _.defaults(config || {}, {});
+      this._attr = _.defaults({}, config || {}, {});
       this.eventTypes = {
         enabled: []
       };
@@ -65,7 +65,7 @@ define(function (require) {
         return;
       }
 
-      if (_.isFunction(this.handler.resize)) {
+      if (this.handler && _.isFunction(this.handler.resize)) {
         this._runOnHandler('resize');
       } else {
         this.render(this.data);
@@ -80,6 +80,7 @@ define(function (require) {
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
         if (error instanceof errors.ContainerTooSmall ||
+          error instanceof errors.PieContainsAllZeros ||
           error instanceof errors.NotEnoughData ||
           error instanceof errors.NoResults) {
           this.handler.error(error.message);

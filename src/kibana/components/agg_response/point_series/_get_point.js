@@ -12,12 +12,14 @@ define(function (require) {
         yScale: yScale
       };
 
-      if (point.y === 'NaN') {
+      if (point.y === 'NaN' || point.y == null) {
+        // filter out NaN from stats and null
+        // from metrics that are not based at zero
         return;
       }
 
       if (series) {
-        point.series = unwrap(row[series.i]);
+        point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
       }
 
       if (yScale) {
