@@ -24,7 +24,6 @@ define(function (require) {
     return new BucketAggType({
       name: 'geohash_grid',
       title: 'Geohash',
-      ordered: {},
       params: [
         {
           name: 'field',
