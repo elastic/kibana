@@ -47,6 +47,25 @@ define(function (require) {
         .call(events.addClickEvent());
     };
 
+    PieChart.prototype.convertToPercentage = function (slices) {
+      (function assignPercentages(children, parent) {
+        var sum = children.reduce(function (sum, child) {
+          return sum + child.size;
+        }, 0);
+
+        children.forEach(function (child) {
+          child.percentOfGroup = child.size / sum;
+
+          var parentPercent = parent ? (parent.percentOfParent || 0) : 1;
+          child.percentOfParent = parentPercent * child.percentOfGroup;
+
+          if (child.children) {
+            assignPercentages(child.children, child);
+          }
+        });
+      }(slices.children));
+    };
+
     /**
      * Adds pie paths to SVG
      *
