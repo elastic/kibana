@@ -2,31 +2,35 @@
   <kbn-settings-indices>
     <div ng-controller="settingsIndicesEdit" bindonce>
       <div class="page-header">
-        <h1>
-          <i ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
-          {{indexPattern.id}}
-          <button
-            ng-click="setDefaultPattern()"
-            tooltip="Set as default index"
-            class="btn btn-success">
-            <i class="fa fa-star"></i>
-          </button>
-          <button
-            confirm-click="indexPattern.refreshFields()"
-            confirmation="This will reset the field popularity counters. Are you sure you want to reload your fields?"
-            tooltip="Reload field list"
-            class="btn btn-warning">
-            <i class="fa fa-refresh"></i>
-          </button>
-          <button
-            confirm-click="removePattern()"
-            confirmation="Are you sure you want to remove this index pattern?"
-            tooltip="Remove index pattern"
-            class="btn btn-danger">
-            <i class="fa fa-trash"></i>
-          </button>
+        <div class="index-pattern-name">
+          <h1 class="title" css-truncate>
+            <i ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
+            {{indexPattern.id}}
+          </h1>
+          <div class="controls">
+            <button
+              ng-click="setDefaultPattern()"
+              tooltip="Set as default index"
+              class="btn btn-success">
+              <i class="fa fa-star"></i>
+            </button>
+            <button
+              confirm-click="indexPattern.refreshFields()"
+              confirmation="This will reset the field popularity counters. Are you sure you want to reload your fields?"
+              tooltip="Reload field list"
+              class="btn btn-warning">
+              <i class="fa fa-refresh"></i>
+            </button>
+            <button
+              confirm-click="removePattern()"
+              confirmation="Are you sure you want to remove this index pattern?"
+              tooltip="Remove index pattern"
+              class="btn btn-danger">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </div>
 
-        </h1>
         <p>
           This page lists every field in the <strong>{{indexPattern.id}}</strong>
           index and the field's associated core type as recorded by Elasticsearch.
