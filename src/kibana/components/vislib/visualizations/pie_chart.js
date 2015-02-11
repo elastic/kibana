@@ -48,10 +48,16 @@ define(function (require) {
     };
 
     PieChart.prototype.convertToPercentage = function (slices) {
-      (function assignPercentages(children, parentPercent) {
-        var sum = children.reduce(function (sum, child) {
+      (function assignPercentages(slices) {
+        if (slices.sumOfChildren != null) return;
+
+        var parent = slices;
+        var children = parent.children;
+        var parentPercent = parent.percentOfParent;
+
+        var sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
           return sum + child.size;
-        }, 0);
+        }, 0));
 
         children.forEach(function (child) {
           child.percentOfGroup = child.size / sum;
@@ -62,10 +68,10 @@ define(function (require) {
           }
 
           if (child.children) {
-            assignPercentages(child.children, child.percentOfParent);
+            assignPercentages(child);
           }
         });
-      }(slices.children));
+      }(slices));
     };
 
     /**
@@ -86,8 +92,7 @@ define(function (require) {
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
-        if (d.size === 0) return;
-        return Math.abs(d.size);
+        return d.percentOfParent * 100;
       });
       var x = d3.scale.linear()
       .range([0, 2 * Math.PI]);
