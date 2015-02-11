@@ -14,7 +14,8 @@ define(function (require) {
     };
 
     return new MetricAggType({
-      name: 'extended_stats',
+      name: 'std_dev',
+      dslName: 'extended_stats',
       title: 'Standard Deviation',
       makeLabel: function (agg) {
         return 'Standard Deviation of ' + agg.fieldDisplayName();

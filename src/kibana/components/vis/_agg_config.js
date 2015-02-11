@@ -201,7 +201,7 @@ define(function (require) {
       var output = this.write();
 
       var configDsl = {};
-      configDsl[this.type.name] = output.params;
+      configDsl[this.type.dslName || this.type.name] = output.params;
 
       // if the config requires subAggs, write them to the dsl as well
       if (output.subAggs) {
