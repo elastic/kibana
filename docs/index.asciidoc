@@ -16,3 +16,5 @@ include::visualize.asciidoc[]
 include::dashboard.asciidoc[]
 
 include::settings.asciidoc[]
+
+include::whats-new.asciidoc[]

@@ -1,5 +1,5 @@
 [[settings]]
-== Configuring Kibana
+== Configuring Kibana Settings
 
 To use Kibana, you have to tell it about the Elasticsearch indexes that you 
 want to explore by configuring one or more index patterns. You can also:
@@ -127,6 +127,21 @@ To set a different pattern as the default index pattern:
 
 NOTE: You can also manually set the default index pattern in *Advanced > Settings*. 
 
+=== Reload the Index Fields List
+When you add an index mapping, Kibana automatically scans the index(es) that 
+match the pattern to display a list of the index fields. You can reload the
+index fields list to pick up any newly-added fields. 
+
+Reloading the index fields list also resets Kibana's popularity counters for the fields. 
+The popularity counters keep track of the fields you've used most often within Kibana
+and are used to sort fields within lists. 
+
+To reload the index fields list:
+
+. Go to the *Settings > Indices* tab.
+. Select an index pattern from the Index Patterns list.
+. Click the pattern's *Reload* button. 
+
 === Delete an Index Pattern
 To delete an index pattern:
 
@@ -237,11 +252,19 @@ or *Dashboard* page. To view a saved object:
 . Go to *Settings > Objects*.
 . Select the object you want to view. 
 . Click the *View* button.
-. Click the *Save* button.
 
 Editing a saved object enables you to directly modify the object definition. 
 You can change the name of the object, add a description, and modify the
 JSON that defines the object's properties. 
+
+If you attempt to access an object whose index has been deleted, Kibana displays
+its Edit Object page. You can:
+
+* Recreate the index so you can continue using the object.  
+* Delete the object and recreate it using a different index.
+* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON`
+to point to an existing index pattern. This is useful if the index you were working
+with has been renamed. 
 
 WARNING: No validation is performed for object properties. Submitting invalid 
 changes will render the object unusable. Generally, you should use the 
@@ -311,31 +334,7 @@ the query that populates a Kibana visualization, the user just sees an empty
 visualization. 
 
 To configure access to Kibana using Shield, you create one or more Shield roles 
-for Kibana using the `kibana4` default role as a starting point. For example, 
-the following role grants access to the `logstash-*` indices from Kibana:
-
-----
-kibana-log-analysis:
-  cluster: cluster:monitor/nodes/info, cluster:monitor/health
-  indices:
-    'logstash-*':
-      - indices:admin/mappings/fields/get
-      - indices:admin/validate/query
-      - indices:data/read/search
-      - indices:data/read/msearch
-      - indices:admin/get 
-    '.kibana':
-      - indices:admin/exists
-      - indices:admin/mapping/put
-      - indices:admin/mappings/fields/get
-      - indices:admin/refresh
-      - indices:admin/validate/query
-      - indices:data/read/get
-      - indices:data/read/mget
-      - indices:data/read/search
-      - indices:data/write/delete
-      - indices:data/write/index
-      - indices:data/write/update
-----
+for Kibana using the `kibana4` default role as a starting point. For more 
+information, see http://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html[Using Shield with Kibana 4].
 
 
