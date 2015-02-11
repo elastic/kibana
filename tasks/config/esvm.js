@@ -6,7 +6,7 @@ module.exports = function (grunt) {
   return {
     options: {
       directory: directory,
-      version: '1.4.2',
+      branch: '1.4.3',
       plugins: [
         'elasticsearch/marvel/latest'
       ],

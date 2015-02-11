@@ -6,7 +6,10 @@ define(function (require) {
 
     var valueProps = {
       makeLabel: function () {
-        return this.key + ' of ' + this.fieldDisplayName();
+        var title = 'Average';
+        if (this.key === 'std_deviation_bounds.lower') title = 'Lower Standard Deviation';
+        if (this.key === 'std_deviation_bounds.upper') title = 'Upper Standard Deviation';
+        return title + ' of ' + this.fieldDisplayName();
       }
     };
 
@@ -26,22 +29,14 @@ define(function (require) {
       getResponseAggs: function (agg) {
         var ValueAggConfig = getResponseAggConfig(agg, valueProps);
         return [
-          new ValueAggConfig('upper_std_deviation'),
+          new ValueAggConfig('std_deviation_bounds.lower'),
           new ValueAggConfig('avg'),
-          new ValueAggConfig('lower_std_deviation')
+          new ValueAggConfig('std_deviation_bounds.upper')
         ];
       },
 
       getValue: function (agg, bucket) {
-        var stats = bucket[agg.parentId];
-        switch (agg.key) {
-        case 'upper_std_deviation':
-          return stats.avg + stats.std_deviation;
-        case 'lower_std_deviation':
-          return stats.avg - stats.std_deviation;
-        case 'avg':
-          return stats.avg;
-        }
+        return _.get(bucket[agg.parentId], agg.key);
       }
     });
   };
