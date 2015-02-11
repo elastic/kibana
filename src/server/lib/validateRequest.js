@@ -32,8 +32,8 @@ function validate(req) {
 
   // methods that accept standard json bodies
   var maybeMGet = ('_mget' === maybeMethod && add && jsonBody);
-  var maybeSearch = ('_search' === maybeMethod && add && jsonBody);
-  var maybeValidate = ('_validate' === maybeMethod && add && jsonBody);
+  var maybeSearch = ('_search' === maybeMethod && add);
+  var maybeValidate = ('_validate' === maybeMethod && add);
 
   // methods that accept bulk bodies
   var maybeBulk = ('_bulk' === maybeMethod && add && bulkBody);
@@ -82,10 +82,10 @@ function validate(req) {
     if (maybeKibanaIndex) return;
 
     // allow json bodies sent to _mget _search and _validate
-    if (jsonBody && (maybeMGet || maybeSearch || maybeValidate)) return;
+    if (maybeMGet || maybeSearch || maybeValidate) return;
 
     // allow bulk bodies sent to _msearch
-    if (bulkBody && (maybeMsearch)) return;
+    if (maybeMsearch) return;
 
     throw new validate.Fail();
   }
