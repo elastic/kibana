@@ -26,11 +26,15 @@ describe('lib/isValid', function () {
     if (_.isArray(body)) body = body.map(JSON.stringify).join('\n') + '\n';
     if (_.isObject(body)) body = JSON.stringify(body);
 
-    var pass = validateRequest({
-      method: method,
-      url: path,
-      rawBody: body
-    });
+    var pass = false;
+    try {
+      validateRequest({
+        method: method,
+        url: path,
+        rawBody: body
+      });
+      pass = true;
+    } catch (e) {}
 
     if (pass !== Boolean(valid)) {
       var msg = 'Expected ' + method + ' ' +
