@@ -15,7 +15,7 @@ define(function (require) {
 
     // maximum ms that we can delay emitting 'resize'. This is only used
     // to debounce resizes when the size of the element is constantly changing
-    var MS_MAX_RESIZE_DELAY = ResizeChecker.MS_MAX_RESIZE_DELAY = 1000;
+    var MS_MAX_RESIZE_DELAY = ResizeChecker.MS_MAX_RESIZE_DELAY = 500;
 
     /**
      * Checks the size of an element on a regular basis. Provides
@@ -28,11 +28,9 @@ define(function (require) {
     function ResizeChecker(el) {
       ResizeChecker.Super.call(this);
 
-      this._id = _.uniqueId('rc');
       this.$el = $(el);
-      this.notify = new Notifier({ location: 'Vislib ResizeChecker ' + this._id });
+      this.notify = new Notifier({ location: 'Vislib ResizeChecker ' + _.uniqueId() });
 
-      this._dirtyChangeStamp = Date.now() + 100;
       this.saveSize();
 
       this.check = _.bind(this.check, this);
