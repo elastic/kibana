@@ -79,7 +79,7 @@ define(function (require) {
       var rightStart = rightLastVal + oneUnit;
       var rightEndzone = {
         x: xScale(rightStart),
-        w: width - xScale(rightStart)
+        w: Math.max(width - xScale(rightStart), 0)
       };
 
       this.endzones = svg.selectAll('.layer')
