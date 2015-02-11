@@ -87,11 +87,16 @@ public class Utils {
 
     public static String[] extractHostsFromHttpServer(HttpServer httpServer, ESLogger logger) {
         logger.debug("deriving host setting from httpServer");
-        BoundTransportAddress boundAddress = httpServer.info().address();
-        if (httpServer.lifecycleState() != Lifecycle.State.STARTED || boundAddress == null || boundAddress.boundAddress() == null) {
+        BoundTransportAddress boundAddress = null;
+        if (httpServer.lifecycleState() == Lifecycle.State.STARTED) {
+            boundAddress = httpServer.info().address();
+        }
+
+        if (boundAddress == null || boundAddress.boundAddress() == null) {
             logger.debug("local http server is not yet started. can't connect");
             return null;
         }
+
         if (boundAddress.boundAddress().uniqueAddressTypeId() != 1) {
             logger.error("local node is not bound via the http transport. can't connect");
             return null;
