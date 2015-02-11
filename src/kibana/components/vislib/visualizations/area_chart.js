@@ -148,7 +148,7 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var circleRadius = 4;
+      var circleRadius = 12;
       var circleStrokeWidth = 1;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
@@ -181,12 +181,10 @@ define(function (require) {
       .attr('class', function circleClass(d) {
         return d.label;
       })
-      .attr('fill', function (d) {
-        return color(d.label);
-      })
       .attr('stroke', function strokeColor(d) {
         return color(d.label);
       })
+      .attr('fill', 'transparent')
       .attr('stroke-width', circleStrokeWidth);
 
       // update
