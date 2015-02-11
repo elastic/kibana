@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
   require('directives/greater_than');
 
-  describe.only('greater_than model validator directive', function () {
+  describe('greater_than model validator directive', function () {
     var $compile, $rootScope;
     var html;
 

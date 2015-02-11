@@ -9,6 +9,7 @@ var url = require('url');
 var target = url.parse(config.elasticsearch);
 var join = require('path').join;
 var logger = require('../lib/logger');
+var validateRequest = require('../lib/validateRequest');
 
 
 // If the target is backed by an SSL and a CA is provided via the config
@@ -23,12 +24,24 @@ var router = module.exports = express.Router();
 
 // We need to capture the raw body before moving on
 router.use(function (req, res, next) {
-  req.rawBody = '';
-  req.setEncoding('utf8');
+  var chunks = [];
   req.on('data', function (chunk) {
-    req.rawBody += chunk;
+    chunks.push(chunk);
   });
-  req.on('end', next);
+  req.on('end', function () {
+    req.rawBody = Buffer.concat(chunks);
+    next();
+  });
+});
+
+router.use(function (req, res, next) {
+  try {
+    validateRequest(req);
+    return next();
+  } catch (err) {
+    logger.error({ req: req }, err.message || 'Bad Request');
+    res.status(403).send(err.message || 'Bad Request');
+  }
 });
 
 function getPort(req) {
@@ -39,7 +52,6 @@ function getPort(req) {
 
 // Create the proxy middleware
 router.use(function (req, res, next) {
-
   var uri = _.defaults({}, target);
 
   // Add a slash to the end of the URL so resolve doesn't remove it.
@@ -65,7 +77,10 @@ router.use(function (req, res, next) {
 
   // Only send the body if it's a PATCH, PUT, or POST
   if (req.rawBody) {
-    options.body = req.rawBody;
+    options.headers['content-length'] = req.rawBody.length;
+    options.body = req.rawBody.toString('utf8');
+  } else {
+    options.headers['content-length'] = 0;
   }
 
   // To support the elasticsearch_preserve_host feature we need to change the
