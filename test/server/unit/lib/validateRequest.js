@@ -102,6 +102,8 @@ describe('lib/isValid', function () {
       run('HEAD', '/other-index', true);
       run('GET', '/_cluster/health', true);
       run('POST', '/.kibana/__notRealIndex__/_validate/query?q=foo:bar', true);
+      run('POST', '/_validate', true);
+      run('POST', '/_search', true);
     });
   });
 
