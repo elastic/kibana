@@ -72,9 +72,6 @@ define(function (require) {
         num = parseInt(mathString.substring(numFrom, i), 10);
       }
 
-      // zero values are invalid
-      if (num === 0) return undefined;
-
       if (type === 0) {
         // rounding is only allowed on whole, single, units (eg M or 1M, not 0.5M or 2M)
         if (num !== 1) {
