@@ -87,6 +87,17 @@ define(function () {
       ]
     });
 
+    api.addEndpointDescription('_recovery', {
+      patterns: [
+        "{indices}/_recovery",
+        "_recovery"
+      ],
+      url_params: {
+        detailed: "__flag__",
+        active_only: "__flag__"
+      }
+    });
+
     api.addEndpointDescription('_analyze', {
       methods: ['GET', 'POST'],
       patterns: [
