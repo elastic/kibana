@@ -47,6 +47,33 @@ define(function (require) {
         .call(events.addClickEvent());
     };
 
+    PieChart.prototype.convertToPercentage = function (slices) {
+      (function assignPercentages(slices) {
+        if (slices.sumOfChildren != null) return;
+
+        var parent = slices;
+        var children = parent.children;
+        var parentPercent = parent.percentOfParent;
+
+        var sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
+          return sum + child.size;
+        }, 0));
+
+        children.forEach(function (child) {
+          child.percentOfGroup = child.size / sum;
+          child.percentOfParent = child.percentOfGroup;
+
+          if (parentPercent != null) {
+            child.percentOfParent *= parentPercent;
+          }
+
+          if (child.children) {
+            assignPercentages(child);
+          }
+        });
+      }(slices));
+    };
+
     /**
      * Adds pie paths to SVG
      *
@@ -65,8 +92,7 @@ define(function (require) {
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
-        if (d.size === 0) return;
-        return Math.abs(d.size);
+        return d.percentOfParent * 100;
       });
       var x = d3.scale.linear()
       .range([0, 2 * Math.PI]);
@@ -177,6 +203,7 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
+          self.convertToPercentage(slices);
           path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 
