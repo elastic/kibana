@@ -1,6 +1,6 @@
 define(function (require) {
   require('modules')
-  .get('app/visualize', ['ui.select'])
+  .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
     require('plugins/visualize/editor/agg_params');
     require('plugins/visualize/editor/agg_add');
