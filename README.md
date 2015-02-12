@@ -1,5 +1,5 @@
 <!-- render {"template":"# Kibana <%= pkg.version %>"} -->
-# Kibana 4.0.0-rc1-snapshot
+# Kibana 4.0.0-rc1
 <!-- /render -->
 
 [![Build Status](https://travis-ci.org/elasticsearch/kibana.svg?branch=master)](https://travis-ci.org/elasticsearch/kibana?branch=master)
