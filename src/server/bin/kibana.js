@@ -68,7 +68,7 @@ server.start(function (err) {
   if (config.kibana.pid_file) {
     return fs.writeFile(config.kibana.pid_file, process.pid, function (err) {
       if (err) {
-        logger.fatal('Failed to write PID file to %s', config.kibana.pid_file);
+        logger.fatal({ err: err }, 'Failed to write PID file to %s', config.kibana.pid_file);
         process.exit(1);
       }
     });
