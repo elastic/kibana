@@ -1,6 +1,6 @@
-<div ng-mouseover="showPopularityControls(field)" ng-mouseout="showPopularityControls(false)">
+<div ng-mouseover="popularityField = field" ng-mouseout="popularityField = null">
   <span>{{ field.count }}</span>
-  <span class="field-popularize" ng-show="popularityHoverState == field">
+  <span class="field-popularize" ng-show="popularityField == field">
     <span ng-click="indexPattern.popularizeField(field.name, 1)"
       class="label label-default"><i class="fa fa-plus"></i></span>
     <span ng-click="indexPattern.popularizeField(field.name, -1)"

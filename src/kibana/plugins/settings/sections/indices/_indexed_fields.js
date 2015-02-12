@@ -31,10 +31,6 @@ define(function (require) {
           info: 'A gauge of how often this field is used',
         }];
 
-        $scope.showPopularityControls = function (field) {
-          $scope.popularityHoverState = (field) ? field : null;
-        };
-
         $scope.$watchCollection('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');
 
@@ -42,11 +38,6 @@ define(function (require) {
             var childScope = $scope.$new();
             rowScopes.push(childScope);
             childScope.field = field;
-
-            // update the active field via object comparison
-            if (_.isEqual(field, $scope.popularityHoverState)) {
-              $scope.showPopularityControls(field);
-            }
 
             return [
               {

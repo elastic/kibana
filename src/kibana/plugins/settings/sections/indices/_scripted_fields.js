@@ -5,6 +5,7 @@ define(function (require) {
   require('modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
+    var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
 
     var notify = new Notifier();
@@ -28,6 +29,8 @@ define(function (require) {
         }, {
           title: 'type'
         }, {
+          title: 'popularity'
+        }, {
           title: 'controls',
           sortable: false
         }];
@@ -43,6 +46,9 @@ define(function (require) {
             rowScopes.push(rowScope);
 
             columns.push({
+              markup: popularityHtml,
+              scope: rowScope
+            }, {
               markup: controlsHtml,
               scope: rowScope
             });
