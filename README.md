@@ -1,5 +1,5 @@
 <!-- render {"template":"# Kibana <%= pkg.version %>"} -->
-# Kibana 4.0.0-beta3
+# Kibana 4.0.0-rc1-snapshot
 <!-- /render -->
 
 [![Build Status](https://travis-ci.org/elasticsearch/kibana.svg?branch=master)](https://travis-ci.org/elasticsearch/kibana?branch=master)
@@ -18,10 +18,8 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 
 ## Requirements
 
-- Elasticsearch version 1.4.0 or later
+- Elasticsearch version 1.4.3 or later
 - Kibana binary package
-
-*Note:* Groovy scripting must be enabled in Elasticsearch
 
 ## Installation
 
