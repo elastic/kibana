@@ -24,7 +24,7 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 ## Installation
 
 * Download: [http://www.elasticsearch.org/overview/kibana/installation/](http://www.elasticsearch.org/overview/kibana/installation/)
-* Run `bin/kibana` on unix, or `bin/kibana.bat` on Windows.
+* Run `server/bin/kibana` on unix, or `server/bin/kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
 
 <!-- include {"path":"docs/quick_start.md"} -->
