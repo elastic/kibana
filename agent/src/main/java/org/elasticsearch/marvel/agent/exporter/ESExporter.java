@@ -125,6 +125,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         keepAliveWorker = new ConnectionKeepAliveWorker();
 
+        dynamicSettings.addDynamicSetting(SETTINGS_HOSTS);
         dynamicSettings.addDynamicSetting(SETTINGS_HOSTS + ".*");
         dynamicSettings.addDynamicSetting(SETTINGS_TIMEOUT);
         dynamicSettings.addDynamicSetting(SETTINGS_READ_TIMEOUT);

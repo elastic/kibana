@@ -37,6 +37,7 @@ import org.elasticsearch.marvel.agent.event.ClusterEvent;
 import org.elasticsearch.marvel.agent.event.Event;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -129,6 +130,28 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
             }
         }
         return false;
+    }
+
+
+    @Test
+    public void testDynamicHostChange() {
+        // disable exporting to be able to use non valid hosts
+        ImmutableSettings.Builder builder = ImmutableSettings.builder()
+                .put(AgentService.SETTINGS_INTERVAL, "-1");
+        cluster().startNode(builder);
+
+        ESExporter esExporter = getEsExporter();
+
+        assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(ESExporter.SETTINGS_HOSTS, "test1")));
+        assertThat(esExporter.getHosts(), Matchers.arrayContaining("test1"));
+
+        // wipes the non array settings
+        assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder()
+                .putArray(ESExporter.SETTINGS_HOSTS, "test2").put(ESExporter.SETTINGS_HOSTS, "")));
+        assertThat(esExporter.getHosts(), Matchers.arrayContaining("test2"));
+
+        assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().putArray(ESExporter.SETTINGS_HOSTS, "test3")));
+        assertThat(esExporter.getHosts(), Matchers.arrayContaining("test3"));
     }
 
     @Test
