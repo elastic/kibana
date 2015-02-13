@@ -291,7 +291,9 @@ connect to Elasticsearch running on a different machine, you'll need to update y
 |The Elasticsearch instance where the indexes you want to query reside. Default: `elasticsearch_url: "http://localhost:9200"`.
 
 |`elasticsearch_preserve_host`
-|By default, the hostname specified in `elasticsearch_url` is sent to xxx. To use the hostname of the Kibana server instead, set this option to `false`. Default: `elasticsearch_preserve_host: true`.
+|By default, the host specified in the incoming request from the browser is specified as the host in the 
+corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host
+specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default. Default: `elasticsearch_preserve_host: true`.
 
 |`kibana_index`
 |The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
