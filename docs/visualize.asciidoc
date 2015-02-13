@@ -12,7 +12,7 @@ data source types:
 Visualizations rely on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1. 
 
 [float]
-[[create-vis]]
+[[createvis]]
 === Creating a New Visualization
 
 To start the New Visualization wizard, click on the *Visualize* tab at the top left of the page. If you are already 
