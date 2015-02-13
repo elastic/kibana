@@ -23,6 +23,8 @@ define(function (require) {
       if (bounds && axisOnTimeField) {
         chart.ordered.min = bounds.min;
         chart.ordered.max = bounds.max;
+      } else {
+        chart.ordered.endzones = false;
       }
     };
   };

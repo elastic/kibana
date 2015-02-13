@@ -53,7 +53,7 @@ define(function (require) {
       var yScale = xAxis.yScale;
       var ordered = xAxis.ordered;
 
-      if (!ordered || ordered.min == null || ordered.max == null) return;
+      if (!ordered || ordered.endzones === false) return;
 
       var attr = this.handler._attr;
       var height = attr.height;
