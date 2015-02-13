@@ -69,7 +69,7 @@
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
-              <button ng-click="moreSamples(true)" class="btn btn-default">
+              <button type="button" ng-click="moreSamples(true)" class="btn btn-default">
                 Expand Search
               </button>
             </div>
@@ -82,6 +82,7 @@
               <button
                 ng-if="index.sampleCount < index.existing.matches.length"
                 ng-click="moreSamples()"
+                type="button"
                 class="btn btn-default">
                 Expand Search
               </button>
