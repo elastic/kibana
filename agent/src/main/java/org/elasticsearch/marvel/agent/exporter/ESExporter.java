@@ -67,6 +67,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     public static final String SETTINGS_TIMEOUT = SETTINGS_PREFIX + "timeout";
     public static final String SETTINGS_READ_TIMEOUT = SETTINGS_PREFIX + "read_timeout";
 
+    // es level timeout used when checking and writing templates (used to speed up tests)
+    public static final String SETTINGS_CHECK_TEMPLATE_TIMEOUT = SETTINGS_PREFIX + ".template.master_timeout";
+
+    // es level timeout used for bulk indexing (used to speed up tests)
+    public static final String SETTINGS_BULK_TIMEOUT = SETTINGS_PREFIX + ".bulk.timeout";
+
     volatile String[] hosts;
     volatile boolean boundToLocalNode = false;
     final String indexPrefix;
@@ -81,6 +87,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final ClusterService clusterService;
     final ClusterName clusterName;
     HttpServer httpServer;
+
+    @Nullable
+    final TimeValue templateCheckTimeout;
+    @Nullable
+    final TimeValue bulkTimeout;
 
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
@@ -116,6 +127,9 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         timeoutInMillis = (int) settings.getAsTime(SETTINGS_TIMEOUT, new TimeValue(6000)).millis();
         readTimeoutInMillis = (int) settings.getAsTime(SETTINGS_READ_TIMEOUT, new TimeValue(timeoutInMillis * 10)).millis();
+
+        templateCheckTimeout = settings.getAsTime(SETTINGS_CHECK_TEMPLATE_TIMEOUT, null);
+        bulkTimeout = settings.getAsTime(SETTINGS_CHECK_TEMPLATE_TIMEOUT, null);
 
         nodeStatsRenderer = new NodeStatsRenderer();
         indexStatsRenderer = new IndexStatsRenderer();
@@ -209,7 +223,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     private HttpURLConnection openExportingConnection() {
         logger.trace("setting up an export connection");
-        HttpURLConnection conn = openAndValidateConnection("POST", getIndexName() + "/_bulk", XContentType.SMILE.restContentType());
+        String queryString = "";
+        if (bulkTimeout != null) {
+            queryString = "?master_timeout=" + bulkTimeout;
+        }
+        HttpURLConnection conn = openAndValidateConnection("POST", getIndexName() + "/_bulk" + queryString, XContentType.SMILE.restContentType());
         if (conn != null && (keepAliveThread == null || !keepAliveThread.isAlive())) {
             // start keep alive upon successful connection if not there.
             initKeepAliveThread();
@@ -458,7 +476,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             if (expectedVersion < 0) {
                 throw new RuntimeException("failed to find an index version in pre-configured index template");
             }
-            HttpURLConnection conn = openConnection(host, "GET", "_template/marvel", null);
+
+            String queryString = "";
+            if (templateCheckTimeout != null) {
+                queryString = "?timeout=" + templateCheckTimeout;
+            }
+            HttpURLConnection conn = openConnection(host, "GET", "_template/marvel" + queryString, null);
             if (conn == null) {
                 return false;
             }
@@ -483,7 +506,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             // nothing there, lets create it
             if (!hasTemplate) {
                 logger.debug("uploading index template");
-                conn = openConnection(host, "PUT", "_template/marvel", XContentType.JSON.restContentType());
+                conn = openConnection(host, "PUT", "_template/marvel" + queryString, XContentType.JSON.restContentType());
                 OutputStream os = conn.getOutputStream();
                 Streams.copy(template, os);
                 if (!(conn.getResponseCode() == 200 || conn.getResponseCode() == 201)) {

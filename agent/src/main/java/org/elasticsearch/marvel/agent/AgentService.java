@@ -63,10 +63,16 @@ import static org.elasticsearch.common.collect.Lists.newArrayList;
 
 public class AgentService extends AbstractLifecycleComponent<AgentService> implements NodeSettingsService.Listener {
 
-    public static final String SETTINGS_INTERVAL = "marvel.agent.interval";
-    public static final String SETTINGS_INDICES = "marvel.agent.indices";
-    public static final String SETTINGS_ENABLED = "marvel.agent.enabled";
-    public static final String SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL = "marvel.agent.cluster_state.heartbeat";
+    private static final String SETTINGS_BASE = "marvel.agent.";
+
+    public static final String SETTINGS_INTERVAL = SETTINGS_BASE + "interval";
+    public static final String SETTINGS_INDICES = SETTINGS_BASE + "indices";
+    public static final String SETTINGS_ENABLED = SETTINGS_BASE + "enabled";
+    public static final String SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL = SETTINGS_BASE + "cluster_state.heartbeat";
+
+    public static final String SETTINGS_STATS_TIMEOUT = SETTINGS_BASE + "stats.timeout";
+    public static final String SETTINGS_INDICES_STATS_TIMEOUT = SETTINGS_BASE + "stats.indices.timeout";
+    public static final String SETTINGS_CLUSTER_STATS_TIMEOUT = SETTINGS_BASE + "stats.cluster_stats.timeout";
 
     private final IndicesLifecycle indicesLifecycle;
     private final NodeService nodeService;
@@ -83,6 +89,9 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     private volatile long samplingInterval;
     private volatile long clusterStateHeartbeatInterval;
     volatile private String[] indicesToExport = Strings.EMPTY_ARRAY;
+
+    private volatile TimeValue indicesStatsTimeout;
+    private volatile TimeValue clusterStatsTimeout;
 
     private Collection<Exporter> exporters;
 
@@ -106,6 +115,10 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         this.client = client;
         this.clusterName = clusterName.value();
 
+        TimeValue statsTimeout = settings.getAsTime(SETTINGS_STATS_TIMEOUT, TimeValue.timeValueMinutes(10));
+        indicesStatsTimeout = settings.getAsTime(SETTINGS_INDICES_STATS_TIMEOUT, statsTimeout);
+        clusterStatsTimeout = settings.getAsTime(SETTINGS_CLUSTER_STATS_TIMEOUT, statsTimeout);
+
         indicesLifeCycleListener = new IndicesLifeCycleListener();
         clusterStateEventListener = new ClusterStateListener();
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
@@ -120,6 +133,9 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         nodeSettingsService.addListener(this);
         dynamicSettings.addDynamicSetting(SETTINGS_INTERVAL);
         dynamicSettings.addDynamicSetting(SETTINGS_INDICES + ".*"); // array settings
+        dynamicSettings.addDynamicSetting(SETTINGS_STATS_TIMEOUT);
+        dynamicSettings.addDynamicSetting(SETTINGS_CLUSTER_STATS_TIMEOUT);
+        dynamicSettings.addDynamicSetting(SETTINGS_INDICES_STATS_TIMEOUT);
     }
 
     protected void applyIntervalSettings() {
@@ -193,7 +209,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     @Override
     public void onRefreshSettings(Settings settings) {
         TimeValue newSamplingInterval = settings.getAsTime(SETTINGS_INTERVAL, null);
-        if (newSamplingInterval != null) {
+        if (newSamplingInterval != null && newSamplingInterval.millis() != samplingInterval) {
             logger.info("sampling interval updated to [{}]", newSamplingInterval);
             samplingInterval = newSamplingInterval.millis();
             applyIntervalSettings();
@@ -203,6 +219,19 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         if (indices != null) {
             logger.info("sampling indices updated to [{}]", Strings.arrayToCommaDelimitedString(indices));
             indicesToExport = indices;
+        }
+
+        TimeValue statsTimeout = settings.getAsTime(SETTINGS_STATS_TIMEOUT, TimeValue.timeValueMinutes(10));
+        TimeValue newTimeValue = settings.getAsTime(SETTINGS_INDICES_STATS_TIMEOUT, statsTimeout);
+        if (!indicesStatsTimeout.equals(newTimeValue)) {
+            logger.info("indices stats timeout updated to [{}]", newTimeValue);
+            indicesStatsTimeout = newTimeValue;
+
+        }
+        newTimeValue = settings.getAsTime(SETTINGS_CLUSTER_STATS_TIMEOUT, statsTimeout);
+        if (!clusterStatsTimeout.equals(newTimeValue)) {
+            logger.info("indices stats timeout updated to [{}]", newTimeValue);
+            clusterStatsTimeout = newTimeValue;
         }
     }
 
@@ -257,7 +286,16 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
 
         private void exportIndicesStats() {
             logger.trace("local node is master, exporting indices stats");
-            IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().setIndices(indicesToExport).get();
+
+            // indices stats doesn't have a time out. we have to rely on futures
+            IndicesStatsResponse indicesStatsResponse;
+            try {
+                indicesStatsResponse = client.admin().indices().prepareStats().all().setIndices(indicesToExport).get(indicesStatsTimeout);
+            } catch (RuntimeException e) {
+                // we have to catch runtime exception here because ElasticsearchTimeoutException was renamed post 1.0
+                logger.error("error while collecting indices stats", e);
+                return;
+            }
             for (Exporter e : exporters) {
                 try {
                     e.exportIndicesStats(indicesStatsResponse);
@@ -269,7 +307,11 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
 
         private void exportClusterStats() {
             logger.trace("local node is master, exporting cluster stats");
-            ClusterStatsResponse stats = client.admin().cluster().prepareClusterStats().get();
+            // TODO: cluster stats timeout here is tricky because it will be silently honoured. The only way to find out is to
+            //       log debug logs in elasticsearch. Doubting whether we should fail the entire operation rather then
+            //       collect partial cluster state. The tricky part here is that you may have some flaky client nodes
+            //       which may cause this to take long.
+            ClusterStatsResponse stats = client.admin().cluster().prepareClusterStats().setTimeout(clusterStatsTimeout).get();
             for (Exporter e : exporters) {
                 try {
                     e.exportClusterStats(stats);

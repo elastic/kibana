@@ -98,7 +98,9 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
                 .put("discovery.type", "zen")
                 .put("discovery.zen.ping_timeout", "1s")
                 .put("discovery.initial_state_timeout", "100ms")
-                .put("discovery.zen.minimum_master_nodes", 2);
+                .put("discovery.zen.minimum_master_nodes", 2)
+                .put(ESExporter.SETTINGS_BULK_TIMEOUT, "1s")
+                .put(ESExporter.SETTINGS_CHECK_TEMPLATE_TIMEOUT, "1s");
         cluster().startNode(builder);
 
         ESExporter esExporter = getEsExporter();
