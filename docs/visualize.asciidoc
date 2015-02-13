@@ -1,7 +1,7 @@
 [[visualize]]
 == Visualize
 
-You can use Kibana's _Visualize_ app to design and create data visualizations. You can save these visualizations, use
+You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use
 them individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following 
 data source types:
 
@@ -9,28 +9,25 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Visualizations are based on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1. 
+Visualizations rely on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1. 
 
 [float]
 [[getting-started]]
 === Creating a New Visualization
 
-To start the New Visualization wizard, click on the *Visualize* tab at the top left of the screen. Alternately, you can 
-click the *New Visualization* button image:images/K4NewDocument.png[New Document button] in the toolbar panel to the 
-right of the search bar. The wizard guides you through the following steps:
+To start the New Visualization wizard, click on the *Visualize* tab at the top left of the page. If you are already 
+creating a visualization, you can click the *New Visualization* button image:images/K4NewDocument.png[New Document 
+button] in the toolbar to the right of the search bar. The wizard guides you through the following steps:
 
 [float]
 [[newvis01]]
 ==== Step 1: Choose the Visualization Type
 
-The New Visualization wizard starts with the following screen:
+The New Visualization wizard starts with the following page:
 
 image:images/NewViz01.png[]
 
-The data table, Markdown, and metric elements aren't visualizations, but all the elements on the list can be included 
-in a <<dashboard,Dashboard>>.
-
-You can also open a saved visualization that you created earlier. The saved visualization selector includes a text 
+You can also load a saved visualization that you created earlier. The saved visualization selector includes a text 
 field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved 
 Objects*, to manage your saved visualizations.
 
@@ -42,9 +39,9 @@ selection.
 [[newvis02]]
 ==== Step 2: Choose a Data Source
 
-You can choose a new or saved search to serve as the data source for your visualization. Searches are based on an 
-_index pattern_, which is a regular expression that matches the indices you want to visualize. After selecting _new 
-search_, select an index pattern from the drop-down to bring up the visualization editor. 
+You can choose a new or saved search to serve as the data source for your visualization. Searches are associated with
+an index or a set of indexes. When you select _new search_ on a system with multiple indices configured, select an 
+index pattern from the drop-down to bring up the visualization editor. 
 
 // How is this drop-down populated? Is it just a list of all indices in the cluster? Can I configure the contents?
 
@@ -58,19 +55,19 @@ When you make changes to the search that is linked to the visualization, the vis
 The visualization editor enables you to configure and edit visualizations. The visualization editor has the following 
 main elements:
 
-image:images/VizEditor.png[]
-
-1. <<toolbar-panel,Toolbar Panel>>
+1. <<toolbar-panel,Toolbar>>
 2. <<aggregation-builder,Aggregation Builder>>
 3. <<preview-canvas,Preview Canvas>>
 
+image:images/VizEditor.png[]
+
 [float]
 [[toolbar-panel]]
-===== Toolbar Panel
+===== Toolbar
 
-The toolbar panel has a search field for interactive data searches, as well as toolbars to manage saving and loading
-visualizations. For visualizations based on saved searches, the search bar is initially disabled. Double-click the 
-grayed-out search field to enable interactive searching.
+The toolbar has a search field for interactive data searches, as well as controls to manage saving and loading
+visualizations. For visualizations based on saved searches, the search bar is grayed out. To edit the search, replacing 
+the saved search with the edited version, double-click the search field.
 
 // Why does it behave this way? I'd like to be able to say 'for saved searches interactive searches are disabled
 // because $REASONS'.
@@ -83,20 +80,26 @@ the current visualization.
 [[aggregation-builder]]
 ===== Aggregation Builder
 
-Use the aggregation builder on the left of the screen to configure the 
+Use the aggregation builder on the left of the page to configure the 
 {ref}/search-aggregations.html#\_metrics_aggregations[metric] and 
 {ref}/search-aggregations.html#\_bucket_aggregations[bucket] aggregations used in your visualization. Buckets are 
 analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
-{ref}/search-aggregations.html[Elasticsearch documentation].
+{ref}/search-aggregations.html[Elasticsearch aggregations reference].
 
-In bar or line chart visualizations, use _metric_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
+In bar or line chart visualizations, use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
 colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of 
 slices.
 
 // "Other visualizations may use these in new and different ways." < Such as? Would it be useful to add an appendix
 // on advanced visualizations or a cookbook of neat nonintuitive vis tricks?
 
-Choose the metric aggregation for your visualization's Y axis, such as count, average, sum, min, max, or cardinality 
+Choose the metric aggregation for your visualization's Y axis, such as 
+{ref}/search-aggregations-metrics-valuecount-aggregation.html[count], 
+{ref}/search-aggregations-metrics-avg-aggregation.html[average], 
+{ref}/search-aggregations-metrics-sum-aggregation.html[sum], 
+{ref}/search-aggregations-metrics-min-aggregation.html[min], 
+{ref}/search-aggregations-metrics-max-aggregation.html[max], or 
+{ref}/search-aggregations-metrics-cardinality-aggregation.html[cardinality] 
 (unique count). Use bucket aggregations for the visualization's X axis, color slices, and row/column splits. Common 
 bucket aggregations include date histogram, range, terms, filters, and significant terms.
 

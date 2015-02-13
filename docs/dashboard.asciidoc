@@ -1,9 +1,11 @@
-[float]
 [[dashboard]]
 == Dashboard
 
-A Kibana _dashboard_ displays saved visualizations in groups that you can arrange. You can save a dashboard to share or 
-reload at a later time.
+A Kibana _dashboard_ displays a set of saved visualizations in groups that you can arrange freely. You can save a 
+dashboard to share or reload at a later time.
+
+.Sample dashboard
+image:images/tfl-dashboard.png[Example dashboard]
 
 [float]
 [[getting-started]]
@@ -13,13 +15,13 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 [float]
 [[creating-a-new-dashboard]]
-==== Creating a New Dashboard
+==== Building a New Dashboard
 
 The first time you click the *Dashboard* tab, Kibana displays an empty dashboard.
 
 image:images/NewDashboard.png[New Dashboard screen]
 
-Add visualizations to start creating your dashboard.
+Build your dashboard by adding visualizations.
 
 [float]
 [[adding-visualizations-to-a-dashboard]]
@@ -31,27 +33,36 @@ string into the *Visualization Filter* field.
 
 The visualization you select appears in a _container_ on your dashboard.
 
-*NOTE:* If you see a message about the container's height or width being too small, <<resizing-containers,resize the 
+NOTE: If you see a message about the container's height or width being too small, <<resizing-containers,resize the 
 container>>.
 
 [float]
 [[saving-dashboards]]
 ==== Saving Dashboards
 
-To save the dashboard, click the *Save Dashboard* button in the toolbar panel, enter a name for the dashboard in the *Save As* field, and click the *Save* button.
+To save the dashboard, click the *Save Dashboard* button in the toolbar panel, enter a name for the dashboard in the 
+*Save As* field, and click the *Save* button.
 
 [float]
 [[loading-a-saved-dashboard]]
 ==== Loading a Saved Dashboard
 
-Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes a text field to filter by dashboard name and a link to the Object Editor, accessible through *Settings > Edit Saved 
-Objects*, to manage your saved dashboards.
+Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes 
+a text field to filter by dashboard name and a link to the Object Editor for managing your saved dashboards. You can 
+also access the Object Editor by clicking *Settings > Edit Saved Objects*.
 
 [float]
 [[sharing-dashboards]]
 ==== Sharing Dashboards
 
-Click the *Share* button to display HTML code to embed the dashboard in another Web page, along with a direct link to the dashboard. Click the copy button image:images/Clipboard.png[Copy to Clipboard button] next to either option to copy the code or the link to your clipboard.
+You can share dashboards with other users. You can share a direct link to the Kibana dashboard or embed the dashboard 
+in your Web page.
+
+NOTE: A user must have Kibana access in order to view embedded dashboards.
+
+Click the *Share* button to display HTML code to embed the dashboard in another Web page, along with a direct link to 
+the dashboard. Click the copy button image:images/Clipboard.png[Copy to Clipboard button] next to either option to copy 
+the code or the link to your clipboard.
 
 [float]
 [[embedding-dashboards]]
@@ -59,13 +70,12 @@ Click the *Share* button to display HTML code to embed the dashboard in another 
 
 To embed a dashboard, copy the embed code from the _Share_ display into your external web application.
 
-NOTE: A user must have Kibana access in order to view embedded dashboards.
-
 [float]
 [[customizing-your-dashboard]]
 === Customizing Dashboard Elements
 
-The visualizations in your dashboard are stored in _containers_. This section discusses customizing these containers.
+The visualizations in your dashboard are stored in resizable _containers_ that you can arrange on the dashboard. This 
+section discusses customizing these containers.
 
 [float]
 [[moving-containers]]
@@ -88,14 +98,15 @@ confirm the new container size.
 [[removing-containers]]
 ==== Removing Containers
 
-Click the *x* icon at the top right corner of a container to remove that container from the dashboard. Removing a container from a dashboard does not affect the saved visualization in that container.
+Click the *x* icon at the top right corner of a container to remove that container from the dashboard. Removing a 
+container from a dashboard does not delete the saved visualization in that container.
 
 [float]
 [[viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-To display the data that creates the visualization, click the bar at the bottom of the container. The raw data
-replaces the visualization with four tabs with detailed information about the data, as in this example:
+To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed 
+information about the raw data replace the visualization, as in this example:
 
 [horizontal]
 *Table*:: A representation of the underlying data, presented as a paginated data grid. You can sort the items 
@@ -114,4 +125,5 @@ image:images/NYCTA-Statistics.png[]
 [[changing-the-visualization]]
 === Changing the Visualization
 
-Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the visualization in the <<visualize,Visualize>> app.
+Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the 
+visualization in the <<visualize,Visualize>> page.
