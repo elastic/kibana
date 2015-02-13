@@ -1,10 +1,9 @@
 var Promise = require('bluebird');
+var waitForEs = require('./waitForEs');
 var migrateConfig = require('./migrateConfig');
 
 module.exports = function () {
-  var tasks = [
-    migrateConfig()
-  ];
-
-  return Promise.all(tasks);
+  return waitForEs().then(function () {
+    return migrateConfig();
+  });
 };
