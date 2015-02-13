@@ -234,6 +234,20 @@ define(function () {
       }
     });
 
+    api.addEndpointDescription('_search_shards', {
+      methods: ['GET' ],
+      priority: 10, // collides with get doc by id
+      patterns: [
+        "{indices}/{types}/_search_shards",
+        "{indices}/_search_shards",
+        "_search_shards"
+      ],
+      url_params: {
+        preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
+        routing: "",
+        local: "__flag__"
+      }
+    });
   };
 
 });
