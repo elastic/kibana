@@ -28,6 +28,7 @@
           <div class="spinner"></div>
         </li>
 
+        <li><a ng-click="previousTimeperiod()"><i class="fa fa-arrow-left"></i></a></li>
         <li ng-if="setupComplete" ng-show="timefilter.enabled" class="navbar-timepicker-container">
           <a ng-click="toggleTimepicker()">
             <span ng-show="timefilter.refreshInterval.value > 0" class="navbar-timepicker-auto-refresh-desc">
@@ -40,6 +41,7 @@
             </span>
           </a>
         </li>
+        <li><a ng-click="nextTimeperiod()" disabled="true"><i class="fa fa-arrow-right"></i></a></li>
       </ul>
       <!-- /Full navbar -->
     </div>
