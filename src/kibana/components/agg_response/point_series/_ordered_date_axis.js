@@ -4,7 +4,8 @@ define(function (require) {
 
     return function orderedDateAxis(vis, chart) {
       var aspects = chart.aspects;
-      var buckets = aspects.x.agg.buckets;
+      var xAgg = aspects.x.agg;
+      var buckets = xAgg.buckets;
       var format = buckets.getScaledDateFormat();
 
       chart.xAxisFormatter = function (val) {
@@ -16,8 +17,10 @@ define(function (require) {
         interval: buckets.getInterval(),
       };
 
+      var axisOnTimeField = xAgg.fieldName() === xAgg.vis.indexPattern.timeFieldName;
       var bounds = buckets.getBounds();
-      if (bounds) {
+
+      if (bounds && axisOnTimeField) {
         chart.ordered.min = bounds.min;
         chart.ordered.max = bounds.max;
       }
