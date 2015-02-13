@@ -17,4 +17,6 @@ include::dashboard.asciidoc[]
 
 include::settings.asciidoc[]
 
+include::production.asciidoc[]
+
 include::whats-new.asciidoc[]

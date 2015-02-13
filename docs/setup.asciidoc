@@ -1,10 +1,10 @@
 [[setup]]
 == Getting Kibana Up and Running
-You can set up Kibana and start exploring your Elasticsearch indexes in minutes.
+You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
-* Elasticsearch 1.4.0 or later
-* An up-to-date web browser 
+* Elasticsearch 1.4.3 or later
+* An up-to-date web browser. For a list of offically-supported browsers, see http://www.elasticsearch.com/support/matrix[Supported Browsers]).
 * Information about your Elasticsearch installation: 
 ** URL of the Elasticsearch instance you want to connect to.
 ** Which index(es) you want to search. You can use the Elasticsearch http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/cat-indices.html[`_cat/indices/`] command to list your indices.
@@ -21,17 +21,18 @@ That's it! Kibana is now running on port 5601.
 TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
 
 === Connect Kibana with Elasticsearch 	
-Before you can start using Kibana, you need to tell it which Elasticsearch index(es) you want to explore. The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of one or more of your indexes. That's it. That's all you need to configure to start using Kibana. 
+Before you can start using Kibana, you need to tell it which Elasticsearch index(es) you want to explore. The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of one or more of your indices. That's it. That's all you need to configure to start using Kibana. 
 
 TIP: You can add index patterns at any time from the <<settings-create-pattern,Settings tab>>.
 
 To configure the Elasticsearch index(es) you want to access with Kibana:
 
 . Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
-// image::images/kibana-start.jpg[Kibana start page]
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indexes. By default, Kibana guesses that you're you're working with data being fed into Elasticsearch by Logstash. If that's the case, you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more characters in an index's name. If your Elasticsearch indexes follow some other naming convention, enter an appropriate pattern.  (The "pattern" can also simply be the name of a single index.)
-. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the index field that contains the timestamp. (Kibana reads the index mapping to list all of the fields that contain a timestamp.) If your index doesn't have time-based data, disable the *Index contains time-based events* option. 
-. If new indexes are generated periodically and have a timestamp appended to the name, select the *Use event times to create index names* option and select the *Index pattern interval*. This improves search performance by enabling Kibana to search only those indices that could contain data in the time range you specify. (This is primarily applicable if you are using Logstash to feed data in to Elasticsearch.)
+image:images/Discover-Start.jpg[Kibana start page]
+
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana guesses that you're you're working with data being fed into Elasticsearch by Logstash. If that's the case, you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more characters in an index's name. If your Elasticsearch indices follow some other naming convention, enter an appropriate pattern.  The "pattern" can also simply be the name of a single index.
+. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the index field that contains the timestamp. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data, disable the *Index contains time-based events* option. 
+. If new indices are generated periodically and have a timestamp appended to the name, select the *Use event times to create index names* option and select the *Index pattern interval*. This improves search performance by enabling Kibana to search only those indices that could contain data in the time range you specify. This is primarily applicable if you are using Logstash to feed data into Elasticsearch.
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default. When you have more than one index pattern, you can designate which one to use as the default from **Settings > Indices**. 
 
 Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for the matching index.

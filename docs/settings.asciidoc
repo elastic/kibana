@@ -1,23 +1,23 @@
 [[settings]]
-== Configuring Kibana Settings
+== Settings
 
-To use Kibana, you have to tell it about the Elasticsearch indexes that you 
+To use Kibana, you have to tell it about the Elasticsearch indices that you 
 want to explore by configuring one or more index patterns. You can also:
 
 * Create scripted fields that are computed on the fly from your data. You can 
 browse and visualize scripted fields, but you cannot search them.
 * Set advanced options such as the number of rows to show in a table and 
-how many of the most popular fields to show. (Use caution when modifying advanced options,
-as it's possible to set values that are incompatible with one another.)
+how many of the most popular fields to show. Use caution when modifying advanced options,
+as it's possible to set values that are incompatible with one another.
 * Configure Kibana for a production environment
 
 
 [[settings-create-pattern]]
 === Create an Index Pattern to Connect to Elasticsearch
-An _index pattern_ identifies one or more Elasticsearch indexes that you want to 
+An _index pattern_ identifies one or more Elasticsearch indices that you want to 
 explore with Kibana. Kibana looks for index names that match the specified pattern.
 An asterisk (*) in the pattern matches zero or more characters. For example, the pattern 
-`myindex-*` matches all indexes whose names start with `myindex-`, such as `myindex-1` 
+`myindex-*` matches all indices whose names start with `myindex-`, such as `myindex-1` 
 and `myindex-2`. 
 
 If you use event times to create index names (for example, if you're pushing data
@@ -25,7 +25,7 @@ into Elasticsearch from Logstash), the index pattern can also contain a date for
 In this case, the static text in the pattern must be enclosed in brackets, and you 
 specify the date format using the tokens described in <<date-format-tokens>>.
 
-For example, `[logstash-]YYYY.MM.DD` matches all indexes whose names have a 
+For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a 
 timestamp of the form `YYYY.MM.DD` appended to the prefix `logstash-`, such as 
 `logstash-2015.01.31` and `logstash-2015-02-01`.
 
@@ -35,25 +35,25 @@ To create an index pattern to connect to Elasticsearch:
 
 . Go to the *Settings > Indices* tab.
 . Specify an index pattern that matches the name of one or more of your Elasticsearch 
-indexes. (By default, Kibana guesses that you're you're working with log data being 
-fed into Elasticsearch by Logstash.)
+indices. By default, Kibana guesses that you're you're working with log data being 
+fed into Elasticsearch by Logstash.
 +
-NOTE: When you switch between top-level tabs, Kibana remembers where you were at.
+NOTE: When you switch between top-level tabs, Kibana remembers where you were.
 For example, if you view a particular index pattern from the Settings tab, switch
 to the Discover tab, and then go back to the Settings tab, Kibana displays the
-index pattern you last looked at. To get to the create new pattern form, click 
-the *Add New* button in the Index Patterns list.
+index pattern you last looked at. To get to the create pattern form, click 
+the *Add* button in the Index Patterns list.
 
 . If your index contains a timestamp field that you want to use to perform 
 time-based comparisons, select the *Index contains time-based events* option 
-and select the index field that contains the timestamp. (Kibana reads the 
-index mapping to list all of the fields that contain a timestamp.)
+and select the index field that contains the timestamp. Kibana reads the 
+index mapping to list all of the fields that contain a timestamp.
 
-. If new indexes are generated periodically and have a timestamp appended to 
+. If new indices are generated periodically and have a timestamp appended to 
 the name, select the *Use event times to create index names* option and select 
 the *Index pattern interval*. This enables Kibana to search only those indices 
-that could possibly contain data in the time range you specify. (This is 
-primarily applicable if you are using Logstash to feed data in to Elasticsearch.)
+that could possibly contain data in the time range you specify. This is 
+primarily applicable if you are using Logstash to feed data into Elasticsearch.
 
 . Click *Create* to add the index pattern. 
 
@@ -152,7 +152,7 @@ To delete an index pattern:
 
 === Create a Scripted Field
 Scripted fields compute data on the fly from the data in your
-Elasticsearch indexes. Scripted field data is shown on the Discover tab as 
+Elasticsearch indices. Scripted field data is shown on the Discover tab as 
 part of the document data, and you can use scripted fields in your visualizations.
 (Scripted field values are computed at query time so they aren't indexed and
 cannot be searched.)
@@ -163,26 +163,14 @@ that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated
 data.
 
-When creating scripted fields in Kibana, you use http://groovy.codehaus.org/[Groovy].
-Elasticsearch sandboxes Groovy scripts used by scripted fields to ensure they don’t 
-perform unwanted actions. 
+Scripted fields use the Lucene expression syntax. For more information, 
+see http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[Lucene Expressions Scripts].
 
-You can reference the value of any index field in your Groovy scripts. Generally,
-the best way to get a field value is:
+You can reference any single value numeric field in your expressions, for example:
 
 ----
 doc['field_name'].value
 ----
-
-This loads the field value directly from the Elasticsearch index. You can also
-load field values from the source (`_source.field_name`) or from a stored field
-(`_fields['field_name']`), but both techniques are significantly slower. You might
-want to load a field value from the source to get the unanalyzed data, but it's
-an I/O intensive operation that is often subject to timeouts. To load a field
-value from a stored field, the Elasticsearch mapping must designate the field
-as a stored field. While this is slightly less resource intensive than loading
-values from the source, it's not as fast as loading the field value from the 
-index.
 
 To create a scripted field:
 
@@ -196,12 +184,8 @@ TIP: If you are just getting started with scripted fields, you can click
 you can use as a starting point.
 
 . Enter a name for the scripted field.
-. Enter the Groovy script that you want to run to compute a value on the fly 
+. Enter the expression that you want to use to compute a value on the fly 
 from your index data.
-. Select the type of data returned by your Groovy script: IP address, date, 
-string, number, Boolean, conflict, geo_point, geo_shape, or attachment. The 
-return type you select must match the type actually returned by your script, 
-or you will get an error when the script is run.
 . Click *Save Scripted Field*.
 
 For more information about scripted fields in Elasticsearch, see 
@@ -286,55 +270,55 @@ To delete a saved object:
 . Click the *Delete* button.
 . Confirm that you really want to delete the object.
 
+===
+Setting Kibana Server Properties
 
+The Kibana server reads properties from the `kibana.yml` file on startup. The default
+settings configure Kibana to run on `localhost:5601`. To change the host or port number, or
+connect to Elasticsearch running on a different machine, you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
-[[production]]
-=== Using Kibana in a Production Environment
-When you set up Kibana in a production environment, rather than on your local
-machine, you need to consider:
+.Kibana Server Properties
+|===
+|Property |Description 
 
-* Where you are going to run Kibana.
-* Whether you need to encrypt communications to and from Kibana.
-* If you need to control access to your data.
+|`port`
+|The port that the Kibana server runs on. Default: `port: 5601`. 
 
-==== Deployment Considerations
-How you deploy Kibana largely depends on your use case. If you are the only user,
-you can run Kibana on your local machine and configure it to point to whatever 
-Elasticsearch instance you want to interact with. Conversely, if you have a large 
-number of heavy Kibana users, you might need to load balance across multiple
-Kibana instances that are all connected to the same Elasticsearch instance.
+|`host`
+|The host to bind the Kibana server to. Default: `host: "0.0.0.0"`.
 
-While Kibana isn't terribly resource intensive, we still recommend running Kibana 
-on its own node, rather than on one of your Elasticsearch nodes. 
+|`elasticsearch_url`
+|The Elasticsearch instance where the indexes you want to query reside. Default: `elasticsearch_url: "http://localhost:9200"`.
 
-==== Enabling SSL
-Kibana supports SSL encryption for both incoming requests and the requests it 
-sends to Elasticsearch.
+|`elasticsearch_preserve_host`
+|By default, the hostname specified in `elasticsearch_url` is sent to xxx. To use the hostname of the Kibana server instead, set this option to `false`. Default: `elasticsearch_preserve_host: true`.
 
-To enable SSL for incoming requests, you need to configure an `ssl_key_file`
-and `ssl_cert_file` for Kibana in `kibana.yml`. For example:
-----
-# SSL for outgoing requests from the Kibana Server (PEM formatted)
-ssl_key_file: /path/to/your/server.key
-ssl_cert_file: /path/to/your/server.crt
-----
+|`kibana_index`
+|The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
 
-To encrypt the requests that Kibana sends to Elasticsearch, you specify the HTTPS
-protocol when you configure the Elasticsearch URL in `kibana.yml`. For example:
+|`default_app_id` 
+|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: `default_app_id: "discover"`. 
 
-----
-elasticsearch: "https://<your_elasticsearch_host>.com:9200"
-----
+|`request_timeout` 
+|How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000` 
 
-==== Controlling access
-You can use http://www.elasticsearch.org/overview/shield/[Elasticsearch Shield] 
-(Shield) to control what Elasticsearch data users can access through Kibana. 
-Shield provides index-level access control. If a user isn't authorized to run 
-the query that populates a Kibana visualization, the user just sees an empty 
-visualization. 
+|`shard_timeout`
+|How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default: `shard_timeout: 0`.
 
-To configure access to Kibana using Shield, you create one or more Shield roles 
-for Kibana using the `kibana4` default role as a starting point. For more 
-information, see http://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html[Using Shield with Kibana 4].
+|`verify_ssl`
+|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. Default: `verify_ssl: true`.
 
+|`ca`
+|The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate 
+so the certificate can be verified. (Otherwise, you have to disable `verify_ssl`.) Default: none.
 
+|`ssl_key_file`
+|The path to your Kibana server's key file. Must be set to encrypt communications between the browser and Kibana. Default: none.
+
+|`ssl_cert_file`
+|The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana. Default: none.
+
+|`pid_file`
+|The location where you want to store the process ID file. If not specified, the PID file is stored in `/var/run/kibana.pid`. Default: none.
+
+|===

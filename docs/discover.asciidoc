@@ -1,2 +1,102 @@
 [[discover]]
-== Discovering your Data
+== Discover
+You can interactively explore your data from the Discover page. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. You can also see the number of documents that match the search query and get field value statistics. If a time field is configured for the selected index pattern, a bar chart displays the distribution of documents over time. 
+
+
+[float]
+=== Setting a Time Filter
+A time filter restricts the search results to a specific time period. You can set a time filter if your index contains time-based events and a time-field is configured for the selected index pattern.
+
+The default time filter is the last 15 minutes. You can use the Time Picker to change the time filter,
+or interactively select a specific time interval or time range in the time chart.
+
+To set a time filter with the time picker:
+
+. Click the time filter displayed in the upper right corner of the menu bar.
+. To set a quick filter, simply click one of the shortcut links.
+. To specify a relative time filter, click **Relative** and enter the relative start time. You can specify
+the relative start time as any number of seconds, minutes, hours, days, months, or years ago.
+. To specify an absolute time filter, click **Absolute** and enter the start date in the **From** field and the end date in the **To** field.
+. Click the caret at the bottom of the Time Picker to hide it. 
+
+
+[float]
+=== Searching Your Data
+The search bar at the top allows Kibana to use Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+
+We can of course do free text search. Find requests that contain the number 200, in any field.
+
+----
+200
+----
+
+Or we can search in a specific field. Find 200 in the status field:
+
+----
+status:200
+----
+
+Find all from 400-499 status codes:
+
+----
+status:[400 TO 499]
+----
+
+Find status codes 400-499 with the extension php:
+
+----
+status:[400 TO 499] AND extension:PHP
+----
+Or HTML
+
+----
+status:[400 TO 499] AND (extension:php OR extension:html)
+----
+
+You can read more about the Lucene Query String syntax in the [Lucene documentation](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html).
+
+While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
+
+
+=== Automatically Refreshing the Page
+You can  configure a refresh interval to automatically refresh the Discover page with the latest
+index data. This periodically resubmits the search query.
+
+When a refresh interval is set, it is displayed to the left of the Time Filter in the menu bar.
+
+To set the refresh interval:
+
+. Click the Time Filter in the upper right corner of the menu bar.
+. Click the the refresh interval you want to set.
+
+image:images/Discover-TimePicker.jpg[Time Picker]
+
+[float]
+=== Filtering by Field
+
+When you expand a document in the document list you will see two magnifying glasses next to indexed terms, one with a plus sign and one with a minus sign. If you click on the magnifying glass with the plus sign it will add a filter to the query for that term. If you click on the magnifying glass with the minus sign, it will add a negative filter (which will remove any documents containing the term). Both filters will appear in the filter bar underneath the **search bar**. When you hover over the filters in the filter bar you will see an option to toggle or remove them. There is also a link to remove all the filters.
+
+[float]
+=== Viewing Document Data
+Once you see some documents, you can begin to explore Discover. In the document list, Kibana will show you the localized version of the time field you specified in your index pattern, as well as the `_source` of the Elasticsearch document.
+
+**Tip:** By default the table contains 500 of the most recent documents. You can increase the number of documents in the table from the advanced settings screen. See the [Setting section](#advanced) of the documentation.
+
+Click on the expand button to the left of the time. Kibana will read the fields from the document and present them in a table. The + and - buttons allow you to quickly filter for documents that share common traits with the one you're looking at. Click the JSON tab at the top of the table to see the full, pretty printed, original document.
+
+Click the expand button again to collapse the detailed view of the document.
+
+[float]
+==== Adding Columns to the Documents Table
+
+The field list has several powerful functions. The first being the ability to add columns to the document list. If no fields are selected `_source` will be automatically selected and shown in the table. Mouse over a field name and click the **add** button that appears. Now, instead of seeing `_source` in the document list, you have the extracted value of the selected field. In addition, the field name has moved up to the **Selected** section of the field list. Add a few more fields. Sweet!
+
+[float]
+=== Viewing Field Data Statistics
+
+Now, instead of clicking the **add** button, click the name of the field itself. You will see a breakdown of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
+
+
+
+
+

@@ -3,15 +3,15 @@
 
 Kibana is an open source analytics and visualization platform designed to work 
 with Elasticsearch. You use Kibana to search, view, and interact with data 
-stored in Elasticsearch indexes. You can easily perform advanced data analysis 
-operations and visualize your data in a variety of charts, tables, and maps.
+stored in Elasticsearch indices. You can easily perform advanced data analysis 
+and visualize your data in a variety of charts, tables, and maps.
 
 Kibana makes it easy to understand large volumes of data. Its simple,
 browser-based interface enables you to quickly create and share dynamic
 dashboards that display changes to Elasticsearch queries in real time.
 
 Setting up Kibana is a snap. You can install Kibana and start exploring your
-Elasticsearch indexes in minutes--no code, no additional infrastructure required. 
+Elasticsearch indices in minutes--no code, no additional infrastructure required. 
 
 NOTE: This guide describes how to use Kibana 4. For information about what's new
 in Kibana 4, see <<whats-new>>. For information about Kibana 3, 
@@ -21,14 +21,14 @@ see the http://www.elasticsearch.org/guide/en/kibana/current/index.html[Kibana 3
 === Data Discovery and Visualization
 
 Let's take a look at how you might use Kibana to explore and visualize data. 
-We've indexed some data from Transport for London (TFL) that shows a week's 
-worth of transit (Oyster) card usage.
+We've indexed some data from Transport for London (TFL) that shows one week 
+of transit (Oyster) card usage.
 
 From Kibana's Discover page, we can submit search queries, filter the results, and 
 examine the data in the returned documents. For example, we can get all trips 
-completed by tube during the week by excluding incomplete trips and trips by bus:
+completed by the Tube during the week by excluding incomplete trips and trips by bus:
 
-image::images/TFL-CompletedTrips.jpg[Discover]
+image:images/TFL-CompletedTrips.jpg[Discover]
 
 Right away, we can see the peaks for the morning and afternoon commute hours. By default, 
 the Discover page shows a time-series chart and the first 500 entries that match the 
@@ -38,20 +38,20 @@ information about exploring your data from the Discover page, see <<discover>>.
 
 You can construct visualizations of your search results from the Visualization page.
 Each visualization is associated with a search. For example, we can create a histogram
-that shows the weekly London commute traffic via tube using a search that excludes 
-incomplete trips and trips by bus. The Y-axis is the number of trips. The X-axis shows
+that shows the weekly London commute traffic via the Tube using a search that excludes 
+incomplete trips and trips by bus. The Y-axis shows the number of trips. The X-axis shows
 the day and time. By adding a sub-aggregation, we can see the top 3 end stations during
 each hour:
 
-image::images/TFL-CommuteHistogram.jpg[Visualize]
+image:images/TFL-CommuteHistogram.jpg[Visualize]
 
-You can save and share visualizations and add them to dashboards to make it easy
-to monitor and share particular metrics. For example, we could create a dashboard
+You can save and share visualizations and combine them into dashboards to make it easy
+to correlate related information. For example, we could create a dashboard
 that displays several visualizations of the TFL data:
 
-image::images/TFL-Dashboard.jpg[Dashboard]
+image:images/TFL-Dashboard.jpg[Dashboard]
 
 For more information about creating and sharing visualizations, see <<visualize>>. 
-For more information about working with Dashboards, see <<dashboard>>.
+For more information about working with Dashboards, see <<dashboard, Dashboard>>.
 
 
