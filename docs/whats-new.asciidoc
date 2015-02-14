@@ -16,9 +16,9 @@ new ones:
 ** Data Table
 ** Line Chart
 ** Markdown Text Widget
-** Metric
 ** Pie Chart (including "doughnut" charts)
 ** Raw Document Widget
+** Single Metric Widget
 ** Tile Map 
 ** Vertical Bar Chart
 * Drag and drop dashboard builder that enables you to quickly add, rearrange, 
@@ -41,7 +41,7 @@ searches to visualizations and add the same visualization to multiple dashboards
 display new types of visualizations, such as "doughnut" charts
 * New URL format eliminates the need for templated and scripted dashboards
 * Better mobile experience
-* Faster dashboard loading thanks to a reduction in the number HTTP calls needed to load the page
+* Faster dashboard loading due to a reduction in the number HTTP calls needed to load the page
 * SSL encryption for client requests as well as requests to and from Elasticsearch
 * Search result highlighting
 * Easy to access and export the data behind any visualization: 
@@ -53,7 +53,6 @@ display new types of visualizations, such as "doughnut" charts
 [float]
 [[nuts-bolts]]
 === Nuts and Bolts
-* Ships with its own webserver and uses Node.js on the backend. Installation 
+* Ships with its own webserver and uses Node.js on the backend--installation 
 binaries are provided for Linux, Windows, and Mac OS
 * Uses the D3 framework to display visualizations
-

@@ -301,7 +301,7 @@ connect to Elasticsearch running on a different machine, you'll need to update y
 |The host to bind the Kibana server to. Default: `host: "0.0.0.0"`.
 
 |`elasticsearch_url`
-|The Elasticsearch instance where the indexes you want to query reside. Default: `elasticsearch_url: "http://localhost:9200"`.
+|The Elasticsearch instance where the indices you want to query reside. Default: `elasticsearch_url: "http://localhost:9200"`.
 
 |`elasticsearch_preserve_host`
 |By default, the host specified in the incoming request from the browser is specified as the host in the 
