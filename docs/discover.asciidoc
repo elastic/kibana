@@ -1,9 +1,15 @@
 [[discover]]
 == Discover
-You can interactively explore your data from the Discover page. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. You can also see the number of documents that match the search query and get field value statistics. If a time field is configured for the selected index pattern, a bar chart displays the distribution of documents over time. 
+You can interactively explore your data from the Discover page. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. You can also see the number of documents that match the search query and get field value statistics. If a time field is configured for the selected index pattern, the distribution of documents over time is displayed in a vertical bar chart. 
 
+////
+TBD: Link to the vbc visualization section when it's available
+////
+
+image:images/Discover-Start-Annotated.jpg[Discover Page]
 
 [float]
+[[set-time-filter]]
 === Setting a Time Filter
 A time filter restricts the search results to a specific time period. You can set a time filter if your index contains time-based events and a time-field is configured for the selected index pattern.
 
@@ -14,50 +20,89 @@ To set a time filter with the time picker:
 
 . Click the time filter displayed in the upper right corner of the menu bar.
 . To set a quick filter, simply click one of the shortcut links.
-. To specify a relative time filter, click **Relative** and enter the relative start time. You can specify
+. To specify a relative time filter, click *Relative* and enter the relative start time. You can specify
 the relative start time as any number of seconds, minutes, hours, days, months, or years ago.
-. To specify an absolute time filter, click **Absolute** and enter the start date in the **From** field and the end date in the **To** field.
+. To specify an absolute time filter, click *Absolute* and enter the start date in the *From* field and the end date in the *To* field.
 . Click the caret at the bottom of the Time Picker to hide it. 
 
+To set a time filter from the time chart, do one of the following:
+
+* Click the bar that represents the time interval you want to zoom in on.
+* Click and drag to select the timespan to zoom in on. You must start the selection with the cursor over the background of the chart--the cursor changes to a plus sign when you hover over a valid start point. 
+
+You can use the browser Back button to undo your changes to the time filter. 
 
 [float]
+[[search]]
 === Searching Your Data
-The search bar at the top allows Kibana to use Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+You can search the indices that match the current index pattern by submitting a search from the Discover page.
+You can enter simple query strings, use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html[Elasticsearch Query DSL]. 
 
-We can of course do free text search. Find requests that contain the number 200, in any field.
+When you submit a search, the time chart, documents table, and field list are updated to reflect 
+the search results. The total number of hits (matching documents) is shown in the upper right corner of the
+time chart. The documents table shows the first five hundred hits. By default, the hits are listed in reverse chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time column header. You can also sort the table using the values in any indexed field. For more information, see <<sorting, Sorting the Documents Table>>.
 
-----
-200
-----
+To search your data:
 
-Or we can search in a specific field. Find 200 in the status field:
+. Enter a query string in the Search field: 
++
+* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you could enter `200` to find entries that contain the string 200. This searches all fields for the string `200`.
++
+* To search for a string in a specific field, you prefix the string with the name of the field. For example, you could enter `status:200` to limit the results to entries that contain the string `200` in the `status` field.
++
+* To search for a range of values, you can use the bracketed range syntax, `[START_VALUE TO END_VALUE]`. For example, to find entries that have 4xx status codes, you could enter `status:[400 TO 499]`.
++
+* To specify more complex search criteria, you can use the Boolean operators `AND`, `OR`, and `NOT`. For example,
+to find entries that have 4xx status codes and have an extension of `php` or `html`, you could enter `status:[400 TO 499] AND (extension:php OR extension:html)`.
++
+NOTE: These examples use the Lucene query syntax. You can also submit queries using the Elasticsearch Query DSL. For examples, see http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax[query string syntax] in the Elasticsearch Reference.
++
+. Press *Enter* or click the *Search* button to submit your search query.
 
-----
-status:200
-----
+[float]
+[[new-search]]
+==== Starting a New Search
+To clear the current search and start a new search, click the *New Search* button in the Discover Toolbar.
 
-Find all from 400-499 status codes:
+image:images/Discover-New-Search.jpg[New Search]
 
-----
-status:[400 TO 499]
-----
+[float]
+[[save-search]]
+==== Saving a Search
+You can reload saved searches on the Discover page and use them as the basis of <<visualize, visualizations>>.
+Saving a search saves both the search query string and the currently selected index pattern.
 
-Find status codes 400-499 with the extension php:
+To save the current search:
 
-----
-status:[400 TO 499] AND extension:PHP
-----
-Or HTML
+. Click the *Save Search* button image:images/SaveButton[Save Search button] in the Discover Toolbar. 
+. Enter a name for the search and click *Save*.
 
-----
-status:[400 TO 499] AND (extension:php OR extension:html)
-----
+[float]
+[[load-search]]
+==== Loading a Saved Search
+To load a saved search:
 
-You can read more about the Lucene Query String syntax in the [Lucene documentation](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html).
+. Click the *Load Search* button image:images/LoadButton[Load Search 
+button] in the Discover Toolbar.
+. Select the search you want to load.
 
-While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
+If the saved search is associated with a different index pattern than is currently selected, loading the saved search also changes the selected index pattern.
 
+[float]
+[[select-pattern]]
+==== Changing Which Indices You're Searching
+When you submit a search request, the indices that match the currently-selected index pattern are searched. The current index pattern is shown below the search field. To change which indices you are searching, select a different index pattern.
 
+To select a different index pattern:
+
+. Click the *Settings* button image:images/SettingsButton[Settings 
+button] in the Discover Toolbar.
+. Select the pattern you want to use from the Index Pattern list.
+
+For more information about index patterns, see <<settings-create-pattern, Creating an Index Pattern>>.
+
+[float]
+[[auto-refresh]]
 === Automatically Refreshing the Page
 You can  configure a refresh interval to automatically refresh the Discover page with the latest
 index data. This periodically resubmits the search query.
@@ -66,36 +111,87 @@ When a refresh interval is set, it is displayed to the left of the Time Filter i
 
 To set the refresh interval:
 
-. Click the Time Filter in the upper right corner of the menu bar.
+. Click the *Time Filter* image:images/TimeFilter[Time 
+Filter]in the upper right corner of the menu bar.
+. Click the *Refresh* tab.
 . Click the the refresh interval you want to set.
 
-image:images/Discover-TimePicker.jpg[Time Picker]
-
 [float]
+[[field-filter]]
 === Filtering by Field
+You can filter the search results to display only those documents that contain a particular value in a field. You can also create negative filters that exclude documents that contain the specified field value.
 
-When you expand a document in the document list you will see two magnifying glasses next to indexed terms, one with a plus sign and one with a minus sign. If you click on the magnifying glass with the plus sign it will add a filter to the query for that term. If you click on the magnifying glass with the minus sign, it will add a negative filter (which will remove any documents containing the term). Both filters will appear in the filter bar underneath the **search bar**. When you hover over the filters in the filter bar you will see an option to toggle or remove them. There is also a link to remove all the filters.
+You can add filters from the Fields list or from the Documents table. When you add a filter, it is displayed in the filter bar below the search query. From the filter bar, you can enable or disable a filter, invert the filter (change it from a positive filter to a negative filter and vice-versa), toggle the filter on or off, or remove it entirely.
+
+To add a filter from the Fields list:
+
+. Click the name of the field you want to filter on. This displays the top five values for that field. To the right of each value, there are two magnifying glass buttons--one for adding a regular (positive) filter, and 
+one for adding a negative filter. 
+. To add a positive filter, click the *Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. This filters out documents that don't contain that value in the field.
+. To add a negative filter, click the *Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. This excludes documents that contain that value in the field. 
+
+To add a filter from the Documents table:
+
+. Expand a document in the Documents table by clicking the *Expand* button image:images/ExpandButton.jpg[Expand Button] to the left of the document's entry in the first column (the first column is usually Time). To the right of each field name, there are two magnifying glass buttons--one for adding a regular (positive) filter, and one for adding a negative filter. 
+. To add a positive filter  based on the document's value in a field, click the *Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. This filters out documents that don't contain the specified value in that field.
+. To add a negative filter based on the document's value in a field, click the *Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. This excludes documents that contain the specified value in that field. 
 
 [float]
+[[document-data]]
 === Viewing Document Data
-Once you see some documents, you can begin to explore Discover. In the document list, Kibana will show you the localized version of the time field you specified in your index pattern, as well as the `_source` of the Elasticsearch document.
+When you submit a search query, the 500 most recent documents that match the query are listed in the Documents table. You can configure the number of documents shown in the table by setting the `discover:sampleSize` property in <<advanced-options,Advanced Settings>>. By default, the table shows the localized version of the time field specified in the selected index pattern and the document `_source`. You can <<adding-columns, add fields to the Documents table>> from the Fields list. You can <<sorting, sort the listed documents>> by any indexed field that's included in the table.
 
-**Tip:** By default the table contains 500 of the most recent documents. You can increase the number of documents in the table from the advanced settings screen. See the [Setting section](#advanced) of the documentation.
+To view a document's field data:
 
-Click on the expand button to the left of the time. Kibana will read the fields from the document and present them in a table. The + and - buttons allow you to quickly filter for documents that share common traits with the one you're looking at. Click the JSON tab at the top of the table to see the full, pretty printed, original document.
-
-Click the expand button again to collapse the detailed view of the document.
-
-[float]
-==== Adding Columns to the Documents Table
-
-The field list has several powerful functions. The first being the ability to add columns to the document list. If no fields are selected `_source` will be automatically selected and shown in the table. Mouse over a field name and click the **add** button that appears. Now, instead of seeing `_source` in the document list, you have the extracted value of the selected field. In addition, the field name has moved up to the **Selected** section of the field list. Add a few more fields. Sweet!
+. Click the *Expand* button image:images/ExpandButton.jpg[Expand Button] to the left of the document's entry in the first column (the first column is usually Time). Kibana reads the document data from Elasticsearch and displays the document fields in a table. The table contains a row for each field that contains the name of the field, add filter buttons, and the field value.
+. To view the original JSON document (pretty-printed), click the *JSON* tab.
+. To view the document data as a separate page, click the link. You can bookmark and share this link to provide direct access to a particular document.
+. To collapse the document details, click the *Collapse* button image:images/CollapseButton.jpg[Collapse Button].
 
 [float]
+[[sorting]]
+==== Sorting the Document List
+You can sort the documents in the Documents table by the values in any indexed field. If a time field is configured for the selected index pattern, by default the documents are sorted in reverse chronological order.
+
+To change the sort order:
+
+* Click the name of the field you want to sort by. The fields you can use for sorting have a sort button to the right of the field name. Clicking the field name a second time reverses the sort order.
+
+[float]
+[[adding-columns]]
+==== Adding Field Columns to the Documents Table
+By default, the Documents table shows the localized version of the time field specified in the selected index pattern and the document `_source`. You can add fields to the table from the Fields list.
+
+To add field columns to the Documents table:
+
+. Mouse over a field in the Fields list and click its  *add* button image:images/AddFieldButton.jpg[Add Field Button].  
+. Repeat until you've added all the fields you want to display in the Documents table.
+
+The added field columns replace the `_source` column in the Documents table. The added fields are also
+listed in the *Selected Fields* section at the top of the field list. 
+
+To rearrange the field columns in the table, mouse over the header of the column you want to move and click the *Move* button.
+
+image:images/Discover-MoveColumn.jpg[Move Column]
+
+[float]
+[[deleting-columns]]
+==== Deleting Field Columns from the Documents Table
+To remove field columns from the Documents table:
+
+. Mouse over the field you want to remove in the *Selected Fields* section of the Fields list and click its *remove* button image:images/RemoveFieldButton.jpg[Remove Field Button].
+. Repeat until you've removed all the fields you want to drop from the Documents table.
+
+[float]
+[[viewing-field-stats]]
 === Viewing Field Data Statistics
+From the field list, you can see how many documents in the Documents table contain a particular field, what the top 5 values are, and what percentage of documents contain each value. 
 
-Now, instead of clicking the **add** button, click the name of the field itself. You will see a breakdown of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
+To view field data statistics:
 
+* Click the name of a field in the Fields list. The field can be anywhere in the Fields list--Selected Fields,  Popular Fields, or the list of other fields. 
+
+image:images/Discover-FieldStats.jpg[Field Statistics]
 
 
 

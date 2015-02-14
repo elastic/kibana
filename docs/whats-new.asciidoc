@@ -6,6 +6,8 @@ get answers, and solve problems like never before. It has a brand-new look and
 feel and improved workflows for discovering and visualizing your data and
 building and sharing dashboards. 
 
+[float]
+[[key-features]]
 === Key Features
 * New data search and discovery interface 
 * Unified visualization builder for your favorite visualizations and some brand
@@ -30,6 +32,8 @@ resize, and remove visualizations
 * Expressions-based scripted fields enable you to perform ad-hoc analysis by 
 performing computations on the fly
 
+[float]
+[[improvements]]
 === Improvements
 * Ability to save searches and visualizations enables you to link 
 searches to visualizations and add the same visualization to multiple dashboards
@@ -46,6 +50,8 @@ display new types of visualizations, such as "doughnut" charts
 ** See the Elasticsearch request and response
 * Share and embed individual visualizations as well as dashboards
 
+[float]
+[[nuts-bolts]]
 === Nuts and Bolts
 * Ships with its own webserver and uses Node.js on the backend. Installation 
 binaries are provided for Linux, Windows, and Mac OS

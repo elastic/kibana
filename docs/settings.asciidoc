@@ -11,9 +11,9 @@ how many of the most popular fields to show. Use caution when modifying advanced
 as it's possible to set values that are incompatible with one another.
 * Configure Kibana for a production environment
 
-
+[float]
 [[settings-create-pattern]]
-=== Create an Index Pattern to Connect to Elasticsearch
+=== Creating an Index Pattern to Connect to Elasticsearch
 An _index pattern_ identifies one or more Elasticsearch indices that you want to 
 explore with Kibana. Kibana looks for index names that match the specified pattern.
 An asterisk (*) in the pattern matches zero or more characters. For example, the pattern 
@@ -60,7 +60,7 @@ primarily applicable if you are using Logstash to feed data into Elasticsearch.
 . To designate the new pattern as the default pattern to load when you view
 the Discover tab, click the *favorite* button. 
 
-
+[float]
 [[date-format-tokens]]
 .Date Format Tokens
 [horizontal]
@@ -113,7 +113,9 @@ the Discover tab, click the *favorite* button.
 `X`:: Unix Timestamp:	1360013296
 `x`::	Unix Millisecond Timestamp: 1360013296123
 
-=== Set the Default Index Pattern
+[float]
+[[set-default-pattern]]
+=== Setting the Default Index Pattern
 The default index pattern is loaded by automatically when you view the *Discover* tab. 
 Kibana displays a star to the left of the name of the default pattern in the Index Patterns list 
 on the *Settings > Indices* tab. The first pattern you create is automatically
@@ -127,7 +129,9 @@ To set a different pattern as the default index pattern:
 
 NOTE: You can also manually set the default index pattern in *Advanced > Settings*. 
 
-=== Reload the Index Fields List
+[float]
+[[reload-fields]]
+=== Reloading the Index Fields List
 When you add an index mapping, Kibana automatically scans the index(es) that 
 match the pattern to display a list of the index fields. You can reload the
 index fields list to pick up any newly-added fields. 
@@ -142,7 +146,9 @@ To reload the index fields list:
 . Select an index pattern from the Index Patterns list.
 . Click the pattern's *Reload* button. 
 
-=== Delete an Index Pattern
+[float]
+[[delete-pattern]]
+=== Deleting an Index Pattern
 To delete an index pattern:
 
 . Go to the *Settings > Indices* tab.
@@ -150,7 +156,9 @@ To delete an index pattern:
 . Click the pattern's *Delete* button.
 . Confirm that you want to remove the index pattern.
 
-=== Create a Scripted Field
+[float]
+[[create-scripted-field]]
+=== Creating a Scripted Field
 Scripted fields compute data on the fly from the data in your
 Elasticsearch indices. Scripted field data is shown on the Discover tab as 
 part of the document data, and you can use scripted fields in your visualizations.
@@ -191,7 +199,9 @@ from your index data.
 For more information about scripted fields in Elasticsearch, see 
 http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
 
-=== Update a Scripted Field
+[float]
+[[update-scripted-field]]
+=== Updating a Scripted Field
 To modify a scripted field:
 
 . Go to *Settings > Indices*
@@ -203,14 +213,18 @@ that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated
 data.
 
-=== Delete a Scripted Field
+[float]
+[[delete-scripted-field]]
+=== Deleting a Scripted Field
 To delete a scripted field:
 
 . Go to *Settings > Indices*
 . Click the *Delete* button for the scripted field you want to remove.
 . Confirm that you really want to delete the field.
 
-=== Set Advanced Options
+[float]
+[[advanced-options]]
+=== Setting Advanced Options
 The Advanced Settings page enables you to directly edit settings that control
 the behavior of the Kibana application. For example, you can change the format
 used to display dates, specify the default index pattern, and set the precision
@@ -270,8 +284,7 @@ To delete a saved object:
 . Click the *Delete* button.
 . Confirm that you really want to delete the object.
 
-===
-Setting Kibana Server Properties
+=== Setting Kibana Server Properties
 
 The Kibana server reads properties from the `kibana.yml` file on startup. The default
 settings configure Kibana to run on `localhost:5601`. To change the host or port number, or
