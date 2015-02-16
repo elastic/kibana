@@ -45,6 +45,25 @@
                 <lucene.version>4.9.0</lucene.version>
             </properties>
         </profile>
+        <profile>
+            <id>deploy-internal</id>
+            <properties>
+                <elasticsearch.version>0.90.10</elasticsearch.version>
+                <lucene.version>4.6.0</lucene.version>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>elasticsearch-internal-releases</id>
+                    <name>Elasticsearch Internal Releases</name>
+                    <url>http://maven.elasticsearch.org/artifactory/internal-releases</url>
+                </repository>
+                <snapshotRepository>
+                    <id>elasticsearch-internal-snapshots</id>
+                    <name>Elasticsearch Internal Snapshots</name>
+                    <url>http://maven.elasticsearch.org/artifactory/internal-snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
     </profiles>
 
     <properties>
