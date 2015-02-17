@@ -1,36 +1,32 @@
 [[discover]]
 == Discover
-You can interactively explore your data from the Discover page. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. You can also see the number of documents that match the search query and get field value statistics. If a time field is configured for the selected index pattern, the distribution of documents over time is displayed in a vertical bar chart. 
-
-////
-TBD: Link to the vbc visualization section when it's available
-////
+You can interactively explore your data from the Discover page. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. You can also see the number of documents that match the search query and get field value statistics. If a time field is configured for the selected index pattern, the distribution of documents over time is displayed in a histogram at the top of the page. 
 
 image:images/Discover-Start-Annotated.jpg[Discover Page]
 
 [float]
 [[set-time-filter]]
-=== Setting a Time Filter
-A time filter restricts the search results to a specific time period. You can set a time filter if your index contains time-based events and a time-field is configured for the selected index pattern.
+=== Setting the Time Filter
+The Time Filter restricts the search results to a specific time period. You can set a time filter if your index contains time-based events and a time-field is configured for the selected index pattern.
 
-The default time filter is the last 15 minutes. You can use the Time Picker to change the time filter,
-or interactively select a specific time interval or time range in the time chart.
+By default the time filter is set to the last 15 minutes. You can use the Time Picker to change the time filter
+or select a specific time interval or time range in the histogram at the top of the page.
 
-To set a time filter with the time picker:
+To set a time filter with the Time Picker:
 
-. Click the time filter displayed in the upper right corner of the menu bar.
+. Click the Time Filter displayed in the upper right corner of the menu bar to open the Time Picker.
 . To set a quick filter, simply click one of the shortcut links.
-. To specify a relative time filter, click *Relative* and enter the relative start time. You can specify
+. To specify a relative Time Filter, click *Relative* and enter the relative start time. You can specify
 the relative start time as any number of seconds, minutes, hours, days, months, or years ago.
-. To specify an absolute time filter, click *Absolute* and enter the start date in the *From* field and the end date in the *To* field.
+. To specify an absolute Time Filter, click *Absolute* and enter the start date in the *From* field and the end date in the *To* field.
 . Click the caret at the bottom of the Time Picker to hide it. 
 
-To set a time filter from the time chart, do one of the following:
+To set a Time Filter from the histogram, do one of the following:
 
 * Click the bar that represents the time interval you want to zoom in on.
-* Click and drag to select the timespan to zoom in on. You must start the selection with the cursor over the background of the chart--the cursor changes to a plus sign when you hover over a valid start point. 
+* Click and drag to view a specific timespan. You must start the selection with the cursor over the background of the chart--the cursor changes to a plus sign when you hover over a valid start point. 
 
-You can use the browser Back button to undo your changes to the time filter. 
+You can use the browser Back button to undo your changes. 
 
 [float]
 [[search]]
@@ -38,17 +34,17 @@ You can use the browser Back button to undo your changes to the time filter.
 You can search the indices that match the current index pattern by submitting a search from the Discover page.
 You can enter simple query strings, use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html[Elasticsearch Query DSL]. 
 
-When you submit a search, the time chart, documents table, and field list are updated to reflect 
+When you submit a search, the histogram, Documents table, and Fields list are updated to reflect 
 the search results. The total number of hits (matching documents) is shown in the upper right corner of the
-time chart. The documents table shows the first five hundred hits. By default, the hits are listed in reverse chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time column header. You can also sort the table using the values in any indexed field. For more information, see <<sorting, Sorting the Documents Table>>.
+histogram. The Documents table shows the first five hundred hits. By default, the hits are listed in reverse chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time column header. You can also sort the table using the values in any indexed field. For more information, see <<sorting, Sorting the Documents Table>>.
 
 To search your data:
 
 . Enter a query string in the Search field: 
 +
-* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you could enter `200` to find entries that contain the string 200. This searches all fields for the string `200`.
+* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you could enter `200` to find entries that contain the value 200. This searches all fields for the value `200`.
 +
-* To search for a string in a specific field, you prefix the string with the name of the field. For example, you could enter `status:200` to limit the results to entries that contain the string `200` in the `status` field.
+* To search for a string in a specific field, you prefix the string with the name of the field. For example, you could enter `status:200` to limit the results to entries that contain the value `200` in the `status` field.
 +
 * To search for a range of values, you can use the bracketed range syntax, `[START_VALUE TO END_VALUE]`. For example, to find entries that have 4xx status codes, you could enter `status:[400 TO 499]`.
 +
@@ -62,7 +58,7 @@ NOTE: These examples use the Lucene query syntax. You can also submit queries us
 [float]
 [[new-search]]
 ==== Starting a New Search
-To clear the current search and start a new search, click the *New Search* button in the Discover Toolbar.
+To clear the current search and start a new search, click the *New Search* button in the Discover toolbar.
 
 image:images/Discover-New-Search.jpg[New Search]
 
@@ -74,7 +70,7 @@ Saving a search saves both the search query string and the currently selected in
 
 To save the current search:
 
-. Click the *Save Search* button image:images/SaveButton[Save Search button] in the Discover Toolbar. 
+. Click the *Save Search* button image:images/SaveButton[Save Search button] in the Discover toolbar. 
 . Enter a name for the search and click *Save*.
 
 [float]
@@ -83,7 +79,7 @@ To save the current search:
 To load a saved search:
 
 . Click the *Load Search* button image:images/LoadButton[Load Search 
-button] in the Discover Toolbar.
+button] in the Discover toolbar.
 . Select the search you want to load.
 
 If the saved search is associated with a different index pattern than is currently selected, loading the saved search also changes the selected index pattern.
@@ -96,7 +92,7 @@ When you submit a search request, the indices that match the currently-selected 
 To select a different index pattern:
 
 . Click the *Settings* button image:images/SettingsButton[Settings 
-button] in the Discover Toolbar.
+button] in the Discover toolbar.
 . Select the pattern you want to use from the Index Pattern list.
 
 For more information about index patterns, see <<settings-create-pattern, Creating an Index Pattern>>.
@@ -113,8 +109,8 @@ To set the refresh interval:
 
 . Click the *Time Filter* image:images/TimeFilter[Time 
 Filter]in the upper right corner of the menu bar.
-. Click the *Refresh* tab.
-. Click the the refresh interval you want to set.
+. Click the *Refresh Interval* tab.
+. Choose a refresh interval from the list.
 
 [float]
 [[field-filter]]
@@ -175,8 +171,8 @@ To rearrange the field columns in the table, mouse over the header of the column
 image:images/Discover-MoveColumn.jpg[Move Column]
 
 [float]
-[[deleting-columns]]
-==== Deleting Field Columns from the Documents Table
+[[removing-columns]]
+==== Removing Field Columns from the Documents Table
 To remove field columns from the Documents table:
 
 . Mouse over the field you want to remove in the *Selected Fields* section of the Fields list and click its *remove* button image:images/RemoveFieldButton.jpg[Remove Field Button].

@@ -4,10 +4,12 @@ You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
 * Elasticsearch 1.4.3 or later
-* An up-to-date web browser. For a list of offically-supported browsers, see http://www.elasticsearch.com/support/matrix[Supported Browsers].
+* A modern web browser - http://www.elasticsearch.com/support/matrix[Supported Browsers].
 * Information about your Elasticsearch installation: 
 ** URL of the Elasticsearch instance you want to connect to.
-** Which index(es) you want to search. You can use the Elasticsearch http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/cat-indices.html[`_cat/indices/`] command to list your indices.
+** Which Elasticsearch indices you want to search. 
+
+NOTE: If your elasticsearch installation is protected by http://www.elasticsearch.org/overview/shield/[Shield] see thehttp://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html#_from_the_kibana_4_server_to_elasticsearch[Shield documentation] for additional setup instructions.
 
 [float]
 [[install]]

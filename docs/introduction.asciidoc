@@ -35,7 +35,7 @@ Right away, we can see the peaks for the morning and afternoon commute hours. By
 the Discover page shows a time-series chart and the first 500 entries that match the 
 search criteria. You can change the time filter, interact with the chart to drill 
 down into the data, and view the details of particular documents. For more 
-information about exploring your data from the Discover page, see <<discover>>.
+information about exploring your data from the Discover page, see <<discover, Discover>>.
 
 You can construct visualizations of your search results from the Visualization page.
 Each visualization is associated with a search. For example, we can create a histogram
@@ -52,7 +52,7 @@ that displays several visualizations of the TFL data:
 
 image:images/TFL-Dashboard.jpg[Dashboard]
 
-For more information about creating and sharing visualizations, see <<visualize>>. 
-For more information about working with Dashboards, see <<dashboard, Dashboard>>.
+For more information about creating and sharing visualizations and dashboards, see <<visualize, Visualize>>. 
+and <<dashboard, Dashboard>>.
 
 
