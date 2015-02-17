@@ -18,6 +18,8 @@ define(function (require) {
 
   // Sort versions from lowest to highest
   var sortVersions = function (versions) {
+    if (!_.isArray(versions)) versions = [versions];
+
     return _.uniq(versions).sort(function (a, b) {
       return compare(a, b) ? -1 : 1;
     });
