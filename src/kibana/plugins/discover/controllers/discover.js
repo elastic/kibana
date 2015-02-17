@@ -77,7 +77,6 @@ define(function (require) {
 
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
-      config: require('text!plugins/discover/partials/settings.html'),
       load: require('text!plugins/discover/partials/load_search.html'),
       save: require('text!plugins/discover/partials/save_search.html')
     });
@@ -139,7 +138,7 @@ define(function (require) {
       $scope.fields = _($scope.indexPattern.fields)
       .sortBy('name')
       .transform(function (fields, field) {
-        // clone the field with Object.create so that it's getters
+        // clone the field with Object.create so that its getters
         // and non-enumerable props are preserved
         var clone = Object.create(field);
         clone.display = _.contains($state.columns, field.name);
@@ -203,18 +202,6 @@ define(function (require) {
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
         });
-
-        $scope.$watch('opts.index', changeIndexPattern($scope.opts, $state));
-        $scope.$watch('state.index', changeIndexPattern($state, $scope.opts));
-        function changeIndexPattern(from, to) {
-          return function () {
-            if (from.index === to.index) return;
-
-            to.index = from.index;
-            if (to === $state) $state.save();
-            $route.reload();
-          };
-        }
 
         $scope.$watchMulti([
           'rows',

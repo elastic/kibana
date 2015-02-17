@@ -30,9 +30,6 @@
       <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
         <button ng-click="configTemplate.toggle('load')"><i class="fa fa-folder-open-o"></i></button>
       </kbn-tooltip>
-      <kbn-tooltip text="Settings" placement="bottom" append-to-body="1">
-        <button ng-click="configTemplate.toggle('config')"><i class="fa fa-gear"></i></button>
-      </kbn-tooltip>
     </div>
   </navbar>
 
@@ -51,6 +48,7 @@
           data="rows"
           filter="filterQuery"
           index-pattern="searchSource.get('index')"
+          index-pattern-list="opts.indexPatternList"
           state="state">
         </disc-field-chooser>
       </div>
