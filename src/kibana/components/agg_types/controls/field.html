@@ -22,7 +22,8 @@
     name="field"
     required
     ng-model="agg.params.field"
-    ng-options="field as field.displayName group by field.type for field in indexedFields">
+    ng-options="field as field.displayName group by field.type for field in indexedFields"
+    ng-change="aggParam.onChange(agg)">
   </select>
 
 </div>

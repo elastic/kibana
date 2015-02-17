@@ -10,8 +10,10 @@ define(function (require) {
       {
         display: 'Auto',
         val: 'auto',
-        enabled: function (aggConfig) {
-          return !!aggConfig.vis.indexPattern.timeFieldName;
+        enabled: function (agg) {
+          // not only do we need a time field, but the selected field needs
+          // to be the time field. (see #3028)
+          return agg.fieldIsTimeField();
         }
       },
       {

@@ -5,19 +5,27 @@ define(function (require) {
 
     describe('params', function () {
       var paramWriter;
+      var writeInterval;
+
       var aggTypes;
       var AggConfig;
       var setTimeBounds;
+      var timeField;
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private, $injector) {
         var AggParamWriter = Private(require('test_utils/agg_param_writer'));
+        var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         var timefilter = $injector.get('timefilter');
 
+        timeField = indexPattern.timeFieldName;
         aggTypes = Private(require('components/agg_types/index'));
         AggConfig = Private(require('components/vis/_agg_config'));
 
         paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
+        writeInterval = function (interval) {
+          return paramWriter.write({ interval: interval, field: timeField });
+        };
 
         var now = moment();
         setTimeBounds = function (n, units) {
@@ -31,24 +39,24 @@ define(function (require) {
 
       describe('interval', function () {
         it('accepts a valid interval', function () {
-          var output = paramWriter.write({ interval: 'day' });
+          var output = writeInterval('day');
           expect(output.params).to.have.property('interval', '1d');
         });
 
         it('ignores invalid intervals', function () {
-          var output = paramWriter.write({ interval: 'foo' });
+          var output = writeInterval('foo');
           expect(output.params).to.have.property('interval', '0ms');
         });
 
         it('automatically picks an interval', function () {
           setTimeBounds(15, 'minutes');
-          var output = paramWriter.write({ interval: 'auto' });
+          var output = writeInterval('auto');
           expect(output.params.interval).to.be('30s');
         });
 
         it('scales up the interval if it will make too many buckets', function () {
           setTimeBounds(30, 'minutes');
-          var output = paramWriter.write({ interval: 'second' });
+          var output = writeInterval('second');
           expect(output.params.interval).to.be('10s');
           expect(output.metricScaleText).to.be('second');
           expect(output.metricScale).to.be(0.1);
@@ -56,7 +64,7 @@ define(function (require) {
 
         it('does not scale down the interval', function () {
           setTimeBounds(1, 'minutes');
-          var output = paramWriter.write({ interval: 'hour' });
+          var output = writeInterval('hour');
           expect(output.params.interval).to.be('1h');
           expect(output.metricScaleText).to.be(undefined);
           expect(output.metricScale).to.be(undefined);
@@ -82,7 +90,7 @@ define(function (require) {
               var histoConfig = new AggConfig(vis, {
                 type: aggTypes.byName.date_histogram,
                 schema: 'segment',
-                params: { interval: 'second' }
+                params: { interval: 'second', field: timeField }
               });
 
               vis.aggs.push(histoConfig);
