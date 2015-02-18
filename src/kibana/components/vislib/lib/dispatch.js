@@ -51,7 +51,7 @@ define(function (require) {
         if (isPercentage) {
 
           // Add the formatted percentage to the point object
-          d.percent = (100 * d.y).toFixed(1) + '%';
+          datum.percent = (100 * d.y).toFixed(1) + '%';
         }
       }
 
