@@ -43,19 +43,7 @@ define(function (require) {
       var color = handler.data.color;
       var isPercentage = (handler._attr.mode === 'percentage');
 
-      if (isSeries) {
-        // Find object with the actual d value and add it to the point object
-        var object = _.find(series, { 'label': d.label });
-        d.value = +object.values[i].y;
-
-        if (isPercentage) {
-
-          // Add the formatted percentage to the point object
-          datum.percent = (100 * d.y).toFixed(1) + '%';
-        }
-      }
-
-      return {
+      var eventData = {
         value: d.y,
         point: datum,
         datum: datum,
@@ -69,6 +57,19 @@ define(function (require) {
         e: d3.event,
         handler: handler
       };
+
+      if (isSeries) {
+        // Find object with the actual d value and add it to the point object
+        var object = _.find(series, { 'label': d.label });
+        eventData.value = +object.values[i].y;
+
+        if (isPercentage) {
+          // Add the formatted percentage to the point object
+          eventData.percent = (100 * d.y).toFixed(1) + '%';
+        }
+      }
+
+      return eventData;
     };
 
     /**

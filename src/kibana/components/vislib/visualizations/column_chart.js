@@ -150,7 +150,7 @@ define(function (require) {
         // an offset='expand', need to add conditional statement to handle zeros
         // appropriately
         if (d._input.y === 0) {
-          return yScale(d.y0) - yScale(d.y0 + d._input.y);
+          return 0;
         }
 
         // for split bars or for one series,
