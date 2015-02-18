@@ -15,6 +15,7 @@ define(function (require) {
       link: function ($scope, $el, attr) {
         var rowScopes = []; // track row scopes, so they can be destroyed as needed
         $scope.perPage = 25;
+        $scope.popularityField = {name: null};
 
         $scope.columns = [
           { title: 'name' },

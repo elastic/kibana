@@ -21,6 +21,7 @@ define(function (require) {
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
         $scope.perPage = 25;
+        $scope.popularityField = {name: null};
 
         $scope.columns = [
           { title: 'name' },
