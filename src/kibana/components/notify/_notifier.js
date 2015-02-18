@@ -141,10 +141,16 @@ define(function (require) {
    */
   Notifier.prototype.timed = function (name, fn) {
     var self = this;
+
+    if (typeof name === 'function') {
+      fn = name;
+      name = fn.name;
+    }
+
     return function WrappedNotifierFunction() {
       var cntx = this;
       var args = arguments;
-      
+
       return self.event(name, function () {
         return fn.apply(cntx, args);
       });
