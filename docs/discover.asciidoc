@@ -42,9 +42,9 @@ To search your data:
 
 . Enter a query string in the Search field: 
 +
-* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you could enter `200` to find entries that contain the value 200. This searches all fields for the value `200`.
+* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you could enter `safari` to search all fields for the term `safari`.
 +
-* To search for a string in a specific field, you prefix the string with the name of the field. For example, you could enter `status:200` to limit the results to entries that contain the value `200` in the `status` field.
+* To search for a value in a specific field, you prefix the value with the name of the field. For example, you could enter `status:200` to limit the results to entries that contain the value `200` in the `status` field.
 +
 * To search for a range of values, you can use the bracketed range syntax, `[START_VALUE TO END_VALUE]`. For example, to find entries that have 4xx status codes, you could enter `status:[400 TO 499]`.
 +
@@ -70,7 +70,7 @@ Saving a search saves both the search query string and the currently selected in
 
 To save the current search:
 
-. Click the *Save Search* button image:images/SaveButton[Save Search button] in the Discover toolbar. 
+. Click the *Save Search* button image:images/SaveButton.jpg[Save Search button] in the Discover toolbar. 
 . Enter a name for the search and click *Save*.
 
 [float]
@@ -78,7 +78,7 @@ To save the current search:
 ==== Loading a Saved Search
 To load a saved search:
 
-. Click the *Load Search* button image:images/LoadButton[Load Search 
+. Click the *Load Search* button image:images/LoadButton.jpg[Load Search 
 button] in the Discover toolbar.
 . Select the search you want to load.
 
@@ -91,7 +91,7 @@ When you submit a search request, the indices that match the currently-selected 
 
 To select a different index pattern:
 
-. Click the *Settings* button image:images/SettingsButton[Settings 
+. Click the *Settings* button image:images/SettingsButton.jpg[Settings 
 button] in the Discover toolbar.
 . Select the pattern you want to use from the Index Pattern list.
 
@@ -107,8 +107,8 @@ When a refresh interval is set, it is displayed to the left of the Time Filter i
 
 To set the refresh interval:
 
-. Click the *Time Filter* image:images/TimeFilter[Time 
-Filter]in the upper right corner of the menu bar.
+. Click the *Time Filter* image:images/TimeFilter.jpg[Time 
+Filter] in the upper right corner of the menu bar.
 . Click the *Refresh Interval* tab.
 . Choose a refresh interval from the list.
 

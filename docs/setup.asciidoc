@@ -9,7 +9,7 @@ All you need is:
 ** URL of the Elasticsearch instance you want to connect to.
 ** Which Elasticsearch indices you want to search. 
 
-NOTE: If your elasticsearch installation is protected by http://www.elasticsearch.org/overview/shield/[Shield] see thehttp://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html#_from_the_kibana_4_server_to_elasticsearch[Shield documentation] for additional setup instructions.
+NOTE: If your Elasticsearch installation is protected by http://www.elasticsearch.org/overview/shield/[Shield] see the http://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html#_from_the_kibana_4_server_to_elasticsearch[Shield documentation] for additional setup instructions.
 
 [float]
 [[install]]
@@ -25,11 +25,11 @@ That's it! Kibana is now running on port 5601.
 [float]
 [[connect]]
 === Connect Kibana with Elasticsearch 	
-Before you can start using Kibana, you need to tell it which Elasticsearch index(es) you want to explore. The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of one or more of your indices. That's it. That's all you need to configure to start using Kibana. You can add index patterns at any time from the <<settings-create-pattern,Settings tab>>.
+Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore. The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of one or more of your indices. That's it. That's all you need to configure to start using Kibana. You can add index patterns at any time from the <<settings-create-pattern,Settings tab>>.
 
 TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
 
-To configure the Elasticsearch index(es) you want to access with Kibana:
+To configure the Elasticsearch indices you want to access with Kibana:
 
 . Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 +
@@ -47,6 +47,6 @@ Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a rea
 === Start Exploring your Data!
 You're ready to dive in to your data:
 
-* Search and browse your data interactively from the <<discover,Discover>> tab. 
-* Chart and map your data from the <<visualize, Visualize>> tab. 
-* Create and view custom dashboards from the <<dashboard, Dashboard>> tab.
+* Search and browse your data interactively from the <<discover,Discover>> page. 
+* Chart and map your data from the <<visualize, Visualize>> page. 
+* Create and view custom dashboards from the <<dashboard, Dashboard>> page.

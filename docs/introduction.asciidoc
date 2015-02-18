@@ -39,8 +39,8 @@ information about exploring your data from the Discover page, see <<discover, Di
 
 You can construct visualizations of your search results from the Visualization page.
 Each visualization is associated with a search. For example, we can create a histogram
-that shows the weekly London commute traffic via the Tube using a search that excludes 
-incomplete trips and trips by bus. The Y-axis shows the number of trips. The X-axis shows
+that shows the weekly London commute traffic via the Tube using our previous search. 
+The Y-axis shows the number of trips. The X-axis shows
 the day and time. By adding a sub-aggregation, we can see the top 3 end stations during
 each hour:
 
@@ -52,7 +52,7 @@ that displays several visualizations of the TFL data:
 
 image:images/TFL-Dashboard.jpg[Dashboard]
 
-For more information about creating and sharing visualizations and dashboards, see <<visualize, Visualize>>. 
-and <<dashboard, Dashboard>>.
+For more information about creating and sharing visualizations and dashboards, see the <<visualize, Visualize>> 
+and <<dashboard, Dashboard>> topics.
 
 
