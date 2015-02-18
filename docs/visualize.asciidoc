@@ -9,7 +9,7 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Visualizations rely on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1. 
+Visualizations rely on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.0. 
 
 [float]
 [[createvis]]

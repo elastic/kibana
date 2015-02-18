@@ -190,5 +190,6 @@ To view field data statistics:
 image:images/Discover-FieldStats.jpg[Field Statistics]
 
 
+TIP: To create a visualization based on the field, click the *Visualize* button below the field statistics.
 
 

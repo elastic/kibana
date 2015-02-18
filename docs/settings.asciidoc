@@ -301,7 +301,8 @@ connect to Elasticsearch running on a different machine, you'll need to update y
 |The host to bind the Kibana server to. Default: `host: "0.0.0.0"`.
 
 |`elasticsearch_url`
-|The Elasticsearch instance where the indices you want to query reside. Default: `elasticsearch_url: "http://localhost:9200"`.
+|The Elasticsearch instance where the indices you want to query reside. Default:&nbsp;&nbsp;`elasticsearch_url: 
+"http://localhost:9200"`.
 
 |`elasticsearch_preserve_host`
 |By default, the host specified in the incoming request from the browser is specified as the host in the 
@@ -315,7 +316,7 @@ specified in `elasticsearch_url`. You probably don't need to worry about this se
 |The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: `default_app_id: "discover"`. 
 
 |`request_timeout` 
-|How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000` 
+|How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000`.
 
 |`shard_timeout`
 |How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default: `shard_timeout: 0`.
