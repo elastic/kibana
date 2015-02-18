@@ -22,18 +22,13 @@ define(function (require) {
 
         $scope.perPage = 25;
 
-        $scope.columns = [{
-          title: 'name'
-        }, {
-          title: 'script'
-        }, {
-          title: 'type'
-        }, {
-          title: 'popularity'
-        }, {
-          title: 'controls',
-          sortable: false
-        }];
+        $scope.columns = [
+          { title: 'name' },
+          { title: 'script' },
+          { title: 'type' },
+          { title: 'popularity', info: 'A gauge of how often this field is used' },
+          { title: 'controls', sortable: false }
+        ];
 
         $scope.$watch('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');

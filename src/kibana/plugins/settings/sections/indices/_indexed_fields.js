@@ -16,20 +16,13 @@ define(function (require) {
         var rowScopes = []; // track row scopes, so they can be destroyed as needed
         $scope.perPage = 25;
 
-        $scope.columns = [{
-          title: 'name'
-        }, {
-          title: 'type'
-        }, {
-          title: 'analyzed',
-          info: 'Analyzed fields may require extra memory to visualize'
-        }, {
-          title: 'indexed',
-          info: 'Fields that are not indexed are unavailable for search'
-        }, {
-          title: 'popularity',
-          info: 'A gauge of how often this field is used',
-        }];
+        $scope.columns = [
+          { title: 'name' },
+          { title: 'type' },
+          { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
+          { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
+          { title: 'popularity', info: 'A gauge of how often this field is used' }
+        ];
 
         $scope.$watchCollection('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');
