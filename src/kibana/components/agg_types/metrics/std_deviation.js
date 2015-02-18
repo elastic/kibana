@@ -29,11 +29,6 @@ define(function (require) {
       }
     };
 
-    function getValAggConfig(agg, key) {
-      var ValueAggConfig = getResponseAggConfig(agg, responseAggConfigProps);
-      return new ValueAggConfig(key);
-    }
-
     return new MetricAggType({
       name: 'std_dev',
       dslName: 'extended_stats',
@@ -49,10 +44,12 @@ define(function (require) {
       ],
 
       getResponseAggs: function (agg) {
+        var ValueAggConfig = getResponseAggConfig(agg, responseAggConfigProps);
+
         return [
-          getValAggConfig(agg, 'std_lower'),
-          getValAggConfig(agg, 'avg'),
-          getValAggConfig(agg, 'std_upper')
+          new ValueAggConfig('std_lower'),
+          new ValueAggConfig('avg'),
+          new ValueAggConfig('std_upper')
         ];
       },
 
