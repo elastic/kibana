@@ -33,7 +33,7 @@ To configure the Elasticsearch index(es) you want to access with Kibana:
 
 . Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 +
-image:images/Discover-Start.jpg[Kibana start page]
+image:images/Start-Page.jpg[Kibana start page]
 +
 . Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana guesses that you're you're working with data being fed into Elasticsearch by Logstash. If that's the case, you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more characters in an index's name. If your Elasticsearch indices follow some other naming convention, enter an appropriate pattern.  The "pattern" can also simply be the name of a single index.
 . Select the index field that contains the timestamp that you want to use to perform time-based comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data, disable the *Index contains time-based events* option. 
