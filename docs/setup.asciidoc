@@ -3,7 +3,7 @@
 You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
-* Elasticsearch 1.4.3 or later
+* Elasticsearch 1.4.4 or later
 * A modern web browser - http://www.elasticsearch.com/support/matrix[Supported Browsers].
 * Information about your Elasticsearch installation: 
 ** URL of the Elasticsearch instance you want to connect to.

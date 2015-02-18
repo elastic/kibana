@@ -31,9 +31,9 @@ completed by the Tube during the week by excluding incomplete trips and trips by
 
 image:images/TFL-CompletedTrips.jpg[Discover]
 
-Right away, we can see the peaks for the morning and afternoon commute hours. By default, 
-the Discover page shows a time-series chart and the first 500 entries that match the 
-search criteria. You can change the time filter, interact with the chart to drill 
+Right away, we can see the peaks for the morning and afternoon commute hours in the 
+histogram. By default, the Discover page also shows the first 500 entries that match the 
+search criteria. You can change the time filter, interact with the histogram to drill 
 down into the data, and view the details of particular documents. For more 
 information about exploring your data from the Discover page, see <<discover, Discover>>.
 
