@@ -137,7 +137,7 @@ define(function (require) {
               schema: 'segment',
               params: {
                 field: field.name,
-                percision: 3
+                precision: 3
               }
             };
           } else {
