@@ -146,6 +146,13 @@ define(function (require) {
           return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
         }
 
+        // Due to an issue with D3 not returning zeros correctly when using
+        // an offset='expand', need to add conditional statement to handle zeros
+        // appropriately
+        if (d._input.y === 0) {
+          return yScale(d.y0) - yScale(d.y0 + d._input.y);
+        }
+
         // for split bars or for one series,
         // last series will have d.y0 = 0
         if (d.y0 === 0 && yMin > 0) {
