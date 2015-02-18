@@ -9,7 +9,7 @@ define(function (require) {
         Private(require('components/agg_types/metrics/sum')),
         Private(require('components/agg_types/metrics/min')),
         Private(require('components/agg_types/metrics/max')),
-        Private(require('components/agg_types/metrics/std_deviation')),
+        Private(require('components/agg_types/metrics/std_dev')),
         Private(require('components/agg_types/metrics/cardinality')),
         Private(require('components/agg_types/metrics/percentiles'))
       ],
