@@ -7,8 +7,8 @@ define(function (require) {
     var valueProps = {
       makeLabel: function () {
         var title = 'Average';
-        if (this.key === 'std_deviation_bounds.lower') title = 'Lower Standard Deviation';
-        if (this.key === 'std_deviation_bounds.upper') title = 'Upper Standard Deviation';
+        if (this.key === 'std_lower') title = 'Lower Standard Deviation';
+        if (this.key === 'std_upper') title = 'Upper Standard Deviation';
         return title + ' of ' + this.fieldDisplayName();
       }
     };
@@ -30,14 +30,14 @@ define(function (require) {
       getResponseAggs: function (agg) {
         var ValueAggConfig = getResponseAggConfig(agg, valueProps);
         return [
-          new ValueAggConfig('std_deviation_bounds.lower'),
+          new ValueAggConfig('std_lower', { valProp: ['std_deviation_bounds', 'lower'] }),
           new ValueAggConfig('avg'),
-          new ValueAggConfig('std_deviation_bounds.upper')
+          new ValueAggConfig('std_upper', { valProp: ['std_deviation_bounds', 'upper'] })
         ];
       },
 
       getValue: function (agg, bucket) {
-        return _.get(bucket[agg.parentId], agg.key);
+        return _.get(bucket[agg.parentId], agg.valProp || agg.key);
       }
     });
   };
