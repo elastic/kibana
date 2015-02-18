@@ -132,7 +132,7 @@ NOTE: You can also manually set the default index pattern in *Advanced > Setting
 [float]
 [[reload-fields]]
 === Reloading the Index Fields List
-When you add an index mapping, Kibana automatically scans the index(es) that 
+When you add an index mapping, Kibana automatically scans the indices that 
 match the pattern to display a list of the index fields. You can reload the
 index fields list to pick up any newly-added fields. 
 
