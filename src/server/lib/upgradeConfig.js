@@ -17,8 +17,8 @@ module.exports = function (response) {
   return client.create({
     index: config.kibana.kibana_index,
     type: 'config',
-    id: config.package.version,
-    body: body
+    body: body._source,
+    id: config.package.version
   });
 
 };
