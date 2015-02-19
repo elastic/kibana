@@ -16,14 +16,19 @@ define(function (require) {
           'word-break': 'break-all',
         });
 
-        $timeout(function () {
-          if (!_.isUndefined(attrs.cssTruncateExpandable) && $elem[0].offsetWidth < $elem[0].scrollWidth) {
-            $elem.css({'cursor': 'pointer'});
-            $elem.bind('click', function () {
-              $scope.toggle();
-            });
-          }
-        });
+        if (attrs.cssTruncateExpandable != null) {
+          $scope.$watch(
+            function () { return $elem.html(); },
+            function () {
+              if ($elem[0].offsetWidth < $elem[0].scrollWidth) {
+                $elem.css({'cursor': 'pointer'});
+                $elem.bind('click', function () {
+                  $scope.toggle();
+                });
+              }
+            }
+          );
+        }
 
         $scope.toggle = function () {
           if ($elem.css('white-space') !== 'normal') {
