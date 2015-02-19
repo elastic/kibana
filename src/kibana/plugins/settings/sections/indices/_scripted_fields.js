@@ -5,6 +5,7 @@ define(function (require) {
   require('modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
+    var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
 
     var notify = new Notifier();
@@ -20,17 +21,15 @@ define(function (require) {
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
         $scope.perPage = 25;
+        $scope.popularityField = {name: null};
 
-        $scope.columns = [{
-          title: 'name'
-        }, {
-          title: 'script'
-        }, {
-          title: 'type'
-        }, {
-          title: 'controls',
-          sortable: false
-        }];
+        $scope.columns = [
+          { title: 'name' },
+          { title: 'script' },
+          { title: 'type' },
+          { title: 'popularity', info: 'A gauge of how often this field is used' },
+          { title: 'controls', sortable: false }
+        ];
 
         $scope.$watch('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');
@@ -43,6 +42,9 @@ define(function (require) {
             rowScopes.push(rowScope);
 
             columns.push({
+              markup: popularityHtml,
+              scope: rowScope
+            }, {
               markup: controlsHtml,
               scope: rowScope
             });
