@@ -69,9 +69,6 @@ The toolbar has a search field for interactive data searches, as well as control
 visualizations. For visualizations based on saved searches, the search bar is grayed out. To edit the search, replacing 
 the saved search with the edited version, double-click the search field.
 
-// Why does it behave this way? I'd like to be able to say 'for saved searches interactive searches are disabled
-// because $REASONS'.
-
 The toolbar at the right of the search box has buttons for creating new visualizations, saving the current 
 visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for 
 the current visualization.
@@ -80,18 +77,13 @@ the current visualization.
 [[aggregation-builder]]
 ===== Aggregation Builder
 
-Use the aggregation builder on the left of the page to configure the 
-{ref}/search-aggregations.html#\_metrics_aggregations[metric] and 
-{ref}/search-aggregations.html#\_bucket_aggregations[bucket] aggregations used in your visualization. Buckets are 
-analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
+Use the aggregation builder on the left of the page to configure the metric and bucket aggregations used in your 
+visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
 {ref}/search-aggregations.html[Elasticsearch aggregations reference].
 
 In bar or line chart visualizations, use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
 colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of 
 slices.
-
-// "Other visualizations may use these in new and different ways." < Such as? Would it be useful to add an appendix
-// on advanced visualizations or a cookbook of neat nonintuitive vis tricks?
 
 Choose the metric aggregation for your visualization's Y axis, such as 
 {ref}/search-aggregations-metrics-valuecount-aggregation.html[count], 
