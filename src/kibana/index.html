@@ -18,7 +18,9 @@
           <img width="128" src="images/initial_load.gif">
           <h1>
             <strong>Kibana</strong>
-            <small>is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!</small>
+            <script>
+              if (location.href.indexOf('?embed') < 0) document.write('<small>is loading. Give me a moment here. I\'m loading a whole bunch of code. Don\'t worry, all this good stuff will be cached up for next time!</small>');
+            </script>
           </h1>
         </center>
       </div>
