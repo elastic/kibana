@@ -26,7 +26,7 @@ define(function (require) {
     var revRoundingRules = roundingRules.slice(0).reverse();
 
     function find(rules, check, last) {
-      return function (buckets, duration) {
+      function pick(buckets, duration) {
         var target = duration / buckets;
         var lastResp;
 
@@ -44,7 +44,14 @@ define(function (require) {
           lastResp = resp;
         }
 
-        return moment.duration(Math.floor(target), 'ms');
+        // fallback to just a number of milliseconds, ensure ms is >= 1
+        var ms = Math.max(Math.floor(target), 1);
+        return moment.duration(ms, 'ms');
+      }
+
+      return function (buckets, duration) {
+        var interval = pick(buckets, duration);
+        if (interval) return moment.duration(interval._data);
       };
     }
 

@@ -7,8 +7,8 @@ module.exports = function (options) {
     var _req = _.pick(req, ['url', 'headers', 'method']);
     _req.connection = _.pick(req.connection, ['remoteAddress', 'remotePort']);
     res.end = function (chunk, encoding) {
+      res.contentLength = parseInt(res.getHeader('content-length') || 0, 10);
       res.responseTime = (new Date()).getTime() - startTime.getTime();
-      res.contentLength = parseInt(res.getHeader('Content-Length') || 0, 10);
       end.call(res, chunk, encoding);
       logger.info({ req: _req, res: res }, '%s %s %d - %dms', req.method, req.url, res.statusCode, res.responseTime);
     };

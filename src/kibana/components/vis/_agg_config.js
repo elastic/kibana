@@ -175,6 +175,19 @@ define(function (require) {
     };
 
     /**
+     * Hook into param onRequest handling, and tell the aggConfig that it
+     * is being sent to elasticsearc.
+     *
+     * @return {[type]} [description]
+     */
+    AggConfig.prototype.requesting = function () {
+      var self = this;
+      self.type.params.forEach(function (param) {
+        if (param.onRequest) param.onRequest(self);
+      });
+    };
+
+    /**
      * Convert this aggConfig to it's dsl syntax.
      *
      * Adds params and adhoc subaggs to a pojo, then returns it
@@ -185,18 +198,10 @@ define(function (require) {
      */
     AggConfig.prototype.toDsl = function () {
       if (this.type.hasNoDsl) return;
-
-      var self = this;
-      self.type.params.forEach(function (param) {
-        if (param.onRequest) {
-          param.onRequest(self);
-        }
-      });
-
-      var output = self.write();
+      var output = this.write();
 
       var configDsl = {};
-      configDsl[self.type.name] = output.params;
+      configDsl[this.type.dslName || this.type.name] = output.params;
 
       // if the config requires subAggs, write them to the dsl as well
       if (output.subAggs) {
@@ -275,6 +280,11 @@ define(function (require) {
     AggConfig.prototype.fieldDisplayName = function () {
       var field = this.field();
       return field ? (field.displayName || this.fieldName()) : '';
+    };
+
+    AggConfig.prototype.fieldIsTimeField = function () {
+      var timeFieldName = this.vis.indexPattern.timeFieldName;
+      return timeFieldName && this.fieldName() === timeFieldName;
     };
 
     return AggConfig;

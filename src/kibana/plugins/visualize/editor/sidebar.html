@@ -3,6 +3,11 @@
         ng-class="{'hide-errors': hideErrors}"
         ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
         name="visualizeEditor">
+
+    <div css-truncate css-truncate-expandable="true" ng-if="vis.type.requiresSearch" class="index-pattern">
+      {{ indexPattern.id }}
+    </div>
+
     <ul class="list-unstyled">
       <!-- metrics -->
       <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>

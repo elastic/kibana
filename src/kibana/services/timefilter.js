@@ -76,6 +76,7 @@ define(function (require) {
           lte: bounds.max.valueOf()
         };
       }
+
       return filter;
     };
 

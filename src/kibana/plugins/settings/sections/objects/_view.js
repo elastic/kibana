@@ -140,20 +140,19 @@ define(function (require) {
 
         $scope.submit = function () {
           var source = _.cloneDeep($scope.obj._source);
-          var value;
 
           _.each($scope.fields, function (field) {
-            switch (field.type) {
-              case 'number':
-                value = Number(field.value);
-                break;
-              case 'array':
-                value = JSON.parse(field.value);
-                break;
-              default:
-                value = field.value;
+            var value = field.value;
+
+            if (field.type === 'number') {
+              value = Number(field.value);
             }
-            _.setValue(source, field.name, field.value);
+
+            if (field.type === 'array') {
+              value = JSON.parse(field.value);
+            }
+
+            _.setValue(source, field.name, value);
           });
 
           es.index({

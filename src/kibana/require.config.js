@@ -14,7 +14,6 @@ require.config({
     'angular-elastic': 'bower_components/angular-elastic/elastic',
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
-    'angular-ui-select': 'bower_components/angular-ui-select/dist/select',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',
@@ -48,7 +47,6 @@ require.config({
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
     'angular-ui-ace': ['angular', 'ace'],
-    'angular-ui-select': ['css!bower_components/angular-ui-select/dist/select.css'],
     'ng-clip': ['angular', 'zeroclipboard'],
     inflection: {
       exports: 'inflection'

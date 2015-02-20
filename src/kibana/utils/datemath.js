@@ -63,13 +63,17 @@ define(function (require) {
 
       if (isNaN(mathString.charAt(i))) {
         num = 1;
+      } else if (mathString.length === 2) {
+        num = mathString.charAt(i);
       } else {
         var numFrom = i;
         while (!isNaN(mathString.charAt(i))) {
           i++;
+          if (i > 10) return undefined;
         }
         num = parseInt(mathString.substring(numFrom, i), 10);
       }
+
       if (type === 0) {
         // rounding is only allowed on whole, single, units (eg M or 1M, not 0.5M or 2M)
         if (num !== 1) {

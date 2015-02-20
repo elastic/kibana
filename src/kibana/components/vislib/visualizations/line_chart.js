@@ -69,20 +69,18 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var circleRadius = 4;
-      var circleStrokeWidth = 1;
+      var visibleRadius = 3;
+      var touchableRadius = 12;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
-      var layer;
-      var circles;
 
-      layer = svg.selectAll('.points')
+      var layer = svg.selectAll('.points')
       .data(data)
       .enter()
         .append('g')
         .attr('class', 'points line');
 
-      circles = layer
+      var circles = layer
       .selectAll('rect')
       .data(function appendData(d) {
         return d;
@@ -92,31 +90,42 @@ define(function (require) {
       .exit()
       .remove();
 
-      circles
-      .enter()
-        .append('circle')
-        .attr('class', function circleClass(d) {
-          return 'circle ' + self.colorToClass(color(d.label));
-        })
-        .attr('fill', function (d) {
-          return color(d.label);
-        })
-        .attr('stroke', function strokeColor(d) {
-          return color(d.label);
-        })
-        .attr('stroke-width', circleStrokeWidth);
-
-      circles
-      .attr('cx', function cx(d) {
+      function cx(d) {
         if (ordered && ordered.date) {
           return xScale(d.x);
         }
         return xScale(d.x) + xScale.rangeBand() / 2;
-      })
-      .attr('cy', function cy(d) {
+      }
+
+      function cy(d) {
         return yScale(d.y);
-      })
-      .attr('r', circleRadius);
+      }
+
+      function cColor(d) {
+        return color(d.label);
+      }
+
+      circles
+      .enter()
+        .append('circle')
+        .attr('r', visibleRadius)
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('fill', cColor)
+        .attr('class', 'circle-decoration');
+
+      circles
+      .enter()
+        .append('circle')
+        .attr('r', touchableRadius)
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('fill', 'transparent')
+        .attr('class', function circleClass(d) {
+          return 'circle ' + self.colorToClass(color(d.label));
+        })
+        .attr('stroke', cColor)
+        .attr('stroke-width', 0);
 
       if (isTooltip) {
         circles.call(tooltip.render());

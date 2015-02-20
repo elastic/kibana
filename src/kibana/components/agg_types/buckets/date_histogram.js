@@ -8,6 +8,12 @@ define(function (require) {
 
     var tzOffset = moment().format('Z');
 
+    function setBounds(agg, force) {
+      if (agg.buckets._alreadySet && !force) return;
+      agg.buckets._alreadySet = true;
+      agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
+    }
+
     require('filters/field_type');
 
     return new BucketAggType({
@@ -32,7 +38,8 @@ define(function (require) {
 
               buckets = new TimeBuckets();
               buckets.setInterval(_.get(this, ['params', 'interval']));
-              buckets.setBounds(timefilter.getActiveBounds());
+              setBounds(this);
+
               return buckets;
             }
           }
@@ -44,6 +51,9 @@ define(function (require) {
           filterFieldTypes: 'date',
           default: function (agg) {
             return agg.vis.indexPattern.timeFieldName;
+          },
+          onChange: function (agg) {
+            setBounds(agg, true);
           }
         },
 
@@ -54,15 +64,10 @@ define(function (require) {
           options: Private(require('components/agg_types/buckets/_interval_options')),
           editor: require('text!components/agg_types/controls/interval.html'),
           onRequest: function (agg) {
-            // flag that prevents us from clobbering on subsequest calls to write()
-            agg.buckets._sentToEs = true;
-            agg.buckets.setBounds(timefilter.getActiveBounds());
+            setBounds(agg, true);
           },
           write: function (agg, output) {
-            if (!agg.buckets._sentToEs) {
-              agg.buckets.setBounds(timefilter.getActiveBounds());
-            }
-
+            setBounds(agg);
             agg.buckets.setInterval(agg.params.interval);
 
             var interval = agg.buckets.getInterval();

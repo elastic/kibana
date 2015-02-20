@@ -117,6 +117,7 @@ define(function (require) {
 
         $scope.runAgg = function (field) {
           var agg = {};
+          var type = 'histogram';
           // If we're visualizing a date field, and our index is time based (and thus has a time filter),
           // then run a date histogram
           if (field.type === 'date' && $scope.indexPattern.timeFieldName) {
@@ -126,6 +127,17 @@ define(function (require) {
               params: {
                 field: field.name,
                 interval: 'auto'
+              }
+            };
+
+          } else if (field.type === 'geo_point') {
+            type = 'tile_map';
+            agg = {
+              type: 'geohash_grid',
+              schema: 'segment',
+              params: {
+                field: field.name,
+                precision: 3
               }
             };
           } else {
@@ -141,7 +153,7 @@ define(function (require) {
 
           $location.path('/visualize/create').search({
             indexPattern: $scope.state.index,
-            type: 'histogram',
+            type: type,
             _a: rison.encode({
               filters: $scope.state.filters || [],
               query: $scope.state.query || undefined,

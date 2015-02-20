@@ -26,6 +26,7 @@ define(function (require) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
+          aggFilter: '!std_dev',
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
@@ -35,21 +36,24 @@ define(function (require) {
           name: 'segment',
           title: 'X-Axis',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         },
         {
           group: 'buckets',
           name: 'group',
           title: 'Split Bars',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         },
         {
           group: 'buckets',
           name: 'split',
           title: 'Split Chart',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         }
       ])
     });
