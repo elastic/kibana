@@ -17,16 +17,16 @@ var versions = [
  * "tag" then the new value can be left of and the preivous
  * value will simply be incremented by one. if the version
  * peice is tag, some special rules apply:
- * 	  1. leaving the value empty will remove a tag
- * 		2. adding a new tag bumps the minor version
+ *     1. leaving the value empty will remove a tag
+ *     2. adding a new tag bumps the minor version
  *
  * examples:
  *
- * 	expr: minor
- * 	1.4.1 => 1.5.0
+ *  expr: minor
+ *  1.4.1 => 1.5.0
  *
- * 	expr: minor=10
- * 	1.5.5 => 1.10.0
+ *  expr: minor=10
+ *  1.5.5 => 1.10.0
  *
  *  expr: major=4
  *  0.0.1 => 4.0.0
@@ -122,7 +122,7 @@ function updateVersion(version, expr) {
 
     // properties that are zero-d by the previous update
     var emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
-    while(emptyUpdates.length) {
+    while (emptyUpdates.length) {
       parts[emptyUpdates.shift()] = '';
     }
   })
