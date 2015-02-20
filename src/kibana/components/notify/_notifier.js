@@ -217,7 +217,7 @@ define(function (require) {
       title: 'Error',
       lifetime: Infinity,
       actions: ['report', 'accept'],
-      stack: err.stack
+      stack: err.stack.indexOf(err.message) > -1 ? err.stack : (err.message + err.stack)
     }, cb);
   };
 
