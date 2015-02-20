@@ -14,7 +14,7 @@ define(function (require) {
       .transform(function (series, row) {
 
         if (!multiY) {
-          var point = partGetPoint(row, aspects.y);
+          var point = partGetPoint(row, aspects.y, aspects.radius);
           if (point) addToSiri(series, point, point.series);
           return;
         }

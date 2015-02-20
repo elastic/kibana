@@ -4,10 +4,11 @@ define(function (require) {
       return aggConfigResult ? aggConfigResult.value : def;
     }
 
-    return function getPoint(x, series, yScale, row, y) {
+    return function getPoint(x, series, yScale, row, y, radius) {
       var point = {
         x: unwrap(row[x.i], '_all'),
         y: unwrap(row[y.i]),
+        radius: unwrap(row[(radius || {}).i]),
         aggConfigResult: row[y.i],
         yScale: yScale
       };
