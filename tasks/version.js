@@ -4,8 +4,10 @@ module.exports = function (grunt) {
 
   var README_PATH = root('README.md');
   var PKG_JSON_PATH = root('package.json');
-  var START = '<!--version-->';
-  var END = '<!--/version-->';
+
+  function replace(source, from, to) {
+    return String(source).split(from).join(to);
+  }
 
   grunt.registerTask('version', function (updateExpr) {
     var oldVersion = grunt.config.get('pkg.version');
@@ -17,32 +19,13 @@ module.exports = function (grunt) {
 
     // write back to package.json
     var pkgJson = grunt.file.read(PKG_JSON_PATH);
-    pkgJson = pkgJson.replace(JSON.stringify(oldVersion), JSON.stringify(version));
+    pkgJson = replace(pkgJson, JSON.stringify(oldVersion), JSON.stringify(version));
     grunt.file.write(PKG_JSON_PATH, pkgJson);
     grunt.log.ok('updated package.json', version);
 
     // write the readme
-    var input = grunt.file.read(README_PATH);
-    var readme = '';
-
-    var startI, endI, before;
-    while (input.length) {
-      startI = input.indexOf(START);
-      endI = input.indexOf(END);
-      if (endI < startI) throw new Error('version tag mismatch in ' + input);
-
-      if (startI < 0) {
-        readme += input;
-        break;
-      }
-
-      before = input.substr(0, startI);
-      input = input.substr(endI ? endI + END.length : startI);
-
-      readme += before + START + version + END;
-    }
-
-    grunt.file.write(README_PATH, readme);
+    var readme = grunt.file.read(README_PATH);
+    grunt.file.write(README_PATH, replace(readme, oldVersion, version));
     grunt.log.ok('updated readme', version);
   });
 };
