@@ -1,4 +1,4 @@
-# Kibana <!--version-->4.1.0-snapshot<!--/version-->
+# Kibana 4.1.0-snapshot
 
 [![Build Status](https://travis-ci.org/elasticsearch/kibana.svg?branch=master)](https://travis-ci.org/elasticsearch/kibana?branch=master)
 
