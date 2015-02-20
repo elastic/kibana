@@ -1,5 +1,6 @@
-// http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-iprange-aggregation.html
 define(function (require) {
+  var _ = require('lodash');
+
   return function RangeAggDefinition(Private) {
     var _ = require('lodash');
     var moment = require('moment');
@@ -18,24 +19,27 @@ define(function (require) {
         {
           name: 'field',
           filterFieldTypes: 'ip'
-        },
-        {
+        }, {
+          name: 'ipRangeType',
+          write: _.noop
+        }, {
           name: 'ranges',
           default: [
-            { from: '0.0.0.0', to: '127.255.255.255', mask: '10.0.0/25' },
+            { from: '0.0.0.0', to: '127.255.255.255', mask: '10.0.0.0/25' },
             { from: '128.0.0.0', to: '191.255.255.255', mask: '10.0.0.127/25' }
           ],
           editor: require('text!components/agg_types/controls/ip_ranges.html'),
           write: function (aggConfig, output) {
-            aggConfig.params.ranges.forEach(function (range) {
+            output.params.ranges = aggConfig.params.ranges.map(function (range) {
+              var copy = {};
               if (aggConfig.params.ipRangeType !== 'mask') {
-                delete range.mask;
+                if (range.to != null) copy.to = range.to;
+                if (range.from != null) copy.from = range.from;
               } else {
-                delete range.to;
-                delete range.from;
+                copy.mask = range.mask;
               }
+              return copy;
             });
-            output.params.ranges = aggConfig.params.ranges;
           }
         }
       ]
