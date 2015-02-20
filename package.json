@@ -29,7 +29,7 @@
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
     "server": "node ./src/server/bin/kibana.js",
-    "precommit": "grunt hintStagedFiles"
+    "precommit": "grunt lintStagedFiles"
   },
   "repository": {
     "type": "git",
