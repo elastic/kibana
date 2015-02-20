@@ -12,6 +12,7 @@ define(function (require) {
       params: {
         defaults: {
           shareYAxis: true,
+          drawLinesBetweenPoints: true,
           addTooltip: true,
           addLegend: true,
           defaultYExtents: false
