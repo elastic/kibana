@@ -27,7 +27,7 @@ define(function (require) {
 
       // Line chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
-        interpolate: 'linear',
+        interpolate: 'cardinal', // FIXME what is this supposed to be? (cardinal || linear)
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
       });
@@ -73,6 +73,17 @@ define(function (require) {
       var touchableRadius = 12;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+      var radii = _(data)
+        .map(function (series) { return _.map(series, function (point) { return point._input.radius; }); })
+        .flatten()
+        .value();
+
+      radii = {
+        min: _.min(radii),
+        max: _.max(radii)
+      };
+
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / 20;
 
       var layer = svg.selectAll('.points')
       .data(data)
@@ -108,7 +119,11 @@ define(function (require) {
       circles
       .enter()
         .append('circle')
-        .attr('r', visibleRadius)
+        .attr('r', function (d) {
+          var circleRadius = (d._input.radius - radii.min) / radiusStep;
+
+          return (circleRadius || 2) + 2;
+        })
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', cColor)
@@ -284,7 +299,9 @@ define(function (require) {
           }
 
           self.addClipPath(svg, width, height);
-          lines = self.addLines(svg, data.series);
+          if (self._attr.drawLinesBetweenPoints) {
+            lines = self.addLines(svg, data.series);
+          }
           circles = self.addCircles(svg, layers);
           self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
