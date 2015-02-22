@@ -14,7 +14,7 @@ define(function (require) {
           var cls = 'number';
           if (/^"/.test(match)) {
             if (/:$/.test(match)) {
-              cls = 'key strong';
+              cls = 'key';
             } else {
               cls = 'string';
             }
