@@ -41,6 +41,6 @@
       </tbody>
     </table>
 
-    <pre ng-show="mode == 'json'">{{hit | json}}</pre>
+    <pre ng-show="mode == 'json'" ng-bind-html="hit | prettyJson | trustAsHtml"></pre>
   </div>
 </div>
