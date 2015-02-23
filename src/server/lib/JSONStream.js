@@ -11,7 +11,7 @@ var levels = {
   60: 'fatal'
 };
 
-function JSONStream (options) {
+function JSONStream(options) {
   options = options || {};
   Writable.call(this, options);
 }
@@ -31,7 +31,10 @@ JSONStream.prototype._write = function (entry, encoding, callback) {
     'response': entry.res
   };
 
-  if (entry.error) output.error = entry.err;
+  if (entry.err) {
+    output.error = entry.err;
+    if (!output.message) output.message = output.error.message;
+  }
 
   process.stdout.write(JSON.stringify(output) + "\n");
   callback();

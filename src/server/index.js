@@ -82,7 +82,6 @@ module.exports = {
     return initialization()
       .then(start)
       .catch(function (err) {
-        logger.error({ err: err });
         throw err;
       })
       .nodeify(cb);

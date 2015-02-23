@@ -4,5 +4,5 @@ module.exports = {
     ignoreLeaks: false,
     reporter: 'dot'
   },
-  all: { src: ['<%= root %>/test/server/unit/**/*.js']}
+  all: { src: ['<%= root %>/test/unit/{server,tasks}/**/*.js'] }
 };

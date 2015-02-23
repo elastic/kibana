@@ -282,6 +282,11 @@ define(function (require) {
       return field ? (field.displayName || this.fieldName()) : '';
     };
 
+    AggConfig.prototype.fieldIsTimeField = function () {
+      var timeFieldName = this.vis.indexPattern.timeFieldName;
+      return timeFieldName && this.fieldName() === timeFieldName;
+    };
+
     return AggConfig;
   };
 });

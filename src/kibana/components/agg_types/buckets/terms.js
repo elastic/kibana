@@ -12,7 +12,7 @@ define(function (require) {
         group: 'none',
         name: 'orderAgg',
         title: 'Order Agg',
-        aggFilter: '!percentiles'
+        aggFilter: ['!percentiles', '!std_dev']
       }
     ])).all[0];
 

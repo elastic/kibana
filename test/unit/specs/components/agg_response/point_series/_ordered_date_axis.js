@@ -14,6 +14,7 @@ define(function (require) {
         aspects: {
           x: {
             agg: {
+              fieldIsTimeField: _.constant(true),
               buckets: {
                 getScaledDateFormat: _.constant('hh:mm:ss'),
                 getInterval: _.constant(moment.duration(15, 'm')),

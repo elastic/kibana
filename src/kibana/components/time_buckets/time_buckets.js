@@ -292,10 +292,10 @@ define(function (require) {
       }
 
       function cacheBreaker(prop) {
-        var breaker = breakers[prop];
-        var setup = breaker.setup;
-        var changes = breaker.changes;
-        var deps = breaker.deps;
+        var resource = resources[breakers[prop]];
+        var setup = resource.setup;
+        var changes = resource.changes;
+        var deps = resource.deps;
         var fn = self[prop];
 
         return {
@@ -304,7 +304,7 @@ define(function (require) {
             var ret = fn.apply(self, arguments);
 
             if (changes.call(self, prev)) {
-              cache = _.omit(cache, deps);
+              cache = {};
             }
 
             return ret;
@@ -330,8 +330,13 @@ define(function (require) {
       };
 
       var breakers = {
-        setBounds: {
-          deps: ['getBounds', 'hasBounds', 'getDuration', 'getInterval', 'getScaledDateFormat'],
+        setBounds: 'bounds',
+        clearBounds: 'bounds',
+        setInterval: 'interval'
+      };
+
+      var resources = {
+        bounds: {
           setup: function () {
             return [self._lb, self._ub];
           },
@@ -339,8 +344,7 @@ define(function (require) {
             return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
           }
         },
-        setInterval: {
-          deps: ['getInterval', 'getScaledDateFormat'],
+        interval: {
           setup: function () {
             return self._i;
           },

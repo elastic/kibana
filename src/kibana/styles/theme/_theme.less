@@ -47,9 +47,14 @@
 
   &-inverse {
     .logo {
+
+      @media (max-width: @screen-md-max) {
+        width: 45px
+      }
+
       background-image: url('../images/no_border.png');
       height: @navbar-height;
-      width: @navbar-height;
+      width: 252px;
     }
 
     .badge {
