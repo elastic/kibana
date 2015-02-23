@@ -9,6 +9,7 @@ define(function (require) {
         scope.$watch(attributes.autoSelectIfOnlyOne, function (options) {
           if (options && options.length === 1) {
             ngModelCtrl.$setViewValue(options[0]);
+            ngModelCtrl.$render();
           }
         });
       }
