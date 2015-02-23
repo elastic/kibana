@@ -18,9 +18,7 @@
           <img width="128" src="images/initial_load.gif">
           <h1>
             <strong>Kibana</strong>
-            <script>
-              if (location.href.indexOf('?embed') < 0) document.write('<small>is loading. Give me a moment here. I\'m loading a whole bunch of code. Don\'t worry, all this good stuff will be cached up for next time!</small>');
-            </script>
+            <small id="cache-message">is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!</small>
           </h1>
         </center>
       </div>
@@ -35,6 +33,9 @@
     <script src="bower_components/requirejs/require.js?_b=@@buildNum"></script>
     <script src="require.config.js?_b=@@buildNum"></script>
     <script>
+      var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
+      if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
+
       if (window.KIBANA_BUILD_NUM.substr(0, 2) !== '@@') {
         // only cache bust if this is really the build number
         require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
