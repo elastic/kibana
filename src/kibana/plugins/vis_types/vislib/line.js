@@ -14,6 +14,7 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          drawLinesBetweenPoints: true,
           defaultYExtents: false
         },
         editor: require('text!plugins/vis_types/vislib/editors/basic.html')
@@ -27,6 +28,13 @@ define(function (require) {
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
+        },
+        {
+          group: 'metrics',
+          name: 'radius',
+          title: 'Dot size',
+          min: 0,
+          max: 1
         },
         {
           group: 'buckets',
