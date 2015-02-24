@@ -15,9 +15,12 @@ define(function (require) {
   }
 
   CidrMask.prototype.getRange = function () {
+    var variableBits = NUM_BITS - this.prefixLength;
+    var fromAddress = this.initialAddress.valueOf() >> variableBits << variableBits >>> 0; // >>> 0 coerces to unsigned
+    var numAddresses = Math.pow(2, variableBits);
     return {
-      from: this.initialAddress.toString(),
-      to: new Ipv4Address(this.initialAddress.valueOf() + Math.pow(2, NUM_BITS - this.prefixLength) - 1).toString()
+      from: new Ipv4Address(fromAddress).toString(),
+      to: new Ipv4Address(fromAddress + numAddresses - 1).toString()
     };
   };
 
