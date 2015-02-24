@@ -10,7 +10,6 @@ define(function (require) {
     return {
       histogram: pointSeries.column,
       line: pointSeries.line,
-      bubble: pointSeries.line,
       pie: Private(require('components/vislib/lib/handler/types/pie')),
       area: pointSeries.area,
       tile_map: Private(require('components/vislib/lib/handler/types/tile_map'))
