@@ -30,8 +30,8 @@ define(function (require) {
               {from: '128.0.0.0', to: '191.255.255.255'}
             ],
             mask: [
-              {mask: '10.0.0.0/25'},
-              {mask: '10.0.0.127/25'}
+              {mask: '0.0.0.0/1'},
+              {mask: '128.0.0.0/2'}
             ]
           },
           editor: require('text!components/agg_types/controls/ip_ranges.html'),
