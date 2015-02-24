@@ -27,7 +27,7 @@ define(function (require) {
 
       // Line chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
-        interpolate: 'cardinal', // FIXME what is this supposed to be? (cardinal || linear)
+        interpolate: 'linear',
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
       });
