@@ -122,7 +122,7 @@ define(function (require) {
         .attr('r', function (d) {
           var circleRadius = (d._input.radius - radii.min) / radiusStep;
 
-          return (circleRadius || 2) + 2;
+          return Math.sqrt((circleRadius || 2) + 2);
         })
         .attr('cx', cx)
         .attr('cy', cy)
