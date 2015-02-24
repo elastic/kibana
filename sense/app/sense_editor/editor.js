@@ -239,6 +239,10 @@ define([
           request.url += t.value;
           t = tokenIter.stepForward();
         }
+        if (editor.parser.isEmptyToken(t)) {
+          // if the url row ends with some spaces, skip them.
+          t = editor.parser.nextNonEmptyToken(tokenIter);
+        }
 
         var bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
         var bodyStartColumn = 0;
@@ -297,7 +301,7 @@ define([
         }
       }
 
-      var column = (session.getLine(curRow) || "").length;
+      var column = (session.getLine(curRow) || "").replace(/\s+$/, "").length;
 
       return { row: curRow, column: column};
     };
