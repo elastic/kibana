@@ -1,5 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
+  require('directives/validate_ip');
+  require('directives/validate_cidr_mask');
 
   return function RangeAggDefinition(Private) {
     var _ = require('lodash');
@@ -21,25 +23,23 @@ define(function (require) {
           filterFieldTypes: 'ip'
         }, {
           name: 'ipRangeType',
+          default: 'fromTo',
           write: _.noop
         }, {
           name: 'ranges',
-          default: [
-            { from: '0.0.0.0', to: '127.255.255.255', mask: '10.0.0.0/25' },
-            { from: '128.0.0.0', to: '191.255.255.255', mask: '10.0.0.127/25' }
-          ],
+          default: {
+            fromTo: [
+              {from: '0.0.0.0', to: '127.255.255.255'},
+              {from: '128.0.0.0', to: '191.255.255.255'}
+            ],
+            mask: [
+              {mask: '10.0.0.0/25'},
+              {mask: '10.0.0.127/25'}
+            ]
+          },
           editor: require('text!components/agg_types/controls/ip_ranges.html'),
           write: function (aggConfig, output) {
-            output.params.ranges = aggConfig.params.ranges.map(function (range) {
-              var copy = {};
-              if (aggConfig.params.ipRangeType !== 'mask') {
-                if (range.to != null) copy.to = range.to;
-                if (range.from != null) copy.from = range.from;
-              } else {
-                copy.mask = range.mask;
-              }
-              return copy;
-            });
+            output.params.ranges = aggConfig.params.ranges[aggConfig.params.ipRangeType];
           }
         }
       ]
