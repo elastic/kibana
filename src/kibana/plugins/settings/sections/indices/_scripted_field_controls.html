@@ -1,12 +1,13 @@
 <div class="actions">
-  <button ng-click="edit(field)" class="btn btn-xs btn-default">
+  <button ng-click="edit(field)" aria-label="Edit" class="btn btn-xs btn-default">
     <i class="fa fa-pencil"></i>
   </button>
 
   <button
     confirm-click="remove(field)"
     confirmation="Are you sure want to delete '{{field.name}}'? This action is irreversible!"
-      class="btn btn-xs btn-danger">
+    class="btn btn-xs btn-danger"
+    aria-label="Delete">
     <i class="fa fa-trash"></i>
   </button>
 </div>
