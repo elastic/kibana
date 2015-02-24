@@ -19,6 +19,9 @@ module.exports = function (response) {
     type: 'config',
     body: body._source,
     id: config.package.version
+  }).catch(function (err) {
+    if (!/DocumentAlreadyExistsException/.test(err.message) && /beta|snapshot/.test(config.package.version)) {
+      throw err;
+    }
   });
-
 };
