@@ -81,10 +81,16 @@ module.exports = {
   start: function (cb) {
     return initialization()
       .then(start)
-      .catch(function (err) {
-        throw err;
-      })
-      .nodeify(cb);
+      .then(function () {
+        cb && cb();
+      }, function (err) {
+        logger.error({ err: err });
+        if (cb) {
+          cb(err);
+        } else {
+          process.exit();
+        }
+      });
   }
 };
 
