@@ -53,7 +53,8 @@
       ng-if="!conf.editting"
       ng-click="edit(conf)"
       class="btn btn-default"
-      ng-disabled="conf.tooComplex">
+      ng-disabled="conf.tooComplex"
+      aria-label="Edit">
       <i class="fa fa-pencil"></i>
     </button>
 
@@ -61,7 +62,8 @@
       ng-if="conf.editting"
       ng-click="save(conf)"
       class="btn btn-success"
-      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid">
+      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
+      aria-label="Save">
       <i ng-if="!conf.loading" class="fa fa-save"></i>
       <i ng-if="conf.loading" class="fa fa-spinner"></i>
     </button>
@@ -70,14 +72,16 @@
       ng-if="!conf.editting"
       ng-click="clear(conf)"
       ng-hide="conf.value === undefined"
-      class="btn btn-danger">
+      class="btn btn-danger"
+      aria-label="Clear">
       <i class="fa fa-trash-o"></i>
     </button>
 
     <button
       ng-if="conf.editting"
       ng-click="cancelEdit(conf)"
-      class="btn btn-default">
+      class="btn btn-default"
+      aria-label="Cancel">
       <i class="fa fa-times"></i>
     </button>
   </td>
