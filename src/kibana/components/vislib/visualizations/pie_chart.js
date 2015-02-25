@@ -25,7 +25,7 @@ define(function (require) {
       PieChart.Super.apply(this, arguments);
 
       // Check whether pie chart should be rendered.
-      this._validatePieData();
+      //this._validatePieData();
 
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false
