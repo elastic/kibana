@@ -186,11 +186,6 @@ To create a scripted field:
 . Select the index pattern you want to add a scripted field to.
 . Go to the pattern's *Scripted Fields* tab.
 . Click *Add Scripted Field*. 
-+
-TIP: If you are just getting started with scripted fields, you can click 
-*create a few examples from your date fields* to add some scripted fields
-you can use as a starting point.
-
 . Enter a name for the scripted field.
 . Enter the expression that you want to use to compute a value on the fly 
 from your index data.
