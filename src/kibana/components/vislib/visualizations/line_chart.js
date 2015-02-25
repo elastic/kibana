@@ -121,8 +121,11 @@ define(function (require) {
         .append('circle')
         .attr('r', function (d) {
           var circleRadius = (d._input.radius - radii.min) / radiusStep;
+          var margin = self._attr.margin;
+          var width = self._attr.width - margin.left - margin.right;
+          var height = self._attr.height - margin.top - margin.bottom;
 
-          return Math.sqrt((circleRadius || 2) + 2);
+          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]);
         })
         .attr('cx', cx)
         .attr('cy', cy)
