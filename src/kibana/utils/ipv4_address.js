@@ -6,6 +6,13 @@ define(function () {
     throw Error('Invalid IPv4 address: ' + ipAddress);
   }
 
+  function isIntegerInRange(integer, min, max) {
+    return !isNaN(integer)
+      && integer >= min
+      && integer < max
+      && integer % 1 === 0;
+  }
+
   function Ipv4Address(ipAddress) {
     this.value = ipAddress;
 
@@ -17,20 +24,12 @@ define(function () {
 
       for (var i = 0; i < bytes.length; i++) {
         var byte = Number(bytes[i]);
-        if (isNaN(byte)
-          || byte < 0
-          || byte >= BYTE_SIZE
-          || byte % 1 !== 0
-        ) throwError(ipAddress);
+        if (!isIntegerInRange(byte, 0, BYTE_SIZE)) throwError(ipAddress);
         this.value += Math.pow(BYTE_SIZE, NUM_BYTES - 1 - i) * byte;
       }
     }
 
-    if (isNaN(this.value)
-      || this.value < 0
-      || this.value >= Math.pow(BYTE_SIZE, NUM_BYTES)
-      || this.value % 1 !== 0
-    ) throwError(ipAddress);
+    if (!isIntegerInRange(this.value, 0, Math.pow(BYTE_SIZE, NUM_BYTES))) throwError(ipAddress);
   }
 
   Ipv4Address.prototype.toString = function () {
