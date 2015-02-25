@@ -38,7 +38,7 @@
 
       <!-- result -->
       <div class="col-md-12" ng-if="status === 'found'">
-        <h2><b>Doc:</b> {{hit._index}}/{{hit._type}}/{{hit._id}}</h2>
+        <h2><b>Doc:</b> {{hit._index}}/{{hit._type}}/{{hit._id | uriescape}}</h2>
 
         <doc-viewer hit="hit" index-pattern="indexPattern"></doc-viewer>
       </div>
