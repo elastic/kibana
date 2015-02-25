@@ -165,30 +165,6 @@ define(function (require) {
         vis = null;
       });
 
-      describe('align color of legend values with pie values', function () {
-        var legendItems;
-        var legendItem;
-        var paths;
-        var value;
-
-        beforeEach(function () {
-          inject(function (d3) {
-            legendItems = vis.handler.data.pieNames();
-            vis.handler.charts.forEach(function (chart) {
-              paths = d3.select(chart.chartEl).selectAll('path')[0];
-            });
-          });
-        });
-
-        it('should have the same value as the legend', function () {
-          legendItem = legendItems[legendItems.length - 1];
-          value = paths.filter(function (obj) {
-            return obj.__data__.name === legendItem;
-          });
-          console.log(value);
-        });
-      });
-
       describe('addPathEvents method', function () {
         var path;
         var d3selectedPath;
