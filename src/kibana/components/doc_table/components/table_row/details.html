@@ -1,5 +1,5 @@
 <td colspan="{{ columns.length + 2 }}">
-  <a class="pull-right" ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/{{row._id}}">
+  <a class="pull-right" ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}">
     <small>Link to /{{row._index}}/{{row._type}}/{{row._id}}</small></i>
   </a>
   <doc-viewer hit="row" filter="filter" index-pattern="indexPattern"></doc-viewer>
