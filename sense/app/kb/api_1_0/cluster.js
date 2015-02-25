@@ -32,7 +32,11 @@ define(function () {
         "metrics": [ "version", "master_node", "nodes", "routing_table", "metadata", "blocks" ]
       }
     });
-    api.addEndpointDescription('_cluster/health');
+    api.addEndpointDescription('_cluster/health', {
+      url_params: {
+        "level": [ "indices", "shards" ]
+      }
+    });
     api.addEndpointDescription('_cluster/pending_tasks');
     api.addEndpointDescription('get_cluster/settings', {
       patterns: [
