@@ -31,7 +31,7 @@ define(function (require) {
     resolve: resolveIndexPattern
   });
 
-  app.controller('doc', function ($scope, $route, es, timefilter, $routeParams) {
+  app.controller('doc', function ($scope, $route, es, timefilter) {
 
     timefilter.enabled = false;
 
