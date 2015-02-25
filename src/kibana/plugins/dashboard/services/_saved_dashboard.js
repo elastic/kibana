@@ -23,7 +23,10 @@ define(function (require) {
           hits: 'integer',
           description: 'string',
           panelsJSON: 'string',
-          version: 'integer'
+          version: 'integer',
+          timeRestore: 'boolean',
+          timeTo: 'string',
+          timeFrom: 'string'
         },
 
         // defeult values to assign to the doc
@@ -32,7 +35,10 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]',
-          version: 1
+          version: 1,
+          timeRestore: false,
+          timeTo: undefined,
+          timeFrom: undefined
         },
 
         searchSource: true,

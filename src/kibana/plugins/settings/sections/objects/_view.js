@@ -55,6 +55,9 @@ define(function (require) {
           } else if (_.isArray(field.value)) {
             field.type = 'array';
             field.value = angular.toJson(field.value, true);
+          } else if (_.isBoolean(field.value)) {
+            field.type = 'boolean';
+            field.value = field.value;
           } else if (_.isPlainObject(field.value)) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);

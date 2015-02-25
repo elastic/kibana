@@ -56,6 +56,14 @@ define(function (require) {
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
+
+        // I don't like this, but not sure how else to tell if this is a fresh load of the
+        // saved dashboard object, so looking for _a in the URL. Ideas?
+        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !$routeParams._a) {
+          timefilter.time.to = dash.timeTo;
+          timefilter.time.from = dash.timeFrom;
+        }
+
         $scope.$on('$destroy', dash.destroy);
 
         var matchQueryFilter = function (filter) {
@@ -135,6 +143,8 @@ define(function (require) {
           $state.title = dash.id = dash.title;
           $state.save();
           dash.panelsJSON = angular.toJson($state.panels);
+          dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
+          dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
 
           dash.save()
           .then(function (id) {
