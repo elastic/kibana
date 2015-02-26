@@ -1,26 +1,25 @@
 .sidebar-container.collapsible-sidebar {
   position: relative;
+  z-index: 1;
 
   .sidebar-collapser {
-    background-color: #fff;
-    right: 0;
-    height: 100%;
+    background-color: #ecf0f1;
+    height: 28px;
     position: absolute;
     top: 0;
-    right: 0;
-    width: 10px;
+    right: -20px;
+    width: 20px;
     border: 1px solid #ecf0f1;
-    border-width: 1px 0 1px 1px;
+    border-width: 0 1px 1px 0;
     cursor: pointer;
+    z-index: -1;
+    border-bottom-right-radius: 4px;
 
     .chevron-cont{
       position: absolute;
-      height: 50px;
-      top: 25%;  /* FIXME because of the different layouts (fullscreen;scrolling) in Discover vs Visualize. */
-      text-align: center;
-      line-height: 50px;
-      left: 50%;
-      margin-left: -5px;
+      left: 4px;
+      top: 5px;
+
       &:before {
         font-family: FontAwesome;
         color: #333;
@@ -33,7 +32,6 @@
     width: 0 !important;
     border-right-width: 0;
     border-left-width: 0;
-    z-index: 100;
 
     > * {
       visibility: hidden;
@@ -41,8 +39,6 @@
 
     .sidebar-collapser {
       visibility: visible;
-      right: -10px;
-      border-right: 1px solid #ecf0f1;
       .chevron-cont:before {
         content: "\F054";
       }
