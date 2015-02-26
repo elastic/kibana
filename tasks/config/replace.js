@@ -25,7 +25,7 @@ module.exports = function (grunt) {
         },
         {
           src: [join(src, 'server', 'config', 'index.js')],
-          dest: join(build, 'dist', 'kibana', 'config', 'index.js')
+          dest: join(build, 'dist', 'kibana', 'src', 'config', 'index.js')
         }
       ]
     },
