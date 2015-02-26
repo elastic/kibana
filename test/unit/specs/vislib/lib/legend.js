@@ -48,6 +48,32 @@ define(function (require) {
         vis = null;
       });
 
+      describe('legend item color matches slice color', function () {
+        var items;
+        var paths;
+        var getColor;
+
+        if (chartTypes[i] === 'pie') {
+          it('should match the slice color', function () {
+            paths = $(vis.el).find('path').toArray();
+            items = vis.handler.legend.labels;
+            getColor = vis.handler.legend.color;
+
+            items.forEach(function (label) {
+              var slice = paths.filter(function (path) {
+                if (path.__data__.name === undefined) return false;
+                return path.__data__.name.toString() === label;
+              });
+
+              slice.forEach(function (s) {
+                var hexColor = s.classList[2].replace('c', '#');
+                expect(hexColor).to.be(getColor(label));
+              });
+            });
+          });
+        }
+      });
+
       describe('header method', function () {
         it('should append the legend header', function () {
           expect($(vis.el).find('.header').length).to.be(1);
