@@ -60,14 +60,15 @@ define(function (require) {
             getColor = vis.handler.legend.color;
 
             items.forEach(function (label) {
-              var slice = paths.filter(function (path) {
+              var slices = paths.filter(function (path) {
                 if (path.__data__.name === undefined) return false;
                 return path.__data__.name.toString() === label;
+              }).map(function (path) {
+                return $(path).attr('class').split(/\s+/)[2].replace('c', '#');
               });
 
-              slice.forEach(function (s) {
-                var hexColor = s.classList[2].replace('c', '#');
-                expect(hexColor).to.be(getColor(label));
+              slices.forEach(function (hex) {
+                expect(hex).to.be(getColor(label));
               });
             });
           });
