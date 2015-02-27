@@ -1,6 +1,7 @@
 [[kibana-guide]]
 = Kibana User Guide
 
+:ref: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current
 
 include::introduction.asciidoc[]
 
@@ -16,7 +17,6 @@ include::dashboard.asciidoc[]
 
 include::settings.asciidoc[]
 
+include::production.asciidoc[]
 
-
-
-
+include::whats-new.asciidoc[]

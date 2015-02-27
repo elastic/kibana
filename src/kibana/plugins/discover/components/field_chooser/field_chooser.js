@@ -21,10 +21,16 @@ define(function (require) {
         data: '=',
         state: '=',
         indexPattern: '=',
+        indexPatternList: '=',
         updateFilterInQuery: '=filter'
       },
       template: html,
-      controller: function ($scope) {
+      controller: function ($scope, $route) {
+        $scope.setIndexPattern = function (indexPattern) {
+          $scope.state.index = indexPattern;
+          $scope.state.save();
+          $route.reload();
+        };
 
         var filter = $scope.filter = {
           props: [
@@ -137,7 +143,7 @@ define(function (require) {
               schema: 'segment',
               params: {
                 field: field.name,
-                percision: 3
+                precision: 3
               }
             };
           } else {
