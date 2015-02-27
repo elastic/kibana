@@ -6,6 +6,7 @@ define(function (require) {
     var orderKeys = Private(require('components/vislib/components/zero_injection/ordered_x_keys'));
     var getLabels = Private(require('components/vislib/components/labels/labels'));
     var color = Private(require('components/vislib/components/color/color'));
+    var errors = require('errors');
 
     /**
      * Provides an API for pulling values off the data
@@ -511,6 +512,33 @@ define(function (require) {
     };
 
     /**
+     * Checks whether all pie slices have zero values.
+     * If so, an error is thrown.
+     */
+    Data.prototype._validatePieData = function () {
+      var visData = this.getVisData();
+
+      visData.forEach(function (chartData) {
+        chartData.slices = (function withoutZeroSlices(slices) {
+          if (!slices.children) return slices;
+
+          slices = _.clone(slices);
+          slices.children = slices.children.reduce(function (children, child) {
+            if (child.size !== 0) {
+              children.push(withoutZeroSlices(child));
+            }
+            return children;
+          }, []);
+          return slices;
+        }(chartData.slices));
+
+        if (chartData.slices.children.length === 0) {
+          throw new errors.PieContainsAllZeros();
+        }
+      });
+    };
+
+    /**
      * Returns an array of names ordered by appearance in the nested array
      * of objects
      *
@@ -520,6 +548,8 @@ define(function (require) {
     Data.prototype.pieNames = function () {
       var self = this;
       var names = [];
+
+      this._validatePieData();
 
       _.forEach(this.getVisData(), function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;

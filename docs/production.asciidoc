@@ -40,7 +40,7 @@ needs permission to perform the following actions on the `.kibana` index:
 ----
 
 For more information about configuring access in Shield, 
-see https://www.elasticsearch.org/guide/en/shield/current/authorization.html[Authorization]
+see https://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html[Shield with Kibana 4]
 in the Shield documentation.
 
 To configure credentials for Kibana, set the `kibana_elasticsearch_username` and

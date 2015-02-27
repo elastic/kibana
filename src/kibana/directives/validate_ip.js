@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var Ipv4Address = require('utils/ipv4_address');
 
   require('modules')
     .get('kibana')
@@ -11,35 +12,21 @@ define(function (require) {
           'ngModel': '=',
         },
         link: function ($scope, elem, attr, ngModel) {
-
-          var isIP = function (value) {
-            if (!value) return false;
-            var parts = value.match(/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)/);
-
-            var valid = true;
-            if (parts) {
-              _.each(parts.slice(1, 5), function (octet) {
-                if (octet > 255 || octet < 0) valid = false;
-              });
-            } else {
-              valid = false;
+          function validateIp(ipAddress) {
+            try {
+              ipAddress = new Ipv4Address(ipAddress);
+              ngModel.$setValidity('ipInput', true);
+              return ipAddress.toString();
+            } catch (e) {
+              ngModel.$setValidity('ipInput', false);
             }
-            return valid;
-          };
+          }
 
           // From User
-          ngModel.$parsers.unshift(function (value) {
-            var valid = isIP(value);
-            ngModel.$setValidity('ipInput', valid);
-            return valid ? value : undefined;
-          });
+          ngModel.$parsers.unshift(validateIp);
 
           // To user
-          ngModel.$formatters.unshift(function (value) {
-            ngModel.$setValidity('ipInput', isIP(value));
-            return value;
-          });
-
+          ngModel.$formatters.unshift(validateIp);
         }
       };
     });

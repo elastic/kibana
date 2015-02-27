@@ -44,7 +44,8 @@ var config = module.exports = {
   bundled_plugins_folder  : path.resolve(public_folder, 'plugins'),
   kibana                  : kibana,
   package                 : require(packagePath),
-  htpasswd                : htpasswdPath
+  htpasswd                : htpasswdPath,
+  buildNum                : '@@buildNum'
 };
 
 config.plugins = listPlugins(config);

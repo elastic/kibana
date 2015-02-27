@@ -77,7 +77,7 @@ the current visualization.
 [[aggregation-builder]]
 ===== Aggregation Builder
 
-Use the aggregation builder on the left of the page to configure the metric and bucket aggregations used in your 
+Use the aggregation builder on the left of the page to configure the {ref}/search-aggregations.html#_metrics_aggregations[metric] and {ref}/search-aggregations.html#_bucket_aggregations[bucket] aggregations used in your 
 visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
 {ref}/search-aggregations.html[Elasticsearch aggregations reference].
 

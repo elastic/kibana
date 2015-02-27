@@ -9,7 +9,7 @@ All you need is:
 ** URL of the Elasticsearch instance you want to connect to.
 ** Which Elasticsearch indices you want to search. 
 
-NOTE: If your Elasticsearch installation is protected by http://www.elasticsearch.org/overview/shield/[Shield] see the http://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html#_from_the_kibana_4_server_to_elasticsearch[Shield documentation] for additional setup instructions.
+NOTE: If your Elasticsearch installation is protected by http://www.elasticsearch.org/overview/shield/[Shield] see  https://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html[Shield with Kibana 4] for additional setup instructions.
 
 [float]
 [[install]]
