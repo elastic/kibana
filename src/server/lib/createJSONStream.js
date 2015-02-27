@@ -1,6 +1,5 @@
 var _ = require('lodash');
-var Writable = require('stream').Writable;
-var util = require('util');
+var through = require('through');
 
 var levels = {
   10: 'trace',
@@ -11,14 +10,7 @@ var levels = {
   60: 'fatal'
 };
 
-function JSONStream(options) {
-  options = options || {};
-  Writable.call(this, options);
-}
-
-util.inherits(JSONStream, Writable);
-
-JSONStream.prototype._write = function (entry, encoding, callback) {
+function write(entry) {
   entry = JSON.parse(entry.toString('utf8'));
   var env = process.env.NODE_ENV || 'development';
 
@@ -36,8 +28,13 @@ JSONStream.prototype._write = function (entry, encoding, callback) {
     if (!output.message) output.message = output.error.message;
   }
 
-  process.stdout.write(JSON.stringify(output) + "\n");
-  callback();
-};
+  this.queue(JSON.stringify(output) + '\n');
+}
 
-module.exports = JSONStream;
+function end() {
+  this.queue(null);
+}
+
+module.exports = function () {
+  return through(write, end);
+};
