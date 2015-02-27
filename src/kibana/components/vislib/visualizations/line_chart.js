@@ -65,6 +65,7 @@ define(function (require) {
      */
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
+      var showCircles = this._attr.showCircles;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
@@ -105,13 +106,18 @@ define(function (require) {
         return color(d.label);
       }
 
+      function showColor(d) {
+        if (!showCircles) return 'none';
+        return cColor(d);
+      }
+
       circles
       .enter()
         .append('circle')
         .attr('r', visibleRadius)
         .attr('cx', cx)
         .attr('cy', cy)
-        .attr('fill', cColor)
+        .attr('fill', showColor)
         .attr('class', 'circle-decoration');
 
       circles
