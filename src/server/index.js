@@ -69,8 +69,8 @@ function onListening() {
 }
 
 function start() {
-  var port = parseInt(process.env.PORT, 10) || config.port || 3000;
-  var host = process.env.HOST || config.host || '127.0.0.1';
+  var port = config.port || 3000;
+  var host = config.host || '127.0.0.1';
   var listen = Promise.promisify(server.listen.bind(server));
   app.set('port', port);
   return listen(port, host);
