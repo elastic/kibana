@@ -6,8 +6,8 @@ define(function (require) {
       restrict: 'A',
       link: function ($scope, $elem, attrs) {
         $timeout(function () {
-          var method = (attrs.inputFocus && attrs.inputFocus === 'select') ? 'select' : 'focus';
-          $elem[0][method]();
+          $elem.focus();
+          if (attrs.inputFocus === 'select') $elem.select();
         });
       }
     };
