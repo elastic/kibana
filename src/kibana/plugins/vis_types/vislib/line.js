@@ -30,11 +30,12 @@ define(function (require) {
           ]
         },
         {
-          group: 'metrics',
+          group: 'buckets',
           name: 'radius',
           title: 'Dot size',
           min: 0,
-          max: 1
+          max: 1,
+          aggFilter: '!geohash_grid'
         },
         {
           group: 'buckets',
