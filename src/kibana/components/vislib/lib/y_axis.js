@@ -32,6 +32,24 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
+    YAxis.prototype.getScaleType = function (string) {
+      var scale;
+
+      switch (string) {
+      case 'log':
+        scale = d3.scale.log();
+        break;
+      case 'square root':
+        scale = d3.scale.sqrt();
+        break;
+      default:
+        scale = d3.scale.linear();
+        break;
+      }
+
+      return scale;
+    };
+
     /**
      * Creates the d3 y scale function
      *
@@ -69,7 +87,7 @@ define(function (require) {
       }
 
       // save reference to y scale
-      this.yScale = d3.scale.linear()
+      this.yScale = this.getScaleType(this._attr.scale)
       .domain([this.yMin, this.yMax])
       .range([height, 0])
       .nice(this.tickScale(height));
