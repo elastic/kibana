@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   require('directives/input_focus');
 
-  describe.only('Input focus directive', function () {
+  describe('Input focus directive', function () {
     var $compile, $rootScope, $timeout, element;
     var $el, selectedEl, selectedText;
     var inputValue = 'Input Text Value';
