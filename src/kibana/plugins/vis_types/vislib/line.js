@@ -30,7 +30,7 @@ define(function (require) {
           ]
         },
         {
-          group: 'buckets',
+          group: 'metrics',
           name: 'radius',
           title: 'Dot size',
           min: 0,

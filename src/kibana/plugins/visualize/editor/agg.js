@@ -55,6 +55,15 @@ define(function (require) {
           aggs.splice(index, 1);
         };
 
+        $scope.canRemove = function (aggregation) {
+          var metricCount = _.reduce($scope.group, function (count, agg) {
+            return (agg.schema.name === aggregation.schema.name) ? ++count : count;
+          }, 0);
+
+          // make sure the the number of these aggs is above the min
+          return metricCount > aggregation.schema.min;
+        };
+
         function calcAggIsTooLow() {
           if (!$scope.agg.schema.mustBeFirst) {
             return false;
