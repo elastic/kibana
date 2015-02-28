@@ -19,6 +19,7 @@ module.exports = function (grunt) {
     'make_plugin_dir',
     'copy:plugin_readme',
     'describe_bundled_plugins',
+    'strip_down_packagejson',
     'npm_install_kibana',
     'clean:test_from_node_modules',
     'download_node_binaries',

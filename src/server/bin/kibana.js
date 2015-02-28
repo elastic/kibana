@@ -3,12 +3,14 @@
 var program = require('commander');
 var env = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'development';
 var path = require('path');
-var packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
 var fs = require('fs');
-if (env !== 'development') {
-  packagePath = path.resolve(__dirname, '..', 'package.json');
+
+var package;
+try {
+  package = require(path.resolve(__dirname, '..', '..', '..', 'package.json'));
+} catch (e) {
+  package = require(path.resolve(__dirname, '..', 'package.json'));
 }
-var package = require(packagePath);
 
 
 program.description('Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch.');
