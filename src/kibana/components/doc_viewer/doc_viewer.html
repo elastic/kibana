@@ -25,7 +25,7 @@
           </td>
 
           <td>
-            <i bo-if="field[0] === '_'"
+            <i bo-if="!mapping[field] && field[0] === '_'"
               tooltip-placement="top"
               tooltip="Field names beginning with _ are not supported"
               class="fa fa-warning text-color-warning ng-scope doc-viewer-underscore"></i>
