@@ -91,12 +91,14 @@
                   </div>
                   <br>
                   <div class="small">
-                    <input
-                      ng-model="relative.round"
-                      ng-checked="relative.round"
-                      ng-change="formatRelative()"
-                      type="checkbox">
-                    round to the {{units[relative.unit]}}
+                    <label>
+                      <input
+                        ng-model="relative.round"
+                        ng-checked="relative.round"
+                        ng-change="formatRelative()"
+                        type="checkbox">
+                      round to the {{units[relative.unit]}}
+                    </label>
                   </div>
                 </div>
 
