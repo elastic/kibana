@@ -38,7 +38,7 @@
         class="sidebar-item-button primary">
           Visualize
           <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
-          ( {{warnings.length}} warnings <i class="fa fa-warning"></i> )
+          ( {{warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i class="fa fa-warning"></i> )
           </span>
       </div>
 
