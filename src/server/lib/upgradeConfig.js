@@ -9,6 +9,9 @@ module.exports = function (response) {
   // nothing needs to be done
   if (response.hits.hits.length === 0) return Promise.resolve();
 
+  // if we already have a the current version in the index then we need to stop
+  if (_.find(response.hits.hits, { _id: config.package.version })) return Promise.resolve();
+
   // Look for upgradeable configs. If none of them are upgradeable
   // then resolve with null.
   var body = _.find(response.hits.hits, isUpgradeable);
