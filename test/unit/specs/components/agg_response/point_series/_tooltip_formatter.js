@@ -34,7 +34,8 @@ define(function (require) {
               value: 1
             }
           }
-        }
+        },
+        extraMetrics: []
       }
     };
 
@@ -42,7 +43,7 @@ define(function (require) {
       var event = _.cloneDeep(baseEvent);
       var $el = $(tooltipFormatter(event));
       var $rows = $el.find('tr');
-      expect($rows.size()).to.be(3);
+      expect($rows.size()).to.be(4);
 
       var $row1 = $rows.eq(0).find('td');
       expect(cell($row1, 0)).to.be('inner');
