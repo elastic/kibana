@@ -229,14 +229,14 @@ define(function (require) {
     Dispatch.prototype.highlightLegend = function (element) {
       var classList = d3.select(this).node().classList;
       var liClass = d3.select(this).node().classList[1];
-      var allLi = d3.select(element)
-        .select('.legend-ul')
-        .selectAll('li.color');
 
-      var thisLi = allLi.filter(function (d, i) {
-        return d3.select(this).node().classList[1] !== liClass;
-      });
-      thisLi.classed('blur_shape', true);
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .filter(function (d, i) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
     };
 
     /**
@@ -246,14 +246,10 @@ define(function (require) {
      * @method unHighlightLegend
      */
     Dispatch.prototype.unHighlightLegend = function (element) {
-      var allLi = d3.select(element)
+      d3.select(element)
         .select('.legend-ul')
         .selectAll('li.color')
-        .filter(function (d, i) {
-          return true;
-        });
-
-      allLi.classed('blur_shape', false);
+        .classed('blur_shape', false);
     };
 
     /**
