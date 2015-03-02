@@ -104,7 +104,7 @@ define(function (require) {
       var addEvent = this.addEvent;
       var $el = this.handler.el;
 
-      function hover (d, i) {
+      function hover(d, i) {
         d3.event.stopPropagation();
 
         // Add pointer if item is clickable
@@ -129,7 +129,7 @@ define(function (require) {
       var addEvent = this.addEvent;
       var $el = this.handler.el;
 
-      function mouseout () {
+      function mouseout() {
         d3.event.stopPropagation();
 
         self.unHighlightLegend.call(this, $el);
@@ -249,7 +249,7 @@ define(function (require) {
       var allLi = d3.select(element)
         .select('.legend-ul')
         .selectAll('li.color')
-        .filter(function(d, i) {
+        .filter(function (d, i) {
           return true;
         });
 
