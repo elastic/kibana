@@ -107,11 +107,11 @@ define(function (require) {
       }
 
       function showColor(d) {
-        // If only 1 point exists, show circle
         var parent = d3.select(this).node().parentNode;
         var lengthOfParent = d3.select(parent).data()[0].length;
         var isVisible = (lengthOfParent === 1);
 
+        // If only 1 point exists, show circle
         if (!showCircles && !isVisible) return 'none';
         return cColor(d);
       }
