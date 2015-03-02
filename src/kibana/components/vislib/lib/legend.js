@@ -135,24 +135,58 @@ define(function (require) {
 
       legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {
-        var legendItem = d3.select(this).node().__data__;
-        var liClass = '.' + self.colorToClass(self.color(d));
-        visEl.selectAll('.color').classed('blur_shape', true);
+        var liClass = self.colorToClass(self.color(d));
+
+        // lines/area
+        visEl.selectAll('.chart')
+        .selectAll('.color')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // circles
+        visEl.selectAll('.chart')
+        .selectAll('.circle')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // pie slices
+        visEl.selectAll('.chart')
+        .selectAll('.slice')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
         eventEl.style('word-break', 'break-all');
 
         // select series on chart
-        visEl.selectAll(liClass).classed('blur_shape', false);
+        //visEl.selectAll(liClass).classed('blur_shape', false);
       })
       .on('mouseout', function () {
         /*
          * The default opacity of elements in charts may be modified by the
          * chart constructor, and so may differ from that of the legend
          */
+
+        // lines/areas
         visEl.selectAll('.chart')
         .selectAll('.color')
+        .classed('blur_shape', false);
+
+        // circles
+        visEl.selectAll('.chart')
+        .selectAll('.circle')
+        .classed('blur_shape', false);
+
+        // pie slices
+        visEl.selectAll('.chart')
+        .selectAll('.slice')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);

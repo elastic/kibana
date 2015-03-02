@@ -96,7 +96,7 @@ define(function (require) {
       // Append path
       path = layer.append('path')
       .attr('class', function (d) {
-        return self.colorToClass(color(d[0].label));
+        return 'color ' + self.colorToClass(color(d[0].label));
       })
       .style('fill', function (d) {
         return color(d[0].label);
