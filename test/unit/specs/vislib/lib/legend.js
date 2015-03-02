@@ -64,7 +64,7 @@ define(function (require) {
                 if (path.__data__.name === undefined) return false;
                 return path.__data__.name.toString() === label;
               }).map(function (path) {
-                return $(path).attr('class').split(/\s+/)[2].replace('c', '#');
+                return $(path).attr('class').split(/\s+/)[1].replace('c', '#');
               });
 
               slices.forEach(function (hex) {
