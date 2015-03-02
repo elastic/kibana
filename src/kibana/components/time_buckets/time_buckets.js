@@ -144,8 +144,18 @@ define(function (require) {
       }
 
       if (_.isString(interval)) {
+        // Assume interval is in the form (value)(unit), such as "1h"
+        var value = parseFloat(interval);
+        var unit;
+        if (!isNaN(value)) {
+          unit = interval.substring((value + '').length).trim();
+        } else {
+          // Interval is probably just the unit, such as "hour"
+          value = 1;
+          unit = interval;
+        }
         input = interval;
-        interval = moment.duration(1, interval);
+        interval = moment.duration(value, unit);
         if (+interval === 0) {
           interval = null;
           input += ' (not a valid moment unit)';

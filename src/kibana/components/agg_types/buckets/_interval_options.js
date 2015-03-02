@@ -43,6 +43,10 @@ define(function (require) {
       {
         display: 'Yearly',
         val: 'year'
+      },
+      {
+        display: 'Custom',
+        val: 'custom'
       }
     ];
   };
