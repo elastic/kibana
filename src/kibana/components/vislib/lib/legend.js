@@ -136,26 +136,31 @@ define(function (require) {
       legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {
         var liClass = self.colorToClass(self.color(d));
+        var charts = visEl.selectAll('.chart');
+
+        // legend
+        legendDiv.selectAll('li')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
 
         // lines/area
-        visEl.selectAll('.chart')
-        .selectAll('.color')
+        charts.selectAll('.color')
         .filter(function (d) {
           return d3.select(this).node().classList[1] !== liClass;
         })
         .classed('blur_shape', true);
 
         // circles
-        visEl.selectAll('.chart')
-        .selectAll('.circle')
+        charts.selectAll('.line circle')
         .filter(function (d) {
           return d3.select(this).node().classList[1] !== liClass;
         })
         .classed('blur_shape', true);
 
         // pie slices
-        visEl.selectAll('.chart')
-        .selectAll('.slice')
+        charts.selectAll('.slice')
         .filter(function (d) {
           return d3.select(this).node().classList[1] !== liClass;
         })
@@ -164,9 +169,6 @@ define(function (require) {
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
         eventEl.style('word-break', 'break-all');
-
-        // select series on chart
-        //visEl.selectAll(liClass).classed('blur_shape', false);
       })
       .on('mouseout', function () {
         /*
@@ -174,29 +176,27 @@ define(function (require) {
          * chart constructor, and so may differ from that of the legend
          */
 
+        var charts = visEl.selectAll('.chart');
+
+        // legend
+        legendDiv.selectAll('li')
+        .classed('blur_shape', false);
+
         // lines/areas
-        visEl.selectAll('.chart')
-        .selectAll('.color')
+        charts.selectAll('.color')
         .classed('blur_shape', false);
 
         // circles
-        visEl.selectAll('.chart')
-        .selectAll('.circle')
+        charts.selectAll('.line circle')
         .classed('blur_shape', false);
 
         // pie slices
-        visEl.selectAll('.chart')
-        .selectAll('.slice')
+        charts.selectAll('.slice')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'nowrap');
         eventEl.style('word-break', 'inherit');
-
-        // Legend values should always return to their default opacity of 1
-        visEl.select('.legend-ul')
-        .selectAll('.color')
-        .classed('blur_shape', false);
       });
     };
 
