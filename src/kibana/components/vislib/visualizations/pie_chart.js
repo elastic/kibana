@@ -41,6 +41,7 @@ define(function (require) {
 
       return element
         .call(events.addHoverEvent())
+        .call(events.addMouseoutEvent())
         .call(events.addClickEvent());
     };
 

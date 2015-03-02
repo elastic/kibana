@@ -45,8 +45,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);

@@ -19,7 +19,7 @@ define(function (require) {
 
       this.handler = handler;
       this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover');
+        'mousedown', 'mouseover', 'mouseout');
     }
 
     /**
@@ -92,6 +92,7 @@ define(function (require) {
       };
     };
 
+
     /**
      *
      * @method addHoverEvent
@@ -101,8 +102,9 @@ define(function (require) {
       var self = this;
       var isClickable = (this.dispatch.on('click'));
       var addEvent = this.addEvent;
+      var $el = this.handler.el;
 
-      function hover(d, i) {
+      function hover (d, i) {
         d3.event.stopPropagation();
 
         // Add pointer if item is clickable
@@ -110,10 +112,30 @@ define(function (require) {
           self.addMousePointer.call(this, arguments);
         }
 
+        self.highlightLegend.call(this, $el);
         self.dispatch.hover.call(this, self.eventResponse(d, i));
       }
 
       return addEvent('mouseover', hover);
+    };
+
+    /**
+     *
+     * @method addMouseoutEvent
+     * @returns {Function}
+     */
+    Dispatch.prototype.addMouseoutEvent = function () {
+      var self = this;
+      var addEvent = this.addEvent;
+      var $el = this.handler.el;
+
+      function mouseout () {
+        d3.event.stopPropagation();
+
+        self.unHighlightLegend.call(this, $el);
+      }
+
+      return addEvent('mouseout', mouseout);
     };
 
     /**
@@ -189,13 +211,49 @@ define(function (require) {
 
 
     /**
-     * Mouse over Behavior
+     * Mouseover Behavior
      *
      * @method addMousePointer
      * @returns {D3.Selection}
      */
     Dispatch.prototype.addMousePointer = function () {
       return d3.select(this).style('cursor', 'pointer');
+    };
+
+    /**
+     * Mouseover Behavior
+     *
+     * @param element {D3.Selection}
+     * @method highlightLegend
+     */
+    Dispatch.prototype.highlightLegend = function (element) {
+      var classList = d3.select(this).node().classList;
+      var liClass = d3.select(this).node().classList[1];
+      var allLi = d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color');
+
+      var thisLi = allLi.filter(function (d, i) {
+        return d3.select(this).node().classList[1] !== liClass;
+      });
+      thisLi.classed('blur_shape', true);
+    };
+
+    /**
+     * Mouseout Behavior
+     *
+     * @param element {D3.Selection}
+     * @method unHighlightLegend
+     */
+    Dispatch.prototype.unHighlightLegend = function (element) {
+      var allLi = d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .filter(function(d, i) {
+          return true;
+        });
+
+      allLi.classed('blur_shape', false);
     };
 
     /**

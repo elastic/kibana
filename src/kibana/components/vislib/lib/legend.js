@@ -85,14 +85,16 @@ define(function (require) {
     };
 
     /**
-     * Creates a class name based on the colors assigned to each label
+     * Creates a class name based on the hexColor assigned to each label
      *
      * @method colorToClass
-     * @param name {String} Label
+     * @param hexColor {String} Label
      * @returns {string} CSS class name
      */
-    Legend.prototype.colorToClass = function (name) {
-      return 'c' + name.replace(/[#]/g, '');
+    Legend.prototype.colorToClass = function (hexColor) {
+      if (hexColor) {
+        return 'c' + hexColor.replace(/[#]/g, '');
+      }
     };
 
     /**
@@ -131,8 +133,9 @@ define(function (require) {
         }
       });
 
-      visEl.selectAll('.color')
+      legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {
+        var legendItem = d3.select(this).node().__data__;
         var liClass = '.' + self.colorToClass(self.color(d));
         visEl.selectAll('.color').classed('blur_shape', true);
 
