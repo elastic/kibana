@@ -77,7 +77,14 @@ module.exports = function (grunt) {
 
     versioned_dist: {
       options: { mode: true },
-      files: []
+      files: [
+        {
+          expand: true,
+          cwd: '<%= build %>/dist/kibana/src',
+          src: '**',
+          dest: '<%= target %>/npm'
+        }
+      ]
     },
 
     plugin_readme: {

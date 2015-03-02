@@ -8,7 +8,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compression = require('compression');
 var config = require('./config');
-var checkPath = require('./lib/checkPath');
 
 var routes = require('./routes/index');
 var proxy = require('./routes/proxy');
@@ -25,8 +24,10 @@ app.use(auth());
 app.use(appHeaders());
 app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 
-if (app.get('env') === 'development' && checkPath('./dev')) {
-  require('./dev')(app);
+if (app.get('env') === 'development') {
+  try {
+    require('./dev')(app);
+  } catch (e) {  } // meh
 }
 
 // The proxy must be set up before all the other middleware.
