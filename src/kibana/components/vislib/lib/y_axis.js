@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var numeral = require('numeral');
+    var errors = require('errors');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
@@ -59,39 +60,55 @@ define(function (require) {
      */
     YAxis.prototype.getYScale = function (height) {
       var isLogScale = (this._attr.scale === 'log');
+      var yMin = this.yMin;
+      var yMax = this.yMax;
 
-      if (isLogScale) { this._attr.defaultYExtents = true; }
+      if (isLogScale) {
+
+        // Negative values cannot be displayed with a log scale.
+        if (yMin < 0 || yMax < 0) {
+          throw new errors.CannotLogScaleNegVals();
+        }
+
+        // log10 of 0 is -Infinity which cannot be coerced to a number
+        if (yMin === 0) {
+          // increase value to 1
+          yMin = 1;
+        }
+
+        this._attr.defaultYExtents = true;
+      }
 
       // yMin and yMax can never be equal for the axis
       // to render. Defaults yMin to 0 if yMin === yMax
       // and yMin is greater than or equal to zero, else
       // defaults yMax to zero.
-      if (this.yMin === this.yMax) {
-        if (this.yMin > 0) {
-          this.yMin = 0;
+      if (yMin === yMax) {
+        if (yMin > 0) {
+          yMin = 0;
         } else if (this.yMin === 0) {
-          this.yMin = -1;
-          this.yMax = 1;
+          yMin = -1;
+          yMax = 1;
         } else {
-          this.yMax = 0;
+          yMax = 0;
         }
       }
 
       if (!this._attr.defaultYExtents) {
         // if yMin and yMax are both positive, then yMin should be zero
-        if (this.yMin > 0 && this.yMax > 0) {
-          this.yMin = 0;
+        if (yMin > 0 && yMax > 0) {
+          yMin = 0;
         }
 
         // if yMin and yMax are both negative, then yMax should be zero
-        if (this.yMin < 0 && this.yMax < 0) {
-          this.yMax = 0;
+        if (yMin < 0 && yMax < 0) {
+          yMax = 0;
         }
       }
 
       // save reference to y scale
       this.yScale = this.getScaleType(this._attr.scale)
-      .domain([this.yMin, this.yMax])
+      .domain([yMin, yMax])
       .range([height, 0])
       .nice(this.tickScale(height));
 
