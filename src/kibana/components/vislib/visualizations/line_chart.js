@@ -74,7 +74,7 @@ define(function (require) {
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var radii = _(data)
-        .map(function (series) { return _.map(series, function (point) { return point._input.radius; }); })
+        .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
         .flatten()
         .value();
 
@@ -120,7 +120,7 @@ define(function (require) {
       .enter()
         .append('circle')
         .attr('r', function (d) {
-          var circleRadius = (d._input.radius - radii.min) / radiusStep;
+          var circleRadius = (d._input.z - radii.min) / radiusStep;
           var margin = self._attr.margin;
           var width = self._attr.width - margin.left - margin.right;
           var height = self._attr.height - margin.top - margin.bottom;

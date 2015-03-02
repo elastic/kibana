@@ -6,7 +6,7 @@ define(function (require) {
     var map = {
       segment: 'x',
       metric: 'y',
-      radius: 'radius',
+      radius: 'z',
       width: 'width',
       group: 'series'
     };
