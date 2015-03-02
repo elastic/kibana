@@ -2,6 +2,8 @@
  * Module dependencies.
  */
 
+var http = require('http');
+http.globalAgent.maxSockets = Infinity;
 var app = require('./app');
 var fs = require('fs');
 var config = require('./config');
