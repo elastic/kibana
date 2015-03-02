@@ -138,6 +138,27 @@ define(function (require) {
         var liClass = self.colorToClass(self.color(d));
         var charts = visEl.selectAll('.chart');
 
+        visEl.selectAll('.color')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // circles
+        charts.selectAll('.line circle')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // pie slices
+        charts.selectAll('.slice')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        /*
         // legend
         legendDiv.selectAll('li')
         .filter(function (d) {
@@ -152,19 +173,7 @@ define(function (require) {
         })
         .classed('blur_shape', true);
 
-        // circles
-        charts.selectAll('.line circle')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        // pie slices
-        charts.selectAll('.slice')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
+        */
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
@@ -176,22 +185,7 @@ define(function (require) {
          * chart constructor, and so may differ from that of the legend
          */
 
-        var charts = visEl.selectAll('.chart');
-
-        // legend
-        legendDiv.selectAll('li')
-        .classed('blur_shape', false);
-
-        // lines/areas
-        charts.selectAll('.color')
-        .classed('blur_shape', false);
-
-        // circles
-        charts.selectAll('.line circle')
-        .classed('blur_shape', false);
-
-        // pie slices
-        charts.selectAll('.slice')
+        visEl.selectAll('*')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
