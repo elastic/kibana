@@ -58,6 +58,9 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
+      var isLogScale = (this._attr.scale === 'log');
+
+      if (isLogScale) { this._attr.defaultYExtents = true; }
 
       // yMin and yMax can never be equal for the axis
       // to render. Defaults yMin to 0 if yMin === yMax
