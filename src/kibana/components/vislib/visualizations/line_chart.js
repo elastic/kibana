@@ -82,7 +82,7 @@ define(function (require) {
         .attr('class', 'points line');
 
       var circles = layer
-      .selectAll('rect')
+      .selectAll('circle')
       .data(function appendData(d) {
         return d;
       });
@@ -106,7 +106,7 @@ define(function (require) {
         return color(d.label);
       }
 
-      function showColor(d) {
+      function showColor(d, i) {
         if (!showCircles) return 'none';
         return cColor(d);
       }
