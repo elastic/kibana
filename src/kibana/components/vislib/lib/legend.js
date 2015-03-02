@@ -138,7 +138,15 @@ define(function (require) {
         var liClass = self.colorToClass(self.color(d));
         var charts = visEl.selectAll('.chart');
 
-        visEl.selectAll('.color')
+        // legend
+        legendDiv.selectAll('li')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // lines/area
+        charts.selectAll('.color')
         .filter(function (d) {
           return d3.select(this).node().classList[1] !== liClass;
         })
@@ -158,23 +166,6 @@ define(function (require) {
         })
         .classed('blur_shape', true);
 
-        /*
-        // legend
-        legendDiv.selectAll('li')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        // lines/area
-        charts.selectAll('.color')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        */
-
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
         eventEl.style('word-break', 'break-all');
@@ -185,7 +176,22 @@ define(function (require) {
          * chart constructor, and so may differ from that of the legend
          */
 
-        visEl.selectAll('*')
+        var charts = visEl.selectAll('.chart');
+
+        // legend
+        legendDiv.selectAll('li')
+        .classed('blur_shape', false);
+
+        // lines/areas
+        charts.selectAll('.color')
+        .classed('blur_shape', false);
+
+        // circles
+        charts.selectAll('.line circle')
+        .classed('blur_shape', false);
+
+        // pie slices
+        charts.selectAll('.slice')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
