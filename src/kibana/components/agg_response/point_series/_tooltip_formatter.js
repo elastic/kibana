@@ -13,7 +13,8 @@ define(function (require) {
 
       var details = $tooltipScope.details = [];
       var result = { $parent: datum.aggConfigResult };
-      while ((result = result.$parent) && result.aggConfig) {
+
+      function addDetail(result) {
         var agg = result.aggConfig;
         var value = result.value;
         if (agg === datum.aggConfigResult.aggConfig && datum.yScale != null) value *= datum.yScale;
@@ -23,6 +24,12 @@ define(function (require) {
           label: agg.makeLabel()
         });
       }
+
+      datum.extraMetrics.forEach(addDetail);
+      while ((result = result.$parent) && result.aggConfig) {
+        addDetail(result);
+      }
+
 
       $tooltipScope.$apply();
       return $tooltip[0].outerHTML;
