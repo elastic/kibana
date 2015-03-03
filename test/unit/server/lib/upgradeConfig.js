@@ -10,17 +10,20 @@ var config = root('src/server/config');
 
 var upgradeFrom4_0_0_to_4_0_1 = root('test/unit/fixtures/config_upgrade_from_4.0.0_to_4.0.1.json');
 var upgradeFrom4_0_0_to_4_0_1_snapshot = root('test/unit/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json');
+var upgradeFrom4_0_0 = root('test/unit/fixtures/config_upgrade_from_4.0.0.json');
 
 describe('lib/upgradeConfig', function () {
 
-  var client, oldPackageVersion;
+  var client, oldPackageVersion, oldBuildNum;
   beforeEach(function () {
     oldPackageVersion = config.package.version;
+    oldBuildNum = config.buildNum;
     client = { create: sinon.stub() };
   });
 
   afterEach(function () {
     config.package.version = oldPackageVersion;
+    config.buildNum = oldBuildNum;
   });
 
   it('should not upgrade if the current version of the config exits', function () {
@@ -47,6 +50,27 @@ describe('lib/upgradeConfig', function () {
     return fn(upgradeFrom4_0_0_to_4_0_1_snapshot).finally(function () {
       sinon.assert.notCalled(client.create);
     });
+  });
+
+  it('should upgrade from 4.0.0 to 4.0.1', function () {
+    config.package.version = '4.0.1';
+    config.buildNum = 5921;
+    var fn = upgradeConfig(client);
+    client.create.resolves({ _index: '.kibana', _type: 'config', _id: '4.0.1', _version: 1, created: true });
+    return fn(upgradeFrom4_0_0).finally(function () {
+      sinon.assert.calledOnce(client.create);
+      var body = client.create.args[0][0];
+      expect(body).to.eql({
+        index: '.kibana',
+        type: 'config',
+        id: '4.0.1',
+        body: {
+          'buildNum': 5921,
+          'defaultIndex': 'logstash-*'
+        }
+      });
+    });
+
   });
 
 });
