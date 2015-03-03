@@ -1,6 +1,7 @@
 <div class="sidebar-container">
-  <form class="sidebar-list in-time-errors"
-        ng-submit="stageEditableVis()"
+  <form class="sidebar-list"
+        ng-class="{'hide-errors': hideErrors}"
+        ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
         name="visualizeEditor">
 
     <div css-truncate css-truncate-expandable="true" ng-if="vis.type.requiresSearch" class="index-pattern">
@@ -24,7 +25,7 @@
     </ul>
     <div class="vis-editor-sidebar-buttons">
       <p
-        ng-if="visualizeEditor.$invalid && !visualizeEditor.hideErrors"
+        ng-if="visualizeEditor.$invalid"
         class="text-center text-danger sidebar-item-text">
         <i class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
       </p>

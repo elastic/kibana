@@ -6,7 +6,6 @@ define(function (require) {
 
     require('plugins/visualize/editor/agg_group');
     require('plugins/visualize/editor/vis_options');
-    require('directives/in_time_errors');
 
     return {
       restrict: 'E',
