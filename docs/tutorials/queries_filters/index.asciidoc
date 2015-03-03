@@ -84,7 +84,7 @@ And of course to search everything:
 === Multiple queries
 
 In some cases, you might want to compare the results of two seperate queries. Kibana can handle multiple queries by joining them with a logical
-`OR` and using the knowledge that they should be treated as seperate to
+`OR` and using the knowledge that they should be treated as separate to
 influence visualizations.
 
 [[adding]]
