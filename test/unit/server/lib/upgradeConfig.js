@@ -5,7 +5,6 @@ var sinon = require('sinon');
 var sinonAsPromised = require('sinon-as-promised')(require('bluebird'));
 var util = require('util');
 var package = root('package.json');
-var Promise = require('bluebird');
 var config = root('src/server/config');
 
 var upgradeFrom4_0_0_to_4_0_1 = root('test/unit/fixtures/config_upgrade_from_4.0.0_to_4.0.1.json');
