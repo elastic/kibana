@@ -9,7 +9,7 @@ define(function (require) {
       restrict: 'C',
       link: function ($scope, $elem, attrs) {
         // this directive requires a Form element, with a name to reference the errors
-        if(!$elem.is('form') || !attrs.name) {
+        if (!$elem.is('form') || !attrs.name) {
           // TODO maybe throw an error here?
           return false;
         }
@@ -22,7 +22,7 @@ define(function (require) {
         $elem.addClass('hide-errors');
 
         // wait for a submit and then show the errors
-        $elem.one('submit.inTimeErrors', function() {
+        $elem.one('submit.inTimeErrors', function () {
           $elem.removeClass('hide-errors');
           formObj.hideErrors = false;
         });
