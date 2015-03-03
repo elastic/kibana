@@ -43,7 +43,7 @@ describe('lib/upgradeConfig', function () {
     });
   });
 
-  it('should not upgrade if there are no hits', function () {
+  it('should not upgrade even if a snapshot exists', function () {
     config.package.version = '4.0.1-snapshot';
     client.create.rejects(new Error('DocumentAlreadyExistsException'));
     var fn = upgradeConfig(client);
