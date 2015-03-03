@@ -4,8 +4,6 @@ define(function (require) {
 
   module.directive('inTimeErrors', function () {
     return {
-      // can't require since there is no controller
-      // require: 'ng-submit',
       restrict: 'C',
       link: function ($scope, $elem, attrs) {
         // this directive requires a Form element, with a name to reference the errors
