@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   var config = {
     pkg: grunt.file.readJSON('package.json'),
     kibanaCheckoutDir: './kibana/vendor/kibana',
-    kibanaRevision: '3eca909d2f9a4f3ce0bca71bbd03ecf1a91827ae',
+    kibanaRevision: 'f7f7b72d0ddc10a0c05f2cb970806e8a472202ab',
     agentDir: 'agent',
     buildDir: 'build',
     packageDir: 'build/packages',
