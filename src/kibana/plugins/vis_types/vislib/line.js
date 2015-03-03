@@ -35,7 +35,7 @@ define(function (require) {
           title: 'Dot size',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
         },
         {
           group: 'buckets',
