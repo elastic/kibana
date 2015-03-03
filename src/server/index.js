@@ -2,11 +2,11 @@
  * Module dependencies.
  */
 
-var http = require('http');
-http.globalAgent.maxSockets = Infinity;
 var app = require('./app');
 var fs = require('fs');
 var config = require('./config');
+var http = require('http');
+http.globalAgent.maxSockets = config.maxSockets;
 var logger = require('./lib/logger');
 var Promise = require('bluebird');
 var initialization = require('./lib/serverInitialization');

@@ -45,7 +45,8 @@ var config = module.exports = {
   kibana                  : kibana,
   package                 : require(packagePath),
   htpasswd                : htpasswdPath,
-  buildNum                : '@@buildNum'
+  buildNum                : '@@buildNum',
+  maxSockets              : kibana.maxSockets || Infinity
 };
 
 config.plugins = listPlugins(config);
