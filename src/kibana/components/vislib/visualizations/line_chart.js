@@ -66,6 +66,7 @@ define(function (require) {
      */
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
+      var showCircles = this._attr.showCircles;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
@@ -82,7 +83,7 @@ define(function (require) {
         .attr('class', 'points line');
 
       var circles = layer
-      .selectAll('rect')
+      .selectAll('circle')
       .data(function appendData(d) {
         return d;
       });
@@ -106,14 +107,23 @@ define(function (require) {
         return color(d.label);
       }
 
+      function colorCircle(d) {
+        var parent = d3.select(this).node().parentNode;
+        var lengthOfParent = d3.select(parent).data()[0].length;
+        var isVisible = (lengthOfParent === 1);
+
+        // If only 1 point exists, show circle
+        if (!showCircles && !isVisible) return 'none';
+        return cColor(d);
+      }
+
       circles
       .enter()
         .append('circle')
         .attr('r', visibleRadius)
         .attr('cx', cx)
         .attr('cy', cy)
-        .attr('fill', cColor)
-        //.attr('class', 'circle-decoration');
+        .attr('fill', colorCircle)
         .attr('class', function circleClass(d) {
           return 'circle-decoration ' + self.colorToClass(color(d.label));
         });
