@@ -45,8 +45,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -123,7 +124,9 @@ define(function (require) {
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', colorCircle)
-        .attr('class', 'circle-decoration');
+        .attr('class', function circleClass(d) {
+          return 'circle-decoration ' + self.colorToClass(color(d.label));
+        });
 
       circles
       .enter()
@@ -183,7 +186,7 @@ define(function (require) {
 
       lines.append('path')
       .attr('class', function lineClass(d) {
-        return self.colorToClass(color(d.label));
+        return 'color ' + self.colorToClass(color(d.label));
       })
       .attr('d', function lineD(d) {
         return line(d.values);
@@ -309,7 +312,6 @@ define(function (require) {
           .attr('y2', height)
           .style('stroke', '#ddd')
           .style('stroke-width', lineStrokeWidth);
-
 
           return svg;
         });
