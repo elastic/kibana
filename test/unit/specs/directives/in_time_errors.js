@@ -40,14 +40,14 @@ define(function (require) {
 
     it('should not allow the red border on input after first compile', function () {
       expect($elem.hasClass('ng-invalid')).to.be(true);
-      expect($elem.attr('border-color')).to.be('#e74c3c');
+      expect($elem.css('border-color')).to.be('#e74c3c');
     });
     it('should add a flag that shows whether or not it\'s showing errors', function () {
       expect($scope.testForm.hideErrors).to.be(true);
     });
     it('should show errors after the first submit', function () {
       $elem.submit();
-      expect($elem.attr('border-color')).to.be('#e74c3c');
+      expect($elem.css('border-color')).to.be('#e74c3c');
     });
   });
 
