@@ -50,7 +50,7 @@ define(function (require) {
       var self = this;
       var $elem = $(this.chartEl);
       var div;
-      var worldBounds = L.latLngBounds([-90, -180], [90, 180]);
+      var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
 
       // clean up old maps
@@ -80,11 +80,10 @@ define(function (require) {
 
           var mapOptions = {
             minZoom: 1,
-            maxZoom: 16,
+            maxZoom: 18,
             layers: tileLayer,
             center: mapCenter,
             zoom: mapZoom,
-            continuousWorld: true,
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
@@ -105,13 +104,16 @@ define(function (require) {
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
 
-          if (data.geoJson) {
-            if (self._attr.mapType === 'Scaled Circle Markers') {
-              featureLayer = self.scaledCircleMarkers(map, data.geoJson);
-            } else {
-              featureLayer = self.shadedCircleMarkers(map, data.geoJson);
-            }
-          }
+          featureLayer = self.rectangleMarkers(map, data.geoJson);
+
+          // if (data.geoJson) {
+          //   if (self._attr.mapType === 'Scaled Circle Markers') {
+          //     featureLayer = self.scaledCircleMarkers(map, data.geoJson);
+          //   } else {
+          //     featureLayer = self.shadedCircleMarkers(map, data.geoJson);
+          //   }
+          // }
+
 
           if (data.geoJson.properties.label) {
             self.addLabel(data.geoJson.properties.label, map);
@@ -151,12 +153,50 @@ define(function (require) {
     /**
      * Type of data overlay for map:
      * creates featurelayer from mapData (geoJson)
+     * with default leaflet pin markers
+     *
+     * @method pinMarkers
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.pinMarkers = function (map, mapData) {
+      var self = this;
+      var min = mapData.properties.min;
+      var max = mapData.properties.max;
+      var length = mapData.properties.length;
+      var precision = mapData.properties.precision;
+      var zoomScale = self.zoomScale(mapZoom);
+      var bounds;
+      var defaultColor = '#ff6128';
+      var featureLayer = L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        },
+        style: function (feature) {
+          var count = feature.properties.count;
+          return {
+            fillColor: defaultColor,
+            color: self.darkerColor(defaultColor),
+            weight: 1.0,
+            opacity: 1,
+            fillOpacity: 0.75
+          };
+        }
+      }).addTo(map)
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
      * with circle markers that are scaled to illustrate values
      *
      * @method scaledCircleMarkers
      * @param map {Object}
      * @param mapData {Object}
-     * @return {undefined}
+     * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
       var self = this;
@@ -208,7 +248,7 @@ define(function (require) {
      * @method shadedCircleMarkers
      * @param map {Object}
      * @param mapData {Object}
-     * @return {undefined}
+     * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
       var self = this;
@@ -262,6 +302,60 @@ define(function (require) {
       if (mapData.features.length > 1) {
         self.addLegend(mapData, map);
       }
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with rectangles that show the geohash grid bounds
+     *
+     * @method rectangleMarkers
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.rectangleMarkers = function (map, mapData) {
+      var self = this;
+      var min = mapData.properties.min;
+      var max = mapData.properties.max;
+      var length = mapData.properties.length;
+      var precision = mapData.properties.precision;
+      var zoomScale = self.zoomScale(mapZoom);
+      var bounds;
+      var defaultColor = '#ff6128';
+      var featureLayer = L.geoJson(mapData, {
+        pointToLayer: function (feature, latlng) {
+          var count = feature.properties.count;
+          var rad = zoomScale * 3;
+          var gh = feature.properties.rectangle;
+            var bounds = [[gh[0][1], gh[0][0]], [gh[2][1], gh[2][0]]];
+            return L.rectangle(bounds);
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+          layer.on({
+            mouseover: function (e) {
+              var layer = e.target;
+              if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+              }
+            }
+          });
+        },
+        style: function (feature) {
+          var count = feature.properties.count;
+          var color = self.quantizeColorScale(count, min, max);
+          return {
+            fillColor: color,
+            color: self.darkerColor(color),
+            weight: 1.0,
+            opacity: 1,
+            fillOpacity: 0.75
+          };
+        }
+      }).addTo(map);
 
       return featureLayer;
     };
