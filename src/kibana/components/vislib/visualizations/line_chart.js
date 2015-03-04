@@ -106,7 +106,7 @@ define(function (require) {
         return color(d.label);
       }
 
-      function showColor(d) {
+      function colorCircle(d) {
         var parent = d3.select(this).node().parentNode;
         var lengthOfParent = d3.select(parent).data()[0].length;
         var isVisible = (lengthOfParent === 1);
@@ -122,7 +122,7 @@ define(function (require) {
         .attr('r', visibleRadius)
         .attr('cx', cx)
         .attr('cy', cy)
-        .attr('fill', showColor)
+        .attr('fill', colorCircle)
         .attr('class', 'circle-decoration');
 
       circles
