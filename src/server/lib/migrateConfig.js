@@ -1,8 +1,7 @@
 var config = require('../config');
 var upgrade = require('./upgradeConfig');
-var client = require('./elasticsearch_client');
 
-module.exports = function () {
+module.exports = function (client) {
   var options =  {
     index: config.kibana.kibana_index,
     type: 'config',
@@ -22,7 +21,7 @@ module.exports = function () {
   };
 
   return client.search(options)
-  .then(upgrade)
+  .then(upgrade(client))
   .catch(function (err) {
     if (!/SearchParseException.+mapping.+\[buildNum\]|^IndexMissingException/.test(err.message)) throw err;
   });
