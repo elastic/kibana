@@ -104,16 +104,7 @@ define(function (require) {
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
 
-          featureLayer = self.rectangleMarkers(map, data.geoJson);
-
-          // if (data.geoJson) {
-          //   if (self._attr.mapType === 'Scaled Circle Markers') {
-          //     featureLayer = self.scaledCircleMarkers(map, data.geoJson);
-          //   } else {
-          //     featureLayer = self.shadedCircleMarkers(map, data.geoJson);
-          //   }
-          // }
-
+          featureLayer = self.markerType(map, data.geoJson);
 
           if (data.geoJson.properties.label) {
             self.addLabel(data.geoJson.properties.label, map);
@@ -148,6 +139,29 @@ define(function (require) {
 
         });
       };
+    };
+
+    /**
+     * Switch type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     *
+     * @method markerType
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.markerType = function (map, mapData) {
+      console.log(mapData);
+      var featureLayer;
+      if (mapData) {
+        if (this._attr.mapType === 'Scaled Circle Markers') {
+          featureLayer = this.scaledCircleMarkers(map, mapData);
+        } else {
+          featureLayer = this.shadedCircleMarkers(map, mapData);
+        }
+      }
+      // featureLayer = this.pinMarkers(map, mapData);
+      return featureLayer;
     };
 
     /**
