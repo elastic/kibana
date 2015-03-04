@@ -151,16 +151,18 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map, mapData) {
-      console.log(mapData);
       var featureLayer;
       if (mapData) {
         if (this._attr.mapType === 'Scaled Circle Markers') {
           featureLayer = this.scaledCircleMarkers(map, mapData);
-        } else {
+        } else if (this._attr.mapType === 'Shaded Circle Markers') {
           featureLayer = this.shadedCircleMarkers(map, mapData);
+        } else if (this._attr.mapType === 'Shaded Geohash Grid') {
+          featureLayer = this.geohashGrid(map, mapData);
+        } else {
+          featureLayer = this.pinMarkers(map, mapData);
         }
       }
-      // featureLayer = this.pinMarkers(map, mapData);
       return featureLayer;
     };
 
@@ -325,12 +327,12 @@ define(function (require) {
      * creates featurelayer from mapData (geoJson)
      * with rectangles that show the geohash grid bounds
      *
-     * @method rectangleMarkers
+     * @method geohashGrid
      * @param map {Object}
      * @param mapData {Object}
      * @return {undefined}
      */
-    TileMap.prototype.rectangleMarkers = function (map, mapData) {
+    TileMap.prototype.geohashGrid = function (map, mapData) {
       var self = this;
       var min = mapData.properties.min;
       var max = mapData.properties.max;
