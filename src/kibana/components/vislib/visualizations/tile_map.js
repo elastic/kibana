@@ -50,7 +50,7 @@ define(function (require) {
       var self = this;
       var $elem = $(this.chartEl);
       var div;
-      var worldBounds = L.latLngBounds([-90, -180], [90, 180]);
+      var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
 
       // clean up old maps
