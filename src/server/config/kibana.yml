@@ -15,9 +15,9 @@ elasticsearch_preserve_host: true
 # and dashboards. It will create a new index if it doesn't already exist.
 kibana_index: ".kibana"
 
-# If your Elasticsearch is protected with basic auth, this is the user credentials
-# used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
-# users will still need to authenticate with Elasticsearch (which is proxied thorugh
+# If your Elasticsearch is protected with basic auth, these are the user credentials
+# used by the Kibana server to perform maintenance on the kibana_index at startup. Your Kibana
+# users will still need to authenticate with Elasticsearch (which is proxied through
 # the Kibana server)
 # kibana_elasticsearch_username: user
 # kibana_elasticsearch_password: pass
@@ -26,7 +26,7 @@ kibana_index: ".kibana"
 # The default application to load.
 default_app_id: "discover"
 
-# Time in milliseconds to wait for responses from the back end or elasticsearch.
+# Time in milliseconds to wait for responses from the back end or Elasticsearch.
 # This must be > 0
 request_timeout: 300000
 
@@ -48,4 +48,3 @@ verify_ssl: true
 
 # Set the path to where you would like the process id file to be created.
 # pid_file: /var/run/kibana.pid
-
