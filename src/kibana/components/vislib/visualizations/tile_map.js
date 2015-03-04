@@ -80,11 +80,10 @@ define(function (require) {
 
           var mapOptions = {
             minZoom: 2,
-            maxZoom: 16,
+            maxZoom: 18,
             layers: tileLayer,
             center: mapCenter,
             zoom: mapZoom,
-            continuousWorld: true,
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
