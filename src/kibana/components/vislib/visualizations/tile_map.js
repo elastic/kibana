@@ -50,7 +50,7 @@ define(function (require) {
       var self = this;
       var $elem = $(this.chartEl);
       var div;
-      var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
+      var worldBounds = L.latLngBounds([-90, -180], [90, 180]);
 
 
       // clean up old maps
@@ -79,11 +79,12 @@ define(function (require) {
           });
 
           var mapOptions = {
-            minZoom: 2,
-            maxZoom: 18,
+            minZoom: 1,
+            maxZoom: 16,
             layers: tileLayer,
             center: mapCenter,
             zoom: mapZoom,
+            continuousWorld: true,
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
