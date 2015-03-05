@@ -163,7 +163,7 @@ define(function (require) {
       var xAxisFormatter = this.handler.data.get('xAxisFormatter');
       var color = this.handler.data.getColorFunc();
       var ordered = this.handler.data.get('ordered');
-      var interpolate = this._attr.interpolate;
+      var interpolate = (this._attr.interpolate === 'smooth') ? 'cardinal' : this._attr.interpolate;
       var line = d3.svg.line()
       .interpolate(interpolate)
       .x(function x(d) {

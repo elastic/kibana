@@ -15,8 +15,10 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           showCircles: true,
+          interpolate: 'linear',
           defaultYExtents: false
         },
+        interpolates: ['linear', 'smooth'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([
