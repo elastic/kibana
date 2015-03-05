@@ -1,7 +1,15 @@
 <div class="vis-option-item">
-  <label>
-    <input type="checkbox" ng-model="vis.params.drawLinesBetweenPoints">
-    Show connecting lines
-  </label>
+  <div class="row form-horizontal">
+    <label class="col-md-8 control-label">Radius Ratio:&nbsp;</label>
+    <div class="col-md-4">
+      <input type="number" step="2" min="1" max="100" class="form-control" ng-model="vis.params.radiusRatio" />
+    </div>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" ng-model="vis.params.drawLinesBetweenPoints">
+      Show connecting lines
+    </label>
+  </div>
 </div>
 <vislib-basic-options></vislib-basic-options>

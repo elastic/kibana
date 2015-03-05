@@ -14,8 +14,9 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          defaultYExtents: false,
           drawLinesBetweenPoints: true,
-          defaultYExtents: false
+          radiusRatio: 9
         },
         editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },
