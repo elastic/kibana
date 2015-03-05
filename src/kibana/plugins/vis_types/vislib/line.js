@@ -14,6 +14,7 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          showCircles: true,
           defaultYExtents: false,
           drawLinesBetweenPoints: true,
           radiusRatio: 9
