@@ -69,7 +69,7 @@ define(function (require) {
       .enter()
       .append('rect')
       .attr('class', function (d) {
-        return self.colorToClass(color(d.label));
+        return 'color ' + self.colorToClass(color(d.label));
       })
       .attr('fill', function (d) {
         return color(d.label);
@@ -144,6 +144,13 @@ define(function (require) {
       .attr('height', function (d) {
         if (d.y < 0) {
           return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
+        }
+
+        // Due to an issue with D3 not returning zeros correctly when using
+        // an offset='expand', need to add conditional statement to handle zeros
+        // appropriately
+        if (d._input.y === 0) {
+          return 0;
         }
 
         // for split bars or for one series,
@@ -239,8 +246,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);

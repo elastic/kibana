@@ -45,8 +45,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -65,6 +66,7 @@ define(function (require) {
      */
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
+      var showCircles = this._attr.showCircles;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
@@ -81,7 +83,7 @@ define(function (require) {
         .attr('class', 'points line');
 
       var circles = layer
-      .selectAll('rect')
+      .selectAll('circle')
       .data(function appendData(d) {
         return d;
       });
@@ -105,14 +107,26 @@ define(function (require) {
         return color(d.label);
       }
 
+      function colorCircle(d) {
+        var parent = d3.select(this).node().parentNode;
+        var lengthOfParent = d3.select(parent).data()[0].length;
+        var isVisible = (lengthOfParent === 1);
+
+        // If only 1 point exists, show circle
+        if (!showCircles && !isVisible) return 'none';
+        return cColor(d);
+      }
+
       circles
       .enter()
         .append('circle')
         .attr('r', visibleRadius)
         .attr('cx', cx)
         .attr('cy', cy)
-        .attr('fill', cColor)
-        .attr('class', 'circle-decoration');
+        .attr('fill', colorCircle)
+        .attr('class', function circleClass(d) {
+          return 'circle-decoration ' + self.colorToClass(color(d.label));
+        });
 
       circles
       .enter()
@@ -172,7 +186,7 @@ define(function (require) {
 
       lines.append('path')
       .attr('class', function lineClass(d) {
-        return self.colorToClass(color(d.label));
+        return 'color ' + self.colorToClass(color(d.label));
       })
       .attr('d', function lineD(d) {
         return line(d.values);
@@ -298,7 +312,6 @@ define(function (require) {
           .attr('y2', height)
           .style('stroke', '#ddd')
           .style('stroke-width', lineStrokeWidth);
-
 
           return svg;
         });

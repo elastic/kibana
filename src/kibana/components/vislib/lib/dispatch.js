@@ -19,7 +19,7 @@ define(function (require) {
 
       this.handler = handler;
       this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover');
+        'mousedown', 'mouseover', 'mouseout');
     }
 
     /**
@@ -43,19 +43,7 @@ define(function (require) {
       var color = handler.data.color;
       var isPercentage = (handler._attr.mode === 'percentage');
 
-      if (isSeries) {
-        // Find object with the actual d value and add it to the point object
-        var object = _.find(series, { 'label': d.label });
-        d.value = +object.values[i].y;
-
-        if (isPercentage) {
-
-          // Add the formatted percentage to the point object
-          d.percent = (100 * d.y).toFixed(1) + '%';
-        }
-      }
-
-      return {
+      var eventData = {
         value: d.y,
         point: datum,
         datum: datum,
@@ -69,6 +57,19 @@ define(function (require) {
         e: d3.event,
         handler: handler
       };
+
+      if (isSeries) {
+        // Find object with the actual d value and add it to the point object
+        var object = _.find(series, { 'label': d.label });
+        eventData.value = +object.values[i].y;
+
+        if (isPercentage) {
+          // Add the formatted percentage to the point object
+          eventData.percent = (100 * d.y).toFixed(1) + '%';
+        }
+      }
+
+      return eventData;
     };
 
     /**
@@ -91,6 +92,7 @@ define(function (require) {
       };
     };
 
+
     /**
      *
      * @method addHoverEvent
@@ -100,6 +102,7 @@ define(function (require) {
       var self = this;
       var isClickable = (this.dispatch.on('click'));
       var addEvent = this.addEvent;
+      var $el = this.handler.el;
 
       function hover(d, i) {
         d3.event.stopPropagation();
@@ -109,10 +112,30 @@ define(function (require) {
           self.addMousePointer.call(this, arguments);
         }
 
+        self.highlightLegend.call(this, $el);
         self.dispatch.hover.call(this, self.eventResponse(d, i));
       }
 
       return addEvent('mouseover', hover);
+    };
+
+    /**
+     *
+     * @method addMouseoutEvent
+     * @returns {Function}
+     */
+    Dispatch.prototype.addMouseoutEvent = function () {
+      var self = this;
+      var addEvent = this.addEvent;
+      var $el = this.handler.el;
+
+      function mouseout() {
+        d3.event.stopPropagation();
+
+        self.unHighlightLegend.call(this, $el);
+      }
+
+      return addEvent('mouseout', mouseout);
     };
 
     /**
@@ -188,13 +211,45 @@ define(function (require) {
 
 
     /**
-     * Mouse over Behavior
+     * Mouseover Behavior
      *
      * @method addMousePointer
      * @returns {D3.Selection}
      */
     Dispatch.prototype.addMousePointer = function () {
       return d3.select(this).style('cursor', 'pointer');
+    };
+
+    /**
+     * Mouseover Behavior
+     *
+     * @param element {D3.Selection}
+     * @method highlightLegend
+     */
+    Dispatch.prototype.highlightLegend = function (element) {
+      var classList = d3.select(this).node().classList;
+      var liClass = d3.select(this).node().classList[1];
+
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .filter(function (d, i) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+    };
+
+    /**
+     * Mouseout Behavior
+     *
+     * @param element {D3.Selection}
+     * @method unHighlightLegend
+     */
+    Dispatch.prototype.unHighlightLegend = function (element) {
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .classed('blur_shape', false);
     };
 
     /**

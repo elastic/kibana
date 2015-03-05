@@ -28,7 +28,7 @@ define(function (require) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
-          aggFilter: '!std_deviation',
+          aggFilter: '!std_dev',
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

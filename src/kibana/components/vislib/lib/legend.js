@@ -85,14 +85,16 @@ define(function (require) {
     };
 
     /**
-     * Creates a class name based on the colors assigned to each label
+     * Creates a class name based on the hexColor assigned to each label
      *
      * @method colorToClass
-     * @param name {String} Label
+     * @param hexColor {String} Label
      * @returns {string} CSS class name
      */
-    Legend.prototype.colorToClass = function (name) {
-      return 'c' + name.replace(/[#]/g, '');
+    Legend.prototype.colorToClass = function (hexColor) {
+      if (hexColor) {
+        return 'c' + hexColor.replace(/[#]/g, '');
+      }
     };
 
     /**
@@ -131,35 +133,70 @@ define(function (require) {
         }
       });
 
-      visEl.selectAll('.color')
+      legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {
-        var liClass = '.' + self.colorToClass(self.color(d));
-        visEl.selectAll('.color').classed('blur_shape', true);
+        var liClass = self.colorToClass(self.color(d));
+        var charts = visEl.selectAll('.chart');
+
+        // legend
+        legendDiv.selectAll('li')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // lines/area
+        charts.selectAll('.color')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // circles
+        charts.selectAll('.line circle')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+
+        // pie slices
+        charts.selectAll('.slice')
+        .filter(function (d) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
         eventEl.style('word-break', 'break-all');
-
-        // select series on chart
-        visEl.selectAll(liClass).classed('blur_shape', false);
       })
       .on('mouseout', function () {
         /*
          * The default opacity of elements in charts may be modified by the
          * chart constructor, and so may differ from that of the legend
          */
-        visEl.selectAll('.chart')
-        .selectAll('.color')
+
+        var charts = visEl.selectAll('.chart');
+
+        // legend
+        legendDiv.selectAll('li')
+        .classed('blur_shape', false);
+
+        // lines/areas
+        charts.selectAll('.color')
+        .classed('blur_shape', false);
+
+        // circles
+        charts.selectAll('.line circle')
+        .classed('blur_shape', false);
+
+        // pie slices
+        charts.selectAll('.slice')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'nowrap');
         eventEl.style('word-break', 'inherit');
-
-        // Legend values should always return to their default opacity of 1
-        visEl.select('.legend-ul')
-        .selectAll('.color')
-        .classed('blur_shape', false);
       });
     };
 
