@@ -1,7 +1,13 @@
 <!-- vis type specific options -->
 <div class="vis-option-item">
-  <div>
-    <label>Radius Ratio:&nbsp;</label>
+  <div ng-if="vis.params">
+    <span class="hintbox_label" ng-click="showDotRatioHint = !showDotRatioHint">
+      <label>Dot Size Ratio:</label>
+      <i class="fa fa-info-circle"></i>
+    </span>
+    <div class="hintbox" ng-show="showDotRatioHint">
+      Change the ratio of the radius of the smallest point to the largest point.
+    </div>
     <input type="range" step="2" min="1" max="100" class="form-control" ng-model="vis.params.radiusRatio" />
   </div>
   <div>
@@ -10,9 +16,11 @@
       Show connecting lines
     </label>
   </div>
-  <label>
-    <input type="checkbox" value="{{showCircles}}" ng-model="vis.params.showCircles" name="showCircles"  ng-checked="vis.params.showCircles">
-    Show Circles
-  </label>
+  <div>
+    <label>
+      <input type="checkbox" value="{{showCircles}}" ng-model="vis.params.showCircles" name="showCircles"  ng-checked="vis.params.showCircles">
+      Show Circles
+    </label>
+  </div>
 </div>
 <vislib-basic-options></vislib-basic-options>
