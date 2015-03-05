@@ -83,7 +83,7 @@ define(function (require) {
         max: _.max(radii)
       };
 
-      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / 20;
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / 90;
 
       var layer = svg.selectAll('.points')
       .data(data)
