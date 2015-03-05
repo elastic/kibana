@@ -1,3 +1,4 @@
+<!-- vis type specific options -->
 <div class="vis-option-item">
   <div class="row form-horizontal">
     <label class="col-md-8 control-label">Radius Ratio:&nbsp;</label>
@@ -11,5 +12,9 @@
       Show connecting lines
     </label>
   </div>
+  <label>
+    <input type="checkbox" value="{{showCircles}}" ng-model="vis.params.showCircles" name="showCircles"  ng-checked="vis.params.showCircles">
+    Show Circles
+  </label>
 </div>
 <vislib-basic-options></vislib-basic-options>
