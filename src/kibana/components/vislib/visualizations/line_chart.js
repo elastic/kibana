@@ -69,7 +69,6 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var visibleRadius = 3;
       var touchableRadius = 12;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
@@ -116,17 +115,31 @@ define(function (require) {
         return color(d.label);
       }
 
-      circles
-      .enter()
-        .append('circle')
-        .attr('r', function (d) {
-          var circleRadius = (d._input.z - radii.min) / radiusStep;
+      function colorCircle(d) {
+        var parent = d3.select(this).node().parentNode;
+        var lengthOfParent = d3.select(parent).data()[0].length;
+        var isVisible = (lengthOfParent === 1);
+
+        // If only 1 point exists, show circle
+        if (!showCircles && !isVisible) return 'none';
+        return cColor(d);
+      }
+      function getCircleRadiusFn(modifier) {
+        return function getCircleRadius(d) {
           var margin = self._attr.margin;
           var width = self._attr.width - margin.left - margin.right;
           var height = self._attr.height - margin.top - margin.bottom;
+          var circleRadius = (d._input.z - radii.min) / radiusStep;
 
-          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]);
-        })
+          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
+        };
+      }
+
+
+      circles
+      .enter()
+        .append('circle')
+        .attr('r', getCircleRadiusFn())
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', cColor)
@@ -135,7 +148,7 @@ define(function (require) {
       circles
       .enter()
         .append('circle')
-        .attr('r', touchableRadius)
+        .attr('r', getCircleRadiusFn(10))
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', 'transparent')
