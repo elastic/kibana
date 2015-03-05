@@ -12,13 +12,13 @@
   </div>
   <div>
     <label>
-      <input type="checkbox" ng-model="vis.params.drawLinesBetweenPoints">
+      <input type="checkbox" value="{{drawLinesBetweenPoints}}" ng-disabled="!vis.params.showCircles" ng-model="vis.params.drawLinesBetweenPoints" name="drawLinesBetweenPoints" ng-checked="vis.params.drawLinesBetweenPoints">
       Show connecting lines
     </label>
   </div>
   <div>
     <label>
-      <input type="checkbox" value="{{showCircles}}" ng-model="vis.params.showCircles" name="showCircles"  ng-checked="vis.params.showCircles">
+      <input type="checkbox" value="{{showCircles}}" ng-disabled="!vis.params.drawLinesBetweenPoints" ng-model="vis.params.showCircles" name="showCircles"  ng-checked="vis.params.showCircles">
       Show Circles
     </label>
   </div>

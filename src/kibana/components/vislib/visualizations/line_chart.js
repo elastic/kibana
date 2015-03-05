@@ -140,7 +140,7 @@ define(function (require) {
       .enter()
         .append('circle')
         .attr('r', getCircleRadiusFn())
-        .attr('fill-opacity', 0.70)
+        .attr('fill-opacity', 0.7)
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', cColor)
