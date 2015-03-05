@@ -52,7 +52,6 @@ define(function (require) {
       var div;
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
-
       // clean up old maps
       _.invoke(self.maps, 'destroy');
       // create a new maps array
@@ -199,7 +198,7 @@ define(function (require) {
             fillOpacity: 0.75
           };
         }
-      }).addTo(map)
+      }).addTo(map);
 
       return featureLayer;
     };
@@ -395,6 +394,8 @@ define(function (require) {
         this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
       };
       label.setPosition('bottomright').addTo(map);
+      return label;
+
     };
 
     /**
