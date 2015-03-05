@@ -14,9 +14,11 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          interpolate: 'linear',
           defaultYExtents: false
         },
-        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
+        interpolates: ['linear', 'smooth'],
+        editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([
         {
