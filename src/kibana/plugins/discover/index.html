@@ -60,7 +60,8 @@
             <span bindonce bo-bind="opts.savedSearch.title"></span>
             <i tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo small"></i>
           </span>
-          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong> 
+
+          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
           <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
         </div>
 
@@ -130,16 +131,17 @@
           <!-- result -->
           <div class="results" ng-show="resultState === 'ready'">
             <div class="discover-timechart" ng-if="opts.timefield">
-              <center class="small">
-                <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
-                <!-- TODO: Currently no way to apply this setting to the visualization -->
-                <!-- <select
+              <div class="results-interval">
+                <select
                   class="form-control"
                   ng-model="state.interval"
-                  ng-options="interval as interval for interval in intervalOptions"
-                  ng-change="setupVisualization();fetch()"
+                  ng-options="interval.val as interval.display for interval in intervalOptions | filter: optionEnabled"
                   >
-                </select> -->
+                </select>
+              </div>
+
+              <center class="small">
+                <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
               </center>
 
               <div ng-show="fetchStatus.hitCount === 0" class="discover-overlay vis-overlay">
