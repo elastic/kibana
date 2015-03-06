@@ -19,7 +19,9 @@ define(function (require) {
 
       // Create the element
       $elem = angular.element(
-        '<form class="in-time-errors" name="testForm"><input type="text" required /></form>'
+        ['<form class="in-time-errors" ng-submit="testFn()" name="testForm">',
+        '<input type="text" required name="textInput" ng-model="textInput" />',
+        '</form>'].join()
       );
 
       // And compile it
@@ -30,6 +32,13 @@ define(function (require) {
 
       // Grab the isolate scope so we can test it
       $scope = $elem.scope();
+
+      $elem.on('submit', function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+      });
+
+      $scope.testFn = function (evt) { return false; };
     });
   };
 
@@ -40,14 +49,13 @@ define(function (require) {
 
     it('should not allow the red border on input after first compile', function () {
       expect($elem.hasClass('ng-invalid')).to.be(true);
-      expect($elem.css('border-color')).to.be('#e74c3c');
     });
     it('should add a flag that shows whether or not it\'s showing errors', function () {
       expect($scope.testForm.hideErrors).to.be(true);
     });
     it('should show errors after the first submit', function () {
       $elem.submit();
-      expect($elem.css('border-color')).to.be('#e74c3c');
+      expect($scope.testForm.hideErrors).to.be(false);
     });
   });
 
