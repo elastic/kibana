@@ -111,6 +111,14 @@ define(function (require) {
         done();
       });
 
+      it('should highlight the current active interval', function (done) {
+        $scope.setRefreshInterval({ value: 300000 });
+        $elem.scope().$digest();
+        expect($elem.find('.refresh-interval-active').length).to.be(1);
+        expect($elem.find('.refresh-interval-active').text().trim()).to.be('5 minutes');
+        done();
+      });
+
       it('should default the interval on the courier with incorrect values', function (done) {
         // Change refresh interval and digest
         $scope.setRefreshInterval('undefined');

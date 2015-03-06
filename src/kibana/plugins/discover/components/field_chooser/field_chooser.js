@@ -21,17 +21,24 @@ define(function (require) {
         data: '=',
         state: '=',
         indexPattern: '=',
+        indexPatternList: '=',
         updateFilterInQuery: '=filter'
       },
       template: html,
-      controller: function ($scope) {
+      controller: function ($scope, $route) {
+        $scope.setIndexPattern = function (indexPattern) {
+          $scope.state.index = indexPattern;
+          $scope.state.save();
+          $route.reload();
+        };
 
         var filter = $scope.filter = {
           props: [
             'type',
             'indexed',
             'analyzed',
-            'missing'
+            'missing',
+            'name'
           ],
           defaults: {
             missing: true

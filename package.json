@@ -56,7 +56,8 @@
     "request": "^2.40.0",
     "requirefrom": "^0.2.0",
     "semver": "^4.2.0",
-    "serve-favicon": "~2.2.0"
+    "serve-favicon": "~2.2.0",
+    "through": "^2.3.6"
   },
   "devDependencies": {
     "connect": "~2.19.5",
@@ -97,6 +98,8 @@
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
     "simple-git": "^0.11.0",
+    "sinon": "^1.12.2",
+    "sinon-as-promised": "^2.0.3",
     "tar": "^1.0.1"
   }
 }

@@ -1,4 +1,5 @@
 var updateVersion = require('../../../../tasks/utils/updateVersion');
+var expect = require('expect.js');
 
 describe('tasks/utils/updateVersion', function () {
 
@@ -29,5 +30,4 @@ describe('tasks/utils/updateVersion', function () {
   it('changes a tag', function () {
     expect(updateVersion('4.1.0-snapshot', 'tag=rc1')).to.be('4.1.0-rc1');
   });
-
 });
