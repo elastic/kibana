@@ -564,7 +564,7 @@ define(function (require) {
             schema: 'segment',
             params: {
               field: $scope.opts.timefield,
-              interval: 'auto',
+              interval: $state.interval,
               min_doc_count: 0
             }
           }
