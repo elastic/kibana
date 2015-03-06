@@ -70,6 +70,7 @@ define(function (require) {
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
+    $scope.intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -201,6 +202,10 @@ define(function (require) {
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
+        });
+
+        $scope.$watch('state.interval', function (interval) {
+          $scope.fetch();
         });
 
         $scope.$watchMulti([
@@ -528,8 +533,30 @@ define(function (require) {
       if (!$scope.opts.timefield) return Promise.resolve();
       if (loadingVis) return loadingVis;
 
-      // we shouldn't have one, or already do, return whatever we already have
-      if ($scope.vis) return Promise.resolve($scope.vis);
+      var visStateAggs = [
+        {
+          type: 'count',
+          schema: 'metric'
+        },
+        {
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {
+            field: $scope.opts.timefield,
+            interval: $state.interval,
+            min_doc_count: 0
+          }
+        }
+      ];
+
+      // we have a vis, just modify the aggs
+      if ($scope.vis) {
+        var visState = $scope.vis.getState();
+        visState.aggs = visStateAggs;
+
+        $scope.vis.setState(visState);
+        return Promise.resolve($scope.vis);
+      }
 
       // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
@@ -546,21 +573,7 @@ define(function (require) {
           },
           brush: brushEvent
         },
-        aggs: [
-          {
-            type: 'count',
-            schema: 'metric'
-          },
-          {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: {
-              field: $scope.opts.timefield,
-              interval: $state.interval,
-              min_doc_count: 0
-            }
-          }
-        ]
+        aggs: visStateAggs
       });
 
       $scope.searchSource.aggs(function () {
