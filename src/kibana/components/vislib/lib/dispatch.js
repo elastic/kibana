@@ -28,7 +28,7 @@ define(function (require) {
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
      * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
-      * series: *, config: *, data: (Object|*),
+     * series: *, config: *, data: (Object|*),
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
@@ -73,12 +73,12 @@ define(function (require) {
     };
 
     /**
-     * Response to click on legend item
+     * Response to click on legend items
      *
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
      * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
-      * series: *, config: *, data: (Object|*),
+     * series: *, config: *, data: (Object|*),
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.legendEventResponse = function (d, i) {
@@ -88,26 +88,23 @@ define(function (require) {
       var label = d.label ? d.label : d.name;
       var isSeries = !!(data.series);
       var isSlices = !!(data.slices);
-      var series = isSeries ? data.series[i] : undefined;
-      var slices = isSlices ? data.slices.children[i] : undefined;
-      var isPercentage = (handler._attr.mode === 'percentage');
+      var series = isSeries ? data.series : undefined;
+      var slices = isSlices ? data.slices.children : undefined;
 
       var eventData = {
-        value: undefined,
+        value: datum,
         point: datum,
         datum: datum,
         label: datum,
-        color: undefined,
         pointIndex: i,
         series: series,
         slices: slices,
         config: handler._attr,
-        data: undefined,
+        data: data,
         e: d3.event,
         handler: handler
       };
 
-      console.log(eventData);
       return eventData;
     };
 
