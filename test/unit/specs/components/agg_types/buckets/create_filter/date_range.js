@@ -36,8 +36,8 @@ define(function (require) {
         expect(filter).to.have.property('meta');
         expect(filter.meta).to.have.property('index', indexPattern.id);
         expect(filter.range).to.have.property('@timestamp');
-        expect(filter.range['@timestamp']).to.have.property('gte', 1422774000000);
-        expect(filter.range['@timestamp']).to.have.property('lte', 1423292400000);
+        expect(filter.range['@timestamp']).to.have.property('gte', +new Date('1 Feb 2015'));
+        expect(filter.range['@timestamp']).to.have.property('lte', +new Date('7 Feb 2015'));
       });
     });
   });
