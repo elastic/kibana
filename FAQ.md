@@ -11,3 +11,7 @@
 
 **Q:** What happened to templated/scripted dashboards?  
 **A:** Check out the URL. The state of each app is stored there, including any filters, queries or columns. This should be a lot easier than constructing scripted dashboards. The encoding of the URL is RISON.
+
+**Q:** I'm getting `bin/node/bin/node: not found` but I can see the node binary in the package?      
+**A:** Kibana 4 packages are architecture specific. Ensure you are using the correct package for your architecture. 
+
