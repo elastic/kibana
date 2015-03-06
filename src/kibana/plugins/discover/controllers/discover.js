@@ -528,16 +528,8 @@ define(function (require) {
       if (!$scope.opts.timefield) return Promise.resolve();
       if (loadingVis) return loadingVis;
 
-
-      // we shouldn't have a vis, delete it
-      if (!$scope.opts.timefield && $scope.vis) {
-        $scope.vis.destroy();
-        $scope.searchSource.set('aggs', undefined);
-        delete $scope.vis;
-      }
-
       // we shouldn't have one, or already do, return whatever we already have
-      if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
+      if ($scope.vis) return Promise.resolve($scope.vis);
 
       // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
