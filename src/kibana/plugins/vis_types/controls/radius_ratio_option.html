@@ -1,10 +1,16 @@
 <div>
   <span class="hintbox_label" ng-click="showDotRatioHint = !showDotRatioHint">
-    <label>Dot Size Ratio:</label>
-    <i class="fa fa-info-circle"></i>
+    <label>
+      Dot Size Ratio:
+      <kbn-info
+        placement="right"
+        class="text-info"
+        info="Change the ratio of the radius of the smallest point to the largest point.">
+      </kbn-info>
+    </label>
   </span>
   <div class="hintbox" ng-show="showDotRatioHint">
-    Change the ratio of the radius of the smallest point to the largest point.
+    
   </div>
   <input type="range" step="2" min="1" max="100" class="form-control" ng-model="vis.params.radiusRatio" />
 </div>
