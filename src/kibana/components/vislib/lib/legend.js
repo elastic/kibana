@@ -1,8 +1,8 @@
 define(function (require) {
-  return function LegendFactory(d3) {
+  return function LegendFactory(d3, Private) {
     var _ = require('lodash');
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
-
+    var Dispatch = Private(require('components/vislib/lib/dispatch'));
     require('css!components/vislib/styles/main');
 
     /**
@@ -23,6 +23,7 @@ define(function (require) {
 
       this.vis = vis;
       this.el = el;
+      this.events = new Dispatch(vis);
       this.labels = labels;
       this.color = color;
       this._attr = _.defaults(_attr || {}, {
@@ -33,6 +34,7 @@ define(function (require) {
         'legendDefaultOpacity': 1,
         'isOpen' : true
       });
+
     }
 
     /**
@@ -131,7 +133,14 @@ define(function (require) {
           // need to add reference to resize function on toggle
           self.vis.resize();
         }
+
       });
+
+      legendDiv.select('.legend-ul').selectAll('li')
+      .on('click', function(d, i) {
+          self.events.legendEventResponse(d, i);
+      });
+
 
       legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {

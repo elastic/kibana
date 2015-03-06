@@ -73,6 +73,45 @@ define(function (require) {
     };
 
     /**
+     * Response to click on legend item
+     *
+     * @param d {Object} Data point
+     * @param i {Number} Index number of data point
+     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
+      * series: *, config: *, data: (Object|*),
+     * e: (d3.event|*), handler: (Object|*)}} Event response object
+     */
+    Dispatch.prototype.legendEventResponse = function (d, i) {
+      var datum = d;
+      var handler = this.handler;
+      var data = handler.data;
+      var label = d.label ? d.label : d.name;
+      var isSeries = !!(data.series);
+      var isSlices = !!(data.slices);
+      var series = isSeries ? data.series[i] : undefined;
+      var slices = isSlices ? data.slices.children[i] : undefined;
+      var isPercentage = (handler._attr.mode === 'percentage');
+
+      var eventData = {
+        value: undefined,
+        point: datum,
+        datum: datum,
+        label: datum,
+        color: undefined,
+        pointIndex: i,
+        series: series,
+        slices: slices,
+        config: handler._attr,
+        data: undefined,
+        e: d3.event,
+        handler: handler
+      };
+
+      console.log(eventData);
+      return eventData;
+    };
+
+    /**
      * Returns a function that adds events and listeners to a D3 selection
      *
      * @method addEvent
