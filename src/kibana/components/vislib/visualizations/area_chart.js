@@ -58,7 +58,7 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var defaultOpacity = this._attr.defaultOpacity;
+      var interpolate = (this._attr.interpolate === 'smooth') ? 'cardinal' : this._attr.interpolate;
 
       var area = d3.svg.area()
       .x(function (d) {
@@ -80,7 +80,8 @@ define(function (require) {
         }
 
         return yScale(d.y0 + d.y);
-      });
+      })
+      .interpolate(interpolate);
 
       var layer;
       var path;

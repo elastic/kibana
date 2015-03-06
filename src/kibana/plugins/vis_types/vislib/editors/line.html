@@ -1,11 +1,5 @@
 <!-- vis type specific options -->
-<div>
-  <label>
-    Line Interpolation
-  </label>
-  <select class="form-control" ng-model="vis.params.interpolate"
-          ng-options="interpolate for interpolate in vis.type.params.interpolates"></select>
-</div>
+<line-interpolation-option></line-interpolation-option>
 <vislib-basic-options></vislib-basic-options>
 <div class="vis-option-item form-group">
   <label>

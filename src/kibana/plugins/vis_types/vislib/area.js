@@ -17,9 +17,11 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           mode: 'stacked',
+          interpolate: 'linear',
           defaultYExtents: false
         },
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
+        interpolates: ['linear', 'smooth'],
         editor: require('text!plugins/vis_types/vislib/editors/area.html')
       },
       schemas: new Schemas([
