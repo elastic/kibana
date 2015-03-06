@@ -5,12 +5,9 @@ define(function (require) {
     return {
       restrict: 'A',
       require: 'ngModel',
-      scope: {
-        autoSelectIfOnlyOne: '&autoSelectIfOnlyOne'
-      },
       link: function (scope, element, attributes, ngModelCtrl) {
-        scope.$watch('autoSelectIfOnlyOne', function (result) {
-          var options = result();
+        attributes.$observe('autoSelectIfOnlyOne', function (result) {
+          var options = $parse(result)(scope);
           if (options && options.length === 1) {
             ngModelCtrl.$setViewValue(options[0]);
             ngModelCtrl.$render();
