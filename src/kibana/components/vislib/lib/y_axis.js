@@ -33,22 +33,42 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    YAxis.prototype.getScaleType = function (string) {
-      var scale;
+    YAxis.prototype.getScaleType = function (fnName) {
+      fnName = fnName || 'linear';
 
-      switch (string) {
-      case 'log':
-        scale = d3.scale.log();
-        break;
-      case 'square root':
-        scale = d3.scale.sqrt();
-        break;
-      default:
-        scale = d3.scale.linear();
-        break;
+      //if (typeof d3.scale(fnName) !== 'function') {
+      //  throw new Error
+      //}
+
+      return d3.scale[fnName]();
+    };
+
+    YAxis.prototype.getDomain = function () {
+      var isLogScale = (this._attr.scale === 'log');
+      var yMin = this.yMin;
+      var yMax = this.yMax;
+
+      if (isLogScale) {
+        // Negative values cannot be displayed with a log scale.
+        if (yMin < 0 || yMax < 0) {
+          throw new errors.CannotLogScaleNegVals();
+        }
+        // Log of 0 is -Infinity
+        yMin = Math.max(1, yMin);
+        this._attr.defaultYExtents = true;
       }
 
-      return scale;
+      // yMin and yMax can never both be equal to zero
+      if (yMin === 0 && yMax === 0) {
+        throw new errors.NoResults();
+      }
+
+      if (!this._attr.defaultYExtents) {
+        yMin = Math.min(0, yMin);
+        yMax = Math.max(0, yMax);
+      }
+
+      return [yMin, yMax];
     };
 
     /**
@@ -59,60 +79,10 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      var isLogScale = (this._attr.scale === 'log');
-      var yMin = this.yMin;
-      var yMax = this.yMax;
-
-      if (isLogScale) {
-
-        // Negative values cannot be displayed with a log scale.
-        if (yMin < 0 || yMax < 0) {
-          throw new errors.CannotLogScaleNegVals();
-        }
-
-        // log10 of 0 is -Infinity which cannot be coerced to a number
-        if (yMin === 0) {
-          // increase value to 1
-          yMin = 1;
-        }
-
-        this._attr.defaultYExtents = true;
-      }
-
-      // yMin and yMax can never be equal for the axis
-      // to render. Defaults yMin to 0 if yMin === yMax
-      // and yMin is greater than or equal to zero, else
-      // defaults yMax to zero.
-      if (yMin === yMax) {
-        if (yMin > 0) {
-          yMin = 0;
-        } else if (this.yMin === 0) {
-          yMin = -1;
-          yMax = 1;
-        } else {
-          yMax = 0;
-        }
-      }
-
-      if (!this._attr.defaultYExtents) {
-        // if yMin and yMax are both positive, then yMin should be zero
-        if (yMin > 0 && yMax > 0) {
-          yMin = 0;
-        }
-
-        // if yMin and yMax are both negative, then yMax should be zero
-        if (yMin < 0 && yMax < 0) {
-          yMax = 0;
-        }
-      }
-
-      // save reference to y scale
-      this.yScale = this.getScaleType(this._attr.scale)
-      .domain([yMin, yMax])
+      return this.yScale = this.getScaleType(this._attr.scale)
+      .domain(this.getDomain())
       .range([height, 0])
       .nice(this.tickScale(height));
-
-      return this.yScale;
     };
 
     /**
