@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.0.1-snapshot",
+  "version": "4.0.2-snapshot",
   "main": "src/server/app.js",
   "homepage": "http://www.elasticsearch.org/overview/kibana/",
   "bugs": {
