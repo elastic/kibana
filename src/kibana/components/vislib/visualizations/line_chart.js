@@ -177,6 +177,9 @@ define(function (require) {
       });
       var lines;
 
+      // Increase tension in line to prevent lines from going out of chart bounds
+      if (interpolate === 'cardinal') { line.tension(0.8); }
+
       lines = svg
       .selectAll('.lines')
       .data(data)

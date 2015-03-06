@@ -1,7 +1,7 @@
 <div>
   <label>
     Line Interpolation
+    <select class="form-control" ng-model="vis.params.interpolate"
+      ng-options="interpolate for interpolate in vis.type.params.interpolates"></select>
   </label>
-  <select class="form-control" ng-model="vis.params.interpolate"
-    ng-options="interpolate for interpolate in vis.type.params.interpolates"></select>
 </div>
