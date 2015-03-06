@@ -137,7 +137,7 @@ define(function (require) {
       });
 
       legendDiv.select('.legend-ul').selectAll('li')
-      .on('click', function(d, i) {
+      .on('click', function (d, i) {
           self.events.legendEventResponse(d, i);
       });
 
