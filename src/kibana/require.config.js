@@ -46,7 +46,7 @@ require.config({
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
-    'angular-ui-ace': ['angular', 'ace'],
+    'angular-ui-ace': ['angular', 'ace', 'bower_components/ace-builds/src-noconflict/mode-json'],
     'ng-clip': ['angular', 'zeroclipboard'],
     inflection: {
       exports: 'inflection'
