@@ -15,6 +15,7 @@ require.config({
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
+    'ace-json': 'bower_components/ace-builds/src-noconflict/mode-json',
     angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',
     bower_components: 'bower_components',
@@ -46,7 +47,8 @@ require.config({
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
-    'angular-ui-ace': ['angular', 'ace', 'bower_components/ace-builds/src-noconflict/mode-json'],
+    'ace-json': ['ace'],
+    'angular-ui-ace': ['angular', 'ace', 'ace-json'],
     'ng-clip': ['angular', 'zeroclipboard'],
     inflection: {
       exports: 'inflection'
