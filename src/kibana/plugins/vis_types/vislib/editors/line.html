@@ -1,15 +1,5 @@
 <!-- vis type specific options -->
 <div class="vis-option-item">
-  <div ng-if="vis.params">
-    <span class="hintbox_label" ng-click="showDotRatioHint = !showDotRatioHint">
-      <label>Dot Size Ratio:</label>
-      <i class="fa fa-info-circle"></i>
-    </span>
-    <div class="hintbox" ng-show="showDotRatioHint">
-      Change the ratio of the radius of the smallest point to the largest point.
-    </div>
-    <input type="range" step="2" min="1" max="100" class="form-control" ng-model="vis.params.radiusRatio" />
-  </div>
   <div>
     <label>
       <input type="checkbox" value="{{drawLinesBetweenPoints}}" ng-disabled="!vis.params.showCircles" ng-model="vis.params.drawLinesBetweenPoints" name="drawLinesBetweenPoints" ng-checked="vis.params.drawLinesBetweenPoints">

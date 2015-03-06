@@ -19,6 +19,8 @@ define(function (require) {
               }
             ];
             schema.editor = require('text!plugins/vis_types/controls/rows_or_columns.html');
+          } else if (schema.name === 'radius') {
+            schema.editor = require('text!plugins/vis_types/controls/radius_ratio_option.html');
           }
 
           _.defaults(schema, {
