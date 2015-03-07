@@ -69,18 +69,16 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var touchableRadius = 12;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var radii = _(data)
         .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
         .flatten()
-        .value();
-
-      radii = {
-        min: _.min(radii),
-        max: _.max(radii)
-      };
+        .reduce(function (result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        }, {min: Infinity, max: -Infinity});
 
       var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
