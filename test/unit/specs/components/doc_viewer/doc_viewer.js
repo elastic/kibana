@@ -13,7 +13,8 @@ define(function (require) {
       'bytes': 100,
       'area': [{lat: 7, lon: 7}],
       'noMapping': 'hasNoMapping',
-      'objectArray': [{foo: true}, {bar: false}]
+      'objectArray': [{foo: true}, {bar: false}],
+      '_underscore': 1
     }
   };
 
@@ -103,14 +104,23 @@ define(function (require) {
       });
 
       describe('warnings', function () {
+        it('displays a warning about field name starting with underscore', function () {
+          var cells = $elem.find('td[title="_underscore"]').siblings();
+          expect(cells.find('.doc-viewer-underscore').length).to.be(1);
+          expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
+          expect(cells.find('.doc-viewer-object-array').length).to.be(0);
+        });
+
         it('displays a warning about missing mappings', function () {
           var cells = $elem.find('td[title="noMapping"]').siblings();
+          expect(cells.find('.doc-viewer-underscore').length).to.be(0);
           expect(cells.find('.doc-viewer-no-mapping').length).to.be(1);
           expect(cells.find('.doc-viewer-object-array').length).to.be(0);
         });
 
         it('displays a warning about objects in arrays', function () {
           var cells = $elem.find('td[title="objectArray"]').siblings();
+          expect(cells.find('.doc-viewer-underscore').length).to.be(0);
           expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
           expect(cells.find('.doc-viewer-object-array').length).to.be(1);
         });
