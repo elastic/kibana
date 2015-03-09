@@ -38,7 +38,7 @@ define(function (require) {
 
       // These can be date math strings or moments.
       self.time = _.defaults(globalState.time || {}, timeDefaults);
-      self.refreshInterval = _.defaults(globalState.time || {}, refreshIntervalDefaults);
+      self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
 
       globalState.on('fetch_with_changes', function () {
         // clone and default to {} in one
