@@ -9,7 +9,7 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Visualizations are based on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1. 
+Visualizations are based on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x. 
 
 [float]
 [[createvis]]
@@ -23,9 +23,19 @@ button] in the toolbar to the right of the search bar. The wizard guides you thr
 [[newvis01]]
 ==== Step 1: Choose the Visualization Type
 
-The New Visualization wizard starts with the following page:
+Choose a visualization type when you start the New Visualization wizard:
 
-image:images/NewViz01.jpg[]
+[horizontal]
+<<areach,Area chart>>:: Use area charts to visualize the total contribution of several different series.
+<<datatable,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data 
+table for several other visualizations by clicking at the bottom of the visualization.
+<<linech,Line chart>>:: Use line charts to compare different series.
+<<mdwidget,Markdown widget>>:: Use the Markdown widget to display free-form information or instructions about your 
+dashboard.
+<<metricch,Metric>>:: Use the metric visualization to display a single number on your dashboard.
+<<piech,Pie chart>>:: Use pie charts to display each source's contribution to a total.
+<<tilemap,Tile map>>:: Use tile maps to associate the results of an aggregation with geographic points.
+<<vertbarch,Vertical bar chart>>:: Use vertical bar charts as a general-purpose chart.
 
 You can also load a saved visualization that you created earlier. The saved visualization selector includes a text 
 field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved 
@@ -124,3 +134,19 @@ To render the visualization on the _preview canvas_, click the *Apply* button at
 
 The preview canvas displays a preview of the visualization you've defined in the aggregation builder. To refresh the 
 visualization preview, clicking the *Refresh* button image:images/K4Refresh.png[Refresh button] on the toolbar.
+
+include::area.asciidoc[]
+
+include::datatable.asciidoc[]
+
+include::line.asciidoc[]
+
+include::markdown.asciidoc[]
+
+include::metric.asciidoc[]
+
+include::pie.asciidoc[]
+
+include::tilemap.asciidoc[]
+
+include::vertbar.asciidoc[]
