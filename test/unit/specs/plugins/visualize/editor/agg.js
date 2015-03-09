@@ -60,7 +60,7 @@ define(function (require) {
     });
     beforeEach(inject(function ($rootScope, $compile) {
       // share the scope
-      _.defaults($parentScope, $rootScope, $rootScope.__proto__);
+      _.defaults($parentScope, $rootScope, Object.getPrototypeOf($rootScope));
 
       // make the element
       $elem = angular.element(
