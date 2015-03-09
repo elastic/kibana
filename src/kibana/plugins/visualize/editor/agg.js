@@ -8,7 +8,6 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
-    var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
 
     var notify = new Notifier({

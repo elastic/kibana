@@ -33,7 +33,7 @@ define(function (require) {
         {
           group: 'metrics',
           name: 'radius',
-          title: 'Dot size',
+          title: 'Dot Size',
           min: 0,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
