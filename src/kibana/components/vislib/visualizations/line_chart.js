@@ -138,7 +138,7 @@ define(function (require) {
       .enter()
         .append('circle')
         .attr('r', getCircleRadiusFn())
-        .attr('fill-opacity', 0.7)
+        .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', cColor)
