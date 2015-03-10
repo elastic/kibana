@@ -87,6 +87,14 @@ define(function (require) {
     return rtn;
   }
 
+  // browsers format Error.stack differently; always include message
+  function formatStack(err) {
+    if (err.stack && !~err.stack.indexOf(err.message)) {
+      return 'Error: ' + err.message + '\n' + err.stack;
+    }
+    return err.stack;
+  }
+
   /**
    * Functionality to check that
    */
@@ -187,7 +195,7 @@ define(function (require) {
 
     var html = fatalToastTemplate({
       msg: formatMsg(err, this.from),
-      stack: err.stack
+      stack: formatStack(err)
     });
 
     var $container = $('#fatal-splash-screen');
@@ -217,7 +225,7 @@ define(function (require) {
       title: 'Error',
       lifetime: Infinity,
       actions: ['report', 'accept'],
-      stack: err.stack.indexOf(err.message) > -1 ? err.stack : (err.message + err.stack)
+      stack: formatStack(err)
     }, cb);
   };
 
