@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  require('filters/pretty_json');
 
   var html = require('text!components/doc_viewer/doc_viewer.html');
   require('css!components/doc_viewer/doc_viewer.css');
