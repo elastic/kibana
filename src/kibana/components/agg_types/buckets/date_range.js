@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  require('directives/validate_date_math');
 
   return function DateRangeAggDefinition(Private) {
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
@@ -21,18 +22,10 @@ define(function (require) {
       }, {
         name: 'ranges',
         default: [{
-          from: new Date(new Date().getFullYear() - 1, 0, 1),
-          to: new Date(new Date().getFullYear(), 0, 1)
+          from: 'now-1w/w',
+          to: 'now'
         }],
-        editor: require('text!components/agg_types/controls/date_ranges.html'),
-        write: function (aggConfig, output) {
-          output.params.ranges = aggConfig.params.ranges.map(function (range) {
-            return {
-              from: +new Date(range.from),
-              to: +new Date(range.to)
-            };
-          });
-        }
+        editor: require('text!components/agg_types/controls/date_ranges.html')
       }]
     });
   };

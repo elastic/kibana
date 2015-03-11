@@ -1,4 +1,6 @@
 <div>
+  <small><a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#date-math">Accepted Date Formats <i class="fa-link fa"></i></a></small>
+
     <table class="vis-editor-agg-editor-ranges form-group">
       <tr>
         <th>
@@ -14,9 +16,7 @@
         <td class="kbn-timepicker">
           <input
             ng-model="range.from"
-            datepicker-popup="yyyy-MM-dd"
-            show-button-bar="false"
-            show-weeks="false"
+            validate-date-math
             type="text"
             class="form-control"
             name="range.from" />
@@ -24,9 +24,7 @@
         <td class="kbn-timepicker">
           <input
             ng-model="range.to"
-            datepicker-popup="yyyy-MM-dd"
-            show-button-bar="false"
-            show-weeks="false"
+            validate-date-math
             class="form-control"
             name="range.to" />
         </td>
