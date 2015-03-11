@@ -120,7 +120,6 @@ define(function (require) {
               });
               // add a make sure to remove the tooltip when necessary
               $('body').one('mousemove', function (event) {
-                // remove the tooltip everytime we leave the chart
                 render(event);
               });
             } else {
