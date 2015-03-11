@@ -77,48 +77,6 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
-        function render(html, event) {
-          allContents = _.filter(allContents, function (content) {
-            return content.id !== id;
-          });
-
-          if (html) allContents.push({ id: id, html: html, order: order });
-
-          var allHtml = _(allContents)
-          .sortBy('order')
-          .pluck('html')
-          .compact()
-          .join('\n');
-
-          if (allHtml) {
-            var placement = positionTooltip({
-              $window: $window,
-              $chart: $chart,
-              $el: $tooltip,
-              $sizer: $sizer,
-              event: event || d3.event
-            }, allHtml);
-
-            $tooltip
-            .html(allHtml)
-            .css({
-              visibility: 'visible',
-              left: placement.left,
-              top: placement.top
-            });
-            // add a make sure to remove the tooltip when necessary
-            $('body').one('mousemove', function (event) {
-              // remove the tooltip everytime we leave the chart
-              render(null, event);
-            });
-          } else {
-            $tooltip.css({
-              visibility: 'hidden',
-              left: '-500px',
-              top: '-500px'
-            });
-          }
-        }
 
         $chart.on('mouseleave', function (event) {
           // only clear when we leave the chart, so that
@@ -132,18 +90,60 @@ define(function (require) {
         selection.each(function (d, i) {
           var element = d3.select(this);
 
+          function render(event, html) {
+            allContents = _.filter(allContents, function (content) {
+              return content.id !== id;
+            });
+
+            if (html) allContents.push({ id: id, html: html, order: order });
+
+            var allHtml = _(allContents)
+            .sortBy('order')
+            .pluck('html')
+            .compact()
+            .join('\n');
+
+            if (allHtml) {
+              var placement = positionTooltip({
+                $window: $window,
+                $chart: $chart,
+                $el: $tooltip,
+                $sizer: $sizer,
+                event: event || d3.event
+              }, allHtml);
+
+              $tooltip
+              .html(allHtml)
+              .css({
+                visibility: 'visible',
+                left: placement.left,
+                top: placement.top
+              });
+              // add a make sure to remove the tooltip when necessary
+              $('body').one('mousemove', function (event) {
+                // remove the tooltip everytime we leave the chart
+                render(event);
+              });
+            } else {
+              $tooltip.css({
+                visibility: 'hidden',
+                left: '-500px',
+                top: '-500px'
+              });
+            }
+          }
 
           element
           .on('mousemove.tip', function update() {
             if (!self.showCondition.call(element, d, i)) {
-              return render();
+              return render(d3.event);
             }
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
-            return render(tooltipFormatter(events));
+            return render(d3.event, tooltipFormatter(events));
           })
           .on('mouseout.tip', function () {
-            render();
+            render(d3.event);
           });
         });
       };
