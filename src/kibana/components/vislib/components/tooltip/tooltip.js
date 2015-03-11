@@ -77,7 +77,6 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
-
         $chart.on('mouseleave', function (event) {
           // only clear when we leave the chart, so that
           // moving between points doesn't make it reposition
@@ -109,7 +108,7 @@ define(function (require) {
                 $chart: $chart,
                 $el: $tooltip,
                 $sizer: $sizer,
-                event: event || d3.event
+                event: event
               }, allHtml);
 
               $tooltip
