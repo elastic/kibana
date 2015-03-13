@@ -1,4 +1,4 @@
-<form>
+<form role="form">
   <div class="form-group finder-form">
     <div>
       <a class="small pull-right" ng-click="manageObject(type)">manage {{type}}</a>
@@ -21,7 +21,7 @@
       ng-href="{{ makeUrl(hit) }}"
       ng-click="onChoose(hit, $event)">
       <li>
-        <i class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
+        <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
         <p ng-if="hit.description" ng-bind="hit.description"></p>
       </li>
     </a>
