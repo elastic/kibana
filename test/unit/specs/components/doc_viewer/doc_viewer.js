@@ -117,5 +117,11 @@ define(function (require) {
       });
 
     });
+
+    describe('JSON mode', function () {
+      it('should have ACE editor', function () {
+        expect($elem.find('div[class="ace_content"]').length).to.be(1);
+      });
+    });
   });
 });
