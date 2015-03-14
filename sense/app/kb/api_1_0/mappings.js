@@ -146,7 +146,7 @@ define(function () {
           '*': {
             type: {
               __one_of: ['string', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
-                'binary', 'object', 'nested'
+                'binary', 'object', 'nested', "geo_point", "geo_shape"
               ]
             },
 
@@ -177,6 +177,45 @@ define(function () {
             // numeric
             precision_step: 4,
             ignore_malformed: BOOLEAN,
+
+            // geo_point
+            lat_lon: {
+              __one_of: [true, false]
+            },
+            geohash: {
+              __one_of: [true, false]
+	    },
+            geohash_precision: '1m',
+            geohash_prefix: {
+              __one_of: [true, false]
+            },
+            validate: {
+              __one_of: [true, false]
+            },
+            validate_lat: {
+              __one_of: [true, false]
+            },
+            validate_lon: {
+              __one_of: [true, false]
+            },
+            normalize: {
+              __one_of: [true, false]
+            },
+            normalize_lat: {
+              __one_of: [true, false]
+            },
+            normalize_lon: {
+              __one_of: [true, false]
+            },
+
+            // geo_shape
+            tree: {
+	       __one_of: ['geohash', 'quadtree']
+            },
+            precision: '5km',
+            tree_levels: 12,
+            distance_error_pct: 0.025,
+            orientation: 'ccw',
 
             // dates
             format: {
