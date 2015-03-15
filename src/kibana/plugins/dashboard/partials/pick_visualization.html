@@ -1,7 +1,7 @@
 <div ng-switch on="mode" ng-init="mode = 'visualization'" class="dashboard-panel-picker">
   <ul class="nav nav-tabs">
-    <li ng-class="{active: mode == 'visualization'}"><a ng-click="mode='visualization'">Visualizations</a></li>
-    <li ng-class="{active: mode == 'search'}"><a ng-click="mode='search'">Searches</a></li>
+    <li ng-class="{active: mode == 'visualization'}"><a ng-click="mode='visualization'" title="Visualizations">Visualizations</a></li>
+    <li ng-class="{active: mode == 'search'}"><a ng-click="mode='search'" title="Searches">Searches</a></li>
   </ul>
 
   <li class="list-group-item" ng-switch-when="visualization">

@@ -27,6 +27,9 @@ define(function (require) {
         $scope.formatted =  _.mapValues($scope.flattened, function (value, name) {
           var mapping = $scope.mapping[name];
           var formatter = (mapping && mapping.format) ? mapping.format : defaultFormat;
+          if (_.isArray(value) && typeof value[0] === 'object') {
+            value = JSON.stringify(value, null, '  ');
+          }
           return formatter.convert(value);
         });
         $scope.fields = _.keys($scope.flattened).sort();

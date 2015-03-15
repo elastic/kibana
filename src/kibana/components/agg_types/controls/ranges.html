@@ -15,21 +15,23 @@
         ng-model="range.from"
         type="number"
         class="form-control"
-        name="range.from" />
+        name="range.from"
+        step="any" />
     </td>
     <td>
       <input
         ng-model="range.to"
         type="number"
         class="form-control"
-        name="range.to" />
+        name="range.to"
+        step="any" />
     </td>
     <td>
       <button
         type="button"
         ng-click="agg.params.ranges.splice($index, 1)"
         class="btn btn-danger btn-xs">
-        <i class="fa fa-ban" ></i>
+        <i class="fa fa-times"></i>
       </button>
     </td>
   </tr>

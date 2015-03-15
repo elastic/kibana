@@ -17,12 +17,20 @@ define(function (require) {
       function addDetail(result) {
         var agg = result.aggConfig;
         var value = result.value;
-        if (agg === datum.aggConfigResult.aggConfig && datum.yScale != null) value *= datum.yScale;
 
-        details.push({
+        var detail = {
           value: agg.fieldFormatter()(value),
           label: agg.makeLabel()
-        });
+        };
+
+        if (agg === datum.aggConfigResult.aggConfig) {
+          detail.percent = event.percent;
+          if (datum.yScale != null) {
+            detail.value = agg.fieldFormatter()(value * datum.yScale);
+          }
+        }
+
+        details.push(detail);
       }
 
       datum.extraMetrics.forEach(addDetail);

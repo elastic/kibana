@@ -15,11 +15,11 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           showCircles: true,
-          defaultYExtents: false,
           drawLinesBetweenPoints: true,
-          radiusRatio: 9
+          radiusRatio: 9,
+          defaultYExtents: false
         },
-        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
+        editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([
         {
