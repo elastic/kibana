@@ -119,8 +119,22 @@ define(function (require) {
     });
 
     describe('JSON mode', function () {
-      it('should have ACE editor', function () {
-        expect($elem.find('div[class="ace_content"]').length).to.be(1);
+      it('has pretty JSON', function () {
+        expect($scope.hit_json).to.equal(angular.toJson(hit, true));
+      });
+
+      it('should have a global ACE object', function () {
+        expect(window.ace).to.be.a(Object);
+      });
+
+      it('should have one ACE div', function () {
+        expect($elem.find('div[id="json-ace"]').length).to.be(1);
+      });
+
+      it('should contain the same code as hit_json', function () {
+        var editor = window.ace.edit($elem.find('div[id="json-ace"]')[0]);
+        var code = editor.getSession().getValue();
+        expect(code).to.equal($scope.hit_json);
       });
     });
   });
