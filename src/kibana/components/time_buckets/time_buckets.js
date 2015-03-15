@@ -4,6 +4,7 @@ define(function (require) {
     var moment = require('moment');
 
     var datemath = require('utils/datemath');
+    var parseInterval = require('utils/parse_interval');
     var calcAuto = Private(require('components/time_buckets/calc_auto_interval'));
     var calcEsInterval = Private(require('components/time_buckets/calc_es_interval'));
     var tzOffset = moment().format('Z');
@@ -144,28 +145,17 @@ define(function (require) {
       }
 
       if (_.isString(interval)) {
-        // Assume interval is in the form (value)(unit), such as "1h"
-        var value = parseFloat(interval);
-        var unit;
-        if (!isNaN(value)) {
-          unit = interval.substring((value + '').length).trim();
-        } else {
-          // Interval is probably just the unit, such as "hour"
-          value = 1;
-          unit = interval;
-        }
         input = interval;
-        interval = moment.duration(value, unit);
+        interval = parseInterval(interval);
         if (+interval === 0) {
           interval = null;
-          input += ' (not a valid moment unit)';
         }
       }
 
       // if the value wasn't converted to a duration, and isn't
       // already a duration, we have a problem
       if (!moment.isDuration(interval)) {
-        throw new TypeError('can\'t convert input ' + input + ' to a moment.duration');
+        throw new TypeError('"' + input + '" is not a valid interval.');
       }
 
       this._i = interval;
