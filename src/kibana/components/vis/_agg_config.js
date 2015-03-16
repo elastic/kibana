@@ -265,16 +265,14 @@ define(function (require) {
 
     AggConfig.prototype.fieldFormatter = function () {
       var field = this.field();
-      var formatter = field && field.format && field.format.convert;
-      var numFormat = fieldFormats.defaultByType.number.convert;
-      var strFormat = fieldFormats.defaultByType.string.convert;
+      var format = field && field.format;
+      var strFormat = fieldFormats.defaultByType.string;
 
-      if (this.schema && this.schema.group === 'metrics') {
-        if (field && field.type === 'date') return formatter;
-        else return numFormat;
+      if (this.type.getFormat) {
+        format = this.type.getFormat(this) || format;
       }
 
-      return formatter || strFormat;
+      return (format || strFormat).convert;
     };
 
     AggConfig.prototype.fieldName = function () {
