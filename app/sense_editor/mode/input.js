@@ -17,13 +17,14 @@
 
 
 
-define(['require', 'exports', 'module' , 'ace', 'ace_mode_json','./sense_highlight_rules'], function (require, exports, module, ace) {
+define(['require', 'exports', 'module', 'ace', 'ace_mode_json', './input_highlight_rules'], function (require, exports,
+                                                                                                      module, ace) {
   'use strict';
 
 
   var oop = ace.require("ace/lib/oop");
   var TextMode = ace.require("ace/mode/text").Mode;
-  var HighlightRules = require("./sense_highlight_rules").SenseJsonHighlightRules;
+  var HighlightRules = require("./input_highlight_rules").InputHighlightRules;
   var MatchingBraceOutdent = ace.require("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
   var CstyleBehaviour = ace.require("ace/mode/behaviour/cstyle").CstyleBehaviour;
   var CStyleFoldMode = ace.require("ace/mode/folding/cstyle").FoldMode;

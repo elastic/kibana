@@ -45,32 +45,61 @@ define([
           ga.pageview();
         }
       } catch (e) {
-        marvelOpts = { status: 'trial' };
+        marvelOpts = {status: 'trial'};
       } // Meh! Who cares...
     }
     else {
-      marvelOpts = { status: 'trial' };
+      marvelOpts = {status: 'trial'};
     }
+
+    var CURRENT_REQ_ID = 0;
 
     function submitCurrentRequestToES() {
 
-      input.getCurrentRequest(function (req) {
+      var req_id = ++CURRENT_REQ_ID;
+
+      input.getRequestsInRange(function (requests) {
+        if (req_id != CURRENT_REQ_ID) {
+          return;
+        }
         output.update('');
 
-        if (!req) {
+        if (requests.length == 0) {
           return;
         }
 
+        var isMultiRequest = requests.length > 1;
+
+        saveCurrentState();
+
         $("#notification").text("Calling ES....").css("visibility", "visible");
 
-        var es_path = req.url;
-        var es_method = req.method;
-        var es_data = req.data.join("\n");
-        if (es_data) {
-          es_data += "\n";
-        } //append a new line for bulk requests.
+        var finishChain = function () {
+          $("#notification").text("").css("visibility", "hidden");
+        };
 
-        es.send(es_method, es_path, es_data).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
+        var isFirstRequest = true;
+
+        var sendNextRequest = function () {
+          if (req_id != CURRENT_REQ_ID) {
+            return;
+          }
+          if (requests.length == 0) {
+            finishChain();
+            return;
+          }
+          var req = requests.shift();
+          var es_path = req.url;
+          var es_method = req.method;
+          var es_data = req.data.join("\n");
+          if (es_data) {
+            es_data += "\n";
+          } //append a new line for bulk requests.
+
+          es.send(es_method, es_path, es_data).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
+            if (req_id != CURRENT_REQ_ID) {
+              return;
+            }
             var xhr;
             if (dataOrjqXHR.promise) {
               xhr = dataOrjqXHR;
@@ -78,17 +107,16 @@ define([
             else {
               xhr = jqXhrORerrorThrown;
             }
-            $("#notification").text("").css("visibility", "hidden");
             if (typeof xhr.status == "number" &&
               ((xhr.status >= 400 && xhr.status < 600) ||
-                (xhr.status >= 200 && xhr.status < 300)
-                )) {
+              (xhr.status >= 200 && xhr.status < 300)
+              )) {
               // we have someone on the other side. Add to history
               history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
 
 
               var value = xhr.responseText;
-              var mode = "ace/mode/json";
+              var mode = null;
               var contentType = xhr.getAllResponseHeaders("Content-Type") || "";
               if (contentType.indexOf("text/plain") >= 0) {
                 mode = "ace/mode/text";
@@ -106,16 +134,36 @@ define([
                 }
               }
 
-              output.update(value, mode);
-
+              if (isMultiRequest) {
+                value = "# " + req.method + " " + req.url + "\n" + value;
+              }
+              if (isFirstRequest) {
+                output.update(value, mode);
+              }
+              else {
+                output.append("\n" + value);
+              }
+              isFirstRequest = false;
+              // single request terminate via sendNextRequest as well
+              sendNextRequest();
             }
             else {
-              output.update("Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText, 'ace/mode/text');
+              var value = "Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText;
+              if (isMultiRequest) {
+                value = "# " + req.method + " " + req.url + "\n" + value;
+              }
+              if (isFirstRequest) {
+                output.update(value, 'ace/mode/text');
+              }
+              else {
+                output.append("\n" + value);
+              }
+              finishChain();
             }
+          });
+        };
 
-          }
-        );
-        saveCurrentState();
+        sendNextRequest();
       });
     }
 
@@ -150,9 +198,9 @@ define([
         }
       }
       else if (/^https?:\/\//.test(sourceLocation)) {
-        var loadFrom = { url: sourceLocation, dataType: "text" };
+        var loadFrom = {url: sourceLocation, dataType: "text"};
         if (/https?:\/\/api.github.com/.test(sourceLocation)) {
-          loadFrom.headers = { Accept: "application/vnd.github.v3.raw" };
+          loadFrom.headers = {Accept: "application/vnd.github.v3.raw"};
         }
         $.ajax(loadFrom).done(function (data) {
           resetToValues(defaultHost, data);

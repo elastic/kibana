@@ -135,7 +135,6 @@ define([
   }
   input.focus();
   input.highlightCurrentRequestAndUpdateActionBar();
-  input.updateActionsBar();
 
   return input;
 });

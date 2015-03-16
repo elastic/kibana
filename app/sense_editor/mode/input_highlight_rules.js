@@ -25,7 +25,7 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
   var oop = ace.require("ace/lib/oop");
   var TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
 
-  var SenseJsonHighlightRules = function () {
+  var InputHighlightRules = function () {
 
     function mergeTokens(/* ... */) {
       return [].concat.apply([], arguments);
@@ -165,15 +165,15 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
           next: "json"
         }
       ]
-    }
+    };
 
-    if (this.constructor === SenseJsonHighlightRules) {
+    if (this.constructor === InputHighlightRules) {
       this.normalizeRules();
     }
   };
 
-  oop.inherits(SenseJsonHighlightRules, TextHighlightRules);
+  oop.inherits(InputHighlightRules, TextHighlightRules);
 
-  exports.SenseJsonHighlightRules = SenseJsonHighlightRules;
+  exports.InputHighlightRules = InputHighlightRules;
 
 });

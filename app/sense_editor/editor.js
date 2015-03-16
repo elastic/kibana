@@ -23,10 +23,10 @@ define([
   'curl',
   'jquery',
   'sense_editor/row_parser',
-  'sense_editor/mode/sense',
+  'sense_editor/mode/input',
   'utils',
   'es'
-], function (_, ace, curl, $, RowParser, SenseMode, utils, es) {
+], function (_, ace, curl, $, RowParser, InputMode, utils, es) {
   'use strict';
 
   function isInt(x) {
@@ -109,26 +109,40 @@ define([
 
     editor.setShowPrintMargin(false);
     (function (session) {
-      session.setMode(new SenseMode.Mode());
+      session.setMode(new InputMode.Mode());
       session.setFoldStyle('markbeginend');
       session.setTabSize(2);
       session.setUseWrapMode(true);
     })(editor.getSession());
 
-    editor.prevRequestStart = function (pos) {
-      pos = pos || editor.getCursorPosition();
-      var curRow = pos.row;
+    editor.prevRequestStart = function (rowOrPos) {
+      rowOrPos = _.isUndefined(rowOrPos) || rowOrPos == null ? editor.getCursorPosition() : rowOrPos;
+
+      var curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
       while (curRow > 0 && !editor.parser.isStartRequestRow(curRow, editor)) curRow--;
 
-      return { row: curRow, column: 0};
+      return {row: curRow, column: 0};
+    };
+
+    editor.nextRequestStart = function (rowOrPos) {
+      rowOrPos = _.isUndefined(rowOrPos) || rowOrPos == null ? editor.getCursorPosition() : rowOrPos;
+      var session = editor.getSession();
+      var curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
+      var maxLines = session.getLength();
+      for (; curRow < maxLines - 1; curRow++) {
+        if (editor.parser.isStartRequestRow(curRow, editor)) {
+          break;
+        }
+      }
+      return {row: curRow, column: 0};
     };
 
     editor.autoIndent = onceDoneTokenizing(function () {
-      editor.getCurrentRequestRange(function (req_range) {
+      editor.getRequestRange(function (req_range) {
         if (!req_range) {
           return;
         }
-        editor.getCurrentRequest(function (parsed_req) {
+        editor.getRequest(function (parsed_req) {
           if (parsed_req.data && parsed_req.data.length > 0) {
             var indent = parsed_req.data.length == 1; // unindent multi docs by default
             var formatted_data = utils.reformatData(parsed_req.data, indent);
@@ -188,17 +202,21 @@ define([
       return new (ace.require("ace/token_iterator").TokenIterator)(editor.getSession(), row, column);
     };
 
-    editor.getCurrentRequestRange = onceDoneTokenizing(function (cb) {
+    editor.getRequestRange = onceDoneTokenizing(function (row, cb) {
+      if (_.isUndefined(cb)) {
+        cb = row;
+        row = null;
+      }
       if (typeof cb !== 'function') {
         return;
       }
 
-      if (editor.parser.isInBetweenRequestsRow(null)) {
+      if (editor.parser.isInBetweenRequestsRow(row)) {
         cb(null);
         return
       }
 
-      var reqStart = editor.prevRequestStart(null, editor);
+      var reqStart = editor.prevRequestStart(row, editor);
       var reqEnd = editor.nextRequestEnd(reqStart, editor);
       cb(new (ace.require("ace/range").Range)(
         reqStart.row, reqStart.column,
@@ -206,65 +224,174 @@ define([
       ));
     });
 
-    editor.getCurrentRequest = onceDoneTokenizing(function (cb) {
-      if (typeof cb !== 'function') {
+    editor.getEngulfingRequestsRange = onceDoneTokenizing(function (range, cb) {
+      if (_.isUndefined(cb)) {
+        cb = range;
+        range = null;
+      }
+
+      range = range || editor.getSelectionRange();
+
+      var session = editor.getSession();
+      var startRow = range.start.row;
+      var endRow = range.end.row;
+      var maxLine = Math.max(0, session.getLength() - 1);
+
+      // move start row to the previous request start if in body, o.w. forward
+      if (editor.parser.isInBetweenRequestsRow(startRow)) {
+        for (; startRow <= endRow; startRow++) {
+          if (editor.parser.isStartRequestRow(startRow)) {
+            break;
+          }
+        }
+      }
+      else {
+        for (; startRow >= 0; startRow--) {
+          if (editor.parser.isStartRequestRow(startRow)) {
+            break;
+          }
+        }
+      }
+
+      if (startRow < 0 || startRow > endRow) {
+        cb(null);
         return;
       }
-      if (editor.parser.isInBetweenRequestsRow(null)) {
+      // move end row to the previous request end if between requests, o.w. walk forward
+      if (editor.parser.isInBetweenRequestsRow(endRow)) {
+        for (; endRow >= startRow; endRow--) {
+          if (editor.parser.isEndRequestRow(endRow)) {
+            break;
+          }
+        }
+      }
+      else {
+
+        for (; endRow <= maxLine; endRow++) {
+          if (editor.parser.isEndRequestRow(endRow)) {
+            break;
+          }
+        }
+
+      }
+
+      if (endRow < startRow || endRow > maxLine) {
         cb(null);
         return;
       }
 
+      var endColumn = (session.getLine(endRow) || "").replace(/\s+$/, "").length;
+      cb(new (ace.require("ace/range").Range)(startRow, 0, endRow, endColumn));
+    });
+
+
+    editor.getRequestInRange = onceDoneTokenizing(function (range, cb) {
       var request = {
         method: "",
         data: [],
-        url: null
+        url: null,
+        range: range
       };
 
-      editor.getCurrentRequestRange(function (currentReqRange) {
-        var pos = currentReqRange.start;
-        var tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
-        var t = tokenIter.getCurrentToken();
-        if (editor.parser.isEmptyToken(t)) {
-          // if the row starts with some spaces, skip them.
-          t = editor.parser.nextNonEmptyToken(tokenIter);
-        }
-        request.method = t.value;
+      var pos = range.start;
+      var tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
+      var t = tokenIter.getCurrentToken();
+      if (editor.parser.isEmptyToken(t)) {
+        // if the row starts with some spaces, skip them.
         t = editor.parser.nextNonEmptyToken(tokenIter);
-        if (!t || t.type == "method") {
-          return null;
-        }
-        request.url = "";
-        while (t && t.type && t.type.indexOf("url") == 0) {
-          request.url += t.value;
-          t = tokenIter.stepForward();
-        }
-        if (editor.parser.isEmptyToken(t)) {
-          // if the url row ends with some spaces, skip them.
-          t = editor.parser.nextNonEmptyToken(tokenIter);
+      }
+      request.method = t.value;
+      t = editor.parser.nextNonEmptyToken(tokenIter);
+      if (!t || t.type == "method") {
+        return null;
+      }
+      request.url = "";
+      while (t && t.type && t.type.indexOf("url") == 0) {
+        request.url += t.value;
+        t = tokenIter.stepForward();
+      }
+      if (editor.parser.isEmptyToken(t)) {
+        // if the url row ends with some spaces, skip them.
+        t = editor.parser.nextNonEmptyToken(tokenIter);
+      }
+
+      var bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
+      var dataEndPos;
+      while (bodyStartRow < range.end.row
+      || (
+      bodyStartRow == range.end.row
+      && 0 < range.end.column
+      )
+        ) {
+        dataEndPos = editor.nextDataDocEnd({row: bodyStartRow, column: 0});
+        var bodyRange = new (ace.require("ace/range").Range)(
+          bodyStartRow, 0,
+          dataEndPos.row, dataEndPos.column
+        );
+        var data = editor.getSession().getTextRange(bodyRange);
+        request.data.push(data.trim());
+        bodyStartRow = dataEndPos.row + 1;
+      }
+
+      cb(request);
+    });
+
+    editor.getRequestsInRange = function (range, cb) {
+      if (_.isUndefined(cb)) {
+        cb = range;
+        range = null;
+      }
+      function explicitRangeToRequests(requestsRange, tempCb) {
+        if (!requestsRange) {
+          tempCb([]);
+          return;
         }
 
-        var bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
-        var bodyStartColumn = 0;
-        var dataEndPos;
-        while (bodyStartRow < currentReqRange.end.row
-          || (
-          bodyStartRow == currentReqRange.end.row
-            && bodyStartColumn < currentReqRange.end.column
+        var startRow = requestsRange.start.row;
+        var endRow = requestsRange.end.row;
+
+        // move to the next request start (during the second iterations this may not be exactly on a request
+        for (; startRow <= endRow; startRow++) {
+          if (editor.parser.isStartRequestRow(startRow)) {
+            break;
+          }
+        }
+
+        if (startRow > endRow) {
+          tempCb([]);
+          return;
+        }
+
+        editor.getRequest(startRow, function (request) {
+          explicitRangeToRequests(
+            {start: {row: request.range.end.row + 1}, end: {row: requestsRange.end.row}},
+            function (rest_of_requests) {
+              rest_of_requests.unshift(request);
+              tempCb(rest_of_requests);
+            }
           )
-          ) {
-          dataEndPos = editor.nextDataDocEnd({ row: bodyStartRow, column: bodyStartColumn});
-          var bodyRange = new (ace.require("ace/range").Range)(
-            bodyStartRow, bodyStartColumn,
-            dataEndPos.row, dataEndPos.column
-          );
-          var data = editor.getSession().getTextRange(bodyRange);
-          request.data.push(data.trim());
-          bodyStartRow = dataEndPos.row + 1;
-          bodyStartColumn = 0;
-        }
+        })
+      }
 
-        cb(request);
+      editor.getEngulfingRequestsRange(range, function (requestRange) {
+        explicitRangeToRequests(requestRange, cb);
+      });
+    };
+
+    editor.getRequest = onceDoneTokenizing(function (row, cb) {
+      if (_.isUndefined(cb)) {
+        cb = row;
+        row = null;
+      }
+      if (typeof cb !== 'function') {
+        return;
+      }
+      if (editor.parser.isInBetweenRequestsRow(row)) {
+        cb(null);
+        return;
+      }
+      editor.getRequestRange(row, function (range) {
+        editor.getRequestInRange(range, cb);
       });
     });
 
@@ -303,7 +430,7 @@ define([
 
       var column = (session.getLine(curRow) || "").replace(/\s+$/, "").length;
 
-      return { row: curRow, column: column};
+      return {row: curRow, column: column};
     };
 
     editor.nextDataDocEnd = function (pos) {
@@ -326,7 +453,7 @@ define([
 
       var column = (session.getLine(curRow) || "").length;
 
-      return { row: curRow, column: column };
+      return {row: curRow, column: column};
     };
 
     // overwrite the actual aceEditor's onPaste method
@@ -354,14 +481,14 @@ define([
 
     editor.highlightCurrentRequestAndUpdateActionBar = onceDoneTokenizing(function () {
       var session = editor.getSession();
-      editor.getCurrentRequestRange(function (new_current_req_range) {
+      editor.getEngulfingRequestsRange(function (new_current_req_range) {
         if (new_current_req_range == null && CURRENT_REQ_RANGE == null) {
           return;
         }
         if (new_current_req_range != null && CURRENT_REQ_RANGE != null &&
           new_current_req_range.start.row == CURRENT_REQ_RANGE.start.row &&
           new_current_req_range.end.row == CURRENT_REQ_RANGE.end.row
-          ) {
+        ) {
           // same request, now see if we are on the first line and update the action bar
           var cursorRow = editor.getCursorPosition().row;
           if (cursorRow == CURRENT_REQ_RANGE.start.row) {
@@ -384,7 +511,7 @@ define([
 
     editor.getCurrentRequestAsCURL = function (cb) {
       cb = typeof cb === 'function' ? cb : $.noop;
-      editor.getCurrentRequest(function (req) {
+      editor.getRequest(function (req) {
         if (!req) {
           return;
         }
@@ -452,7 +579,12 @@ define([
 
           if (firstLine.length > session.getScreenWidth() - 5) {
             // overlap first row
-            if (startRow > 0) startRow--; else startRow++;
+            if (startRow > 0) {
+              startRow--;
+            }
+            else {
+              startRow++;
+            }
           }
 
 
@@ -463,9 +595,9 @@ define([
           }
 
           var bottomOfReq = editor.renderer.textToScreenCoordinates(
-            CURRENT_REQ_RANGE.end.row,
-            CURRENT_REQ_RANGE.end.column
-          ).pageY - offsetFromPage;
+              CURRENT_REQ_RANGE.end.row,
+              CURRENT_REQ_RANGE.end.column
+            ).pageY - offsetFromPage;
 
           if (bottomOfReq >= 0) {
             return set(0);

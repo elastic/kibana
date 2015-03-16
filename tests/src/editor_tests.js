@@ -20,8 +20,8 @@
 define([
   'ace',
   'input',
-  'jquery'
-], function (ace, input, $) {
+  'text!test_src/editor_input1.txt'
+], function (ace, input, editor_input1) {
   'use strict';
 
   var aceRange = ace.require("ace/range");
@@ -41,10 +41,19 @@ define([
 
   function utils_test(name, prefix, data, test) {
     var id = testCount++;
-    if (data && typeof data != "string") data = JSON.stringify(data, null, 3);
+    if (typeof data == "function") {
+      test = data;
+      data = null;
+    }
+    if (data && typeof data != "string") {
+      data = JSON.stringify(data, null, 3);
+    }
     if (data) {
-      if (prefix) data = prefix + "\n" + data;
-    } else {
+      if (prefix) {
+        data = prefix + "\n" + data;
+      }
+    }
+    else {
       data = prefix;
     }
 
@@ -53,6 +62,18 @@ define([
         test();
       });
     });
+  }
+
+  function compareRequest(requests, expected) {
+    if (!Array.isArray(requests)) {
+      requests = [requests];
+      expected = [expected];
+    }
+
+    _.each(requests, function (r) {
+      delete  r.range
+    });
+    deepEqual(requests, expected);
   }
 
   var simple_request = {
@@ -65,7 +86,8 @@ define([
   };
 
   var single_line_request =
-  { prefix: 'POST _search',
+  {
+    prefix: 'POST _search',
     data: '{ "query": { "match_all": {} } }'
   };
 
@@ -84,31 +106,31 @@ define([
 
 
   utils_test("simple request range", simple_request.prefix, simple_request.data, function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         3, 1
       );
-      deepEqual(range, expected);
+      compareRequest(range, expected);
       start();
     });
   });
 
   utils_test("simple request data", simple_request.prefix, simple_request.data, function () {
-    input.getCurrentRequest(function (request) {
+    input.getRequest(function (request) {
       var expected = {
         method: "POST",
         url: "_search",
         data: [simple_request.data]
       };
 
-      deepEqual(request, expected);
+      compareRequest(request, expected);
       start();
     });
   });
 
   utils_test("simple request range, prefixed with spaces", "   " + simple_request.prefix, simple_request.data, function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         3, 1
@@ -119,94 +141,94 @@ define([
   });
 
   utils_test("simple request data, prefixed with spaces", "    " + simple_request.prefix, simple_request.data, function () {
-    input.getCurrentRequest(function (request) {
+    input.getRequest(function (request) {
       var expected = {
         method: "POST",
         url: "_search",
         data: [simple_request.data]
       };
 
-      deepEqual(request, expected);
+      compareRequest(request, expected);
       start();
     });
   });
 
   utils_test("simple request range, suffixed with spaces", simple_request.prefix + "   ", simple_request.data + "  ", function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         3, 1
       );
-      deepEqual(range, expected);
+      compareRequest(range, expected);
       start();
     });
   });
 
-  utils_test("simple request data, suffixed with spaces", simple_request.prefix + "    " , simple_request.data + " ", function () {
-    input.getCurrentRequest(function (request) {
+  utils_test("simple request data, suffixed with spaces", simple_request.prefix + "    ", simple_request.data + " ", function () {
+    input.getRequest(function (request) {
       var expected = {
         method: "POST",
         url: "_search",
         data: [simple_request.data]
       };
 
-      deepEqual(request, expected);
+      compareRequest(request, expected);
       start();
     });
   });
 
 
   utils_test("single line request range", single_line_request.prefix, single_line_request.data, function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         1, 32
       );
-      deepEqual(range, expected);
+      compareRequest(range, expected);
       start();
     });
   });
 
   utils_test("full url: single line request data", "POST https://somehoset/_search", single_line_request.data, function () {
-    input.getCurrentRequest(function (request) {
+    input.getRequest(function (request) {
       var expected = {
         method: "POST",
         url: "https://somehoset/_search",
         data: [single_line_request.data]
       };
 
-      deepEqual(request, expected);
+      compareRequest(request, expected);
       start();
     });
   });
 
   utils_test("request with no data followed by a new line", get_request_no_data.prefix, "\n", function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         0, 10
       );
-      deepEqual(range, expected);
+      compareRequest(range, expected);
       start();
     });
   });
 
   utils_test("request with no data followed by a new line (data)", get_request_no_data.prefix, "\n", function () {
-    input.getCurrentRequest(function (request) {
+    input.getRequest(function (request) {
       var expected = {
         method: "GET",
         url: "_stats",
         data: []
       };
 
-      deepEqual(request, expected);
+      compareRequest(request, expected);
       start();
     });
   });
 
 
   utils_test("request with no data", get_request_no_data.prefix, get_request_no_data.data, function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         0, 10
@@ -217,20 +239,20 @@ define([
   });
 
   utils_test("request with no data (data)", get_request_no_data.prefix, get_request_no_data.data, function () {
-    input.getCurrentRequest(function (range) {
+    input.getRequest(function (request) {
       var expected = {
         method: "GET",
         url: "_stats",
         data: []
       };
 
-      deepEqual(range, expected);
+      compareRequest(request, expected);
       start();
     });
   });
 
   utils_test("multi doc request range", multi_doc_request.prefix, multi_doc_request.data, function () {
-    input.getCurrentRequestRange(function (range) {
+    input.getRequestRange(function (range) {
       var expected = new aceRange.Range(
         0, 0,
         2, 14
@@ -241,15 +263,92 @@ define([
   });
 
   utils_test("multi doc request data", multi_doc_request.prefix, multi_doc_request.data, function () {
-    input.getCurrentRequest(function (request) {
+    input.getRequest(function (request) {
       var expected = {
         method: "POST",
         url: "_bulk",
         data: multi_doc_request.data_as_array
       };
 
-      deepEqual(request, expected);
+      compareRequest(request, expected);
       start();
     });
   });
-})
+
+  function multi_req_test(name, editor_input, range, expected) {
+    utils_test("multi request select - " + name, editor_input, function () {
+      input.getRequestsInRange(range, function (requests) {
+        // convert to format returned by request.
+        _.each(expected, function (req) {
+          req.data = req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
+        });
+
+        compareRequest(requests, expected);
+        start();
+      });
+    });
+
+  }
+
+  multi_req_test("mid body to mid body", editor_input1,
+    {start: {row: 12}, end: {row: 17}}, [{
+      method: "PUT",
+      url: "index_1/type1/1",
+      data: {
+        "f": 1
+      }
+    }, {
+      method: "PUT",
+      url: "index_1/type1/2",
+      data: {
+        "f": 2
+      }
+    }]);
+
+  multi_req_test("single request start to end", editor_input1,
+    {start: {row: 10}, end: {row: 13}}, [{
+      method: "PUT",
+      url: "index_1/type1/1",
+      data: {
+        "f": 1
+      }
+    }]);
+
+  multi_req_test("start to end, with comment", editor_input1,
+    {start: {row: 6}, end: {row: 13}}, [{
+      method: "GET",
+      url: "_stats?level=shards",
+      data: null
+    },
+      {
+        method: "PUT",
+        url: "index_1/type1/1",
+        data: {
+          "f": 1
+        }
+      }]);
+
+  multi_req_test("before start to after end, with comments", editor_input1,
+    {start: {row: 4}, end: {row: 14}}, [{
+      method: "GET",
+      url: "_stats?level=shards",
+      data: null
+    },
+      {
+        method: "PUT",
+        url: "index_1/type1/1",
+        data: {
+          "f": 1
+        }
+      }]);
+
+  multi_req_test("between requests", editor_input1,
+    {start: {row: 21}, end: {row: 22}}, []);
+
+  multi_req_test("between requests - with comment", editor_input1,
+    {start: {row: 20}, end: {row: 22}}, []);
+
+  multi_req_test("between requests - before comment", editor_input1,
+    {start: {row: 19}, end: {row: 22}}, []);
+
+});
