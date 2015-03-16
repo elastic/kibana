@@ -1,0 +1,132 @@
+==========
+Curl 1
+-------------------------------------
+curl -XPUT 'http://localhost:9200/twitter/tweet/1' -d '{
+  "user" : "kimchy",
+  "post_date" : "2009-11-15T14:12:12",
+  "message" : "trying out Elastic Search"
+}'
+-------------------------------------
+{
+  "server": "http://localhost:9200",
+  "method": "PUT",
+  "url": "/twitter/tweet/1"
+}
+-------------------------------------
+{
+  "user" : "kimchy",
+  "post_date" : "2009-11-15T14:12:12",
+  "message" : "trying out Elastic Search"
+}
+==========
+Curl 2
+-------------------------------------
+curl -XGET "localhost/twitter/tweet/1?version=2" -d '{
+   "message" : "elasticsearch now has versioning support, double cool!"
+}'
+-------------------------------------
+{
+   "server": "http://localhost",
+   "method": "GET",
+   "url": "/twitter/tweet/1?version=2"
+}
+-------------------------------------
+{
+   "message" : "elasticsearch now has versioning support, double cool!"
+}
+===========
+Curl 3
+-------------------------------------
+curl -XPOST https://localhost/twitter/tweet/1?version=2 -d '{
+   "message" : "elasticsearch now has versioning support, double cool!"
+}'
+-------------------------------------
+{
+    "server": "https://localhost",
+    "method": "POST",
+    "url": "/twitter/tweet/1?version=2"
+}
+-------------------------------------
+{
+   "message" : "elasticsearch now has versioning support, double cool!"
+}
+=========
+Curl 4
+-------------------------------------
+curl -XPOST https://localhost/twitter
+-------------------------------------
+{
+  "server": "https://localhost",
+  "method": "POST",
+  "url": "/twitter"
+}
+-------------------------------------
+==========
+Curl 5
+-------------------------------------
+curl -X POST https://localhost/twitter/
+-------------------------------------
+{
+    "server": "https://localhost",
+    "method": "POST",
+    "url": "/twitter/"
+}
+-------------------------------------
+=============
+Curl 6
+-------------------------------------
+curl -s -XPOST localhost:9200/missing-test -d'
+{
+  "mappings": {
+  }
+}'
+-------------------------------------
+{
+  "server": "http://localhost:9200",
+  "method": "POST",
+  "url": "/missing-test"
+}
+-------------------------------------
+{
+  "mappings": {
+  }
+}
+=========================
+Curl 7
+-------------------------------------
+curl 'localhost:9200/missing-test/doc/_search?pretty' -d'
+{
+  "query": {
+  },
+}'
+-------------------------------------
+{
+  "server": "http://localhost:9200",
+  "method": "",
+  "url": "/missing-test/doc/_search?pretty"
+}
+-------------------------------------
+{
+  "query": {
+  },
+}
+===========================
+Curl 8
+-------------------------------------
+curl localhost:9200/ -d'
+{
+  "query": {
+  }
+}'
+-------------------------------------
+{
+  "server": "http://localhost:9200",
+  "method": "",
+  "url": "/"
+}
+-------------------------------------
+{
+  "query": {
+  }
+}
+====================================

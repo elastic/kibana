@@ -15,8 +15,6 @@
  * from Elasticsearch Incorporated.
  */
 
-
-
 define([
     'curl',
     'help_popup',

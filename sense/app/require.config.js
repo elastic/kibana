@@ -36,7 +36,9 @@
       'ace_mode_json': '../vendor/ace/mode-json',
       'ace_ext_language_tools': '../vendor/ace/ext-language_tools',
       'ace_ext_searchbox': '../vendor/ace/ext-searchbox',
-      'analytics': '../../common/analytics'
+      'analytics': '../../common/analytics',
+      text: '../vendor/require/text',
+      test_src: '../tests/src'
     },
     map: {
       '*': {
