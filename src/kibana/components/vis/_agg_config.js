@@ -264,12 +264,17 @@ define(function (require) {
     };
 
     AggConfig.prototype.fieldFormatter = function () {
+      var field = this.field();
+      var formatter = field && field.format && field.format.convert;
+      var numFormat = fieldFormats.defaultByType.number.convert;
+      var strFormat = fieldFormats.defaultByType.string.convert;
+
       if (this.schema && this.schema.group === 'metrics') {
-        return fieldFormats.defaultByType.number.convert;
+        if (field && field.type === 'date') return formatter;
+        else return numFormat;
       }
 
-      var field = this.field();
-      return field ? field.format.convert : String;
+      return formatter || strFormat;
     };
 
     AggConfig.prototype.fieldName = function () {
