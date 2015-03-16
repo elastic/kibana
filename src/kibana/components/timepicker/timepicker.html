@@ -64,7 +64,7 @@
             </div>
 
             <div ng-switch-when="relative">
-              <form ng-submit="applyRelative()" class="form-inline" name="relativeTime">
+              <form role="form" ng-submit="applyRelative()" class="form-inline" name="relativeTime">
                 <div class="kbn-timepicker-section">
                   <label>
                     From:
@@ -91,12 +91,14 @@
                   </div>
                   <br>
                   <div class="small">
-                    <input
-                      ng-model="relative.round"
-                      ng-checked="relative.round"
-                      ng-change="formatRelative()"
-                      type="checkbox">
-                    round to the {{units[relative.unit]}}
+                    <label>
+                      <input
+                        ng-model="relative.round"
+                        ng-checked="relative.round"
+                        ng-change="formatRelative()"
+                        type="checkbox">
+                      round to the {{units[relative.unit]}}
+                    </label>
                   </div>
                 </div>
 
