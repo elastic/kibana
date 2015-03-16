@@ -23,7 +23,7 @@ define(function () {
   var INDEX_SETTING = {
     __one_of: ['analyzed', 'not_analyzed', 'no']
   }, BOOLEAN = {
-    __one_of: [ true, false ]
+    __one_of: [true, false]
   };
 
   return function init(api) {
@@ -184,7 +184,7 @@ define(function () {
             },
             geohash: {
               __one_of: [true, false]
-	    },
+            },
             geohash_precision: '1m',
             geohash_prefix: {
               __one_of: [true, false]
@@ -210,7 +210,7 @@ define(function () {
 
             // geo_shape
             tree: {
-	       __one_of: ['geohash', 'quadtree']
+              __one_of: ['geohash', 'quadtree']
             },
             precision: '5km',
             tree_levels: 12,
@@ -263,7 +263,7 @@ define(function () {
                 __scope_link: '_put_mapping.type.properties.field'
               }
             },
-            copy_to: { __one_of: ['{field}', ['{field}']] },
+            copy_to: {__one_of: ['{field}', ['{field}']]},
 
             // nested
             include_in_parent: BOOLEAN,
