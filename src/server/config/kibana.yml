@@ -22,6 +22,10 @@ kibana_index: ".kibana"
 # kibana_elasticsearch_username: user
 # kibana_elasticsearch_password: pass
 
+# If your Elasticsearch requires client certificate and key
+# kibana_elasticsearch_client_crt: /path/to/your/client.crt
+# kibana_elasticsearch_client_key: /path/to/your/client.key
+
 
 # The default application to load.
 default_app_id: "discover"
