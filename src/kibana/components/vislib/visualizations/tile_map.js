@@ -47,6 +47,7 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
+      self.precisionSize = [0, 4900000, 624000, 156000, 19000, 4400, 550, 120, 16];
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -116,6 +117,9 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
+          // zoom to featureLayer data bounds
+          map.fitBounds(featureLayer.getBounds());
+
           // Add button to fit container to points
           var FitControl = L.Control.extend({
             options: {
@@ -147,8 +151,7 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.fitBounds = function (map, featureLayer) {
-
-      map.fitBounds(featureLayer.getBounds(L.latLngBounds([-90, -220], [90, 220])));
+      map.fitBounds(featureLayer.getBounds());
     };
 
     /**
@@ -252,11 +255,9 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-
-          var rad = zoomScale * self.radiusScale(count, max, precision);
-          return L.circleMarker(latlng, {
-            radius: rad
-          });
+          var rad = self.radiusScale(count, max, precision);
+          return L.circle(latlng, rad);
+          // return L.circleMarker(latlng, { radius: rad });
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -284,7 +285,6 @@ define(function (require) {
       map.on('moveend', function setZoomCenter() {
         self._attr.mapZoom = self._attr.lastZoom = map.getZoom();
         self._attr.mapCenter = self._attr.lastCenter = map.getCenter();
-        self.resizeFeatures(map);
       });
 
 
@@ -322,9 +322,8 @@ define(function (require) {
           var count = feature.properties.count;
           var rad = zoomScale * 3;
           console.log(count, rad, zoomScale, self._attr.mapZoom);
-          return L.circleMarker(latlng, {
-            radius: rad
-          });
+          return L.circle(latlng, self.precisionSize[precision] / 2);
+          // return L.circleMarker(latlng, { radius: rad });
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -493,36 +492,6 @@ define(function (require) {
     };
 
     /**
-     * Redraws feature layer markers
-     *
-     * @method resizeFeatures
-     * @param map {Object}
-     * @param min {Number}
-     * @param max {Number}
-     * @param precision {Number}
-     * @param featureLayer {GeoJson Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
-      var self = this;
-      var zoomScale = self.zoomScale(self._attr.mapZoom);
-
-      featureLayer.eachLayer(function (layer) {
-        var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
-
-        var count = layer.feature.properties.count;
-        var rad;
-        if (self._attr.mapType === 'Shaded Circle Markers') {
-          rad = zoomScale * self.quantRadiusScale(precision);
-        } else {
-          rad = zoomScale * self.radiusScale(count, max, precision);
-        }
-        layer.setRadius(rad);
-        console.log('rad', self._attr.mapZoom, zoomScale, rad);
-      });
-    };
-
-    /**
      * Binds popup and events to each feature on map
      *
      * @method bindPopup
@@ -582,39 +551,9 @@ define(function (require) {
     TileMap.prototype.radiusScale = function (count, max, precision) {
       // exp = 0.5 for true square root ratio
       // exp = 1 for linear ratio
+      var self = this;
       var exp = 0.6;
-      var maxr;
-      switch (precision) {
-        case 1:
-          maxr = 150;
-          break;
-        case 2:
-          maxr = 28;
-          break;
-        case 3:
-          maxr = 8;
-          break;
-        case 4:
-          maxr = 2;
-          break;
-        case 5:
-          maxr = 1.4;
-          break;
-        case 6:
-          maxr = 0.6;
-          break;
-        case 7:
-          maxr = 0.4;
-          break;
-        case 8:
-          maxr = 0.2;
-          break;
-        case 9:
-          maxr = 0.12;
-          break;
-        default:
-          maxr = 8;
-      }
+      var maxr = self.precisionSize[precision];
       return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
     };
 
