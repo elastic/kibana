@@ -9,11 +9,6 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
-    var mapData;
-    var mapCenter = [15, 5];
-    var mapZoom = 2;
-    var minMapSize = 60;
-
     /**
      * Tile Map Visualization: renders maps
      *
@@ -47,6 +42,7 @@ define(function (require) {
      * @return {Function} Creates the map
      */
     TileMap.prototype.draw = function () {
+
       var self = this;
       var $elem = $(this.chartEl);
       var div;
@@ -59,15 +55,24 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-          div = $(this);
-          div.addClass('tilemap');
+
+          var mapCenter = [15, 5];
+          var mapZoom = 2;
 
           if (self._attr.lastZoom) {
-            mapZoom = self._attr.lastZoom;
+            self._attr.mapZoom = self._attr.lastZoom;
+          } else {
+            self._attr.mapZoom = self._attr.lastZoom = mapZoom;
           }
           if (self._attr.lastCenter) {
-            mapCenter = self._attr.lastCenter;
+            mapCenter = self._attr.mapCenter = self._attr.lastCenter;
+          } else {
+            self._attr.mapCenter = self._attr.lastCenter = mapCenter;
           }
+
+          var mapData = data.geoJson;
+          div = $(this);
+          div.addClass('tilemap');
 
           var featureLayer;
           var tileLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
@@ -92,21 +97,23 @@ define(function (require) {
           var map = L.map(div[0], mapOptions);
           self.maps.push(map);
 
-          tileLayer.on('tileload', saturateTiles);
-
-          map.on('unload', function () {
-            tileLayer.off('tileload', saturateTiles);
+          tileLayer.on('tileload', function () {
+            self.saturateTiles();
           });
 
-          map.on('zoomend dragend', function setZoomCenter() {
+          featureLayer = self.markerType(map, mapData).addTo(map);
+
+          map.on('unload', function () {
+            tileLayer.off('tileload', self.saturateTiles);
+          });
+
+          map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.lastZoom = map.getZoom();
             mapCenter = self._attr.lastCenter = map.getCenter();
           });
 
-          featureLayer = self.markerType(map, data.geoJson);
-
-          if (data.geoJson.properties.label) {
-            self.addLabel(data.geoJson.properties.label, map);
+          if (mapData.properties.label) {
+            self.addLabel(mapData.properties.label, map);
           }
 
           // Add button to fit container to points
@@ -117,27 +124,46 @@ define(function (require) {
             onAdd: function (map) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
               $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-              $(container).on('click', fitBounds);
+              $(container).on('click', function () {
+                self.fitBounds(map, featureLayer);
+              });
               return container;
             }
           });
 
-          if (data && data.geoJson && data.geoJson.features.length > 0) {
+          if (mapData && mapData.features.length > 0) {
             map.addControl(new FitControl());
           }
-
-          function fitBounds() {
-            map.fitBounds(featureLayer.getBounds());
-          }
-
-          function saturateTiles() {
-            if (!self._attr.isDesaturated) {
-              $('img.leaflet-tile-loaded').addClass('filters-off');
-            }
-          }
-
         });
       };
+    };
+
+    /**
+     * zoom map to fit all features in featureLayer
+     *
+     * @method fitBounds
+     * @param map {Object}
+     * @param featureLayer {Leaflet object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.fitBounds = function (map, featureLayer) {
+
+      map.fitBounds(featureLayer.getBounds(L.latLngBounds([-90, -220], [90, 220])));
+    };
+
+    /**
+     * remove css class on map tiles
+     *
+     * @method saturateTiles
+     * @param map {Object}
+     * @param featureLayer {Leaflet object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.saturateTiles = function () {
+      var self = this;
+      if (!self._attr.isDesaturated) {
+        $('img.leaflet-tile-loaded').addClass('filters-off');
+      }
     };
 
     /**
@@ -157,7 +183,7 @@ define(function (require) {
         } else if (this._attr.mapType === 'Shaded Circle Markers') {
           featureLayer = this.shadedCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
-          featureLayer = this.geohashGrid(map, mapData);
+          featureLayer = this.shadedGeohashGrid(map, mapData);
         } else {
           featureLayer = this.pinMarkers(map, mapData);
         }
@@ -181,7 +207,7 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapZoom);
+      var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
       var featureLayer = L.geoJson(mapData, {
@@ -198,7 +224,7 @@ define(function (require) {
             fillOpacity: 0.75
           };
         }
-      }).addTo(map);
+      });
 
       return featureLayer;
     };
@@ -219,9 +245,10 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapZoom);
+      var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
+
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
@@ -236,21 +263,30 @@ define(function (require) {
         },
         style: function (feature) {
           var count = feature.properties.count;
+          var color = self.quantizeColorScale(count, min, max);
           return {
-            fillColor: defaultColor,
-            color: self.darkerColor(defaultColor),
+            // fillColor: defaultColor,
+            fillColor: color,
+            //color: self.darkerColor(defaultColor),
+            color: self.darkerColor(color),
             weight: 1.0,
             opacity: 1,
             fillOpacity: 0.75
           };
         }
-      }).addTo(map);
-      self.resizeFeatures(map, min, max, precision, featureLayer);
-      map.on('zoomend dragend', function () {
-        mapZoom = map.getZoom();
-        bounds = map.getBounds();
-        self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+
+      // add legend
+      if (mapData.features.length > 1) {
+        self.addLegend(mapData, map);
+      }
+
+      map.on('moveend', function setZoomCenter() {
+        self._attr.mapZoom = self._attr.lastZoom = map.getZoom();
+        self._attr.mapCenter = self._attr.lastCenter = map.getCenter();
+        self.resizeFeatures(map);
+      });
+
 
       return featureLayer;
     };
@@ -267,9 +303,6 @@ define(function (require) {
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
       var self = this;
-
-      // TODO: add UI to select local min max or all min max
-
       // min and max from chart data for this map
       // var min = mapData.properties.min;
       // var max = mapData.properties.max;
@@ -280,13 +313,15 @@ define(function (require) {
 
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapZoom);
+      var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#005baa';
+
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
           var rad = zoomScale * 3;
+          console.log(count, rad, zoomScale, self._attr.mapZoom);
           return L.circleMarker(latlng, {
             radius: rad
           });
@@ -305,12 +340,6 @@ define(function (require) {
             fillOpacity: 0.75
           };
         }
-      }).addTo(map);
-      self.resizeFeatures(map, min, max, precision, featureLayer);
-      map.on('zoomend dragend', function () {
-        mapZoom = map.getZoom();
-        bounds = map.getBounds();
-        self.resizeFeatures(map, min, max, precision, featureLayer);
       });
 
       // add legend
@@ -331,15 +360,21 @@ define(function (require) {
      * @param mapData {Object}
      * @return {undefined}
      */
-    TileMap.prototype.geohashGrid = function (map, mapData) {
+    TileMap.prototype.shadedGeohashGrid = function (map, mapData) {
       var self = this;
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapZoom);
+      var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
+
+      // add legend
+      if (mapData.features.length > 1) {
+        self.addLegend(mapData, map);
+      }
+
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
@@ -370,7 +405,7 @@ define(function (require) {
             fillOpacity: 0.75
           };
         }
-      }).addTo(map);
+      });
 
       return featureLayer;
     };
@@ -395,7 +430,6 @@ define(function (require) {
       };
       label.setPosition('bottomright').addTo(map);
       return label;
-
     };
 
     /**
@@ -427,12 +461,14 @@ define(function (require) {
             vals[0].toFixed(0));
         } else {
           // 3 to 5 vals for legend
-          for (i = 0; i < colors.length; i++) {
+          if (colors) {
+            for (i = 0; i < colors.length; i++) {
             vals = self._attr.cScale.invertExtent(colors[i]);
             strokecol = self.darkerColor(colors[i]);
             labels.push(
               '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
               vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+            }
           }
         }
         div.innerHTML = labels.join('<br>');
@@ -469,7 +505,7 @@ define(function (require) {
      */
     TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
       var self = this;
-      var zoomScale = self.zoomScale(mapZoom);
+      var zoomScale = self.zoomScale(self._attr.mapZoom);
 
       featureLayer.eachLayer(function (layer) {
         var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
@@ -482,6 +518,7 @@ define(function (require) {
           rad = zoomScale * self.radiusScale(count, max, precision);
         }
         layer.setRadius(rad);
+        console.log('rad', self._attr.mapZoom, zoomScale, rad);
       });
     };
 
@@ -503,8 +540,6 @@ define(function (require) {
         'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
         props.valueLabel + ': ' + props.count
       );
-
-      // TODO: tooltip-like formatter passed in?
       layer.bindPopup(popup)
       .on('mouseover', function (e) {
         layer.openPopup();
@@ -528,7 +563,7 @@ define(function (require) {
       var zScale = d3.scale.pow()
         .exponent(4)
         .domain([1, 12])
-        .range([0.3, 100]);
+        .range([1, 100]);
       return zScale(zoom);
     };
 
