@@ -37,7 +37,8 @@ define(function (require) {
             'type',
             'indexed',
             'analyzed',
-            'missing'
+            'missing',
+            'name'
           ],
           defaults: {
             missing: true

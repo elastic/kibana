@@ -55,7 +55,7 @@ define(function (require) {
      * @returns {String} CSS class name
      */
     Chart.prototype.colorToClass = function (label) {
-      return 'color ' + Legend.prototype.colorToClass.call(null, label);
+      return Legend.prototype.colorToClass.call(null, label);
     };
 
     /**

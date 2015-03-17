@@ -45,8 +45,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -65,14 +66,23 @@ define(function (require) {
      */
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
+      var showCircles = this._attr.showCircles;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var visibleRadius = 3;
-      var touchableRadius = 12;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+      var radii = _(data)
+        .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
+        .flatten()
+        .reduce(function (result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        }, {min: Infinity, max: -Infinity});
+
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
       var layer = svg.selectAll('.points')
       .data(data)
@@ -81,7 +91,7 @@ define(function (require) {
         .attr('class', 'points line');
 
       var circles = layer
-      .selectAll('rect')
+      .selectAll('circle')
       .data(function appendData(d) {
         return d;
       });
@@ -105,19 +115,43 @@ define(function (require) {
         return color(d.label);
       }
 
-      circles
-      .enter()
-        .append('circle')
-        .attr('r', visibleRadius)
-        .attr('cx', cx)
-        .attr('cy', cy)
-        .attr('fill', cColor)
-        .attr('class', 'circle-decoration');
+      function colorCircle(d) {
+        var parent = d3.select(this).node().parentNode;
+        var lengthOfParent = d3.select(parent).data()[0].length;
+        var isVisible = (lengthOfParent === 1);
+
+        // If only 1 point exists, show circle
+        if (!showCircles && !isVisible) return 'none';
+        return cColor(d);
+      }
+      function getCircleRadiusFn(modifier) {
+        return function getCircleRadius(d) {
+          var margin = self._attr.margin;
+          var width = self._attr.width - margin.left - margin.right;
+          var height = self._attr.height - margin.top - margin.bottom;
+          var circleRadius = (d._input.z - radii.min) / radiusStep;
+
+          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
+        };
+      }
+
 
       circles
       .enter()
         .append('circle')
-        .attr('r', touchableRadius)
+        .attr('r', getCircleRadiusFn())
+        .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('fill', colorCircle)
+        .attr('class', function circleClass(d) {
+          return 'circle-decoration ' + self.colorToClass(color(d.label));
+        });
+
+      circles
+      .enter()
+        .append('circle')
+        .attr('r', getCircleRadiusFn(10))
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', 'transparent')
@@ -172,7 +206,7 @@ define(function (require) {
 
       lines.append('path')
       .attr('class', function lineClass(d) {
-        return self.colorToClass(color(d.label));
+        return 'color ' + self.colorToClass(color(d.label));
       })
       .attr('d', function lineD(d) {
         return line(d.values);
@@ -284,7 +318,9 @@ define(function (require) {
           }
 
           self.addClipPath(svg, width, height);
-          lines = self.addLines(svg, data.series);
+          if (self._attr.drawLinesBetweenPoints) {
+            lines = self.addLines(svg, data.series);
+          }
           circles = self.addCircles(svg, layers);
           self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
@@ -298,7 +334,6 @@ define(function (require) {
           .attr('y2', height)
           .style('stroke', '#ddd')
           .style('stroke-width', lineStrokeWidth);
-
 
           return svg;
         });

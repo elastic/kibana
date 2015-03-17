@@ -14,6 +14,9 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          showCircles: true,
+          drawLinesBetweenPoints: true,
+          radiusRatio: 9,
           scale: 'linear',
           defaultYExtents: false
         },
@@ -29,6 +32,14 @@ define(function (require) {
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
+        },
+        {
+          group: 'metrics',
+          name: 'radius',
+          title: 'Dot Size',
+          min: 0,
+          max: 1,
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
         },
         {
           group: 'buckets',

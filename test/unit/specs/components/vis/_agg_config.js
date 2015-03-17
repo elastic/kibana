@@ -6,6 +6,9 @@ define(function (require) {
     var AggType;
     var AggConfig;
     var indexPattern;
+    var dateFormat;
+    var stringFormat;
+    var numberFormat;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
@@ -13,6 +16,10 @@ define(function (require) {
       AggType = Private(require('components/agg_types/_agg_type'));
       AggConfig = Private(require('components/vis/_agg_config'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+
+      dateFormat = indexPattern.fields.byName['@timestamp'].format.convert;
+      stringFormat = indexPattern.fields.byName.extension.format.convert;
+      numberFormat = indexPattern.fields.byName.bytes.format.convert;
     }));
 
     describe('#toDsl', function () {
@@ -204,6 +211,106 @@ define(function (require) {
         expect(state.params).to.be.an('object');
         expect(state).to.have.property('type', 'date_histogram');
         expect(state).to.have.property('schema', 'segment');
+      });
+    });
+
+    describe('#fieldFormatter', function () {
+      it('returns number formatter for metrics on boolean', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'avg',
+              schema: 'metric',
+              params: { field: 'ssl' }
+            },
+            {
+              type: 'terms',
+              schema: 'segment',
+              params: { field: 'ssl' }
+            }
+          ]
+        });
+
+        expect(vis.aggs[0].fieldFormatter()).to.be(numberFormat);
+        expect(vis.aggs[1].fieldFormatter()).to.be(stringFormat);
+      });
+
+      it('returns number formatter for metrics on strings', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'cardinality',
+              schema: 'metric',
+              params: { field: 'extension' }
+            },
+            {
+              type: 'terms',
+              schema: 'segment',
+              params: { field: 'extension' }
+            }
+          ]
+        });
+
+        expect(vis.aggs[0].fieldFormatter()).to.be(numberFormat);
+        expect(vis.aggs[1].fieldFormatter()).to.be(stringFormat);
+      });
+
+      it('returns date formatter for metrics on date fields', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'cardinality',
+              schema: 'metric',
+              params: { field: '@timestamp' }
+            },
+            {
+              type: 'date_histogram',
+              schema: 'segment',
+              params: { field: '@timestamp' }
+            }
+          ]
+        });
+
+        expect(vis.aggs[0].fieldFormatter()).to.be(dateFormat);
+        expect(vis.aggs[1].fieldFormatter()).to.be(dateFormat);
+      });
+
+      it('returns the string format if the field does not have a format', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'date_histogram',
+              schema: 'segment',
+              params: { field: '@timestamp' }
+            }
+          ]
+        });
+
+        var agg = vis.aggs[0];
+        agg.params.field = { type: 'date', format: null };
+        expect(agg.fieldFormatter()).to.be(stringFormat);
+      });
+
+
+      it('returns the string format if their is no field', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'date_histogram',
+              schema: 'segment',
+              params: { field: '@timestamp' }
+            }
+          ]
+        });
+
+        var agg = vis.aggs[0];
+        delete agg.params.field;
+        expect(agg.fieldFormatter()).to.be(stringFormat);
       });
     });
   }];

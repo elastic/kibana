@@ -18,9 +18,9 @@
             <div ng-repeat="bucket in field.details.buckets" class="discover-field-details-item">
               <div>
                 <span ng-show="field.filterable" class="pull-right">
-                  <i class="fa fa-search-minus pull-right discover-field-details-filter"
+                  <i aria-hidden="true" class="fa fa-search-minus pull-right discover-field-details-filter"
                     ng-click="updateFilterInQuery(field, bucket.value, '-')"></i>
-                  <i class="fa fa-search-plus pull-right discover-field-details-filter"
+                  <i aria-hidden="true" class="fa fa-search-plus pull-right discover-field-details-filter"
                     ng-click="updateFilterInQuery(field, bucket.value, '+')"></i>
                 </span>
                 <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
@@ -38,7 +38,7 @@
         class="sidebar-item-button primary">
           Visualize
           <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
-          ( {{warnings.length}} warnings <i class="fa fa-warning"></i> )
+          ( {{warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
           </span>
       </div>
 

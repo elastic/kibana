@@ -5,6 +5,10 @@
 var app = require('./app');
 var fs = require('fs');
 var config = require('./config');
+var http = require('http');
+var https = require('https');
+http.globalAgent.maxSockets = config.maxSockets;
+https.globalAgent.maxSockets = config.maxSockets;
 var logger = require('./lib/logger');
 var Promise = require('bluebird');
 var initialization = require('./lib/serverInitialization');
@@ -25,12 +29,12 @@ try {
  */
 var server;
 if (key && cert) {
-  server = require('https').createServer({
+  server = https.createServer({
     key: key,
     cert: cert
   }, app);
 } else {
-  server = require('http').createServer(app);
+  server = http.createServer(app);
 }
 server.on('error', onError);
 server.on('listening', onListening);
@@ -69,8 +73,8 @@ function onListening() {
 }
 
 function start() {
-  var port = parseInt(process.env.PORT, 10) || config.port || 3000;
-  var host = process.env.HOST || config.host || '127.0.0.1';
+  var port = config.port || 3000;
+  var host = config.host || '127.0.0.1';
   var listen = Promise.promisify(server.listen.bind(server));
   app.set('port', port);
   return listen(port, host);

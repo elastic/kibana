@@ -96,7 +96,7 @@ define(function (require) {
       // Append path
       path = layer.append('path')
       .attr('class', function (d) {
-        return self.colorToClass(color(d[0].label));
+        return 'color ' + self.colorToClass(color(d[0].label));
       })
       .style('fill', function (d) {
         return color(d[0].label);
@@ -125,8 +125,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -144,6 +145,7 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with circles added
      */
     AreaChart.prototype.addCircles = function (svg, data) {
+      var self = this;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
@@ -162,7 +164,7 @@ define(function (require) {
         .append('g')
         .attr('class', 'points area');
 
-      // Append the bars
+      // append the bars
       circles = layer
       .selectAll('rect')
       .data(function appendData(data) {
@@ -179,7 +181,7 @@ define(function (require) {
       .enter()
       .append('circle')
       .attr('class', function circleClass(d) {
-        return d.label;
+        return d.label + ' ' + self.colorToClass(color(d.label));
       })
       .attr('stroke', function strokeColor(d) {
         return color(d.label);
