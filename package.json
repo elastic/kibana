@@ -15,7 +15,7 @@
   "main": "src/server/app.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/issues"
+    "url": "http://github.com/elastic/kibana/issues"
   },
   "license": "Apache 2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",

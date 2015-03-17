@@ -11,7 +11,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 ## Installation
 
-* Download: [https://www.elastic.co/downloads/kibana](https://www.elastic.co/downloads/kibana)
+* Download: [http://www.elastic.co/downloads/kibana](http://www.elastic.co/downloads/kibana)
 * Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
 
