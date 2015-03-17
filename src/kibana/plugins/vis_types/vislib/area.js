@@ -17,7 +17,8 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           mode: 'stacked',
-          defaultYExtents: false
+          defaultYExtents: false,
+          setYExtents: false
         },
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
         editor: require('text!plugins/vis_types/vislib/editors/area.html')

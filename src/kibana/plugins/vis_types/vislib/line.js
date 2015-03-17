@@ -17,7 +17,8 @@ define(function (require) {
           showCircles: true,
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
-          defaultYExtents: false
+          defaultYExtents: false,
+          setYExtents: false
         },
         editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },

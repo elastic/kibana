@@ -32,6 +32,16 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
+    YAxis.prototype.validateUserExtents = function (yMin, yMax) {
+      yMin = parseInt(yMin, 10);
+      yMax = parseInt(yMax, 10);
+
+      if (isNaN(yMin) || isNaN(yMax)) throw new Error(yMin + ' or ' + yMax + ' is not a valid number');
+      if (yMin > yMax) throw new Error(yMin + ' is less than ' + yMax);
+
+      return [yMin, yMax];
+    };
+
     /**
      * Creates the d3 y scale function
      *
@@ -40,37 +50,38 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
+      var isUserDefined = (this._attr.setYExtents);
+      var yMin = this.yMin;
+      var yMax = this.yMax;
 
       // yMin and yMax can never be equal for the axis
       // to render. Defaults yMin to 0 if yMin === yMax
       // and yMin is greater than or equal to zero, else
       // defaults yMax to zero.
-      if (this.yMin === this.yMax) {
-        if (this.yMin > 0) {
-          this.yMin = 0;
-        } else if (this.yMin === 0) {
-          this.yMin = -1;
-          this.yMax = 1;
+      if (yMin === yMax) {
+        if (yMin > 0) {
+          yMin = 0;
+        } else if (yMin === 0) {
+          yMin = -1;
+          yMax = 1;
         } else {
-          this.yMax = 0;
+          yMax = 0;
         }
       }
 
       if (!this._attr.defaultYExtents) {
         // if yMin and yMax are both positive, then yMin should be zero
-        if (this.yMin > 0 && this.yMax > 0) {
-          this.yMin = 0;
+        if (yMin > 0 && yMax > 0) {
+          yMin = 0;
         }
 
         // if yMin and yMax are both negative, then yMax should be zero
-        if (this.yMin < 0 && this.yMax < 0) {
-          this.yMax = 0;
-        }
+        if (yMin < 0 && yMax < 0) yMax = 0;
       }
 
       // save reference to y scale
       this.yScale = d3.scale.linear()
-      .domain([this.yMin, this.yMax])
+      .domain((isUserDefined) ? this.validateUserExtents(yMin, yMax) : [yMin, yMax])
       .range([height, 0])
       .nice(this.tickScale(height));
 

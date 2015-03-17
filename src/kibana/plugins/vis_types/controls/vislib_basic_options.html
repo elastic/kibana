@@ -17,4 +17,20 @@
       Scale Y-Axis to Data Bounds
     </label>
   </div>
+  <div class="vis-option-item">
+    <label>
+      <input type="checkbox" ng-model="vis.params.setYExtents" ng-checked="vis.params.setYExtents">
+      Set Y-Axis Min and Max Values
+    </label>
+    <div ng-show="vis.params.setYExtents">
+      <label>
+        Y-Axis maximum value
+        <input type="number" ng-model="vis.params.yAxis.yMax">
+      </label>
+      <label>
+        Y-Axis minimum value
+        <input type="number" ng-model="vis.params.yAxis.yMin">
+      </label>
+    </div>
+  </div>
 </div>

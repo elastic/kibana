@@ -15,7 +15,8 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           mode: 'stacked',
-          defaultYExtents: false
+          defaultYExtents: false,
+          setYExtents: false
         },
         modes: ['stacked', 'percentage', 'grouped'],
         editor: require('text!plugins/vis_types/vislib/editors/histogram.html')
