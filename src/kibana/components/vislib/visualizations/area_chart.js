@@ -59,7 +59,6 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var interpolate = (this._attr.interpolate === 'smooth') ? 'cardinal' : this._attr.interpolate;
-
       var area = d3.svg.area()
       .x(function (d) {
         if (isTimeSeries) {
@@ -82,6 +81,10 @@ define(function (require) {
         return yScale(d.y0 + d.y);
       })
       .interpolate(interpolate);
+
+      // Increase tension in line to prevent lines from going out of chart bounds
+      if (interpolate === 'cardinal') { area.tension(0.8); }
+
 
       var layer;
       var path;
@@ -225,9 +228,8 @@ define(function (require) {
      */
     AreaChart.prototype.addClipPath = function (svg, width, height) {
       // Prevents circles from being clipped at the top of the chart
-      var clipPathBuffer = 5;
       var startX = 0;
-      var startY = 0 - clipPathBuffer;
+      var startY = 0;
       var id = 'chart-area' + _.uniqueId();
 
       // Creating clipPath
@@ -239,9 +241,7 @@ define(function (require) {
       .attr('x', startX)
       .attr('y', startY)
       .attr('width', width)
-      // Adding clipPathBuffer to height so it doesn't
-      // cutoff the lower part of the chart
-      .attr('height', height + clipPathBuffer);
+      .attr('height', height);
     };
 
     AreaChart.prototype.checkIfEnoughData = function () {
