@@ -11,7 +11,7 @@
     "elasticsearch"
   ],
   "license": "Apache 2.0",
-  "homepage": "http://www.elasticsearch.org/overview/kibana/",
+  "homepage": "https://www.elastic.co/products/kibana",
   "ignore": [
     "**/.*",
     "node_modules",

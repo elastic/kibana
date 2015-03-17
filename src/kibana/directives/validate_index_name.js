@@ -1,4 +1,4 @@
-// See https://github.com/elasticsearch/elasticsearch/issues/6736
+// See https://github.com/elastic/elastic/issues/6736
 define(function (require) {
   var _ = require('lodash');
 
