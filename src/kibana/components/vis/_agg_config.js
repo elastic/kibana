@@ -264,12 +264,15 @@ define(function (require) {
     };
 
     AggConfig.prototype.fieldFormatter = function () {
-      if (this.schema && this.schema.group === 'metrics') {
-        return fieldFormats.defaultByType.number.convert;
+      var field = this.field();
+      var format = field && field.format;
+      var strFormat = fieldFormats.defaultByType.string;
+
+      if (this.type.getFormat) {
+        format = this.type.getFormat(this) || format;
       }
 
-      var field = this.field();
-      return field ? field.format.convert : String;
+      return (format || strFormat).convert;
     };
 
     AggConfig.prototype.fieldName = function () {
