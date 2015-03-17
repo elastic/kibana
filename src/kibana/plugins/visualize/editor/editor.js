@@ -234,11 +234,10 @@ define(function (require) {
     };
 
     $scope.shareData = function () {
+      var embedUrl = $location.absUrl().replace('?', '?embed&');
       return {
-        link: $location.absUrl(),
-        // This sucks, but seems like the cleanest way. Uhg.
-        embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-          '" height="600" width="800"></iframe>'
+        link: embedUrl,
+        embed: '<iframe src="' + embedUrl + '" height="600" width="800"></iframe>'
       };
     };
 
