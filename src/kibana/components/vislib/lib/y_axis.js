@@ -33,42 +33,60 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
+    YAxis.prototype.throwCustomError = function (message) {
+      throw new Error(message);
+    };
+
+    YAxis.prototype.throwCannotLogScaleNegVals = function () {
+      throw new errors.CannotLogScaleNegVals();
+    };
+
+    YAxis.prototype.throwNoResultsError = function () {
+      throw new errors.NoResults();
+    };
+
+    /**
+     * Returns the appropriate D3 scale
+     *
+     * @param fnName {String} D3 scale
+     * @returns {*}
+     */
     YAxis.prototype.getScaleType = function (fnName) {
+      if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
       fnName = fnName || 'linear';
 
-      //if (typeof d3.scale(fnName) !== 'function') {
-      //  throw new Error
-      //}
+      if (typeof d3.scale[fnName] !== 'function') return this.throwCustomError('YAxis.getScaleType: ' + fnName + ' is not a function');
 
       return d3.scale[fnName]();
     };
 
-    YAxis.prototype.getDomain = function () {
-      var isLogScale = (this._attr.scale === 'log');
-      var yMin = this.yMin;
-      var yMax = this.yMax;
+    /**
+     * Return the domain for log scale, i.e. the extent of the log scale.
+     * Log scales must begin at 1 since the log(0) = -Infinity
+     *
+     * @param scale
+     * @param yMin
+     * @param yMax
+     * @returns {*[]}
+     */
+    YAxis.prototype.returnLogDomain = function (yMin, yMax) {
+      if (yMin < 0 || yMax < 0) return this.throwCannotLogScaleNegVals();
+      return [Math.max(1, yMin), yMax];
+    };
 
-      if (isLogScale) {
-        // Negative values cannot be displayed with a log scale.
-        if (yMin < 0 || yMax < 0) {
-          throw new errors.CannotLogScaleNegVals();
-        }
-        // Log of 0 is -Infinity
-        yMin = Math.max(1, yMin);
-        this._attr.defaultYExtents = true;
-      }
+    /**
+     * Returns the domain, i.e. the extent of the y axis
+     *
+     * @param scale {String} Kibana scale
+     * @param yMin {Number} Y-axis minimum value
+     * @param yMax {Number} Y-axis maximum value
+     * @returns {*[]}
+     */
+    YAxis.prototype.getDomain = function (scale, yMin, yMax) {
+      if (scale === 'log') return this.returnLogDomain(yMin, yMax); // Negative values cannot be displayed with a log scale.
+      if (yMin === 0 && yMax === 0) return this.throwNoResultsError(); // yMin and yMax can never both be equal to zero
 
-      // yMin and yMax can never both be equal to zero
-      if (yMin === 0 && yMax === 0) {
-        throw new errors.NoResults();
-      }
-
-      if (!this._attr.defaultYExtents) {
-        yMin = Math.min(0, yMin);
-        yMax = Math.max(0, yMax);
-      }
-
-      return [yMin, yMax];
+      return [Math.min(0, yMin), Math.max(0, yMax)];
     };
 
     /**
@@ -80,7 +98,7 @@ define(function (require) {
      */
     YAxis.prototype.getYScale = function (height) {
       return this.yScale = this.getScaleType(this._attr.scale)
-      .domain(this.getDomain())
+      .domain(this.getDomain(this._attr.scale, this.yMin, this.yMax))
       .range([height, 0])
       .nice(this.tickScale(height));
     };
