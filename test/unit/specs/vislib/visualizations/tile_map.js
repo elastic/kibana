@@ -1,6 +1,7 @@
 define (function (require) {
   var angular = require('angular');
   var _ = require('lodash');
+  var $ = require('jquery');
   var L = require('leaflet');
 
   // Data
@@ -73,67 +74,4 @@ define (function (require) {
 
     });
   });
-
-
-  describe('TileMap', function () {
-
-    var types = ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pin Markers'];
-    var vis;
-    var visLibParams = {
-      isDesaturated: true,
-      type: 'tile_map',
-      mapType: 'Scaled Circle Markers'
-    };
-
-    beforeEach(function () {
-      module('TileMapFactory');
-    });
-
-    beforeEach(function () {
-      inject(function (Private) {
-        vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-        require('css!components/vislib/styles/main');
-        vis.render(dataArray[0]);
-
-        console.log('vis', vis);
-
-
-      });
-    });
-
-    afterEach(function () {
-     $(vis.el).remove();
-     vis = null;
-    });
-
-    it('first test case', function() {
-      expect(1 === 1).to.be(true);
-    });
-
-    it('second, has data', function() {
-      expect(dataArray[0]).to.be(true);
-    });
-
-    it('map should draw', function() {
-      //
-    })
-  });
-
-  describe('TileMap nest 1', function () {
-    beforeEach(function () {
-      console.log('before each');
-    });
-
-    it('map should draw 1', function() {
-      expect(1 === 1).to.be(true);
-    });
-
-    describe('TileMap nest 2', function () {
-      it('map should draw 2', function() {
-        expect(1 === 1).to.be(false);
-      });
-    });
-
-  });
-
 });
