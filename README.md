@@ -1,8 +1,8 @@
 # Kibana 4.1.0-snapshot
 
-[![Build Status](https://travis-ci.org/elasticsearch/kibana.svg?branch=master)](https://travis-ci.org/elasticsearch/kibana?branch=master)
+[![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
 
-Kibana is an open source ([Apache Licensed](https://github.com/elasticsearch/kibana/blob/master/LICENSE.md)), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
+Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/blob/master/LICENSE.md)), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elasticsearch/kib
 
 ## Installation
 
-* Download: [http://www.elasticsearch.org/overview/kibana/installation/](http://www.elasticsearch.org/overview/kibana/installation/)
+* Download: [https://www.elastic.co/downloads/kibana](https://www.elastic.co/downloads/kibana)
 * Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
 
@@ -31,4 +31,4 @@ Now that you've configured an index pattern, you're ready to hop over to the [Di
 
 ## Documentation
 
-Visit [Elasticsearch.org](http://www.elasticsearch.org/guide/en/kibana/current/index.html) for the full Kibana documentation.
+Visit [elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.

@@ -57,6 +57,7 @@
 
       <!-- remove button -->
       <button
+        ng-if="canRemove(agg)"
         aria-label="Remove Dimension"
         ng-if="stats.count > stats.min"
         ng-click="remove(agg)"
