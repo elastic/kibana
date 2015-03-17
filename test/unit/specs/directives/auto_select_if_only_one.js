@@ -35,5 +35,16 @@ define(function (require) {
       $rootScope.$digest();
       expect($rootScope.value).to.be(oneOption[0]);
     });
+
+    it('should still auto select if the collection contains 2 items but is filtered to 1', function () {
+      $rootScope.options = multiOptions;
+      var html = '<select ng-model="value" ng-options="option.name for option in options | filter:{label:\'bar\'}" ' +
+      'auto-select-if-only-one="options | filter:{label:\'bar\'}"></select>';
+      $compile(html)($rootScope);
+      $rootScope.value = null;
+      $rootScope.$digest();
+
+      expect($rootScope.value).to.be(multiOptions[1]);
+    });
   });
 });

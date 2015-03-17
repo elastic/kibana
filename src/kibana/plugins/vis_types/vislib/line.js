@@ -16,6 +16,8 @@ define(function (require) {
           addLegend: true,
           showCircles: true,
           interpolate: 'linear',
+          drawLinesBetweenPoints: true,
+          radiusRatio: 9,
           defaultYExtents: false
         },
         interpolates: ['linear', 'smooth'],
@@ -30,6 +32,14 @@ define(function (require) {
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
+        },
+        {
+          group: 'metrics',
+          name: 'radius',
+          title: 'Dot Size',
+          min: 0,
+          max: 1,
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
         },
         {
           group: 'buckets',
