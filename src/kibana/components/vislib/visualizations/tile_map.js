@@ -9,6 +9,8 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
+    var tileMapState;
+
     /**
      * Tile Map Visualization: renders maps
      *
@@ -32,6 +34,10 @@ define(function (require) {
       // add allmin and allmax to geoJson
       chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
       chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
+
+      tileMapState = this.handler.vis._attr;
+      console.log('new TileMap tileMapState', tileMapState);
+
     }
 
     /**
@@ -47,7 +53,7 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
-      self.precisionSize = [0, 4900000, 624000, 156000, 19000, 4400, 550, 120, 16];
+      self.precisionSize = [0, 4900000, 620000, 155000, 19000, 4400, 550, 120, 16, 4, 0.6, 0.12, 0.02];
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -60,12 +66,12 @@ define(function (require) {
           var mapCenter = [15, 5];
           var mapZoom = 2;
 
-          if (self._attr.lastZoom) {
+          if (tileMapState.mapZoom) {
             self._attr.mapZoom = self._attr.lastZoom;
           } else {
             self._attr.mapZoom = self._attr.lastZoom = mapZoom;
           }
-          if (self._attr.lastCenter) {
+          if (tileMapState.mapCenter) {
             mapCenter = self._attr.mapCenter = self._attr.lastCenter;
           } else {
             self._attr.mapCenter = self._attr.lastCenter = mapCenter;
@@ -109,8 +115,9 @@ define(function (require) {
           });
 
           map.on('moveend', function setZoomCenter() {
-            mapZoom = self._attr.lastZoom = map.getZoom();
-            mapCenter = self._attr.lastCenter = map.getCenter();
+            mapZoom = tileMapState.mapZoom = self._attr.lastZoom = map.getZoom();
+            mapCenter = tileMapState.mapCenter = self._attr.lastCenter = map.getCenter();
+            console.log(tileMapState);
           });
 
           if (mapData.properties.label) {
@@ -118,7 +125,10 @@ define(function (require) {
           }
 
           // zoom to featureLayer data bounds
-          map.fitBounds(featureLayer.getBounds());
+          console.log(tileMapState);
+          if (!tileMapState.firstFitBounds) {
+            map.fitBounds(featureLayer.getBounds());
+          }
 
           // Add button to fit container to points
           var FitControl = L.Control.extend({
@@ -152,6 +162,7 @@ define(function (require) {
      */
     TileMap.prototype.fitBounds = function (map, featureLayer) {
       map.fitBounds(featureLayer.getBounds());
+      tileMapState.firstFitBounds = true;
     };
 
     /**
@@ -257,7 +268,6 @@ define(function (require) {
           var count = feature.properties.count;
           var rad = self.radiusScale(count, max, precision);
           return L.circle(latlng, rad);
-          // return L.circleMarker(latlng, { radius: rad });
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -321,9 +331,7 @@ define(function (require) {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
           var rad = zoomScale * 3;
-          console.log(count, rad, zoomScale, self._attr.mapZoom);
           return L.circle(latlng, self.precisionSize[precision] / 2);
-          // return L.circleMarker(latlng, { radius: rad });
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
