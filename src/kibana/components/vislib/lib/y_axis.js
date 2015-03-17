@@ -16,7 +16,7 @@ define(function (require) {
     function YAxis(args) {
       this.el = args.el;
       this.yMin = args.yMin;
-      this.yMax = args.yMax;
+      this.yMax = (args._attr.type === 'line' && args._attr.interpolate === 'smooth') ? args.yMax += 1 : args.yMax;
       this._attr = args._attr || {};
     }
 
