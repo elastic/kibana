@@ -13,17 +13,20 @@
   "private": false,
   "version": "4.1.0-snapshot",
   "main": "src/server/app.js",
-  "homepage": "http://www.elasticsearch.org/overview/kibana/",
+  "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
-    "url": "https://github.com/elasticsearch/kibana/issues"
+    "url": "http://github.com/elastic/kibana/issues"
   },
   "license": "Apache 2.0",
-  "author": "Rashid Khan <rashid.khan@elasticsearch.com>",
+  "author": "Rashid Khan <rashid.khan@elastic.co>",
   "contributors": [
-    "Spencer Alger <spencer.alger@elasticsearch.com>",
-    "Chris Cowan <chris.cowan@elasticsearch.com>",
-    "Joe Fleming <joe.fleming@elasticsearch.com>",
-    "Lukas Olson <lukas.olson@elasticsearch.com>"
+    "Spencer Alger <spencer.alger@elastic.co>",
+    "Chris Cowan <chris.cowan@elastic.co>",
+    "Joe Fleming <joe.fleming@elastic.co>",
+    "Lukas Olson <lukas.olson@elastic.co>",
+    "Juan Thomassie <juan.thomassie@elastic.co>",
+    "Shleby Sturgis <shelby@elastic.co>",
+    "Khalah Jones-Golden <khalah.jones@elastic.co>"
   ],
   "scripts": {
     "test": "grunt test",
@@ -33,7 +36,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elasticsearch/kibana.git"
+    "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
     "ansicolors": "^0.3.2",

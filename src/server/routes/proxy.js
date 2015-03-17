@@ -58,8 +58,14 @@ router.use(function (req, res, next) {
   var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
   path = url.resolve(path, '.' + req.url);
 
+  if (uri.auth) {
+    var auth = new Buffer(uri.auth);
+    base64_auth = auth.toString('base64');
+    req.headers.authorization = "Basic " + base64_auth;
+  }
+
   var options = {
-    url: uri.protocol + '//' + uri.host + path,
+    url: config.elasticsearch + path,
     method: req.method,
     headers: _.defaults({ host: target.hostname }, req.headers),
     strictSSL: config.kibana.verify_ssl,
