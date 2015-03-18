@@ -82,11 +82,14 @@ define(function (require) {
           // moving between points doesn't make it reposition
           $chart.removeData('previousPlacement');
         });
+        $chart.find('.chart > svg').on('mousemove', function (event) {
+          event.stopPropagation();
+        });
 
         selection.each(function (d, i) {
           var element = d3.select(this);
 
-          function render(html) {
+          function render(event, html) {
             allContents = _.filter(allContents, function (content) {
               return content.id !== id;
             });
@@ -105,7 +108,7 @@ define(function (require) {
                 $chart: $chart,
                 $el: $tooltip,
                 $sizer: $sizer,
-                event: d3.event
+                event: event
               }, allHtml);
 
               $tooltip
@@ -114,6 +117,10 @@ define(function (require) {
                 visibility: 'visible',
                 left: placement.left,
                 top: placement.top
+              });
+              // add a make sure to remove the tooltip when necessary
+              $('body').one('mousemove', function (event) {
+                render(event);
               });
             } else {
               $tooltip.css({
@@ -127,14 +134,14 @@ define(function (require) {
           element
           .on('mousemove.tip', function update() {
             if (!self.showCondition.call(element, d, i)) {
-              return render();
+              return render(d3.event);
             }
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
-            return render(tooltipFormatter(events));
+            return render(d3.event, tooltipFormatter(events));
           })
           .on('mouseout.tip', function () {
-            render();
+            render(d3.event);
           });
         });
       };
