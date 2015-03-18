@@ -12,6 +12,7 @@ define(function (require) {
         if (
           valueOf(rangeA.to) !== valueOf(rangeB.to)
           || valueOf(rangeA.from) !== valueOf(rangeB.from)
+          || valueOf(rangeA.value) !== valueOf(rangeB.value)
         ) {
           return true;
         }
