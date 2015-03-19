@@ -4,10 +4,10 @@ define(function (require) {
     return function (aggConfig, key) {
       var splits = key.split(/\-/);
       var gte = Number(splits[0]);
-      var lte = Number(splits[1]);
+      var lt = Number(splits[1]);
       return buildRangeFilter(aggConfig.params.field, {
         gte: gte,
-        lte: lte
+        lt: lt
       }, aggConfig.vis.indexPattern);
     };
   };
