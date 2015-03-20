@@ -17,9 +17,6 @@ define(function (require) {
         name: 'field',
         filterFieldTypes: 'date'
       }, {
-        name: 'format',
-        default: 'd MMM yyyy'
-      }, {
         name: 'ranges',
         default: [{
           from: 'now-1w/w',
