@@ -146,7 +146,8 @@ define(function (require) {
               schema: 'segment',
               params: {
                 field: field.name,
-                size: config.get('discover:aggs:terms:size', 20)
+                size: config.get('discover:aggs:terms:size', 20),
+                orderBy: config.get('discover:aggs:terms:orderBy', '2')
               }
             };
           }
