@@ -9,8 +9,19 @@ var uri = url.parse(config.elasticsearch);
 if (config.kibana.kibana_elasticsearch_username && config.kibana.kibana_elasticsearch_password) {
   uri.auth = util.format('%s:%s', config.kibana.kibana_elasticsearch_username, config.kibana.kibana_elasticsearch_password);
 }
-options = {
+
+var ssl = { rejectUnauthorized: config.kibana.verify_ssl }
+if (config.kibana.kibana_elasticsearch_client_crt && config.kibana.kibana_elasticsearch_client_key) {
+  ssl.cert = fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt , 'utf8');
+  ssl.key = fs.readFileSync(config.kibana.kibana_elasticsearch_client_key , 'utf8');
+}
+if (config.kibana.ca) {
+  ssl.ca = fs.readFileSync(config.kibana.ca , 'utf8');
+}
+
+module.exports = new elasticsearch.Client({
   host: url.format(uri),
+  ssl: ssl,
   log: function (config) {
     this.error = function (err) {
       logger.error({ err: err });
@@ -21,13 +32,5 @@ options = {
     this.trace = _.noop;
     this.close = _.noop;
   }
-}
-if (config.kibana.kibana_elasticsearch_client_crt && config.kibana.kibana_elasticsearch_client_key) {
-  options.ssl = {
-    cert: fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt , 'utf8'),
-    key: fs.readFileSync(config.kibana.kibana_elasticsearch_client_key , 'utf8')
-  }
-}
-
-module.exports = new elasticsearch.Client(options);
+});
 
