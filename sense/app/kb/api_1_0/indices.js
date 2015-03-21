@@ -94,7 +94,8 @@ define(function () {
       ],
       url_params: {
         detailed: "__flag__",
-        active_only: "__flag__"
+        active_only: "__flag__",
+        human: "__flag__"
       }
     });
 
