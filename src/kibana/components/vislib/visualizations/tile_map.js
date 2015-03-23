@@ -9,8 +9,6 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
-    var tileMapState;
-
     /**
      * Tile Map Visualization: renders maps
      *
@@ -34,10 +32,6 @@ define(function (require) {
       // add allmin and allmax to geoJson
       chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
       chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
-
-      tileMapState = this.handler.vis._attr;
-      console.log('new TileMap tileMapState', tileMapState);
-
     }
 
     /**
@@ -66,15 +60,15 @@ define(function (require) {
           var mapCenter = [15, 5];
           var mapZoom = 2;
 
-          if (tileMapState.mapZoom) {
-            self._attr.mapZoom = self._attr.lastZoom;
+          if (self._attr.mapZoom) {
+            mapZoom = self._attr.mapZoom;
           } else {
-            self._attr.mapZoom = self._attr.lastZoom = mapZoom;
+            self._attr.mapZoom = mapZoom;
           }
-          if (tileMapState.mapCenter) {
-            mapCenter = self._attr.mapCenter = self._attr.lastCenter;
+          if (self._attr.mapCenter) {
+            mapCenter = self._attr.mapCenter;
           } else {
-            self._attr.mapCenter = self._attr.lastCenter = mapCenter;
+            mapCenter = self._attr.mapCenter;
           }
 
           var mapData = data.geoJson;
@@ -115,9 +109,8 @@ define(function (require) {
           });
 
           map.on('moveend', function setZoomCenter() {
-            mapZoom = tileMapState.mapZoom = self._attr.lastZoom = map.getZoom();
-            mapCenter = tileMapState.mapCenter = self._attr.lastCenter = map.getCenter();
-            console.log(tileMapState);
+            mapZoom = self._attr.mapZoom = map.getZoom();
+            mapCenter = self._attr.mapCenter = map.getCenter();
           });
 
           if (mapData.properties.label) {
@@ -125,9 +118,11 @@ define(function (require) {
           }
 
           // zoom to featureLayer data bounds
-          console.log(tileMapState);
-          if (!tileMapState.firstFitBounds) {
+          if (!self._attr.firstFitBounds) {
             map.fitBounds(featureLayer.getBounds());
+            self._attr.firstFitBounds = featureLayer.getBounds();
+          } else {
+            map.fitBounds(self._attr.firstFitBounds);
           }
 
           // Add button to fit container to points
@@ -162,7 +157,7 @@ define(function (require) {
      */
     TileMap.prototype.fitBounds = function (map, featureLayer) {
       map.fitBounds(featureLayer.getBounds());
-      tileMapState.firstFitBounds = true;
+      this._attr.firstFitBounds = featureLayer.getBounds();
     };
 
     /**
@@ -174,8 +169,7 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.saturateTiles = function () {
-      var self = this;
-      if (!self._attr.isDesaturated) {
+      if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
     };
@@ -221,7 +215,7 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(self._attr.mapZoom);
+      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
       var featureLayer = L.geoJson(mapData, {
@@ -259,7 +253,7 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(self._attr.mapZoom);
+      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
 
@@ -293,8 +287,8 @@ define(function (require) {
       }
 
       map.on('moveend', function setZoomCenter() {
-        self._attr.mapZoom = self._attr.lastZoom = map.getZoom();
-        self._attr.mapCenter = self._attr.lastCenter = map.getCenter();
+        self._attr.mapZoom = map.getZoom();
+        self._attr.mapCenter = map.getCenter();
       });
 
 
@@ -323,14 +317,14 @@ define(function (require) {
 
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(self._attr.mapZoom);
+      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#005baa';
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var rad = zoomScale * 3;
+          //var rad = zoomScale * 3;
           return L.circle(latlng, self.precisionSize[precision] / 2);
         },
         onEachFeature: function (feature, layer) {
@@ -373,7 +367,7 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(self._attr.mapZoom);
+      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
 
@@ -385,7 +379,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var rad = zoomScale * 3;
+          //var rad = zoomScale * 3;
           var gh = feature.properties.rectangle;
             var bounds = [[gh[0][1], gh[0][0]], [gh[2][1], gh[2][0]]];
             return L.rectangle(bounds);
@@ -524,24 +518,6 @@ define(function (require) {
       .on('mouseout', function (e) {
         layer.closePopup();
       });
-    };
-
-    /**
-     * zoomScale uses map zoom to determine a scaling
-     * factor for circle marker radius to display more
-     * consistent circle size as you zoom in or out
-     *
-     * @method radiusScale
-     * @param value {Number}
-     * @param max {Number}
-     * @return {Number}
-     */
-    TileMap.prototype.zoomScale = function (zoom) {
-      var zScale = d3.scale.pow()
-        .exponent(4)
-        .domain([1, 12])
-        .range([1, 100]);
-      return zScale(zoom);
     };
 
     /**

@@ -58,9 +58,8 @@ define(function (require) {
     },
     'visualization:tileMap:maxPrecision': {
       value: 7,
-      description: 'The maximum geoHash precision displayed on tile maps: ' +
-      '7 is high, 10 is very high, 12 is the max geoHash precision. ' +
-      'http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
+      description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +
+      '12 is the max. Explanation of cell dimensions: http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
       'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator',
     },
     'csv:separator': {
