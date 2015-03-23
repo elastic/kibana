@@ -161,7 +161,7 @@ define(function (require) {
               vis: {
                 aggs: [
                   agg,
-                  {schema: 'metric', type: 'count'}
+                  {schema: 'metric', type: 'count', 'id': '2'}
                 ]
               },
               metric: [{
