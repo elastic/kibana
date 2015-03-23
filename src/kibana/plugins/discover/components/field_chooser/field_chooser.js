@@ -171,13 +171,7 @@ define(function (require) {
                   agg,
                   {schema: 'metric', type: 'count', 'id': '2'}
                 ]
-              },
-              metric: [{
-                agg: 'count',
-              }],
-              segment: [],
-              group: [],
-              split: [],
+              }
             })
           });
         };
