@@ -153,7 +153,8 @@ define(function (require) {
               schema: 'segment',
               params: {
                 field: field.name,
-                size: config.get('discover:aggs:terms:size', 20)
+                size: config.get('discover:aggs:terms:size', 20),
+                orderBy: '2'
               }
             };
           }
@@ -167,7 +168,7 @@ define(function (require) {
               vis: {
                 aggs: [
                   agg,
-                  {schema: 'metric', type: 'count'}
+                  {schema: 'metric', type: 'count', 'id': '2'}
                 ]
               },
               metric: [{
