@@ -154,7 +154,7 @@ define(function (require) {
               params: {
                 field: field.name,
                 size: config.get('discover:aggs:terms:size', 20),
-                orderBy: config.get('discover:aggs:terms:orderBy', '2')
+                orderBy: '2'
               }
             };
           }
