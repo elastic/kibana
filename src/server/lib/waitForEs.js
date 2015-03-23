@@ -15,11 +15,19 @@ function waitForPong() {
 }
 
 function waitForShards() {
-  return client.cluster.health().then(function (resp) {
-    if (resp.initializing_shards <= 0) return;
-
-    logger.info('Elasticsearch is still initializaing... Trying again in 2500 seconds.');
-    return Promise.delay(2500).then(waitForShards);
+  return client.cluster.health({
+    index: config.kibana.kibana_index
+  })
+  .then(function (resp) {
+    switch (resp && resp.status) {
+    case 'yellow':
+    case 'green':
+      logger.debug('Kibana index is available, starting');
+      break;
+    default:
+      logger.info('Elasticsearch is still initializing... Trying again in 2.5 seconds.');
+      return Promise.delay(2500).then(waitForShards);
+    }
   });
 }
 
