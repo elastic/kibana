@@ -16,18 +16,26 @@ function waitForPong() {
 
 function waitForShards() {
   return client.cluster.health({
+    timeout: '5s', // tells es to not sit around and wait forever
     index: config.kibana.kibana_index
   })
   .then(function (resp) {
-    switch (resp && resp.status) {
-    case 'yellow':
-    case 'green':
-      logger.debug('Kibana index is available, starting');
-      break;
-    default:
-      logger.info('Elasticsearch is still initializing... Trying again in 2.5 seconds.');
+    // if "timed_out" === true then elasticsearch could not
+    // find any idices matching our filter within 5 seconds
+    if (resp.timed_out) {
+      logger.info('No existing kibana index found');
+      return;
+    }
+
+    // If status === "red" that means that index(es) were found
+    // but the shards are not ready for queries
+    if (resp.status === 'red') {
+      logger.info('Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.');
       return Promise.delay(2500).then(waitForShards);
     }
+
+    // otherwise we are g2g
+    logger.info('Found kibana index');
   });
 }
 
