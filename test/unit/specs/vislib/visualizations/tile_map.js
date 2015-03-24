@@ -1,4 +1,4 @@
-define (function (require) {
+define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
@@ -42,8 +42,8 @@ define (function (require) {
       });
 
       afterEach(function () {
-       $(vis.el).remove();
-       vis = null;
+        $(vis.el).remove();
+        vis = null;
       });
 
       describe('draw method', function () {
