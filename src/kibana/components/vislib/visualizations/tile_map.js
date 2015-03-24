@@ -47,7 +47,6 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
-      self.precisionSize = [0, 4700000, 620000, 155000, 19000, 4400, 550, 120, 16, 4, 0.6, 0.12, 0.02];
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -196,6 +195,7 @@ define(function (require) {
           featureLayer = this.pinMarkers(map, mapData);
         }
       }
+
       return featureLayer;
     };
 
@@ -400,6 +400,11 @@ define(function (require) {
         }
       });
 
+      // add legend
+      if (mapData.features.length > 1) {
+        self.addLegend(mapData, map);
+      }
+
       return featureLayer;
     };
 
@@ -421,7 +426,7 @@ define(function (require) {
       label.update = function () {
         this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
       };
-      label.setPosition('bottomright').addTo(map);
+
       return label;
     };
 
