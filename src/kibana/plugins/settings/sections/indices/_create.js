@@ -12,11 +12,12 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config) {
+  .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
     var notify = new Notifier();
     var MissingIndices = errors.IndexPatternMissingIndices;
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
     var intervals = indexPatterns.intervals;
+    var samplePromise;
 
     // this and child scopes will write pattern vars here
     var index = $scope.index = {
@@ -32,45 +33,6 @@ define(function (require) {
 
     index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
     index.timeField = null;
-
-    var updateSamples = function () {
-      index.samples = null;
-      index.existing = null;
-      index.patternErrors = [];
-
-      if (!index.nameInterval || !index.name) {
-        return;
-      }
-
-      var pattern = mockIndexPattern(index);
-
-      indexPatterns.mapper.getIndicesForIndexPattern(pattern)
-      .then(function (existing) {
-        var all = existing.all;
-        var matches = existing.matches;
-        if (all.length) {
-          index.existing = {
-            class: 'success',
-            all: all,
-            matches: matches,
-            matchPercent: Math.round((matches.length / all.length) * 100) + '%',
-            failures: _.difference(all, matches)
-          };
-          return;
-        }
-
-        index.patternErrors.push('Pattern does not match any existing indices');
-        var radius = Math.round(index.sampleCount / 2);
-        var samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
-
-        if (_.uniq(samples).length !== samples.length) {
-          index.patternErrors.push('Invalid pattern, interval does not create unique index names');
-        } else {
-          index.samples = samples;
-        }
-      })
-      .catch(notify.error);
-    };
 
     $scope.refreshFieldList = function () {
       index.dateFields = index.timeField = index.listUsed = null;
@@ -194,7 +156,6 @@ define(function (require) {
         index.nameInterval = index.nameInterval || intervals.byName['days'];
         index.name = index.name || getPatternDefault(index.nameInterval);
       }
-
     });
 
     var mockIndexPattern = function (index) {
@@ -213,13 +174,85 @@ define(function (require) {
     $scope.$watchMulti([
       'index.name',
       'index.nameInterval'
-    ], updateSamples);
+    ], function (newVal, oldVal) {
+      var lastPromise;
+      samplePromise = lastPromise = updateSamples()
+      .then(function () {
+        promiseMatch(lastPromise, function () {
+          index.samples = null;
+          index.patternErrors = [];
+        });
+      })
+      .catch(function (errors) {
+        promiseMatch(lastPromise, function () {
+          index.existing = null;
+          index.patternErrors = errors;
+        });
+      })
+      .finally(function () {
+        // prevent running when no change happened (ie, first watcher call)
+        if (!_.isEqual(newVal, oldVal)) {
+          promiseMatch(lastPromise, function () {
+            $scope.refreshFieldList();
+            samplePromise = Promise.resolve();
+          });
+        }
+      });
+    });
 
     $scope.$watchMulti([
-      'index.name',
       'index.isTimeBased',
-      'index.nameInterval',
       'index.sampleCount'
     ], $scope.refreshFieldList);
+
+    function updateSamples() {
+      var patternErrors = [];
+
+      if (!index.nameInterval || !index.name) {
+        return Promise.resolve();
+      }
+
+      var pattern = mockIndexPattern(index);
+
+      return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
+      .catch(notify.error)
+      .then(function (existing) {
+        var all = existing.all;
+        var matches = existing.matches;
+        if (all.length) {
+          index.existing = {
+            class: 'success',
+            all: all,
+            matches: matches,
+            matchPercent: Math.round((matches.length / all.length) * 100) + '%',
+            failures: _.difference(all, matches)
+          };
+          return;
+        }
+
+        patternErrors.push('Pattern does not match any existing indices');
+        var radius = Math.round(index.sampleCount / 2);
+        var samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
+
+        if (_.uniq(samples).length !== samples.length) {
+          patternErrors.push('Invalid pattern, interval does not create unique index names');
+        } else {
+          index.samples = samples;
+        }
+
+        throw patternErrors;
+      });
+    }
+
+    function promiseMatch(lastPromise, cb) {
+      if (lastPromise === samplePromise) {
+        cb();
+      } else {
+        index.patternErrors = [];
+        index.samples = null;
+        index.existing = null;
+        index.fetchFieldsError = 'Loading';
+      }
+    }
   });
 });
