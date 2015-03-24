@@ -8,6 +8,7 @@ module.exports = function (grunt) {
     options: {
       patterns: [
         { match: 'version', replacement: '<%= pkg.version %>' },
+        { match: 'kibanaStatic', replacement: 'kibanaStatic' },
         { match: 'buildNum', replacement: '<%= buildNum %>' },
         { match: 'commitSha', replacement: '<%= commitSha %>' }
       ]
