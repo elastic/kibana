@@ -24,7 +24,7 @@ If you are using Shield to authenticate Elasticsearch users, you need to provide
 the Kibana server with credentials so it can access the `.kibana` index and monitor
 the cluster. 
 
-To configure credentials the Kibana server, set the `kibana_elasticsearch_username` and
+To configure credentials for the Kibana server, set the `kibana_elasticsearch_username` and
 `kibana_elasticsearch_password` properties in `kibana.yml`:
 
 ----
