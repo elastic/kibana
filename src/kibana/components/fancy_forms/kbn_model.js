@@ -94,8 +94,19 @@ define(function (require) {
       };
     }
 
-    if (ngModel.$dirty) waitForPristine();
-    else watchForDirtyOrInvalid();
+    function treatBlurAsModification() {
+      $element.one('blur', ngModel.$setDirty);
+      $scope.$on('$destroy', function () {
+        $element.off('blur', ngModel.$setDirty);
+      });
+    }
+
+    if (ngModel.$dirty) {
+      waitForPristine();
+    } else {
+      watchForDirtyOrInvalid();
+      treatBlurAsModification();
+    }
   }
 
   return KbnModelController;
