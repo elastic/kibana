@@ -54,7 +54,7 @@ define(function (require) {
       expect($scope.testForm.hideErrors).to.be(true);
     });
     it('should show errors after the first submit', function () {
-      $elem.submit();
+      $elem.trigger({type: 'keydown', which: 13, target: $elem.children()});
       expect($scope.testForm.hideErrors).to.be(false);
     });
   });
