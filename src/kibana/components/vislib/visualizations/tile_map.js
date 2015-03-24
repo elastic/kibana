@@ -47,7 +47,7 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
-      self.precisionSize = [0, 4900000, 620000, 155000, 19000, 4400, 550, 120, 16, 4, 0.6, 0.12, 0.02];
+      self.precisionSize = [0, 4700000, 620000, 155000, 19000, 4400, 550, 120, 16, 4, 0.6, 0.12, 0.02];
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -215,7 +215,6 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
       var featureLayer = L.geoJson(mapData, {
@@ -253,15 +252,14 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var rad = self.radiusScale(count, max, precision);
-          return L.circle(latlng, rad);
+          var scaledRadius = self.radiusScale(count, max, precision, feature);
+          return L.circle(latlng, scaledRadius);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -270,9 +268,7 @@ define(function (require) {
           var count = feature.properties.count;
           var color = self.quantizeColorScale(count, min, max);
           return {
-            // fillColor: defaultColor,
             fillColor: color,
-            //color: self.darkerColor(defaultColor),
             color: self.darkerColor(color),
             weight: 1.0,
             opacity: 1,
@@ -290,7 +286,6 @@ define(function (require) {
         self._attr.mapZoom = map.getZoom();
         self._attr.mapCenter = map.getCenter();
       });
-
 
       return featureLayer;
     };
@@ -317,15 +312,14 @@ define(function (require) {
 
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#005baa';
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          //var rad = zoomScale * 3;
-          return L.circle(latlng, self.precisionSize[precision] / 2);
+          var radius = self.geohashMinDistance(feature) / 2;
+          return L.circle(latlng, radius);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -367,7 +361,6 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      //var zoomScale = self.zoomScale(self._attr.mapZoom);
       var bounds;
       var defaultColor = '#ff6128';
 
@@ -379,7 +372,6 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          //var rad = zoomScale * 3;
           var gh = feature.properties.rectangle;
             var bounds = [[gh[0][1], gh[0][0]], [gh[2][1], gh[2][0]]];
             return L.rectangle(bounds);
@@ -521,7 +513,26 @@ define(function (require) {
     };
 
     /**
-     * radiusScale returns a a number for scaled circle markers
+     * geohashMinDistance returns a min distance in meters for sizing
+     * circle markers to fit within geohash grid
+     *
+     * @method geohashMinDistance
+     * @param feature {Object}
+     * @return {Number}
+     */
+    TileMap.prototype.geohashMinDistance = function (feature) {
+      var gh = feature.properties.rectangle;
+      var nw = L.latLng([gh[3][1], gh[3][0]]);
+      var ne = L.latLng([gh[2][1], gh[2][0]]);
+      var sw = L.latLng([gh[0][1], gh[0][0]]);
+      var ew = Math.floor(nw.distanceTo(ne));
+      var ns = Math.floor(nw.distanceTo(sw));
+      var min = _.min([ew, ns]);
+      return min;
+    };
+
+    /**
+     * radiusScale returns a number for scaled circle markers
      * approx. square root of count
      * which is multiplied by a factor based on the geohash precision
      * for relative sizing of markers
@@ -532,57 +543,12 @@ define(function (require) {
      * @param precision {Number}
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (count, max, precision) {
-      // exp = 0.5 for true square root ratio
+    TileMap.prototype.radiusScale = function (count, max, precision, feature) {
+      // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
-      var self = this;
       var exp = 0.6;
-      var maxr = self.precisionSize[precision];
+      var maxr = this.geohashMinDistance(feature);
       return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
-    };
-
-    /**
-     * returns a number to scale shaded circle markers
-     * based on the geohash precision
-     *
-     * @method quantRadiusScale
-     * @param precision {Number}
-     * @return {Number}
-     */
-    TileMap.prototype.quantRadiusScale = function (precision) {
-      var maxr;
-      switch (precision) {
-        case 1:
-          maxr = 150;
-          break;
-        case 2:
-          maxr = 18;
-          break;
-        case 3:
-          maxr = 4.5;
-          break;
-        case 4:
-          maxr = 0.7;
-          break;
-        case 5:
-          maxr = 0.26;
-          break;
-        case 6:
-          maxr = 0.20;
-          break;
-        case 7:
-          maxr = 0.16;
-          break;
-        case 8:
-          maxr = 0.13;
-          break;
-        case 9:
-          maxr = 0.11;
-          break;
-        default:
-          maxr = 4.5;
-      }
-      return maxr;
     };
 
     /**
@@ -596,19 +562,18 @@ define(function (require) {
      * @return {String} hex color
      */
     TileMap.prototype.quantizeColorScale = function (count, min, max) {
-      var self = this;
       var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
       var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
       var reds1 = ['#ff6128'];
-      var colors = self._attr.colors = reds5;
+      var colors = this._attr.colors = reds5;
 
       if (max - min < 3) {
-        colors = self._attr.colors = reds1;
+        colors = this._attr.colors = reds1;
       } else if (max - min < 25) {
-        colors = self._attr.colors = reds3;
+        colors = this._attr.colors = reds3;
       }
 
-      var cScale = self._attr.cScale = d3.scale.quantize()
+      var cScale = this._attr.cScale = d3.scale.quantize()
         .domain([min, max])
         .range(colors);
       if (max === min) {
