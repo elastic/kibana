@@ -118,24 +118,6 @@ define(function (require) {
       'index.nameIsPattern',
       'index.nameInterval.name'
     ], function (newVal, oldVal) {
-
-      function getPatternDefault(interval) {
-        switch (interval) {
-        case 'hours':
-          return '[logstash-]YYYY.MM.DD.HH';
-        case 'days':
-          return '[logstash-]YYYY.MM.DD';
-        case 'weeks':
-          return '[logstash-]GGGG.WW';
-        case 'months':
-          return '[logstash-]YYYY.MM';
-        case 'years':
-          return '[logstash-]YYYY';
-        default:
-          return 'logstash-*';
-        }
-      }
-
       var isTimeBased = newVal[0];
       var nameIsPattern = newVal[1];
       var newDefault = getPatternDefault(newVal[2]);
@@ -157,14 +139,6 @@ define(function (require) {
         index.name = index.name || getPatternDefault(index.nameInterval);
       }
     });
-
-    var mockIndexPattern = function (index) {
-      // trick the mapper into thinking this is an indexPattern
-      return {
-        id: index.name,
-        intervalName: index.nameInterval
-      };
-    };
 
     $scope.moreSamples = function (andUpdate) {
       index.sampleCount += 5;
@@ -253,6 +227,31 @@ define(function (require) {
         index.existing = null;
         index.fetchFieldsError = 'Loading';
       }
+    }
+
+    function getPatternDefault(interval) {
+      switch (interval) {
+      case 'hours':
+        return '[logstash-]YYYY.MM.DD.HH';
+      case 'days':
+        return '[logstash-]YYYY.MM.DD';
+      case 'weeks':
+        return '[logstash-]GGGG.WW';
+      case 'months':
+        return '[logstash-]YYYY.MM';
+      case 'years':
+        return '[logstash-]YYYY';
+      default:
+        return 'logstash-*';
+      }
+    }
+
+    function mockIndexPattern(index) {
+      // trick the mapper into thinking this is an indexPattern
+      return {
+        id: index.name,
+        intervalName: index.nameInterval
+      };
     }
   });
 });
