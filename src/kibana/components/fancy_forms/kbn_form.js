@@ -28,8 +28,9 @@ define(function (require) {
       }, []);
     };
 
-    function filterSubmits() {
+    function filterSubmits(event) {
       if (self.errorCount()) {
+        event.stopImmediatePropagation();
         self.invalidModels().forEach(function (model) {
           if (model.$setDirty) { // only kbnModels have $setDirty
             model.$setDirty();
