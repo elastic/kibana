@@ -368,8 +368,8 @@ define(function (require) {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
           var gh = feature.properties.rectangle;
-            var bounds = [[gh[0][1], gh[0][0]], [gh[2][1], gh[2][0]]];
-            return L.rectangle(bounds);
+          var bounds = [[gh[0][1], gh[0][0]], [gh[2][1], gh[2][0]]];
+          return L.rectangle(bounds);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -456,11 +456,10 @@ define(function (require) {
           // 3 to 5 vals for legend
           if (colors) {
             for (i = 0; i < colors.length; i++) {
-            vals = self._attr.cScale.invertExtent(colors[i]);
-            strokecol = self.darkerColor(colors[i]);
-            labels.push(
-              '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-              vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+              vals = self._attr.cScale.invertExtent(colors[i]);
+              strokecol = self.darkerColor(colors[i]);
+              labels.push('<i style="background:' + colors[i] + ';border-color:' +
+              strokecol + '"></i> ' + vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
             }
           }
         }
