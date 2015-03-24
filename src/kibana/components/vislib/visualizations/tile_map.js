@@ -364,11 +364,6 @@ define(function (require) {
       var bounds;
       var defaultColor = '#ff6128';
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
-
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
