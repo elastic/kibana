@@ -12,66 +12,105 @@ define(function (require) {
   ];
 
   var names = ['geojson', 'columns', 'rows'];
+  var mapTypes = ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pins'];
 
   angular.module('TileMapFactory', ['kibana']);
 
   dataArray.forEach(function (data, i) {
-    describe('TileMap Test Suite for ' + names[i] + ' data', function () {
-      var vis;
-      var visLibParams = {
-        isDesaturated: true,
-        type: 'tile_map',
-        mapType: 'Scaled Circle Markers'
-      };
 
-      beforeEach(function () {
-        module('TileMapFactory');
-      });
+    mapTypes.forEach(function (type, j) {
 
-      beforeEach(function () {
-        inject(function (Private) {
-          vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-          require('css!components/vislib/styles/main');
-          vis.render(data);
+      describe('TileMap Test Suite for ' + mapTypes[j] + ' with ' + names[i] + ' data', function () {
+        var vis;
+        var visLibParams = {
+          isDesaturated: true,
+          type: 'tile_map',
+          mapType: type
+        };
+
+        beforeEach(function () {
+          module('TileMapFactory');
         });
 
         beforeEach(function () {
-          $(vis.el).height(400);
-          $(vis.el).width(300);
-        });
-      });
-
-      afterEach(function () {
-        $(vis.el).remove();
-        vis = null;
-      });
-
-      describe('draw method', function () {
-        var leafletContainer;
-        var isDrawn;
-
-        it('should draw a map', function () {
-          leafletContainer = $(vis.el).find('.leaflet-container');
-          isDrawn = (leafletContainer.length > 0);
-          expect(isDrawn).to.be(true);
-        });
-      });
-
-      describe('containerTooSmall error', function () {
-        beforeEach(function () {
-          $(vis.el).height(40);
-          $(vis.el).width(40);
-        });
-
-        it('should throw an error', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(function () {
-              chart.render();
-            }).to.throwError();
+          inject(function (Private) {
+            vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
+            require('css!components/vislib/styles/main');
+            vis.render(data);
           });
         });
-      });
 
+        afterEach(function () {
+          $(vis.el).remove();
+          vis = null;
+        });
+
+        describe('draw method', function () {
+          var leafletContainer;
+          var isDrawn;
+
+          it('should return a function', function () {
+            vis.handler.charts.forEach(function (chart) {
+              expect(_.isFunction(chart.draw())).to.be(true);
+            });
+          });
+
+          it('should draw a map', function () {
+            leafletContainer = $(vis.el).find('.leaflet-container');
+            isDrawn = (leafletContainer.length > 0);
+            expect(isDrawn).to.be(true);
+          });
+        });
+
+        describe('containerTooSmall error', function () {
+          beforeEach(function () {
+            $(vis.el).height(10);
+            $(vis.el).width(10);
+          });
+
+          it('should throw an error', function () {
+            vis.handler.charts.forEach(function (chart) {
+              expect(function () {
+                chart.render();
+              }).to.throwError();
+            });
+          });
+        });
+
+        describe('geohashMinDistance method', function () {
+          it('should return a number', function () {
+            vis.handler.charts.forEach(function (chart) {
+              var feature = chart.chartData.geoJson.features[0];
+              expect(_.isNumber(chart.geohashMinDistance(feature))).to.be(true);
+            });
+          });
+        });
+
+        describe('radiusScale method', function () {
+          it('should return a number', function () {
+            vis.handler.charts.forEach(function (chart) {
+              var count = Math.random() * 50;
+              var max = 50;
+              var precision = 1;
+              var feature = chart.chartData.geoJson.features[0];
+              expect(_.isNumber(chart.radiusScale(count, max, precision, feature))).to.be(true);
+            });
+          });
+        });
+
+        describe('quantizeColorScale method', function () {
+          it('should return a hex color', function () {
+            vis.handler.charts.forEach(function (chart) {
+              var reds = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
+              var count = Math.random() * 300;
+              var min = 0;
+              var max = 300;
+              expect(_.indexOf(reds, chart.quantizeColorScale(count, min, max))).to.not.be(-1);
+            });
+          });
+        });
+
+      });
     });
   });
 });

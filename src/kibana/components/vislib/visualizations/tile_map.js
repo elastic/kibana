@@ -49,7 +49,7 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       // clean up old maps
-      _.invoke(self.maps, 'destroy');
+      _.invoke(self.maps, self.destroy);
       // create a new maps array
       self.maps = [];
 
@@ -599,9 +599,11 @@ define(function (require) {
      * tell leaflet that it's time to cleanup the map
      */
     TileMap.prototype.destroy = function () {
-      this.maps.forEach(function (map) {
-        map.remove();
-      });
+      if (this.maps) {
+        this.maps.forEach(function (map) {
+          map.remove();
+        });
+      }
     };
 
     return TileMap;
