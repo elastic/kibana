@@ -32,8 +32,8 @@ define(function (require) {
       if (self.errorCount()) {
         event.stopImmediatePropagation();
         self.invalidModels().forEach(function (model) {
-          if (model.$setDirty) { // only kbnModels have $setDirty
-            model.$setDirty();
+          if (model.$setTouched) { // only kbnModels have $setTouched
+            model.$setTouched();
           }
         });
       }
