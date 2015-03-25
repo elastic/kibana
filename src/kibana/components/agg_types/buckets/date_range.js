@@ -15,7 +15,10 @@ define(function (require) {
       },
       params: [{
         name: 'field',
-        filterFieldTypes: 'date'
+        filterFieldTypes: 'date',
+        default: function (agg) {
+          return agg.vis.indexPattern.timeFieldName;
+        },
       }, {
         name: 'ranges',
         default: [{
