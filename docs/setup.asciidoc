@@ -16,7 +16,7 @@ NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/o
 === Install and Start Kibana
 To get Kibana up and running:
 
-. Download the http://www.elastic.co/overview/kibana/installation/[Kibana 4 binary package] for your platform.
+. Download the https://www.elastic.co/downloads/kibana[Kibana 4 binary package] for your platform.
 . Extract the `.zip` or `tar.gz` archive file.
 . Run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
 
