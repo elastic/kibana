@@ -6,6 +6,7 @@ define(function (require) {
 
     require('plugins/visualize/editor/agg_group');
     require('plugins/visualize/editor/vis_options');
+    require('directives/in_time_errors');
 
     return {
       restrict: 'E',
@@ -13,11 +14,6 @@ define(function (require) {
       scope: true,
       link: function ($scope) {
         $scope.$bind('vis', 'editableVis');
-
-        $scope.hideErrors = true;
-        $scope.dontApply = function () {
-          $scope.hideErrors = false;
-        };
       }
     };
   });
