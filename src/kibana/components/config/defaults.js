@@ -35,7 +35,6 @@ define(function (require) {
     'defaultColumns': {
       value: '["_source"]',
       description: 'Columns displayed by default in the Discover tab',
-      type: 'json',
     },
     'metaFields': {
       value: ['_source', '_id', '_type', '_index'],
