@@ -9,8 +9,8 @@ script:
 - npm test
 notifications:
   email:
-  - rashid.khan@elasticsearch.com
-  - spencer.alger@elasticsearch.com
+  - rashid.khan@elastic.co
+  - spencer.alger@elastic.co
   hipchat:
     rooms:
       secure: UKrVR+5KztHarodQruQe97UJfwftutD6RNdXlVkr+oIr2GqccisDIIN9pAzS/kxl+eAnP1uT6VHzc9YI/jgbrmiSkz3DHViw+MwDwY2aIDgI8aHEbd/4B2ihtb15+OYTVbb+lytyz4+W8A8hSmbkTR/P/uFIJ+EYcBeYZfw1elo=

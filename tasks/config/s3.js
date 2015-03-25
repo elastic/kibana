@@ -22,7 +22,7 @@ module.exports = function (grunt) {
 
   return {
     release: {
-      bucket: 'download.elasticsearch.org',
+      bucket: 'download.elastic.co',
       access: 'private',
       // debug: true, // uncommment to prevent actual upload
       upload: upload
