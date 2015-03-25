@@ -3,6 +3,8 @@ define(function (require) {
   var angular = require('angular');
   var PRISTINE_CLASS = 'ng-pristine';
   var DIRTY_CLASS = 'ng-dirty';
+  var UNTOUCHED_CLASS = 'ng-untouched';
+  var TOUCHED_CLASS = 'ng-touched';
 
   // http://goo.gl/eJofve
   var nullFormCtrl = {
@@ -51,6 +53,17 @@ define(function (require) {
       ngModel.$getForm().$setDirty();
     };
 
+    ngModel.$setTouched = toggleTouched(true);
+    ngModel.$setUntouched = toggleTouched(false);
+    function toggleTouched(val) {
+      return function () {
+        ngModel.$touched = val;
+        ngModel.$untouched = !val;
+        $animate.addClass($element, val ? TOUCHED_CLASS : UNTOUCHED_CLASS);
+        $animate.removeClass($element, val ? UNTOUCHED_CLASS : TOUCHED_CLASS);
+      };
+    }
+
     /**
      * While the model is pristine, ensure that the model
      * gets set to dirty if it becomes invalid. If the model
@@ -94,19 +107,14 @@ define(function (require) {
       };
     }
 
-    function treatBlurAsModification() {
-      $element.one('blur', ngModel.$setDirty);
-      $scope.$on('$destroy', function () {
-        $element.off('blur', ngModel.$setDirty);
-      });
-    }
+    $element.addClass(UNTOUCHED_CLASS);
+    $element.one('blur', ngModel.$setTouched);
+    $scope.$on('$destroy', function () {
+      $element.off('blur', ngModel.$setTouched);
+    });
 
-    if (ngModel.$dirty) {
-      waitForPristine();
-    } else {
-      watchForDirtyOrInvalid();
-      treatBlurAsModification();
-    }
+    if (ngModel.$dirty) waitForPristine();
+    else watchForDirtyOrInvalid();
   }
 
   return KbnModelController;
