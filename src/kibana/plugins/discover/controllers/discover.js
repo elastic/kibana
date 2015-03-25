@@ -243,7 +243,7 @@ define(function (require) {
 
         $scope.searchSource.onError(function (err) {
           console.log(err);
-          notify.error('An error occured with your request. Reset your inputs and try again.');
+          notify.error('An error occurred with your request. Reset your inputs and try again.');
         }).catch(notify.fatal);
 
         function initForTime() {
