@@ -15,12 +15,21 @@
           </td>
           <td width="1%" class="doc-viewer-buttons" ng-if="filter">
             <span bo-if="mapping[field].filterable">
-              <i ng-click="filter(mapping[field], flattened[field], '+')" class="fa fa-search-plus"></i>
-              <i ng-click="filter(mapping[field], flattened[field],'-')" class="fa fa-search-minus"></i>
+              <i ng-click="filter(mapping[field], flattened[field], '+')"
+                tooltip="Filter for value"
+                class="fa fa-search-plus"></i>
+              <i ng-click="filter(mapping[field], flattened[field],'-')"
+                tooltip="Filter out value"
+                class="fa fa-search-minus"></i>
             </span>
             <span bo-if="!mapping[field].filterable" tooltip="Unindexed fields can not be searched">
               <i class="fa fa-search-plus text-muted"></i>
               <i class="fa fa-search-minus text-muted"></i>
+            </span>
+            <span bo-if="columns">
+              <i ng-click="toggleColumn(field)"
+                tooltip="Toggle column in table"
+                class="fa fa-columns"></i>
             </span>
           </td>
 

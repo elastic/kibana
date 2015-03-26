@@ -39,12 +39,12 @@ define(function (require) {
           'field',
           'fieldName',
           'fieldType',
-          'field.rowCount'
+          'field.inData'
         ], function () {
 
           var type = $scope.field ? $scope.field.type : $scope.fieldType;
           var name = $scope.field ? $scope.field.name : $scope.fieldName;
-          var results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
+          var results = $scope.field ? !$scope.field.inData && !$scope.field.scripted : false;
           var scripted = $scope.field ? $scope.field.scripted : false;
 
           var displayName = $filter('shortDots')(name);

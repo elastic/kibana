@@ -134,44 +134,6 @@ define(function (require) {
         $scope.failuresShown = showTotal;
       };
 
-      // stores the complete list of fields
-      $scope.fields = _($scope.indexPattern.fields)
-      .sortBy('name')
-      .transform(function (fields, field) {
-        // clone the field with Object.create so that its getters
-        // and non-enumerable props are preserved
-        var clone = Object.create(field);
-        clone.display = _.contains($state.columns, field.name);
-        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
-        fields.push(clone);
-      }, [])
-      .value();
-
-      refreshColumns();
-
-      // listen for changes, and relisten everytime something happens
-      $scope.$listen($state, 'fetch_with_changes', updateFields);
-      $scope.$listen($state, 'reset_with_changes', updateFields);
-      function updateFields(changes) {
-        var newColumns = _.contains(changes, 'columns');
-        var newIndex = _.contains(changes, 'index');
-        var otherChanges = _.pull(changes, 'index', 'columns');
-
-        if (newIndex) {
-          // we will be reloading, don't need to juggle state
-          return;
-        }
-
-        if (newColumns) {
-          $scope.fields.forEach(function (field) {
-            field.display = _.contains($state.columns, field.name);
-          });
-          refreshColumns();
-        }
-
-        if (otherChanges.length) $scope.fetch();
-      }
-
       $scope.updateDataSource()
       .then(function () {
         $scope.$listen(timefilter, 'update', function () {
@@ -290,10 +252,6 @@ define(function (require) {
 
       $scope.updateTime();
 
-      if (_.isEmpty($state.columns)) {
-        refreshColumns();
-      }
-
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -398,11 +356,6 @@ define(function (require) {
           hit.$$_formatted = _.mapValues(hit.$$_flattened, formatAndCount);
         });
 
-        // apply the field counts to the field list
-        // We could do this in the field_chooser but it would us to iterate the array again
-        $scope.fields.forEach(function (field) {
-          field.rowCount = counts[field.name] || 0;
-        });
       }));
 
       segmented.on('mergedSegment', function (merged) {
@@ -461,50 +414,13 @@ define(function (require) {
       filterManager.add(field, values, operation, $state.index);
     };
 
-    $scope.toggleField = function (name) {
-      var field = _.find($scope.fields, { name: name });
-
-      // If we can't find the field in the mapping, ensure it isn't in the column list and abort
-      if (!field) {
-        $state.columns = _.without($state.columns, name);
-        return;
-      }
-
-      // toggle the display property
-      field.display = !field.display;
-
-      if ($state.columns.length === 1 && $state.columns[0] === '_source') {
-        $state.columns = _.toggleInOut($state.columns, name);
-        $state.columns = _.toggleInOut($state.columns, '_source');
-        _.find($scope.fields, {name: '_source'}).display = false;
-      } else {
-        $state.columns = _.toggleInOut($state.columns, name);
-      }
-
-      refreshColumns();
+    $scope.toggleField = function (fieldName) {
+      _.toggleInOut($state.columns, fieldName);
     };
 
     $scope.toTop = function () {
       $window.scrollTo(0, 0);
     };
-
-    function refreshColumns() {
-      // Get all displayed field names;
-      var fields = _($scope.fields).filter('display').pluck('name').value();
-
-      // Make sure there are no columns added that aren't in the displayed field list.
-      $state.columns = _.intersection($state.columns, fields);
-
-      // If no columns remain, use _source
-      if (!$state.columns.length) {
-        $scope.toggleField('_source');
-        return;
-      }
-
-      if (init.complete) {
-        $state.save();
-      }
-    }
 
     // TODO: Move to utility class
     var addSlashes = function (str) {

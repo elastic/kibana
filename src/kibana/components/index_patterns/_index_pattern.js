@@ -104,7 +104,7 @@ define(function (require) {
                 }
               },
               filterable: {
-                value: field.name === '_id' || ((field.indexed && type.filterable) || field.scripted)
+                value: field.name === '_id' || ((field.indexed && type && type.filterable) || field.scripted)
               },
               format: {
                 get: function () {
@@ -113,7 +113,7 @@ define(function (require) {
                 }
               },
               sortable: {
-                value: field.indexed && type.sortable
+                value: field.indexed && type && type.sortable
               },
               scripted: {
                 // enumerable properties end up in the JSON
