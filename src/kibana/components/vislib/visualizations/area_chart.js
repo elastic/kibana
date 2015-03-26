@@ -58,7 +58,7 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var interpolate = (this._attr.interpolate === 'smooth') ? 'cardinal' : this._attr.interpolate;
+      var interpolate = (this._attr.interpolate === 'smooth') ? 'monotone' : this._attr.interpolate;
       var area = d3.svg.area()
       .x(function (d) {
         if (isTimeSeries) {
@@ -81,10 +81,6 @@ define(function (require) {
         return yScale(d.y0 + d.y);
       })
       .interpolate(interpolate);
-
-      // Increase tension in line to prevent lines from going out of chart bounds
-      if (interpolate === 'cardinal') { area.tension(0.8); }
-
 
       var layer;
       var path;

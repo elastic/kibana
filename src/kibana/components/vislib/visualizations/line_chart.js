@@ -183,7 +183,7 @@ define(function (require) {
       var xAxisFormatter = this.handler.data.get('xAxisFormatter');
       var color = this.handler.data.getColorFunc();
       var ordered = this.handler.data.get('ordered');
-      var interpolate = (this._attr.interpolate === 'smooth') ? 'cardinal' : this._attr.interpolate;
+      var interpolate = (this._attr.interpolate === 'smooth') ? 'monotone' : this._attr.interpolate;
       var line = d3.svg.line()
       .interpolate(interpolate)
       .x(function x(d) {
@@ -196,9 +196,6 @@ define(function (require) {
         return yScale(d.y);
       });
       var lines;
-
-      // Increase tension in line to prevent lines from going out of chart bounds
-      if (interpolate === 'cardinal') { line.tension(0.8); }
 
       lines = svg
       .selectAll('.lines')
