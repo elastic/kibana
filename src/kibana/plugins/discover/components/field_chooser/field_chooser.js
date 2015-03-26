@@ -124,10 +124,11 @@ define(function (require) {
 
         $scope.runAgg = function (field) {
           var agg = {};
-          var type = 'histogram';
+          var isGeoPoint = field.type === 'geo_point';
+          var type = isGeoPoint ? 'tile_map' : 'histogram';
           // If we're visualizing a date field, and our index is time based (and thus has a time filter),
           // then run a date histogram
-          if (field.type === 'date' && $scope.indexPattern.timeFieldName) {
+          if (field.type === 'date' && field.indexed && $scope.indexPattern.timeFieldName) {
             agg = {
               type: 'date_histogram',
               schema: 'segment',
@@ -137,8 +138,7 @@ define(function (require) {
               }
             };
 
-          } else if (field.type === 'geo_point') {
-            type = 'tile_map';
+          } else if (isGeoPoint) {
             agg = {
               type: 'geohash_grid',
               schema: 'segment',
