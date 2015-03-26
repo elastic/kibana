@@ -33,7 +33,7 @@ define(function (require) {
       description: 'The index to access if no index is set',
     },
     'defaultColumns': {
-      value: '["_source"]',
+      value: ['_source'],
       description: 'Columns displayed by default in the Discover tab',
     },
     'metaFields': {
