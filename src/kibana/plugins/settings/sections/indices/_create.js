@@ -35,43 +35,7 @@ define(function (require) {
     index.timeField = null;
 
     $scope.refreshFieldList = function () {
-      index.dateFields = index.timeField = index.listUsed = null;
-      var useIndexList = index.isTimeBased && index.nameIsPattern;
-
-      // we don't have enough info to continue
-      if (!index.name) {
-        index.fetchFieldsError = 'Set an index name first';
-        return;
-      }
-
-      if (useIndexList && !index.nameInterval) {
-        index.fetchFieldsError = 'Select the interval at which your indices are populated.';
-        return;
-      }
-
-      return indexPatterns.mapper.clearCache(index.name)
-      .then(function () {
-        var pattern = mockIndexPattern(index);
-
-        return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
-        .catch(function (err) {
-          // TODO: we should probably display a message of some kind
-          if (err instanceof MissingIndices) {
-            index.fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
-            return [];
-          }
-
-          throw err;
-        });
-      })
-      .then(function (fields) {
-        if (fields.length > 0) {
-          index.fetchFieldsError = null;
-          index.dateFields = fields.filter(function (field) {
-            return field.type === 'date';
-          });
-        }
-      }, notify.fatal);
+      fetchFieldList().then(updateFieldList);
     };
 
     $scope.createIndexPattern = function () {
@@ -166,9 +130,10 @@ define(function (require) {
       .finally(function () {
         // prevent running when no change happened (ie, first watcher call)
         if (!_.isEqual(newVal, oldVal)) {
-          promiseMatch(lastPromise, function () {
-            $scope.refreshFieldList();
-            samplePromise = Promise.resolve();
+          fetchFieldList().then(function (results) {
+            if (lastPromise === samplePromise) {
+              updateFieldList(results);
+            }
           });
         }
       });
@@ -218,10 +183,63 @@ define(function (require) {
       });
     }
 
+    function fetchFieldList() {
+      index.dateFields = index.timeField = index.listUsed = null;
+      var useIndexList = index.isTimeBased && index.nameIsPattern;
+      var fetchFieldsError;
+      var dateFields;
+
+      // we don't have enough info to continue
+      if (!index.name) {
+        fetchFieldsError = 'Set an index name first';
+        return;
+      }
+
+      if (useIndexList && !index.nameInterval) {
+        fetchFieldsError = 'Select the interval at which your indices are populated.';
+        return;
+      }
+
+      return indexPatterns.mapper.clearCache(index.name)
+      .then(function () {
+        var pattern = mockIndexPattern(index);
+
+        return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
+        .catch(function (err) {
+          // TODO: we should probably display a message of some kind
+          if (err instanceof MissingIndices) {
+            fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
+            return [];
+          }
+
+          throw err;
+        });
+      })
+      .then(function (fields) {
+        if (fields.length > 0) {
+          fetchFieldsError = null;
+          dateFields = fields.filter(function (field) {
+            return field.type === 'date';
+          });
+        }
+
+        return {
+          fetchFieldsError: fetchFieldsError,
+          dateFields: dateFields
+        };
+      }, notify.fatal);
+    }
+
+    function updateFieldList(results) {
+      index.fetchFieldsError = results.fetchFieldsError;
+      index.dateFields = results.dateFields;
+    }
+
     function promiseMatch(lastPromise, cb) {
       if (lastPromise === samplePromise) {
         cb();
-      } else {
+      } else if (samplePromise != null) {
+        // haven't hit the last promise yet, reset index params
         index.patternErrors = [];
         index.samples = null;
         index.existing = null;
