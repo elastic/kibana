@@ -32,7 +32,11 @@ define(function (require) {
         });
 
         var wrapTmpl = function (tmpl) {
-          return '<div class="container-fluid">' + tmpl + '</div>';
+          if ($scope.configSubmit) {
+            return '<form role="form" class="container-fluid" ng-submit="configSubmit()">' + tmpl + '</form>';
+          } else {
+            return '<div class="container-fluid">' + tmpl + '</div>';
+          }
         };
 
         var render = function (newTemplate, oldTemplate) {
