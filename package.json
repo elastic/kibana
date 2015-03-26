@@ -12,6 +12,9 @@
   ],
   "private": false,
   "version": "4.1.0-snapshot",
+  "engines" : {
+    "node" : ">=0.10.36 <0.12"
+  },
   "main": "src/server/app.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
