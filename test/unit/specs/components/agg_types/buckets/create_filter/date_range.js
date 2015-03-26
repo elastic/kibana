@@ -1,4 +1,5 @@
 define(function (require) {
+  var moment = require('moment');
   describe('AggConfig Filters', function () {
     describe('Date range', function () {
       var AggConfig;
@@ -31,13 +32,13 @@ define(function (require) {
         });
 
         var aggConfig = vis.aggs.byTypeName.date_range[0];
-        var filter = createFilter(aggConfig, '1 Feb 2015-7 Feb 2015');
+        var filter = createFilter(aggConfig, 'February 1st, 2015 to February 7th, 2015');
         expect(filter).to.have.property('range');
         expect(filter).to.have.property('meta');
         expect(filter.meta).to.have.property('index', indexPattern.id);
         expect(filter.range).to.have.property('@timestamp');
         expect(filter.range['@timestamp']).to.have.property('gte', +new Date('1 Feb 2015'));
-        expect(filter.range['@timestamp']).to.have.property('lte', +new Date('7 Feb 2015'));
+        expect(filter.range['@timestamp']).to.have.property('lt', +new Date('7 Feb 2015'));
       });
     });
   });

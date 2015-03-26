@@ -1,14 +1,17 @@
 define(function (require) {
-  return function createDateRangeFilterProvider() {
+  var dateRange = require('utils/date_range');
+
+  return function createDateRangeFilterProvider(config) {
     var buildRangeFilter = require('components/filter_manager/lib/range');
 
     return function (agg, key) {
-      var dates = key.split('-');
+      var range = dateRange.parse(key, config.get('dateFormat'));
 
-      return buildRangeFilter(agg.params.field, {
-        gte: +new Date(dates[0]),
-        lte: +new Date(dates[1])
-      }, agg.vis.indexPattern);
+      var filter = {};
+      if (range.from) filter.gte = +range.from;
+      if (range.to) filter.lt = +range.to;
+
+      return buildRangeFilter(agg.params.field, filter, agg.vis.indexPattern);
     };
 
   };

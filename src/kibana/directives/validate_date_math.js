@@ -14,6 +14,11 @@ define(function (require) {
         ngModel.$formatters.unshift(validateDateMath);
 
         function validateDateMath(input) {
+          if (input == null || input === '') {
+            ngModel.$setValidity('validDateMath', true);
+            return null;
+          }
+
           var moment = DateMath.parse(input);
           ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
           return input;

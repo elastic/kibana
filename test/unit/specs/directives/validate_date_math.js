@@ -40,10 +40,6 @@ define(function (require) {
     it('should disallow invalid date math', function () {
       var element = $compile(html)($rootScope);
 
-      $rootScope.value = '';
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-
       $rootScope.value = 'hello, world';
       $rootScope.$digest();
       expect(element.hasClass('ng-invalid')).to.be.ok();
@@ -59,6 +55,14 @@ define(function (require) {
       $rootScope.value = '5/5/2005+3d';
       $rootScope.$digest();
       expect(element.hasClass('ng-invalid')).to.be.ok();
+    });
+
+    it('should allow empty values', function () {
+      var element = $compile(html)($rootScope);
+
+      $rootScope.value = '';
+      $rootScope.$digest();
+      expect(element.hasClass('ng-valid')).to.be.ok();
     });
   });
 });
