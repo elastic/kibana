@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var numeral = require('numeral');
+    var errors = require('errors');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
@@ -51,6 +52,7 @@ define(function (require) {
      */
     YAxis.prototype.getYScale = function (height) {
       var isUserDefined = (this._attr.setYExtents);
+      var isYExtents = (this._attr.defaultYExtents);
       var yMin = this.yMin;
       var yMax = this.yMax;
 
@@ -58,31 +60,18 @@ define(function (require) {
       // to render. Defaults yMin to 0 if yMin === yMax
       // and yMin is greater than or equal to zero, else
       // defaults yMax to zero.
-      if (yMin === yMax) {
-        if (yMin > 0) {
-          yMin = 0;
-        } else if (yMin === 0) {
-          yMin = -1;
-          yMax = 1;
-        } else {
-          yMax = 0;
-        }
-      }
+      if (yMin === yMax && yMin === 0) throw new errors.NoResults();
 
-      if (!this._attr.defaultYExtents) {
-        // if yMin and yMax are both positive, then yMin should be zero
-        if (yMin > 0 && yMax > 0) {
-          yMin = 0;
-        }
-
-        // if yMin and yMax are both negative, then yMax should be zero
-        if (yMin < 0 && yMax < 0) yMax = 0;
+      if (!isYExtents && !isUserDefined) {
+        yMin = Math.min(0, yMin);
+        yMax = Math.max(0, yMax);
       }
 
       // save reference to y scale
       this.yScale = d3.scale.linear()
       .domain((isUserDefined) ? this.validateUserExtents(yMin, yMax) : [yMin, yMax])
       .range([height, 0])
+      .clamp(true)
       .nice(this.tickScale(height));
 
       return this.yScale;

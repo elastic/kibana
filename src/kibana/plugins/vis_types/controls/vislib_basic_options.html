@@ -19,17 +19,18 @@
   </div>
   <div class="vis-option-item">
     <label>
-      <input type="checkbox" ng-model="vis.params.setYExtents" ng-checked="vis.params.setYExtents">
+      <input type="checkbox" ng-model="vis.params.setYExtents"
+             ng-checked="vis.params.setYExtents && vis.params.mode !== 'percentage'" ng-disabled="(vis.params.mode === 'percentage')">
       Set Y-Axis Min and Max Values
     </label>
     <div ng-show="vis.params.setYExtents">
       <label>
         y-max
-        <input type="number" ng-model="vis.params.yAxis.yMax">
+        <input type="number" ng-model="vis.params.yAxis.yMax" placeholder="Enter a number">
       </label>
       <label>
         y-min
-        <input type="number" ng-model="vis.params.yAxis.yMin">
+        <input type="number" ng-model="vis.params.yAxis.yMin" placeholder="Enter a number">
       </label>
     </div>
   </div>
