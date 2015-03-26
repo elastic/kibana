@@ -37,7 +37,7 @@ define(function (require) {
       yMax = parseInt(yMax, 10);
 
       if (isNaN(yMin) || isNaN(yMax)) throw new Error(yMin + ' or ' + yMax + ' is not a valid number');
-      if (yMin > yMax) throw new Error(yMin + ' is less than ' + yMax);
+      if (yMin > yMax) throw new Error('y-min: ' + yMin + ' is greater than y-max: ' + yMax);
 
       return [yMin, yMax];
     };
