@@ -20,7 +20,12 @@ define(function (require) {
       template: require('text!plugins/metric_vis/metric_vis.html'),
       params: {
         defaults: {
-          fontSize: 60
+          fontSize: 60,
+          customFormat: false,
+          decimalSep: ',',
+          thousandsSep: '.',
+          precision: 0,
+          unit: '€'
         },
         editor: require('text!plugins/metric_vis/metric_vis_params.html')
       },

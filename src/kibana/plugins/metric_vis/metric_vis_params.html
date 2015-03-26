@@ -1,4 +1,17 @@
 <div class="form-group">
   <label>Font Size - {{ vis.params.fontSize }}pt</label>
   <input type="range" ng-model="vis.params.fontSize" class="form-control" min="12" max="120" />
+  <br/>
+  <label>Custom format</label>
+  <input type="checkbox" ng-model="vis.params.customFormat" class="form-control"/>
+  <div ng-show="vis.params.customFormat">
+	  <label>Thousands Separator format</label>
+	  <input type="text" ng-model="vis.params.thousandsSep" class="form-control"/>
+	  <label>Decimal separator</label>
+	  <input type="text" ng-model="vis.params.decimalSep" class="form-control"/>
+	  <label>Precision</label>
+	  <input type="text" ng-model="vis.params.precision" class="form-control"/>
+	  <label>Unit</label>
+	  <input type="text" ng-model="vis.params.unit" class="form-control"/>
+  </div>
 </div>
