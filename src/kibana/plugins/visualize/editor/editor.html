@@ -82,13 +82,29 @@
       </kbn-tooltip>
 
       <kbn-tooltip text="Load Saved Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="configTemplate.toggle('load')" aria-label="Load Saved Visualization"><i aria-hidden="true" class="fa fa-folder-open-o"></i></button>
+        <button
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('load') }}"
+          ng-click="configTemplate.toggle('load')"
+          aria-label="Load Saved Visualization">
+          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Share Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="configTemplate.toggle('share')" aria-label="Share Visualization"><i aria-hidden="true" class="fa fa-external-link"></i></button>
+        <button
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('share') }}"
+          ng-click="configTemplate.toggle('share')"
+          aria-label="Share Visualization">
+          <i aria-hidden="true" class="fa fa-external-link"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Refresh" placement="bottom" append-to-body="1">
-        <button ng-click="fetch()" aria-label="Refresh"><i aria-hidden="true" class="fa fa-refresh"></i></button>
+        <button
+          ng-click="fetch()"
+          aria-label="Refresh">
+          <i aria-hidden="true" class="fa fa-refresh"></i>
+        </button>
       </kbn-tooltip>
     </div>
   </navbar>
