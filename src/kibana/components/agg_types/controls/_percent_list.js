@@ -8,14 +8,14 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('percentList', function ($parse) {
+  .directive('valuesList', function ($parse) {
     return {
       restrict: 'A',
       require: 'ngModel',
       link: function ($scope, $el, attrs, ngModelController) {
         var $setModel = $parse(attrs.ngModel).assign;
         var $repeater = $el.closest('[ng-repeat]');
-        var $listGetter = $parse(attrs.percentList);
+        var $listGetter = $parse(attrs.valuesList);
 
         var handlers = {
           up: change(add, 1),
@@ -42,7 +42,7 @@ define(function (require) {
         }
 
         function $get(dir) {
-          return $repeater[dir]().find('[percent-list]');
+          return $repeater[dir]().find('[values-list]');
         }
 
         function go(dir) {
@@ -122,9 +122,9 @@ define(function (require) {
           if (isNaN(num)) return INVALID;
 
           var list = $listGetter($scope);
-          var min = list[$scope.$index - 1] || 0;
-          var max = list[$scope.$index + 1] || 100;
-
+          var min = list[$scope.$index - 1] || $scope.valueBoundaries[0];
+          var max = list[$scope.$index + 1] || $scope.valueBoundaries[1];
+          
           if (num <= min || num >= max) return INVALID;
 
           return num;
@@ -140,7 +140,7 @@ define(function (require) {
           }
         ], function () {
           var valid = parse(ngModelController.$viewValue) !== INVALID;
-          ngModelController.$setValidity('percentList', valid);
+          ngModelController.$setValidity('valuesList', valid);
         });
 
         function validate(then) {
@@ -148,7 +148,7 @@ define(function (require) {
             var value = parse(input);
             var valid = value !== INVALID;
             value = valid ? value : void 0;
-            ngModelController.$setValidity('percentList', valid);
+            ngModelController.$setValidity('valuesList', valid);
             then && then(input, value);
             return value;
           };
