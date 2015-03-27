@@ -27,13 +27,10 @@
         <button ng-click="newQuery()" aria-label="New Search"><i aria-hidden="true" class="fa fa-file-new-o"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
-        <button aria-haspopup="true" aria-expanded="{{toggleSaveSearch}}" ng-click="configTemplate.toggle('save'); toggleSaveSearch = !toggleSaveSearch" aria-label="Save Search"><i aria-hidden="true" class="fa fa-save"></i></button>
+        <button aria-haspopup="true" aria-expanded="{{toggleSaveSearch}}" ng-click="configTemplate.toggle('save');" aria-label="Save Search"><i aria-hidden="true" class="fa fa-save"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
-        <button aria-haspopup="true" aria-expanded="{{toggleLoadSavedSearch}}" ng-click="configTemplate.toggle('load'); toggleLoadSavedSearch = !toggleLoadSavedSearch" aria-label="Load Saved Search"><i aria-hidden="true" class="fa fa-folder-open-o"></i></button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Settings" placement="bottom" append-to-body="1">
-        <button aria-haspopup="true" aria-expanded="{{toggleSettings}}"  ng-click="configTemplate.toggle('config'); toggleSettings = !toggleSettings" aria-label="Settings"><i aria-hidden="true" class="fa fa-gear"></i></button>
+        <button aria-haspopup="true" aria-expanded="{{toggleLoadSavedSearch}}" ng-click="configTemplate.toggle('load');" aria-label="Load Saved Search"><i aria-hidden="true" class="fa fa-folder-open-o"></i></button>
       </kbn-tooltip>
     </div>
   </navbar>
@@ -65,7 +62,7 @@
             <span bindonce bo-bind="opts.savedSearch.title"></span>
             <i aria-label="Reload saved query" tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo small"></i>
           </span>
-          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong> 
+          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
           <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
         </div>
 
