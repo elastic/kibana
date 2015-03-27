@@ -16,6 +16,6 @@ define(function (require) {
       }
     });
 
-    return hit.$$_flattened = _.merge(source, fields, _.pick(hit, self.metaFields));
+    return hit.$$_flattened = _.merge(source, fields, _.pick(hit, self.metaFields), _.pick(hit.fields, self.metaFields));
   };
 });

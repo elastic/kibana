@@ -11,7 +11,7 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 
 ## Installation
 
-* Download: [http://www.elasticsearch.org/overview/kibana/installation/](http://www.elasticsearch.org/overview/kibana/installation/)
+* Download: [http://www.elastic.co/downloads/kibana](http://www.elastic.co/downloads/kibana)
 * Run `bin/kibana` on unix, or `bin/kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
 
@@ -31,4 +31,4 @@ Now that you've configured an index pattern, you're ready to hop over to the [Di
 
 ## Documentation
 
-Visit [Elasticsearch.org](http://www.elasticsearch.org/guide/en/kibana/current/index.html) for the full Kibana documentation.
+Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.

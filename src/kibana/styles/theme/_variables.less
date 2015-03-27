@@ -9,7 +9,8 @@
 //
 //## Gray and brand colors for use across Bootstrap.
 
-@gray-darker:            lighten(#000, 13.5%);
+@gray-base:              #000;
+@gray-darker:            lighten(@gray-base, 13.5%);
 @gray-dark:              #7b8a8b;
 @gray:                   #95a5a6;
 @gray-light:             #b4bcc2;
@@ -208,6 +209,9 @@
 //** Small `.form-control` height
 @input-height-small:             (floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) + 2);
 
+//** `.form-group` margin
+@form-group-margin-bottom:       15px;
+
 @legend-color:                   @text-color;
 @legend-border-color:            transparent;
 
@@ -262,11 +266,12 @@
 @zindex-navbar:            1000;
 @zindex-dropdown:          1000;
 @zindex-popover:           1010;
-@zindex-typeahead:         1020;
-@zindex-tooltip:           1030;
-@zindex-navbar-fixed:      1030;
-@zindex-modal-background:  1040;
-@zindex-modal:             1050;
+@zindex-tooltip:           1020;
+@zindex-typeahead:         1030;
+@zindex-tooltip:           1040;
+@zindex-navbar-fixed:      1050;
+@zindex-modal-background:  1060;
+@zindex-modal:             1070;
 
 
 //== Media queries breakpoints
