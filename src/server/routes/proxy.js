@@ -74,7 +74,7 @@ router.use(function (req, res, next) {
   var options = {
     url: config.elasticsearch + path,
     method: req.method,
-    headers: _.defaults({ host: target.hostname }, req.headers),
+    headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
