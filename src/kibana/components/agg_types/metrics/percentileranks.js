@@ -1,25 +1,24 @@
 define(function (require) {
-  return function AggTypeMetricPercentilesProvider(Private) {
+  return function AggTypeMetricPercentileRanksProvider(Private) {
     var _ = require('lodash');
 
     var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
     var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
-    var ordinalSuffix = require('utils/ordinal_suffix');
 
     require('components/agg_types/controls/_values_list');
-    var percentEditor = require('text!components/agg_types/controls/percents.html');
+    var valuesEditor = require('text!components/agg_types/controls/values.html');
 
     var valueProps = {
       makeLabel: function () {
-        return ordinalSuffix(this.key) + ' percentile of ' + this.fieldDisplayName();
+        return 'Percentile rank ' + this.key + ' of "' + this.fieldDisplayName() + '"';
       }
     };
 
     return new MetricAggType({
-      name: 'percentiles',
-      title: 'Percentiles',
+      name: 'percentile_ranks',
+      title: 'Percentile Ranks',
       makeLabel: function (agg) {
-        return 'Percentiles of ' + agg.fieldDisplayName();
+        return 'Percentile ranks of ' + agg.fieldDisplayName();
       },
       params: [
         {
@@ -27,22 +26,22 @@ define(function (require) {
           filterFieldTypes: 'number'
         },
         {
-          name: 'percents',
-          editor: percentEditor,
-          default: [1, 5, 25, 50, 75, 95, 99],
+          name: 'values',
+          editor: valuesEditor,
+          default: [10],
           controller: function ($scope) {
-            $scope.valueBoundaries = [0, 100];
+            $scope.valueBoundaries = [0];
 
             $scope.remove = function (index) {
-              $scope.agg.params.percents.splice(index, 1);
+              $scope.agg.params.values.splice(index, 1);
             };
 
             $scope.add = function () {
-              $scope.agg.params.percents.push(_.last($scope.agg.params.percents) + 1);
+              $scope.agg.params.values.push(_.last($scope.agg.params.values) + 1);
             };
 
-            $scope.$watchCollection('agg.params.percents', function (percents) {
-              $scope.validLength = _.size(percents) || null;
+            $scope.$watchCollection('agg.params.values', function (values) {
+              $scope.validLength = _.size(values) || null;
             });
           }
         }
@@ -50,12 +49,12 @@ define(function (require) {
       getResponseAggs: function (agg) {
         var ValueAggConfig = getResponseAggConfig(agg, valueProps);
 
-        return agg.params.percents.map(function (percent) {
-          return new ValueAggConfig(percent);
+        return agg.params.values.map(function (value) {
+          return new ValueAggConfig(value);
         });
       },
       getValue: function (agg, bucket) {
-        // percentiles for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
+        // values for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
         // parse the keys and respond with the value that matches
         return _.find(bucket[agg.parentId].values, function (value, key) {
           return agg.key === parseFloat(key);
