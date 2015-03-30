@@ -49,7 +49,8 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       // clean up old maps
-      _.invoke(self.maps, self.destroy);
+      self.destroy();
+
       // create a new maps array
       self.maps = [];
 
@@ -112,6 +113,7 @@ define(function (require) {
             mapCenter = self._attr.mapCenter = map.getCenter();
           });
 
+          // add label for splits
           if (mapData.properties.label) {
             self.addLabel(mapData.properties.label, map);
           }
@@ -423,8 +425,7 @@ define(function (require) {
       label.update = function () {
         this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
       };
-
-      return label;
+      label.addTo(map);
     };
 
     /**
