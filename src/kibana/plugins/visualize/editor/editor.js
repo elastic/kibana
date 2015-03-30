@@ -152,8 +152,17 @@ define(function (require) {
       });
 
       filterBarWatchFilters($scope, {
-        update: $state.save,
-        fetch: $scope.fetch
+        update: function () {
+          if ($state.filters && $state.filters.length) {
+            searchSource.set('filter', $state.filters);
+          } else {
+            searchSource.set('filter', []);
+          }
+          $state.save();
+        },
+        fetch: function () {
+          $scope.fetch();
+        }
       });
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
@@ -177,10 +186,9 @@ define(function (require) {
           searchSource.set('query', null);
         }
 
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
+        if (_.isEqual(keys, ['filters'])) {
+          // updates will happen in filterBarWatchFilters() if needed
+          return;
         }
 
         $scope.fetch();
