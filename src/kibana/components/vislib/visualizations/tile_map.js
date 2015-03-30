@@ -45,7 +45,6 @@ define(function (require) {
 
       var self = this;
       var $elem = $(this.chartEl);
-      var div;
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       // clean up old maps
@@ -72,8 +71,7 @@ define(function (require) {
           }
 
           var mapData = data.geoJson;
-          div = $(this);
-          div.addClass('tilemap');
+          var div = $(this).addClass('tilemap');
 
           var featureLayer;
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
