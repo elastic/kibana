@@ -188,14 +188,13 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        filterBarWatchFilters($scope, {
-          update: function () {
-            return $scope.updateDataSource().then(function () {
-              $state.save();
-            });
-          },
-          fetch: $scope.fetch
-        });
+        filterBarWatchFilters($scope)
+        .on('update', function () {
+          return $scope.updateDataSource().then(function () {
+            $state.save();
+          });
+        })
+        .on('fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;

@@ -151,18 +151,17 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      filterBarWatchFilters($scope, {
-        update: function () {
-          if ($state.filters && $state.filters.length) {
-            searchSource.set('filter', $state.filters);
-          } else {
-            searchSource.set('filter', []);
-          }
-          $state.save();
-        },
-        fetch: function () {
-          $scope.fetch();
+      filterBarWatchFilters($scope)
+      .on('update', function () {
+        if ($state.filters && $state.filters.length) {
+          searchSource.set('filter', $state.filters);
+        } else {
+          searchSource.set('filter', []);
         }
+        $state.save();
+      })
+      .on('fetch', function () {
+        $scope.fetch();
       });
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {

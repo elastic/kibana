@@ -114,13 +114,12 @@ define(function (require) {
           }
         }
 
-        filterBarWatchFilters($scope, {
-          update: function () {
-            updateQueryOnRootSource();
-            $state.save();
-          },
-          fetch: $scope.refresh
-        });
+        filterBarWatchFilters($scope)
+        .on('update', function () {
+          updateQueryOnRootSource();
+          $state.save();
+        })
+        .on('fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});
