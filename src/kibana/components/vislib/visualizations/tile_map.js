@@ -520,13 +520,13 @@ define(function (require) {
      * @return {Number}
      */
     TileMap.prototype.geohashMinDistance = function (feature) {
-      var gh = feature.properties.rectangle;
-      var nw = L.latLng([gh[3][1], gh[3][0]]);
-      var ne = L.latLng([gh[2][1], gh[2][0]]);
-      var sw = L.latLng([gh[0][1], gh[0][0]]);
-      var ew = Math.floor(nw.distanceTo(ne));
-      var ns = Math.floor(nw.distanceTo(sw));
-      var min = _.min([ew, ns]);
+      var geohashRect = feature.properties.rectangle;
+      var northWest = L.latLng([geohashRect[3][1], geohashRect[3][0]]);
+      var northEast = L.latLng([geohashRect[2][1], geohashRect[2][0]]);
+      var southWest = L.latLng([geohashRect[0][1], geohashRect[0][0]]);
+      var eastWest = Math.floor(northWest.distanceTo(northEast));
+      var northSouth = Math.floor(northWest.distanceTo(southWest));
+      var min = _.min([eastWest, northSouth]);
       return min;
     };
 
