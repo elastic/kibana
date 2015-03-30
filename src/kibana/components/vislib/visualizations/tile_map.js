@@ -117,11 +117,13 @@ define(function (require) {
           }
 
           // zoom to featureLayer data bounds
-          if (!self._attr.firstFitBounds) {
-            map.fitBounds(featureLayer.getBounds());
-            self._attr.firstFitBounds = featureLayer.getBounds();
-          } else {
-            map.fitBounds(self._attr.firstFitBounds);
+          if (mapData.features.length > 0) {
+            if (!self._attr.firstFitBounds) {
+              map.fitBounds(featureLayer.getBounds());
+              self._attr.firstFitBounds = featureLayer.getBounds();
+            } else {
+              map.fitBounds(self._attr.firstFitBounds);
+            }
           }
 
           // Add button to fit container to points
@@ -513,7 +515,7 @@ define(function (require) {
 
     /**
      * geohashMinDistance returns a min distance in meters for sizing
-     * circle markers to fit within geohash grid
+     * circle markers to fit within geohash grid rectangle
      *
      * @method geohashMinDistance
      * @param feature {Object}
