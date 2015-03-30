@@ -6,29 +6,21 @@ define(function (require) {
 
 		var watchFilters;
     var Promise;
+    var EventEmitter;
     var $scope;
 
 		beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
       Promise = $injector.get('Promise');
+      EventEmitter = Private(require('factories/events'));
       watchFilters = Private(require('components/filter_bar/lib/watchFilters'));
       $scope = {
         $watch: sinon.stub()
       };
     }));
 
-    it('requires update and fetch handlers', function () {
-      expect(function () {
-        watchFilters($scope);
-      }).throwException(TypeError);
-
-      expect(function () {
-        watchFilters($scope, {});
-      }).throwException(TypeError);
-
-      expect(function () {
-        watchFilters($scope, { update: _.noop, refresh: _.noop });
-      }).throwException(TypeError);
+    it('returns an event emitter', function () {
+      expect(watchFilters($scope)).to.be.an(EventEmitter);
     });
 
     it('listens to the filters on state', function () {
@@ -46,7 +38,7 @@ define(function (require) {
         var onFetch = sinon.stub();
         var onUpdate = sinon.stub();
 
-        watchFilters($scope, { update: onUpdate, fetch: onFetch });
+        watchFilters($scope).on('fetch', onFetch).on('update', onUpdate);
         var handler = $scope.$watch.args[0][1];
 
         return handler([ {} ], [])
@@ -60,7 +52,7 @@ define(function (require) {
         var onFetch = sinon.stub();
         var onUpdate = sinon.stub();
 
-        watchFilters($scope, { update: onUpdate, fetch: onFetch });
+        watchFilters($scope).on('fetch', onFetch).on('update', onUpdate);
         var handler = $scope.$watch.args[0][1];
 
         return handler([ ], [ { meta: { disabled: true } } ])
@@ -74,7 +66,7 @@ define(function (require) {
         var onFetch = sinon.stub();
         var onUpdate = sinon.stub();
 
-        watchFilters($scope, { update: onUpdate, fetch: onFetch });
+        watchFilters($scope).on('fetch', onFetch).on('update', onUpdate);
         var handler = $scope.$watch.args[0][1];
         var cur = [];
         var prev = cur;
