@@ -360,7 +360,6 @@ define(function (require) {
           });
         }
 
-        $scope.hits += resp.hits.total;
         var rows = $scope.rows;
         var counts = rows.fieldCounts;
 
@@ -407,6 +406,8 @@ define(function (require) {
 
       segmented.on('mergedSegment', function (merged) {
         $scope.mergedEsResp = merged;
+        $scope.hits = merged.hits.total;
+
       });
 
       segmented.on('complete', function () {
