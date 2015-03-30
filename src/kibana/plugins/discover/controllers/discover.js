@@ -3,7 +3,6 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var ConfigTemplate = require('utils/config_template');
-  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
   var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
   var rison = require('utils/rison');
@@ -70,6 +69,7 @@ define(function (require) {
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
+    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -188,15 +188,13 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        $scope.$watch('state.filters', function (newFilters, oldFilters) {
-          if (newFilters === oldFilters) return;
-
-          if (onlyDisabled(newFilters, oldFilters)) {
-            $state.save();
-            return;
-          }
-
-          $scope.fetch();
+        filterBarWatchFilters($scope, {
+          update: function () {
+            return $scope.updateDataSource().then(function () {
+              $state.save();
+            });
+          },
+          fetch: $scope.fetch
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
