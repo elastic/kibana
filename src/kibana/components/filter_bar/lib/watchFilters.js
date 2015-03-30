@@ -11,7 +11,7 @@ define(function (require) {
       $scope.$watch('state.filters', function (newFilters, oldFilters) {
         if (newFilters === oldFilters) return;
 
-        Promise.resolve()
+        return Promise.resolve()
         .then(handlers.update)
         .then(function () {
           if (!onlyDisabled(newFilters, oldFilters)) {
