@@ -26,11 +26,11 @@
     <div ng-show="vis.params.setYExtents">
       <label>
         y-max
-        <input type="number" ng-model="vis.params.yAxis.yMax">
+        <input type="number" ng-model="vis.params.yAxis.max" ng-required="vis.params.setYExtents">
       </label>
       <label>
         y-min
-        <input type="number" ng-model="vis.params.yAxis.yMin">
+        <input type="number" ng-model="vis.params.yAxis.min" ng-required="vis.params.setYExtents">
       </label>
     </div>
   </div>

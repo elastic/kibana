@@ -20,20 +20,13 @@ define(function (require) {
       opts = opts || {};
 
       return function (vis) {
-        var isUserDefinedYAxis = (vis._attr.setYExtents && vis._attr.yAxis.yMin !== undefined && vis._attr.yAxis.yMax !== undefined);
+        var isUserDefinedYAxis = (vis._attr.setYExtents && vis._attr.yAxis.max != null && vis._attr.yAxis.min != null);
         var data;
 
         if (opts.zeroFill) {
           data = new Data(injectZeros(vis.data), vis._attr);
         } else {
           data = new Data(vis.data, vis._attr);
-        }
-
-        if (!isUserDefinedYAxis) {
-          vis._attr.yAxis = {
-            yMin: Math.min(0, data.getYMin()),
-            yMax: Math.max(0, data.getYMax())
-          };
         }
 
         return new Handler(vis, {
@@ -52,8 +45,8 @@ define(function (require) {
           alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
             el   : vis.el,
-            yMin : (isUserDefinedYAxis) ? vis._attr.yAxis.yMin : data.getYMin(),
-            yMax : (isUserDefinedYAxis) ? vis._attr.yAxis.yMax : data.getYMax(),
+            yMin : (isUserDefinedYAxis) ? vis._attr.yAxis.min : data.getYMin(),
+            yMax : (isUserDefinedYAxis) ? vis._attr.yAxis.max : data.getYMax(),
             _attr: vis._attr
           })
         });

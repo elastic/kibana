@@ -58,7 +58,7 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      var isUserDefined = (this._attr.setYExtents);
+      var isUserDefined = (this._attr.setYExtents && this._attr.yAxis.max != null && this._attr.yAxis.min != null);
       var isYExtents = (this._attr.defaultYExtents);
       var yMin = this.yMin;
       var yMax = this.yMax;
