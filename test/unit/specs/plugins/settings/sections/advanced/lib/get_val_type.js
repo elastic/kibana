@@ -26,6 +26,10 @@ define(function (require) {
           expect(getValType({value: 'someString'})).to.be('string');
           expect(getValType({value: 'someString'}, 42)).to.be('string');
         });
+
+        it('should return the type of the value if the default value is null', function () {
+          expect(getValType({value: null}, 'someString')).to.be('string');
+        });
       });
     });
   });

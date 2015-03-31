@@ -47,7 +47,7 @@ define(function (require) {
 
             var editor = getEditorType(conf);
             conf.json = editor === 'json';
-            conf.bool = editor === 'bool';
+            conf.bool = editor === 'boolean';
             conf.array = editor === 'array';
             conf.normal = editor === 'normal';
             conf.tooComplex = !editor;
