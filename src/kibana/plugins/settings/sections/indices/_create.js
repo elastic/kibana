@@ -114,6 +114,7 @@ define(function (require) {
       'index.nameInterval'
     ], function (newVal, oldVal) {
       var lastPromise;
+      resetIndex();
       samplePromise = lastPromise = updateSamples()
       .then(function () {
         promiseMatch(lastPromise, function () {
@@ -133,6 +134,7 @@ define(function (require) {
           fetchFieldList().then(function (results) {
             if (lastPromise === samplePromise) {
               updateFieldList(results);
+              samplePromise = null;
             }
           });
         }
@@ -240,11 +242,15 @@ define(function (require) {
         cb();
       } else if (samplePromise != null) {
         // haven't hit the last promise yet, reset index params
-        index.patternErrors = [];
-        index.samples = null;
-        index.existing = null;
-        index.fetchFieldsError = 'Loading';
+        resetIndex();
       }
+    }
+
+    function resetIndex() {
+      index.patternErrors = [];
+      index.samples = null;
+      index.existing = null;
+      index.fetchFieldsError = 'Loading';
     }
 
     function getPatternDefault(interval) {
