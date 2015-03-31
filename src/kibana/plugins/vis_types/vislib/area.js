@@ -18,7 +18,8 @@ define(function (require) {
           addLegend: true,
           mode: 'stacked',
           defaultYExtents: false,
-          setYExtents: false
+          setYExtents: false,
+          yAxis: {}
         },
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
         editor: require('text!plugins/vis_types/vislib/editors/area.html')

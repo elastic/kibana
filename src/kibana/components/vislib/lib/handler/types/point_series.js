@@ -20,12 +20,20 @@ define(function (require) {
       opts = opts || {};
 
       return function (vis) {
-        var isUserDefinedYAxis = vis._attr.setYExtents && vis._attr.yAxis.yMin !== undefined && vis._attr.mode !== 'percentage';
+        var isUserDefinedYAxis = (vis._attr.setYExtents && vis._attr.yAxis.yMin !== undefined && vis._attr.yAxis.yMax !== undefined);
         var data;
+
         if (opts.zeroFill) {
           data = new Data(injectZeros(vis.data), vis._attr);
         } else {
           data = new Data(vis.data, vis._attr);
+        }
+
+        if (!isUserDefinedYAxis) {
+          vis._attr.yAxis = {
+            yMin: Math.min(0, data.getYMin()),
+            yMax: Math.max(0, data.getYMax())
+          };
         }
 
         return new Handler(vis, {

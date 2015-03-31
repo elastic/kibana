@@ -34,11 +34,18 @@ define(function (require) {
     };
 
     YAxis.prototype.validateUserExtents = function (yMin, yMax) {
+      var isPercentage = (this._attr.mode === 'percentage');
       yMin = parseInt(yMin, 10);
       yMax = parseInt(yMax, 10);
 
       if (isNaN(yMin) || isNaN(yMax)) throw new Error(yMin + ' or ' + yMax + ' is not a valid number');
       if (yMin > yMax) throw new Error('y-min: ' + yMin + ' is greater than y-max: ' + yMax);
+
+      if (isPercentage) {
+        return [yMin, yMax].map(function (num) {
+          return num / 100;
+        });
+      }
 
       return [yMin, yMax];
     };
