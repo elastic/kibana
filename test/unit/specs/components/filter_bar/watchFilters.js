@@ -1,15 +1,14 @@
-/* global sinon */
 define(function (require) {
   describe('Filter Bar watchFilters()', function () {
     var sinon = require('test_utils/auto_release_sinon');
     var _ = require('lodash');
 
-		var watchFilters;
+    var watchFilters;
     var Promise;
     var EventEmitter;
     var $scope;
 
-		beforeEach(module('kibana'));
+    beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
       Promise = $injector.get('Promise');
       EventEmitter = Private(require('factories/events'));
