@@ -10,9 +10,14 @@ define(function (require) {
     require('vislib_fixtures/mock_data/geohash/_columns'),
     require('vislib_fixtures/mock_data/geohash/_rows')
   ];
-
   var names = ['geojson', 'columns', 'rows'];
   var mapTypes = ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pins'];
+  var sizes = [
+    70,
+    90,
+    110
+  ];
+
 
   angular.module('TileMapFactory', ['kibana']);
 
@@ -62,17 +67,33 @@ define(function (require) {
           });
         });
 
-        describe('containerTooSmall error', function () {
-          beforeEach(function () {
-            $(vis.el).height(10);
-            $(vis.el).width(10);
-          });
+        sizes.forEach(function (size) {
+          describe('containerTooSmall error', function () {
+            it('should throw an error', function () {
+              // 90px is the minimum height and width
+              vis.handler.charts.forEach(function (chart) {
+                $(chart.chartEl).height(size);
+                $(chart.chartEl).width(size);
 
-          it('should throw an error', function () {
-            vis.handler.charts.forEach(function (chart) {
-              expect(function () {
-                chart.render();
-              }).to.throwError();
+                if (size < 90) {
+                  expect(function () {
+                    chart.render();
+                  }).to.throwError();
+                }
+              });
+            });
+
+            it('should not throw an error', function () {
+              vis.handler.charts.forEach(function (chart) {
+                $(chart.chartEl).height(size);
+                $(chart.chartEl).width(size);
+
+                if (size >= 90) {
+                  expect(function () {
+                    chart.render();
+                  }).to.not.throwError();
+                }
+              });
             });
           });
         });

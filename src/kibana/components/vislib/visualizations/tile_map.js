@@ -42,10 +42,12 @@ define(function (require) {
      * @return {Function} Creates the map
      */
     TileMap.prototype.draw = function () {
-
       var self = this;
-      var $elem = $(this.chartEl);
-      var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
+      var $elem = $(this.chartEl)[0];
+      var elWidth = $elem.clientWidth;
+      var elHeight = $elem.clientHeight;
+      var minWidth = 90;
+      var minHeight = 90;
 
       // clean up old maps
       self.destroy();
@@ -56,6 +58,11 @@ define(function (require) {
       return function (selection) {
         selection.each(function (data) {
 
+          if (elWidth < minWidth || elHeight < minHeight) {
+            throw new errors.ContainerTooSmall();
+          }
+
+          var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
           var mapCenter = [15, 5];
           var mapZoom = 2;
 
