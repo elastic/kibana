@@ -254,6 +254,10 @@ define(function (require) {
       return this.type.getValue(this, bucket);
     };
 
+    AggConfig.prototype.getKey = function (bucket, key) {
+      return this.type.getKey(bucket, key);
+    };
+
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
       return this.type.makeLabel(this);
