@@ -18,31 +18,35 @@ define(function (require) {
       },
       {
         display: 'Second',
-        val: 'second'
+        val: 's'
       },
       {
         display: 'Minute',
-        val: 'minute'
+        val: 'm'
       },
       {
         display: 'Hourly',
-        val: 'hour'
+        val: 'h'
       },
       {
         display: 'Daily',
-        val: 'day'
+        val: 'd'
       },
       {
         display: 'Weekly',
-        val: 'week'
+        val: 'w'
       },
       {
         display: 'Monthly',
-        val: 'month'
+        val: 'M'
       },
       {
         display: 'Yearly',
-        val: 'year'
+        val: 'y'
+      },
+      {
+        display: 'Custom',
+        val: 'custom'
       }
     ];
   };

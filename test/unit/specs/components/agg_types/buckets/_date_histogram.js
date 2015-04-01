@@ -39,7 +39,7 @@ define(function (require) {
 
       describe('interval', function () {
         it('accepts a valid interval', function () {
-          var output = writeInterval('day');
+          var output = writeInterval('d');
           expect(output.params).to.have.property('interval', '1d');
         });
 
@@ -49,22 +49,22 @@ define(function (require) {
         });
 
         it('automatically picks an interval', function () {
-          setTimeBounds(15, 'minutes');
+          setTimeBounds(15, 'm');
           var output = writeInterval('auto');
           expect(output.params.interval).to.be('30s');
         });
 
         it('scales up the interval if it will make too many buckets', function () {
-          setTimeBounds(30, 'minutes');
-          var output = writeInterval('second');
+          setTimeBounds(30, 'm');
+          var output = writeInterval('s');
           expect(output.params.interval).to.be('10s');
           expect(output.metricScaleText).to.be('second');
           expect(output.metricScale).to.be(0.1);
         });
 
         it('does not scale down the interval', function () {
-          setTimeBounds(1, 'minutes');
-          var output = writeInterval('hour');
+          setTimeBounds(1, 'm');
+          var output = writeInterval('h');
           expect(output.params.interval).to.be('1h');
           expect(output.metricScaleText).to.be(undefined);
           expect(output.metricScale).to.be(undefined);
@@ -82,7 +82,7 @@ define(function (require) {
             var typeNames = test.slice();
 
             it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
-              setTimeBounds(1, 'year');
+              setTimeBounds(1, 'y');
 
               var vis = paramWriter.vis;
               vis.aggs.splice(0);
@@ -90,7 +90,7 @@ define(function (require) {
               var histoConfig = new AggConfig(vis, {
                 type: aggTypes.byName.date_histogram,
                 schema: 'segment',
-                params: { interval: 'second', field: timeField }
+                params: { interval: 's', field: timeField }
               });
 
               vis.aggs.push(histoConfig);

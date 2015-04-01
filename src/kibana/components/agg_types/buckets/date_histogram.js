@@ -8,6 +8,12 @@ define(function (require) {
 
     var tzOffset = moment().format('Z');
 
+    function getInterval(agg) {
+      var interval = _.get(agg, ['params', 'interval']);
+      if (interval && interval.val === 'custom') interval = _.get(agg, ['params', 'customInterval']);
+      return interval;
+    }
+
     function setBounds(agg, force) {
       if (agg.buckets._alreadySet && !force) return;
       agg.buckets._alreadySet = true;
@@ -37,7 +43,7 @@ define(function (require) {
               if (buckets) return buckets;
 
               buckets = new TimeBuckets();
-              buckets.setInterval(_.get(this, ['params', 'interval']));
+              buckets.setInterval(getInterval(this));
               setBounds(this);
 
               return buckets;
@@ -68,7 +74,7 @@ define(function (require) {
           },
           write: function (agg, output) {
             setBounds(agg);
-            agg.buckets.setInterval(agg.params.interval);
+            agg.buckets.setInterval(getInterval(agg));
 
             var interval = agg.buckets.getInterval();
             output.bucketInterval = interval;
@@ -88,6 +94,12 @@ define(function (require) {
               output.metricScaleText = interval.preScaled.description;
             }
           }
+        },
+
+        {
+          name: 'customInterval',
+          default: '2h',
+          write: _.noop
         },
 
         {
