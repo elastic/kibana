@@ -8,7 +8,7 @@ define(function (require) {
   require('services/private');
   require('plugins/discover/components/field_chooser/field_chooser');
 
-  var $parentScope, $scope, config, indexPattern;
+  var $parentScope, $scope, config, indexPattern, indexPatternList;
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   var init = function ($elem, props) {
@@ -35,6 +35,7 @@ define(function (require) {
       '  data="data"' +
       '  filter="filter"' +
       '  index-pattern="indexPattern"' +
+      '  index-pattern-list="indexPatternList"' +
       '  state="state">' +
       '</disc-field-chooser>'
     );
@@ -43,6 +44,7 @@ define(function (require) {
     beforeEach(function () {
       inject(function (Private) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        indexPatternList = [ 'b', 'a', 'c' ];
       });
 
       var hits = _.each(require('fixtures/hits.js'), indexPattern.flattenHit);
@@ -52,7 +54,8 @@ define(function (require) {
         toggle: sinon.spy(),
         data: hits,
         filter: sinon.spy(),
-        indexPattern: indexPattern
+        indexPattern: indexPattern,
+        indexPatternList: indexPatternList
       });
 
       $scope.$digest();
@@ -69,6 +72,13 @@ define(function (require) {
         unpopular: $('.discover-unpopular-fields', ctx),
       };
     };
+
+    describe('Index list', function () {
+      it('should be in alphabetical order', function (done) {
+        expect($elem.find('li.sidebar-item-title').text()).to.be('abc');
+        done();
+      });
+    });
 
     describe('Field listing', function () {
       it('should have Selected Fields, Fields and Popular Fields sections', function (done) {

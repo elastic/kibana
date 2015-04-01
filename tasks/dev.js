@@ -3,11 +3,10 @@ module.exports = function (grunt) {
 
   grunt.registerTask('dev', function () {
     var tasks = [
-      'less',
+      'less:dev',
       'jade',
       'esvm:dev',
-      'ruby_server',
-      'maybe_start_server',
+      'maybe_start_kibana',
       'watch'
     ];
 

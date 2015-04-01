@@ -93,7 +93,7 @@ visualize-spy {
   }
 
   .visualize-spy-container {
-    .flex(1, 0, auto);
+    .flex(1, 1, auto);
 
     .display(flex);
     .flex-direction(column);
@@ -103,6 +103,11 @@ visualize-spy {
 
     header {
       padding: 0 0 15px;
+    }
+
+    header + * {
+      .flex(1, 1, auto);
+      overflow: auto;
     }
 
     > .alert {
@@ -123,6 +128,31 @@ visualize-spy {
 
     a.btn {
       margin: @padding-small-vertical @padding-small-vertical;
+    }
+  }
+
+  .visualize-spy-content {
+    position: relative;
+
+    .visualize-spy-loading {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      text-align: center;
+
+      &-text {
+        display: inline-block;
+        margin: 0;
+        background: @alert-info-bg;
+        color: @alert-info-text;
+        padding: 5px 10px;
+        border-radius: @border-radius-base;
+
+        .spinner > * {
+          background-color: @alert-info-text;
+        }
+      }
     }
   }
 

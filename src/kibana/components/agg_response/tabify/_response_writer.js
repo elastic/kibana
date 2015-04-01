@@ -4,7 +4,13 @@ define(function (require) {
     var Table = Private(require('components/agg_response/tabify/_table'));
     var TableGroup = Private(require('components/agg_response/tabify/_table_group'));
     var getColumns = Private(require('components/agg_response/tabify/_get_columns'));
+
     var AggConfigResult = require('components/vis/_agg_config_result');
+
+    _(SplitAcr).inherits(AggConfigResult);
+    function SplitAcr(agg, parent, key) {
+      SplitAcr.Super.call(this, agg, parent, key, key);
+    }
 
     /**
      * Writer class that collects information about an aggregation response and
@@ -103,35 +109,7 @@ define(function (require) {
 
         var splitAcr = false;
         if (self.asAggConfigResults) {
-          // find the previous split so this split can follow it
-          var lastSplitI = _.findIndex(self.acrStack, { $$_fromSplit: true });
-          var lastSplit = self.acrStack[lastSplitI];
-
-          // create the acr for this split
-          splitAcr = new AggConfigResult(agg, lastSplit, key, key);
-          // tag so we can find this later
-          splitAcr.$$_fromSplit = true;
-
-          // inject our new acr into the stack
-          if (lastSplit) {
-            self.acrStack.splice(lastSplitI, 0, splitAcr);
-          } else {
-            self.acrStack.push(splitAcr);
-          }
-
-          // rebuild any acrs that have new parents
-          self.acrStack.forEach(function (acr, i, stack) {
-            var parent = stack[i + 1];
-            if (acr.$$_fromSplit || acr.$parent === parent) return;
-
-            var newAcr = new AggConfigResult(acr.aggConfig, parent, acr.value, acr.key);
-            // replace the acr in the stack
-            stack[i] = newAcr;
-
-            // and replace the acr in the row buffer if its there
-            var rowI = self.rowBuffer.indexOf(acr);
-            if (rowI > -1) self.rowBuffer[rowI] = newAcr;
-          });
+          splitAcr = self._injectParentSplit(agg, key);
         }
 
         // push the split onto the stack so that it will receive written tables
@@ -166,6 +144,60 @@ define(function (require) {
       });
 
       if (mI > -1) this.aggStack.splice(mI, 1);
+    };
+
+    /**
+     * When a split is found while building the aggConfigResult tree, we
+     * want to push the split into the tree at another point. Since each
+     * branch in the tree is a double-linked list we need do some special
+     * shit to pull this off.
+     *
+     * @private
+     * @param {AggConfig} - The agg which produced the split bucket
+     * @param {any} - The value which identifies the bucket
+     * @return {SplitAcr} - the AggConfigResult created for the split bucket
+     */
+    TabbedAggResponseWriter.prototype._injectParentSplit = function (agg, key) {
+      var oldList = this.acrStack;
+      var newList = this.acrStack = [];
+
+      // walk from right to left through the old stack
+      // and move things to the new stack
+      var injected = false;
+
+      if (!oldList.length) {
+        injected = new SplitAcr(agg, null, key);
+        newList.unshift(injected);
+        return injected;
+      }
+
+      // walk from right to left, emptying the previous list
+      while (oldList.length) {
+        var acr = oldList.pop();
+
+        // ignore other splits
+        if (acr instanceof SplitAcr) {
+          newList.unshift(acr);
+          continue;
+        }
+
+        // inject the split
+        if (!injected) {
+          injected = new SplitAcr(agg, newList[0], key);
+          newList.unshift(injected);
+        }
+
+        var newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
+        newList.unshift(newAcr);
+
+        // and replace the acr in the row buffer if its there
+        var rowI = this.rowBuffer.indexOf(acr);
+        if (rowI > -1) {
+          this.rowBuffer[rowI] = newAcr;
+        }
+      }
+
+      return injected;
     };
 
     /**

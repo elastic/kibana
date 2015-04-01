@@ -3,6 +3,11 @@
         ng-class="{'hide-errors': hideErrors}"
         ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
         name="visualizeEditor">
+
+    <div css-truncate css-truncate-expandable="true" ng-if="vis.type.requiresSearch" class="index-pattern">
+      {{ indexPattern.id }}
+    </div>
+
     <ul class="list-unstyled">
       <!-- metrics -->
       <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
@@ -17,26 +22,27 @@
       </vis-editor-vis-options>
 
       <!-- apply/discard -->
-      <li class="vis-editor-sidebar-buttons sidebar-item">
-        <p
-          ng-if="visualizeEditor.$invalid"
-          class="text-center text-danger sidebar-item-text">
-          <i class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
-        </p>
-        <button
-          ng-disabled="!vis.dirty || visualizeEditor.$invalid"
-          type="submit"
-          class="sidebar-item-button success">
-          Apply
-        </button>
-        <button
-          ng-disabled="!vis.dirty"
-          type="button"
-          ng-click="resetEditableVis()"
-          class="sidebar-item-button default">
-          Discard
-        </button>
-      </li>
     </ul>
+    <div class="vis-editor-sidebar-buttons">
+      <p
+        ng-if="visualizeEditor.$invalid"
+        class="text-center text-danger sidebar-item-text">
+        <i aria-hidden="true" class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
+      </p>
+      <button
+        ng-disabled="!vis.dirty || visualizeEditor.$invalid"
+        type="submit"
+        class="sidebar-item-button success">
+        Apply
+      </button>
+      <button
+        ng-disabled="!vis.dirty"
+        type="button"
+        ng-click="resetEditableVis()"
+        class="sidebar-item-button default">
+        Discard
+      </button>
+    </div>
   </form>
 </div>
+

@@ -4,6 +4,10 @@ define(function (require) {
     var sinon = require('sinon/sinon');
     var IndexedArray = require('utils/indexed_array/index');
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+    var flattenHit = require('components/index_patterns/_flatten_hit');
+    var getComputedFields = require('components/index_patterns/_get_computed_fields');
+
 
     function StubIndexPattern(pattern, timeField, fields) {
       this.popularizeField = sinon.spy();
@@ -27,6 +31,10 @@ define(function (require) {
       });
       this.getFields = sinon.spy();
       this.toIndexList = _.constant([pattern]);
+      this.getComputedFields = getComputedFields;
+      this.flattenSearchResponse = flattenSearchResponse;
+      this.flattenHit = flattenHit;
+      this.metaFields = ['_id', '_type', '_source'];
     }
 
     return StubIndexPattern;

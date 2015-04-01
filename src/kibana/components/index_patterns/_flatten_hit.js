@@ -23,14 +23,14 @@ define(function (require) {
       });
     }(hit._source));
 
-    // unwrap computed fields
-    _.forOwn(hit.fields, function (val, key) {
-      flat[key] = val[0];
-    });
-
     // assign the meta fields
     _.each(indexPattern.metaFields, function (meta) {
       flat[meta] = hit[meta];
+    });
+
+    // unwrap computed fields
+    _.forOwn(hit.fields, function (val, key) {
+      flat[key] = val[0];
     });
 
     return flat;

@@ -1,6 +1,8 @@
 define(function (require) {
-  return function DispatchClass(d3) {
+  return function DispatchClass(d3, Private) {
     var _ = require('lodash');
+    var $ = require('jquery');
+    var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
 
     /**
      * Handles event responses
@@ -17,7 +19,7 @@ define(function (require) {
 
       this.handler = handler;
       this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover');
+        'mousedown', 'mouseover', 'mouseout');
     }
 
     /**
@@ -41,19 +43,7 @@ define(function (require) {
       var color = handler.data.color;
       var isPercentage = (handler._attr.mode === 'percentage');
 
-      if (isSeries) {
-        // Find object with the actual d value and add it to the point object
-        var object = _.find(series, { 'label': d.label });
-        d.value = +object.values[i].y;
-
-        if (isPercentage) {
-
-          // Add the formatted percentage to the point object
-          d.percent = (100 * d.y).toFixed(1) + '%';
-        }
-      }
-
-      return {
+      var eventData = {
         value: d.y,
         point: datum,
         datum: datum,
@@ -67,6 +57,19 @@ define(function (require) {
         e: d3.event,
         handler: handler
       };
+
+      if (isSeries) {
+        // Find object with the actual d value and add it to the point object
+        var object = _.find(series, { 'label': d.label });
+        eventData.value = +object.values[i].y;
+
+        if (isPercentage) {
+          // Add the formatted percentage to the point object
+          eventData.percent = (100 * d.y).toFixed(1) + '%';
+        }
+      }
+
+      return eventData;
     };
 
     /**
@@ -89,6 +92,7 @@ define(function (require) {
       };
     };
 
+
     /**
      *
      * @method addHoverEvent
@@ -98,6 +102,7 @@ define(function (require) {
       var self = this;
       var isClickable = (this.dispatch.on('click'));
       var addEvent = this.addEvent;
+      var $el = this.handler.el;
 
       function hover(d, i) {
         d3.event.stopPropagation();
@@ -107,10 +112,30 @@ define(function (require) {
           self.addMousePointer.call(this, arguments);
         }
 
+        self.highlightLegend.call(this, $el);
         self.dispatch.hover.call(this, self.eventResponse(d, i));
       }
 
       return addEvent('mouseover', hover);
+    };
+
+    /**
+     *
+     * @method addMouseoutEvent
+     * @returns {Function}
+     */
+    Dispatch.prototype.addMouseoutEvent = function () {
+      var self = this;
+      var addEvent = this.addEvent;
+      var $el = this.handler.el;
+
+      function mouseout() {
+        d3.event.stopPropagation();
+
+        self.unHighlightLegend.call(this, $el);
+      }
+
+      return addEvent('mouseout', mouseout);
     };
 
     /**
@@ -158,10 +183,14 @@ define(function (require) {
      */
     Dispatch.prototype.addBrushEvent = function (svg) {
       if (!this.isBrushable()) return;
+
       var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.xAxis.yScale;
       var brush = this.createBrush(xScale, svg);
 
       function brushEnd() {
+        if (!validBrushClick(d3.event)) return;
+
         var bar = d3.select(this);
         var startX = d3.mouse(svg.node());
         var startXInv = xScale.invert(startX[0]);
@@ -182,13 +211,45 @@ define(function (require) {
 
 
     /**
-     * Mouse over Behavior
+     * Mouseover Behavior
      *
      * @method addMousePointer
      * @returns {D3.Selection}
      */
     Dispatch.prototype.addMousePointer = function () {
       return d3.select(this).style('cursor', 'pointer');
+    };
+
+    /**
+     * Mouseover Behavior
+     *
+     * @param element {D3.Selection}
+     * @method highlightLegend
+     */
+    Dispatch.prototype.highlightLegend = function (element) {
+      var classList = d3.select(this).node().classList;
+      var liClass = d3.select(this).node().classList[1];
+
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .filter(function (d, i) {
+          return d3.select(this).node().classList[1] !== liClass;
+        })
+        .classed('blur_shape', true);
+    };
+
+    /**
+     * Mouseout Behavior
+     *
+     * @param element {D3.Selection}
+     * @method unHighlightLegend
+     */
+    Dispatch.prototype.unHighlightLegend = function (element) {
+      d3.select(element)
+        .select('.legend-ul')
+        .selectAll('li.color')
+        .classed('blur_shape', false);
     };
 
     /**
@@ -206,39 +267,52 @@ define(function (require) {
 
       // Brush scale
       var brush = d3.svg.brush()
-        .x(xScale)
-        .on('brushend', function brushEnd() {
+      .x(xScale)
+      .on('brushend', function brushEnd() {
 
-          // Assumes data is selected at the chart level
-          // In this case, the number of data objects should always be 1
-          var data = d3.select(this).data()[0];
-          var isTimeSeries = (data.ordered && data.ordered.date);
+        // Assumes data is selected at the chart level
+        // In this case, the number of data objects should always be 1
+        var data = d3.select(this).data()[0];
+        var isTimeSeries = (data.ordered && data.ordered.date);
 
-          // Allows for brushing on d3.scale.ordinal()
-          var selected = xScale.domain().filter(function (d) {
-            return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
-          });
-          var range = isTimeSeries ? brush.extent() : selected;
-
-          return dispatch.brush({
-            range: range,
-            config: attr,
-            e: d3.event,
-            data: data
-          });
+        // Allows for brushing on d3.scale.ordinal()
+        var selected = xScale.domain().filter(function (d) {
+          return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
         });
+        var range = isTimeSeries ? brush.extent() : selected;
+
+        return dispatch.brush({
+          range: range,
+          config: attr,
+          e: d3.event,
+          data: data
+        });
+      });
 
       // if `addBrushing` is true, add brush canvas
       if (dispatch.on('brush')) {
         svg.insert('g', 'g')
-          .attr('class', 'brush')
-          .call(brush)
-          .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
+        .attr('class', 'brush')
+        .call(brush)
+        .call(function (brushG) {
+          // hijack the brush start event to filter out right/middle clicks
+          var brushHandler = brushG.on('mousedown.brush');
+          if (!brushHandler) return; // touch events in use
+          brushG.on('mousedown.brush', function () {
+            if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
+          });
+        })
+        .selectAll('rect')
+        .attr('height', height - margin.top - margin.bottom);
 
         return brush;
       }
     };
+
+    function validBrushClick(event) {
+      return event.button === 0;
+    }
+
 
     return Dispatch;
   };

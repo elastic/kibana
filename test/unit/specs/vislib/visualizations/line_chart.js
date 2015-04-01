@@ -4,18 +4,24 @@ define(function (require) {
   var $ = require('jquery');
 
   // Data
-  var series = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var seriesPos = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var seriesPosNeg = require('vislib_fixtures/mock_data/date_histogram/_series_pos_neg');
+  var seriesNeg = require('vislib_fixtures/mock_data/date_histogram/_series_neg');
   var histogramColumns = require('vislib_fixtures/mock_data/histogram/_columns');
   var rangeRows = require('vislib_fixtures/mock_data/range/_rows');
   var termSeries = require('vislib_fixtures/mock_data/terms/_series');
   var dateHistogramArray = [
-    series,
+    seriesPos,
+    seriesPosNeg,
+    seriesNeg,
     histogramColumns,
     rangeRows,
     termSeries,
   ];
   var names = [
-    'series',
+    'series pos',
+    'series pos neg',
+    'series neg',
     'histogram columns',
     'range rows',
     'term series',
@@ -29,7 +35,8 @@ define(function (require) {
       var visLibParams = {
         type: 'line',
         addLegend: true,
-        addTooltip: true
+        addTooltip: true,
+        drawLinesBetweenPoints: true
       };
 
       beforeEach(function () {
@@ -41,9 +48,7 @@ define(function (require) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
 
-          vis.on('brush', function (e) {
-            console.log(e);
-          });
+          vis.on('brush', _.noop);
 
           vis.render(data);
         });
@@ -65,7 +70,7 @@ define(function (require) {
         beforeEach(function () {
           inject(function (d3) {
             vis.handler.charts.forEach(function (chart) {
-              circle = $(chart.chartEl).find('circle')[0];
+              circle = $(chart.chartEl).find('.circle')[0];
               brush = $(chart.chartEl).find('.brush');
               d3selectedCircle = d3.select(circle)[0][0];
 
@@ -133,6 +138,25 @@ define(function (require) {
             expect(chart.draw()).to.be.a(Function);
           });
         });
+
+        it('should return a yMin and yMax', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            expect(yAxis.yMin).to.not.be(undefined);
+            expect(yAxis.yMax).to.not.be(undefined);
+          });
+        });
+
+        it('should render a zero axis line', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+
+            if (yAxis.yMin < 0 && yAxis.yMax > 0) {
+              expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
+            }
+          });
+        });
       });
 
       describe('containerTooSmall error', function () {
@@ -150,6 +174,22 @@ define(function (require) {
         });
       });
 
+      describe('defaultYExtents is true', function () {
+        beforeEach(function () {
+          vis._attr.defaultYExtents = true;
+          vis.render(data);
+        });
+
+        it('should return yAxis extents equal to data extents', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var yAxis = chart.handler.yAxis;
+            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+
+            expect(yAxis.yMin).to.equal(yVals[0]);
+            expect(yAxis.yMax).to.equal(yVals[1]);
+          });
+        });
+      });
     });
   });
 });

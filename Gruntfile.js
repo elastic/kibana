@@ -14,8 +14,8 @@ module.exports = function (grunt) {
     buildApp: __dirname + '/build/kibana', // build directory for the app
     configFile: __dirname + '/src/server/config/kibana.yml',
 
-    jrubyVersion: '1.7.14',
-    jrubyPath: __dirname + '/.jruby',
+    nodeVersion: '0.10.35',
+    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
 
     unitTestDir: __dirname + '/test/unit',
     testUtilsDir: __dirname + '/test/utils',
@@ -29,7 +29,22 @@ module.exports = function (grunt) {
         '<%= package.homepage ? " * " + package.homepage + "\\n" : "" %>' +
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
-    }
+    },
+
+    lessFiles: [
+      '<%= src %>/kibana/components/*/*.less',
+      '<%= src %>/kibana/styles/main.less',
+      '<%= src %>/kibana/components/vislib/styles/main.less',
+      '<%= plugins %>/dashboard/styles/main.less',
+      '<%= plugins %>/discover/styles/main.less',
+      '<%= plugins %>/settings/styles/main.less',
+      '<%= plugins %>/visualize/styles/main.less',
+      '<%= plugins %>/visualize/styles/visualization.less',
+      '<%= plugins %>/visualize/styles/main.less',
+      '<%= plugins %>/table_vis/table_vis.less',
+      '<%= plugins %>/metric_vis/metric_vis.less',
+      '<%= plugins %>/markdown_vis/markdown_vis.less'
+    ]
   };
 
   grunt.config.merge(config);

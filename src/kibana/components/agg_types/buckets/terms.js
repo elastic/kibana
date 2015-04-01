@@ -12,9 +12,16 @@ define(function (require) {
         group: 'none',
         name: 'orderAgg',
         title: 'Order Agg',
-        aggFilter: '!percentiles'
+        aggFilter: ['!percentiles', '!std_dev']
       }
     ])).all[0];
+
+    function isNotType(type) {
+      return function (agg) {
+        var field = agg.params.field;
+        return !field || field.type !== type;
+      };
+    }
 
     return new BucketAggType({
       name: 'terms',
@@ -34,17 +41,13 @@ define(function (require) {
           name: 'exclude',
           type: 'regex',
           advanced: true,
-          disabled: function (aggConfig) {
-            return aggConfig.params.field.type !== 'string';
-          }
+          disabled: isNotType('string')
         },
         {
           name: 'include',
           type: 'regex',
           advanced: true,
-          disabled: function (aggConfig) {
-            return aggConfig.params.field.type !== 'string';
-          }
+          disabled: isNotType('string')
         },
         {
           name: 'size',

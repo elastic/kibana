@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
     var errors = require('errors');
 
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     require('css!components/vislib/styles/main');
 
     /**
@@ -17,7 +17,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(LineChart).inherits(Chart);
+    _(LineChart).inherits(PointSeriesChart);
     function LineChart(handler, chartEl, chartData) {
       if (!(this instanceof LineChart)) {
         return new LineChart(handler, chartEl, chartData);
@@ -45,8 +45,9 @@ define(function (require) {
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(click);
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -65,25 +66,32 @@ define(function (require) {
      */
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
+      var showCircles = this._attr.showCircles;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var circleRadius = 4;
-      var circleStrokeWidth = 1;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
-      var layer;
-      var circles;
+      var radii = _(data)
+        .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
+        .flatten()
+        .reduce(function (result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        }, {min: Infinity, max: -Infinity});
 
-      layer = svg.selectAll('.points')
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
+
+      var layer = svg.selectAll('.points')
       .data(data)
       .enter()
         .append('g')
         .attr('class', 'points line');
 
-      circles = layer
-      .selectAll('rect')
+      var circles = layer
+      .selectAll('circle')
       .data(function appendData(d) {
         return d;
       });
@@ -92,31 +100,66 @@ define(function (require) {
       .exit()
       .remove();
 
-      circles
-      .enter()
-        .append('circle')
-        .attr('class', function circleClass(d) {
-          return self.colorToClass(color(d.label));
-        })
-        .attr('fill', function (d) {
-          return color(d.label);
-        })
-        .attr('stroke', function strokeColor(d) {
-          return color(d.label);
-        })
-        .attr('stroke-width', circleStrokeWidth);
-
-      circles
-      .attr('cx', function cx(d) {
+      function cx(d) {
         if (ordered && ordered.date) {
           return xScale(d.x);
         }
         return xScale(d.x) + xScale.rangeBand() / 2;
-      })
-      .attr('cy', function cy(d) {
+      }
+
+      function cy(d) {
         return yScale(d.y);
-      })
-      .attr('r', circleRadius);
+      }
+
+      function cColor(d) {
+        return color(d.label);
+      }
+
+      function colorCircle(d) {
+        var parent = d3.select(this).node().parentNode;
+        var lengthOfParent = d3.select(parent).data()[0].length;
+        var isVisible = (lengthOfParent === 1);
+
+        // If only 1 point exists, show circle
+        if (!showCircles && !isVisible) return 'none';
+        return cColor(d);
+      }
+      function getCircleRadiusFn(modifier) {
+        return function getCircleRadius(d) {
+          var margin = self._attr.margin;
+          var width = self._attr.width - margin.left - margin.right;
+          var height = self._attr.height - margin.top - margin.bottom;
+          var circleRadius = (d._input.z - radii.min) / radiusStep;
+
+          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
+        };
+      }
+
+
+      circles
+      .enter()
+        .append('circle')
+        .attr('r', getCircleRadiusFn())
+        .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('fill', colorCircle)
+        .attr('class', function circleClass(d) {
+          return 'circle-decoration ' + self.colorToClass(color(d.label));
+        });
+
+      circles
+      .enter()
+        .append('circle')
+        .attr('r', getCircleRadiusFn(10))
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('fill', 'transparent')
+        .attr('class', function circleClass(d) {
+          return 'circle ' + self.colorToClass(color(d.label));
+        })
+        .attr('stroke', cColor)
+        .attr('stroke-width', 0);
 
       if (isTooltip) {
         circles.call(tooltip.render());
@@ -163,7 +206,7 @@ define(function (require) {
 
       lines.append('path')
       .attr('class', function lineClass(d) {
-        return self.colorToClass(color(d.label));
+        return 'color ' + self.colorToClass(color(d.label));
       })
       .attr('d', function lineD(d) {
         return line(d.values);
@@ -217,8 +260,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
-      var xScale = this.handler.xAxis.xScale;
-      var chartToSmallError = 'The height and/or width of this container is too small for this chart.';
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
       var startLineX = 0;
@@ -261,13 +304,30 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+          if (yMin < 0) {
+
+            // Draw line at yScale 0 value
+            svg.append('line')
+              .attr('class', 'zero-line')
+              .attr('x1', 0)
+              .attr('y1', yScale(0))
+              .attr('x2', width)
+              .attr('y2', yScale(0))
+              .style('stroke', '#ddd')
+              .style('stroke-width', 1);
+          }
+
           self.addClipPath(svg, width, height);
-          lines = self.addLines(svg, data.series);
+          if (self._attr.drawLinesBetweenPoints) {
+            lines = self.addLines(svg, data.series);
+          }
           circles = self.addCircles(svg, layers);
           self.addCircleEvents(circles, svg);
+          self.createEndZones(svg);
 
           var line = svg
           .append('line')
+          .attr('class', 'base-line')
           .attr('x1', startLineX)
           .attr('y1', height)
           .attr('x2', width)

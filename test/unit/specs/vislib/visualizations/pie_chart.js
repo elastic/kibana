@@ -47,6 +47,79 @@ define(function (require) {
     120
   ];
 
+  describe('No global chart settings', function () {
+    var visLibParams1 = {
+      el: '<div class=chart1></div>',
+      type: 'pie',
+      addLegend: true,
+      addTooltip: true
+    };
+    var visLibParams2 = {
+      el: '<div class=chart2></div>',
+      type: 'pie',
+      addLegend: true,
+      addTooltip: true
+    };
+    var chart1;
+    var chart2;
+    var Vis;
+    var indexPattern;
+    var buildHierarchicalData;
+    var data1;
+    var data2;
+
+    beforeEach(function () {
+      module('PieChartFactory');
+    });
+
+    beforeEach(function () {
+      inject(function (d3, Private) {
+        chart1 = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams1);
+        chart2 = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams2);
+        Vis = Private(require('components/vis/vis'));
+        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
+        require('css!components/vislib/styles/main');
+
+        var id_1 = 1;
+        var id_2 = 1;
+        var stubVis1 = new Vis(indexPattern, {
+          type: 'pie',
+          aggs: rowAgg
+        });
+        var stubVis2 = new Vis(indexPattern, {
+          type: 'pie',
+          aggs: colAgg
+        });
+
+        // We need to set the aggs to a known value.
+        _.each(stubVis1.aggs, function (agg) {
+          agg.id = 'agg_' + id_1++;
+        });
+        _.each(stubVis2.aggs, function (agg) {
+          agg.id = 'agg_' + id_2++;
+        });
+
+        data1 = buildHierarchicalData(stubVis1, fixtures.threeTermBuckets);
+        data2 = buildHierarchicalData(stubVis2, fixtures.threeTermBuckets);
+
+        chart1.render(data1);
+        chart2.render(data2);
+      });
+    });
+
+    afterEach(function () {
+      $('.visualize-chart').remove();
+      chart1 = null;
+      chart2 = null;
+    });
+
+    it('should render chart titles for all charts', function () {
+      expect($(chart1.el).find('.y-axis-chart-title').length).to.be(1);
+      expect($(chart2.el).find('.x-axis-chart-title').length).to.be(1);
+    });
+  });
+
   aggArray.forEach(function (dataAgg, i) {
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
       var visLibParams = {

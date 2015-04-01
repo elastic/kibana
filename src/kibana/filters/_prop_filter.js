@@ -24,26 +24,30 @@ define(function (require) {
       if (!_.isArray(filters)) filters = filters.split(',');
       if (_.contains(filters, '*')) return list;
 
-      filters = filters.map(function (filter) {
-        var match = true;
+      var options = filters.reduce(function (options, filter) {
+        var type = 'include';
         var value = filter;
 
         if (filter.charAt(0) === '!') {
-          match = false;
+          type = 'exclude';
           value = filter.substr(1);
         }
 
-        return {
-          match: match,
-          value: value
-        };
-      });
+        if (!options[type]) options[type] = [];
+        options[type].push(value);
+        return options;
+      }, {});
 
       return list.filter(function (item) {
-        for (var i = 0; i < filters.length; i++) {
-          var filter = filters[i];
-          if ((item[prop] === filter.value) === filter.match) return true;
-        }
+        var value = item[prop];
+
+        var excluded = options.exclude && _.contains(options.exclude, value);
+        if (excluded) return false;
+
+        var included = !options.include || _.contains(options.include, value);
+        if (included) return true;
+
+        return false;
       });
     };
   }

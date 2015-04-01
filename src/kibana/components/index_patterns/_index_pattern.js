@@ -118,6 +118,10 @@ define(function (require) {
                 // enumerable properties end up in the JSON
                 enumerable: true,
                 value: !!field.scripted
+              },
+              lang: {
+                enumerable: true,
+                value: field.scripted ? field.lang || 'expression' : undefined
               }
             });
 
@@ -136,7 +140,7 @@ define(function (require) {
         }
       };
 
-      self.addScriptedField = function (name, script, type) {
+      self.addScriptedField = function (name, script, type, lang) {
         type = type || 'string';
 
         var scriptFields = _.pluck(self.getFields('scripted'), 'name');
@@ -150,6 +154,7 @@ define(function (require) {
           script: script,
           type: type,
           scripted: true,
+          lang: lang
         });
 
         self.save();

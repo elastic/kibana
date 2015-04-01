@@ -13,9 +13,6 @@
 // bootstrap modifications
 @import "./theme/_theme.less";
 
-// chosen
-@import "./_ui_select.less";
-
 // call outs
 @import "./_callout.less";
 
@@ -34,6 +31,7 @@
 @import "./_sidebar.less";
 @import "./_truncate.less";
 @import "./_control_group.less";
+@import "./_hintbox.less";
 
 html,
 body {
@@ -80,6 +78,10 @@ button {
 .text-color-danger {
   color: @brand-danger;
 }
+
+// alias for alert types - allows class="fa fa-{{alertType}}"
+.fa-success:before { content: @fa-var-check; }
+.fa-danger:before { content: @fa-var-exclamation-circle; }
 
 ul.navbar-inline li {
   display: inline;
@@ -274,6 +276,16 @@ notifications {
   text-shadow: none;
 }
 
+.kbn-timepicker .refresh-interval {
+  padding: 0.2em 0.4em;
+  border-radius: @border-radius-small;
+}
+
+.kbn-timepicker .refresh-interval-active {
+  background-color: @btn-info-bg;
+  color: @btn-info-color;
+}
+
 //== Table
 
 kbn-table, .kbn-table {
@@ -432,6 +444,10 @@ input[type="checkbox"],
 
 textarea {
   resize: vertical;
+}
+
+.initial-load {
+  margin-top: 60px;
 }
 
 .field-collapse-toggle {

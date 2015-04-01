@@ -6,7 +6,7 @@ The process for contributing to any of the Elasticsearch repositories is similar
 
 ### Sign the contributor license agreement
 
-Please make sure you have signed the [Contributor License Agreement](http://www.elasticsearch.org/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
+Please make sure you have signed the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
 #### Development Environment Setup
 
@@ -17,31 +17,16 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install 0.10
   ```
 
-- Install ruby *1.9.3* (we recommend using [rbenv](https://github.com/sstephenson/rbenv))
-  - See [rbenv docs](https://github.com/sstephenson/rbenv#installation) for installation assistance
-  
-    ```sh
-    ## install ruby and ruby-build using your local package manager (apt, brew, etc)
-    brew install rbenv ruby-build
-    ```
-    
-  - Run `rbenv init` and add `eval "$(rbenv init -)"` to your shell (ex. .bashrc/.bash_profile)
-  - Run `rbenv install` to install the required version
-  - Run `ruby -v` and make sure you are using 1.9.3
-    - Check the installation docs if you have issues getting the correct version
-  - Install bundler by running `gem install bundler`
-  - Install local gems by running `bundle`
-
-- Install grunt and bower globally
+- Install grunt and bower globally (as root if not using nvm)
 
   ```sh
   npm install -g grunt-cli bower
   ```
 
-- Install node, bower, and ruby dependencies
+- Install node and bower dependencies
 
   ```sh
-  npm install && bower install && bundle
+  npm install && bower install
   ```
 
 - Start the development server.

@@ -27,7 +27,8 @@ define(function (require) {
         depth: depth,
         field: field,
         bucket: bucket,
-        metric: item.value
+        metric: item.size,
+        item: item
       });
 
       // If the item has a parent and it's also a child then continue walking

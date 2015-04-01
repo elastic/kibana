@@ -1,5 +1,9 @@
 <div class="form-group regex">
-  <label>JSON Input</label>
+    <span class="hintbox-label" ng-click="showJsonHint = !showJsonHint">
+      <label>JSON Input</label>
+      <i class="fa fa-info-circle"></i>
+    </span>
+    <div class="hintbox" ng-show="showJsonHint">Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example <i>shard_size</i> on a <i>terms</i> aggregation</div>
   <p>
     <textarea
       type="text"
@@ -7,6 +11,5 @@
       ng-model="agg.params.json"
       validate-json
       ></textarea>
-      <small>Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example <i>shard_size</i> on a <i>terms</i> aggregation</small>
   </p>
 </div>

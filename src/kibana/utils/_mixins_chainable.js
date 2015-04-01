@@ -207,6 +207,54 @@ define(function (require) {
 
       // place the obj at it's new index
       objs.splice(targetI, 0, objs.splice(origI, 1)[0]);
-    }
+    },
+
+    /**
+     * Like _.groupBy, but allows specifying multiple groups for a
+     * single object.
+     *
+     * _.organizeBy([{ a: [1, 2, 3] }, { b: true, a: [1, 4] }], 'a')
+     * // Object {1: Array[2], 2: Array[1], 3: Array[1], 4: Array[1]}
+     *
+     * _.groupBy([{ a: [1, 2, 3] }, { b: true, a: [1, 4] }], 'a')
+     * // Object {'1,2,3': Array[1], '1,4': Array[1]}
+     *
+     * @param  {array} collection - the list of values to organize
+     * @param  {Function} callback - either a property name, or a callback.
+     * @return {object}
+     */
+    organizeBy: function (collection, callback) {
+      var buckets = {};
+      var prop = typeof callback === 'function' ? false : callback;
+
+      function add(key, obj) {
+        if (!buckets[key]) buckets[key] = [];
+        buckets[key].push(obj);
+      }
+
+      _.each(collection, function (obj) {
+        var keys = prop === false ? callback(obj) : obj[prop];
+
+        if (!_.isArray(keys)) {
+          add(keys, obj);
+          return;
+        }
+
+        var length = keys.length;
+        while (length-- > 0) {
+          add(keys[length], obj);
+        }
+      });
+
+      return buckets;
+    },
+
+    /**
+     * Shortcut for the simple version of _.deepGet
+     * @return {any}
+     */
+    get: function (obj, path) {
+      return _.deepGet(obj, path);
+    },
   };
 });

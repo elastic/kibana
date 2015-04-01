@@ -25,7 +25,11 @@
           </td>
 
           <td>
-            <i bo-if="!mapping[field] && !showArrayInObjectsWarning(doc, field)"
+            <i bo-if="!mapping[field] && field[0] === '_'"
+              tooltip-placement="top"
+              tooltip="Field names beginning with _ are not supported"
+              class="fa fa-warning text-color-warning ng-scope doc-viewer-underscore"></i>
+            <i bo-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
               tooltip-placement="top"
               tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
               class="fa fa-warning text-color-warning ng-scope doc-viewer-no-mapping"></i>
@@ -33,7 +37,9 @@
               tooltip-placement="top"
               tooltip="Objects in arrays are not well supported."
               class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
-            <span class="doc-viewer-value" ng-bind-html="(formatted[field] || hit[field]) | highlight : hit.highlight[field] | trustAsHtml"></span>
+            <span class="doc-viewer-value" ng-bind-html="(typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field]) | highlight : hit.highlight[field] | trustAsHtml"></span>
+
+
           </td>
         </tr>
       </tbody>

@@ -6,17 +6,17 @@
         ng-dblclick="unlink()"
         tooltip="Double click to unlink this visualization from the saved search"
         class="bitty-modal visualize-linked">
-        <i class="fa fa-link"></i>
+        <i aria-hidden="true" class="fa fa-link"></i>
         &nbsp;
         This visualization is linked to a saved search:
-        <b>{{ savedVis.savedSearchId | json}}</b>
+        <b>{{ savedVis.savedSearch.title }}</b>
       </div>
 
       <div
         ng-if="vis.type.requiresSearch && unlinking"
         ng-click="clearUnlinking()"
         class="bitty-modal">
-        <i class="fa fa-chain-broken"></i> Unlinked!
+        <i aria-hidden="true" class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
       <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form" name="queryInput">
@@ -29,8 +29,8 @@
 
             <button
               class="btn btn-default" type="submit"
-              ng-disabled="true">
-              <span class="fa fa-search"></span>
+              ng-disabled="true" aria-label="Search">
+              <span aria-hidden="true" class="fa fa-search"></span>
             </button>
           </div>
         </div>
@@ -55,8 +55,8 @@
 
             <button
               class="btn btn-default" type="submit"
-              ng-disabled="queryInput.$invalid">
-              <span class="fa fa-search"></span>
+              ng-disabled="queryInput.$invalid" aria-label="Search">
+              <span aria-hidden="true" class="fa fa-search"></span>
             </button>
           </div>
           <kbn-typeahead-items></kbn-typeahead-items>
@@ -66,29 +66,45 @@
 
     <div class="button-group">
       <kbn-tooltip text="New Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="startOver()"><i class="fa fa-file-new-o"></i></button>
+        <button ng-click="startOver()" aria-label="New Visualization"><i aria-hidden="true" class="fa fa-file-new-o"></i></button>
       </kbn-tooltip>
 
       <kbn-tooltip text="Save Visualization" placement="bottom" append-to-body="1">
         <!-- normal save -->
-        <button ng-if="!editableVis.dirty" ng-click="configTemplate.toggle('save')">
-          <i class="fa fa-save"></i>
+        <button ng-if="!editableVis.dirty" ng-click="configTemplate.toggle('save')" aria-label="Save Visualization">
+          <i aria-hidden="true" class="fa fa-save"></i>
         </button>
 
         <!-- save stub with tooltip -->
-        <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving">
-          <i class="fa fa-save"></i>
+        <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving" aria-label="Apply or Discard your changes before saving">
+          <i aria-hidden="true" class="fa fa-save"></i>
         </button>
       </kbn-tooltip>
 
       <kbn-tooltip text="Load Saved Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="configTemplate.toggle('load')"><i class="fa fa-folder-open-o"></i></button>
+        <button
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('load') }}"
+          ng-click="configTemplate.toggle('load')"
+          aria-label="Load Saved Visualization">
+          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Share Visualization" placement="bottom" append-to-body="1">
-        <button ng-click="configTemplate.toggle('share')"><i class="fa fa-external-link"></i></button>
+        <button
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('share') }}"
+          ng-click="configTemplate.toggle('share')"
+          aria-label="Share Visualization">
+          <i aria-hidden="true" class="fa fa-external-link"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Refresh" placement="bottom" append-to-body="1">
-        <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
+        <button
+          ng-click="fetch()"
+          aria-label="Refresh">
+          <i aria-hidden="true" class="fa fa-refresh"></i>
+        </button>
       </kbn-tooltip>
     </div>
   </navbar>

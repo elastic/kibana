@@ -1,6 +1,7 @@
 define(function (require) {
   return function IntervalOptionsService(Private) {
     var moment = require('moment');
+    require('directives/input_whole_number');
 
     // shorthand
     var ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
@@ -9,44 +10,43 @@ define(function (require) {
       {
         display: 'Auto',
         val: 'auto',
-        enabled: function (aggConfig) {
-          return !!aggConfig.vis.indexPattern.timeFieldName;
+        enabled: function (agg) {
+          // not only do we need a time field, but the selected field needs
+          // to be the time field. (see #3028)
+          return agg.fieldIsTimeField();
         }
       },
       {
         display: 'Second',
-        val: 'second',
-        ms: ms('second')
+        val: 's'
       },
       {
         display: 'Minute',
-        val: 'minute',
-        ms: ms('minute')
+        val: 'm'
       },
       {
         display: 'Hourly',
-        val: 'hour',
-        ms: ms('hour')
+        val: 'h'
       },
       {
         display: 'Daily',
-        val: 'day',
-        ms: ms('day')
+        val: 'd'
       },
       {
         display: 'Weekly',
-        val: 'week',
-        ms: ms('week')
+        val: 'w'
       },
       {
         display: 'Monthly',
-        val: 'month',
-        ms: ms('month')
+        val: 'M'
       },
       {
         display: 'Yearly',
-        val: 'year',
-        ms: ms('year')
+        val: 'y'
+      },
+      {
+        display: 'Custom',
+        val: 'custom'
       }
     ];
   };
