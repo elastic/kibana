@@ -68,12 +68,8 @@ define(function (require) {
 
           if (self._attr.mapZoom) {
             mapZoom = self._attr.mapZoom;
-          } else {
-            self._attr.mapZoom = mapZoom;
           }
           if (self._attr.mapCenter) {
-            mapCenter = self._attr.mapCenter;
-          } else {
             mapCenter = self._attr.mapCenter;
           }
 
@@ -101,7 +97,6 @@ define(function (require) {
           };
 
           var map = L.map(div[0], mapOptions);
-          self.maps.push(map);
 
           tileLayer.on('tileload', function () {
             self.saturateTiles();
@@ -123,16 +118,6 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
-          // zoom to featureLayer data bounds
-          if (mapData.features.length > 0) {
-            if (!self._attr.firstFitBounds) {
-              map.fitBounds(featureLayer.getBounds());
-              self._attr.firstFitBounds = featureLayer.getBounds();
-            } else {
-              map.fitBounds(self._attr.firstFitBounds);
-            }
-          }
-
           // Add button to fit container to points
           var FitControl = L.Control.extend({
             options: {
@@ -151,6 +136,8 @@ define(function (require) {
           if (mapData && mapData.features.length > 0) {
             map.addControl(new FitControl());
           }
+
+          self.maps.push(map);
         });
       };
     };
@@ -164,8 +151,8 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.fitBounds = function (map, featureLayer) {
+
       map.fitBounds(featureLayer.getBounds());
-      this._attr.firstFitBounds = featureLayer.getBounds();
     };
 
     /**
@@ -607,11 +594,11 @@ define(function (require) {
      * tell leaflet that it's time to cleanup the map
      */
     TileMap.prototype.destroy = function () {
-      if (this.maps) {
-        this.maps.forEach(function (map) {
-          map.remove();
-        });
-      }
+      //if (this.maps) {
+      this.maps.forEach(function (map) {
+        map.remove();
+      });
+      //}
     };
 
     return TileMap;
