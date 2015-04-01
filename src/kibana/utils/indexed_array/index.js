@@ -9,6 +9,7 @@ define(function (require) {
   var inflectOrder = inflector('in', 'Order');
 
   var CLEAR_CACHE = {};
+  var OPT_NAMES = IndexedArray.OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
 
   /**
    * Generic extension of Array class, which will index (and reindex) the
@@ -29,7 +30,10 @@ define(function (require) {
   _(IndexedArray).inherits(Array);
   function IndexedArray(config) {
     IndexedArray.Super.call(this);
-    config = config || {};
+
+    // just to remind future us that this list is important
+    config = _.pick(config || {}, OPT_NAMES);
+
     this.raw = [];
 
     // setup indices
