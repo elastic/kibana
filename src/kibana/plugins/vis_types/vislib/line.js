@@ -18,7 +18,10 @@ define(function (require) {
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
           defaultYExtents: false,
-          setYExtents: false,
+          setYExtents: {
+            max: false,
+            min: false
+          },
           yAxis: {}
         },
         editor: require('text!plugins/vis_types/vislib/editors/line.html')

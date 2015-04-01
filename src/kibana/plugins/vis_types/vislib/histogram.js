@@ -16,7 +16,10 @@ define(function (require) {
           addLegend: true,
           mode: 'stacked',
           defaultYExtents: false,
-          setYExtents: false,
+          setYExtents: {
+            max: false,
+            min: false
+          },
           yAxis: {}
         },
         modes: ['stacked', 'percentage', 'grouped'],

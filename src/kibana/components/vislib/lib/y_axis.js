@@ -58,7 +58,8 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      var isUserDefined = (this._attr.setYExtents && this._attr.yAxis.max != null && this._attr.yAxis.min != null);
+      var isYMinUserDefined = (this._attr.setYExtents.min && this._attr.yAxis.min != null);
+      var isYMaxUserDefined = (this._attr.setYExtents.max && this._attr.yAxis.max != null);
       var isYExtents = (this._attr.defaultYExtents);
       var yMin = this.yMin;
       var yMax = this.yMax;
@@ -69,14 +70,14 @@ define(function (require) {
       // defaults yMax to zero.
       if (yMin === yMax && yMin === 0) throw new errors.NoResults();
 
-      if (!isYExtents && !isUserDefined) {
+      if (!isYExtents && !isYMinUserDefined && !isYMaxUserDefined) {
         yMin = Math.min(0, yMin);
         yMax = Math.max(0, yMax);
       }
 
       // save reference to y scale
       this.yScale = d3.scale.linear()
-      .domain((isUserDefined) ? this.validateUserExtents(yMin, yMax) : [yMin, yMax])
+      .domain((isYMinUserDefined) ? this.validateUserExtents(yMin, yMax) : [yMin, yMax])
       .range([height, 0])
       .clamp(true)
       .nice(this.tickScale(height));
