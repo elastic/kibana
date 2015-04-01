@@ -36,7 +36,7 @@ try {
 var config = module.exports = {
   port                    : kibana.port || 5601,
   host                    : kibana.host || '0.0.0.0',
-  elasticsearch           : kibana.elasticsearch_url || 'http           : //localhost : 9200',
+  elasticsearch           : kibana.elasticsearch_url || 'http://localhost:9200',
   root                    : path.normalize(path.join(__dirname, '..')),
   quiet                   : false,
   public_folder           : public_folder,
@@ -46,6 +46,7 @@ var config = module.exports = {
   package                 : require(packagePath),
   htpasswd                : htpasswdPath,
   buildNum                : '@@buildNum',
+  maxSockets              : kibana.maxSockets || Infinity,
   log_file                : kibana.log_file || null
 };
 

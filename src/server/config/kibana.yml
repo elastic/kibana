@@ -22,6 +22,13 @@ kibana_index: ".kibana"
 # kibana_elasticsearch_username: user
 # kibana_elasticsearch_password: pass
 
+# If your Elasticsearch requires client certificate and key
+# kibana_elasticsearch_client_crt: /path/to/your/client.crt
+# kibana_elasticsearch_client_key: /path/to/your/client.key
+
+# If you need to provide a CA certificate for your Elasticsarech instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
 
 # The default application to load.
 default_app_id: "discover"
@@ -37,10 +44,6 @@ shard_timeout: 0
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
 verify_ssl: true
-
-# If you need to provide a CA certificate for your Elasticsarech instance, put
-# the path of the pem file here.
-# ca: /path/to/your/CA.pem
 
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
 # ssl_key_file: /path/to/your/server.key

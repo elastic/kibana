@@ -37,6 +37,20 @@ module.exports = function (grunt) {
       '<%= src %>/server/*.js',
       '<%= src %>/kibana/{components,directives,factories,filters,plugins,registry,services,utils}/**/*.js',
       '<%= unitTestDir %>/**/*.js'
+    ],
+    lessFiles: [
+      '<%= src %>/kibana/components/*/*.less',
+      '<%= src %>/kibana/styles/main.less',
+      '<%= src %>/kibana/components/vislib/styles/main.less',
+      '<%= plugins %>/dashboard/styles/main.less',
+      '<%= plugins %>/discover/styles/main.less',
+      '<%= plugins %>/settings/styles/main.less',
+      '<%= plugins %>/visualize/styles/main.less',
+      '<%= plugins %>/visualize/styles/visualization.less',
+      '<%= plugins %>/visualize/styles/main.less',
+      '<%= plugins %>/table_vis/table_vis.less',
+      '<%= plugins %>/metric_vis/metric_vis.less',
+      '<%= plugins %>/markdown_vis/markdown_vis.less'
     ]
   };
 

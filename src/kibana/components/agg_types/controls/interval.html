@@ -19,6 +19,13 @@
     <option value="">-- select a valid interval --</option>
   </select>
   <input
+    type="text"
+    ng-model="agg.params.customInterval"
+    ng-change="agg.write()"
+    ng-if="agg.params.interval.val == 'custom'"
+    class="form-control"
+    required />
+  <input
     ng-if="!aggParam.options"
     ng-model="agg.params.interval"
     required

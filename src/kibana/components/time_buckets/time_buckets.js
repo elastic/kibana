@@ -4,6 +4,7 @@ define(function (require) {
     var moment = require('moment');
 
     var datemath = require('utils/datemath');
+    var parseInterval = require('utils/parse_interval');
     var calcAuto = Private(require('components/time_buckets/calc_auto_interval'));
     var calcEsInterval = Private(require('components/time_buckets/calc_es_interval'));
     var tzOffset = moment().format('Z');
@@ -145,17 +146,16 @@ define(function (require) {
 
       if (_.isString(interval)) {
         input = interval;
-        interval = moment.duration(1, interval);
+        interval = parseInterval(interval);
         if (+interval === 0) {
           interval = null;
-          input += ' (not a valid moment unit)';
         }
       }
 
       // if the value wasn't converted to a duration, and isn't
       // already a duration, we have a problem
       if (!moment.isDuration(interval)) {
-        throw new TypeError('can\'t convert input ' + input + ' to a moment.duration');
+        throw new TypeError('"' + input + '" is not a valid interval.');
       }
 
       this._i = interval;

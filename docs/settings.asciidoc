@@ -172,7 +172,7 @@ buggy, you'll get exceptions whenever you try to view the dynamically generated
 data.
 
 Scripted fields use the Lucene expression syntax. For more information, 
-see http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[Lucene Expressions Scripts].
+see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[Lucene Expressions Scripts].
 
 You can reference any single value numeric field in your expressions, for example:
 
@@ -192,7 +192,10 @@ from your index data.
 . Click *Save Scripted Field*.
 
 For more information about scripted fields in Elasticsearch, see 
-http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
+{ref}/modules-scripting[dynamic Groovy scripting].
 
 [float]
 [[update-scripted-field]]

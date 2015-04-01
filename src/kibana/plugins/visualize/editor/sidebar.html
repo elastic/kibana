@@ -27,7 +27,7 @@
       <p
         ng-if="visualizeEditor.$invalid"
         class="text-center text-danger sidebar-item-text">
-        <i class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
+        <i aria-hidden="true" class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
       </p>
       <button
         ng-disabled="!vis.dirty || visualizeEditor.$invalid"

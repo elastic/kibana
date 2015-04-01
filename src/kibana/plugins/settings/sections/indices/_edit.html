@@ -4,7 +4,7 @@
       <div class="page-header">
         <div class="index-pattern-name">
           <h1 class="title" css-truncate>
-            <i ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
+            <i aria-hidden="true" ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
             {{indexPattern.id}}
           </h1>
           <div class="controls">
@@ -12,21 +12,25 @@
               ng-click="setDefaultPattern()"
               tooltip="Set as default index"
               class="btn btn-success">
-              <i class="fa fa-star"></i>
+              <span class="sr-only">Set as default index</span>
+              <i aria-hidden="true" class="fa fa-star"></i>
             </button>
             <button
               confirm-click="indexPattern.refreshFields()"
               confirmation="This will reset the field popularity counters. Are you sure you want to reload your fields?"
               tooltip="Reload field list"
               class="btn btn-warning">
-              <i class="fa fa-refresh"></i>
+              <span class="sr-only">Reload field list</span>
+              <i aria-hidden="true" class="fa fa-refresh"></i>
             </button>
             <button
+              aria-label="Remove index pattern"
               confirm-click="removePattern()"
               confirmation="Are you sure you want to remove this index pattern?"
               tooltip="Remove index pattern"
               class="btn btn-danger">
-              <i class="fa fa-trash"></i>
+              <span class="sr-only">Remove index pattern</span>
+              <i aria-hidden="true" class="fa fa-trash"></i>
             </button>
           </div>
         </div>
@@ -36,9 +40,9 @@
           index and the field's associated core type as recorded by Elasticsearch.
           While this list allows you to view the core type of each field, changing
           field types must be done using Elasticsearch's
-          <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping.html">
+          <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
             Mapping API
-            <i class="fa-link fa"></i>
+            <i aria-hidden="true" class="fa-link fa"></i>
           </a>
         </p>
         <div bo-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">

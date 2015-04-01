@@ -71,10 +71,18 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
-      var visibleRadius = 3;
-      var touchableRadius = 12;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+      var radii = _(data)
+        .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
+        .flatten()
+        .reduce(function (result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        }, {min: Infinity, max: -Infinity});
+
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
       var layer = svg.selectAll('.points')
       .data(data)
@@ -116,11 +124,23 @@ define(function (require) {
         if (!showCircles && !isVisible) return 'none';
         return cColor(d);
       }
+      function getCircleRadiusFn(modifier) {
+        return function getCircleRadius(d) {
+          var margin = self._attr.margin;
+          var width = self._attr.width - margin.left - margin.right;
+          var height = self._attr.height - margin.top - margin.bottom;
+          var circleRadius = (d._input.z - radii.min) / radiusStep;
+
+          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
+        };
+      }
+
 
       circles
       .enter()
         .append('circle')
-        .attr('r', visibleRadius)
+        .attr('r', getCircleRadiusFn())
+        .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', colorCircle)
@@ -131,7 +151,7 @@ define(function (require) {
       circles
       .enter()
         .append('circle')
-        .attr('r', touchableRadius)
+        .attr('r', getCircleRadiusFn(10))
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', 'transparent')
@@ -298,7 +318,9 @@ define(function (require) {
           }
 
           self.addClipPath(svg, width, height);
-          lines = self.addLines(svg, data.series);
+          if (self._attr.drawLinesBetweenPoints) {
+            lines = self.addLines(svg, data.series);
+          }
           circles = self.addCircles(svg, layers);
           self.addCircleEvents(circles, svg);
           self.createEndZones(svg);

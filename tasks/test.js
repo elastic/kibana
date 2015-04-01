@@ -29,7 +29,7 @@ module.exports = function (grunt) {
       'jscs:source',
       'maybe_start_kibana',
       'jade',
-      'less'
+      'less:build'
     ];
     addTestTask(tasks);
     if (process.env.TRAVIS) tasks.unshift('esvm:dev');

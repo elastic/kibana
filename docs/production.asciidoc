@@ -24,7 +24,7 @@ If you are using Shield to authenticate Elasticsearch users, you need to provide
 the Kibana server with credentials so it can access the `.kibana` index and monitor
 the cluster. 
 
-To configure credentials the Kibana server, set the `kibana_elasticsearch_username` and
+To configure credentials for the Kibana server, set the `kibana_elasticsearch_username` and
 `kibana_elasticsearch_password` properties in `kibana.yml`:
 
 ----
@@ -34,7 +34,7 @@ kibana_elasticsearch_password: kibana4
 ----
 
 For information about assigning the Kibana server the necessary permissions in Shield, 
-see https://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html[Shield with Kibana 4]
+see https://www.elastic.co/guide/en/shield/current/_shield_with_kibana_4.html[Shield with Kibana 4]
 in the Shield documentation.
 
 [float]
@@ -73,7 +73,7 @@ ca: /path/to/your/ca/cacert.pem
 [float]
 [[controlling-access]]
 === Controlling access
-You can use http://www.elasticsearch.org/overview/shield/[Elasticsearch Shield] 
+You can use http://www.elastic.co/overview/shield/[Elasticsearch Shield] 
 (Shield) to control what Elasticsearch data users can access through Kibana. 
 Shield provides index-level access control. If a user isn't authorized to run 
 the query that populates a Kibana visualization, the user just sees an empty 
@@ -81,7 +81,7 @@ visualization.
 
 To configure access to Kibana using Shield, you create Shield roles 
 for Kibana using the `kibana4` default role as a starting point. For more 
-information, see http://www.elasticsearch.org/guide/en/shield/current/_shield_with_kibana_4.html[Using Shield with Kibana 4].
+information, see http://www.elastic.co/guide/en/shield/current/_shield_with_kibana_4.html[Using Shield with Kibana 4].
 
 [float]
 [[load-balancing]]
@@ -90,7 +90,7 @@ If you have multiple nodes in your Elasticsearch cluster, the easiest way to dis
 across the nodes is to run an Elasticsearch _client_ node on the same machine as Kibana. 
 Elasticsearch client nodes are essentially smart load balancers that are part of the cluster. They
 process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and 
-gather and return the results. For more information, see http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-node.html[Node] in the Elasticsearch reference.
+gather and return the results. For more information, see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html[Node] in the Elasticsearch reference.
 
 To use a local client node to load balance Kibana requests:
 
@@ -118,8 +118,3 @@ cluster.name: "my_cluster"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch_url: "http://localhost:9200"
 --------
-
-
-
-
-
