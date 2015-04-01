@@ -32,3 +32,14 @@ Now that you've configured an index pattern, you're ready to hop over to the [Di
 ## Documentation
 
 Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.
+
+## Snapshot Builds
+
+For the daring, snapshot builds are available. These builds are created after each commit to the master branch, and therefore are not something you should run in production.
+
+| platform |  |  |
+| --- | --- | --- |
+| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-darwin-x64.zip) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x64.zip) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x86.zip) |
+| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-windows.zip) |
