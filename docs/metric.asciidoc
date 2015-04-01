@@ -1,4 +1,4 @@
-[[metricch]]
+[[metric-chart]]
 === Metric
 
 A metric visualization displays a single number for each aggregation you select:

@@ -26,16 +26,16 @@ button] in the toolbar to the right of the search bar. The wizard guides you thr
 Choose a visualization type when you start the New Visualization wizard:
 
 [horizontal]
-<<areach,Area chart>>:: Use area charts to visualize the total contribution of several different series.
-<<datatable,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data 
+<<area-chart,Area chart>>:: Use area charts to visualize the total contribution of several different series.
+<<data-table,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data 
 table for several other visualizations by clicking at the bottom of the visualization.
-<<linech,Line chart>>:: Use line charts to compare different series.
-<<mdwidget,Markdown widget>>:: Use the Markdown widget to display free-form information or instructions about your 
+<<line-chart,Line chart>>:: Use line charts to compare different series.
+<<markdown-widget,Markdown widget>>:: Use the Markdown widget to display free-form information or instructions about your 
 dashboard.
-<<metricch,Metric>>:: Use the metric visualization to display a single number on your dashboard.
-<<piech,Pie chart>>:: Use pie charts to display each source's contribution to a total.
+<<metric-chart,Metric>>:: Use the metric visualization to display a single number on your dashboard.
+<<pie-chart,Pie chart>>:: Use pie charts to display each source's contribution to a total.
 <<tilemap,Tile map>>:: Use tile maps to associate the results of an aggregation with geographic points.
-<<vertbarch,Vertical bar chart>>:: Use vertical bar charts as a general-purpose chart.
+<<vertical-bar-chart,Vertical bar chart>>:: Use vertical bar charts as a general-purpose chart.
 
 You can also load a saved visualization that you created earlier. The saved visualization selector includes a text 
 field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved 

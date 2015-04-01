@@ -1,4 +1,4 @@
-[[piech]]
+[[pie-chart]]
 === Pie Charts
 
 The slice size of a pie chart is determined by the _metrics_ aggregation. The following aggregations are available for 

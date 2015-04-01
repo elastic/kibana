@@ -1,4 +1,4 @@
-[[areach]]
+[[area-chart]]
 === Area Charts
 
 This chart's Y axis is the _metrics_ axis. The following aggregations are available for this axis:
