@@ -377,10 +377,6 @@ define(function (require) {
           // "top 500" may change with each response
           if (hit.$$_formatted && !sortFn) return;
 
-          // Flatten the fields
-          var indexPattern = $scope.searchSource.get('index');
-          var flatHit = indexPattern.flattenHit(hit);
-
           var formatAndCount = function (value, name) {
             // add up the counts for each field name
             counts[name] = counts[name] ? counts[name] + 1 : 1;
@@ -392,6 +388,7 @@ define(function (require) {
             return formatter.convert(value);
           };
 
+          var flatHit = $scope.indexPattern.flattenHit(hit);
           hit.$$_formatted = _.mapValues(flatHit, formatAndCount);
         });
 
