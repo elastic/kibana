@@ -1,0 +1,6 @@
+{
+  "name": "kibana-doc-preview",
+  "root": "./html",
+  "clean_urls": true,
+  "error_page": "error.html"
+}
