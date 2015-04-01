@@ -1,4 +1,4 @@
-[[mdwidget]]
+[[markdown-widget]]
 === Markdown Widget
 
 The Markdown widget is a text entry field that accepts GitHub-flavored Markdown text. Kibana renders the text you enter 

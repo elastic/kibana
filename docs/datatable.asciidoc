@@ -1,4 +1,4 @@
-[[datatable]]
+[[data-table]]
 === Data Table
 
 include::y-axis-aggs.asciidoc[]
