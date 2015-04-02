@@ -99,7 +99,7 @@ define(function (require) {
         delete index.nameInterval;
         delete index.timeField;
       } else {
-        index.nameInterval = index.nameInterval || intervals.byName['days'];
+        index.nameInterval = index.nameInterval || intervals.byName.days;
         index.name = index.name || getPatternDefault(index.nameInterval);
       }
     });

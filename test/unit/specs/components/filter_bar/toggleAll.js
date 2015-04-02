@@ -1,11 +1,10 @@
-/* global sinon */
 define(function (require) {
-
-  var _ = require('lodash');
-  var toggleAll = require('components/filter_bar/lib/toggleAll');
   describe('Filter Bar Directive', function () {
-
+    var toggleAll = require('components/filter_bar/lib/toggleAll');
+    var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var mapFilter, $rootScope, $compile, Promise, getIndexPatternStub, indexPattern;
+
     beforeEach(module('kibana'));
 
     beforeEach(function () {

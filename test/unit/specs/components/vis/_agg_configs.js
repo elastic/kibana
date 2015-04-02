@@ -130,7 +130,7 @@ define(function (require) {
 
         it('should only set the number of defaults defined by the max', function () {
           var ac = new AggConfigs(vis);
-          expect(ac.bySchemaName['metric']).to.have.length(2);
+          expect(ac.bySchemaName.metric).to.have.length(2);
         });
 
         it('should set the defaults defined in the schema when none exist', function () {

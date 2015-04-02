@@ -32,7 +32,7 @@
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
     "server": "node ./src/server/bin/kibana.js",
-    "precommit": "grunt hintStagedFiles"
+    "precommit": "grunt lintStagedFiles"
   },
   "repository": {
     "type": "git",
@@ -72,11 +72,12 @@
     "grunt-contrib-compress": "~0.9.1",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-jade": "~0.10.0",
-    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-jshint": "^0.11",
     "grunt-contrib-less": "~0.10.0",
     "grunt-contrib-requirejs": "~0.4.4",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-esvm": "~0.3.2",
+    "grunt-jscs": "git://github.com/spalger/grunt-jscs.git#addFix",
     "grunt-mocha": "~0.4.10",
     "grunt-replace": "^0.7.9",
     "grunt-run": "^0.2.3",
