@@ -48,6 +48,7 @@
     "with"
   ],
   "validateIndentation": 2,
+  "validateQuoteMarks": { "mark": "'", "escape": true },
   "disallowMixedSpacesAndTabs": true,
   "disallowTrailingWhitespace": true,
   "requireCapitalizedConstructors": true,

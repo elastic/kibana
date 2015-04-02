@@ -77,7 +77,7 @@
     "grunt-contrib-requirejs": "~0.4.4",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-esvm": "~0.3.2",
-    "grunt-jscs": "^1.5.0",
+    "grunt-jscs": "git://github.com/spalger/grunt-jscs.git#addFix",
     "grunt-mocha": "~0.4.10",
     "grunt-replace": "^0.7.9",
     "grunt-run": "^0.2.3",
