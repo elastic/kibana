@@ -1,6 +1,7 @@
 define(function (require) {
   return function VisLibFixtures(Private) {
     var $ = require('jquery');
+    var _ = require('lodash');
 
     return function (visLibParams) {
       var Vis = Private(require('components/vislib/vis'));
@@ -12,12 +13,18 @@ define(function (require) {
       $el.width(1024);
       $el.height(300);
 
-      var config = visLibParams || {
+      var config = _.defaults(visLibParams || {}, {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
+        defaultYExtents: false,
+        setYExtents: {
+          max: false,
+          min: false
+        },
+        yAxis: {},
         type: 'histogram'
-      };
+      });
 
       return new Vis($el, config);
     };

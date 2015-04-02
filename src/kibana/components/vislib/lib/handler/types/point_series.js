@@ -20,7 +20,8 @@ define(function (require) {
       opts = opts || {};
 
       return function (vis) {
-        var isUserDefinedYAxis = (vis._attr.setYExtents && vis._attr.yAxis.max != null && vis._attr.yAxis.min != null);
+        var isUserDefinedYAxisMin = (vis._attr.setYExtents.min);
+        var isUserDefinedYAxisMax = (vis._attr.setYExtents.max);
         var data;
 
         if (opts.zeroFill) {
@@ -45,8 +46,8 @@ define(function (require) {
           alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
             el   : vis.el,
-            yMin : (isUserDefinedYAxis) ? vis._attr.yAxis.min : data.getYMin(),
-            yMax : (isUserDefinedYAxis) ? vis._attr.yAxis.max : data.getYMax(),
+            yMin : (isUserDefinedYAxisMin) ? vis._attr.yAxis.min : data.getYMin(),
+            yMax : (isUserDefinedYAxisMax) ? vis._attr.yAxis.max : data.getYMax(),
             _attr: vis._attr
           })
         });

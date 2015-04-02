@@ -75,7 +75,13 @@ define(function (require) {
       yMin: dataObj.getYMin(),
       yMax: dataObj.getYMax(),
       _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        defaultYMin: true,
+        setYExtents: {
+          max: false,
+          min: false
+        },
+        yAxis: {}
       }
     });
   }

@@ -16,8 +16,8 @@ define(function (require) {
      */
     function YAxis(args) {
       this.el = args.el;
-      this.yMin = args.yMin;
-      this.yMax = args.yMax;
+      this.scale = null;
+      this.domain = [args.yMin, args.yMax];
       this._attr = args._attr || {};
     }
 
@@ -33,21 +33,46 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    YAxis.prototype.validateUserExtents = function (yMin, yMax) {
-      var isPercentage = (this._attr.mode === 'percentage');
-      yMin = parseInt(yMin, 10);
-      yMax = parseInt(yMax, 10);
+    YAxis.prototype.isPercentage = function () {
+      return (this._attr.mode === 'percentage');
+    };
 
-      if (isNaN(yMin) || isNaN(yMax)) throw new Error(yMin + ' or ' + yMax + ' is not a valid number');
-      if (yMin > yMax) throw new Error('y-min: ' + yMin + ' is greater than y-max: ' + yMax);
+    YAxis.prototype.isUserDefined = function () {
+      return (this._attr.setYExtents.min || this._attr.setYExtents.max);
+    };
 
-      if (isPercentage) {
-        return [yMin, yMax].map(function (num) {
-          return num / 100;
-        });
-      }
+    YAxis.prototype.isYExtents = function () {
+      return (this._attr.defaultYExtents);
+    };
 
-      return [yMin, yMax];
+    YAxis.prototype.validateUserExtents = function (domain) {
+      var self = this;
+      var extents = ['min', 'max'];
+
+      return domain.map(function (val, i) {
+        var extent = extents[i];
+        val = parseInt(val, 10);
+
+        if (isNaN(val)) throw new Error(val + ' is not a valid number');
+        if (self.isPercentage() && self._attr.setYExtents[extent]) return  val / 100;
+        if (!self._attr.setYExtents[extent]) return Math[extent](0, val);
+        return val;
+      });
+    };
+
+    YAxis.prototype.validateExtents = function (min, max) {
+      if (min === max && min === 0) throw new errors.NoResults();
+      if (min > max) throw new Error('min: ' + min + ' cannot be greater than max: ' + max);
+    };
+
+    YAxis.prototype.getExtents = function (domain) {
+      var min = domain[0];
+      var max = domain[1];
+
+      this.validateExtents(min, max);
+      if (!this.isYExtents() && !this.isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
+      if (this.isUserDefined()) return this.validateUserExtents(domain);
+      return domain;
     };
 
     /**
@@ -58,26 +83,11 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      var isYMinUserDefined = (this._attr.setYExtents.min && this._attr.yAxis.min != null);
-      var isYMaxUserDefined = (this._attr.setYExtents.max && this._attr.yAxis.max != null);
-      var isYExtents = (this._attr.defaultYExtents);
-      var yMin = this.yMin;
-      var yMax = this.yMax;
+      var scale = d3.scale.linear();
+      var domain = this.getExtents(this.domain);
 
-      // yMin and yMax can never be equal for the axis
-      // to render. Defaults yMin to 0 if yMin === yMax
-      // and yMin is greater than or equal to zero, else
-      // defaults yMax to zero.
-      if (yMin === yMax && yMin === 0) throw new errors.NoResults();
-
-      if (!isYExtents && !isYMinUserDefined && !isYMaxUserDefined) {
-        yMin = Math.min(0, yMin);
-        yMax = Math.max(0, yMax);
-      }
-
-      // save reference to y scale
-      this.yScale = d3.scale.linear()
-      .domain((isYMinUserDefined) ? this.validateUserExtents(yMin, yMax) : [yMin, yMax])
+      this.yScale = scale
+      .domain(domain)
       .range([height, 0])
       .clamp(true)
       .nice(this.tickScale(height));
@@ -99,6 +109,16 @@ define(function (require) {
       return numeral(d).format('0.[0]a');
     };
 
+    YAxis.prototype.tickFormat = function (domain) {
+      if (this.isPercentage()) return d3.format('%');
+      if (domain[1] <= 100 && domain[0] >= -100 && !this.isPercentage()) return d3.format('n');
+      return this.formatAxisLabel;
+    };
+
+    YAxis.prototype.validateYScale = function (yScale) {
+      if (!yScale || _.isNaN(yScale)) throw new Error('yScale is ' + yScale);
+    };
+
     /**
      * Creates the d3 y axis function
      *
@@ -108,26 +128,12 @@ define(function (require) {
      */
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
-      var isPercentage = (this._attr.mode === 'percentage');
-      var tickFormat;
-
-      if (isPercentage) {
-        tickFormat = d3.format('%');
-      } else if (this.yMax <= 100 && this.yMin >= -100 && !isPercentage) {
-        tickFormat = d3.format('n');
-      } else {
-        tickFormat = this.formatAxisLabel;
-      }
-
-      // y scale should never be `NaN`
-      if (!yScale || _.isNaN(yScale)) {
-        throw new Error('yScale is ' + yScale);
-      }
+      this.validateYScale(yScale);
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
         .scale(yScale)
-        .tickFormat(tickFormat)
+        .tickFormat(this.tickFormat(this.domain))
         .ticks(this.tickScale(height))
         .orient('left');
 
