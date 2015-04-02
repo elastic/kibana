@@ -207,25 +207,16 @@ define(function (require) {
      */
     TileMap.prototype.pinMarkers = function (map, mapData) {
       var self = this;
-      var min = mapData.properties.min;
-      var max = mapData.properties.max;
+
+      // super min and max from all chart data
+      var min = mapData.properties.allmin;
+      var max = mapData.properties.allmax;
+
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var bounds;
-      var defaultColor = '#ff6128';
       var featureLayer = L.geoJson(mapData, {
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
-        },
-        style: function (feature) {
-          var count = feature.properties.count;
-          return {
-            fillColor: defaultColor,
-            color: self.darkerColor(defaultColor),
-            weight: 1.0,
-            opacity: 1,
-            fillOpacity: 0.75
-          };
         }
       });
 
@@ -244,12 +235,14 @@ define(function (require) {
      */
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
       var self = this;
-      var min = mapData.properties.min;
-      var max = mapData.properties.max;
+
+      // super min and max from all chart data
+      var min = mapData.properties.allmin;
+      var max = mapData.properties.allmax;
+
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var bounds;
-      var defaultColor = '#ff6128';
+      var radiusScaler = 2.5;
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
@@ -298,18 +291,10 @@ define(function (require) {
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
       var self = this;
-      // min and max from chart data for this map
-      // var min = mapData.properties.min;
-      // var max = mapData.properties.max;
 
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
-
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
-      var bounds;
-      var defaultColor = '#005baa';
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
@@ -353,12 +338,12 @@ define(function (require) {
      */
     TileMap.prototype.shadedGeohashGrid = function (map, mapData) {
       var self = this;
-      var min = mapData.properties.min;
-      var max = mapData.properties.max;
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
+
+      // super min and max from all chart data
+      var min = mapData.properties.allmin;
+      var max = mapData.properties.allmax;
+
       var bounds;
-      var defaultColor = '#ff6128';
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
