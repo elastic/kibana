@@ -128,7 +128,7 @@ define(function (require) {
           var type = isGeoPoint ? 'tile_map' : 'histogram';
           // If we're visualizing a date field, and our index is time based (and thus has a time filter),
           // then run a date histogram
-          if (field.type === 'date' && $scope.indexPattern.timeFieldName) {
+          if (field.type === 'date' && $scope.indexPattern.timeFieldName === field.name) {
             agg = {
               type: 'date_histogram',
               schema: 'segment',
@@ -171,13 +171,7 @@ define(function (require) {
                   agg,
                   {schema: 'metric', type: 'count', 'id': '2'}
                 ]
-              },
-              metric: [{
-                agg: 'count',
-              }],
-              segment: [],
-              group: [],
-              split: [],
+              }
             })
           });
         };

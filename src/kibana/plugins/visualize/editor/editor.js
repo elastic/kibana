@@ -52,12 +52,12 @@ define(function (require) {
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
-    var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
+    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
@@ -151,12 +151,17 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      $scope.$watch('state.filters', function (newFilters, oldFilters) {
-        if (onlyDisabled(newFilters, oldFilters)) {
-          $state.save();
-          return;
+      filterBarWatchFilters($scope)
+      .on('update', function () {
+        if ($state.filters && $state.filters.length) {
+          searchSource.set('filter', $state.filters);
+        } else {
+          searchSource.set('filter', []);
         }
-        if (newFilters !== oldFilters) $scope.fetch();
+        $state.save();
+      })
+      .on('fetch', function () {
+        $scope.fetch();
       });
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
@@ -180,10 +185,9 @@ define(function (require) {
           searchSource.set('query', null);
         }
 
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
+        if (_.isEqual(keys, ['filters'])) {
+          // updates will happen in filterBarWatchFilters() if needed
+          return;
         }
 
         $scope.fetch();
