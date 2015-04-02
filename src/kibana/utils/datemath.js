@@ -8,7 +8,7 @@ define(function (require) {
   });
   var unitsDesc = unitsAsc.reverse();
 
-/* This is a simplified version of elasticsearch's date parser */
+  /* This is a simplified version of elasticsearch's date parser */
   function parse(text, roundUp) {
     if (!text) return undefined;
     if (moment.isMoment(text)) return text;

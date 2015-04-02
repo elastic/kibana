@@ -1,7 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
- // bring in the factory
+  // bring in the factory
   require('plugins/dashboard/services/_saved_dashboard');
 
 
