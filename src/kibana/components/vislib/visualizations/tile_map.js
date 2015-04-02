@@ -254,7 +254,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var scaledRadius = self.radiusScale(count, max, precision, feature);
+          var scaledRadius = self.radiusScale(count, max, precision, feature) * 2;
           return L.circle(latlng, scaledRadius);
         },
         onEachFeature: function (feature, layer) {
@@ -314,7 +314,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var radius = self.geohashMinDistance(feature) / 2;
+          var radius = self.geohashMinDistance(feature);
           return L.circle(latlng, radius);
         },
         onEachFeature: function (feature, layer) {
@@ -515,14 +515,17 @@ define(function (require) {
      * @return {Number}
      */
     TileMap.prototype.geohashMinDistance = function (feature) {
+      var centerPoint = feature.properties.center;
       var geohashRect = feature.properties.rectangle;
-      var northWest = L.latLng([geohashRect[3][1], geohashRect[3][0]]);
-      var northEast = L.latLng([geohashRect[2][1], geohashRect[2][0]]);
-      var southWest = L.latLng([geohashRect[0][1], geohashRect[0][0]]);
-      var eastWest = Math.floor(northWest.distanceTo(northEast));
-      var northSouth = Math.floor(northWest.distanceTo(southWest));
-      var min = _.min([eastWest, northSouth]);
-      return min;
+
+      var center = L.latLng([centerPoint[1], centerPoint[0]]);
+      var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
+      var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
+
+      var eastRadius  = Math.floor(center.distanceTo(east));
+      var northRadius = Math.floor(center.distanceTo(north));
+
+      return _.min([eastRadius, northRadius]);
     };
 
     /**
@@ -594,11 +597,9 @@ define(function (require) {
      * tell leaflet that it's time to cleanup the map
      */
     TileMap.prototype.destroy = function () {
-      //if (this.maps) {
       this.maps.forEach(function (map) {
         map.remove();
       });
-      //}
     };
 
     return TileMap;
