@@ -1,6 +1,10 @@
 <kbn-settings-app section="objects">
   <kbn-settings-objects class="container">
-    <h2>Edit Saved Objects</h2>
+    <div class="header">
+      <h2 class="title">Edit Saved Objects</h2>
+      <a class="controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export</a>
+      <a class="controls" ng-click="importAll()"><i aria-hidden="true" class="fa fa-upload"></i> Import</a>
+    </div>
     <p>
       From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen.
     </p>
@@ -16,13 +20,16 @@
     <div class="tab-content">
       <div class="action-bar">
         <label>
-          <input type="checkbox" ng-model="deleteAll">
+          <input type="checkbox" ng-checked="selectedItems.length == currentTab.data.length" ng-click="toggleAll()" />
           Select All
         </label>
-        <a ng-disabled="!deleteAllBtn"
+        <a ng-disabled="selectedItems.length == 0"
           confirm-click="bulkDelete()"
           confirmation="Are you sure want to delete the selected {{service.title}}? This action is irreversible!"
-          class="delete-all btn btn-danger btn-xs" aria-label="Delete Selected"><i aria-hidden="true" class="fa fa-trash"></i> Delete Selected</a>
+          class="delete-all btn btn-xs btn-danger" aria-label="Delete"><i aria-hidden="true" class="fa fa-trash"></i> Delete</a>
+        <a ng-disabled="selectedItems.length == 0"
+          ng-click="bulkExport()"
+          class="delete-all btn btn-xs btn-default" aria-label="Export"><i aria-hidden="true" class="fa fa-download"></i> Export</a>
       </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
@@ -47,8 +54,8 @@
 
             <div class="pull-left">
               <input
-                ng-click="item.checked = !item.checked; toggleDeleteBtn(service)"
-                ng-checked="item.checked"
+                ng-click="toggleItem(item)"
+                ng-checked="selectedItems.indexOf(item) >= 0"
                 type="checkbox" >
             </div>
 

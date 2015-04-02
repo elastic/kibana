@@ -265,6 +265,14 @@ define(function (require) {
         });
       };
 
+      self.export = function () {
+        return {
+          _id: this.id,
+          _type: type,
+          _source: this._source
+        };
+      };
+
     }
 
     return SavedObject;

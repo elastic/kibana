@@ -29,7 +29,7 @@ define(function (require) {
          *
          * @param {array} memo The stack of fields
          * @param {mixed} value The value of the field
-         * @param {stirng} key The key of the field
+         * @param {string} key The key of the field
          * @param {object} collection This is a reference the collection being reduced
          * @param {array} parents The parent keys to the field
          * @returns {array}
