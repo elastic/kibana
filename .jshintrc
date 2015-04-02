@@ -4,7 +4,6 @@
 
   // shared with .jshintrc files for browser and node
   "unused": false,
-  "camelcase": false,
   "bitwise": false,
   "eqnull": true,
   "eqeqeq": true,

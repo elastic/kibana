@@ -36,7 +36,8 @@ module.exports = function (grunt) {
       '<%= src %>/kibana/*.js',
       '<%= src %>/server/*.js',
       '<%= src %>/kibana/{components,directives,factories,filters,plugins,registry,services,utils}/**/*.js',
-      '<%= unitTestDir %>/**/*.js'
+      '<%= unitTestDir %>/**/*.js',
+      '!<%= unitTestDir %>/specs/vislib/fixture/**/*'
     ],
     lessFiles: [
       '<%= src %>/kibana/components/*/*.less',
