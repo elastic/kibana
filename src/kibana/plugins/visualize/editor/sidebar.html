@@ -25,7 +25,8 @@
     <div class="vis-editor-sidebar-buttons">
       <p
         ng-if="visualizeEditor.$invalid"
-        class="text-center text-danger sidebar-item-text">
+        class="text-center text-danger sidebar-item-text"
+        ng-click="visualizeEditor.$setTouched()">
         <i aria-hidden="true" class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
       </p>
       <button
