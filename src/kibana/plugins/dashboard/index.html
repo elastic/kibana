@@ -38,6 +38,7 @@
           aria-label="Save Dashboard"
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('save') }}"
+          ng-class="{active: configTemplate.is('save')}"
           ng-click="configTemplate.toggle('save');">
           <i aria-hidden="true" class="fa fa-save"></i>
         </button>
@@ -47,6 +48,7 @@
           aria-label="Load Saved Dashboard"
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('load') }}"
+          ng-class="{active: configTemplate.is('load')}"
           ng-click="configTemplate.toggle('load');">
           <i aria-hidden="true" class="fa fa-folder-open-o"></i>
         </button>
@@ -56,6 +58,7 @@
           aria-label="Share Dashboard"
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('share') }}"
+          ng-class="{active: configTemplate.is('share')}"
           ng-click="configTemplate.toggle('share');">
           <i aria-hidden="true" class="fa fa-external-link"></i>
         </button>
@@ -65,6 +68,7 @@
           aria-label="Add Visualization"
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('pickVis') }}"
+          ng-class="{active: configTemplate.is('pickVis')}"
           ng-click="configTemplate.toggle('pickVis');">
           <i aria-hidden="true" class="fa fa-plus-circle"></i>
         </button>

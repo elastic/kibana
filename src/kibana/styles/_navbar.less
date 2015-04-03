@@ -37,7 +37,13 @@ navbar {
       background-color: @navbar-default-link-hover-bg;
     }
 
-    &:active, &:focus {
+    &:focus {
+      color: @navbar-default-link-color;
+      background-color: transparent;
+      outline: none;
+    }
+
+    &:active, &.active {
       color: @navbar-default-link-active-color;
       background-color: @navbar-default-link-active-bg;
     }
