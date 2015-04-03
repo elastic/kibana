@@ -136,12 +136,6 @@ define(function (require) {
         });
 
         $scope.$watchCollection('columns', function (columns, oldColumns) {
-          if (oldColumns.length === 1 && oldColumns[0] === '_source' && columns.length > 1) {
-            _.pull(columns, '_source');
-          }
-
-          if (columns.length === 0) columns.push('_source');
-
           _.each($scope.fields, function (field) {
             field.display = _.contains(columns, field.name) ? true : false;
           });

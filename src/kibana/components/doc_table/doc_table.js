@@ -55,6 +55,15 @@ define(function (require) {
           $scope.limit += 50;
         };
 
+        $scope.$watchCollection('columns', function (columns, oldColumns) {
+          if (oldColumns.length === 1 && oldColumns[0] === '_source' && columns.length > 1) {
+            _.pull(columns, '_source');
+          }
+
+          if (columns.length === 0) columns.push('_source');
+        });
+
+
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!$scope.searchSource) return;
 

@@ -37,7 +37,6 @@ define(function (require) {
 
         $scope.toggleColumn = function (fieldName) {
           _.toggleInOut($scope.columns, fieldName);
-          console.log($scope.columns);
         };
 
         $scope.showArrayInObjectsWarning = function (row, field) {
