@@ -24,7 +24,6 @@ define(function (require) {
       controller: function ($scope) {
         var init = function () {
           $scope.setMode($scope.mode);
-          $scope.formatRelative();
         };
 
         $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
@@ -96,6 +95,7 @@ define(function (require) {
             }
 
             if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+            $scope.formatRelative();
 
             break;
           case 'absolute':
