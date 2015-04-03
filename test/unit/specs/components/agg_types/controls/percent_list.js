@@ -21,8 +21,9 @@ define(function (require) {
           .attr('ng-model', 'vals[$index]')
           .attr('ng-repeat', 'val in vals')
           .attr('values-list', 'vals')
+          .attr('values-list-min', '0')
+          .attr('values-list-max', '100')
       );
-      $scope.valueBoundaries = [0, 100];
       compile = function (vals) {
         $scope.vals = vals || [];
         $compile($el)($scope);
