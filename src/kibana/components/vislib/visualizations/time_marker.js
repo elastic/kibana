@@ -1,26 +1,37 @@
-define(function () {
+define(function (require) {
+  var datemath = require('utils/datemath');
+
   return function TimeMarkerFactory(d3) {
-    function TimeMarker(xScale, height) {
+    function TimeMarker(times, xScale, height) {
       if (!(this instanceof TimeMarker)) {
-        return new TimeMarker(xScale, height);
+        return new TimeMarker(times, xScale, height);
       }
+      var currentTimeArr = [new Date().getTime()];
 
       this.xScale = xScale;
       this.height = height;
       this.lineClass = 'time-marker';
-      this.time = new Date().getTime();
       this.stroke = 'blue';
       this.strokeWidth = 2;
+      this.times = (times.length) ? times.map(function (dateMathString) {
+        return datemath.parse(dateMathString);
+      }) : currentTimeArr;
     }
 
     TimeMarker.prototype.render = function (selection) {
       var self = this;
 
       selection.each(function () {
-        var g = d3.select(this).append('line')
+        d3.select(this).selectAll('time-marker')
+          .data(self.times)
+          .enter().append('line')
           .attr('class', self.lineClass)
-          .attr('x1', self.xScale(self.time))
-          .attr('x2', self.xScale(self.time))
+          .attr('x1', function (d) {
+            return self.xScale(d);
+          })
+          .attr('x2', function (d) {
+            return self.xScale(d);
+          })
           .attr('y1', self.height)
           .attr('y2', self.xScale.range()[0])
           .attr('stroke', self.stroke)

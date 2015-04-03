@@ -19,6 +19,7 @@ define(function (require) {
           radiusRatio: 9,
           scale: 'linear',
           defaultYExtents: false,
+          times: [],
           addTimeMarker: false
         },
         scales: ['linear', 'log', 'square root'],

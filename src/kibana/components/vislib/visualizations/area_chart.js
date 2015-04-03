@@ -277,6 +277,7 @@ define(function (require) {
       var minWidth = 20;
       var minHeight = 20;
       var addTimeMarker = this._attr.addTimeMarker;
+      var times = this._attr.times;
       var timeMarker;
       var div;
       var svg;
@@ -294,7 +295,7 @@ define(function (require) {
           // Get the width and height
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
-          timeMarker = new TimeMarker(xScale, height);
+          timeMarker = new TimeMarker(times, xScale, height);
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();

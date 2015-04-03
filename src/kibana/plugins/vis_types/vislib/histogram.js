@@ -17,6 +17,7 @@ define(function (require) {
           scale: 'linear',
           mode: 'stacked',
           defaultYExtents: false,
+          times: [],
           addTimeMarker: false
         },
         scales: ['linear', 'log', 'square root'],
