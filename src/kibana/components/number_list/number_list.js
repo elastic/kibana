@@ -1,14 +1,14 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('components/agg_types/controls/number_list/number_list_input');
+  require('components/number_list/number_list_input');
 
   require('modules')
   .get('kibana')
   .directive('aggControlNumberList', function () {
     return {
       restrict: 'E',
-      template: require('text!components/agg_types/controls/number_list/number_list.html'),
+      template: require('text!components/number_list/number_list.html'),
       controllerAs: 'numberListCntr',
       require: 'ngModel',
       controller: function ($scope, $attrs, $parse) {

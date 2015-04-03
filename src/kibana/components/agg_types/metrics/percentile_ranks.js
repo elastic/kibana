@@ -7,7 +7,7 @@ define(function (require) {
 
     var valuesEditor = require('text!components/agg_types/controls/percentile_ranks.html');
     // required by the values editor
-    require('components/agg_types/controls/number_list/number_list');
+    require('components/number_list/number_list');
 
     var valueProps = {
       makeLabel: function () {

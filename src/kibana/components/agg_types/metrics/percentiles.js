@@ -8,7 +8,7 @@ define(function (require) {
 
     var percentsEditor = require('text!components/agg_types/controls/percentiles.html');
     // required by the percentiles editor
-    require('components/agg_types/controls/number_list/number_list');
+    require('components/number_list/number_list');
 
     var valueProps = {
       makeLabel: function () {
