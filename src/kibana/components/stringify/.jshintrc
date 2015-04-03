@@ -1,4 +1,4 @@
 {
-  "extends": "../../../.jshintrc",
+  "extends": "../../.jshintrc",
   "unused": true
 }
