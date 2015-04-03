@@ -104,7 +104,8 @@ define(function (require) {
       },
       {
         types: [
-          'number'
+          'number',
+          'murmur3'
         ],
         name: 'number',
         convert: function (val) {
