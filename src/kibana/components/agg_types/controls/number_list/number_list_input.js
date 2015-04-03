@@ -8,16 +8,16 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('valuesList', function ($parse) {
+  .directive('aggControlNumberListInput', function ($parse) {
     return {
       restrict: 'A',
-      require: 'ngModel',
-      link: function ($scope, $el, attrs, ngModelController) {
+      require: ['ngModel', '^aggControlNumberList'],
+      link: function ($scope, $el, attrs, controllers) {
+        var ngModelCntr = controllers[0];
+        var numberListCntr = controllers[1];
+
         var $setModel = $parse(attrs.ngModel).assign;
         var $repeater = $el.closest('[ng-repeat]');
-        var $listGetter = $parse(attrs.valuesList);
-        var $minValue = $parse(attrs.valuesListMin);
-        var $maxValue = $parse(attrs.valuesListMax);
 
         var handlers = {
           up: change(add, 1),
@@ -29,6 +29,8 @@ define(function (require) {
           tab: go('next'),
           'shift-tab': go('prev'),
 
+          'shift-enter': numberListCntr.add,
+
           backspace: removeIfEmpty,
           delete: removeIfEmpty
         };
@@ -36,7 +38,7 @@ define(function (require) {
         function removeIfEmpty(event) {
           if ($el.val() === '') {
             $get('prev').focus();
-            $scope.remove($scope.$index);
+            numberListCntr.remove($scope.$index);
             event.preventDefault();
           }
 
@@ -44,7 +46,7 @@ define(function (require) {
         }
 
         function $get(dir) {
-          return $repeater[dir]().find('[values-list]');
+          return $repeater[dir]().find('[agg-control-number-list-input]');
         }
 
         function go(dir) {
@@ -88,7 +90,7 @@ define(function (require) {
 
         function change(using, mod) {
           return function () {
-            var str = String(ngModelController.$viewValue);
+            var str = String(ngModelCntr.$viewValue);
             var val = parse(str);
             if (val === INVALID) return;
 
@@ -96,7 +98,7 @@ define(function (require) {
             if (next === INVALID) return;
 
             $el.val(next);
-            ngModelController.$setViewValue(next);
+            ngModelCntr.$setViewValue(next);
           };
         }
 
@@ -123,9 +125,9 @@ define(function (require) {
           num = parseFloat(num);
           if (isNaN(num)) return INVALID;
 
-          var list = $listGetter($scope);
-          var min = list[$scope.$index - 1] || $minValue($scope);
-          var max = list[$scope.$index + 1] || $maxValue($scope);
+          var list = numberListCntr.getList();
+          var min = list[$scope.$index - 1] || numberListCntr.getMin();
+          var max = list[$scope.$index + 1] || numberListCntr.getMax();
 
           if (num <= min || num >= max) return INVALID;
 
@@ -137,12 +139,12 @@ define(function (require) {
           {
             fn: $scope.$watchCollection,
             get: function () {
-              return $listGetter($scope);
+              return numberListCntr.getList();
             }
           }
         ], function () {
-          var valid = parse(ngModelController.$viewValue) !== INVALID;
-          ngModelController.$setValidity('valuesList', valid);
+          var valid = parse(ngModelCntr.$viewValue) !== INVALID;
+          ngModelCntr.$setValidity('valuesList', valid);
         });
 
         function validate(then) {
@@ -150,14 +152,14 @@ define(function (require) {
             var value = parse(input);
             var valid = value !== INVALID;
             value = valid ? value : void 0;
-            ngModelController.$setValidity('valuesList', valid);
+            ngModelCntr.$setValidity('valuesList', valid);
             then && then(input, value);
             return value;
           };
         }
 
-        ngModelController.$parsers.push(validate());
-        ngModelController.$formatters.push(validate(function (input, value) {
+        ngModelCntr.$parsers.push(validate());
+        ngModelCntr.$formatters.push(validate(function (input, value) {
           if (input !== value) $setModel($scope, value);
         }));
       }
