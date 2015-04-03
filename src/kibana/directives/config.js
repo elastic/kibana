@@ -48,15 +48,20 @@ define(function (require) {
           tmpScope.$destroy();
           tmpScope = $scope.$new();
 
-          element.html(!tmpl ? '' : $compile('' +
-            '<div class="config" ng-show="configTemplate">' +
-              wrapTmpl(tmpl) +
-            '  <div class="config-close remove" ng-click="close()">' +
-            '    <i class="fa fa-chevron-up"></i>' +
-            '  </div>' +
-            '</div>' +
-            ''
-          )(tmpScope));
+          var html = '';
+          if (tmpl) {
+            html = $compile('' +
+              '<div class="config" ng-show="configTemplate">' +
+                wrapTmpl(tmpl) +
+              '  <div class="config-close remove" ng-click="close()">' +
+              '    <i class="fa fa-chevron-up"></i>' +
+              '  </div>' +
+              '</div>' +
+              ''
+            )(tmpScope);
+          }
+
+          element.html(html);
         };
 
         $scope.$watch('configSubmit', render);

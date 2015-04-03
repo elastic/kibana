@@ -18,9 +18,11 @@ define(function (require) {
           interpolate: 'linear',
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
+          scale: 'linear',
           defaultYExtents: false
         },
         interpolates: ['linear', 'smooth'],
+        scales: ['linear', 'log', 'square root'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([

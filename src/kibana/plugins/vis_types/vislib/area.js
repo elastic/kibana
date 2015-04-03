@@ -16,10 +16,12 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          scale: 'linear',
           mode: 'stacked',
           interpolate: 'linear',
           defaultYExtents: false
         },
+        scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
         interpolates: ['linear', 'smooth'],
         editor: require('text!plugins/vis_types/vislib/editors/area.html')

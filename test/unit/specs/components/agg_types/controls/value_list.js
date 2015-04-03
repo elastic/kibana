@@ -4,7 +4,7 @@ define(function (require) {
     var _ = require('lodash');
     var simulateKeys = require('test_utils/simulate_keys');
 
-    require('components/agg_types/controls/_percent_list');
+    require('components/agg_types/controls/_values_list');
 
     var $el;
     var $scope;
@@ -20,7 +20,9 @@ define(function (require) {
         $('<input>')
           .attr('ng-model', 'vals[$index]')
           .attr('ng-repeat', 'val in vals')
-          .attr('percent-list', 'vals')
+          .attr('values-list', 'vals')
+          .attr('values-list-min', '0')
+          .attr('values-list-max', '100')
       );
       compile = function (vals) {
         $scope.vals = vals || [];

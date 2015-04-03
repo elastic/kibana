@@ -15,7 +15,7 @@ define(function (require) {
       return 'array';
     }
 
-    return (typeof def.value);
+    return (def.value != null ? typeof def.value : typeof value);
   }
 
   return getValType;
