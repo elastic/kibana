@@ -22,20 +22,29 @@ define(function (require) {
       return count + ' Error' + (count === 1 ? '' : 's');
     };
 
-    self.invalidModels = function () {
+    self.$invalidModels = function () {
       return _.reduce(self.$error, function (all, models) {
         return all.concat(models ? models : []);
       }, []);
     };
 
+    self.$setTouched = function () {
+      self.$invalidModels().forEach(function (model) {
+        if (model.$setTouched) { // only kbnModels have $setTouched
+          model.$setTouched();
+        }
+
+        if (model.$invalidModels) {
+          // propogate the setTouched call to sub-forms
+          model.$setTouched();
+        }
+      });
+    };
+
     function filterSubmits(event) {
       if (self.errorCount()) {
         event.stopImmediatePropagation();
-        self.invalidModels().forEach(function (model) {
-          if (model.$setTouched) { // only kbnModels have $setTouched
-            model.$setTouched();
-          }
-        });
+        self.$setTouched();
       }
     }
 

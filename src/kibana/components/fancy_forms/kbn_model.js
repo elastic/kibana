@@ -45,7 +45,11 @@ define(function (require) {
      * @return {undefined}
      */
     ngModel.$setDirty = function () {
+      // ensure that models which don't emit "blur" events are never dirty and untouched
+      ngModel.$setTouched();
+
       if (ngModel.$dirty) return;
+
       ngModel.$dirty = true;
       ngModel.$pristine = false;
       $animate.removeClass($element, PRISTINE_CLASS);
@@ -57,6 +61,8 @@ define(function (require) {
     ngModel.$setUntouched = toggleTouched(false);
     function toggleTouched(val) {
       return function () {
+        if (ngModel.$touched === val) return;
+
         ngModel.$touched = val;
         ngModel.$untouched = !val;
         $animate.addClass($element, val ? TOUCHED_CLASS : UNTOUCHED_CLASS);
@@ -107,7 +113,8 @@ define(function (require) {
       };
     }
 
-    $element.addClass(UNTOUCHED_CLASS);
+    // wire up touched & untouched
+    ngModel.$setUntouched();
     $element.one('blur', ngModel.$setTouched);
     $scope.$on('$destroy', function () {
       $element.off('blur', ngModel.$setTouched);
