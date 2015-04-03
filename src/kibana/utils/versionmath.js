@@ -32,8 +32,8 @@ define(function (require) {
   */
   var is = function (equation, versions) {
     var _versions = sortVersions(versions);
-    var _v = equation,
-      _cf;
+    var _v = equation;
+    var _cf;
 
     if (_v.charAt(0) === '>') {
       _cf = _v.charAt(1) === '=' ? gte(_v.slice(2), _versions) : gt(_v.slice(1), _versions);

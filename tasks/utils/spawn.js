@@ -29,7 +29,7 @@ module.exports = function (cmd, args, cwd, silent) {
         .pipe(estream.split())
         .pipe(
           estream.map(function (line, cb) {
-            if (!line) { empty ++; if (empty > maxEmpty) return; }
+            if (!line) { empty++; if (empty > maxEmpty) return; }
             else empty = 0;
 
             buffer += line + '\n';

@@ -53,7 +53,7 @@ define(function (require) {
           var div = d3.select(el);
           var width = $(el).width();
           var height = $(el).height();
-          
+
           self.validateWidthandHeight(width, height);
 
           div.append('svg')

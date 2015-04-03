@@ -16,7 +16,8 @@ define(function (require) {
   require('plugins/discover/index');
 
   var $parentScope, $scope, $elem;
-  var clock, anchor = '2014-01-01T06:06:06.666Z';
+  var anchor = '2014-01-01T06:06:06.666Z';
+  var clock;
 
   var init = function () {
     // Load the application
