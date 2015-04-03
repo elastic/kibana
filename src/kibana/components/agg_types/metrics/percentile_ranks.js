@@ -28,7 +28,7 @@ define(function (require) {
         {
           name: 'values',
           editor: valuesEditor,
-          default: [10],
+          default: [],
           controller: function ($scope) {
             $scope.remove = function (index) {
               $scope.agg.params.values.splice(index, 1);
