@@ -18,17 +18,18 @@ define(function (require) {
 
     it('produces a single series with points for each row', function () {
       var rows = [
-        [1, 2],
-        [1, 2],
-        [1, 2],
-        [1, 2],
-        [1, 2]
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3]
       ].map(wrapRows);
 
       var chart = {
         aspects: {
           x: { i: 0 },
-          y: { i: 1 }
+          y: { i: 1 },
+          z: { i: 2 }
         }
       };
 
@@ -49,7 +50,10 @@ define(function (require) {
         .and.have.length(5);
 
       siri.values.forEach(function (point) {
-        expect(point).to.have.property('x', 1).and.property('y', 2);
+        expect(point)
+          .to.have.property('x', 1)
+          .and.property('y', 2)
+          .and.property('z', 3);
       });
     });
 

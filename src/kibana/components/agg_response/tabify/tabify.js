@@ -38,12 +38,12 @@ define(function (require) {
           var splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
             write.split(agg, buckets, function forEachBucket(subBucket, key) {
-              collectBucket(write, subBucket, key);
+              collectBucket(write, subBucket, agg.getKey(subBucket), key);
             });
           } else {
             buckets.forEach(function (subBucket, key) {
-              write.cell(agg, key, function () {
-                collectBucket(write, subBucket, key);
+              write.cell(agg, agg.getKey(subBucket, key), function () {
+                collectBucket(write, subBucket, agg.getKey(subBucket, key));
               });
             });
           }

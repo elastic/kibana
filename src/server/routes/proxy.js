@@ -18,6 +18,13 @@ var customCA;
 if (/^https/.test(target.protocol) && config.kibana.ca) {
   customCA = fs.readFileSync(config.kibana.ca, 'utf8');
 }
+// Add client certificate and key if required by elasticsearch
+var clientCrt;
+var clientKey;
+if (/^https/.test(target.protocol) && config.kibana.kibana_elasticsearch_client_crt && config.kibana.kibana_elasticsearch_client_key) {
+  clientCrt = fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt, 'utf8');
+  clientKey = fs.readFileSync(config.kibana.kibana_elasticsearch_client_key, 'utf8');
+}
 
 // Create the router
 var router = module.exports = express.Router();
@@ -58,10 +65,16 @@ router.use(function (req, res, next) {
   var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
   path = url.resolve(path, '.' + req.url);
 
+  if (uri.auth) {
+    var auth = new Buffer(uri.auth);
+    base64_auth = auth.toString('base64');
+    req.headers.authorization = "Basic " + base64_auth;
+  }
+
   var options = {
-    url: uri.protocol + '//' + uri.host + path,
+    url: config.elasticsearch + path,
     method: req.method,
-    headers: _.defaults({ host: target.hostname }, req.headers),
+    headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,
     timeout: config.kibana.request_timeout
   };
@@ -73,6 +86,15 @@ router.use(function (req, res, next) {
   // If the server has a custom CA we need to add it to the agent options
   if (customCA) {
     options.agentOptions = { ca: [customCA] };
+  }
+  
+  // Add client key and certificate for elasticsearch if needed.
+  if (clientCrt && clientKey) {
+    if (! options.agentOptions ) {
+      options.agentOptions = {};
+    }
+    options.agentOptions.cert = clientCrt;
+    options.agentOptions.key = clientKey;
   }
 
   // Only send the body if it's a PATCH, PUT, or POST

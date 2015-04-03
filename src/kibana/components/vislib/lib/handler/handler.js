@@ -92,12 +92,12 @@ define(function (require) {
         var chart = new self.ChartClass(self, this, chartData);
         var enabledEvents;
 
-         /*
-          * inside handler: if there are charts, bind events to charts
-          * functionality: track in array that event is enabled
-          * clean up event handlers every time it destroys the chart
-          * rebind them every time it creates the charts
-          */
+        /*
+         * inside handler: if there are charts, bind events to charts
+         * functionality: track in array that event is enabled
+         * clean up event handlers every time it destroys the chart
+         * rebind them every time it creates the charts
+         */
         if (chart.events.dispatch) {
           enabledEvents = self.vis.eventTypes.enabled;
 

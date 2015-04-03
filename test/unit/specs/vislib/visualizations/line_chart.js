@@ -35,7 +35,8 @@ define(function (require) {
       var visLibParams = {
         type: 'line',
         addLegend: true,
-        addTooltip: true
+        addTooltip: true,
+        drawLinesBetweenPoints: true
       };
 
       beforeEach(function () {

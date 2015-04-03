@@ -1,32 +1,30 @@
-/* jshint ignore:start */
-/* markdown
+/**
 
-### Formatting a value
-To format a response value, you need to get ahold of the field list, which is usually available at `indexPattern.fields`. Each field object has a `format` property*, which is an object detailed in [_field_formats.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js).
+  ### Formatting a value
+  To format a response value, you need to get ahold of the field list, which is usually available at `indexPattern.fields`. Each field object has a `format` property*, which is an object detailed in [_field_formats.js](https://github.com/elastic/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js).
 
-Once you have the field that a response value came from, pass the value to `field.format.convert(value)` and a formatted string representation of the field will be returned.
+  Once you have the field that a response value came from, pass the value to `field.format.convert(value)` and a formatted string representation of the field will be returned.
 
-\* the `format` property on field object's is a non-enumerable getter, meaning that if you itterate/clone/stringify the field object the format property will not be present.
+  \* the `format` property on field object's is a non-enumerable getter, meaning that if you itterate/clone/stringify the field object the format property will not be present.
 
-### Changing a field's format
+  ### Changing a field's format
 
-Currently only one field format exists, `"string"`, which just [flattens any value down to a string](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js#L18-L24).
+  Currently only one field format exists, `"string"`, which just [flattens any value down to a string](https://github.com/elastic/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js#L18-L24).
 
-To change the format for a specific field you can either change the default for a field type modify the [default format mapping here](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js#L37-L46).
+  To change the format for a specific field you can either change the default for a field type modify the [default format mapping here](https://github.com/elastic/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js#L37-L46).
 
-To change the format for a specific indexPattern's field, add the field and format name to `indexPattern.customFormats` object property.
+  To change the format for a specific indexPattern's field, add the field and format name to `indexPattern.customFormats` object property.
 
-```js
-$scope.onChangeFormat = function (field, format) {
-  indexPattern.customFormats[field.name] = format.name;
-};
-```
+  ```js
+  $scope.onChangeFormat = function (field, format) {
+    indexPattern.customFormats[field.name] = format.name;
+  };
+  ```
 
-### Passing the formats to a chart
-Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/blob/master/src/plugins/visualize/saved_visualizations/resp_converters/histogram.js) passes the formatting function as the `xAxisFormatter` and `yAxisFormatter` function.
+  ### Passing the formats to a chart
+  Currently, the [histogram formatter](https://github.com/elastic/kibana4/blob/master/src/plugins/visualize/saved_visualizations/resp_converters/histogram.js) passes the formatting function as the `xAxisFormatter` and `yAxisFormatter` function.
 
 */
-/* jshint ignore:end */
 
 define(function (require) {
   return function FieldFormattingService($rootScope, config) {

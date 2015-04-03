@@ -1,5 +1,5 @@
 define(function (require) {
-	var moment = require('moment');
+  var moment = require('moment');
   var _ = require('lodash');
 
   require('modules')

@@ -6,7 +6,7 @@ define(function (require) {
     var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
     var ordinalSuffix = require('utils/ordinal_suffix');
 
-    require('components/agg_types/controls/_percent_list');
+    require('components/agg_types/controls/_values_list');
     var percentEditor = require('text!components/agg_types/controls/percents.html');
 
     var valueProps = {

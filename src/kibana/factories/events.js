@@ -37,6 +37,8 @@ define(function (require) {
           Promise.resolve(handler(value)).catch(notify.fatal);
         });
       }());
+
+      return this;
     };
 
     /**
@@ -61,6 +63,8 @@ define(function (require) {
           return handler !== listener.handler;
         });
       }
+
+      return this;
     };
 
     /**

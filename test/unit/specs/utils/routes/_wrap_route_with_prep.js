@@ -22,7 +22,7 @@ define(function (require) {
         opts = opts || {};
 
         var delaySetup = opts.delayUserWork ? 0 : 50;
-        var delayUserWork = opts.delayUserWork ? 50: 0;
+        var delayUserWork = opts.delayUserWork ? 50 : 0;
 
         return function () {
           module('kibana', 'kibana/notify');

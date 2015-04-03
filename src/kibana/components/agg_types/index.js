@@ -11,12 +11,14 @@ define(function (require) {
         Private(require('components/agg_types/metrics/max')),
         Private(require('components/agg_types/metrics/std_deviation')),
         Private(require('components/agg_types/metrics/cardinality')),
-        Private(require('components/agg_types/metrics/percentiles'))
+        Private(require('components/agg_types/metrics/percentiles')),
+        Private(require('components/agg_types/metrics/percentile_ranks'))
       ],
       buckets: [
         Private(require('components/agg_types/buckets/date_histogram')),
         Private(require('components/agg_types/buckets/histogram')),
         Private(require('components/agg_types/buckets/range')),
+        Private(require('components/agg_types/buckets/date_range')),
         Private(require('components/agg_types/buckets/ip_range')),
         Private(require('components/agg_types/buckets/terms')),
         Private(require('components/agg_types/buckets/filters')),

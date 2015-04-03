@@ -11,7 +11,8 @@
     <form
       name="forms.configEdit"
       ng-if="conf.editting"
-      ng-submit="save(conf)">
+      ng-submit="save(conf)"
+      role="form">
       <input
         ng-show="conf.normal"
         ng-model="conf.unsavedValue"
@@ -39,7 +40,6 @@
       <input
         ng-show="conf.bool"
         ng-model="conf.unsavedValue"
-        ng-checked="conf.unsavedValue === undefined ? conf.defVal : conf.unsavedValue"
         type="checkbox"
         class="form-control">
     </form>
@@ -53,32 +53,40 @@
       ng-if="!conf.editting"
       ng-click="edit(conf)"
       class="btn btn-default"
-      ng-disabled="conf.tooComplex">
-      <i class="fa fa-pencil"></i>
+      ng-disabled="conf.tooComplex"
+      aria-label="Edit">
+      <span class="sr-only">Edit</span>
+      <i aria-hidden="true" class="fa fa-pencil"></i>
     </button>
 
     <button
       ng-if="conf.editting"
       ng-click="save(conf)"
       class="btn btn-success"
-      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid">
-      <i ng-if="!conf.loading" class="fa fa-save"></i>
-      <i ng-if="conf.loading" class="fa fa-spinner"></i>
+      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
+      aria-label="Save">
+      <span class="sr-only">Save</span>
+      <i aria-hidden="true" ng-if="!conf.loading" class="fa fa-save"></i>
+      <i aria-hidden="true" ng-if="conf.loading" class="fa fa-spinner"></i>
     </button>
 
     <button
       ng-if="!conf.editting"
       ng-click="clear(conf)"
       ng-hide="conf.value === undefined"
-      class="btn btn-danger">
-      <i class="fa fa-trash-o"></i>
+      class="btn btn-danger"
+      aria-label="Clear">
+      <span class="sr-only">Clear</span>
+      <i aria-hidden="true" class="fa fa-trash-o"></i>
     </button>
 
     <button
       ng-if="conf.editting"
       ng-click="cancelEdit(conf)"
-      class="btn btn-default">
-      <i class="fa fa-times"></i>
+      class="btn btn-default"
+      aria-label="Cancel edit">
+      <span class="sr-only">Cancel Edit</span>
+      <i aria-hidden="true" class="fa fa-times"></i>
     </button>
   </td>
 </tr>
