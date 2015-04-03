@@ -5,6 +5,7 @@ define(function (require) {
 
   var INVALID = {}; // invalid flag
   var FLOATABLE = /^[\d\.e\-\+]+$/i;
+  var VALIDATION_ERROR = 'numberListRangeAndOrder';
 
   require('modules')
   .get('kibana')
@@ -144,7 +145,7 @@ define(function (require) {
           }
         ], function () {
           var valid = parse(ngModelCntr.$viewValue) !== INVALID;
-          ngModelCntr.$setValidity('valuesList', valid);
+          ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
         });
 
         function validate(then) {
@@ -152,7 +153,7 @@ define(function (require) {
             var value = parse(input);
             var valid = value !== INVALID;
             value = valid ? value : void 0;
-            ngModelCntr.$setValidity('valuesList', valid);
+            ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
             then && then(input, value);
             return value;
           };
