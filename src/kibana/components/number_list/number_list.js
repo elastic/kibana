@@ -5,7 +5,7 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('aggControlNumberList', function () {
+  .directive('kbnNumberList', function () {
     return {
       restrict: 'E',
       template: require('text!components/number_list/number_list.html'),

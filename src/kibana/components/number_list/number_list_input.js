@@ -5,14 +5,16 @@ define(function (require) {
 
   var INVALID = {}; // invalid flag
   var FLOATABLE = /^[\d\.e\-\+]+$/i;
+
   var VALIDATION_ERROR = 'numberListRangeAndOrder';
+  var DIRECTIVE_ATTR = 'kbn-number-list-input';
 
   require('modules')
   .get('kibana')
-  .directive('aggControlNumberListInput', function ($parse) {
+  .directive('kbnNumberListInput', function ($parse) {
     return {
       restrict: 'A',
-      require: ['ngModel', '^aggControlNumberList'],
+      require: ['ngModel', '^kbnNumberList'],
       link: function ($scope, $el, attrs, controllers) {
         var ngModelCntr = controllers[0];
         var numberListCntr = controllers[1];
@@ -47,7 +49,7 @@ define(function (require) {
         }
 
         function $get(dir) {
-          return $repeater[dir]().find('[agg-control-number-list-input]');
+          return $repeater[dir]().find('[' + DIRECTIVE_ATTR + ']');
         }
 
         function go(dir) {
