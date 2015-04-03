@@ -18,7 +18,8 @@ define(function (require) {
           addLegend: true,
           scale: 'linear',
           mode: 'stacked',
-          defaultYExtents: false
+          defaultYExtents: false,
+          addTimeMarker: false
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],

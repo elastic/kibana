@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
+    var TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -275,6 +276,8 @@ define(function (require) {
       var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
+      var addTimeMarker = this._attr.addTimeMarker;
+      var timeMarker;
       var div;
       var svg;
       var width;
@@ -291,6 +294,7 @@ define(function (require) {
           // Get the width and height
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
+          timeMarker = new TimeMarker(xScale, height);
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
@@ -341,6 +345,10 @@ define(function (require) {
           .attr('y2', height)
           .style('stroke', '#ddd')
           .style('stroke-width', 1);
+
+          if (addTimeMarker) {
+            timeMarker.render(svg);
+          }
 
           return svg;
         });

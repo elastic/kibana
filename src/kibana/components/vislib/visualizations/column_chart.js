@@ -275,7 +275,7 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var minWidth = 20;
       var minHeight = 20;
-      var addTimeMarker = this._attr.addTimeMarker || true;
+      var addTimeMarker = this._attr.addTimeMarker;
       var timeMarker;
       var div;
       var svg;
