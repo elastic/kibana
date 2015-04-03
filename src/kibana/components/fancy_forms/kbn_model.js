@@ -115,15 +115,17 @@ define(function (require) {
       };
     }
 
-    // wire up touched & untouched
     ngModel.$setUntouched();
     $element.one('blur', ngModel.$setTouched);
     $scope.$on('$destroy', function () {
       $element.off('blur', ngModel.$setTouched);
     });
 
-    if (ngModel.$dirty) waitForPristine();
-    else watchForDirtyOrInvalid();
+    // wait for child scope to init before watching validity
+    $scope.$evalAsync(function () {
+      if (ngModel.$dirty) waitForPristine();
+      else watchForDirtyOrInvalid();
+    });
   }
 
   return KbnModelController;
