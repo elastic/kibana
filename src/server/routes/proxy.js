@@ -75,7 +75,7 @@ router.use(function (req, res, next) {
     method: req.method,
     headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,
-    timeout: config.kibana.request_timeout
+    timeout: config.request_timeout
   };
 
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
