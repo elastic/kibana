@@ -142,6 +142,7 @@ define(function (require) {
 
     formats.defaultByType = {
       number:     formats.byName.number,
+      murmur3:    formats.byName.number,
       date:       formats.byName.date,
       boolean:    formats.byName.string,
       ip:         formats.byName.ip,
