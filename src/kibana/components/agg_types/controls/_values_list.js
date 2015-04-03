@@ -126,7 +126,7 @@ define(function (require) {
           var list = $listGetter($scope);
           var min = list[$scope.$index - 1] || $minValue($scope);
           var max = list[$scope.$index + 1] || $maxValue($scope);
-          
+
           if (num <= min || num >= max) return INVALID;
 
           return num;

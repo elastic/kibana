@@ -13,7 +13,6 @@ define(function (require) {
         Private(require('components/agg_types/metrics/cardinality')),
         Private(require('components/agg_types/metrics/percentiles')),
         Private(require('components/agg_types/metrics/percentileranks'))
-		
       ],
       buckets: [
         Private(require('components/agg_types/buckets/date_histogram')),
