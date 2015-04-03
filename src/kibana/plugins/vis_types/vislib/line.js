@@ -17,8 +17,10 @@ define(function (require) {
           showCircles: true,
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
+          scale: 'linear',
           defaultYExtents: false
         },
+        scales: ['linear', 'log', 'square root'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([

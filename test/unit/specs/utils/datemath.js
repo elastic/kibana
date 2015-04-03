@@ -6,11 +6,11 @@ define(function (require) {
 
   describe('datemath', function () {
     // Test each of these intervals when testing relative time
-    var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'],
-      anchor =  '2014-01-01T06:06:06.666Z',
-      unix = moment(anchor).valueOf(),
-      format = 'YYYY-MM-DDTHH:mm:ss.SSSZ',
-      clock;
+    var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+    var anchor =  '2014-01-01T06:06:06.666Z';
+    var unix = moment(anchor).valueOf();
+    var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+    var clock;
 
     describe('errors', function () {
       it('should return undefined if passed something falsy', function () {

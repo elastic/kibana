@@ -25,7 +25,8 @@ module.exports = function (grunt) {
     }
 
     var tasks = [
-      'jshint',
+      'jshint:source',
+      'jscs:source',
       'maybe_start_kibana',
       'jade',
       'less:build'

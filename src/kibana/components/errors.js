@@ -247,5 +247,15 @@ define(function (require) {
   };
   inherits(errors.PieContainsAllZeros, KbnError);
 
+  /**
+   * error thrown when no results are returned from an elasticsearch query
+   */
+  errors.CannotLogScaleNegVals = function CannotLogScaleNegVals() {
+    KbnError.call(this,
+      'Negative values cannot be displayed on a log scale',
+      errors.CannotLogScaleNegVals);
+  };
+  inherits(errors.CannotLogScaleNegVals, KbnError);
+
   return errors;
 });

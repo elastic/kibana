@@ -27,6 +27,7 @@ define(function (require) {
 
         init = function (interval, duration) {
           interval = interval || 'auto';
+          if (interval === 'custom') interval = agg.params.customInterval;
           duration = duration || moment.duration(15, 'minutes');
           field = _.sample(indexPattern.fields.byType.date);
           vis = new Vis(indexPattern, {
@@ -35,7 +36,7 @@ define(function (require) {
               {
                 type: 'date_histogram',
                 schema: 'segment',
-                params: { field: field.name, interval: interval }
+                params: { field: field.name, interval: interval, customInterval: '5d' }
               }
             ]
           });
@@ -78,7 +79,7 @@ define(function (require) {
       it('extends the filter edge to 1ms before the next bucket for all interval options', function () {
         intervalOptions.forEach(function (option) {
           var duration;
-          if (moment(1, option.val).isValid()) {
+          if (option.val !== 'custom' && moment(1, option.val).isValid()) {
             duration = moment.duration(10, option.val);
 
             if (+duration < 10) {

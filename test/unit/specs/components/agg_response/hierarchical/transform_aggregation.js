@@ -9,8 +9,8 @@ define(function (require) {
       }));
 
       var fixture = {};
-      fixture.agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' },
-        _next: { id: 'agg_3', name: 'example', schema: { group: 'buckets' } } };
+      fixture.agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }, getKey: function () {},
+        _next: { id: 'agg_3', name: 'example', schema: { group: 'buckets' }, getKey: function () {} } };
       fixture.metric = { id: 'agg_1' };
       fixture.aggData = {
         buckets: [
@@ -20,7 +20,7 @@ define(function (require) {
       };
 
       it('should return an array of objects with the doc_count as the size if the metric does not exist', function () {
-        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }};
+        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }, getKey: function () {}};
         var aggData = {
           buckets: [
             { key: 'foo', doc_count: 1 },
@@ -36,7 +36,7 @@ define(function (require) {
       });
 
       it('should return an array of objects with the metric agg value as the size', function () {
-        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' } };
+        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }, getKey: function () {} };
         var aggData = {
           buckets: [
             { key: 'foo', doc_count: 1, agg_1: { value: 0 } },
