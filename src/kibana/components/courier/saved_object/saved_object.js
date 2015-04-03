@@ -233,7 +233,7 @@ define(function (require) {
           if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
             return docSource.doIndex(source).then(finish);
           }
-          return Promise.reject(err.message);
+          return Promise.reject(err);
         });
       };
 
