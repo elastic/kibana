@@ -30,8 +30,6 @@ define(function (require) {
           editor: valuesEditor,
           default: [10],
           controller: function ($scope) {
-            $scope.valueBoundaries = [0];
-
             $scope.remove = function (index) {
               $scope.agg.params.values.splice(index, 1);
             };

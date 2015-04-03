@@ -16,6 +16,8 @@ define(function (require) {
         var $setModel = $parse(attrs.ngModel).assign;
         var $repeater = $el.closest('[ng-repeat]');
         var $listGetter = $parse(attrs.valuesList);
+        var $minValue = $parse(attrs.valuesListMin);
+        var $maxValue = $parse(attrs.valuesListMax);
 
         var handlers = {
           up: change(add, 1),
@@ -122,8 +124,8 @@ define(function (require) {
           if (isNaN(num)) return INVALID;
 
           var list = $listGetter($scope);
-          var min = list[$scope.$index - 1] || $scope.valueBoundaries[0];
-          var max = list[$scope.$index + 1] || $scope.valueBoundaries[1];
+          var min = list[$scope.$index - 1] || $minValue($scope);
+          var max = list[$scope.$index + 1] || $maxValue($scope);
           
           if (num <= min || num >= max) return INVALID;
 

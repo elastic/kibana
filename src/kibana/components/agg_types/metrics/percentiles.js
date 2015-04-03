@@ -31,8 +31,6 @@ define(function (require) {
           editor: percentEditor,
           default: [1, 5, 25, 50, 75, 95, 99],
           controller: function ($scope) {
-            $scope.valueBoundaries = [0, 100];
-
             $scope.remove = function (index) {
               $scope.agg.params.percents.splice(index, 1);
             };
