@@ -9,6 +9,9 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
+    var mapCenter = [15, 5];
+    var mapZoom = 2;
+
     /**
      * Tile Map Visualization: renders maps
      *
@@ -50,12 +53,10 @@ define(function (require) {
       // create a new maps array
       self.maps = [];
 
+      var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
+
       return function (selection) {
         selection.each(function (data) {
-
-          var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
-          var mapCenter = [15, 5];
-          var mapZoom = 2;
 
           if (self._attr.mapZoom) {
             mapZoom = self._attr.mapZoom;
@@ -261,11 +262,6 @@ define(function (require) {
       if (mapData.features.length > 1) {
         self.addLegend(mapData, map);
       }
-
-      map.on('moveend', function setZoomCenter() {
-        self._attr.mapZoom = map.getZoom();
-        self._attr.mapCenter = map.getCenter();
-      });
 
       return featureLayer;
     };
