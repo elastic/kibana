@@ -82,7 +82,7 @@ define(function (require) {
       inject(function (d3, Private) {
         Data = Private(require('components/vislib/lib/data'));
         XAxis = Private(require('components/vislib/lib/x_axis'));
-        
+
         el = d3.select('body').append('div')
           .attr('class', 'x-axis-wrapper')
           .style('height', '40px');

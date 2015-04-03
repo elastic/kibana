@@ -3,14 +3,7 @@ module.exports = function (grunt) {
     // just lint the source dir
     source: {
       files: {
-        src: [
-          'Gruntfile.js',
-          '<%= root %>/tasks/**/*.js',
-          '<%= src %>/kibana/*.js',
-          '<%= src %>/server/*.js',
-          '<%= src %>/kibana/{components,directives,factories,filters,plugins,registry,services,utils}/**/*.js',
-          '<%= unitTestDir %>/**/*.js'
-        ]
+        src: '<%= lintThese %>'
       }
     },
     options: {

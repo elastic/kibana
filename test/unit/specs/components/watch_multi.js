@@ -93,7 +93,7 @@ define(function (require) {
         'two',
         'three'
       ], function () {
-        calls ++;
+        calls++;
         expect(arguments).to.have.length(0);
       });
       $rootScope.$apply();

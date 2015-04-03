@@ -1,5 +1,7 @@
 define(function (require) {
-    /* Extensions:
+
+  /*
+    Extensions:
     gif: 5
     html: 8
     php: 5 (thus 5 with phpmemory fields)
@@ -14,6 +16,7 @@ define(function (require) {
 
     All have the same index, ids are unique
   */
+
   return [
     {
       '_index': 'logstash-2014.09.09',

@@ -6,7 +6,10 @@ define(function (require) {
   return function parseInterval(interval) {
     // Assume interval is in the form (value)(unit), such as "1h"
     var regex = new RegExp('^([0-9\\.]*)\\s*(' + datemath.units.join('|') + ')$');
-    var matches = regex.exec(interval), value, unit;
+    var matches = regex.exec(interval);
+    var value;
+    var unit;
+
     if (matches && matches.length) {
       value = parseFloat(matches[1]) || 1;
       unit = matches[2];

@@ -181,7 +181,7 @@ define(function (require) {
   describe('Vislib Data Class Test Suite', function () {
 
     describe('Data Class (main)', function () {
-      var dataFactory;
+      var DataFactory;
       var rowIn;
 
       beforeEach(function () {
@@ -190,13 +190,13 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataFactory = Private(require('components/vislib/lib/data'));
+          DataFactory = Private(require('components/vislib/lib/data'));
         });
-        rowIn = new dataFactory(rowsData, {});
+        rowIn = new DataFactory(rowsData, {});
       });
 
       it('should be a function', function () {
-        expect(_.isFunction(dataFactory)).to.be(true);
+        expect(_.isFunction(DataFactory)).to.be(true);
       });
 
       it('should return an object', function () {
@@ -206,7 +206,7 @@ define(function (require) {
     });
 
     describe('Data.flatten', function () {
-      var dataFactory;
+      var DataFactory;
       var serIn;
       var rowIn;
       var colIn;
@@ -220,11 +220,11 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataFactory = Private(require('components/vislib/lib/data'));
+          DataFactory = Private(require('components/vislib/lib/data'));
         });
-        serIn = new dataFactory(seriesData, {});
-        rowIn = new dataFactory(rowsData, {});
-        colIn = new dataFactory(colsData, {});
+        serIn = new DataFactory(seriesData, {});
+        rowIn = new DataFactory(rowsData, {});
+        colIn = new DataFactory(colsData, {});
         serOut = serIn.flatten();
         rowOut = rowIn.flatten();
         colOut = colIn.flatten();
@@ -236,7 +236,7 @@ define(function (require) {
 
       function testLength(inputData) {
         return function () {
-          var data = new dataFactory(inputData, {});
+          var data = new DataFactory(inputData, {});
           var len = _.reduce(data.chartData(), function (sum, chart) {
             return sum + chart.series.reduce(function (sum, series) {
               return sum + series.values.length;
