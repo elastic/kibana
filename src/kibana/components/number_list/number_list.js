@@ -22,8 +22,7 @@ define(function (require) {
             return self.modelCntr.$modelValue;
           };
 
-          self.getTitle = attrGetter('title', 'Values');
-          self.getUnitName = attrGetter('unitName', 'value');
+          self.getUnitName = attrGetter('unitName', 'number');
           self.getMin = attrGetter('min', 0, _.parseInt);
           self.getMax = attrGetter('max', Infinity, _.parseInt);
 
@@ -76,7 +75,7 @@ define(function (require) {
            * @return {Boolean}
            */
           self.undefinedLength = function () {
-            return self.tooShort() && self.modelCntr.$touched !== true;
+            return self.tooShort() && (self.modelCntr.$untouched && self.modelCntr.$pristine);
           };
 
           /**
