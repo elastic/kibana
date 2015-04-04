@@ -17,9 +17,11 @@
             <span bo-if="mapping[field].filterable">
               <i ng-click="filter(mapping[field], flattened[field], '+')"
                 tooltip="Filter for value"
+                tooltip-append-to-body="1"
                 class="fa fa-search-plus"></i>
               <i ng-click="filter(mapping[field], flattened[field],'-')"
                 tooltip="Filter out value"
+                tooltip-append-to-body="1"
                 class="fa fa-search-minus"></i>
             </span>
             <span bo-if="!mapping[field].filterable" tooltip="Unindexed fields can not be searched">
@@ -29,6 +31,7 @@
             <span bo-if="columns">
               <i ng-click="toggleColumn(field)"
                 tooltip="Toggle column in table"
+                tooltip-append-to-body="1"
                 class="fa fa-columns"></i>
             </span>
           </td>
