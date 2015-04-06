@@ -24,13 +24,12 @@
     </ul>
     <div class="vis-editor-sidebar-buttons">
       <p
-        ng-if="visualizeEditor.$invalid"
-        class="text-center text-danger sidebar-item-text"
-        ng-click="visualizeEditor.$setTouched()">
+        ng-if="visualizeEditor.$invalid && visualizeEditor.$blockedSubmits > 0"
+        class="text-center text-danger sidebar-item-text">
         <i aria-hidden="true" class="fa fa-warning"></i> {{visualizeEditor.describeErrors()}}
       </p>
       <button
-        ng-disabled="!vis.dirty || visualizeEditor.$invalid"
+        ng-disabled="!vis.dirty"
         type="submit"
         class="sidebar-item-button success">
         Apply
