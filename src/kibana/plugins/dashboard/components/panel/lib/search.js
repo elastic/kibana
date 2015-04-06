@@ -6,6 +6,14 @@ define(function (require) {
           panel.columns = panel.columns || savedSearch.columns;
           panel.sort = panel.sort || savedSearch.sort;
 
+          $scope.$watchCollection('panel.columns', function () {
+            $scope.state.save();
+          });
+
+          $scope.$watchCollection('panel.sort', function () {
+            $scope.state.save();
+          });
+
           return {
             savedObj: savedSearch,
             panel: panel,
