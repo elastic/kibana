@@ -73,7 +73,7 @@ define(function (require) {
 
             if (!typeName || !visTypes.byName[typeName]) {
               if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
-              else notify.error('Visualization type of "' + typeName + '" is invalid. Please change toe a valid type.', hit);
+              else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
               return kbnUrl.redirect('/settings/objects/savedVisualizations/{{id}}', {id: source.id});
             }
 
