@@ -9,6 +9,7 @@ define(function (require) {
    */
   function KbnFormController($scope, $element) {
     var self = this;
+    self.$blockedSubmits = 0;
 
     self.errorCount = function () {
       return _.reduce(self.$error, function (count, models, errorType) {
@@ -43,8 +44,12 @@ define(function (require) {
 
     function filterSubmits(event) {
       if (self.errorCount()) {
+        event.preventDefault();
         event.stopImmediatePropagation();
+        self.$blockedSubmits += 1;
         self.$setTouched();
+      } else {
+        self.$blockedSubmits = 0;
       }
     }
 
