@@ -49,6 +49,14 @@ define(function (require) {
       });
     };
 
+    TimeMarker.prototype.get = function (field) {
+      return this[field] ? this[field] : undefined;
+    };
+
+    TimeMarker.prototype.set = function (field, val) {
+      if (this[field]) this[field] = val;
+    };
+
     return TimeMarker;
   };
 });
