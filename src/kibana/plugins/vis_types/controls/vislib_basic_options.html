@@ -17,7 +17,7 @@
       Scale Y-Axis to Data Bounds
     </label>
   </div>
-  <div class="vis-option-item">
+  <div class="vis-option-item" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
     <label>
       <input type="checkbox" ng-model="vis.params.addTimeMarker" ng-checked="vis.params.addTimeMarker">
       Current time marker

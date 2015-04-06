@@ -18,8 +18,18 @@ define(function (require) {
       }) : currentTimeArr;
     }
 
+    TimeMarker.prototype._isTimeBasedChart = function (selection) {
+      var data = selection.data();
+      return data.every(function (datum) {
+        return (datum.ordered && datum.ordered.date);
+      });
+    };
+
     TimeMarker.prototype.render = function (selection) {
       var self = this;
+
+      // return if not time based chart
+      if (!self._isTimeBasedChart(selection)) return;
 
       selection.each(function () {
         d3.select(this).selectAll('time-marker')
@@ -37,14 +47,6 @@ define(function (require) {
           .attr('stroke', self.stroke)
           .attr('stroke-width', self.strokeWidth);
       });
-    };
-
-    TimeMarker.prototype.get = function (opt) {
-      if (this[opt]) return this[opt];
-    };
-
-    TimeMarker.prototype.set = function (opt, val) {
-      if (this[opt] && this[opt] !== val) this[opt] = val;
     };
 
     return TimeMarker;

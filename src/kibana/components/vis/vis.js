@@ -102,6 +102,13 @@ define(function (require) {
       }
     };
 
+    Vis.prototype.hasSchemaAgg = function (schemaName, aggTypeName) {
+      var aggs = this.aggs.bySchemaName[schemaName] || [];
+      return aggs.some(function (agg) {
+        return agg.type.name === aggTypeName;
+      });
+    };
+
     return Vis;
   };
 });
