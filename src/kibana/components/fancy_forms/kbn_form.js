@@ -31,14 +31,8 @@ define(function (require) {
 
     self.$setTouched = function () {
       self.$invalidModels().forEach(function (model) {
-        if (model.$setTouched) { // only kbnModels have $setTouched
-          model.$setTouched();
-        }
-
-        if (model.$invalidModels) {
-          // propogate the setTouched call to sub-forms
-          model.$setTouched();
-        }
+        // only kbnModels and kbnForms have $setTouched
+        if (model.$setTouched) model.$setTouched();
       });
     };
 
