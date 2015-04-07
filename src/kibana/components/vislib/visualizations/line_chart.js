@@ -269,7 +269,7 @@ define(function (require) {
       var startLineX = 0;
       var lineStrokeWidth = 1;
       var addTimeMarker = this._attr.addTimeMarker;
-      var times = this._attr.times;
+      var times = this._attr.times || [];
       var timeMarker;
       var div;
       var svg;

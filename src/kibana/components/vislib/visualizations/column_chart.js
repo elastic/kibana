@@ -276,7 +276,7 @@ define(function (require) {
       var minWidth = 20;
       var minHeight = 20;
       var addTimeMarker = this._attr.addTimeMarker;
-      var times = this._attr.times;
+      var times = this._attr.times || [];
       var timeMarker;
       var div;
       var svg;
