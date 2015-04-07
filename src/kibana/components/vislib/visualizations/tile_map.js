@@ -180,7 +180,7 @@ define(function (require) {
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
           featureLayer = this.shadedGeohashGrid(map, mapData);
         } else {
-          featureLayer = this.pinMarkers(map, mapData);
+          featureLayer = this.pinMarkers(mapData);
         }
       }
 
@@ -197,12 +197,8 @@ define(function (require) {
      * @param mapData {Object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.pinMarkers = function (map, mapData) {
+    TileMap.prototype.pinMarkers = function (mapData) {
       var self = this;
-
-      // super min and max from all chart data
-      var min = mapData.properties.allmin;
-      var max = mapData.properties.allmax;
 
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
@@ -239,7 +235,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var scaledRadius = self.radiusScale(count, max, precision, feature) * 2;
+          var scaledRadius = self.radiusScale(count, max, feature) * 2;
           return L.circle(latlng, scaledRadius);
         },
         onEachFeature: function (feature, layer) {
@@ -335,8 +331,13 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var gh = feature.properties.rectangle;
-          var bounds = [[gh[0][1], gh[0][0]], [gh[2][1], gh[2][0]]];
+          var geohashRect = feature.properties.rectangle;
+          // get bounds from northEast[3] and southWest[1]
+          // points in geohash rectangle
+          var bounds = [
+            [geohashRect[3][1], geohashRect[3][0]],
+            [geohashRect[1][1], geohashRect[1][0]]
+          ];
           return L.rectangle(bounds);
         },
         onEachFeature: function (feature, layer) {
@@ -344,6 +345,7 @@ define(function (require) {
           layer.on({
             mouseover: function (e) {
               var layer = e.target;
+              // bring layer to front if not older browser
               if (!L.Browser.ie && !L.Browser.opera) {
                 layer.bringToFront();
               }
@@ -490,6 +492,9 @@ define(function (require) {
       var centerPoint = feature.properties.center;
       var geohashRect = feature.properties.rectangle;
 
+      // get lat[1] and lng[2] of geohash center point
+      // apply to east[2] and north[3] sides of rectangle points
+      // to get radius at center of geohash grid recttangle
       var center = L.latLng([centerPoint[1], centerPoint[0]]);
       var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
       var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
@@ -512,7 +517,7 @@ define(function (require) {
      * @param precision {Number}
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (count, max, precision, feature) {
+    TileMap.prototype.radiusScale = function (count, max, feature) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
       var exp = 0.6;
@@ -543,8 +548,9 @@ define(function (require) {
       }
 
       var cScale = this._attr.cScale = d3.scale.quantize()
-        .domain([min, max])
-        .range(colors);
+      .domain([min, max])
+      .range(colors);
+
       if (max === min) {
         return colors[0];
       } else {
