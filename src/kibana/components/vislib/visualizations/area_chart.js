@@ -58,7 +58,7 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var interpolate = (this._attr.interpolate === 'smooth') ? 'monotone' : this._attr.interpolate;
+      var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       var area = d3.svg.area()
       .x(function (d) {
         if (isTimeSeries) {

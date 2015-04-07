@@ -15,13 +15,13 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           showCircles: true,
+          smoothLines: false,
           interpolate: 'linear',
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
           scale: 'linear',
           defaultYExtents: false
         },
-        interpolates: ['linear', 'smooth'],
         scales: ['linear', 'log', 'square root'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },

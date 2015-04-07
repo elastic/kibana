@@ -1,7 +1,7 @@
 <div>
   <label>
-    Line Smoothing
-    <select class="form-control" ng-model="vis.params.interpolate"
-      ng-options="interpolate for interpolate in vis.type.params.interpolates"></select>
+    <input type="checkbox" value="{{smoothLines}}" ng-model="vis.params.smoothLines" name="smoothLines"
+           ng-checked="vis.params.smoothLines">
+    Smooth Lines
   </label>
 </div>
