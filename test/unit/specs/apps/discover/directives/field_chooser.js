@@ -118,32 +118,35 @@ define(function (require) {
       });
 
       it('should not show the popular fields if there are not any', function (done) {
+
         // Re-init
         destroy();
+
+        _.each(indexPattern.fields, function (field) { field.count = 0;}); // Reset the popular fields
         init($elem, {
           columns: [],
           toggle: sinon.spy(),
           data: require('fixtures/hits'),
           filter: sinon.spy(),
-          indexPattern: indexPattern.fields
+          indexPattern: indexPattern
         });
 
         var section = getSections($elem);
-        // Remove the popular fields
+
         $scope.$digest();
         expect(section.popular.hasClass('ng-hide')).to.be(true);
         expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be(0);
         done();
       });
 
-      it('should move the field into selected when setting field.display', function (done) {
+      it('should move the field into selected when it is added to the columns array', function (done) {
         var section = getSections($elem);
-        indexPattern.fields.byName.bytes.display = true;
+        $scope.columns.push('bytes');
         $scope.$digest();
         expect(section.selected.text()).to.contain('bytes');
         expect(section.popular.text()).to.not.contain('bytes');
 
-        indexPattern.fields.byName.ip.display = true;
+        $scope.columns.push('ip');
         $scope.$digest();
         expect(section.selected.text()).to.contain('ip\n');
         expect(section.unpopular.text()).to.not.contain('ip\n');

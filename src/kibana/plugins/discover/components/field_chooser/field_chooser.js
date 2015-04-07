@@ -146,7 +146,7 @@ define(function (require) {
 
           // Get all fields current in data set
           var currentFields = _.chain($scope.data).map(function (d) {
-            return _.keys(d.$$_flattened);
+            return _.keys($scope.indexPattern.flattenHit(d));
           }).flatten().unique().sort().value();
 
           _.each($scope.fields, function (field) {
