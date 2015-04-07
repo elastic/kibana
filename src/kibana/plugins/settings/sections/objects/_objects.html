@@ -3,7 +3,7 @@
     <div class="header">
       <h2 class="title">Edit Saved Objects</h2>
       <a class="controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export</a>
-      <a class="controls" ng-click="importAll()"><i aria-hidden="true" class="fa fa-upload"></i> Import</a>
+      <a file-upload="importAll(result)" class="controls"><i aria-hidden="true" class="fa fa-upload"></i> Import</a>
     </div>
     <p>
       From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen.

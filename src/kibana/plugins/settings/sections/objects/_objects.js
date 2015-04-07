@@ -5,6 +5,8 @@ define(function (require) {
   var registry = require('plugins/settings/saved_object_registry');
   var objectIndexHTML = require('text!plugins/settings/sections/objects/_objects.html');
 
+  require('directives/file_upload');
+
   require('routes')
   .when('/settings/objects', {
     template: objectIndexHTML
@@ -97,7 +99,9 @@ define(function (require) {
           saveAs(blob, 'export.json');
         }
 
-        $scope.importAll = function () {};
+        $scope.importAll = function (result) {
+          console.log(JSON.parse(result));
+        };
 
         $scope.changeTab = function (obj) {
           $scope.currentTab = _.find($scope.services, {title: obj.title});
