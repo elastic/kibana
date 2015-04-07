@@ -12,12 +12,17 @@ define(function (require) {
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   var init = function ($elem, props) {
-    inject(function ($rootScope, $compile, _config_) {
+    inject(function ($rootScope, $compile, $timeout, _config_) {
       config = _config_;
       $parentScope = $rootScope;
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
-      $elem.scope().$digest();
+
+      // Required for test to run solo. Sigh
+      $timeout(function () {
+        $elem.scope().$digest();
+      }, 0);
+
       $scope = $elem.isolateScope();
     });
   };
@@ -30,7 +35,7 @@ define(function (require) {
   describe('discover field chooser directives', function () {
     var $elem = angular.element(
       '<disc-field-chooser' +
-      '  fields="fields"' +
+      '  columns="columns"' +
       '  toggle="toggle"' +
       '  data="data"' +
       '  filter="filter"' +
@@ -52,7 +57,7 @@ define(function (require) {
       });
 
       init($elem, {
-        fields: _.map(indexPattern.fields.raw, function (v, i) { return _.merge(v, {display: false, rowCount: i}); }),
+        columns: [],
         toggle: sinon.spy(),
         data: hits,
         filter: sinon.spy(),
@@ -99,7 +104,7 @@ define(function (require) {
         expect(section.popular.text()).to.not.contain('ip\n');
 
         expect(section.unpopular.text()).to.contain('extension');
-        expect(section.unpopular.text()).to.contain('area');
+        expect(section.unpopular.text()).to.contain('machine.os');
         expect(section.unpopular.text()).to.not.contain('ssl');
         done();
       });
@@ -116,14 +121,11 @@ define(function (require) {
         // Re-init
         destroy();
         init($elem, {
-          fields: _.filter(
-            _.map(indexPattern.fields.raw, function (v, i) { return _.merge(v, {display: false, rowCount: i}); }),
-            {count: 0}
-          ),
+          columns: [],
           toggle: sinon.spy(),
           data: require('fixtures/hits'),
           filter: sinon.spy(),
-          indexPattern: indexPattern
+          indexPattern: indexPattern.fields
         });
 
         var section = getSections($elem);
@@ -201,7 +203,7 @@ define(function (require) {
       it('should create buckets with formatted and raw values', function (done) {
         $scope.details(field);
         expect(field.details.buckets).to.not.be(undefined);
-        expect(field.details.buckets[0].value).to.be(40.1415926535);
+        expect(field.details.buckets[0].value).to.be(40.141592);
         expect(field.details.buckets[0].display).to.be(40.142);
         done();
       });

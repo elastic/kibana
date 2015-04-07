@@ -56,11 +56,11 @@ define(function (require) {
         };
 
         $scope.$watchCollection('columns', function (columns, oldColumns) {
-          if (oldColumns.length === 1 && oldColumns[0] === '_source' && columns.length > 1) {
-            _.pull(columns, '_source');
+          if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
+            _.pull($scope.columns, '_source');
           }
 
-          if (columns.length === 0) columns.push('_source');
+          if ($scope.columns.length === 0) $scope.columns.push('_source');
         });
 
 

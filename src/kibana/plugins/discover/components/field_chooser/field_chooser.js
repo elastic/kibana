@@ -91,6 +91,7 @@ define(function (require) {
         });
 
         $scope.toggle = function (fieldName) {
+          $scope.increaseFieldCounter(fieldName);
           _.toggleInOut($scope.columns, fieldName);
         };
 
@@ -156,8 +157,8 @@ define(function (require) {
           });
         });
 
-        $scope.increaseFieldCounter = function (field) {
-          $scope.indexPattern.popularizeField(field.name, 1);
+        $scope.increaseFieldCounter = function (fieldName) {
+          $scope.indexPattern.popularizeField(fieldName, 1);
         };
 
         $scope.runAgg = function (field) {

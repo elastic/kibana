@@ -31,7 +31,7 @@
   </ul>
 
   <div class="sidebar-list-header sidebar-item">
-    <h5>Fields
+    <h5>Available Fields
       <i
         ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
         ng-click="showFields = !showFields"
@@ -106,9 +106,9 @@
   </div>
 
   <ul bindonce
-    ng-show="(fields | filter:filter.popularity).length > 0"
+    ng-show="(popularFields | filter:filter.isFieldFiltered).length > 0"
     class="list-unstyled sidebar-well discover-popular-fields" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }">
-    <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
+    <li class="sidebar-item sidebar-list-header"><h6>Popular</h6></li>
     <discover-field ng-repeat="field in popularFields | filter:filter.isFieldFiltered">
     </discover-field>
   </ul>

@@ -16,9 +16,10 @@ define(function (require) {
       { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: '_type',              type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: '_id',                type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: true},
-      { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false },
-      { name: 'script string',    type: 'string',     scripted: true, script: '\'i am a string\'', lang: 'expression'},
-      { name: 'script number',    type: 'number',     scripted: true, script: '1234', lang: 'expression'},
+      { name: '_source',            type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: false},
+      { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false, sortable: false, filterable: true },
+      { name: 'script string',    type: 'string',       scripted: true, script: '\'i am a string\'', lang: 'expression'},
+      { name: 'script number',    type: 'number',       scripted: true, script: '1234', lang: 'expression'},
     ].map(function (field) {
       field.count = field.count || 0;
       field.scripted = field.scripted || false;

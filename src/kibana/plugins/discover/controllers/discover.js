@@ -111,6 +111,10 @@ define(function (require) {
     $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
+    $scope.$watchCollection('state.columns', function (columns) {
+      $state.save();
+    });
+
     var metaFields = config.get('metaFields');
     filterManager.init($state);
 
@@ -397,23 +401,10 @@ define(function (require) {
       .set('filter', $state.filters || []);
     });
 
-    // This is a hacky optimization for comparing the contents of a large array to a short one.
-    function arrayToKeys(array, value) {
-      var obj = {};
-      _.each(array, function (key) {
-        obj[key] = value || true;
-      });
-      return obj;
-    }
-
     // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, values, operation) {
       $scope.indexPattern.popularizeField(field, 1);
       filterManager.add(field, values, operation, $state.index);
-    };
-
-    $scope.toggleField = function (fieldName) {
-      _.toggleInOut($state.columns, fieldName);
     };
 
     $scope.toTop = function () {
@@ -428,12 +419,6 @@ define(function (require) {
       str = str.replace(/\"/g, '\\"');
       str = str.replace(/\0/g, '\\0');
       return str;
-    };
-
-    // TODO: Move to utility class
-    // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
-    var regexEscape = function (str) {
-      return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
 
     var loadingVis;
