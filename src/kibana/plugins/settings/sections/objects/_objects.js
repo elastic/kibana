@@ -13,10 +13,11 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl) {
+  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl, $route) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, AppState) {
+        var notify = new Notifier({ location: 'Saved Objects' });
 
         var $state = $scope.state = new AppState();
         $scope.currentTab = null;
@@ -26,7 +27,7 @@ define(function (require) {
           var services = registry.all().map(function (obj) {
             var service = $injector.get(obj.service);
             return service.find(filter).then(function (data) {
-              return { service: service, serviceName: obj.service, title: obj.title, data: data.hits };
+              return { service: service, serviceName: obj.service, title: obj.title, type: service.type, data: data.hits };
             });
           });
 
@@ -100,8 +101,30 @@ define(function (require) {
         }
 
         $scope.importAll = function (result) {
-          console.log(JSON.parse(result));
+          var results;
+          try {
+            results = JSON.parse(result);
+          } catch (e) {
+            return importError();
+          }
+
+          var promises = results.map(function (result) {
+            var service = _.find($scope.services, {type: result._type});
+            if (service == null) return importError();
+
+            return service.service.get().then(function (obj) {
+              return obj.import(result);
+            });
+          });
+
+          $q.all(promises).then(function () {
+            $route.reload();
+          });
         };
+
+        function importError() {
+          notify.error('The file could not be processed.');
+        }
 
         $scope.changeTab = function (obj) {
           $scope.currentTab = _.find($scope.services, {title: obj.title});
