@@ -160,10 +160,6 @@
                 </select> -->
               </center>
 
-              <div ng-show="fetchStatus.hitCount === 0" class="discover-overlay vis-overlay">
-                <div class="spinner large"> </div>
-              </div>
-
               <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
             </div>
 
