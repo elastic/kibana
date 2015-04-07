@@ -1,5 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
+  require('angular-ui-ace');
 
   var html = require('text!components/doc_viewer/doc_viewer.html');
   require('css!components/doc_viewer/doc_viewer.css');
@@ -25,6 +27,7 @@ define(function (require) {
         $scope.mapping = $scope.indexPattern.fields.byName;
 
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
+        $scope.hit_json = angular.toJson($scope.hit, true);
         $scope.formatted =  _.mapValues($scope.flattened, function (value, name) {
           var mapping = $scope.mapping[name];
           var formatter = (mapping && mapping.format) ? mapping.format : defaultFormat;

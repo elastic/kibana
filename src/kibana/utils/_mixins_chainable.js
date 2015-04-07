@@ -160,7 +160,7 @@ define(function (require) {
     chunk: function (arr, count) {
       var size = Math.ceil(arr.length / count);
       var chunks = new Array(count);
-      for (var i = 0; i < count; i ++) {
+      for (var i = 0; i < count; i++) {
         var start = i * size;
         chunks[i] = arr.slice(start, start + size);
       }

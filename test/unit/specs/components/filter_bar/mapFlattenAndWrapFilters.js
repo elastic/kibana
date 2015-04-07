@@ -1,11 +1,10 @@
-/* global sinon */
 define(function (require) {
   var _ = require('lodash');
   describe('Filter Bar Directive', function () {
     describe('mapFlattenAndWrapFilters()', function () {
-
-			var mapFlattenAndWrapFilters, $rootScope, indexPattern, getIndexPatternStub;
-			beforeEach(module('kibana'));
+      var sinon = require('test_utils/auto_release_sinon');
+      var mapFlattenAndWrapFilters, $rootScope, indexPattern, getIndexPatternStub;
+      beforeEach(module('kibana'));
 
       beforeEach(function () {
         getIndexPatternStub = sinon.stub();
@@ -17,12 +16,12 @@ define(function (require) {
         });
       });
 
-			beforeEach(inject(function (Private, _$rootScope_, Promise) {
-				mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
+      beforeEach(inject(function (Private, _$rootScope_, Promise) {
+        mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
         $rootScope = _$rootScope_;
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
-			}));
+      }));
 
       var filters = [
         null,
@@ -36,12 +35,12 @@ define(function (require) {
       ];
 
       it('should map, flatten and wrap filters', function (done) {
-				mapFlattenAndWrapFilters(filters).then(function (results) {
-					expect(results).to.have.length(5);
-					_.each(results, function (filter) {
+        mapFlattenAndWrapFilters(filters).then(function (results) {
+          expect(results).to.have.length(5);
+          _.each(results, function (filter) {
             expect(filter).to.have.property('meta');
-						expect(filter.meta).to.have.property('apply', true);
-					});
+            expect(filter.meta).to.have.property('apply', true);
+          });
           done();
         });
         $rootScope.$apply();

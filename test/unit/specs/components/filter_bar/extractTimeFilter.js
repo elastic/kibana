@@ -1,9 +1,8 @@
-/* global sinon */
 define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('extractTimeFilter()', function () {
-
-			var extractTimeFilter,
+      var sinon = require('test_utils/auto_release_sinon');
+      var extractTimeFilter,
           $rootScope,
           indexPattern,
           getIndexPatternStub;
@@ -20,12 +19,12 @@ define(function (require) {
         });
       });
 
-			beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(inject(function (Private, _$rootScope_, Promise) {
         extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
-				$rootScope = _$rootScope_;
+        $rootScope = _$rootScope_;
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
-			}));
+      }));
 
       it('should return the matching filter for the defualt time field', function (done) {
         var filters = [

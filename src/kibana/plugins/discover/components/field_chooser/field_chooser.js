@@ -162,10 +162,11 @@ define(function (require) {
 
         $scope.runAgg = function (field) {
           var agg = {};
-          var type = 'histogram';
+          var isGeoPoint = field.type === 'geo_point';
+          var type = isGeoPoint ? 'tile_map' : 'histogram';
           // If we're visualizing a date field, and our index is time based (and thus has a time filter),
           // then run a date histogram
-          if (field.type === 'date' && $scope.indexPattern.timeFieldName) {
+          if (field.type === 'date' && $scope.indexPattern.timeFieldName === field.name) {
             agg = {
               type: 'date_histogram',
               schema: 'segment',
@@ -175,8 +176,7 @@ define(function (require) {
               }
             };
 
-          } else if (field.type === 'geo_point') {
-            type = 'tile_map';
+          } else if (isGeoPoint) {
             agg = {
               type: 'geohash_grid',
               schema: 'segment',
@@ -191,7 +191,8 @@ define(function (require) {
               schema: 'segment',
               params: {
                 field: field.name,
-                size: config.get('discover:aggs:terms:size', 20)
+                size: config.get('discover:aggs:terms:size', 20),
+                orderBy: '2'
               }
             };
           }
@@ -203,17 +204,12 @@ define(function (require) {
               filters: $scope.state.filters || [],
               query: $scope.state.query || undefined,
               vis: {
+                type: type,
                 aggs: [
                   agg,
-                  {schema: 'metric', type: 'count'}
+                  {schema: 'metric', type: 'count', 'id': '2'}
                 ]
-              },
-              metric: [{
-                agg: 'count',
-              }],
-              segment: [agg],
-              group: [],
-              split: [],
+              }
             })
           });
         };

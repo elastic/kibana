@@ -3,7 +3,6 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var ConfigTemplate = require('utils/config_template');
-  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
   var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
   var rison = require('utils/rison');
@@ -70,6 +69,7 @@ define(function (require) {
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
+    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -150,16 +150,13 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        $scope.$watch('state.filters', function (newFilters, oldFilters) {
-          if (newFilters === oldFilters) return;
-
-          if (onlyDisabled(newFilters, oldFilters)) {
+        filterBarWatchFilters($scope)
+        .on('update', function () {
+          return $scope.updateDataSource().then(function () {
             $state.save();
-            return;
-          }
-
-          $scope.fetch();
-        });
+          });
+        })
+        .on('fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
@@ -205,7 +202,7 @@ define(function (require) {
 
         $scope.searchSource.onError(function (err) {
           console.log(err);
-          notify.error('An error occured with your request. Reset your inputs and try again.');
+          notify.error('An error occurred with your request. Reset your inputs and try again.');
         }).catch(notify.fatal);
 
         function initForTime() {
@@ -318,7 +315,6 @@ define(function (require) {
           });
         }
 
-        $scope.hits += resp.hits.total;
         var rows = $scope.rows;
         var counts = rows.fieldCounts;
 
@@ -360,6 +356,8 @@ define(function (require) {
 
       segmented.on('mergedSegment', function (merged) {
         $scope.mergedEsResp = merged;
+        $scope.hits = merged.hits.total;
+
       });
 
       segmented.on('complete', function () {

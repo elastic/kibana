@@ -57,6 +57,6 @@
       </tbody>
     </table>
 
-    <pre ng-show="mode == 'json'">{{hit | json}}</pre>
+    <div id="json-ace" ng-show="mode == 'json'" readonly ui-ace="{ useWrapMode: true, advanced: { highlightActiveLine: false }, rendererOptions: { showPrintMargin: false, maxLines: 4294967296 }, mode: 'json' }" ng-model="hit_json"></div>
   </div>
 </div>
