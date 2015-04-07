@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
+  var parseRange = require('utils/range');
 
   require('components/number_list/number_list_input');
-
   require('modules')
   .get('kibana')
   .directive('kbnNumberList', function () {
@@ -22,19 +22,24 @@ define(function (require) {
             return self.modelCntr.$modelValue;
           };
 
-          self.getUnitName = attrGetter('unitName', 'number');
-          self.getMin = attrGetter('min', 0, _.parseInt);
-          self.getMax = attrGetter('max', Infinity, _.parseInt);
+          self.getUnitName = _.partial($parse($attrs.unit), $scope);
 
-          function attrGetter(prop, def, transf) {
-            var $get = $parse($attrs[prop]);
-            transf = transf || _.identity;
+          var defaultRange = self.range = parseRange('[0,Infinity)');
 
-            return function () {
-              var val = $get($scope);
-              return val == null ? def : transf(val);
-            };
-          }
+          $scope.$watch(function () {
+            return $attrs.range;
+          }, function (range, prev) {
+            if (!range) {
+              self.range = defaultRange;
+              return;
+            }
+
+            try {
+              self.range = parseRange(range);
+            } catch (e) {
+              throw new TypeError('Unable to parse range: ' + e.message);
+            }
+          });
 
           /**
            * Remove an item from list by index

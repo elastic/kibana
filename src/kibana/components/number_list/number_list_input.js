@@ -122,17 +122,27 @@ define(function (require) {
         });
 
         function parse(viewValue) {
-          viewValue = String(viewValue || 0);
-          var num = viewValue.trim();
-          if (!FLOATABLE.test(num)) return INVALID;
-          num = parseFloat(num);
-          if (isNaN(num)) return INVALID;
+          var num = viewValue;
 
-          var list = numberListCntr.getList();
-          var min = list[$scope.$index - 1] || numberListCntr.getMin();
-          var max = list[$scope.$index + 1] || numberListCntr.getMax();
+          if (typeof num !== 'number' || isNaN(num)) {
+            // parse non-numbers
+            num = String(viewValue || 0).trim();
+            if (!FLOATABLE.test(num)) return INVALID;
 
-          if (num <= min || num >= max) return INVALID;
+            num = parseFloat(num);
+            if (isNaN(num)) return INVALID;
+          }
+
+          var range = numberListCntr.range;
+          if (!range.within(num)) return INVALID;
+
+          if ($scope.$index > 0) {
+            var i = $scope.$index;
+            var list = numberListCntr.getList();
+            var prev;
+            while (prev === undefined && i-- > 0) prev = list[i];
+            if (prev !== undefined && num <= prev) return INVALID;
+          }
 
           return num;
         }

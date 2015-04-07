@@ -1,10 +1,10 @@
 define(function (require) {
-  describe('PercentList directive', function () {
+  describe('NumberList directive', function () {
     var $ = require('jquery');
     var _ = require('lodash');
     var simulateKeys = require('test_utils/simulate_keys');
 
-    require('components/agg_types/controls/_values_list');
+    require('components/number_list/number_list');
 
     var $el;
     var $scope;
@@ -16,16 +16,11 @@ define(function (require) {
       var $rootScope = $injector.get('$rootScope');
 
       $scope = $rootScope.$new();
-      $el = $('<div>').append(
-        $('<input>')
-          .attr('ng-model', 'vals[$index]')
-          .attr('ng-repeat', 'val in vals')
-          .attr('values-list', 'vals')
-          .attr('values-list-min', '0')
-          .attr('values-list-max', '100')
-      );
-      compile = function (vals) {
+      $el = $('<kbn-number-list ng-model="vals">');
+      compile = function (vals, range) {
         $scope.vals = vals || [];
+        $el.attr('range', range);
+
         $compile($el)($scope);
         $scope.$apply();
       };
@@ -49,40 +44,14 @@ define(function (require) {
 
     it('ensures that the values are in order', function () {
       compile([1, 2, 3, 10, 4, 5]);
-      expect($scope.vals).to.eql([1, 2, 3, undefined, 4, 5]);
-      expect($el.find('.ng-invalid').size()).to.be(1);
+      expect($scope.vals).to.eql([1, 2, 3, 10, undefined, undefined]);
+      expect($el.find('.ng-invalid').size()).to.be(2);
     });
 
-    describe('ensures that the values are between 0 and 100', function () {
-      it(': -1', function () {
-        compile([-1, 1]);
-        expect($scope.vals).to.eql([undefined, 1]);
-        expect($el.find('.ng-invalid').size()).to.be(1);
-      });
-
-      it(': 0', function () {
-        compile([0, 1]);
-        expect($scope.vals).to.eql([undefined, 1]);
-        expect($el.find('.ng-invalid').size()).to.be(1);
-      });
-
-      it(': 0.0001', function () {
-        compile([0.0001, 1]);
-        expect($scope.vals).to.eql([0.0001, 1]);
-        expect($el.find('.ng-invalid').size()).to.be(0);
-      });
-
-      it(': 99.9999999', function () {
-        compile([1, 99.9999999]);
-        expect($scope.vals).to.eql([1, 99.9999999]);
-        expect($el.find('.ng-invalid').size()).to.be(0);
-      });
-
-      it(': 101', function () {
-        compile([1, 101]);
-        expect($scope.vals).to.eql([1, undefined]);
-        expect($el.find('.ng-invalid').size()).to.be(1);
-      });
+    it('requires that values are within a range', function () {
+      compile([50, 100, 200, 250], '[100, 200)');
+      expect($scope.vals).to.eql([undefined, 100, undefined, undefined]);
+      expect($el.find('.ng-invalid').size()).to.be(3);
     });
 
     describe('listens for keyboard events', function () {
