@@ -119,10 +119,6 @@ define(function (require) {
           searchSource.onError(notify.error).catch(notify.fatal);
         }));
 
-        $scope.$watch('searchSource.activeFetchCount', function (activeFetchCount) {
-          $el.toggleClass('loading', activeFetchCount !== 0);
-        });
-
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;
           $scope.renderbot.render(resp);
