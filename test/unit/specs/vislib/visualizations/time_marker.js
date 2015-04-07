@@ -31,6 +31,7 @@ define(function (require) {
     });
 
     afterEach(function () {
+      selection.remove('*');
       selection = null;
       marker = null;
     });
@@ -54,10 +55,31 @@ define(function (require) {
     describe('get method', function () {
       it('should get the correct value', function () {
         var ht = marker.get('height');
+        var scale = marker.get('xScale');
         var currentTimeArr = marker.get('times');
         expect(ht).to.be(height);
         expect(currentTimeArr.length).to.be(1);
+        expect(scale).to.be(xScale);
       });
     });
+
+    describe('set method', function () {
+      it('should set the value', function () {
+        var stroke = 'green';
+        var lineClass = 'new-time-marker';
+        marker.set('stroke', stroke);
+        marker.set('lineClass', lineClass);
+        expect(marker.get('stroke')).to.be(stroke);
+        expect(marker.get('lineClass')).to.be(lineClass);
+      });
+    });
+
+    describe('render method', function () {
+      it('should render lines', function () {
+        marker.render(selection);
+        expect(!!$('line.time-marker').length).to.be(true);
+      });
+    });
+
   });
 });
