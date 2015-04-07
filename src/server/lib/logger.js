@@ -9,7 +9,7 @@ var config = require('../config');
 var streams = [];
 
 // Set the default stream based on the enviroment. If we are on development then
-// then we are going to create a pretty stream. Everytyhing else will get the 
+// then we are going to create a pretty stream. Everytyhing else will get the
 // JSON stream to stdout.
 var defaultStream;
 if (env === 'development') {
