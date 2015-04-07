@@ -116,7 +116,10 @@ define(function (require) {
     }
 
     ngModel.$setUntouched();
-    $element.one('blur', ngModel.$setTouched);
+    $element.one('blur', function () {
+      ngModel.$setTouched();
+      $scope.$apply();
+    });
     $scope.$on('$destroy', function () {
       $element.off('blur', ngModel.$setTouched);
     });
