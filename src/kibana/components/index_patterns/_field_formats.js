@@ -102,7 +102,8 @@ define(function (require) {
       },
       {
         types: [
-          'number'
+          'number',
+          'murmur3'
         ],
         name: 'number',
         convert: function (val) {
@@ -140,6 +141,7 @@ define(function (require) {
 
     formats.defaultByType = {
       number:     formats.byName.number,
+      murmur3:    formats.byName.number,
       date:       formats.byName.date,
       boolean:    formats.byName.string,
       ip:         formats.byName.ip,

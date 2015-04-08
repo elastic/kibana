@@ -11,6 +11,7 @@ define(function (require) {
       { name: 'request_body',       type: 'attachment', indexed: true,  analyzed: true, sortable:  false, filterable: true },
       { name: 'point',              type: 'geo_point',  indexed: true,  analyzed: true, sortable:  false, filterable: false },
       { name: 'area',               type: 'geo_shape',  indexed: true,  analyzed: true, sortable:  true,  filterable: false },
+      { name: 'hashed',             type: 'murmur3',    indexed: true,  analyzed: true, sortable:  false, filterable: false },
       { name: 'extension',          type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: 'machine.os',         type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
