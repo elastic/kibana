@@ -87,7 +87,7 @@ define(function (require) {
       var marginFactor = 0.95;
       var isDonut = self._attr.isDonut;
       var radius = (Math.min(width, height) / 2) * marginFactor;
-      var color = self.handler.data.getPieColorFunc();
+      var color = this.handler.data.color;
       var tooltip = self.tooltip;
       var isTooltip = self._attr.addTooltip;
 

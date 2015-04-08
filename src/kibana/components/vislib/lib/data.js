@@ -39,18 +39,23 @@ define(function (require) {
       this.type = this.getDataType();
 
       this.labels;
+      this.color;
 
       if (this.type === 'series') {
-        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
+        var labels = getLabels(data);
+        var matchEmptyToFirst = false;
+        if (labels.length === 1 && labels[0] === '') {
           this.labels = [(this.get('yAxisLabel'))];
+          matchEmptyToFirst = true;
         } else {
-          this.labels = getLabels(data);
+          this.labels = labels;
         }
+        this.color = this.labels ? color(this.labels, matchEmptyToFirst) : undefined;
       } else if (this.type === 'slices') {
-        this.labels = this.pieNames();
+        var flatAndNested = this.pieNames();
+        this.labels = flatAndNested.nestedNames;
+        this.color = color(flatAndNested.flatNames);
       }
-
-      this.color = this.labels ? color(this.labels) : undefined;
 
       this._normalizeOrdered();
 
@@ -456,29 +461,28 @@ define(function (require) {
 
     /**
      * Helper function for getNames
-     * Returns an array of objects with a name (key) value and an index value.
-     * The index value allows us to sort the names in the correct nested order.
+     * Returns a nested set of objects that contain the hierarchical relationship. Each object contains
+     * the name, the children, and a data object that has the size and depth for sorting
+     * purposes.
      *
      * @method returnNames
      * @param array {Array} Array of data objects
      * @param index {Number} Number of times the object is nested
-     * @param columns {Object} Contains name formatter information
-     * @returns {Array} Array of labels (strings)
+     * @returns {Object} Nested set of objects
      */
-    Data.prototype.returnNames = function (array, index, columns) {
-      var names = [];
+    Data.prototype.returnNames = function (array, index) {
+      var names = {};
       var self = this;
 
       _.forEach(array, function (obj) {
         var fieldFormatter = obj.aggConfig ? obj.aggConfig.fieldFormatter() : String;
-        names.push({ key: fieldFormatter(obj.name), index: index });
+        var name = fieldFormatter(obj.name);
+        names[name] = {name: name, data: {name: name, amount: obj.size, depth: index}, children: {}};
 
         if (obj.children) {
           var plusIndex = index + 1;
 
-          _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
-            names.push(namedObj);
-          });
+          names[name].children = self.returnNames(obj.children, plusIndex);
         }
       });
 
@@ -486,28 +490,19 @@ define(function (require) {
     };
 
     /**
-     * Flattens hierarchical data into an array of objects with a name and index value.
-     * The indexed value determines the order of nesting in the data.
-     * Returns an array with names sorted by the index value.
+     * Returns a nested set of objects that contain the hierarchical relationship. Each object contains
+     * the name, the children, and a data object that has the size and depth for sorting
+     * purposes.
      *
      * @method getNames
      * @param data {Object} Chart data object
-     * @param columns {Object} Contains formatter information
-     * @returns {Array} Array of names (strings)
+     * @returns {Object} Nested set of objects
      */
-    Data.prototype.getNames = function (data, columns) {
+    Data.prototype.getNames = function (data) {
       var slices = data.slices;
 
       if (slices.children) {
-        var namedObj = this.returnNames(slices.children, 0, columns);
-
-        return _(namedObj)
-        .sortBy(function (obj) {
-          return obj.index;
-        })
-        .pluck('key')
-        .unique()
-        .value();
+        return this.returnNames(slices.children, 0);
       }
     };
 
@@ -539,27 +534,51 @@ define(function (require) {
     };
 
     /**
-     * Returns an array of names ordered by appearance in the nested array
-     * of objects
+     * Returns an array of names and an object hierarchy of names ordered by size
      *
      * @method pieNames
-     * @returns {Array} Array of unique names (strings)
+     * @returns {Object} Object that contains array of names and hierarchy of names
      */
     Data.prototype.pieNames = function () {
       var self = this;
-      var names = [];
+      var hierarchy = {};
+      var nestedNames = {};
+      var flatNames = [];
 
       this._validatePieData();
 
       _.forEach(this.getVisData(), function (obj) {
-        var columns = obj.raw ? obj.raw.columns : undefined;
-
-        _.forEach(self.getNames(obj, columns), function (name) {
-          names.push(name);
+        var namedObj = [];
+        _.merge(hierarchy, self.getNames(obj), function (resultValue, sourceValue) {
+          // current version of lodash doesn't pass in the key name so use duck-typing to determine
+          // if this is the correct valur
+          if (_.isPlainObject(sourceValue) && _.has(sourceValue, 'amount')) {
+            namedObj.push({name: sourceValue.name, depth: sourceValue.depth});
+            if (_.has(resultValue, 'amount')) {
+              resultValue.amount += sourceValue.amount;
+              return resultValue;
+            } else {
+              return sourceValue;
+            }
+          }
         });
+        flatNames.push(_(namedObj)
+        .sortBy(function (obj) {
+            return obj.depth;
+          })
+        .pluck('name')
+        .unique()
+        .value());
       });
+      var recursiveSort = function (obj) {
+        obj.children = _.sortBy(obj.children, function (child) {
+          return recursiveSort(child);
+        });
+        return -1 * obj.data.amount;
+      };
+      nestedNames = _.sortBy(hierarchy, recursiveSort);
 
-      return _.uniq(names);
+      return {flatNames: _(flatNames).flatten().unique().value(), nestedNames: nestedNames};
     };
 
     /**
@@ -580,38 +599,6 @@ define(function (require) {
      */
     Data.prototype.xValues = function () {
       return orderKeys(this.data);
-    };
-
-    /**
-     * Return an array of unique labels
-     * Curently, only used for vertical bar and line charts,
-     * or any data object with series values
-     *
-     * @method getLabels
-     * @returns {Array} Array of labels (strings)
-     */
-    Data.prototype.getLabels = function () {
-      return getLabels(this.data);
-    };
-
-    /**
-     * Returns a function that does color lookup on labels
-     *
-     * @method getColorFunc
-     * @returns {Function} Performs lookup on string and returns hex color
-     */
-    Data.prototype.getColorFunc = function () {
-      return color(this.getLabels());
-    };
-
-    /**
-     * Returns a function that does color lookup on names for pie charts
-     *
-     * @method getPieColorFunc
-     * @returns {Function} Performs lookup on string and returns hex color
-     */
-    Data.prototype.getPieColorFunc = function () {
-      return color(this.pieNames());
     };
 
     /**

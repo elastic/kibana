@@ -16,7 +16,35 @@ define(function () {
               'interval': 1000,
               'extended_bounds': {}
             }
-          }
+          },
+          'children': [
+            {
+              'name': '0-inner0',
+              'size': 378611,
+              'aggConfig': {
+                'type': 'histogram',
+                'schema': 'segment',
+                'fieldFormatter': _.constant(String),
+                'params': {
+                  'interval': 1000,
+                  'extended_bounds': {}
+                }
+              }
+            },
+            {
+              'name': '0-inner1',
+              'size': 378610,
+              'aggConfig': {
+                'type': 'histogram',
+                'schema': 'segment',
+                'fieldFormatter': _.constant(String),
+                'params': {
+                  'interval': 1000,
+                  'extended_bounds': {}
+                }
+              }
+            }
+          ]
         },
         {
           'name': 1000,

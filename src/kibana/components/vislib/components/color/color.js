@@ -9,9 +9,10 @@ define(function (require) {
      * a lookup table that associates the values (key) with a hex color (value).
      * Returns a function that accepts a value (i.e. a string or number)
      * and returns a hex color associated with that value.
+     * Allows an empty value to match to the first color.
      */
 
-    return function (arrayOfStringsOrNumbers) {
+    return function (arrayOfStringsOrNumbers, matchEmptyToFirst) {
       if (!_.isArray(arrayOfStringsOrNumbers)) {
         throw new Error('ColorUtil expects an array');
       }
@@ -26,6 +27,9 @@ define(function (require) {
       var colorObj = _.zipObject(arrayOfStringsOrNumbers, createColorPalette(arrayLength));
 
       return function (value) {
+        if (matchEmptyToFirst && value === '') {
+          value = _.first(arrayOfStringsOrNumbers);
+        }
         return colorObj[value];
       };
     };

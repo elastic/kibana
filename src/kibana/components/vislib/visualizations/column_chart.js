@@ -43,7 +43,7 @@ define(function (require) {
      */
     ColumnChart.prototype.addBars = function (svg, layers) {
       var self = this;
-      var color = this.handler.data.getColorFunc();
+      var color = this.handler.data.color;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
