@@ -49,6 +49,16 @@ define(function (require) {
       this.makeLabel = config.makeLabel || _.constant(this.name);
 
       /**
+       * a function that will be called when showing scaling from this aggType
+       * (typically in a chart).
+       *
+       * @method makeShortLabel
+       * @param {AggConfig} aggConfig - an agg config of this type
+       * @returns {string} - label that can be used in the ui to descripe the aggConfig
+       */
+      this.makeScaleLabel = config.makeScaleLabel || '';
+
+      /**
        * Describes if this aggType creates data that is ordered, and if that ordered data
        * is some sort of time series.
        *
