@@ -77,7 +77,7 @@ define(function (require) {
               var max = 50;
               var precision = 1;
               var feature = chart.chartData.geoJson.features[0];
-              expect(_.isNumber(chart.radiusScale(count, max, precision, feature))).to.be(true);
+              expect(_.isNumber(chart.radiusScale(count, max, feature))).to.be(true);
             });
           });
         });
