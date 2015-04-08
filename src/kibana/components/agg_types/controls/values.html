@@ -1,0 +1,30 @@
+<div class="form-group" ng-controller="agg.type.params.byName.values.controller">
+  <label>Values</label>
+  <div
+    ng-repeat="value in agg.params.values track by $index"
+    class="form-group vis-editor-agg-form-row vis-editor-agg-form-row">
+
+    <input
+      ng-model="agg.params.values[$index]"
+      values-list="agg.params.values"
+      values-list-min="0"
+      input-focus
+      class="form-control">
+
+    <button type="button" ng-click="remove($index, 1)" class="btn btn-danger btn-xs">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <input ng-model="validLength" name="validLength" required type="hidden">
+  <p ng-show="aggForm.validLength.$invalid" class="text-danger text-center">
+    You must specify at least one value
+  </p>
+
+  <button
+    ng-click="add()"
+    type="button"
+    class="sidebar-item-button primary">
+    <i class="fa fa-plus"></i> Add value
+  </button>
+</div>

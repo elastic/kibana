@@ -1,10 +1,9 @@
-/* global sinon */
 define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('mapTerms()', function () {
-
-			var indexPattern, mapTerms, $rootScope, getIndexPatternStub;
-			beforeEach(module('kibana'));
+      var sinon = require('test_utils/auto_release_sinon');
+      var indexPattern, mapTerms, $rootScope, getIndexPatternStub;
+      beforeEach(module('kibana'));
 
       beforeEach(function () {
         getIndexPatternStub = sinon.stub();
@@ -17,11 +16,11 @@ define(function (require) {
       });
 
       beforeEach(inject(function (Private, _$rootScope_, Promise) {
-				$rootScope = _$rootScope_;
-				mapTerms = Private(require('components/filter_bar/lib/mapTerms'));
+        $rootScope = _$rootScope_;
+        mapTerms = Private(require('components/filter_bar/lib/mapTerms'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
-			}));
+      }));
 
       it('should return the key and value for matching filters', function (done) {
         var filter = { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } };

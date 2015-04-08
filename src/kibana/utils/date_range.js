@@ -1,6 +1,6 @@
 define(function (require) {
   var moment = require('moment');
-  
+
   return {
     toString: function (range, format) {
       if (!range.from) {
