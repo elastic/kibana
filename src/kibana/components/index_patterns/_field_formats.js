@@ -31,6 +31,7 @@ define(function (require) {
     var _ = require('lodash');
     var angular = require('angular');
     var moment = require('moment');
+    require('moment-timezone');
 
     function stringConverter(val) {
       return formatField(val, function (val) {
@@ -166,9 +167,15 @@ define(function (require) {
       format.convert = _.memoize(format._origConvert);
     }
 
+    function updateDefaultTimezone() {
+      moment.tz.setDefault(config.get('dateFormat:tz'));
+    }
+
     // memoize once config is ready, and every time the date format changes
     $rootScope.$on('init:config', memoizeDateFormat);
     $rootScope.$on('change:config.dateFormat', memoizeDateFormat);
+    $rootScope.$on('init:config', updateDefaultTimezone);
+    $rootScope.$on('change:config.dateFormat:tz', updateDefaultTimezone);
 
     return formats;
   };
