@@ -492,8 +492,8 @@ define(function (require) {
       var centerPoint = feature.properties.center;
       var geohashRect = feature.properties.rectangle;
 
-      // get lat[1] and lng[2] of geohash center point
-      // apply to east[2] and north[3] sides of rectangle points
+      // get lat[1] and lng[0] of geohash center point
+      // apply lat to east[2] and lng to north[3] sides of rectangle
       // to get radius at center of geohash grid recttangle
       var center = L.latLng([centerPoint[1], centerPoint[0]]);
       var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
