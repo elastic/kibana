@@ -11,6 +11,10 @@ define(function (require) {
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
       description: 'When displaying a pretty formatted date, use this format',
     },
+    'dateFormat:tz': {
+      value: 'browser',
+      description: 'Which timezone should be used.  (e.g. "browser", "utc", or "America/Chicago")',
+    },
     'dateFormat:scaled': {
       type: 'json',
       value:
