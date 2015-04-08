@@ -15,6 +15,8 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
           showCircles: true,
+          smoothLines: false,
+          interpolate: 'linear',
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
           defaultYExtents: false,
@@ -22,8 +24,10 @@ define(function (require) {
             max: false,
             min: false
           },
-          yAxis: {}
+          yAxis: {},
+          scale: 'linear'
         },
+        scales: ['linear', 'log', 'square root'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([

@@ -69,9 +69,47 @@ define(function (require) {
       var max = domain[1];
 
       this._validateAxisExtents(min, max);
+      if (this._attr.scale === 'log') return this._logDomain(min, max); // Negative values cannot be displayed with a log scale.
       if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
       if (this._isUserDefined()) return this._validateUserExtents(domain);
       return domain;
+    };
+
+    YAxis.prototype._throwCustomError = function (message) {
+      throw new Error(message);
+    };
+
+    YAxis.prototype._throwCannotLogScaleNegVals = function () {
+      throw new errors.CannotLogScaleNegVals();
+    };
+
+    /**
+     * Returns the appropriate D3 scale
+     *
+     * @param fnName {String} D3 scale
+     * @returns {*}
+     */
+    YAxis.prototype._getScaleType = function (fnName) {
+      if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
+      fnName = fnName || 'linear';
+
+      if (typeof d3.scale[fnName] !== 'function') return this._throwCustomError('YAxis.getScaleType: ' + fnName + ' is not a function');
+
+      return d3.scale[fnName]();
+    };
+
+    /**
+     * Return the domain for log scale, i.e. the extent of the log scale.
+     * Log scales must begin at 1 since the log(0) = -Infinity
+     *
+     * @param scale
+     * @param yMin
+     * @param yMax
+     * @returns {*[]}
+     */
+    YAxis.prototype._logDomain = function (min, max) {
+      if (min < 0 || max < 0) return this._throwCannotLogScaleNegVals();
+      return [Math.max(1, min), max];
     };
 
     /**
@@ -82,7 +120,7 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      var scale = d3.scale.linear();
+      var scale = this._getScaleType(this._attr.scale);
       var domain = this._getExtents(this.domain);
 
       this.yScale = scale
@@ -91,7 +129,6 @@ define(function (require) {
       .clamp(true);
 
       if (!this._isUserDefined()) this.yScale.nice(); // round extents when not user defined
-
       return this.yScale;
     };
 

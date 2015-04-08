@@ -14,6 +14,7 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          scale: 'linear',
           mode: 'stacked',
           defaultYExtents: false,
           setYExtents: {
@@ -22,6 +23,7 @@ define(function (require) {
           },
           yAxis: {}
         },
+        scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'percentage', 'grouped'],
         editor: require('text!plugins/vis_types/vislib/editors/histogram.html')
       },

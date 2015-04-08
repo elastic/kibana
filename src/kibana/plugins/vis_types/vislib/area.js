@@ -16,6 +16,9 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          smoothLines: false,
+          scale: 'linear',
+          interpolate: 'linear',
           mode: 'stacked',
           defaultYExtents: false,
           setYExtents: {
@@ -24,6 +27,7 @@ define(function (require) {
           },
           yAxis: {}
         },
+        scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
         editor: require('text!plugins/vis_types/vislib/editors/area.html')
       },

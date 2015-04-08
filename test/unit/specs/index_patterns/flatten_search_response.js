@@ -50,7 +50,7 @@ define(function (require) {
 
     it('should preserve objects in arrays', function () {
       var obj = indexPattern.flattenSearchResponse(fixture);
-      expect(obj).to.have.property('tags', fixture['tags']);
+      expect(obj).to.have.property('tags', fixture.tags);
     });
   });
 });

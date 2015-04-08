@@ -34,16 +34,44 @@
         <button ng-click="newDashboard()" aria-label="New Dashboard"><i aria-hidden="true" class="fa fa-file-new-o"></i></button>
       </kbn-tooltip>
       <kbn-tooltip text="Save Dashboard" placement="bottom" append-to-body="1">
-        <button aria-label="Save Dashboard" aria-haspopup="true" aria-expanded="{{toggleSaveDashboard}}" ng-click="configTemplate.toggle('save'); toggleSaveDashboard = !toggleSaveDashboard"><i aria-hidden="true" class="fa fa-save"></i></button>
+        <button
+          aria-label="Save Dashboard"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('save') }}"
+          ng-class="{active: configTemplate.is('save')}"
+          ng-click="configTemplate.toggle('save');">
+          <i aria-hidden="true" class="fa fa-save"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Load Saved Dashboard" placement="bottom" append-to-body="1">
-        <button aria-label="Load Saved Dashboard" aria-haspopup="true" aria-expanded="{{toggleLoadSavedDashboard}}" ng-click="configTemplate.toggle('load'); toggleLoadSavedDashboard = !toggleLoadSavedDashboard"><i aria-hidden="true" class="fa fa-folder-open-o"></i></button>
+        <button
+          aria-label="Load Saved Dashboard"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('load') }}"
+          ng-class="{active: configTemplate.is('load')}"
+          ng-click="configTemplate.toggle('load');">
+          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
-        <button aria-label="Share Dashboard" aria-haspopup="true" aria-expanded="{{toggleShareDashboard}}" ng-click="configTemplate.toggle('share'); toggleShareDashboard = !toggleShareDashboard"><i aria-hidden="true" class="fa fa-external-link"></i></button>
+        <button
+          aria-label="Share Dashboard"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('share') }}"
+          ng-class="{active: configTemplate.is('share')}"
+          ng-click="configTemplate.toggle('share');">
+          <i aria-hidden="true" class="fa fa-external-link"></i>
+        </button>
       </kbn-tooltip>
       <kbn-tooltip text="Add Visualization" placement="bottom" append-to-body="1">
-        <button aria-label="Add Visualization" aria-haspopup="true" aria-expanded="{{toggleAddVisualization}}" ng-click="configTemplate.toggle('pickVis'); toggleAddVisualization = !toggleAddVisualization"><i aria-hidden="true" class="fa fa-plus-circle"></i></button>
+        <button
+          aria-label="Add Visualization"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('pickVis') }}"
+          ng-class="{active: configTemplate.is('pickVis')}"
+          ng-click="configTemplate.toggle('pickVis');">
+          <i aria-hidden="true" class="fa fa-plus-circle"></i>
+        </button>
       </kbn-tooltip>
     </div>
   </navbar>

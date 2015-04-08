@@ -1,6 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var configDefaults = require('components/config/defaults');
+  var getValType = require('plugins/settings/sections/advanced/lib/get_val_type');
+
 
   require('plugins/settings/sections/advanced/advanced_row');
 
@@ -38,14 +40,14 @@ define(function (require) {
             var conf = {
               name: name,
               defVal: def.value,
-              type: (def.type || _.isArray(val) || typeof val),
+              type: getValType(def, val),
               description: def.description,
               value: val,
             };
 
             var editor = getEditorType(conf);
             conf.json = editor === 'json';
-            conf.bool = editor === 'bool';
+            conf.bool = editor === 'boolean';
             conf.array = editor === 'array';
             conf.normal = editor === 'normal';
             conf.tooComplex = !editor;

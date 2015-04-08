@@ -187,7 +187,7 @@ define(function (require) {
           newList.unshift(injected);
         }
 
-        var newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.key);
+        var newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
         newList.unshift(newAcr);
 
         // and replace the acr in the row buffer if its there

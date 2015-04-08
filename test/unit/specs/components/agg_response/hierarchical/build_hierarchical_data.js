@@ -222,8 +222,8 @@ define(function (require) {
                 ]
               }
             }
-            ]
-          });
+          ]
+        });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
         results = buildHierarchicalData(vis, fixtures.oneFilterBucket);
@@ -254,8 +254,8 @@ define(function (require) {
                 ]
               }
             }
-            ]
-          });
+          ]
+        });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
         results = buildHierarchicalData(vis, fixtures.oneFilterBucket);

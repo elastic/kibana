@@ -22,6 +22,13 @@ kibana_index: ".kibana"
 # kibana_elasticsearch_username: user
 # kibana_elasticsearch_password: pass
 
+# If your Elasticsearch requires client certificate and key
+# kibana_elasticsearch_client_crt: /path/to/your/client.crt
+# kibana_elasticsearch_client_key: /path/to/your/client.key
+
+# If you need to provide a CA certificate for your Elasticsarech instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
 
 # The default application to load.
 default_app_id: "discover"
@@ -38,10 +45,6 @@ shard_timeout: 0
 # certificate.
 verify_ssl: true
 
-# If you need to provide a CA certificate for your Elasticsarech instance, put
-# the path of the pem file here.
-# ca: /path/to/your/CA.pem
-
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
 # ssl_key_file: /path/to/your/server.key
 # ssl_cert_file: /path/to/your/server.crt
@@ -49,6 +52,6 @@ verify_ssl: true
 # Set the path to where you would like the process id file to be created.
 # pid_file: /var/run/kibana.pid
 
-# If you would like to send the log output to a file you can set the path below. 
+# If you would like to send the log output to a file you can set the path below.
 # This will also turn off the STDOUT log output.
 # log_file: ./kibana.log

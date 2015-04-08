@@ -1,7 +1,7 @@
 <form ng-submit="opts.save()" role="form">
   <div class="form-group">
     <label for="dashboardTitle">Save As</label>
-    <input id="dashboardTitle" type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title" input-focus>
+    <input id="dashboardTitle" type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title" input-focus="select">
   </div>
   <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">Save</button>
 </form>

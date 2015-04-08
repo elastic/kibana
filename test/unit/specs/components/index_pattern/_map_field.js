@@ -24,32 +24,32 @@ define(function (require) {
     });
 
     it('should not consider _id indexed unless it is', function () {
-      var mapped = fn(fields['_id'], '_id');
+      var mapped = fn(fields._id, '_id');
       expect(mapped.indexed).to.be(false);
 
-      var mapping = _.cloneDeep(fields['_id']);
+      var mapping = _.cloneDeep(fields._id);
       mapping.mapping._id.index = 'not_analyzed';
       var mapped2 = fn(mapping, '_id');
       expect(mapped2.indexed).to.be(true);
     });
 
     it('should always consider _timestamp to be an indexed date', function () {
-      var mapped = fn(fields['_timestamp'], '_timestamp');
+      var mapped = fn(fields._timestamp, '_timestamp');
       expect(mapped.indexed).to.be(true);
       expect(mapped.type).to.be('date');
     });
 
     it('should treat falsy and no as false for index', function () {
-      var mapped = fn(fields['index_no_field'], 'index_no_field');
+      var mapped = fn(fields.index_no_field, 'index_no_field');
       expect(mapped.indexed).to.be(false);
 
-      fields['index_no_field'].index = false;
-      mapped = fn(fields['index_no_field'], 'index_no_field');
+      fields.index_no_field.index = false;
+      mapped = fn(fields.index_no_field, 'index_no_field');
       expect(mapped.indexed).to.be(false);
     });
 
     it('should treat other values for index as true', function () {
-      var mapped = fn(fields['not_analyzed_field'], 'not_analyzed_field');
+      var mapped = fn(fields.not_analyzed_field, 'not_analyzed_field');
       expect(mapped.indexed).to.be(true);
     });
 

@@ -3,7 +3,6 @@ define(function (require) {
   var $ = require('jquery');
   var angular = require('angular');
   var ConfigTemplate = require('utils/config_template');
-  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
 
   require('directives/config');
   require('components/courier/courier');
@@ -51,6 +50,8 @@ define(function (require) {
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
+        var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+
         var notify = new Notifier({
           location: 'Dashboard'
         });
@@ -113,13 +114,12 @@ define(function (require) {
           }
         }
 
-        $scope.$watch('state.filters', function (newFilters, oldFilters) {
-          if (onlyDisabled(newFilters, oldFilters)) {
-            $state.save();
-            return;
-          }
-          $scope.filterResults();
-        });
+        filterBarWatchFilters($scope)
+        .on('update', function () {
+          updateQueryOnRootSource();
+          $state.save();
+        })
+        .on('fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});
