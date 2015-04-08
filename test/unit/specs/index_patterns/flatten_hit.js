@@ -66,7 +66,7 @@ define(function (require) {
     });
 
     it('preserves objects in arrays', function () {
-      expect(flat).to.have.property('tags', hit._source['tags']);
+      expect(flat).to.have.property('tags', hit._source.tags);
     });
 
     it('does not enter into nested fields', function () {
