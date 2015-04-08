@@ -52,9 +52,7 @@ define(function (require) {
         indexPatternList = [ 'b', 'a', 'c' ];
       });
 
-      var hits = _.each(require('fixtures/hits.js'), function (hit) {
-        hit.$$_flattened = indexPattern.flattenSearchResponse(hit._source);
-      });
+      var hits = _.each(require('fixtures/hits.js'), indexPattern.flattenHit);
 
       init($elem, {
         columns: [],
