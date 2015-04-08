@@ -10,18 +10,21 @@ if (config.kibana.kibana_elasticsearch_username && config.kibana.kibana_elastics
   uri.auth = util.format('%s:%s', config.kibana.kibana_elasticsearch_username, config.kibana.kibana_elasticsearch_password);
 }
 
-var ssl = { rejectUnauthorized: config.kibana.verify_ssl }
+var ssl = { rejectUnauthorized: config.kibana.verify_ssl };
+
 if (config.kibana.kibana_elasticsearch_client_crt && config.kibana.kibana_elasticsearch_client_key) {
-  ssl.cert = fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt , 'utf8');
-  ssl.key = fs.readFileSync(config.kibana.kibana_elasticsearch_client_key , 'utf8');
+  ssl.cert = fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt, 'utf8');
+  ssl.key = fs.readFileSync(config.kibana.kibana_elasticsearch_client_key, 'utf8');
 }
+
 if (config.kibana.ca) {
-  ssl.ca = fs.readFileSync(config.kibana.ca , 'utf8');
+  ssl.ca = fs.readFileSync(config.kibana.ca, 'utf8');
 }
 
 module.exports = new elasticsearch.Client({
   host: url.format(uri),
   ssl: ssl,
+  pingTimeout: config.kibana.ping_timeout,
   log: function (config) {
     this.error = function (err) {
       logger.error({ err: err });
