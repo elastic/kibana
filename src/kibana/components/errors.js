@@ -247,5 +247,15 @@ define(function (require) {
   };
   inherits(errors.PieContainsAllZeros, KbnError);
 
+  /**
+   * y axis min value cannot be larger than y axis max value
+   */
+  errors.YMinGreaterThanYMax = function YMinGreaterThanYMax() {
+    KbnError.call(this,
+      'The y-axis minimum value is greater than the y-axis maximum value',
+      errors.YMinGreaterThanYMax);
+  };
+  inherits(errors.PieContainsAllZeros, KbnError);
+
   return errors;
 });

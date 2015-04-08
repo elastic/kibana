@@ -82,6 +82,7 @@ define(function (require) {
         if (error instanceof errors.ContainerTooSmall ||
           error instanceof errors.PieContainsAllZeros ||
           error instanceof errors.NotEnoughData ||
+          error instanceof errors.YMinGreaterThanYMax ||
           error instanceof errors.NoResults) {
           this.handler.error(error.message);
         } else {

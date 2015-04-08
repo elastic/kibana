@@ -25,7 +25,7 @@
     <div ng-show="vis.params.setYExtents.max">
       <label>
         y-max
-        <input type="number" ng-model="vis.params.yAxis.max" ng-required="vis.params.setYExtents.max">
+        <input type="number" step="0.1" ng-model="vis.params.yAxis.max" ng-required="vis.params.setYExtents.max">
       </label>
     </div>
   </div>
@@ -37,7 +37,7 @@
     <div ng-show="vis.params.setYExtents.min">
       <label>
         y-min
-        <input type="number" ng-model="vis.params.yAxis.min" ng-required="vis.params.setYExtents.min">
+        <input type="number" step="0.1" ng-model="vis.params.yAxis.min" ng-required="vis.params.setYExtents.min">
       </label>
     </div>
   </div>

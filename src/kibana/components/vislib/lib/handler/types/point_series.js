@@ -20,8 +20,8 @@ define(function (require) {
       opts = opts || {};
 
       return function (vis) {
-        var isUserDefinedYAxisMin = (vis._attr.setYExtents.min);
-        var isUserDefinedYAxisMax = (vis._attr.setYExtents.max);
+        var isUserDefinedYAxisMin = vis._attr.setYExtents.min;
+        var isUserDefinedYAxisMax = vis._attr.setYExtents.max;
         var data;
 
         if (opts.zeroFill) {

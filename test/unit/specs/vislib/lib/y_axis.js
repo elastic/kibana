@@ -127,6 +127,7 @@ define(function (require) {
     describe('getYScale Method', function () {
       var yScale;
       var graphData;
+      var domain;
       var height = 50;
 
       function checkDomain(min, max) {
@@ -208,6 +209,72 @@ define(function (require) {
           expect(domain[0]).to.be.lessThan(0);
           expect(domain[1]).to.be.greaterThan(0);
           checkRange();
+        });
+      });
+
+      describe('validate user defined values', function () {
+        var newDomain;
+        var min;
+        var max;
+
+        beforeEach(function () {
+          yAxis._attr.mode = 'stacked';
+          yAxis._attr.setYExtents.min = false;
+          yAxis._attr.setYExtents.max = false;
+          yAxis._attr.yAxis = {};
+        });
+
+        it('should throw a NaN error', function () {
+          min = 'Not a number';
+          max = 12;
+
+          expect(function () {
+            yAxis._validateUserExtents(min, max);
+          }).to.throwError();
+        });
+
+        it('should return a decimal value', function () {
+          yAxis._attr.mode = 'percentage';
+          yAxis._attr.setYExtents.min = true;
+          yAxis._attr.setYExtents.max = true;
+          domain = [];
+          domain[0] = yAxis._attr.yAxis.min = 20;
+          domain[1] = yAxis._attr.yAxis.max = 80;
+          newDomain = yAxis._validateUserExtents(domain);
+
+          expect(newDomain[0]).to.be(domain[0] / 100);
+          expect(newDomain[1]).to.be(domain[1] / 100);
+        });
+
+        it('should return the user defined value', function () {
+          domain = [20, 50];
+          newDomain = yAxis._validateUserExtents(domain);
+
+          expect(newDomain[0]).to.be(domain[0]);
+          expect(newDomain[1]).to.be(domain[1]);
+        });
+      });
+
+      describe('should throw an error when', function () {
+        var min;
+        var max;
+
+        it('min === max', function () {
+          min = 12;
+          max = 12;
+
+          expect(function () {
+            yAxis._validateAxisExtents(min, max);
+          }).to.throwError();
+        });
+
+        it('min > max', function () {
+          min = 30;
+          max = 10;
+
+          expect(function () {
+            yAxis._validateAxisExtents(min, max);
+          }).to.throwError();
         });
       });
     });

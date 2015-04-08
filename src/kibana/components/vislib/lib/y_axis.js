@@ -33,19 +33,19 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    YAxis.prototype.isPercentage = function () {
+    YAxis.prototype._isPercentage = function () {
       return (this._attr.mode === 'percentage');
     };
 
-    YAxis.prototype.isUserDefined = function () {
+    YAxis.prototype._isUserDefined = function () {
       return (this._attr.setYExtents.min || this._attr.setYExtents.max);
     };
 
-    YAxis.prototype.isYExtents = function () {
+    YAxis.prototype._isYExtents = function () {
       return (this._attr.defaultYExtents);
     };
 
-    YAxis.prototype.validateUserExtents = function (domain) {
+    YAxis.prototype._validateUserExtents = function (domain) {
       var self = this;
       var extents = ['min', 'max'];
 
@@ -54,24 +54,23 @@ define(function (require) {
         val = parseInt(val, 10);
 
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
-        if (self.isPercentage() && self._attr.setYExtents[extent]) return  val / 100;
-        if (!self._attr.setYExtents[extent]) return Math[extent](0, val);
+        if (self._isPercentage() && self._attr.setYExtents[extent]) return  val / 100;
         return val;
       });
     };
 
-    YAxis.prototype.validateExtents = function (min, max) {
-      if (min === max && min === 0) throw new errors.NoResults();
-      if (min > max) throw new Error('min: ' + min + ' cannot be greater than max: ' + max);
+    YAxis.prototype._validateAxisExtents = function (min, max) {
+      if (min === max) throw new errors.NoResults();
+      if (min > max) throw new errors.YMinGreaterThanYMax();
     };
 
-    YAxis.prototype.getExtents = function (domain) {
+    YAxis.prototype._getExtents = function (domain) {
       var min = domain[0];
       var max = domain[1];
 
-      this.validateExtents(min, max);
-      if (!this.isYExtents() && !this.isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
-      if (this.isUserDefined()) return this.validateUserExtents(domain);
+      this._validateAxisExtents(min, max);
+      if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
+      if (this._isUserDefined()) return this._validateUserExtents(domain);
       return domain;
     };
 
@@ -84,13 +83,14 @@ define(function (require) {
      */
     YAxis.prototype.getYScale = function (height) {
       var scale = d3.scale.linear();
-      var domain = this.getExtents(this.domain);
+      var domain = this._getExtents(this.domain);
 
       this.yScale = scale
       .domain(domain)
       .range([height, 0])
-      .clamp(true)
-      .nice(this.tickScale(height));
+      .clamp(true);
+
+      if (!this._isUserDefined()) this.yScale.nice(); // round extents when not user defined
 
       return this.yScale;
     };
@@ -109,13 +109,17 @@ define(function (require) {
       return numeral(d).format('0.[0]a');
     };
 
+    YAxis.prototype._isDecimalFormat = function (domain) {
+      return (domain[1] <= 100 && domain[0] >= -100 && !this._isPercentage());
+    };
+
     YAxis.prototype.tickFormat = function (domain) {
-      if (this.isPercentage()) return d3.format('%');
-      if (domain[1] <= 100 && domain[0] >= -100 && !this.isPercentage()) return d3.format('n');
+      if (this._isPercentage()) return d3.format('%');
+      if (this._isDecimalFormat(domain)) return d3.format('n');
       return this.formatAxisLabel;
     };
 
-    YAxis.prototype.validateYScale = function (yScale) {
+    YAxis.prototype._validateYScale = function (yScale) {
       if (!yScale || _.isNaN(yScale)) throw new Error('yScale is ' + yScale);
     };
 
@@ -128,7 +132,7 @@ define(function (require) {
      */
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
-      this.validateYScale(yScale);
+      this._validateYScale(yScale);
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
