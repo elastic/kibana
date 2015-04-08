@@ -1,4 +1,4 @@
-<div class="spinner large" ng-show="searchSource.activeFetchCount > 0"></div>
+<div class="spinner large" ng-show="vis.type.requiresSearch && searchSource.activeFetchCount > 0"></div>
 <div ng-if="vis.type.requiresSearch && esResp.hits.total === 0"
   class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
@@ -9,7 +9,7 @@
   <div class="item bottom"></div>
 </div>
 <div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
-  ng-class="{ loading: searchSource.activeFetchCount > 0 }"
+  ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
   class="visualize-chart"></div>
 <!-- <pre>{{chartData | json}}</pre> -->
 <visualize-spy ng-if="vis.type.requiresSearch"></visualize-spy>
