@@ -31,7 +31,15 @@ define(function (require) {
       makeLabel: function (agg) {
         var output = this.params.write(agg);
         var params = output.params;
-        return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
+        var interval = output.metricScaleText || output.bucketInterval.description;
+        var label = params.field + ' per ' + interval;
+
+        var bucketInterval = agg.buckets.getInterval();
+        if (bucketInterval.scaled) {
+          label += ' (scaled from ' + bucketInterval.expression + ')';
+        }
+
+        return label;
       },
       createFilter: createFilter,
       decorateAggConfig: function () {
