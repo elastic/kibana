@@ -21,7 +21,7 @@ define(function (require) {
         { name: 'geo_shape',    type: 'geo_shape',  group: 'geo'    },
         { name: 'ip',           type: 'ip',         group: 'other'  },
         { name: 'attachment',   type: 'attachment', group: 'other'  },
-        { name: 'murmur3',      type: 'murmur3',    group: 'hash'  },
+        { name: 'murmur3',      type: 'murmur3',    group: 'hash'  }
       ]
     });
 
