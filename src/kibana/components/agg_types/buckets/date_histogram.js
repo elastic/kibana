@@ -31,12 +31,13 @@ define(function (require) {
       makeLabel: function (agg) {
         var output = this.params.write(agg);
         var params = output.params;
-        var interval = output.metricScaleText || output.bucketInterval.description;
-        var label = params.field + ' per ' + interval;
+        var label = params.field + ' per ';
 
-        var bucketInterval = agg.buckets.getInterval();
-        if (bucketInterval.scaled) {
-          label += ' (scaled from ' + bucketInterval.expression + ')';
+        if (output.bucketInterval.scaled) {
+          label += output.bucketInterval.description + ' (scaled to per ' + output.metricScaleText + ')';
+        } else {
+          var interval = output.metricScaleText || output.bucketInterval.description;
+          label += interval;
         }
 
         return label;
