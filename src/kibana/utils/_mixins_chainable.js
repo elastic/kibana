@@ -256,5 +256,25 @@ define(function (require) {
     get: function (obj, path) {
       return _.deepGet(obj, path);
     },
+
+    /**
+     * Parse a comma-seperated list into an array
+     * efficiently, or just return if already an array
+     *
+     * @param {string|array} input  - the comma-seperated list
+     * @return {array}
+     */
+    commaSeperatedList: function (input) {
+      if (_.isArray(input)) return input;
+
+      var source = String(input || '').split(',');
+      var list = [];
+      while (source.length) {
+        var item = source.shift().trim();
+        if (item) list.push(item);
+      }
+
+      return list;
+    },
   };
 });
