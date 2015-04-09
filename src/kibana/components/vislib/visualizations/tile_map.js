@@ -507,6 +507,17 @@ define(function (require) {
       });
     };
 
+    TileMap.prototype.mapDataToHeatArray = function (mapData, max) {
+      var heatData = mapData.features.map(function (feature) {
+        return [
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0],
+          feature.properties.count / max * 100
+        ];
+      });
+      return heatData;
+    };
+
     /**
      * geohashMinDistance returns a min distance in meters for sizing
      * circle markers to fit within geohash grid rectangle
