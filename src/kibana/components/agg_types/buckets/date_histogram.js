@@ -42,10 +42,14 @@ define(function (require) {
       },
       makeLabel: function (agg) {
         var label = getLabelParts(this.params, agg);
+        var output = label.field + ' per ' + label.intervalDescription;
 
         if (label.isScaled) {
-          return label.field + ' per ' + label.intervalDescription +
-            ' (scaled to per ' + label.intervalScale + ')';
+          if (label.intervalScale) {
+            output += ' (scaled to per ' + label.intervalScale + ')';
+          }
+
+          return output;
         }
 
         return this.makeShortLabel(agg);
