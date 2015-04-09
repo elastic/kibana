@@ -1,7 +1,7 @@
 define(function (require) {
   return function BaseNumeralFormatProvider(Private, config, $rootScope) {
     var _ = require('lodash');
-    var format = Private(require('components/stringify/_format'));
+    var format = Private(require('components/stringify/format'));
     var numeral = require('numeral');
 
     return function numFormat(name, units) {

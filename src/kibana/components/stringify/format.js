@@ -3,12 +3,16 @@ define(function (require) {
     var _ = require('lodash');
     var angular = require('angular');
 
+    function escape(v) {
+      return typeof v === 'string' ? _.escape(v) : v;
+    }
+
     return function format(fn) {
-      return function (value) {
+      return function convert(value) {
         if (_.isArray(value)) {
-          return angular.toJson(_.map(value, fn));
+          return angular.toJson(_.map(value, convert));
         } else {
-          return fn(value);
+          return fn(escape(value));
         }
       };
     };
