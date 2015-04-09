@@ -7,7 +7,7 @@
       <div>
 
         <p>
-          By default, Elasticsearch scripts use <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts">Lucene Expressions <i class="fa-link fa"></i></a>, which is a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations. We'll let you do some reading on <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts">Lucene Expressions<i class="fa-link fa"></i></a> To access values in the document use the following format:
+          By default, Elasticsearch scripts use <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts">Lucene Expressions <i class="fa-link fa"></i></a>, which is a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations. We'll let you do some reading on <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts">Lucene Expressions<i class="fa-link fa"></i></a> To access values in the document use the following format:
           <h4><code>doc['some_field'].value</code></h4>
         </p>
         <p>There are a few limitations when using Lucene Expressions:
@@ -45,23 +45,25 @@
           <label>Name</label>
           <input required type="text" ng-model="scriptedField.name" class="form-control span12">
         </div>
+
         <div class="form-group">
-          <label>Script <small>Please familiarize yourself with <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with
-        <a target="_window" href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a>
+          <label>Script <small>Please familiarize yourself with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with
+        <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a>
         before using scripted fields.</small></label>
-          <textarea required class="form-control span12" ng-model="scriptedField.script"></textarea>
+          <textarea required class="scripted-field-script form-control span12" ng-model="scriptedField.script"></textarea>
+        </div>
+
+        <div ng-if="namingConflict" class="alert alert-danger">
+          You already have a field with the name {{ scriptedField.name }}. Naming your scripted
+          field with the same name means you won't be able to query both fields at the same time.
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="button" ng-click="goBack()">Cancel</button>
+          <button class="btn btn-success" type="submit">
+            Save Scripted Field
+          </button>
         </div>
       </form>
-      <div ng-if="namingConflict" class="alert alert-danger">
-        You already have a field with the name {{ scriptedField.name }}. Naming your scripted
-        field with the same name means you won't be able to query both fields at the same time.
-      </div>
-      <div class="form-group">
-        <button class="btn btn-primary" ng-click="goBack()">Cancel</button>
-        <button class="btn btn-success" ng-click="submit()" ng-disabled="scriptedFieldForm.$invalid">
-          Save Scripted Field
-        </button>
-      </div>
     </div>
 
   </kbn-settings-indices>

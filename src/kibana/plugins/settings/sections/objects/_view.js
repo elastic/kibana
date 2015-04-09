@@ -35,7 +35,7 @@ define(function (require) {
          * @returns {array}
          */
         var createField = function (memo, val, key, collection, parents) {
-          if (_.isArray(parents))  {
+          if (_.isArray(parents)) {
             parents.push(key);
           } else {
             parents = [key];

@@ -182,7 +182,7 @@ define(function (require) {
      */
     AggConfig.prototype.requesting = function () {
       var self = this;
-      self.type.params.forEach(function (param) {
+      self.type && self.type.params.forEach(function (param) {
         if (param.onRequest) param.onRequest(self);
       });
     };
@@ -254,6 +254,10 @@ define(function (require) {
       return this.type.getValue(this, bucket);
     };
 
+    AggConfig.prototype.getKey = function (bucket, key) {
+      return this.type.getKey(bucket, key);
+    };
+
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
       return this.type.makeLabel(this);
@@ -264,12 +268,15 @@ define(function (require) {
     };
 
     AggConfig.prototype.fieldFormatter = function () {
-      if (this.schema && this.schema.group === 'metrics') {
-        return fieldFormats.defaultByType.number.convert;
+      var field = this.field();
+      var format = field && field.format;
+      var strFormat = fieldFormats.defaultByType.string;
+
+      if (this.type.getFormat) {
+        format = this.type.getFormat(this) || format;
       }
 
-      var field = this.field();
-      return field ? field.format.convert : String;
+      return (format || strFormat).convert;
     };
 
     AggConfig.prototype.fieldName = function () {

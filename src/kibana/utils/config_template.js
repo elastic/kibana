@@ -10,7 +10,7 @@ define(function (require) {
 
     function update(newState, name) {
       var toUpdate = templates[name];
-      var curState = template.current === toUpdate;
+      var curState = template.is(name);
       if (newState == null) newState = !curState;
 
       if (newState) {
@@ -21,6 +21,10 @@ define(function (require) {
 
       return newState;
     }
+
+    template.is = function (name) {
+      return template.current === templates[name];
+    };
 
     template.toString = function () {
       return template.current;

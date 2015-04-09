@@ -25,12 +25,15 @@ var levelColor = function (code) {
   if (code < 299) {
     return ansicolors.green(code);
   }
+
   if (code < 399) {
-    return ansicolors.yellow(code)
-  };
+    return ansicolors.yellow(code);
+  }
+
   if (code < 499) {
-    return ansicolors.magenta(code)
-  };
+    return ansicolors.magenta(code);
+  }
+
   return ansicolors.red(code);
 };
 
@@ -56,10 +59,13 @@ StdOutStream.prototype._write = function (entry, encoding, callback) {
   } else if (entry.msg) {
     output += entry.msg;
   }
-  process.stdout.write(output + "\n");
+
+  process.stdout.write(output + '\n');
+
   if (entry.err) {
-    process.stdout.write(ansicolors.brightRed(entry.err.stack) + "\n");
+    process.stdout.write(ansicolors.brightRed(entry.err.stack) + '\n');
   }
+
   callback();
 };
 

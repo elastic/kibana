@@ -1,4 +1,7 @@
-<div ng-if="hits.length">
+<div class="spinner large" ng-show="searchSource.activeFetchCount > 0"></div>
+<div
+  ng-if="hits.length"
+  ng-class="{ loading: searchSource.activeFetchCount > 0 }">
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
     <table class="kbn-table table" ng-if="indexPattern">
       <thead

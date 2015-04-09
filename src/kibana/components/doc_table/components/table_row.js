@@ -6,9 +6,11 @@ define(function (require) {
   var module = require('modules').get('app/discover');
 
   require('components/highlight/highlight');
+  require('components/highlight/highlight_tags');
   require('components/doc_viewer/doc_viewer');
   require('filters/trust_as_html');
   require('filters/short_dots');
+
 
   // guestimate at the minimum number of chars wide cells in the table should be
   var MIN_LINE_LENGTH = 20;
@@ -21,7 +23,7 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config, highlightFilter, shortDotsFilter, courier) {
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter, highlightTags, shortDotsFilter, courier) {
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(require('text!components/doc_table/components/table_row/cell.html'));
@@ -104,14 +106,17 @@ define(function (require) {
 
           $scope.columns.forEach(function (column) {
             var formatted;
+
+            var sources = _.extend({}, row.$$_formatted, row.highlight);
             if (column === '_source') {
-              formatted = sourceTemplate({
-                source: _.mapValues(row.$$_formatted, function (val, field) {
+              var sourceConfig = {
+                source: _.mapValues(sources, function (val, field) {
                   return _displayField(row, field, false);
                 }),
                 highlight: row.highlight,
                 shortDotsFilter: shortDotsFilter
-              });
+              };
+              formatted = sourceTemplate(sourceConfig);
             } else {
               formatted = _displayField(row, column, true);
             }
@@ -187,6 +192,16 @@ define(function (require) {
         function _getValForField(row, field) {
           var val;
 
+          if (row.highlight && row.highlight[field]) {
+            // Strip out the highlight tags so we have the "original" value
+            var untagged = _.map(row.highlight[field], function (value) {
+              return value
+                .split(highlightTags.pre).join('')
+                .split(highlightTags.post).join('');
+            });
+            return _formatField(untagged, field);
+          }
+
           // discover formats all of the values and puts them in $$_formatted for display
           val = (row.$$_formatted || _formatRow(row))[field];
 
@@ -211,7 +226,7 @@ define(function (require) {
          * Create the $$_formatted key on a row
          */
         function _formatRow(row) {
-          row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
+          $scope.indexPattern.flattenHit(row);
           row.$$_formatted = row.$$_formatted || _.mapValues(row.$$_flattened, _formatField);
           return row.$$_formatted;
         }

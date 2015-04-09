@@ -8,7 +8,8 @@ define(function (require) {
   require('filters/moment');
 
   var filter, config;
-  var clock, anchor = '2014-01-01T06:06:06.666';
+  var anchor = '2014-01-01T06:06:06.666';
+  var clock;
 
   var init = function (expandable) {
     // Load the application

@@ -32,7 +32,6 @@ if (app.get('env') === 'development') {
 // TODO: WE might want to move the middleware to each of the individual routes
 // so we don't have weird conflicts in the future.
 app.use('/elasticsearch', proxy);
-app.use('/enforcer', require('./lib/enforce'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

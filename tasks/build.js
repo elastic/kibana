@@ -4,7 +4,7 @@ module.exports = function (grunt) {
     'clean:target',
     'clean:build',
     'require_css_deps:copy',
-    'less',
+    'less:build',
     'copy:kibana_src',
     'clean:dev_only_plugins',
     'touch_config',

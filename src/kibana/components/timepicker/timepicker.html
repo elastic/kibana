@@ -64,7 +64,7 @@
             </div>
 
             <div ng-switch-when="relative">
-              <form ng-submit="applyRelative()" class="form-inline" name="relativeTime">
+              <form role="form" ng-submit="applyRelative()" class="form-inline" name="relativeTime">
                 <div class="kbn-timepicker-section">
                   <label>
                     From:
@@ -91,12 +91,14 @@
                   </div>
                   <br>
                   <div class="small">
-                    <input
-                      ng-model="relative.round"
-                      ng-checked="relative.round"
-                      ng-change="formatRelative()"
-                      type="checkbox">
-                    round to the {{units[relative.unit]}}
+                    <label>
+                      <input
+                        ng-model="relative.round"
+                        ng-checked="relative.round"
+                        ng-change="formatRelative()"
+                        type="checkbox">
+                      round to the {{units[relative.unit]}}
+                    </label>
                   </div>
                 </div>
 
@@ -169,7 +171,11 @@
       <br>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
-          <li ng-repeat="interval in list"><a ng-click="setRefreshInterval(interval)">{{interval.display}}</a></li>
+          <li ng-repeat="inter in list">
+            <a class="refresh-interval" ng-class="{ 'refresh-interval-active': interval.value == inter.value }" ng-click="setRefreshInterval(inter)">
+              {{inter.display}}
+            </a>
+          </li>
         </ul>
       </div>
     </div>

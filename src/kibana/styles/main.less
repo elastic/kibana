@@ -276,6 +276,16 @@ notifications {
   text-shadow: none;
 }
 
+.kbn-timepicker .refresh-interval {
+  padding: 0.2em 0.4em;
+  border-radius: @border-radius-small;
+}
+
+.kbn-timepicker .refresh-interval-active {
+  background-color: @btn-info-bg;
+  color: @btn-info-color;
+}
+
 //== Table
 
 kbn-table, .kbn-table {
@@ -409,13 +419,12 @@ button[disabled] {
   white-space: pre-wrap;
 }
 
-input.ng-dirty.ng-invalid,
-textarea.ng-dirty.ng-invalid,
-select.ng-dirty.ng-invalid,
-form:not(.hide-errors) input.ng-invalid,
-form:not(.hide-errors) textarea.ng-invalid,
-form:not(.hide-errors) select.ng-invalid {
-  border-color: @state-danger-bg !important;
+.ng-dirty, .ng-touched {
+  input.ng-invalid&,
+  textarea.ng-invalid&,
+  select.ng-invalid& {
+    border-color: @state-danger-bg !important;
+  }
 }
 
 

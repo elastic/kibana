@@ -1,14 +1,18 @@
 define(function (require) {
   return function PointSeriesGetPoint() {
+    var _ = require('lodash');
     function unwrap(aggConfigResult, def) {
       return aggConfigResult ? aggConfigResult.value : def;
     }
 
-    return function getPoint(x, series, yScale, row, y) {
+    return function getPoint(x, series, yScale, row, y, z) {
+      var zRow = z && row[z.i];
       var point = {
         x: unwrap(row[x.i], '_all'),
         y: unwrap(row[y.i]),
+        z: zRow && unwrap(zRow),
         aggConfigResult: row[y.i],
+        extraMetrics: _.compact([zRow]),
         yScale: yScale
       };
 

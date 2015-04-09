@@ -14,7 +14,7 @@ define(function (require) {
   var rowsArr;
   var uniqLabels;
   var error;
-  
+
   var seriesData = {
     'label': '',
     'series': [
@@ -219,29 +219,33 @@ define(function (require) {
         }).to.throwError();
       });
 
-      it('should throw an error if property series, rows, or columns is not ' +
-        'present', function () {
+      it(
+        'should throw an error if property series, rows, or ' +
+        'columns is not present',
+        function () {
+          expect(function () {
+            dataArray(childrenObject);
+          }).to.throwError();
+        }
+      );
 
-        expect(function () {
-          dataArray(childrenObject);
-        }).to.throwError();
-      });
+      it(
+        'should not throw an error if object has property series, rows, or ' +
+        'columns',
+        function () {
+          expect(function () {
+            dataArray(seriesObject);
+          }).to.not.throwError();
 
-      it('should not throw an error if object has property series, rows, or ' +
-        'columns', function () {
+          expect(function () {
+            dataArray(rowsObject);
+          }).to.not.throwError();
 
-        expect(function () {
-          dataArray(seriesObject);
-        }).to.not.throwError();
-
-        expect(function () {
-          dataArray(rowsObject);
-        }).to.not.throwError();
-
-        expect(function () {
-          dataArray(columnsObject);
-        }).to.not.throwError();
-      });
+          expect(function () {
+            dataArray(columnsObject);
+          }).to.not.throwError();
+        }
+      );
 
       it('should be a function', function () {
         expect(typeof dataArray).to.equal('function');

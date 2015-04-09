@@ -14,9 +14,16 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          showCircles: true,
+          smoothLines: false,
+          interpolate: 'linear',
+          drawLinesBetweenPoints: true,
+          radiusRatio: 9,
+          scale: 'linear',
           defaultYExtents: false
         },
-        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
+        scales: ['linear', 'log', 'square root'],
+        editor: require('text!plugins/vis_types/vislib/editors/line.html')
       },
       schemas: new Schemas([
         {
@@ -27,6 +34,14 @@ define(function (require) {
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
+        },
+        {
+          group: 'metrics',
+          name: 'radius',
+          title: 'Dot Size',
+          min: 0,
+          max: 1,
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
         },
         {
           group: 'buckets',

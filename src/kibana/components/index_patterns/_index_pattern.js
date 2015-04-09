@@ -9,7 +9,6 @@ define(function (require) {
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
-    var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
@@ -104,7 +103,7 @@ define(function (require) {
                 }
               },
               filterable: {
-                value: field.name === '_id' || ((field.indexed && type.filterable) || field.scripted)
+                value: field.name === '_id' || ((field.indexed && type && type.filterable) || field.scripted)
               },
               format: {
                 get: function () {
@@ -113,7 +112,7 @@ define(function (require) {
                 }
               },
               sortable: {
-                value: field.indexed && type.sortable
+                value: field.indexed && type && type.sortable
               },
               scripted: {
                 // enumerable properties end up in the JSON
@@ -276,8 +275,7 @@ define(function (require) {
       };
 
       self.metaFields = config.get('metaFields');
-      self.flattenSearchResponse = flattenSearchResponse.bind(self);
-      self.flattenHit = flattenHit.bind(self);
+      self.flattenHit = _.partial(flattenHit, self);
       self.getComputedFields = getComputedFields.bind(self);
 
 

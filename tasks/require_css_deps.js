@@ -7,8 +7,8 @@ module.exports = function (grunt) {
       'normalize.js'
     ].forEach(function (dep) {
       grunt.file.copy(
-        join(grunt.config.get('bowerComponentsDir'), 'require-css',  dep),
-        join(grunt.config.get('build'), 'src',  dep)
+        join(grunt.config.get('bowerComponentsDir'), 'require-css', dep),
+        join(grunt.config.get('build'), 'src', dep)
       );
     });
   });

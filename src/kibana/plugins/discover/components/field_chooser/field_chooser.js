@@ -5,6 +5,7 @@ define(function (require) {
   var rison = require('utils/rison');
   var qs = require('utils/query_string');
   var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
+  var IndexedArray = require('utils/indexed_array/index');
 
 
   require('directives/css_truncate');
@@ -16,22 +17,28 @@ define(function (require) {
     return {
       restrict: 'E',
       scope: {
-        fields: '=',
-        toggle: '=',
+        columns: '=',
         data: '=',
         state: '=',
         indexPattern: '=',
+        indexPatternList: '=',
         updateFilterInQuery: '=filter'
       },
       template: html,
-      controller: function ($scope) {
+      controller: function ($scope, $route) {
+        $scope.setIndexPattern = function (indexPattern) {
+          $scope.state.index = indexPattern;
+          $scope.state.save();
+          $route.reload();
+        };
 
         var filter = $scope.filter = {
           props: [
             'type',
             'indexed',
             'analyzed',
-            'missing'
+            'missing',
+            'name'
           ],
           defaults: {
             missing: true
@@ -48,11 +55,14 @@ define(function (require) {
           reset: function () {
             filter.vals = _.clone(filter.defaults);
           },
+          isFieldSelected: function (field) {
+            return field.display;
+          },
           isFieldFiltered: function (field) {
             var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
             var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
             var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
-            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.inData);
             var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
             return !field.display
@@ -80,6 +90,11 @@ define(function (require) {
           filter.active = filter.getActive();
         });
 
+        $scope.toggle = function (fieldName) {
+          $scope.increaseFieldCounter(fieldName);
+          _.toggleInOut($scope.columns, fieldName);
+        };
+
         var calculateFields = function (newFields) {
           // Find the top N most popular fields
           $scope.popularFields = _(newFields)
@@ -103,24 +118,56 @@ define(function (require) {
         };
 
         $scope.$watch('fields', calculateFields);
-        $scope.$watch('data', function () {
+
+        $scope.$watch('indexPattern', function (indexPattern) {
+          $scope.fields = new IndexedArray ({
+            index: ['name'],
+            initialSet: _($scope.indexPattern.fields)
+              .sortBy('name')
+              .transform(function (fields, field) {
+                // clone the field with Object.create so that its getters
+                // and non-enumerable props are preserved
+                var clone = Object.create(field);
+                clone.display = _.contains($scope.columns, field.name);
+                fields.push(clone);
+              }, [])
+              .value()
+          });
+
+        });
+
+        $scope.$watchCollection('columns', function (columns, oldColumns) {
           _.each($scope.fields, function (field) {
+            field.display = _.contains(columns, field.name) ? true : false;
+          });
+        });
+
+        $scope.$watch('data', function () {
+
+          // Get all fields current in data set
+          var currentFields = _.chain($scope.data).map(function (d) {
+            return _.keys($scope.indexPattern.flattenHit(d));
+          }).flatten().unique().sort().value();
+
+          _.each($scope.fields, function (field) {
+            field.inData = _.contains(currentFields, field.name) ? true : false;
             if (field.details) {
               $scope.details(field, true);
             }
           });
         });
 
-        $scope.increaseFieldCounter = function (field) {
-          $scope.indexPattern.popularizeField(field.name, 1);
+        $scope.increaseFieldCounter = function (fieldName) {
+          $scope.indexPattern.popularizeField(fieldName, 1);
         };
 
         $scope.runAgg = function (field) {
           var agg = {};
-          var type = 'histogram';
+          var isGeoPoint = field.type === 'geo_point';
+          var type = isGeoPoint ? 'tile_map' : 'histogram';
           // If we're visualizing a date field, and our index is time based (and thus has a time filter),
           // then run a date histogram
-          if (field.type === 'date' && $scope.indexPattern.timeFieldName) {
+          if (field.type === 'date' && $scope.indexPattern.timeFieldName === field.name) {
             agg = {
               type: 'date_histogram',
               schema: 'segment',
@@ -130,8 +177,7 @@ define(function (require) {
               }
             };
 
-          } else if (field.type === 'geo_point') {
-            type = 'tile_map';
+          } else if (isGeoPoint) {
             agg = {
               type: 'geohash_grid',
               schema: 'segment',
@@ -146,7 +192,8 @@ define(function (require) {
               schema: 'segment',
               params: {
                 field: field.name,
-                size: config.get('discover:aggs:terms:size', 20)
+                size: config.get('discover:aggs:terms:size', 20),
+                orderBy: '2'
               }
             };
           }
@@ -158,17 +205,12 @@ define(function (require) {
               filters: $scope.state.filters || [],
               query: $scope.state.query || undefined,
               vis: {
+                type: type,
                 aggs: [
                   agg,
-                  {schema: 'metric', type: 'count'}
+                  {schema: 'metric', type: 'count', 'id': '2'}
                 ]
-              },
-              metric: [{
-                agg: 'count',
-              }],
-              segment: [agg],
-              group: [],
-              split: [],
+              }
             })
           });
         };

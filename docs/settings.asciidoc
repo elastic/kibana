@@ -172,7 +172,7 @@ buggy, you'll get exceptions whenever you try to view the dynamically generated
 data.
 
 Scripted fields use the Lucene expression syntax. For more information, 
-see http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[Lucene Expressions Scripts].
+see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[Lucene Expressions Scripts].
 
 You can reference any single value numeric field in your expressions, for example:
 
@@ -186,18 +186,16 @@ To create a scripted field:
 . Select the index pattern you want to add a scripted field to.
 . Go to the pattern's *Scripted Fields* tab.
 . Click *Add Scripted Field*. 
-+
-TIP: If you are just getting started with scripted fields, you can click 
-*create a few examples from your date fields* to add some scripted fields
-you can use as a starting point.
-
 . Enter a name for the scripted field.
 . Enter the expression that you want to use to compute a value on the fly 
 from your index data.
 . Click *Save Scripted Field*.
 
 For more information about scripted fields in Elasticsearch, see 
-http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
+{ref}/modules-scripting.html[dynamic Groovy scripting].
 
 [float]
 [[update-scripted-field]]

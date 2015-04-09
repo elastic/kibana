@@ -63,7 +63,7 @@ define(function (require) {
           new_param: 'should exist in output'
         });
 
-        output.params['existing'] = 'true';
+        output.params.existing = 'true';
         aggConfig.params[paramName] = jsonData;
 
         aggParam.write(aggConfig, output);
@@ -82,7 +82,7 @@ define(function (require) {
           existing: 'should be used'
         });
 
-        output.params['existing'] = 'true';
+        output.params.existing = 'true';
         aggConfig.params[paramName] = jsonData;
 
         aggParam.write(aggConfig, output);
