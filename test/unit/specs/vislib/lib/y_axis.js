@@ -153,6 +153,20 @@ define(function (require) {
         });
       });
 
+      describe('should return log values', function () {
+        var domain;
+        var extents;
+
+        it('should return 1', function () {
+          yAxis._attr.scale = 'log';
+          extents = [0, 400];
+          domain = yAxis._getExtents(extents);
+
+          // Log scales have a yMin value of 1
+          expect(domain[0]).to.be(1);
+        });
+      });
+
       describe('positive values', function () {
         beforeEach(function () {
           graphData = defaultGraphData;
@@ -298,82 +312,37 @@ define(function (require) {
 
       it('should return a function', function () {
         fnNames.forEach(function (fnName) {
-          var isFunction = (typeof yAxis.getScaleType(fnName) === 'function');
+          var isFunction = (typeof yAxis._getScaleType(fnName) === 'function');
           expect(isFunction).to.be(true);
         });
 
         // if no value is provided to the function, scale should default to a linear scale
-        expect(typeof yAxis.getScaleType()).to.be('function');
+        expect(typeof yAxis._getScaleType()).to.be('function');
       });
 
       it('should throw an error if function name is undefined', function () {
         expect(function () {
-          yAxis.getScaleType('square');
+          yAxis._getScaleType('square');
         }).to.throwError();
       });
     });
 
-    describe('returnLogDomain method', function () {
+    describe('_logDomain method', function () {
       it('should throw an error', function () {
         expect(function () {
-          yAxis.returnLogDomain(-10, -5);
+          yAxis._logDomain(-10, -5);
         }).to.throwError();
         expect(function () {
-          yAxis.returnLogDomain(-10, 5);
+          yAxis._logDomain(-10, 5);
         }).to.throwError();
         expect(function () {
-          yAxis.returnLogDomain(0, -5);
+          yAxis._logDomain(0, -5);
         }).to.throwError();
       });
 
       it('should return a yMin value of 1', function () {
-        var yMin = yAxis.returnLogDomain(0, 200)[0];
+        var yMin = yAxis._logDomain(0, 200)[0];
         expect(yMin).to.be(1);
-      });
-    });
-
-    describe('getDomain method', function () {
-      it('should return a log domain', function () {
-        var scale = 'log';
-        var yMin = 0;
-        var yMax = 400;
-        var domain = yAxis.getDomain(scale, yMin, yMax);
-
-        // Log scales have a yMin value of 1
-        expect(domain[0]).to.be(1);
-      });
-
-      it('should throw a no results error if yMin and yMax values are both 0', function () {
-        expect(function () {
-          yAxis.getDomain('linear', 0, 0);
-        }).to.throwError();
-      });
-
-      it('should return the correct min and max values', function () {
-        var extents = [
-          [-5, 20],
-          [-30, -10],
-          [5, 20]
-        ];
-
-        extents.forEach(function (extent) {
-          var domain = yAxis.getDomain('linear', extent[0], extent[1]);
-
-          if (extent[0] < 0 && extent[1] > 0) {
-            expect(domain[0]).to.be(extent[0]);
-            expect(domain[1]).to.be(extent[1]);
-          }
-
-          if (extent[0] < 0 && extent[1] < 0) {
-            expect(domain[0]).to.be(extent[0]);
-            expect(domain[1]).to.be(0);
-          }
-
-          if (extent[0] > 0 && extent[1] > 0) {
-            expect(domain[0]).to.be(0);
-            expect(domain[1]).to.be(extent[1]);
-          }
-        });
       });
     });
 

@@ -54,7 +54,7 @@ define(function (require) {
         val = parseInt(val, 10);
 
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
-        if (self._isPercentage() && self._attr.setYExtents[extent]) return  val / 100;
+        if (self._isPercentage() && self._attr.setYExtents[extent]) return val / 100;
         return val;
       });
     };
