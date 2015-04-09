@@ -115,6 +115,10 @@ define(function (require) {
     'defaultFormat:attachment': {
       value: 'string',
       description: 'The default format to be used for fields of type "attachment".'
+    },
+    'defaultFormat:murmur3': {
+      value: 'string',
+      description: 'The default format to be used for fields of type "murmur3"'
     }
   };
 });
