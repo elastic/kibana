@@ -90,9 +90,7 @@ define(function (require) {
       var hits;
 
       beforeEach(function () {
-        hits = _.each(require('fixtures/real_hits.js'), function (hit) {
-          hit.$$_flattened = indexPattern.flattenHit(hit);
-        });
+        hits = _.each(require('fixtures/real_hits.js'), indexPattern.flattenHit);
       });
 
       it('Should return an array of values for _source fields', function () {
