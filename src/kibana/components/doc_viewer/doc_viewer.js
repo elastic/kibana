@@ -17,6 +17,7 @@ define(function (require) {
         hit: '=',
         indexPattern: '=',
         filter: '=?',
+        columns: '=?'
       },
       link: function ($scope, $el, attr) {
         // If a field isn't in the mapping, use this
@@ -36,6 +37,10 @@ define(function (require) {
           return formatter.convert(value);
         });
         $scope.fields = _.keys($scope.flattened).sort();
+
+        $scope.toggleColumn = function (fieldName) {
+          _.toggleInOut($scope.columns, fieldName);
+        };
 
         $scope.showArrayInObjectsWarning = function (row, field) {
           var value = $scope.flattened[field];

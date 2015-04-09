@@ -65,7 +65,7 @@ define(function (require) {
      */
     toggleInOut: function (arr, value) {
       if (_.contains(arr, value)) {
-        arr = _.without(arr, value);
+        arr.splice(arr.indexOf(value), 1);
       } else {
         arr.push(value);
       }
