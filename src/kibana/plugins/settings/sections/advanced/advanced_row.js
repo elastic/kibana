@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var configDefaults = require('components/config/defaults');
+  require('components/elastic_textarea');
 
   require('modules').get('apps/settings')
   .directive('advancedRow', function (config, Notifier, Private) {
@@ -63,6 +64,7 @@ define(function (require) {
             return config.clear(conf.name);
           });
         };
+
       }
     };
   });

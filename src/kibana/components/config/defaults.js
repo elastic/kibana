@@ -80,45 +80,18 @@ define(function (require) {
       value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
     },
-    'defaultFormat:ip': {
-      value: 'ip',
-      description: 'The default format to be used for fields of type "ip".'
-    },
-    'defaultFormat:date': {
-      value: 'date',
-      description: 'The default format to be used for fields of type "date".'
-    },
-    'defaultFormat:string': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "string".'
-    },
-    'defaultFormat:number': {
-      value: 'number',
-      description: 'The default format to be used for fields of type "number".'
-    },
-    'defaultFormat:boolean': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "boolean".'
-    },
-    'defaultFormat:conflict': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "conflict".'
-    },
-    'defaultFormat:geo_point': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "geo_point".'
-    },
-    'defaultFormat:geo_shape': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "geo_shape".'
-    },
-    'defaultFormat:attachment': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "attachment".'
-    },
-    'defaultFormat:murmur3': {
-      value: 'string',
-      description: 'The default format to be used for fields of type "murmur3"'
+    'defaultFieldFormats': {
+      type: 'json',
+      value: [
+        '{',
+        '  "ip": "ip",',
+        '  "date": "date",',
+        '  "number": "number",',
+        '  "_default_": "string"',
+        '}',
+      ].join('\n'),
+      description: 'Map of the format name to use by default for each field type. ' +
+        '"_default_" is used if the field type is not mentioned explicitly.'
     }
   };
 });

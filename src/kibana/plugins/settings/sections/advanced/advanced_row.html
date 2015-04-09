@@ -34,6 +34,7 @@
         class="form-control"
         ng-model="conf.unsavedValue"
         ng-keyup="maybeCancel($event, conf)"
+        elastic-textarea
         validate-json
         ></textarea>
         <small ng-show="forms.configEdit.$error.jsonInput">Invalid JSON syntax</small>

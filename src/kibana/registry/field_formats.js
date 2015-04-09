@@ -3,7 +3,7 @@ define(function (require) {
 
   // when the registry is empty or the default for a
   // field type is not set, we will provide this
-  // as the "default" format.
+  // as a hard-coded fallback.
   var defaultFallbackFormat = { convert: _.asString, name: '' };
 
   return require('registry/_registry')({
@@ -14,7 +14,8 @@ define(function (require) {
 
     constructor: function (config) {
       this.for = function (type, fallbackFormat) {
-        var name = config.get('defaultFormat:' + type);
+        var map = config.get('defaultFieldFormats');
+        var name = map[type] || map._default_;
         return this.byName[name] || (fallbackFormat || defaultFallbackFormat);
       };
     }
