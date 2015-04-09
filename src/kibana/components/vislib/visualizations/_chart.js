@@ -1,6 +1,7 @@
 define(function (require) {
   return function ChartBaseClass(d3, Private) {
     var _ = require('lodash');
+    var errors = require('errors');
 
     var Legend = Private(require('components/vislib/lib/legend'));
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
