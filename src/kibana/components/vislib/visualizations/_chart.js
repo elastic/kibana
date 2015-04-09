@@ -64,7 +64,10 @@ define(function (require) {
      * @method destroy
      */
     Chart.prototype.destroy = function () {
-      d3.select(this.chartEl).selectAll('*').remove();
+      var selection = d3.select(this.chartEl);
+
+      selection.remove();
+      selection = null;
     };
 
     return Chart;
