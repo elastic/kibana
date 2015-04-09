@@ -26,6 +26,7 @@ define(function (require) {
         $scope.columns = [
           { title: 'name' },
           { title: 'script' },
+          { title: 'lang' },
           { title: 'type' },
           { title: 'popularity', info: 'A gauge of how often this field is used' },
           { title: 'controls', sortable: false }
@@ -37,7 +38,7 @@ define(function (require) {
 
           $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
             var rowScope = $scope.$new();
-            var columns = [field.name, field.script, field.type];
+            var columns = [field.name, field.script, field.lang, field.type];
             rowScope.field = field;
             rowScopes.push(rowScope);
 
