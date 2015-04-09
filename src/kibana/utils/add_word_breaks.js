@@ -1,5 +1,6 @@
 define(function () {
   return function addWordBreaks(text, minLineLength) {
+    text = text || '';
     var lineSize = 0;
     var newText = '';
     var inHtmlTag = false;

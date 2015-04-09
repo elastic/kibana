@@ -142,12 +142,18 @@ define(function (require) {
         // ensure that all fields will be included in the returned docSource
         setDocsourcePayload(docSourceResponse(indexPatternId));
 
-        // refresh fields, which will fetch
-        return indexPattern.refreshFields().then(function () {
-          // compare non-scripted fields to the mapper.getFieldsForIndexPattern fields
-          return mapper.getFieldsForIndexPattern().then(function (fields) {
-            expect(indexPattern.getFields()).to.eql(fields);
-          });
+        return Promise.all([
+          // read fields from elasticsearch
+          mapper.getFieldsForIndexPattern(),
+
+          // tell the index pattern to do the same
+          indexPattern.refreshFields(),
+        ])
+        .then(function (data) {
+          var expected = data[0]; // just the fields in the index
+          var fields = indexPattern.getFields(); // get all but scripted fields
+
+          expect(_.pluck(fields, 'name')).to.eql(_.pluck(expected, 'name'));
         });
       });
 

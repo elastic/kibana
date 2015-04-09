@@ -69,17 +69,26 @@ define(function (require) {
     saved = !!saved;
 
     if (saved && has) {
-      return { enumerable: true, writable: change, value: val };
+      return {
+        enumerable: true,
+        configurable: true,
+        writable: change,
+        value: val
+      };
     }
 
     if (saved && !has) {
       return {
         enumerable: false,
+        configurable: true,
         get: _.constant(val),
         set: function (update) {
+          if (!change) return false;
+
           // redefine the property as normal/writable
           Object.defineProperty(self.wrapper, name, {
             enumerable: true,
+            configurable: true,
             writable: true,
             value: update
           });

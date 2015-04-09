@@ -3,6 +3,7 @@ define(function (require) {
     var ip;
     var date;
     var bytes;
+    var anchor;
     var string;
     var number;
     var percentage;
@@ -12,14 +13,17 @@ define(function (require) {
     var currentPrec;
     var config;
 
+    var _ = require('lodash');
+
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      ip = Private(require('components/stringify/ip'));
-      date = Private(require('components/stringify/date'));
-      bytes = Private(require('components/stringify/bytes'));
-      string = Private(require('components/stringify/string'));
-      number = Private(require('components/stringify/number'));
-      percentage = Private(require('components/stringify/percentage'));
+      ip = Private(require('components/stringify/types/ip'));
+      date = Private(require('components/stringify/types/date'));
+      bytes = Private(require('components/stringify/types/bytes'));
+      anchor = Private(require('components/stringify/types/anchor'));
+      string = Private(require('components/stringify/types/string'));
+      number = Private(require('components/stringify/types/number'));
+      percentage = Private(require('components/stringify/types/percentage'));
 
       fieldFormats = Private(require('registry/field_formats'));
 
@@ -33,13 +37,11 @@ define(function (require) {
       config.set('format:numberPrecision', currentPrec);
     }));
 
-    it('registers some fieldFormats', function () {
-      expect(fieldFormats).to.contain(ip);
-      expect(fieldFormats).to.contain(date);
-      expect(fieldFormats).to.contain(bytes);
-      expect(fieldFormats).to.contain(string);
-      expect(fieldFormats).to.contain(number);
-      expect(fieldFormats).to.contain(percentage);
+    it('registers all of the fieldFormats', function () {
+      var diff = _.difference(fieldFormats.raw, [
+        ip, date, bytes, string, number, percentage, anchor
+      ]);
+      expect(diff).to.eql([]);
     });
 
     describe('ip', function () {
@@ -109,6 +111,14 @@ define(function (require) {
       it('appends a percent sign to a rounded number, 100X the number', function () {
         config.set('format:numberPrecision', 3);
         expect(percentage.convert(0.0333333)).to.be('3.333%');
+      });
+    });
+
+    describe('anchor', function () {
+      it('formats the input as an anchor tag', function () {
+        var text = '<script>alert("hi");</script>';
+        var final = '<a href="' + _.escape(text) + '" target="_blank">' + _.escape(text) + '</a>';
+        expect(anchor.convert(text)).to.be(final);
       });
     });
   });
