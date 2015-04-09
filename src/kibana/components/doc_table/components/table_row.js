@@ -108,7 +108,6 @@ define(function (require) {
           $scope.columns.forEach(function (column) {
             var formatted;
 
-            var sources = _.extend({}, row.$$_formatted, row.highlight);
             if (column === '_source') {
               formatted = sourceTemplate({
                 source: indexPattern.formatHit(row),
@@ -163,7 +162,7 @@ define(function (require) {
          * Fill an element with the value of a field
          */
         function _displayField(row, field, breakWords) {
-          var text = _.asString($scope.indexPattern.formatHit(row)[field]);
+          var text = $scope.indexPattern.formatHit(row)[field];
           text = highlightFilter(text, row.highlight && row.highlight[field]);
 
           if (breakWords) {

@@ -17,7 +17,7 @@ define(function (require) {
   require('components/bind');
   require('components/listen');
   require('components/fancy_forms/fancy_forms');
-  require('components/stringify/_register');
+  require('components/stringify/register');
   require('directives/click_focus');
   require('directives/info');
   require('directives/spinner');
