@@ -491,9 +491,9 @@ define(function (require) {
       // Make sure there are no columns added that aren't in the displayed field list.
       $state.columns = _.intersection($state.columns, fields);
 
-      // If no columns remain, use _source
+      // If no columns remain, use defaultColumns
       if (!$state.columns.length) {
-        $scope.toggleField('_source');
+        config.get('defaultColumns').forEach($scope.toggleField);
         return;
       }
 

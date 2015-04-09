@@ -32,6 +32,10 @@ define(function (require) {
       value: null,
       description: 'The index to access if no index is set',
     },
+    'defaultColumns': {
+      value: ['_source'],
+      description: 'Columns displayed by default in the Discover tab',
+    },
     'metaFields': {
       value: ['_source', '_id', '_type', '_index'],
       description: 'Fields that exist outside of _source to merge into our document when displaying it',
