@@ -8,7 +8,7 @@ define(function (require) {
 
     return function ($parent, $scope, field) {
       $scope.field = field;
-      $scope.defaultFormatName = fieldFormats.defaultFor(field.type).name;
+      $scope.defaultFormatName = fieldFormats.for(field.type).name;
       $scope.formatOptionNames = [DEFAULT].concat(
         _.pluck(fieldFormats.byFieldType[field.type], 'name')
       );

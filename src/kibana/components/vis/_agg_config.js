@@ -270,7 +270,7 @@ define(function (require) {
     AggConfig.prototype.fieldFormatter = function () {
       var field = this.field();
       var format = field && field.format;
-      var strFormat = fieldFormats.defaultByType.string;
+      var strFormat = fieldFormats.for('string');
 
       if (this.type.getFormat) {
         format = this.type.getFormat(this) || format;

@@ -10,7 +10,7 @@ define(function (require) {
       var type = fieldTypes.byName[spec.type];
       if (!type) throw new TypeError('unknown field type :' + spec.type);
 
-      var format = fieldFormats.byName[spec.formatName] || fieldFormats.defaultFor(spec.type);
+      var format = fieldFormats.byName[spec.formatName] || fieldFormats.for(spec.type);
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
       var sortable = indexed && type.sortable;

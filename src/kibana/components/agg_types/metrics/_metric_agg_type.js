@@ -27,7 +27,7 @@ define(function (require) {
       if (field && field.type === 'date' && field.format) {
         return field.format;
       } else {
-        return fieldFormats.converterFor('number');
+        return fieldFormats.for('number');
       }
     };
 

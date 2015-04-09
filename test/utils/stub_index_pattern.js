@@ -20,7 +20,7 @@ define(function (require) {
           Object.defineProperty(field, 'format', {
             enumerable: false,
             get: function () {
-              return fieldFormats.defaultFor(field.type);
+              return fieldFormats.for(field.type);
             }
           });
 

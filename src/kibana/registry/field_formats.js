@@ -13,13 +13,9 @@ define(function (require) {
 
 
     constructor: function (config) {
-      this.defaultFor = function (type, fallbackFormat) {
+      this.for = function (type, fallbackFormat) {
         var name = config.get('defaultFormat:' + type);
         return this.byName[name] || (fallbackFormat || defaultFallbackFormat);
-      };
-
-      this.converterFor = function (type) {
-        return this.defaultFor(type).convert;
       };
     }
   });
