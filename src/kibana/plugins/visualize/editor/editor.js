@@ -8,6 +8,7 @@ define(function (require) {
   require('directives/saved_object_finder');
   require('components/visualize/visualize');
   require('components/clipboard/clipboard');
+  require('components/comma_list_filter');
 
   require('filters/uriescape');
 
