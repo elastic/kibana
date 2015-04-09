@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    require('heat');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
