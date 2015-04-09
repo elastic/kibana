@@ -20,6 +20,8 @@ define(function (require) {
             return '<i class="fa fa-file-text-o "></i>';
           case 'string':
             return '<i><strong>t</strong></i>';
+          case 'murmur3':
+            return '<i><strong>h</strong></i>';
           case 'number':
             return '<i><strong>#</strong></i>';
           case 'date':
