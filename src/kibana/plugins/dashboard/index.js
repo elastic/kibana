@@ -49,7 +49,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
+      controller: function ($scope, $route, $routeParams, $location, configFile, Private, getAppState) {
         var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
 
         var notify = new Notifier({
@@ -60,7 +60,7 @@ define(function (require) {
 
         // I don't like this, but not sure how else to tell if this is a fresh load of the
         // saved dashboard object, so looking for _a in the URL. Ideas?
-        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !$routeParams._a) {
+        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.mightExist()) {
           timefilter.time.to = dash.timeTo;
           timefilter.time.from = dash.timeFrom;
         }

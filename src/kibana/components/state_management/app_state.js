@@ -1,18 +1,22 @@
 define(function (require) {
   var _ = require('lodash');
   var modules = require('modules');
+  var urlParam = '_a';
+
 
   function AppStateProvider(Private, $rootScope, getAppState) {
     var State = Private(require('components/state_management/state'));
 
+
     _(AppState).inherits(State);
     function AppState(defaults) {
-      AppState.Super.call(this, '_a', defaults);
+      AppState.Super.call(this, urlParam, defaults);
       getAppState._set(this);
     }
 
     // if the url param is missing, write it back
     AppState.prototype._persistAcrossApps = false;
+
 
     AppState.prototype.destroy = function () {
       AppState.Super.prototype.destroy.call(this);
@@ -26,12 +30,18 @@ define(function (require) {
   .factory('AppState', function (Private) {
     return Private(AppStateProvider);
   })
-  .service('getAppState', function () {
+  .service('getAppState', function ($location) {
     var currentAppState;
 
     function get() {
       return currentAppState;
     }
+
+    // Checks to see if the appState might already exist, even if it hasn't been newed up
+    get.mightExist = function () {
+      var search = $location.search();
+      return search[urlParam] ? true : false;
+    };
 
     get._set = function (current) {
       currentAppState = current;
