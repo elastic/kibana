@@ -24,10 +24,36 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false
       });
     }
+
+    /**
+     * Checks whether all pie slices have zero values.
+     * If so, an error is thrown.
+     */
+    PieChart.prototype._validatePieData = function () {
+      var data = this.chartData;
+
+      data.slices = (function withoutZeroSlices(slices) {
+        if (!slices.children) return slices;
+
+        slices = _.clone(slices);
+        slices.children = slices.children.reduce(function (children, child) {
+          if (child.size !== 0) {
+            children.push(withoutZeroSlices(child));
+          }
+          return children;
+        }, []);
+        return slices;
+      }(data.slices));
+
+      if (data.slices.children.length === 0) {
+        throw new errors.PieContainsAllZeros();
+      }
+    };
 
     /**
      * Adds Events to SVG paths
@@ -168,6 +194,7 @@ define(function (require) {
           var minHeight = 20;
           var path;
 
+          self._validatePieData();
           if (width <= minWidth || height <= minHeight) {
             throw new errors.ContainerTooSmall();
           }
