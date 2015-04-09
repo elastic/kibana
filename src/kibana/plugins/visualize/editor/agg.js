@@ -32,8 +32,8 @@ define(function (require) {
          * @return {[type]} [description]
          */
         $scope.describe = function () {
-          if (!$scope.agg.type.makeLabel) return '';
-          var label = $scope.agg.type.makeLabel($scope.agg);
+          if (!$scope.agg.type.makeShortLabel) return '';
+          var label = $scope.agg.type.makeShortLabel($scope.agg);
           return label ? label : '';
         };
 

@@ -260,13 +260,12 @@ define(function (require) {
 
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
-      var label = this.type.makeLabel(this);
+      return this.type.makeLabel(this);
+    };
 
-      if (this.type.makeScaleLabel) {
-        label += ' ' + this.type.makeScaleLabel(this);
-      }
-
-      return label;
+    AggConfig.prototype.makeShortLabel = function () {
+      if (!this.type) return '';
+      return this.type.makeShortLabel(this);
     };
 
     AggConfig.prototype.field = function () {
