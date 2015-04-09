@@ -112,7 +112,7 @@ define(function (require) {
                 }
               },
               sortable: {
-                value: field.indexed && type && type.sortable
+                value: (field.indexed || field.scripted) && type && type.sortable
               },
               scripted: {
                 // enumerable properties end up in the JSON
