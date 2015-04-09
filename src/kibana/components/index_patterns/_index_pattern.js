@@ -23,7 +23,8 @@ define(function (require) {
       title: 'string',
       timeFieldName: 'string',
       intervalName: 'string',
-      fields: 'json'
+      fields: 'json',
+      fieldFormatMap: 'json'
     });
 
     function IndexPattern(id) {
@@ -61,6 +62,11 @@ define(function (require) {
           return docSource.fetch()
           .then(function applyESResp(resp) {
             if (!resp.found) throw new errors.SavedObjectNotFound(type, self.id);
+
+            // assign the defaults to the response
+            _.defaults(resp._source, {
+              fieldFormatMap: '{}'
+            });
 
             // deserialize any json fields
             _.forOwn(mapping, function ittr(fieldMapping, name) {
@@ -126,8 +132,8 @@ define(function (require) {
       };
 
       self.setFieldFormat = function (field, format) {
-        if (format) field.formatName = format.name;
-        else delete field.formatName;
+        if (format) self.fieldFormatMap[field.name] = format.name;
+        else delete self.fieldFormatMap[field.name];
         initFields();
         return self.save().then(_.ary(initFields));
       };
@@ -222,10 +228,8 @@ define(function (require) {
 
       self.refreshFields = function () {
         return mapper.clearCache(self)
-        .then(function () {
-          return self._fetchFields()
-          .then(self.save);
-        });
+        .then(self._fetchFields)
+        .then(self.save);
       };
 
       self._fetchFields = function () {
@@ -233,7 +237,16 @@ define(function (require) {
         .then(function (fields) {
           // append existing scripted fields
           fields = fields.concat(self.getFields('scripted'));
+
+          // initialize self.field with this field list
           initFields(fields);
+
+          // update the field format map to ensure that only format names for resolved fields are set
+          self.fieldFormatMap = _.transform(self.fieldFormatMap, function (map, formatName, field) {
+            if (self.fields.byName[field]) {
+              map[field] = formatName;
+            }
+          }, {});
         });
       };
 

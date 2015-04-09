@@ -10,7 +10,8 @@ define(function (require) {
       var type = fieldTypes.byName[spec.type];
       if (!type) throw new TypeError('unknown field type :' + spec.type);
 
-      var format = fieldFormats.byName[spec.formatName] || fieldFormats.for(spec.type);
+      var formatName = indexPattern.fieldFormatMap[spec.name];
+      var format = fieldFormats.byName[formatName] || fieldFormats.for(spec.type);
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
       var sortable = indexed && type.sortable;
@@ -21,7 +22,6 @@ define(function (require) {
       field.fact('name');
       field.fact('type');
       field.writ('count', spec.count || 0);
-      field.writ('formatName');
 
       // scripted fields
       field.fact('scripted', scripted);
@@ -34,6 +34,7 @@ define(function (require) {
       field.fact('doc_values', !!spec.doc_values);
 
       // usage flags, read-only and won't be saved
+      field.flag('formatName', formatName);
       field.flag('format', format);
       field.flag('sortable', sortable);
       field.flag('bucketable', bucketable);
