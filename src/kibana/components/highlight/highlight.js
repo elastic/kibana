@@ -9,8 +9,6 @@ define(function (require) {
     return function (formatted, highlight) {
       if (typeof formatted === 'object') formatted = angular.toJson(formatted);
 
-      formatted = _.escape(formatted);
-
       _.each(highlight, function (section) {
         section = _.escape(section);
 

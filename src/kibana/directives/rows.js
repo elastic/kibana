@@ -54,7 +54,7 @@ define(function (require) {
             if (contents === '') {
               $cell.html('&nbsp;');
             } else {
-              $cell.text(contents);
+              $cell.html(contents);
             }
           }
 
