@@ -177,6 +177,8 @@ define(function (require) {
           featureLayer = this.shadedCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
           featureLayer = this.shadedGeohashGrid(map, mapData);
+        } else if (this._attr.mapType === 'Heatmap') {
+          featureLayer = this.heatMap(map, mapData);
         } else {
           featureLayer = this.pinMarkers(mapData);
         }
@@ -337,6 +339,39 @@ define(function (require) {
       if (mapData.features.length > 1) {
         self.addLegend(mapData, map);
       }
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with leaflet.heat plugin
+     *
+     * @method heatMap
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.heatMap = function (map, mapData) {
+      //console.log('mapData.properties', mapData.properties);
+      var max = mapData.properties.allmax;
+      var points = this.mapDataToHeatArray(mapData, max);
+      // default heat options in kibana:
+      // minOpacity: 0.1,
+      // maxZoom: 18,
+      // radius: 25,
+      // blur: 15,
+      // max: 1,
+      // gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+      var options = {
+        radius: this._attr.heatRadius,
+        blur: this._attr.heatBlur,
+        maxZoom: this._attr.heatMaxZoom,
+        max: 1,
+        minOpacity: this._attr.heatMinOpacity
+      };
+      var featureLayer = L.heatLayer(points, options).addTo(map);
 
       return featureLayer;
     };
