@@ -11,26 +11,33 @@ define(function (require) {
     var sortObj = {};
     var field, direction;
 
-    function isSortable(field) {
-      return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
+    function getValue(field, key) {
+      return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field][key]);
     }
 
-    if (_.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {
+    if (_.isArray(sort) && sort.length === 2 && getValue(sort[0], 'sortable')) {
       // At some point we need to refact the sorting logic, this array sucks.
       field = sort[0];
       direction = sort[1];
-    } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName)) {
+    } else if (indexPattern.timeFieldName && getValue(indexPattern.timeFieldName, 'sortable')) {
       field = indexPattern.timeFieldName;
       direction = 'desc';
     }
 
     if (field) {
-      sortObj[field] = direction;
+      // sorting on a scripted field requires the script value
+      if (getValue(field, 'scripted')) {
+        sortObj._script = {
+          script: getValue(field, 'script'),
+          type: getValue(field, 'type'),
+          order: direction
+        };
+      } else {
+        sortObj[field] = direction;
+      }
     } else {
       sortObj._score = 'desc';
     }
-
-
 
     return sortObj;
   }
