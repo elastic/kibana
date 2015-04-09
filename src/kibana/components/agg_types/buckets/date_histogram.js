@@ -30,17 +30,17 @@ define(function (require) {
       },
       makeLabel: function (agg) {
         var output = this.params.write(agg);
-        var params = output.params;
-        var label = params.field + ' per ';
+        var interval = output.metricScaleText || output.bucketInterval.description;
+        return output.params.field + ' per ' + interval;
+      },
+      makeScaleLabel: function (agg) {
+        var output = this.params.write(agg);
 
-        if (output.bucketInterval.scaled) {
-          label += output.bucketInterval.description + ' (scaled to per ' + output.metricScaleText + ')';
-        } else {
-          var interval = output.metricScaleText || output.bucketInterval.description;
-          label += interval;
+        if (!output.bucketInterval.scaled) {
+          return '';
         }
 
-        return label;
+        return ' (scaled from per ' + output.bucketInterval.description + ')';
       },
       createFilter: createFilter,
       decorateAggConfig: function () {
