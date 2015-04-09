@@ -11,7 +11,7 @@ define(function (require) {
   require('components/doc_table/components/table_row');
 
   require('modules').get('kibana')
-  .directive('docTable', function (config, Notifier) {
+  .directive('docTable', function (config, Notifier, getAppState) {
     return {
       restrict: 'E',
       template: html,
@@ -57,7 +57,11 @@ define(function (require) {
 
         // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
         $scope.$watch('columns', function (columns) {
-          if (columns.length === 0) $scope.columns.push('_source');
+          if (columns.length !== 0) return;
+
+          var $state = getAppState();
+          $scope.columns.push('_source');
+          if ($state) $state.replace();
         });
 
         $scope.$watchCollection('columns', function (columns, oldColumns) {
