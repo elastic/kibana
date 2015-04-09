@@ -151,8 +151,6 @@ define(function (require) {
      * remove css class on map tiles
      *
      * @method saturateTiles
-     * @param map {Object}
-     * @param featureLayer {Leaflet object}
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.saturateTiles = function () {
@@ -193,15 +191,12 @@ define(function (require) {
      * with default leaflet pin markers
      *
      * @method pinMarkers
-     * @param map {Object}
      * @param mapData {Object}
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.pinMarkers = function (mapData) {
       var self = this;
 
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
       var featureLayer = L.geoJson(mapData, {
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -228,8 +223,6 @@ define(function (require) {
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
 
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
       var radiusScaler = 2.5;
 
       var featureLayer = L.geoJson(mapData, {
@@ -242,15 +235,7 @@ define(function (require) {
           self.bindPopup(feature, layer);
         },
         style: function (feature) {
-          var count = feature.properties.count;
-          var color = self.quantizeColorScale(count, min, max);
-          return {
-            fillColor: color,
-            color: self.darkerColor(color),
-            weight: 1.0,
-            opacity: 1,
-            fillOpacity: 0.75
-          };
+          return self.applyShadingStyle(feature, min, max);
         }
       });
 
@@ -289,15 +274,7 @@ define(function (require) {
           self.bindPopup(feature, layer);
         },
         style: function (feature) {
-          var count = feature.properties.count;
-          var color = self.quantizeColorScale(count, min, max);
-          return {
-            fillColor: color,
-            color: self.darkerColor(color),
-            weight: 1.0,
-            opacity: 1,
-            fillOpacity: 0.75
-          };
+          return self.applyShadingStyle(feature, min, max);
         }
       });
 
@@ -330,7 +307,6 @@ define(function (require) {
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
-          var count = feature.properties.count;
           var geohashRect = feature.properties.rectangle;
           // get bounds from northEast[3] and southWest[1]
           // points in geohash rectangle
@@ -353,15 +329,7 @@ define(function (require) {
           });
         },
         style: function (feature) {
-          var count = feature.properties.count;
-          var color = self.quantizeColorScale(count, min, max);
-          return {
-            fillColor: color,
-            color: self.darkerColor(color),
-            weight: 1.0,
-            opacity: 1,
-            fillOpacity: 0.75
-          };
+          return self.applyShadingStyle(feature, min, max);
         }
       });
 
@@ -437,6 +405,29 @@ define(function (require) {
         return div;
       };
       legend.addTo(map);
+    };
+
+    /**
+     * Apply style with shading to feature
+     *
+     * @method applyShadingStyle
+     * @param feature {Object}
+     * @param min {Number}
+     * @param max {Number}
+     * @return {Object}
+     */
+    TileMap.prototype.applyShadingStyle = function (feature, min, max) {
+      var self = this;
+      var count = feature.properties.count;
+      var color = self.quantizeColorScale(count, min, max);
+
+      return {
+        fillColor: color,
+        color: self.darkerColor(color),
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 0.75
+      };
     };
 
     /**
@@ -572,7 +563,10 @@ define(function (require) {
     };
 
     /**
-     * tell leaflet that it's time to cleanup the map
+     * clean up the maps
+     *
+     * @method destroy
+     * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
       this.maps.forEach(function (map) {
