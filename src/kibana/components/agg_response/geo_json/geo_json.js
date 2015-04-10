@@ -34,8 +34,13 @@ define(function (require) {
         label: table.title(),
         length: 0,
         min: 0,
-        max: 0
+        max: 0,
+        metricType : agg.metric._opts.type
       };
+
+      if (agg.metric._opts.params.field) {
+        props.metricField = agg.metric._opts.params.field;
+      }
 
       // set precision from the bucketting column, if we have one
       if (agg.geo) {

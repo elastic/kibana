@@ -34,8 +34,9 @@ define(function (require) {
       this.maps = [];
 
       // add allmin and allmax to geoJson
-      chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
-      chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
+      var allMinMax = this.getMinMax(handler.data.data);
+      chartData.geoJson.properties.allmin = allMinMax.min;
+      chartData.geoJson.properties.allmax = allMinMax.max;
     }
 
     /**
@@ -58,7 +59,7 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-
+          console.log(data.geoJson.properties.metricField, data.geoJson.properties.metricType);
           if (self._attr.mapZoom) {
             mapZoom = self._attr.mapZoom;
           }
@@ -120,7 +121,7 @@ define(function (require) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
               $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
               $(container).on('click', function () {
-                self.fitBounds(map, featureLayer);
+                self.fitBounds(map, mapData);
               });
               return container;
             }
@@ -136,20 +137,45 @@ define(function (require) {
     };
 
     /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @param data {Object}
+     * @return {Object}
+     */
+    TileMap.prototype.getMinMax = function (data) {
+      var min = [];
+      var max = [];
+      var allData = data.rows ? data.rows : data.columns ? data.columns : [data];
+
+      allData.forEach(function (datum) {
+        min.push(datum.geoJson.properties.min);
+        max.push(datum.geoJson.properties.max);
+      });
+
+      var minMax = {
+        min: _.min(min),
+        max: _.max(max)
+      };
+
+      return minMax;
+    };
+
+    /**
      * zoom map to fit all features in featureLayer
      *
      * @method fitBounds
      * @param map {Object}
-     * @param featureLayer {Leaflet object}
-     * @return {Leaflet object} featureLayer
+     * @param mapData {Object}
+     * @return {undefined}
      */
-    TileMap.prototype.fitBounds = function (map, featureLayer) {
+    TileMap.prototype.fitBounds = function (map, mapData) {
 
-      map.fitBounds(featureLayer.getBounds());
+      map.fitBounds(this.getBounds(mapData));
     };
 
     /**
-     * remove css class on map tiles
+     * remove css class for desat filters on map tiles
      *
      * @method saturateTiles
      * @return {Leaflet object} featureLayer
@@ -355,23 +381,24 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.heatMap = function (map, mapData) {
-      //console.log('mapData.properties', mapData.properties);
       var max = mapData.properties.allmax;
-      var points = this.mapDataToHeatArray(mapData, max);
-      // default heat options in kibana:
-      // minOpacity: 0.1,
-      // maxZoom: 18,
+      var points = this.dataToHeatArray(mapData, max);
+
+      // default heatmap options in kibana:
       // radius: 25,
       // blur: 15,
       // max: 1,
+      // minOpacity: 0.1,
+      // maxZoom: 18,
       // gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+
       var options = {
         radius: this._attr.heatRadius,
         blur: this._attr.heatBlur,
         maxZoom: this._attr.heatMaxZoom,
-        max: 1,
         minOpacity: this._attr.heatMinOpacity
       };
+
       var featureLayer = L.heatLayer(points, options).addTo(map);
 
       return featureLayer;
@@ -470,6 +497,7 @@ define(function (require) {
      * Invalidate the size of the map, so that leaflet will resize to fit.
      * then moves to center
      *
+     * @method resizeArea
      * @return {undefined}
      */
     TileMap.prototype.resizeArea = function () {
@@ -507,15 +535,47 @@ define(function (require) {
       });
     };
 
-    TileMap.prototype.mapDataToHeatArray = function (mapData, max) {
-      var heatData = mapData.features.map(function (feature) {
-        return [
-          feature.geometry.coordinates[1],
-          feature.geometry.coordinates[0],
-          feature.properties.count / max * 100
-        ];
+    /**
+     * get bounds of features from geoJson
+     *
+     * @method getBounds
+     * @param mapData {Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.getBounds = function (mapData) {
+      var bounds = L.geoJson(mapData).getBounds();
+      return bounds;
+    };
+
+    /**
+     * if attribute is checked/true
+     • normalize data for heat map intensity
+     *
+     * @param mapData {Object}
+     * @param nax {Number}
+     * @method dataToHeatArray
+     * @return {undefined}
+     */
+    TileMap.prototype.dataToHeatArray = function (mapData, max) {
+      var self = this;
+
+      return mapData.features.map(function (feature) {
+        if (!self._attr.heatNormalizeData) {
+          // show bucket count on heatmap
+          return [
+            feature.geometry.coordinates[1],
+            feature.geometry.coordinates[0],
+            feature.properties.count
+          ];
+        } else {
+          // show bucket count normalized to max value
+          return [
+            feature.geometry.coordinates[1],
+            feature.geometry.coordinates[0],
+            parseInt(feature.properties.count / max * 100)
+          ];
+        }
       });
-      return heatData;
     };
 
     /**
@@ -552,7 +612,7 @@ define(function (require) {
      * @method radiusScale
      * @param count {Number}
      * @param max {Number}
-     * @param precision {Number}
+     * @param feature {Object}
      * @return {Number}
      */
     TileMap.prototype.radiusScale = function (count, max, feature) {
