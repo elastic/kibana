@@ -32,9 +32,10 @@
       </kbn-tooltip>
       <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
         <button
+          ng-click="configTemplate.toggle('save');"
+          ng-class="{active: configTemplate.is('save')}"
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('save') }}"
-          ng-click="configTemplate.toggle('save');"
           aria-label="Save Search">
           <i aria-hidden="true" class="fa fa-save"></i>
         </button>
@@ -44,6 +45,7 @@
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('load') }}"
           ng-click="configTemplate.toggle('load');"
+          ng-class="{active: configTemplate.is('load')}"
           aria-label="Load Saved Search">
           <i aria-hidden="true" class="fa fa-folder-open-o"></i>
         </button>
@@ -60,8 +62,7 @@
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar">
         <disc-field-chooser
-          fields="fields"
-          toggle="toggleField"
+          columns="state.columns"
           refresh="refreshFieldList"
           data="rows"
           filter="filterQuery"
@@ -159,10 +160,6 @@
                   >
                 </select> -->
               </center>
-
-              <div ng-show="fetchStatus.hitCount === 0" class="discover-overlay vis-overlay">
-                <div class="spinner large"> </div>
-              </div>
 
               <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
             </div>

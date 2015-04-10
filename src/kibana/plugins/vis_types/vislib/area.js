@@ -16,8 +16,10 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          smoothLines: false,
           scale: 'linear',
           mode: 'stacked',
+          interpolate: 'linear',
           defaultYExtents: false,
           times: [],
           addTimeMarker: false

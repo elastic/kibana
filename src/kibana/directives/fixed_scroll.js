@@ -14,25 +14,25 @@ define(function (require) {
       link: function ($scope, $elem, attrs) {
 
         var options = {
-          contentElement: _.isUndefined($scope.anchor) ? undefined : $elem.find($scope.anchor),
           fixedScrollMarkup: '<div class="fixedScroll-container" ' +
             'style="height: 20px;"><div class="fixedScroll-scroll" style="height: 20px;"></div></div>',
           fixedScrollInnerSelector: '.fixedScroll-scroll'
         };
 
         var innerElem;
-        // Set the inner element that gives context to the scroll
-        if (options.contentElement !== undefined && $elem.find(options.contentElement).length !== 0) {
-          innerElem = $elem.find(options.contentElement);
-        } else {
-          innerElem = $elem.find('>:first-child');
-        }
 
         var fixedScroll = $($(options.fixedScrollMarkup));
         fixedScroll.css({position: 'fixed', bottom: 0});
 
 
         var addScroll = function ($elem, options) {
+
+          // Set the inner element that gives context to the scroll
+          if ($scope.anchor !== undefined && $elem.find($scope.anchor).length !== 0) {
+            innerElem = $elem.find($scope.anchor);
+          } else {
+            return;
+          }
 
           // If content isn't wide enough to scroll, abort
           if ($elem.get(0).scrollWidth <= $elem.width()) {
@@ -82,6 +82,7 @@ define(function (require) {
 
         // Create a watchable for the content element
         $scope.innerElemWidth = function () {
+          if (!innerElem) return;
           return innerElem.outerWidth();
         };
 
@@ -89,7 +90,7 @@ define(function (require) {
         $(window).resize(recompute);
 
         // Watch the trigger if there is one
-        $scope.$watch('trigger', function () {
+        $scope.$watchCollection('fixedScrollTrigger', function () {
           recompute();
         });
 

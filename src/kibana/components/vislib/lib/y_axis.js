@@ -100,7 +100,7 @@ define(function (require) {
       return this.yScale = this.getScaleType(this._attr.scale)
       .domain(this.getDomain(this._attr.scale, this.yMin, this.yMax))
       .range([height, 0])
-      .nice(this.tickScale(height));
+      .nice();
     };
 
     /**
