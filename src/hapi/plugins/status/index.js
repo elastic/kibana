@@ -1,16 +1,19 @@
 var join = require('path').join;
 var kibana = require('../../');
+var status = require('../../lib/status');
+
 function Series(size) {
   this.size = size;
   this.data = [];
 }
 Series.prototype.push = function (value) {
-  this.data.push([Date.now(), value]);
-  if (this.data.length > this.size) this.data.shift();
+  this.data.unshift([Date.now(), value]);
+  if (this.data.length > this.size) this.data.pop();
 };
 Series.prototype.toJSON = function () {
   return this.data;
 };
+
 module.exports = new kibana.Plugin({
 
   init: function (server, options) {
@@ -68,7 +71,8 @@ module.exports = new kibana.Plugin({
       path: '/status/health',
       handler: function (request, reply) {
         return reply({
-          metrics: fiveMinuteData
+          metrics: fiveMinuteData,
+          status: status
         });
       }
     });

@@ -3,6 +3,8 @@ var http = require('http');
 var fs = require('fs');
 var querystring = require('querystring');
 var kibana = require('../../');
+var healthCheck = require('./lib/health_check');
+var exposeClient = require('./lib/expose_client');
 
 module.exports = new kibana.Plugin({
 
@@ -10,6 +12,11 @@ module.exports = new kibana.Plugin({
 
   init: function (server, options) {
     var config = server.config();
+
+    exposeClient(server);
+    healthCheck(this, server);
+
+
     var target = url.parse(config.elasticsearch);
 
     var agentOptions = {
