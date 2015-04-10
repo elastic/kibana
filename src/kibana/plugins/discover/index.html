@@ -150,17 +150,28 @@
           <div class="results" ng-show="resultState === 'ready'">
             <div class="discover-timechart" ng-if="opts.timefield">
               <header>
-                <div class="results-interval form-inline">
-                  <select
-                    class="form-control"
-                    ng-model="state.interval"
-                    ng-options="interval.val as interval.display for interval in intervalOptions | filter: optionEnabled"
-                    >
-                  </select>
-                </div>
                 <center class="small">
                   <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
+
+                  &mdash;
+
+                  <span class="results-interval" ng-hide="showInterval">
+                    <a
+                      ng-click="$parent.showInterval = !$parent.showInterval">
+                      {{ intervalName }}
+                    </a>
+                  </span>
+
+                  <span ng-show="showInterval" class="results-interval form-inline">
+                    <select
+                      class="form-control"
+                      ng-model="state.interval"
+                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: optionEnabled"
+                      >
+                    </select>
+                  </span>
                 </center>
+
               </header>
 
               <div ng-show="fetchStatus.hitCount === 0" class="discover-overlay vis-overlay">

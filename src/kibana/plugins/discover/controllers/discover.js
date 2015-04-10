@@ -76,6 +76,7 @@ define(function (require) {
     });
 
     $scope.intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
+    $scope.showInterval = false;
 
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
@@ -202,8 +203,21 @@ define(function (require) {
           timefilter.enabled = !!timefield;
         });
 
-        $scope.$watch('state.interval', function (interval) {
+        $scope.$watch('state.interval', function (interval, oldInterval) {
+          if (interval !== oldInterval && interval === 'auto') {
+            $scope.showInterval = false;
+          }
           $scope.fetch();
+        });
+
+        $scope.$watch('vis.aggs', function (aggs) {
+          var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
+
+          if (buckets && buckets.length === 1) {
+            $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
+          } else {
+            $scope.intervalName = 'auto';
+          }
         });
 
         $scope.$watchMulti([

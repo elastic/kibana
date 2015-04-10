@@ -255,16 +255,13 @@ disc-field-chooser {
   }
 
   &-interval {
-    text-align: right;
+    a {
+      text-decoration: underline;;
+    }
 
     select {
       display: inline-block;
       width: auto;
-    }
-
-    @media (min-width: @screen-sm-min) {
-      position: absolute;
-      right: 10px;
     }
   }
 }
