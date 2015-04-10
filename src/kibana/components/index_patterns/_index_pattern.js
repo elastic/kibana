@@ -7,7 +7,7 @@ define(function (require) {
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
     var intervals = Private(require('components/index_patterns/_intervals'));
-    var fieldSetup = Private(require('components/index_patterns/_field_setup'));
+    var Field = Private(require('components/index_patterns/_field'));
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var formatHit = require('components/index_patterns/_format_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
@@ -96,7 +96,7 @@ define(function (require) {
           index: ['name'],
           group: ['type'],
           initialSet: fields.map(function (field) {
-            return fieldSetup(self, field);
+            return new Field(self, field);
           })
         });
       }
