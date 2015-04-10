@@ -1,6 +1,7 @@
 define(function (require) {
-  return function LegendFactory(d3) {
+  return function LegendFactory(d3, Private) {
     var _ = require('lodash');
+    var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
     require('css!components/vislib/styles/main');
@@ -16,16 +17,20 @@ define(function (require) {
      * @param color {Function} Color function
      * @param _attr {Object|*} Reference to Vis options
      */
-    function Legend(vis, el, labels, color, _attr) {
+    function Legend(vis, data) {
       if (!(this instanceof Legend)) {
-        return new Legend(vis, el, labels, color, _attr);
+        return new Legend(vis, data);
       }
 
+      var isPie = (vis._attr.type === 'pie');
+
       this.vis = vis;
-      this.el = el;
-      this.labels = labels;
-      this.color = color;
-      this._attr = _.defaults(_attr || {}, {
+      this.data = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
+      this.el = vis.el;
+      this.events = new Dispatch();
+      this.labels = isPie ? data.pieNames() : data.labels;
+      this.color = isPie ? data.getPieColorFunc() : data.color;
+      this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
@@ -34,6 +39,37 @@ define(function (require) {
         'isOpen' : true
       });
     }
+
+    Legend.prototype._transformPieData = function (arr) {
+      var data = [];
+
+
+      arr.forEach(function (chart) {
+        chart.slices.children.forEach(function (obj) {
+          if (obj.children) data.push(obj.children);
+          data.push(obj);
+        });
+      });
+
+      return data;
+    };
+
+    Legend.prototype._transformSeriesData = function (arr) {
+      var data = [];
+
+      arr.forEach(function (chart) {
+        chart.series.forEach(function (obj, i) {
+          var currentObj = data[i];
+          if (!currentObj) data.push(obj);
+
+          if (currentObj && currentObj.label === obj.label) {
+            currentObj.values = currentObj.values.concat(obj.values);
+          }
+        });
+      });
+
+      return data;
+    };
 
     /**
      * Adds legend header
@@ -198,6 +234,8 @@ define(function (require) {
         eventEl.style('white-space', 'nowrap');
         eventEl.style('word-break', 'inherit');
       });
+
+      legendDiv.call(this.events.addClickEvent());
     };
 
     return Legend;

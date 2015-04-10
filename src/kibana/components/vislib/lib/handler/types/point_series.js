@@ -29,7 +29,7 @@ define(function (require) {
 
         return new Handler(vis, {
           data: data,
-          legend: new Legend(vis, vis.el, data.labels, data.color, vis._attr),
+          legend: new Legend(vis, data),
           axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
           chartTitle: new ChartTitle(vis.el),
           xAxis: new XAxis({
