@@ -1,52 +1,60 @@
 define(function (require) {
   var _ = require('lodash');
-  var flattenHit = require('components/index_patterns/_flatten_hit');
-
   describe('IndexPattern#flattenHit()', function () {
 
-    var indexPattern = {
-      fields: {
-        byName: {
-          'message': { type: 'string' },
-          'geo.coordinates': { type: 'geo_point' },
-          'geo.dest': { type: 'string' },
-          'geo.src': { type: 'string' },
-          'bytes': { type: 'number' },
-          '@timestamp': { type: 'date' },
-          'team': { type: 'nested' },
-          'team.name': { type: 'string' },
-          'team.role': { type: 'string' },
-          'delta': { type: 'number', scripted: true }
+    var flattenHit;
+    var indexPattern;
+    var hit;
+    var flat;
+
+    beforeEach(module('kibana'));
+    beforeEach(inject(function (Private) {
+      flattenHit = Private(require('components/index_patterns/_flatten_hit'));
+
+      indexPattern = {
+        fields: {
+          byName: {
+            'message': { type: 'string' },
+            'geo.coordinates': { type: 'geo_point' },
+            'geo.dest': { type: 'string' },
+            'geo.src': { type: 'string' },
+            'bytes': { type: 'number' },
+            '@timestamp': { type: 'date' },
+            'team': { type: 'nested' },
+            'team.name': { type: 'string' },
+            'team.role': { type: 'string' },
+            'delta': { type: 'number', scripted: true }
+          }
         }
-      }
-    };
+      };
 
-    var hit = {
-      _source: {
-        message: 'Hello World',
-        geo: {
-          coordinates: { lat: 33.4500, lon: 112.0667 },
-          dest: 'US',
-          src: 'IN'
+      hit = {
+        _source: {
+          message: 'Hello World',
+          geo: {
+            coordinates: { lat: 33.4500, lon: 112.0667 },
+            dest: 'US',
+            src: 'IN'
+          },
+          bytes: 10039103,
+          '@timestamp': (new Date()).toString(),
+          tags: [{ text: 'foo' }, { text: 'bar' }],
+          groups: ['loners'],
+          noMapping: true,
+          team: [
+            { name: 'foo', role: 'leader' },
+            { name: 'bar', role: 'follower' },
+            { name: 'baz', role: 'party boy' },
+          ]
         },
-        bytes: 10039103,
-        '@timestamp': (new Date()).toString(),
-        tags: [{ text: 'foo' }, { text: 'bar' }],
-        groups: ['loners'],
-        noMapping: true,
-        team: [
-          { name: 'foo', role: 'leader' },
-          { name: 'bar', role: 'follower' },
-          { name: 'baz', role: 'party boy' },
-        ]
-      },
-      fields: {
-        delta: [42],
-        random: [0.12345]
-      }
-    };
+        fields: {
+          delta: [42],
+          random: [0.12345]
+        }
+      };
 
-    var flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(indexPattern, hit);
+    }));
 
     it('flattens keys as far down as the mapping goes', function () {
       expect(flat).to.have.property('geo.coordinates', hit._source.geo.coordinates);
