@@ -166,7 +166,7 @@
                     <select
                       class="form-control"
                       ng-model="state.interval"
-                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: optionEnabled"
+                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
                       >
                     </select>
                   </span>

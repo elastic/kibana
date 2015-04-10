@@ -78,6 +78,10 @@ define(function (require) {
     $scope.intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
     $scope.showInterval = false;
 
+    $scope.intervalEnabled = function (interval) {
+      return interval.val !== 'custom';
+    };
+
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
       load: require('text!plugins/discover/partials/load_search.html'),
