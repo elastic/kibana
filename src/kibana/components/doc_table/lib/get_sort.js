@@ -11,29 +11,39 @@ define(function (require) {
     var sortObj = {};
     var field, direction;
 
-    function getValue(field, key) {
-      return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field][key]);
+    function useTimeField() {
+      var timeField = (indexPattern.timeFieldName && indexPattern.fields.byName[indexPattern.timeFieldName]);
+      if (timeField && timeField.sortable) {
+        field = timeField;
+        direction = 'desc';
+      } else {
+        field = direction = undefined;
+      }
     }
 
-    if (_.isArray(sort) && sort.length === 2 && getValue(sort[0], 'sortable')) {
-      // At some point we need to refact the sorting logic, this array sucks.
-      field = sort[0];
-      direction = sort[1];
-    } else if (indexPattern.timeFieldName && getValue(indexPattern.timeFieldName, 'sortable')) {
-      field = indexPattern.timeFieldName;
-      direction = 'desc';
+    if (_.isArray(sort) && sort.length === 2) {
+      field = indexPattern.fields.byName[sort[0]];
+
+      if (field && field.sortable) {
+        // At some point we need to refact the sorting logic, this array sucks.
+        direction = sort[1];
+      } else {
+        useTimeField();
+      }
+    } else {
+      useTimeField();
     }
 
     if (field) {
       // sorting on a scripted field requires the script value
-      if (getValue(field, 'scripted')) {
+      if (field.scripted) {
         sortObj._script = {
-          script: getValue(field, 'script'),
-          type: getValue(field, 'type'),
+          script: field.script,
+          type: field.type,
           order: direction
         };
       } else {
-        sortObj[field] = direction;
+        sortObj[field.name] = direction;
       }
     } else {
       sortObj._score = 'desc';
