@@ -11,8 +11,6 @@ define(function (require) {
       this.xScale = xScale;
       this.height = height;
       this.lineClass = 'time-marker';
-      this.stroke = 'blue';
-      this.strokeWidth = 2;
       this.times = (times.length) ? times.map(function (dateMathString) {
         return datemath.parse(dateMathString);
       }) : currentTimeArr;
@@ -43,9 +41,7 @@ define(function (require) {
             return self.xScale(d);
           })
           .attr('y1', self.height)
-          .attr('y2', self.xScale.range()[0])
-          .attr('stroke', self.stroke)
-          .attr('stroke-width', self.strokeWidth);
+          .attr('y2', self.xScale.range()[0]);
       });
     };
 
