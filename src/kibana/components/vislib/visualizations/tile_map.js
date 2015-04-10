@@ -9,10 +9,8 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
-    var mapData;
     var mapCenter = [15, 5];
     var mapZoom = 2;
-    var minMapSize = 60;
 
     /**
      * Tile Map Visualization: renders maps
@@ -48,27 +46,27 @@ define(function (require) {
      */
     TileMap.prototype.draw = function () {
       var self = this;
-      var $elem = $(this.chartEl);
-      var div;
-      var worldBounds = L.latLngBounds([-90, -180], [90, 180]);
-
 
       // clean up old maps
-      _.invoke(self.maps, 'destroy');
+      self.destroy();
+
       // create a new maps array
       self.maps = [];
 
+      var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
+
       return function (selection) {
         selection.each(function (data) {
-          div = $(this);
-          div.addClass('tilemap');
 
-          if (self._attr.lastZoom) {
-            mapZoom = self._attr.lastZoom;
+          if (self._attr.mapZoom) {
+            mapZoom = self._attr.mapZoom;
           }
-          if (self._attr.lastCenter) {
-            mapCenter = self._attr.lastCenter;
+          if (self._attr.mapCenter) {
+            mapCenter = self._attr.mapCenter;
           }
+
+          var mapData = data.geoJson;
+          var div = $(this).addClass('tilemap');
 
           var featureLayer;
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
@@ -79,12 +77,11 @@ define(function (require) {
           });
 
           var mapOptions = {
-            minZoom: 2,
-            maxZoom: 16,
+            minZoom: 1,
+            maxZoom: 18,
             layers: tileLayer,
             center: mapCenter,
             zoom: mapZoom,
-            continuousWorld: true,
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
@@ -92,29 +89,25 @@ define(function (require) {
           };
 
           var map = L.map(div[0], mapOptions);
-          self.maps.push(map);
 
-          tileLayer.on('tileload', saturateTiles);
+          tileLayer.on('tileload', function () {
+            self.saturateTiles();
+          });
+
+          featureLayer = self.markerType(map, mapData).addTo(map);
 
           map.on('unload', function () {
-            tileLayer.off('tileload', saturateTiles);
+            tileLayer.off('tileload', self.saturateTiles);
           });
 
-          map.on('zoomend dragend', function setZoomCenter() {
-            mapZoom = self._attr.lastZoom = map.getZoom();
-            mapCenter = self._attr.lastCenter = map.getCenter();
+          map.on('moveend', function setZoomCenter() {
+            mapZoom = self._attr.mapZoom = map.getZoom();
+            mapCenter = self._attr.mapCenter = map.getCenter();
           });
 
-          if (data.geoJson) {
-            if (self._attr.mapType === 'Scaled Circle Markers') {
-              featureLayer = self.scaledCircleMarkers(map, data.geoJson);
-            } else {
-              featureLayer = self.shadedCircleMarkers(map, data.geoJson);
-            }
-          }
-
-          if (data.geoJson.properties.label) {
-            self.addLabel(data.geoJson.properties.label, map);
+          // add label for splits
+          if (mapData.properties.label) {
+            self.addLabel(mapData.properties.label, map);
           }
 
           // Add button to fit container to points
@@ -125,27 +118,92 @@ define(function (require) {
             onAdd: function (map) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
               $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-              $(container).on('click', fitBounds);
+              $(container).on('click', function () {
+                self.fitBounds(map, featureLayer);
+              });
               return container;
             }
           });
 
-          if (data && data.geoJson && data.geoJson.features.length > 0) {
+          if (mapData && mapData.features.length > 0) {
             map.addControl(new FitControl());
           }
 
-          function fitBounds() {
-            map.fitBounds(featureLayer.getBounds());
-          }
-
-          function saturateTiles() {
-            if (!self._attr.isDesaturated) {
-              $('img.leaflet-tile-loaded').addClass('filters-off');
-            }
-          }
-
+          self.maps.push(map);
         });
       };
+    };
+
+    /**
+     * zoom map to fit all features in featureLayer
+     *
+     * @method fitBounds
+     * @param map {Object}
+     * @param featureLayer {Leaflet object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.fitBounds = function (map, featureLayer) {
+
+      map.fitBounds(featureLayer.getBounds());
+    };
+
+    /**
+     * remove css class on map tiles
+     *
+     * @method saturateTiles
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.saturateTiles = function () {
+      if (!this._attr.isDesaturated) {
+        $('img.leaflet-tile-loaded').addClass('filters-off');
+      }
+    };
+
+    /**
+     * Switch type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     *
+     * @method markerType
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.markerType = function (map, mapData) {
+      var featureLayer;
+      if (mapData) {
+        if (this._attr.mapType === 'Scaled Circle Markers') {
+          featureLayer = this.scaledCircleMarkers(map, mapData);
+        } else if (this._attr.mapType === 'Shaded Circle Markers') {
+          featureLayer = this.shadedCircleMarkers(map, mapData);
+        } else if (this._attr.mapType === 'Shaded Geohash Grid') {
+          featureLayer = this.shadedGeohashGrid(map, mapData);
+        } else {
+          featureLayer = this.pinMarkers(mapData);
+        }
+      }
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with default leaflet pin markers
+     *
+     * @method pinMarkers
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.pinMarkers = function (mapData) {
+      var self = this;
+
+      var featureLayer = L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        }
+      });
+
+      return featureLayer;
     };
 
     /**
@@ -156,46 +214,35 @@ define(function (require) {
      * @method scaledCircleMarkers
      * @param map {Object}
      * @param mapData {Object}
-     * @return {undefined}
+     * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
       var self = this;
-      var min = mapData.properties.min;
-      var max = mapData.properties.max;
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapZoom);
-      var bounds;
-      var defaultColor = '#ff6128';
+
+      // super min and max from all chart data
+      var min = mapData.properties.allmin;
+      var max = mapData.properties.allmax;
+
+      var radiusScaler = 2.5;
+
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-
-          var rad = zoomScale * self.radiusScale(count, max, precision);
-          return L.circleMarker(latlng, {
-            radius: rad
-          });
+          var scaledRadius = self.radiusScale(count, max, feature) * 2;
+          return L.circle(latlng, scaledRadius);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
         },
         style: function (feature) {
-          var count = feature.properties.count;
-          return {
-            fillColor: defaultColor,
-            color: self.darkerColor(defaultColor),
-            weight: 1.0,
-            opacity: 1,
-            fillOpacity: 0.75
-          };
+          return self.applyShadingStyle(feature, min, max);
         }
-      }).addTo(map);
-      self.resizeFeatures(map, min, max, precision, featureLayer);
-      map.on('zoomend dragend', function () {
-        mapZoom = map.getZoom();
-        bounds = map.getBounds();
-        self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+
+      // add legend
+      if (mapData.features.length > 1) {
+        self.addLegend(mapData, map);
+      }
 
       return featureLayer;
     };
@@ -208,54 +255,82 @@ define(function (require) {
      * @method shadedCircleMarkers
      * @param map {Object}
      * @param mapData {Object}
-     * @return {undefined}
+     * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
       var self = this;
-
-      // TODO: add UI to select local min max or all min max
-
-      // min and max from chart data for this map
-      // var min = mapData.properties.min;
-      // var max = mapData.properties.max;
 
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
 
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapZoom);
-      var bounds;
-      var defaultColor = '#005baa';
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var rad = zoomScale * 3;
-          return L.circleMarker(latlng, {
-            radius: rad
-          });
+          var radius = self.geohashMinDistance(feature);
+          return L.circle(latlng, radius);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
         },
         style: function (feature) {
-          var count = feature.properties.count;
-          var color = self.quantizeColorScale(count, min, max);
-          return {
-            fillColor: color,
-            color: self.darkerColor(color),
-            weight: 1.0,
-            opacity: 1,
-            fillOpacity: 0.75
-          };
+          return self.applyShadingStyle(feature, min, max);
         }
-      }).addTo(map);
-      self.resizeFeatures(map, min, max, precision, featureLayer);
-      map.on('zoomend dragend', function () {
-        mapZoom = map.getZoom();
-        bounds = map.getBounds();
-        self.resizeFeatures(map, min, max, precision, featureLayer);
+      });
+
+      // add legend
+      if (mapData.features.length > 1) {
+        self.addLegend(mapData, map);
+      }
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with rectangles that show the geohash grid bounds
+     *
+     * @method geohashGrid
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.shadedGeohashGrid = function (map, mapData) {
+      var self = this;
+
+      // super min and max from all chart data
+      var min = mapData.properties.allmin;
+      var max = mapData.properties.allmax;
+
+      var bounds;
+
+      var featureLayer = L.geoJson(mapData, {
+        pointToLayer: function (feature, latlng) {
+          var geohashRect = feature.properties.rectangle;
+          // get bounds from northEast[3] and southWest[1]
+          // points in geohash rectangle
+          var bounds = [
+            [geohashRect[3][1], geohashRect[3][0]],
+            [geohashRect[1][1], geohashRect[1][0]]
+          ];
+          return L.rectangle(bounds);
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+          layer.on({
+            mouseover: function (e) {
+              var layer = e.target;
+              // bring layer to front if not older browser
+              if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+              }
+            }
+          });
+        },
+        style: function (feature) {
+          return self.applyShadingStyle(feature, min, max);
+        }
       });
 
       // add legend
@@ -284,7 +359,7 @@ define(function (require) {
       label.update = function () {
         this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
       };
-      label.setPosition('bottomright').addTo(map);
+      label.addTo(map);
     };
 
     /**
@@ -316,12 +391,13 @@ define(function (require) {
             vals[0].toFixed(0));
         } else {
           // 3 to 5 vals for legend
-          for (i = 0; i < colors.length; i++) {
-            vals = self._attr.cScale.invertExtent(colors[i]);
-            strokecol = self.darkerColor(colors[i]);
-            labels.push(
-              '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-              vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+          if (colors) {
+            for (i = 0; i < colors.length; i++) {
+              vals = self._attr.cScale.invertExtent(colors[i]);
+              strokecol = self.darkerColor(colors[i]);
+              labels.push('<i style="background:' + colors[i] + ';border-color:' +
+              strokecol + '"></i> ' + vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+            }
           }
         }
         div.innerHTML = labels.join('<br>');
@@ -329,6 +405,29 @@ define(function (require) {
         return div;
       };
       legend.addTo(map);
+    };
+
+    /**
+     * Apply style with shading to feature
+     *
+     * @method applyShadingStyle
+     * @param feature {Object}
+     * @param min {Number}
+     * @param max {Number}
+     * @return {Object}
+     */
+    TileMap.prototype.applyShadingStyle = function (feature, min, max) {
+      var self = this;
+      var count = feature.properties.count;
+      var color = self.quantizeColorScale(count, min, max);
+
+      return {
+        fillColor: color,
+        color: self.darkerColor(color),
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 0.75
+      };
     };
 
     /**
@@ -342,35 +441,6 @@ define(function (require) {
         map.invalidateSize({
           debounceMoveend: true
         });
-      });
-    };
-
-    /**
-     * Redraws feature layer markers
-     *
-     * @method resizeFeatures
-     * @param map {Object}
-     * @param min {Number}
-     * @param max {Number}
-     * @param precision {Number}
-     * @param featureLayer {GeoJson Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
-      var self = this;
-      var zoomScale = self.zoomScale(mapZoom);
-
-      featureLayer.eachLayer(function (layer) {
-        var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
-
-        var count = layer.feature.properties.count;
-        var rad;
-        if (self._attr.mapType === 'Shaded Circle Markers') {
-          rad = zoomScale * self.quantRadiusScale(precision);
-        } else {
-          rad = zoomScale * self.radiusScale(count, max, precision);
-        }
-        layer.setRadius(rad);
       });
     };
 
@@ -392,8 +462,6 @@ define(function (require) {
         'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
         props.valueLabel + ': ' + props.count
       );
-
-      // TODO: tooltip-like formatter passed in?
       layer.bindPopup(popup)
       .on('mouseover', function (e) {
         layer.openPopup();
@@ -404,25 +472,32 @@ define(function (require) {
     };
 
     /**
-     * zoomScale uses map zoom to determine a scaling
-     * factor for circle marker radius to display more
-     * consistent circle size as you zoom in or out
+     * geohashMinDistance returns a min distance in meters for sizing
+     * circle markers to fit within geohash grid rectangle
      *
-     * @method radiusScale
-     * @param value {Number}
-     * @param max {Number}
+     * @method geohashMinDistance
+     * @param feature {Object}
      * @return {Number}
      */
-    TileMap.prototype.zoomScale = function (zoom) {
-      var zScale = d3.scale.pow()
-        .exponent(4)
-        .domain([1, 12])
-        .range([0.3, 100]);
-      return zScale(zoom);
+    TileMap.prototype.geohashMinDistance = function (feature) {
+      var centerPoint = feature.properties.center;
+      var geohashRect = feature.properties.rectangle;
+
+      // get lat[1] and lng[0] of geohash center point
+      // apply lat to east[2] and lng to north[3] sides of rectangle
+      // to get radius at center of geohash grid recttangle
+      var center = L.latLng([centerPoint[1], centerPoint[0]]);
+      var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
+      var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
+
+      var eastRadius  = Math.floor(center.distanceTo(east));
+      var northRadius = Math.floor(center.distanceTo(north));
+
+      return _.min([eastRadius, northRadius]);
     };
 
     /**
-     * radiusScale returns a a number for scaled circle markers
+     * radiusScale returns a number for scaled circle markers
      * approx. square root of count
      * which is multiplied by a factor based on the geohash precision
      * for relative sizing of markers
@@ -433,87 +508,12 @@ define(function (require) {
      * @param precision {Number}
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (count, max, precision) {
-      // exp = 0.5 for true square root ratio
+    TileMap.prototype.radiusScale = function (count, max, feature) {
+      // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
       var exp = 0.6;
-      var maxr;
-      switch (precision) {
-        case 1:
-          maxr = 150;
-          break;
-        case 2:
-          maxr = 28;
-          break;
-        case 3:
-          maxr = 8;
-          break;
-        case 4:
-          maxr = 2;
-          break;
-        case 5:
-          maxr = 1.4;
-          break;
-        case 6:
-          maxr = 0.6;
-          break;
-        case 7:
-          maxr = 0.4;
-          break;
-        case 8:
-          maxr = 0.2;
-          break;
-        case 9:
-          maxr = 0.12;
-          break;
-        default:
-          maxr = 8;
-      }
+      var maxr = this.geohashMinDistance(feature);
       return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
-    };
-
-    /**
-     * returns a number to scale shaded circle markers
-     * based on the geohash precision
-     *
-     * @method quantRadiusScale
-     * @param precision {Number}
-     * @return {Number}
-     */
-    TileMap.prototype.quantRadiusScale = function (precision) {
-      var maxr;
-      switch (precision) {
-        case 1:
-          maxr = 150;
-          break;
-        case 2:
-          maxr = 18;
-          break;
-        case 3:
-          maxr = 4.5;
-          break;
-        case 4:
-          maxr = 0.7;
-          break;
-        case 5:
-          maxr = 0.26;
-          break;
-        case 6:
-          maxr = 0.20;
-          break;
-        case 7:
-          maxr = 0.16;
-          break;
-        case 8:
-          maxr = 0.13;
-          break;
-        case 9:
-          maxr = 0.11;
-          break;
-        default:
-          maxr = 4.5;
-      }
-      return maxr;
     };
 
     /**
@@ -527,21 +527,21 @@ define(function (require) {
      * @return {String} hex color
      */
     TileMap.prototype.quantizeColorScale = function (count, min, max) {
-      var self = this;
       var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
       var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
       var reds1 = ['#ff6128'];
-      var colors = self._attr.colors = reds5;
+      var colors = this._attr.colors = reds5;
 
       if (max - min < 3) {
-        colors = self._attr.colors = reds1;
+        colors = this._attr.colors = reds1;
       } else if (max - min < 25) {
-        colors = self._attr.colors = reds3;
+        colors = this._attr.colors = reds3;
       }
 
-      var cScale = self._attr.cScale = d3.scale.quantize()
-        .domain([min, max])
-        .range(colors);
+      var cScale = this._attr.cScale = d3.scale.quantize()
+      .domain([min, max])
+      .range(colors);
+
       if (max === min) {
         return colors[0];
       } else {
@@ -563,7 +563,10 @@ define(function (require) {
     };
 
     /**
-     * tell leaflet that it's time to cleanup the map
+     * clean up the maps
+     *
+     * @method destroy
+     * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
       this.maps.forEach(function (map) {
