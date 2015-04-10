@@ -65,11 +65,8 @@ define(function (require) {
 
     describe('set method', function () {
       it('should set the value', function () {
-        var stroke = 'green';
         var lineClass = 'new-time-marker';
-        marker.set('stroke', stroke);
         marker.set('lineClass', lineClass);
-        expect(marker.get('stroke')).to.be(stroke);
         expect(marker.get('lineClass')).to.be(lineClass);
       });
     });
