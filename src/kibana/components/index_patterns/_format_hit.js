@@ -8,7 +8,7 @@ define(function (require) {
     var fields = indexPattern.fields.byName;
     return _.transform(flatten(indexPattern, hit), function (formatted, val, name) {
       var field = fields[name];
-      formatted[name] = field ? field.format.convert(val) : _.asString(val);
+      formatted[name] = field ? field.format.convert(val) : _.asPrettyString(val);
     }, {});
   }
 

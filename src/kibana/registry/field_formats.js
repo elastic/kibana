@@ -4,7 +4,7 @@ define(function (require) {
   // when the registry is empty or the default for a
   // field type is not set, we will provide this
   // as a hard-coded fallback.
-  var defaultFallbackFormat = { convert: _.asString, name: '' };
+  var defaultFallbackFormat = { convert: _.asPrettyString, name: '' };
 
   return require('registry/_registry')({
     name: 'fieldFormats',

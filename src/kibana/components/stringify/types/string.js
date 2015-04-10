@@ -16,7 +16,7 @@ define(function (require) {
         'string',
         'conflict'
       ],
-      convert: format(_.asString)
+      convert: format(_.asPrettyString)
     };
   };
 });

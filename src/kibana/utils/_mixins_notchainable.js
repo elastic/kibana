@@ -177,12 +177,17 @@ define(function (require) {
       _.invoke(arr, 'call');
     },
 
-    asString: function (val) {
+    /**
+     * Convert a value to a presentable string
+     * @param  {any} val - the value to transform
+     * @return {string}
+     */
+    asPrettyString: function (val) {
       if (_.isObject(val)) {
-        return angular.toJson(val);
+        return angular.toJson(val, true);
       }
       else if (val == null) {
-        return '';
+        return ' - ';
       }
       else {
         return '' + val;
