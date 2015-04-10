@@ -18,14 +18,15 @@ define(function (require) {
 
       // find the type for this field, fallback to conflict type of type is unknown
       var type = fieldTypes.byName[spec.type];
-      if (!type) {
-        type = fieldTypes.byName.conflict;
+      if (spec.type && !type) {
         notify.error(
           'Unkown field type "' + spec.type + '"' +
           ' for field "' + spec.name + '"' +
           ' in indexPattern "' + indexPattern.id + '"'
         );
       }
+
+      if (!type) type = fieldTypes.byName.unknown;
 
       var formatName = indexPattern.fieldFormatMap[spec.name];
       var format = fieldFormats.byName[formatName] || fieldFormats.for(spec.type);

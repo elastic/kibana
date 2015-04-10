@@ -14,6 +14,7 @@ define(function (require) {
         'geo_point',
         'geo_shape',
         'string',
+        'unknown',
         'conflict'
       ],
       convert: format(_.asPrettyString)
