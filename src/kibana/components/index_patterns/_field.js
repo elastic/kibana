@@ -9,7 +9,7 @@ define(function (require) {
 
     function Field(indexPattern, spec) {
       // unwrap old instances of Field
-      if (spec instanceof Field) spec = spec.source;
+      if (spec instanceof Field) spec = spec.$$spec;
 
       // constuct this object using ObjDefine class, which
       // extends the Field.prototype but gets it's properties
@@ -59,7 +59,10 @@ define(function (require) {
       obj.flag('indexPattern', indexPattern);
       obj.flag('displayName', shortDotsFilter(spec.name));
 
-      return obj.create();
+      var field = obj.create();
+      field.$$spec = spec;
+
+      return field;
     }
 
     return Field;
