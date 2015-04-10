@@ -69,9 +69,7 @@ define(function (require) {
 
       var div = selection
         .append('div')
-        // class name needs `chart` in it for the polling checkSize function
-        // to continuously call render on resize
-        .attr('class', 'visualize-error chart error');
+        .attr('class', 'visualize-error');
 
       if (message === 'No results found') {
         div.append('div')

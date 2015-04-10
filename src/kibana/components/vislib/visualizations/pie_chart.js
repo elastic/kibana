@@ -51,7 +51,7 @@ define(function (require) {
       }(data.slices));
 
       if (data.slices.children.length === 0) {
-        throw new errors.PieContainsAllZeros();
+        throw new errors.NoResults();
       }
     };
 
@@ -174,6 +174,15 @@ define(function (require) {
       return path;
     };
 
+    PieChart.prototype._validateContainerSize = function (width, height) {
+      var minWidth = 20;
+      var minHeight = 20;
+
+      if (width <= minWidth || height <= minHeight) {
+        throw new errors.ContainerTooSmall();
+      }
+    };
+
     /**
      * Renders d3 visualization
      *
@@ -186,18 +195,14 @@ define(function (require) {
       return function (selection) {
         selection.each(function (data) {
           var slices = data.slices;
-          var el = this;
-          var div = d3.select(el);
-          var width = $(el).width();
-          var height = $(el).height();
-          var minWidth = 20;
-          var minHeight = 20;
+          var div = d3.select(this);
+          var width = $(this).width();
+          var height = $(this).height();
           var path;
 
           self._validatePieData();
-          if (width <= minWidth || height <= minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
+          self.convertToPercentage(slices);
+          self._validateContainerSize(width, height);
 
           var svg = div.append('svg')
           .attr('width', width)
@@ -205,7 +210,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-          self.convertToPercentage(slices);
           path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 
