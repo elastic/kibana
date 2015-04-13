@@ -8,14 +8,14 @@ var exposeClient = require('./lib/expose_client');
 
 module.exports = new kibana.Plugin({
 
-  require: ['status'],
-
   init: function (server, options) {
     var config = server.config();
 
+    // Expose the client to the server
     exposeClient(server);
-    healthCheck(this, server);
 
+    // Set up the health check service
+    healthCheck(this, server);
 
     var target = url.parse(config.elasticsearch);
 

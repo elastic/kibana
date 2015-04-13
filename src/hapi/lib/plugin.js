@@ -14,12 +14,4 @@ function Plugin(options) {
   _.assign(this, options);
 }
 
-Plugin.prototype.setStatus = function (state, message) {
-  var previous = getStatus(this.name);
-  if (previous.state === state && previous.message === message) return;
-  var logMsg = util.format('[ %s ] Change status from %s to %s - %s', this.name, previous.state, state, message);
-  this.server.log('plugin', logMsg);
-  setStatus(this.name, state, message);
-};
-
 module.exports = Plugin;

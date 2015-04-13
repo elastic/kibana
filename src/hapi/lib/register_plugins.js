@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
 var checkDependencies = require('./check_dependencies');
-var status = require('./status');
+var systemStatus = require('./system_status');
 
 function checkForCircularDependency(tasks) {
   var deps = {};
@@ -35,8 +35,8 @@ module.exports = function (server, plugins) {
     return new Promise(function (resolve, reject) {
       var register = function (server, options, next) {
         plugin.server = server;
-        plugin.setStatus('yellow', 'Initializing');
-        server.expose('status', status[plugin.name]);
+        systemStatus.createStatus(plugin);
+        plugin.status.yellow('Initializing');
         Promise.try(plugin.init, [server, options], plugin).nodeify(next);
       };
       register.attributes = { name: plugin.name };
@@ -44,7 +44,7 @@ module.exports = function (server, plugins) {
       server.register({ register: register, options: options }, function (err) {
         if (err) return reject(err);
         resolve();
-        plugin.setStatus('green', 'Ready');
+        plugin.status.green('Ready');
       });
     });
   }
