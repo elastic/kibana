@@ -28,7 +28,7 @@ define(function (require) {
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
      * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
-      * series: *, config: *, data: (Object|*),
+     * series: *, config: *, data: (Object|*),
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
@@ -68,6 +68,42 @@ define(function (require) {
           eventData.percent = (100 * d.y).toFixed(1) + '%';
         }
       }
+
+      return eventData;
+    };
+
+    /**
+     * Response to click on legend items
+     *
+     * @param d {Object} Data point
+     * @param i {Number} Index number of data point
+     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
+     * series: *, config: *, data: (Object|*),
+     * e: (d3.event|*), handler: (Object|*)}} Event response object
+     */
+    Dispatch.prototype.legendEventResponse = function (d, i) {
+      var datum = d;
+      var handler = this.handler;
+      var data = handler.data;
+      var label = d.label ? d.label : d.name;
+      var isSeries = !!(data.series);
+      var isSlices = !!(data.slices);
+      var series = isSeries ? data.series : undefined;
+      var slices = isSlices ? data.slices.children : undefined;
+
+      var eventData = {
+        value: datum,
+        point: datum,
+        datum: datum,
+        label: datum,
+        pointIndex: i,
+        series: series,
+        slices: slices,
+        config: handler._attr,
+        data: data,
+        e: d3.event,
+        handler: handler
+      };
 
       return eventData;
     };
