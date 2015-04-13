@@ -6,7 +6,6 @@ define(function (require) {
     require('heat');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var errors = require('errors');
 
     require('css!components/vislib/styles/main');
 
@@ -49,17 +48,18 @@ define(function (require) {
     TileMap.prototype.draw = function () {
       var self = this;
 
+      console.log(this.maps);
       // clean up old maps
       self.destroy();
 
-      // create a new maps array
+      // clear maps array
       self.maps = [];
 
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       return function (selection) {
         selection.each(function (data) {
-          console.log(data.geoJson.properties.metricField, data.geoJson.properties.metricType);
+
           if (self._attr.mapZoom) {
             mapZoom = self._attr.mapZoom;
           }
@@ -69,15 +69,13 @@ define(function (require) {
 
           var mapData = data.geoJson;
           var div = $(this).addClass('tilemap');
-
-          var featureLayer;
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-
+          var featureLayer = new L.layerGroup();
           var mapOptions = {
             minZoom: 1,
             maxZoom: 18,
@@ -92,11 +90,14 @@ define(function (require) {
 
           var map = L.map(div[0], mapOptions);
 
+          var features = self.markerType(map, mapData);
+
+          featureLayer.addLayer(features);
+          map.addLayer(featureLayer);
+
           tileLayer.on('tileload', function () {
             self.saturateTiles();
           });
-
-          featureLayer = self.markerType(map, mapData).addTo(map);
 
           map.on('unload', function () {
             tileLayer.off('tileload', self.saturateTiles);
@@ -196,43 +197,23 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map, mapData) {
-      var featureLayer;
+      var features;
+
       if (mapData) {
         if (this._attr.mapType === 'Scaled Circle Markers') {
-          featureLayer = this.scaledCircleMarkers(map, mapData);
+          features = this.scaledCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Circle Markers') {
-          featureLayer = this.shadedCircleMarkers(map, mapData);
+          features = this.shadedCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
-          featureLayer = this.shadedGeohashGrid(map, mapData);
+          features = this.shadedGeohashGrid(map, mapData);
         } else if (this._attr.mapType === 'Heatmap') {
-          featureLayer = this.heatMap(map, mapData);
+          features = this.heatMap(map, mapData);
         } else {
-          featureLayer = this.pinMarkers(mapData);
+          features = this.pinMarkers(mapData);
         }
       }
 
-      return featureLayer;
-    };
-
-    /**
-     * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJson)
-     * with default leaflet pin markers
-     *
-     * @method pinMarkers
-     * @param mapData {Object}
-     * @return {Leaflet object} featureLayer
-     */
-    TileMap.prototype.pinMarkers = function (mapData) {
-      var self = this;
-
-      var featureLayer = L.geoJson(mapData, {
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        }
-      });
-
-      return featureLayer;
+      return features;
     };
 
     /**
@@ -399,7 +380,28 @@ define(function (require) {
         minOpacity: this._attr.heatMinOpacity
       };
 
-      var featureLayer = L.heatLayer(points, options).addTo(map);
+      var featureLayer = L.heatLayer(points, options);
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with default leaflet pin markers
+     *
+     * @method pinMarkers
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.pinMarkers = function (mapData) {
+      var self = this;
+
+      var featureLayer = L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        }
+      });
 
       return featureLayer;
     };

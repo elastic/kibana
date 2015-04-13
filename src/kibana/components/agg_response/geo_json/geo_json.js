@@ -38,7 +38,7 @@ define(function (require) {
         metricType : agg.metric._opts.type
       };
 
-      if (agg.metric._opts.params.field) {
+      if (agg.metric._opts.params && agg.metric._opts.params.field) {
         props.metricField = agg.metric._opts.params.field;
       }
 
