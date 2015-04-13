@@ -16,7 +16,8 @@ define(function (require) {
   require('plugins/discover/index');
 
   var $parentScope, $scope, $elem;
-  var clock, anchor = '2014-01-01T06:06:06.666Z';
+  var anchor = '2014-01-01T06:06:06.666Z';
+  var clock;
 
   var init = function () {
     // Load the application
@@ -184,7 +185,7 @@ define(function (require) {
 
       it('has a preview of the "from" input', function (done) {
         var preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
-        expect(preview.text()).to.be(moment().subtract(1, 'minutes').format($scope.format));
+        expect(preview.text()).to.be(moment().subtract(15, 'minutes').format($scope.format));
         done();
       });
 

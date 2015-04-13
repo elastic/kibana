@@ -118,8 +118,3 @@ cluster.name: "my_cluster"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch_url: "http://localhost:9200"
 --------
-
-
-
-
-

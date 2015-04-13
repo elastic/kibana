@@ -38,7 +38,10 @@ define(function (require) {
    * @returns {Object.<string,boolean|Array>}
    */
   qs.decode = function (keyValue) {
-    var obj = {}, key_value, key;
+    var obj = {};
+    var key_value;
+    var key;
+
     (keyValue || '').split('&').forEach(function (keyValue) {
       if (keyValue) {
         key_value = keyValue.split('=');

@@ -65,7 +65,7 @@ define(function (require) {
      */
     toggleInOut: function (arr, value) {
       if (_.contains(arr, value)) {
-        arr = _.without(arr, value);
+        arr.splice(arr.indexOf(value), 1);
       } else {
         arr.push(value);
       }
@@ -160,7 +160,7 @@ define(function (require) {
     chunk: function (arr, count) {
       var size = Math.ceil(arr.length / count);
       var chunks = new Array(count);
-      for (var i = 0; i < count; i ++) {
+      for (var i = 0; i < count; i++) {
         var start = i * size;
         chunks[i] = arr.slice(start, start + size);
       }

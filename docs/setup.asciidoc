@@ -4,10 +4,10 @@ You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
 * Elasticsearch 1.4.4 or later
-* A modern web browser - http://www.elastic.co/support/matrix[Supported Browsers].
-* Information about your Elasticsearch installation: 
+* A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
+* Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
-** Which Elasticsearch indices you want to search. 
+** Which Elasticsearch indices you want to search.
 
 NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[Shield] see  https://www.elastic.co/guide/en/shield/current/_shield_with_kibana_4.html[Shield with Kibana 4] for additional setup instructions.
 
@@ -20,11 +20,11 @@ To get Kibana up and running:
 . Extract the `.zip` or `tar.gz` archive file.
 . Run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
 
-That's it! Kibana is now running on port 5601. 
+That's it! Kibana is now running on port 5601.
 
 [float]
 [[connect]]
-=== Connect Kibana with Elasticsearch 	
+=== Connect Kibana with Elasticsearch
 Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore. The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of one or more of your indices. That's it. That's all you need to configure to start using Kibana. You can add index patterns at any time from the <<settings-create-pattern,Settings tab>>.
 
 TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
@@ -36,9 +36,9 @@ To configure the Elasticsearch indices you want to access with Kibana:
 image:images/Start-Page.jpg[Kibana start page]
 +
 . Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case, you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more characters in an index's name. If your Elasticsearch indices follow some other naming convention, enter an appropriate pattern.  The "pattern" can also simply be the name of a single index.
-. Select the index field that contains the timestamp that you want to use to perform time-based comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data, disable the *Index contains time-based events* option. 
+. Select the index field that contains the timestamp that you want to use to perform time-based comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data, disable the *Index contains time-based events* option.
 . If new indices are generated periodically and have a timestamp appended to the name, select the *Use event times to create index names* option and select the *Index pattern interval*. This improves search performance by enabling Kibana to search only those indices that could contain data in the time range you specify. This is primarily applicable if you are using Logstash to feed data into Elasticsearch.
-. Click *Create* to add the index pattern. This first pattern is automatically configured as the default. When you have more than one index pattern, you can designate which one to use as the default from *Settings > Indices*. 
+. Click *Create* to add the index pattern. This first pattern is automatically configured as the default. When you have more than one index pattern, you can designate which one to use as the default from *Settings > Indices*.
 
 Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for the matching index.
 
@@ -47,6 +47,6 @@ Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a rea
 === Start Exploring your Data!
 You're ready to dive in to your data:
 
-* Search and browse your data interactively from the <<discover,Discover>> page. 
-* Chart and map your data from the <<visualize, Visualize>> page. 
+* Search and browse your data interactively from the <<discover,Discover>> page.
+* Chart and map your data from the <<visualize, Visualize>> page.
 * Create and view custom dashboards from the <<dashboard, Dashboard>> page.

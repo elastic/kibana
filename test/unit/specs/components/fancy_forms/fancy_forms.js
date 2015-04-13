@@ -45,7 +45,13 @@ define(function (require) {
         expect(ngForm.describeErrors()).to.be('0 Errors');
       });
 
-      it('describes 1 error', function () {
+      it('describes 0 error when the model is invalid but untouched', function () {
+        $scope.$apply();
+        expect(ngForm.describeErrors()).to.be('0 Errors');
+      });
+
+      it('describes 1 error when the model is touched', function () {
+        $el.find('input').blur();
         $scope.$apply();
         expect(ngForm.describeErrors()).to.be('1 Error');
       });

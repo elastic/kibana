@@ -1,5 +1,3 @@
-/* jshint node:true */
-
 var express = require('express');
 var instrumentationMiddleware = require('./_instrumentation');
 var amdRapperMiddleware = require('./_amd_rapper');

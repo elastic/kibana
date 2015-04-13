@@ -46,17 +46,17 @@ define(function (require) {
 
       it('should have a a key for value in the array when not grouping array terms', function (done) {
         expect(_.keys(groups).length).to.be(3);
-        expect(groups['foo']).to.be.a(Object);
-        expect(groups['bar']).to.be.a(Object);
-        expect(groups['baz']).to.be.a(Object);
+        expect(groups.foo).to.be.a(Object);
+        expect(groups.bar).to.be.a(Object);
+        expect(groups.baz).to.be.a(Object);
         done();
       });
 
       it('should count array terms independently', function (done) {
         expect(groups['foo,bar']).to.be(undefined);
-        expect(groups['foo'].count).to.be(5);
-        expect(groups['bar'].count).to.be(3);
-        expect(groups['baz'].count).to.be(1);
+        expect(groups.foo.count).to.be(5);
+        expect(groups.bar.count).to.be(3);
+        expect(groups.baz.count).to.be(1);
         done();
       });
 
@@ -79,8 +79,8 @@ define(function (require) {
 
         it('should count the pairs seperately from the values they contain', function (done) {
           expect(groups['foo,bar'].count).to.be(2);
-          expect(groups['foo'].count).to.be(3);
-          expect(groups['bar'].count).to.be(1);
+          expect(groups.foo.count).to.be(3);
+          expect(groups.bar.count).to.be(1);
           done();
         });
       });
@@ -90,9 +90,7 @@ define(function (require) {
       var hits;
 
       beforeEach(function () {
-        hits = _.each(require('fixtures/real_hits.js'), function (hit) {
-          hit.$$_flattened = indexPattern.flattenHit(hit);
-        });
+        hits = _.each(require('fixtures/real_hits.js'), indexPattern.flattenHit);
       });
 
       it('Should return an array of values for _source fields', function () {

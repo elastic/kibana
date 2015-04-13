@@ -1,7 +1,7 @@
 define(function (require) {
   var errors = require('errors');
   var _ = require('lodash');
-  
+
   require('services/es');
   require('services/promises');
   require('components/index_patterns/index_patterns');

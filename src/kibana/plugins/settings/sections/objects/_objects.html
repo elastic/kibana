@@ -6,7 +6,7 @@
       <a file-upload="importAll(result)" class="controls" ng-click><i aria-hidden="true" class="fa fa-upload"></i> Import</a>
     </div>
     <p>
-      From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen.
+      From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
     </p>
     <form role="form">
       <input aria-label="Filter" ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
@@ -14,7 +14,11 @@
 
     <ul class="nav nav-tabs">
       <li class="kbn-settings-tab" ng-class="{ active: state.tab === service.title }" ng-repeat="service in services">
-        <a title="{{ service.title }}" ng-click="changeTab(service)">{{ service.title }} <small>({{service.data.length}})</small></a>
+        <a title="{{ service.title }}" ng-click="changeTab(service)">{{ service.title }}
+          <small>
+          ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
+          </small>
+        </a>
       </li>
     </ul>
     <div class="tab-content">

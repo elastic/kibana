@@ -33,6 +33,10 @@ kibana_index: ".kibana"
 # The default application to load.
 default_app_id: "discover"
 
+# Time in milliseconds to wait for elasticsearch to respond to pings, defaults to
+# request_timeout setting
+# ping_timeout: 1500
+
 # Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
 request_timeout: 300000
@@ -52,6 +56,6 @@ verify_ssl: true
 # Set the path to where you would like the process id file to be created.
 # pid_file: /var/run/kibana.pid
 
-# If you would like to send the log output to a file you can set the path below. 
+# If you would like to send the log output to a file you can set the path below.
 # This will also turn off the STDOUT log output.
 # log_file: ./kibana.log

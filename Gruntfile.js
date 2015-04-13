@@ -30,7 +30,15 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
-
+    lintThese: [
+      'Gruntfile.js',
+      '<%= root %>/tasks/**/*.js',
+      '<%= src %>/kibana/*.js',
+      '<%= src %>/server/**/*.js',
+      '<%= src %>/kibana/{components,directives,factories,filters,plugins,registry,services,utils}/**/*.js',
+      '<%= unitTestDir %>/**/*.js',
+      '!<%= unitTestDir %>/specs/vislib/fixture/**/*'
+    ],
     lessFiles: [
       '<%= src %>/kibana/components/*/*.less',
       '<%= src %>/kibana/styles/main.less',

@@ -1,4 +1,3 @@
-/* global sinon */
 define(function (require) {
   var fn = require('components/filter_manager/lib/range');
   var _ = require('lodash');

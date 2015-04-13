@@ -1,9 +1,7 @@
-/* global sinon */
 define(function (require) {
-  var toggleFilter = require('components/filter_bar/lib/toggleFilter');
-
   describe('Filter Bar Directive', function () {
-
+    var sinon = require('test_utils/auto_release_sinon');
+    var toggleFilter = require('components/filter_bar/lib/toggleFilter');
     var $rootScope, $compile, mapFilter, getIndexPatternStub, indexPattern;
 
     beforeEach(module('kibana'));

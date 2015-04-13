@@ -419,13 +419,12 @@ button[disabled] {
   white-space: pre-wrap;
 }
 
-input.ng-dirty.ng-invalid,
-textarea.ng-dirty.ng-invalid,
-select.ng-dirty.ng-invalid,
-form:not(.hide-errors) input.ng-invalid,
-form:not(.hide-errors) textarea.ng-invalid,
-form:not(.hide-errors) select.ng-invalid {
-  border-color: @state-danger-bg !important;
+.ng-dirty, .ng-touched {
+  input.ng-invalid&,
+  textarea.ng-invalid&,
+  select.ng-invalid& {
+    border-color: @state-danger-bg !important;
+  }
 }
 
 
@@ -469,3 +468,6 @@ style-compile {
   background-color: @gray-lighter;
 }
 
+mark, .mark {
+  background-color: rgba(252, 229, 113, 1);
+}

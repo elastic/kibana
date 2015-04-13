@@ -35,7 +35,7 @@ define(function (require) {
       expect(vis.aggs).to.have.length(3);
 
       expect(vis).to.have.property('type');
-      expect(vis.type).to.eql(visTypes.byName['pie']);
+      expect(vis.type).to.eql(visTypes.byName.pie);
 
       expect(vis).to.have.property('listeners');
       expect(vis.listeners).to.have.property('click');
@@ -80,7 +80,7 @@ define(function (require) {
       it('should set the state to defualts', function () {
         var vis = new Vis(indexPattern);
         expect(vis).to.have.property('type');
-        expect(vis.type).to.eql(visTypes.byName['histogram']);
+        expect(vis.type).to.eql(visTypes.byName.histogram);
         expect(vis).to.have.property('aggs');
         expect(vis.aggs).to.have.length(1);
         expect(vis).to.have.property('listeners');

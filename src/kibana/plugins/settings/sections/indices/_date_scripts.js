@@ -15,7 +15,7 @@ define(function (require) {
       __year:         'year'
     };
 
-    _.each(indexPattern.fields.byType['date'], function (field) {
+    _.each(indexPattern.fields.byType.date, function (field) {
       if (field.indexed) {
         _.each(scripts, function (value, key) {
           dateScripts[field.name + '.' + key] = 'doc["' + field.name + '"].date.' + value;

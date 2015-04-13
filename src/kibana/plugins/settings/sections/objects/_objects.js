@@ -27,7 +27,14 @@ define(function (require) {
           var services = registry.all().map(function (obj) {
             var service = $injector.get(obj.service);
             return service.find(filter).then(function (data) {
-              return { service: service, serviceName: obj.service, title: obj.title, type: service.type, data: data.hits };
+              return {
+                service: service,
+                serviceName: obj.service,
+                title: obj.title,
+                type: service.type,
+                data: data.hits,
+                total: data.total
+              };
             });
           });
 

@@ -67,7 +67,7 @@ define(function (require) {
         { version: '1.4.2', attributes: { client: 'true' } },
         '1.4.5'
       );
-      
+
       return checkEsVersion();
     });
 

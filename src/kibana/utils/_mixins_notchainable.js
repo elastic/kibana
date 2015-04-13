@@ -34,7 +34,9 @@ define(function (require) {
      */
     repeat: function (str, times) {
       var out = '';
-      for (var i = 0; i < times; i++) out += str;
+      for (var i = 0; i < times; i++) {
+        out += str;
+      }
       return out;
     },
 

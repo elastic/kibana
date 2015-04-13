@@ -1,4 +1,3 @@
-/* global sinon */
 define(function (require) {
   var moment = require('moment');
   describe('Filter Bar Directive', function () {
@@ -8,10 +7,10 @@ define(function (require) {
 
       beforeEach(module('kibana'));
 
-			beforeEach(inject(function (Private, _timefilter_) {
+      beforeEach(inject(function (Private, _timefilter_) {
         changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
         timefilter = _timefilter_;
-			}));
+      }));
 
       it('should change the timefilter to match the range gt/lt', function () {
         var filter = { range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } };
