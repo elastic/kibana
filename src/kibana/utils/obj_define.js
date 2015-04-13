@@ -76,12 +76,11 @@ define(function (require) {
         set: function (update) {
           if (!changeable) return false;
 
-          // redefine the property to reflect changes
-          Object.defineProperty(
-            self.obj,
-            name,
-            self._describe(name, update, exported, changeable)
-          );
+          // change the descriptor, since the value now exists.
+          self.descs[name] = self._describe(name, update, exported, changeable);
+
+          // apply the updated descriptor
+          Object.defineProperty(self.obj, name, self.descs[name]);
         }
       };
     }
