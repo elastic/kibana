@@ -67,7 +67,7 @@ define(function (require) {
       description: 'Enable if using a WMS mapping provider'
     },
     'visualization:tileMap:url': {
-      value: 'http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
+      value: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
       description: 'URL of mapping provider, see <a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">leafletjs ' +
         'reference</a> or <a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">provider demos</a>'
     },
