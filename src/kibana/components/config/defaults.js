@@ -64,8 +64,9 @@ define(function (require) {
     },
     'visualization:tileMap:url': {
       value: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
-      description: 'URL template of mapping provider, see <a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">leafletjs ' +
-        'reference</a> or <a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">provider demos</a>'
+      description: 'URL template of mapping provider, see ' +
+        '<a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">leafletjs reference</a> or ' +
+        '<a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">provider demos</a>'
     },
     'visualization:tileMap:options': {
       value: null,
