@@ -3,8 +3,8 @@ define(function (require) {
   /**
    * Creates a string based on the hex color passed in
    *
-   * @method colorToClass
-   * @param d {Object} d3 object
+   * @method dataLabel
+   * @param d {Object} object to wrap in d3.select
    * @returns {string} label value
    */
   function dataLabel(selection, label) {
