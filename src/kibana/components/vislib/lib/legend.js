@@ -2,6 +2,7 @@ define(function (require) {
   return function LegendFactory(d3) {
     var _ = require('lodash');
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
+    var dataLabel = require('components/vislib/lib/_data_label');
 
     require('css!components/vislib/styles/main');
 
@@ -76,26 +77,23 @@ define(function (require) {
       .data(arrOfLabels)
       .enter()
         .append('li')
-        .attr('class', function (d) {
-          return 'color ' + self.colorToClass(args.color(d));
-        })
+        .attr('class', 'color')
+        .each(self._addIdentifier)
         .html(function (d) {
           return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
         });
     };
 
     /**
-     * Creates a class name based on the hexColor assigned to each label
+     * Append the data label to the element
      *
-     * @method colorToClass
-     * @param hexColor {String} Label
-     * @returns {string} CSS class name
+     * @method _addIdentifier
+     * @param label {string} label to use
      */
-    Legend.prototype.colorToClass = function (hexColor) {
-      if (hexColor) {
-        return 'c' + hexColor.replace(/[#]/g, '');
-      }
+    Legend.prototype._addIdentifier = function (label) {
+      dataLabel(this, label);
     };
+
 
     /**
      * Renders legend
