@@ -1,6 +1,6 @@
 var join = require('path').join;
 var kibana = require('../../');
-var status = require('../../lib/status');
+var systemStatus = require('../../lib/system_status');
 
 function Series(size) {
   this.size = size;
@@ -72,7 +72,7 @@ module.exports = new kibana.Plugin({
       handler: function (request, reply) {
         return reply({
           metrics: fiveMinuteData,
-          status: status
+          status: systemStatus
         });
       }
     });
