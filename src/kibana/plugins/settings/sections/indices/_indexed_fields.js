@@ -4,12 +4,12 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .directive('indexedFields', function (Private) {
-    var setupIndexedField = Private(require('plugins/settings/sections/indices/_indexed_field'));
-
+    var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
+    var noTemplate = '';
     var nameHtml = require('text!plugins/settings/sections/indices/_field_name.html');
     var typeHtml = require('text!plugins/settings/sections/indices/_field_type.html');
     var formatHtml = require('text!plugins/settings/sections/indices/_field_format.html');
-    var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
+    var controlsHtml = require('text!plugins/settings/sections/indices/_field_controls.html');
 
     return {
       restrict: 'E',
@@ -18,15 +18,12 @@ define(function (require) {
       link: function ($scope, $el, attr) {
         var rowScopes = []; // track row scopes, so they can be destroyed as needed
         $scope.perPage = 25;
-        $scope.popularityField = {name: null};
-
         $scope.columns = [
           { title: 'name' },
           { title: 'type' },
-          { title: 'format', info: 'The format that will be applied to valus in this field' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-          { title: 'popularity', info: 'A gauge of how often this field is used' }
+          { title: 'controls', }
         ];
 
         $scope.$watchCollection('indexPattern.fields', function () {
@@ -34,8 +31,7 @@ define(function (require) {
           _.invoke(rowScopes.splice(0), '$destroy');
 
           $scope.rows = $scope.indexPattern.getFields().map(function (field) {
-            var childScope = $scope.$new();
-            setupIndexedField($scope, childScope, field);
+            var childScope = _.assign($scope.$new(), { field: field });
             rowScopes.push(childScope);
 
             return [
@@ -50,19 +46,16 @@ define(function (require) {
                 value: field.type
               },
               {
-                markup: formatHtml,
-                scope: childScope,
-                class: 'cell-hover',
-                attr: {
-                  'ng-click': 'toggle()'
-                }
+                markup: field.analyzed ? yesTemplate : noTemplate,
+                value: field.analyzed
               },
-              field.analyzed,
-              field.indexed,
               {
-                markup: popularityHtml,
-                scope: childScope,
-                value: field.count
+                markup: field.indexed ? yesTemplate : noTemplate,
+                value: field.indexed
+              },
+              {
+                markup: controlsHtml,
+                scope: childScope
               }
             ];
           });

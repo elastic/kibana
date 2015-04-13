@@ -1,10 +1,11 @@
 <div class="actions">
-  <button ng-click="edit(field)" aria-label="Edit" class="btn btn-xs btn-default">
+  <a ng-href="{{ field.editUrl }}" aria-label="Edit" class="btn btn-xs btn-default">
     <span class="sr-only">Edit</span>
     <i aria-hidden="true" class="fa fa-pencil"></i>
-  </button>
+  </a>
 
   <button
+    ng-if="field.scripted"
     confirm-click="remove(field)"
     confirmation="Are you sure want to delete '{{field.name}}'? This action is irreversible!"
     class="btn btn-xs btn-danger"
