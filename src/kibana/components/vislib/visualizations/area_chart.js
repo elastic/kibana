@@ -147,7 +147,7 @@ define(function (require) {
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
       var circleRadius = 12;
-      var circleStrokeWidth = 1;
+      var circleStrokeWidth = 0;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var isOverlapping = this.isOverlapping;
