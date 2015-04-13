@@ -30,12 +30,12 @@ define(function (require) {
   };
 
   /**
-   * calculated fact, not exported or changeable
+   * computed fact, not exported or changeable
    *
    * @param  {any} v - value
    * @return {object} - property descriptor
    */
-  ObjDefine.prototype.flag = function (name, val) {
+  ObjDefine.prototype.comp = function (name, val) {
     this._define(name, val);
   };
 

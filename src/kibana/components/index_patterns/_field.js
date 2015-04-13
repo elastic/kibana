@@ -51,13 +51,15 @@ define(function (require) {
       obj.fact('doc_values', !!spec.doc_values);
 
       // usage flags, read-only and won't be saved
-      obj.flag('formatName', formatName);
-      obj.flag('format', format);
-      obj.flag('sortable', sortable);
-      obj.flag('bucketable', bucketable);
-      obj.flag('filterable', filterable);
-      obj.flag('indexPattern', indexPattern);
-      obj.flag('displayName', shortDotsFilter(spec.name));
+      obj.comp('formatName', formatName);
+      obj.comp('format', format);
+      obj.comp('sortable', sortable);
+      obj.comp('bucketable', bucketable);
+      obj.comp('filterable', filterable);
+
+      // computed values
+      obj.comp('indexPattern', indexPattern);
+      obj.comp('displayName', shortDotsFilter(spec.name));
 
       var field = obj.create();
       field.$$spec = spec;

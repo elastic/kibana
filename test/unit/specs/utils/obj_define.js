@@ -85,12 +85,12 @@ define(function (require) {
       });
     });
 
-    describe('#flag', function () {
+    describe('#comp', function () {
       it('creates an immutable field', function () {
         var def = new ObjDefine();
         var val = 'foo';
         var notval = 'bar';
-        def.flag('name', val);
+        def.comp('name', val);
         var obj = def.create();
 
 
@@ -98,9 +98,9 @@ define(function (require) {
         expect(obj).to.have.property('name', val);
       });
 
-      it('does not export the flag to JSON', function () {
+      it('does not export the computed value to JSON', function () {
         var def = new ObjDefine();
-        def.flag('name', 'foo');
+        def.comp('name', 'foo');
         expect(flatten(def.create())).to.not.have.property('name');
       });
     });
