@@ -31,15 +31,23 @@ define(function (require) {
         doc._storeVersion(resp._version);
         doc.id(resp._id);
 
+        var docFetchProm;
+        if (method !== 'index') {
+          docFetchProm = doc.fetch();
+        } else {
+          // we already know what the response will be
+          docFetchProm = Promise.resolve({
+            _id: resp._id,
+            _index: params.index,
+            _source: body,
+            _type: params.type,
+            _version: doc._getVersion(),
+            found: true
+          });
+        }
+
         // notify pending request for this same document that we have updates
-        Promise.cast(method !== 'index' ? doc.fetch() : {
-          _id: resp._id,
-          _index: params.index,
-          _source: body,
-          _type: params.type,
-          _version: doc._getVersion(),
-          found: true
-        }).then(function (fetchResp) {
+        docFetchProm.then(function (fetchResp) {
           // use the key to compair sources
           var key = doc._versionKey();
 

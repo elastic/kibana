@@ -70,7 +70,7 @@ define(function (require) {
       expect($scope.searchSource.size.called).to.be(true);
     });
 
-    it('should have an addRows function that increases the row cound', function () {
+    it('should have an addRows function that increases the row count', function () {
       expect($scope.addRows).to.be.a(Function);
       searchSource.crankResults();
       $scope.$digest();

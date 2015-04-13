@@ -30,12 +30,20 @@ define(function (require) {
         to: 'now'
       };
 
+      var refreshIntervalDefaults = {
+        display: 'Off',
+        section: 0,
+        value: 0
+      };
+
       // These can be date math strings or moments.
       self.time = _.defaults(globalState.time || {}, timeDefaults);
+      self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
 
       globalState.on('fetch_with_changes', function () {
         // clone and default to {} in one
         var newTime = _.defaults({}, globalState.time, timeDefaults);
+        var newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
 
         if (newTime) {
           if (newTime.to) newTime.to = convertISO8601(newTime.to);
@@ -43,6 +51,7 @@ define(function (require) {
         }
 
         self.time = newTime;
+        self.refreshInterval = newRefreshInterval;
       });
 
       $rootScope.$$timefilter = self;
@@ -50,16 +59,20 @@ define(function (require) {
         '$$timefilter.time.from',
         '$$timefilter.time.to',
         '$$timefilter.time.mode',
-        '$$timefilter.time'
+        '$$timefilter.time',
+        '$$timefilter.refreshInterval',
+        '$$timefilter.refreshInterval.value'
       ], (function () {
         var oldTime;
+        var oldRefreshInterval;
 
         return function () {
-          if (diff(self.time, oldTime)) {
+          if (diff(self.time, oldTime) || diff(self.refreshInterval, oldRefreshInterval)) {
             self.emit('update');
           }
 
           oldTime = _.clone(self.time);
+          oldRefreshInterval = _.clone(self.refreshInterval);
         };
       }()));
     }
@@ -76,6 +89,7 @@ define(function (require) {
           lte: bounds.max.valueOf()
         };
       }
+
       return filter;
     };
 
@@ -84,6 +98,10 @@ define(function (require) {
         min: datemath.parse(this.time.from),
         max: datemath.parse(this.time.to, true)
       };
+    };
+
+    Timefilter.prototype.getActiveBounds = function () {
+      if (this.enabled) return this.getBounds();
     };
 
     return new Timefilter();

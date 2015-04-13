@@ -1,16 +1,19 @@
 module.exports = function (grunt) {
-  var rel = require('path').join.bind(null, __dirname, '../../');
+  var join = require('path').join;
+  var rel = require('path').join.bind(null, grunt.config.get('root'));
+  var directory = join(grunt.config.get('root'), 'esvm');
+  var dataDir = join(directory, 'data_dir');
 
   return {
     options: {
-      version: '^1.4',
+      directory: directory,
+      version: '1.4.4',
       plugins: [
         'elasticsearch/marvel/latest'
       ],
       config: {
         path: {
-          data: rel('esvm/data_dir'),
-          logs: rel('esvm/logs')
+          data: dataDir
         },
         network: {
           host: '127.0.0.1'

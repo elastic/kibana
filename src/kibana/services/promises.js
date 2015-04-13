@@ -57,6 +57,12 @@ define(function (require) {
       // https://github.com/angular/angular.js/blob/58f5da86645990ef984353418cd1ed83213b111e/src/ng/q.js#L335
       return obj && typeof obj.then === 'function';
     };
+    Promise.halt = _.once(function () {
+      var promise = new Promise();
+      promise.then = _.constant(promise);
+      promise.catch = _.constant(promise);
+      return promise;
+    });
     Promise.try = function (fn, args, ctx) {
       if (typeof fn !== 'function') {
         return Promise.reject('fn must be a function');

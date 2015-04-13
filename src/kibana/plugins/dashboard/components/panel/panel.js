@@ -6,7 +6,6 @@ define(function (require) {
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $compile) {
     var _ = require('lodash');
-    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
     var loadPanel = Private(require('plugins/dashboard/components/panel/lib/load_panel'));
     var notify = new Notifier();
 

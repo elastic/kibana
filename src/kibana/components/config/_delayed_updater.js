@@ -19,7 +19,6 @@ define(function (require) {
         if (updater.fired) return;
         updater.fired = true;
 
-
         var method;
         var body;
         var updated = [];
@@ -44,6 +43,9 @@ define(function (require) {
           queue.forEach(function (q) { q.resolve(resp); });
         }, function (err) {
           queue.forEach(function (q) { q.reject(err); });
+        })
+        .finally(function () {
+          $rootScope.$emit('change:config', updated.concat(deleted));
         });
       };
 
@@ -68,7 +70,7 @@ define(function (require) {
         var defer = Promise.defer();
         queue.push(defer);
         notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
-        $rootScope.$broadcast('change:config.' + key, newVal, oldVal);
+        $rootScope.$emit('change:config.' + key, newVal, oldVal);
 
         // reset the fire timer
         clearTimeout(timer);

@@ -2,14 +2,13 @@ define(function (require) {
   var IndexedArray = require('utils/indexed_array/index');
 
   require('modules')
-  .get('app/visualize', ['ui.select'])
+  .get('app/visualize')
   .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-    require('angular-ui-select');
     require('filters/match_any');
     require('plugins/visualize/editor/agg_param');
 

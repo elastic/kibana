@@ -1,7 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
- // bring in the factory
+  // bring in the factory
   require('plugins/dashboard/services/_saved_dashboard');
 
 
@@ -37,7 +37,9 @@ define(function (require) {
 
     this.find = function (searchString) {
       var self = this;
-      var body = searchString ? {
+      var body;
+      if (searchString) {
+        body = {
           query: {
             simple_query_string: {
               query: searchString + '*',
@@ -45,7 +47,11 @@ define(function (require) {
               default_operator: 'AND'
             }
           }
-        }: { query: {match_all: {}}};
+        };
+      } else {
+        body = { query: {match_all: {}}};
+      }
+
       return es.search({
         index: config.file.kibana_index,
         type: 'dashboard',

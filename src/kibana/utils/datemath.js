@@ -2,16 +2,23 @@ define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
 
-/* This is a simplified version of elasticsearch's date parser */
-  var parse = function (text, roundUp) {
+  var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+  var unitsAsc = _.sortBy(units, function (unit) {
+    return moment.duration(1, unit).valueOf();
+  });
+  var unitsDesc = unitsAsc.reverse();
+
+  /* This is a simplified version of elasticsearch's date parser */
+  function parse(text, roundUp) {
     if (!text) return undefined;
     if (moment.isMoment(text)) return text;
     if (_.isDate(text)) return moment(text);
 
-    var time,
-      mathString = '',
-      index,
-      parseString;
+    var time;
+    var mathString = '';
+    var index;
+    var parseString;
+
     if (text.substring(0, 3) === 'now') {
       time = moment();
       mathString = text.substring('now'.length);
@@ -33,17 +40,17 @@ define(function (require) {
     }
 
     return parseDateMath(mathString, time, roundUp);
-  };
+  }
 
-  var parseDateMath = function (mathString, time, roundUp) {
-    var dateTime = time,
-      spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+  function parseDateMath(mathString, time, roundUp) {
+    var dateTime = time;
 
     for (var i = 0; i < mathString.length;) {
-      var c = mathString.charAt(i++),
-        type,
-        num,
-        unit;
+      var c = mathString.charAt(i++);
+      var type;
+      var num;
+      var unit;
+
       if (c === '/') {
         type = 0;
       } else if (c === '+') {
@@ -56,13 +63,17 @@ define(function (require) {
 
       if (isNaN(mathString.charAt(i))) {
         num = 1;
+      } else if (mathString.length === 2) {
+        num = mathString.charAt(i);
       } else {
         var numFrom = i;
         while (!isNaN(mathString.charAt(i))) {
           i++;
+          if (i > 10) return undefined;
         }
         num = parseInt(mathString.substring(numFrom, i), 10);
       }
+
       if (type === 0) {
         // rounding is only allowed on whole, single, units (eg M or 1M, not 0.5M or 2M)
         if (num !== 1) {
@@ -71,22 +82,26 @@ define(function (require) {
       }
       unit = mathString.charAt(i++);
 
-      if (!_.contains(spans, unit)) {
+      if (!_.contains(units, unit)) {
         return undefined;
       } else {
         if (type === 0) {
           roundUp ? dateTime.endOf(unit) : dateTime.startOf(unit);
         } else if (type === 1) {
-          dateTime.add(unit, num);
+          dateTime.add(num, unit);
         } else if (type === 2) {
-          dateTime.subtract(unit, num);
+          dateTime.subtract(num, unit);
         }
       }
     }
     return dateTime;
-  };
+  }
 
   return {
-    parse: parse
+    parse: parse,
+
+    units: Object.freeze(units),
+    unitsAsc: Object.freeze(unitsAsc),
+    unitsDesc: Object.freeze(unitsDesc)
   };
 });

@@ -52,7 +52,7 @@ define(function (require) {
           val = bounds[bound];
         }
 
-        if (_.isNumeric(val)) val = moment().add(interval.name, val);
+        if (_.isNumeric(val)) val = moment().add(val, interval.name);
         else if (!moment.isMoment(val)) val = moment(val);
 
         return val.clone().utc()[extend](interval.startOf);
@@ -72,7 +72,7 @@ define(function (require) {
 
       while (start <= stop) {
         indexList.push(start.format(format));
-        start.add(interval.name, 1);
+        start.add(1, interval.name);
       }
       return indexList;
     };

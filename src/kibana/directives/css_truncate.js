@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
 
-  module.directive('cssTruncate', function ($compile) {
+  module.directive('cssTruncate', function ($timeout) {
     return {
       restrict: 'A',
       scope: {},
@@ -16,11 +16,18 @@ define(function (require) {
           'word-break': 'break-all',
         });
 
-        if (!_.isUndefined(attrs.cssTruncateExpandable)) {
-          $elem.css({'cursor': 'pointer'});
-          $elem.bind('click', function () {
-            $scope.toggle();
-          });
+        if (attrs.cssTruncateExpandable != null) {
+          $scope.$watch(
+            function () { return $elem.html(); },
+            function () {
+              if ($elem[0].offsetWidth < $elem[0].scrollWidth) {
+                $elem.css({'cursor': 'pointer'});
+                $elem.bind('click', function () {
+                  $scope.toggle();
+                });
+              }
+            }
+          );
         }
 
         $scope.toggle = function () {

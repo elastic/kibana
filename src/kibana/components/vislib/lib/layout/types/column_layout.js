@@ -75,6 +75,10 @@ define(function (require) {
                 },
                 {
                   type: 'div',
+                  class: 'vis-alerts'
+                },
+                {
+                  type: 'div',
                   class: 'x-axis-wrapper',
                   children: [
                     {

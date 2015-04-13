@@ -1,9 +1,9 @@
-/* global sinon */
 define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('filterOutTimeBasedFilter()', function () {
 
-			var filterOutTimeBasedFilter,
+      var sinon = require('test_utils/auto_release_sinon');
+      var filterOutTimeBasedFilter,
           $rootScope,
           indexPattern,
           getIndexPatternStub;
@@ -20,12 +20,12 @@ define(function (require) {
         });
       });
 
-			beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(inject(function (Private, _$rootScope_, Promise) {
         filterOutTimeBasedFilter = Private(require('components/filter_bar/lib/filterOutTimeBasedFilter'));
-				$rootScope = _$rootScope_;
+        $rootScope = _$rootScope_;
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         getIndexPatternStub.returns(Promise.resolve(indexPattern));
-			}));
+      }));
 
       it('should return the matching filter for the defualt time field', function (done) {
         var filters = [

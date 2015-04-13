@@ -18,6 +18,8 @@ define(function (require) {
 
   // Sort versions from lowest to highest
   var sortVersions = function (versions) {
+    if (!_.isArray(versions)) versions = [versions];
+
     return _.uniq(versions).sort(function (a, b) {
       return compare(a, b) ? -1 : 1;
     });
@@ -30,8 +32,8 @@ define(function (require) {
   */
   var is = function (equation, versions) {
     var _versions = sortVersions(versions);
-    var _v = equation,
-      _cf;
+    var _v = equation;
+    var _cf;
 
     if (_v.charAt(0) === '>') {
       _cf = _v.charAt(1) === '=' ? gte(_v.slice(2), _versions) : gt(_v.slice(1), _versions);

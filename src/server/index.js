@@ -3,16 +3,39 @@
  */
 
 var app = require('./app');
-var http = require('http');
+var fs = require('fs');
 var config = require('./config');
+var http = require('http');
+var https = require('https');
+http.globalAgent.maxSockets = config.maxSockets;
+https.globalAgent.maxSockets = config.maxSockets;
 var logger = require('./lib/logger');
+var Promise = require('bluebird');
+var initialization = require('./lib/serverInitialization');
+var key, cert;
+try {
+  key = fs.readFileSync(config.kibana.ssl_key_file, 'utf8');
+  cert = fs.readFileSync(config.kibana.ssl_cert_file, 'utf8');
+} catch (err) {
+  if (err.code === 'ENOENT') {
+    logger.fatal('Failed to read %s', err.path);
+    process.exit(1);
+  }
+}
 
 
 /**
- * Create HTTP server.
+ * Create HTTPS/HTTP server.
  */
-
-var server = http.createServer(app);
+var server;
+if (key && cert) {
+  server = https.createServer({
+    key: key,
+    cert: cert
+  }, app);
+} else {
+  server = http.createServer(app);
+}
 server.on('error', onError);
 server.on('listening', onListening);
 
@@ -36,7 +59,6 @@ function onError(error) {
       process.exit(1);
       break;
     default:
-      logger.error({ err: error });
       throw error;
   }
 }
@@ -50,13 +72,29 @@ function onListening() {
   logger.info('Listening on %s:%d', address.address, address.port);
 }
 
+function start() {
+  var port = config.port || 3000;
+  var host = config.host || '127.0.0.1';
+  var listen = Promise.promisify(server.listen.bind(server));
+  app.set('port', port);
+  return listen(port, host);
+}
+
 module.exports = {
   server: server,
   start: function (cb) {
-    var port = parseInt(process.env.PORT, 10) || config.port || 3000;
-    var host = process.env.HOST || config.host || '127.0.0.1';
-    app.set('port', port);
-    server.listen(port, host, cb);
+    return initialization()
+      .then(start)
+      .then(function () {
+        cb && cb();
+      }, function (err) {
+        logger.error({ err: err });
+        if (cb) {
+          cb(err);
+        } else {
+          process.exit();
+        }
+      });
   }
 };
 

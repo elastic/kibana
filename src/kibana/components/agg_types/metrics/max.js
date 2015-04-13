@@ -11,7 +11,7 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          filterFieldTypes: 'number'
+          filterFieldTypes: 'number,date'
         }
       ]
     });

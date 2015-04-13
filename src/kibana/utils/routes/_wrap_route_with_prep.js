@@ -41,7 +41,7 @@ define(function (require) {
         var defer = Promise.defer();
         userWork.push(defer);
         return defer.promise.then(function () {
-          return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
+          return $injector[angular.isString(expr) ? 'get' : 'invoke'](expr);
         });
       };
     });

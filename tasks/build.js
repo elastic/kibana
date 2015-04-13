@@ -4,7 +4,7 @@ module.exports = function (grunt) {
     'clean:target',
     'clean:build',
     'require_css_deps:copy',
-    'less',
+    'less:build',
     'copy:kibana_src',
     'clean:dev_only_plugins',
     'touch_config',
@@ -23,6 +23,7 @@ module.exports = function (grunt) {
     'clean:test_from_node_modules',
     'download_node_binaries',
     'copy:versioned_dist',
-    'create_packages'
+    'create_packages',
+    'create_shasums'
   ]);
 };

@@ -1,0 +1,48 @@
+      <div bindonce>
+        <div class="discover-field-details">
+          <h5 ng-show="!field.details.error">Quick Count <kbn-info info="Based on documents in the table" placement="right"></kbn-info>
+            <span ng-if="!field.details.error" class="small discover-field-details-count">
+              (
+              <a ng-show="field.indexed" ng-click="updateFilterInQuery('_exists_', field.name, '+')">{{field.details.exists}}</a>
+              <span ng-show="!field.indexed">{{field.details.exists}}</span>
+              /{{field.details.total}} records
+              )
+            </span>
+          </h5>
+
+          <div class="clearfix"></div>
+
+          <div ng-if="field.details.error" class="discover-field-details-error">{{field.details.error}}</div>
+
+          <div ng-if="!field.details.error">
+            <div ng-repeat="bucket in field.details.buckets" class="discover-field-details-item">
+              <div>
+                <span ng-show="field.filterable" class="pull-right">
+                  <i aria-hidden="true" class="fa fa-search-minus pull-right discover-field-details-filter"
+                    ng-click="updateFilterInQuery(field, bucket.value, '-')"></i>
+                  <i aria-hidden="true" class="fa fa-search-plus pull-right discover-field-details-filter"
+                    ng-click="updateFilterInQuery(field, bucket.value, '+')"></i>
+                </span>
+                <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
+                  {{bucket.display}} <i ng-show="bucket.display === ''">Empty string</i>
+                </div>
+              </div>
+              <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div ng-show="field.indexed || field.scripted"
+        ng-click="runAgg(field)"
+        class="sidebar-item-button primary">
+          Visualize
+          <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
+          ( {{warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
+          </span>
+      </div>
+
+      <div ng-show="!field.indexed && !field.scripted"
+          disabled="disabled"
+          tooltip="This field is not indexed thus unavailable for visualization and search"
+          class="sidebar-item-button primary">Not Indexed</div>

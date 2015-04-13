@@ -14,7 +14,7 @@ define(function (require) {
 
         // Create the new branch record
         var $parent = parent && parent.aggConfigResult;
-        var aggConfigResult = new AggConfigResult(agg, $parent, value, bucket.key);
+        var aggConfigResult = new AggConfigResult(agg, $parent, value, agg.getKey(bucket));
         var branch = {
           name: bucket.key,
           size: value,

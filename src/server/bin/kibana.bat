@@ -12,7 +12,7 @@ set CONFIG_PATH=%DIR%\config\kibana.yml
 
 TITLE Kibana Server @@version
 
-%NODE% %SERVER% %*
+"%NODE%" "%SERVER%" %*
 
 :finally
 

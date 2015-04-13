@@ -2,7 +2,6 @@ define(function (require) {
   var $ = require('jquery');
   var app = require('modules').get('apps/discover');
   var html = require('text!plugins/discover/components/field_chooser/discover_field.html');
-  var detailsHtml = require('text!plugins/discover/components/field_chooser/discover_field_details.html');
   var _ = require('lodash');
 
   require('directives/css_truncate');
@@ -18,6 +17,8 @@ define(function (require) {
         var detailsElem;
         var detailScope = $scope.$new();
 
+        var detailsHtml = require('text!plugins/discover/components/field_chooser/lib/detail_views/string.html');
+
         var init = function () {
           if ($scope.field.details) {
             $scope.toggleDetails($scope.field, true);
@@ -28,7 +29,7 @@ define(function (require) {
           var warnings = [];
 
           if (!field.scripted) {
-            if (!field.doc_values) {
+            if (!field.doc_values && !(field.analyzed && field.type === 'string')) {
               warnings.push('Doc values are not enabled on this field. This may lead to excess heap consumption when visualizing.');
             }
 

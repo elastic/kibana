@@ -2,39 +2,50 @@
   <kbn-settings-objects class="container">
     <h2>Edit Saved Objects</h2>
     <p>
-      From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen.
+      From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
     </p>
-    <form>
-      <input ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
+    <form role="form">
+      <input aria-label="Filter" ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
     </form>
 
     <ul class="nav nav-tabs">
       <li class="kbn-settings-tab" ng-class="{ active: state.tab === service.title }" ng-repeat="service in services">
-        <a ng-click="changeTab(service)">{{ service.title }} <small>({{service.data.length}})</small></a>
+        <a title="{{ service.title }}" ng-click="changeTab(service)">{{ service.title }}
+          <small>
+          ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
+          </small>
+        </a>
       </li>
     </ul>
     <div class="tab-content">
       <div class="action-bar">
-        <input type="checkbox" ng-model="deleteAll">
+        <label>
+          <input type="checkbox" ng-model="deleteAll">
+          Select All
+        </label>
         <a ng-disabled="!deleteAllBtn"
           confirm-click="bulkDelete()"
           confirmation="Are you sure want to delete the selected {{service.title}}? This action is irreversible!"
-          class="btn btn-danger btn-xs">Delete</a>
+          class="delete-all btn btn-danger btn-xs" aria-label="Delete Selected"><i aria-hidden="true" class="fa fa-trash"></i> Delete Selected</a>
       </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
-          <li class="item" ng-repeat="item in service.data">
+          <li class="item" ng-repeat="item in service.data | orderBy:'title'">
             <div class="actions pull-right">
               <button
                 ng-click="edit(service, item)"
-                class="btn btn-default">
-                <i class="fa fa-pencil"></i>
+                class="btn btn-default"
+                aria-label="Edit">
+                <span class="sr-only">Edit</span>
+                <i aria-hidden="true" class="fa fa-pencil"></i>
               </button>
 
               <button
                 ng-click="open(item)"
-                class="btn btn-info">
-                <i class="fa fa-eye"></i>
+                class="btn btn-info"
+                aria-label="Hide">
+                <span class="sr-only">Hide</span>
+                <i aria-hidden="true" class="fa fa-eye"></i>
               </button>
             </div>
 

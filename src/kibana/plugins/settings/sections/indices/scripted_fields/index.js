@@ -47,10 +47,14 @@ define(function (require) {
     };
 
     $scope.submit = function () {
-      var field = $scope.scriptedField;
+      var field = _.defaults($scope.scriptedField, {
+        type: 'number',
+        lang: 'expression'
+      });
+
       try {
         if (createMode) {
-          $scope.indexPattern.addScriptedField(field.name, field.script, field.type);
+          $scope.indexPattern.addScriptedField(field.name, field.script, field.type, field.lang);
         } else {
           $scope.indexPattern.save();
         }

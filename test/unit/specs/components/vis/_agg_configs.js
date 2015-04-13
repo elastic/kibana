@@ -97,6 +97,7 @@ define(function (require) {
         var vis;
         beforeEach(function () {
           vis = {
+            indexPattern: indexPattern,
             type: {
               schemas: new Schemas([
                 {
@@ -129,7 +130,7 @@ define(function (require) {
 
         it('should only set the number of defaults defined by the max', function () {
           var ac = new AggConfigs(vis);
-          expect(ac.bySchemaName['metric']).to.have.length(2);
+          expect(ac.bySchemaName.metric).to.have.length(2);
         });
 
         it('should set the defaults defined in the schema when none exist', function () {
@@ -140,7 +141,7 @@ define(function (require) {
         it('should NOT set the defaults defined in the schema when some exist', function () {
           var ac = new AggConfigs(vis, [{ schema: 'segment', type: 'date_histogram' }]);
           expect(ac).to.have.length(3);
-          expect(ac.bySchemaName['segment'][0].type.name).to.equal('date_histogram');
+          expect(ac.bySchemaName.segment[0].type.name).to.equal('date_histogram');
         });
       });
     });

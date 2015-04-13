@@ -6,8 +6,10 @@
         <a
           bo-if="edittingId"
           href="#/settings/indices"
-          class="btn btn-primary btn-xs">
-          <i class="fa fa-plus"></i> Add New
+          class="btn btn-primary btn-xs"
+          aria-label="Add New">
+          <span class="sr-only">Add New</span>
+          <i aria-hidden="true" class="fa fa-plus"></i> Add New
         </a>
       </h5>
     </div>
@@ -24,7 +26,7 @@
         class="sidebar-item">
         <a bo-href="pattern.url">
           <div bo-class="pattern.class">
-            <i ng-if="pattern.default" class="fa fa-star"></i>
+            <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
             <span bo-text="pattern.id"></span>
           </div>
         </a>

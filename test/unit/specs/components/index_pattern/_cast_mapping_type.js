@@ -41,6 +41,7 @@ define(function (require) {
         'attachment',
         'geo_point',
         'geo_shape',
+        'murmur3',
         'string'
       ];
 

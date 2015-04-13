@@ -50,6 +50,7 @@ define(function (require) {
             meta: { negate: negate, index: index, field: fieldName },
             script: {
               script: '(' + field.script + ') == value',
+              lang: field.lang,
               params: {
                 value: value
               }

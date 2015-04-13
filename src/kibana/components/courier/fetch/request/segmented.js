@@ -177,7 +177,7 @@ define(function (require) {
       this._segments.push(seg);
 
       merged.took += seg.took;
-      merged.hits.total = Math.max(merged.hits.total, seg.hits.total);
+      merged.hits.total += seg.hits.total;
       merged.hits.max_score = Math.max(merged.hits.max_score, seg.hits.max_score);
       [].push.apply(merged.hits.hits, seg.hits.hits);
 

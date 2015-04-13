@@ -130,7 +130,7 @@ define(function (require) {
             var goingUp;
 
             switch (event.keyCode) {
-            case 13: // enter
+            case enter:
               if (!$selected) return;
 
               // get the index of the selected element
@@ -148,15 +148,15 @@ define(function (require) {
               $scope.onChoose(hit);
 
               return;
-            case 38: // up
+            case up:
               $next = $selected ? $selected.prev() : $list.find('li:last-child');
               goingUp = false;
               break;
-            case 40: // down
+            case down:
               $next = $selected ? $selected.next() : $list.find('li:first-child');
               goingUp = true;
               break;
-            case 27: // esc
+            case esc:
               scrollIntoView($list.find('li:first-child'));
               $next = null;
               break;

@@ -4,6 +4,7 @@ var program = require('commander');
 var env = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'development';
 var path = require('path');
 var packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
+var fs = require('fs');
 if (env !== 'development') {
   packagePath = path.resolve(__dirname, '..', 'package.json');
 }
@@ -17,6 +18,7 @@ program.option('-c, --config <path>', 'Path to the config file');
 program.option('-p, --port <port>', 'The port to bind to', parseInt);
 program.option('-q, --quiet', 'Turns off logging');
 program.option('-H, --host <host>', 'The host to bind to');
+program.option('-l, --log-file <path>', 'The file to log to');
 program.option('--plugins <path>', 'Path to scan for plugins');
 program.parse(process.argv);
 
@@ -48,6 +50,10 @@ if (program.quiet) {
   config.quiet = program.quiet;
 }
 
+if (program.logFile) {
+  config.log_file = program.logFile;
+}
+
 if (program.host) {
   config.host = program.host;
 }
@@ -56,4 +62,21 @@ if (program.host) {
 // Load and start the server. This must happen after all the config changes
 // have been made since the server also requires the config.
 var server = require('../');
-server.start();
+var logger = require('../lib/logger');
+server.start(function (err) {
+  // If we get here then things have gone sideways and we need to give up.
+  if (err) {
+    logger.fatal({ err: err });
+    process.exit(1);
+  }
+
+  if (config.kibana.pid_file) {
+    return fs.writeFile(config.kibana.pid_file, process.pid, function (err) {
+      if (err) {
+        logger.fatal({ err: err }, 'Failed to write PID file to %s', config.kibana.pid_file);
+        process.exit(1);
+      }
+    });
+  }
+
+});

@@ -30,7 +30,6 @@ define(function (require) {
           name: 'metric',
           title: 'Metric',
           min: 1,
-          max: 1,
           defaults: [
             { type: 'count', schema: 'metric' }
           ]

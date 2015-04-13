@@ -15,25 +15,15 @@ define(function (require) {
       link: function ($scope, $el, attr) {
         var rowScopes = []; // track row scopes, so they can be destroyed as needed
         $scope.perPage = 25;
+        $scope.popularityField = {name: null};
 
-        $scope.columns = [{
-          title: 'name'
-        }, {
-          title: 'type'
-        }, {
-          title: 'analyzed',
-          info: 'Analyzed fields may require extra memory to visualize'
-        }, {
-          title: 'indexed',
-          info: 'Fields that are not indexed are unavailable for search'
-        }, {
-          title: 'popularity',
-          info: 'A gauge of how often this field is used',
-        }];
-
-        $scope.showPopularityControls = function (field) {
-          $scope.popularityHoverState = (field) ? field : null;
-        };
+        $scope.columns = [
+          { title: 'name' },
+          { title: 'type' },
+          { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
+          { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
+          { title: 'popularity', info: 'A gauge of how often this field is used' }
+        ];
 
         $scope.$watchCollection('indexPattern.fields', function () {
           _.invoke(rowScopes, '$destroy');
@@ -42,11 +32,6 @@ define(function (require) {
             var childScope = $scope.$new();
             rowScopes.push(childScope);
             childScope.field = field;
-
-            // update the active field via object comparison
-            if (_.isEqual(field, $scope.popularityHoverState)) {
-              $scope.showPopularityControls(field);
-            }
 
             return [
               {

@@ -12,3 +12,4 @@ target
 *.iml
 *.log
 esvm
+.htpasswd

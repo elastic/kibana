@@ -1,4 +1,3 @@
-/* global sinon */
 define(function (require) {
   var moment = require('moment');
   describe('Query decorator', function () {

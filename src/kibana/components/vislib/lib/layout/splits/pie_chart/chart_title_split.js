@@ -9,7 +9,7 @@ define(function () {
      * if not data.rows or data.columns, return no chart titles
      */
 
-    return function (selection) {
+    return function (selection, parent) {
       selection.each(function (data) {
         var div = d3.select(this);
 
@@ -24,9 +24,9 @@ define(function () {
             .attr('class', 'chart-title');
 
           if (data.rows) {
-            d3.select('.x-axis-chart-title').remove();
+            d3.select(parent).select('.x-axis-chart-title').remove();
           } else {
-            d3.select('.y-axis-chart-title').remove();
+            d3.select(parent).select('.y-axis-chart-title').remove();
           }
 
           return div;

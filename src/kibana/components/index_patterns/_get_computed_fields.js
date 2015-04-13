@@ -7,10 +7,10 @@ define(function (require) {
     var scriptFields = {};
     var fielddataFields = [];
 
-    fielddataFields = _.pluck(self.fields.byType['date'], 'name');
+    fielddataFields = _.pluck(self.fields.byType.date, 'name');
 
     _.each(self.getFields('scripted'), function (field) {
-      scriptFields[field.name] = { script: field.script };
+      scriptFields[field.name] = { script: field.script, lang: field.lang };
     });
 
     return {

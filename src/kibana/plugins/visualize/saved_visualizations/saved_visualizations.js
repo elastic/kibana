@@ -14,7 +14,7 @@ define(function (require) {
   app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private, Notifier, kbnUrl) {
     var visTypes = Private(require('registry/vis_types'));
     var notify = new Notifier({
-      location: 'saved visualization service'
+      location: 'Saved Visualization Service'
     });
 
     this.type = SavedVis.type;
@@ -36,7 +36,9 @@ define(function (require) {
 
     this.find = function (searchString) {
       var self = this;
-      var body = searchString ? {
+      var body;
+      if (searchString) {
+        body = {
           query: {
             simple_query_string: {
               query: searchString + '*',
@@ -44,7 +46,11 @@ define(function (require) {
               default_operator: 'AND'
             }
           }
-        }: { query: {match_all: {}}};
+        };
+      } else {
+        body = { query: {match_all: {}}};
+      }
+
       return es.search({
         index: config.file.kibana_index,
         type: 'visualization',
@@ -66,8 +72,9 @@ define(function (require) {
             }
 
             if (!typeName || !visTypes.byName[typeName]) {
-              notify.info('unable to detect type from visualization source', hit);
-              return;
+              if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
+              else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
+              return kbnUrl.redirect('/settings/objects/savedVisualizations/{{id}}', {id: source.id});
             }
 
             source.type = visTypes.byName[typeName];

@@ -5,11 +5,6 @@ define(function (require) {
   module.directive('spinner', function () {
     return {
       restrict: 'C',
-      scope: {
-        from: '=',
-        to: '=',
-        mode: '='
-      },
       template: html
     };
   });

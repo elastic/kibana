@@ -13,14 +13,22 @@ define(function (require) {
     'kibana/index_patterns'
   ]);
 
+  var html = require('text!plugins/doc/index.html');
+
+  var resolveIndexPattern = {
+    indexPattern: function (courier, savedSearches, $route) {
+      return courier.indexPatterns.get($route.current.params.indexPattern);
+    }
+  };
+
   require('routes')
   .when('/doc/:indexPattern/:index/:type/:id', {
-    template: require('text!plugins/doc/index.html'),
-    resolve: {
-      indexPattern: function (courier, savedSearches, $route) {
-        return courier.indexPatterns.get($route.current.params.indexPattern);
-      }
-    }
+    template: html,
+    resolve: resolveIndexPattern
+  })
+  .when('/doc/:indexPattern/:index/:type', {
+    template: html,
+    resolve: resolveIndexPattern
   });
 
   app.controller('doc', function ($scope, $route, es, timefilter) {

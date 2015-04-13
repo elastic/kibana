@@ -7,16 +7,37 @@ define(function (require) {
    * @param {object} indexPattern used for determining default sort
    * @returns {object} a sort object suitable for returning to elasticsearch
    */
-  return function (sort, indexPattern) {
+  function getSort(sort, indexPattern) {
     var sortObj = {};
-    if (_.isArray(sort) && sort.length === 2) {
+    var field, direction;
+
+    function isSortable(field) {
+      return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
+    }
+
+    if (_.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {
       // At some point we need to refact the sorting logic, this array sucks.
-      sortObj[sort[0]] = sort[1];
-    } else if (indexPattern.timeFieldName) {
-      sortObj[indexPattern.timeFieldName] = 'desc';
+      field = sort[0];
+      direction = sort[1];
+    } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName)) {
+      field = indexPattern.timeFieldName;
+      direction = 'desc';
+    }
+
+    if (field) {
+      sortObj[field] = direction;
     } else {
       sortObj._score = 'desc';
     }
+
+
+
     return sortObj;
+  }
+
+  getSort.array = function (sort, indexPattern) {
+    return _(getSort(sort, indexPattern)).pairs().pop();
   };
+
+  return getSort;
 });

@@ -21,7 +21,6 @@ define(function (require) {
       }
 
       this.data = opts.data || new Data(vis.data, vis._attr);
-
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -36,6 +35,7 @@ define(function (require) {
       this.yAxis = opts.yAxis;
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
+      this.alerts = opts.alerts;
 
       if (this._attr.addLegend) {
         this.legend = opts.legend;
@@ -46,6 +46,7 @@ define(function (require) {
         this.legend,
         this.axisTitle,
         this.chartTitle,
+        this.alerts,
         this.xAxis,
         this.yAxis
       ], Boolean);
@@ -91,12 +92,12 @@ define(function (require) {
         var chart = new self.ChartClass(self, this, chartData);
         var enabledEvents;
 
-         /*
-          * inside handler: if there are charts, bind events to charts
-          * functionality: track in array that event is enabled
-          * clean up event handlers every time it destroys the chart
-          * rebind them every time it creates the charts
-          */
+        /*
+         * inside handler: if there are charts, bind events to charts
+         * functionality: track in array that event is enabled
+         * clean up event handlers every time it destroys the chart
+         * rebind them every time it creates the charts
+         */
         if (chart.events.dispatch) {
           enabledEvents = self.vis.eventTypes.enabled;
 

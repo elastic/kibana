@@ -6,8 +6,9 @@ define(function (require) {
       return 'lastPath:' + app.id;
     }
 
-    function getLastPath(app) {
-      app.lastPath = sessionStorage.get(appKey(app)) || '/' + app.id;
+    function assignPaths(app) {
+      app.rootPath = '/' + app.id;
+      app.lastPath = sessionStorage.get(appKey(app)) || app.rootPath;
       return app.lastPath;
     }
 
@@ -22,7 +23,7 @@ define(function (require) {
 
     $scope.apps = Private(require('registry/apps'));
     // initialize each apps lastPath (fetch it from storage)
-    $scope.apps.forEach(getLastPath);
+    $scope.apps.forEach(assignPaths);
     $scope.apps.forEach(getShow);
 
 

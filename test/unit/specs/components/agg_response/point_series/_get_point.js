@@ -12,16 +12,18 @@ define(function (require) {
     }));
 
     it('properly unwraps and scales values without a series', function () {
-      var row = [ { value: 1 }, { value: 2 }];
+      var row = [ { value: 1 }, { value: 2 }, { value: 3 } ];
       var xAspect = { i: 0 };
       var seriesAspect = null;
       var yScale = 5;
       var yAspect = { i: 1 };
-      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      var zAspect = { i: 2 };
+      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect, zAspect);
 
       expect(point)
         .to.have.property('x', 1)
         .and.have.property('y', 10)
+        .and.have.property('z', 3)
         .and.have.property('aggConfigResult', row[1])
         .and.not.have.property('series');
     });
@@ -65,5 +67,6 @@ define(function (require) {
       var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
       expect(point).to.be(void 0);
     });
+
   }];
 });

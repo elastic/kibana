@@ -1,6 +1,6 @@
 define(function (require) {
   var module = require('modules').get('kibana/vislib', ['kibana']);
-  
+
   require('services/private');
 
   module.service('d3', function () {

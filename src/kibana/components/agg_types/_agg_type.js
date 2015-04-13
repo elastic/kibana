@@ -15,12 +15,20 @@ define(function (require) {
     function AggType(config) {
 
       /**
-       * the unique, unchanging, name that elasticsearch has assigned this aggType
+       * the unique, unchanging, name that we have assigned this aggType
        *
        * @property name
        * @type {string}
        */
       this.name = config.name;
+
+      /**
+       * the name of the elasticsearch aggregation that this aggType represents. Usually just this.name
+       *
+       * @property name
+       * @type {string}
+       */
+      this.dslName = config.dslName || config.name;
 
       /**
        * the user friendly name that will be shown in the ui for this aggType
@@ -102,6 +110,12 @@ define(function (require) {
        *                                         or undefined
        */
       this.getResponseAggs = config.getResponseAggs || _.noop;
+
+      /**
+       * A function that will be called each time an aggConfig of this type
+       * is created, giving the agg type a chance to modify the agg config
+       */
+      this.decorateAggConfig = config.decorateAggConfig || null;
     }
 
     return AggType;

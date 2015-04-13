@@ -20,7 +20,7 @@ define(function (require) {
 
       var datedX = aspects.x.agg.type.ordered && aspects.x.agg.type.ordered.date;
       if (datedX) {
-        setupOrderedDateXAxis(vis, table, chart);
+        setupOrderedDateXAxis(vis, chart);
       }
 
       chart.series = getSeries(table.rows, chart);

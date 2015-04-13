@@ -1,4 +1,3 @@
-/* global sinon */
 define(function (require) {
   var fn = require('components/filter_manager/lib/range');
   var _ = require('lodash');
@@ -28,6 +27,7 @@ define(function (require) {
       it('should return a script filter when passed a scripted field', function () {
         expected.meta.field = 'script number';
         expected.script = {
+          lang: 'expression',
           script: '(' + indexPattern.fields.byName['script number'].script + ')>=gte && (' +
             indexPattern.fields.byName['script number'].script + ')<=lte',
           params: {

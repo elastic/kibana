@@ -13,11 +13,6 @@ define(function (require) {
       scope: true,
       link: function ($scope) {
         $scope.$bind('vis', 'editableVis');
-
-        $scope.hideErrors = true;
-        $scope.dontApply = function () {
-          $scope.hideErrors = false;
-        };
       }
     };
   });

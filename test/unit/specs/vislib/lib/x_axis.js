@@ -82,7 +82,7 @@ define(function (require) {
       inject(function (d3, Private) {
         Data = Private(require('components/vislib/lib/data'));
         XAxis = Private(require('components/vislib/lib/x_axis'));
-        
+
         el = d3.select('body').append('div')
           .attr('class', 'x-axis-wrapper')
           .style('height', '40px');
@@ -136,13 +136,13 @@ define(function (require) {
       var range;
 
       beforeEach(function () {
-        ordered = dataObj.get('ordered');
-        timeScale = xAxis.getScale(ordered);
-        timeDomain = xAxis.getDomain(timeScale, ordered);
-        ordinalScale = xAxis.getScale(false);
+        timeScale = xAxis.getScale();
+        timeDomain = xAxis.getDomain(timeScale);
+        range = xAxis.getRange(timeDomain, width);
+        xAxis.ordered = {};
+        ordinalScale = xAxis.getScale();
         ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
         width = $('.x-axis-div').width();
-        range = xAxis.getRange(timeDomain, ordered, width);
       });
 
       it('should return a function', function () {
@@ -176,14 +176,12 @@ define(function (require) {
     });
 
     describe('getXScale Method', function () {
-      var ordered;
       var width;
       var xScale;
 
       beforeEach(function () {
-        ordered = dataObj.get('ordered');
         width = $('.x-axis-div').width();
-        xScale = xAxis.getXScale(ordered, width);
+        xScale = xAxis.getXScale(width);
       });
 
       it('should return a function', function () {

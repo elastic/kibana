@@ -209,7 +209,7 @@ define(function (require) {
           g.get_widgets_from_DOM();
           // We can't call this method if the gridmap is empty. This was found
           // when the user double clicked the "New Dashboard" icon. See
-          // https://github.com/elasticsearch/kibana4/issues/390
+          // https://github.com/elastic/kibana4/issues/390
           if (gridster.gridmap.length > 0) g.set_dom_grid_height();
           g.drag_api.set_limits(COLS * g.min_widget_width);
         };

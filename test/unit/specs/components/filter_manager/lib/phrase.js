@@ -1,4 +1,3 @@
-/* global sinon */
 define(function (require) {
   var fn = require('components/filter_manager/lib/phrase');
   var _ = require('lodash');
@@ -31,6 +30,7 @@ define(function (require) {
         expected.meta.field = 'script number';
         expected.script = {
           script: '(' + indexPattern.fields.byName['script number'].script + ') == value',
+          lang: 'expression',
           params: {
             value: 5,
           }

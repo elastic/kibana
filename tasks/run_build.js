@@ -27,6 +27,6 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('_open_built_kibana', function () {
-    require('opn')('http://localhost:' + config.kibana.port);
+    require('opn')('http://localhost:5601');
   });
 };
