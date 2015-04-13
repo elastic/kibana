@@ -452,7 +452,8 @@ define(function (require) {
       .highlight({
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
-        fields: {'*': {}}
+        fields: {'*': {}},
+        fragment_size: 2147483647 // Limit of an integer.
       })
       .set('filter', $state.filters || []);
     });
