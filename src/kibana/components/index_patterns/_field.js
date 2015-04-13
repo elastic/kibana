@@ -1,5 +1,5 @@
 define(function (require) {
-  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
+  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier, kbnUrl) {
     var _ = require('lodash');
     var notify = new Notifier({ location: 'IndexPattern Field' });
 
@@ -60,12 +60,23 @@ define(function (require) {
       // computed values
       obj.comp('indexPattern', indexPattern);
       obj.comp('displayName', shortDotsFilter(spec.name));
+      obj.comp('editUrl', Field.getEditUrl(indexPattern, spec));
 
       var field = obj.create();
       field.$$spec = spec;
 
       return field;
     }
+
+    Field.getEditUrl = function (indexPattern, field) {
+      return kbnUrl.eval(
+        '#/settings/indices/{{index}}/field/{{field}}',
+        {
+          index: indexPattern.id,
+          field: field.name
+        }
+      );
+    };
 
     return Field;
   };
