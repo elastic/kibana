@@ -91,24 +91,6 @@ define(function (require) {
         });
       });
 
-      describe('colorToClass method', function () {
-        var labels;
-        var color;
-        var colorToClass;
-
-        beforeEach(function () {
-          labels = vis.handler.legend.labels;
-          color = vis.handler.legend.color;
-          colorToClass = vis.handler.legend.colorToClass;
-        });
-
-        it('should create a class label from the labels hex color', function () {
-          labels.forEach(function (label) {
-            expect(colorToClass(color(label))).to.be('c' + color(label).replace(/[#]/g, ''));
-          });
-        });
-      });
-
       describe('render method', function () {
         it('should create a legend toggle', function () {
           expect($('.legend-toggle').length).to.be(1);
