@@ -132,35 +132,20 @@ define(function (require) {
       });
 
       legendDiv.select('.legend-ul').selectAll('li')
-      .on('mouseover', function (d) {
-        var liClass = self.colorToClass(self.color(d));
+      .on('mouseover', function (label) {
         var charts = visEl.selectAll('.chart');
 
         // legend
         legendDiv.selectAll('li')
         .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
 
-        // lines/area
-        charts.selectAll('.color')
+        // all data-label attribute
+        charts.selectAll('[data-label]')
         .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        // circles
-        charts.selectAll('.line circle')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        // pie slices
-        charts.selectAll('.slice')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
 
@@ -180,16 +165,8 @@ define(function (require) {
         legendDiv.selectAll('li')
         .classed('blur_shape', false);
 
-        // lines/areas
-        charts.selectAll('.color')
-        .classed('blur_shape', false);
-
-        // circles
-        charts.selectAll('.line circle')
-        .classed('blur_shape', false);
-
-        // pie slices
-        charts.selectAll('.slice')
+        // all data-label attribute
+        charts.selectAll('[data-label]')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
