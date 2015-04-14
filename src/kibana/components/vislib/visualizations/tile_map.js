@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
     var L = require('leaflet');
     require('heat');
+    require('markercluster');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
@@ -208,6 +209,8 @@ define(function (require) {
           features = this.shadedGeohashGrid(map, mapData);
         } else if (this._attr.mapType === 'Heatmap') {
           features = this.heatMap(map, mapData);
+        } else if (this._attr.mapType === 'Marker Cluster') {
+          features = this.markerCluster(map, mapData);
         } else {
           features = this.pinMarkers(mapData);
         }
