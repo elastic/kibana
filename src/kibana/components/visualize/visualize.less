@@ -27,6 +27,19 @@ visualize {
       display: none;
     }
   }
+
+  .loading {
+    opacity: @loading-opacity;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    opacity: @loading-opacity;
+  }
 }
 
 .visualize-error {

@@ -67,8 +67,7 @@ router.use(function (req, res, next) {
 
   if (uri.auth) {
     var auth = new Buffer(uri.auth);
-    base64_auth = auth.toString('base64');
-    req.headers.authorization = "Basic " + base64_auth;
+    req.headers.authorization = 'Basic ' + auth.toString('base64');
   }
 
   var options = {
@@ -76,7 +75,7 @@ router.use(function (req, res, next) {
     method: req.method,
     headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,
-    timeout: config.kibana.request_timeout
+    timeout: config.request_timeout
   };
 
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
@@ -87,10 +86,10 @@ router.use(function (req, res, next) {
   if (customCA) {
     options.agentOptions = { ca: [customCA] };
   }
-  
+
   // Add client key and certificate for elasticsearch if needed.
   if (clientCrt && clientKey) {
-    if (! options.agentOptions ) {
+    if (!options.agentOptions) {
       options.agentOptions = {};
     }
     options.agentOptions.cert = clientCrt;
