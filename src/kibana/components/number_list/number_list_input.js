@@ -164,7 +164,7 @@ define(function (require) {
           return function (input) {
             var value = parse(input);
             var valid = value !== INVALID;
-            value = valid ? value : void 0;
+            value = valid ? value : input;
             ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
             then && then(input, value);
             return value;
