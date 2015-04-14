@@ -82,6 +82,10 @@ define(function (require) {
       return interval.val !== 'custom';
     };
 
+    $scope.toggleInterval = function () {
+      $scope.showInterval = !$scope.showInterval;
+    };
+
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
       load: require('text!plugins/discover/partials/load_search.html'),
