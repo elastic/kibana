@@ -18,6 +18,7 @@ define(function (require) {
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
+          clusterMetricCount: true,
           isDesaturated: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap', 'Marker Cluster', 'Pins'],

@@ -3,8 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
-    require('heat');
-    require('markercluster');
+    require('leaflet-heat');
+    require('leaflet-markercluster');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
@@ -49,7 +49,6 @@ define(function (require) {
     TileMap.prototype.draw = function () {
       var self = this;
 
-      console.log(this.maps);
       // clean up old maps
       self.destroy();
 
@@ -114,7 +113,7 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
-          // Add button to fit container to points
+          // if data, add button to fit container to points
           var FitControl = L.Control.extend({
             options: {
               position: 'topleft'
@@ -401,45 +400,18 @@ define(function (require) {
     TileMap.prototype.markerCluster = function (map, mapData) {
       var self = this;
       var max = mapData.properties.allmax;
+      var metric = mapData.properties.metricType;
+
       var featureLayer = new L.MarkerClusterGroup({
         maxClusterRadius: 130,
         disableClusteringAtZoom: 16,
+        chunkedLoading: true,
         iconCreateFunction: function (cluster) {
+          var count = cluster.getChildCount();
           var markers = cluster.getAllChildMarkers();
-          var sum = 0;
-          markers.forEach(function (marker) {
-            sum += marker.feature.properties.count;
-          });
-          var div = '<div>' + sum + '</div>';
-          var className = 'custom-marker-cluster';
-          var size = 36;
 
-          if (sum >= 100) {
-            className += ' custom-marker-cluster-100';
-            size = 36;
-          }
-          if (sum >= 1000) {
-            className += ' custom-marker-cluster-1000';
-            size = 36;
-          }
-          if (sum >= 10000) {
-            className += ' custom-marker-cluster-10000';
-            size = 46;
-          }
-          if (sum >= 100000) {
-            className += ' custom-marker-cluster-100000';
-            size = 52;
-          }
-          return new L.DivIcon({
-            html: div,
-            className: className,
-            iconSize: L.point(size, size)
-          });
+          return self.customClusterIcon(count, metric, markers);
         }
-      }).addTo(map);
-
-      map.on('dragend', function () {
-        console.log(map.getZoom());
       });
 
       L.geoJson(mapData, {
@@ -450,6 +422,134 @@ define(function (require) {
       });
 
       return featureLayer;
+    };
+
+    /**
+     * Div element icon marker for map
+     * creates featurelayer from mapData (geoJson)
+     *
+     * @method customClusterIcon
+     * @param count {Number}
+     * @param markers {Array of Leaflet Markers}
+     * @return {Leaflet DivIcon}
+     */
+    TileMap.prototype.customClusterIcon = function (count, metric, markers) {
+      var self = this;
+      var value = 0;
+      var parts;
+      var pre;
+
+      if (!self._attr.clusterMetricCount) {
+        value = count;
+      } else {
+        value = self.markerMetricValue(count, metric, markers);
+      }
+
+      var className = 'custom-marker-cluster';
+      var width = 32;
+      var height = 32;
+
+      function formatNum(num) {
+        num = +num;
+        var exp = num.toExponential();
+        var parts = exp.split('e');
+        var pre = +parts[0];
+
+        return pre.toFixed(2) + 'e' + parts[1];
+      }
+
+      // width of custom icon grows to fit length of metric value
+      if (value < 100) {
+        className += ' custom-marker-cluster-10';
+      }
+      else if (value < 1000) {
+        className += ' custom-marker-cluster-100';
+        width = 36;
+      }
+      else if (value < 10000) {
+        className += ' custom-marker-cluster-1000';
+        width = 46;
+      }
+      else if (value < 100000) {
+        className += ' custom-marker-cluster-10000';
+        width = 54;
+      }
+      else if (value < 1000000) {
+        className += ' custom-marker-cluster-100000';
+        width = 62;
+      }
+      else {
+        value = formatNum(value);
+        className += ' custom-marker-cluster-1000000';
+        width = 70;
+      }
+
+      var div = '<div>' + value + '</div>';
+
+      return new L.DivIcon({
+        html: div,
+        className: className,
+        iconSize: L.point(width, height)
+      });
+    };
+
+    /**
+     * Aggregates marker values by type of metric
+     *
+     * @method markerMetricValue
+     * @param count {Number}
+     * @param metric {String}
+     * @param markers {Array of Leaflet Markers}
+     * @return {Number}
+     */
+    TileMap.prototype.markerMetricValue = function (count, metric, markers) {
+      // metric: 'count', 'avg', 'sum', 'min', 'max', 'cardinality'
+      var value;
+
+      if (metric === 'count' || metric === 'sum') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .compact()
+        .reduce(function (sum, n) {
+          return sum + n;
+        })
+        .value();
+      }
+
+      if (metric === 'min') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .without(null)
+        .min()
+        .value();
+      }
+
+      if (metric === 'max' || metric === 'cardinality') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .compact()
+        .max()
+        .value();
+      }
+
+      if (metric === 'avg') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .compact()
+        .max()
+        .value();
+        value = parseInt(value / count);
+      }
+
+      return value;
     };
 
     /**
