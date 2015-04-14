@@ -35,7 +35,8 @@ define(function (require) {
 
             if (field.analyzed && field.type === 'string') {
               warnings.push('This is an analyzed string field.' +
-                ' Analyzed strings are highly unique and can use a lot of memory to visualize.');
+                ' Analyzed strings are highly unique and can use a lot of memory to visualize.' +
+                ' Values such as foo-bar will be broken into foo and bar.');
             }
 
             if (!field.indexed) {
