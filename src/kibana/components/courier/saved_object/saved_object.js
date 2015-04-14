@@ -141,20 +141,20 @@ define(function (require) {
       });
 
       function parseSearchSource(searchSourceJson) {
+        if (!self.searchSource) return;
+
         // if we have a searchSource, set its state based on the searchSourceJSON field
-        if (self.searchSource) {
-          var state = {};
-          try {
-            state = JSON.parse(searchSourceJson);
-          } catch (e) {}
+        var state = {};
+        try {
+          state = JSON.parse(searchSourceJson);
+        } catch (e) {}
 
-          var oldState = self.searchSource.toJSON();
-          var fnProps = _.transform(oldState, function (dynamic, val, name) {
-            if (_.isFunction(val)) dynamic[name] = val;
-          }, {});
+        var oldState = self.searchSource.toJSON();
+        var fnProps = _.transform(oldState, function (dynamic, val, name) {
+          if (_.isFunction(val)) dynamic[name] = val;
+        }, {});
 
-          self.searchSource.set(_.defaults(state, fnProps));
-        }
+        self.searchSource.set(_.defaults(state, fnProps));
       }
 
       /**
@@ -278,10 +278,10 @@ define(function (require) {
       };
 
       self.import = function (result) {
-        self.id = result._id;
-        Object.keys(result._source).forEach(function (key) {
-          self[key] = result._source[key];
-        });
+        _.assign(self, {
+          id: result._id,
+          _source: result._source
+        }, result._source);
 
         parseSearchSource(self.kibanaSavedObjectMeta && self.kibanaSavedObjectMeta.searchSourceJSON);
 

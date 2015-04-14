@@ -40,7 +40,9 @@ define(function (require) {
 
           $q.all(services).then(function (data) {
             $scope.services = _.sortBy(data, 'title');
-            $scope.changeTab($state.tab ? {title: $state.tab} : $scope.services[0]);
+            var tab = $scope.services[0];
+            if ($state.tab) tab = _.find($scope.services, {title: $state.tab});
+            $scope.changeTab(tab);
           });
         };
 
@@ -133,10 +135,10 @@ define(function (require) {
           notify.error('The file could not be processed.');
         }
 
-        $scope.changeTab = function (obj) {
-          $scope.currentTab = _.find($scope.services, {title: obj.title});
+        $scope.changeTab = function (tab) {
+          $scope.currentTab = tab;
           $scope.selectedItems.length = 0;
-          $state.tab = obj.title;
+          $state.tab = tab.title;
           $state.save();
         };
 
