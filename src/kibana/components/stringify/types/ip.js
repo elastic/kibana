@@ -11,7 +11,8 @@ define(function (require) {
         if (!isFinite(val)) return val;
         // shazzam!
         return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
-      })
+      }),
+      editor: '<p>ip address params</p>'
     };
   };
 });

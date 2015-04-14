@@ -49,9 +49,9 @@ define(function (require) {
       obj.fact('indexed', indexed);
       obj.fact('analyzed', !!spec.analyzed);
       obj.fact('doc_values', !!spec.doc_values);
+      obj.writ('formatName', formatName);
 
       // usage flags, read-only and won't be saved
-      obj.comp('formatName', formatName);
       obj.comp('format', format);
       obj.comp('sortable', sortable);
       obj.comp('bucketable', bucketable);
@@ -60,7 +60,7 @@ define(function (require) {
       // computed values
       obj.comp('indexPattern', indexPattern);
       obj.comp('displayName', shortDotsFilter(spec.name));
-      obj.comp('editUrl', Field.getEditUrl(indexPattern, spec));
+      obj.comp('editRoute', Field.getEditRoute(indexPattern, spec));
 
       var field = obj.create();
       field.$$spec = spec;
@@ -68,9 +68,9 @@ define(function (require) {
       return field;
     }
 
-    Field.getEditUrl = function (indexPattern, field) {
+    Field.getEditRoute = function (indexPattern, field) {
       return kbnUrl.eval(
-        '#/settings/indices/{{index}}/field/{{field}}',
+        '/settings/indices/{{index}}/field/{{field}}',
         {
           index: indexPattern.id,
           field: field.name

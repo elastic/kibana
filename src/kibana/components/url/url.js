@@ -1,14 +1,16 @@
 define(function (require) {
-  require('filters/uriescape');
-  require('filters/rison');
-  var _ = require('lodash');
-  var rison = require('utils/rison');
-  var location = require('modules').get('kibana/url');
+  require('modules').get('kibana/url')
+  .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-  location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse, getAppState) {
+  function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {
     var self = this;
     var reloading;
     var unbindListener;
+    var rison = require('utils/rison');
+    var _ = require('lodash');
+
+    require('filters/uriescape');
+    require('filters/rison');
 
     self.change = function (url, paramObj) {
       self._changeLocation('url', url, paramObj);
@@ -99,6 +101,7 @@ define(function (require) {
         return $parse(expr)(paramObj);
       });
     }
+  }
 
-  });
+  return KbnUrlProvider;
 });

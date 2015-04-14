@@ -1,15 +1,76 @@
-<h1>Field</h1>
-<pre>{{ fieldEditor.getIndexPattern() | json }}</pre>
-<h2>From</h2>
-<pre>{{ fieldEditor.getField() | json }}</pre>
+<form ng-submit="editor.save()">
+  <h2 ng-if="editor.creating"><strong>Create {{ field.scripted ? 'Scripted ' : '' }}Field</strong></h1>
+  <h2 ng-if="!editor.creating"><strong>Field:</strong> <code>{{ field.name }}</code></h1>
 
+  <div class="form-group">
+    <label>
+      Index Pattern
+      <a href="#{{ indexPattern.editRoute }}"><i class="fa fa-pencil" aria-label="edit"></i></a>
+    </label>
+    <input
+      ng-model="indexPattern.id"
+      readonly
+      class="form-control"
+    >
+  </div>
 
-<div ng-mouseover="popularityField.name = field.name" ng-mouseout="popularityField.name = null">
-  <span>{{ field.count }}</span>
-  <span class="field-popularize" ng-show="popularityField.name == field.name">
-    <span aria-label="Plus" ng-click="indexPattern.popularizeField(field.name, 1)"
-      class="label label-default"><i  aria-hidden="true" class="fa fa-plus"></i></span>
-    <span aria-label="Minus" ng-click="indexPattern.popularizeField(field.name, -1)"
-      class="label label-default"><i  aria-hidden="true" class="fa fa-minus"></i></span>
-  </span>
-</div>
+  <div class="form-group">
+    <label>Name</label>
+    <input
+      ng-model="field.name"
+      input-focus
+      ng-readonly="!editor.creating"
+      class="form-control"
+    >
+  </div>
+
+  <div class="form-group" ng-if="field.scripted">
+    <label>
+      Script
+      <small>Please familiarize yourself with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a> before using scripted fields.</small>
+    </label>
+
+    <div ng-bind-html="editor.scriptingInfo" class="hintbox"></div>
+    <div ng-bind-html="editor.scriptingWarning" class="hintbox"></div>
+
+    <textarea required class="form-control text-monospace" ng-model="field.script"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Format</label>
+    <select
+      ng-model="field.formatName"
+      ng-options="format.name as format.display || format.name for format in editor.fieldFormatOptions"
+      class="form-control">
+    </select>
+    <format field-editor-format-fieldset></format>
+  </div>
+
+  <div class="form-group">
+    <label for="field.count">Popularity</label>
+    <div class="input-group">
+
+      <input
+        ng-model="field.count"
+        type="number"
+        class="form-control">
+
+      <span class="input-group-btn">
+        <button
+          type="button"
+          ng-click="field.count = field.count + 1"
+          aria-label="Plus"
+          class="btn btn-default">
+          <i aria-hidden="true" class="fa fa-plus"></i>
+        </button>
+        <button
+          type="button"
+          ng-click="field.count = field.count - 1"
+          aria-label="Minus"
+          class="btn btn-default">
+          <i aria-hidden="true" class="fa fa-minus"></i>
+        </button>
+      </span>
+    </div>
+  </div>
+</form>

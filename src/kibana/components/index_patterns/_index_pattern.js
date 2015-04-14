@@ -4,6 +4,7 @@ define(function (require) {
     var angular = require('angular');
     var errors = require('errors');
 
+    var kbnUrl = Private(require('components/url/url'));
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
     var intervals = Private(require('components/index_patterns/_intervals'));
@@ -33,6 +34,7 @@ define(function (require) {
       // set defaults
       self.id = id;
       self.title = id;
+      self.editRoute = kbnUrl.eval('/settings/indices/{{ id }}', self);
 
       var docSource = new DocSource();
 

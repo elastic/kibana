@@ -1,50 +1,51 @@
 define(function (require) {
+  require('modules')
+  .get('app/settings')
+  .directive('fieldEditor', function (Private, Promise) {
+    var _ = require('lodash');
+    var fieldFormats = Private(require('registry/field_formats'));
+    var Field = Private(require('components/index_patterns/_field'));
 
-  require('modules').get('app/settings')
-  .directive('fieldEditor', function () {
     return {
       restrict: 'E',
       template: require('text!plugins/field_editor/field_editor.html'),
-      controllerAs: 'fieldEditor',
-      controller: function ($scope, $attrs) {
+      controllerAs: 'editor',
+      controller: function ($sce, $scope, $attrs) {
         var self = this;
 
-        self.getIndexPattern = $scope.$getter($attrs.indexPattern);
-        self.getField = $scope.$getter($attrs.field);
+        $scope.indexPattern = $scope.$eval($attrs.indexPattern);
+        $scope.field = $scope.$eval($attrs.field);
 
-        // var _ = require('lodash');
-        // var fieldFormats = Private(require('registry/field_formats'));
-        // var save = Promise.resolve();
+        $scope.defaultFormat = {
+          display: '- default -'
+        };
 
-        // var DEFAULT = '- default -';
+        self.scriptingInfo = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_info.html'));
+        self.scriptingWarning = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_warning.html'));
+        self.fieldFormatOptions = [$scope.defaultFormat].concat(fieldFormats.byFieldType[$scope.field.type] || []);
 
-        // return function ($parent, $scope, field) {
-        //   $scope.field = field;
-        //   $scope.defaultFormatName = fieldFormats.for(field.type).name;
-        //   $scope.formatOptionNames = [DEFAULT].concat(
-        //     _.pluck(fieldFormats.byFieldType[field.type], 'name')
-        //   );
-        //   $scope.selectedFormat = field.formatName;
+        self.creating = !_.contains($scope.indexPattern.fields, $scope.field);
+        self.save = function () {
 
-        //   $scope.$watch('selectedFormat', function (current, prev) {
-        //     $parent.editFormat = false;
-        //     var selected = $scope.selectedFormat = current || DEFAULT;
-        //     var formatName = $scope.selectedFormat === DEFAULT ? undefined : current;
+        };
+      }
+    };
+  })
+  .directive('fieldEditorFormatFieldset', function (Private, $compile) {
+    var fieldFormats = Private(require('registry/field_formats'));
 
-        //     if (field.formatName !== formatName) {
-        //       var format = fieldFormats.byName[formatName];
-        //       return $scope.indexPattern.setFieldFormat(field, format);
-        //     }
-        //   });
-
-        //   $scope.toggle = function () {
-        //     if ($parent.editFormat === $scope.field.name) {
-        //       $parent.editFormat = null;
-        //     } else {
-        //       $parent.editFormat = field.name;
-        //     }
-        //   };
-        // };
+    return {
+      restrict: 'A',
+      require: '^fieldEditor',
+      link: function ($scope, $el, attr, editor) {
+        $scope.$watch('field.formatName', function (formatName) {
+          var format = fieldFormats.byName[formatName];
+          if (!format || !format.editor) {
+            $el.empty();
+          } else {
+            $el.html($compile(format.editor)($scope));
+          }
+        });
       }
     };
   });
