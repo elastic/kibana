@@ -388,6 +388,70 @@ define(function (require) {
     /**
      * Type of data overlay for map:
      * creates featurelayer from mapData (geoJson)
+     * with leaflet.markercluster plugin
+     *
+     * @method markerCluster
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.markerCluster = function (map, mapData) {
+      var self = this;
+      var max = mapData.properties.allmax;
+      var featureLayer = new L.MarkerClusterGroup({
+        maxClusterRadius: 130,
+        disableClusteringAtZoom: 16,
+        iconCreateFunction: function (cluster) {
+          var markers = cluster.getAllChildMarkers();
+          var sum = 0;
+          markers.forEach(function (marker) {
+            sum += marker.feature.properties.count;
+          });
+          var div = '<div>' + sum + '</div>';
+          var className = 'custom-marker-cluster';
+          var size = 36;
+
+          if (sum >= 100) {
+            className += ' custom-marker-cluster-100';
+            size = 36;
+          }
+          if (sum >= 1000) {
+            className += ' custom-marker-cluster-1000';
+            size = 36;
+          }
+          if (sum >= 10000) {
+            className += ' custom-marker-cluster-10000';
+            size = 46;
+          }
+          if (sum >= 100000) {
+            className += ' custom-marker-cluster-100000';
+            size = 52;
+          }
+          return new L.DivIcon({
+            html: div,
+            className: className,
+            iconSize: L.point(size, size)
+          });
+        }
+      }).addTo(map);
+
+      map.on('dragend', function () {
+        console.log(map.getZoom());
+      });
+
+      L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+          featureLayer.addLayer(layer);
+        }
+      });
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
      * with default leaflet pin markers
      *
      * @method pinMarkers

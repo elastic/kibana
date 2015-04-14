@@ -40,6 +40,7 @@
     "jquery": "~2.1.0",
     "leaflet": "0.7.3",
     "Leaflet.heat": "Leaflet/Leaflet.heat#627ede7c11bbe43",
+    "leaflet.markercluster": "~0.4.0",
     "lesshat": "~3.0.2",
     "lodash": "~2.4.1",
     "moment": "~2.9.0",

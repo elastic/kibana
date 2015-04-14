@@ -31,6 +31,7 @@ require.config({
     leaflet: 'bower_components/leaflet/dist/leaflet',
     lodash_src: 'bower_components/lodash/dist/lodash',
     'lodash-deep': 'bower_components/lodash-deep/factory',
+    markercluster: 'bower_components/leaflet.markercluster/dist/leaflet.markercluster',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
@@ -65,6 +66,12 @@ require.config({
     },
     marked: {
       exports: 'marked'
+    },
+    markercluster: {
+      deps: ['leaflet',
+      'css!bower_components/leaflet.markercluster/dist/MarkerCluster.css',
+      'css!bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css'
+      ]
     }
   },
   waitSeconds: 60
