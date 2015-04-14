@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
-    require('heat');
+    require('leaflet-heat');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
@@ -48,7 +48,6 @@ define(function (require) {
     TileMap.prototype.draw = function () {
       var self = this;
 
-      console.log(this.maps);
       // clean up old maps
       self.destroy();
 
@@ -147,7 +146,15 @@ define(function (require) {
     TileMap.prototype.getMinMax = function (data) {
       var min = [];
       var max = [];
-      var allData = data.rows ? data.rows : data.columns ? data.columns : [data];
+      var allData;
+
+      if (data.rows) {
+        allData = data.rows;
+      } else if (data.columns) {
+        allData = data.columns;
+      } else {
+        allData = [data];
+      }
 
       allData.forEach(function (datum) {
         min.push(datum.geoJson.properties.min);
@@ -542,10 +549,11 @@ define(function (require) {
      *
      * @method getBounds
      * @param mapData {Object}
-     * @return {undefined}
+     * @return {Leaflet}
      */
     TileMap.prototype.getBounds = function (mapData) {
       var bounds = L.geoJson(mapData).getBounds();
+      console.log(bounds);
       return bounds;
     };
 
@@ -556,27 +564,25 @@ define(function (require) {
      * @param mapData {Object}
      * @param nax {Number}
      * @method dataToHeatArray
-     * @return {undefined}
+     * @return {Array}
      */
     TileMap.prototype.dataToHeatArray = function (mapData, max) {
       var self = this;
 
       return mapData.features.map(function (feature) {
+        var lat = feature.geometry.coordinates[1];
+        var lng = feature.geometry.coordinates[0];
+        var heatIntensity;
+
         if (!self._attr.heatNormalizeData) {
           // show bucket count on heatmap
-          return [
-            feature.geometry.coordinates[1],
-            feature.geometry.coordinates[0],
-            feature.properties.count
-          ];
+          heatIntensity = feature.properties.count;
         } else {
           // show bucket count normalized to max value
-          return [
-            feature.geometry.coordinates[1],
-            feature.geometry.coordinates[0],
-            parseInt(feature.properties.count / max * 100)
-          ];
+          heatIntensity = parseInt(feature.properties.count / max * 100);
         }
+
+        return [lat, lng, heatIntensity];
       });
     };
 

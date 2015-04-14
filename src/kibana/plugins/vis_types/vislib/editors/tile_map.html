@@ -1,45 +1,53 @@
 <!-- vis type specific options -->
 <div class="form-group">
   <label>Map type</label>
-  <select
-    name="agg"
-    class="form-control"
-    ng-model="vis.params.mapType"
-    ng-init="vis.params.mapType || vis.type.params.mapTypes[0]"
-    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes">
+    <select name="agg" class="form-control" ng-model="vis.params.mapType" ng-init="vis.params.mapType || vis.type.params.mapTypes[0]" ng-options="mapType as mapType for mapType in vis.type.params.mapTypes">
   </select>
 </div>
 
 <div ng-if="vis.params.mapType === 'Heatmap'">
   <div class="vis-editor-agg-form-row">
-    <div class="form-group">
-      <label>Radius</label>
+    <div>
+      <label>
+        Radius
+        &nbsp;<kbn-info placement="right" info="Size of dots. Min: 5, Max: 50, Default: 25"></kbn-info>
+      </label>
       <input name="heatRadius" ng-model="vis.params.heatRadius" required class="form-control ng-valid ng-valid-number ng-valid-min ng-valid-required ng-dirty" type="number" step="1" min="5" max="50">
     </div>
-    <div class="form-group">
-      <label>Blur</label>
+    <div>
+      <label>
+        Blur
+        &nbsp;<kbn-info placement="right" info="Amount of blur applied to dots. Min: 5, Max: 50, Default: 15"></kbn-info>
+      </label>
       <input name="heatBlur" ng-model="vis.params.heatBlur" required class="form-control ng-valid ng-valid-number ng-valid-min ng-valid-required ng-dirty" type="number" step="1" min="5" max="50">
     </div>
-    <div class="form-group">
-      <label>Max zoom</label>
+    <div>
+      <label>
+        Max zoom
+        &nbsp;<kbn-info placement="right" info="Map zoom where dots display at full intensity. Min: 1, Max: 18, Default: 16"></kbn-info>
+      </label>
       <input name="heatMaxZoom" ng-model="vis.params.heatMaxZoom" required class="form-control ng-valid ng-valid-number ng-valid-min ng-valid-required ng-dirty" type="number" step="1" min="1" max="18">
     </div>
-    <div class="form-group">
-      <label>Min opacity</label>
+    <div>
+      <label>
+        Min opacity
+        &nbsp;<kbn-info placement="right" info="Minimum opacity of dots. \n Min: 0.0, Max: 1.0, Default: 0.1"></kbn-info>
+      </label>
       <input name="heatMinOpacity" ng-model="vis.params.heatMinOpacity" required class="form-control ng-valid ng-valid-number ng-valid-min ng-valid-required ng-dirty" type="number" step="0.1" min="0.0" max="1.0">
     </div>
   </div>
 
-  <div class="vis-option-item">
+  <div>
     <label>
       <input type="checkbox" value="{{heatNormalizeData}}" ng-model="vis.params.heatNormalizeData" name="heatNormalizeData" ng-checked="vis.params.heatNormalizeData">
       Normalize data for heatmap intesity
+      &nbsp;<kbn-info placement="right" info="Check to show bucket count as percent of max count. Uncheck to show bucket count."></kbn-info>
     </label>
   </div>
 
 </div>
 
-<div class="vis-option-item">
+<div>
   <label>
     <input type="checkbox" value="{{isDesaturated}}" ng-model="vis.params.isDesaturated" name="isDesaturated" ng-checked="vis.params.isDesaturated">
     Desaturate map tiles

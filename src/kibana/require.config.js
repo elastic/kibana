@@ -25,7 +25,7 @@ require.config({
     faker: 'bower_components/Faker/faker',
     file_saver: 'bower_components/FileSaver/FileSaver',
     gridster: 'bower_components/gridster/dist/jquery.gridster',
-    heat: 'bower_components/Leaflet.heat/dist/leaflet-heat',
+    'leaflet-heat': 'bower_components/Leaflet.heat/dist/leaflet-heat',
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
@@ -51,7 +51,7 @@ require.config({
     'ace-json': ['ace'],
     'angular-ui-ace': ['angular', 'ace', 'ace-json'],
     'ng-clip': ['angular', 'zeroclipboard'],
-    heat: {
+    'leaflet-heat': {
       deps: ['leaflet']
     },
     inflection: {
