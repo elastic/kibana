@@ -57,7 +57,7 @@ define(function (require) {
       labelProp = labelProp || 'label';
       selection.each(function (datum) {
         var label = datum[0] ? datum[0][labelProp] : datum[labelProp];
-        if (!label) return;
+        if (label == null) return;
         dataLabel(this, label);
       });
     };
