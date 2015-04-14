@@ -182,14 +182,12 @@ define(function (require) {
         });
       }
 
-
       /**
-       * Save this object
+       * Serialize this object
        *
-       * @return {Promise}
-       * @resolved {String} - The id of the doc
+       * @return {Object}
        */
-      self.save = function () {
+      self.serialize = function () {
         var body = {};
 
         _.forOwn(mapping, function (fieldMapping, fieldName) {
@@ -206,6 +204,18 @@ define(function (require) {
           };
         }
 
+        return body;
+      };
+
+      /**
+       * Save this object
+       *
+       * @return {Promise}
+       * @resolved {String} - The id of the doc
+       */
+      self.save = function () {
+
+        var body = self.serialize();
 
         // Slugify the object id
         self.id = slugifyId(self.id);

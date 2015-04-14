@@ -61,8 +61,6 @@ define(function (require) {
           } else if (_.isPlainObject(field.value)) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
-          } else {
-            return memo;
           }
 
           memo.push(field);
@@ -77,13 +75,10 @@ define(function (require) {
 
         $scope.title = inflection.singularize(serviceObj.title);
 
-
-
-
         service.get($routeParams.id).then(function (obj) {
           $scope.obj = obj;
           $scope.link = service.urlFor(obj.id);
-          $scope.fields = _.reduce(_.defaults(obj._source, obj.defaults), createField, []);
+          $scope.fields = _.reduce(_.defaults(obj.serialize(), obj.defaults), createField, []);
         })
         .catch(notify.fatal);
 
