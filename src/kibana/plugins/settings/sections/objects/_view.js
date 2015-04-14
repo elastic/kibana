@@ -62,7 +62,7 @@ define(function (require) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
           } else {
-            return;
+            return memo;
           }
 
           memo.push(field);
