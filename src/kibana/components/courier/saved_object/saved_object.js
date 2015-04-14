@@ -43,6 +43,7 @@ define(function (require) {
 
       // the id of the document
       self.id = config.id || void 0;
+      self.defaults = config.defaults;
 
       /**
        * Asynchronously initialize this object - will only run

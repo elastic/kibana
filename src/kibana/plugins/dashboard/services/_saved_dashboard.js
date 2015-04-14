@@ -1,6 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
+  var moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
   module.factory('SavedDashboard', function (courier) {
@@ -37,8 +38,8 @@ define(function (require) {
           panelsJSON: '[]',
           version: 1,
           timeRestore: false,
-          timeTo: undefined,
-          timeFrom: undefined
+          timeTo: moment().toISOString(),
+          timeFrom: moment().toISOString()
         },
 
         searchSource: true,

@@ -77,15 +77,13 @@ define(function (require) {
 
         $scope.title = inflection.singularize(serviceObj.title);
 
-        es.get({
-          index: config.file.kibana_index,
-          type: service.type,
-          id: $routeParams.id
-        })
-        .then(function (obj) {
+
+
+
+        service.get($routeParams.id).then(function (obj) {
           $scope.obj = obj;
-          $scope.link = service.urlFor(obj._id);
-          $scope.fields = _.reduce(obj._source, createField, []);
+          $scope.link = service.urlFor(obj.id);
+          $scope.fields = _.reduce(_.defaults(obj._source, obj.defaults), createField, []);
         })
         .catch(notify.fatal);
 
