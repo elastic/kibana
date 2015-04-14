@@ -38,7 +38,7 @@ define(function (require) {
     }
 
     // Checks to see if the appState might already exist, even if it hasn't been newed up
-    get.mightExist = function () {
+    get.wouldExist = function () {
       var search = $location.search();
       return search[urlParam] ? true : false;
     };
