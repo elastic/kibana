@@ -100,7 +100,7 @@ define(function (require) {
      * @method destroy
      */
     Vis.prototype.destroy = function () {
-      var selection = d3.select('.vis-wrapper');
+      var selection = d3.select(this.el).select('.vis-wrapper');
 
       this.resizeChecker.off('resize', this.resize);
       this.resizeChecker.destroy();
