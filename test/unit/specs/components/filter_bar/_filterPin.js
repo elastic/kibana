@@ -50,20 +50,31 @@ define(function (require) {
         fn = filterActions($rootScope).pinFilter;
       });
 
-      it('should set pinned state to true', function () {
+      it('should set pinned state from false to true and append', function () {
         var filter = $rootScope.filters[1];
+        var filterCount = $rootScope.filters.length;
 
         expect(filter.meta.pinned).to.be(false);
         filter = fn(filter);
         expect(filter.meta.pinned).to.be(true);
+        // should also duplicate filter as pinned
+        expect($rootScope.filters.length).to.be(filterCount + 1);
       });
 
-      it('should set pinned state to false', function () {
+      it('should set pinned state from true to false and de-dupe', function () {
         var filter = $rootScope.filters[0];
+        var filterCount = $rootScope.filters.length;
+        var dupeFilter = _.cloneDeep(filter);
+        dupeFilter.meta.pinned = false;
+
+        $rootScope.filters.push(dupeFilter);
+        expect($rootScope.filters.length).to.be(filterCount + 1);
 
         expect(filter.meta.pinned).to.be(true);
         filter = fn(filter);
         expect(filter.meta.pinned).to.be(false);
+        // check that the 2 now-unpinned filters are de-duped
+        expect($rootScope.filters.length).to.be(filterCount);
       });
 
       it('should force pin filter to true', function () {
@@ -72,10 +83,22 @@ define(function (require) {
         expect(filter.meta.pinned).to.be(true);
         filter = fn(filter, true);
         expect(filter.meta.pinned).to.be(true);
+
+        filter = $rootScope.filters[1];
+
+        expect(filter.meta.pinned).to.be(false);
+        filter = fn(filter, true);
+        expect(filter.meta.pinned).to.be(true);
       });
 
       it('should force pin filter to false', function () {
-        var filter = $rootScope.filters[1];
+        var filter = $rootScope.filters[0];
+
+        expect(filter.meta.pinned).to.be(true);
+        filter = fn(filter, false);
+        expect(filter.meta.pinned).to.be(false);
+
+        filter = $rootScope.filters[1];
 
         expect(filter.meta.pinned).to.be(false);
         filter = fn(filter, false);
@@ -91,15 +114,22 @@ define(function (require) {
       });
 
       it('should pin all filters to global state', function () {
+        var filterCount = $rootScope.filters.length;
+        var unfilteredCount = _.filter($rootScope.filters, { meta: { pinned: false }}).length;
         fn(true);
         var pinned = _.filter($rootScope.filters, { meta: { pinned: true }});
-        expect(pinned.length).to.be($rootScope.filters.length);
+        // all existing filters were pinned
+        expect(pinned.length).to.be(filterCount);
+        // all previously unpinned filters were duplicated
+        expect($rootScope.filters.length).to.be(filterCount + unfilteredCount);
       });
 
       it('should unpin all filters from global state', function () {
+        var filterCount = $rootScope.filters.length;
         fn(false);
-        var pinned = _.filter($rootScope.filters, { meta: { pinned: false }});
-        expect(pinned.length).to.be($rootScope.filters.length);
+        var unpinned = _.filter($rootScope.filters, { meta: { pinned: false }});
+        // all filters were unpinned, no duplicates remain
+        expect(unpinned.length).to.be(filterCount);
       });
     });
 

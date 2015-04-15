@@ -66,14 +66,14 @@ define(function (require) {
       function pinFilter(filter, force) {
         var pinned = _.isUndefined(force) ? !filter.meta.pinned : force;
 
-        if (!pinned) {
-          filter.meta.pinned = !filter.meta.pinned;
-        } else {
-          // var pinnedFilter = _.cloneDeep(filter);
+        if (pinned && !filter.meta.pinned) {
+          // append unpinned filter, use angular.extend to remove hashes
           var pinnedFilter = _.cloneDeep(angular.extend({}, filter));
-          pinnedFilter.meta.pinned = !!pinned;
+          pinnedFilter.meta.pinned = false;
           $scope.filters.push(pinnedFilter);
         }
+
+        filter.meta.pinned = pinned;
 
         saveState();
         return filter;
