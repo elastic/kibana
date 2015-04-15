@@ -103,6 +103,7 @@ define(function (require) {
           map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.mapZoom = map.getZoom();
             mapCenter = self._attr.mapCenter = map.getCenter();
+            self.zoomPrecision(mapZoom);
           });
 
           // add label for splits
@@ -132,6 +133,21 @@ define(function (require) {
           self.maps.push(map);
         });
       };
+    };
+
+    /**
+     * change precision based on map zoom
+     *
+     * @method zoomPrecision
+     * @param mapZoom {Number}
+     * @return {undefined}
+     */
+    TileMap.prototype.zoomPrecision = function (mapZoom) {
+      var self = this;
+      console.log(self._attr.zoomPrecision, agg.params.precision, mapZoom);
+      if (mapZoom < 3) {
+
+      }
     };
 
     /**
