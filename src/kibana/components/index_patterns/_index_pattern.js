@@ -31,10 +31,7 @@ define(function (require) {
     function IndexPattern(id) {
       var self = this;
 
-      // set defaults
-      self.id = id;
-      self.title = id;
-      self.editRoute = kbnUrl.eval('/settings/indices/{{ id }}', self);
+      setId(id);
 
       var docSource = new DocSource();
 
@@ -205,18 +202,20 @@ define(function (require) {
       };
 
       // index the document
-      var finish =  function (id) {
+      function setId(id) {
         self.id = id;
+        self.editRoute = id && kbnUrl.eval('/settings/indices/{{id}}', { id: id });
+
         return self.id;
-      };
+      }
 
       self.create = function () {
         var body = self.prepBody();
         return docSource.doCreate(body)
-        .then(finish).catch(function (err) {
+        .then(setId).catch(function (err) {
           var confirmMessage = 'Are you sure you want to overwrite this?';
           if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
-            return docSource.doIndex(body).then(finish);
+            return docSource.doIndex(body).then(setId);
           }
           return Promise.resolve(false);
 
@@ -225,7 +224,7 @@ define(function (require) {
 
       self.save = function () {
         var body = self.prepBody();
-        return docSource.doIndex(body).then(finish);
+        return docSource.doIndex(body).then(setId);
       };
 
       self.refreshFields = function () {
