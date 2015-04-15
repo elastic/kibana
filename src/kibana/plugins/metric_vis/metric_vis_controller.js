@@ -3,20 +3,27 @@ define(function (require) {
   // didn't already
   var module = require('modules').get('kibana/metric_vis', ['kibana']);
 
-  module.controller('KbnMetricVisController', function ($scope) {
-    var metric = $scope.metric = {
-      label: null,
-      value: null
+  module.controller('KbnMetricVisController', function ($scope, Private) {
+    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
+
+    var metrics = $scope.metrics = [];
+
+    $scope.processTableGroups = function (tableGroups) {
+      tableGroups.tables.forEach(function (table) {
+        table.columns.forEach(function (column, i) {
+          var fieldFormatter = table.aggConfig(column).fieldFormatter();
+          metrics.push({
+            label: column.title,
+            value: fieldFormatter(table.rows[0][i])
+          });
+        });
+      });
     };
 
     $scope.$watch('esResponse', function (resp) {
-      if (!resp) {
-        metric.label = metric.value = null;
-      } else {
-        var agg = $scope.vis.aggs[0];
-        metric.label = agg.makeLabel();
-        if (agg.type.name === 'count') metric.value = resp.hits.total;
-        else metric.value = resp.aggregations[agg.id].value;
+      if (resp) {
+        metrics.length = 0;
+        $scope.processTableGroups(tabifyAggResponse($scope.vis, resp));
       }
     });
   });

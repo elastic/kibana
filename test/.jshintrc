@@ -1,18 +1,12 @@
 {
-  "extends": "../src/.jshintrc",
-
+  "extends": "../.jshintrc.browser",
+  "mocha": true,
   "globals": {
-    "module": false,
-    "inject": false,
-    "console": false,
-    "describe": true,
-    "it": true,
-    "beforeEach": true,
-    "afterEach": true,
-    "before": true,
-    "after": true,
+    // expect.js
     "expect": true,
-    "define": true,
-    "require": true
+
+    // angular mocks
+    "module": true,
+    "inject": true
   }
 }

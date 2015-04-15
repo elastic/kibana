@@ -50,33 +50,38 @@
   &-sidebar {
     .flex-parent(0, 0, auto);
 
-    overflow: auto;
+    // overflow: auto;
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       .flex-basis(@vis-editor-sidebar-basis);
       min-width: @vis-editor-sidebar-min-width;
       max-width: @vis-editor-sidebar-min-width;
-      margin-bottom: (@input-height-base * 2) - 3;
+      // margin-bottom: (@input-height-base * 2) - 3;
     }
 
-    &-buttons {
-      // overrides for tablet and desktop
-      @media (min-width: @screen-md-min) {
-        position: absolute;
-        bottom: 0;
-        min-width: @vis-editor-sidebar-min-width;
-      }
-    }
 
     .sidebar-item {
       border-top: 0 !important;
     }
 
     .sidebar-container {
-      .flex(1, 0, auto);
+      .flex-parent(1, 1, auto);
       background-color: @body-bg;
       border-right-color: @sidebar-bg;
+
+      form {
+        .flex-parent(1, 1, auto);
+
+        > ul {
+          .flex(1, 1, auto);
+          overflow-y: auto;
+        }
+
+        > .vis-edit-sidebar-buttons {
+          .flex(0, 0, auto)
+        }
+      }
     }
 
     .sidebar-item-title {
@@ -94,6 +99,9 @@
 
     .form-group {
       margin-bottom: 5px;
+    }
+    .form-horizontal .control-label {
+      text-align: left;
     }
   }
 

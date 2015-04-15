@@ -15,7 +15,7 @@
 }
 
 .tick text {
-  font-size: 9pt;
+  font-size: 8pt;
   fill: #848e96;
 }
 
@@ -26,13 +26,15 @@
   shape-rendering: crispEdges;
 }
 
+@vis-hover-opacity: 0.65;
+
 /* SVG Element Default Styling */
 rect {
   stroke: none;
   opacity: 1;
 
   &:hover {
-    stroke: #333;
+    opacity: @vis-hover-opacity;
   }
 }
 
@@ -41,13 +43,35 @@ circle {
 
   &:hover {
     opacity: 1;
-    stroke: #333;
+    stroke-width: 10px;
+    stroke-opacity: @vis-hover-opacity;
   }
+}
+
+.overlap_area {
+  opacity: 0.6;
+}
+
+.blur_shape {
+  opacity: 0.3 !important;
 }
 
 path {
   &:hover {
-    opacity: 1;
+    //opacity: @vis-hover-opacity;
+  }
+}
+
+.slice {
+  &:hover {
+    opacity: @vis-hover-opacity;
+  }
+}
+
+.leaflet-clickable {
+  &:hover {
+    stroke-width: 10px;
+    stroke-opacity: @vis-hover-opacity;
   }
 }
 
@@ -55,9 +79,16 @@ path {
 .line {
   circle {
     opacity: 1;
-  }
 
-  &:hover {
-    stroke: #333;
+    &:hover {
+      stroke-width: 10px;
+      stroke-opacity: @vis-hover-opacity;
+    }
   }
+}
+
+.endzone {
+  opacity: 0.05;
+  fill: #000;
+  pointer-events: none;
 }

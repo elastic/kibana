@@ -1,27 +1,10 @@
 define(function (require) {
-  var metricVis = {
-    aggs: [{
-      type: {name: 'count'},
-      schema: 'metric',
-      makeLabel: function () {
-        return 'Count of documents';
-      }
-    }]
-  };
-
-  var averageVis = {
-    aggs: [{
-      id: 'agg',
-      type: {name: 'average'},
-      schema: 'metric',
-      makeLabel: function () {
-        return 'Average bytes';
-      }
-    }]
-  };
-
   describe('metric vis', function () {
     var $scope;
+
+    var formatter = function (value) {
+      return value.toFixed(3);
+    };
 
     beforeEach(module('kibana/metric_vis'));
     beforeEach(inject(function ($rootScope, $controller) {
@@ -30,32 +13,49 @@ define(function (require) {
       $scope.$digest();
     }));
 
-    it('should set the metric', function () {
-      expect($scope).to.have.property('metric');
+    it('should set the metric label and value', function () {
+      $scope.processTableGroups({
+        tables: [{
+          columns: [{title: 'Count'}],
+          rows: [[4301021]],
+          aggConfig: function () {
+            return {
+              fieldFormatter: function () {
+                return formatter;
+              }
+            };
+          }
+        }]
+      });
+
+      expect($scope.metrics.length).to.be(1);
+      expect($scope.metrics[0].label).to.be('Count');
+      expect($scope.metrics[0].value).to.be('4301021.000');
     });
 
-    it('should set the metric label and value for count', function () {
-      expect($scope.metric.label).to.not.be.ok();
-      expect($scope.metric.value).to.not.be.ok();
+    it('should support multi-value metrics', function () {
+      $scope.processTableGroups({
+        tables: [{
+          columns: [
+            {title: '1st percentile of bytes'},
+            {title: '99th percentile of bytes'}
+          ],
+          rows: [[182, 445842.4634666484]],
+          aggConfig: function () {
+            return {
+              fieldFormatter: function () {
+                return formatter;
+              }
+            };
+          }
+        }]
+      });
 
-      $scope.vis = metricVis;
-      $scope.esResponse = {hits: {total: 4826}};
-      $scope.$digest();
-
-      expect($scope.metric.label).to.be('Count of documents');
-      expect($scope.metric.value).to.be($scope.esResponse.hits.total);
-    });
-
-    it('should set the metric value for average', function () {
-      expect($scope.metric.label).to.not.be.ok();
-      expect($scope.metric.value).to.not.be.ok();
-
-      $scope.vis = averageVis;
-      $scope.esResponse = {hits: {total: 4826}, aggregations: {agg: {value: 1234}}};
-      $scope.$digest();
-
-      expect($scope.metric.label).to.be('Average bytes');
-      expect($scope.metric.value).to.be($scope.esResponse.aggregations.agg.value);
+      expect($scope.metrics.length).to.be(2);
+      expect($scope.metrics[0].label).to.be('1st percentile of bytes');
+      expect($scope.metrics[0].value).to.be('182.000');
+      expect($scope.metrics[1].label).to.be('99th percentile of bytes');
+      expect($scope.metrics[1].value).to.be('445842.463');
     });
   });
 });

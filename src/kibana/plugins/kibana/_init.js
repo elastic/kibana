@@ -4,7 +4,7 @@ define(function (require) {
     $rootScope.globalState = globalState;
 
     // and some local values
-    $scope.appEmbedded = $location.search().embed;
+    $scope.appEmbedded = $location.search().embed || false;
     $scope.httpActive = $http.pendingRequests;
     $scope.notifList = notify._notifs;
 

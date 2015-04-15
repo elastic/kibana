@@ -38,12 +38,12 @@ define(function (require) {
           var splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
             write.split(agg, buckets, function forEachBucket(subBucket, key) {
-              collectBucket(write, subBucket, key);
+              collectBucket(write, subBucket, agg.getKey(subBucket), key);
             });
           } else {
             buckets.forEach(function (subBucket, key) {
-              write.cell(agg, key, function () {
-                collectBucket(write, subBucket, key);
+              write.cell(agg, agg.getKey(subBucket, key), function () {
+                collectBucket(write, subBucket, agg.getKey(subBucket, key));
               });
             });
           }
@@ -77,16 +77,6 @@ define(function (require) {
       write.aggStack.unshift(agg);
     }
 
-    // read the metric value from a metric response
-    function metricValue(aggResp) {
-      return aggResp.value == null ? 0 : aggResp.value;
-    }
-
-    // read the bucket count from an agg bucket
-    function bucketCount(bucket) {
-      return bucket.doc_count;
-    }
-
     // write empty values for each bucket agg, then write
     // the metrics from the initial bucket using collectBucket()
     function passEmptyBuckets(write, bucket, key) {
@@ -100,7 +90,7 @@ define(function (require) {
         return;
 
       case 'buckets':
-        write.cell('', function () {
+        write.cell(agg, '', function () {
           passEmptyBuckets(write, bucket, key);
         });
       }

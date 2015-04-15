@@ -1,13 +1,19 @@
 <!-- vis type specific options -->
-<div ng-repeat="mapType in vis.type.params.mapTypes">
-  <label>
-    <input type="radio" value="{{mapType}}" ng-model="vis.params.mapType" name="mapType" ng-checked="mapType === vis.params.mapType">
-    {{mapType}}
-  </label>
+<div class="form-group">
+  <label>Map type</label>
+  <select
+    name="agg"
+    class="form-control"
+    ng-model="vis.params.mapType"
+    ng-init="vis.params.mapType || vis.type.params.mapTypes[0]"
+    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes">
+  </select>
 </div>
+
 <div class="vis-option-item">
+  </br>
   <label>
     <input type="checkbox" value="{{isDesaturated}}" ng-model="vis.params.isDesaturated" name="isDesaturated" ng-checked="vis.params.isDesaturated">
-    Desaturate map
+    Desaturate map tiles
   </label>
 </div>

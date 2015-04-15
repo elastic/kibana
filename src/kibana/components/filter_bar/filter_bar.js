@@ -1,5 +1,4 @@
 define(function (require) {
-  'use strict';
   var _ = require('lodash');
   var module = require('modules').get('kibana');
   var template = require('text!components/filter_bar/filter_bar.html');

@@ -4,7 +4,7 @@ define(function (require) {
 
     return new MetricAggType({
       name: 'cardinality',
-      title: 'Unique count',
+      title: 'Unique Count',
       makeLabel: function (aggConfig) {
         return 'Unique count of ' + aggConfig.params.field.displayName;
       },

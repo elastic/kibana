@@ -1,31 +1,49 @@
 var child_process = require('child_process');
 var Promise = require('bluebird');
-var exec = Promise.promisify(child_process.exec);
 var join = require('path').join;
 var mkdirp = Promise.promisifyAll(require('mkdirp'));
 
-module.exports = function (grunt) {
+var exec = Promise.promisify(child_process.exec);
+
+var getBaseNames = function (grunt) {
+  var packageName = grunt.config.get('pkg.name');
+  var version = grunt.config.get('pkg.version');
+  var platforms = grunt.config.get('platforms');
+  return platforms.map(function (platform) {
+    return packageName + '-' + version + '-' + platform;
+  });
+};
+
+function createPackages(grunt) {
   grunt.registerTask('create_packages', function () {
     var done = this.async();
     var target = grunt.config.get('target');
-    var packageName = grunt.config.get('pkg.name');
-    var version = grunt.config.get('pkg.version');
-    var archiveName = join(target, packageName + '-' + version);
     var distPath = join(grunt.config.get('build'), 'dist');
 
-    var tgzCmd = 'tar -zcvf ' + archiveName + '.tar.gz kibana-' + version;
-    var zipCmd = 'zip -r ' + archiveName + '.zip kibana-' + version;
+    var createPackage = function (name) {
+      var options = { cwd: distPath };
+      var archiveName = join(target, name);
+      var tgzCmd = 'tar -zcf ' + archiveName + '.tar.gz ' + name;
+      var zipCmd = 'zip -rq ' + archiveName + '.zip ' + name;
 
-    var options = { cwd: distPath };
+      if (/windows/.test(name)) {
+        zipCmd = 'zip -rq -ll ' + archiveName + '.zip ' + name;
+      }
 
-    mkdirp.mkdirpAsync(target)
-      .then(function (arg) {
-        return exec(tgzCmd, options);
-      })
-      .then(function (arg) {
-        return exec(zipCmd, options);
-      })
-      .finally(done);
+      return mkdirp.mkdirpAsync(target)
+        .then(function (arg) {
+          return exec(tgzCmd, options);
+        })
+        .then(function (arg) {
+          return exec(zipCmd, options);
+        });
+    };
+
+    Promise.map(getBaseNames(grunt), createPackage).finally(done);
 
   });
-};
+}
+
+module.exports = createPackages;
+createPackages.exec = exec;
+createPackages.getBaseNames = getBaseNames;

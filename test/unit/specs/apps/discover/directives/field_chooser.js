@@ -8,16 +8,21 @@ define(function (require) {
   require('services/private');
   require('plugins/discover/components/field_chooser/field_chooser');
 
-  var $parentScope, $scope, config, indexPattern;
+  var $parentScope, $scope, config, indexPattern, indexPatternList;
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   var init = function ($elem, props) {
-    inject(function ($rootScope, $compile, _config_) {
+    inject(function ($rootScope, $compile, $timeout, _config_) {
       config = _config_;
       $parentScope = $rootScope;
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
-      $elem.scope().$digest();
+
+      // Required for test to run solo. Sigh
+      $timeout(function () {
+        $elem.scope().$digest();
+      }, 0);
+
       $scope = $elem.isolateScope();
     });
   };
@@ -30,11 +35,12 @@ define(function (require) {
   describe('discover field chooser directives', function () {
     var $elem = angular.element(
       '<disc-field-chooser' +
-      '  fields="fields"' +
+      '  columns="columns"' +
       '  toggle="toggle"' +
       '  data="data"' +
       '  filter="filter"' +
       '  index-pattern="indexPattern"' +
+      '  index-pattern-list="indexPatternList"' +
       '  state="state">' +
       '</disc-field-chooser>'
     );
@@ -43,18 +49,18 @@ define(function (require) {
     beforeEach(function () {
       inject(function (Private) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        indexPatternList = [ 'b', 'a', 'c' ];
       });
 
-      var hits = _.each(require('fixtures/hits.js'), function (hit) {
-        hit.$$_flattened = indexPattern.flattenSearchResponse(hit._source);
-      });
+      var hits = _.each(require('fixtures/hits.js'), indexPattern.flattenHit);
 
       init($elem, {
-        fields: _.map(indexPattern.fields.raw, function (v, i) { return _.merge(v, {display: false, rowCount: i}); }),
+        columns: [],
         toggle: sinon.spy(),
         data: hits,
         filter: sinon.spy(),
-        indexPattern: indexPattern
+        indexPattern: indexPattern,
+        indexPatternList: indexPatternList
       });
 
       $scope.$digest();
@@ -71,6 +77,13 @@ define(function (require) {
         unpopular: $('.discover-unpopular-fields', ctx),
       };
     };
+
+    describe('Index list', function () {
+      it('should be in alphabetical order', function (done) {
+        expect($elem.find('li.sidebar-item-title').text()).to.be('abc');
+        done();
+      });
+    });
 
     describe('Field listing', function () {
       it('should have Selected Fields, Fields and Popular Fields sections', function (done) {
@@ -89,7 +102,7 @@ define(function (require) {
         expect(section.popular.text()).to.not.contain('ip\n');
 
         expect(section.unpopular.text()).to.contain('extension');
-        expect(section.unpopular.text()).to.contain('area');
+        expect(section.unpopular.text()).to.contain('machine.os');
         expect(section.unpopular.text()).to.not.contain('ssl');
         done();
       });
@@ -103,13 +116,13 @@ define(function (require) {
       });
 
       it('should not show the popular fields if there are not any', function (done) {
+
         // Re-init
         destroy();
+
+        _.each(indexPattern.fields, function (field) { field.count = 0;}); // Reset the popular fields
         init($elem, {
-          fields: _.filter(
-            _.map(indexPattern.fields.raw, function (v, i) { return _.merge(v, {display: false, rowCount: i}); }),
-            {count: 0}
-          ),
+          columns: [],
           toggle: sinon.spy(),
           data: require('fixtures/hits'),
           filter: sinon.spy(),
@@ -117,22 +130,22 @@ define(function (require) {
         });
 
         var section = getSections($elem);
-        // Remove the popular fields
+
         $scope.$digest();
         expect(section.popular.hasClass('ng-hide')).to.be(true);
         expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be(0);
         done();
       });
 
-      it('should move the field into selected when setting field.display', function (done) {
+      it('should move the field into selected when it is added to the columns array', function (done) {
         var section = getSections($elem);
-        indexPattern.fields.byName.bytes.display = true;
+        $scope.columns.push('bytes');
         $scope.$digest();
 
         expect(section.selected.text()).to.contain('bytes');
         expect(section.popular.text()).to.not.contain('bytes');
 
-        indexPattern.fields.byName.request_body.display = true;
+        $scope.columns.push('ip');
         $scope.$digest();
         expect(section.selected.text()).to.contain('ip\n');
         expect(section.unpopular.text()).to.not.contain('ip\n');
@@ -188,6 +201,15 @@ define(function (require) {
         expect(field.details).to.not.be(undefined);
         done();
       });
+
+      it('should create buckets with formatted and raw values', function (done) {
+        $scope.details(field);
+        expect(field.details.buckets).to.not.be(undefined);
+        expect(field.details.buckets[0].value).to.be(40.141592);
+        expect(field.details.buckets[0].display).to.be(40.142);
+        done();
+      });
+
 
       it('should recalculate the details on open fields if the data changes', function () {
         $scope.details(field);

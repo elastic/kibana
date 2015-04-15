@@ -1,6 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var configDefaults = require('components/config/defaults');
+  var getValType = require('plugins/settings/sections/advanced/lib/get_val_type');
+
 
   require('plugins/settings/sections/advanced/advanced_row');
 
@@ -10,59 +12,52 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsAdvanced', function (config, Notifier, Private) {
+  .directive('kbnSettingsAdvanced', function (config, Notifier, Private, $rootScope) {
     return {
       restrict: 'E',
       link: function ($scope) {
-        var notify = new Notifier();
-        var configVals = config._vals();
         var keyCodes = {
           ESC: 27
         };
 
-        // determine if a value is too complex to be edditted (at this time)
-        var tooComplex = function (conf) {
-          // get the type of the current value or the default
-          switch (conf.type) {
-          case 'string':
-          case 'number':
-          case 'null':
-          case 'undefined':
-            conf.normal = true;
-            break;
-          case 'json':
-            conf.json = true;
-            break;
-          default:
-            if (_.isArray(config.get(conf.name))) {
-              conf.array = true;
-            } else if (typeof config.get(conf.name) === 'boolean') {
-              conf.bool = true;
-            } else {
-              conf.tooComplex = true;
-            }
-          }
-        };
+        var NAMED_EDITORS = ['json', 'array', 'boolean'];
+        var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
-        $scope.configs = _.map(configDefaults, function (def, name) {
-          var conf = {
-            name: name,
-            defVal: def.value,
-            type: (def.type ||  typeof config.get(name)),
-            description: def.description,
-            value: configVals[name]
-          };
+        function getEditorType(conf) {
+          if (_.contains(NAMED_EDITORS, conf.type)) return conf.type;
+          if (_.contains(NORMAL_EDITOR, conf.type)) return 'normal';
+        }
 
-          tooComplex(conf);
+        function isTypeComplex(conf) {
+          return !(conf.json || conf.array || conf.bool || conf.normal);
+        }
 
-          $scope.$on('change:config.' + name, function () {
-            configVals = config._vals();
-            conf.value = configVals[name];
-            tooComplex(conf);
+        function readConfigVals() {
+          var configVals = config._vals();
+
+          $scope.configs = _.map(configDefaults, function (def, name) {
+            var val = configVals[name];
+            var conf = {
+              name: name,
+              defVal: def.value,
+              type: getValType(def, val),
+              description: def.description,
+              value: val,
+            };
+
+            var editor = getEditorType(conf);
+            conf.json = editor === 'json';
+            conf.bool = editor === 'boolean';
+            conf.array = editor === 'array';
+            conf.normal = editor === 'normal';
+            conf.tooComplex = !editor;
+
+            return conf;
           });
+        }
 
-          return conf;
-        });
+        readConfigVals();
+        $rootScope.$on('change:config', readConfigVals);
       }
     };
   });

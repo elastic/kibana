@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
 
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
     var requestQueue = Private(require('components/courier/_request_queue'));
@@ -109,7 +110,7 @@ define(function (require) {
      * @return {[type]} [description]
      */
     SourceAbstract.prototype.toString = function () {
-      return JSON.stringify(this.toJSON());
+      return angular.toJson(this.toJSON());
     };
 
     /**

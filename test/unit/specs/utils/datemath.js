@@ -6,11 +6,11 @@ define(function (require) {
 
   describe('datemath', function () {
     // Test each of these intervals when testing relative time
-    var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'],
-      anchor =  '2014-01-01T06:06:06.666Z',
-      unix = moment(anchor).valueOf(),
-      format = 'YYYY-MM-DDTHH:mm:ss.SSSZ',
-      clock;
+    var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+    var anchor =  '2014-01-01T06:06:06.666Z';
+    var unix = moment(anchor).valueOf();
+    var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+    var clock;
 
     describe('errors', function () {
       it('should return undefined if passed something falsy', function () {
@@ -29,6 +29,13 @@ define(function (require) {
         expect(datemath.parse('now/2y')).to.be(undefined);
         expect(datemath.parse('now/0.5y')).to.be(undefined);
       });
+
+      it('should not go into an infinite loop when missing a unit', function () {
+        expect(datemath.parse('now-0')).to.be(undefined);
+        expect(datemath.parse('now-00')).to.be(undefined);
+        expect(datemath.parse('now-000')).to.be(undefined);
+      });
+
     });
 
     describe('objects and strings', function () {
@@ -49,7 +56,7 @@ define(function (require) {
       it('should return the same moment if passed a moment', function () {
         expect(datemath.parse(mmnt)).to.eql(mmnt);
       });
-      
+
       it('should return a moment if passed a date', function () {
         expect(datemath.parse(date).format(format)).to.eql(mmnt.format(format));
       });

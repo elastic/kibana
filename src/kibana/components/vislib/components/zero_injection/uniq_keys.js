@@ -18,21 +18,19 @@ define(function (require) {
 
       var flattenedData = flattenDataArray(obj);
       var uniqueXValues = {};
-      var charts;
-      var isDate;
-      var isOrdered;
 
+      var charts;
       if (!obj.series) {
         charts = obj.rows ? obj.rows : obj.columns;
       } else {
         charts = [obj];
       }
 
-      isDate = charts.every(function (chart) {
+      var isDate = charts.every(function (chart) {
         return chart.ordered && chart.ordered.date;
       });
 
-      isOrdered = charts.every(function (chart) {
+      var isOrdered = charts.every(function (chart) {
         return chart.ordered;
       });
 

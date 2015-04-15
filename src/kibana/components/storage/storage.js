@@ -1,5 +1,6 @@
 define(function (require) {
   var modules = require('modules');
+  var angular = require('angular');
 
   function Storage(store) {
     var self = this;
@@ -15,7 +16,7 @@ define(function (require) {
 
     self.set = function (key, value) {
       try {
-        return self.store.setItem(key, JSON.stringify(value));
+        return self.store.setItem(key, angular.toJson(value));
       } catch (e) {
         return false;
       }

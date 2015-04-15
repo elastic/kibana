@@ -23,7 +23,7 @@ define(function (require) {
 
           // We actually need a proper object in all JSON inputs
           newValue = (newValue || '').trim();
-          if (newValue[0] === '{') {
+          if (newValue[0] === '{' || '[') {
             try {
               JSON.parse(newValue);
               setValid();

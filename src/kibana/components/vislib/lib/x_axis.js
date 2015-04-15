@@ -2,6 +2,7 @@ define(function (require) {
   return function XAxisFactory(d3, Private) {
     var $ = require('jquery');
     var _ = require('lodash');
+    var moment = require('moment');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
@@ -22,6 +23,7 @@ define(function (require) {
       this.xValues = args.xValues;
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
+      this.expandLastBucket = args.expandLastBucket == null ? true : args.expandLastBucket;
       this._attr = _.defaults(args._attr || {});
     }
 
@@ -42,10 +44,11 @@ define(function (require) {
      * If time, return time scale, else return d3 ordinal scale for nominal data
      *
      * @method getScale
-     * @param ordered {Object|*} Time information
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getScale = function (ordered) {
+    XAxis.prototype.getScale = function () {
+      var ordered = this.ordered;
+
       if (ordered && ordered.date) {
         return d3.time.scale.utc();
       }
@@ -59,12 +62,13 @@ define(function (require) {
      *
      * @method getDomain
      * @param scale {Function} D3 scale
-     * @param ordered {Object} Time information
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getDomain = function (scale, ordered) {
+    XAxis.prototype.getDomain = function (scale) {
+      var ordered = this.ordered;
+
       if (ordered && ordered.date) {
-        return this.getTimeDomain(scale, ordered);
+        return this.getTimeDomain(scale, this.xValues);
       }
       return this.getOrdinalDomain(scale, this.xValues);
     };
@@ -74,11 +78,91 @@ define(function (require) {
      *
      * @method getTimeDomain
      * @param scale {Function} D3 scale function
-     * @param ordered {Object} Time information
+     * @param data {Array}
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getTimeDomain = function (scale, ordered) {
-      return scale.domain([ordered.min, ordered.max]);
+    XAxis.prototype.getTimeDomain = function (scale, data) {
+      return scale.domain([this.minExtent(data), this.maxExtent(data)]);
+    };
+
+    XAxis.prototype.minExtent = function (data) {
+      return this._calculateExtent(data || this.xValues, 'min');
+    };
+
+    XAxis.prototype.maxExtent = function (data) {
+      return this._calculateExtent(data || this.xValues, 'max');
+    };
+
+    /**
+     *
+     * @param data
+     * @param extent
+     */
+    XAxis.prototype._calculateExtent = function (data, extent) {
+      var ordered = this.ordered;
+      var opts = [ordered[extent]];
+
+      var point = d3[extent](data);
+      if (this.expandLastBucket && extent === 'max') {
+        point = this.addInterval(point);
+      }
+      opts.push(point);
+
+      return d3[extent](opts.reduce(function (opts, v) {
+        if (!_.isNumber(v)) v = +v;
+        if (!isNaN(v)) opts.push(v);
+        return opts;
+      }, []));
+    };
+
+    /**
+     * Add the interval to a point on the x axis,
+     * this properly adds dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @returns {number} - x + the ordered interval
+     */
+    XAxis.prototype.addInterval = function (x) {
+      return this.modByInterval(x, +1);
+    };
+
+    /**
+     * Subtract the interval to a point on the x axis,
+     * this properly subtracts dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @returns {number} - x - the ordered interval
+     */
+    XAxis.prototype.subtractInterval = function (x) {
+      return this.modByInterval(x, -1);
+    };
+
+    /**
+     * Modify the x value by n intervals, properly
+     * handling dates if needed.
+     *
+     * @param {number} x - a value on the x-axis
+     * @param {number} n - the number of intervals
+     * @returns {number} - x + n intervals
+     */
+    XAxis.prototype.modByInterval = function (x, n) {
+      var ordered = this.ordered;
+      if (!ordered) return x;
+      var interval = ordered.interval;
+      if (!interval) return x;
+
+      if (!ordered.date) {
+        return x += (ordered.interval * n);
+      }
+
+      var y = moment(x);
+      var method = n > 0 ? 'add' : 'subtract';
+
+      _.times(Math.abs(n), function () {
+        y[method](interval);
+      });
+
+      return y.valueOf();
     };
 
     /**
@@ -99,29 +183,29 @@ define(function (require) {
      *
      * @method getRange
      * @param scale {Function} D3 scale function
-     * @param ordered {Object} Time information
      * @param width {Number} HTML Element width
      * @returns {*} D3 scale function
      */
-    XAxis.prototype.getRange = function (scale, ordered, width) {
+    XAxis.prototype.getRange = function (domain, width) {
+      var ordered = this.ordered;
+
       if (ordered && ordered.date) {
-        return scale.range([0, width]);
+        return domain.range([0, width]);
       }
-      return scale.rangeBands([0, width], 0.1);
+      return domain.rangeBands([0, width], 0.1);
     };
 
     /**
      * Return the x axis scale
      *
      * @method getXScale
-     * @param ordered {Object} Time information
      * @param width {Number} HTML Element width
      * @returns {*} D3 x scale function
      */
-    XAxis.prototype.getXScale = function (ordered, width) {
-      var scale = this.getScale(ordered);
-      var domain = this.getDomain(scale, ordered);
-      return this.getRange(domain, ordered, width);
+    XAxis.prototype.getXScale = function (width) {
+      var domain = this.getDomain(this.getScale());
+
+      return this.getRange(domain, width);
     };
 
     /**
@@ -131,7 +215,7 @@ define(function (require) {
      * @param width {Number} HTML Element width
      */
     XAxis.prototype.getXAxis = function (width) {
-      this.xScale = this.getXScale(this.ordered, width);
+      this.xScale = this.getXScale(width);
 
       if (!this.xScale || _.isNaN(this.xScale)) {
         throw new Error('xScale is ' + this.xScale);
@@ -208,10 +292,10 @@ define(function (require) {
         selection.each(function () {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
-          if (!ordered || ordered === undefined) {
-            axis.call(self.rotateAxisLabels());
-          } else {
+          if (ordered && ordered.date) {
             axis.call(self.filterAxisLabels());
+          } else {
+            axis.call(self.rotateAxisLabels());
           }
         });
 

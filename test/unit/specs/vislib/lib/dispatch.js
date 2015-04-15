@@ -20,9 +20,7 @@ define(function (require) {
         vis = Private(require('vislib_fixtures/_vis_fixture'))();
         require('css!components/vislib/styles/main');
 
-        vis.on('brush', function (e) {
-          console.log(e);
-        });
+        vis.on('brush', _.noop);
 
         vis.render(data);
       });
@@ -36,12 +34,8 @@ define(function (require) {
     describe('addEvent method', function () {
       it('should return a function', function () {
         vis.handler.charts.forEach(function (chart) {
-          var clickEvent = function (e) {
-            console.log(e);
-          };
           var addEvent = chart.events.addEvent;
-
-          expect(_.isFunction(addEvent('click', clickEvent))).to.be(true);
+          expect(_.isFunction(addEvent('click', _.noop))).to.be(true);
         });
       });
     });

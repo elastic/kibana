@@ -5,11 +5,7 @@ port: 5601
 host: "0.0.0.0"
 
 # The Elasticsearch instance to use for all your queries.
-elasticsearch: "http://localhost:9200"
-
-# If your Elasticsearch is protected with basic auth:
-# elasticsearch_username: user
-# elasticsearch_password: pass
+elasticsearch_url: "http://localhost:9200"
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
@@ -19,19 +15,47 @@ elasticsearch_preserve_host: true
 # and dashboards. It will create a new index if it doesn't already exist.
 kibana_index: ".kibana"
 
+# If your Elasticsearch is protected with basic auth, this is the user credentials
+# used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
+# users will still need to authenticate with Elasticsearch (which is proxied thorugh
+# the Kibana server)
+# kibana_elasticsearch_username: user
+# kibana_elasticsearch_password: pass
+
+# If your Elasticsearch requires client certificate and key
+# kibana_elasticsearch_client_crt: /path/to/your/client.crt
+# kibana_elasticsearch_client_key: /path/to/your/client.key
+
+# If you need to provide a CA certificate for your Elasticsarech instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
+
 # The default application to load.
 default_app_id: "discover"
 
-# Time in seconds to wait for responses from the back end or elasticsearch.
-# Note this should always be higher than "shard_timeout".
+# Time in milliseconds to wait for elasticsearch to respond to pings, defaults to
+# request_timeout setting
+# ping_timeout: 1500
+
+# Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
-request_timeout: 60
+request_timeout: 300000
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards.
-# Note this should always be lower than "request_timeout".
-# Set to 0 to disable (not recommended).
-shard_timeout: 30000
+# Set to 0 to disable.
+shard_timeout: 0
 
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
 verify_ssl: true
+
+# SSL for outgoing requests from the Kibana Server (PEM formatted)
+# ssl_key_file: /path/to/your/server.key
+# ssl_cert_file: /path/to/your/server.crt
+
+# Set the path to where you would like the process id file to be created.
+# pid_file: /var/run/kibana.pid
+
+# If you would like to send the log output to a file you can set the path below.
+# This will also turn off the STDOUT log output.
+# log_file: ./kibana.log

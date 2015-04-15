@@ -91,6 +91,12 @@ define(function (require) {
         return aggConfig.type === self.aggType;
       });
 
+      aggConfig.type.params.forEach(function (param) {
+        if (param.onRequest) {
+          param.onRequest(aggConfig);
+        }
+      });
+
       return aggConfig.type.params.write(aggConfig);
     };
 

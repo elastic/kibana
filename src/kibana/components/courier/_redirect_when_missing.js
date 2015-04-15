@@ -2,7 +2,7 @@ define(function (require) {
   var errors = require('errors');
   var qs = require('utils/query_string');
 
-  return function RedirectWhenMissingFn($location, kbnUrl, Notifier) {
+  return function RedirectWhenMissingFn($location, kbnUrl, Notifier, Promise) {
     var SavedObjectNotFound = errors.SavedObjectNotFound;
 
     var notify = new Notifier();
@@ -31,7 +31,7 @@ define(function (require) {
 
         notify.error(err);
         kbnUrl.redirect(url);
-        return;
+        return Promise.halt();
       };
     };
   };

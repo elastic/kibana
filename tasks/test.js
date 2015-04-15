@@ -1,6 +1,6 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-  function getTestTask() {
+  function addTestTask(tasks) {
     var testTask = 'mocha:unit';
 
     if (grunt.option('use-sauce') || process.env.TRAVIS) {
@@ -13,6 +13,8 @@ module.exports = function (grunt) {
       }
     }
 
+    tasks.push('simplemocha:all', testTask);
+
     return testTask;
   }
 
@@ -23,35 +25,33 @@ module.exports = function (grunt) {
     }
 
     var tasks = [
-      'jshint',
-      'ruby_server',
-      'maybe_start_server',
+      'jshint:source',
+      'jscs:source',
+      'maybe_start_kibana',
       'jade',
-      'less',
-      getTestTask()
+      'less:build'
     ];
+    addTestTask(tasks);
+    if (process.env.TRAVIS) tasks.unshift('esvm:dev');
     grunt.task.run(tasks);
   });
 
   grunt.registerTask('quick-test', function () {
     var tasks = [
-      'ruby_server',
-      'maybe_start_server',
-      getTestTask()
+      'maybe_start_kibana'
     ];
+    addTestTask(tasks);
     grunt.task.run(tasks);
   });
 
   grunt.registerTask('coverage', [
     'blanket',
-    'ruby_server',
-    'maybe_start_server',
+    'maybe_start_kibana',
     'mocha:coverage'
   ]);
 
   grunt.registerTask('test:watch', [
-    'ruby_server',
-    'maybe_start_server',
+    'maybe_start_kibana',
     'watch:test'
   ]);
 };

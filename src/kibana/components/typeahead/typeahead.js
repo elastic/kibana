@@ -169,7 +169,7 @@ define(function (require) {
 
           // persist selection on enter, when not selecting from the list
           if (_.contains([keyMap.ENTER], keyCode)) {
-            if (! self.active) {
+            if (!self.active) {
               self.persistEntry();
             }
           }

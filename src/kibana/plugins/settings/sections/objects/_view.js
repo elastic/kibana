@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
   var inflection = require('inflection');
   var rison = require('utils/rison');
   var registry = require('plugins/settings/saved_object_registry');
@@ -34,7 +35,7 @@ define(function (require) {
          * @returns {array}
          */
         var createField = function (memo, val, key, collection, parents) {
-          if (_.isArray(parents))  {
+          if (_.isArray(parents)) {
             parents.push(key);
           } else {
             parents = [key];
@@ -44,7 +45,7 @@ define(function (require) {
 
           if (_.isString(field.value)) {
             try {
-              field.value = JSON.stringify(JSON.parse(field.value), null, '  ');
+              field.value = angular.toJson(JSON.parse(field.value), true);
               field.type = 'json';
             } catch (err) {
               field.value = field.value;
@@ -53,7 +54,7 @@ define(function (require) {
             field.type = 'number';
           } else if (_.isArray(field.value)) {
             field.type = 'array';
-            field.value = JSON.stringify(field.value, null, ' ');
+            field.value = angular.toJson(field.value, true);
           } else if (_.isPlainObject(field.value)) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
@@ -139,20 +140,19 @@ define(function (require) {
 
         $scope.submit = function () {
           var source = _.cloneDeep($scope.obj._source);
-          var value;
 
           _.each($scope.fields, function (field) {
-            switch (field.type) {
-              case 'number':
-                value = Number(field.value);
-                break;
-              case 'array':
-                value = JSON.parse(field.value);
-                break;
-              default:
-                value = field.value;
+            var value = field.value;
+
+            if (field.type === 'number') {
+              value = Number(field.value);
             }
-            _.setValue(source, field.name, field.value);
+
+            if (field.type === 'array') {
+              value = JSON.parse(field.value);
+            }
+
+            _.setValue(source, field.name, value);
           });
 
           es.index({

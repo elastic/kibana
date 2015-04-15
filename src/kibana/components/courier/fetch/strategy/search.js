@@ -1,6 +1,7 @@
 define(function (require) {
   return function FetchStrategyForSearch(Private, Promise, timefilter, configFile) {
     var _ = require('lodash');
+    var angular = require('angular');
 
     return {
       clientMethod: 'msearch',
@@ -20,14 +21,14 @@ define(function (require) {
             indexList = indexList.toIndexList(timeBounds.min, timeBounds.max);
           }
 
-          return JSON.stringify({
+          return angular.toJson({
             index: indexList,
             type: fetchParams.type,
             search_type: fetchParams.search_type,
             ignore_unavailable: true
           })
           + '\n'
-          + JSON.stringify(fetchParams.body || {});
+          + angular.toJson(fetchParams.body || {});
         }).join('\n') + '\n';
       },
 

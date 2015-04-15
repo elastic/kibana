@@ -11,7 +11,7 @@ define(function (require) {
   require('components/doc_table/components/table_row');
 
   require('modules').get('kibana')
-  .directive('docTable', function (config, Notifier) {
+  .directive('docTable', function (config, Notifier, getAppState) {
     return {
       restrict: 'E',
       template: html,
@@ -54,6 +54,24 @@ define(function (require) {
         $scope.addRows = function () {
           $scope.limit += 50;
         };
+
+        // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
+        $scope.$watch('columns', function (columns) {
+          if (columns.length !== 0) return;
+
+          var $state = getAppState();
+          $scope.columns.push('_source');
+          if ($state) $state.replace();
+        });
+
+        $scope.$watchCollection('columns', function (columns, oldColumns) {
+          if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
+            _.pull($scope.columns, '_source');
+          }
+
+          if ($scope.columns.length === 0) $scope.columns.push('_source');
+        });
+
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!$scope.searchSource) return;

@@ -90,6 +90,10 @@ define(function (require) {
       return new Vis(this.indexPattern, this.getState());
     };
 
+    Vis.prototype.requesting = function () {
+      _.invoke(this.aggs.getRequestAggs(), 'requesting');
+    };
+
     Vis.prototype.isHierarchical = function () {
       if (_.isFunction(this.type.hierarchicalData)) {
         return !!this.type.hierarchicalData(this);

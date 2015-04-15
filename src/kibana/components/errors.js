@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
   var inherits = require('lodash').inherits;
 
   var canStack = (function () {
@@ -55,7 +56,7 @@ define(function (require) {
     err = err || false;
 
     KbnError.call(this,
-      'Request to Elasticsearch failed: ' + JSON.stringify(resp || err.message),
+      'Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
       errors.RequestFailure);
 
     this.origError = err;
@@ -70,12 +71,24 @@ define(function (require) {
    */
   errors.FetchFailure = function FetchFailure(resp) {
     KbnError.call(this,
-      'Failed to get the doc: ' + JSON.stringify(resp),
+      'Failed to get the doc: ' + angular.toJson(resp),
       errors.FetchFailure);
 
     this.resp = resp;
   };
   inherits(errors.FetchFailure, KbnError);
+
+  /**
+   * ShardFailure Error - when one or more shards fail
+   * @param {String} [msg] - An error message that will probably end up in a log.
+   */
+  errors.ShardFailure = function ShardFailure(resp) {
+    KbnError.call(this, resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
+      errors.ShardFailure);
+
+    this.resp = resp;
+  };
+  inherits(errors.ShardFailure, KbnError);
 
 
   /**
@@ -223,6 +236,26 @@ define(function (require) {
     errors.NoResults);
   };
   inherits(errors.NoResults, KbnError);
+
+  /**
+   * error thrown when no results are returned from an elasticsearch query
+   */
+  errors.PieContainsAllZeros = function PieContainsAllZeros() {
+    KbnError.call(this,
+      'No results displayed because all values equal 0',
+      errors.PieContainsAllZeros);
+  };
+  inherits(errors.PieContainsAllZeros, KbnError);
+
+  /**
+   * error thrown when no results are returned from an elasticsearch query
+   */
+  errors.CannotLogScaleNegVals = function CannotLogScaleNegVals() {
+    KbnError.call(this,
+      'Negative values cannot be displayed on a log scale',
+      errors.CannotLogScaleNegVals);
+  };
+  inherits(errors.CannotLogScaleNegVals, KbnError);
 
   return errors;
 });

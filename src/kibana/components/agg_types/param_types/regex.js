@@ -27,6 +27,15 @@ define(function (require) {
     RegexAggParam.prototype.editor = editorHtml;
 
     /**
+     * Disabled state of the agg param
+     *
+     * @return {bool}
+     */
+    RegexAggParam.prototype.disabled = function (aggConfig) {
+      return false;
+    };
+
+    /**
      * Write the aggregation parameter.
      *
      * @param  {AggConfig} aggConfig - the entire configuration for this agg
@@ -38,9 +47,10 @@ define(function (require) {
      */
     RegexAggParam.prototype.write = function (aggConfig, output) {
       var param = aggConfig.params[this.name];
+      var paramType = aggConfig.type.params.byName[this.name];
 
-      // clear aggParam if pattern is not set
-      if (!param || !param.pattern || !param.pattern.length) {
+      // clear aggParam if pattern is not set or is disabled
+      if (!param || !param.pattern || !param.pattern.length || paramType.disabled(aggConfig)) {
         return;
       }
 

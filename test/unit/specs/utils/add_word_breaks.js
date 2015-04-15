@@ -8,7 +8,7 @@ define(function (require) {
       ['aaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaa<wbr>aaaaaaaaa'],
       ['aaaa aaaaaaaaaaaaaaa', 'aaaa aaaaaaaaaaa<wbr>aaaa'],
       ['aaaa;aaaaaaaaaaaaaaa', 'aaaa;aaaaaaaaaaa<wbr>aaaa'],
-      ['aaaa&aaaaaaaaaaaaaaa', 'aaaa&aaaaaaaaaaa<wbr>aaaa'],
+      ['aaaa&aaaaaaaaaaaaaaa', 'aaaa&aaaaaa<wbr>aaaaaaaaa'],
       ['aaaa:aaaaaaaaaaaaaaa', 'aaaa:aaaaaaaaaaa<wbr>aaaa'],
       ['aaaa,aaaaaaaaaaaaaaa', 'aaaa,aaaaaaaaaaa<wbr>aaaa'],
       ['aaaa aaaa', 'aaaa aaaa'],

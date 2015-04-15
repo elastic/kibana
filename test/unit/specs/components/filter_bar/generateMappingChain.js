@@ -1,6 +1,6 @@
-/* global sinon */
 define(function (require) {
   var generateMappingChain = require('components/filter_bar/lib/generateMappingChain');
+  var sinon = require('test_utils/auto_release_sinon');
 
   describe('Filter Bar Directive', function () {
     describe('generateMappingChain()', function () {

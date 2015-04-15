@@ -5,10 +5,11 @@
 
     <!-- open/close editor -->
     <button
+      aria-label="{{ editorOpen ? 'Close Editor' : 'Open Editor' }}"
       ng-click="editorOpen = !editorOpen"
       type="button"
       class="btn btn-xs vis-editor-agg-header-toggle">
-      <i ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
+      <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
     </button>
 
     <!-- title -->
@@ -23,13 +24,14 @@
 
     <!-- error -->
     <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger">
-      {{ describeError() }}
+      {{ aggForm.describeErrors() }}
     </span>
 
     <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
     <div class="vis-editor-agg-header-controls btn-group">
       <!-- up button -->
       <button
+        aria-label="Increase Priority"
         ng-if="stats.count > 1"
         ng-class="{ disabled: $first }"
         ng-click="moveUp(agg)"
@@ -37,11 +39,12 @@
         tooltip-append-to-body="true"
         type="button"
         class="btn btn-xs btn-default">
-        <i class="fa fa-caret-up"></i>
+        <i aria-hidden="true" class="fa fa-caret-up"></i>
       </button>
 
       <!-- down button -->
       <button
+        aria-lebl="Decrease Priority"
         ng-if="stats.count > 1"
         ng-class="{ disabled: $last }"
         ng-click="moveDown(agg)"
@@ -49,18 +52,20 @@
         tooltip-append-to-body="true"
         type="button"
         class="btn btn-xs btn-default">
-        <i class="fa fa-caret-down"></i>
+        <i aria-hidden="true" class="fa fa-caret-down"></i>
       </button>
 
       <!-- remove button -->
       <button
+        ng-if="canRemove(agg)"
+        aria-label="Remove Dimension"
         ng-if="stats.count > stats.min"
         ng-click="remove(agg)"
         tooltip="Remove Dimension"
         tooltip-append-to-body="true"
         type="button"
         class="btn btn-xs btn-danger">
-        <i class="fa fa-times"></i>
+        <i aria-hidden="true" class="fa fa-times"></i>
       </button>
     </div>
   </div>

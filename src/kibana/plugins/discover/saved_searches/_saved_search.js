@@ -21,7 +21,8 @@ define(function (require) {
           description: 'string',
           hits: 'integer',
           columns: 'string',
-          sort: 'string'
+          sort: 'string',
+          version: 'integer'
         },
 
         defaults: {
@@ -29,7 +30,8 @@ define(function (require) {
           description: '',
           columns: [],
           hits: 0,
-          sort: []
+          sort: [],
+          version: 1
         },
 
         searchSource: true

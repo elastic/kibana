@@ -106,7 +106,7 @@ define(function (require) {
     // sets a value in the config
     config.set = function (key, val) {
       if (_.isPlainObject(val)) {
-        return change(key, JSON.stringify(val));
+        return change(key, angular.toJson(val));
       } else {
         return change(key, val);
       }

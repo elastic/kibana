@@ -13,7 +13,8 @@ define(function (require) {
       'bytes': 100,
       'area': [{lat: 7, lon: 7}],
       'noMapping': 'hasNoMapping',
-      'objectArray': [{foo: true}, {bar: false}]
+      'objectArray': [{foo: true}, {bar: false}],
+      '_underscore': 1
     }
   };
 
@@ -103,19 +104,48 @@ define(function (require) {
       });
 
       describe('warnings', function () {
+        it('displays a warning about field name starting with underscore', function () {
+          var cells = $elem.find('td[title="_underscore"]').siblings();
+          expect(cells.find('.doc-viewer-underscore').length).to.be(1);
+          expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
+          expect(cells.find('.doc-viewer-object-array').length).to.be(0);
+        });
+
         it('displays a warning about missing mappings', function () {
           var cells = $elem.find('td[title="noMapping"]').siblings();
+          expect(cells.find('.doc-viewer-underscore').length).to.be(0);
           expect(cells.find('.doc-viewer-no-mapping').length).to.be(1);
           expect(cells.find('.doc-viewer-object-array').length).to.be(0);
         });
 
         it('displays a warning about objects in arrays', function () {
           var cells = $elem.find('td[title="objectArray"]').siblings();
+          expect(cells.find('.doc-viewer-underscore').length).to.be(0);
           expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
           expect(cells.find('.doc-viewer-object-array').length).to.be(1);
         });
       });
 
+    });
+
+    describe('JSON mode', function () {
+      it('has pretty JSON', function () {
+        expect($scope.hit_json).to.equal(angular.toJson(hit, true));
+      });
+
+      it('should have a global ACE object', function () {
+        expect(window.ace).to.be.a(Object);
+      });
+
+      it('should have one ACE div', function () {
+        expect($elem.find('div[id="json-ace"]').length).to.be(1);
+      });
+
+      it('should contain the same code as hit_json', function () {
+        var editor = window.ace.edit($elem.find('div[id="json-ace"]')[0]);
+        var code = editor.getSession().getValue();
+        expect(code).to.equal($scope.hit_json);
+      });
     });
   });
 });

@@ -25,7 +25,7 @@ define(function (require) {
       PieChart.Super.apply(this, arguments);
 
       this._attr = _.defaults(handler._attr || {}, {
-        isDonut: handler._attr.isDonut || false,
+        isDonut: handler._attr.isDonut || false
       });
     }
 
@@ -41,7 +41,35 @@ define(function (require) {
 
       return element
         .call(events.addHoverEvent())
+        .call(events.addMouseoutEvent())
         .call(events.addClickEvent());
+    };
+
+    PieChart.prototype.convertToPercentage = function (slices) {
+      (function assignPercentages(slices) {
+        if (slices.sumOfChildren != null) return;
+
+        var parent = slices;
+        var children = parent.children;
+        var parentPercent = parent.percentOfParent;
+
+        var sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
+          return sum + child.size;
+        }, 0));
+
+        children.forEach(function (child) {
+          child.percentOfGroup = child.size / sum;
+          child.percentOfParent = child.percentOfGroup;
+
+          if (parentPercent != null) {
+            child.percentOfParent *= parentPercent;
+          }
+
+          if (child.children) {
+            assignPercentages(child);
+          }
+        });
+      }(slices));
     };
 
     /**
@@ -55,13 +83,14 @@ define(function (require) {
      * @returns {D3.Selection} SVG with paths attached
      */
     PieChart.prototype.addPath = function (width, height, svg, slices) {
+      var marginFactor = 0.95;
       var isDonut = this._attr.isDonut;
-      var radius = Math.min(width, height) / 2;
+      var radius = (Math.min(width, height) / 2) * marginFactor;
       var color = this.handler.data.getPieColorFunc();
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
-        return d.size;
+        return d.percentOfParent * 100;
       });
       var x = d3.scale.linear()
       .range([0, 2 * Math.PI]);
@@ -104,12 +133,11 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
-          return self.colorToClass(color(format(d, d.name)));
+          return 'slice ' + self.colorToClass(color(format(d, d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
-
           return color(format(d, d.name));
         });
 
@@ -150,6 +178,7 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
+          self.convertToPercentage(slices);
           path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 

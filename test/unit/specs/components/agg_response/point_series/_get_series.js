@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var getSeries;
 
+    var agg = { fieldFormatter: _.constant(_.identity) };
+
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
       getSeries = Private(require('components/agg_response/point_series/_get_series'));
@@ -16,17 +18,18 @@ define(function (require) {
 
     it('produces a single series with points for each row', function () {
       var rows = [
-        [1, 2],
-        [1, 2],
-        [1, 2],
-        [1, 2],
-        [1, 2]
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3]
       ].map(wrapRows);
 
       var chart = {
         aspects: {
           x: { i: 0 },
-          y: { i: 1 }
+          y: { i: 1 },
+          z: { i: 2 }
         }
       };
 
@@ -47,7 +50,10 @@ define(function (require) {
         .and.have.length(5);
 
       siri.values.forEach(function (point) {
-        expect(point).to.have.property('x', 1).and.property('y', 2);
+        expect(point)
+          .to.have.property('x', 1)
+          .and.property('y', 2)
+          .and.property('z', 3);
       });
     });
 
@@ -98,7 +104,9 @@ define(function (require) {
       var rows = [
         ['0', 3],
         ['1', 3],
+        ['1', 'NaN'],
         ['0', 3],
+        ['0', 'NaN'],
         ['1', 3],
         ['0', 3],
         ['1', 3]
@@ -107,7 +115,7 @@ define(function (require) {
       var chart = {
         aspects: {
           x: { i: -1 },
-          series: { i: 0 },
+          series: { i: 0, agg: agg },
           y: { i: 1, col: { title: '0' } }
         }
       };
@@ -149,7 +157,7 @@ define(function (require) {
       var chart = {
         aspects: {
           x: { i: -1 },
-          series: { i: 0 },
+          series: { i: 0, agg: agg },
           y: [
             { i: 1, col: { title: '0' }, agg: { id: 1 } },
             { i: 2, col: { title: '1' }, agg: { id: 2 } }
@@ -199,7 +207,7 @@ define(function (require) {
       var chart = {
         aspects: {
           x: { i: -1 },
-          series: { i: 0 },
+          series: { i: 0, agg: agg },
           y: [
             { i: 1, col: { title: '0' }, agg: { id: 1 } },
             { i: 2, col: { title: '1' }, agg: { id: 2 } }

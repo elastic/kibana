@@ -10,7 +10,6 @@ define(function () {
 
       switch (chr) {
       case ' ':
-      case '&':
       case ';':
       case ':':
       case ',':

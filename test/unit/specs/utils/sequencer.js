@@ -31,7 +31,7 @@ define(function (require) {
 
       seq.forEach(function (n, i) {
         if (i > 0 && (seq[i - 1] < n) !== up) {
-          throw new Error('expected values to ' + (up ? 'increase': 'decrease'));
+          throw new Error('expected values to ' + (up ? 'increase' : 'decrease'));
         }
       });
     }

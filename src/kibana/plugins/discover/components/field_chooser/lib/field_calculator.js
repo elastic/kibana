@@ -23,9 +23,9 @@ define(function (require) {
       return { error: 'Analysis is not available for geo fields.' };
     }
 
-    var allValues = getFieldValues(params.data, params.field),
-      exists = 0,
-      counts;
+    var allValues = getFieldValues(params.data, params.field);
+    var exists = 0;
+    var counts;
 
     var missing = _countMissing(allValues);
 
@@ -68,13 +68,11 @@ define(function (require) {
 
 
   var _groupValues = function (allValues, params) {
-    var groups = {},
-    value, k;
+    var groups = {};
+    var value;
+    var k;
 
-    for (var i = 0; i < allValues.length; ++i) {
-
-      value = allValues[i];
-
+    allValues.forEach(function (value) {
       if (_.isObject(value) && !_.isArray(value)) {
         throw new Error('Analysis is not available for object fields');
       }
@@ -82,10 +80,9 @@ define(function (require) {
       if (_.isArray(value) && !params.grouped) {
         k = value;
       } else {
-        k = _.isUndefined(value) || _.isNull(value) ? undefined : [value.toString()];
+        k = value == null ? undefined : [value];
       }
 
-      /* jshint -W083 */
       _.each(k, function (key) {
         if (_.has(groups, key)) {
           groups[key].count++;
@@ -96,7 +93,8 @@ define(function (require) {
           };
         }
       });
-    }
+    });
+
     return groups;
   };
 

@@ -1,0 +1,26 @@
+.hintbox-label,
+.hintbox-label[ng-click] {
+  cursor: help;
+}
+
+.hintbox {
+  border-radius: 5px;
+  background-color: @gray-lighter;
+  padding: 5px;
+  margin-bottom: 5px;
+
+  a {
+    color: @link-color !important;
+
+    &:hover {
+      color: @text-color !important;
+    }
+  }
+}
+
+.hintbox p {
+  margin-bottom: 0;
+}
+.hintbox p + p {
+  margin-top: 5px;
+}

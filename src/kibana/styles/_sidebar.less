@@ -15,7 +15,7 @@
       margin-bottom: 0px;
     }
 
-    .sidebar-list-header {
+    &-header {
       padding-left: 10px;
       padding-right: 10px;
       color: @sidebar-header-color;
@@ -35,8 +35,19 @@
         }
       }
 
-      .sidebar-item-title {
+      &-title,
+      &-text,
+      &-button {
+        margin: 0;
         padding: 5px 10px;
+        text-align: center;
+        width: 100%;
+        border: none;
+        border-radius: 0;
+      }
+
+      &-title {
+        text-align: left;
         white-space: nowrap;
         .ellipsis();
 
@@ -51,11 +62,11 @@
         }
       }
 
-      .sidebar-item-button {
-        padding: 5px 10px;
-        text-align: center;
-        width: 100%;
-        border-radius: 0;
+      &-text {
+        background: white;
+      }
+
+      &-button {
         font-size: inherit;
 
         &[disabled] {
@@ -87,6 +98,10 @@
           background-color: @btn-danger-bg;
           color: @btn-danger-color
         }
+
+        &.default {
+          .btn-default();
+        }
       }
 
       .active {
@@ -100,5 +115,22 @@
         }
       }
     }
+  }
+
+  .index-pattern {
+    background-color: @sidebar-active-bg;
+    font-weight: bold;
+    padding: 5px 10px;
+    color: @sidebar-active-color;
+    .display(flex);
+    .justify-content(space-between);
+
+    > * {
+      .flex;
+    }
+  }
+
+  .index-pattern-selection .sidebar-item-title {
+    background-color: white;
   }
 }

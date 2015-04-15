@@ -1,10 +1,11 @@
-<form>
+<form role="form">
   <div class="form-group finder-form">
     <div>
       <a class="small pull-right" ng-click="manageObject(type)">manage {{type}}</a>
     </div>
     <div class="clearfix visible-xs-block"></div>
     <input
+      input-focus
       ng-model="filter"
       ng-attr-placeholder="{{noun}} Filter"
       class="form-control"
@@ -13,14 +14,14 @@
       <span class="finder-hit-count"><strong>{{hitCount}}</strong> {{type}}</span>
   </div>
 </form>
-<paginate list="hits" per-page="5">
+<paginate list="hits | orderBy:'title'" per-page="5">
   <ul class="list-group list-group-menu">
     <a class="list-group-item list-group-menu-item"
       ng-repeat="hit in page"
       ng-href="{{ makeUrl(hit) }}"
       ng-click="onChoose(hit, $event)">
       <li>
-        <i class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
+        <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
         <p ng-if="hit.description" ng-bind="hit.description"></p>
       </li>
     </a>

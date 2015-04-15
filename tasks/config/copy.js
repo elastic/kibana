@@ -1,5 +1,6 @@
 module.exports = function (grunt) {
   var version = grunt.config.get('pkg.version');
+  var platforms = grunt.config.get('platforms');
   var config = {
 
     kibana_src: {
@@ -12,21 +13,27 @@ module.exports = function (grunt) {
     server_src: {
       files: [
         {
-          src: '<%= server %>/Gemfile',
-          dest: '<%= build %>/kibana/Gemfile'
+          src: '<%= root %>/package.json',
+          dest: '<%= build %>/kibana/package.json'
         },
         {
-          src: '<%= server %>/Gemfile.lock',
-          dest: '<%= build %>/kibana/Gemfile.lock'
+          src: '<%= server %>/app.js',
+          dest: '<%= build %>/kibana/app.js'
         },
         {
-          src: '<%= server %>/bin/initialize',
-          dest: '<%= build %>/kibana/bin/initialize'
+          src: '<%= server %>/index.js',
+          dest: '<%= build %>/kibana/index.js'
+        },
+        {
+          expand: true,
+          cwd: '<%= server %>/bin/',
+          src: '**',
+          dest: '<%= build %>/kibana/bin'
         },
         {
           expand: true,
           cwd: '<%= server %>/config/',
-          src: '**',
+          src: '*.yml',
           dest: '<%= build %>/kibana/config'
         },
         {
@@ -40,6 +47,12 @@ module.exports = function (grunt) {
           cwd: '<%= server %>/routes/',
           src: '**',
           dest: '<%= build %>/kibana/routes'
+        },
+        {
+          expand: true,
+          cwd: '<%= server %>/views/',
+          src: '**',
+          dest: '<%= build %>/kibana/views'
         }
       ]
     },
@@ -49,9 +62,9 @@ module.exports = function (grunt) {
       files: [
         {
           expand: true,
-          cwd: '<%= build %>/kibana/',
-          src: '*.jar',
-          dest: '<%= build %>/dist/kibana/lib/'
+          cwd: '<%= build %>/kibana',
+          src: '**',
+          dest: '<%= build %>/dist/kibana/src'
         },
         {
           expand: true,
@@ -64,14 +77,7 @@ module.exports = function (grunt) {
 
     versioned_dist: {
       options: { mode: true },
-      files: [
-        {
-          expand: true,
-          cwd: '<%= build %>/dist/kibana',
-          src: '**',
-          dest: '<%= build %>/dist/kibana-' + version
-        }
-      ]
+      files: []
     },
 
     plugin_readme: {
@@ -84,6 +90,21 @@ module.exports = function (grunt) {
     }
 
   };
+
+  platforms.forEach(function (platform) {
+    config.versioned_dist.files.push({
+      expand: true,
+      cwd: '<%= build %>/dist/kibana',
+      src: '**',
+      dest: '<%= build %>/dist/kibana-' + version + '-' + platform
+    });
+    config.versioned_dist.files.push({
+      expand: true,
+      cwd: '<%= root %>/.node_binaries/' + platform,
+      src: '**',
+      dest: '<%= build %>/dist/kibana-' + version + '-' + platform + '/node'
+    });
+  });
 
   return config;
 };

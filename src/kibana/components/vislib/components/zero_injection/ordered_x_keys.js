@@ -1,6 +1,7 @@
 define(function (require) {
   return function OrderedXKeysUtilService(Private) {
     var _ = require('lodash');
+    var moment = require('moment');
     var getUniqKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
 
     /*
@@ -16,8 +17,10 @@ define(function (require) {
       }
 
       var objKeys = getUniqKeys(obj);
+      var interval = _.deepGet(obj, 'ordered.interval');
+      var dateInterval = moment.isDuration(interval) ? interval : false;
 
-      return _.chain(objKeys)
+      return _(objKeys)
       .pairs()
       .sortBy(function (d) {
         if (d[1].isDate || d[1].isOrdered) {
@@ -25,9 +28,34 @@ define(function (require) {
         }
         return d[1].index;
       })
-      .map(function (d) {
-        return d[1].isNumber ? +d[0] : d[0];
+      .map(function (d, i, list) {
+        if (!d[1].isNumber) return d[0];
+
+        var val = +d[0];
+        if (interval == null) return val;
+
+        var gapEdge = parseFloat(_.deepGet(list, [i + 1, 0]));
+        if (isNaN(gapEdge)) return val;
+
+        var vals = [];
+        var next = val;
+
+        if (dateInterval) {
+          next = moment(val);
+          while (next < gapEdge) {
+            vals.push(next.valueOf());
+            next.add(dateInterval);
+          }
+        } else {
+          while (next < gapEdge) {
+            vals.push(next);
+            next += interval;
+          }
+        }
+
+        return vals;
       })
+      .flatten(true)
       .value();
     };
   };

@@ -52,12 +52,12 @@ define(function (require) {
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
-    var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
+    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
@@ -65,8 +65,15 @@ define(function (require) {
     });
 
     var savedVis = $route.current.locals.savedVis;
+
     var vis = savedVis.vis;
     var editableVis = vis.clone();
+    vis.requesting = function () {
+      var requesting = editableVis.requesting;
+      requesting.call(vis);
+      requesting.call(editableVis);
+    };
+
     var searchSource = savedVis.searchSource;
 
     // config panel templates
@@ -109,6 +116,7 @@ define(function (require) {
       $scope.savedVis = savedVis;
       $scope.searchSource = searchSource;
       $scope.vis = vis;
+      $scope.indexPattern = vis.indexPattern;
       $scope.editableVis = editableVis;
       $scope.state = $state;
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
@@ -143,12 +151,17 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      $scope.$watch('state.filters', function (newFilters, oldFilters) {
+      filterBarWatchFilters($scope)
+      .on('update', function () {
+        if ($state.filters && $state.filters.length) {
+          searchSource.set('filter', $state.filters);
+        } else {
+          searchSource.set('filter', []);
+        }
         $state.save();
-        searchSource.set('filter', $state.filters);
-
-        if (onlyDisabled(newFilters, oldFilters)) return;
-        if (newFilters !== oldFilters) $scope.fetch();
+      })
+      .on('fetch', function () {
+        $scope.fetch();
       });
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
@@ -172,14 +185,16 @@ define(function (require) {
           searchSource.set('query', null);
         }
 
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
+        if (_.isEqual(keys, ['filters'])) {
+          // updates will happen in filterBarWatchFilters() if needed
+          return;
         }
 
         $scope.fetch();
       });
+
+      // Without this manual emission, we'd miss filters and queries that were on the $state initially
+      $state.emit('fetch_with_changes');
 
       $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
 
@@ -196,7 +211,9 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', $state.filters);
       if (!$state.linked) searchSource.set('query', $state.query);
-      if ($scope.vis.type.requiresSearch) courier.fetch();
+      if ($scope.vis.type.requiresSearch) {
+        courier.fetch();
+      }
     };
 
 

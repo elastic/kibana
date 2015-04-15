@@ -6,7 +6,7 @@ define(function (require) {
     var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
     var ordinalSuffix = require('utils/ordinal_suffix');
 
-    require('components/agg_types/controls/_percent_list');
+    require('components/agg_types/controls/_values_list');
     var percentEditor = require('text!components/agg_types/controls/percents.html');
 
     var valueProps = {
@@ -53,6 +53,8 @@ define(function (require) {
         });
       },
       getValue: function (agg, bucket) {
+        // percentiles for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
+        // parse the keys and respond with the value that matches
         return _.find(bucket[agg.parentId].values, function (value, key) {
           return agg.key === parseFloat(key);
         });

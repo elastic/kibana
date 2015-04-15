@@ -38,7 +38,7 @@ define(function (require) {
         };
 
         $scope.edit = function (conf) {
-          conf.unsavedValue = conf.value || conf.defVal;
+          conf.unsavedValue = conf.value == null ? conf.defVal : conf.value;
           $scope.configs.forEach(function (c) {
             c.editting = (c === conf);
           });

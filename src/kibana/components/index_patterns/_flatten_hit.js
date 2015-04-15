@@ -2,20 +2,41 @@
 // returns a flattened version
 define(function (require) {
   var _ = require('lodash');
-  return function (hit) {
-    if (hit.$$_flattened) return hit.$$_flattened;
 
-    var self = this;
-    var source = self.flattenSearchResponse(hit._source);
-    var fields = _.omit(self.flattenSearchResponse(hit.fields), function (val, name) {
-      var field = self.fields.byName[name];
-      if (field && !field.scripted && !_.has(source, name)) {
-        return true;
-      } else {
-        return false;
-      }
+  function flattenHit(indexPattern, hit) {
+    var flat = {};
+
+    // recursively merge _source
+    var fields = indexPattern.fields.byName;
+    (function flatten(obj, keyPrefix) {
+      keyPrefix = keyPrefix ? keyPrefix + '.' : '';
+      _.forOwn(obj, function (val, key) {
+        key = keyPrefix + key;
+
+        if (flat[key] !== void 0) return;
+        if (fields[key] || !_.isPlainObject(val)) {
+          flat[key] = val;
+          return;
+        }
+
+        flatten(val, key);
+      });
+    }(hit._source));
+
+    // assign the meta fields
+    _.each(indexPattern.metaFields, function (meta) {
+      flat[meta] = hit[meta];
     });
 
-    return hit.$$_flattened = _.merge(source, fields, _.pick(hit, self.metaFields));
+    // unwrap computed fields
+    _.forOwn(hit.fields, function (val, key) {
+      flat[key] = val[0];
+    });
+
+    return flat;
+  }
+
+  return function cachedFlatten(indexPattern, hit) {
+    return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
   };
 });

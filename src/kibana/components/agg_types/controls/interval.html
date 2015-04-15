@@ -1,14 +1,30 @@
 <div class="form-group">
-  <label>Interval</label>
+  <label>
+    Interval
+    <kbn-info
+      ng-show="agg.buckets.getInterval().scaled"
+      placement="right"
+      class="text-warning"
+      info="This interval creates {{ agg.buckets.getInterval().scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ agg.buckets.getInterval().description }}">
+    </kbn-info>
+  </label>
   <select
     ng-if="aggParam.options"
     ng-model="agg.params.interval"
+    ng-change="agg.write()"
     required
     ng-options="opt as opt.display for opt in aggParam.options.raw | filter: optionEnabled"
     class="form-control"
     name="interval">
     <option value="">-- select a valid interval --</option>
   </select>
+  <input
+    type="text"
+    ng-model="agg.params.customInterval"
+    ng-change="agg.write()"
+    ng-if="agg.params.interval.val == 'custom'"
+    class="form-control"
+    required />
   <input
     ng-if="!aggParam.options"
     ng-model="agg.params.interval"
@@ -17,5 +33,6 @@
     class="form-control"
     name="interval"
     min="0"
+    input-whole-number
     >
 </div>

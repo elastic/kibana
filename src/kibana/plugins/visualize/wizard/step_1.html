@@ -9,7 +9,7 @@
      ng-repeat="type in visTypes.inTitleOrder"
      ng-href="{{ visTypeUrl(type) }}">
     <div class="wizard-vis-type-heading">
-      <i class="fa" ng-class="type.icon"></i>
+      <i aria-hidden="true" class="fa" ng-class="type.icon"></i>
       <h4>{{type.title}}</h4>
     </div>
     <span class="wizard-vis-type-description">{{type.description}}</span>

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function AggConfigFactory(Private) {
+  return function AggConfigFactory(Private, fieldTypeFilter) {
     var _ = require('lodash');
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
 
@@ -10,17 +10,9 @@ define(function (require) {
       self.vis = vis;
       self._opts = opts = (opts || {});
 
-      // get the config type
+      // setters
       self.type = opts.type;
-      if (_.isString(self.type)) {
-        self.type = AggConfig.aggTypes.byName[self.type];
-      }
-
-      // get the config schema
       self.schema = opts.schema;
-      if (_.isString(self.schema)) {
-        self.schema = self.vis.type.schemas.all.byName[self.schema];
-      }
 
       // resolve the params
       self.fillDefaults(opts.params);
@@ -59,6 +51,44 @@ define(function (require) {
       }, 0);
     };
 
+    Object.defineProperties(AggConfig.prototype, {
+      type: {
+        get: function () {
+          return this.__type;
+        },
+        set: function (type) {
+          if (this.__typeDecorations) {
+            _.forOwn(this.__typeDecorations, function (prop, name) {
+              delete this[name];
+            }, this);
+          }
+
+          if (_.isString(type)) {
+            type = AggConfig.aggTypes.byName[type];
+          }
+
+          if (type && _.isFunction(type.decorateAggConfig)) {
+            this.__typeDecorations = type.decorateAggConfig();
+            Object.defineProperties(this, this.__typeDecorations);
+          }
+
+          this.__type = type;
+        }
+      },
+      schema: {
+        get: function () {
+          return this.__schema;
+        },
+        set: function (schema) {
+          if (_.isString(schema)) {
+            schema = this.vis.type.schemas.all.byName[schema];
+          }
+
+          this.__schema = schema;
+        }
+      }
+    });
+
     /**
      * Write the current values to this.params, filling in the defaults as we go
      *
@@ -76,7 +106,13 @@ define(function (require) {
 
         if (val == null) {
           if (aggParam.default == null) return;
-          else val = aggParam.default;
+
+          if (!_.isFunction(aggParam.default)) {
+            val = aggParam.default;
+          } else {
+            val = aggParam.default(self);
+            if (val == null) return;
+          }
         }
 
         if (aggParam.deserialize) {
@@ -104,8 +140,16 @@ define(function (require) {
      * @return {object} the new params object
      */
     AggConfig.prototype.resetParams = function () {
-      // We need to ensure that row doesn't get overriden.
-      return this.fillDefaults(_.pick(this.params, 'row'));
+      var fieldParam = this.type && this.type.params.byName.field;
+      var field;
+
+      if (fieldParam) {
+        var prevField = this.params.field;
+        var fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, fieldParam.filterFieldTypes);
+        field = _.contains(fieldOpts, prevField) ? prevField : null;
+      }
+
+      return this.fillDefaults({ row: this.params.row, field: field });
     };
 
     AggConfig.prototype.write = function () {
@@ -131,6 +175,19 @@ define(function (require) {
     };
 
     /**
+     * Hook into param onRequest handling, and tell the aggConfig that it
+     * is being sent to elasticsearc.
+     *
+     * @return {[type]} [description]
+     */
+    AggConfig.prototype.requesting = function () {
+      var self = this;
+      self.type && self.type.params.forEach(function (param) {
+        if (param.onRequest) param.onRequest(self);
+      });
+    };
+
+    /**
      * Convert this aggConfig to it's dsl syntax.
      *
      * Adds params and adhoc subaggs to a pojo, then returns it
@@ -141,11 +198,10 @@ define(function (require) {
      */
     AggConfig.prototype.toDsl = function () {
       if (this.type.hasNoDsl) return;
-
       var output = this.write();
 
       var configDsl = {};
-      configDsl[this.type.name] = output.params;
+      configDsl[this.type.dslName || this.type.name] = output.params;
 
       // if the config requires subAggs, write them to the dsl as well
       if (output.subAggs) {
@@ -167,8 +223,8 @@ define(function (require) {
 
         // don't serialize undefined/null values
         if (val == null) return;
-
         if (aggParam.serialize) val = aggParam.serialize(val, self);
+        if (val == null) return;
 
         // to prevent accidental leaking, we will clone all complex values
         out[aggParam.name] = _.cloneDeep(val);
@@ -198,6 +254,10 @@ define(function (require) {
       return this.type.getValue(this, bucket);
     };
 
+    AggConfig.prototype.getKey = function (bucket, key) {
+      return this.type.getKey(bucket, key);
+    };
+
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
       return this.type.makeLabel(this);
@@ -208,12 +268,15 @@ define(function (require) {
     };
 
     AggConfig.prototype.fieldFormatter = function () {
-      if (this.schema && this.schema.group === 'metrics') {
-        return fieldFormats.defaultByType.number.convert;
+      var field = this.field();
+      var format = field && field.format;
+      var strFormat = fieldFormats.defaultByType.string;
+
+      if (this.type.getFormat) {
+        format = this.type.getFormat(this) || format;
       }
 
-      var field = this.field();
-      return field ? field.format.convert : String;
+      return (format || strFormat).convert;
     };
 
     AggConfig.prototype.fieldName = function () {
@@ -224,6 +287,11 @@ define(function (require) {
     AggConfig.prototype.fieldDisplayName = function () {
       var field = this.field();
       return field ? (field.displayName || this.fieldName()) : '';
+    };
+
+    AggConfig.prototype.fieldIsTimeField = function () {
+      var timeFieldName = this.vis.indexPattern.timeFieldName;
+      return timeFieldName && this.fieldName() === timeFieldName;
     };
 
     return AggConfig;

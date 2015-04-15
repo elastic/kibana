@@ -25,7 +25,11 @@ define(function (require) {
               $scope.editableVis.params.spyPerPage = PER_PAGE_DEFAULT;
             }
 
-            $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, { canSplit: false });
+            $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, {
+              canSplit: false,
+              asAggConfigResults: true,
+              partialRows: true
+            });
           }
         });
       }

@@ -1,5 +1,6 @@
 define(function (require) {
   return function HandlerTypeFactory(Private) {
+    var pointSeries = Private(require('components/vislib/lib/handler/types/point_series'));
 
     /**
      * Handles the building of each visualization
@@ -7,10 +8,10 @@ define(function (require) {
      * @return {Function} Returns an Object of Handler types
      */
     return {
-      histogram: Private(require('components/vislib/lib/handler/types/column')),
-      line: Private(require('components/vislib/lib/handler/types/column')),
+      histogram: pointSeries.column,
+      line: pointSeries.line,
       pie: Private(require('components/vislib/lib/handler/types/pie')),
-      area: Private(require('components/vislib/lib/handler/types/column')),
+      area: pointSeries.area,
       tile_map: Private(require('components/vislib/lib/handler/types/tile_map'))
     };
   };

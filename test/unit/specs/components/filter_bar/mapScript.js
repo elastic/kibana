@@ -1,8 +1,7 @@
-/* global sinon */
 define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('mapScript()', function () {
-
+      var sinon = require('test_utils/auto_release_sinon');
       var indexPattern, mapScript, $rootScope, getIndexPatternStub;
       beforeEach(module('kibana'));
 

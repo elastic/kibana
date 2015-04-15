@@ -34,7 +34,8 @@ define(function (require) {
               value: 1
             }
           }
-        }
+        },
+        extraMetrics: []
       }
     };
 

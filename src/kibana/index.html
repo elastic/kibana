@@ -7,6 +7,22 @@
     <meta name="viewport" content="width=device-width">
     <link rel="shortcut icon" href="styles/theme/elk.ico">
     <title>Kibana 4</title>
+    <link rel="stylesheet" href="styles/main.css?_b=@@buildNum">
+
+  </head>
+  <body kibana ng-class="'application-' + activeApp.id">
+
+    <div class="row">
+      <div class="col-md-offset-4 col-md-4 page-header initial-load">
+        <center>
+          <img width="128" alt="Loading Kibana" src="images/initial_load.gif">
+          <h1>
+            <strong>Kibana</strong>
+            <small id="cache-message">is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!</small>
+          </h1>
+        </center>
+      </div>
+    </div>
 
     <script>
       window.KIBANA_VERSION='@@version';
@@ -14,10 +30,12 @@
       window.KIBANA_COMMIT_SHA='@@commitSha';
     </script>
 
-    <link rel="stylesheet" href="styles/main.css?_b=@@buildNum">
     <script src="bower_components/requirejs/require.js?_b=@@buildNum"></script>
     <script src="require.config.js?_b=@@buildNum"></script>
     <script>
+      var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
+      if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
+
       if (window.KIBANA_BUILD_NUM.substr(0, 2) !== '@@') {
         // only cache bust if this is really the build number
         require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
@@ -25,6 +43,6 @@
 
       require(['kibana'], function (kibana) { kibana.init(); });
     </script>
-  </head>
-  <body kibana ng-class="'application-' + activeApp.id"></body>
+
+  </body>
 </html>

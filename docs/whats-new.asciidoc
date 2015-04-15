@@ -1,0 +1,58 @@
+[[whats-new]]
+== What's New in Kibana 4
+
+Kibana 4 provides dozens of new features that enable you to compose questions, 
+get answers, and solve problems like never before. It has a brand-new look and 
+feel and improved workflows for discovering and visualizing your data and
+building and sharing dashboards. 
+
+[float]
+[[key-features]]
+=== Key Features
+* New data search and discovery interface 
+* Unified visualization builder for your favorite visualizations and some brand
+new ones:
+** Area Chart
+** Data Table
+** Line Chart
+** Markdown Text Widget
+** Pie Chart (including "doughnut" charts)
+** Raw Document Widget
+** Single Metric Widget
+** Tile Map 
+** Vertical Bar Chart
+* Drag and drop dashboard builder that enables you to quickly add, rearrange, 
+resize, and remove visualizations
+* Advanced aggregation-based analytics capabilities, including support for:
+** Unique counts (cardinality)
+** Non-date histograms
+** Ranges
+** Significant terms
+** Percentiles
+* Expressions-based scripted fields enable you to perform ad-hoc analysis by 
+performing computations on the fly
+
+[float]
+[[improvements]]
+=== Improvements
+* Ability to save searches and visualizations enables you to link 
+searches to visualizations and add the same visualization to multiple dashboards
+* Visualizations support an unlimited number of nested aggregations so you can 
+display new types of visualizations, such as "doughnut" charts
+* New URL format eliminates the need for templated and scripted dashboards
+* Better mobile experience
+* Faster dashboard loading due to a reduction in the number HTTP calls needed to load the page
+* SSL encryption for client requests as well as requests to and from Elasticsearch
+* Search result highlighting
+* Easy to access and export the data behind any visualization: 
+** View in a table or view as JSON
+** Export in CSV format
+** See the Elasticsearch request and response
+* Share and embed individual visualizations as well as dashboards
+
+[float]
+[[nuts-bolts]]
+=== Nuts and Bolts
+* Ships with its own webserver and uses Node.js on the backend--installation 
+binaries are provided for Linux, Windows, and Mac OS
+* Uses the D3 framework to display visualizations

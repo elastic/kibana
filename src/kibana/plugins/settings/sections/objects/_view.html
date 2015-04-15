@@ -18,7 +18,7 @@
 
       <p>Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn't be.</p>
     </div>
-    <form name="objectForm" ng-submit="submit()">
+    <form role="form" name="objectForm" ng-submit="submit()">
       <div class="form-group" ng-repeat="field in fields">
         <label>{{ field.name }}</label>
         <textarea rows="1" msd-elastic ng-if="field.type === 'text'" ng-model="field.value" class="form-control span12"/>
@@ -27,8 +27,8 @@
       </div>
     </form>
     <div class="form-group">
-      <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
-      <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid || aceInvalidEditors.length !==0">Save {{ title }} Object</button>
+      <button aria-label="Cancel" class="btn btn-primary" ng-click="cancel()">Cancel</button>
+      <button aria-label="Save {{ title }} Object" class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid || aceInvalidEditors.length !==0">Save {{ title }} Object</button>
     </div>
   </kbn-settings-objects-view>
 </kbn-settings-app>

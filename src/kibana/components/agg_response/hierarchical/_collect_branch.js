@@ -17,7 +17,7 @@ define(function (require) {
       // Set the bucket name, and use the converter to format the field if
       // the field exists.
       var bucket = item.name;
-      if (col)  {
+      if (col) {
         bucket = col.fieldFormatter()(bucket);
       }
 
@@ -27,7 +27,8 @@ define(function (require) {
         depth: depth,
         field: field,
         bucket: bucket,
-        metric: item.value
+        metric: item.size,
+        item: item
       });
 
       // If the item has a parent and it's also a child then continue walking

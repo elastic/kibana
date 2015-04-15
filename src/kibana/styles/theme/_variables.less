@@ -9,7 +9,8 @@
 //
 //## Gray and brand colors for use across Bootstrap.
 
-@gray-darker:            lighten(#000, 13.5%);
+@gray-base:              #000;
+@gray-darker:            lighten(@gray-base, 13.5%);
 @gray-dark:              #7b8a8b;
 @gray:                   #95a5a6;
 @gray-light:             #b4bcc2;
@@ -208,6 +209,9 @@
 //** Small `.form-control` height
 @input-height-small:             (floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) + 2);
 
+//** `.form-group` margin
+@form-group-margin-bottom:       15px;
+
 @legend-color:                   @text-color;
 @legend-border-color:            transparent;
 
@@ -262,11 +266,12 @@
 @zindex-navbar:            1000;
 @zindex-dropdown:          1000;
 @zindex-popover:           1010;
-@zindex-typeahead:         1020;
-@zindex-tooltip:           1030;
-@zindex-navbar-fixed:      1030;
-@zindex-modal-background:  1040;
-@zindex-modal:             1050;
+@zindex-tooltip:           1020;
+@zindex-typeahead:         1030;
+@zindex-tooltip:           1040;
+@zindex-navbar-fixed:      1050;
+@zindex-modal-background:  1060;
+@zindex-modal:             1070;
 
 
 //== Media queries breakpoints
@@ -355,16 +360,18 @@
 //##
 
 // Basics of a navbar
-@navbar-height:                    35px;
+@navbar-height:                    45px;
 @navbar-margin-bottom:             0px;
 @navbar-border-radius:             @border-radius-base;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
 @navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
 @navbar-collapse-max-height:       340px;
 
+@navbar-arrow-size:                7px;
+
 // Default theme
 @navbar-default-color:               #fff;
-@navbar-default-bg:                  #3D636B;
+@navbar-default-bg:                  #656A76;
 @navbar-default-border:              darken(@navbar-default-bg, 10%);
 @navbar-default-link-color:          @gray-lighter;
 @navbar-default-link-hover-color:    #fff;
@@ -388,22 +395,23 @@
 // Inverted navbar
 // Reset inverted navbar basics
 @navbar-inverse-color:                      #fff;
-@navbar-inverse-bg:                         #294247;
+@navbar-inverse-bg:                         @gray-darker;
 @navbar-inverse-border:                     darken(@navbar-inverse-bg, 10%);
 
 // Inverted navbar links
 @navbar-inverse-link-color:                 @gray-lighter;
 @navbar-inverse-link-hover-color:           #fff;
-@navbar-inverse-link-hover-bg:              lighten(@navbar-inverse-bg, 5%);
+@navbar-inverse-link-hover-bg:              lighten(@navbar-inverse-bg, 20%);
 @navbar-inverse-link-active-color:          #fff;
-@navbar-inverse-link-active-bg:             darken(@navbar-inverse-bg, 5%);
+@navbar-inverse-link-active-bg:             #41454c;
 @navbar-inverse-link-disabled-color:        @gray-light;
 @navbar-inverse-link-disabled-bg:           transparent;
 
 // Inverted navbar brand label
-@navbar-inverse-brand-color:                @navbar-inverse-link-color;
-@navbar-inverse-brand-hover-color:          @navbar-inverse-link-hover-color;
-@navbar-inverse-brand-hover-bg:             transparent;
+@navbar-inverse-brand-color:                white;
+@navbar-inverse-brand-bg:                   lighten(@navbar-inverse-bg, 10%);
+@navbar-inverse-brand-hover-color:          @navbar-inverse-brand-color;
+@navbar-inverse-brand-hover-bg:             @navbar-inverse-brand-bg;
 
 // Inverted navbar toggle
 @navbar-inverse-toggle-hover-bg:            darken(@navbar-inverse-bg, 10%);
@@ -869,3 +877,5 @@
 
 //** Horizontal offset for forms and lists.
 @component-offset-horizontal: 180px;
+
+@loading-opacity:             0.5;

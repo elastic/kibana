@@ -1,5 +1,6 @@
 define(function (require) {
   return function SavedObjectFactory(es, configFile, Promise, Private, Notifier, indexPatterns) {
+    var angular = require('angular');
     var errors = require('errors');
     var _ = require('lodash');
     var slugifyId = require('utils/slugify_id');
@@ -200,7 +201,7 @@ define(function (require) {
 
         if (self.searchSource) {
           body.kibanaSavedObjectMeta = {
-            searchSourceJSON: JSON.stringify(_.omit(self.searchSource.toJSON(), ['sort', 'size']))
+            searchSourceJSON: angular.toJson(_.omit(self.searchSource.toJSON(), ['sort', 'size']))
           };
         }
 
@@ -232,7 +233,7 @@ define(function (require) {
           if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
             return docSource.doIndex(source).then(finish);
           }
-          return Promise.resolve(false);
+          return Promise.reject(err);
         });
       };
 

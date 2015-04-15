@@ -16,7 +16,8 @@ define(function (require) {
   require('plugins/discover/index');
 
   var $parentScope, $scope, $elem;
-  var clock, anchor = '2014-01-01T06:06:06.666Z';
+  var anchor = '2014-01-01T06:06:06.666Z';
+  var clock;
 
   var init = function () {
     // Load the application
@@ -110,6 +111,14 @@ define(function (require) {
         done();
       });
 
+      it('should highlight the current active interval', function (done) {
+        $scope.setRefreshInterval({ value: 300000 });
+        $elem.scope().$digest();
+        expect($elem.find('.refresh-interval-active').length).to.be(1);
+        expect($elem.find('.refresh-interval-active').text().trim()).to.be('5 minutes');
+        done();
+      });
+
       it('should default the interval on the courier with incorrect values', function (done) {
         // Change refresh interval and digest
         $scope.setRefreshInterval('undefined');
@@ -153,8 +162,8 @@ define(function (require) {
         $scope.$digest();
       });
 
-      it('should contain 3 lists of options', function (done) {
-        expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(3);
+      it('should contain 4 lists of options', function (done) {
+        expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(4);
         done();
       });
 
@@ -176,7 +185,7 @@ define(function (require) {
 
       it('has a preview of the "from" input', function (done) {
         var preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
-        expect(preview.text()).to.be(moment().subtract(1, 'minutes').format($scope.format));
+        expect(preview.text()).to.be(moment().subtract(15, 'minutes').format($scope.format));
         done();
       });
 

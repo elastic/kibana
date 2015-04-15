@@ -28,6 +28,7 @@ module.exports = function (grunt) {
         '<%= app %>/public/{css-builder,normalize}.js'
       ]
     },
-    dev_only_plugins: '<%= build %>/src/plugins/<%= devPlugins %>'
+    dev_only_plugins: '<%= build %>/src/plugins/<%= devPlugins %>',
+    test_from_node_modules: '<%= build %>/dist/kibana/src/node_modules/**/*test*'
   };
 };

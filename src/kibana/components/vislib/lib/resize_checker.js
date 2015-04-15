@@ -8,9 +8,9 @@ define(function (require) {
     var sequencer = require('utils/sequencer');
 
     var SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
-      5,      // shortest delay
+      100,      // shortest delay
       10000,  // longest delay
-      125     // tick count
+      50     // tick count
     );
 
     // maximum ms that we can delay emitting 'resize'. This is only used
