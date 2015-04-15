@@ -75,6 +75,17 @@ define(function (require) {
       location: 'Discover'
     });
 
+    $scope.intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
+    $scope.showInterval = false;
+
+    $scope.intervalEnabled = function (interval) {
+      return interval.val !== 'custom';
+    };
+
+    $scope.toggleInterval = function () {
+      $scope.showInterval = !$scope.showInterval;
+    };
+
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
       load: require('text!plugins/discover/partials/load_search.html'),
@@ -164,6 +175,23 @@ define(function (require) {
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
+        });
+
+        $scope.$watch('state.interval', function (interval, oldInterval) {
+          if (interval !== oldInterval && interval === 'auto') {
+            $scope.showInterval = false;
+          }
+          $scope.fetch();
+        });
+
+        $scope.$watch('vis.aggs', function (aggs) {
+          var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
+
+          if (buckets && buckets.length === 1) {
+            $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
+          } else {
+            $scope.intervalName = 'auto';
+          }
         });
 
         $scope.$watchMulti([
@@ -394,7 +422,8 @@ define(function (require) {
       .highlight({
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
-        fields: {'*': {}}
+        fields: {'*': {}},
+        fragment_size: 2147483647 // Limit of an integer.
       })
       .set('filter', $state.filters || []);
     });
@@ -425,16 +454,30 @@ define(function (require) {
       if (!$scope.opts.timefield) return Promise.resolve();
       if (loadingVis) return loadingVis;
 
+      var visStateAggs = [
+        {
+          type: 'count',
+          schema: 'metric'
+        },
+        {
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {
+            field: $scope.opts.timefield,
+            interval: $state.interval,
+            min_doc_count: 0
+          }
+        }
+      ];
 
-      // we shouldn't have a vis, delete it
-      if (!$scope.opts.timefield && $scope.vis) {
-        $scope.vis.destroy();
-        $scope.searchSource.set('aggs', undefined);
-        delete $scope.vis;
+      // we have a vis, just modify the aggs
+      if ($scope.vis) {
+        var visState = $scope.vis.getState();
+        visState.aggs = visStateAggs;
+
+        $scope.vis.setState(visState);
+        return Promise.resolve($scope.vis);
       }
-
-      // we shouldn't have one, or already do, return whatever we already have
-      if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
       // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
@@ -452,21 +495,7 @@ define(function (require) {
           },
           brush: brushEvent
         },
-        aggs: [
-          {
-            type: 'count',
-            schema: 'metric'
-          },
-          {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: {
-              field: $scope.opts.timefield,
-              interval: 'auto',
-              min_doc_count: 0
-            }
-          }
-        ]
+        aggs: visStateAggs
       });
 
       $scope.searchSource.aggs(function () {

@@ -69,9 +69,7 @@ define(function (require) {
       bars
       .enter()
       .append('rect')
-      .attr('class', function (d) {
-        return 'color ' + self.colorToClass(color(d.label));
-      })
+      .call(this._addIdentifier)
       .attr('fill', function (d) {
         return color(d.label);
       });

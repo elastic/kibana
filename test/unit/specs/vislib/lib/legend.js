@@ -20,6 +20,13 @@ define(function (require) {
     'line'
   ];
 
+  var chartSelectors = {
+    histogram: '.chart rect',
+    pie: '.chart path',
+    area: '.chart path',
+    line: '.chart circle',
+  };
+
   angular.module('LegendFactory', ['kibana']);
 
   dataArray.forEach(function (data, i) {
@@ -48,31 +55,25 @@ define(function (require) {
         vis = null;
       });
 
-      describe('legend item color matches slice color', function () {
-        var items;
-        var paths;
-        var getColor;
+      describe('legend item label matches vis item label', function () {
+        it('should match the slice label', function () {
+          var chartType = chartTypes[i];
+          var paths = $(vis.el).find(chartSelectors[chartType]).toArray();
+          var items = vis.handler.legend.labels;
 
-        if (chartTypes[i] === 'pie') {
-          it('should match the slice color', function () {
-            paths = $(vis.el).find('path').toArray();
-            items = vis.handler.legend.labels;
-            getColor = vis.handler.legend.color;
+          items.forEach(function (label) {
+            var path = _(paths)
+            .map(function (path) {
+              return path.getAttribute('data-label');
+            })
+            .filter(function (dataLabel) {
+              return dataLabel === label;
+            })
+            .value();
 
-            items.forEach(function (label) {
-              var slices = paths.filter(function (path) {
-                if (path.__data__.name === undefined) return false;
-                return path.__data__.name.toString() === label;
-              }).map(function (path) {
-                return $(path).attr('class').split(/\s+/)[1].replace('c', '#');
-              });
-
-              slices.forEach(function (hex) {
-                expect(hex).to.be(getColor(label));
-              });
-            });
+            expect(path.length).to.be.greaterThan(0);
           });
-        }
+        });
       });
 
       describe('header method', function () {
@@ -88,24 +89,6 @@ define(function (require) {
         });
         it('should contain a list of items', function () {
           expect($(vis.el).find('li').length).to.be.greaterThan(1);
-        });
-      });
-
-      describe('colorToClass method', function () {
-        var labels;
-        var color;
-        var colorToClass;
-
-        beforeEach(function () {
-          labels = vis.handler.legend.labels;
-          color = vis.handler.legend.color;
-          colorToClass = vis.handler.legend.colorToClass;
-        });
-
-        it('should create a class label from the labels hex color', function () {
-          labels.forEach(function (label) {
-            expect(colorToClass(color(label))).to.be('c' + color(label).replace(/[#]/g, ''));
-          });
         });
       });
 

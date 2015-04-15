@@ -7,12 +7,13 @@ define(function (require) {
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {
       VislibRenderbot.Super.call(this, vis, $el);
-      this.vislibVis = {};
       this._createVis();
     }
 
     VislibRenderbot.prototype._createVis = function () {
       var self = this;
+
+      if (self.vislibVis) self.destroy();
 
       self.vislibParams = self._getVislibParams();
       self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
