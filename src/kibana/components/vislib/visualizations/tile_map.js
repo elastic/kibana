@@ -553,7 +553,6 @@ define(function (require) {
      */
     TileMap.prototype.getBounds = function (mapData) {
       var bounds = L.geoJson(mapData).getBounds();
-      console.log(bounds);
       return bounds;
     };
 
