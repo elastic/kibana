@@ -1,6 +1,6 @@
 <div class="pagination-other-pages">
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
-    <li ng-class="{disabled: page.first}">
+    <li ng-hide="page.first">
       <a ng-click="paginate.goToPage(page.prev)">«</a>
     </li>
 
@@ -18,7 +18,7 @@
       <a ng-click="paginate.goToPage(page.count)">...{{page.count}}</a>
     </li>
 
-    <li ng-class="{disabled: page.last}">
+    <li ng-hide="page.last">
       <a ng-click="paginate.goToPage(page.next)">»</a>
     </li>
   </ul>
