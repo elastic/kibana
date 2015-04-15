@@ -14,22 +14,22 @@
               class="doc-viewer-field">
           </td>
           <td width="1%" class="doc-viewer-buttons" ng-if="filter">
-            <span bo-if="mapping[field].filterable">
+            <span ng-if="mapping[field].filterable">
               <i ng-click="filter(mapping[field], flattened[field], '+')" class="fa fa-search-plus"></i>
               <i ng-click="filter(mapping[field], flattened[field],'-')" class="fa fa-search-minus"></i>
             </span>
-            <span bo-if="!mapping[field].filterable" tooltip="Unindexed fields can not be searched">
+            <span ng-if="!mapping[field].filterable" tooltip="Unindexed fields can not be searched">
               <i class="fa fa-search-plus text-muted"></i>
               <i class="fa fa-search-minus text-muted"></i>
             </span>
           </td>
 
           <td>
-            <i bo-if="!mapping[field] && !showArrayInObjectsWarning(doc, field)"
+            <i ng-if="!mapping[field] && !showArrayInObjectsWarning(doc, field)"
               tooltip-placement="top"
               tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
               class="fa fa-warning text-color-warning ng-scope doc-viewer-no-mapping"></i>
-            <i bo-if="showArrayInObjectsWarning(doc, field)"
+            <i ng-if="showArrayInObjectsWarning(doc, field)"
               tooltip-placement="top"
               tooltip="Objects in arrays are not well supported."
               class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
