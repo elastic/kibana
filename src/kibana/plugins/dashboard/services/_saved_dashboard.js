@@ -26,8 +26,8 @@ define(function (require) {
           panelsJSON: 'string',
           version: 'integer',
           timeRestore: 'boolean',
-          timeTo: 'string',
-          timeFrom: 'string'
+          timeTo: 'date',
+          timeFrom: 'date'
         },
 
         // defeult values to assign to the doc
@@ -38,8 +38,8 @@ define(function (require) {
           panelsJSON: '[]',
           version: 1,
           timeRestore: false,
-          timeTo: moment().toISOString(),
-          timeFrom: moment().toISOString()
+          timeTo: undefined,
+          timeFrom: undefined
         },
 
         searchSource: true,
