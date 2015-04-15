@@ -2,9 +2,9 @@ define(function (require) {
   return function ChartBaseClass(d3, Private) {
     var _ = require('lodash');
 
-    var Legend = Private(require('components/vislib/lib/legend'));
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
+    var dataLabel = require('components/vislib/lib/_data_label');
 
     /**
      * The Base Class for all visualizations.
@@ -51,14 +51,18 @@ define(function (require) {
     };
 
     /**
-     * Returns a CSS class name
+     * Append the data label to the element
      *
-     * @method colorToClass
-     * @param label {String} Data point label
-     * @returns {String} CSS class name
+     * @method _addIdentifier
+     * @param selection {Object} d3 select object
      */
-    Chart.prototype.colorToClass = function (label) {
-      return Legend.prototype.colorToClass.call(null, label);
+    Chart.prototype._addIdentifier = function (selection, labelProp) {
+      labelProp = labelProp || 'label';
+      selection.each(function (datum) {
+        var label = datum[0] ? datum[0][labelProp] : datum[labelProp];
+        if (label == null) return;
+        dataLabel(this, label);
+      });
     };
 
     /**

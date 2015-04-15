@@ -16,6 +16,9 @@ define(function (require) {
           'team': { type: 'nested' },
           'team.name': { type: 'string' },
           'team.role': { type: 'string' },
+          'user': { type: 'conflict' },
+          'user.name': { type: 'string' },
+          'user.id': { type: 'conflict' },
           'delta': { type: 'number', scripted: true }
         }
       }
@@ -38,7 +41,8 @@ define(function (require) {
           { name: 'foo', role: 'leader' },
           { name: 'bar', role: 'follower' },
           { name: 'baz', role: 'party boy' },
-        ]
+        ],
+        user: { name: 'smith', id: 123 }
       },
       fields: {
         delta: [42],
@@ -63,6 +67,12 @@ define(function (require) {
       expect(flat).to.have.property('noMapping', true);
       expect(flat).to.have.property('groups');
       expect(flat.groups).to.eql(['loners']);
+    });
+
+    it('flattens conflicting types in the mapping', function () {
+      expect(flat).to.not.have.property('user');
+      expect(flat).to.have.property('user.name', hit._source.user.name);
+      expect(flat).to.have.property('user.id', hit._source.user.id);
     });
 
     it('preserves objects in arrays', function () {
