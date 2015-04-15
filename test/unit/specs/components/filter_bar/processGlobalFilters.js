@@ -32,6 +32,11 @@ define(function (require) {
       delete globalStateStub.filters;
     });
 
+    it('should be an empty array if no filters are passed', function () {
+      var processedFilters = processGlobalFilters();
+      expect(_.isArray(processedFilters)).to.be(true);
+    });
+
     it('should remove pinned filters', function () {
       var processedFilters = processGlobalFilters(filters);
       expect(processedFilters).to.have.length(2);

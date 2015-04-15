@@ -16,6 +16,7 @@ define(function (require) {
     };
 
     function stripPinned(filters) {
+      if (!filters) return [];
       return filters.filter(function (filter) {
         return !filter.meta.pinned;
       });
