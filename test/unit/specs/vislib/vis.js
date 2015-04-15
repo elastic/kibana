@@ -27,6 +27,7 @@ define(function (require) {
       var beforeEvent = 'click';
       var afterEvent = 'brush';
       var vis;
+      var secondVis;
       var numberOfCharts;
 
       beforeEach(function () {
@@ -36,12 +37,14 @@ define(function (require) {
       beforeEach(function () {
         inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
+          secondVis = Private(require('vislib_fixtures/_vis_fixture'))();
           require('css!components/vislib/styles/main');
         });
       });
 
       afterEach(function () {
         $(vis.el).remove();
+        $(secondVis.el).remove();
         vis = null;
       });
 
@@ -86,11 +89,16 @@ define(function (require) {
 
       describe('destroy Method', function () {
         beforeEach(function () {
+          secondVis.render(data);
           vis.destroy();
         });
 
         it('should remove all DOM elements from el', function () {
-          expect($('.vis-wrapper').length).to.be(0);
+          expect($(vis.el).find('.vis-wrapper').length).to.be(0);
+        });
+
+        it('should not remove visualizations that have not been destroyed', function () {
+          expect($(secondVis.el).find('.vis-wrapper').length).to.be(1);
         });
       });
 
