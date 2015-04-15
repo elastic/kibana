@@ -26,8 +26,8 @@ define(function (require) {
           panelsJSON: 'string',
           version: 'integer',
           timeRestore: 'boolean',
-          timeTo: 'date',
-          timeFrom: 'date'
+          timeTo: 'string',
+          timeFrom: 'string'
         },
 
         // defeult values to assign to the doc
