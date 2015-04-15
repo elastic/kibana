@@ -12,9 +12,9 @@ define(function (require) {
 
     VislibRenderbot.prototype._createVis = function () {
       var self = this;
-      if (self.vislibVis) {
-        self.destroy();
-      }
+
+      if (self.vislibVis) self.destroy();
+
       self.vislibParams = self._getVislibParams();
       self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
 
