@@ -10,6 +10,13 @@ define(function (require) {
     var $scope;
     var compile;
 
+    function onlyValidValues() {
+      return $el.find('[ng-model]').toArray().map(function (el) {
+        var ngModel = $(el).controller('ngModel');
+        return ngModel.$valid ? ngModel.$modelValue : undefined;
+      });
+    }
+
     beforeEach(module('kibana'));
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
@@ -33,25 +40,22 @@ define(function (require) {
 
     it('fails on invalid numbers', function () {
       compile([1, 'foo']);
-      expect($scope.vals).to.eql([1, undefined]);
-      expect($el.find('.ng-invalid').size()).to.be(1);
+      expect(onlyValidValues()).to.eql([1, undefined]);
     });
 
     it('supports decimals', function () {
       compile(['1.2', '000001.6', '99.10']);
-      expect($scope.vals).to.eql([1.2, 1.6, 99.1]);
+      expect(onlyValidValues()).to.eql([1.2, 1.6, 99.1]);
     });
 
     it('ensures that the values are in order', function () {
       compile([1, 2, 3, 10, 4, 5]);
-      expect($scope.vals).to.eql([1, 2, 3, 10, undefined, undefined]);
-      expect($el.find('.ng-invalid').size()).to.be(2);
+      expect(onlyValidValues()).to.eql([1, 2, 3, 10, undefined, 5]);
     });
 
     it('requires that values are within a range', function () {
       compile([50, 100, 200, 250], '[100, 200)');
-      expect($scope.vals).to.eql([undefined, 100, undefined, undefined]);
-      expect($el.find('.ng-invalid').size()).to.be(3);
+      expect(onlyValidValues()).to.eql([undefined, 100, undefined, undefined]);
     });
 
     describe('listens for keyboard events', function () {
@@ -63,7 +67,7 @@ define(function (require) {
           ['up', 'up', 'up']
         )
         .then(function () {
-          expect($scope.vals).to.eql([4]);
+          expect(onlyValidValues()).to.eql([4]);
         });
       });
 
@@ -87,7 +91,7 @@ define(function (require) {
           seq
         )
         .then(function () {
-          expect($scope.vals).to.eql([5.1]);
+          expect(onlyValidValues()).to.eql([5.1]);
         });
       });
 
@@ -99,7 +103,7 @@ define(function (require) {
           ['down', 'down', 'down']
         )
         .then(function () {
-          expect($scope.vals).to.eql([2]);
+          expect(onlyValidValues()).to.eql([2]);
         });
       });
 
@@ -123,7 +127,7 @@ define(function (require) {
           seq
         )
         .then(function () {
-          expect($scope.vals).to.eql([4.8]);
+          expect(onlyValidValues()).to.eql([4.8]);
         });
       });
 
@@ -139,7 +143,7 @@ define(function (require) {
 
         return simulateKeys(getEl, seq)
         .then(function () {
-          expect($scope.vals).to.eql([9, 10, 13]);
+          expect(onlyValidValues()).to.eql([9, 10, 13]);
         });
       });
     });

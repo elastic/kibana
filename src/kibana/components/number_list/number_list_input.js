@@ -137,11 +137,10 @@ define(function (require) {
           if (!range.within(num)) return INVALID;
 
           if ($scope.$index > 0) {
-            var i = $scope.$index;
+            var i = $scope.$index - 1;
             var list = numberListCntr.getList();
-            var prev;
-            while (prev === undefined && i-- > 0) prev = list[i];
-            if (prev !== undefined && num <= prev) return INVALID;
+            var prev = list[i];
+            if (num <= prev) return INVALID;
           }
 
           return num;
