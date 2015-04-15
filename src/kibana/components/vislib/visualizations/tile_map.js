@@ -94,6 +94,12 @@ define(function (require) {
           featureLayer.addLayer(features);
           map.addLayer(featureLayer);
 
+          // heat map popups
+          if (self._attr.mapType === 'Heatmap' && self._attr.heatShowTooltips) {
+            var popups = self.heatMapPoints(map, mapData);
+            map.addLayer(popups);
+          }
+
           tileLayer.on('tileload', function () {
             self.saturateTiles();
           });
@@ -369,6 +375,7 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.heatMap = function (map, mapData) {
+      var self = this;
       var max = mapData.properties.allmax;
       var points = this.dataToHeatArray(mapData, max);
 
@@ -381,15 +388,39 @@ define(function (require) {
       // gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
 
       var options = {
-        radius: this._attr.heatRadius,
-        blur: this._attr.heatBlur,
-        maxZoom: this._attr.heatMaxZoom,
-        minOpacity: this._attr.heatMinOpacity
+        radius: +this._attr.heatRadius,
+        blur: +this._attr.heatBlur,
+        maxZoom: +this._attr.heatMaxZoom,
+        minOpacity: +this._attr.heatMinOpacity
       };
 
       var featureLayer = L.heatLayer(points, options);
 
       return featureLayer;
+    };
+
+    TileMap.prototype.heatMapPoints = function (map, mapData) {
+      var self = this;
+
+      var popups = L.geoJson(mapData, {
+        pointToLayer: function (feature, latlng) {
+          var count = feature.properties.count;
+          var radius = self.geohashMinDistance(feature);//+self._attr.heatRadius * 100;
+          return L.circle(latlng, radius);
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        },
+        style: function (feature) {
+          return {
+            fillColor: 'rgba(0,0,0,0)',
+            color: 'rgba(0,0,0,0.2)',
+            opacity: 0,
+            fillOpacity: 0
+          };
+        }
+      });
+      return popups;
     };
 
     /**
