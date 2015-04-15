@@ -105,6 +105,7 @@ define(function (require) {
     Vis.prototype.hasSchemaAgg = function (schemaName, aggTypeName) {
       var aggs = this.aggs.bySchemaName[schemaName] || [];
       return aggs.some(function (agg) {
+        if (!agg.type || !agg.type.name) return false;
         return agg.type.name === aggTypeName;
       });
     };

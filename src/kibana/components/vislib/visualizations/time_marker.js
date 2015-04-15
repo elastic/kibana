@@ -6,13 +6,25 @@ define(function (require) {
       if (!(this instanceof TimeMarker)) {
         return new TimeMarker(times, xScale, height);
       }
-      var currentTimeArr = [new Date().getTime()];
+
+      var currentTimeArr = [{
+        'time': new Date().getTime(),
+        'class': 'time-marker',
+        'color': '#c80000',
+        'opacity': 0.3,
+        'width': 2
+      }];
 
       this.xScale = xScale;
       this.height = height;
-      this.lineClass = 'time-marker';
-      this.times = (times.length) ? times.map(function (dateMathString) {
-        return datemath.parse(dateMathString);
+      this.times = (times.length) ? times.map(function (d) {
+        return {
+          'time': datemath.parse(d.time),
+          'class': d.class || 'time-marker',
+          'color': d.color || '#c80000',
+          'opacity': d.opacity || 0.3,
+          'width': d.width || 2
+        };
       }) : currentTimeArr;
     }
 
@@ -33,24 +45,28 @@ define(function (require) {
         d3.select(this).selectAll('time-marker')
           .data(self.times)
           .enter().append('line')
-          .attr('class', self.lineClass)
+          .attr('class', function (d) {
+            return d.class;
+          })
+          .attr('pointer-events', 'none')
+          .attr('stroke', function (d) {
+            return d.color;
+          })
+          .attr('stroke-width', function (d) {
+            return d.width;
+          })
+          .attr('stroke-opacity', function (d) {
+            return d.opacity;
+          })
           .attr('x1', function (d) {
-            return self.xScale(d);
+            return self.xScale(d.time);
           })
           .attr('x2', function (d) {
-            return self.xScale(d);
+            return self.xScale(d.time);
           })
           .attr('y1', self.height)
           .attr('y2', self.xScale.range()[0]);
       });
-    };
-
-    TimeMarker.prototype.get = function (field) {
-      return this[field] ? this[field] : undefined;
-    };
-
-    TimeMarker.prototype.set = function (field, val) {
-      if (this[field]) this[field] = val;
     };
 
     return TimeMarker;

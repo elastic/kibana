@@ -9,11 +9,36 @@ define(function (require) {
   angular.module('TimeMarkerFactory', ['kibana']);
   describe('VisLib Time Marker Test Suite', function () {
     var height = 50;
+    var color = '#ff0000';
+    var opacity = 0.5;
+    var width = 3;
+    var customClass = 'custom-time-marker';
+    var dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
+    var myTimes = dateMathTimes.map(function (dateMathString) {
+      return {
+        time: dateMathString,
+        class: customClass,
+        color: color,
+        opacity: opacity,
+        width: width
+      };
+    });
+    var getExtent = function (dataArray, func) {
+      return func(dataArray, function (obj) {
+        return func(obj.values, function (d) {
+          return d.x;
+        });
+      });
+    };
     var times = [];
     var TimeMarker;
-    var marker;
+    var defaultMarker;
+    var customMarker;
     var selection;
     var xScale;
+    var minDomain;
+    var maxDomain;
+    var domain;
 
     beforeEach(function () {
       module('TimeMarkerFactory');
@@ -22,8 +47,12 @@ define(function (require) {
     beforeEach(function () {
       inject(function (d3, Private) {
         TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
-        xScale = d3.time.scale();
-        marker = new TimeMarker(times, xScale, height);
+        minDomain = getExtent(series.series, d3.min);
+        maxDomain = getExtent(series.series, d3.max);
+        domain = [minDomain, maxDomain];
+        xScale = d3.time.scale().domain(domain).range([0, 500]);
+        defaultMarker = new TimeMarker(times, xScale, height);
+        customMarker = new TimeMarker(myTimes, xScale, height);
 
         selection = d3.select('body').append('div').attr('class', 'marker');
         selection.datum(series);
@@ -33,7 +62,7 @@ define(function (require) {
     afterEach(function () {
       selection.remove('*');
       selection = null;
-      marker = null;
+      defaultMarker = null;
     });
 
     describe('_isTimeBaseChart method', function () {
@@ -41,40 +70,56 @@ define(function (require) {
       var newSelection;
 
       it('should return true when data is time based', function () {
-        boolean = marker._isTimeBasedChart(selection);
+        boolean = defaultMarker._isTimeBasedChart(selection);
         expect(boolean).to.be(true);
       });
 
       it('should return false when data is not time based', function () {
         newSelection = selection.datum(terms);
-        boolean = marker._isTimeBasedChart(newSelection);
+        boolean = defaultMarker._isTimeBasedChart(newSelection);
         expect(boolean).to.be(false);
       });
     });
 
-    describe('get method', function () {
-      it('should get the correct value', function () {
-        var ht = marker.get('height');
-        var scale = marker.get('xScale');
-        var currentTimeArr = marker.get('times');
-        expect(ht).to.be(height);
-        expect(currentTimeArr.length).to.be(1);
-        expect(scale).to.be(xScale);
-      });
-    });
-
-    describe('set method', function () {
-      it('should set the value', function () {
-        var lineClass = 'new-time-marker';
-        marker.set('lineClass', lineClass);
-        expect(marker.get('lineClass')).to.be(lineClass);
-      });
-    });
-
     describe('render method', function () {
-      it('should render lines', function () {
-        marker.render(selection);
+      var lineArray;
+
+      beforeEach(function () {
+        defaultMarker.render(selection);
+        customMarker.render(selection);
+        lineArray = document.getElementsByClassName('custom-time-marker');
+      });
+
+      it('should render the default line', function () {
         expect(!!$('line.time-marker').length).to.be(true);
+      });
+
+      it('should render the custom (user defined) lines', function () {
+        expect($('line.custom-time-marker').length).to.be(myTimes.length);
+      });
+
+      it('should set the class', function () {
+        Array.prototype.forEach.call(lineArray, function (line) {
+          expect(line.getAttribute('class')).to.be(customClass);
+        });
+      });
+
+      it('should set the stroke', function () {
+        Array.prototype.forEach.call(lineArray, function (line) {
+          expect(line.getAttribute('stroke')).to.be(color);
+        });
+      });
+
+      it('should set the stroke-opacity', function () {
+        Array.prototype.forEach.call(lineArray, function (line) {
+          expect(+line.getAttribute('stroke-opacity')).to.be(opacity);
+        });
+      });
+
+      it('should set the stroke-width', function () {
+        Array.prototype.forEach.call(lineArray, function (line) {
+          expect(+line.getAttribute('stroke-width')).to.be(width);
+        });
       });
     });
 
