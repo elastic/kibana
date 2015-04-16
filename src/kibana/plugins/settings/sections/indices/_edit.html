@@ -45,10 +45,10 @@
             <i aria-hidden="true" class="fa-link fa"></i>
           </a>
         </p>
-        <div bo-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
+        <div ng-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
           This index uses a <strong>Time-based index pattern</strong> which repeats <span bo-text="indexPattern.getInterval().display"></span>
         </div>
-        <div bo-if="conflictFields.length" class="alert alert-warning">
+        <div ng-if="conflictFields.length" class="alert alert-warning">
           <strong>Mapping conflict!</strong> {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
         </div>
       </div>
