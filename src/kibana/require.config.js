@@ -32,7 +32,7 @@ require.config({
     lodash_src: 'bower_components/lodash/dist/lodash',
     'lodash-deep': 'bower_components/lodash-deep/factory',
     moment: 'bower_components/moment/moment',
-    'moment-timezone': 'bower_components/moment-timezone/builds/moment-timezone-with-data-2010-2020',
+    'moment-timezone': 'bower_components/moment-timezone/builds/moment-timezone-with-data',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
