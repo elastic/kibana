@@ -39,7 +39,7 @@ define(function (require) {
         };
 
         function removeIfEmpty(event) {
-          if ($el.val() === '') {
+          if (!ngModelCntr.$viewValue) {
             $get('prev').focus();
             numberListCntr.remove($scope.$index);
             event.preventDefault();
@@ -174,6 +174,10 @@ define(function (require) {
         ngModelCntr.$formatters.push(validate(function (input, value) {
           if (input !== value) $setModel($scope, value);
         }));
+
+        if (parse(ngModelCntr.$viewValue) === INVALID) {
+          ngModelCntr.$setTouched();
+        }
       }
     };
   });
