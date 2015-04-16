@@ -17,9 +17,12 @@
   </div>
 
   <input ng-model="validLength" name="validLength" required type="hidden">
-  <p ng-show="aggForm.validLength.$invalid" class="text-danger text-center">
-    You must specify at least one value
-  </p>
+  <div class="hintbox" ng-show="aggForm.validLength.$invalid">
+    <p>
+      <i class="fa fa-danger text-danger"></i>
+      <strong>Required:</strong> You must specify at least one value
+    </p>
+  </div>
 
   <button
     ng-click="add()"
