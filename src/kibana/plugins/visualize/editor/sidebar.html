@@ -3,9 +3,13 @@
         ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
         name="visualizeEditor">
 
+    <div css-truncate css-truncate-expandable="true" ng-if="vis.type.requiresSearch" class="index-pattern">
+      {{ indexPattern.id }}
+    </div>
+
     <nav class="navbar navbar-default navbar-static-top subnav">
       <div class="container-fluid">
-        <ul class="nav navbar-nav" ng-init="visConfigSection = vis.type.schemas.metrics ? 'data' : 'options'">
+        <ul class="nav navbar-nav" ng-init="visConfigSection = vis.type.requiresSearch ? 'data' : 'options'">
           <li ng-class="{active: visConfigSection == 'data'}" ng-show="vis.type.schemas.metrics">
             <a class="navbar-link active" ng-click="visConfigSection='data'">Data</a>
           </li>
@@ -41,10 +45,6 @@
       </div>
     </nav>
 
-    <!--<div css-truncate css-truncate-expandable="true" ng-if="vis.type.requiresSearch" class="index-pattern">
-      {{ indexPattern.id }}
-    </div>-->
-
     <div class="vis-editor-config" ng-show="visConfigSection == 'data'">
       <ul class="list-unstyled">
         <!-- metrics -->
@@ -64,8 +64,10 @@
           >
         </vis-editor-vis-options>
 
+        <!-- apply/discard -->
       </ul>
     </div>
+
 
   </form>
 </div>
