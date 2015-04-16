@@ -204,6 +204,23 @@ define(function (require) {
           checkRange();
         });
       });
+
+      describe('should not return a nice scale when defaultYExtents is true', function () {
+        beforeEach(function () {
+          createData(defaultGraphData);
+          yAxis._attr.defaultYExtents = true;
+          yAxis.getYAxis(height);
+          yAxis.render();
+        });
+
+        it('not return a nice scale', function () {
+          var min = _.min(_.flatten(defaultGraphData));
+          var max = _.max(_.flatten(defaultGraphData));
+          var domain = yAxis.yAxis.scale().domain();
+          expect(domain[0]).to.be(min);
+          expect(domain[1]).to.be(max);
+        });
+      });
     });
 
     describe('formatAxisLabel method', function () {
@@ -260,6 +277,13 @@ define(function (require) {
     });
 
     describe('getDomain method', function () {
+      beforeEach(function () {
+        // Need to set this to false before each test since its
+        // status changes in one of the tests below. Having this set to
+        // true causes other tests to fail that need this attr to be set to false.
+        yAxis._attr.defaultYExtents = false;
+      });
+
       it('should return a log domain', function () {
         var scale = 'log';
         var yMin = 0;
@@ -268,6 +292,19 @@ define(function (require) {
 
         // Log scales have a yMin value of 1
         expect(domain[0]).to.be(1);
+      });
+
+      it('should return the default y axis extents (i.e. the min and max values)', function () {
+        var scale = 'linear';
+        var yMin = 25;
+        var yMax = 150;
+        var domain;
+
+        yAxis._attr.defaultYExtents = true;
+        domain = yAxis.getDomain(scale, yMin, yMax);
+
+        expect(domain[0]).to.be(yMin);
+        expect(domain[1]).to.be(yMax);
       });
 
       it('should throw a no results error if yMin and yMax values are both 0', function () {
