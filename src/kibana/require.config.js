@@ -28,6 +28,8 @@ require.config({
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
+    'leaflet-heat': 'bower_components/Leaflet.heat/dist/leaflet-heat',
+    'leaflet-markercluster': 'bower_components/leaflet.markercluster/dist/leaflet.markercluster',
     lodash_src: 'bower_components/lodash/dist/lodash',
     'lodash-deep': 'bower_components/lodash-deep/factory',
     moment: 'bower_components/moment/moment',
@@ -50,6 +52,9 @@ require.config({
     'ace-json': ['ace'],
     'angular-ui-ace': ['angular', 'ace', 'ace-json'],
     'ng-clip': ['angular', 'zeroclipboard'],
+    'leaflet-heat': {
+      deps: ['leaflet']
+    },
     inflection: {
       exports: 'inflection'
     },
@@ -61,6 +66,12 @@ require.config({
     },
     marked: {
       exports: 'marked'
+    },
+    'leaflet-markercluster': {
+      deps: ['leaflet',
+      'css!bower_components/leaflet.markercluster/dist/MarkerCluster.css',
+      'css!bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css'
+      ]
     }
   },
   waitSeconds: 60

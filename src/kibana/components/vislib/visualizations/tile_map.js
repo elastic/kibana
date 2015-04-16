@@ -3,9 +3,10 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    require('leaflet-heat');
+    require('leaflet-markercluster');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var errors = require('errors');
 
     require('css!components/vislib/styles/main');
 
@@ -33,8 +34,9 @@ define(function (require) {
       this.maps = [];
 
       // add allmin and allmax to geoJson
-      chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
-      chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
+      var allMinMax = this.getMinMax(handler.data.data);
+      chartData.geoJson.properties.allmin = allMinMax.min;
+      chartData.geoJson.properties.allmax = allMinMax.max;
     }
 
     /**
@@ -50,7 +52,7 @@ define(function (require) {
       // clean up old maps
       self.destroy();
 
-      // create a new maps array
+      // clear maps array
       self.maps = [];
 
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
@@ -67,15 +69,13 @@ define(function (require) {
 
           var mapData = data.geoJson;
           var div = $(this).addClass('tilemap');
-
-          var featureLayer;
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-
+          var featureLayer = new L.layerGroup();
           var mapOptions = {
             minZoom: 1,
             maxZoom: 18,
@@ -90,11 +90,14 @@ define(function (require) {
 
           var map = L.map(div[0], mapOptions);
 
+          var features = self.markerType(map, mapData);
+
+          featureLayer.addLayer(features);
+          map.addLayer(featureLayer);
+
           tileLayer.on('tileload', function () {
             self.saturateTiles();
           });
-
-          featureLayer = self.markerType(map, mapData).addTo(map);
 
           map.on('unload', function () {
             tileLayer.off('tileload', self.saturateTiles);
@@ -110,7 +113,7 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
-          // Add button to fit container to points
+          // if data, add button to fit container to points
           var FitControl = L.Control.extend({
             options: {
               position: 'topleft'
@@ -119,7 +122,7 @@ define(function (require) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
               $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
               $(container).on('click', function () {
-                self.fitBounds(map, featureLayer);
+                self.fitBounds(map, mapData);
               });
               return container;
             }
@@ -135,20 +138,53 @@ define(function (require) {
     };
 
     /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @param data {Object}
+     * @return {Object}
+     */
+    TileMap.prototype.getMinMax = function (data) {
+      var min = [];
+      var max = [];
+      var allData;
+
+      if (data.rows) {
+        allData = data.rows;
+      } else if (data.columns) {
+        allData = data.columns;
+      } else {
+        allData = [data];
+      }
+
+      allData.forEach(function (datum) {
+        min.push(datum.geoJson.properties.min);
+        max.push(datum.geoJson.properties.max);
+      });
+
+      var minMax = {
+        min: _.min(min),
+        max: _.max(max)
+      };
+
+      return minMax;
+    };
+
+    /**
      * zoom map to fit all features in featureLayer
      *
      * @method fitBounds
      * @param map {Object}
-     * @param featureLayer {Leaflet object}
-     * @return {Leaflet object} featureLayer
+     * @param mapData {Object}
+     * @return {undefined}
      */
-    TileMap.prototype.fitBounds = function (map, featureLayer) {
+    TileMap.prototype.fitBounds = function (map, mapData) {
 
-      map.fitBounds(featureLayer.getBounds());
+      map.fitBounds(this.getBounds(mapData));
     };
 
     /**
-     * remove css class on map tiles
+     * remove css class for desat filters on map tiles
      *
      * @method saturateTiles
      * @return {Leaflet object} featureLayer
@@ -169,41 +205,25 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map, mapData) {
-      var featureLayer;
+      var features;
+
       if (mapData) {
         if (this._attr.mapType === 'Scaled Circle Markers') {
-          featureLayer = this.scaledCircleMarkers(map, mapData);
+          features = this.scaledCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Circle Markers') {
-          featureLayer = this.shadedCircleMarkers(map, mapData);
+          features = this.shadedCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
-          featureLayer = this.shadedGeohashGrid(map, mapData);
+          features = this.shadedGeohashGrid(map, mapData);
+        } else if (this._attr.mapType === 'Heatmap') {
+          features = this.heatMap(map, mapData);
+        } else if (this._attr.mapType === 'Marker Cluster') {
+          features = this.markerCluster(map, mapData);
         } else {
-          featureLayer = this.pinMarkers(mapData);
+          features = this.pinMarkers(mapData);
         }
       }
 
-      return featureLayer;
-    };
-
-    /**
-     * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJson)
-     * with default leaflet pin markers
-     *
-     * @method pinMarkers
-     * @param mapData {Object}
-     * @return {Leaflet object} featureLayer
-     */
-    TileMap.prototype.pinMarkers = function (mapData) {
-      var self = this;
-
-      var featureLayer = L.geoJson(mapData, {
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        }
-      });
-
-      return featureLayer;
+      return features;
     };
 
     /**
@@ -342,6 +362,226 @@ define(function (require) {
     };
 
     /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with leaflet.heat plugin
+     *
+     * @method heatMap
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.heatMap = function (map, mapData) {
+      var max = mapData.properties.allmax;
+      var points = this.dataToHeatArray(mapData, max);
+
+      // default heatmap options in kibana:
+      // radius: 25,
+      // blur: 15,
+      // max: 1,
+      // minOpacity: 0.1,
+      // maxZoom: 18,
+      // gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+
+      var options = {
+        radius: this._attr.heatRadius,
+        blur: this._attr.heatBlur,
+        maxZoom: this._attr.heatMaxZoom,
+        minOpacity: this._attr.heatMinOpacity
+      };
+
+      var featureLayer = L.heatLayer(points, options);
+
+      return featureLayer;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with leaflet.markercluster plugin
+     *
+     * @method markerCluster
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.markerCluster = function (map, mapData) {
+      var self = this;
+      var max = mapData.properties.allmax;
+      var metric = mapData.properties.metricType;
+
+      var featureLayer = new L.MarkerClusterGroup({
+        maxClusterRadius: 130,
+        disableClusteringAtZoom: 16,
+        chunkedLoading: true,
+        iconCreateFunction: function (cluster) {
+          var count = cluster.getChildCount();
+          var markers = cluster.getAllChildMarkers();
+
+          return self.customClusterIcon(count, metric, markers);
+        }
+      });
+
+      L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+          featureLayer.addLayer(layer);
+        }
+      });
+
+      return featureLayer;
+    };
+
+    /**
+     * Div element icon marker for map
+     * creates featurelayer from mapData (geoJson)
+     *
+     * @method customClusterIcon
+     * @param count {Number}
+     * @param markers {Array of Leaflet Markers}
+     * @return {Leaflet DivIcon}
+     */
+    TileMap.prototype.customClusterIcon = function (count, metric, markers) {
+      var self = this;
+      var value = 0;
+      var parts;
+      var pre;
+
+      if (!self._attr.clusterMetricCount) {
+        value = count;
+      } else {
+        value = self.markerMetricValue(count, metric, markers);
+      }
+
+      var className = 'custom-marker-cluster';
+      var width = 32;
+      var height = 32;
+
+      function formatNum(num) {
+        num = +num;
+        var exp = num.toExponential();
+        var parts = exp.split('e');
+        var pre = +parts[0];
+
+        return pre.toFixed(2) + 'e' + parts[1];
+      }
+
+      // width of custom icon grows to fit length of metric value
+      if (value < 100) {
+        className += ' custom-marker-cluster-10';
+      }
+      else if (value < 1000) {
+        className += ' custom-marker-cluster-100';
+        width = 36;
+      }
+      else if (value < 10000) {
+        className += ' custom-marker-cluster-1000';
+        width = 46;
+      }
+      else if (value < 100000) {
+        className += ' custom-marker-cluster-10000';
+        width = 54;
+      }
+      else if (value < 1000000) {
+        className += ' custom-marker-cluster-100000';
+        width = 62;
+      }
+      else {
+        value = formatNum(value);
+        className += ' custom-marker-cluster-1000000';
+        width = 70;
+      }
+
+      var div = '<div>' + value + '</div>';
+
+      return new L.DivIcon({
+        html: div,
+        className: className,
+        iconSize: L.point(width, height)
+      });
+    };
+
+    /**
+     * Aggregates marker values by type of metric
+     *
+     * @method markerMetricValue
+     * @param count {Number}
+     * @param metric {String}
+     * @param markers {Array of Leaflet Markers}
+     * @return {Number}
+     */
+    TileMap.prototype.markerMetricValue = function (count, metric, markers) {
+      // metric: 'count', 'avg', 'sum', 'min', 'max', 'cardinality'
+      var value;
+
+      if (metric === 'count' || metric === 'sum') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .compact()
+        .reduce(function (sum, n) {
+          return sum + n;
+        })
+        .value();
+      }
+
+      if (metric === 'min') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .without(null)
+        .min()
+        .value();
+      }
+
+      if (metric === 'max' || metric === 'cardinality') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .compact()
+        .max()
+        .value();
+      }
+
+      if (metric === 'avg') {
+        value = _.chain(markers)
+        .map(function (m) {
+          return m.feature.properties.count;
+        })
+        .compact()
+        .max()
+        .value();
+        value = parseInt(value / count);
+      }
+
+      return value;
+    };
+
+    /**
+     * Type of data overlay for map:
+     * creates featurelayer from mapData (geoJson)
+     * with default leaflet pin markers
+     *
+     * @method pinMarkers
+     * @param mapData {Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.pinMarkers = function (mapData) {
+      var self = this;
+
+      var featureLayer = L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        }
+      });
+
+      return featureLayer;
+    };
+
+    /**
      * Adds label div to each map when data is split
      *
      * @method addLabel
@@ -434,6 +674,7 @@ define(function (require) {
      * Invalidate the size of the map, so that leaflet will resize to fit.
      * then moves to center
      *
+     * @method resizeArea
      * @return {undefined}
      */
     TileMap.prototype.resizeArea = function () {
@@ -472,6 +713,47 @@ define(function (require) {
     };
 
     /**
+     * get bounds of features from geoJson
+     *
+     * @method getBounds
+     * @param mapData {Object}
+     * @return {Leaflet}
+     */
+    TileMap.prototype.getBounds = function (mapData) {
+      var bounds = L.geoJson(mapData).getBounds();
+      return bounds;
+    };
+
+    /**
+     * if attribute is checked/true
+     • normalize data for heat map intensity
+     *
+     * @param mapData {Object}
+     * @param nax {Number}
+     * @method dataToHeatArray
+     * @return {Array}
+     */
+    TileMap.prototype.dataToHeatArray = function (mapData, max) {
+      var self = this;
+
+      return mapData.features.map(function (feature) {
+        var lat = feature.geometry.coordinates[1];
+        var lng = feature.geometry.coordinates[0];
+        var heatIntensity;
+
+        if (!self._attr.heatNormalizeData) {
+          // show bucket count on heatmap
+          heatIntensity = feature.properties.count;
+        } else {
+          // show bucket count normalized to max value
+          heatIntensity = parseInt(feature.properties.count / max * 100);
+        }
+
+        return [lat, lng, heatIntensity];
+      });
+    };
+
+    /**
      * geohashMinDistance returns a min distance in meters for sizing
      * circle markers to fit within geohash grid rectangle
      *
@@ -505,7 +787,7 @@ define(function (require) {
      * @method radiusScale
      * @param count {Number}
      * @param max {Number}
-     * @param precision {Number}
+     * @param feature {Object}
      * @return {Number}
      */
     TileMap.prototype.radiusScale = function (count, max, feature) {

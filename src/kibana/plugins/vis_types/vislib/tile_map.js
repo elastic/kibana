@@ -12,10 +12,16 @@ define(function (require) {
        'that is mapped as type:geo_point with latitude and longitude coordinates.',
       params: {
         defaults: {
-          mapType: 'Scaled Circle Markers',
+          mapType: 'Shaded Circle Markers',
+          heatMaxZoom: 12,
+          heatMinOpacity: 0.1,
+          heatRadius: 25,
+          heatBlur: 15,
+          heatNormalizeData: true,
+          clusterMetricCount: true,
           isDesaturated: true
         },
-        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pins'],
+        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap', 'Marker Cluster', 'Pins'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       responseConverter: geoJsonConverter,
