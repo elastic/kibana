@@ -182,7 +182,7 @@ define(function (require) {
      */
     AggConfig.prototype.requesting = function () {
       var self = this;
-      self.type.params.forEach(function (param) {
+      self.type && self.type.params.forEach(function (param) {
         if (param.onRequest) param.onRequest(self);
       });
     };

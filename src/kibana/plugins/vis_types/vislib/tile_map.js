@@ -12,10 +12,10 @@ define(function (require) {
        'that is mapped as type:geo_point with latitude and longitude coordinates.',
       params: {
         defaults: {
-          mapType: 'Shaded Circle Markers',
+          mapType: 'Scaled Circle Markers',
           isDesaturated: true
         },
-        mapTypes: ['Shaded Circle Markers', 'Scaled Circle Markers'],
+        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pins'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       responseConverter: geoJsonConverter,
