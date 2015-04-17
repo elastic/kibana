@@ -151,15 +151,21 @@ define(function (require) {
      * @return {Object}
      */
     TileMap.prototype.addGeohashBounds = function (mapData) {
-      mapData.features.map(function (feature) {
-        var geohashRect = feature.properties.rectangle;
+      // scale to pad bounds based on precision
+      var padScale = d3.scale.linear().domain([1, 3, 5, 8, 10, 12]).range([0, 0, 4, 6, 20, 80]);
+      var padFactor = padScale(mapData.properties.precision);
+
+      for (var i = 0; i < mapData.features.length; i++) {
+        var geohashRect = mapData.features[i].properties.rectangle;
+        // get bounds from northEast[3] and southWest[1]
+        // corners in geohash rectangle
         var corners = [
           [geohashRect[3][1], geohashRect[3][0]],
           [geohashRect[1][1], geohashRect[1][0]]
         ];
-        var bounds = L.latLngBounds(corners);
-        feature.properties.bounds = bounds;
-      });
+        var bounds = L.latLngBounds(corners).pad(padFactor);
+        mapData.features[i].properties.bounds = bounds;
+      }
 
       return mapData;
     };
@@ -354,12 +360,12 @@ define(function (require) {
         pointToLayer: function (feature, latlng) {
           var geohashRect = feature.properties.rectangle;
           // get bounds from northEast[3] and southWest[1]
-          // points in geohash rectangle
-          var bounds = [
+          // corners in geohash rectangle
+          var corners = [
             [geohashRect[3][1], geohashRect[3][0]],
             [geohashRect[1][1], geohashRect[1][0]]
           ];
-          return L.rectangle(bounds);
+          return L.rectangle(corners);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -388,13 +394,13 @@ define(function (require) {
 
     /**
      * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJson)
+     * creates canvas layer from mapData (geoJson)
      * with leaflet.heat plugin
      *
      * @method heatMap
      * @param map {Object}
      * @param mapData {Object}
-     * @return {Leaflet object} featureLayer
+     * @return featureLayer {Leaflet object}
      */
     TileMap.prototype.heatMap = function (map, mapData) {
       var self = this;
@@ -427,18 +433,26 @@ define(function (require) {
       return featureLayer;
     };
 
+    /**
+     * Checks if event latlng is within bounds of mapData
+     * features and shows tooltip for that feature
+     *
+     * @method showHeatTooltip
+     * @param e {Event}
+     * @param map {Object}
+     * @param mapData {Object}
+     * @return {undefined}
+     */
     TileMap.prototype.showHeatTooltip = function (e, map, mapData) {
-      // console.time('heatpop');
       map.closePopup();
 
-      var match = _.chain(mapData.features)
-      .map(function (n) {
-        if (n.properties.bounds.contains(e.latlng)) {
-          return n;
+      var match = [];
+      for (var i = 0; i < mapData.features.length; i++) {
+        if (mapData.features[i].properties.bounds.contains(e.latlng)) {
+          match.push(mapData.features[i]);
+          break;
         }
-      })
-      .compact()
-      .value();
+      }
 
       if (match.length) {
         var layer = match[0];
@@ -451,7 +465,6 @@ define(function (require) {
           .setContent(content)
           .openOn(map);
       }
-      // console.timeEnd('heatpop');
     };
 
     /**
