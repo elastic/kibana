@@ -1,14 +1,14 @@
 <form ng-submit="editor.save()" name="form">
-  <h2 ng-if="editor.creating"><strong>Create {{ field.scripted ? 'Scripted ' : '' }}Field</strong></h1>
-  <h2 ng-if="!editor.creating"><strong>Field:</strong> <code>{{ field.name }}</code></h1>
+  <h2 ng-if="editor.creating"><strong>Create {{ editor.field.scripted ? 'Scripted ' : '' }}Field</strong></h1>
+  <h2 ng-if="!editor.creating"><strong>Field:</strong> <code>{{ editor.field.name }}</code></h1>
 
   <div class="form-group">
     <label>
       Index Pattern
-      <a href="#{{ indexPattern.editRoute }}"><i class="fa fa-pencil" aria-label="edit"></i></a>
+      <a href="#{{ editor.indexPattern.editRoute }}"><i class="fa fa-pencil" aria-label="edit"></i></a>
     </label>
     <input
-      ng-model="indexPattern.id"
+      ng-model="editor.indexPattern.id"
       readonly
       class="form-control"
     >
@@ -17,7 +17,7 @@
   <div class="form-group">
     <label>Name</label>
     <input
-      ng-model="field.name"
+      ng-model="editor.field.name"
       ng-readonly="!editor.creating"
       class="form-control"
     >
@@ -26,13 +26,13 @@
   <div class="form-group">
     <label>Type</label>
     <input
-      ng-model="field.type"
+      ng-model="editor.field.type"
       ng-readonly="!editor.creating"
       class="form-control"
     >
   </div>
 
-  <div class="form-group" ng-if="field.scripted">
+  <div class="form-group" ng-if="editor.field.scripted">
     <label>
       Script
       <small>Please familiarize yourself with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a> before using scripted fields.</small>
@@ -41,11 +41,11 @@
     <div ng-bind-html="editor.scriptingInfo" class="hintbox"></div>
     <div ng-bind-html="editor.scriptingWarning" class="hintbox"></div>
 
-    <textarea required class="form-control text-monospace" ng-model="field.script"></textarea>
+    <textarea required class="form-control text-monospace" ng-model="editor.field.script"></textarea>
   </div>
 
   <div class="form-group">
-    <label>Format <small>(Default: <i>{{defFormatType.resolvedTitle}}</i>)</small></label>
+    <label>Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
     <select
       ng-model="editor.selectedFormatId"
       ng-options="format.id as format.title for format in editor.fieldFormatTypes"
@@ -55,25 +55,25 @@
   </div>
 
   <div class="form-group">
-    <label for="field.count">Popularity</label>
+    <label for="editor.field.count">Popularity</label>
     <div class="input-group">
 
       <input
-        ng-model="field.count"
+        ng-model="editor.field.count"
         type="number"
         class="form-control">
 
       <span class="input-group-btn">
         <button
           type="button"
-          ng-click="field.count = field.count + 1"
+          ng-click="editor.field.count = editor.field.count + 1"
           aria-label="Plus"
           class="btn btn-default">
           <i aria-hidden="true" class="fa fa-plus"></i>
         </button>
         <button
           type="button"
-          ng-click="field.count = field.count - 1"
+          ng-click="editor.field.count = editor.field.count - 1"
           aria-label="Minus"
           class="btn btn-default">
           <i aria-hidden="true" class="fa fa-minus"></i>

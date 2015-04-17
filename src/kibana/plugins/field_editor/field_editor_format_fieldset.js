@@ -8,16 +8,10 @@ define(function (require) {
     return {
       restrict: 'A',
       require: '^fieldEditor',
-      scope: true,
       link: function ($scope, $el) {
-        $scope.$bind('params', 'formatParams');
-        $scope.$bind('field', 'field');
-        $scope.$bind('format', 'editor.getFormat()');
-        $scope.$bind('FieldFormat', 'editor.getFormat().type');
-
         var childScopesToCleanup = [];
 
-        $scope.$watch('FieldFormat', function (FieldFormat) {
+        $scope.$watch('editor.field.format.type', function (FieldFormat) {
           var editor = FieldFormat && FieldFormat.editor;
           _.invoke(childScopesToCleanup.splice(0), '$destroy');
 

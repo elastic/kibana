@@ -12,8 +12,8 @@ define(function (require) {
     NumeralJs.id = 'nujs';
     NumeralJs.title = 'numeral.js';
     NumeralJs.fieldType = 'number';
-    NumeralJs.defaultParams = {
-      format: '0,0'
+    NumeralJs.paramDefaults = {
+      pattern: '0,0'
     };
 
     NumeralJs.prototype._convert = function (val) {
@@ -24,7 +24,7 @@ define(function (require) {
       if (isNaN(val)) {
         return '';
       } else {
-        return numeral.set(val).format(this.param('format'));
+        return numeral.set(val).format(this.param('pattern'));
       }
     };
 
@@ -40,11 +40,14 @@ define(function (require) {
         ];
 
         self.samples = [];
-        $scope.$watch('format.param("format")', function (pattern) {
+        $scope.$watch('editor.field.format.param("pattern")', function (pattern) {
           if (pattern) {
+            var format = $scope.editor.field.format;
+
             self.samples = examples.map(function (input) {
-              return [input, $scope.format.convert(input)];
+              return [input, format.convert(input)];
             });
+
           } else {
             self.samples = null;
           }

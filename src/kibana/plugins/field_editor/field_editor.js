@@ -7,6 +7,7 @@ define(function (require) {
   .directive('fieldEditor', function (Private) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
+    var Field = Private(require('components/index_patterns/_field'));
 
     return {
       restrict: 'E',
@@ -15,60 +16,65 @@ define(function (require) {
       controller: function ($sce, $scope, $attrs) {
         var self = this;
 
-        $scope.indexPattern = $scope.$eval($attrs.indexPattern);
-        $scope.field = $scope.$eval($attrs.field);
+        self.indexPattern = $scope.$eval($attrs.indexPattern);
+        self.fieldSpec = Object.create($scope.$eval($attrs.field).$$spec);
+        self.field = mutatedField();
 
-        $scope.formatParams = $scope.field.format.params() || {};
-        $scope.defFormatType = initDefaultFormat($scope.field);
+        self.formatParams = self.field.format.params() || {};
+        self.defFormatType = initDefaultFormat();
 
         self.scriptingInfo = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_info.html'));
         self.scriptingWarning = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_warning.html'));
-        self.fieldFormatTypes = [$scope.defFormatType].concat(fieldFormats.byFieldType[$scope.field.type] || []);
+        self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
 
-        self.creating = !_.contains($scope.indexPattern.fields, $scope.field);
+        self.creating = !self.indexPattern.fields.byName[self.field.name];
+
         self.cancel = function () {
-
+          window.history.back();
         };
 
         self.save = function () {
 
         };
 
-        var format;
-        self.getFormat = function () { return format; };
-        self.getSelectedFormatId = function () { return self.selectedFormatId; };
         $scope.$watchMulti([
-          self.getSelectedFormatId,
-          '=formatParams'
+          'editor.selectedFormatId',
+          '=editor.formatParams'
         ], function (cur) {
           var id = cur[0];
+          var field = self.field;
+          var FieldFormat = fieldFormats.byId[id];
+          var newFormat = FieldFormat && !(field.format instanceof FieldFormat);
+          var resetFormat = (!id || newFormat);
+          var resetParams = resetFormat && _.size(self.formatParams) > 0;
 
-          if (!id) {
-            format = undefined;
+          if (resetParams) {
+            // clear the params, which will cause another trigger
+            self.formatParams = {};
             return;
           }
 
-          var FieldFormat = fieldFormats.byId[id];
-          if (!(format instanceof FieldFormat)) {
-            $scope.formatParams = {};
-          }
-
-          format = new FieldFormat($scope.formatParams);
+          self.fieldSpec.format = FieldFormat && new FieldFormat(self.formatParams);
+          self.field = mutatedField();
         });
+
+        function mutatedField() {
+          return new Field(self.indexPattern, self.fieldSpec);
+        }
+
+        function initDefaultFormat() {
+          var prototype = fieldFormats.for(self.field.type).type;
+          var def = Object.create(prototype);
+
+          // explicitly set to undefined to prevent inheritting the prototypes id
+          def.id = undefined;
+          def.resolvedTitle = def.title;
+          def.title = '- default - ';
+
+          return def;
+        }
       }
     };
-
-    function initDefaultFormat(field) {
-      var prototype = fieldFormats.for(field.type).type;
-      var def = Object.create(prototype);
-
-      // explicitly set to undefined to prevent inheritting the prototypes id
-      def.id = undefined;
-      def.resolvedTitle = def.title;
-      def.title = '- default - ';
-
-      return def;
-    }
   });
 
 });
