@@ -418,7 +418,40 @@ define(function (require) {
 
       var featureLayer = L.heatLayer(points, options);
 
+      map.on('mousemove', _.debounce(heatLocation, 50));
+
+      function heatLocation(e) {
+        self.showHeatTooltip(e, map, mapData);
+      }
+
       return featureLayer;
+    };
+
+    TileMap.prototype.showHeatTooltip = function (e, map, mapData) {
+      // console.time('heatpop');
+      map.closePopup();
+
+      var match = _.chain(mapData.features)
+      .map(function (n) {
+        if (n.properties.bounds.contains(e.latlng)) {
+          return n;
+        }
+      })
+      .compact()
+      .value();
+
+      if (match.length) {
+        var layer = match[0];
+        var content = 'Geohash: ' + layer.properties.geohash + '<br>' +
+          'Center: ' + layer.properties.center[1].toFixed(1) + ', ' +
+          layer.properties.center[0].toFixed(1) + '<br>' +
+          layer.properties.valueLabel + ': ' + layer.properties.count;
+        var popup = L.popup({autoPan: false})
+          .setLatLng(e.latlng)
+          .setContent(content)
+          .openOn(map);
+      }
+      // console.timeEnd('heatpop');
     };
 
     /**
