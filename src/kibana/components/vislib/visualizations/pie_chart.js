@@ -24,7 +24,8 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
-      this._validatePieData();
+      var charts = this.handler.data.getVisData();
+      this._validatePieData(charts);
 
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false
@@ -35,15 +36,12 @@ define(function (require) {
      * Checks whether pie slices have all zero values.
      * If so, an error is thrown.
      */
-    PieChart.prototype._validatePieData = function () {
-      var charts = this.handler.data.getVisData();
+    PieChart.prototype._validatePieData = function (charts) {
       var isAllZeros = charts.every(function (chart) {
         return chart.slices.children.length === 0;
       });
 
-      if (isAllZeros) {
-        throw new errors.PieContainsAllZeros();
-      }
+      if (isAllZeros) { throw new errors.PieContainsAllZeros(); }
     };
 
     /**
