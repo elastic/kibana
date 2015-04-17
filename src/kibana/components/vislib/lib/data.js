@@ -512,6 +512,26 @@ define(function (require) {
     };
 
     /**
+     * Removes zeros from pie chart data
+     * @param slices
+     * @returns {*}
+     */
+    Data.prototype.withoutZeroSlices = function (slices) {
+      var self = this;
+
+      if (!slices.children) return slices;
+
+      slices = _.clone(slices);
+      slices.children = slices.children.reduce(function (children, child) {
+        if (child.size !== 0) {
+          children.push(self.withoutZeroSlices(child));
+        }
+        return children;
+      }, []);
+      return slices;
+    };
+
+    /**
      * Returns an array of names ordered by appearance in the nested array
      * of objects
      *
@@ -524,6 +544,7 @@ define(function (require) {
 
       _.forEach(this.getVisData(), function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;
+        obj.slices = self.withoutZeroSlices(obj.slices); // Remove zeros from pie data
 
         _.forEach(self.getNames(obj, columns), function (name) {
           names.push(name);
