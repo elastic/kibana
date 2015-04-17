@@ -13,13 +13,15 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/field_editor/field_editor.html'),
       controllerAs: 'editor',
-      controller: function ($sce, $scope, $attrs) {
+      controller: function ($sce, $scope, $attrs, Notifier) {
         var self = this;
+        var notify = new Notifier({ location: 'Field Editor' });
 
         self.indexPattern = $scope.$eval($attrs.indexPattern);
         self.fieldSpec = Object.create($scope.$eval($attrs.field).$$spec);
         self.field = mutatedField();
 
+        self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
         self.formatParams = self.field.format.params() || {};
         self.defFormatType = initDefaultFormat();
 
@@ -30,11 +32,32 @@ define(function (require) {
         self.creating = !self.indexPattern.fields.byName[self.field.name];
 
         self.cancel = function () {
-          window.history.back();
+          window.location.hash = self.indexPattern.editRoute;
         };
 
         self.save = function () {
+          var indexPattern = self.indexPattern;
+          var fields = indexPattern.fields;
+          var field = self.field;
 
+          if (fields.byName[field.name]) {
+            var index = _.findIndex(fields, { name: field.name });
+            fields.splice(index, 1, field);
+          } else {
+            fields.push(field);
+          }
+
+          if (!self.selectedFormatId) {
+            delete indexPattern.fieldFormatMap[field.name];
+          } else {
+            indexPattern.fieldFormatMap[field.name] = field.format;
+          }
+
+          return indexPattern.save()
+          .then(function () {
+            notify.info('Saved Field "' + self.field.name + '"');
+            window.location.hash = self.indexPattern.editRoute;
+          });
         };
 
         $scope.$watchMulti([
