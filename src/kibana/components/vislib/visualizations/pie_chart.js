@@ -98,10 +98,19 @@ define(function (require) {
      * @returns {D3.Selection} SVG with paths attached
      */
     PieChart.prototype.addPath = function (width, height, svg, slices) {
+      var self = this;
       var marginFactor = 0.95;
-      var isDonut = this._attr.isDonut;
+      var isDonut = self._attr.isDonut;
       var radius = (Math.min(width, height) / 2) * marginFactor;
-      var color = this.handler.data.getPieColorFunc();
+      var color = self.handler.data.getPieColorFunc();
+      var tooltip = self.tooltip;
+      var isTooltip = self._attr.addTooltip;
+
+      var format = function (d, label) {
+        var formatter = d.aggConfig ? d.aggConfig.fieldFormatter() : String;
+        return formatter(label);
+      };
+
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
@@ -130,16 +139,8 @@ define(function (require) {
       .outerRadius(function (d) {
         return Math.max(0, y(d.y + d.dy));
       });
-      var tooltip = this.tooltip;
-      var isTooltip = this._attr.addTooltip;
-      var self = this;
-      var path;
-      var format = function (d, label) {
-        var formatter = d.aggConfig ? d.aggConfig.fieldFormatter() : String;
-        return formatter(label);
-      };
 
-      path = svg
+      var path = svg
       .datum(slices)
       .selectAll('path')
       .data(partition.nodes)
@@ -148,8 +149,9 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
-          return 'slice ' + self.colorToClass(color(format(d, d.name)));
+          return 'slice';
         })
+        .call(self._addIdentifier, 'name')
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
