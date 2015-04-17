@@ -28,7 +28,11 @@ define(function (require) {
 
       if (!type) type = fieldTypes.byName.unknown;
 
-      var format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.for(spec.type);
+      var format = spec.format;
+      if (!format || !(format instanceof FieldFormat)) {
+        format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.for(spec.type);
+      }
+
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
       var sortable = indexed && type.sortable;
