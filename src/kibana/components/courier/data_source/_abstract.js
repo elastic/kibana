@@ -300,7 +300,8 @@ define(function (require) {
            * @returns {object}
            */
           var cleanFilter = function (filter) {
-            return _.omit(filter, ['$$hashKey', 'meta']);
+            // use angular.extend to remove $$hashKey and other props
+            return _.omit(angular.extend({}, filter), ['meta']);
           };
 
           // switch to filtered query if there are filters
