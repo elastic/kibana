@@ -2,7 +2,9 @@ define(function (require) {
   return function IndexPatternFactory(Private, timefilter, configFile, Notifier, config, Promise, $rootScope) {
     var _ = require('lodash');
     var errors = require('errors');
+    var angular = require('angular');
 
+    var fieldformats = Private(require('registry/field_formats'));
     var kbnUrl = Private(require('components/url/url'));
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
@@ -24,7 +26,31 @@ define(function (require) {
       timeFieldName: 'string',
       intervalName: 'string',
       fields: 'json',
-      fieldFormatMap: 'json'
+      fieldFormatMap: {
+        type: 'string',
+        _serialize: function (map) {
+          if (map == null) return;
+
+          var count = 0;
+          var serialized = _.transform(map, function (flat, format, field) {
+            if (!format) return;
+            count++;
+            flat[field] = {
+              id: format.type.id,
+              params: format.params()
+            };
+          });
+
+          if (count) return angular.toJson(serialized);
+        },
+        _deserialize: function (map) {
+          if (map == null) return {};
+          return _.mapValues(angular.fromJson(map), function (mapping) {
+            var FieldFormat = fieldformats.byId[mapping.id];
+            return FieldFormat && new FieldFormat(mapping.params);
+          });
+        }
+      }
     });
 
     function IndexPattern(id) {
@@ -60,11 +86,6 @@ define(function (require) {
           return docSource.fetch()
           .then(function applyESResp(resp) {
             if (!resp.found) throw new errors.SavedObjectNotFound(type, self.id);
-
-            // assign the defaults to the response
-            _.defaults(resp._source, {
-              fieldFormatMap: '{}'
-            });
 
             // deserialize any json fields
             _.forOwn(mapping, function ittr(fieldMapping, name) {
@@ -190,7 +211,7 @@ define(function (require) {
         return body;
       };
 
-      // index the document
+      // refresh the id and editRoute
       function setId(id) {
         self.id = id;
         self.editRoute = id && kbnUrl.eval('/settings/indices/{{id}}', { id: id });
@@ -201,13 +222,13 @@ define(function (require) {
       self.create = function () {
         var body = self.prepBody();
         return docSource.doCreate(body)
-        .then(setId).catch(function (err) {
+        .then(setId)
+        .catch(function (err) {
           var confirmMessage = 'Are you sure you want to overwrite this?';
           if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
             return docSource.doIndex(body).then(setId);
           }
           return Promise.resolve(false);
-
         });
       };
 
@@ -219,7 +240,6 @@ define(function (require) {
       self.refreshFields = function () {
         return mapper.clearCache(self)
         .then(self._fetchFields)
-        .then(self._refreshFieldFormatMap)
         .then(self.save);
       };
 
@@ -232,17 +252,6 @@ define(function (require) {
           // initialize self.field with this field list
           initFields(fields);
         });
-      };
-
-      self._refreshFieldFormatMap = function () {
-        var self = this;
-
-        // update the field format map to ensure that only format names for resolved fields are set
-        self.fieldFormatMap = _.transform(self.fieldFormatMap, function (map, id, field) {
-          if (self.fields.byName[field]) {
-            map[field] = id;
-          }
-        }, {});
       };
 
       self.toJSON = function () {
