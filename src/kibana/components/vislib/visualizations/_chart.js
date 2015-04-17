@@ -45,45 +45,7 @@ define(function (require) {
      * @returns {HTMLElement} Contains the D3 chart
      */
     Chart.prototype.render = function () {
-      try {
-        d3.select(this.chartEl).call(this.draw());
-      } catch (error) {
-        if (error instanceof errors.PieContainsAllZeros ||
-          error instanceof errors.NoResults) {
-
-          this._error(error.message);
-        } else {
-          throw error;
-        }
-      }
-    };
-
-    /**
-     * Displays an error message in the DOM
-     */
-    Chart.prototype._error = function (message) {
-      var selection = d3.select(this.chartEl);
-
-      // Remove all elements from selection
-      selection.selectAll('*').remove();
-
-      var div = selection
-        .append('div')
-        .attr('class', 'visualize-error');
-
-      if (message === 'No results found') {
-        div.append('div')
-          .attr('class', 'text-center visualize-error visualize-chart ng-scope')
-          .append('div').attr('class', 'item top')
-          .append('div').attr('class', 'item')
-          .append('h2').html('<i class="fa fa-meh-o"></i>')
-          .append('h4').text(message);
-
-        div.append('div').attr('class', 'item bottom');
-        return div;
-      }
-
-      return div.append('h4').text(message);
+      d3.select(this.chartEl).call(this.draw());
     };
 
     /**

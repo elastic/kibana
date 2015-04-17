@@ -24,6 +24,7 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+      this._validatePieData();
 
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false
@@ -51,7 +52,7 @@ define(function (require) {
       }(data.slices));
 
       if (data.slices.children.length === 0) {
-        throw new errors.NoResults();
+        throw new errors.PieContainsAllZeros();
       }
     };
 
@@ -200,7 +201,6 @@ define(function (require) {
           var height = $(this).height();
           var path;
 
-          self._validatePieData();
           self.convertToPercentage(slices);
           self._validateContainerSize(width, height);
 
