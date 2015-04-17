@@ -66,7 +66,14 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          var mapData = data.geoJson;
+          var mapData;
+          // add bounds to mapData features for heatmap popups
+          if (self._attr.mapType === 'Heatmap') {
+            mapData = self.addGeohashBounds(data.geoJson);
+          } else {
+            mapData = data.geoJson;
+          }
+
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
@@ -134,6 +141,27 @@ define(function (require) {
           self.maps.push(map);
         });
       };
+    };
+
+    /**
+     * add geohash grid bounds to mapData properties
+     *
+     * @method addGeohashBounds
+     * @param data {Object}
+     * @return {Object}
+     */
+    TileMap.prototype.addGeohashBounds = function (mapData) {
+      mapData.features.map(function (feature) {
+        var geohashRect = feature.properties.rectangle;
+        var corners = [
+          [geohashRect[3][1], geohashRect[3][0]],
+          [geohashRect[1][1], geohashRect[1][0]]
+        ];
+        var bounds = L.latLngBounds(corners);
+        feature.properties.bounds = bounds;
+      });
+
+      return mapData;
     };
 
     /**
