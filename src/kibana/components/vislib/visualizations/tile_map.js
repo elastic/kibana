@@ -94,12 +94,6 @@ define(function (require) {
           featureLayer.addLayer(features);
           map.addLayer(featureLayer);
 
-          // heat map popups
-          if (self._attr.mapType === 'Heatmap' && self._attr.heatShowTooltips) {
-            var popups = self.heatMapPoints(map, mapData);
-            map.addLayer(popups);
-          }
-
           tileLayer.on('tileload', function () {
             self.saturateTiles();
           });
@@ -397,30 +391,6 @@ define(function (require) {
       var featureLayer = L.heatLayer(points, options);
 
       return featureLayer;
-    };
-
-    TileMap.prototype.heatMapPoints = function (map, mapData) {
-      var self = this;
-
-      var popups = L.geoJson(mapData, {
-        pointToLayer: function (feature, latlng) {
-          var count = feature.properties.count;
-          var radius = self.geohashMinDistance(feature);//+self._attr.heatRadius * 100;
-          return L.circle(latlng, radius);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        },
-        style: function (feature) {
-          return {
-            fillColor: 'rgba(0,0,0,0)',
-            color: 'rgba(0,0,0,0.2)',
-            opacity: 0,
-            fillOpacity: 0
-          };
-        }
-      });
-      return popups;
     };
 
     /**
