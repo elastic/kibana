@@ -528,6 +528,7 @@ define(function (require) {
         }
         return children;
       }, []);
+
       return slices;
     };
 
@@ -540,9 +541,10 @@ define(function (require) {
      */
     Data.prototype.pieNames = function () {
       var self = this;
+      var data = this.getVisData();
       var names = [];
 
-      _.forEach(this.getVisData(), function (obj) {
+      _.forEach(data, function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;
         obj.slices = self._removeZeroSlices(obj.slices);
 

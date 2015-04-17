@@ -32,13 +32,16 @@ define(function (require) {
     }
 
     /**
-     * Checks whether all pie slices have zero values.
+     * Checks whether pie slices have all zero values.
      * If so, an error is thrown.
      */
     PieChart.prototype._validatePieData = function () {
-      var data = this.chartData;
+      var charts = this.handler.data.getVisData();
+      var isAllZeros = charts.every(function (chart) {
+        return chart.slices.children.length === 0;
+      });
 
-      if (data.slices.children.length === 0) {
+      if (isAllZeros) {
         throw new errors.PieContainsAllZeros();
       }
     };
