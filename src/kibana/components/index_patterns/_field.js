@@ -1,6 +1,5 @@
 define(function (require) {
   return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier, kbnUrl) {
-    var _ = require('lodash');
     var notify = new Notifier({ location: 'IndexPattern Field' });
 
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
@@ -16,7 +15,7 @@ define(function (require) {
       // defined using the logic below
       var obj = new ObjDefine(spec, Field.prototype);
 
-      // find the type for this field, fallback to conflict type of type is unknown
+      // find the type for this field, fallback to unkown type
       var type = fieldTypes.byName[spec.type];
       if (spec.type && !type) {
         notify.error(
@@ -28,8 +27,7 @@ define(function (require) {
 
       if (!type) type = fieldTypes.byName.unknown;
 
-      var formatName = indexPattern.fieldFormatMap[spec.name];
-      var format = fieldFormats.byName[formatName] || fieldFormats.for(spec.type);
+      var format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.for(spec.type);
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
       var sortable = indexed && type.sortable;
@@ -49,7 +47,6 @@ define(function (require) {
       obj.fact('indexed', indexed);
       obj.fact('analyzed', !!spec.analyzed);
       obj.fact('doc_values', !!spec.doc_values);
-      obj.writ('formatName', formatName);
 
       // usage flags, read-only and won't be saved
       obj.comp('format', format);
@@ -61,11 +58,9 @@ define(function (require) {
       obj.comp('indexPattern', indexPattern);
       obj.comp('displayName', shortDotsFilter(spec.name));
       obj.comp('editRoute', Field.getEditRoute(indexPattern, spec));
+      obj.comp('$$spec', spec);
 
-      var field = obj.create();
-      field.$$spec = spec;
-
-      return field;
+      return obj.create();
     }
 
     Field.getEditRoute = function (indexPattern, field) {

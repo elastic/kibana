@@ -88,6 +88,7 @@ define(function (require) {
     return {
       enumerable: false,
       writable: changeable,
+      configurable: true,
       value: val
     };
   };

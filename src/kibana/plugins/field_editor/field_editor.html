@@ -39,11 +39,11 @@
   <div class="form-group">
     <label>Format</label>
     <select
-      ng-model="field.formatName"
-      ng-options="format.name as format.display || format.name for format in editor.fieldFormatOptions"
+      ng-model="editor.selectedFormatId"
+      ng-options="format.id as format.title for format in editor.fieldFormatOptions"
       class="form-control">
     </select>
-    <format field-editor-format-fieldset></format>
+    <fieldset field-editor-format-fieldset></fieldset>
   </div>
 
   <div class="form-group">

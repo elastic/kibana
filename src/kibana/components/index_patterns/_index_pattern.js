@@ -1,7 +1,6 @@
 define(function (require) {
   return function IndexPatternFactory(Private, timefilter, configFile, Notifier, config, Promise, $rootScope) {
     var _ = require('lodash');
-    var angular = require('angular');
     var errors = require('errors');
 
     var kbnUrl = Private(require('components/url/url'));
@@ -119,7 +118,7 @@ define(function (require) {
           throw new errors.DuplicateField(name);
         }
 
-        var scriptedField = self.fields.push({
+        self.fields.push({
           name: name,
           script: script,
           type: type,
@@ -128,13 +127,6 @@ define(function (require) {
         });
 
         self.save();
-      };
-
-      self.setFieldFormat = function (field, format) {
-        if (format) self.fieldFormatMap[field.name] = format.name;
-        else delete self.fieldFormatMap[field.name];
-        initFields();
-        return self.save().then(_.ary(initFields));
       };
 
       self.removeScriptedField = function (name) {
@@ -162,10 +154,7 @@ define(function (require) {
       };
 
       self.getFields = function (type) {
-        var getScripted = (type === 'scripted');
-        return _.where(self.fields, function (field) {
-          return field.scripted ? getScripted : !getScripted;
-        });
+        return _.where(self.fields, { scripted: type === 'scripted' });
       };
 
       self.getInterval = function () {
@@ -230,6 +219,7 @@ define(function (require) {
       self.refreshFields = function () {
         return mapper.clearCache(self)
         .then(self._fetchFields)
+        .then(self._refreshFieldFormatMap)
         .then(self.save);
       };
 
@@ -241,14 +231,18 @@ define(function (require) {
 
           // initialize self.field with this field list
           initFields(fields);
-
-          // update the field format map to ensure that only format names for resolved fields are set
-          self.fieldFormatMap = _.transform(self.fieldFormatMap, function (map, formatName, field) {
-            if (self.fields.byName[field]) {
-              map[field] = formatName;
-            }
-          }, {});
         });
+      };
+
+      self._refreshFieldFormatMap = function () {
+        var self = this;
+
+        // update the field format map to ensure that only format names for resolved fields are set
+        self.fieldFormatMap = _.transform(self.fieldFormatMap, function (map, id, field) {
+          if (self.fields.byName[field]) {
+            map[field] = id;
+          }
+        }, {});
       };
 
       self.toJSON = function () {

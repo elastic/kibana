@@ -1,23 +1,28 @@
 define(function (require) {
   var _ = require('lodash');
 
-  // when the registry is empty or the default for a
-  // field type is not set, we will provide this
-  // as a hard-coded fallback.
-  var defaultFallbackFormat = { convert: _.asPrettyString, name: '' };
-
   return require('registry/_registry')({
     name: 'fieldFormats',
-    index: ['name'],
+    index: ['id'],
     group: ['fieldType'],
 
+    constructor: function (config, $rootScope) {
+      var self = this;
 
-    constructor: function (config) {
-      this.for = function (type, fallbackFormat) {
-        var map = config.get('defaultFieldFormats');
-        var name = map[type] || map._default_;
-        return this.byName[name] || (fallbackFormat || defaultFallbackFormat);
-      };
+      var defaultMap;
+      setupDefaultHandling();
+      $rootScope.$on('init:config', setupDefaultHandling);
+      $rootScope.$on('change:config.defaultFieldFormats', setupDefaultHandling);
+
+      function setupDefaultHandling() {
+        defaultMap = config.get('defaultFieldFormats');
+
+        self.for = _.memoize(function (type) {
+          var id = defaultMap[type] || defaultMap._default_;
+          var FieldFormat = this.byId[id];
+          return new FieldFormat();
+        });
+      }
     }
   });
 });

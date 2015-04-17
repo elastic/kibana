@@ -1,10 +1,12 @@
 define(function (require) {
+
+  require('plugins/field_editor/field_editor_format_fieldset');
+
   require('modules')
   .get('app/settings')
-  .directive('fieldEditor', function (Private, Promise) {
+  .directive('fieldEditor', function (Private) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
-    var Field = Private(require('components/index_patterns/_field'));
 
     return {
       restrict: 'E',
@@ -16,8 +18,9 @@ define(function (require) {
         $scope.indexPattern = $scope.$eval($attrs.indexPattern);
         $scope.field = $scope.$eval($attrs.field);
 
+        $scope.formatParams = $scope.field.format.params() || {};
         $scope.defaultFormat = {
-          display: '- default -'
+          title: '- default -'
         };
 
         self.scriptingInfo = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_info.html'));
@@ -28,23 +31,26 @@ define(function (require) {
         self.save = function () {
 
         };
-      }
-    };
-  })
-  .directive('fieldEditorFormatFieldset', function (Private, $compile) {
-    var fieldFormats = Private(require('registry/field_formats'));
 
-    return {
-      restrict: 'A',
-      require: '^fieldEditor',
-      link: function ($scope, $el, attr, editor) {
-        $scope.$watch('field.formatName', function (formatName) {
-          var format = fieldFormats.byName[formatName];
-          if (!format || !format.editor) {
-            $el.empty();
-          } else {
-            $el.html($compile(format.editor)($scope));
+        var format;
+        self.getFormat = function () { return format; };
+        self.getSelectedFormatId = function () { return self.selectedFormatId; };
+        $scope.$watchMulti([
+          self.getSelectedFormatId,
+          '=formatParams'
+        ], function (cur) {
+          var id = cur[0];
+
+          if (!id) {
+            format = undefined;
+            return;
           }
+
+          var FieldFormat = fieldFormats.byId[id];
+          if (format instanceof FieldFormat) return;
+
+          $scope.formatParams = {};
+          format = new FieldFormat($scope.formatParams);
         });
       }
     };

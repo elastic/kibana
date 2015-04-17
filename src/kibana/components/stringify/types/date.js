@@ -1,35 +1,40 @@
 define(function (require) {
-  return function DateFormatProvider(Private, config, $rootScope) {
+  return function DateTimeFormatProvider(Private, config, $rootScope) {
     var _ = require('lodash');
-    var format = Private(require('components/stringify/format'));
+    var FieldFormat = Private(require('components/field_format/field_format'));
     var moment = require('moment');
 
-    function converter(val) {
-      if (_.isNumber(val) || _.isDate(val)) {
-        return moment(val).format(config.get('dateFormat'));
-      } else {
-        return val;
-      }
-    }
-
-    var memoizedConverter;
-    function memoizeDateFormat() {
-      memoizedConverter = _.memoize(converter);
+    var converter;
+    function updateConverter() {
+      converter = _.memoize(function converter(val) {
+        if (_.isNumber(val) || _.isDate(val)) {
+          return moment(val).format(config.get('dateFormat'));
+        } else {
+          return val;
+        }
+      });
     }
 
     // memoize now, once config is ready, and every time the date format changes
-    memoizeDateFormat();
-    $rootScope.$on('init:config', memoizeDateFormat);
-    $rootScope.$on('change:config.dateFormat', memoizeDateFormat);
+    updateConverter();
+    $rootScope.$on('init:config', updateConverter);
+    $rootScope.$on('change:config.dateFormat', updateConverter);
 
-    return {
-      name: 'date',
-      fieldType: 'date',
-      convert: format(function (val) {
-        // don't give away our ref to memoizedConverter so
-        // we can hot-swap when config changes
-        return memoizedConverter(val);
-      })
+    _(DateTime).inherits(FieldFormat);
+    function DateTime(params) {
+      DateTime.Super.call(this, params);
+    }
+
+    DateTime.id = 'date';
+    DateTime.title = 'Date';
+    DateTime.fieldType = 'date';
+
+    DateTime._convert = function (val) {
+      // don't give away our ref to converter so
+      // we can hot-swap when config changes
+      return converter(val);
     };
+
+    return DateTime;
   };
 });

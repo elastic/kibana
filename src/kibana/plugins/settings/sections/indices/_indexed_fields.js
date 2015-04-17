@@ -23,7 +23,7 @@ define(function (require) {
           { title: 'type' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-          { title: 'controls', }
+          { title: 'controls', sortable: false }
         ];
 
         $scope.$watchCollection('indexPattern.fields', function () {
