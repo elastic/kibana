@@ -19,15 +19,17 @@ define(function (require) {
         $scope.field = $scope.$eval($attrs.field);
 
         $scope.formatParams = $scope.field.format.params() || {};
-        $scope.defaultFormat = {
-          title: '- default -'
-        };
+        $scope.defFormatType = initDefaultFormat($scope.field);
 
         self.scriptingInfo = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_info.html'));
         self.scriptingWarning = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_warning.html'));
-        self.fieldFormatOptions = [$scope.defaultFormat].concat(fieldFormats.byFieldType[$scope.field.type] || []);
+        self.fieldFormatTypes = [$scope.defFormatType].concat(fieldFormats.byFieldType[$scope.field.type] || []);
 
         self.creating = !_.contains($scope.indexPattern.fields, $scope.field);
+        self.cancel = function () {
+
+        };
+
         self.save = function () {
 
         };
@@ -47,13 +49,26 @@ define(function (require) {
           }
 
           var FieldFormat = fieldFormats.byId[id];
-          if (format instanceof FieldFormat) return;
+          if (!(format instanceof FieldFormat)) {
+            $scope.formatParams = {};
+          }
 
-          $scope.formatParams = {};
           format = new FieldFormat($scope.formatParams);
         });
       }
     };
+
+    function initDefaultFormat(field) {
+      var prototype = fieldFormats.for(field.type).type;
+      var def = Object.create(prototype);
+
+      // explicitly set to undefined to prevent inheritting the prototypes id
+      def.id = undefined;
+      def.resolvedTitle = def.title;
+      def.title = '- default - ';
+
+      return def;
+    }
   });
 
 });

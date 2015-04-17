@@ -7,5 +7,27 @@
       </a>
     </small>
   </label>
-  <input ng-model="params.format" class="form-control">
+  <input ng-model="params.format" required class="form-control">
+</div>
+<div class="form-group" ng-if="cntrl.samples">
+  <hr>
+  <label>Samples</label>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          Input
+        </th>
+        <th>
+          Formatted
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="sample in cntrl.samples">
+        <td>{{ sample[0] }}</td>
+        <td>{{ sample[1] }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

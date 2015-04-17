@@ -19,6 +19,7 @@ define(function (require) {
       'geo_point',
       'geo_shape',
       'string',
+      'murmur3',
       'unknown',
       'conflict'
     ];

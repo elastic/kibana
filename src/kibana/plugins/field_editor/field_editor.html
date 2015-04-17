@@ -1,4 +1,4 @@
-<form ng-submit="editor.save()">
+<form ng-submit="editor.save()" name="form">
   <h2 ng-if="editor.creating"><strong>Create {{ field.scripted ? 'Scripted ' : '' }}Field</strong></h1>
   <h2 ng-if="!editor.creating"><strong>Field:</strong> <code>{{ field.name }}</code></h1>
 
@@ -18,7 +18,15 @@
     <label>Name</label>
     <input
       ng-model="field.name"
-      input-focus
+      ng-readonly="!editor.creating"
+      class="form-control"
+    >
+  </div>
+
+  <div class="form-group">
+    <label>Type</label>
+    <input
+      ng-model="field.type"
       ng-readonly="!editor.creating"
       class="form-control"
     >
@@ -37,10 +45,10 @@
   </div>
 
   <div class="form-group">
-    <label>Format</label>
+    <label>Format <small>(Default: <i>{{defFormatType.resolvedTitle}}</i>)</small></label>
     <select
       ng-model="editor.selectedFormatId"
-      ng-options="format.id as format.title for format in editor.fieldFormatOptions"
+      ng-options="format.id as format.title for format in editor.fieldFormatTypes"
       class="form-control">
     </select>
     <fieldset field-editor-format-fieldset></fieldset>
@@ -72,5 +80,21 @@
         </button>
       </span>
     </div>
+  </div>
+
+  <div class="form-group">
+    <button
+      ng-click="editor.cancel()"
+      aria-label="Cancel"
+      class="btn btn-primary">
+      Cancel
+    </button>
+    <button
+      ng-disabled="form.$invalid"
+      type="submit"
+      aria-label="Save {{ title }} Object"
+      class="btn btn-success">
+      Save {{ title }} Object
+    </button>
   </div>
 </form>

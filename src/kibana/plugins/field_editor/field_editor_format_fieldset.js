@@ -1,4 +1,6 @@
 define(function (require) {
+  var _ = require('lodash');
+  var $ = require('jquery');
 
   require('modules')
   .get('app/settings')
@@ -7,20 +9,81 @@ define(function (require) {
       restrict: 'A',
       require: '^fieldEditor',
       scope: true,
-      link: function ($scope, $el, attrs, editor) {
+      link: function ($scope, $el) {
         $scope.$bind('params', 'formatParams');
         $scope.$bind('field', 'field');
-        $scope.$bind('format', 'field.format');
-        $scope.$bind('FieldFormat', 'field.format.type');
+        $scope.$bind('format', 'editor.getFormat()');
+        $scope.$bind('FieldFormat', 'editor.getFormat().type');
 
-        $scope.$watch(editor.getFormat, function (format) {
-          var editor = format && format.type && format.type.editor;
+        var childScopesToCleanup = [];
+
+        $scope.$watch('FieldFormat', function (FieldFormat) {
+          var editor = FieldFormat && FieldFormat.editor;
+          _.invoke(childScopesToCleanup.splice(0), '$destroy');
+
           if (!editor) {
             $el.hide().empty();
-          } else {
+            return;
+          }
+
+          if (typeof editor === 'string') {
             $el.show().html($compile(editor)($scope));
+            return;
+          }
+
+          if (_.isPlainObject(editor)) {
+            customDirectiveInit($el, editor);
+            return;
           }
         });
+
+
+        /**
+         * Compile a subset of the directive definition object
+         * API as if it was a directive found in the angular compilation
+         * process.
+         *
+         * Supported options:
+         *   - template
+         *   - controller
+         *   - controllerAs
+         *
+         * more options will be supported as needed.
+         *
+         * @param  {angular.element} $el - template
+         * @param  {object} directiveDef - the directive definition object
+         * @return {undefined}
+         */
+        function customDirectiveInit($el, directive) {
+          var $target = $el;
+          var $targetScope = $scope;
+          var $template = $(directive.template);
+          var controller = directive.controller;
+          var controllerAs = directive.controllerAs;
+
+          if (!controller) {
+            $target.html($template);
+          } else {
+            // create a child scope for us to fuck with
+            $targetScope = $scope.$new();
+            childScopesToCleanup.push($targetScope);
+
+            // assign the controller
+            $targetScope.Controller = controller;
+
+            if ($template.size() === 1) {
+              // reuse the top level element
+              $target = $template;
+            } else {
+              $target = $('<div>').append($template);
+            }
+
+            $target.attr('ng-controller', 'Controller as ' + (controllerAs || 'cntrl'));
+          }
+
+
+          $el.show().html($compile($target)($targetScope));
+        }
 
       }
     };

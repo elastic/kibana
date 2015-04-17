@@ -4,9 +4,12 @@ define(function (require) {
     var angular = require('angular');
 
     function FieldFormat(params) {
-      this._params = params || {};
+      // give the constructor a more appropriate name
       this.type = this.constructor;
-      this._paramDefaults = this.type.paramDefaults;
+
+      // keep the params and defaults seperate
+      this._params = params || {};
+      this._paramDefaults = this.type.paramDefaults || {};
 
       // bind the public api
       this.convert = _.bind(this.convert, this);
