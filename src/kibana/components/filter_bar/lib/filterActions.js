@@ -22,6 +22,7 @@ define(function (require) {
         removeAll: removeAll
       };
 
+      // allows exported methods to be bound to the passed in scope
       return _.assign({
         apply: function () {
           _.each(Object.keys(exports), function (method) {
@@ -38,7 +39,7 @@ define(function (require) {
        */
       function toggleFilter(filter, force) {
         // Toggle the disabled flag
-        var disabled = _.isUndefined(force) ? !filter.meta.disabled : force;
+        var disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
         filter.meta.disabled = disabled;
 
         // Save the filters back to the searchSource
@@ -64,7 +65,7 @@ define(function (require) {
        * @returns {object} filter passed in
        */
       function pinFilter(filter, force) {
-        var pinned = _.isUndefined(force) ? !filter.meta.pinned : force;
+        var pinned = _.isUndefined(force) ? !filter.meta.pinned : !!force;
 
         if (pinned && !filter.meta.pinned) {
           // append unpinned filter, use angular.extend to remove hashes

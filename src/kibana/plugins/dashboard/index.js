@@ -107,7 +107,7 @@ define(function (require) {
           var filters = $state.filters;
           if ($state.query) {
             dash.searchSource.set('filter', _.union($state.filters, [{
-              query:  $state.query
+              query: $state.query
             }]));
           } else {
             dash.searchSource.set('filter', filters);
