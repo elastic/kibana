@@ -516,7 +516,7 @@ define(function (require) {
      * @param slices
      * @returns {*}
      */
-    Data.prototype.withoutZeroSlices = function (slices) {
+    Data.prototype._removeZeroSlices = function (slices) {
       var self = this;
 
       if (!slices.children) return slices;
@@ -524,7 +524,7 @@ define(function (require) {
       slices = _.clone(slices);
       slices.children = slices.children.reduce(function (children, child) {
         if (child.size !== 0) {
-          children.push(self.withoutZeroSlices(child));
+          children.push(self._removeZeroSlices(child));
         }
         return children;
       }, []);
@@ -544,7 +544,7 @@ define(function (require) {
 
       _.forEach(this.getVisData(), function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;
-        obj.slices = self.withoutZeroSlices(obj.slices); // Remove zeros from pie data
+        obj.slices = self._removeZeroSlices(obj.slices);
 
         _.forEach(self.getNames(obj, columns), function (name) {
           names.push(name);
