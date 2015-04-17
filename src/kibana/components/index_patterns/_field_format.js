@@ -24,8 +24,14 @@ define(function (require) {
      * @return {any}
      */
     FieldFormat.prototype.param = function (name) {
-      var source = this._params[name] == null ? this._paramDefaults : this._params;
-      return source[name];
+      var val = this._params[name];
+      if (val || val === false || val === 0) {
+        // truthy, false, or 0 are find
+        // '', NaN, null, undefined, etc are not
+        return val;
+      }
+
+      return this._paramDefaults[name];
     };
 
     FieldFormat.prototype.params = function () {

@@ -1,7 +1,7 @@
 define(function (require) {
   return function DateTimeFormatProvider(Private, config, $rootScope) {
     var _ = require('lodash');
-    var FieldFormat = Private(require('components/field_format/field_format'));
+    var FieldFormat = Private(require('components/index_patterns/_field_format'));
     var moment = require('moment');
 
     var converter;
