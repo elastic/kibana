@@ -22,9 +22,17 @@
     name="field"
     required
     ng-model="agg.params.field"
+    ng-if="indexedFields.length"
     auto-select-if-only-one="indexedFields"
     ng-options="field as field.displayName group by field.type for field in indexedFields"
     ng-change="aggParam.onChange(agg)">
   </select>
+
+  <div class="hintbox" ng-if="!indexedFields.length">
+    <p>
+      <i class="fa fa-danger text-danger"></i>
+      <strong>No Compatible Fields:</strong> The "{{ vis.indexPattern.id }}" index pattern does not any of the following field types: {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
+    </p>
+  </div>
 
 </div>
