@@ -227,14 +227,15 @@ define(function (require) {
      * @method highlightLegend
      */
     Dispatch.prototype.highlightLegend = function (element) {
-      var classList = d3.select(this).node().classList;
-      var liClass = d3.select(this).node().classList[1];
+      var label = this.getAttribute('data-label');
+
+      if (!label) return;
 
       d3.select(element)
         .select('.legend-ul')
         .selectAll('li.color')
         .filter(function (d, i) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
     };

@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
+    var dataLabel = require('components/vislib/lib/_data_label');
 
     require('css!components/vislib/styles/main');
 
@@ -112,26 +113,23 @@ define(function (require) {
       .data(arrOfLabels)
       .enter()
         .append('li')
-        .attr('class', function (d) {
-          return 'color ' + self.colorToClass(args.color(d));
-        })
+        .attr('class', 'color')
+        .each(self._addIdentifier)
         .html(function (d) {
           return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
         });
     };
 
     /**
-     * Creates a class name based on the hexColor assigned to each label
+     * Append the data label to the element
      *
-     * @method colorToClass
-     * @param hexColor {String} Label
-     * @returns {string} CSS class name
+     * @method _addIdentifier
+     * @param label {string} label to use
      */
-    Legend.prototype.colorToClass = function (hexColor) {
-      if (hexColor) {
-        return 'c' + hexColor.replace(/[#]/g, '');
-      }
+    Legend.prototype._addIdentifier = function (label) {
+      dataLabel(this, label);
     };
+
 
     /**
      * Renders legend
@@ -170,35 +168,20 @@ define(function (require) {
       });
 
       legendDiv.select('.legend-ul').selectAll('li')
-      .on('mouseover', function (d) {
-        var liClass = self.colorToClass(self.color(d));
+      .on('mouseover', function (label) {
         var charts = visEl.selectAll('.chart');
 
         // legend
         legendDiv.selectAll('li')
         .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
 
-        // lines/area
-        charts.selectAll('.color')
+        // all data-label attribute
+        charts.selectAll('[data-label]')
         .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        // circles
-        charts.selectAll('.line circle')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
-        })
-        .classed('blur_shape', true);
-
-        // pie slices
-        charts.selectAll('.slice')
-        .filter(function (d) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
 
@@ -218,16 +201,8 @@ define(function (require) {
         legendDiv.selectAll('li')
         .classed('blur_shape', false);
 
-        // lines/areas
-        charts.selectAll('.color')
-        .classed('blur_shape', false);
-
-        // circles
-        charts.selectAll('.line circle')
-        .classed('blur_shape', false);
-
-        // pie slices
-        charts.selectAll('.slice')
+        // all data-label attribute
+        charts.selectAll('[data-label]')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);
