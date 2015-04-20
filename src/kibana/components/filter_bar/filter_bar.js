@@ -46,7 +46,7 @@ define(function (require) {
         $scope.$watch('state.$newFilters', function (filters) {
           if (!filters) return;
 
-          // If the filters is not undefined and the length is greater then
+          // If filters is not undefined and the length is greater than
           // one we need to set the newFilters attribute and allow the
           // users to decide what they want to apply.
           if (filters.length > 1) {
@@ -79,6 +79,7 @@ define(function (require) {
 
         $scope.$watch('state.filters', function (filters) {
           mapAndFlattenFilters(filters).then(function (results) {
+            // used to display the current filters in the state
             $scope.filters = _.sortBy(results, function (filter) {
               return !filter.meta.pinned;
             });

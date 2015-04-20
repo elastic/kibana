@@ -7,7 +7,7 @@ define(function (require) {
     return function ($scope) {
       var saver = saveFilterState($scope.state, globalState);
       var saveState = function () {
-        $scope.filters = saver($scope.filters);
+        saver($scope.filters);
       };
 
       var exports = {

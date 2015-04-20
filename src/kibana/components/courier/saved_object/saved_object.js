@@ -205,7 +205,6 @@ define(function (require) {
           };
         }
 
-
         // Slugify the object id
         self.id = slugifyId(self.id);
 
@@ -226,6 +225,7 @@ define(function (require) {
             return self.id;
           });
         };
+
         return docSource.doCreate(source)
         .then(finish)
         .catch(function (err) {
