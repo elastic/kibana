@@ -140,33 +140,6 @@ define(function (require) {
     };
 
     /**
-     * add geohash grid bounds to mapData properties
-     *
-     * @method addGeohashBounds
-     * @param data {Object}
-     * @return {Object}
-     */
-    TileMap.prototype.addGeohashBounds = function (mapData) {
-      // scale to pad bounds based on precision
-      var padScale = d3.scale.linear().domain([1, 3, 5, 8, 10, 12]).range([0, 0, 4, 6, 20, 80]);
-      var padFactor = padScale(mapData.properties.precision);
-
-      for (var i = 0; i < mapData.features.length; i++) {
-        var geohashRect = mapData.features[i].properties.rectangle;
-        // get bounds from northEast[3] and southWest[1]
-        // corners in geohash rectangle
-        var corners = [
-          [geohashRect[3][1], geohashRect[3][0]],
-          [geohashRect[1][1], geohashRect[1][0]]
-        ];
-        var bounds = L.latLngBounds(corners).pad(padFactor);
-        mapData.features[i].properties.bounds = bounds;
-      }
-
-      return mapData;
-    };
-
-    /**
      * get min and max for all cols, rows of data
      *
      * @method getMaxMin
@@ -403,6 +376,8 @@ define(function (require) {
       var max = mapData.properties.allmax;
       var points = this.dataToHeatArray(mapData, max);
 
+      mapData = self.addLatLng(mapData);
+
       // default heatmap options in kibana:
       // radius: 25,
       // blur: 15,
@@ -420,24 +395,43 @@ define(function (require) {
 
       var featureLayer = L.heatLayer(points, options);
 
-      map.on('mousemove', _.debounce(heatLocation, 20));
+      map.on('mousemove', _.debounce(heatLocation, 15));
 
       function heatLocation(e) {
         map.closePopup();
 
-        var nearest = self.nearestFeature(e, mapData);
-        if (nearest.properties.eventDistance < 500000) {
+        var zoomScale = d3.scale.linear().domain([1, 9, 14, 18]).range([750000, 25000, 10, 0.01]);
+        var proximity = Math.floor(zoomScale(map.getZoom()));
+        var nearest = self.nearestFeature(e.latlng, mapData);
+
+        if (nearest.properties.eventDistance < proximity) {
           self.showHeatTooltip(map, nearest);
         }
         delete nearest.properties.eventDistance;
       }
 
       // add legend
-      if (mapData.features.length > 1) {
-        self.addHeatLegend(mapData, map);
-      }
+      //if (mapData.features.length > 1) {
+      //self.addHeatLegend(mapData, map);
+      //}
 
       return featureLayer;
+    };
+
+    /**
+     * add Leaflet latLng to mapData properties
+     *
+     * @method addLatLng
+     * @param mapData {Object}
+     * @return mapData {Object}
+     */
+    TileMap.prototype.addLatLng = function (mapData) {
+      for (var i = 0; i < mapData.features.length; i++) {
+        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
+        mapData.features[i].properties.latLng = latLng;
+      }
+
+      return mapData;
     };
 
     /**
@@ -448,15 +442,13 @@ define(function (require) {
      * @param mapData {Object}
      * @return nearestPoint {Leaflet Object}
      */
-    TileMap.prototype.nearestFeature = function (e, mapData) {
+    TileMap.prototype.nearestFeature = function (point, mapData) {
       var self = this;
-      var eventPoint = e.latlng;
       var distance = Infinity;
       var nearest;
 
       for (var i = 0; i < mapData.features.length; i++) {
-        var featurePoint = L.latLng([mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]]);
-        var dist = eventPoint.distanceTo(featurePoint);
+        var dist = point.distanceTo(mapData.features[i].properties.latLng);
         if (dist < distance) {
           distance = dist;
           nearest = mapData.features[i];
