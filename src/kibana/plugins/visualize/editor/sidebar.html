@@ -7,42 +7,68 @@
       {{ indexPattern.id }}
     </div>
 
-    <ul class="list-unstyled">
-      <!-- metrics -->
-      <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
+    <nav class="navbar navbar-default navbar-static-top subnav">
+      <div class="container-fluid">
+        <ul class="nav navbar-nav" ng-init="visConfigSection = vis.type.requiresSearch ? 'data' : 'options'">
+          <li ng-class="{active: visConfigSection == 'data'}" ng-show="vis.type.schemas.metrics">
+            <a class="navbar-link active" ng-click="visConfigSection='data'">Data</a>
+          </li>
+          <li ng-class="{active: visConfigSection == 'options'}">
+            <a class="navbar-link" ng-click="visConfigSection='options'">Options</a>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li ng-if="visualizeEditor.softErrorCount() > 0"
+            disabled
+            tooltip="{{visualizeEditor.describeErrors()}}" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
+            <a class="danger navbar-link">
+              <i class="fa fa-warning"></i>
+            </a>
+          </li>
+          <li tooltip="Discard changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
+            <button class="btn-default navbar-btn-link"
+              ng-disabled="!vis.dirty"
+              ng-click="resetEditableVis()">
 
-      <!-- buckets -->
-      <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+              <i class="fa fa-close"></i>
+            </button>
+          </li>
+          <li tooltip="Apply changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
+            <button class="btn-success navbar-btn-link"
+              type="submit"
+              ng-disabled="!vis.dirty">
 
-      <!-- vis options -->
-      <vis-editor-vis-options
-        vis="vis"
-        >
-      </vis-editor-vis-options>
+              <i class="fa fa-play"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
-      <!-- apply/discard -->
-    </ul>
-    <div class="vis-editor-sidebar-buttons">
-      <p
-        ng-if="visualizeEditor.softErrorCount() > 0"
-        class="text-center text-danger sidebar-item-text">
-        <i aria-hidden="true" class="fa fa-warning"></i>
-        {{ visualizeEditor.describeErrors() }}
-      </p>
-      <button
-        ng-disabled="!vis.dirty"
-        type="submit"
-        class="sidebar-item-button success">
-        Apply
-      </button>
-      <button
-        ng-disabled="!vis.dirty"
-        type="button"
-        ng-click="resetEditableVis()"
-        class="sidebar-item-button default">
-        Discard
-      </button>
+    <div class="vis-editor-config" ng-show="visConfigSection == 'data'">
+      <ul class="list-unstyled">
+        <!-- metrics -->
+        <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
+
+        <!-- buckets -->
+        <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+      </ul>
     </div>
+
+    <div class="vis-editor-config" ng-show="visConfigSection == 'options'">
+      <ul class="list-unstyled">
+
+        <!-- vis options -->
+        <vis-editor-vis-options
+          vis="vis"
+          >
+        </vis-editor-vis-options>
+
+        <!-- apply/discard -->
+      </ul>
+    </div>
+
+
   </form>
 </div>
 
