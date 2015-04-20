@@ -460,33 +460,34 @@ define(function (require) {
     };
 
     /**
-     * Helper function for getNames
+     * Helper function for getHierarchyNames
      * Returns a nested set of objects that contain the hierarchical relationship. Each object contains
      * the name, the children, and a data object that has the size and depth for sorting
      * purposes.
      *
-     * @method returnNames
+     * @method returnHierarchyNames
      * @param array {Array} Array of data objects
-     * @param index {Number} Number of times the object is nested
-     * @returns {Object} Nested set of objects
+     * @param depth {Number} Number of times the object is nested
+     * @returns {Array} Array of objects with children
      */
-    Data.prototype.returnNames = function (array, index) {
-      var names = {};
+    Data.prototype.returnHierarchyNames = function (array, depth) {
+      var hierarchyNames = [];
       var self = this;
 
       _.forEach(array, function (obj) {
         var fieldFormatter = obj.aggConfig ? obj.aggConfig.fieldFormatter() : String;
         var name = fieldFormatter(obj.name);
-        names[name] = {name: name, data: {name: name, amount: obj.size, depth: index}, children: {}};
+        var hierarchyName = {name: name, depth: depth, children: []};
 
         if (obj.children) {
-          var plusIndex = index + 1;
+          var plusDepth = depth + 1;
 
-          names[name].children = self.returnNames(obj.children, plusIndex);
+          hierarchyName.children = self.returnHierarchyNames(obj.children, plusDepth);
         }
+        hierarchyNames.push(hierarchyName);
       });
 
-      return names;
+      return hierarchyNames;
     };
 
     /**
@@ -494,15 +495,15 @@ define(function (require) {
      * the name, the children, and a data object that has the size and depth for sorting
      * purposes.
      *
-     * @method getNames
+     * @method getHierarchyNames
      * @param data {Object} Chart data object
      * @returns {Object} Nested set of objects
      */
-    Data.prototype.getNames = function (data) {
+    Data.prototype.getHierarchyNames = function (data) {
       var slices = data.slices;
 
       if (slices.children) {
-        return this.returnNames(slices.children, 0);
+        return this.returnHierarchyNames(slices.children, 0);
       }
     };
 
@@ -534,6 +535,54 @@ define(function (require) {
     };
 
     /**
+     * Merges two object hierarchy of names into finalHierarchyNames.
+     * Also grabs a list of names and depth pairs
+     *
+     * @method _mergeHierarchyNames
+     * @param finalHierarchyNames {Object} Object hierarchy of names destination
+     * @param newHierarchyNames {Object} Object hierarchy of names source
+     * @param namesWithDepth {Array} Array of name/depth pairs
+     */
+    Data.prototype._mergeHierarchyNames = function (finalHierarchyNames, newHierarchyNames, namesWithDepth) {
+      var self = this;
+
+      _.each(newHierarchyNames, function (hierarchy) {
+        var name = hierarchy.name;
+        namesWithDepth.push({name: name, depth: hierarchy.depth});
+        var wasMerged = false;
+        _.each(finalHierarchyNames, function (finalHierarchy) {
+          if (finalHierarchy.name === name) {
+            // merge together
+            wasMerged = true;
+            self._mergeHierarchyNames(finalHierarchy.children, hierarchy.children, namesWithDepth);
+          }
+        });
+        if (!wasMerged) {
+          finalHierarchyNames.push(hierarchy);
+          self._getNamesWithDepth(hierarchy.children, namesWithDepth);
+        }
+      });
+    };
+
+    /**
+     * Helper function for _mergeHierarchyNames to grab just the name/depth pairs when there is
+     * no destination merge location.
+     *
+     * @method _getNamesWithDepth
+     * @param hierarchyNames {Object} Object hierarchy of names
+     * @param namesWithDepth {Array} Array of name/depth pairs
+     */
+    Data.prototype._getNamesWithDepth = function (hierarchyNames, namesWithDepth) {
+      var self = this;
+
+      _.each(hierarchyNames, function (hierarchy) {
+        var name = hierarchy.name;
+        namesWithDepth.push({name: name, depth: hierarchy.depth});
+        self._getNamesWithDepth(hierarchy.children, namesWithDepth);
+      });
+    };
+
+    /**
      * Returns an array of names and an object hierarchy of names ordered by size
      *
      * @method pieNames
@@ -541,28 +590,16 @@ define(function (require) {
      */
     Data.prototype.pieNames = function () {
       var self = this;
-      var hierarchy = {};
-      var nestedNames = {};
+      var mergedHierarchyNames = [];
       var flatNames = [];
 
       this._validatePieData();
 
       _.forEach(this.getVisData(), function (obj) {
-        var namedObj = [];
-        _.merge(hierarchy, self.getNames(obj), function (resultValue, sourceValue) {
-          // current version of lodash doesn't pass in the key name so use duck-typing to determine
-          // if this is the correct valur
-          if (_.isPlainObject(sourceValue) && _.has(sourceValue, 'amount')) {
-            namedObj.push({name: sourceValue.name, depth: sourceValue.depth});
-            if (_.has(resultValue, 'amount')) {
-              resultValue.amount += sourceValue.amount;
-              return resultValue;
-            } else {
-              return sourceValue;
-            }
-          }
-        });
-        flatNames.push(_(namedObj)
+        var namesWithDepth = [];
+        self._mergeHierarchyNames(mergedHierarchyNames, self.getHierarchyNames(obj), namesWithDepth);
+
+        flatNames.push(_(namesWithDepth)
         .sortBy(function (obj) {
             return obj.depth;
           })
@@ -570,15 +607,8 @@ define(function (require) {
         .unique()
         .value());
       });
-      var recursiveSort = function (obj) {
-        obj.children = _.sortBy(obj.children, function (child) {
-          return recursiveSort(child);
-        });
-        return -1 * obj.data.amount;
-      };
-      nestedNames = _.sortBy(hierarchy, recursiveSort);
 
-      return {flatNames: _(flatNames).flatten().unique().value(), nestedNames: nestedNames};
+      return {flatNames: _(flatNames).flatten().unique().value(), nestedNames: mergedHierarchyNames};
     };
 
     /**
