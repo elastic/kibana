@@ -21,6 +21,11 @@
     display: block;
     position: relative;
 
+    header {
+      min-height: @input-height-base + 8px;
+      padding: 4px 0;
+    }
+
     visualize {
       height: 200px;
       max-height: 600px;
@@ -247,5 +252,16 @@ disc-field-chooser {
   h3 {
     margin: -20px 0 10px 0;
     text-align: center;
+  }
+
+  &-interval {
+    a {
+      text-decoration: underline;;
+    }
+
+    select {
+      display: inline-block;
+      width: auto;
+    }
   }
 }

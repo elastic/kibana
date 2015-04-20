@@ -33,6 +33,10 @@ kibana_index: ".kibana"
 # The default application to load.
 default_app_id: "discover"
 
+# Time in milliseconds to wait for elasticsearch to respond to pings, defaults to
+# request_timeout setting
+# ping_timeout: 1500
+
 # Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
 request_timeout: 300000
