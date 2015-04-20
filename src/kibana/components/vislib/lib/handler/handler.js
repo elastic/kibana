@@ -77,6 +77,9 @@ define(function (require) {
     Handler.prototype.render = function () {
       var self = this;
       var charts = this.charts = [];
+      var selection = d3.select(this.el);
+
+      selection.selectAll('*').remove();
 
       this._validateData();
       this.renderArray.forEach(function (property) {
@@ -86,8 +89,7 @@ define(function (require) {
       });
 
       // render the chart(s)
-      d3.select(this.el)
-      .selectAll('.chart')
+      selection.selectAll('.chart')
       .each(function (chartData) {
         var chart = new self.ChartClass(self, this, chartData);
         var enabledEvents;

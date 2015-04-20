@@ -1,13 +1,6 @@
 <li class="sidebar-item" ng-show="vis.type.params.editor">
-  <div ng-hide="alwaysShowOptions" class="sidebar-item-title" ng-click="showVisOptions = !showVisOptions">
+  <div class="sidebar-item-title">
     view options
-    <i
-      aria-hidden="true"
-      class="fa fa-caret-down"
-      ng-class="{'fa-caret-down': showVisOptions, 'fa-caret-right': !showVisOptions}">
-    </i>
   </div>
-  <div ng-show="alwaysShowOptions" class="sidebar-item-title">view options</div>
-
-  <div class="visualization-options" ng-show="alwaysShowOptions || showVisOptions"></div>
+  <div class="visualization-options"></div>
 </li>
