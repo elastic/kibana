@@ -67,12 +67,8 @@ define(function (require) {
           }
 
           var mapData;
-          // add bounds to mapData features for heatmap popups
-          if (self._attr.mapType === 'Heatmap') {
-            mapData = self.addGeohashBounds(data.geoJson);
-          } else {
-            mapData = data.geoJson;
-          }
+
+          mapData = data.geoJson;
 
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
@@ -413,7 +409,7 @@ define(function (require) {
       // max: 1,
       // minOpacity: 0.1,
       // maxZoom: 18,
-      // gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+      // gradient: {0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1: 'red'}
 
       var options = {
         radius: +this._attr.heatRadius,
@@ -424,13 +420,50 @@ define(function (require) {
 
       var featureLayer = L.heatLayer(points, options);
 
-      map.on('mousemove', _.debounce(heatLocation, 50));
+      map.on('mousemove', _.debounce(heatLocation, 20));
 
       function heatLocation(e) {
-        self.showHeatTooltip(e, map, mapData);
+        map.closePopup();
+
+        var nearest = self.nearestFeature(e, mapData);
+        if (nearest.properties.eventDistance < 500000) {
+          self.showHeatTooltip(map, nearest);
+        }
+        delete nearest.properties.eventDistance;
+      }
+
+      // add legend
+      if (mapData.features.length > 1) {
+        self.addHeatLegend(mapData, map);
       }
 
       return featureLayer;
+    };
+
+    /**
+     * Finds nearest feature in mapData to event latlng
+     *
+     * @method nearestFeature
+     * @param e {Event}
+     * @param mapData {Object}
+     * @return nearestPoint {Leaflet Object}
+     */
+    TileMap.prototype.nearestFeature = function (e, mapData) {
+      var self = this;
+      var eventPoint = e.latlng;
+      var distance = Infinity;
+      var nearest;
+
+      for (var i = 0; i < mapData.features.length; i++) {
+        var featurePoint = L.latLng([mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]]);
+        var dist = eventPoint.distanceTo(featurePoint);
+        if (dist < distance) {
+          distance = dist;
+          nearest = mapData.features[i];
+        }
+      }
+      nearest.properties.eventDistance = distance;
+      return nearest;
     };
 
     /**
@@ -443,28 +476,21 @@ define(function (require) {
      * @param mapData {Object}
      * @return {undefined}
      */
-    TileMap.prototype.showHeatTooltip = function (e, map, mapData) {
-      map.closePopup();
+    TileMap.prototype.showHeatTooltip = function (map, feature) {
 
-      var match = [];
-      for (var i = 0; i < mapData.features.length; i++) {
-        if (mapData.features[i].properties.bounds.contains(e.latlng)) {
-          match.push(mapData.features[i]);
-          break;
-        }
-      }
+      var lat = feature.geometry.coordinates[1];
+      var lng = feature.geometry.coordinates[0];
+      var latLng = L.latLng(lat, lng);
 
-      if (match.length) {
-        var layer = match[0];
-        var content = 'Geohash: ' + layer.properties.geohash + '<br>' +
-          'Center: ' + layer.properties.center[1].toFixed(1) + ', ' +
-          layer.properties.center[0].toFixed(1) + '<br>' +
-          layer.properties.valueLabel + ': ' + layer.properties.count;
-        var popup = L.popup({autoPan: false})
-          .setLatLng(e.latlng)
-          .setContent(content)
-          .openOn(map);
-      }
+      var content = 'Geohash: ' + feature.properties.geohash + '<br>' +
+        'Center: ' + lat.toFixed(1) + ', ' +
+        lng.toFixed(1) + '<br>' +
+        feature.properties.valueLabel + ': ' + feature.properties.count;
+
+      var popup = L.popup({autoPan: false})
+       .setLatLng(latLng)
+       .setContent(content)
+       .openOn(map);
     };
 
     /**
@@ -546,6 +572,38 @@ define(function (require) {
               strokecol + '"></i> ' + vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
             }
           }
+        }
+        div.innerHTML = labels.join('<br>');
+
+        return div;
+      };
+      legend.addTo(map);
+    };
+
+    /**
+     * Adds heatmap legend div to each map when data is split
+     * uses d3 scale from TileMap.prototype.quantizeColorScale
+     *
+     * @method addHeatLegend
+     * @param data {Object}
+     * @param map {Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.addHeatLegend = function (data, map) {
+      var self = this;
+      var legend = L.control({position: 'bottomright'});
+      legend.onAdd = function () {
+        var div = L.DomUtil.create('div', 'tilemap-legend heatmap-le  gend');
+        var heatColors = ['red', 'yellow', 'lime', 'cyan', 'blue'];
+        var values = ['Max', '', '', '', 'Min'];
+        var labels = [];
+        var fillcol;
+        var strokecol;
+
+        for (var i = 0; i < heatColors.length; i++) {
+          fillcol = d3.rgb(heatColors[i]);
+          strokecol = self.darkerColor(fillcol);
+          labels.push('<i style="background:' + fillcol + '; border-color:' + strokecol + '"></i> ' + values[i]);
         }
         div.innerHTML = labels.join('<br>');
 
