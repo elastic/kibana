@@ -3,7 +3,7 @@
     <div class="header">
       <h2 class="title">Edit Saved Objects</h2>
       <button class="btn btn-default controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export</button>
-      <button file-upload="importAll(result)" class="btn btn-default controls" ng-click><i aria-hidden="true" class="fa fa-upload"></i> Import</button>
+      <button file-upload="importAll(fileContents)" class="btn btn-default controls" ng-click><i aria-hidden="true" class="fa fa-upload"></i> Import</button>
     </div>
     <p>
       From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
@@ -24,12 +24,12 @@
     <div class="tab-content">
       <div class="action-bar">
         <label>
-          <input type="checkbox" ng-checked="selectedItems.length == currentTab.data.length" ng-click="toggleAll()" />
+          <input type="checkbox" ng-checked="currentTab.data.length > 0 && selectedItems.length == currentTab.data.length" ng-click="toggleAll()" />
           Select All
         </label>
         <a ng-disabled="selectedItems.length == 0"
           confirm-click="bulkDelete()"
-          confirmation="Are you sure want to delete the selected {{service.title}}? This action is irreversible!"
+          confirmation="Are you sure want to delete the selected {{currentTab.title}}? This action is irreversible!"
           class="btn btn-xs btn-danger" aria-label="Delete"><i aria-hidden="true" class="fa fa-trash"></i> Delete</a>
         <a ng-disabled="selectedItems.length == 0"
           ng-click="bulkExport()"

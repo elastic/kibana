@@ -13,10 +13,10 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl, $route) {
+  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $q, AppState) {
+      controller: function ($scope, $injector, $q, AppState, es) {
         var notify = new Notifier({ location: 'Saved Objects' });
 
         var $state = $scope.state = new AppState();
@@ -77,31 +77,34 @@ define(function (require) {
         };
 
         $scope.bulkDelete = function () {
-          $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(function (resp) {
-            $scope.currentTab.data = _.difference($scope.currentTab.data, $scope.selectedItems);
-            $scope.selectedItems.length = 0;
-          });
+          $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(refreshData);
         };
 
         $scope.bulkExport = function () {
-          var promises = $scope.selectedItems.map(getExportedItems($scope.currentTab.service));
-          $q.all(promises).then(saveToFile);
+          var objs = $scope.selectedItems.map(_.partialRight(_.extend, {type: $scope.currentTab.type}));
+          retrieveAndExportDocs(objs);
         };
 
         $scope.exportAll = function () {
-          var promises = $scope.services.reduce(function (promises, service) {
-            return promises.concat(service.data.map(getExportedItems(service.service)));
-          }, []);
-
-          $q.all(promises).then(saveToFile);
+          var objs = $scope.services.map(function (service) {
+            return service.data.map(_.partialRight(_.extend, {type: service.type}));
+          });
+          retrieveAndExportDocs(_.flatten(objs));
         };
 
-        function getExportedItems(service) {
-          return function (item) {
-            return service.get(item.id).then(function (obj) {
-              return obj.export();
-            });
-          };
+        function retrieveAndExportDocs(objs) {
+          es.mget({
+            index: config.file.kibana_index,
+            body: {docs: objs.map(transformToMget)}
+          })
+          .then(function (response) {
+            saveToFile(response.docs.map(_.partialRight(_.pick, '_id', '_type', '_source')));
+          });
+        }
+
+        // Takes an object and returns the associated data needed for an mget API request
+        function transformToMget(obj) {
+          return {_id: obj.id, _type: obj.type};
         }
 
         function saveToFile(results) {
@@ -109,30 +112,48 @@ define(function (require) {
           saveAs(blob, 'export.json');
         }
 
-        $scope.importAll = function (result) {
-          var results;
+        $scope.importAll = function (fileContents) {
+          var docs;
           try {
-            results = JSON.parse(result);
+            docs = JSON.parse(fileContents);
           } catch (e) {
-            return importError();
+            notify.error('The file could not be processed.');
           }
 
-          var promises = results.map(function (result) {
-            var service = _.find($scope.services, {type: result._type});
-            if (service == null) return importError();
-
-            return service.service.get().then(function (obj) {
-              return obj.import(result);
-            });
-          });
-
-          $q.all(promises).then(function () {
-            $route.reload();
+          return es.mget({
+            index: config.file.kibana_index,
+            body: {docs: docs.map(_.partialRight(_.pick, '_id', '_type'))}
+          })
+          .then(function (response) {
+            var existingDocs = _.where(response.docs, {found: true});
+            var confirmMessage = 'The following objects will be overwritten:\n\n';
+            if (existingDocs.length === 0 || window.confirm(confirmMessage + _.pluck(existingDocs, '_id').join('\n'))) {
+              return es.bulk({
+                index: config.file.kibana_index,
+                body: _.flatten(docs.map(transformToBulk))
+              })
+              .then(refreshIndex)
+              .then(refreshData, notify.error);
+            }
           });
         };
 
-        function importError() {
-          notify.error('The file could not be processed.');
+        // Takes a doc and returns the associated two entries for an index bulk API request
+        function transformToBulk(doc) {
+          return [
+            {index: _.pick(doc, '_id', '_type')},
+            doc._source
+          ];
+        }
+
+        function refreshIndex() {
+          return es.indices.refresh({
+            index: config.file.kibana_index
+          });
+        }
+
+        function refreshData() {
+          return getData($scope.advancedFilter);
         }
 
         $scope.changeTab = function (tab) {

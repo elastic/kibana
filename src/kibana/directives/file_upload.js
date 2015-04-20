@@ -15,7 +15,7 @@ define(function (require) {
           var reader = new FileReader();
           reader.onload = function (e) {
             $scope.$apply(function () {
-              onUpload($scope, {result: e.target.result});
+              onUpload($scope, {fileContents: e.target.result});
             });
           };
 

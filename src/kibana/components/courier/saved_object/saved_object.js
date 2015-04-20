@@ -268,25 +268,6 @@ define(function (require) {
           });
         });
       };
-
-      self.export = function () {
-        return {
-          _id: this.id,
-          _type: type,
-          _source: this._source
-        };
-      };
-
-      self.import = function (result) {
-        _.assign(self, {
-          id: result._id,
-          _source: result._source
-        }, result._source);
-
-        parseSearchSource(self.kibanaSavedObjectMeta && self.kibanaSavedObjectMeta.searchSourceJSON);
-
-        return self.save();
-      };
     }
 
     return SavedObject;
