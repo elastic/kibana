@@ -107,7 +107,7 @@ define(function (require) {
         });
 
         it('should attach onmouseover listener', function () {
-          expect(!!$('li > span')[0].__onmouseover).to.be(true);
+          expect(!!$('li > div')[0].__onmouseover).to.be(true);
         });
       });
     });

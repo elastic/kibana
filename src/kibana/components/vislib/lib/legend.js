@@ -73,7 +73,7 @@ define(function (require) {
 
       function recurseLabels(li) {
         li.attr('class', 'color');
-        var label = li.append('span')
+        var label = li.append('div')
           .attr('class', 'color')
           .each(self._addIdentifier);
 
@@ -167,14 +167,14 @@ define(function (require) {
         }
       });
 
-      legendDiv.select('.legend-ul').selectAll('li > span')
+      legendDiv.select('.legend-ul').selectAll('li > div')
       .on('mouseover', function (d) {
         // data-label's are strings so make sure the label is a string
         var label = '' + d.name;
         var charts = visEl.selectAll('.chart');
 
         // legend
-        legendDiv.selectAll('li span.color')
+        legendDiv.selectAll('li div.color')
         .filter(function (d) {
           return this.getAttribute('data-label') !== label;
         })
@@ -200,7 +200,7 @@ define(function (require) {
         var charts = visEl.selectAll('.chart');
 
         // legend
-        legendDiv.selectAll('li span.blur_shape')
+        legendDiv.selectAll('li div.blur_shape')
         .classed('blur_shape', false);
 
         // all blur'ed elements with data-label attribute
