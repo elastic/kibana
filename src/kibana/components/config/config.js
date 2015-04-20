@@ -123,6 +123,29 @@ define(function (require) {
       if (updater) updater.fire();
     };
 
+    /**
+     * A little helper for binding config variables to $scopes
+     *
+     * @param  {Scope} $scope - an angular $scope object
+     * @param  {string} key - the config key to bind to
+     * @param  {string} [property] - optional property name where the value should
+     *                             be stored. Defaults to the config key
+     * @return {function} - an unbind function
+     */
+    config.$bind = function ($scope, property, key) {
+      if (!key) key = property;
+
+      var update = function () {
+        $scope[property] = config.get(key);
+      };
+
+      update();
+      return _.partial(_.invoke, [
+        $scope.$on('change:config.' + key, update),
+        $scope.$on('init:config', update)
+      ], 'call');
+    };
+
     /*****
      * PRIVATE API
      *****/
