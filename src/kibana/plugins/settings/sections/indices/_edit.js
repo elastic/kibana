@@ -2,13 +2,14 @@ define(function (require) {
   var _ = require('lodash');
   require('plugins/settings/sections/indices/_indexed_fields');
   require('plugins/settings/sections/indices/_scripted_fields');
+  require('plugins/settings/sections/indices/_index_header');
 
   require('routes')
-  .when('/settings/indices/:id', {
+  .when('/settings/indices/:indexPatternId', {
     template: require('text!plugins/settings/sections/indices/_edit.html'),
     resolve: {
       indexPattern: function ($route, courier) {
-        return courier.indexPatterns.get($route.current.params.id)
+        return courier.indexPatterns.get($route.current.params.indexPatternId)
         .catch(courier.redirectWhenMissing('/settings/indices'));
       }
     }
