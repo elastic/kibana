@@ -29,7 +29,7 @@ define(function (require) {
     DateTime.title = 'Date';
     DateTime.fieldType = 'date';
 
-    DateTime._convert = function (val) {
+    DateTime.prototype._convert = function (val) {
       // don't give away our ref to converter so
       // we can hot-swap when config changes
       return converter(val);

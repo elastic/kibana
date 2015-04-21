@@ -12,7 +12,7 @@ define(function (require) {
     Anchor.title = 'Anchor';
     Anchor.fieldType = 'string';
 
-    Anchor._convert = function (val) {
+    Anchor.prototype._convert = function (val) {
       return '<a href="' + val + '" target="_blank">' + val + '</a>';
     };
 
