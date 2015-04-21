@@ -13,13 +13,14 @@ define(function (require) {
      */
 
     function Dispatch(handler) {
+      var eventTypes = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout'].concat(handler.vis.eventTypes.enabled);
+
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
       }
 
       this.handler = handler;
-      this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover', 'mouseout');
+      this.dispatch = d3.dispatch.apply(this, eventTypes);
     }
 
     /**

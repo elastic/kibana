@@ -26,6 +26,7 @@ define(function (require) {
       Private(require('./mapExists')),
       Private(require('./mapMissing')),
       Private(require('./mapQueryString')),
+      Private(require('./mapGeoBoundingBox')),
       Private(require('./mapScript')),
       Private(require('./mapDefault')) // ProTip: last one to get applied
     ];

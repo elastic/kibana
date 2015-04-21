@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapVisType(Private) {
+  return function TileMapVisType(Private, getAppState) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
@@ -17,6 +17,18 @@ define(function (require) {
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pins'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
+      },
+      listeners: {
+        square: function (event) {
+          var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
+          var indexPatternName = event.data.geoJson.properties.agg.geo.vis.indexPattern.id;
+
+          var field = event.data.geoJson.properties.agg.geo.fieldName();
+          var filter = {geo_bounding_box: {}};
+          filter.geo_bounding_box[field] = event.bounds;
+
+          pushFilter(filter, false, indexPatternName);
+        }
       },
       responseConverter: geoJsonConverter,
       schemas: new Schemas([
