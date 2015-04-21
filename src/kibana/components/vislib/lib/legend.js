@@ -26,7 +26,7 @@ define(function (require) {
       var isPie = (vis._attr.type === 'pie');
 
       this.vis = vis;
-      this.data = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
+      this.dataLabels = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
       this.el = vis.el;
       this.events = new Dispatch();
       this.labels = isPie ? data.pieNames() : data.labels;
@@ -41,20 +41,32 @@ define(function (require) {
       });
     }
 
+    /**
+     * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
+     * for the pie chart.
+     */
     Legend.prototype._transformPieData = function (arr) {
       var data = [];
-
+      var recurse = function (obj) {
+        if (obj.children) {
+          recurse(obj.children.reverse()).forEach(function (d) { data.unshift(d); });
+        }
+        return obj;
+      };
 
       arr.forEach(function (chart) {
-        chart.slices.children.forEach(function (obj) {
-          if (obj.children) data.push(obj.children);
-          data.push(obj);
-        });
+        chart.slices.children.map(recurse)
+        .reverse()
+        .forEach(function (d) { data.unshift(d); });
       });
 
-      return data;
+      return _.unique(data, function (d) { return d.name; });
     };
 
+    /**
+     * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
+     * for the point series charts.
+     */
     Legend.prototype._transformSeriesData = function (arr) {
       var data = [];
 
@@ -63,6 +75,19 @@ define(function (require) {
           var currentObj = data[i];
           if (!currentObj) data.push(obj);
 
+          // Copies first aggConfigResults object to data object.
+          if (obj.values && obj.values.length) {
+
+            // Filter out zero injected values
+            var values = obj.values.filter(function (d) {
+              return d.aggConfigResult !== undefined;
+            });
+
+            obj.aggConfig = values[0].aggConfigResult && values[0].aggConfigResult.aggConfig ?
+              _.clone(values[0].aggConfigResult.aggConfig) : undefined;
+          }
+
+          // Joins all values arrays that share a common label
           if (currentObj && currentObj.label === obj.label) {
             currentObj.values = currentObj.values.concat(obj.values);
           }
@@ -104,9 +129,7 @@ define(function (require) {
 
       return el.append('ul')
       .attr('class', function () {
-        if (args._attr.isOpen) {
-          return 'legend-ul';
-        }
+        if (args._attr.isOpen) { return 'legend-ul'; }
         return 'legend-ul hidden';
       })
       .selectAll('li')
@@ -115,8 +138,9 @@ define(function (require) {
         .append('li')
         .attr('class', 'color')
         .each(self._addIdentifier)
-        .html(function (d) {
-          return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
+        .html(function (d, i) {
+          var label = d.label ? d.label : d.name;
+          return '<i class="fa fa-circle dots" style="color:' + args.color(label) + '"></i>' + label;
         });
     };
 
@@ -141,7 +165,7 @@ define(function (require) {
       var self = this;
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
-      var items = this.labels;
+      var items = this.dataLabels;
       this.header(legendDiv, this);
       this.list(legendDiv, items, this);
 
@@ -168,21 +192,25 @@ define(function (require) {
       });
 
       legendDiv.select('.legend-ul').selectAll('li')
-      .on('mouseover', function (label) {
+      .on('mouseover', function (d) {
+        var label = d.label ? d.label : d.name;
         var charts = visEl.selectAll('.chart');
+
+        function filterLabel(d) {
+          var pointLabel = d.label ? d.label : d.name;
+          return pointLabel !== label;
+        }
+
+        d3.select(this).style('cursor', 'pointer'); // Add mouse pointer
 
         // legend
         legendDiv.selectAll('li')
-        .filter(function (d) {
-          return this.getAttribute('data-label') !== label;
-        })
+        .filter(filterLabel)
         .classed('blur_shape', true);
 
         // all data-label attribute
         charts.selectAll('[data-label]')
-        .filter(function (d) {
-          return this.getAttribute('data-label') !== label;
-        })
+        .filter(filterLabel)
         .classed('blur_shape', true);
 
         var eventEl =  d3.select(this);
@@ -210,7 +238,9 @@ define(function (require) {
         eventEl.style('word-break', 'inherit');
       });
 
-      legendDiv.call(this.events.addClickEvent());
+      legendDiv.selectAll('li.color').each(function () {
+        d3.select(this).call(self.events.addClickEvent());
+      });
     };
 
     return Legend;
