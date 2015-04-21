@@ -1,24 +1,11 @@
 <form ng-submit="editor.save()" name="form">
-  <h2 ng-if="editor.creating"><strong>Create {{ editor.field.scripted ? 'Scripted ' : '' }}Field</strong></h1>
-  <h2 ng-if="!editor.creating"><strong>Field:</strong> <code>{{ editor.field.name }}</code></h1>
-
-  <div class="form-group">
-    <label>
-      Index Pattern
-      <a href="#{{ editor.indexPattern.editRoute }}"><i class="fa fa-pencil" aria-label="edit"></i></a>
-    </label>
-    <input
-      ng-model="editor.indexPattern.id"
-      readonly
-      class="form-control"
-    >
-  </div>
-
-  <div class="form-group">
+  <div ng-if="editor.creating" class="form-group">
     <label>Name</label>
     <input
-      ng-model="editor.field.name"
-      ng-readonly="!editor.creating"
+      ng-model="editor.fieldSpec.name"
+      required
+      placeholder="New Scripted Field"
+      input-focus
       class="form-control"
     >
   </div>
@@ -30,18 +17,6 @@
       ng-readonly="!editor.creating"
       class="form-control"
     >
-  </div>
-
-  <div class="form-group" ng-if="editor.field.scripted">
-    <label>
-      Script
-      <small>Please familiarize yourself with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a> before using scripted fields.</small>
-    </label>
-
-    <div ng-bind-html="editor.scriptingInfo" class="hintbox"></div>
-    <div ng-bind-html="editor.scriptingWarning" class="hintbox"></div>
-
-    <textarea required class="form-control text-monospace" ng-model="editor.field.script"></textarea>
   </div>
 
   <div class="form-group">
@@ -80,6 +55,17 @@
         </button>
       </span>
     </div>
+  </div>
+
+  <div class="form-group" ng-if="editor.field.scripted">
+    <label>Script</label>
+    <textarea required class="form-control text-monospace" ng-model="editor.field.script"></textarea>
+  </div>
+  <div class="form-group">
+    <div ng-bind-html="editor.scriptingWarning" class="hintbox"></div>
+  </div>
+  <div class="form-group">
+    <div ng-bind-html="editor.scriptingInfo" class="hintbox"></div>
   </div>
 
   <div class="form-group">

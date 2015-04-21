@@ -1,6 +1,6 @@
 define(function (require) {
 
-  require('plugins/field_editor/field_editor_format_fieldset');
+  require('components/field_editor/field_editor_format_fieldset');
 
   require('modules')
   .get('app/settings')
@@ -11,9 +11,9 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/field_editor/field_editor.html'),
+      template: require('text!components/field_editor/field_editor.html'),
       controllerAs: 'editor',
-      controller: function ($sce, $scope, $attrs, Notifier) {
+      controller: function ($sce, $scope, $attrs, Notifier, kbnUrl) {
         var self = this;
         var notify = new Notifier({ location: 'Field Editor' });
 
@@ -25,14 +25,14 @@ define(function (require) {
         self.formatParams = self.field.format.params() || {};
         self.defFormatType = initDefaultFormat();
 
-        self.scriptingInfo = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_info.html'));
-        self.scriptingWarning = $sce.trustAsHtml(require('text!plugins/field_editor/scripting_warning.html'));
+        self.scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
+        self.scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
         self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
 
         self.creating = !self.indexPattern.fields.byName[self.field.name];
 
         self.cancel = function () {
-          window.location.hash = self.indexPattern.editRoute;
+          kbnUrl.change(self.indexPattern.editRoute);
         };
 
         self.save = function () {
@@ -56,13 +56,14 @@ define(function (require) {
           return indexPattern.save()
           .then(function () {
             notify.info('Saved Field "' + self.field.name + '"');
-            window.location.hash = self.indexPattern.editRoute;
+            kbnUrl.change(self.indexPattern.editRoute);
           });
         };
 
         $scope.$watchMulti([
           'editor.selectedFormatId',
-          '=editor.formatParams'
+          '=editor.formatParams',
+          '=editor.fieldSpec'
         ], function (cur) {
           var id = cur[0];
           var field = self.field;

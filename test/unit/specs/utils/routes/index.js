@@ -1,14 +1,12 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var RouteManager = require('routes').RouteManager;
   var routes; // will contain an new instance of RouteManager for each test
-  var sinon = require('test_utils/auto_release_sinon');
   var getRouteProvider = require('./_get_route_provider');
   var chainableMethods = [
     { name: 'when', args: ['', {}] },
     { name: 'otherwise', args: [{}] },
-    { name: 'addResolves', args: [/regexp/, {}] }
+    { name: 'defaults', args: [/regexp/, {}] }
   ];
 
   describe('Custom Route Management', function () {
@@ -88,9 +86,6 @@ define(function (require) {
         routes.when('/nothing-set');
         routes.when('/no-reload', { reloadOnSearch: false });
         routes.when('/always-reload', { reloadOnSearch: true });
-
-        var exec = 0;
-
         routes.config($rp);
 
         expect($rp.when.callCount).to.be(3);
