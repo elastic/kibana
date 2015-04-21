@@ -188,6 +188,7 @@ define(function (require) {
 
         it('should have an onclick listener', function () {
           expect(!!$('.legend-toggle')[0].__onclick).to.be(true);
+          expect(!!$('li.color')[0].__onclick).to.be(true);
         });
 
         it('should attach onmouseover listener', function () {
