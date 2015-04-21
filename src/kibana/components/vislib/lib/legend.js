@@ -88,7 +88,7 @@ define(function (require) {
           if (obj.values && obj.values.length) {
             var values = self._filterZeroInjectedValues(obj.values);
 
-            obj.aggConfig = values[0].aggConfigResult && values[0].aggConfigResult.aggConfig ?
+            obj.aggConfig = values.length && values[0].aggConfigResult && values[0].aggConfigResult.aggConfig ?
               _.clone(values[0].aggConfigResult.aggConfig) : undefined;
           }
 

@@ -59,14 +59,17 @@ define(function (require) {
         it('should match the slice label', function () {
           var chartType = chartTypes[i];
           var paths = $(vis.el).find(chartSelectors[chartType]).toArray();
-          var items = vis.handler.legend.labels;
+          var items = vis.handler.legend.dataLabels;
 
-          items.forEach(function (label) {
+          items.forEach(function (d) {
             var path = _(paths)
             .map(function (path) {
               return path.getAttribute('data-label');
             })
             .filter(function (dataLabel) {
+              var label = d.label ? d.label : d.name;
+
+              if (typeof label === 'number') dataLabel = +dataLabel;
               return dataLabel === label;
             })
             .value();
