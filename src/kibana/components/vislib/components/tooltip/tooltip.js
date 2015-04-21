@@ -115,12 +115,14 @@ define(function (require) {
                 left: placement.left,
                 top: placement.top
               });
+              console.log('drawHTML', id);
             } else {
               $tooltip.css({
                 visibility: 'hidden',
                 left: '-500px',
                 top: '-500px'
               });
+              console.log('hideTooltip', id);
             }
           }
 
@@ -134,6 +136,7 @@ define(function (require) {
             return render(tooltipFormatter(events));
           })
           .on('mouseout.tip', function () {
+            console.log('mouseoutevent', id);
             render();
           });
         });

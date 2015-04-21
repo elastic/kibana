@@ -6,7 +6,7 @@ define(['angular', 'jquery', 'lodash', 'nvd3', 'nvd3_directives'],
         var statusMap = {
           green: {
             label: 'success',
-            msg: 'All systems are a Go.',
+            msg: 'Ready',
             idx: 1
           },
           yellow: {
@@ -61,6 +61,7 @@ define(['angular', 'jquery', 'lodash', 'nvd3', 'nvd3_directives'],
           }(),
           charts: [],
           plugins: [],
+          chartAverages: [],
           nvd3Config: {
             getX: function(d) { return d[0]; },
             getY: function(d) {
@@ -81,14 +82,22 @@ define(['angular', 'jquery', 'lodash', 'nvd3', 'nvd3_directives'],
         $http
           .get('/status/health')
           .success(function(data) {
-            // Assign the propper variables to the scope
-            $scope.ui.charts = data.metrics;
+            // Assign the propper variables to the scope and change them as necessary
+
+            // setup The charts
+            // wrap the metrics data and append the average
+            $scope.ui.charts = _.mapValues(data.metrics, function(metric) {
+              var sum = metric.reduce(function(prev, vector) {
+                return prev + $scope.ui.nvd3Config.getY(vector);
+              }, 0);
+              return { data: metric, average: sum / metric.length };
+            });
+
+            // give the plugins their proper name so CSS classes can be properply applied
             $scope.ui.plugins = _.mapValues(data.status, function(plugin) {
               plugin.uiStatus = getLabel(plugin);
               return plugin;
             });
-
-            console.log($scope.ui);
           })
           .error(function() {
             alert('Something went terribly wrong while making the request!!!');
