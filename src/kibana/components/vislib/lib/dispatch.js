@@ -149,6 +149,7 @@ define(function (require) {
       var addEvent = this.addEvent;
 
       function click(d, i) {
+        console.log(d);
         d3.event.stopPropagation();
         self.dispatch.click.call(this, self.eventResponse(d, i));
       }

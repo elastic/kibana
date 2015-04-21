@@ -26,8 +26,9 @@ define(function (require) {
       var isPie = (vis._attr.type === 'pie');
 
       this.vis = vis;
-      this.dataLabels = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
+      this.data = data;
       this.el = vis.el;
+      this.dataLabels = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
       this.events = new Dispatch();
       this.color = isPie ? data.getPieColorFunc() : data.color;
       this._attr = _.defaults(vis._attr || {}, {
@@ -144,6 +145,7 @@ define(function (require) {
         .each(self._addIdentifier)
         .html(function (d, i) {
           var label = d.label ? d.label : d.name;
+          if (!label) { label = self.data.get('yAxisLabel'); }
           return '<i class="fa fa-circle dots" style="color:' + args.color(label) + '"></i>' + label;
         });
     };
@@ -202,11 +204,13 @@ define(function (require) {
         var charts = visEl.selectAll('.chart');
 
         function filterLabel(d) {
-          var pointLabel = d.label ? d.label : d.name;
+          var pointLabel = this.getAttribute('data-label');
           return pointLabel !== label;
         }
 
-        d3.select(this).style('cursor', 'pointer'); // Add mouse pointer
+        if (label !== undefined && label !== '_all') {
+          d3.select(this).style('cursor', 'pointer');
+        }
 
         // legend
         legendDiv.selectAll('li')
@@ -243,8 +247,11 @@ define(function (require) {
         eventEl.style('word-break', 'inherit');
       });
 
-      legendDiv.selectAll('li.color').each(function () {
-        d3.select(this).call(self.events.addClickEvent());
+      legendDiv.selectAll('li.color').each(function (d) {
+        var label = d.label ? d.label : d.name;
+        if (label !== undefined && label !== '_all') {
+          d3.select(this).call(self.events.addClickEvent());
+        }
       });
     };
 
