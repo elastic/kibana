@@ -1,5 +1,5 @@
 require.config({
-  baseUrl: './',
+  baseUrl: '/',
   paths: {
     kibana: 'index',
     // special utils
@@ -21,6 +21,8 @@ require.config({
     bower_components: 'bower_components',
     css: 'bower_components/require-css/css',
     d3: 'bower_components/d3/d3',
+    nvd3: 'bower_components/nvd3/nv.d3',
+    nvd3_directives: 'bower_components/angularjs-nvd3-directives/dist/angularjs-nvd3-directives',
     elasticsearch: 'bower_components/elasticsearch/elasticsearch.angular',
     faker: 'bower_components/Faker/faker',
     file_saver: 'bower_components/FileSaver/FileSaver',
@@ -42,6 +44,9 @@ require.config({
       deps: ['jquery'],
       exports: 'angular'
     },
+    file_saver: {
+      exports: 'saveAs'
+    },
     gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
     'angular-route': ['angular'],
     'elasticsearch': ['angular'],
@@ -53,15 +58,14 @@ require.config({
     inflection: {
       exports: 'inflection'
     },
-    file_saver: {
-      exports: 'saveAs'
-    },
     leaflet: {
       deps: ['css!bower_components/leaflet/dist/leaflet.css']
     },
     marked: {
       exports: 'marked'
-    }
+    },
+    nvd3: ['css!bower_components/nvd3/nv.d3.css', 'd3'],
+    nvd3_directives: ['angular', 'd3', 'nvd3']
   },
   waitSeconds: 60
 });

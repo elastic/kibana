@@ -1,9 +1,70 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>Kibana Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="/styles/theme/elk.ico">
+    <link rel="stylesheet" href="/styles/main.css?_b=@@buildNum">
+
+    <style>
+      .status_chart_wrapper { float: left; }
+      .status_chart {
+        height: auto;
+        width: auto;
+      }
+    </style>
   </head>
   <body>
-    <h1>Kibana Status Page</h1>
-    <p>Statusy stuff goes here... it's goign to be totally awesome!</p>
+    <div class="container">
+      <header>
+        <h1>
+          <strong>Kibana</strong>&nbsp;Status
+        </h1>
+      </header>
+      <div>
+        <section>
+          <h4>What is this page?</h4>
+          <p>This page is your sanity check, and your savior. You can check for potential problems</p>
+          <p>Here is the status of your kibana instance and the plugins you have installed along with some, statistics to asses potential problems.</p>
+        </section>
+        <section>
+          <h4>What is this page?</h4>
+          <p>This page is your sanity check, and your savior. You can check for potential problems</p>
+        </section>
+        <div ng-controller="StatusPage">
+          <div id="system-status" class="alert alert-{{ui.systemStatus().label}}">
+            {{ui.systemStatus().msg}}
+          </div>
+          <div id="plugin-cont">
+            <div ng-repeat="(key, plugin) in ui.plugins" class="plugin">
+              <div class="alert alert-{{plugin.uiStatus}}">
+                {{key}}:&nbsp;{{plugin.message}}
+              </div>
+            </div>
+          </div>
+          <div id="chart-cont">
+            <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper">
+              <h2 class="title">{{key}}</h2>
+              <nvd3-sparkline-chart
+                id="{{key}}-chart"
+                data="chart"
+                width="450"
+                height="200"
+                x="ui.nvd3Config.getX"
+                y="ui.nvd3Config.getY">
+                <svg class="status_chart"></svg>
+              </nvd3-sparkline-chart>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer></footer>
+    </div>
+    <script type="text/javascript" src="/bower_components/requirejs/require.js?_b=@@buildNum"></script>
+    <script type="text/javascript" src="/require.config.js?_b=@@buildNum"></script>
+    <script type="text/javascript">
+      require(['/status/index.js'], function(kibanaStatus) { kibanaStatus.init(); });
+    </script>
   </body>
 </html>
