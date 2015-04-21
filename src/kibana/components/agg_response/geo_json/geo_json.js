@@ -26,8 +26,13 @@ define(function (require) {
 
       var chart = {};
 
-      chart.tooltipFormatter = function() {
-        debugger;
+      chart.tooltipFormatter = function (feature) {
+        var lat = feature.geometry.coordinates[1];
+        var lng = feature.geometry.coordinates[0];
+
+        return 'Geohash: ' + feature.properties.geohash + '<br>' +
+        'Center: ' + lat.toFixed(1) + ', ' + lng.toFixed(1) + '<br>' +
+        feature.properties.valueLabel + ': ' + feature.properties.count;
       };
 
       var geoJson = chart.geoJson = {

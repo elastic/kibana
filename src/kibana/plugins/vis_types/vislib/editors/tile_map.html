@@ -5,14 +5,7 @@
   </select>
 </div>
 
-<div class="form-group">
-  <label>
-    <input type="checkbox" ng-model="vis.params.addLeafletPopup">
-    Show Tooltip
-  </label>
-</div>
-
-<div ng-if="vis.params.mapType === 'Heatmap'">
+<div ng-if="vis.params.mapType === 'Heatmap'" class="form-group">
   <div>
     <label>
       Radius
@@ -109,7 +102,14 @@
   </div>
 </div>
 
-<div>
+<div class="form-group">
+  <label>
+    <input type="checkbox" ng-model="vis.params.addLeafletPopup">
+    Show Tooltip
+  </label>
+</div>
+
+<div class="form-group">
   <label>
     <input type="checkbox" value="{{isDesaturated}}" ng-model="vis.params.isDesaturated" name="isDesaturated" ng-checked="vis.params.isDesaturated">
     Desaturate map tiles
