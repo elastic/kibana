@@ -146,7 +146,6 @@ define(function (require) {
               'trailing': false
             }));
             map.on('mouseout', function () {
-              console.log('mouseout');
               map.closePopup();
             });
           }
