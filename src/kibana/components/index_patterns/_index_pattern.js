@@ -214,7 +214,8 @@ define(function (require) {
       // refresh the id and editRoute
       function setId(id) {
         self.id = id;
-        self.editRoute = id && kbnUrl.eval('/settings/indices/{{id}}', { id: id });
+        self.editRoute = id && kbnUrl.eval('/settings/indices/{{id}}', self);
+        self.addFieldRoute = id && kbnUrl.eval('/settings/indices/{{id}}/create-field', self);
 
         return self.id;
       }

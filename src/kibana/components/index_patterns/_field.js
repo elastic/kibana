@@ -69,6 +69,8 @@ define(function (require) {
     }
 
     Field.getEditRoute = function (indexPattern, field) {
+      if (!field.name || !indexPattern.id) return;
+
       return kbnUrl.eval(
         '/settings/indices/{{index}}/field/{{field}}',
         {
