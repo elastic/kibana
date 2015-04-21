@@ -88,8 +88,8 @@ define(function (require) {
           if (obj.values && obj.values.length) {
             var values = self._filterZeroInjectedValues(obj.values);
 
-            obj.aggConfig = values.length && values[0].aggConfigResult && values[0].aggConfigResult.aggConfig ?
-              _.clone(values[0].aggConfigResult.aggConfig) : undefined;
+            obj.aggConfigResult = values.length && values[0].aggConfigResult ?
+              _.clone(values[0].aggConfigResult) : undefined;
           }
 
           // Joins all values arrays that share a common label
