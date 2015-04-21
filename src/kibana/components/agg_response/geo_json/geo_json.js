@@ -25,6 +25,11 @@ define(function (require) {
       });
 
       var chart = {};
+
+      chart.tooltipFormatter = function() {
+        debugger;
+      };
+
       var geoJson = chart.geoJson = {
         type: 'FeatureCollection',
         features: []

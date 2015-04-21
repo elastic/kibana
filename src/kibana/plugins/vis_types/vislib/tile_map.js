@@ -18,7 +18,8 @@ define(function (require) {
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
-          isDesaturated: true
+          isDesaturated: true,
+          addLeafletPopup: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap', 'Pins'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')

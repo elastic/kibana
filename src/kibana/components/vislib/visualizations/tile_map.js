@@ -27,6 +27,7 @@ define(function (require) {
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);
       }
+
       TileMap.Super.apply(this, arguments);
 
       // track the map objects
@@ -395,7 +396,9 @@ define(function (require) {
 
       var featureLayer = L.heatLayer(points, options);
 
-      map.on('mousemove', _.debounce(heatLocation, 15));
+      if (this._attr.addLeafletPopup) {
+        map.on('mousemove', _.debounce(heatLocation, 15));
+      }
 
       function heatLocation(e) {
         map.closePopup();
