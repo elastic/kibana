@@ -48,18 +48,26 @@ define(function (require) {
       var data = [];
       var recurse = function (obj) {
         if (obj.children) {
-          recurse(obj.children.reverse()).forEach(function (d) { data.unshift(d); });
+          recurse(obj.children).reverse().forEach(function (d) { data.unshift(d); });
         }
         return obj;
       };
 
       arr.forEach(function (chart) {
         chart.slices.children.map(recurse)
-        .reverse()
-        .forEach(function (d) { data.unshift(d); });
+        .reverse().forEach(function (d) { data.unshift(d); });
       });
 
       return _.unique(data, function (d) { return d.name; });
+    };
+
+    /**
+     * Filter out zero injected objects
+     */
+    Legend.prototype._filterZeroInjectedValues = function (arr) {
+      return arr.filter(function (d) {
+        return d.aggConfigResult !== undefined;
+      });
     };
 
     /**
@@ -68,6 +76,7 @@ define(function (require) {
      */
     Legend.prototype._transformSeriesData = function (arr) {
       var data = [];
+      var self = this;
 
       arr.forEach(function (chart) {
         chart.series.forEach(function (obj, i) {
@@ -76,11 +85,7 @@ define(function (require) {
 
           // Copies first aggConfigResults object to data object.
           if (obj.values && obj.values.length) {
-
-            // Filter out zero injected values
-            var values = obj.values.filter(function (d) {
-              return d.aggConfigResult !== undefined;
-            });
+            var values = self._filterZeroInjectedValues(obj.values);
 
             obj.aggConfig = values[0].aggConfigResult && values[0].aggConfigResult.aggConfig ?
               _.clone(values[0].aggConfigResult.aggConfig) : undefined;
@@ -149,7 +154,8 @@ define(function (require) {
      * @method _addIdentifier
      * @param label {string} label to use
      */
-    Legend.prototype._addIdentifier = function (label) {
+    Legend.prototype._addIdentifier = function (d) {
+      var label = d.label ? d.label : d.name;
       dataLabel(this, label);
     };
 
