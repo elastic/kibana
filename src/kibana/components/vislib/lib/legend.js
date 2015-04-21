@@ -29,7 +29,6 @@ define(function (require) {
       this.dataLabels = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
       this.el = vis.el;
       this.events = new Dispatch();
-      this.labels = isPie ? data.pieNames() : data.labels;
       this.color = isPie ? data.getPieColorFunc() : data.color;
       this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
