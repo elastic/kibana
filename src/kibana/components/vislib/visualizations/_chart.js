@@ -44,7 +44,10 @@ define(function (require) {
      * @returns {HTMLElement} Contains the D3 chart
      */
     Chart.prototype.render = function () {
-      return d3.select(this.chartEl).call(this.draw());
+      var selection = d3.select(this.chartEl);
+
+      selection.selectAll('*').remove();
+      selection.call(this.draw());
     };
 
     /**
@@ -68,7 +71,10 @@ define(function (require) {
      * @method destroy
      */
     Chart.prototype.destroy = function () {
-      d3.select(this.chartEl).selectAll('*').remove();
+      var selection = d3.select(this.chartEl);
+
+      selection.remove();
+      selection = null;
     };
 
     return Chart;

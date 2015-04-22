@@ -49,6 +49,11 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
+      if (this.handler) {
+        this.data = null;
+        this._runOnHandler('destroy');
+      }
+
       this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
@@ -100,10 +105,14 @@ define(function (require) {
      * @method destroy
      */
     Vis.prototype.destroy = function () {
+      var selection = d3.select(this.el).select('.vis-wrapper');
+
       this.resizeChecker.off('resize', this.resize);
       this.resizeChecker.destroy();
       if (this.handler) this._runOnHandler('destroy');
-      d3.select(this.el).selectAll('*').remove();
+
+      selection.remove();
+      selection = null;
     };
 
     /**
