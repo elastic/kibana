@@ -30,11 +30,13 @@
         name="filter{{$index}}">
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-show="showConfig">
+      <label class="vis-editor-agg-header-title">
+          Filter {{$index + 1}} label
+      </label>
       <input
-        ng-show="showConfig"
         ng-model="filter.label"
-        placeholder="Legend"
+        placeholder="Label"
         type="text"
         class="form-control"
         name="label{{$index}}">
