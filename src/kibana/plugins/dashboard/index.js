@@ -60,7 +60,7 @@ define(function (require) {
 
         // I don't like this, but not sure how else to tell if this is a fresh load of the
         // saved dashboard object, so looking for _a in the URL. Ideas?
-        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.mightExist()) {
+        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
           timefilter.time.to = dash.timeTo;
           timefilter.time.from = dash.timeFrom;
         }
