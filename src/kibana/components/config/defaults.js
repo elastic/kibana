@@ -1,6 +1,4 @@
-define(function (require) {
-  var _ = require('lodash');
-
+define(function () {
   return {
     'query:queryString:options': {
       value: '{ "analyze_wildcard": true }',
@@ -44,10 +42,6 @@ define(function (require) {
       value: 10,
       description: 'The top N most popular fields to show',
     },
-    'format:numberPrecision': {
-      value: 3,
-      description: 'Round numbers to this many decimal places',
-    },
     'histogram:barTarget': {
       value: 50,
       description: 'Attempt to generate around this many bar when using "auto" interval in date histograms',
@@ -82,7 +76,7 @@ define(function (require) {
       value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
     },
-    'defaultFieldFormats': {
+    'format:defaultTypeMap': {
       type: 'json',
       value: [
         '{',
@@ -94,6 +88,22 @@ define(function (require) {
       ].join('\n'),
       description: 'Map of the format name to use by default for each field type. ' +
         '"_default_" is used if the field type is not mentioned explicitly.'
+    },
+    'format:number:defaultPattern': {
+      type: 'string',
+      value: '0,0.[000]'
+    },
+    'format:bytes:defaultPattern': {
+      type: 'string',
+      value: '0,0.[000]b'
+    },
+    'format:percentage:defaultPattern': {
+      type: 'string',
+      value: '0,0.[000]%'
+    },
+    'format:currency:defaultPattern': {
+      type: 'string',
+      value: '($0,0.[00])'
     }
   };
 });
