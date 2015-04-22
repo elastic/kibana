@@ -12,10 +12,10 @@ define(function (require) {
       var defaultMap;
       setupDefaultHandling();
       $rootScope.$on('init:config', setupDefaultHandling);
-      $rootScope.$on('change:config.defaultFieldFormats', setupDefaultHandling);
+      $rootScope.$on('change:config.format:defaultTypeMap', setupDefaultHandling);
 
       function setupDefaultHandling() {
-        defaultMap = config.get('defaultFieldFormats');
+        defaultMap = config.get('format:defaultTypeMap');
 
         self.for = _.memoize(function (type) {
           var id = defaultMap[type] || defaultMap._default_;

@@ -1,9 +1,12 @@
 <kbn-settings-app section="indices">
   <kbn-settings-indices>
+    <div class="page-header">
+      <kbn-settings-index-header index-pattern="editor.indexPattern"></kbn-settings-index-header>
 
-    <h1>{{ editor.indexPattern.id }}</h1>
-    <h2 ng-if="fieldSettings.mode === 'create'">Create {{ editor.field.scripted ? 'Scripted ' : '' }}Field</h2>
-    <h2 ng-if="fieldSettings.mode === 'edit'">{{ editor.field.name }}</h2>
+      <h2 ng-if="fieldSettings.mode === 'create'">Create {{ editor.field.scripted ? 'Scripted ' : '' }}Field</h2>
+      <h2 ng-if="fieldSettings.mode === 'edit'">{{ editor.field.name }}</h2>
+    </div>
+
 
     <field-editor
       index-pattern="fieldSettings.indexPattern"

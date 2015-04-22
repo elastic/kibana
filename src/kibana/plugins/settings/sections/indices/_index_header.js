@@ -11,7 +11,10 @@ define(function (require) {
         refreshFields: '&',
         delete: '&'
       },
-      link: function ($scope) {
+      link: function ($scope, $el, attrs) {
+        $scope.delete = attrs.delete ? $scope.delete : null;
+        $scope.setDefault = attrs.setDefault ? $scope.setDefault : null;
+        $scope.refreshFields = attrs.refreshFields ? $scope.refreshFields : null;
         config.$bind($scope, 'defaultIndex');
       }
     };

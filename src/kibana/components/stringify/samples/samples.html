@@ -1,0 +1,26 @@
+<input
+  ng-model="params.pattern"
+  placeholder="{{ format.param('pattern') }}"
+  class="form-control">
+<div class="form-group" ng-if="samples">
+  <hr>
+  <label>Samples</label>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          Input
+        </th>
+        <th>
+          Formatted
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="sample in samples">
+        <td>{{ sample[0] }}</td>
+        <td>{{ sample[1] }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

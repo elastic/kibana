@@ -1,5 +1,5 @@
 define(function (require) {
-  return function FieldFormatClassProvider() {
+  return function FieldFormatClassProvider(config, $rootScope) {
     var _ = require('lodash');
     var angular = require('angular');
 
@@ -15,6 +15,25 @@ define(function (require) {
       this.convert = _.bind(this.convert, this);
       this.param = _.bind(this.param, this);
     }
+
+    FieldFormat.initConfig = function (input) {
+      return _.transform(input, function (params, val, key) {
+        if (!_.isString(val) || val.charAt(0) !== '=') {
+          params[key] = val;
+          return;
+        }
+
+        var configKey = val.substr(1);
+
+        update();
+        $rootScope.$on('init:config', update);
+        $rootScope.$on('change:config.' + configKey, update);
+        function update() {
+          params[key] = config.get(configKey);
+        }
+
+      }, {});
+    };
 
     /**
      * Get the value of a param. This value may be a default value.

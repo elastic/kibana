@@ -5,7 +5,6 @@ define(function (require) {
   fieldFormats.register(require('components/stringify/types/Date'));
   fieldFormats.register(require('components/stringify/types/Ip'));
   fieldFormats.register(require('components/stringify/types/Number'));
-  fieldFormats.register(require('components/stringify/types/NumeralJs'));
   fieldFormats.register(require('components/stringify/types/Percentage'));
   fieldFormats.register(require('components/stringify/types/String'));
 });
