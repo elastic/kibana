@@ -11,7 +11,7 @@ define(function (require) {
       link: function ($scope, $el) {
         var childScopesToCleanup = [];
 
-        $scope.$watch('editor.field.format.type', function (FieldFormat) {
+        $scope.$watch('editor.selectedFormatId && editor.field.format.type', function (FieldFormat) {
           var editor = FieldFormat && FieldFormat.editor;
           _.invoke(childScopesToCleanup.splice(0), '$destroy');
 
