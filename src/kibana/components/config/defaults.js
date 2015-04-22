@@ -81,6 +81,11 @@ define(function (require) {
     'truncate:maxHeight': {
       value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
+    },
+    'indexPattern:fieldMapping:lookBack': {
+      value: 5,
+      description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
+        'patterns from which to query the field mapping.'
     }
   };
 });
