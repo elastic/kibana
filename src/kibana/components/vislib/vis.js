@@ -66,7 +66,6 @@ define(function (require) {
      */
     Vis.prototype.resize = function () {
       if (!this.data) {
-        // TODO: need to come up with a solution for resizing when no data is available
         return;
       }
 

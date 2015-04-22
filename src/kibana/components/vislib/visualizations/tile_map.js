@@ -102,12 +102,14 @@ define(function (require) {
           featureLayer.addLayer(features);
           map.addLayer(featureLayer);
 
-          tileLayer.on('tileload', function () {
+          function saturateTiles() {
             self.saturateTiles();
-          });
+          }
+
+          tileLayer.on('tileload', saturateTiles);
 
           map.on('unload', function () {
-            tileLayer.off('tileload', self.saturateTiles);
+            tileLayer.off('tileload', saturateTiles);
           });
 
           map.on('moveend', function setZoomCenter() {
@@ -120,7 +122,7 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
-          // Add button to fit container to points
+          // add button to fit container to points
           var FitControl = L.Control.extend({
             options: {
               position: 'topleft'
@@ -141,7 +143,7 @@ define(function (require) {
 
           // add tooltips
           if (self._attr.addLeafletPopup && self.tooltipFormatter) {
-            map.on('mousemove', _.debounce(mousemoveLocation, 15, {
+            map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
               'leading': true,
               'trailing': false
             }));
@@ -150,20 +152,13 @@ define(function (require) {
             });
           }
 
-          function mousemoveLocation(e) {
+          function mouseMoveLocation(e) {
             map.closePopup();
 
-            var zoomScale = d3.scale.linear()
-            .domain([1, 9, 14, 18])
-            .range([750000, 25000, 10, 0.01]);
-            var proximity = zoomScale(map.getZoom());
-            var nearest = self.nearestFeature(e.latlng, mapData);
-
-            if (nearest.properties.eventDistance < proximity) {
-              self.showTooltip(map, nearest);
+            if (!mapData.features.length) {
+              return;
             }
-
-            delete nearest.properties.eventDistance;
+            self.mouseMoveLocation(e, map, mapData);
           }
 
           self.maps.push(map);
@@ -227,6 +222,30 @@ define(function (require) {
       if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
+    };
+
+    /**
+     * uses event latLng to find nearest mapData feature
+     * for display of tooltip
+     *
+     * @method mouseMoveLocation
+     * @param e {event}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return {Leaflet object} featureLayer
+     */
+    TileMap.prototype.mouseMoveLocation = function (e, map, mapData) {
+      var zoomScale = d3.scale.linear()
+      .domain([1, 9, 14, 18])
+      .range([750000, 25000, 10, 0.01]);
+      var proximity = zoomScale(map.getZoom());
+      var nearest = this.nearestFeature(e.latlng, mapData);
+
+      if (nearest.properties.eventDistance < proximity) {
+        this.showTooltip(map, nearest);
+      }
+
+      delete nearest.properties.eventDistance;
     };
 
     /**
@@ -631,33 +650,6 @@ define(function (require) {
         map.invalidateSize({
           debounceMoveend: true
         });
-      });
-    };
-
-    /**
-     * Binds popup and events to each feature on map
-     *
-     * @method bindPopup
-     * @param feature {Object}
-     * @param layer {Object}
-     * return {undefined}
-     */
-    TileMap.prototype.bindPopup = function (feature, layer) {
-      var props = feature.properties;
-      var popup = L.popup({
-        autoPan: false
-      })
-      .setContent(
-        'Geohash: ' + props.geohash + '<br>' +
-        'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
-        props.valueLabel + ': ' + props.count
-      );
-      layer.bindPopup(popup)
-      .on('mouseover', function (e) {
-        layer.openPopup();
-      })
-      .on('mouseout', function (e) {
-        layer.closePopup();
       });
     };
 
