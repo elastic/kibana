@@ -191,6 +191,8 @@ define(function (require) {
           var height = $(this).height();
           var path;
 
+          if (!slices.children.length) return;
+
           self.convertToPercentage(slices);
           self._validateContainerSize(width, height);
 
