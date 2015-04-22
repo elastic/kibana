@@ -10,7 +10,6 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src');
-  var angular = require('angular');
 
   return {
     /**
@@ -183,14 +182,11 @@ define(function (require) {
      * @return {string}
      */
     asPrettyString: function (val) {
-      if (_.isObject(val)) {
-        return angular.toJson(val, true);
-      }
-      else if (val == null) {
-        return ' - ';
-      }
-      else {
-        return '' + val;
+      if (val === null || val === undefined) return ' - ';
+      switch (typeof val) {
+      case 'string': return val;
+      case 'object': return JSON.stringify(val, null, '  ');
+      default: return '' + val;
       }
     }
   };
