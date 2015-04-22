@@ -13,7 +13,7 @@ define(function (require) {
       params: {
         defaults: {
           mapType: 'Shaded Circle Markers',
-          heatMaxZoom: 12,
+          heatMaxZoom: 16,
           heatMinOpacity: 0.1,
           heatRadius: 25,
           heatBlur: 15,
