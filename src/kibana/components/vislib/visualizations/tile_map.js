@@ -69,11 +69,8 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          var mapData;
-
-          //mapData = data.geoJson;
-          mapData = self.addLatLng(data.geoJson);
-
+          // add leaflet latLngs to properties for tooltip
+          var mapData = self.addLatLng(data.geoJson);
 
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
