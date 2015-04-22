@@ -32,9 +32,10 @@
       </kbn-tooltip>
       <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
         <button
+          ng-click="configTemplate.toggle('save');"
+          ng-class="{active: configTemplate.is('save')}"
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('save') }}"
-          ng-click="configTemplate.toggle('save');"
           aria-label="Save Search">
           <i aria-hidden="true" class="fa fa-save"></i>
         </button>
@@ -44,6 +45,7 @@
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('load') }}"
           ng-click="configTemplate.toggle('load');"
+          ng-class="{active: configTemplate.is('load')}"
           aria-label="Load Saved Search">
           <i aria-hidden="true" class="fa fa-folder-open-o"></i>
         </button>
@@ -60,8 +62,7 @@
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar">
         <disc-field-chooser
-          fields="fields"
-          toggle="toggleField"
+          columns="state.columns"
           refresh="refreshFieldList"
           data="rows"
           filter="filterQuery"
@@ -78,6 +79,7 @@
             <span bindonce bo-bind="opts.savedSearch.title"></span>
             <i aria-label="Reload saved query" tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo small"></i>
           </span>
+
           <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
           <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
         </div>
@@ -112,7 +114,7 @@
 
                 <h3>Refine your query</h3>
                 <p>
-                  The search bar at the top uses Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+                  The search bar at the top uses Elasticsearch's support for Lucene <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
                 </p>
 
                 <p>
@@ -148,21 +150,30 @@
           <!-- result -->
           <div class="results" ng-show="resultState === 'ready'">
             <div class="discover-timechart" ng-if="opts.timefield">
-              <center class="small">
-                <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
-                <!-- TODO: Currently no way to apply this setting to the visualization -->
-                <!-- <select
-                  class="form-control"
-                  ng-model="state.interval"
-                  ng-options="interval as interval for interval in intervalOptions"
-                  ng-change="setupVisualization();fetch()"
-                  >
-                </select> -->
-              </center>
+              <header>
+                <center class="small">
+                  <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
 
-              <div ng-show="fetchStatus.hitCount === 0" class="discover-overlay vis-overlay">
-                <div class="spinner large"> </div>
-              </div>
+                  &mdash;
+
+                  <span class="results-interval" ng-hide="showInterval">
+                    <a
+                      ng-click="toggleInterval()">
+                      {{ intervalName }}
+                    </a>
+                  </span>
+
+                  <span ng-show="showInterval" class="results-interval form-inline">
+                    <select
+                      class="form-control"
+                      ng-model="state.interval"
+                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
+                      >
+                    </select>
+                  </span>
+                </center>
+
+              </header>
 
               <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
             </div>

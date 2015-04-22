@@ -119,20 +119,7 @@ define(function (require) {
             _.assign(self, self._source);
 
             return Promise.try(function () {
-              // if we have a searchSource, set it's state based on the searchSourceJSON field
-              if (self.searchSource) {
-                var state = {};
-                try {
-                  state = JSON.parse(meta.searchSourceJSON);
-                } catch (e) {}
-
-                var oldState = self.searchSource.toJSON();
-                var fnProps = _.transform(oldState, function (dynamic, val, name) {
-                  if (_.isFunction(val)) dynamic[name] = val;
-                }, {});
-
-                self.searchSource.set(_.defaults(state, fnProps));
-              }
+              parseSearchSource(meta.searchSourceJSON);
             })
             .then(hydrateIndexPattern)
             .then(function () {
@@ -152,6 +139,23 @@ define(function (require) {
           return self;
         });
       });
+
+      function parseSearchSource(searchSourceJson) {
+        if (!self.searchSource) return;
+
+        // if we have a searchSource, set its state based on the searchSourceJSON field
+        var state = {};
+        try {
+          state = JSON.parse(searchSourceJson);
+        } catch (e) {}
+
+        var oldState = self.searchSource.toJSON();
+        var fnProps = _.transform(oldState, function (dynamic, val, name) {
+          if (_.isFunction(val)) dynamic[name] = val;
+        }, {});
+
+        self.searchSource.set(_.defaults(state, fnProps));
+      }
 
       /**
        * After creation or fetching from ES, ensure that the searchSources index indexPattern
@@ -229,11 +233,11 @@ define(function (require) {
         return docSource.doCreate(source)
         .then(finish)
         .catch(function (err) {
-          var confirmMessage = 'Are you sure you want to overwrite this?';
+          var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
           if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
             return docSource.doIndex(source).then(finish);
           }
-          return Promise.resolve(false);
+          return Promise.reject(err);
         });
       };
 
@@ -264,7 +268,6 @@ define(function (require) {
           });
         });
       };
-
     }
 
     return SavedObject;

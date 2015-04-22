@@ -144,9 +144,8 @@ define(function (require) {
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', colorCircle)
-        .attr('class', function circleClass(d) {
-          return 'circle-decoration ' + self.colorToClass(color(d.label));
-        });
+        .attr('class', 'circle-decoration')
+        .call(this._addIdentifier);
 
       circles
       .enter()
@@ -155,9 +154,8 @@ define(function (require) {
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('fill', 'transparent')
-        .attr('class', function circleClass(d) {
-          return 'circle ' + self.colorToClass(color(d.label));
-        })
+        .attr('class', 'circle')
+        .call(this._addIdentifier)
         .attr('stroke', cColor)
         .attr('stroke-width', 0);
 
@@ -183,7 +181,7 @@ define(function (require) {
       var xAxisFormatter = this.handler.data.get('xAxisFormatter');
       var color = this.handler.data.getColorFunc();
       var ordered = this.handler.data.get('ordered');
-      var interpolate = this._attr.interpolate;
+      var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       var line = d3.svg.line()
       .interpolate(interpolate)
       .x(function x(d) {
@@ -202,12 +200,10 @@ define(function (require) {
       .data(data)
       .enter()
         .append('g')
-        .attr('class', 'lines');
+        .attr('class', 'pathgroup lines');
 
       lines.append('path')
-      .attr('class', function lineClass(d) {
-        return 'color ' + self.colorToClass(color(d.label));
-      })
+      .call(this._addIdentifier)
       .attr('d', function lineD(d) {
         return line(d.values);
       })

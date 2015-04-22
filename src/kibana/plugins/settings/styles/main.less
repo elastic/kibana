@@ -18,7 +18,7 @@ kbn-settings-objects-view {
   text-transform: capitalize;
 }
 
-li.kbn-settings-tab {
+li.kbn-settings-tab:first-letter {
   text-transform: capitalize;
 }
 
@@ -48,12 +48,18 @@ kbn-settings-objects {
       font-weight: normal;
     }
 
-    .delete-all {
+    .btn {
       font-size: 10px;
       margin-left: 20px;
     }
   }
 
+  .header {
+    .title, .controls {
+      padding-right: 1em;
+      display: inline-block;
+    }
+  }
 }
 
 kbn-settings-advanced {

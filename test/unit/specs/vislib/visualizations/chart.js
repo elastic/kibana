@@ -120,5 +120,14 @@ define(function (require) {
       expect(typeof myChart.render === 'function').to.be(true);
     });
 
+    it('should destroy the chart element', function () {
+      // Once destroy is called, a chart should not be able to be drawn
+      myChart.destroy();
+
+      expect(function () {
+        myChart.draw();
+      }).to.throwError();
+    });
+
   });
 });

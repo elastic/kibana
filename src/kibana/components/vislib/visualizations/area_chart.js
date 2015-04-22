@@ -58,8 +58,7 @@ define(function (require) {
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var defaultOpacity = this._attr.defaultOpacity;
-
+      var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       var area = d3.svg.area()
       .x(function (d) {
         if (isTimeSeries) {
@@ -80,24 +79,21 @@ define(function (require) {
         }
 
         return yScale(d.y0 + d.y);
-      });
-
-      var layer;
-      var path;
+      })
+      .interpolate(interpolate);
 
       // Data layers
-      layer = svg.selectAll('.layer')
+      var layer = svg.selectAll('.layer')
       .data(layers)
-      .enter().append('g')
+      .enter()
+      .append('g')
       .attr('class', function (d, i) {
-        return i;
+        return 'pathgroup ' + i;
       });
 
       // Append path
-      path = layer.append('path')
-      .attr('class', function (d) {
-        return 'color ' + self.colorToClass(color(d[0].label));
-      })
+      var path = layer.append('path')
+      .call(this._addIdentifier)
       .style('fill', function (d) {
         return color(d[0].label);
       })
@@ -151,7 +147,7 @@ define(function (require) {
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
       var circleRadius = 12;
-      var circleStrokeWidth = 1;
+      var circleStrokeWidth = 0;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var isOverlapping = this.isOverlapping;
@@ -180,9 +176,7 @@ define(function (require) {
       circles
       .enter()
       .append('circle')
-      .attr('class', function circleClass(d) {
-        return d.label + ' ' + self.colorToClass(color(d.label));
-      })
+      .call(this._addIdentifier)
       .attr('stroke', function strokeColor(d) {
         return color(d.label);
       })
@@ -224,9 +218,8 @@ define(function (require) {
      */
     AreaChart.prototype.addClipPath = function (svg, width, height) {
       // Prevents circles from being clipped at the top of the chart
-      var clipPathBuffer = 5;
       var startX = 0;
-      var startY = 0 - clipPathBuffer;
+      var startY = 0;
       var id = 'chart-area' + _.uniqueId();
 
       // Creating clipPath
@@ -238,9 +231,7 @@ define(function (require) {
       .attr('x', startX)
       .attr('y', startY)
       .attr('width', width)
-      // Adding clipPathBuffer to height so it doesn't
-      // cutoff the lower part of the chart
-      .attr('height', height + clipPathBuffer);
+      .attr('height', height);
     };
 
     AreaChart.prototype.checkIfEnoughData = function () {

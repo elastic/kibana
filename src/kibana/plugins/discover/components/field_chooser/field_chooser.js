@@ -5,6 +5,7 @@ define(function (require) {
   var rison = require('utils/rison');
   var qs = require('utils/query_string');
   var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
+  var IndexedArray = require('utils/indexed_array/index');
 
 
   require('directives/css_truncate');
@@ -16,8 +17,7 @@ define(function (require) {
     return {
       restrict: 'E',
       scope: {
-        fields: '=',
-        toggle: '=',
+        columns: '=',
         data: '=',
         state: '=',
         indexPattern: '=',
@@ -55,11 +55,14 @@ define(function (require) {
           reset: function () {
             filter.vals = _.clone(filter.defaults);
           },
+          isFieldSelected: function (field) {
+            return field.display;
+          },
           isFieldFiltered: function (field) {
             var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
             var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
             var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
-            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.inData);
             var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
             return !field.display
@@ -87,6 +90,11 @@ define(function (require) {
           filter.active = filter.getActive();
         });
 
+        $scope.toggle = function (fieldName) {
+          $scope.increaseFieldCounter(fieldName);
+          _.toggleInOut($scope.columns, fieldName);
+        };
+
         var calculateFields = function (newFields) {
           // Find the top N most popular fields
           $scope.popularFields = _(newFields)
@@ -110,16 +118,47 @@ define(function (require) {
         };
 
         $scope.$watch('fields', calculateFields);
-        $scope.$watch('data', function () {
+
+        $scope.$watch('indexPattern', function (indexPattern) {
+          $scope.fields = new IndexedArray ({
+            index: ['name'],
+            initialSet: _($scope.indexPattern.fields)
+              .sortBy('name')
+              .transform(function (fields, field) {
+                // clone the field with Object.create so that its getters
+                // and non-enumerable props are preserved
+                var clone = Object.create(field);
+                clone.display = _.contains($scope.columns, field.name);
+                fields.push(clone);
+              }, [])
+              .value()
+          });
+
+        });
+
+        $scope.$watchCollection('columns', function (columns, oldColumns) {
           _.each($scope.fields, function (field) {
+            field.display = _.contains(columns, field.name) ? true : false;
+          });
+        });
+
+        $scope.$watch('data', function () {
+
+          // Get all fields current in data set
+          var currentFields = _.chain($scope.data).map(function (d) {
+            return _.keys($scope.indexPattern.flattenHit(d));
+          }).flatten().unique().sort().value();
+
+          _.each($scope.fields, function (field) {
+            field.inData = _.contains(currentFields, field.name) ? true : false;
             if (field.details) {
               $scope.details(field, true);
             }
           });
         });
 
-        $scope.increaseFieldCounter = function (field) {
-          $scope.indexPattern.popularizeField(field.name, 1);
+        $scope.increaseFieldCounter = function (fieldName) {
+          $scope.indexPattern.popularizeField(fieldName, 1);
         };
 
         $scope.runAgg = function (field) {

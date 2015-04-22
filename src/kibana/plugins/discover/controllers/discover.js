@@ -75,6 +75,17 @@ define(function (require) {
       location: 'Discover'
     });
 
+    $scope.intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
+    $scope.showInterval = false;
+
+    $scope.intervalEnabled = function (interval) {
+      return interval.val !== 'custom';
+    };
+
+    $scope.toggleInterval = function () {
+      $scope.showInterval = !$scope.showInterval;
+    };
+
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
       load: require('text!plugins/discover/partials/load_search.html'),
@@ -111,6 +122,10 @@ define(function (require) {
     $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
+    $scope.$watchCollection('state.columns', function (columns) {
+      $state.save();
+    });
+
     var metaFields = config.get('metaFields');
     filterManager.init($state);
 
@@ -133,44 +148,6 @@ define(function (require) {
       $scope.showLessFailures = function () {
         $scope.failuresShown = showTotal;
       };
-
-      // stores the complete list of fields
-      $scope.fields = _($scope.indexPattern.fields)
-      .sortBy('name')
-      .transform(function (fields, field) {
-        // clone the field with Object.create so that its getters
-        // and non-enumerable props are preserved
-        var clone = Object.create(field);
-        clone.display = _.contains($state.columns, field.name);
-        clone.rowCount = $scope.rows ? $scope.rows.fieldCounts[field.name] : 0;
-        fields.push(clone);
-      }, [])
-      .value();
-
-      refreshColumns();
-
-      // listen for changes, and relisten everytime something happens
-      $scope.$listen($state, 'fetch_with_changes', updateFields);
-      $scope.$listen($state, 'reset_with_changes', updateFields);
-      function updateFields(changes) {
-        var newColumns = _.contains(changes, 'columns');
-        var newIndex = _.contains(changes, 'index');
-        var otherChanges = _.pull(changes, 'index', 'columns');
-
-        if (newIndex) {
-          // we will be reloading, don't need to juggle state
-          return;
-        }
-
-        if (newColumns) {
-          $scope.fields.forEach(function (field) {
-            field.display = _.contains($state.columns, field.name);
-          });
-          refreshColumns();
-        }
-
-        if (otherChanges.length) $scope.fetch();
-      }
 
       $scope.updateDataSource()
       .then(function () {
@@ -198,6 +175,23 @@ define(function (require) {
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
+        });
+
+        $scope.$watch('state.interval', function (interval, oldInterval) {
+          if (interval !== oldInterval && interval === 'auto') {
+            $scope.showInterval = false;
+          }
+          $scope.fetch();
+        });
+
+        $scope.$watch('vis.aggs', function (aggs) {
+          var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
+
+          if (buckets && buckets.length === 1) {
+            $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
+          } else {
+            $scope.intervalName = 'auto';
+          }
         });
 
         $scope.$watchMulti([
@@ -287,10 +281,6 @@ define(function (require) {
 
       $scope.updateTime();
 
-      if (_.isEmpty($state.columns)) {
-        refreshColumns();
-      }
-
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -377,9 +367,6 @@ define(function (require) {
           // "top 500" may change with each response
           if (hit.$$_formatted && !sortFn) return;
 
-          // Flatten the fields
-          hit.$$_flattened = $scope.indexPattern.flattenHit(hit);
-
           var formatAndCount = function (value, name) {
             // add up the counts for each field name
             counts[name] = counts[name] ? counts[name] + 1 : 1;
@@ -391,14 +378,10 @@ define(function (require) {
             return formatter.convert(value);
           };
 
-          hit.$$_formatted = _.mapValues(hit.$$_flattened, formatAndCount);
+          var flatHit = $scope.indexPattern.flattenHit(hit);
+          hit.$$_formatted = _.mapValues(flatHit, formatAndCount);
         });
 
-        // apply the field counts to the field list
-        // We could do this in the field_chooser but it would us to iterate the array again
-        $scope.fields.forEach(function (field) {
-          field.rowCount = counts[field.name] || 0;
-        });
       }));
 
       segmented.on('mergedSegment', function (merged) {
@@ -439,19 +422,11 @@ define(function (require) {
       .highlight({
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
-        fields: {'*': {}}
+        fields: {'*': {}},
+        fragment_size: 2147483647 // Limit of an integer.
       })
       .set('filter', $state.filters || []);
     });
-
-    // This is a hacky optimization for comparing the contents of a large array to a short one.
-    function arrayToKeys(array, value) {
-      var obj = {};
-      _.each(array, function (key) {
-        obj[key] = value || true;
-      });
-      return obj;
-    }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, values, operation) {
@@ -459,50 +434,9 @@ define(function (require) {
       filterManager.add(field, values, operation, $state.index);
     };
 
-    $scope.toggleField = function (name) {
-      var field = _.find($scope.fields, { name: name });
-
-      // If we can't find the field in the mapping, ensure it isn't in the column list and abort
-      if (!field) {
-        $state.columns = _.without($state.columns, name);
-        return;
-      }
-
-      // toggle the display property
-      field.display = !field.display;
-
-      if ($state.columns.length === 1 && $state.columns[0] === '_source') {
-        $state.columns = _.toggleInOut($state.columns, name);
-        $state.columns = _.toggleInOut($state.columns, '_source');
-        _.find($scope.fields, {name: '_source'}).display = false;
-      } else {
-        $state.columns = _.toggleInOut($state.columns, name);
-      }
-
-      refreshColumns();
-    };
-
     $scope.toTop = function () {
       $window.scrollTo(0, 0);
     };
-
-    function refreshColumns() {
-      // Get all displayed field names;
-      var fields = _($scope.fields).filter('display').pluck('name').value();
-
-      // Make sure there are no columns added that aren't in the displayed field list.
-      $state.columns = _.intersection($state.columns, fields);
-
-      // If no columns remain, use _source
-      if (!$state.columns.length) {
-        $scope.toggleField('_source');
-        return;
-      }
-
-      if (init.complete) {
-        $state.save();
-      }
-    }
 
     // TODO: Move to utility class
     var addSlashes = function (str) {
@@ -514,28 +448,36 @@ define(function (require) {
       return str;
     };
 
-    // TODO: Move to utility class
-    // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
-    var regexEscape = function (str) {
-      return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    };
-
     var loadingVis;
     var setupVisualization = function () {
       // If we're not setting anything up we need to return an empty promise
       if (!$scope.opts.timefield) return Promise.resolve();
       if (loadingVis) return loadingVis;
 
+      var visStateAggs = [
+        {
+          type: 'count',
+          schema: 'metric'
+        },
+        {
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {
+            field: $scope.opts.timefield,
+            interval: $state.interval,
+            min_doc_count: 0
+          }
+        }
+      ];
 
-      // we shouldn't have a vis, delete it
-      if (!$scope.opts.timefield && $scope.vis) {
-        $scope.vis.destroy();
-        $scope.searchSource.set('aggs', undefined);
-        delete $scope.vis;
+      // we have a vis, just modify the aggs
+      if ($scope.vis) {
+        var visState = $scope.vis.getState();
+        visState.aggs = visStateAggs;
+
+        $scope.vis.setState(visState);
+        return Promise.resolve($scope.vis);
       }
-
-      // we shouldn't have one, or already do, return whatever we already have
-      if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
       // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
@@ -552,21 +494,7 @@ define(function (require) {
           },
           brush: brushEvent
         },
-        aggs: [
-          {
-            type: 'count',
-            schema: 'metric'
-          },
-          {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: {
-              field: $scope.opts.timefield,
-              interval: 'auto',
-              min_doc_count: 0
-            }
-          }
-        ]
+        aggs: visStateAggs
       });
 
       $scope.searchSource.aggs(function () {
