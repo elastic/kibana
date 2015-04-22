@@ -132,8 +132,8 @@ define(function (require) {
      *                             be stored. Defaults to the config key
      * @return {function} - an unbind function
      */
-    config.$bind = function ($scope, property, key) {
-      if (!key) key = property;
+    config.$bind = function ($scope, key, property) {
+      if (!property) property = key;
 
       var update = function () {
         $scope[property] = config.get(key);
