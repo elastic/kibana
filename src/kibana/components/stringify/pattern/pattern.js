@@ -15,6 +15,7 @@ define(function (require) {
 
         $scope.samples = null;
         $scope.$bind('inputs', attrs.samples);
+        $scope.$bind('placeholder', attrs.placeholder);
 
         $scope.$watch('model', ngModelCntrl.$setViewValue);
         ngModelCntrl.$render = function () {
