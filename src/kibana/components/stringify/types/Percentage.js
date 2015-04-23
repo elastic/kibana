@@ -3,7 +3,6 @@ define(function (require) {
     var _ = require('lodash');
     var FieldFormat = Private(require('components/index_patterns/_field_format'));
     var Numeral = Private(require('components/stringify/types/_Numeral'));
-    require('components/stringify/numeral/pattern');
 
     return Numeral.factory({
       id: 'percent',

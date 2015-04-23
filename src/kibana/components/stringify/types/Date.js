@@ -4,7 +4,7 @@ define(function (require) {
     var FieldFormat = Private(require('components/index_patterns/_field_format'));
     var moment = require('moment');
 
-    require('components/stringify/samples/samples');
+    require('components/stringify/pattern/pattern');
 
     _(DateTime).inherits(FieldFormat);
     function DateTime(params) {

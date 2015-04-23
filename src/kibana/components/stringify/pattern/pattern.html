@@ -1,6 +1,6 @@
 <input
-  ng-model="params.pattern"
-  placeholder="{{ format.param('pattern') }}"
+  ng-model="model"
+  placeholder="{{ placeholder }}"
   class="form-control">
 <div class="form-group" ng-if="samples">
   <hr>
@@ -18,8 +18,8 @@
     </thead>
     <tbody>
       <tr ng-repeat="sample in samples">
-        <td>{{ sample[0] }}</td>
-        <td>{{ sample[1] }}</td>
+        <td ng-bind="sample[0]"></td>
+        <td ng-bind-html="sample[1]"></td>
       </tr>
     </tbody>
   </table>

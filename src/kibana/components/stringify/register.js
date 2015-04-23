@@ -1,6 +1,6 @@
 define(function (require) {
   var fieldFormats = require('registry/field_formats');
-  fieldFormats.register(require('components/stringify/types/Anchor'));
+  fieldFormats.register(require('components/stringify/types/Url'));
   fieldFormats.register(require('components/stringify/types/Bytes'));
   fieldFormats.register(require('components/stringify/types/Date'));
   fieldFormats.register(require('components/stringify/types/Ip'));
