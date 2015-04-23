@@ -28,6 +28,11 @@ define(function (require) {
       template: null
     };
 
+    Url.urlTypes = [
+      { id: 'a', name: 'Link' },
+      { id: 'img', name: 'Image' }
+    ];
+
     Url.prototype._convert = function (rawValue, contentType) {
       var template = this.param('template');
       var val = !template ? rawValue : this._compileTemplate(template)(rawValue);

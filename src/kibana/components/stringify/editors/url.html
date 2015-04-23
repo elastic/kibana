@@ -1,8 +1,8 @@
 <div class="form-group">
   <label>Url Type</label>
-  <select ng-model="editor.formatParams.type">
-    <option value="a">Link</option>
-    <option value="img">Image</option>
+  <select
+    ng-model="editor.formatParams.type"
+    ng-options="type.id as type.name for type in editor.field.format.type.urlTypes">
   </select>
 </div>
 
