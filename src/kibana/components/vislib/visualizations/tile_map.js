@@ -107,7 +107,8 @@ define(function (require) {
 
           map.on('zoomend', function (e) {
             var mapInfo = {
-              zoom: map.getZoom() / 18
+              zoom: map.getZoom(),
+              zoomPct: map.getZoom() / 18
             };
             self.events.dispatch.mapZoomEnd(mapInfo);
           });

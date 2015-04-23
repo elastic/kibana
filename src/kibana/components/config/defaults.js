@@ -57,8 +57,8 @@ define(function (require) {
       description: 'Never show more than this many bar in date histograms, scale values if needed',
     },
     'visualization:tileMap:maxPrecision': {
-      value: 8,
-      description: 'The maximum geoHash precision displayed on tile maps: 8 is high, 10 is very high, ' +
+      value: 7,
+      description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +
       '12 is the max. Explanation of cell dimensions: http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
       'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator',
     },

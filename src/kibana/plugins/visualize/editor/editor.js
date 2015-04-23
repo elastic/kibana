@@ -132,11 +132,68 @@ define(function (require) {
 
         if (!geoHash) return;
 
-        console.log(' ');
-        console.log('zoom', event.zoom * 18, event.zoom,
-          '  precision', Math.ceil(config.get('visualization:tileMap:maxPrecision') * event.zoom));
+        var autoPrecision;
+        switch (event.zoom) {
+          case 1:
+            autoPrecision = 1;
+            break;
+          case 2:
+            autoPrecision = 2;
+            break;
+          case 3:
+            autoPrecision = 2;
+            break;
+          case 4:
+            autoPrecision = 3;
+            break;
+          case 5:
+            autoPrecision = 3;
+            break;
+          case 6:
+            autoPrecision = 4;
+            break;
+          case 7:
+            autoPrecision = 4;
+            break;
+          case 8:
+            autoPrecision = 4;
+            break;
+          case 9:
+            autoPrecision = 5;
+            break;
+          case 10:
+            autoPrecision = 5;
+            break;
+          case 11:
+            autoPrecision = 6;
+            break;
+          case 12:
+            autoPrecision = 6;
+            break;
+          case 13:
+            autoPrecision = 7;
+            break;
+          case 14:
+            autoPrecision = 8;
+            break;
+          case 15:
+            autoPrecision = 9;
+            break;
+          case 16:
+            autoPrecision = 10;
+            break;
+          case 17:
+            autoPrecision = 11;
+            break;
+          case 18:
+            autoPrecision = 12;
+            break;
+          default:
+            autoPrecision = 2;
+        }
 
-        geoHash.params.precision = Math.ceil(config.get('visualization:tileMap:maxPrecision') * event.zoom);
+        autoPrecision = _.min([autoPrecision, config.get('visualization:tileMap:maxPrecision')]);
+        geoHash.params.precision = autoPrecision;
         $scope.fetch();
       };
 
