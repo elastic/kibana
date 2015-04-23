@@ -90,8 +90,7 @@ define(function (require) {
         }
 
         function initDefaultFormat() {
-          var prototype = fieldFormats.for(self.field.type).type;
-          var def = Object.create(prototype);
+          var def = Object.create(fieldFormats.getDefaultType(self.field.type));
 
           // explicitly set to undefined to prevent inheritting the prototypes id
           def.id = undefined;

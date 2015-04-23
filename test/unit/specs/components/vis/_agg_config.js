@@ -227,8 +227,8 @@ define(function (require) {
           ]
         });
 
-        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.for('number').convert);
-        expect(vis.aggs[1].fieldFormatter()).to.be(fieldFormat.for('string').convert);
+        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getInstance('number').convert);
+        expect(vis.aggs[1].fieldFormatter()).to.be(fieldFormat.getInstance('string').convert);
       });
 
       it('returns number formatter for metrics on strings', function () {
@@ -248,8 +248,8 @@ define(function (require) {
           ]
         });
 
-        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.for('number').convert);
-        expect(vis.aggs[1].fieldFormatter()).to.be(fieldFormat.for('string').convert);
+        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getInstance('number').convert);
+        expect(vis.aggs[1].fieldFormatter()).to.be(fieldFormat.getInstance('string').convert);
       });
 
       it('returns date formatter for metrics on date fields', function () {
@@ -269,8 +269,8 @@ define(function (require) {
           ]
         });
 
-        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.for('date').convert);
-        expect(vis.aggs[1].fieldFormatter()).to.be(fieldFormat.for('date').convert);
+        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getInstance('date').convert);
+        expect(vis.aggs[1].fieldFormatter()).to.be(fieldFormat.getInstance('date').convert);
       });
 
       it('returns the string format if the field does not have a format', function () {
@@ -287,7 +287,7 @@ define(function (require) {
 
         var agg = vis.aggs[0];
         agg.params.field = { type: 'date', format: null };
-        expect(agg.fieldFormatter()).to.be(fieldFormat.for('string').convert);
+        expect(agg.fieldFormatter()).to.be(fieldFormat.getInstance('string').convert);
       });
 
 
@@ -305,7 +305,7 @@ define(function (require) {
 
         var agg = vis.aggs[0];
         delete agg.params.field;
-        expect(agg.fieldFormatter()).to.be(fieldFormat.for('string').convert);
+        expect(agg.fieldFormatter()).to.be(fieldFormat.getInstance('string').convert);
       });
     });
   }];

@@ -30,7 +30,7 @@ define(function (require) {
 
       var format = spec.format;
       if (!format || !(format instanceof FieldFormat)) {
-        format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.for(spec.type);
+        format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
       }
 
       var indexed = !!spec.indexed;
