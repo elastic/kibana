@@ -17,17 +17,16 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     line-height: 2em;
     word-break: break-all;
 
-    dt {
+    dt, dd {
       display: inline;
+    }
+
+    dt {
       background: @gray-lighter;
       padding: @padding-xs-vertical @padding-xs-horizontal;
       margin-right: @padding-xs-horizontal;
       font-family: monospace;
-    }
-
-    dd {
-      display: inline;
-      word-break: break-all;
+      word-break: normal;
     }
   }
 
