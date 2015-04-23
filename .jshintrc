@@ -3,7 +3,7 @@
   "node": true,
 
   // shared with .jshintrc files for browser and node
-  "unused": true,
+  "unused": false,
   "bitwise": false,
   "eqnull": true,
   "eqeqeq": true,

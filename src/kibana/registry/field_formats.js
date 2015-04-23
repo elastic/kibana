@@ -16,15 +16,17 @@ define(function (require) {
         $rootScope.$on('change:config.format:defaultTypeMap', parseDefaultTypeMap);
       }
 
+
       /**
        * Get a FieldFormat type (class) by it's id.
        *
        * @param  {String} formatId - the format id
        * @return {Function}
        */
-      self.type = function (formatId) {
+      self.getType = function (formatId) {
         return self.byId[formatId];
       };
+
 
       /**
        * Get the singleton instance of the FieldFormat type by it's id.
@@ -32,10 +34,11 @@ define(function (require) {
        * @param  {String} formatId
        * @return {FieldFormat}
        */
-      self.instance = _.memoize(function (formatId) {
+      self.getInstance = _.memoize(function (formatId) {
         var FieldFormat = self.byId[formatId];
         return new FieldFormat();
       });
+
 
       /**
        * Get the id of the default type for this field type
@@ -44,9 +47,10 @@ define(function (require) {
        * @param  {String} fieldType - the field type
        * @return {String}
        */
-      self.defaultTypeId = function (fieldType) {
+      self.getDefaultTypeId = function (fieldType) {
         return defaultMap[fieldType] || defaultMap._default_;
       };
+
 
       /**
        * Get the default FieldFormat type (class) for
@@ -55,9 +59,10 @@ define(function (require) {
        * @param  {String} fieldType
        * @return {Function}
        */
-      self.defaultType = function (fieldType) {
-        return self.byId[self.defaultTypeId(fieldType)];
+      self.getDefaultType = function (fieldType) {
+        return self.byId[self.getDefaultTypeId(fieldType)];
       };
+
 
       /**
        * Get the default fieldFormat instance for a field format.
@@ -65,9 +70,10 @@ define(function (require) {
        * @param  {String} fieldType
        * @return {FieldFormat}
        */
-      self.defaultInstance = _.memoize(function (fieldType) {
-        return self.instance(self.defaultTypeId(fieldType));
+      self.getDefaultInstance = _.memoize(function (fieldType) {
+        return self.getInstance(self.getDefaultTypeId(fieldType));
       });
+
 
       function parseDefaultTypeMap() {
         defaultMap = config.get('format:defaultTypeMap');
