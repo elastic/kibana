@@ -44,11 +44,7 @@ define(function (require) {
       if (this._memoizedPattern !== pattern) {
         this._memoizedPattern = pattern;
         this._memoizedConverter = _.memoize(function converter(val) {
-          if (_.isNumber(val) || _.isDate(val)) {
-            return moment(val).format(pattern);
-          } else {
-            return val;
-          }
+          return moment(val).format(pattern);
         });
       }
       return this._memoizedConverter(val);
