@@ -50,7 +50,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise, config) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -125,6 +125,20 @@ define(function (require) {
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
+      editableVis.listeners.mapZoomEnd = vis.listeners.mapZoomEnd = function (event) {
+        var geoHash = _.find(vis.aggs, function (agg) {
+          return agg.type.name === 'geohash_grid' && vis.params.autoPrecision;
+        });
+
+        if (!geoHash) return;
+
+        console.log(' ');
+        console.log('zoom', event.zoom * 18, event.zoom,
+          '  precision', Math.ceil(config.get('visualization:tileMap:maxPrecision') * event.zoom));
+
+        geoHash.params.precision = Math.ceil(config.get('visualization:tileMap:maxPrecision') * event.zoom);
+        $scope.fetch();
+      };
 
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
