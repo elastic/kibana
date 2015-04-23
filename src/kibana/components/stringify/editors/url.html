@@ -1,8 +1,9 @@
 <div class="form-group">
-  <label>Url Type</label>
+  <label>Type</label>
   <select
     ng-model="editor.formatParams.type"
-    ng-options="type.id as type.name for type in editor.field.format.type.urlTypes">
+    ng-options="type.id as type.name for type in editor.field.format.type.urlTypes"
+    class="form-control">
   </select>
 </div>
 
@@ -11,7 +12,7 @@
     <i class="fa fa-warning"></i> Url Template Help
   </span>
 
-  <label>Url Template</label>
+  <label>Template</label>
   <text ng-model="editor.formatParams.format">
   <div class="hintbox" ng-if="editor.showUrlTemplateHelp">
     <h4 class="hintbox-heading">
@@ -22,16 +23,14 @@
       If a field only contains part of a url then a "Url Template" can be used to format the value as a complete url. The format is a string which uses double curly brace notation <code ng-bind="'\{\{ \}\}'"></code> to inject values. The following values can be accessed:
     </p>
 
-    <table class="table">
-      <tr>
-        <th>value</th>
-        <td>The uri-escaped value</td>
-      </tr>
-      <tr>
-        <th>rawValue</th>
-        <td>The unescaped value</td>
-      </tr>
-    </table>
+    <ul>
+      <li>
+        <strong>value</strong> &mdash; The uri-escaped value
+      </li>
+      <li>
+        <strong>rawValue</strong> &mdash; The unescaped value
+      </li>
+    </ul>
   </div>
 
   <field-editor-pattern
