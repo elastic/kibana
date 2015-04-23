@@ -97,7 +97,7 @@ define(function () {
       type: 'string',
       value: '0,0.[000]b'
     },
-    'format:percentage:defaultPattern': {
+    'format:percent:defaultPattern': {
       type: 'string',
       value: '0,0.[000]%'
     },
