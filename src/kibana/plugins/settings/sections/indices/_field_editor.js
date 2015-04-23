@@ -1,6 +1,4 @@
 define(function (require) {
-  var _ = require('lodash');
-
   require('components/field_editor/field_editor');
   require('plugins/settings/sections/indices/_index_header');
 
@@ -16,12 +14,14 @@ define(function (require) {
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($route, Private, Notifier, kbnUrl) {
+    controller: function FieldEditorPageController($route, Private, Notifier, kbnUrl, docTitle) {
       var Field = Private(require('components/index_patterns/_field'));
       var notify = new Notifier({ location: 'Field Editor' });
 
+
       this.mode = $route.current.mode;
       this.indexPattern = $route.current.locals.indexPattern;
+
 
       if (this.mode === 'edit') {
         var fieldName = $route.current.params.fieldName;
@@ -42,6 +42,7 @@ define(function (require) {
         throw new Error('unknown fieldEditorPage mode ' + this.mode);
       }
 
+      docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.id]);
       this.goBack = function () {
         kbnUrl.change(this.indexPattern.editUrl);
       };
@@ -49,60 +50,60 @@ define(function (require) {
   });
 
 
-  require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private) {
-    var fieldTypes = Private(require('components/index_patterns/_field_types'));
-    var notify = new Notifier();
-    var createMode = (!$route.current.params.field);
+  // require('modules').get('apps/settings')
+  // .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private) {
+  //   var fieldTypes = Private(require('components/index_patterns/_field_types'));
+  //   var notify = new Notifier();
+  //   var createMode = (!$route.current.params.field);
 
-    $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.fieldTypes = fieldTypes;
+  //   $scope.indexPattern = $route.current.locals.indexPattern;
+  //   $scope.fieldTypes = fieldTypes;
 
-    if (createMode) {
-      $scope.action = 'Create';
-    } else {
-      var scriptName = $route.current.params.field;
-      $scope.action = 'Edit';
-      $scope.scriptedField = _.find($scope.indexPattern.fields, {
-        name: scriptName,
-        scripted: true
-      });
-    }
+  //   if (createMode) {
+  //     $scope.action = 'Create';
+  //   } else {
+  //     var scriptName = $route.current.params.field;
+  //     $scope.action = 'Edit';
+  //     $scope.scriptedField = _.find($scope.indexPattern.fields, {
+  //       name: scriptName,
+  //       scripted: true
+  //     });
+  //   }
 
-    $scope.submit = function () {
-      var field = _.defaults($scope.scriptedField, {
-        type: 'number',
-        lang: 'expression'
-      });
+  //   $scope.submit = function () {
+  //     var field = _.defaults($scope.scriptedField, {
+  //       type: 'number',
+  //       lang: 'expression'
+  //     });
 
-      try {
-        if (createMode) {
-          $scope.indexPattern.addScriptedField(field.name, field.script, field.type, field.lang);
-        } else {
-          $scope.indexPattern.save();
-        }
-        notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
-        $scope.goBack();
-      } catch (e) {
-        notify.error(e.message);
-      }
-    };
+  //     try {
+  //       if (createMode) {
+  //         $scope.indexPattern.addScriptedField(field.name, field.script, field.type, field.lang);
+  //       } else {
+  //         $scope.indexPattern.save();
+  //       }
+  //       notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
+  //       $scope.goBack();
+  //     } catch (e) {
+  //       notify.error(e.message);
+  //     }
+  //   };
 
-    $scope.$watch('scriptedField.name', function (name) {
-      checkConflict(name);
-    });
+  //   $scope.$watch('scriptedField.name', function (name) {
+  //     checkConflict(name);
+  //   });
 
-    function checkConflict(name) {
-      var match = _.find($scope.indexPattern.getFields(), {
-        name: name
-      });
+  //   function checkConflict(name) {
+  //     var match = _.find($scope.indexPattern.getFields(), {
+  //       name: name
+  //     });
 
-      if (match) {
-        $scope.namingConflict = true;
-      } else {
-        $scope.namingConflict = false;
-      }
-    }
-  });
+  //     if (match) {
+  //       $scope.namingConflict = true;
+  //     } else {
+  //       $scope.namingConflict = false;
+  //     }
+  //   }
+  // });
 
 });

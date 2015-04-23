@@ -16,13 +16,14 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState) {
+  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
 
     var notify = new Notifier();
     var $state = $scope.state = new AppState();
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
 
     $scope.indexPattern = $route.current.locals.indexPattern;
+    docTitle.change($scope.indexPattern.id);
     var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
     var fieldTypes = Private(require('plugins/settings/sections/indices/_field_types'));
