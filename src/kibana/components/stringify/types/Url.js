@@ -62,7 +62,12 @@ define(function (require) {
         var output = '';
         var i = -1;
         while (++i < parts.length) {
-          output += (i % 2) ? locals[parts[i]] : parts[i];
+          if (i % 2) {
+            var local = locals[parts[i]];
+            output += local == null ? '' : local;
+          } else {
+            output += parts[i];
+          }
         }
 
         return output;

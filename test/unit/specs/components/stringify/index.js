@@ -1,125 +1,194 @@
 define(function (require) {
   describe('Stringify Component', function () {
-    var ip;
-    var date;
-    var bytes;
-    var anchor;
-    var string;
-    var number;
-    var percentage;
+    var _ = require('lodash');
+    var $ = require('jquery');
+    var moment = require('moment');
 
     var fieldFormats;
-    var currentDateFormat;
-    var currentPrec;
+    var FieldFormat;
     var config;
+    var $rootScope;
 
-    var _ = require('lodash');
+    var formatIds = [
+      'bytes',
+      'date',
+      'ip',
+      'number',
+      'percent',
+      'string',
+      'url'
+    ];
+
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      ip = Private(require('components/stringify/types/ip'));
-      date = Private(require('components/stringify/types/date'));
-      bytes = Private(require('components/stringify/types/bytes'));
-      anchor = Private(require('components/stringify/types/anchor'));
-      string = Private(require('components/stringify/types/string'));
-      number = Private(require('components/stringify/types/number'));
-      percentage = Private(require('components/stringify/types/percentage'));
-
       fieldFormats = Private(require('registry/field_formats'));
-
+      FieldFormat = Private(require('components/index_patterns/_field_format'));
       config = $injector.get('config');
-      currentDateFormat = config.get('dateFormat');
-      currentPrec = config.get('format:numberPrecision');
-    }));
-
-    afterEach(inject(function () {
-      config.set('dateFormat', currentDateFormat);
-      config.set('format:numberPrecision', currentPrec);
+      $rootScope = $injector.get('$rootScope');
     }));
 
     it('registers all of the fieldFormats', function () {
-      var diff = _.difference(fieldFormats.raw, [
-        ip, date, bytes, string, number, percentage, anchor
-      ]);
-      expect(diff).to.eql([]);
+      expect(_.difference(fieldFormats.raw, formatIds.map(fieldFormats.getType))).to.eql([]);
     });
 
-    describe('ip', function () {
-      it('formats numeric version of ip addresses properly', function () {
-        expect(ip.convert(3624101182)).to.be('216.3.101.62');
-      });
+    describe('conformance', function () {
+      formatIds.forEach(function (id) {
+        var instance;
+        var Type;
 
-      it('ignores strings', function () {
-        expect('216.3.101.63').to.be('216.3.101.63');
-      });
-    });
+        beforeEach(function () {
+          Type = fieldFormats.getType(id);
+          instance = fieldFormats.getInstance(id);
+        });
 
-    describe('date', function () {
-      it('formats dates using the current date format', function () {
-        config.set('dateFormat', 'YYYY');
-        var d = Date.now();
-        expect(date.convert(d)).to.eql((new Date(d)).getFullYear());
-      });
+        describe(id + ' Type', function () {
+          it('has an id', function () {
+            expect(Type.id).to.be.a('string');
+          });
 
-      it('formats dates using the current date format', function () {
-        config.set('dateFormat', 'YYYY-M');
-        var d = Date.now();
-        var dd = new Date(d);
-        var year = dd.getFullYear();
-        var month = dd.getMonth() + 1;
-        expect(date.convert(d)).to.eql(year + '-' + month);
-      });
-    });
+          it('has a title', function () {
+            expect(Type.title).to.be.a('string');
+          });
 
-    describe('bytes', function () {
-      it('rounds at 1024', function () {
-        expect(bytes.convert(1023)).to.be('1023B');
-      });
+          it('declares compatible field formats as a string or array', function () {
+            expect(Type.fieldType).to.be.ok();
+            expect(_.isString(Type.fieldType) || _.isArray(Type.fieldType)).to.be(true);
+          });
+        });
 
-      it('rounds at 1024', function () {
-        expect(bytes.convert(1024)).to.be('1KB');
-      });
+        describe(id + ' Instance', function () {
+          it('extends FieldFormat', function () {
+            expect(instance).to.be.a(FieldFormat);
+          });
 
-      it('rounds at 1024', function () {
-        expect(bytes.convert(1048576)).to.be('1MB');
+          it('implements the _convert method', function () {
+            expect(instance._convert).to.be.a('function');
+          });
+        });
       });
     });
 
-    describe('string', function () {
-      it('turns numbers into strings', function () {
-        expect(string.convert(1)).to.be('1');
+    describe('Bytes format', basicPatternTests('bytes', require('numeral')));
+    describe('Percent Format', basicPatternTests('percent', require('numeral')));
+    describe('Date Format', basicPatternTests('date', require('moment')));
+
+    describe('Number Format', function () {
+      basicPatternTests('number', require('numeral'))();
+
+      it('tries to parse strings', function () {
+        var number = new (fieldFormats.getType('number'))({ pattern: '0.0b' });
+        expect(number.convert(123.456)).to.be('123.5B');
+        expect(number.convert('123.456')).to.be('123.5B');
       });
 
-      it('turns arrays into strings', function () {
-        expect(string.convert([1, 2, 3])).to.be('["1","2","3"]');
+    });
+
+    function basicPatternTests(id, lib) {
+      var confKey = id === 'date' ? 'dateFormat' : 'format:' + id + ':defaultPattern';
+
+      return function () {
+        it('converts using the format:' + id + ':defaultPattern config', function () {
+          var inst = fieldFormats.getInstance(id);
+          [
+            '0b',
+            '0 b',
+            '0.[000] b',
+            '0.[000]b',
+            '0.[0]b'
+          ].forEach(function (pattern) {
+            var num = _.random(-10000, 10000, true);
+            config.set(confKey, pattern);
+            expect(inst.convert(num)).to.be(lib(num).format(pattern));
+          });
+        });
+
+        it('uses the pattern param if available', function () {
+          var num = _.random(-10000, 10000, true);
+          var defFormat = '0b';
+          var customFormat = '0.00000%';
+
+          config.set(confKey, defFormat);
+          var defInst = fieldFormats.getInstance(id);
+
+          var Type = fieldFormats.getType(id);
+          var customInst = new Type({ pattern: customFormat });
+
+          expect(defInst.convert(num)).to.not.be(customInst.convert(num));
+          expect(defInst.convert(num)).to.be(lib(num).format(defFormat));
+          expect(customInst.convert(num)).to.be(lib(num).format(customFormat));
+        });
+      };
+    }
+
+    describe('Ip format', function () {
+      it('convers a value from a decimal to a string', function () {
+        var ip = fieldFormats.getInstance('ip');
+        expect(ip.convert(1186489492)).to.be('70.184.100.148');
       });
     });
 
-    describe('number', function () {
-      it('rounds based on the config precision', function () {
-        config.set('format:numberPrecision', 3);
-        expect(number.convert(3.333333)).to.be('3.333');
+    describe('Url Format', function () {
+      var Url;
+
+      beforeEach(function () {
+        Url = fieldFormats.getType('url');
       });
 
-      it('rounds based on the config precision', function () {
-        config.set('format:numberPrecision', 5);
-        expect(number.convert(3.333333)).to.be('3.33333');
-      });
-    });
+      it('ouputs a simple <a> tab by default', function () {
+        var url = new Url();
 
-    describe('percentage', function () {
-      it('appends a percent sign to a rounded number, 100X the number', function () {
-        config.set('format:numberPrecision', 3);
-        expect(percentage.convert(0.0333333)).to.be('3.333%');
+        var $a = $(url.convert('http://elastic.co'));
+        expect($a.is('a')).to.be(true);
+        expect($a.size()).to.be(1);
+        expect($a.attr('href')).to.be('http://elastic.co');
+        expect($a.attr('target')).to.be('_blank');
+        expect($a.children().size()).to.be(0);
       });
-    });
 
-    describe('anchor', function () {
-      it('formats the input as an anchor tag', function () {
-        var text = '<script>alert("hi");</script>';
-        var final = '<a href="' + _.escape(text) + '" target="_blank">' + _.escape(text) + '</a>';
-        expect(anchor.convert(text)).to.be(final);
+      it('outputs an <image> if type === "img"', function () {
+        var url = new Url({ type: 'img' });
+
+        var $img = $(url.convert('http://elastic.co'));
+        expect($img.is('img')).to.be(true);
+        expect($img.attr('src')).to.be('http://elastic.co');
       });
+
+      it('only outputs the url if the contentType === "text"', function () {
+        var url = new Url();
+        expect(url.convert('url', 'text')).to.be('url');
+      });
+
+      describe('template', function () {
+
+        it('accepts a template', function () {
+          var url = new Url({ template: 'url: {{ value }}' });
+          var $a = $(url.convert('url'));
+          expect($a.is('a')).to.be(true);
+          expect($a.size()).to.be(1);
+          expect($a.attr('href')).to.be('url: url');
+          expect($a.attr('target')).to.be('_blank');
+          expect($a.children().size()).to.be(0);
+        });
+
+        it('renders for text contentType', function () {
+          var url = new Url({ template: 'url: {{ value }}' });
+          expect(url.convert('url', 'text')).to.be('url: url');
+        });
+
+        it('ignores unknown variables', function () {
+          var url = new Url({ template: '{{ not really a var }}' });
+          expect(url.convert('url', 'text')).to.be('');
+        });
+
+        it('does not allow executing code in variable expressions', function () {
+          window.SHOULD_NOT_BE_TRUE = false;
+          var url = new Url({ template: '{{ (window.SHOULD_NOT_BE_TRUE = true) && value }}' });
+          expect(url.convert('url', 'text')).to.be('');
+        });
+
+      });
+
     });
   });
 });
