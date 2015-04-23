@@ -103,16 +103,8 @@ define(function (require) {
           map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.mapZoom = map.getZoom();
             mapCenter = self._attr.mapCenter = map.getCenter();
-          });
-
-          map.on('viewreset', function resetView() {
-            map.eachLayer(function (layer) {
-              var coordinates = layer.feature && layer.feature.geometry && layer.feature.geometry.coordinates;
-
-              if (coordinates) {
-                console.log(map.getBounds().contains([coordinates[1], coordinates[0]]));
-              }
-            });
+            featureLayer.clearLayers();
+            featureLayer = self.markerType(map, mapData).addTo(map);
           });
 
           // add label for splits
@@ -299,7 +291,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -354,7 +347,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -397,6 +391,10 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
+      var isLegend = $('div.tilemap-legend').length;
+
+      if (isLegend) return; // Don't add Legend if already one
+
       var legend = L.control({position: 'bottomright'});
       legend.onAdd = function () {
         var div = L.DomUtil.create('div', 'tilemap-legend');
