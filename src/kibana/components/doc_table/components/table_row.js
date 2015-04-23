@@ -12,7 +12,7 @@ define(function (require) {
   require('filters/short_dots');
 
 
-  // guestimate at the minimum number of chars wide cells in the table should be
+  // guesstimate at the minimum number of chars wide cells in the table should be
   var MIN_LINE_LENGTH = 20;
 
   /**
