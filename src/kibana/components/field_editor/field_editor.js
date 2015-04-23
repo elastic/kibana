@@ -40,12 +40,8 @@ define(function (require) {
           var fields = indexPattern.fields;
           var field = self.field;
 
-          if (fields.byName[field.name]) {
-            var index = _.findIndex(fields, { name: field.name });
-            fields.splice(index, 1, field);
-          } else {
-            fields.push(field);
-          }
+          _.remove(fields, { name: field.name });
+          fields.push(field);
 
           if (!self.selectedFormatId) {
             delete indexPattern.fieldFormatMap[field.name];
@@ -57,6 +53,18 @@ define(function (require) {
           .then(function () {
             notify.info('Saved Field "' + self.field.name + '"');
             kbnUrl.change(self.indexPattern.editRoute);
+          });
+        };
+
+        self.delete = function () {
+          var indexPattern = self.indexPattern;
+          var field = self.field;
+
+          _.remove(indexPattern.fields, { name: field.name });
+          return indexPattern.save()
+          .then(function () {
+            notify.info('Deleted Field "' + field.name + '"');
+            kbnUrl.change(indexPattern.editRoute);
           });
         };
 

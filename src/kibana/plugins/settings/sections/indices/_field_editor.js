@@ -32,14 +32,16 @@ define(function (require) {
           kbnUrl.redirect(this.indexPattern.editRoute);
           return;
         }
+
       }
       else if (this.mode === 'create') {
         this.field = new Field(this.indexPattern, {
           scripted: true,
           type: 'number'
         });
-      } else {
-        throw new Error('unknown fieldEditorPage mode ' + this.mode);
+      }
+      else {
+        throw new Error('unknown fieldSettings mode ' + this.mode);
       }
 
       docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.id]);
@@ -48,62 +50,5 @@ define(function (require) {
       };
     }
   });
-
-
-  // require('modules').get('apps/settings')
-  // .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, Private) {
-  //   var fieldTypes = Private(require('components/index_patterns/_field_types'));
-  //   var notify = new Notifier();
-  //   var createMode = (!$route.current.params.field);
-
-  //   $scope.indexPattern = $route.current.locals.indexPattern;
-  //   $scope.fieldTypes = fieldTypes;
-
-  //   if (createMode) {
-  //     $scope.action = 'Create';
-  //   } else {
-  //     var scriptName = $route.current.params.field;
-  //     $scope.action = 'Edit';
-  //     $scope.scriptedField = _.find($scope.indexPattern.fields, {
-  //       name: scriptName,
-  //       scripted: true
-  //     });
-  //   }
-
-  //   $scope.submit = function () {
-  //     var field = _.defaults($scope.scriptedField, {
-  //       type: 'number',
-  //       lang: 'expression'
-  //     });
-
-  //     try {
-  //       if (createMode) {
-  //         $scope.indexPattern.addScriptedField(field.name, field.script, field.type, field.lang);
-  //       } else {
-  //         $scope.indexPattern.save();
-  //       }
-  //       notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
-  //       $scope.goBack();
-  //     } catch (e) {
-  //       notify.error(e.message);
-  //     }
-  //   };
-
-  //   $scope.$watch('scriptedField.name', function (name) {
-  //     checkConflict(name);
-  //   });
-
-  //   function checkConflict(name) {
-  //     var match = _.find($scope.indexPattern.getFields(), {
-  //       name: name
-  //     });
-
-  //     if (match) {
-  //       $scope.namingConflict = true;
-  //     } else {
-  //       $scope.namingConflict = false;
-  //     }
-  //   }
-  // });
 
 });

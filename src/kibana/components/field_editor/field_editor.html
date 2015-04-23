@@ -9,12 +9,20 @@
       class="form-control"
     >
   </div>
+  <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.fieldSpec.name]" class="hintbox">
+    <p>
+      <i class="fa fa-danger text-danger"></i>
+      <strong>Mapping Conflict:</strong>
+      You already have a field with the name {{ editor.fieldSpec.name }}. Naming your scripted
+      field with the same name means you won't be able to query both fields at the same time.
+    </p>
+  </div>
 
   <div class="form-group">
     <label>Type</label>
     <input
       ng-model="editor.field.type"
-      ng-readonly="!editor.creating"
+      readonly
       class="form-control"
     >
   </div>
@@ -81,11 +89,20 @@
       Cancel
     </button>
     <button
+      type="button"
+      ng-if="editor.field.scripted && !editor.creating"
+      confirm-click="editor.delete()"
+      confirmation="Are you sure want to delete '{{ editor.field.name }}'? This action is irreversible!"
+      aria-label="Delete"
+      class="btn btn-danger">
+      Delete Field
+    </button>
+    <button
       ng-disabled="form.$invalid"
       type="submit"
-      aria-label="Save {{ title }} Object"
+      aria-label="Update Field"
       class="btn btn-success">
-      Save {{ title }} Object
+      Update Field
     </button>
   </div>
 </form>
