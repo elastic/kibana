@@ -105,6 +105,16 @@ define(function (require) {
             mapCenter = self._attr.mapCenter = map.getCenter();
           });
 
+          map.on('viewreset', function resetView() {
+            map.eachLayer(function (layer) {
+              var coordinates = layer.feature && layer.feature.geometry && layer.feature.geometry.coordinates;
+
+              if (coordinates) {
+                console.log(map.getBounds().contains([coordinates[1], coordinates[0]]));
+              }
+            });
+          });
+
           // add label for splits
           if (mapData.properties.label) {
             self.addLabel(mapData.properties.label, map);
@@ -131,6 +141,19 @@ define(function (require) {
 
           self.maps.push(map);
         });
+      };
+    };
+
+    /**
+     * Return features within the map bounds
+     */
+    TileMap.prototype._filterToMapBounds = function (map) {
+      return function (feature) {
+        var coordinates = feature.geometry.coordinates;
+        var p0 = coordinates[0];
+        var p1 = coordinates[1];
+
+        return map.getBounds().contains([p1, p0]);
       };
     };
 
@@ -236,7 +259,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
