@@ -4,6 +4,7 @@ define(function (require) {
     var errors = require('errors');
 
     var Data = Private(require('components/vislib/lib/data'));
+    var Legend = Private(require('components/vislib/lib/legend'));
     var Layout = Private(require('components/vislib/lib/layout/layout'));
 
     /**
@@ -68,6 +69,28 @@ define(function (require) {
     };
 
     /**
+     * Adds event listeners
+     */
+    Handler.prototype._addEventListeners = function (chart) {
+      var self = this;
+      var enabledEvents;
+
+      if (chart.events.dispatch) {
+        enabledEvents = this.vis.eventTypes.enabled;
+
+        // Copy dispatch.on methods to chart object
+        d3.rebind(chart, chart.events.dispatch, 'on');
+
+        // Bind events to chart(s)
+        if (enabledEvents.length) {
+          enabledEvents.forEach(function (event) {
+            self.enable(event, chart);
+          });
+        }
+      }
+    };
+
+    /**
      * Renders the constructors that create the visualization,
      * including the chart constructor
      *
@@ -83,6 +106,10 @@ define(function (require) {
 
       this._validateData();
       this.renderArray.forEach(function (property) {
+        if (property instanceof Legend) {
+          self._addEventListeners(property);
+        }
+
         if (typeof property.render === 'function') {
           property.render();
         }
@@ -92,28 +119,8 @@ define(function (require) {
       selection.selectAll('.chart')
       .each(function (chartData) {
         var chart = new self.ChartClass(self, this, chartData);
-        var enabledEvents;
 
-        /*
-         * inside handler: if there are charts, bind events to charts
-         * functionality: track in array that event is enabled
-         * clean up event handlers every time it destroys the chart
-         * rebind them every time it creates the charts
-         */
-        if (chart.events.dispatch) {
-          enabledEvents = self.vis.eventTypes.enabled;
-
-          // Copy dispatch.on methods to chart object
-          d3.rebind(chart, chart.events.dispatch, 'on');
-
-          // Bind events to chart(s)
-          if (enabledEvents.length) {
-            enabledEvents.forEach(function (event) {
-              self.enable(event, chart);
-            });
-          }
-        }
-
+        self._addEventListeners(chart);
         charts.push(chart);
         chart.render();
       });

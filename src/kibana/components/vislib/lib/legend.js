@@ -4,6 +4,7 @@ define(function (require) {
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
     var dataLabel = require('components/vislib/lib/_data_label');
+    var AggConfigResult = require('components/vis/_agg_config_result');
 
     require('css!components/vislib/styles/main');
 
@@ -87,9 +88,12 @@ define(function (require) {
           // Copies first aggConfigResults object to data object.
           if (obj.values && obj.values.length) {
             var values = self._filterZeroInjectedValues(obj.values);
+            var aggConfigResult = values[0].aggConfigResult;
 
-            obj.aggConfigResult = values.length && values[0].aggConfigResult ?
-              _.clone(values[0].aggConfigResult) : undefined;
+            obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, aggConfigResult.$parent,
+              aggConfigResult.value, aggConfigResult.key);
+
+            obj.aggConfigResult.$parent.$parent = null;
           }
 
           // Joins all values arrays that share a common label
