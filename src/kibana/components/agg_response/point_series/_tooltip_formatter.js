@@ -1,6 +1,5 @@
 define(function (require) {
   return function PointSeriesTooltipFormatter($compile, $rootScope) {
-    var _ = require('lodash');
     var $ = require('jquery');
 
     var $tooltipScope = $rootScope.$new();
@@ -19,14 +18,14 @@ define(function (require) {
         var value = result.value;
 
         var detail = {
-          value: agg.fieldFormatter()(value),
+          value: agg.fieldFormatter('text')(value),
           label: agg.makeLabel()
         };
 
         if (agg === datum.aggConfigResult.aggConfig) {
           detail.percent = event.percent;
           if (datum.yScale != null) {
-            detail.value = agg.fieldFormatter()(value * datum.yScale);
+            detail.value = agg.fieldFormatter('text')(value * datum.yScale);
           }
         }
 

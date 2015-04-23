@@ -1,8 +1,8 @@
-define(function (require) {
+define(function () {
   return function PointSeriesInitX() {
     return function initXAxis(chart) {
       var x = chart.aspects.x;
-      chart.xAxisFormatter = x.agg ? x.agg.fieldFormatter() : String;
+      chart.xAxisFormatter = x.agg ? x.agg.fieldFormatter('text') : String;
       chart.xAxisLabel = x.col.title;
 
       if (!x.agg || !x.agg.type.ordered) return;

@@ -267,7 +267,7 @@ define(function (require) {
       return this.params.field;
     };
 
-    AggConfig.prototype.fieldFormatter = function () {
+    AggConfig.prototype.fieldFormatter = function (contentType) {
       var field = this.field();
       var format = field && field.format;
       var strFormat = fieldFormats.for('string');
@@ -276,7 +276,7 @@ define(function (require) {
         format = this.type.getFormat(this) || format;
       }
 
-      return (format || strFormat).convert;
+      return (format || strFormat).getConverterFor(contentType);
     };
 
     AggConfig.prototype.fieldName = function () {

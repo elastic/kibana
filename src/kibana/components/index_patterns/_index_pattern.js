@@ -110,7 +110,7 @@ define(function (require) {
       };
 
       function initFields(fields) {
-        fields = fields || self.fields;
+        fields = fields || self.fields || [];
         self.fields = new IndexedArray({
           index: ['name'],
           group: ['type'],

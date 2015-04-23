@@ -1,5 +1,4 @@
-define(function (require) {
-  var _ = require('lodash');
+define(function () {
   return function mapScriptProvider(Promise, courier) {
     return function (filter) {
       var key, value, field;
@@ -10,7 +9,7 @@ define(function (require) {
           key = filter.meta.field;
           field = indexPattern.fields.byName[key];
           value = filter.script.params.value;
-          value = field.format.convert(value);
+          value = field.format.convert(value, 'text');
           return { key: key, value: value };
         });
       }

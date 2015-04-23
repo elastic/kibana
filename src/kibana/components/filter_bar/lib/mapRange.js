@@ -10,9 +10,9 @@ define(function (require) {
           key = _.keys(filter.range)[0];
           field = indexPattern.fields.byName[key];
           from = (filter.range[key].gte != null) ? filter.range[key].gte : filter.range[key].gt;
-          from = field.format.convert(from);
+          from = field.format.convert(from, 'text');
           to = (filter.range[key].lte != null) ? filter.range[key].lte : filter.range[key].lt;
-          to = field.format.convert(to);
+          to = field.format.convert(to, 'text');
           value = from + ' to ' + to;
           return { key: key, value: value };
         });
