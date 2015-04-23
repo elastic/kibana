@@ -23,9 +23,15 @@ define(function (require) {
           if (value && typeof value.map === 'function') {
             // rudimentary array testing
             return JSON.stringify(value.map(boundConverter));
-          } else {
-            return self._convert(_.escape(value), contentType);
           }
+
+          if (typeof value === 'number') {
+            value = +value;
+          } else {
+            value = _.escape(value);
+          }
+
+          return self._convert(value, contentType);
         };
       });
 
