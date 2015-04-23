@@ -57,13 +57,16 @@
     </div>
   </div>
 
-  <div class="form-group" ng-if="editor.field.scripted">
-    <label>Script</label>
-    <textarea required class="form-control text-monospace" ng-model="editor.field.script"></textarea>
+  <div ng-if="editor.field.scripted">
+    <div class="form-group">
+      <label>Script</label>
+      <textarea required class="form-control text-monospace" ng-model="editor.field.script"></textarea>
+    </div>
 
     <div class="form-group">
       <div ng-bind-html="editor.scriptingWarning" class="hintbox"></div>
     </div>
+
     <div class="form-group">
       <div ng-bind-html="editor.scriptingInfo" class="hintbox"></div>
     </div>
