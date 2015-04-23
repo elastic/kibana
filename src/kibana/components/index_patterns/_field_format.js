@@ -62,7 +62,7 @@ define(function (require) {
       self.param = function (name) {
         var val = this._params[name];
         if (val || val === false || val === 0) {
-          // truthy, false, or 0 are find
+          // truthy, false, or 0 are fine
           // '', NaN, null, undefined, etc are not
           return val;
         }
@@ -71,7 +71,7 @@ define(function (require) {
       };
 
       self.params = function () {
-        return _.cloneDeep(this._params);
+        return _.cloneDeep(_.defaults({}, this._params, this._paramDefaults));
       };
     }
 
@@ -95,7 +95,23 @@ define(function (require) {
     };
 
     FieldFormat.prototype.toJSON = function () {
-      return { id: this.type.id, params: this._params };
+      var type = this.type;
+      var defaults = type.paramDefaults;
+
+      var params = _.transform(this._params, function (uniqParams, val, param) {
+        if (val !== defaults[param]) {
+          uniqParams[param] = val;
+        }
+      }, {});
+
+      if (!_.size(params)) {
+        params = undefined;
+      }
+
+      return {
+        id: type.id,
+        params: params
+      };
     };
 
     return FieldFormat;

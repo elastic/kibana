@@ -35,10 +35,7 @@ define(function (require) {
           var serialized = _.transform(map, function (flat, format, field) {
             if (!format) return;
             count++;
-            flat[field] = {
-              id: format.type.id,
-              params: format.params()
-            };
+            flat[field] = format;
           });
 
           if (count) return angular.toJson(serialized);

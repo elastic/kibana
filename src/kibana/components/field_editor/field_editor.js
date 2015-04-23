@@ -22,7 +22,7 @@ define(function (require) {
         self.field = mutatedField();
 
         self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
-        self.formatParams = self.field.format.params() || {};
+        self.formatParams = self.field.format.params();
         self.defFormatType = initDefaultFormat();
 
         self.scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
@@ -64,21 +64,16 @@ define(function (require) {
           'editor.selectedFormatId',
           '=editor.formatParams',
           '=editor.fieldSpec'
-        ], function (cur) {
-          var id = cur[0];
-          var field = self.field;
-          var FieldFormat = fieldFormats.byId[id];
-          var newFormat = FieldFormat && !(field.format instanceof FieldFormat);
-          var resetFormat = (!id || newFormat);
-          var resetParams = resetFormat && _.size(self.formatParams) > 0;
+        ], function (cur, prev) {
+          var formatId = cur[0];
+          var updatedFormat = cur[0] !== prev[0];
 
-          if (resetParams) {
-            // clear the params, which will cause another trigger
-            self.formatParams = {};
-            return;
+          if (updatedFormat) {
+            var FieldFormat = fieldFormats.byId[formatId];
+            self.formatParams = _.cloneDeep(FieldFormat.paramDefaults);
+            self.fieldSpec.format = FieldFormat && new FieldFormat(self.formatParams);
           }
 
-          self.fieldSpec.format = FieldFormat && new FieldFormat(self.formatParams);
           self.field = mutatedField();
         });
 
