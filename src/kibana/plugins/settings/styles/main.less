@@ -157,21 +157,23 @@ kbn-settings-objects-view {
   }
 }
 
-kbn-settings-indices .fields {
-  & th:first-child,
-  & td:first-child {
-    width: 35%;
-  }
-}
-
 kbn-settings-indices {
+  .fields {
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+  }
+
+  .indexed-fields {
+    th:first-child,
+    td:first-child {
+      width: 35%;
+    }
+  }
+
   .scripted-fields header {
     margin: 5px 0;
-    text-align: right;
-  }
-
-  th:last-child,
-  td:last-child {
     text-align: right;
   }
 }

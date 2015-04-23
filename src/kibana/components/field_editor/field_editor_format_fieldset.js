@@ -21,7 +21,9 @@ define(function (require) {
           }
 
           if (typeof editor === 'string') {
-            $el.show().html($compile(editor)($scope));
+            var $editor = $(editor);
+            $el.show().html($editor);
+            $compile($editor)($scope);
             return;
           }
 
@@ -49,34 +51,34 @@ define(function (require) {
          * @return {undefined}
          */
         function customDirectiveInit($el, directive) {
-          var $target = $el;
-          var $targetScope = $scope;
+          var $editor = $el;
+          var $editorScope = $scope;
           var $template = $(directive.template);
           var controller = directive.controller;
           var controllerAs = directive.controllerAs;
 
           if (!controller) {
-            $target.html($template);
+            $editor = $template;
           } else {
-            // create a child scope for us to fuck with
-            $targetScope = $scope.$new();
-            childScopesToCleanup.push($targetScope);
+            // create a child scope for us to mess with
+            $editorScope = $scope.$new();
+            childScopesToCleanup.push($editorScope);
 
             // assign the controller
-            $targetScope.Controller = controller;
+            $editorScope.Controller = controller;
 
             if ($template.size() === 1) {
               // reuse the top level element
-              $target = $template;
+              $editor = $template;
             } else {
-              $target = $('<div>').append($template);
+              $editor = $('<div>').append($template);
             }
 
-            $target.attr('ng-controller', 'Controller as ' + (controllerAs || 'cntrl'));
+            $editor.attr('ng-controller', 'Controller as ' + (controllerAs || 'cntrl'));
           }
 
-
-          $el.show().html($compile($target)($targetScope));
+          $el.show().html($editor);
+          $compile($editor)($editorScope);
         }
 
       }
