@@ -1,13 +1,12 @@
-.hintbox-label,
-.hintbox-label[ng-click] {
-  cursor: help;
-}
+@hintbox-background-color: @gray-lighter;
+@hintbox-spacing-vertical: 10px;
+@hintbox-spacing-horizontal: 12px;
 
 .hintbox {
+  padding: @hintbox-spacing-vertical @hintbox-spacing-horizontal;
   border-radius: 5px;
-  background-color: @gray-lighter;
-  padding: 5px;
-  margin-bottom: 5px;
+  margin-bottom: @hintbox-spacing-vertical;
+  background-color: @hintbox-background-color;
 
   a {
     color: @link-color !important;
@@ -16,11 +15,23 @@
       color: @text-color !important;
     }
   }
-}
 
-.hintbox p {
-  margin-bottom: 0;
-}
-.hintbox p + p {
-  margin-top: 5px;
+  &-label,
+  &-label[ng-click] {
+    cursor: help;
+  }
+
+  ul, ol {
+    padding-left: 25px;
+  }
+
+  // inspired by Bootstrap alerts component
+  // https://github.com/twbs/bootstrap/blob/063c1b0780ea0240e4adce4c88d57fc23e099475/less/alerts.less#L27-L35
+  > * {
+    margin: 0;
+  }
+
+  > * + * {
+    margin-top: @hintbox-spacing-vertical;
+  }
 }
