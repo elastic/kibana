@@ -15,10 +15,14 @@ define(function (require) {
     });
 
     return {
-      restrict: 'E',
+      restrict: 'A',
       template: require('text!plugins/visualize/editor/agg.html'),
-      link: function ($scope, $el) {
-        $scope.editorOpen = $scope.agg.brandNew;
+      require: 'form',
+      link: function ($scope, $el, attrs, kbnForm) {
+        $scope.editorOpen = !!$scope.agg.brandNew;
+        if (!$scope.editorOpen) {
+          $scope.$evalAsync(kbnForm.$setTouched);
+        }
 
         $scope.$watchMulti([
           '$index',
