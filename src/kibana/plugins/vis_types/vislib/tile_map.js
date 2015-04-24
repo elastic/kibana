@@ -20,7 +20,7 @@ define(function (require) {
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       listeners: {
-        square: function (event) {
+        rectangle: function (event) {
           var agg = _.deepGet(event, 'data.geoJson.properties.agg');
           if (!agg) return;
 

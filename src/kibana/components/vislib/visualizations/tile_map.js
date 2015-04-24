@@ -81,14 +81,10 @@ define(function (require) {
           });
 
 
-          var drawOptions =  {
-            draw: {
-              polyline: false,
-              polygon: false,
-              circle: false, // Turns off this drawing tool
-              marker: false
-            }
-          };
+          var drawOptions = {draw: {}};
+          _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
+            if (!self.events.dispatch[drawShape]) drawOptions.draw[drawShape] = false;
+          });
 
           L.drawLocal.draw.toolbar.buttons.rectangle = 'Draw a bounding box filter';
           L.drawLocal.draw.handlers.rectangle.tooltip.start = 'Click and drag to draw bounding box';
@@ -127,11 +123,13 @@ define(function (require) {
           });
 
           map.on('draw:created', function (e) {
-            var type = e.layerType;
-            var layer = e.layer;
-            var bounds = layer.getBounds();
+            var drawType = e.layerType;
+            if (!self.events.dispatch[drawType]) return;
 
-            self.events.dispatch.square({
+            // TODO: Different drawTypes need differ info. Need a switch on the object creation
+            var bounds = e.layer.getBounds();
+
+            self.events.dispatch[drawType]({
               e: e,
               data: self.chartData,
               bounds: {
