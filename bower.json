@@ -50,8 +50,7 @@
     "requirejs-text": "~2.0.10",
     "lodash-deep": "spenceralger/lodash-deep#compat",
     "marked": "~0.3.2",
-    "numeral": "~1.5.3",
-    "dist": "/Library/WebServer/Documents/dev/leaflet-canvas/dist/"
+    "numeral": "~1.5.3"
   },
   "devDependencies": {}
 }
