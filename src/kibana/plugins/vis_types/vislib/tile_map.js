@@ -3,6 +3,7 @@ define(function (require) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
+    var _ = require('lodash');
 
     return new VislibVisType({
       name: 'tile_map',
@@ -20,10 +21,13 @@ define(function (require) {
       },
       listeners: {
         square: function (event) {
-          var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
-          var indexPatternName = event.data.geoJson.properties.agg.geo.vis.indexPattern.id;
+          var agg = _.deepGet(event, 'data.geoJson.properties.agg');
+          if (!agg) return;
 
-          var field = event.data.geoJson.properties.agg.geo.fieldName();
+          var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
+
+          var indexPatternName = agg.geo.vis.indexPattern.id;
+          var field = agg.geo.fieldName();
           var filter = {geo_bounding_box: {}};
           filter.geo_bounding_box[field] = event.bounds;
 

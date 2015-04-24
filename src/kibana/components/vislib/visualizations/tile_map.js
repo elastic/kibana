@@ -80,6 +80,19 @@ define(function (require) {
             subdomains: '1234'
           });
 
+
+          var drawOptions =  {
+            draw: {
+              polyline: false,
+              polygon: false,
+              circle: false, // Turns off this drawing tool
+              marker: false
+            }
+          };
+
+          L.drawLocal.draw.toolbar.buttons.rectangle = 'Draw a bounding box filter';
+          L.drawLocal.draw.handlers.rectangle.tooltip.start = 'Click and drag to draw bounding box';
+
           var mapOptions = {
             minZoom: 1,
             maxZoom: 18,
@@ -90,10 +103,13 @@ define(function (require) {
             maxBounds: worldBounds,
             scrollWheelZoom: false,
             fadeAnimation: false,
-            drawControl: true
           };
 
           var map = L.map(div[0], mapOptions);
+          var drawControl = new L.Control.Draw(drawOptions);
+
+          map.addControl(drawControl);
+
 
           tileLayer.on('tileload', function () {
             self.saturateTiles();
