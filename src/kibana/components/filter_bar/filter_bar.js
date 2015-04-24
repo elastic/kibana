@@ -33,9 +33,6 @@ define(function (require) {
           $scope[method] = queryFilter[method];
         });
 
-        // update the scope filter list on load and on filter update
-        updateFilters();
-        queryFilter.on('update', updateFilters);
 
         $scope.applyFilters = function (filters) {
           // add new filters
@@ -52,6 +49,10 @@ define(function (require) {
           $scope.newFilters = [];
           $scope.changeTimeFilter = null;
         };
+
+        // update the scope filter list on filter and appState changes
+        queryFilter.on('update', updateFilters);
+        updateFilters();
 
         $scope.$watch(function () {
           var appState = getAppState();

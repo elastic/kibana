@@ -2,7 +2,6 @@ define(function (require) {
   var _ = require('lodash');
 
   return function (Private, $rootScope, getAppState, globalState) {
-    var appState;
     var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var EventEmitter = Private(require('factories/events'));
 
@@ -13,6 +12,7 @@ define(function (require) {
     };
 
     queryFilter.getAppFilters = function () {
+      var appState = getAppState();
       if (!appState) return [];
       return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
@@ -29,6 +29,7 @@ define(function (require) {
      * @returns {object} Resulting new filter list
      */
     queryFilter.addFilters = function (filters, global) {
+      var appState = getAppState();
       var state = (global) ? globalState : appState;
 
       if (!_.isArray(filters)) {
@@ -62,6 +63,7 @@ define(function (require) {
      * @returns {object} Resulting new filter list
      */
     queryFilter.removeAll = function () {
+      var appState = getAppState();
       appState.filters = [];
       globalState.filters = [];
       return saveState();
@@ -128,6 +130,7 @@ define(function (require) {
      * @returns {object} filter passed in
      */
     queryFilter.pinFilter = function (filter, force) {
+      var appState = getAppState();
       if (!appState) return filter;
 
       // ensure that both states have a filters property
@@ -173,6 +176,7 @@ define(function (require) {
      * @returns {object} Resulting filter list, app and global combined
      */
     function saveState() {
+      var appState = getAppState();
       if (appState) appState.save();
       globalState.save();
       return queryFilter.getFilters();
@@ -189,6 +193,7 @@ define(function (require) {
 
     // get state (app or global) or the filter passed in
     function getStateByFilter(filter) {
+      var appState = getAppState();
       if (appState) {
         var appIndex = _.indexOf(appState.filters, filter);
         if (appIndex !== -1) return appState;
@@ -201,6 +206,7 @@ define(function (require) {
     }
 
     function executeOnFilters(fn) {
+      var appState = getAppState();
       appState.filters.forEach(fn);
       globalState.filters.forEach(fn);
     }
@@ -228,6 +234,8 @@ define(function (require) {
       $rootScope.$watchMulti(stateWatchers, function (next, prev) {
         var doUpdate = false;
         var doFetch = false;
+        var nextState = next[0];
+        var prevState = prev[0];
 
         _.forEach(next, function (val, i) {
           var nextVal = next[i];
@@ -235,14 +243,11 @@ define(function (require) {
 
           if (nextVal === prevVal) return;
 
-          // triggered by an appState change, update appState
-          if (i === 0) {
-            appState = nextVal;
-            return;
-          }
-
           doUpdate = true;
-          if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
+
+          // if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
+          // don't trigger fetch when changing the appState or only disabled filters
+          if (i > 0 && nextState === prevState && !onlyDisabled(nextVal, prevVal)) doFetch = true;
         });
 
         if (!doUpdate) return;
