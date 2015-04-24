@@ -3,7 +3,7 @@ define(function (require) {
   require('components/field_editor/field_editor_format_fieldset');
 
   require('modules')
-  .get('app/settings')
+  .get('kibana')
   .directive('fieldEditor', function (Private) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
@@ -12,24 +12,27 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!components/field_editor/field_editor.html'),
+      scope: {
+        getIndexPattern: '&indexPattern',
+        getField: '&field'
+      },
       controllerAs: 'editor',
-      controller: function ($sce, $scope, $attrs, Notifier, kbnUrl) {
+      controller: function ($sce, $scope, Notifier, kbnUrl) {
         var self = this;
         var notify = new Notifier({ location: 'Field Editor' });
 
-        self.indexPattern = $scope.$eval($attrs.indexPattern);
-        self.fieldSpec = Object.create($scope.$eval($attrs.field).$$spec);
+        self.indexPattern = $scope.getIndexPattern();
+        self.fieldSpec = Object.create($scope.getField().$$spec);
         self.field = mutatedField();
-
         self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
         self.formatParams = self.field.format.params();
         self.defFormatType = initDefaultFormat();
+        self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
+        self.creating = !self.indexPattern.fields.byName[self.field.name];
+
 
         self.scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
         self.scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
-        self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
-
-        self.creating = !self.indexPattern.fields.byName[self.field.name];
 
         self.cancel = function () {
           kbnUrl.change(self.indexPattern.editRoute);
