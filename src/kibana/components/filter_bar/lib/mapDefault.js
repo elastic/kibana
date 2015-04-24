@@ -1,7 +1,6 @@
 define(function (require) {
   return function mapDefaultProvider(Promise) {
     var angular = require('angular');
-    var _ = require('lodash');
 
     return function (filter) {
       var key, value;
