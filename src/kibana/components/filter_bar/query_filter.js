@@ -207,6 +207,9 @@ define(function (require) {
       // multi watch on the app and global states
       var stateWatchers = [{
         fn: $rootScope.$watch,
+        get: getAppState
+      }, {
+        fn: $rootScope.$watch,
         deep: true,
         get: queryFilter.getAppFilters
       }, {
@@ -226,6 +229,12 @@ define(function (require) {
 
           if (nextVal === prevVal) return;
 
+          // triggered by an appState change, update appState
+          if (i === 0) {
+            appState = nextVal;
+            return;
+          }
+
           doUpdate = true;
           if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
         });
@@ -237,11 +246,6 @@ define(function (require) {
           if (!doFetch) return;
           return queryFilter.emit('fetch');
         });
-      });
-
-      // watch for appState changes and update local copy
-      $rootScope.$watch(getAppState, function (_appState_) {
-        appState = _appState_;
       });
     }
   });
