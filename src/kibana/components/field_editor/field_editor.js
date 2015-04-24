@@ -1,6 +1,6 @@
 define(function (require) {
 
-  require('components/field_editor/field_editor_format_fieldset');
+  require('components/field_format_editor/field_format_editor');
 
   require('modules')
   .get('kibana')
@@ -29,7 +29,6 @@ define(function (require) {
         self.defFormatType = initDefaultFormat();
         self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
         self.creating = !self.indexPattern.fields.byName[self.field.name];
-
 
         self.scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
         self.scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));

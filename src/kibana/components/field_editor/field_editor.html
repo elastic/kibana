@@ -34,7 +34,12 @@
       ng-options="format.id as format.title for format in editor.fieldFormatTypes"
       class="form-control">
     </select>
-    <fieldset field-editor-format-fieldset></fieldset>
+    <fieldset
+      field-format-editor
+      ng-if="editor.selectedFormatId"
+      field="editor.field"
+      format-params="editor.formatParams">
+    </fieldset>
   </div>
 
   <div class="form-group">
