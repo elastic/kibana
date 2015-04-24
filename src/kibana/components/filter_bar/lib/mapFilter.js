@@ -55,7 +55,6 @@ define(function (require) {
         filter.meta.value = result.value;
         filter.meta.disabled = !!(filter.meta.disabled);
         filter.meta.negate = !!(filter.meta.negate);
-        filter.meta.pinned = !!(filter.meta.pinned);
         return filter;
       });
     };
