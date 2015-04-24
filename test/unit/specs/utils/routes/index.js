@@ -41,8 +41,10 @@ define(function (require) {
         routes.when('/some/other/route');
 
         // add the addition resolve to every route
-        routes.addResolves(/.*/, {
-          addition: function () {}
+        routes.defaults(/.*/, {
+          resolve: {
+            addition: function () {}
+          }
         });
 
         routes.config($rp);
