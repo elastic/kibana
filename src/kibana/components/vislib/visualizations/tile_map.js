@@ -358,7 +358,7 @@ define(function (require) {
         } else if (this._attr.mapType === 'Heatmap') {
           features = this.heatMap(map, mapData);
         } else {
-          features = this.pinMarkers(mapData);
+          features = this.scaledCircleMarkers(map, mapData);
         }
       }
 
