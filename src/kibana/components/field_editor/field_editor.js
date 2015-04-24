@@ -81,8 +81,12 @@ define(function (require) {
 
           if (updatedFormat) {
             var FieldFormat = fieldFormats.byId[formatId];
-            self.formatParams = _.cloneDeep(FieldFormat.paramDefaults);
-            self.fieldSpec.format = FieldFormat && new FieldFormat(self.formatParams);
+            if (FieldFormat) {
+              self.formatParams = _.cloneDeep(FieldFormat.paramDefaults || {});
+              self.fieldSpec.format = new FieldFormat(self.formatParams);
+            } else {
+              self.formatParams = self.fieldSpec.format = undefined;
+            }
           }
 
           self.field = mutatedField();
