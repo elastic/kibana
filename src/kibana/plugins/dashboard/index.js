@@ -50,7 +50,7 @@ define(function (require) {
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
-        var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+        var queryFilter = Private(require('components/filter_bar/query_filter'));
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -114,7 +114,7 @@ define(function (require) {
           }
         }
 
-        filterBarWatchFilters($scope)
+        queryFilter
         .on('update', function () {
           updateQueryOnRootSource();
           $state.save();

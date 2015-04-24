@@ -57,7 +57,7 @@ define(function (require) {
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
@@ -151,7 +151,7 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      filterBarWatchFilters($scope)
+      queryFilter
       .on('update', function () {
         if ($state.filters && $state.filters.length) {
           searchSource.set('filter', $state.filters);
