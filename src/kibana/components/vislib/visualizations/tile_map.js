@@ -155,7 +155,18 @@ define(function (require) {
             if (!mapData.features.length) {
               return;
             }
-            self.mouseMoveLocation(e, map, mapData);
+
+            var latlng = e.latlng;
+
+            // find nearest feature to event latlng
+            var feature = self.nearestFeature(latlng, mapData);
+
+            var zoom = map.getZoom();
+
+            // show tooltip if close enough to event latlng
+            if (self.tooltipProximity(latlng, zoom, feature, map)) {
+              self.showTooltip(map, feature);
+            }
           }
 
           self.maps.push(map);
@@ -197,6 +208,22 @@ define(function (require) {
     };
 
     /**
+     * add Leaflet latLng to mapData properties
+     *
+     * @method addLatLng
+     * @param mapData {mapData Object}
+     * @return mapData {Object}
+     */
+    TileMap.prototype.addLatLng = function (mapData) {
+      for (var i = 0; i < mapData.features.length; i++) {
+        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
+        mapData.features[i].properties.latLng = latLng;
+      }
+
+      return mapData;
+    };
+
+    /**
      * zoom map to fit all features in featureLayer
      *
      * @method fitBounds
@@ -222,27 +249,91 @@ define(function (require) {
     };
 
     /**
-     * uses event latLng to find nearest mapData feature
-     * for display of tooltip
+     * Finds nearest feature in mapData to event latlng
      *
-     * @method mouseMoveLocation
-     * @param e {event}
-     * @param map {Leaflet Object}
+     * @method nearestFeature
+     * @param point {Leaflet Object}
      * @param mapData {geoJson Object}
-     * @return {Leaflet object} featureLayer
+     * @return nearestPoint {Leaflet Object}
      */
-    TileMap.prototype.mouseMoveLocation = function (e, map, mapData) {
+    TileMap.prototype.nearestFeature = function (point, mapData) {
+      var self = this;
+      var distance = Infinity;
+      var nearest;
+
+      if (point.lng < -180 || point.lng > 180) {
+        return;
+      }
+
+      for (var i = 0; i < mapData.features.length; i++) {
+        var dist = point.distanceTo(mapData.features[i].properties.latLng);
+        if (dist < distance) {
+          distance = dist;
+          nearest = mapData.features[i];
+        }
+      }
+      nearest.properties.eventDistance = distance;
+
+      return nearest;
+    };
+
+    /**
+     * display tooltip if feature is close enough to event latlng
+     *
+     * @method tooltipProximity
+     * @param latlng {Leaflet Object}
+     * @param zoom {Number}
+     * @param feature {geoJson Object}
+     * @param map {Leaflet Object}
+     * @return boolean
+     */
+    TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
+      if (!feature) {
+        return;
+      }
+
+      var showTip = false;
       var zoomScale = d3.scale.linear()
       .domain([1, 9, 14, 18])
       .range([750000, 25000, 10, 0.01]);
-      var proximity = zoomScale(map.getZoom());
-      var nearest = this.nearestFeature(e.latlng, mapData);
 
-      if (nearest.properties.eventDistance < proximity) {
-        this.showTooltip(map, nearest);
+      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
+      var proximity = zoomScale(zoom);
+      var distance = latlng.distanceTo(feature.properties.latLng);
+
+      if (distance < proximity && lngDif < 40) {
+        showTip = true;
       }
 
-      delete nearest.properties.eventDistance;
+      delete feature.properties.eventDistance;
+
+      return showTip;
+    };
+
+    /**
+     * Checks if event latlng is within bounds of mapData
+     * features and shows tooltip for that feature
+     *
+     * @method showTooltip
+     * @param e {Event}
+     * @param map {Leaflet Object}
+     * @param mapData {mapData Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.showTooltip = function (map, feature) {
+      var content = this.tooltipFormatter(feature);
+      if (!content) {
+        return;
+      }
+
+      var lat = feature.geometry.coordinates[1];
+      var lng = feature.geometry.coordinates[0];
+      var latLng = L.latLng(lat, lng);
+
+      L.popup({autoPan: false})
+       .setLatLng(latLng)
+       .setContent(content)
+       .openOn(map);
     };
 
     /**
@@ -432,72 +523,6 @@ define(function (require) {
     };
 
     /**
-     * add Leaflet latLng to mapData properties
-     *
-     * @method addLatLng
-     * @param mapData {mapData Object}
-     * @return mapData {Object}
-     */
-    TileMap.prototype.addLatLng = function (mapData) {
-      for (var i = 0; i < mapData.features.length; i++) {
-        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
-        mapData.features[i].properties.latLng = latLng;
-      }
-
-      return mapData;
-    };
-
-    /**
-     * Finds nearest feature in mapData to event latlng
-     *
-     * @method nearestFeature
-     * @param point {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return nearestPoint {Leaflet Object}
-     */
-    TileMap.prototype.nearestFeature = function (point, mapData) {
-      var self = this;
-      var distance = Infinity;
-      var nearest;
-
-      for (var i = 0; i < mapData.features.length; i++) {
-        var dist = point.distanceTo(mapData.features[i].properties.latLng);
-        if (dist < distance) {
-          distance = dist;
-          nearest = mapData.features[i];
-        }
-      }
-      nearest.properties.eventDistance = distance;
-      return nearest;
-    };
-
-    /**
-     * Checks if event latlng is within bounds of mapData
-     * features and shows tooltip for that feature
-     *
-     * @method showTooltip
-     * @param e {Event}
-     * @param map {Object}
-     * @param mapData {mapData Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.showTooltip = function (map, feature) {
-      var content = this.tooltipFormatter(feature);
-      if (!content) {
-        return;
-      }
-
-      var lat = feature.geometry.coordinates[1];
-      var lng = feature.geometry.coordinates[0];
-      var latLng = L.latLng(lat, lng);
-
-      L.popup({autoPan: false})
-       .setLatLng(latLng)
-       .setContent(content)
-       .openOn(map);
-    };
-
-    /**
      * Type of data overlay for map:
      * creates featurelayer from mapData (geoJson)
      * with default leaflet pin markers
@@ -663,8 +688,9 @@ define(function (require) {
     };
 
     /**
-     * if attribute is checked/true
-     • normalize data for heat map intensity
+     * retuns data for data for heat map intensity
+     * if heatNormalizeData attribute is checked/true
+     • normalizes data for heat map intensity
      *
      * @param mapData {mapData Object}
      * @param nax {Number}
