@@ -5,6 +5,7 @@ define(function (require) {
 
   require('modules').get('kibana/filters')
   .service('queryFilter', function (Private, $rootScope, getAppState, globalState) {
+    var appState;
     var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var EventEmitter = Private(require('factories/events'));
 
@@ -15,9 +16,8 @@ define(function (require) {
     };
 
     queryFilter.getAppFilters = function () {
-      var state = getAppState();
-      if (!state) return [];
-      return state.filters || [];
+      if (!appState) return [];
+      return appState.filters || [];
     };
 
     queryFilter.getGlobalFilters = function () {
@@ -32,7 +32,7 @@ define(function (require) {
      * @returns {object} Resulting new filter list
      */
     queryFilter.addFilters = function (filters, global) {
-      var state = (global) ? globalState : getAppState();
+      var state = (global) ? globalState : appState;
 
       if (!_.isArray(filters)) {
         filters = [filters];
@@ -65,7 +65,7 @@ define(function (require) {
      * @returns {object} Resulting new filter list
      */
     queryFilter.removeAll = function () {
-      getAppState().filters = [];
+      appState.filters = [];
       globalState.filters = [];
       return saveState();
     };
@@ -131,8 +131,6 @@ define(function (require) {
      * @returns {object} filter passed in
      */
     queryFilter.pinFilter = function (filter, force) {
-      // TODO: swap filter to app from global state, or vice versa
-      var appState = getAppState();
       if (!appState) return filter;
 
       // ensure that both states have a filters property
@@ -178,7 +176,6 @@ define(function (require) {
      * @returns {object} Resulting filter list, app and global combined
      */
     function saveState() {
-      var appState = getAppState();
       if (appState) appState.save();
       globalState.save();
       return queryFilter.getFilters();
@@ -186,8 +183,10 @@ define(function (require) {
 
     // get state (app or global) or the filter passed in
     function getStateByFilter(filter) {
-      var appIndex = _.indexOf(getAppState().filters, filter);
-      if (appIndex !== -1) return getAppState();
+      if (appState) {
+        var appIndex = _.indexOf(appState.filters, filter);
+        if (appIndex !== -1) return appState;
+      }
 
       var globalIndex = _.indexOf(globalState.filters, filter);
       if (globalIndex !== -1) return globalState;
@@ -196,7 +195,7 @@ define(function (require) {
     }
 
     function executeOnFilters(fn) {
-      getAppState().filters.forEach(fn);
+      appState.filters.forEach(fn);
       globalState.filters.forEach(fn);
     }
 
@@ -238,6 +237,11 @@ define(function (require) {
           if (!doFetch) return;
           return queryFilter.emit('fetch');
         });
+      });
+
+      // watch for appState changes and update local copy
+      $rootScope.$watch(getAppState, function (_appState_) {
+        appState = _appState_;
       });
     }
   });
