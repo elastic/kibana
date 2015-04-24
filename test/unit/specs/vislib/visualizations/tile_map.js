@@ -11,7 +11,7 @@ define(function (require) {
     require('vislib_fixtures/mock_data/geohash/_rows')
   ];
   var names = ['geojson', 'columns', 'rows'];
-  var mapTypes = ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap', 'Pin'];
+  var mapTypes = ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'];
 
   angular.module('TileMapFactory', ['kibana']);
 

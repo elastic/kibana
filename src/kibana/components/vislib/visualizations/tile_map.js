@@ -523,23 +523,6 @@ define(function (require) {
     };
 
     /**
-     * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJson)
-     * with default leaflet pin markers
-     *
-     * @method pinMarkers
-     * @param mapData {mapData Object}
-     * @return {Leaflet object} featureLayer
-     */
-    TileMap.prototype.pinMarkers = function (mapData) {
-      var self = this;
-
-      var featureLayer = L.geoJson(mapData);
-
-      return featureLayer;
-    };
-
-    /**
      * Adds label div to each map when data is split
      *
      * @method addLabel
