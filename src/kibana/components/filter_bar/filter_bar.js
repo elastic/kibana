@@ -4,28 +4,38 @@ define(function (require) {
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
-  module.directive('filterBar', function (Private, Promise) {
-    var filterActions = Private(require('components/filter_bar/lib/filterActions'));
+  module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
-    var processGlobalFilters = Private(require('components/filter_bar/lib/processGlobalFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
     var filterOutTimeBasedFilter = Private(require('components/filter_bar/lib/filterOutTimeBasedFilter'));
     var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
 
     return {
       restrict: 'E',
       template: template,
-      scope: {
-        state: '='
-      },
+      scope: {},
       link: function ($scope, $el, attrs) {
-        // bind all the filter actions to the scope
-        filterActions($scope).apply();
+        // bind query filter actions to the scope
+        [
+          'addFilters',
+          'toggleFilter',
+          'toggleAll',
+          'pinFilter',
+          'pinAll',
+          'invertFilter',
+          'invertAll',
+          'removeFilter',
+          'removeAll'
+        ].forEach(function (method) {
+          $scope[method] = queryFilter[method];
+        });
 
-        // update the state filters to include global filters
-        $scope.state.filters = processGlobalFilters($scope.state.filters);
+        // update the scope filter list on load and on filter update
+        updateFilters();
+        queryFilter.on('update', updateFilters);
 
         $scope.applyFilters = function (filters) {
           // add new filters
@@ -43,7 +53,10 @@ define(function (require) {
           $scope.changeTimeFilter = null;
         };
 
-        $scope.$watch('state.$newFilters', function (filters) {
+        $scope.$watch(function () {
+          var appState = getAppState();
+          return (appState) ? appState.$newFilters : [];
+        }, function (filters) {
           if (!filters) return;
 
           // If filters is not undefined and the length is greater than
@@ -77,14 +90,15 @@ define(function (require) {
           }
         });
 
-        $scope.$watch('state.filters', function (filters) {
+        function updateFilters() {
+          var filters = queryFilter.getFilters();
           mapAndFlattenFilters(filters).then(function (results) {
             // used to display the current filters in the state
             $scope.filters = _.sortBy(results, function (filter) {
               return !filter.meta.pinned;
             });
           });
-        });
+        }
       }
     };
   });
