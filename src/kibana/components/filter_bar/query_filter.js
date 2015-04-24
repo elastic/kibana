@@ -17,11 +17,11 @@ define(function (require) {
 
     queryFilter.getAppFilters = function () {
       if (!appState) return [];
-      return appState.filters || [];
+      return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
 
     queryFilter.getGlobalFilters = function () {
-      if (globalState.filters) return globalState.filters;
+      if (globalState.filters) return _.map(globalState.filters, appendStoreType('globalState'));
       return [];
     };
 
@@ -179,6 +179,15 @@ define(function (require) {
       if (appState) appState.save();
       globalState.save();
       return queryFilter.getFilters();
+    }
+
+    function appendStoreType(type) {
+      return function (filter) {
+        filter.$state = {
+          store: type
+        };
+        return filter;
+      };
     }
 
     // get state (app or global) or the filter passed in
