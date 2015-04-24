@@ -88,12 +88,10 @@ define(function (require) {
           // Copies first aggConfigResults object to data object.
           if (obj.values && obj.values.length) {
             var values = self._filterZeroInjectedValues(obj.values);
-            var aggConfigResult = values[0].aggConfigResult;
+            var aggConfigResult = values[0].aggConfigResult.$parent;
 
-            obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, aggConfigResult.$parent,
+            obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, null,
               aggConfigResult.value, aggConfigResult.key);
-
-            obj.aggConfigResult.$parent.$parent = null;
           }
 
           // Joins all values arrays that share a common label
