@@ -293,15 +293,25 @@ define(function (require) {
       }
 
       var showTip = false;
+
+      // scale takes map zoom and returns proximity value for tooltips
+      // domain input values are map zoom steps
+      // range values are proximity distances in meters
+      // used to compare proximity of event latlng to feature latlng
       var zoomScale = d3.scale.linear()
       .domain([1, 9, 14, 18])
       .range([750000, 25000, 10, 0.01]);
 
-      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
       var proximity = zoomScale(zoom);
       var distance = latlng.distanceTo(feature.properties.latLng);
 
-      if (distance < proximity && lngDif < 40) {
+      // added this check on difference in longitudes
+      // to eliminate tooltips appearing 360°
+      // away from event latlngs
+      var maxDif = 40;
+      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
+
+      if (distance < proximity && lngDif < maxDif) {
         showTip = true;
       }
 
@@ -514,11 +524,6 @@ define(function (require) {
 
       var featureLayer = L.heatLayer(points, options);
 
-      // add legend
-      //if (mapData.features.length > 1) {
-      //self.addHeatLegend(mapData, map);
-      //}
-
       return featureLayer;
     };
 
@@ -580,38 +585,6 @@ define(function (require) {
               strokecol + '"></i> ' + vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
             }
           }
-        }
-        div.innerHTML = labels.join('<br>');
-
-        return div;
-      };
-      legend.addTo(map);
-    };
-
-    /**
-     * Adds heatmap legend div to each map when data is split
-     * uses d3 scale from TileMap.prototype.quantizeColorScale
-     *
-     * @method addHeatLegend
-     * @param data {Object}
-     * @param map {Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.addHeatLegend = function (data, map) {
-      var self = this;
-      var legend = L.control({position: 'bottomright'});
-      legend.onAdd = function () {
-        var div = L.DomUtil.create('div', 'tilemap-legend heatmap-le  gend');
-        var heatColors = ['red', 'yellow', 'lime', 'cyan', 'blue'];
-        var values = ['Max', '', '', '', 'Min'];
-        var labels = [];
-        var fillcol;
-        var strokecol;
-
-        for (var i = 0; i < heatColors.length; i++) {
-          fillcol = d3.rgb(heatColors[i]);
-          strokecol = self.darkerColor(fillcol);
-          labels.push('<i style="background:' + fillcol + '; border-color:' + strokecol + '"></i> ' + values[i]);
         }
         div.innerHTML = labels.join('<br>');
 
