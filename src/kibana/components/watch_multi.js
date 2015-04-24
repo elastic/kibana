@@ -80,9 +80,9 @@ define(function (require) {
           queue.push(expr);
           expr.fn.call($scope, expr.get, function (newVal, oldVal) {
             vals[i] = newVal;
+            prev[i] = oldVal;
 
             if (queue) {
-              prev[i] = oldVal;
               _.pull(queue, expr);
               if (queue.length > 0) return;
               queue = false;
