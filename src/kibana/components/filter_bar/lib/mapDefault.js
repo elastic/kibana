@@ -9,10 +9,6 @@ define(function (require) {
         key = 'query';
         value = angular.toJson(filter.query);
         return Promise.resolve({ key: key, value: value });
-      } else {
-        var displayFilter = _.clone(filter);
-        delete displayFilter.meta;
-        return Promise.resolve({ key: 'filter', value: angular.toJson(displayFilter)});
       }
       return Promise.reject(filter);
     };

@@ -13,7 +13,10 @@ define(function (require) {
      */
 
     function Dispatch(handler) {
-      var eventTypes = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout'].concat(handler.vis.eventTypes.enabled);
+
+      var stockEvents = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout'];
+      var customEvents = _.deepGet(handler, 'vis.eventTypes.enabled');
+      var eventTypes = customEvents ? stockEvents.concat(customEvents) : stockEvents;
 
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
