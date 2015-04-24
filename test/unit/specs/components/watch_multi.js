@@ -82,23 +82,22 @@ define(function (require) {
       ]);
     });
 
-    it('does not pass args unless the function will use them', function () {
-      var calls = 0;
+    it('the current value is always up to date', function () {
+      var count = 0;
 
-      $scope.one = 'a';
-      $scope.two = 'b';
-      $scope.three = 'c';
-      $scope.$watchMulti([
-        'one',
-        'two',
-        'three'
-      ], function () {
-        calls++;
-        expect(arguments).to.have.length(0);
+      $scope.vals = [1, 0];
+      $scope.$watchMulti([ 'vals[0]', 'vals[1]' ], function (cur, prev) {
+        expect(cur).to.eql($scope.vals);
+        count++;
       });
-      $rootScope.$apply();
 
-      expect(calls).to.be(1);
+      var $child = $scope.$new();
+      $child.$watch('vals[0]', function (cur) {
+        $child.vals[1] = cur;
+      });
+
+      $rootScope.$apply();
+      expect(count).to.be(2);
     });
   });
 });
