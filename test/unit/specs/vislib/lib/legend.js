@@ -155,8 +155,7 @@ define(function (require) {
             .filter(function (dataLabel) {
               var label = d.label ? d.label : d.name;
 
-              if (typeof label === 'number') dataLabel = +dataLabel;
-              return dataLabel === label;
+              return dataLabel === label.toString();
             })
             .value();
 

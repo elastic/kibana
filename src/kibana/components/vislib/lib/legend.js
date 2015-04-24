@@ -88,12 +88,14 @@ define(function (require) {
           // Copies first aggConfigResults object to data object.
           if (obj.values && obj.values.length) {
             var values = self._filterZeroInjectedValues(obj.values);
-            var aggConfigResult = values[0].aggConfigResult.$parent;
+            var aggConfigResult = values.length && values[0].aggConfigResult ?
+              values[0].aggConfigResult.$parent : undefined;
 
-            obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, null,
-              aggConfigResult.value, aggConfigResult.key);
+            if (aggConfigResult) {
+              obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, null,
+                  aggConfigResult.value, aggConfigResult.key);
+            }
           }
-
           // Joins all values arrays that share a common label
           if (currentObj && currentObj.label === obj.label) {
             currentObj.values = currentObj.values.concat(obj.values);
@@ -207,22 +209,22 @@ define(function (require) {
 
         function filterLabel(d) {
           var pointLabel = this.getAttribute('data-label');
-          return pointLabel !== label;
+          return pointLabel !== label.toString();
         }
 
-        if (label !== undefined && label !== '_all') {
+        if (label && label !== '_all') {
           d3.select(this).style('cursor', 'pointer');
+
+          // legend
+          legendDiv.selectAll('li')
+            .filter(filterLabel)
+            .classed('blur_shape', true);
+
+          // all data-label attribute
+          charts.selectAll('[data-label]')
+            .filter(filterLabel)
+            .classed('blur_shape', true);
         }
-
-        // legend
-        legendDiv.selectAll('li')
-        .filter(filterLabel)
-        .classed('blur_shape', true);
-
-        // all data-label attribute
-        charts.selectAll('[data-label]')
-        .filter(filterLabel)
-        .classed('blur_shape', true);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
