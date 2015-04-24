@@ -3,7 +3,6 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('components/agg_types/buckets/create_filter/geohash_grid'));
 
     var defaultPrecision = 3;
 
@@ -26,7 +25,6 @@ define(function (require) {
     return new BucketAggType({
       name: 'geohash_grid',
       title: 'Geohash',
-      createFilter: createFilter,
       params: [
         {
           name: 'field',
