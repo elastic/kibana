@@ -1,10 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
-  // var angular = require('angular');
-  // var saveFilterState = require('components/filter_bar/lib/saveFilterState');
 
-  require('modules').get('kibana/filters')
-  .service('queryFilter', function (Private, $rootScope, getAppState, globalState) {
+  return function (Private, $rootScope, getAppState, globalState) {
     var appState;
     var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var EventEmitter = Private(require('factories/events'));
@@ -257,5 +254,5 @@ define(function (require) {
         });
       });
     }
-  });
+  };
 });
