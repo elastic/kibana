@@ -193,7 +193,7 @@ define(function (require) {
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
           featureLayer = this.shadedGeohashGrid(map, mapData);
         } else {
-          featureLayer = this.pinMarkers(mapData);
+          featureLayer = this.pinMarkers(map, mapData);
         }
       }
 
@@ -209,13 +209,14 @@ define(function (require) {
      * @param mapData {Object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.pinMarkers = function (mapData) {
+    TileMap.prototype.pinMarkers = function (map, mapData) {
       var self = this;
 
       var featureLayer = L.geoJson(mapData, {
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       return featureLayer;
