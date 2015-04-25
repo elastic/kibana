@@ -3,13 +3,14 @@ define(function (require) {
   var faker = require('faker');
   var _ = require('lodash');
   var rison = require('utils/rison');
+  var MockState = require('fixtures/mock_state');
 
   // global vars, injected and mocked in init()
   var kbnUrl;
   var $route;
   var $location;
   var $rootScope;
-  var globalStateMock = require('fixtures/global_state');
+  var globalStateMock;
   var appState;
 
   require('components/url/url');
@@ -30,6 +31,7 @@ define(function (require) {
       });
 
       $provide.service('globalState', function () {
+        globalStateMock = new MockState();
         globalStateMock.removeFromUrl = function (url) {
           return url;
         };
