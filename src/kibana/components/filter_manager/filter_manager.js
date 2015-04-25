@@ -31,7 +31,7 @@ define(function (require) {
         if (existing) {
           if (existing.meta.negate !== negate) {
             // existing.meta.negate = negate;
-            newFilters.invertFilter(existing);
+            queryFilter.invertFilter(existing);
           }
           return;
         }
