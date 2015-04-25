@@ -6,6 +6,19 @@
   @vis-editor-nesting-width: 8px;
   @vis-editor-agg-editor-spacing: 5px;
 
+  // For the vis-editor sidebar nav
+  .navbar-default .navbar-nav {
+    &> .active > a:before {
+      border: 7px solid @gray-lighter;
+      border-color: transparent transparent @gray-lighter transparent;
+    }
+
+    .danger {
+      color: @btn-danger-color;
+      background-color: @btn-danger-bg;
+    }
+  }
+
   navbar {
     .bitty-modal-container {
       position: relative;
@@ -73,7 +86,7 @@
       form {
         .flex-parent(1, 1, auto);
 
-        > ul {
+        > div.vis-editor-config {
           .flex(1, 1, auto);
           overflow-y: auto;
         }
@@ -85,12 +98,16 @@
     }
 
     .sidebar-item-title {
-      background: @sidebar-bg;
+      font-size: 20px;
+      font-weight: bold;
+      border: inherit !important;
+      background-color: @gray-lighter;
+      margin-bottom: 5px;
     }
 
     .sidebar-item-title:hover {
-      color: @sidebar-header-color !important;
-      background-color: @sidebar-bg !important;
+      color: @text-color !important;
+      background-color: @gray-lighter !important;
     }
   }
 
@@ -119,7 +136,6 @@
     .flex-parent();
 
     padding: @vis-editor-agg-editor-spacing;
-    border-bottom: 1px solid @sidebar-bg;
 
     // wraps the .vis-editor-agg and nesting-indicator ^^
     &-wrapper {
@@ -226,6 +242,24 @@
 
     &-wide-btn {
       .border-radius(0);
+      border-top: 2px solid @gray-lighter;
+
+      &-add {
+        width: 140px;
+        margin: -2px auto 5px auto;
+        text-align: center;
+        border: 2px solid @gray-lighter;
+        border-top: 0px;
+        padding: 3px;
+        border-bottom-right-radius: @border-radius-base;
+        border-bottom-left-radius: @border-radius-base;
+        background-color: @body-bg;
+        font-weight: bold;
+      }
+
+      &-add:hover {
+        background-color: @gray-lighter;
+      }
     }
 
     &-add {

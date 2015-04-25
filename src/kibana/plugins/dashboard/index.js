@@ -49,7 +49,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
+      controller: function ($scope, $route, $routeParams, $location, configFile, Private, getAppState) {
         var queryFilter = Private(require('components/filter_bar/query_filter'));
 
         var notify = new Notifier({
@@ -57,6 +57,12 @@ define(function (require) {
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
+
+        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
+          timefilter.time.to = dash.timeTo;
+          timefilter.time.from = dash.timeFrom;
+        }
+
         $scope.$on('$destroy', dash.destroy);
 
         var matchQueryFilter = function (filter) {
@@ -135,6 +141,8 @@ define(function (require) {
           $state.title = dash.id = dash.title;
           $state.save();
           dash.panelsJSON = angular.toJson($state.panels);
+          dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
+          dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
 
           dash.save()
           .then(function (id) {
