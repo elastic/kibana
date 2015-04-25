@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var FieldFormat = Private(require('components/index_patterns/_field_format'));
+    var StringFormat = Private(require('components/stringify/types/String'));
     require('components/stringify/pattern/pattern');
 
     _(Url).inherits(FieldFormat);
@@ -13,7 +14,7 @@ define(function (require) {
 
     Url.id = 'url';
     Url.title = 'Url';
-    Url.fieldType = 'string';
+    Url.fieldType = StringFormat.fieldType; // anything that can be serialized to a string is g2g!
     Url.editor = {
       template: require('text!components/stringify/editors/url.html'),
       controllerAs: 'url',

@@ -2,18 +2,18 @@
   <div ng-if="editor.creating" class="form-group">
     <label>Name</label>
     <input
-      ng-model="editor.fieldSpec.name"
+      ng-model="editor.fieldProps.name"
       required
       placeholder="New Scripted Field"
       input-focus
       class="form-control"
     >
   </div>
-  <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.fieldSpec.name]" class="hintbox">
+  <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.fieldProps.name]" class="hintbox">
     <p>
       <i class="fa fa-danger text-danger"></i>
       <strong>Mapping Conflict:</strong>
-      You already have a field with the name {{ editor.fieldSpec.name }}. Naming your scripted
+      You already have a field with the name {{ editor.fieldProps.name }}. Naming your scripted
       field with the same name means you won't be able to query both fields at the same time.
     </p>
   </div>
@@ -88,6 +88,7 @@
 
   <div class="form-group">
     <button
+      type="button"
       ng-click="editor.cancel()"
       aria-label="Cancel"
       class="btn btn-primary">

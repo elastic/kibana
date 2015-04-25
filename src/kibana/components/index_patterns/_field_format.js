@@ -102,7 +102,7 @@ define(function (require) {
 
     FieldFormat.prototype.toJSON = function () {
       var type = this.type;
-      var defaults = type.paramDefaults;
+      var defaults = this._paramDefaults;
 
       var params = _.transform(this._params, function (uniqParams, val, param) {
         if (val !== defaults[param]) {

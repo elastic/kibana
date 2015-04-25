@@ -4,10 +4,13 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('fieldEditor', function (Private) {
+  .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
     var Field = Private(require('components/index_patterns/_field'));
+
+    var scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
+    var scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
 
     return {
       restrict: 'E',
@@ -17,21 +20,17 @@ define(function (require) {
         getField: '&field'
       },
       controllerAs: 'editor',
-      controller: function ($sce, $scope, Notifier, kbnUrl) {
+      controller: function ($scope, Notifier, kbnUrl) {
         var self = this;
         var notify = new Notifier({ location: 'Field Editor' });
 
-        self.indexPattern = $scope.getIndexPattern();
-        self.fieldSpec = Object.create($scope.getField().$$spec);
-        self.field = mutatedField();
-        self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
-        self.formatParams = self.field.format.params();
-        self.defFormatType = initDefaultFormat();
-        self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
-        self.creating = !self.indexPattern.fields.byName[self.field.name];
+        self.scriptingInfo = scriptingInfo;
+        self.scriptingWarning = scriptingWarning;
 
-        self.scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
-        self.scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
+        self.indexPattern = $scope.getIndexPattern();
+        self.fieldProps = Object.create($scope.getField().$$spec);
+        createField();
+        self.formatParams = self.field.format.params();
 
         self.cancel = function () {
           kbnUrl.change(self.indexPattern.editRoute);
@@ -48,7 +47,7 @@ define(function (require) {
           if (!self.selectedFormatId) {
             delete indexPattern.fieldFormatMap[field.name];
           } else {
-            indexPattern.fieldFormatMap[field.name] = field.format;
+            indexPattern.fieldFormatMap[field.name] = self.format;
           }
 
           return indexPattern.save()
@@ -73,26 +72,52 @@ define(function (require) {
         $scope.$watchMulti([
           'editor.selectedFormatId',
           '=editor.formatParams',
-          '=editor.fieldSpec'
+          '=editor.fieldProps'
         ], function (cur, prev) {
-          var formatId = cur[0];
-          var updatedFormat = cur[0] !== prev[0];
+          var changedFormat = cur[0] !== prev[0];
+          var missingFormat = cur[0] && (!self.format || self.format.type.id !== cur[0]);
+          var changedParams = cur[1] !== prev[1];
+          var FieldFormat = getFieldFormatType();
 
-          if (updatedFormat) {
-            var FieldFormat = fieldFormats.byId[formatId];
-            if (FieldFormat) {
-              self.formatParams = _.cloneDeep(FieldFormat.paramDefaults || {});
-              self.fieldSpec.format = new FieldFormat(self.formatParams);
+          if (changedFormat) {
+            // the old params are no longer valid
+            self.formatParams = {};
+          }
+
+          if (!changedParams && (changedFormat || missingFormat)) {
+            self.formatParams = _.defaults(self.formatParams || {}, FieldFormat.paramDefaults);
+            if (!_.isEqual(self.formatParams, cur[1])) return;
+          }
+
+          if (changedParams || changedFormat || missingFormat) {
+            if (self.selectedFormatId) {
+              self.format = new FieldFormat(self.formatParams);
+              self.formatParams = self.format.params();
             } else {
-              self.formatParams = self.fieldSpec.format = undefined;
+              self.format = undefined;
             }
           }
 
-          self.field = mutatedField();
+          createField();
         });
 
-        function mutatedField() {
-          return new Field(self.indexPattern, self.fieldSpec);
+        function createField() {
+          var first = !self.field;
+          var spec = _.assign(Object.create(self.fieldProps), { format: self.format });
+          self.field = new Field(self.indexPattern, spec);
+
+          if (!first) return;
+          // only init on first create
+          self.creating = !self.indexPattern.fields.byName[self.field.name];
+          self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
+          if (self.selectedFormatId) self.format = self.field.format;
+          self.defFormatType = initDefaultFormat();
+          self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
+        }
+
+        function getFieldFormatType() {
+          if (self.selectedFormatId) return fieldFormats.getType(self.selectedFormatId);
+          else return fieldFormats.getDefaultType(self.field.type);
         }
 
         function initDefaultFormat() {
