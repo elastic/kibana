@@ -1,7 +1,7 @@
 <div class="form-group">
   <div ng-repeat="filter in agg.params.filters">
     <div class="vis-editor-agg-header">
-      <label class="vis-editor-agg-header-title vis-editor-agg-header-growing">
+      <label class="vis-editor-agg-header-growing">
           Filter {{$index + 1}}
           <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
@@ -31,9 +31,7 @@
     </div>
 
     <div class="form-group" ng-show="showConfig">
-      <label class="vis-editor-agg-header-title">
-          Filter {{$index + 1}} label
-      </label>
+      <label>Filter {{$index + 1}} label</label>
       <input
         ng-model="filter.label"
         placeholder="Label"
