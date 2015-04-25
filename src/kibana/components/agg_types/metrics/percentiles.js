@@ -7,8 +7,9 @@ define(function (require) {
     var ordinalSuffix = require('utils/ordinal_suffix');
     var fieldFormats = Private(require('registry/field_formats'));
 
-    require('components/agg_types/controls/_values_list');
-    var percentEditor = require('text!components/agg_types/controls/percents.html');
+    var percentsEditor = require('text!components/agg_types/controls/percentiles.html');
+    // required by the percentiles editor
+    require('components/number_list/number_list');
 
     var valueProps = {
       makeLabel: function () {
@@ -29,21 +30,8 @@ define(function (require) {
         },
         {
           name: 'percents',
-          editor: percentEditor,
-          default: [1, 5, 25, 50, 75, 95, 99],
-          controller: function ($scope) {
-            $scope.remove = function (index) {
-              $scope.agg.params.percents.splice(index, 1);
-            };
-
-            $scope.add = function () {
-              $scope.agg.params.percents.push(_.last($scope.agg.params.percents) + 1);
-            };
-
-            $scope.$watchCollection('agg.params.percents', function (percents) {
-              $scope.validLength = _.size(percents) || null;
-            });
-          }
+          editor: percentsEditor,
+          default: [1, 5, 25, 50, 75, 95, 99]
         }
       ],
       getResponseAggs: function (agg) {
