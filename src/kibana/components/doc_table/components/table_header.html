@@ -1,6 +1,6 @@
 <th width="1%"></th>
 <th ng-if="indexPattern.timeFieldName">
-  <span ng-click="sort(indexPattern.timeFieldName)" tooltip="Sort by time">Time <i ng-class="headerClass(indexPattern.timeFieldName)"></i></span>
+  <span tooltip="Sort by time">Time <i ng-class="headerClass(indexPattern.timeFieldName)" ng-click="sort(indexPattern.timeFieldName)"></i></span>
 </th>
 <th ng-repeat="name in columns">
   <span class="table-header-name">
