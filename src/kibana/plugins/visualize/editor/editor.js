@@ -154,11 +154,7 @@ define(function (require) {
 
       queryFilter
       .on('update', function () {
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
-        }
+        searchSource.set('filter', queryFilter.getFilters());
         $state.save();
       })
       .on('fetch', function () {
@@ -210,7 +206,7 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      searchSource.set('filter', $state.filters);
+      searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);
       if ($scope.vis.type.requiresSearch) {
         courier.fetch();

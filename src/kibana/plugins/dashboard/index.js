@@ -110,9 +110,9 @@ define(function (require) {
         }
 
         function updateQueryOnRootSource() {
-          var filters = $state.filters;
+          var filters = queryFilter.getFilters();
           if ($state.query) {
-            dash.searchSource.set('filter', _.union($state.filters, [{
+            dash.searchSource.set('filter', _.union(filters, [{
               query: $state.query
             }]));
           } else {

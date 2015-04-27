@@ -425,7 +425,7 @@ define(function (require) {
         fields: {'*': {}},
         fragment_size: 2147483647 // Limit of an integer.
       })
-      .set('filter', $state.filters || []);
+      .set('filter', queryFilter.getFilters());
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
