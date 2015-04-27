@@ -31,7 +31,6 @@ define(function (require) {
        *
        * @param  {array[string|function|obj]} expressions - the list of expressions to $watch
        * @param  {Function} fn - the callback function
-       * @param  {boolean} deep - should the watchers be created as deep watchers?
        * @return {undefined}
        */
       $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
