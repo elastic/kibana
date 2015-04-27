@@ -31,7 +31,7 @@ define(function (require) {
        *
        * @param  {array[string|function|obj]} expressions - the list of expressions to $watch
        * @param  {Function} fn - the callback function
-       * @return {undefined}
+       * @return {Function} - an unwatch function, just like the return value of $watch
        */
       $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
         if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
@@ -43,11 +43,11 @@ define(function (require) {
         var fire = false;
 
         // first, register all of the multi-watchers
-        expressions.forEach(function (expr, i) {
+        var unwatchers = expressions.map(function (expr, i) {
           expr = normalizeExpression($scope, expr);
           if (!expr) return;
 
-          expr.fn.call($scope, expr.get, function (newVal, oldVal) {
+          return expr.fn.call($scope, expr.get, function (newVal, oldVal) {
             vals[i] = newVal;
             prev[i] = oldVal;
             fire = true;
@@ -57,7 +57,7 @@ define(function (require) {
         // then, the watcher that checks to see if any of
         // the other watchers triggered this cycle
         var flip = false;
-        $scope.$watch(function () {
+        unwatchers.push($scope.$watch(function () {
           if (fire) {
             fire = false;
             flip = !flip;
@@ -68,7 +68,9 @@ define(function (require) {
           vals.forEach(function (v, i) {
             prev[i] = v;
           });
-        });
+        }));
+
+        return _.partial(_.callEach, unwatchers);
       };
 
       function normalizeExpression($scope, expr) {

@@ -99,5 +99,31 @@ define(function (require) {
       $rootScope.$apply();
       expect(count).to.be(2);
     });
+
+    it('returns a working unwatch function', function () {
+      $scope.a = 0;
+      $scope.b = 0;
+      var triggers = 0;
+      var unwatch = $scope.$watchMulti(['a', 'b'], function () { triggers++; });
+
+      // initial watch
+      $scope.$apply();
+      expect(triggers).to.be(1);
+
+      // prove that it triggers on chagne
+      $scope.a++;
+      $scope.$apply();
+      expect(triggers).to.be(2);
+
+      // remove watchers
+      expect($scope.$$watchers).to.not.eql([]);
+      unwatch();
+      expect($scope.$$watchers).to.eql([]);
+
+      // prove that it doesn't trigger anymore
+      $scope.a++;
+      $scope.$apply();
+      expect(triggers).to.be(2);
+    });
   });
 });
