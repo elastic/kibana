@@ -50,9 +50,11 @@ define(function (require) {
           $scope.changeTimeFilter = null;
         };
 
-        // update the scope filter list on filter and appState changes
+        // update the scope filter list on filter changes
         queryFilter.on('update', updateFilters);
-        updateFilters();
+        $scope.$on('$destroy', function () {
+          queryFilter.off('update', updateFilters);
+        });
 
         $scope.$watch(function () {
           var appState = getAppState();
@@ -100,6 +102,8 @@ define(function (require) {
             });
           });
         }
+
+        updateFilters();
       }
     };
   });
