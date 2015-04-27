@@ -39,6 +39,7 @@ define(function (require) {
         if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
 
         var $scope = this;
+        var registry = [];
         var fired = false;
         var queue = [];
         var vals = new Array(expressions.length);
@@ -78,7 +79,7 @@ define(function (require) {
           if (!expr) return;
 
           queue.push(expr);
-          expr.fn.call($scope, expr.get, function (newVal, oldVal) {
+          var watcher = expr.fn.call($scope, expr.get, function (newVal, oldVal) {
             vals[i] = newVal;
             prev[i] = oldVal;
 
@@ -104,7 +105,15 @@ define(function (require) {
               }
             });
           }, expr.deep);
+
+          registry.push(watcher);
         });
+
+        return function deregister() {
+          registry.forEach(function (deregisterWatcher) {
+            deregisterWatcher();
+          });
+        };
       };
 
       return $delegate;

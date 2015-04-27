@@ -13,7 +13,7 @@ define(function (require) {
 
     queryFilter.getAppFilters = function () {
       var appState = getAppState();
-      if (!appState) return [];
+      if (!appState || !appState.filters) return [];
       return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
 
@@ -216,48 +216,49 @@ define(function (require) {
      * @returns {void}
      */
     function initWatchers() {
-      // multi watch on the app and global states
-      var stateWatchers = [{
-        fn: $rootScope.$watch,
-        get: getAppState
-      }, {
-        fn: $rootScope.$watch,
-        deep: true,
-        get: queryFilter.getAppFilters
-      }, {
-        fn: $rootScope.$watch,
-        deep: true,
-        get: queryFilter.getGlobalFilters
-      }];
+      var removeAppStateWatchers;
 
-      // when states change, use event emitter to trigger updates and fetches
-      $rootScope.$watchMulti(stateWatchers, function (next, prev) {
-        var doUpdate = false;
-        var doFetch = false;
-        var nextState = next[0];
-        var prevState = prev[0];
-
-        _.forEach(next, function (val, i) {
-          var nextVal = next[i];
-          var prevVal = prev[i];
-
-          if (nextVal === prevVal) return;
-
-          doUpdate = true;
-
-          // if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
-          // don't trigger fetch when changing the appState or only disabled filters
-          if (i > 0 && nextState === prevState && !onlyDisabled(nextVal, prevVal)) doFetch = true;
-        });
-
-        if (!doUpdate) return;
-
-        return queryFilter.emit('update')
-        .then(function () {
-          if (!doFetch) return;
-          return queryFilter.emit('fetch');
-        });
+      $rootScope.$watch(getAppState, function () {
+        removeAppStateWatchers && removeAppStateWatchers();
+        removeAppStateWatchers = initAppStateWatchers();
       });
+
+      function initAppStateWatchers() {
+        // multi watch on the app and global states
+        var stateWatchers = [{
+          fn: $rootScope.$watch,
+          deep: true,
+          get: queryFilter.getAppFilters
+        }, {
+          fn: $rootScope.$watch,
+          deep: true,
+          get: queryFilter.getGlobalFilters
+        }];
+
+        // when states change, use event emitter to trigger updates and fetches
+        return $rootScope.$watchMulti(stateWatchers, function (next, prev) {
+          var doUpdate = false;
+          var doFetch = false;
+
+          stateWatchers.forEach(function (watcher, i) {
+            var nextVal = next[i];
+            var prevVal = prev[i];
+
+            if (nextVal === prevVal) return;
+            if (nextVal) doUpdate = true;
+            // don't trigger fetch when only disabled filters
+            if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
+          });
+
+          if (!doUpdate) return;
+
+          return queryFilter.emit('update')
+          .then(function () {
+            if (!doFetch) return;
+            return queryFilter.emit('fetch');
+          });
+        });
+      }
     }
   };
 });
