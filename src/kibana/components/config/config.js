@@ -19,7 +19,7 @@ define(function (require) {
 
     var angular = require('angular');
     var _ = require('lodash');
-    var defaults = require('components/config/defaults');
+    var defaults = Private(require('components/config/defaults'));
     var DelayedUpdater = Private(require('components/config/_delayed_updater'));
     var vals = Private(require('components/config/_vals'));
 
