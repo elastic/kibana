@@ -62,7 +62,6 @@ define(function (require) {
        * Get the value of a param. This value may be a default value.
        *
        * @param  {string} name - the param name to fetch
-       * @param  {any} val - the param name to fetch
        * @return {any}
        */
       self.param = function (name) {
