@@ -25,13 +25,16 @@ define(function (require) {
           if (!agg) return;
 
           var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
-
           var indexPatternName = agg.geo.vis.indexPattern.id;
           var field = agg.geo.fieldName();
           var filter = {geo_bounding_box: {}};
           filter.geo_bounding_box[field] = event.bounds;
 
           pushFilter(filter, false, indexPatternName);
+
+          // Set the map viewport to our new bounds
+          event.visSettings.bounds = [event.bounds.top_left, event.bounds.bottom_right];
+
         }
       },
       responseConverter: geoJsonConverter,
