@@ -33,6 +33,7 @@ define(function (require) {
           $scope[method] = queryFilter[method];
         });
 
+        $scope.state = getAppState();
 
         $scope.applyFilters = function (filters) {
           // add new filters
@@ -56,10 +57,12 @@ define(function (require) {
           queryFilter.off('update', updateFilters);
         });
 
-        $scope.$watch(function () {
-          var appState = getAppState();
-          return (appState) ? appState.$newFilters : [];
-        }, function (filters) {
+        // when appState changes, update scope's state
+        $scope.$watch(getAppState, function (appState) {
+          $scope.state = appState;
+        });
+
+        $scope.$watch('state.$newFilters', function (filters) {
           if (!filters) return;
 
           // If filters is not undefined and the length is greater than
@@ -100,6 +103,7 @@ define(function (require) {
             $scope.filters = _.sortBy(results, function (filter) {
               return !filter.meta.pinned;
             });
+            $scope.$emit('filterbar:updated');
           });
         }
 
