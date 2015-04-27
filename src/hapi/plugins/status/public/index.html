@@ -9,8 +9,99 @@
 
     <style>
       .section {
-        border-bottom: 1px solid #ecf0f1;
         margin-bottom: 15px;
+      }
+      .system_status_wrapper {
+        border: 1px solid #0a8e03;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .system_status_wrapper .title {
+        color: #fff;
+        height: 50px;
+        line-height: 50px;
+        background-color: #0a8e03;
+        margin: 0 0 10px 0;
+        padding: 0 15px;
+        background: -moz-linear-gradient(left,  #0a8e03 0%, #96f501 100%);
+        background: -webkit-gradient(linear, left top, right top, color-stop(0%,#0a8e03), color-stop(100%,#96f501));
+        background: -webkit-linear-gradient(left,  #0a8e03 0%,#96f501 100%);
+        background: -o-linear-gradient(left,  #0a8e03 0%,#96f501 100%);
+        background: -ms-linear-gradient(left,  #0a8e03 0%,#96f501 100%);
+        background: linear-gradient(to right,  #0a8e03 0%,#96f501 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0a8e03', endColorstr='#96f501',GradientType=1 );
+      }
+      .system_status_wrapper.system_status_danger {
+        border-color: #da1e04;
+      }
+      .system_status_wrapper.system_status_danger .title {
+        border-color: #da1e04;
+        background: #da1e04;
+        background: -moz-linear-gradient(left, #da1e04 0%, #ff730f 100%);
+        background: -webkit-gradient(linear, left top, right top, color-stop(0%,#da1e04), color-stop(100%,#ff730f));
+        background: -webkit-linear-gradient(left, #da1e04 0%,#ff730f 100%);
+        background: -o-linear-gradient(left, #da1e04 0%,#ff730f 100%);
+        background: -ms-linear-gradient(left, #da1e04 0%,#ff730f 100%);
+        background: linear-gradient(to right, #da1e04 0%,#ff730f 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#da1e04', endColorstr='#ff730f',GradientType=1 );
+      }
+      #plugin_table {
+        margin: 0 15px 15px 15px;
+      }
+      #plugin_table .plugin_row {
+        height: 30px;
+        line-height: 30px;
+      }
+      #plugin_table .plugin_table_header {
+        font-size: 10px;
+        color: #a9a9a9;
+        height: 25px;
+        line-height: 25px;
+      }
+      #plugin_table .plugin_row + .plugin_row,
+      .status_chart_wrapper {
+        border-top: 1px solid #ebebeb;
+      }
+      #plugin_table .plugin_state,
+      .status_chart_wrapper {
+        border-left: 1px solid #ebebeb;
+      }
+      #plugin_table .plugin_table_plugin {
+        color: #608b32;
+      }
+      #plugin_table .plugin_key {
+        font-weight: bold;
+      }
+      #plugin_table .plugin_state,
+      #plugin_table .plugin_key {
+        padding: 0;
+      }
+      #plugin_table .plugin_state {
+        padding-left: 15px;
+      }
+      #plugin_table .plugin_status_danger {
+        color: #da1e04;
+      }
+
+
+      /**********  Charts  **********/
+
+      #chart_cont {
+        margin-top: 35px;
+      }
+      .status_chart_wrapper:nth-child(2),
+      .status_chart_wrapper:nth-child(3),
+      .status_chart_wrapper:first-child { border-top: 0 none transparent; }
+
+      .status_chart_wrapper:nth-child(3n + 1),
+      .status_chart_wrapper:first-child { border-left: 0 none transparent; }
+      .status_chart_wrapper:nth-child(n + 4) {
+        padding-top: 20px;
+      }
+      .status_chart_wrapper .title {
+        margin: 0 0 15px 0;
+        text-transform: capitalize;
+
       }
     </style>
   </head>
@@ -18,7 +109,7 @@
     <div class="container" ng-controller="StatusPage">
       <header>
         <h1>
-          <strong>Kibana</strong>&nbsp;Status
+          <strong>Kibana</strong>&nbsp;Status Page
         </h1>
       </header>
       <div>
@@ -27,30 +118,33 @@
           <p>This page is your sanity check, and your savior. You can check for potential problems</p>
           <p>Here is the status of your kibana instance and the plugins you have installed along with some, statistics to asses potential problems.</p>
         </section>
-        <section class="section">
-          <h4>What is this page?</h4>
-          <p>This page is your sanity check, and your savior. You can check for potential problems</p>
-        </section>
-        <h3 class="col-md-12">
-          System Status: {{ui.systemStatus().msg}}
-        </h3>
-        <div id="plugin-cont">
-          <div ng-repeat="(key, plugin) in ui.plugins" class="plugin col-md-4">
-            <div class="alert alert-{{plugin.uiStatus}}">
-              {{key}}:&nbsp;{{plugin.message}}
+        <div class="system_status_wrapper system_status_{{ui.systemStatus().label}}">
+          <h3 class="title">
+            <b>System Status:</b> {{ui.systemStatus().msg}}
+          </h3>
+          <div id="plugin_table">
+            <div class="plugin_table_header plugin_row">
+              <div class="col-md-1 plugin_key">Plugin</div>
+              <div class="col-md-11 plugin_state">Status</div>
+              <div class="clearfix"></div>
+            </div>
+            <div ng-repeat="(key, plugin) in ui.plugins" class="plugin_table_plugin plugin_row plugin_status_{{plugin.uiStatus}}">
+              <div class="col-md-1 plugin_key">{{key}}</div>
+              <div class="col-md-11 plugin_state">{{plugin.message}}</div>
+              <div class="clearfix"></div>
             </div>
           </div>
-          <div class="clearfix"></div>
         </div>
-        <div id="chart-cont">
-          <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper pull-left col-md-4 section">
-            <h2 class="title">{{key}}</h2>
+        <div id="chart_cont" class="row">
+          <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
+            <h2 class="title">{{chart.niceName}}</h2>
             <h1 class="average">{{chart.average}}</h1>
             <nvd3-sparkline-chart
               id="{{key}}-chart"
               data="chart.data"
-              x="ui.nvd3Config.getX"
-              y="ui.nvd3Config.getY">
+              x="ui.chartOptions.getX"
+              y="ui.chartOptions.getY"
+              xtickformat="ui.chartOptions.formatX">
               <svg class="status_chart"></svg>
             </nvd3-sparkline-chart>
           </div>
