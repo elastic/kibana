@@ -31,10 +31,6 @@ define(function (require) {
           filter.geo_bounding_box[field] = event.bounds;
 
           pushFilter(filter, false, indexPatternName);
-
-          // Set the map viewport to our new bounds
-          event.visSettings.bounds = [event.bounds.top_left, event.bounds.bottom_right];
-
         }
       },
       responseConverter: geoJsonConverter,

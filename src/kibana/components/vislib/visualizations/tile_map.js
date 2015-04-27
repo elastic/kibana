@@ -131,7 +131,6 @@ define(function (require) {
 
             self.events.dispatch[drawType]({
               e: e,
-              visSettings: self._attr,
               data: self.chartData,
               bounds: {
                 top_left: {
@@ -169,10 +168,6 @@ define(function (require) {
 
           if (mapData && mapData.features.length > 0) {
             map.addControl(new FitControl());
-          }
-
-          if (self._attr.bounds) {
-            map.fitBounds(self._attr.bounds);
           }
 
           self.maps.push(map);
