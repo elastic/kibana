@@ -6,7 +6,8 @@ var logger = require('./logger');
 var config = require('../config');
 
 function waitForPong() {
-  return client.ping({ requestTimeout: 1500 }).catch(function (err) {
+  return client.ping({requestTimeout: config.kibana.startup_timeout})
+  .catch(function (err) {
     if (!(err instanceof NoConnections)) throw err;
 
     logger.info('Unable to connect to elasticsearch at %s. Retrying in 2.5 seconds.', config.elasticsearch);
