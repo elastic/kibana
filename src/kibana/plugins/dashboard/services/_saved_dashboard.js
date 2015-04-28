@@ -1,6 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
+  var moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
   module.factory('SavedDashboard', function (courier) {
@@ -23,7 +24,10 @@ define(function (require) {
           hits: 'integer',
           description: 'string',
           panelsJSON: 'string',
-          version: 'integer'
+          version: 'integer',
+          timeRestore: 'boolean',
+          timeTo: 'string',
+          timeFrom: 'string'
         },
 
         // defeult values to assign to the doc
@@ -32,7 +36,10 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]',
-          version: 1
+          version: 1,
+          timeRestore: false,
+          timeTo: undefined,
+          timeFrom: undefined
         },
 
         searchSource: true,

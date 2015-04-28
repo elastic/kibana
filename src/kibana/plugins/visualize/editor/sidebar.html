@@ -9,29 +9,25 @@
 
     <nav class="navbar navbar-default navbar-static-top subnav">
       <div class="container-fluid">
-        <ul class="nav navbar-nav" ng-init="visConfigSection = vis.type.requiresSearch ? 'data' : 'options'">
-          <li ng-class="{active: visConfigSection == 'data'}" ng-show="vis.type.schemas.metrics">
-            <a class="navbar-link active" ng-click="visConfigSection='data'">Data</a>
+
+        <!-- tabs -->
+        <ul class="nav navbar-nav">
+          <li ng-class="{active: sidebar.section == 'data'}" ng-show="vis.type.schemas.metrics">
+            <a class="navbar-link active" ng-click="sidebar.section='data'">Data</a>
           </li>
-          <li ng-class="{active: visConfigSection == 'options'}">
-            <a class="navbar-link" ng-click="visConfigSection='options'">Options</a>
+          <li ng-class="{active: sidebar.section == 'options'}">
+            <a class="navbar-link" ng-click="sidebar.section='options'">Options</a>
           </li>
         </ul>
+
+        <!-- controls -->
         <ul class="nav navbar-nav navbar-right">
           <li ng-if="visualizeEditor.softErrorCount() > 0"
             disabled
-            tooltip="{{visualizeEditor.describeErrors()}}" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
+            tooltip="{{ visualizeEditor.describeErrors() }}" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
             <a class="danger navbar-link">
               <i class="fa fa-warning"></i>
             </a>
-          </li>
-          <li tooltip="Discard changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
-            <button class="btn-default navbar-btn-link"
-              ng-disabled="!vis.dirty"
-              ng-click="resetEditableVis()">
-
-              <i class="fa fa-close"></i>
-            </button>
           </li>
           <li tooltip="Apply changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
             <button class="btn-success navbar-btn-link"
@@ -41,11 +37,19 @@
               <i class="fa fa-play"></i>
             </button>
           </li>
+          <li tooltip="Discard changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
+            <button class="btn-default navbar-btn-link"
+              ng-disabled="!vis.dirty"
+              ng-click="resetEditableVis()">
+
+              <i class="fa fa-close"></i>
+            </button>
+          </li>
         </ul>
       </div>
     </nav>
 
-    <div class="vis-editor-config" ng-show="visConfigSection == 'data'">
+    <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
       <ul class="list-unstyled">
         <!-- metrics -->
         <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
@@ -55,16 +59,12 @@
       </ul>
     </div>
 
-    <div class="vis-editor-config" ng-show="visConfigSection == 'options'">
+    <div class="vis-editor-config" ng-show="sidebar.section == 'options'">
       <ul class="list-unstyled">
 
         <!-- vis options -->
-        <vis-editor-vis-options
-          vis="vis"
-          >
-        </vis-editor-vis-options>
+        <vis-editor-vis-options vis="vis"></vis-editor-vis-options>
 
-        <!-- apply/discard -->
       </ul>
     </div>
 
