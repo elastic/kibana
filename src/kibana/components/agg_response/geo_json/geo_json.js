@@ -30,9 +30,19 @@ define(function (require) {
         var lat = feature.geometry.coordinates[1];
         var lng = feature.geometry.coordinates[0];
 
-        return 'Geohash: ' + feature.properties.geohash + '<br>' +
-        'Center: ' + lat.toFixed(1) + ', ' + lng.toFixed(1) + '<br>' +
-        feature.properties.valueLabel + ': ' + feature.properties.count;
+        //var content = feature.properties.valueLabel + ': ' + feature.properties.count  + '<br>' +
+        //'Center: ' + lat.toFixed(3) + ', ' + lng.toFixed(3);
+
+
+        var content = '<table class="ng-scope"><tbody>' +
+        '<tr><td><b>' + feature.properties.valueLabel + ': </b></td>' +
+        '<td>' + feature.properties.count + '</td></tr>' +
+        '<tr><td><b>Center: </b></td>' +
+        '<td>' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '</td></tr>' +
+        '</tbody></table>';
+
+        return content;
+
       };
 
       var geoJson = chart.geoJson = {

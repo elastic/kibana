@@ -317,7 +317,9 @@ define(function (require) {
 
       delete feature.properties.eventDistance;
 
-      console.log(zoom, proximity, distance, showTip);
+      var testScale = d3.scale.pow().exponent(0.2)
+      .domain([1, 18])
+      .range([1500000, 50]);
       return showTip;
     };
 
