@@ -83,11 +83,17 @@ define(function (require) {
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
-            if (!self.events.dispatch[drawShape]) drawOptions.draw[drawShape] = false;
+            if (!self.events.dispatch[drawShape]) {
+              drawOptions.draw[drawShape] = false;
+            } else {
+              drawOptions.draw[drawShape] = {
+                shapeOptions: {
+                  stroke: false,
+                  color: '#000'
+                }
+              };
+            }
           });
-
-          L.drawLocal.draw.toolbar.buttons.rectangle = 'Draw a bounding box filter';
-          L.drawLocal.draw.handlers.rectangle.tooltip.start = 'Click and drag to draw bounding box';
 
           var mapOptions = {
             minZoom: 1,
