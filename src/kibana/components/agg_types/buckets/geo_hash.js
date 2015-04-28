@@ -4,7 +4,7 @@ define(function (require) {
     var moment = require('moment');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
 
-    var defaultPrecision = 3;
+    var defaultPrecision = 2;
 
     function getPrecision(precision) {
       var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));

@@ -14,7 +14,7 @@ define(function (require) {
 
     function Dispatch(handler) {
 
-      var stockEvents = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout'];
+      var stockEvents = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout', 'mapZoomEnd'];
       var customEvents = _.deepGet(handler, 'vis.eventTypes.enabled');
       var eventTypes = customEvents ? stockEvents.concat(customEvents) : stockEvents;
 
