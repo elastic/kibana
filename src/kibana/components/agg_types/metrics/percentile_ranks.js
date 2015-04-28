@@ -5,8 +5,9 @@ define(function (require) {
     var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
     var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
 
-    require('components/agg_types/controls/_values_list');
-    var valuesEditor = require('text!components/agg_types/controls/values.html');
+    var valuesEditor = require('text!components/agg_types/controls/percentile_ranks.html');
+    // required by the values editor
+    require('components/number_list/number_list');
 
     var valueProps = {
       makeLabel: function () {
@@ -28,20 +29,7 @@ define(function (require) {
         {
           name: 'values',
           editor: valuesEditor,
-          default: [],
-          controller: function ($scope) {
-            $scope.remove = function (index) {
-              $scope.agg.params.values.splice(index, 1);
-            };
-
-            $scope.add = function () {
-              $scope.agg.params.values.push(_.last($scope.agg.params.values) + 1);
-            };
-
-            $scope.$watchCollection('agg.params.values', function (values) {
-              $scope.validLength = _.size(values) || null;
-            });
-          }
+          default: []
         }
       ],
       getResponseAggs: function (agg) {

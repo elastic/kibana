@@ -178,30 +178,9 @@ define(function (require) {
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
           featureLayer = this.shadedGeohashGrid(map, mapData);
         } else {
-          featureLayer = this.pinMarkers(mapData);
+          featureLayer = this.scaledCircleMarkers(map, mapData);
         }
       }
-
-      return featureLayer;
-    };
-
-    /**
-     * Type of data overlay for map:
-     * creates featurelayer from mapData (geoJson)
-     * with default leaflet pin markers
-     *
-     * @method pinMarkers
-     * @param mapData {Object}
-     * @return {Leaflet object} featureLayer
-     */
-    TileMap.prototype.pinMarkers = function (mapData) {
-      var self = this;
-
-      var featureLayer = L.geoJson(mapData, {
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        }
-      });
 
       return featureLayer;
     };
