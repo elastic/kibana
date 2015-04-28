@@ -42,4 +42,12 @@ define(function (require) {
       });
     });
   });
+
+  describe('Query Filter Actions', function () {
+    var childSuites = [
+      require('specs/components/filter_bar/_getFilters'),
+    ].forEach(function (s) {
+      describe(s[0], s[1]);
+    });
+  });
 });
