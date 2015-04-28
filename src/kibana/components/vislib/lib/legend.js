@@ -26,10 +26,15 @@ define(function (require) {
 
       var isPie = (vis._attr.type === 'pie');
 
+      if (isPie) {
+        this.dataLabels = this._transformPieData(data.pieData());
+      } else {
+        this.dataLabels = this._transformSeriesData(data.getVisData());
+      }
+
       this.vis = vis;
       this.data = data;
       this.el = vis.el;
-      this.dataLabels = isPie ? this._transformPieData(data.pieData()) : this._transformSeriesData(data.getVisData());
       this.events = new Dispatch();
       this.color = isPie ? data.getPieColorFunc() : data.color;
       this._attr = _.defaults(vis._attr || {}, {
@@ -88,8 +93,11 @@ define(function (require) {
           // Copies first aggConfigResults object to data object.
           if (obj.values && obj.values.length) {
             var values = self._filterZeroInjectedValues(obj.values);
-            var aggConfigResult = values.length && values[0].aggConfigResult ?
-              values[0].aggConfigResult.$parent : undefined;
+            var aggConfigResult;
+
+            if (values.length && values[0].aggConfigResult) {
+              aggConfigResult = values[0].aggConfigResult.$parent;
+            }
 
             if (aggConfigResult) {
               obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, null,
