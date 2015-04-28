@@ -13,33 +13,33 @@
   </div>
   <div class="vis-option-item">
     <label>
-      <input type="checkbox" ng-model="vis.params.defaultYExtents" ng-checked="vis.params.defaultYExtents">
+      <input type="checkbox" ng-model="vis.params.defaultYExtents">
       Scale Y-Axis to Data Bounds
     </label>
   </div>
   <div class="vis-option-item">
     <label>
-      <input type="checkbox" ng-model="vis.params.setYExtents.max" ng-checked="vis.params.setYExtents.max">
+      <input type="checkbox" ng-model="vis.params.setYExtents.max">
       Set Y-Axis Max Value
     </label>
     <div ng-show="vis.params.setYExtents.max">
       <label>
         y-max
-        <input class="form-control" type="number" step="0.1" ng-model="vis.params.yAxis.max"
+        <input name="y-max" class="form-control" type="number" step="0.1" ng-model="vis.params.yAxis.max"
                ng-required="vis.params.setYExtents.max">
       </label>
     </div>
   </div>
   <div class="vis-option-item">
     <label>
-      <input type="checkbox" ng-model="vis.params.setYExtents.min" ng-checked="vis.params.setYExtents.min">
+      <input type="checkbox" ng-model="vis.params.setYExtents.min">
       Set Y-Axis Min Value
     </label>
     <div ng-show="vis.params.setYExtents.min">
       <label>
         y-min
-        <input class="form-control" type="number" step="0.1" ng-model="vis.params.yAxis.min"
-        ng-required="vis.params.setYExtents.min">
+        <input name="y-min" class="form-control" type="number" step="0.1" ng-model="vis.params.yAxis.min"
+               ng-required="vis.params.setYExtents.min">
       </label>
     </div>
   </div>
