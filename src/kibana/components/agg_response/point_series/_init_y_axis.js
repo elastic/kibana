@@ -11,7 +11,7 @@ define(function (require) {
         chart.yAxisFormatter = y[0].agg.fieldFormatter('text');
         chart.yAxisLabel = ''; // use the legend
       } else {
-        chart.yAxisFormatter = y.agg.fieldFormatter();
+        chart.yAxisFormatter = y.agg.fieldFormatter('text');
         chart.yAxisLabel = y.col.title;
       }
 
