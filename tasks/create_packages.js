@@ -3,7 +3,7 @@ var Promise = require('bluebird');
 var join = require('path').join;
 var mkdirp = Promise.promisifyAll(require('mkdirp'));
 
-var exec = Promise.promisify(child_process.exec);
+var execFile = Promise.promisify(child_process.execFile);
 
 var getBaseNames = function (grunt) {
   var packageName = grunt.config.get('pkg.name');
@@ -23,27 +23,25 @@ function createPackages(grunt) {
     var createPackage = function (name) {
       var options = { cwd: distPath };
       var archiveName = join(target, name);
-      var tgzCmd = 'tar -zcf ' + archiveName + '.tar.gz ' + name;
-      var zipCmd = 'zip -rq ' + archiveName + '.zip ' + name;
+      var tgzCmd = [ 'tar', '-zcf', archiveName + '.tar.gz', name ];
+      var zipCmd = [ 'zip', '-rq', archiveName + '.zip', name ];
 
       if (/windows/.test(name)) {
-        zipCmd = 'zip -rq -ll ' + archiveName + '.zip ' + name;
+        zipCmd = [ 'zip', '-rq', '-ll', archiveName + '.zip', name ];
       }
 
       return mkdirp.mkdirpAsync(target)
         .then(function (arg) {
-          return exec(tgzCmd, options);
-        })
+          return execFile(tgzCmd.shift(), tgzCmd, options);
+        }, function (err) { console.log('Failure on ' + name + ': ' + err); })
         .then(function (arg) {
-          return exec(zipCmd, options);
-        });
+          return execFile(zipCmd.shift(), zipCmd, options);
+        }, function (err) { console.log('Failure on ' + name + ': ' + err); });
     };
 
     Promise.map(getBaseNames(grunt), createPackage).finally(done);
-
   });
 }
 
 module.exports = createPackages;
-createPackages.exec = exec;
 createPackages.getBaseNames = getBaseNames;
