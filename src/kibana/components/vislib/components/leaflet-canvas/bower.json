@@ -1,0 +1,7 @@
+{
+  "name": "leaflet-canvas",
+  "main": "leaflet-canvas.js",
+  "_source": "/Library/WebServer/Documents/dev/kibana/src/kibana/components/vislib/components/leaflet-canvas",
+  "_target": "*",
+  "_originalSource": "./src/kibana/components/vislib/components/leaflet-canvas"
+}
