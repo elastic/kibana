@@ -2,24 +2,32 @@ define(function (require) {
   var _ = require('lodash');
 
   return function (Private, $rootScope, getAppState, globalState) {
-    var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var EventEmitter = Private(require('factories/events'));
+    var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
+    var uniqFilters = require('components/filter_bar/lib/uniqFilters');
+    var compareFilters = require('components/filter_bar/lib/compareFilters');
 
     var queryFilter = new EventEmitter();
 
     queryFilter.getFilters = function () {
-      return queryFilter.getGlobalFilters().concat(queryFilter.getAppFilters());
+      var compareOptions = { disabled: true, negate: true };
+      var appFilters = queryFilter.getAppFilters();
+      var globalFilters = queryFilter.getGlobalFilters();
+
+      return uniqFilters(globalFilters.concat(appFilters), compareOptions);
     };
 
     queryFilter.getAppFilters = function () {
       var appState = getAppState();
       if (!appState || !appState.filters) return [];
-      return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
+      var appFilters = (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
+      return uniqFilters(appFilters, { disabled: true });
     };
 
     queryFilter.getGlobalFilters = function () {
-      if (globalState.filters) return _.map(globalState.filters, appendStoreType('globalState'));
-      return [];
+      if (!globalState.filters) return [];
+      var globalFilters = _.map(globalState.filters, appendStoreType('globalState'));
+      return uniqFilters(globalFilters, { disabled: true });
     };
 
     /**
@@ -31,18 +39,41 @@ define(function (require) {
     queryFilter.addFilters = function (filters, global) {
       var appState = getAppState();
       var state = (global) ? globalState : appState;
+      var globalFilters = queryFilter.getGlobalFilters();
 
       if (!_.isArray(filters)) {
         filters = [filters];
       }
 
-      if (!state.filters) {
-        state.filters = filters;
-      } else {
-        state.filters = state.filters.concat(filters);
+      // simply concat global filters, they will be deduped
+      if (global) {
+        globalState.filters = globalState.filters.concat(filters);
+        return saveState();
       }
 
-      saveState();
+      if (!appState) return queryFilter.getFilters();
+      if (!appState.filters) appState.filters = [];
+
+      // app filters need to mutate global filter state
+      // if they match existing global filters
+      var compareOptions = {};
+      filters = _.filter(filters, function (filter) {
+        var match = _.find(globalFilters, function (globalFilter) {
+          return compareFilters(globalFilter, filter, compareOptions);
+        });
+
+        // if the filter remains, it doesn't match any filters in global state
+        if (!match) return true;
+
+        // filter matches a filter in globalFilters, mutate existing global filter
+        match.meta = filter.meta;
+        return false;
+      });
+
+      // append any remaining app filters, they will be deduped
+      appState.filters = appState.filters.concat(filters);
+
+      return saveState();
     };
 
     /**
