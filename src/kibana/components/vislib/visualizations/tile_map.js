@@ -294,29 +294,30 @@ define(function (require) {
 
       var showTip = false;
 
-      // scale takes map zoom and returns proximity value for tooltips
-      // domain input values are map zoom steps
-      // range values are proximity distances in meters
+      // zoomScale takes map zoom and returns proximity value for tooltip display
+      // domain (input values) is map zoom (min 1 and max 18)
+      // range (output values) is distance in meters
       // used to compare proximity of event latlng to feature latlng
       var zoomScale = d3.scale.linear()
-      .domain([1, 9, 14, 18])
-      .range([750000, 25000, 10, 0.01]);
+      .domain([1, 4, 7, 10, 13, 16, 18])
+      .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
 
       var proximity = zoomScale(zoom);
       var distance = latlng.distanceTo(feature.properties.latLng);
 
-      // added this check on difference in longitudes
-      // to eliminate tooltips appearing 360°
-      // away from event latlngs
-      var maxDif = 40;
+      // maxLngDif is max difference in longitudes
+      // to prevent feature tooltip from appearing 360°
+      // away from event latlng
+      var maxLngDif = 40;
       var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
 
-      if (distance < proximity && lngDif < maxDif) {
+      if (distance < proximity && lngDif < maxLngDif) {
         showTip = true;
       }
 
       delete feature.properties.eventDistance;
 
+      console.log(zoom, proximity, distance, showTip);
       return showTip;
     };
 
@@ -506,14 +507,6 @@ define(function (require) {
       var self = this;
       var max = mapData.properties.allmax;
       var points = this.dataToHeatArray(mapData, max);
-
-      // default heatmap options in kibana:
-      // radius: 25,
-      // blur: 15,
-      // max: 1,
-      // minOpacity: 0.1,
-      // maxZoom: 18,
-      // gradient: {0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1: 'red'}
 
       var options = {
         radius: +this._attr.heatRadius,
