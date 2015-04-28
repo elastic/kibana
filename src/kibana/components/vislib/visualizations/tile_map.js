@@ -151,15 +151,6 @@ define(function (require) {
             });
           });
 
-
-          map.on('zoomend', function (e) {
-            var mapInfo = {
-              zoom: map.getZoom(),
-              zoomPct: map.getZoom() / 18
-            };
-            self.events.dispatch.mapZoomEnd(mapInfo);
-          });
-
           // add label for splits
           if (mapData.properties.label) {
             self.addLabel(mapData.properties.label, map);
@@ -187,14 +178,6 @@ define(function (require) {
           self.maps.push(map);
         });
       };
-    };
-
-    TileMap.prototype.addZoomEndEvent = function (element) {
-      var events = this.events;
-      var zoomend = events.addMapZoomEndEvent();
-      var attachedEvents = element.call(zoomend);
-
-      return attachedEvents;
     };
 
     /**

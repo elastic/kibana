@@ -3,8 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
-
-    var defaultPrecision = 2;
+    var defaultPrecision = 3;
 
     function getPrecision(precision) {
       var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
