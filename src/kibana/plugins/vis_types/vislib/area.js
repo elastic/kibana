@@ -20,7 +20,9 @@ define(function (require) {
           scale: 'linear',
           mode: 'stacked',
           interpolate: 'linear',
-          defaultYExtents: false
+          defaultYExtents: false,
+          times: [],
+          addTimeMarker: false
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],

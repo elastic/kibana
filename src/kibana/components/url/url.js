@@ -45,7 +45,8 @@ define(function (require) {
 
       if (self.shouldAutoReload(next, prev)) {
         var appState = getAppState();
-        appState.destroy();
+        if (appState) appState.destroy();
+
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
           // call the "unlisten" function returned by $on
           reloading();
