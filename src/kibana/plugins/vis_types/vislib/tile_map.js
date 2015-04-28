@@ -13,9 +13,10 @@ define(function (require) {
       params: {
         defaults: {
           mapType: 'Scaled Circle Markers',
-          isDesaturated: true
+          isDesaturated: true,
+          autoPrecision: true
         },
-        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Pins'],
+        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       responseConverter: geoJsonConverter,
