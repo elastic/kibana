@@ -5,7 +5,7 @@
       (Default: <i>{{conf.defVal == undefined ? 'null' : conf.defVal}}</i>)
     </span>
     <br>
-    <span class="smaller">{{conf.description}}</span>
+    <span class="smaller" ng-bind-html="conf.description | trustAsHtml"></span>
   </td>
   <td class="value">
 

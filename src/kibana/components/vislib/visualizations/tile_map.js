@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private) {
+  return function TileMapFactory(d3, Private, config) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -69,12 +69,13 @@ define(function (require) {
           var div = $(this).addClass('tilemap');
 
           var featureLayer;
-          var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
+          var tileOptions = config.get('visualization:tileMap:options', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
+          var tileLayer = L.tileLayer(config.get('visualization:tileMap:url'), tileOptions);
 
           var mapOptions = {
             minZoom: 1,

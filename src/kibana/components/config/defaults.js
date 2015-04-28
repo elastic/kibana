@@ -62,6 +62,18 @@ define(function (require) {
       '12 is the max. Explanation of cell dimensions: http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
       'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator',
     },
+    'visualization:tileMap:url': {
+      value: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
+      description: 'URL template of mapping provider, see ' +
+        '<a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">leafletjs reference</a> or ' +
+        '<a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">provider demos</a>'
+    },
+    'visualization:tileMap:options': {
+      value: null,
+      description: 'TileLayer options, see <a href="http://leafletjs.com/reference.html#tilelayer" target="_blank">' +
+        'leafletjs reference</a>',
+      type: 'json'
+    },
     'csv:separator': {
       value: ',',
       description: 'Separate exported values with this string',
