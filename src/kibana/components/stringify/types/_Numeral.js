@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var FieldFormat = Private(require('components/index_patterns/_field_format'));
     var numeral = require('numeral')();
-    require('components/stringify/numeral/numeral');
+    require('components/field_editor/numeral/numeral');
 
     _(Numeral).inherits(FieldFormat);
     function Numeral(params) {
@@ -36,7 +36,7 @@ define(function (require) {
       });
 
       Class.editor = {
-        template: opts.editorTemplate || require('text!components/stringify/numeral/numeral.html'),
+        template: opts.editorTemplate || require('text!components/field_editor/numeral/numeral.html'),
         controllerAs: 'cntrl',
         controller: opts.controller || function () {
           this.samples = opts.samples;

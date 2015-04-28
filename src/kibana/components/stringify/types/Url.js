@@ -4,7 +4,7 @@ define(function (require) {
 
     var FieldFormat = Private(require('components/index_patterns/_field_format'));
     var StringFormat = Private(require('components/stringify/types/String'));
-    require('components/stringify/pattern/pattern');
+    require('components/field_editor/pattern/pattern');
 
     _(Url).inherits(FieldFormat);
     function Url(params) {
