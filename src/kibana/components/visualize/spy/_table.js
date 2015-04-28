@@ -21,8 +21,8 @@ define(function (require) {
           if (!$scope.vis || !$scope.esResp) {
             $scope.table = null;
           } else {
-            if (!$scope.editableVis.params.spyPerPage) {
-              $scope.editableVis.params.spyPerPage = PER_PAGE_DEFAULT;
+            if (!$scope.spy.perPage) {
+              $scope.spy.perPage = PER_PAGE_DEFAULT;
             }
 
             $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, {
