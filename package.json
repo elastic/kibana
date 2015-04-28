@@ -17,6 +17,9 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
+  "bin": {
+    "kibana": "./bin/kibana.js"
+  },
   "license": "Apache 2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "contributors": [

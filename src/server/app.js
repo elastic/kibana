@@ -25,7 +25,9 @@ app.use(appHeaders());
 app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 
 if (app.get('env') === 'development') {
-  require('./dev')(app);
+  try {
+    require('./dev')(app);
+  } catch (e) {  } // meh
 }
 
 // The proxy must be set up before all the other middleware.

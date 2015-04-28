@@ -1,20 +1,12 @@
 var _ = require('lodash');
 var fs = require('fs');
+var checkPath = require('../lib/checkPath');
 var yaml = require('js-yaml');
 var path = require('path');
 var listPlugins = require('../lib/listPlugins');
 var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibana.yml');
 var kibana = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
 var env = process.env.NODE_ENV || 'development';
-
-function checkPath(path) {
-  try {
-    fs.statSync(path);
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
 
 // Check if the local public folder is present. This means we are running in
 // the NPM module. If it's not there then we are running in the git root.
