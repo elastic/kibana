@@ -5,16 +5,19 @@ define(function (require) {
 
   var slices = require('vislib_fixtures/mock_data/histogram/_slices');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
+  var histogramSlices = require('vislib_fixtures/mock_data/histogram/_slices');
 
   var dataArray = [
     stackedSeries,
     slices,
+    histogramSlices,
     stackedSeries,
-    stackedSeries,
+    stackedSeries
   ];
 
   var chartTypes = [
     'histogram',
+    'pie',
     'pie',
     'area',
     'line'
@@ -24,7 +27,7 @@ define(function (require) {
     histogram: '.chart rect',
     pie: '.chart path',
     area: '.chart path',
-    line: '.chart circle',
+    line: '.chart circle'
   };
 
   angular.module('LegendFactory', ['kibana']);

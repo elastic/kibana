@@ -215,24 +215,24 @@ define(function (require) {
         var label = d.label ? d.label : d.name;
         var charts = visEl.selectAll('.chart');
 
-        function filterLabel(d) {
+        function filterLabel() {
           var pointLabel = this.getAttribute('data-label');
           return pointLabel !== label.toString();
         }
 
         if (label && label !== '_all') {
           d3.select(this).style('cursor', 'pointer');
-
-          // legend
-          legendDiv.selectAll('li')
-            .filter(filterLabel)
-            .classed('blur_shape', true);
-
-          // all data-label attribute
-          charts.selectAll('[data-label]')
-            .filter(filterLabel)
-            .classed('blur_shape', true);
         }
+
+        // legend
+        legendDiv.selectAll('li')
+        .filter(filterLabel)
+        .classed('blur_shape', true);
+
+        // all data-label attribute
+        charts.selectAll('[data-label]')
+        .filter(filterLabel)
+        .classed('blur_shape', true);
 
         var eventEl =  d3.select(this);
         eventEl.style('white-space', 'inherit');
