@@ -28,14 +28,16 @@ define(function (require) {
         self.scriptingWarning = scriptingWarning;
 
         self.indexPattern = $scope.getIndexPattern();
-        self.fieldProps = Object.create($scope.getField().$$spec);
-        createField();
+        self.field = shadowCopy($scope.getField());
         self.formatParams = self.field.format.params();
 
-        self.cancel = function () {
-          redirectAway();
-        };
+        // only init on first create
+        self.creating = !self.indexPattern.fields.byName[self.field.name];
+        self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
+        self.defFormatType = initDefaultFormat();
+        self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
 
+        self.cancel = redirectAway;
         self.save = function () {
           var indexPattern = self.indexPattern;
           var fields = indexPattern.fields;
@@ -47,7 +49,7 @@ define(function (require) {
           if (!self.selectedFormatId) {
             delete indexPattern.fieldFormatMap[field.name];
           } else {
-            indexPattern.fieldFormatMap[field.name] = self.format;
+            indexPattern.fieldFormatMap[field.name] = self.field.format;
           }
 
           return indexPattern.save()
@@ -69,59 +71,47 @@ define(function (require) {
           });
         };
 
-        $scope.$watchMulti([
-          'editor.selectedFormatId',
-          '=editor.formatParams',
-          '=editor.fieldProps'
-        ], function (cur, prev) {
-          var changedFormat = cur[0] !== prev[0];
-          var missingFormat = cur[0] && (!self.format || self.format.type.id !== cur[0]);
-          var changedParams = cur[1] !== prev[1];
-          var FieldFormat = getFieldFormatType();
+        $scope.$watch('editor.selectedFormatId', function (cur, prev) {
+          var format = self.field.format;
+          var changedFormat = cur !== prev;
+          var missingFormat = cur && (!format || format.type.id !== cur);
 
-          if (changedFormat) {
-            // the old params are no longer valid
-            self.formatParams = {};
-          }
+          if (!changedFormat || !missingFormat) return;
 
-          if (!changedParams && (changedFormat || missingFormat)) {
-            self.formatParams = _.defaults(self.formatParams || {}, FieldFormat.paramDefaults);
-            if (!_.isEqual(self.formatParams, cur[1])) return;
-          }
-
-          if (changedParams || changedFormat || missingFormat) {
-            if (self.selectedFormatId) {
-              self.format = new FieldFormat(self.formatParams);
-              self.formatParams = self.format.params();
-            } else {
-              self.format = undefined;
-            }
-          }
-
-          createField();
+          // reset to the defaults, but make sure it's an object
+          self.formatParams = _.assign({}, getFieldFormatType().paramDefaults);
         });
 
-        function createField() {
-          var first = !self.field;
-          var spec = _.assign(Object.create(self.fieldProps), { format: self.format });
-          self.field = new Field(self.indexPattern, spec);
+        $scope.$watch('editor.formatParams', function () {
+          var FieldFormat = getFieldFormatType();
+          self.field.format = new FieldFormat(self.formatParams);
+        }, true);
 
-          if (!first) return;
-          // only init on first create
-          self.creating = !self.indexPattern.fields.byName[self.field.name];
-          self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
-          if (self.selectedFormatId) self.format = self.field.format;
-          self.defFormatType = initDefaultFormat();
-          self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
+        // copy the defined properties of the field to a plain object
+        // which is mutable, and capture the changed seperately.
+        function shadowCopy(field) {
+          var changes = {};
+          var shadowProps = {};
+
+          Object.getOwnPropertyNames(field).forEach(function (prop) {
+            var desc = Object.getOwnPropertyDescriptor(field, prop);
+            shadowProps[prop] = {
+              enumerable: desc.enumerable,
+              get: function () {
+                return _.has(changes, prop) ? changes[prop] : field[prop];
+              },
+              set: function (v) {
+                changes[prop] = v;
+              }
+            };
+          });
+
+          return Object.create(null, shadowProps);
         }
 
         function redirectAway() {
-          if (window.history.length) {
-            window.history.back();
-          } else {
-            var route = self.indexPattern.routes[self.field.scripted ? 'scriptedFields' : 'indexedFields'];
-            kbnUrl.change(route);
-          }
+          var route = self.indexPattern.routes[self.field.scripted ? 'scriptedFields' : 'indexedFields'];
+          kbnUrl.change(route);
         }
 
         function getFieldFormatType() {
