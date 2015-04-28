@@ -10,7 +10,7 @@ define(function (require) {
       '=' : '-equal-'
     };
     _.each(trans, function (val, key) {
-      var regex = new RegExp(key);
+      var regex = new RegExp(key, 'g');
       id = id.replace(regex, val);
     });
     id = id.replace(/[\s]+/g, '-');

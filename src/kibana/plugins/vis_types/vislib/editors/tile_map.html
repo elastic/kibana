@@ -111,7 +111,22 @@
 
 <div class="form-group">
   <label>
-    <input type="checkbox" value="{{isDesaturated}}" ng-model="vis.params.isDesaturated" name="isDesaturated" ng-checked="vis.params.isDesaturated">
+    <input type="checkbox"
+    name="autoPrecision"
+    value="{{autoPrecision}}"
+    ng-model="vis.params.autoPrecision"
+    ng-checked="vis.params.autoPrecision">
+    Change geoHash precision on map zoom
+  </label>
+</div>
+
+<div class="vis-option-item">
+  <label>
+    <input type="checkbox"
+    name="isDesaturated"
+    value="{{isDesaturated}}"
+    ng-model="vis.params.isDesaturated"
+    ng-checked="vis.params.isDesaturated">
     Desaturate map tiles
   </label>
 </div>

@@ -484,6 +484,7 @@ define(function (require) {
         type: 'histogram',
         params: {
           addLegend: false,
+          addTimeMarker: true
         },
         listeners: {
           click: function (e) {
