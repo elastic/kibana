@@ -211,9 +211,12 @@ define(function (require) {
       // refresh the id and editRoute
       function setId(id) {
         self.id = id;
-        self.editRoute = id && kbnUrl.eval('/settings/indices/{{id}}', self);
-        self.addFieldRoute = id && kbnUrl.eval('/settings/indices/{{id}}/create-field', self);
-
+        self.routes = !id ? {} : {
+          edit: kbnUrl.eval('/settings/indices/{{id}}', self),
+          addField: kbnUrl.eval('/settings/indices/{{id}}/create-field', self),
+          indexedFields: kbnUrl.eval('/settings/indices/{{id}}?_a=(tab:indexedFields)', self),
+          scriptedFields: kbnUrl.eval('/settings/indices/{{id}}?_a=(tab:scriptedFields)', self)
+        };
         return self.id;
       }
 

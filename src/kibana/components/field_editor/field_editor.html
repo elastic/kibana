@@ -106,9 +106,9 @@
     <button
       ng-disabled="form.$invalid"
       type="submit"
-      aria-label="Update Field"
+      aria-label="{{ editor.creating ? 'Create' : 'Update' }} Field"
       class="btn btn-success">
-      Update Field
+      {{ editor.creating ? 'Create' : 'Update' }} Field
     </button>
   </div>
 </form>

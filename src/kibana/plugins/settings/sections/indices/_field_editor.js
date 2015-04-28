@@ -29,7 +29,7 @@ define(function (require) {
 
         if (!this.field) {
           notify.error(this.indexPattern + ' does not have a "' + fieldName + '" field.');
-          kbnUrl.redirect(this.indexPattern.editRoute);
+          kbnUrl.redirect(this.indexPattern.routes.edit);
           return;
         }
 

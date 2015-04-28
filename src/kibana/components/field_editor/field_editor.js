@@ -33,7 +33,7 @@ define(function (require) {
         self.formatParams = self.field.format.params();
 
         self.cancel = function () {
-          kbnUrl.change(self.indexPattern.editRoute);
+          redirectAway();
         };
 
         self.save = function () {
@@ -53,7 +53,7 @@ define(function (require) {
           return indexPattern.save()
           .then(function () {
             notify.info('Saved Field "' + self.field.name + '"');
-            kbnUrl.change(self.indexPattern.editRoute);
+            redirectAway();
           });
         };
 
@@ -65,7 +65,7 @@ define(function (require) {
           return indexPattern.save()
           .then(function () {
             notify.info('Deleted Field "' + field.name + '"');
-            kbnUrl.change(indexPattern.editRoute);
+            redirectAway();
           });
         };
 
@@ -113,6 +113,15 @@ define(function (require) {
           if (self.selectedFormatId) self.format = self.field.format;
           self.defFormatType = initDefaultFormat();
           self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
+        }
+
+        function redirectAway() {
+          if (window.history.length) {
+            window.history.back();
+          } else {
+            var route = self.indexPattern.routes[self.field.scripted ? 'scriptedFields' : 'indexedFields'];
+            kbnUrl.change(route);
+          }
         }
 
         function getFieldFormatType() {
