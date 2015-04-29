@@ -20,14 +20,12 @@ define(function (require) {
     queryFilter.getAppFilters = function () {
       var appState = getAppState();
       if (!appState || !appState.filters) return [];
-      var appFilters = (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
-      return uniqFilters(appFilters, { disabled: true });
+      return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
 
     queryFilter.getGlobalFilters = function () {
       if (!globalState.filters) return [];
-      var globalFilters = _.map(globalState.filters, appendStoreType('globalState'));
-      return uniqFilters(globalFilters, { disabled: true });
+      return _.map(globalState.filters, appendStoreType('globalState'));
     };
 
     /**
@@ -39,7 +37,6 @@ define(function (require) {
     queryFilter.addFilters = function (filters, global) {
       var appState = getAppState();
       var state = (global) ? globalState : appState;
-      var globalFilters = queryFilter.getGlobalFilters();
 
       if (!_.isArray(filters)) {
         filters = [filters];
@@ -48,30 +45,10 @@ define(function (require) {
       // simply concat global filters, they will be deduped
       if (global) {
         globalState.filters = globalState.filters.concat(filters);
-        return saveState();
+      } else if (appState) {
+        if (!appState.filters) appState.filters = [];
+        appState.filters = appState.filters.concat(filters);
       }
-
-      if (!appState) return queryFilter.getFilters();
-      if (!appState.filters) appState.filters = [];
-
-      // app filters need to mutate global filter state
-      // if they match existing global filters
-      var compareOptions = {};
-      filters = _.filter(filters, function (filter) {
-        var match = _.find(globalFilters, function (globalFilter) {
-          return compareFilters(globalFilter, filter, compareOptions);
-        });
-
-        // if the filter remains, it doesn't match any filters in global state
-        if (!match) return true;
-
-        // filter matches a filter in globalFilters, mutate existing global filter
-        match.meta = filter.meta;
-        return false;
-      });
-
-      // append any remaining app filters, they will be deduped
-      appState.filters = appState.filters.concat(filters);
 
       return saveState();
     };
@@ -208,7 +185,32 @@ define(function (require) {
      */
     function saveState() {
       var appState = getAppState();
-      if (appState) appState.save();
+      var globalFilters = globalState.filters || [];
+
+      if (appState) {
+        var appFilters = appState.filters || [];
+
+        // app filters need to mutate global filter state
+        // if they match existing global filters
+        var compareOptions = { disabled: true };
+        appFilters = _.filter(appFilters, function (filter) {
+          var match = _.find(globalFilters, function (globalFilter) {
+            return compareFilters(globalFilter, filter, compareOptions);
+          });
+
+          // if the filter remains, it doesn't match any filters in global state
+          if (!match) return true;
+
+          // filter matches a filter in globalFilters, mutate existing global filter
+          match.meta = filter.meta;
+          return false;
+        });
+
+        appState.filters = uniqFilters(appFilters, { disabled: true });
+        appState.save();
+      }
+
+      globalState.filters = uniqFilters(globalFilters, { disabled: true });
       globalState.save();
       return queryFilter.getFilters();
     }
