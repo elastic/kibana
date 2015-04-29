@@ -22,11 +22,8 @@ define(function (require) {
       template: require('text!plugins/settings/sections/indices/index.html'),
       link: function ($scope) {
         $scope.edittingId = $route.current.params.id;
-        $scope.defaultIndex = config.get('defaultIndex');
-        $rootScope.$on('change:config.defaultIndex', function () {
-          $scope.defaultIndex = config.get('defaultIndex');
-        });
 
+        config.$bind($scope, 'defaultIndex');
         $scope.$watch('defaultIndex', function (defaultIndex) {
           $scope.indexPatternList = _($route.current.locals.indexPatternIds)
             .map(function (id) {

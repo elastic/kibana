@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var configDefaults = require('components/config/defaults');
 
   require('modules').get('apps/settings')
   .directive('advancedRow', function (config, Notifier, Private) {
@@ -13,6 +12,7 @@ define(function (require) {
         configs: '='
       },
       link: function ($scope) {
+        var configDefaults = Private(require('components/config/defaults'));
         var notify = new Notifier();
         var keyCodes = {
           ESC: 27
