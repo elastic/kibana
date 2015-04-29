@@ -19,7 +19,7 @@ define(function (require) {
 
       this.handler = handler;
       this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover', 'mouseout', 'mapZoomEnd');
+        'mousedown', 'mouseover', 'mouseout');
     }
 
     /**
