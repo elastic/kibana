@@ -19,7 +19,7 @@ function createStatusFn(color) {
     this.state = color;
     this.message = message;
     if (previous.state === this.state && previous.message === this.message) return;
-    this.emit(color, message);
+    this.emit(color, message, previous);
     this.emit('change', this.toJSON(), previous);
   };
 }

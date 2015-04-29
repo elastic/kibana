@@ -1,18 +1,7 @@
 var join = require('path').join;
 var kibana = require('../../');
-var systemStatus = require('../../lib/system_status');
-
-function Series(size) {
-  this.size = size;
-  this.data = [];
-}
-Series.prototype.push = function (value) {
-  this.data.unshift([Date.now(), value]);
-  if (this.data.length > this.size) this.data.pop();
-};
-Series.prototype.toJSON = function () {
-  return this.data;
-};
+var status = require('../../lib/status');
+var Series = require('./lib/series');
 
 module.exports = new kibana.Plugin({
 
@@ -33,7 +22,7 @@ module.exports = new kibana.Plugin({
     };
 
     server.plugins.good.monitor.on('ops', function (event) {
-      var port = String(config.port);
+      var port = String(config.get('kibana.server.port'));
       fiveMinuteData.rss.push(event.psmem.rss);
       fiveMinuteData.heapTotal.push(event.psmem.heapTotal);
       fiveMinuteData.heapUsed.push(event.psmem.heapUsed);
@@ -56,15 +45,15 @@ module.exports = new kibana.Plugin({
       }
     });
 
-    server.route({
-      method: 'GET',
-      path: '/status/{param*}',
-      handler: {
-        directory: {
-          path: join(__dirname, 'public')
-        }
-      }
-    });
+    // server.route({
+    //   method: 'GET',
+    //   path: '/status/{param*}',
+    //   handler: {
+    //     directory: {
+    //       path: join(__dirname, 'public')
+    //     }
+    //   }
+    // });
 
     server.route({
       method: 'GET',
@@ -72,7 +61,7 @@ module.exports = new kibana.Plugin({
       handler: function (request, reply) {
         return reply({
           metrics: fiveMinuteData,
-          status: systemStatus
+          status: status
         });
       }
     });

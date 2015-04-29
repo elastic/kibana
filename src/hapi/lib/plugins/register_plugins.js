@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
 var checkDependencies = require('./check_dependencies');
-var systemStatus = require('./system_status');
+var status = require('../status');
+var addStaticsForPublic = require('./add_statics_for_public');
 
 function checkForCircularDependency(tasks) {
   var deps = {};
@@ -35,16 +36,15 @@ module.exports = function (server, plugins) {
     return new Promise(function (resolve, reject) {
       var register = function (server, options, next) {
         plugin.server = server;
-        systemStatus.createStatus(plugin);
-        plugin.status.yellow('Initializing');
+        status.createStatus(plugin);
         Promise.try(plugin.init, [server, options], plugin).nodeify(next);
       };
       register.attributes = { name: plugin.name };
       var options = config[plugin.name] || {};
       server.register({ register: register, options: options }, function (err) {
         if (err) return reject(err);
-        resolve();
         plugin.status.green('Ready');
+        resolve(plugin);
       });
     });
   }
@@ -64,6 +64,7 @@ module.exports = function (server, plugins) {
           if (!plugin.require || (plugin.require && allDone(plugin.require))) {
             running[plugin.name] = true;
             registerPlugin(plugin)
+            .then(addStaticsForPublic)
             .then(function () {
               results[plugin.name] = true;
               runPending();

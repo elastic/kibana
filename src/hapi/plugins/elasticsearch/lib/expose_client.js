@@ -6,13 +6,13 @@ var url = require('url');
 
 module.exports = function (server) {
   var config = server.config();
-  var uri = url.parse(config.elasticsearch);
-  var username = config.kibana.kibana_elasticsearch_username;
-  var password = config.kibana.kibana_elasticsearch_password;
-  var verify_ssl = config.kibana.verify_ssl;
-  var client_crt = config.kibana.kibana_elasticsearch_client_crt;
-  var client_key = config.kibana.kibana_elasticsearch_client_key;
-  var ca = config.kibana.ca;
+  var uri = url.parse(config.get('elasticsearch.url'));
+  var username = config.get('elasticsearch.username');
+  var password = config.get('elasticsearch.password');
+  var verify_ssl = config.get('elasticsearch.ssl.verify');
+  var client_crt = config.get('elasticsearch.ssl.cert');
+  var client_key = config.get('elasticsearch.ssl.key');
+  var ca = config.get('elasticsearch.ssl.ca');
 
   if (username && password) {
     uri.auth = util.format('%s:%s', username, password);

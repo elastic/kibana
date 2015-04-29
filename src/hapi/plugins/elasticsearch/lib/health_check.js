@@ -15,7 +15,7 @@ module.exports = function (plugin, server) {
     return client.ping({ requestTimeout: 1500 }).catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s. Retrying in 2.5 seconds.', config.elasticsearch));
+      plugin.status.red(format('Unable to connect to Elasticsearch at %s. Retrying in 2.5 seconds.', config.get('elasticsearch.url')));
 
       return Promise.delay(2500).then(waitForPong);
     });
@@ -24,7 +24,7 @@ module.exports = function (plugin, server) {
   function waitForShards() {
     return client.cluster.health({
       timeout: '5s', // tells es to not sit around and wait forever
-      index: config.kibana.kibana_index
+      index: config.get('kibana.index')
     })
     .then(function (resp) {
       // if "timed_out" === true then elasticsearch could not

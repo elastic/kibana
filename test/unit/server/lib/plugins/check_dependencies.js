@@ -1,4 +1,4 @@
-var checkDependencies = require('../../../../src/hapi/lib/check_dependencies');
+var checkDependencies = require('../../../../../src/hapi/lib/plugins/check_dependencies');
 var expect = require('expect.js');
 
 describe('src/server/lib/check_dependencies', function () {
