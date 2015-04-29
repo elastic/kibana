@@ -26,8 +26,8 @@ define(function (require) {
 
   function mapFilter(filter) {
     var cleaned = _.omit(filter, excludedAttributes);
-    if (comparators.negate) cleaned.negate = filter.meta && filter.meta.negate;
-    if (comparators.disabled) cleaned.disabled = filter.meta && filter.meta.disabled;
+    if (comparators.negate) cleaned.negate = filter.meta && !!filter.meta.negate;
+    if (comparators.disabled) cleaned.disabled = filter.meta && !!filter.meta.disabled;
     return cleaned;
   }
 });
