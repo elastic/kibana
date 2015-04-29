@@ -152,8 +152,8 @@ define(function (require) {
       if (appIndex !== -1) {
         appState.filters.splice(appIndex, 1);
         globalState.filters.push(filter);
-      } else {
-        globalState.filters.splice(appIndex, 1);
+      } else if (globalIndex !== -1) {
+        globalState.filters.splice(globalIndex, 1);
         appState.filters.push(filter);
       }
 
