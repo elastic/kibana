@@ -29,20 +29,20 @@
               <i class="fa fa-warning"></i>
             </a>
           </li>
-          <li tooltip="Discard changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
-            <button class="btn-default navbar-btn-link"
-              ng-disabled="!vis.dirty"
-              ng-click="resetEditableVis()">
-
-              <i class="fa fa-close"></i>
-            </button>
-          </li>
           <li tooltip="Apply changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
             <button class="btn-success navbar-btn-link"
               type="submit"
               ng-disabled="!vis.dirty">
 
               <i class="fa fa-play"></i>
+            </button>
+          </li>
+          <li tooltip="Discard changes" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
+            <button class="btn-default navbar-btn-link"
+              ng-disabled="!vis.dirty"
+              ng-click="resetEditableVis()">
+
+              <i class="fa fa-close"></i>
             </button>
           </li>
         </ul>

@@ -138,14 +138,14 @@ define(function (require) {
         // legend
         legendDiv.selectAll('li')
         .filter(function (d) {
-          return this.getAttribute('data-label') !== label;
+          return this.getAttribute('data-label') !== label.toString();
         })
         .classed('blur_shape', true);
 
         // all data-label attribute
         charts.selectAll('[data-label]')
         .filter(function (d) {
-          return this.getAttribute('data-label') !== label;
+          return this.getAttribute('data-label') !== label.toString();
         })
         .classed('blur_shape', true);
 

@@ -16,7 +16,11 @@ define(function (require) {
       ['test / ^test', 'test-slash-^test'],
       ['test ?  test', 'test-questionmark-test'],
       ['test =  test', 'test-equal-test'],
-      ['test &  test', 'test-ampersand-test']
+      ['test &  test', 'test-ampersand-test'],
+      ['test/test/test', 'test-slash-test-slash-test'],
+      ['test?test?test', 'test-questionmark-test-questionmark-test'],
+      ['test&test&test', 'test-ampersand-test-ampersand-test'],
+      ['test=test=test', 'test-equal-test-equal-test']
     ];
 
     _.each(fixtures, function (fixture) {
