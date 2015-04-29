@@ -18,9 +18,11 @@ define(function (require) {
       self.vislibParams = self._getVislibParams();
       self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
 
-      _.each(self.vis.listeners, function (listener, event) {
-        self.vislibVis.on(event, listener);
-      });
+      self.vis.type.initVis(self.vis, self.vislibVis);
+
+      if (self.vis.type.create) {
+        self.vis.type.create(self.vis, self.vislibVis);
+      }
     };
 
     VislibRenderbot.prototype._getVislibParams = function () {
@@ -45,9 +47,11 @@ define(function (require) {
 
       var vislibVis = self.vislibVis;
 
-      _.forOwn(self.vis.listeners, function (listener, event) {
-        vislibVis.off(event, listener);
-      });
+      if (self.vis.type.destroy) {
+        self.vis.type.destroy(self.vis, self.vislibVis);
+      }
+
+      self.vis.type.destroyVis(self.vis, self.vislibVis);
 
       vislibVis.destroy();
     };

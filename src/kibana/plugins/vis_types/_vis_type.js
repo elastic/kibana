@@ -7,6 +7,8 @@ define(function (require) {
 
       this.name = opts.name;
       this.title = opts.title;
+      this.create = opts.create;
+      this.destroy = opts.destroy;
       this.responseConverter = opts.responseConverter;
       this.hierarchicalData = opts.hierarchicalData || false;
       this.icon = opts.icon;

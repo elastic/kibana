@@ -23,6 +23,18 @@ define(function (require) {
       this.listeners = opts.listeners || {};
     }
 
+    VislibVisType.prototype.initVis = function (vis, vislibVis) {
+      _.each(vis.listeners, function (listener, event) {
+        vislibVis.on(event, listener);
+      });
+    };
+
+    VislibVisType.prototype.destroyVis = function (vis, vislibVis) {
+      _.forOwn(vis.listeners, function (listener, event) {
+        vislibVis.off(event, listener);
+      });
+    };
+
     VislibVisType.prototype.createRenderbot = function (vis, $el) {
       return new VislibRenderbot(vis, $el);
     };
