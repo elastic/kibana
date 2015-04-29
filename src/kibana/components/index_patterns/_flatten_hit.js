@@ -41,7 +41,9 @@ define(function (require) {
     return flat;
   }
 
-  return function cachedFlatten(indexPattern, hit) {
-    return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
+  return function (indexPattern) {
+    return function cachedFlatten(hit) {
+      return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
+    };
   };
 });

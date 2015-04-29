@@ -162,7 +162,7 @@ define(function (require) {
          * Fill an element with the value of a field
          */
         function _displayField(row, field, breakWords) {
-          var text = $scope.indexPattern.formatHit(row)[field];
+          var text = $scope.indexPattern.formatField(row, field);
           text = highlightFilter(text, row.highlight && row.highlight[field]);
 
           if (breakWords) {

@@ -2,18 +2,42 @@
 // returns a formated version
 define(function (require) {
   var _ = require('lodash');
-  var flatten = require('components/index_patterns/_flatten_hit');
 
-  function formatHit(indexPattern, hit) {
-    var fields = indexPattern.fields.byName;
-    return _.transform(flatten(indexPattern, hit), function (formatted, val, name) {
-      var field = fields[name];
-      formatted[name] = field ? field.format.convert(val) : _.asPrettyString(val);
-    }, {});
-  }
+  return function (indexPattern, defaultFormat) {
 
-  return function cachedFormat(indexPattern, hit) {
-    return hit.$$_formatted || (hit.$$_formatted = formatHit(indexPattern, hit));
+    function transformField(memo, val, name) {
+      var field = indexPattern.fields.byName[name];
+      return memo[name] = field ? field.format.convert(val, 'html') : defaultFormat.convert(val, 'html');
+    }
+
+    function formatHit(hit) {
+      if (hit.$$_formatted) return hit.$$_formatted;
+      var cache = hit.$$_partialFormatted = hit.$$_formatted = {};
+
+      _.forOwn(indexPattern.flattenHit(hit), function (val, fieldName) {
+        transformField(cache, val, fieldName);
+      });
+
+      return hit.$$_formatted;
+    }
+
+    formatHit.formatField = function (hit, fieldName) {
+      // formatHit was previously called
+      if (hit.$$_formatted) return hit.$$_formatted[fieldName];
+
+      var partial = hit.$$_partialFormatted;
+      if (partial && _.has(partial, fieldName)) {
+        return partial[fieldName];
+      }
+
+      if (!partial) {
+        partial = hit.$$_partialFormatted = {};
+      }
+
+      return transformField(partial, indexPattern.flattenHit(hit)[fieldName], fieldName);
+    };
+
+    return formatHit;
   };
 
 });

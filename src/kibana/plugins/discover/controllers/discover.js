@@ -355,26 +355,30 @@ define(function (require) {
         rows = $scope.rows = rows.concat(resp.hits.hits);
 
         if (sortFn) {
-          rows.sort(sortFn);
-          rows = $scope.rows = rows.slice(0, totalSize);
-          counts = rows.fieldCounts = {};
+          notify.event('resort rows', function () {
+            rows.sort(sortFn);
+            rows = $scope.rows = rows.slice(0, totalSize);
+            counts = rows.fieldCounts = {};
+          });
         }
 
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it and we are NOT sorting.
-          // ---
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response
-          if (hit.$$_counted && !sortFn) return;
-          hit.$$_counted = true;
+        notify.event('flatten hit and count fields', function () {
+          $scope.rows.forEach(function (hit) {
+            // skip this work if we have already done it and we are NOT sorting.
+            // ---
+            // when we are sorting results, we need to redo the counts each time because the
+            // "top 500" may change with each response
+            if (hit.$$_counted && !sortFn) return;
+            hit.$$_counted = true;
 
-          var fields = _.keys(indexPattern.formatHit(hit));
-          var n = fields.length;
-          var field;
-          while (field = fields[--n]) {
-            if (counts[field]) counts[field] += 1;
-            else counts[field] = 1;
-          }
+            var fields = _.keys(indexPattern.flattenHit(hit));
+            var n = fields.length;
+            var field;
+            while (field = fields[--n]) {
+              if (counts[field]) counts[field] += 1;
+              else counts[field] = 1;
+            }
+          });
         });
 
       }));

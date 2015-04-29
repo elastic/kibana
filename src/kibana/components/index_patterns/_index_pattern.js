@@ -10,12 +10,13 @@ define(function (require) {
     var mapper = Private(require('components/index_patterns/_mapper'));
     var intervals = Private(require('components/index_patterns/_intervals'));
     var Field = Private(require('components/index_patterns/_field'));
-    var flattenHit = require('components/index_patterns/_flatten_hit');
-    var formatHit = require('components/index_patterns/_format_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
     var IndexedArray = require('utils/indexed_array/index');
+
+    var flattenHit = require('components/index_patterns/_flatten_hit');
+    var formatHit = require('components/index_patterns/_format_hit');
 
     var type = 'index-pattern';
 
@@ -264,9 +265,11 @@ define(function (require) {
       };
 
       self.metaFields = config.get('metaFields');
-      self.flattenHit = _.partial(flattenHit, self);
-      self.formatHit = _.partial(formatHit, self);
       self.getComputedFields = getComputedFields.bind(self);
+
+      self.flattenHit = flattenHit(self);
+      self.formatHit = formatHit(self, fieldformats.getDefaultInstance('string'));
+      self.formatField = self.formatHit.formatField;
     }
     return IndexPattern;
   };
