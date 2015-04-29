@@ -24,6 +24,7 @@ define(function (require) {
      */
     _(TileMap).inherits(Chart);
     function TileMap(handler, chartEl, chartData) {
+
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);
       }
@@ -31,6 +32,8 @@ define(function (require) {
 
       // track the map objects
       this.maps = [];
+
+      this.tooltipFormatter = chartData.tooltipFormatter;
 
       // add allmin and allmax to geoJson
       chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
@@ -65,7 +68,9 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          var mapData = data.geoJson;
+          // add leaflet latLngs to properties for tooltip
+          var mapData = self.addLatLng(data.geoJson);
+
           var div = $(this).addClass('tilemap');
 
           var featureLayer;
@@ -129,9 +134,83 @@ define(function (require) {
             map.addControl(new FitControl());
           }
 
+          // add tooltips
+          console.log('tooltips', self._attr.addLeafletPopup);
+          if (self._attr.addLeafletPopup && self.tooltipFormatter) {
+            map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
+              'leading': true,
+              'trailing': false
+            }));
+            map.on('mouseout', function () {
+              map.closePopup();
+            });
+          }
+
+          function mouseMoveLocation(e) {
+            map.closePopup();
+
+            if (!mapData.features.length) {
+              return;
+            }
+
+            var latlng = e.latlng;
+
+            // find nearest feature to event latlng
+            var feature = self.nearestFeature(latlng, mapData);
+
+            var zoom = map.getZoom();
+
+            // show tooltip if close enough to event latlng
+            if (self.tooltipProximity(latlng, zoom, feature, map)) {
+              self.showTooltip(map, feature);
+            }
+          }
+
           self.maps.push(map);
         });
       };
+    };
+
+    /**
+     * add Leaflet latLng to mapData properties
+     *
+     * @method addLatLng
+     * @param mapData {mapData Object}
+     * @return mapData {Object}
+     */
+    TileMap.prototype.addLatLng = function (mapData) {
+      for (var i = 0; i < mapData.features.length; i++) {
+        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
+        mapData.features[i].properties.latLng = latLng;
+      }
+
+      return mapData;
+    };
+
+    /**
+     * Checks if event latlng is within bounds of mapData
+     * features and shows tooltip for that feature
+     *
+     * @method showTooltip
+     * @param e {Event}
+     * @param map {Leaflet Object}
+     * @param mapData {mapData Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.showTooltip = function (map, feature) {
+      var content = this.tooltipFormatter(feature);
+      if (!content) {
+        return;
+      }
+
+      var lat = feature.geometry.coordinates[1];
+      var lng = feature.geometry.coordinates[0];
+      var latLng = L.latLng(lat, lng);
+
+      L.popup({autoPan: false})
+       .setLatLng(latLng)
+       .setContent(content)
+       .openOn(map);
     };
 
     /**
@@ -157,6 +236,81 @@ define(function (require) {
       if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
+    };
+
+    /**
+     * Finds nearest feature in mapData to event latlng
+     *
+     * @method nearestFeature
+     * @param point {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return nearestPoint {Leaflet Object}
+     */
+    TileMap.prototype.nearestFeature = function (point, mapData) {
+      var self = this;
+      var distance = Infinity;
+      var nearest;
+
+      if (point.lng < -180 || point.lng > 180) {
+        return;
+      }
+
+      for (var i = 0; i < mapData.features.length; i++) {
+        var dist = point.distanceTo(mapData.features[i].properties.latLng);
+        if (dist < distance) {
+          distance = dist;
+          nearest = mapData.features[i];
+        }
+      }
+      nearest.properties.eventDistance = distance;
+
+      return nearest;
+    };
+
+    /**
+     * display tooltip if feature is close enough to event latlng
+     *
+     * @method tooltipProximity
+     * @param latlng {Leaflet Object}
+     * @param zoom {Number}
+     * @param feature {geoJson Object}
+     * @param map {Leaflet Object}
+     * @return boolean
+     */
+    TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
+      if (!feature) {
+        return;
+      }
+
+      var showTip = false;
+
+      // zoomScale takes map zoom and returns proximity value for tooltip display
+      // domain (input values) is map zoom (min 1 and max 18)
+      // range (output values) is distance in meters
+      // used to compare proximity of event latlng to feature latlng
+      var zoomScale = d3.scale.linear()
+      .domain([1, 4, 7, 10, 13, 16, 18])
+      .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
+
+      var proximity = zoomScale(zoom);
+      var distance = latlng.distanceTo(feature.properties.latLng);
+
+      // maxLngDif is max difference in longitudes
+      // to prevent feature tooltip from appearing 360°
+      // away from event latlng
+      var maxLngDif = 40;
+      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
+
+      if (distance < proximity && lngDif < maxLngDif) {
+        showTip = true;
+      }
+
+      delete feature.properties.eventDistance;
+
+      var testScale = d3.scale.pow().exponent(0.2)
+      .domain([1, 18])
+      .range([1500000, 50]);
+      return showTip;
     };
 
     /**
@@ -210,9 +364,6 @@ define(function (require) {
           var scaledRadius = self.radiusScale(count, max, feature) * 2;
           return L.circle(latlng, scaledRadius);
         },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
         }
@@ -248,9 +399,6 @@ define(function (require) {
           var count = feature.properties.count;
           var radius = self.geohashMinDistance(feature);
           return L.circle(latlng, radius);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -294,18 +442,6 @@ define(function (require) {
             [geohashRect[1][1], geohashRect[1][0]]
           ];
           return L.rectangle(bounds);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-          layer.on({
-            mouseover: function (e) {
-              var layer = e.target;
-              // bring layer to front if not older browser
-              if (!L.Browser.ie && !L.Browser.opera) {
-                layer.bringToFront();
-              }
-            }
-          });
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
