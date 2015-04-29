@@ -185,32 +185,7 @@ define(function (require) {
      */
     function saveState() {
       var appState = getAppState();
-      var globalFilters = globalState.filters || [];
-
-      if (appState) {
-        var appFilters = appState.filters || [];
-
-        // app filters need to mutate global filter state
-        // if they match existing global filters
-        var compareOptions = { disabled: true };
-        appFilters = _.filter(appFilters, function (filter) {
-          var match = _.find(globalFilters, function (globalFilter) {
-            return compareFilters(globalFilter, filter, compareOptions);
-          });
-
-          // if the filter remains, it doesn't match any filters in global state
-          if (!match) return true;
-
-          // filter matches a filter in globalFilters, mutate existing global filter
-          match.meta = filter.meta;
-          return false;
-        });
-
-        appState.filters = uniqFilters(appFilters, { disabled: true });
-        appState.save();
-      }
-
-      globalState.filters = uniqFilters(globalFilters, { disabled: true });
+      if (appState) appState.save();
       globalState.save();
       return queryFilter.getFilters();
     }
@@ -238,10 +213,36 @@ define(function (require) {
       return false;
     }
 
+    // helper to run a function on all filters in all states
     function executeOnFilters(fn) {
       var appState = getAppState();
       appState.filters.forEach(fn);
       globalState.filters.forEach(fn);
+    }
+
+    function mergeAndMutateFilters(globalFilters, appFilters, compareOptions) {
+      appFilters = appFilters || [];
+      globalFilters = globalFilters || [];
+      compareOptions = _.defaults(compareOptions || {}, { disabled: true });
+
+      // existing globalFilters should be mutated by appFilters
+      appFilters = _.filter(appFilters, function (filter) {
+        var match = _.find(globalFilters, function (globalFilter) {
+          return compareFilters(globalFilter, filter, compareOptions);
+        });
+
+        // if the filter remains, it doesn't match any filters in global state
+        if (!match) return true;
+
+        // filter matches a filter in globalFilters, mutate existing global filter
+        _.assign(match.meta, filter.meta);
+        return false;
+      });
+
+      appFilters = uniqFilters(appFilters, { disabled: true });
+      globalFilters = uniqFilters(globalFilters, { disabled: true });
+
+      return [globalFilters, appFilters];
     }
 
     /**
@@ -261,11 +262,11 @@ define(function (require) {
         var stateWatchers = [{
           fn: $rootScope.$watch,
           deep: true,
-          get: queryFilter.getAppFilters
+          get: queryFilter.getGlobalFilters
         }, {
           fn: $rootScope.$watch,
           deep: true,
-          get: queryFilter.getGlobalFilters
+          get: queryFilter.getAppFilters
         }];
 
         // when states change, use event emitter to trigger updates and fetches
@@ -273,6 +274,7 @@ define(function (require) {
           var doUpdate = false;
           var doFetch = false;
 
+          // iterate over each state type, checking for changes
           stateWatchers.forEach(function (watcher, i) {
             var nextVal = next[i];
             var prevVal = prev[i];
@@ -284,6 +286,13 @@ define(function (require) {
           });
 
           if (!doUpdate) return;
+
+          // reconcile filter in global and app states
+          var appState = getAppState();
+          var filters = mergeAndMutateFilters(next[0], next[1]);
+          globalState.filters = filters[0];
+          appState.filters = filters[1];
+          saveState();
 
           return queryFilter.emit('update')
           .then(function () {

@@ -130,8 +130,9 @@ define(function (require) {
         globalState.filters = filters;
         var appFilter = _.cloneDeep(filters[idx]);
         appFilter.meta.negate = true;
-        // use addFilters here, so custom adding logic can be applied
-        queryFilter.addFilters(appFilter);
+        $rootScope.$digest();
+        appState.filters.push(appFilter);
+        $rootScope.$digest();
 
         var res = queryFilter.getFilters();
         expect(res).to.have.length(3);
