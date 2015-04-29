@@ -10,6 +10,7 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src');
+  var DOT_PREFIX_RE = /(.).+?\./g;
 
   return {
     /**
@@ -188,6 +189,17 @@ define(function (require) {
       case 'object': return JSON.stringify(val, null, '  ');
       default: return '' + val;
       }
+    },
+
+    /**
+     * Convert a dot.notated.string into a short
+     * version (d.n.string)
+     *
+     * @param {string} str - the long string to convert
+     * @return {string}
+     */
+    shortenDottedString: function (str) {
+      return String(str).replace(DOT_PREFIX_RE, '$1.');
     }
   };
 });

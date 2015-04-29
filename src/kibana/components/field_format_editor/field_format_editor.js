@@ -102,7 +102,7 @@ define(function (require) {
           }
 
           var attrs = {};
-          var linkFns = directive.compile($el, attrs);
+          var linkFns = directive.compile && directive.compile($el, attrs);
           if (!linkFns || _.isFunction(linkFns)) {
             linkFns = {
               pre: _.noop,
