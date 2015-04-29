@@ -21,7 +21,7 @@ define(function (require) {
       self.vis.type.initVis(self.vis, self.vislibVis);
 
       if (self.vis.type.create) {
-        self.vis.type.create(self.vis);
+        self.vis.type.create(self.vis, self.vislibVis);
       }
     };
 
@@ -48,7 +48,7 @@ define(function (require) {
       var vislibVis = self.vislibVis;
 
       if (self.vis.type.destroy) {
-        self.vis.type.destroy(self.vis);
+        self.vis.type.destroy(self.vis, self.vislibVis);
       }
 
       self.vis.type.destroyVis(self.vis, self.vislibVis);
