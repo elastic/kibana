@@ -132,9 +132,16 @@ define(function (require) {
           return agg.type.name === 'geohash_grid';
         });
 
+        console.log(event.zoom, event.zoomPct);
         geoHash.params.precision = autoPrecision(event.zoom, config.get('visualization:tileMap:maxPrecision'));
         $scope.fetch();
       };
+
+      function autoPrecision(zoom, limit) {
+        console.log(zoom, limit, Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit));
+        // return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
+        return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
+      }
 
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -296,10 +303,6 @@ define(function (require) {
 
         if (fetch) $scope.fetch();
       };
-    }
-
-    function autoPrecision(zoom, limit) {
-      return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
     }
 
     init();
