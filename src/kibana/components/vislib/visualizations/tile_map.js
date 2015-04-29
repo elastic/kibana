@@ -142,14 +142,6 @@ define(function (require) {
       };
     };
 
-    TileMap.prototype.addZoomEndEvent = function (element) {
-      var events = this.events;
-      var zoomend = events.addMapZoomEndEvent();
-      var attachedEvents = element.call(zoomend);
-
-      return attachedEvents;
-    };
-
     /**
      * zoom map to fit all features in featureLayer
      *

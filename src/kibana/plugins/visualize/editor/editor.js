@@ -132,15 +132,38 @@ define(function (require) {
           return agg.type.name === 'geohash_grid';
         });
 
-        console.log(event.zoom, event.zoomPct);
         geoHash.params.precision = autoPrecision(event.zoom, config.get('visualization:tileMap:maxPrecision'));
         $scope.fetch();
       };
 
       function autoPrecision(zoom, limit) {
-        console.log(zoom, limit, Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit));
-        // return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
-        return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
+        var precision;
+
+        // zoomPrecision keys are map zoom, values are geohash precision
+        // default max precision is 7, configurable up to 12
+        // limit (max precision) is the max precision value returned
+        var zoomPrecision = {
+          1: 1,
+          2: 2,
+          3: 2,
+          4: 3,
+          5: 3,
+          6: 4,
+          7: 4,
+          8: 5,
+          9: 5,
+          10: 6,
+          11: 6,
+          12: 7,
+          13: 7,
+          14: 8,
+          15: 9,
+          16: 10,
+          17: 11,
+          18: 12
+        };
+        precision = Math.min(zoomPrecision[zoom], limit);
+        return precision;
       }
 
       // track state of editable vis vs. "actual" vis
