@@ -50,7 +50,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise, config) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -125,16 +125,6 @@ define(function (require) {
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
-      editableVis.listeners.mapZoomEnd = vis.listeners.mapZoomEnd = function (event) {
-        if (!vis.params.autoPrecision) return;
-
-        var geoHash = _.find(vis.aggs, function (agg) {
-          return agg.type.name === 'geohash_grid';
-        });
-
-        geoHash.params.precision = autoPrecision(event.zoom, config.get('visualization:tileMap:maxPrecision'));
-        $scope.fetch();
-      };
 
       function autoPrecision(zoom, limit) {
         var precision;

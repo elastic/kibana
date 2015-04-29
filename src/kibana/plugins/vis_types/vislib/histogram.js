@@ -16,7 +16,9 @@ define(function (require) {
           addLegend: true,
           scale: 'linear',
           mode: 'stacked',
-          defaultYExtents: false
+          defaultYExtents: false,
+          times: [],
+          addTimeMarker: false
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'percentage', 'grouped'],
