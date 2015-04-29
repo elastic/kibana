@@ -105,6 +105,14 @@ define(function (require) {
             mapCenter = self._attr.mapCenter = map.getCenter();
           });
 
+          map.on('zoomend', function (e) {
+            var mapInfo = {
+              zoom: map.getZoom(),
+              zoomPct: map.getZoom() / 18
+            };
+            self.events.dispatch.mapZoomEnd(mapInfo);
+          });
+
           // add label for splits
           if (mapData.properties.label) {
             self.addLabel(mapData.properties.label, map);
