@@ -135,8 +135,9 @@ define(function (require) {
           }
 
           // add tooltips
-          console.log('tooltips', self._attr.addLeafletPopup);
-          if (self._attr.addLeafletPopup && self.tooltipFormatter) {
+          self._attr.disableTooltips = false;
+
+          if (self._attr.addLeafletPopup && self.tooltipFormatter && !self._attr.disableTooltips) {
             map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
               'leading': true,
               'trailing': false
@@ -144,12 +145,19 @@ define(function (require) {
             map.on('mouseout', function () {
               map.closePopup();
             });
+            map.on('mousedown', function () {
+              self._attr.disableTooltips = true;
+              map.closePopup();
+            });
+            map.on('mouseup', function () {
+              self._attr.disableTooltips = false;
+            });
           }
 
           function mouseMoveLocation(e) {
             map.closePopup();
 
-            if (!mapData.features.length) {
+            if (!mapData.features.length || self._attr.disableTooltips) {
               return;
             }
 
