@@ -152,14 +152,15 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      queryFilter
-      .on('update', function () {
+      // update the searchSource when filters update
+      $scope.$listen(queryFilter, 'update', function () {
         searchSource.set('filter', queryFilter.getFilters());
         $state.save();
-      })
-      .on('fetch', function () {
-        $scope.fetch();
       });
+
+      // fetch data when filters fire fetch event
+      $scope.$listen(queryFilter, 'fetch', $scope.fetch);
+
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
         if (_.contains(keys, 'linked') && $state.linked === true) {

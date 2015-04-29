@@ -120,12 +120,14 @@ define(function (require) {
           }
         }
 
-        queryFilter
-        .on('update', function () {
+        // update root source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           updateQueryOnRootSource();
           $state.save();
-        })
-        .on('fetch', $scope.refresh);
+        });
+
+        // update data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});

@@ -164,14 +164,15 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        // update the datasource and fetch the data based on filters
-        queryFilter
-        .on('update', function () {
+        // update data source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
-        })
-        .on('fetch', $scope.fetch);
+        });
+
+        // fetch data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
