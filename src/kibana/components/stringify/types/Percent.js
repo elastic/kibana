@@ -7,7 +7,7 @@ define(function (require) {
     return Numeral.factory({
       id: 'percent',
       title: 'Percentage',
-      editorTemplate: require('text!components/stringify/editors/percent.html'),
+      editorTemplate: require('text!components/stringify/editors/_numeral.html'),
       paramDefaults: FieldFormat.initConfig({
         pattern: '=format:percent:defaultPattern',
         fractional: true

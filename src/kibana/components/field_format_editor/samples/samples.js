@@ -3,32 +3,24 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('fieldEditorPattern', function ($sce, Promise) {
+  .directive('fieldFormatEditorSamples', function ($sce, Promise) {
     return {
       restrict: 'E',
-      template: require('text!components/field_editor/pattern/pattern.html'),
-      require: ['ngModel', '^fieldEditor'],
+      template: require('text!components/field_format_editor/samples/samples.html'),
+      require: ['?^ngModel', '^fieldEditor'],
       scope: true,
       link: function ($scope, $el, attrs, cntrls) {
         var ngModelCntrl = cntrls[0];
-        var editor = cntrls[1];
 
         $scope.samples = null;
-        $scope.$bind('inputs', attrs.samples);
-        $scope.$bind('placeholder', attrs.placeholder);
-
-        $scope.$watch('model', ngModelCntrl.$setViewValue);
-        ngModelCntrl.$render = function () {
-          $scope.model = ngModelCntrl.$viewValue;
-        };
+        $scope.$bind('inputs', attrs.inputs);
 
         $scope.$watchMulti([
-          '=editor.field.format._params',
-          '[]inputs',
-          'model'
+          'editor.field.format',
+          '[]inputs'
         ], function () {
           $scope.samples = null;
-          var field = editor.field;
+          var field = $scope.editor.field;
 
           if (!field || !field.format) {
             return;
@@ -45,7 +37,7 @@ define(function (require) {
 
         function validity(err) {
           $scope.error = err;
-          ngModelCntrl.$setValidity('patternExecutes', !err);
+          ngModelCntrl && ngModelCntrl.$setValidity('patternExecutes', !err);
         }
       }
     };

@@ -1,17 +1,9 @@
-<div class="form-group">
-  <input
-    ng-model="model"
-    placeholder="{{ placeholder }}"
-    pattern-runs
-    class="form-control">
-</div>
-
 <div class="form-group hintbox" ng-if="error">
   <h4 class="hintbox-heading">
-    <i class="fa fa-danger text-danger"></i> Pattern error
+    <i class="fa fa-danger text-danger"></i> Format error
   </h4>
   <p>
-    An error occured while trying to use this pattern. Please make sure that it is valid.
+    An error occured while trying to use this format configuration.
   </p>
   <pre>{{ error.message }}</pre>
 </div>
