@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Notifier) {
+  return function () {
     return function ($state) {
       return function (filter, negate, index) {
         // Hierarchical and tabular data set their aggConfigResult parameter
