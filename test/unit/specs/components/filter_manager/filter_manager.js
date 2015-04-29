@@ -66,6 +66,20 @@ define(function (require) {
       expect(appState.filters[1].meta.negate).to.be(true);
     });
 
+    it('should enable matching filters being changed', function () {
+      _.each([true, false], function (negate) {
+        appState.filters = [{
+          query: { match: { myField: { query: 1 } } },
+          meta: { disabled: true, negate: negate }
+        }];
+        expect(appState.filters.length).to.be(1);
+        expect(appState.filters[0].meta.disabled).to.be(true);
+
+        filterManager.add('myField', 1, '+', 'myIndex');
+        expect(appState.filters.length).to.be(1);
+        expect(appState.filters[0].meta.disabled).to.be(false);
+      });
+    });
   });
 });
 

@@ -29,8 +29,8 @@ define(function (require) {
         });
 
         if (existing) {
+          existing.meta.disabled = false;
           if (existing.meta.negate !== negate) {
-            // existing.meta.negate = negate;
             queryFilter.invertFilter(existing);
           }
           return;
