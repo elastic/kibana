@@ -18,6 +18,17 @@ define(function (require) {
 
 
       /**
+       * Get the id of the default type for this field type
+       * using the format:defaultTypeMap config map
+       *
+       * @param  {String} fieldType - the field type
+       * @return {String}
+       */
+      self.getDefaultConfig = function (fieldType) {
+        return defaultMap[fieldType] || defaultMap._default_;
+      };
+
+      /**
        * Get a FieldFormat type (class) by it's id.
        *
        * @param  {String} formatId - the format id
@@ -27,6 +38,16 @@ define(function (require) {
         return self.byId[formatId];
       };
 
+      /**
+       * Get the default FieldFormat type (class) for
+       * a field type, using the format:defaultTypeMap.
+       *
+       * @param  {String} fieldType
+       * @return {Function}
+       */
+      self.getDefaultType = function (fieldType) {
+        return self.byId[self.getDefaultConfig(fieldType).id];
+      };
 
       /**
        * Get the singleton instance of the FieldFormat type by it's id.
@@ -39,31 +60,6 @@ define(function (require) {
         return new FieldFormat();
       });
 
-
-      /**
-       * Get the id of the default type for this field type
-       * using the format:defaultTypeMap config map
-       *
-       * @param  {String} fieldType - the field type
-       * @return {String}
-       */
-      self.getDefaultTypeId = function (fieldType) {
-        return defaultMap[fieldType] || defaultMap._default_;
-      };
-
-
-      /**
-       * Get the default FieldFormat type (class) for
-       * a field type, using the format:defaultTypeMap.
-       *
-       * @param  {String} fieldType
-       * @return {Function}
-       */
-      self.getDefaultType = function (fieldType) {
-        return self.byId[self.getDefaultTypeId(fieldType)];
-      };
-
-
       /**
        * Get the default fieldFormat instance for a field format.
        *
@@ -71,7 +67,9 @@ define(function (require) {
        * @return {FieldFormat}
        */
       self.getDefaultInstance = _.memoize(function (fieldType) {
-        return self.getInstance(self.getDefaultTypeId(fieldType));
+        var conf = self.getDefaultConfig(fieldType);
+        var FieldFormat = self.byId[conf.id];
+        return new FieldFormat(conf.params);
       });
 
 

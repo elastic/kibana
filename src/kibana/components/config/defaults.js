@@ -1,6 +1,6 @@
-define(function (require) {
-  return function () {
-    var _ = require('lodash');
+define(function () {
+  return function configDefaultsProvider() {
+    // wraped in provider so that a new instance is given to each app/test
 
     return {
       'query:queryString:options': {
@@ -92,10 +92,10 @@ define(function (require) {
         type: 'json',
         value: [
           '{',
-          '  "ip": "ip",',
-          '  "date": "date",',
-          '  "number": "number",',
-          '  "_default_": "string"',
+          '  "ip": { "id": "ip", "params": {} },',
+          '  "date": { "id": "date", "params": {} },',
+          '  "number": { "id": "number", "params": {} },',
+          '  "_default_": { "id": "string", "params": {} }',
           '}',
         ].join('\n'),
         description: 'Map of the format name to use by default for each field type. ' +
