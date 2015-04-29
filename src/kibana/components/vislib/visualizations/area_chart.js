@@ -56,7 +56,7 @@ define(function (require) {
       var ordered = this.handler.data.get('ordered');
       var isTimeSeries = (ordered && ordered.date);
       var isOverlapping = this.isOverlapping;
-      var color = this.handler.data.getColorFunc();
+      var color = this.handler.data.color;
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
@@ -143,7 +143,7 @@ define(function (require) {
      */
     AreaChart.prototype.addCircles = function (svg, data) {
       var self = this;
-      var color = this.handler.data.getColorFunc();
+      var color = this.handler.data.color;
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');

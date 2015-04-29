@@ -25,6 +25,11 @@ define(function (require) {
       this.vis = vis;
       this.el = el;
       this.labels = labels;
+      if (!_.isPlainObject(_.first(this.labels))) {
+        this.labels = _.map(this.labels, function (label) {
+          return {name: label, children: []};
+        });
+      }
       this.color = color;
       this._attr = _.defaults(_attr || {}, {
         'legendClass' : 'legend-col-wrapper',
@@ -66,6 +71,41 @@ define(function (require) {
     Legend.prototype.list = function (el, arrOfLabels, args) {
       var self = this;
 
+      function recurseLabels(li) {
+        li.attr('class', 'color');
+        var label = li.append('div')
+          .attr('class', 'color')
+          .each(self._addIdentifier);
+
+        label.append('i')
+          .attr('class', 'fa fa-circle dots')
+          .attr('style', function (d) {
+            return 'color:' + args.color(d.name);
+          });
+
+        label.append('span')
+        .text(function (d) {
+          return d.name;
+        });
+
+        var hasChildSelection = li.filter(function (d) {
+          return d.children.length > 0;
+        });
+        if (hasChildSelection.empty()) {
+          return;
+        }
+
+        // add children
+        hasChildSelection.append('ul')
+        .selectAll('li')
+        .data(function (d) {
+          return d.children;
+        })
+        .enter()
+          .append('li')
+          .call(recurseLabels);
+      }
+
       return el.append('ul')
       .attr('class', function () {
         if (args._attr.isOpen) {
@@ -77,11 +117,7 @@ define(function (require) {
       .data(arrOfLabels)
       .enter()
         .append('li')
-        .attr('class', 'color')
-        .each(self._addIdentifier)
-        .html(function (d) {
-          return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
-        });
+        .call(recurseLabels);
     };
 
     /**
@@ -91,7 +127,7 @@ define(function (require) {
      * @param label {string} label to use
      */
     Legend.prototype._addIdentifier = function (label) {
-      dataLabel(this, label);
+      dataLabel(this, label.name);
     };
 
 
@@ -131,12 +167,14 @@ define(function (require) {
         }
       });
 
-      legendDiv.select('.legend-ul').selectAll('li')
-      .on('mouseover', function (label) {
+      legendDiv.select('.legend-ul').selectAll('li > div')
+      .on('mouseover', function (d) {
+        // data-label's are strings so make sure the label is a string
+        var label = '' + d.name;
         var charts = visEl.selectAll('.chart');
 
         // legend
-        legendDiv.selectAll('li')
+        legendDiv.selectAll('li div.color')
         .filter(function (d) {
           return this.getAttribute('data-label') !== label.toString();
         })
@@ -162,11 +200,11 @@ define(function (require) {
         var charts = visEl.selectAll('.chart');
 
         // legend
-        legendDiv.selectAll('li')
+        legendDiv.selectAll('li div.blur_shape')
         .classed('blur_shape', false);
 
-        // all data-label attribute
-        charts.selectAll('[data-label]')
+        // all blur'ed elements with data-label attribute
+        charts.selectAll('.blur_shape[data-label]')
         .classed('blur_shape', false);
 
         var eventEl =  d3.select(this);

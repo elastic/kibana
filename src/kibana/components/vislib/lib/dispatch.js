@@ -233,7 +233,7 @@ define(function (require) {
 
       d3.select(element)
         .select('.legend-ul')
-        .selectAll('li.color')
+        .selectAll('li div.color')
         .filter(function (d, i) {
           return this.getAttribute('data-label') !== label;
         })
@@ -249,7 +249,7 @@ define(function (require) {
     Dispatch.prototype.unHighlightLegend = function (element) {
       d3.select(element)
         .select('.legend-ul')
-        .selectAll('li.color')
+        .selectAll('li div.color.blur_shape')
         .classed('blur_shape', false);
     };
 

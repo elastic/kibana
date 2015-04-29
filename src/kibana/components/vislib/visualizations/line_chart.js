@@ -68,7 +68,7 @@ define(function (require) {
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
       var showCircles = this._attr.showCircles;
-      var color = this.handler.data.getColorFunc();
+      var color = this.handler.data.color;
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
@@ -180,7 +180,7 @@ define(function (require) {
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var xAxisFormatter = this.handler.data.get('xAxisFormatter');
-      var color = this.handler.data.getColorFunc();
+      var color = this.handler.data.color;
       var ordered = this.handler.data.get('ordered');
       var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       var line = d3.svg.line()

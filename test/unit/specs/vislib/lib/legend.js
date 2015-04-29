@@ -64,13 +64,13 @@ define(function (require) {
           var paths = $(vis.el).find(chartSelectors[chartType]).toArray();
           var items = vis.handler.legend.labels;
 
-          items.forEach(function (label) {
+          items.forEach(function (item) {
             var path = _(paths)
             .map(function (path) {
               return path.getAttribute('data-label');
             })
             .filter(function (dataLabel) {
-              return dataLabel === label;
+              return dataLabel === item.name;
             })
             .value();
 
@@ -93,6 +93,11 @@ define(function (require) {
         it('should contain a list of items', function () {
           expect($(vis.el).find('li').length).to.be.greaterThan(1);
         });
+        if (chartTypes[i] === 'pie') {
+          it('should contain a nested list of items', function () {
+            expect($(vis.el).find('li ul li').length).to.be.greaterThan(1);
+          });
+        }
       });
 
       describe('render method', function () {
@@ -105,7 +110,7 @@ define(function (require) {
         });
 
         it('should attach onmouseover listener', function () {
-          expect(!!$('li.color')[0].__onmouseover).to.be(true);
+          expect(!!$('li > div')[0].__onmouseover).to.be(true);
         });
       });
     });

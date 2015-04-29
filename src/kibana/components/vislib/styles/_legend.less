@@ -45,14 +45,20 @@
       cursor: default;
       text-align: left;
       .flex-grow(2);
-      white-space: nowrap;
       overflow-x: hidden;
-      text-overflow: ellipsis;
       max-width: 150px;
+      & > div {
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+      }
 
       .dots {
         padding-right: 5px;
       }
+    }
+    ul {
+      padding-left: 15px;
     }
   }
 
