@@ -1,14 +1,14 @@
 define(function (require) {
   return function NumberFormatProvider(Private) {
     var _ = require('lodash');
-    var FieldFormat = Private(require('components/index_patterns/_field_format'));
+    var BoundToConfigObj = Private(require('components/bound_to_config_obj'));
     var Numeral = Private(require('components/stringify/types/_Numeral'));
 
     return Numeral.factory({
       id: 'percent',
       title: 'Percentage',
       editorTemplate: require('text!components/stringify/editors/_numeral.html'),
-      paramDefaults: FieldFormat.initConfig({
+      paramDefaults: new BoundToConfigObj({
         pattern: '=format:percent:defaultPattern',
         fractional: true
       }),

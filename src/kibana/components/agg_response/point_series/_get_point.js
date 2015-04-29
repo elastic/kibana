@@ -23,7 +23,7 @@ define(function (require) {
       }
 
       if (series) {
-        point.series = series.agg.fieldFormatter('text')(unwrap(row[series.i]));
+        point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
       }
 
       if (yScale) {

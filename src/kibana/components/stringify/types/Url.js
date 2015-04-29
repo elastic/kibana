@@ -2,7 +2,7 @@ define(function (require) {
   return function UrlFormatProvider(Private) {
     var _ = require('lodash');
 
-    var FieldFormat = Private(require('components/index_patterns/_field_format'));
+    var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
     var StringFormat = Private(require('components/stringify/types/String'));
     require('components/field_format_editor/pattern/pattern');
 
@@ -34,16 +34,21 @@ define(function (require) {
       { id: 'img', name: 'Image' }
     ];
 
-    Url.prototype._convert = function (rawValue, contentType) {
-      var template = this.param('template');
-      var val = !template ? rawValue : this._compileTemplate(template)(rawValue);
+    Url.prototype._convert = {
+      html: function (rawValue) {
+        var url = this.convert(rawValue, 'text');
+        var value = _.escape(rawValue);
 
-      if (contentType !== 'html') return val;
+        switch (this.param('type')) {
+        case 'img': return '<img src="' + url + '" alt="' + value + '">';
+        default:
+          return '<a href="' + url + '" target="_blank">' + url + '</a>';
+        }
+      },
 
-      switch (this.param('type')) {
-      case 'img': return '<img src="' + val + '" alt="' + rawValue + '">';
-      default:
-        return '<a href="' + val + '" target="_blank">' + val + '</a>';
+      text: function (value) {
+        var template = this.param('template');
+        return !template ? value : this._compileTemplate(template)(value);
       }
     };
 

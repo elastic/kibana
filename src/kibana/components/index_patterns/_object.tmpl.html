@@ -1,0 +1,13 @@
+<dl class="source truncate-by-height">
+  <% _.each(highlight, function (value, field) { /* show fields that match the query first */ %>
+    <dt><%- shortDotsFilter(field) %>:</dt>
+    <dd><%= source[field] %></dd>
+    <%= ' ' %>
+  <% }); %>
+  <% _.each(source, function (value, field) { %>
+    <% if (_.has(highlight, field)) return; %>
+    <dt><%- shortDotsFilter(field) %>:</dt>
+    <dd><%= value %></dd>
+    <%= ' ' %>
+  <% }); %>
+</dl>

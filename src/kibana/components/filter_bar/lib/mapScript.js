@@ -9,7 +9,7 @@ define(function () {
           key = filter.meta.field;
           field = indexPattern.fields.byName[key];
           value = filter.script.params.value;
-          value = field.format.convert(value, 'text');
+          value = field.format.convert(value);
           return { key: key, value: value };
         });
       }

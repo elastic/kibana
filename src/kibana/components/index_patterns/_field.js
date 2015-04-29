@@ -2,7 +2,7 @@ define(function (require) {
   return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier, kbnUrl) {
     var notify = new Notifier({ location: 'IndexPattern Field' });
 
-    var FieldFormat = Private(require('components/index_patterns/_field_format'));
+    var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var fieldFormats = Private(require('registry/field_formats'));
     var ObjDefine = require('utils/obj_define');

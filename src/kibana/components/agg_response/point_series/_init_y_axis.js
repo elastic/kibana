@@ -8,10 +8,10 @@ define(function (require) {
 
       if (_.isArray(y)) {
         // TODO: vis option should allow choosing this format
-        chart.yAxisFormatter = y[0].agg.fieldFormatter('text');
+        chart.yAxisFormatter = y[0].agg.fieldFormatter();
         chart.yAxisLabel = ''; // use the legend
       } else {
-        chart.yAxisFormatter = y.agg.fieldFormatter('text');
+        chart.yAxisFormatter = y.agg.fieldFormatter();
         chart.yAxisLabel = y.col.title;
       }
 

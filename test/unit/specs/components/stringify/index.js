@@ -2,7 +2,6 @@ define(function (require) {
   describe('Stringify Component', function () {
     var _ = require('lodash');
     var $ = require('jquery');
-    var moment = require('moment');
 
     var fieldFormats;
     var FieldFormat;
@@ -23,7 +22,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
       fieldFormats = Private(require('registry/field_formats'));
-      FieldFormat = Private(require('components/index_patterns/_field_format'));
+      FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
       config = $injector.get('config');
       $rootScope = $injector.get('$rootScope');
     }));

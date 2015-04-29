@@ -1,7 +1,8 @@
 define(function (require) {
   return function AbstractNumeralFormatProvider(Private) {
     var _ = require('lodash');
-    var FieldFormat = Private(require('components/index_patterns/_field_format'));
+    var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
+    var BoundToConfigObj = Private(require('components/bound_to_config_obj'));
     var numeral = require('numeral')();
     require('components/field_format_editor/numeral/numeral');
 
@@ -31,7 +32,7 @@ define(function (require) {
       Class.title = opts.title;
       Class.fieldType = 'number';
 
-      Class.paramDefaults = opts.paramDefaults || FieldFormat.initConfig({
+      Class.paramDefaults = opts.paramDefaults || new BoundToConfigObj({
         pattern: '=format:' + opts.id + ':defaultPattern',
       });
 

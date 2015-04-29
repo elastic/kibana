@@ -17,7 +17,7 @@ define(function () {
       // the field exists.
       var bucket = item.name;
       if (col) {
-        bucket = col.fieldFormatter('text')(bucket);
+        bucket = col.fieldFormatter()(bucket);
       }
 
       // Add the row to the tooltipScope.rows
