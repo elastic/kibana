@@ -108,10 +108,10 @@ define(function (require) {
           };
 
           var map = L.map(div[0], mapOptions);
-          var drawControl = new L.Control.Draw(drawOptions);
 
-          map.addControl(drawControl);
-
+          if (data.geoJson.features.length) {
+            map.addControl(new L.Control.Draw(drawOptions));
+          }
 
           tileLayer.on('tileload', function () {
             self.saturateTiles();
