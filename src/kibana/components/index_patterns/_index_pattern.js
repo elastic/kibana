@@ -91,7 +91,7 @@ define(function (require) {
               }
             });
 
-            // Give obj all of the values in _source.fields
+            // Give obj all of the values in _source
             _.assign(self, resp._source);
 
             self._indexFields();

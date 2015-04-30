@@ -15,6 +15,10 @@ define(function (require) {
       // defined using the logic below
       var obj = new ObjDefine(spec, Field.prototype);
 
+      if (spec.name === '_source') {
+        spec.type = '_source';
+      }
+
       // find the type for this field, fallback to unkown type
       var type = fieldTypes.byName[spec.type];
       if (spec.type && !type) {

@@ -21,6 +21,9 @@ define(function (require) {
         _timestamp: {
           indexed: true,
           type: 'date'
+        },
+        _source: {
+          type: '_source'
         }
       };
 
