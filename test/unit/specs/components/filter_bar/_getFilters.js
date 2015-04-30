@@ -125,24 +125,6 @@ define(function (require) {
         }).length).to.be(1);
       });
 
-      it('should mutate global filters on appState filter changes', function () {
-        var idx = 1;
-        globalState.filters = filters;
-        var appFilter = _.cloneDeep(filters[idx]);
-        appFilter.meta.negate = true;
-        $rootScope.$digest();
-        appState.filters.push(appFilter);
-        $rootScope.$digest();
-
-        var res = queryFilter.getFilters();
-        expect(res).to.have.length(3);
-        _.each(res, function (filter, i) {
-          expect(filter.$state.store).to.be('globalState');
-          // make sure global filter actually mutated
-          expect(filter.meta.negate).to.be(i === idx);
-        });
-      });
-
       it('should not affect disabled filters', function () {
         // test adding to globalState
         globalState.filters = _.map(filters, function (filter) {
