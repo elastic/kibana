@@ -288,10 +288,6 @@ define(function (require) {
       };
     }
 
-    function autoPrecision(zoom, limit) {
-      return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
-    }
-
     init();
   });
 });

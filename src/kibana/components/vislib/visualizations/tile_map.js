@@ -172,14 +172,6 @@ define(function (require) {
       };
     };
 
-    TileMap.prototype.addZoomEndEvent = function (element) {
-      var events = this.events;
-      var zoomend = events.addMapZoomEndEvent();
-      var attachedEvents = element.call(zoomend);
-
-      return attachedEvents;
-    };
-
     /**
      * get min and max for all cols, rows of data
      *
