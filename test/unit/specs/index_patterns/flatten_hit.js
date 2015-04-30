@@ -1,5 +1,4 @@
 define(function (require) {
-  var _ = require('lodash');
   var flattenHit = require('components/index_patterns/_flatten_hit');
 
   describe('IndexPattern#flattenHit()', function () {
@@ -50,7 +49,7 @@ define(function (require) {
       }
     };
 
-    var flat = flattenHit(indexPattern, hit);
+    var flat = flattenHit(indexPattern)(hit);
 
     it('flattens keys as far down as the mapping goes', function () {
       expect(flat).to.have.property('geo.coordinates', hit._source.geo.coordinates);

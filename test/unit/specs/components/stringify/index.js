@@ -60,10 +60,6 @@ define(function (require) {
           it('extends FieldFormat', function () {
             expect(instance).to.be.a(FieldFormat);
           });
-
-          it('implements the _convert method', function () {
-            expect(instance._convert).to.be.a('function');
-          });
         });
       });
     });
@@ -137,7 +133,7 @@ define(function (require) {
       it('ouputs a simple <a> tab by default', function () {
         var url = new Url();
 
-        var $a = $(url.convert('http://elastic.co'));
+        var $a = $(url.convert('http://elastic.co', 'html'));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
         expect($a.attr('href')).to.be('http://elastic.co');
@@ -148,7 +144,7 @@ define(function (require) {
       it('outputs an <image> if type === "img"', function () {
         var url = new Url({ type: 'img' });
 
-        var $img = $(url.convert('http://elastic.co'));
+        var $img = $(url.convert('http://elastic.co', 'html'));
         expect($img.is('img')).to.be(true);
         expect($img.attr('src')).to.be('http://elastic.co');
       });
@@ -162,7 +158,7 @@ define(function (require) {
 
         it('accepts a template', function () {
           var url = new Url({ template: 'url: {{ value }}' });
-          var $a = $(url.convert('url'));
+          var $a = $(url.convert('url', 'html'));
           expect($a.is('a')).to.be(true);
           expect($a.size()).to.be(1);
           expect($a.attr('href')).to.be('url: url');

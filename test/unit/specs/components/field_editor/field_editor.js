@@ -1,6 +1,5 @@
 define(function (require) {
   describe('FieldEditor directive', function () {
-    var _ = require('lodash');
     var $ = require('jquery');
 
     var Field;
@@ -11,20 +10,6 @@ define(function (require) {
     var $scope;
     var $el;
 
-    // just some properties of field that we can compare
-    var fieldProps = [
-      'name', 'type', 'count', 'scripted', 'script', 'lang',
-      'indexed', 'analyzed', 'doc_values', 'format', 'sortable',
-      'bucketable', 'filterable', 'indexPattern', 'displayName',
-      'editRoute'
-    ];
-
-    var fieldToPrimativeVals = function (field) {
-      return _(field).pick(fieldProps).omit(function (v) {
-        return v && (typeof v === 'object' || typeof v === 'function');
-      }).value();
-    };
-
     beforeEach(module('kibana'));
     beforeEach(inject(function ($compile, $injector, Private) {
       $rootScope = $injector.get('$rootScope');
@@ -32,10 +17,10 @@ define(function (require) {
       StringFormat = Private(require('registry/field_formats')).getType('string');
 
       $rootScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      $rootScope.field = $rootScope.indexPattern.fields.byName.time;
       // set the field format for this field
-      $rootScope.indexPattern.fieldFormatMap[$rootScope.field.name] = new StringFormat({ foo: 1, bar: 2 });
-
+      $rootScope.indexPattern.fieldFormatMap.time = new StringFormat({ foo: 1, bar: 2 });
+      $rootScope.indexPattern._indexFields();
+      $rootScope.field = $rootScope.indexPattern.fields.byName.time;
 
       compile = function () {
         $el = $compile($('<field-editor field="field" index-pattern="indexPattern">'))($rootScope);
@@ -69,52 +54,49 @@ define(function (require) {
         expect(editor.indexPattern).to.be($rootScope.indexPattern);
       });
 
-      it('exposes editor.fieldProps', function () {
-        expect(editor.fieldProps).to.be.an('object');
-      });
-
-      describe('editor.fieldProps', function () {
-        it('is a shadow copy of the index patterns field spec', function () {
-          var actual = $rootScope.field;
-          var spec = editor.fieldProps;
-
-          expect(spec).to.not.be(actual.$$spec);
-          expect(actual.$$spec.isPrototypeOf(spec)).to.be(true);
-        });
-      });
-
-
       it('exposes editor.field', function () {
         expect(editor.field).to.be.an('object');
       });
 
       describe('editor.field', function () {
+        var field;
+        var actual;
+
+        beforeEach(function () {
+          field = editor.field;
+          actual = $rootScope.field;
+        });
+
         it('looks like the field from the index pattern, but isn\'t', function () {
-          var field = editor.field;
-          var actual = $rootScope.field;
-
           expect(field).to.not.be(actual);
-          expect(field).to.be.a(Field);
-          expect(fieldToPrimativeVals(field)).to.eql(fieldToPrimativeVals(actual));
+          expect(field).to.not.be.a(Field);
+          expect(field.name).to.be(actual.name);
+          expect(field.type).to.be(actual.type);
+          expect(field.scripted).to.be(actual.scripted);
+          expect(field.script).to.be(actual.script);
         });
 
-        it('is built to match the editor.fieldProps', function () {
-          expect(editor.field).to.have.property('name', editor.fieldProps.name);
-          expect(editor.field).to.have.property('type', editor.fieldProps.type);
+        it('reflects changes to the index patterns field', function () {
+          var a = {};
+          var b = {};
 
-          editor.fieldProps.name = 'smith';
-          $rootScope.$apply();
-          expect(editor.field.name).to.be('smith');
+          actual.script = a;
+          expect(field.script).to.be(a);
 
+          actual.script = b;
+          expect(field.script).to.be(b);
         });
 
-        it('is rebuilt when the fieldProps changes', function () {
-          expect(editor.field.name).to.be(editor.fieldProps.name);
-          var newName = editor.fieldProps.name = editor.fieldProps.name + 'foo';
-          expect(editor.field.name).to.not.be(newName); // rebuilt after $digest
-          $rootScope.$apply();
-          expect(editor.field.name).to.be(newName);
-          expect(editor.fieldProps.name).to.be(newName);
+        it('is fully mutable, unlike the index patterns field', function () {
+          var origName = actual.name;
+          actual.name = 'john';
+          expect(actual.name).to.not.be('john');
+          expect(actual.name).to.be(origName);
+
+          expect(field.name).to.be(origName);
+          field.name = 'john';
+          expect(field.name).to.be('john');
+          expect(actual.name).to.be(origName);
         });
       });
 
