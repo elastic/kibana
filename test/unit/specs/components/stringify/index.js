@@ -183,7 +183,27 @@ define(function (require) {
         });
 
       });
+    });
 
+    describe('Source format', function () {
+      var indexPattern;
+      var hits;
+      var format;
+      var convertHtml;
+
+      beforeEach(inject(function (Private) {
+        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        hits = Private(require('fixtures/hits'));
+        format = fieldFormats.getInstance('_source');
+        convertHtml = format.getConverterFor('html');
+      }));
+
+      it('uses the hit source, indexPattern, and the hit itself to create a <dl>', function () {
+        var hit = _.first(hits);
+        var $dl = $(convertHtml(hit._source, indexPattern, hit));
+        expect($dl.is('dl')).to.be.ok();
+        expect($dl.find('dt')).to.have.length(_.keys(indexPattern.flattenHit(hit)).length);
+      });
     });
   });
 });

@@ -7,4 +7,5 @@ define(function (require) {
   fieldFormats.register(require('components/stringify/types/Number'));
   fieldFormats.register(require('components/stringify/types/Percent'));
   fieldFormats.register(require('components/stringify/types/String'));
+  fieldFormats.register(require('components/stringify/types/Source'));
 });
