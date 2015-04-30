@@ -41,7 +41,7 @@ define(function (require) {
       var series = isSeries ? data.series : undefined;
       var slices = isSlices ? data.slices : undefined;
       var handler = this.handler;
-      var color = handler && handler.data && handler.data.color;
+      var color = _.deepGet(handler, 'data.color');
       var isPercentage = (handler && handler._attr.mode === 'percentage');
 
       var eventData = {
