@@ -198,8 +198,8 @@ define(function (require) {
      * @param {string} str - the long string to convert
      * @return {string}
      */
-    shortenDottedString: function (str) {
-      return String(str).replace(DOT_PREFIX_RE, '$1.');
+    shortenDottedString: function (input) {
+      return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
     }
   };
 });
