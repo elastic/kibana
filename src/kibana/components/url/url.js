@@ -90,7 +90,19 @@ define(function (require) {
     };
 
     /**
-     * convert an object's route to a full url.
+     * convert an object's route to an href, compatible with
+     * window.location.href= and <a href="">
+     *
+     * @param  {Object} obj - any object that list's it's routes at obj.routes{}
+     * @param  {string} route - the route name
+     * @return {string} - the computed href
+     */
+    self.getRouteHref = function (obj, route) {
+      return '#' + self.getRouteUrl(obj, route);
+    };
+
+    /**
+     * convert an object's route to a url, compatible with url.change() or $location.url()
      *
      * @param  {Object} obj - any object that list's it's routes at obj.routes{}
      * @param  {string} route - the route name
@@ -98,7 +110,7 @@ define(function (require) {
      */
     self.getRouteUrl = function (obj, route) {
       var template = obj && obj.routes && obj.routes[route];
-      if (template) return '#' + self.eval(template, obj);
+      if (template) return self.eval(template, obj);
     };
 
     /**
