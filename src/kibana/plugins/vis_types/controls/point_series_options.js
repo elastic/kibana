@@ -7,10 +7,7 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!plugins/vis_types/controls/point_series_options.html'),
-      replace: true,
-      link: function (scope, elem, attrs) {
-        console.log(scope.$parent.visualizeEditor);
-      }
+      replace: true
     };
   });
 });
