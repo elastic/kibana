@@ -115,55 +115,6 @@ define(function (require) {
           });
         });
 
-        describe('nearestFeature method', function () {
-          it('should return an object', function () {
-            vis.handler.charts.forEach(function (chart) {
-              var lat = (Math.random() * 180) - 90;
-              var lng = (Math.random() * 360) - 180;
-              var point = L.latLng(lat, lng);
-              var mapData = chart.chartData.geoJson;
-              expect(_.isObject(chart.nearestFeature(point, mapData))).to.be(true);
-              expect(chart.nearestFeature(point, mapData).type).to.be('Feature');
-            });
-          });
-        });
-
-        describe('tooltipProximity method', function () {
-          it('should return true', function () {
-            vis.handler.charts.forEach(function (chart) {
-              var zoom = _.random(1, 12);
-              var mapData = chart.chartData.geoJson;
-              var i = _.random(0, mapData.features.length - 1);
-              var feature = mapData.features[i];
-              var point = feature.properties.latLng;
-              var map = chart.maps[0];
-              expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(true);
-            });
-          });
-          it('should return false', function () {
-            vis.handler.charts.forEach(function (chart) {
-              var zoom = _.random(1, 12);
-              var mapData = chart.chartData.geoJson;
-              var i = _.random(0, mapData.features.length - 1);
-              var feature = mapData.features[i];
-              var point = L.latLng(90, -180);
-              var map = chart.maps[0];
-              expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(false);
-            });
-          });
-        });
-
-        describe('geohashMinDistance method', function () {
-          it('should return a number', function () {
-            vis.handler.charts.forEach(function (chart) {
-              var mapData = chart.chartData.geoJson;
-              var i = _.random(0, mapData.features.length - 1);
-              var randomFeature = mapData.features[i];
-              expect(_.isFinite(chart.geohashMinDistance(randomFeature))).to.be(true);
-            });
-          });
-        });
-
         describe('getMinMax method', function () {
           it('should return an object', function () {
             vis.handler.charts.forEach(function (chart) {

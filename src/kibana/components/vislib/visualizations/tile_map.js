@@ -69,9 +69,7 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          // add leaflet latLngs to properties for tooltip
-          var mapData = self.addLatLng(data.geoJson);
-
+          var mapData = data.geoJson;
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
@@ -419,6 +417,9 @@ define(function (require) {
           var scaledRadius = self.radiusScale(count, max, feature) * 2;
           return L.circle(latlng, scaledRadius);
         },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
         }
@@ -454,6 +455,9 @@ define(function (require) {
           var count = feature.properties.count;
           var radius = self.geohashMinDistance(feature);
           return L.circle(latlng, radius);
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -497,6 +501,18 @@ define(function (require) {
             [geohashRect[1][1], geohashRect[1][0]]
           ];
           return L.rectangle(corners);
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+          layer.on({
+            mouseover: function (e) {
+              var layer = e.target;
+              // bring layer to front if not older browser
+              if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+              }
+            }
+          });
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -639,6 +655,33 @@ define(function (require) {
         map.invalidateSize({
           debounceMoveend: true
         });
+      });
+    };
+
+    /**
+     * Binds popup and events to each feature on map
+     *
+     * @method bindPopup
+     * @param feature {Object}
+     * @param layer {Object}
+     * return {undefined}
+     */
+    TileMap.prototype.bindPopup = function (feature, layer) {
+      var props = feature.properties;
+      var popup = L.popup({
+        autoPan: false
+      })
+      .setContent(
+        'Geohash: ' + props.geohash + '<br>' +
+        'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
+        props.valueLabel + ': ' + props.count
+      );
+      layer.bindPopup(popup)
+      .on('mouseover', function (e) {
+        layer.openPopup();
+      })
+      .on('mouseout', function (e) {
+        layer.closePopup();
       });
     };
 

@@ -15,7 +15,6 @@ define(function (require) {
           mapType: 'Scaled Circle Markers',
           isDesaturated: true,
           autoPrecision: true,
-          addLeafletPopup: true,
           heatMaxZoom: 16,
           heatMinOpacity: 0.1,
           heatRadius: 25,
