@@ -7,7 +7,6 @@ define(function (require) {
   .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
-    var Field = Private(require('components/index_patterns/_field'));
 
     var scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
     var scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
@@ -110,8 +109,7 @@ define(function (require) {
         }
 
         function redirectAway() {
-          var route = self.indexPattern.routes[self.field.scripted ? 'scriptedFields' : 'indexedFields'];
-          kbnUrl.change(route);
+          kbnUrl.changeToRoute(self.indexPattern, self.field.scripted ? 'scriptedFields' : 'indexedFields');
         }
 
         function getFieldFormatType() {

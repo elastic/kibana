@@ -1,7 +1,6 @@
 define(function (require) {
-  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier, kbnUrl) {
+  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
     var notify = new Notifier({ location: 'IndexPattern Field' });
-
     var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
     var fieldFormats = Private(require('registry/field_formats'));
@@ -62,22 +61,13 @@ define(function (require) {
       // computed values
       obj.comp('indexPattern', indexPattern);
       obj.comp('displayName', shortDotsFilter(spec.name));
-      obj.comp('editRoute', Field.getEditRoute(indexPattern, spec));
       obj.comp('$$spec', spec);
 
       return obj.create();
     }
 
-    Field.getEditRoute = function (indexPattern, field) {
-      if (!field.name || !indexPattern.id) return;
-
-      return kbnUrl.eval(
-        '/settings/indices/{{index}}/field/{{field}}',
-        {
-          index: indexPattern.id,
-          field: field.name
-        }
-      );
+    Field.prototype.routes = {
+      edit: '/settings/indices/{{indexPattern.id}}/field/{{name}}'
     };
 
     return Field;

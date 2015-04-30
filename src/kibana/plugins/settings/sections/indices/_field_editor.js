@@ -14,9 +14,10 @@ define(function (require) {
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($route, Private, Notifier, kbnUrl, docTitle) {
+    controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
       var Field = Private(require('components/index_patterns/_field'));
       var notify = new Notifier({ location: 'Field Editor' });
+      var kbnUrl = Private(require('components/url/url'));
 
 
       this.mode = $route.current.mode;
@@ -29,7 +30,7 @@ define(function (require) {
 
         if (!this.field) {
           notify.error(this.indexPattern + ' does not have a "' + fieldName + '" field.');
-          kbnUrl.redirect(this.indexPattern.routes.edit);
+          kbnUrl.redirectToRoute(this.indexPattern, 'edit');
           return;
         }
 
@@ -46,7 +47,7 @@ define(function (require) {
 
       docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.id]);
       this.goBack = function () {
-        kbnUrl.change(this.indexPattern.editUrl);
+        kbnUrl.changeToRoute(this.indexPattern, 'edit');
       };
     }
   });

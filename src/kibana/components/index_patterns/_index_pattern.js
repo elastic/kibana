@@ -5,7 +5,6 @@ define(function (require) {
     var angular = require('angular');
 
     var fieldformats = Private(require('registry/field_formats'));
-    var kbnUrl = Private(require('components/url/url'));
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
     var intervals = Private(require('components/index_patterns/_intervals'));
@@ -209,16 +208,8 @@ define(function (require) {
         return body;
       };
 
-      // refresh the id and editRoute
       function setId(id) {
-        self.id = id;
-        self.routes = !id ? {} : {
-          edit: kbnUrl.eval('/settings/indices/{{id}}', self),
-          addField: kbnUrl.eval('/settings/indices/{{id}}/create-field', self),
-          indexedFields: kbnUrl.eval('/settings/indices/{{id}}?_a=(tab:indexedFields)', self),
-          scriptedFields: kbnUrl.eval('/settings/indices/{{id}}?_a=(tab:scriptedFields)', self)
-        };
-        return self.id;
+        return self.id = id;
       }
 
       self.create = function () {
@@ -271,6 +262,14 @@ define(function (require) {
       self.formatHit = formatHit(self, fieldformats.getDefaultInstance('string'));
       self.formatField = self.formatHit.formatField;
     }
+
+    IndexPattern.prototype.routes = {
+      edit: '/settings/indices/{{id}}',
+      addField: '/settings/indices/{{id}}/create-field',
+      indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
+      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+    };
+
     return IndexPattern;
   };
 });

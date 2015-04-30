@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('sinon/sinon');
     var IndexedArray = require('utils/indexed_array/index');
+    var IndexPattern = require('components/index_patterns/_index_pattern');
     var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
@@ -19,6 +20,7 @@ define(function (require) {
       this.flattenHit = _.partial(flattenHit, this);
       this.metaFields = ['_id', '_type', '_source'];
       this.fieldFormatMap = {};
+      this.routes = IndexPattern.prototype.routes;
 
       this.fields = new IndexedArray({
         index: ['name'],
