@@ -19,7 +19,7 @@ define(function (require) {
 
     var angular = require('angular');
     var _ = require('lodash');
-    var defaults = require('components/config/defaults');
+    var defaults = Private(require('components/config/defaults'));
     var DelayedUpdater = Private(require('components/config/_delayed_updater'));
     var vals = Private(require('components/config/_vals'));
 
@@ -121,6 +121,29 @@ define(function (require) {
 
     config.close = function () {
       if (updater) updater.fire();
+    };
+
+    /**
+     * A little helper for binding config variables to $scopes
+     *
+     * @param  {Scope} $scope - an angular $scope object
+     * @param  {string} key - the config key to bind to
+     * @param  {string} [property] - optional property name where the value should
+     *                             be stored. Defaults to the config key
+     * @return {function} - an unbind function
+     */
+    config.$bind = function ($scope, key, property) {
+      if (!property) property = key;
+
+      var update = function () {
+        $scope[property] = config.get(key);
+      };
+
+      update();
+      return _.partial(_.invoke, [
+        $scope.$on('change:config.' + key, update),
+        $scope.$on('init:config', update)
+      ], 'call');
     };
 
     /*****
