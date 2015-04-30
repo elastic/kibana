@@ -13,7 +13,7 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/settings/sections/indices/_scripted_fields.html'),
       scope: true,
-      link: function ($scope, $el, attr) {
+      link: function ($scope) {
         var dateScripts = require('plugins/settings/sections/indices/_date_scripts');
 
         var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
@@ -23,6 +23,7 @@ define(function (require) {
         $scope.columns = [
           { title: 'name' },
           { title: 'script' },
+          { title: 'format' },
           { title: 'controls', sortable: false }
         ];
 
@@ -32,16 +33,18 @@ define(function (require) {
 
           $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
             var rowScope = $scope.$new();
-            var columns = [field.name, field.script];
             rowScope.field = field;
             rowScopes.push(rowScope);
 
-            columns.push({
-              markup: controlsHtml,
-              scope: rowScope
-            });
-
-            return columns;
+            return [
+              field.name,
+              field.script,
+              _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
+              {
+                markup: controlsHtml,
+                scope: rowScope
+              }
+            ];
           });
         });
 

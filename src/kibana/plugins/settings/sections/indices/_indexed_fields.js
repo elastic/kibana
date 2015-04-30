@@ -20,6 +20,7 @@ define(function (require) {
         $scope.columns = [
           { title: 'name' },
           { title: 'type' },
+          { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
           { title: 'controls', sortable: false }
@@ -29,7 +30,7 @@ define(function (require) {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
 
-          $scope.rows = $scope.indexPattern.getFields().map(function (field) {
+          $scope.rows = $scope.indexPattern.fields.map(function (field) {
             var childScope = _.assign($scope.$new(), { field: field });
             rowScopes.push(childScope);
 
@@ -44,6 +45,7 @@ define(function (require) {
                 scope: childScope,
                 value: field.type
               },
+              _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
               {
                 markup: field.analyzed ? yesTemplate : noTemplate,
                 value: field.analyzed
