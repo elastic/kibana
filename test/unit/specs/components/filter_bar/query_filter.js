@@ -47,6 +47,7 @@ define(function (require) {
       var childSuites = [
         require('specs/components/filter_bar/_getFilters'),
         require('specs/components/filter_bar/_addFilters'),
+        require('specs/components/filter_bar/_removeFilters'),
       ].forEach(function (s) {
         describe(s[0], s[1]);
       });
