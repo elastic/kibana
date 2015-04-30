@@ -206,20 +206,6 @@ define(function (require) {
       });
     });
 
-    describe('formatAxisLabel method', function () {
-      var num = 1e9;
-      var val;
-
-      beforeEach(function () {
-        createData(defaultGraphData);
-        val = yAxis.formatAxisLabel(num);
-      });
-
-      it('should return a string with suffix B', function () {
-        expect(val).to.be('1b');
-      });
-    });
-
     describe('getScaleType method', function () {
       var fnNames = ['linear', 'log', 'square root'];
 

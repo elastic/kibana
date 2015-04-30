@@ -2,7 +2,6 @@ define(function (require) {
   return function YAxisFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var numeral = require('numeral');
     var errors = require('errors');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
@@ -18,7 +17,7 @@ define(function (require) {
       this.el = args.el;
       this.yMin = args.yMin;
       this.yMax = args.yMax;
-      this.tickFormat = args.tickFormat;
+      this.yAxisFormatter = args.yAxisFormatter;
       this._attr = args._attr || {};
     }
 
@@ -104,6 +103,13 @@ define(function (require) {
       .nice();
     };
 
+    YAxis.prototype.tickFormat = function () {
+      var isPercentage = this._attr.mode === 'percentage';
+      if (isPercentage) return d3.format('%');
+      if (this.yAxisFormatter) return this.yAxisFormatter;
+      return d3.format('n');
+    };
+
     /**
      * Creates the d3 y axis function
      *
@@ -122,7 +128,7 @@ define(function (require) {
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
         .scale(yScale)
-        .tickFormat(this.tickFormat)
+        .tickFormat(this.tickFormat())
         .ticks(this.tickScale(height))
         .orient('left');
 
