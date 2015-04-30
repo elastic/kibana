@@ -73,6 +73,19 @@ define(function (require) {
         expect(res[0].$state.store).to.be(storeNames.global);
         expect(res[1].$state.store).to.be(storeNames.app);
       });
+
+      it('should return filters from specific states', function () {
+        var states = [
+          [ globalState, queryFilter.getGlobalFilters ],
+          [ appState, queryFilter.getAppFilters ],
+        ];
+
+        _.each(states, function (state) {
+          state[0].filters = filters;
+          var res = state[1]();
+          expect(res.length).to.be(state[0].filters.length);
+        });
+      });
     });
 
     describe('filter reconciliation', function () {
