@@ -20,6 +20,8 @@ define(function (require) {
           scale: 'linear',
           interpolate: 'linear',
           mode: 'stacked',
+          times: [],
+          addTimeMarker: false,
           defaultYExtents: false,
           setYExtents: false,
           yAxis: {}

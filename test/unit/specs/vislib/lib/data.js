@@ -205,6 +205,37 @@ define(function (require) {
 
     });
 
+    describe('_removeZeroSlices', function () {
+      var pieData = {
+        slices: {
+          children: [
+            {size: 30},
+            {size: 20},
+            {size: 0}
+          ]
+        }
+      };
+      var DataFactory;
+      var data;
+
+      beforeEach(function () {
+        module('DataFactory');
+      });
+
+      beforeEach(function () {
+        inject(function (Private) {
+          DataFactory = Private(require('components/vislib/lib/data'));
+          data = new DataFactory(pieData, {});
+          data._removeZeroSlices(pieData.slices);
+        });
+      });
+
+      it('should remove zero values', function () {
+        var slices = data.data.slices;
+        expect(slices.children.length).to.be(2);
+      });
+    });
+
     describe('Data.flatten', function () {
       var DataFactory;
       var serIn;
