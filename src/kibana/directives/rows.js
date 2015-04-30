@@ -23,7 +23,7 @@ define(function (require) {
             $cell.scope = $scope.$new();
             $cell.addClass('cell-hover');
             $cell.attr('ng-click', 'clickHandler()');
-            $cell.scope.clickHandler = function (negate) {
+            $cell.scope.clickHandler = function () {
               clickHandler({ point: { aggConfigResult: aggConfigResult } });
             };
             return $compile($cell)($cell.scope);
@@ -33,7 +33,7 @@ define(function (require) {
             if (contents.type === 'bucket' && contents.aggConfig.field() && contents.aggConfig.field().filterable) {
               $cell = createAggConfigResultCell(contents);
             }
-            contents = contents.toString();
+            contents = contents.toString('html');
           }
 
           if (_.isObject(contents)) {

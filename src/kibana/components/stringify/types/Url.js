@@ -1,5 +1,5 @@
 define(function (require) {
-  return function UrlFormatProvider(Private) {
+  return function UrlFormatProvider(Private, highlightFilter) {
     var _ = require('lodash');
 
     var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
@@ -44,20 +44,25 @@ define(function (require) {
     ];
 
     Url.prototype._convert = {
-      html: function (rawValue) {
+      text: function (value) {
+        var template = this.param('template');
+        return !template ? value : this._compileTemplate(template)(value);
+      },
+
+      html: function (rawValue, field, hit) {
         var url = this.convert(rawValue, 'text');
         var value = _.escape(rawValue);
 
         switch (this.param('type')) {
-        case 'img': return '<img src="' + url + '" alt="' + value + '">';
+        case 'img': return '<img src="' + url + '" alt="' + value + '" title="' + value + '">';
         default:
-          return '<a href="' + url + '" target="_blank">' + url + '</a>';
-        }
-      },
+          var urlDisplay = url;
+          if (hit && hit.highlight && hit.highlight[field.name]) {
+            urlDisplay = highlightFilter(url, hit.highlight[field.name]);
+          }
 
-      text: function (value) {
-        var template = this.param('template');
-        return !template ? value : this._compileTemplate(template)(value);
+          return '<a href="' + url + '" target="_blank">' + urlDisplay + '</a>';
+        }
       }
     };
 

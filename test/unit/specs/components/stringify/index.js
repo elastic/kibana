@@ -15,7 +15,8 @@ define(function (require) {
       'number',
       'percent',
       'string',
-      'url'
+      'url',
+      '_source'
     ];
 
 

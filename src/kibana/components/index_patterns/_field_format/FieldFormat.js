@@ -36,12 +36,11 @@ define(function (require) {
 
     /**
      * Get a convert function that is bound to a specific contentType
-     * @param  {string} [contentType=html]
-     * @return {function} - a bound converter function, which accepts a single "value"
-     *                      argument of any type
+     * @param  {string} [contentType=text]
+     * @return {function} - a bound converter function
      */
     FieldFormat.prototype.getConverterFor = function (contentType) {
-      return this._convert[contentType] || this._convert.text;
+      return this._convert[contentType || 'text'];
     };
 
     /**

@@ -22,7 +22,7 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, highlightFilter) {
+  module.directive('kbnTableRow', function ($compile) {
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(require('text!components/doc_table/components/table_row/cell.html'));
@@ -150,18 +150,7 @@ define(function (require) {
          */
         function _displayField(row, fieldName, breakWords) {
           var indexPattern = $scope.indexPattern;
-
-          if (fieldName === '_source') {
-            if (!row.$$_formattedSource) {
-              var field = indexPattern.fields.byName._source;
-              var converter = field.format.getConverterFor('html');
-              row.$$_formattedSource = converter(row._source, indexPattern, row);
-            }
-            return row.$$_formattedSource;
-          }
-
           var text = indexPattern.formatField(row, fieldName);
-          text = highlightFilter(text, row.highlight && row.highlight[fieldName]);
 
           if (breakWords) {
             text = addWordBreaks(text, MIN_LINE_LENGTH);
