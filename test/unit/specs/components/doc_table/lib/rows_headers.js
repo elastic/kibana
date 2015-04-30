@@ -16,17 +16,18 @@ define(function (require) {
   // Stub out a minimal mapping of 4 fields
   var mapping;
 
+  beforeEach(module('kibana', 'apps/discover'));
+  beforeEach(inject(function (_config_, $rootScope, Private) {
+    config = _config_;
+    $parentScope = $rootScope;
+    $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    mapping = $parentScope.indexPattern.fields.byName;
+  }));
+
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   var init = function ($elem, props) {
-    module('kibana');
-    inject(function ($rootScope, $compile, _config_, Private) {
-      config = _config_;
-      $parentScope = $rootScope;
-
+    inject(function ($compile) {
       _.assign($parentScope, props);
-      $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      mapping = $parentScope.indexPattern.fields.byName;
-
       $compile($elem)($parentScope);
       $elem.scope().$digest();
       $scope = $elem.isolateScope();
@@ -314,7 +315,6 @@ define(function (require) {
       var $root;
       var $before;
 
-      beforeEach(module('kibana', 'apps/discover'));
       beforeEach(inject(function ($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
@@ -342,7 +342,6 @@ define(function (require) {
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
         expect($before.eq(1).text().trim()).to.match(/^time_formatted/);
-        expect($before.eq(2).find('dl dt').length).to.be(_.keys($scope.row.$$_flattened).length);
       }));
 
       afterEach(function () {
@@ -444,7 +443,7 @@ define(function (require) {
       });
 
       it('handles two columns with the same content', function () {
-        $root.row.$$_formatted.request_body = $root.row.$$_formatted.bytes;
+        $root.row.$$_partialFormatted.request_body = $root.row.$$_partialFormatted.bytes;
         $root.columns.length = 0;
         $root.columns.push('bytes');
         $root.columns.push('request_body');

@@ -199,9 +199,9 @@ define(function (require) {
         convertHtml = format.getConverterFor('html');
       }));
 
-      it('uses the hit source, indexPattern, and the hit itself to create a <dl>', function () {
+      it('uses the _source, field, and hit to create a <dl>', function () {
         var hit = _.first(hits);
-        var $dl = $(convertHtml(hit._source, indexPattern, hit));
+        var $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
         expect($dl.is('dl')).to.be.ok();
         expect($dl.find('dt')).to.have.length(_.keys(indexPattern.flattenHit(hit)).length);
       });
