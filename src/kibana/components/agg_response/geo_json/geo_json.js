@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
 
     var readRows = require('components/agg_response/geo_json/_read_rows');
+    var tooltipFormatter = Private(require('components/agg_response/geo_json/_tooltip_formatter'));
+
     function findCol(table, name) {
       return _.findIndex(table.columns, function (col) {
         return col.aggConfig.schema.name === name;
@@ -26,19 +28,7 @@ define(function (require) {
 
       var chart = {};
 
-      chart.tooltipFormatter = function (feature) {
-        var lat = feature.geometry.coordinates[1];
-        var lng = feature.geometry.coordinates[0];
-
-        var content = '<table class="ng-scope"><tbody>' +
-        '<tr><td><b>' + feature.properties.valueLabel + ': </b></td>' +
-        '<td>' + feature.properties.count + '</td></tr>' +
-        '<tr><td><b>Center: </b></td>' +
-        '<td>' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '</td></tr>' +
-        '</tbody></table>';
-
-        return content;
-      };
+      chart.tooltipFormatter = tooltipFormatter;
 
       var geoJson = chart.geoJson = {
         type: 'FeatureCollection',

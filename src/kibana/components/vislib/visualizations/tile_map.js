@@ -137,7 +137,7 @@ define(function (require) {
           // add tooltips
           self._attr.disableTooltips = false;
 
-          if (self._attr.addLeafletPopup && self.tooltipFormatter && !self._attr.disableTooltips) {
+          if (self._attr.addTooltip && self.tooltipFormatter && !self._attr.disableTooltips) {
             map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
               'leading': true,
               'trailing': false
@@ -595,8 +595,8 @@ define(function (require) {
     };
 
     /**
-     * geohashMinDistance returns a min distance in meters for sizing
-     * circle markers to fit within geohash grid rectangle
+     * geohashMinDistance returns a max distance in meters for sizing
+     * circle markers to fit within min distance of geohash grid rectangle
      *
      * @method geohashMinDistance
      * @param feature {Object}
@@ -608,7 +608,7 @@ define(function (require) {
 
       // get lat[1] and lng[0] of geohash center point
       // apply lat to east[2] and lng to north[3] sides of rectangle
-      // to get radius at center of geohash grid recttangle
+      // to get radius at center of geohash grid rectangle
       var center = L.latLng([centerPoint[1], centerPoint[0]]);
       var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
       var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);

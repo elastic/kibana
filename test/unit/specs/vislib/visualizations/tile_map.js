@@ -58,36 +58,29 @@ define(function (require) {
             });
           });
 
-          it('should draw a map', function () {
+          it('should draw a Leaflet map to the DOM', function () {
             leafletContainer = $(vis.el).find('.leaflet-container');
             isDrawn = (leafletContainer.length > 0);
             expect(isDrawn).to.be(true);
           });
         });
 
-        describe('geohashMinDistance method', function () {
-          it('should return a number', function () {
-            vis.handler.charts.forEach(function (chart) {
-              var feature = chart.chartData.geoJson.features[0];
-              expect(_.isNumber(chart.geohashMinDistance(feature))).to.be(true);
-            });
-          });
-        });
-
         describe('radiusScale method', function () {
-          it('should return a number', function () {
+          it('should return a number for scaling circle markers based on square root of count', function () {
             vis.handler.charts.forEach(function (chart) {
-              var count = Math.random() * 50;
-              var max = 50;
-              var precision = 1;
-              var feature = chart.chartData.geoJson.features[0];
+              var count = Math.random() * 500;
+              var max = 500;
+              var precision = Math.ceil(Math.random() * 5);
+              var mapData = chart.chartData.geoJson;
+              var i = _.random(0, mapData.features.length - 1);
+              var feature = mapData.features[i];
               expect(_.isNumber(chart.radiusScale(count, max, feature))).to.be(true);
             });
           });
         });
 
         describe('quantizeColorScale method', function () {
-          it('should return a hex color', function () {
+          it('should return a hex color from the array of color options', function () {
             vis.handler.charts.forEach(function (chart) {
               var reds = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
               var count = Math.random() * 300;
@@ -99,7 +92,7 @@ define(function (require) {
         });
 
         describe('nearestFeature method', function () {
-          it('should return an object', function () {
+          it('should return a geoJson feature object', function () {
             vis.handler.charts.forEach(function (chart) {
               var lat = (Math.random() * 180) - 90;
               var lng = (Math.random() * 360) - 180;
@@ -112,7 +105,7 @@ define(function (require) {
         });
 
         describe('tooltipProximity method', function () {
-          it('should return true', function () {
+          it('should return true if feature is close enough to event latlng to display tooltip', function () {
             vis.handler.charts.forEach(function (chart) {
               var zoom = _.random(1, 12);
               var mapData = chart.chartData.geoJson;
@@ -123,7 +116,7 @@ define(function (require) {
               expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(true);
             });
           });
-          it('should return false', function () {
+          it('should return false if feature is not close enough to event latlng to display tooltip', function () {
             vis.handler.charts.forEach(function (chart) {
               var zoom = _.random(1, 12);
               var mapData = chart.chartData.geoJson;
@@ -137,7 +130,7 @@ define(function (require) {
         });
 
         describe('geohashMinDistance method', function () {
-          it('should return a number', function () {
+          it('should return the max distance in meters for sizing circle markers to fit within feature geohash', function () {
             vis.handler.charts.forEach(function (chart) {
               var mapData = chart.chartData.geoJson;
               var i = _.random(0, mapData.features.length - 1);

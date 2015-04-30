@@ -14,7 +14,7 @@ define(function (require) {
         defaults: {
           mapType: 'Scaled Circle Markers',
           isDesaturated: true,
-          addLeafletPopup: true
+          addTooltip: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
