@@ -38,7 +38,7 @@ define(function (require) {
     };
 
     YAxis.prototype._isUserDefined = function () {
-      return (this._attr.setYExtents.min || this._attr.setYExtents.max);
+      return (this._attr.setYExtents);
     };
 
     YAxis.prototype._isYExtents = function () {
@@ -47,28 +47,20 @@ define(function (require) {
 
     YAxis.prototype._validateUserExtents = function (domain) {
       var self = this;
-      var extents = ['min', 'max'];
 
-      return domain.map(function (val, i) {
-        var extent = extents[i];
+      return domain.map(function (val) {
         val = parseInt(val, 10);
 
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
-        if (self._isPercentage() && self._attr.setYExtents[extent]) return val / 100;
+        if (self._isPercentage() && self._attr.setYExtents) return val / 100;
         return val;
       });
-    };
-
-    YAxis.prototype._validateAxisExtents = function (min, max) {
-      if (min === max) throw new errors.NoResults();
-      if (min > max) throw new errors.YMinGreaterThanYMax();
     };
 
     YAxis.prototype._getExtents = function (domain) {
       var min = domain[0];
       var max = domain[1];
 
-      this._validateAxisExtents(min, max);
       if (this._attr.scale === 'log') return this._logDomain(min, max); // Negative values cannot be displayed with a log scale.
       if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
       if (this._isUserDefined()) return this._validateUserExtents(domain);

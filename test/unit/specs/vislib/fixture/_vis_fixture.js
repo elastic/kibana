@@ -18,10 +18,7 @@ define(function (require) {
         addTooltip: true,
         addLegend: true,
         defaultYExtents: false,
-        setYExtents: {
-          max: false,
-          min: false
-        },
+        setYExtents: false,
         yAxis: {},
         type: 'histogram'
       });

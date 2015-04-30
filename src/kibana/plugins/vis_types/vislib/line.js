@@ -20,10 +20,7 @@ define(function (require) {
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
           defaultYExtents: false,
-          setYExtents: {
-            max: false,
-            min: false
-          },
+          setYExtents: false,
           yAxis: {},
           scale: 'linear'
         },

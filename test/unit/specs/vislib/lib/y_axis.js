@@ -77,10 +77,7 @@ define(function (require) {
       _attr: {
         margin: { top: 0, right: 0, bottom: 0, left: 0 },
         defaultYMin: true,
-        setYExtents: {
-          max: false,
-          min: false
-        },
+        setYExtents: false,
         yAxis: {}
       }
     });
@@ -233,8 +230,7 @@ define(function (require) {
 
         beforeEach(function () {
           yAxis._attr.mode = 'stacked';
-          yAxis._attr.setYExtents.min = false;
-          yAxis._attr.setYExtents.max = false;
+          yAxis._attr.setYExtents = false;
           yAxis._attr.yAxis = {};
         });
 
@@ -249,8 +245,7 @@ define(function (require) {
 
         it('should return a decimal value', function () {
           yAxis._attr.mode = 'percentage';
-          yAxis._attr.setYExtents.min = true;
-          yAxis._attr.setYExtents.max = true;
+          yAxis._attr.setYExtents = true;
           domain = [];
           domain[0] = yAxis._attr.yAxis.min = 20;
           domain[1] = yAxis._attr.yAxis.max = 80;

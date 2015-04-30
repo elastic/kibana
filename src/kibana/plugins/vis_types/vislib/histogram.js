@@ -17,10 +17,7 @@ define(function (require) {
           scale: 'linear',
           mode: 'stacked',
           defaultYExtents: false,
-          setYExtents: {
-            max: false,
-            min: false
-          },
+          setYExtents: false,
           yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],

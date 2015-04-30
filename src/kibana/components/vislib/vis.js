@@ -83,7 +83,6 @@ define(function (require) {
           error instanceof errors.CannotLogScaleNegVals ||
           error instanceof errors.PieContainsAllZeros ||
           error instanceof errors.NotEnoughData ||
-          error instanceof errors.YMinGreaterThanYMax ||
           error instanceof errors.NoResults) {
           this.handler.error(error.message);
         } else {

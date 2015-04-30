@@ -1,0 +1,30 @@
+<div>
+  <div class="vis-option-item">
+    <label>
+      <input type="checkbox" ng-model="vis.params.setYExtents">
+      Set Y-Axis Extents
+    </label>
+    <div ng-if="vis.params.setYExtents">
+      <label>
+        y-max
+        <input name="yMax"
+               class="form-control"
+               type="number"
+               step="0.1"
+               min="{{vis.params.yAxis.min}}"
+               ng-model="vis.params.yAxis.max"
+               ng-required="vis.params.setYExtents">
+      </label>
+      <label>
+        y-min
+        <input name="yMin"
+               class="form-control"
+               type="number"
+               step="0.1"
+               max="{{vis.params.yAxis.max}}"
+               ng-model="vis.params.yAxis.min"
+               ng-required="vis.params.setYExtents">
+      </label>
+    </div>
+  </div>
+</div>
