@@ -49,6 +49,7 @@ define(function (require) {
         require('specs/components/filter_bar/_addFilters'),
         require('specs/components/filter_bar/_removeFilters'),
         require('specs/components/filter_bar/_toggleFilters'),
+        require('specs/components/filter_bar/_invertFilters'),
       ].forEach(function (s) {
         describe(s[0], s[1]);
       });
