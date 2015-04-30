@@ -50,6 +50,7 @@ define(function (require) {
         require('specs/components/filter_bar/_removeFilters'),
         require('specs/components/filter_bar/_toggleFilters'),
         require('specs/components/filter_bar/_invertFilters'),
+        require('specs/components/filter_bar/_pinFilters'),
       ].forEach(function (s) {
         describe(s[0], s[1]);
       });

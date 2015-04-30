@@ -153,10 +153,10 @@ define(function (require) {
       var globalIndex = _.indexOf(globalState.filters, filter);
       if (appIndex === -1 && globalIndex === -1) return;
 
-      if (appIndex !== -1) {
+      if (appIndex !== -1 && force !== false) {
         appState.filters.splice(appIndex, 1);
         globalState.filters.push(filter);
-      } else if (globalIndex !== -1) {
+      } else if (globalIndex !== -1 && force !== true) {
         globalState.filters.splice(globalIndex, 1);
         appState.filters.push(filter);
       }
@@ -220,8 +220,13 @@ define(function (require) {
     // helper to run a function on all filters in all states
     function executeOnFilters(fn) {
       var appState = getAppState();
-      appState.filters.forEach(fn);
-      globalState.filters.forEach(fn);
+      var appFilters;
+      if (appState && appState.filters) {
+        appFilters = appState.filters;
+      } else {
+        appFilters = [];
+      }
+      globalState.filters.concat(appFilters).forEach(fn);
     }
 
     function mergeAndMutateFilters(globalFilters, appFilters, compareOptions) {
