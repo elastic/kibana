@@ -96,9 +96,34 @@ define(function (require) {
         expect(leafletContainer.find('.leaflet-draw').length).to.be(1);
       });
 
-      it('should attach the filter drawing button', function () {
+      it('should attach the crop button', function () {
         expect(leafletContainer.find('.leaflet-control-fit').length).to.be(1);
       });
+
+      it('should not attach the filter or crop buttons if no data is present', function () {
+        var noData = {
+          geoJson: {
+            features: [],
+            properties: {
+              label: null,
+              length: 30,
+              min: 1,
+              max: 608,
+              precision: 1,
+              allmin: 1,
+              allmax: 608
+            },
+            hits: 20
+          }
+        };
+        vis.render(noData);
+        leafletContainer = $(vis.el).find('.leaflet-container');
+
+        expect(leafletContainer.find('.leaflet-control-fit').length).to.be(0);
+        expect(leafletContainer.find('.leaflet-draw').length).to.be(0);
+
+      });
+
     });
 
     // Probably only neccesary to test one of these as we already know the the map will render
