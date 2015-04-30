@@ -45,16 +45,6 @@ module.exports = new kibana.Plugin({
       }
     });
 
-    // server.route({
-    //   method: 'GET',
-    //   path: '/status/{param*}',
-    //   handler: {
-    //     directory: {
-    //       path: join(__dirname, 'public')
-    //     }
-    //   }
-    // });
-
     server.route({
       method: 'GET',
       path: '/status/health',

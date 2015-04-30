@@ -6,9 +6,18 @@ _.mixin(require('lodash-deep'));
 
 function Config(schema, config) {
   config = config || {};
-  this.schema = Joi.compile(schema || {});
+  this.schema = schema || Joi.object({}).default();
   this.reset(config);
 }
+
+Config.prototype.extendSchema = function (key, schema) {
+  var additionalSchema = {};
+  if (!this.has(key)) {
+    additionalSchema[key] = schema;
+    this.schema = this.schema.keys(additionalSchema);
+    this.reset(this.config);
+  }
+};
 
 Config.prototype.reset = function (obj) {
   var results = Joi.validate(obj, this.schema);

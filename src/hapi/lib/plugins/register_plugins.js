@@ -4,9 +4,14 @@ var checkDependencies = require('./check_dependencies');
 var status = require('../status');
 var addStaticsForPublic = require('./add_statics_for_public');
 
-function checkForCircularDependency(tasks) {
+/**
+ * Check to see if there are any circular dependencies for the task tree
+ * @param {array} plugins an array of plugins
+ * @returns {type} description
+ */
+function checkForCircularDependency(plugins) {
   var deps = {};
-  tasks.forEach(function (task) {
+  plugins.forEach(function (task) {
     deps[task.name] = [];
     if (task.require) deps[task.name] = task.require;
   });
@@ -24,6 +29,11 @@ module.exports = function (server, plugins) {
   var finished = false;
   var todo = plugins.concat();
 
+  /**
+   * Checks to see if all the tasks are completed for an array of dependencies
+   * @param {array} tasks  An array of plugin names
+   * @returns {boolean} if all the tasks are done this it will return true
+   */
   function allDone(tasks) {
     var done = _.keys(results);
     return tasks.every(function (dep) {
@@ -31,6 +41,15 @@ module.exports = function (server, plugins) {
     });
   }
 
+  /**
+   * Register a plugin with the Kibana server
+   *
+   * This includes setting up the status object and setting the reference to
+   * the plugin's server
+   *
+   * @param {object} plugin The plugin to register
+   * @returns {Promise}
+   */
   function registerPlugin(plugin) {
     var config = server.config();
     return new Promise(function (resolve, reject) {
@@ -40,7 +59,7 @@ module.exports = function (server, plugins) {
         Promise.try(plugin.init, [server, options], plugin).nodeify(next);
       };
       register.attributes = { name: plugin.name };
-      var options = config[plugin.name] || {};
+      var options = config.get(plugin.name) || {};
       server.register({ register: register, options: options }, function (err) {
         if (err) return reject(err);
         plugin.status.green('Ready');

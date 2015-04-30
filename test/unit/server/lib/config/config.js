@@ -187,6 +187,29 @@ describe('lib/config/config', function () {
 
     });
 
+    describe('#extendSchema(key, schema)', function () {
+      var config;
+      beforeEach(function () {
+        config = new Config(schema);
+      });
+
+      it('should allow you to extend the schema at the top level', function () {
+        var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        config.extendSchema('myTest', newSchema);
+        expect(config.get('myTest.test')).to.be(true);
+      });
+
+      it('should NOT allow you to extend the schema if somethign else is there', function () {
+        var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        config.extendSchema('test', newSchema);
+        var run = function () {
+          config.get('test.test');
+        };
+        expect(run).to.throwException();
+      });
+
+    });
+
   });
 });
 
