@@ -22,7 +22,7 @@ define(function (require) {
 
       function sourceToHtml(source, indexPattern, hit) {
         if (!indexPattern) return sourceToText(source);
-        var highlights = (hit && hit.highlights) || {};
+        var highlights = (hit && hit.highlight) || {};
 
         var formatted = indexPattern.formatHit(hit);
         var highlightPairs = [];

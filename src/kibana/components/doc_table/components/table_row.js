@@ -2,7 +2,6 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var addWordBreaks = require('utils/add_word_breaks');
-  var noWhiteSpace = require('utils/no_white_space');
   var module = require('modules').get('app/discover');
 
   require('components/highlight/highlight');
@@ -23,12 +22,11 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config, highlightFilter, highlightTags, shortDotsFilter, courier) {
+  module.directive('kbnTableRow', function ($compile, highlightFilter) {
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(require('text!components/doc_table/components/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
-    var sourceTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/_source.html')));
 
     return {
       restrict: 'A',
@@ -38,7 +36,7 @@ define(function (require) {
         indexPattern: '=',
         row: '=kbnTableRow'
       },
-      link: function ($scope, $el, attrs) {
+      link: function ($scope, $el) {
         $el.after('<tr>');
         $el.empty();
 
@@ -106,20 +104,9 @@ define(function (require) {
           }
 
           $scope.columns.forEach(function (column) {
-            var formatted;
-
-            if (column === '_source') {
-              formatted = sourceTemplate({
-                source: indexPattern.formatHit(row),
-                highlight: row.highlight,
-                shortDotsFilter: shortDotsFilter
-              });
-            } else {
-              formatted = _displayField(row, column, true);
-            }
             newHtmls.push(cellTemplate({
               timefield: false,
-              formatted: formatted
+              formatted: _displayField(row, column, true)
             }));
           });
 
@@ -161,9 +148,20 @@ define(function (require) {
         /**
          * Fill an element with the value of a field
          */
-        function _displayField(row, field, breakWords) {
-          var text = $scope.indexPattern.formatField(row, field);
-          text = highlightFilter(text, row.highlight && row.highlight[field]);
+        function _displayField(row, fieldName, breakWords) {
+          var indexPattern = $scope.indexPattern;
+
+          if (fieldName === '_source') {
+            if (!row.$$_formattedSource) {
+              var field = indexPattern.fields.byName._source;
+              var converter = field.format.getConverterFor('html');
+              row.$$_formattedSource = converter(row._source, indexPattern, row);
+            }
+            return row.$$_formattedSource;
+          }
+
+          var text = indexPattern.formatField(row, fieldName);
+          text = highlightFilter(text, row.highlight && row.highlight[fieldName]);
 
           if (breakWords) {
             text = addWordBreaks(text, MIN_LINE_LENGTH);

@@ -95,6 +95,7 @@ define(function () {
           '  "ip": { "id": "ip", "params": {} },',
           '  "date": { "id": "date", "params": {} },',
           '  "number": { "id": "number", "params": {} },',
+          '  "_source": { "id": "_source", "params": {} },',
           '  "_default_": { "id": "string", "params": {} }',
           '}',
         ].join('\n'),
