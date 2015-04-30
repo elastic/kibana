@@ -42,12 +42,16 @@ define(function (require) {
         filters = [filters];
       }
 
-      // simply concat global filters, they will be deduped
       if (global) {
+        // simply concat global filters, they will be deduped
         globalState.filters = globalState.filters.concat(filters);
       } else if (appState) {
         if (!appState.filters) appState.filters = [];
-        appState.filters = appState.filters.concat(filters);
+        var mergeOptions = { disabled: true, negate: false };
+        var appFilters = appState.filters.concat(filters);
+        var merged = mergeAndMutateFilters(globalState.filters, appFilters, mergeOptions);
+        globalState.filters = merged[0];
+        appState.filters = merged[1];
       }
 
       return saveState();
@@ -223,7 +227,7 @@ define(function (require) {
     function mergeAndMutateFilters(globalFilters, appFilters, compareOptions) {
       appFilters = appFilters || [];
       globalFilters = globalFilters || [];
-      compareOptions = _.defaults(compareOptions || {}, { disabled: true });
+      compareOptions = _.defaults(compareOptions || {}, { disabled: true, negate: true });
 
       // existing globalFilters should be mutated by appFilters
       appFilters = _.filter(appFilters, function (filter) {
@@ -279,20 +283,24 @@ define(function (require) {
             var nextVal = next[i];
             var prevVal = prev[i];
 
+            // no update or fetch if there was no change
             if (nextVal === prevVal) return;
             if (nextVal) doUpdate = true;
+
             // don't trigger fetch when only disabled filters
             if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
           });
 
-          if (!doUpdate) return;
-
           // reconcile filter in global and app states
-          var appState = getAppState();
           var filters = mergeAndMutateFilters(next[0], next[1]);
           globalState.filters = filters[0];
-          appState.filters = filters[1];
+          var appState = getAppState();
+          if (appState) {
+            appState.filters = filters[1];
+          }
           saveState();
+
+          if (!doUpdate) return;
 
           return queryFilter.emit('update')
           .then(function () {
