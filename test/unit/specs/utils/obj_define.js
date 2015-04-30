@@ -35,11 +35,6 @@ define(function (require) {
       });
 
       it('switched to exporting if a value is written', function () {
-        if (/PhantomJS/.test(window.navigator.userAgent)) {
-          // disabled in phantom until https://github.com/ariya/phantomjs/issues/11856 is resolved
-          return;
-        }
-
         var def = new ObjDefine();
         def.writ('name');
 
@@ -63,6 +58,7 @@ define(function (require) {
         obj.name = null;
         expect(flatten(obj)).to.not.have.property('name');
       });
+
     });
 
     describe('#fact', function () {

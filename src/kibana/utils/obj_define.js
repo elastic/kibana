@@ -9,6 +9,22 @@ define(function (require) {
     this.prototype = prototype || Object.prototype;
   }
 
+  ObjDefine.REDEFINE_SUPPORTED = (function () {
+    var a = Object.create(Object.prototype, {
+      prop: {
+        configurable: true,
+        value: 1
+      }
+    });
+
+    Object.defineProperty(a, 'prop', {
+      configurable: true,
+      value: 2
+    });
+
+    return a.prop === 2;
+  }());
+
   /**
    * normal value, writable and exported in JSON
    *
@@ -51,7 +67,20 @@ define(function (require) {
    * @return {object} - created object
    */
   ObjDefine.prototype.create = function () {
-    return this.obj = Object.create(this.prototype, this.descs);
+    var self = this;
+    self.obj = Object.create(this.prototype, self.descs);
+
+    if (!Object.REDEFINE_SUPPORTED && !self.prototype.toJSON) {
+      self.obj.toJSON = function () {
+        return _.transform(self.obj, function (json, val, key) {
+          var desc = self.descs[key];
+          if (desc && desc.enumerable && val == null) return;
+          json[key] = val;
+        }, {});
+      };
+    }
+
+    return self.obj;
   };
 
 
@@ -68,7 +97,7 @@ define(function (require) {
     var self = this;
     var exists = val != null;
 
-    if (exported) {
+    if (exported && ObjDefine.REDEFINE_SUPPORTED) {
       return {
         enumerable: exists,
         configurable: true,
@@ -82,6 +111,15 @@ define(function (require) {
           // apply the updated descriptor
           Object.defineProperty(self.obj, name, self.descs[name]);
         }
+      };
+    }
+
+    if (exported && !ObjDefine.REDEFINE_SUPPORTED) {
+      return {
+        enumerable: true,
+        configurable: true,
+        writable: changeable,
+        value: val
       };
     }
 
