@@ -5,85 +5,85 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var getFakeRow = require('fixtures/fake_row');
 
-
-  // Load the kibana app dependencies.
-  require('angular-route');
-
-  require('plugins/discover/index');
-
-  var $parentScope, $scope, config;
-
-  // Stub out a minimal mapping of 4 fields
-  var mapping;
-
-  beforeEach(module('kibana', 'apps/discover'));
-  beforeEach(inject(function (_config_, $rootScope, Private) {
-    config = _config_;
-    $parentScope = $rootScope;
-    $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    mapping = $parentScope.indexPattern.fields.byName;
-  }));
-
-  // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-  var init = function ($elem, props) {
-    inject(function ($compile) {
-      _.assign($parentScope, props);
-      $compile($elem)($parentScope);
-      $elem.scope().$digest();
-      $scope = $elem.isolateScope();
-    });
-  };
-
-  var destroy = function () {
-    $scope.$destroy();
-    $parentScope.$destroy();
-  };
-
-  // For testing column removing/adding for the header and the rows
-  //
-  var columnTests = function (elemType, parentElem) {
-
-    it('should create a time column if the timefield is defined', function (done) {
-      var childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      done();
-    });
-
-    it('should be able to add and remove columns', function (done) {
-      var childElems;
-      // Should include a column for toggling and the time column by default
-      $parentScope.columns = ['bytes'];
-      parentElem.scope().$digest();
-      childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('bytes');
-
-      $parentScope.columns = ['bytes', 'request_body'];
-      parentElem.scope().$digest();
-      childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(4);
-      expect($(childElems[3]).text()).to.contain('request_body');
-
-      $parentScope.columns = ['request_body'];
-      parentElem.scope().$digest();
-      childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('request_body');
-      done();
-    });
-
-    it('should create only the toggle column if there is no timeField', function (done) {
-      delete parentElem.scope().indexPattern.timeFieldName;
-      parentElem.scope().$digest();
-
-      var childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(1);
-      done();
-    });
-
-  };
-
   describe('Doc Table', function () {
+
+    // Load the kibana app dependencies.
+    require('angular-route');
+
+    require('plugins/discover/index');
+
+    var $parentScope, $scope, config;
+
+    // Stub out a minimal mapping of 4 fields
+    var mapping;
+
+    beforeEach(module('kibana', 'apps/discover'));
+    beforeEach(inject(function (_config_, $rootScope, Private) {
+      config = _config_;
+      $parentScope = $rootScope;
+      $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      mapping = $parentScope.indexPattern.fields.byName;
+    }));
+
+    // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
+    var init = function ($elem, props) {
+      inject(function ($compile) {
+        _.assign($parentScope, props);
+        $compile($elem)($parentScope);
+        $elem.scope().$digest();
+        $scope = $elem.isolateScope();
+      });
+    };
+
+    var destroy = function () {
+      $scope.$destroy();
+      $parentScope.$destroy();
+    };
+
+    // For testing column removing/adding for the header and the rows
+    //
+    var columnTests = function (elemType, parentElem) {
+
+      it('should create a time column if the timefield is defined', function (done) {
+        var childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(2);
+        done();
+      });
+
+      it('should be able to add and remove columns', function (done) {
+        var childElems;
+        // Should include a column for toggling and the time column by default
+        $parentScope.columns = ['bytes'];
+        parentElem.scope().$digest();
+        childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(3);
+        expect($(childElems[2]).text()).to.contain('bytes');
+
+        $parentScope.columns = ['bytes', 'request_body'];
+        parentElem.scope().$digest();
+        childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(4);
+        expect($(childElems[3]).text()).to.contain('request_body');
+
+        $parentScope.columns = ['request_body'];
+        parentElem.scope().$digest();
+        childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(3);
+        expect($(childElems[2]).text()).to.contain('request_body');
+        done();
+      });
+
+      it('should create only the toggle column if there is no timeField', function (done) {
+        delete parentElem.scope().indexPattern.timeFieldName;
+        parentElem.scope().$digest();
+
+        var childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(1);
+        done();
+      });
+
+    };
+
 
     describe('kbnTableHeader', function () {
 
