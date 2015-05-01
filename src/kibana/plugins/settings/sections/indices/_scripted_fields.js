@@ -3,10 +3,11 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('scriptedFields', function (kbnUrl, Notifier) {
+  .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
     var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
+    var filter = $filter('filter');
 
     var notify = new Notifier();
 
@@ -31,11 +32,16 @@ define(function (require) {
           { title: 'controls', sortable: false }
         ];
 
-        $scope.$watch('indexPattern.fields', function () {
+        $scope.$watch('indexPattern.fields', refreshRows);
+        $scope.$watch('fieldFilter', refreshRows);
+
+        function refreshRows() {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
-          $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
+          var fields = filter($scope.indexPattern.getFields('scripted'), $scope.fieldFilter);
+
+          $scope.rows = fields.map(function (field) {
             var rowScope = $scope.$new();
             var columns = [field.name, field.script, field.type];
             rowScope.field = field;
@@ -51,7 +57,7 @@ define(function (require) {
 
             return columns;
           });
-        });
+        }
 
         $scope.addDateScripts = function () {
           var conflictFields = [];
