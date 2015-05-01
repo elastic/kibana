@@ -35,7 +35,6 @@
   background: #aaa;
 }
 
-
 /* leaflet Dom Util div for map legend */
 
 .tilemap-info {
@@ -62,7 +61,6 @@
   height: 26px;
   outline: 1px black;
 }
-
 
 /* over-rides leaflet popup styles to look like kibana tooltip */
 
@@ -146,6 +144,9 @@
   padding: 0 !important;
 }
 
+.leaflet-draw-tooltip {
+    display: none;
+}
 
 /* filter to desaturate mapquest tiles */
 
@@ -157,10 +158,8 @@ img.leaflet-tile.filters-off {
   .filter(none);
 }
 
-
 /* remove events from svg map markers */
 
 .leaflet-clickable {
   pointer-events: none;
 }
-
