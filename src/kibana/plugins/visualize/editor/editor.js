@@ -184,7 +184,7 @@ define(function (require) {
         }
 
         if (_.isEqual(keys, ['filters'])) {
-          // updates will happen in filterBarWatchFilters() if needed
+          // updates will happen in filter watcher if needed
           return;
         }
 
