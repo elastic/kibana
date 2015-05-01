@@ -6,6 +6,7 @@ define(function (require) {
   var YAxis;
   var Data;
   var el;
+  var buildYAxis;
   var yAxis;
   var yAxisDiv;
 
@@ -70,14 +71,18 @@ define(function (require) {
       defaultYMin: true
     });
 
-    yAxis = new YAxis({
-      el: node,
-      yMin: dataObj.getYMin(),
-      yMax: dataObj.getYMax(),
-      _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
-      }
-    });
+    buildYAxis = function (params) {
+      return new YAxis(_.merge({}, params, {
+        el: node,
+        yMin: dataObj.getYMin(),
+        yMax: dataObj.getYMax(),
+        _attr: {
+          margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        }
+      }));
+    };
+
+    yAxis = buildYAxis();
   }
 
   describe('Vislib yAxis Class Test Suite', function () {
@@ -203,20 +208,6 @@ define(function (require) {
           expect(domain[1]).to.be.greaterThan(0);
           checkRange();
         });
-      });
-    });
-
-    describe('formatAxisLabel method', function () {
-      var num = 1e9;
-      var val;
-
-      beforeEach(function () {
-        createData(defaultGraphData);
-        val = yAxis.formatAxisLabel(num);
-      });
-
-      it('should return a string with suffix B', function () {
-        expect(val).to.be('1b');
       });
     });
 
@@ -358,6 +349,35 @@ define(function (require) {
         expect(yAxis.tickScale(1000)).to.be(11);
         expect(yAxis.tickScale(40)).to.be(3);
         expect(yAxis.tickScale(20)).to.be(0);
+      });
+    });
+
+    describe('#tickFormat()', function () {
+      var formatter = function () {};
+
+      it('returns a basic number formatter by default', function () {
+        var yAxis = buildYAxis();
+        expect(yAxis.tickFormat()).to.not.be(formatter);
+        expect(yAxis.tickFormat()(1)).to.be('1');
+      });
+
+      it('returns the yAxisFormatter when passed', function () {
+        var yAxis = buildYAxis({
+          yAxisFormatter: formatter
+        });
+        expect(yAxis.tickFormat()).to.be(formatter);
+      });
+
+      it('returns a percentage formatter when the vis is in percentage mode', function () {
+        var yAxis = buildYAxis({
+          yAxisFormatter: formatter,
+          _attr: {
+            mode: 'percentage'
+          }
+        });
+
+        expect(yAxis.tickFormat()).to.not.be(formatter);
+        expect(yAxis.tickFormat()(1)).to.be('100%');
       });
     });
   });
