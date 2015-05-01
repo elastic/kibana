@@ -70,12 +70,8 @@ define(function (require) {
 
         var off = $rootScope.$on('filterbar:updated', function () {
           off();
-
           // force a nextTick so it continues *after* the $digest loop completes
-          setTimeout(function () {
-            $rootScope.$apply(); // ┗( ●-﹏ ｀｡)づ ....angular
-            done();
-          }, 0);
+          setTimeout(done, 0);
         });
 
         // kick off the digest loop
