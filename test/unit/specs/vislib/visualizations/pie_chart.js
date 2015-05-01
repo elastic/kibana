@@ -118,6 +118,41 @@ define(function (require) {
       expect($(chart1.el).find('.y-axis-chart-title').length).to.be(1);
       expect($(chart2.el).find('.x-axis-chart-title').length).to.be(1);
     });
+
+    describe('_validatePieData method', function () {
+      var allZeros = [
+        { slices: { children: [] } },
+        { slices: { children: [] } },
+        { slices: { children: [] } }
+      ];
+
+      var someZeros = [
+        { slices: { children: [{}] } },
+        { slices: { children: [{}] } },
+        { slices: { children: [] } }
+      ];
+
+      var noZeros = [
+        { slices: { children: [{}] } },
+        { slices: { children: [{}] } },
+        { slices: { children: [{}] } }
+      ];
+
+      it('should throw an error when all charts contain zeros', function () {
+        expect(function () {
+          chart1.ChartClass.prototype._validatePieData(allZeros);
+        }).to.throwError();
+      });
+
+      it('should not throw an error when only some or no charts contain zeros', function () {
+        expect(function () {
+          chart1.ChartClass.prototype._validatePieData(someZeros);
+        }).to.not.throwError();
+        expect(function () {
+          chart1.ChartClass.prototype._validatePieData(noZeros);
+        }).to.not.throwError();
+      });
+    });
   });
 
   aggArray.forEach(function (dataAgg, i) {

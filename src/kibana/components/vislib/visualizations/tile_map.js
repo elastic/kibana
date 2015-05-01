@@ -3,7 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    require('leaflet-draw');
 
+    var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
@@ -31,6 +33,8 @@ define(function (require) {
 
       // track the map objects
       this.maps = [];
+
+      this.events = new Dispatch(handler);
 
       // add allmin and allmax to geoJson
       chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
@@ -76,6 +80,21 @@ define(function (require) {
             subdomains: '1234'
           });
 
+
+          var drawOptions = {draw: {}};
+          _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
+            if (!self.events.dispatch[drawShape]) {
+              drawOptions.draw[drawShape] = false;
+            } else {
+              drawOptions.draw[drawShape] = {
+                shapeOptions: {
+                  stroke: false,
+                  color: '#000'
+                }
+              };
+            }
+          });
+
           var mapOptions = {
             minZoom: 1,
             maxZoom: 18,
@@ -85,10 +104,14 @@ define(function (require) {
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
-            fadeAnimation: false
+            fadeAnimation: false,
           };
 
           var map = L.map(div[0], mapOptions);
+
+          if (data.geoJson.features.length) {
+            map.addControl(new L.Control.Draw(drawOptions));
+          }
 
           tileLayer.on('tileload', function () {
             self.saturateTiles();
@@ -105,6 +128,29 @@ define(function (require) {
             mapCenter = self._attr.mapCenter = map.getCenter();
             featureLayer.clearLayers();
             featureLayer = self.markerType(map, mapData).addTo(map);
+          });
+
+          map.on('draw:created', function (e) {
+            var drawType = e.layerType;
+            if (!self.events.dispatch[drawType]) return;
+
+            // TODO: Different drawTypes need differ info. Need a switch on the object creation
+            var bounds = e.layer.getBounds();
+
+            self.events.dispatch[drawType]({
+              e: e,
+              data: self.chartData,
+              bounds: {
+                top_left: {
+                  lat: bounds.getNorthWest().lat,
+                  lon: bounds.getNorthWest().lng
+                },
+                bottom_right: {
+                  lat: bounds.getSouthEast().lat,
+                  lon: bounds.getSouthEast().lng
+                }
+              }
+            });
           });
 
           // add label for splits

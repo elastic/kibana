@@ -15,18 +15,18 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
   dl.source {
     margin-bottom: 0;
     line-height: 2em;
+    word-break: break-all;
+
+    dt, dd {
+      display: inline;
+    }
 
     dt {
-      display: inline;
       background: @gray-lighter;
       padding: @padding-xs-vertical @padding-xs-horizontal;
       margin-right: @padding-xs-horizontal;
       font-family: monospace;
-    }
-
-    dd {
-      display: inline;
-      word-break: break-all;
+      word-break: normal;
     }
   }
 

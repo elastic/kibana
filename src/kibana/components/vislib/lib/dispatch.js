@@ -13,13 +13,17 @@ define(function (require) {
      */
 
     function Dispatch(handler) {
+
+      var stockEvents = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout'];
+      var customEvents = _.deepGet(handler, 'vis.eventTypes.enabled');
+      var eventTypes = customEvents ? stockEvents.concat(customEvents) : stockEvents;
+
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
       }
 
       this.handler = handler;
-      this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover', 'mouseout');
+      this.dispatch = d3.dispatch.apply(this, eventTypes);
     }
 
     /**
