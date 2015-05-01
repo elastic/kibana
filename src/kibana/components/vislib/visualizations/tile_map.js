@@ -216,7 +216,7 @@ define(function (require) {
 
             // show tooltip if close enough to event latlng
             if (self.tooltipProximity(latlng, zoom, feature, map)) {
-              self.showTooltip(map, feature);
+              self.showTooltip(map, feature, latlng);
             }
           }
 
@@ -251,15 +251,11 @@ define(function (require) {
      * @param mapData {mapData Object}
      * @return {undefined}
      */
-    TileMap.prototype.showTooltip = function (map, feature) {
+    TileMap.prototype.showTooltip = function (map, feature, latLng) {
       var content = this.tooltipFormatter(feature);
       if (!content) {
         return;
       }
-
-      var lat = feature.geometry.coordinates[1];
-      var lng = feature.geometry.coordinates[0];
-      var latLng = L.latLng(lat, lng);
 
       L.popup({autoPan: false})
        .setLatLng(latLng)
