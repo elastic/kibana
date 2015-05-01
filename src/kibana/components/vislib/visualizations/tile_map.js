@@ -1,9 +1,10 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private) {
+  return function TileMapFactory(d3, Private, config) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
 
+    var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
@@ -31,6 +32,8 @@ define(function (require) {
 
       // track the map objects
       this.maps = [];
+
+      this.events = new Dispatch(handler);
 
       // add allmin and allmax to geoJson
       chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
@@ -105,8 +108,11 @@ define(function (require) {
             mapCenter = self._attr.mapCenter = map.getCenter();
           });
 
-          map.on('zoomend', function (e) {
+          map.on('zoomend', function () {
+            if (!self.events.dispatch.mapZoomEnd) return;
             var mapInfo = {
+              data: mapData,
+              limit: config.get('visualization:tileMap:maxPrecision'),
               zoom: map.getZoom(),
               zoomPct: map.getZoom() / 18
             };
