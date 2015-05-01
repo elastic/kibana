@@ -31,90 +31,75 @@ define(function (require) {
        *
        * @param  {array[string|function|obj]} expressions - the list of expressions to $watch
        * @param  {Function} fn - the callback function
-       * @param  {boolean} deep - should the watchers be created as deep watchers?
-       * @return {undefined}
+       * @return {Function} - an unwatch function, just like the return value of $watch
        */
-      $delegate.constructor.prototype.$watchMulti = function (expressions, fn, deep) {
+      $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
         if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
         if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
 
         var $scope = this;
-        var registry = [];
-        var fired = false;
-        var queue = [];
         var vals = new Array(expressions.length);
         var prev = new Array(expressions.length);
+        var fire = false;
 
-        function normalizeExpression(expr) {
+        // first, register all of the multi-watchers
+        var unwatchers = expressions.map(function (expr, i) {
+          expr = normalizeExpression($scope, expr);
           if (!expr) return;
 
-          var norm = {
-            fn: $scope.$watch,
-            deep: false
-          };
-
-          if (_.isFunction(expr)) return _.assign(norm, { get: expr });
-          if (_.isObject(expr)) return _.assign(norm, expr);
-          if (!_.isString(expr)) return;
-
-          if (expr.substr(0, 2) === '[]') {
-            return _.assign(norm, {
-              fn: $scope.$watchCollection,
-              get: expr.substr(2)
-            });
-          }
-
-          if (expr.charAt(0) === '=') {
-            return _.assign(norm, {
-              deep: true,
-              get: expr.substr(1)
-            });
-          }
-
-          return _.assign(norm, { get: expr });
-        }
-
-        expressions.forEach(function (expr, i) {
-          expr = normalizeExpression(expr);
-          if (!expr) return;
-
-          queue.push(expr);
-          var watcher = expr.fn.call($scope, expr.get, function (newVal, oldVal) {
+          return expr.fn.call($scope, expr.get, function (newVal, oldVal) {
             vals[i] = newVal;
             prev[i] = oldVal;
-
-            if (queue) {
-              _.pull(queue, expr);
-              if (queue.length > 0) return;
-              queue = false;
-            }
-
-            if (fired) return;
-            fired = true;
-            $scope.$evalAsync(function () {
-              fired = false;
-
-              if (fn.length) {
-                fn(vals.slice(0), prev.slice(0));
-              } else {
-                fn();
-              }
-
-              for (var i = 0; i < vals.length; i++) {
-                prev[i] = vals[i];
-              }
-            });
+            fire = true;
           }, expr.deep);
-
-          registry.push(watcher);
         });
 
-        return function deregister() {
-          registry.forEach(function (deregisterWatcher) {
-            deregisterWatcher();
+        // then, the watcher that checks to see if any of
+        // the other watchers triggered this cycle
+        var flip = false;
+        unwatchers.push($scope.$watch(function () {
+          if (fire) {
+            fire = false;
+            flip = !flip;
+          }
+          return flip;
+        }, function () {
+          fn(vals.slice(0), prev.slice(0));
+          vals.forEach(function (v, i) {
+            prev[i] = v;
           });
-        };
+        }));
+
+        return _.partial(_.callEach, unwatchers);
       };
+
+      function normalizeExpression($scope, expr) {
+        if (!expr) return;
+        var norm = {
+          fn: $scope.$watch,
+          deep: false
+        };
+
+        if (_.isFunction(expr)) return _.assign(norm, { get: expr });
+        if (_.isObject(expr)) return _.assign(norm, expr);
+        if (!_.isString(expr)) return;
+
+        if (expr.substr(0, 2) === '[]') {
+          return _.assign(norm, {
+            fn: $scope.$watchCollection,
+            get: expr.substr(2)
+          });
+        }
+
+        if (expr.charAt(0) === '=') {
+          return _.assign(norm, {
+            deep: true,
+            get: expr.substr(1)
+          });
+        }
+
+        return _.assign(norm, { get: expr });
+      }
 
       return $delegate;
     });
