@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapVisType(Private, getAppState) {
+  return function TileMapVisType(Private, courier) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
@@ -51,8 +51,7 @@ define(function (require) {
 
           agg.params.precision = Math.min(zoomPrecision[event.zoom], event.limit);
 
-          // need to change state of tilemap here to get new data
-          console.log(event.zoom, agg.params.precision);
+          courier.fetch();
         }
       },
       responseConverter: geoJsonConverter,
