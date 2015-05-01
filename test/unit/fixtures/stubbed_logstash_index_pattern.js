@@ -16,8 +16,6 @@ define(function (require) {
     });
 
     var indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
-
-    indexPattern.metaFields = ['_id', '_type', '_source'];
     indexPattern.id = 'logstash-*';
 
     return indexPattern;

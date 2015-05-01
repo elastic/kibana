@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, config, Promise, $rootScope) {
+  return function IndexPatternFactory(Private, timefilter, Notifier, config, Promise, $rootScope) {
     var _ = require('lodash');
     var errors = require('errors');
     var angular = require('angular');
@@ -14,7 +14,7 @@ define(function (require) {
     var mappingSetup = Private(require('utils/mapping_setup'));
     var IndexedArray = require('utils/indexed_array/index');
 
-    var flattenHit = require('components/index_patterns/_flatten_hit');
+    var flattenHit = Private(require('components/index_patterns/_flatten_hit'));
     var formatHit = require('components/index_patterns/_format_hit');
 
     var type = 'index-pattern';
@@ -60,7 +60,7 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibana_index)
+        .index(config.file.kibana_index)
         .type(type)
         .id(self.id);
 

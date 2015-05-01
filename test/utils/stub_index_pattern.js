@@ -5,7 +5,7 @@ define(function (require) {
     var IndexedArray = require('utils/indexed_array/index');
     var IndexPattern = require('components/index_patterns/_index_pattern');
     var fieldFormats = Private(require('registry/field_formats'));
-    var flattenHit = require('components/index_patterns/_flatten_hit');
+    var flattenHit = Private(require('components/index_patterns/_flatten_hit'));
     var formatHit = require('components/index_patterns/_format_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
 
