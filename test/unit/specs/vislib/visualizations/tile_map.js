@@ -42,7 +42,7 @@ define(function (require) {
   }
 
   describe('TileMap Tests', function () {
-    describe('Rendering each types of tile map', function () {
+    describe('Rendering each type of tile map with each type of data', function () {
       dataArray.forEach(function (data, i) {
 
         mapTypes.forEach(function (type, j) {
@@ -176,14 +176,33 @@ define(function (require) {
       });
 
       describe('nearestFeature method', function () {
-        it('should return a geoJson feature object', function () {
+        it('should return an object', function () {
           vis.handler.charts.forEach(function (chart) {
-            var lat = (Math.random() * 180) - 90;
-            var lng = (Math.random() * 360) - 180;
-            var point = L.latLng(lat, lng);
             var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
             expect(_.isObject(chart.nearestFeature(point, mapData))).to.be(true);
+          });
+        });
+
+        it('should return a geoJson feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
             expect(chart.nearestFeature(point, mapData).type).to.be('Feature');
+          });
+        });
+
+        it('should return the geoJson feature with same latlng as point', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
+            expect(chart.nearestFeature(point, mapData)).to.be(feature);
           });
         });
       });
@@ -200,6 +219,7 @@ define(function (require) {
             expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(true);
           });
         });
+
         it('should return false if feature is not close enough to event latlng to display tooltip', function () {
           vis.handler.charts.forEach(function (chart) {
             var zoom = _.random(1, 12);
