@@ -24,10 +24,25 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+      var charts = this.handler.data.getVisData();
+      this._validatePieData(charts);
+
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false
       });
     }
+
+    /**
+     * Checks whether pie slices have all zero values.
+     * If so, an error is thrown.
+     */
+    PieChart.prototype._validatePieData = function (charts) {
+      var isAllZeros = charts.every(function (chart) {
+        return chart.slices.children.length === 0;
+      });
+
+      if (isAllZeros) { throw new errors.PieContainsAllZeros(); }
+    };
 
     /**
      * Adds Events to SVG paths
@@ -150,6 +165,15 @@ define(function (require) {
       return path;
     };
 
+    PieChart.prototype._validateContainerSize = function (width, height) {
+      var minWidth = 20;
+      var minHeight = 20;
+
+      if (width <= minWidth || height <= minHeight) {
+        throw new errors.ContainerTooSmall();
+      }
+    };
+
     /**
      * Renders d3 visualization
      *
@@ -162,17 +186,15 @@ define(function (require) {
       return function (selection) {
         selection.each(function (data) {
           var slices = data.slices;
-          var el = this;
-          var div = d3.select(el);
-          var width = $(el).width();
-          var height = $(el).height();
-          var minWidth = 20;
-          var minHeight = 20;
+          var div = d3.select(this);
+          var width = $(this).width();
+          var height = $(this).height();
           var path;
 
-          if (width <= minWidth || height <= minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
+          if (!slices.children.length) return;
+
+          self.convertToPercentage(slices);
+          self._validateContainerSize(width, height);
 
           var svg = div.append('svg')
           .attr('width', width)
@@ -180,7 +202,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-          self.convertToPercentage(slices);
           path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 
