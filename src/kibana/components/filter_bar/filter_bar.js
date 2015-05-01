@@ -52,9 +52,8 @@ define(function (require) {
         };
 
         // update the scope filter list on filter changes
-        queryFilter.on('update', updateFilters);
-        $scope.$on('$destroy', function () {
-          queryFilter.off('update', updateFilters);
+        $scope.$listen(queryFilter, 'update', function () {
+          updateFilters();
         });
 
         // when appState changes, update scope's state
