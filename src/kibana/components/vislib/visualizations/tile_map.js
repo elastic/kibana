@@ -131,6 +131,8 @@ define(function (require) {
           map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.mapZoom = map.getZoom();
             mapCenter = self._attr.mapCenter = map.getCenter();
+            featureLayer.clearLayers();
+            featureLayer = self.markerType(map, mapData).addTo(map);
           });
 
           map.on('draw:created', function (e) {
@@ -222,6 +224,19 @@ define(function (require) {
 
           self.maps.push(map);
         });
+      };
+    };
+
+    /**
+     * Return features within the map bounds
+     */
+    TileMap.prototype._filterToMapBounds = function (map) {
+      return function (feature) {
+        var coordinates = feature.geometry.coordinates;
+        var p0 = coordinates[0];
+        var p1 = coordinates[1];
+
+        return map.getBounds().contains([p1, p0]);
       };
     };
 
@@ -416,7 +431,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -452,7 +468,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -495,7 +512,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -538,6 +556,10 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
+      var isLegend = $('div.tilemap-legend').length;
+
+      if (isLegend) return; // Don't add Legend if already one
+
       var legend = L.control({position: 'bottomright'});
       legend.onAdd = function () {
         var div = L.DomUtil.create('div', 'tilemap-legend');

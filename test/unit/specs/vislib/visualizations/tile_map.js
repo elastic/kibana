@@ -73,7 +73,6 @@ define(function (require) {
       });
     });
 
-
     describe('Leaflet controls', function () {
       var vis;
       var leafletContainer;
@@ -139,6 +138,30 @@ define(function (require) {
 
       afterEach(function () {
         destroyVis(vis);
+      });
+
+      describe('_filterToMapBounds method', function () {
+        it('should filter out data points that are outside of the map bounds', function () {
+          vis.handler.charts.forEach(function (chart) {
+            chart.maps.forEach(function (map) {
+              var featuresLength = chart.chartData.geoJson.features.length;
+              var mapFeatureLength;
+
+              function getSize(obj) {
+                var size = 0;
+                var key;
+
+                for (key in obj) { if (obj.hasOwnProperty(key)) size++; }
+                return size;
+              }
+
+              map.setZoom(13); // Zoom in on the map!
+              mapFeatureLength = getSize(map._layers);
+
+              expect(mapFeatureLength).to.be.lessThan(featuresLength);
+            });
+          });
+        });
       });
 
       describe('geohashMinDistance method', function () {
