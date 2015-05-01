@@ -50,7 +50,7 @@ define(function (require) {
       },
 
       html: function (rawValue, field, hit) {
-        var url = this.convert(rawValue, 'text');
+        var url = _.escape(this.convert(rawValue, 'text'));
         var value = _.escape(rawValue);
 
         switch (this.param('type')) {

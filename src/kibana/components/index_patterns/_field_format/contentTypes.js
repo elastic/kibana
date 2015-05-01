@@ -29,17 +29,17 @@ define(function (require) {
             return angular.toJson(value.map(recurse), true);
           }
 
-          return _.escape(convert.call(format, value));
+          return convert.call(format, value);
         };
       }
     };
 
     function fallbackText(value) {
-      return _.escape(_.asPrettyString(value));
+      return _.asPrettyString(value);
     }
 
     function fallbackHtml(value, field, hit) {
-      var formatted = this.convert(value, 'text');
+      var formatted = _.escape(this.convert(value, 'text'));
 
       if (!hit || !hit.highlight || !hit.highlight[field.name]) {
         return formatted;
