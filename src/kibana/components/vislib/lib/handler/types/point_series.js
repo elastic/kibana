@@ -1,7 +1,5 @@
 define(function (require) {
   return function ColumnHandler(d3, Private) {
-    var $ = require('jquery');
-
     var injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
     var Handler = Private(require('components/vislib/lib/handler/handler'));
     var Data = Private(require('components/vislib/lib/data'));
@@ -27,9 +25,6 @@ define(function (require) {
           data = new Data(vis.data, vis._attr);
         }
 
-        var isPercentage = (vis._attr.mode === 'percentage');
-        var tickFormat = isPercentage ? d3.format('%') : data.get('yAxisFormatter', d3.format('n'));
-
         return new Handler(vis, {
           data: data,
           legend: new Legend(vis, vis.el, data.labels, data.color, vis._attr),
@@ -49,7 +44,7 @@ define(function (require) {
             yMin : data.getYMin(),
             yMax : data.getYMax(),
             _attr: vis._attr,
-            tickFormat: tickFormat
+            tickFormat: data.get('yAxisFormatter')
           })
         });
       };
