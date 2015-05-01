@@ -64,7 +64,7 @@ define(function (require) {
 
       // make the element
       $elem = angular.element(
-        '<vis-editor-agg></vis-editor-agg>'
+        '<ng-form vis-editor-agg></ng-form>'
       );
 
       // compile the html
@@ -77,7 +77,7 @@ define(function (require) {
       $scope = $elem.isolateScope();
     }));
 
-    it('should only add the close button only if there is more than the minimum', function () {
+    it('should only add the close button if there is more than the minimum', function () {
       expect($parentScope.canRemove($parentScope.agg)).to.be(false);
       $parentScope.group.push({
         id: '3',

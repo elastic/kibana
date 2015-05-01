@@ -21,7 +21,11 @@ define(function (require) {
           key = keyPrefix + key;
 
           if (flat[key] !== void 0) return;
-          if (fields[key] || !_.isPlainObject(val)) {
+
+          var hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
+          var isValue = !_.isPlainObject(val);
+
+          if (hasValidMapping || isValue) {
             flat[key] = val;
             return;
           }

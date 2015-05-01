@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var configDefaults = require('components/config/defaults');
   var getValType = require('plugins/settings/sections/advanced/lib/get_val_type');
 
 
@@ -16,11 +15,12 @@ define(function (require) {
     return {
       restrict: 'E',
       link: function ($scope) {
+        var configDefaults = Private(require('components/config/defaults'));
         var keyCodes = {
           ESC: 27
         };
 
-        var NAMED_EDITORS = ['json', 'array', 'boolean'];
+        var NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
         var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
         function getEditorType(conf) {
@@ -42,11 +42,13 @@ define(function (require) {
               defVal: def.value,
               type: getValType(def, val),
               description: def.description,
+              options: def.options,
               value: val,
             };
 
             var editor = getEditorType(conf);
             conf.json = editor === 'json';
+            conf.select = editor === 'select';
             conf.bool = editor === 'boolean';
             conf.array = editor === 'array';
             conf.normal = editor === 'normal';

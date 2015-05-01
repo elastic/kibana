@@ -6,7 +6,7 @@ var logger = require('./logger');
 var config = require('../config');
 
 function waitForPong() {
-  return client.ping()
+  return client.ping({requestTimeout: config.kibana.startup_timeout})
   .catch(function (err) {
     if (!(err instanceof NoConnections)) throw err;
 

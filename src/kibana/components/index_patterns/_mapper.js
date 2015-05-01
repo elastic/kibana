@@ -51,7 +51,7 @@ define(function (require) {
           promise = self.getIndicesForIndexPattern(indexPattern)
           .then(function (existing) {
             if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-            return existing.matches.slice(-5); // Grab the most recent 5
+            return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
           });
         }
 

@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
+    var TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -82,22 +83,18 @@ define(function (require) {
       })
       .interpolate(interpolate);
 
-      var layer;
-      var path;
-
       // Data layers
-      layer = svg.selectAll('.layer')
+      var layer = svg.selectAll('.layer')
       .data(layers)
-      .enter().append('g')
+      .enter()
+      .append('g')
       .attr('class', function (d, i) {
-        return i;
+        return 'pathgroup ' + i;
       });
 
       // Append path
-      path = layer.append('path')
-      .attr('class', function (d) {
-        return 'color ' + self.colorToClass(color(d[0].label));
-      })
+      var path = layer.append('path')
+      .call(this._addIdentifier)
       .style('fill', function (d) {
         return color(d[0].label);
       })
@@ -151,7 +148,7 @@ define(function (require) {
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
       var circleRadius = 12;
-      var circleStrokeWidth = 1;
+      var circleStrokeWidth = 0;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var isOverlapping = this.isOverlapping;
@@ -180,9 +177,7 @@ define(function (require) {
       circles
       .enter()
       .append('circle')
-      .attr('class', function circleClass(d) {
-        return d.label + ' ' + self.colorToClass(color(d.label));
-      })
+      .call(this._addIdentifier)
       .attr('stroke', function strokeColor(d) {
         return color(d.label);
       })
@@ -272,6 +267,9 @@ define(function (require) {
       var yScale = this.handler.yAxis.yScale;
       var minWidth = 20;
       var minHeight = 20;
+      var addTimeMarker = this._attr.addTimeMarker;
+      var times = this._attr.times || [];
+      var timeMarker;
       var div;
       var svg;
       var width;
@@ -288,6 +286,10 @@ define(function (require) {
           // Get the width and height
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
+
+          if (addTimeMarker) {
+            timeMarker = new TimeMarker(times, xScale, height);
+          }
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
@@ -338,6 +340,10 @@ define(function (require) {
           .attr('y2', height)
           .style('stroke', '#ddd')
           .style('stroke-width', 1);
+
+          if (addTimeMarker) {
+            timeMarker.render(svg);
+          }
 
           return svg;
         });
