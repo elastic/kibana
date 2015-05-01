@@ -480,6 +480,7 @@ define(function (require) {
     TileMap.prototype.bindPopup = function (feature, layer) {
       var props = feature.properties;
       var popup = L.popup({
+        className: 'leaflet-popup-kibana',
         autoPan: false
       })
       .setContent(
@@ -594,6 +595,9 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
+      // Cleanup hanging DOM nodes
+      $(this.chartEl).find('[class*=" leaflet"]').remove();
+
       this.maps.forEach(function (map) {
         map.remove();
       });
