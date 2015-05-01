@@ -35,6 +35,11 @@
           ScreencastReporter: '../../node_modules/mocha-screencast-reporter/screencast-reporter'
         },
         shim: {
+          angular_src: {
+            deps: [
+              'jquery'
+            ]
+          },
           angular: {
             deps: [
               'jquery',
