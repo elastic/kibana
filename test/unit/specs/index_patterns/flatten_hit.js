@@ -1,15 +1,18 @@
 define(function (require) {
-  var _ = require('lodash');
   describe('IndexPattern#flattenHit()', function () {
+
+    var _ = require('lodash');
 
     var flattenHit;
     var indexPattern;
+    var config;
     var hit;
     var flat;
 
     beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
-      flattenHit = Private(require('components/index_patterns/_flatten_hit'));
+    beforeEach(inject(function (Private, $injector) {
+      flattenHit = Private(require('components/index_patterns/_flatten_hit')).uncached;
+      config = $injector.get('config');
 
       indexPattern = {
         fields: {
@@ -101,6 +104,39 @@ define(function (require) {
 
     it('assumes that all fields are "computed fields"', function () {
       expect(flat).to.have.property('random', 0.12345);
+    });
+
+    it('ignores fields that start with an _ and are not in the metaFields', function () {
+      config.set('metaFields', ['_metaKey']);
+      hit.fields._notMetaKey = [100];
+      flat = flattenHit(indexPattern, hit);
+      expect(flat).to.not.have.property('_notMetaKey');
+    });
+
+    it('includes underscore-prefixed keys that are in the metaFields', function () {
+      config.set('metaFields', ['_metaKey']);
+      hit.fields._metaKey = [100];
+      flat = flattenHit(indexPattern, hit);
+      expect(flat).to.have.property('_metaKey', 100);
+    });
+
+    it('adapts to changes in the metaFields', function () {
+      hit.fields._metaKey = [100];
+
+      config.set('metaFields', ['_metaKey']);
+      flat = flattenHit(indexPattern, hit);
+      expect(flat).to.have.property('_metaKey', 100);
+
+      config.set('metaFields', []);
+      flat = flattenHit(indexPattern, hit);
+      expect(flat).to.not.have.property('_metaKey');
+    });
+
+    it('handles fields that are not arrays, like _timestamp', function () {
+      hit.fields._metaKey = 20000;
+      config.set('metaFields', ['_metaKey']);
+      flat = flattenHit(indexPattern, hit);
+      expect(flat).to.have.property('_metaKey', 20000);
     });
   });
 });
