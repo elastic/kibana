@@ -512,30 +512,24 @@ define(function (require) {
     };
 
     /**
-     * Checks whether all pie slices have zero values.
-     * If so, an error is thrown.
+     * Removes zeros from pie chart data
+     * @param slices
+     * @returns {*}
      */
-    Data.prototype._validatePieData = function () {
-      var visData = this.getVisData();
+    Data.prototype._removeZeroSlices = function (slices) {
+      var self = this;
 
-      visData.forEach(function (chartData) {
-        chartData.slices = (function withoutZeroSlices(slices) {
-          if (!slices.children) return slices;
+      if (!slices.children) return slices;
 
-          slices = _.clone(slices);
-          slices.children = slices.children.reduce(function (children, child) {
-            if (child.size !== 0) {
-              children.push(withoutZeroSlices(child));
-            }
-            return children;
-          }, []);
-          return slices;
-        }(chartData.slices));
-
-        if (chartData.slices.children.length === 0) {
-          throw new errors.PieContainsAllZeros();
+      slices = _.clone(slices);
+      slices.children = slices.children.reduce(function (children, child) {
+        if (child.size !== 0) {
+          children.push(self._removeZeroSlices(child));
         }
-      });
+        return children;
+      }, []);
+
+      return slices;
     };
 
     /**
@@ -547,12 +541,12 @@ define(function (require) {
      */
     Data.prototype.pieNames = function () {
       var self = this;
+      var data = this.getVisData();
       var names = [];
 
-      this._validatePieData();
-
-      _.forEach(this.getVisData(), function (obj) {
+      _.forEach(data, function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;
+        obj.slices = self._removeZeroSlices(obj.slices);
 
         _.forEach(self.getNames(obj, columns), function (name) {
           names.push(name);
