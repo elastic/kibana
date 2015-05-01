@@ -49,7 +49,8 @@
     "requirejs-text": "~2.0.10",
     "lodash-deep": "spenceralger/lodash-deep#compat",
     "marked": "~0.3.2",
-    "numeral": "~1.5.3"
+    "numeral": "~1.5.3",
+    "leaflet-draw": "~0.2.4"
   },
   "devDependencies": {}
 }
