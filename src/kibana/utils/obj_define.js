@@ -70,7 +70,11 @@ define(function (require) {
     var self = this;
     self.obj = Object.create(this.prototype, self.descs);
 
-    if (!Object.REDEFINE_SUPPORTED && !self.prototype.toJSON) {
+    if (!ObjDefine.REDEFINE_SUPPORTED && !self.prototype.toJSON) {
+      // since we can't redefine properties as enumerable we will
+      // clone the object on serialization and choose which properties
+      // to include or trim manually. This is currently only in use in PhantomJS
+      // due to https://github.com/ariya/phantomjs/issues/11856
       self.obj.toJSON = function () {
         return _.transform(self.obj, function (json, val, key) {
           var desc = self.descs[key];
