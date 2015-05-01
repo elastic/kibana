@@ -3,10 +3,11 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('indexedFields', function () {
+  .directive('indexedFields', function ($filter) {
     var nameHtml = require('text!plugins/settings/sections/indices/_field_name.html');
     var typeHtml = require('text!plugins/settings/sections/indices/_field_type.html');
     var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
+    var filter = $filter('filter');
 
     return {
       restrict: 'E',
@@ -25,10 +26,15 @@ define(function (require) {
           { title: 'popularity', info: 'A gauge of how often this field is used' }
         ];
 
-        $scope.$watchCollection('indexPattern.fields', function () {
+        $scope.$watchCollection('indexPattern.fields', refreshRows);
+        $scope.$watch('fieldFilter', refreshRows);
+
+        function refreshRows() {
           _.invoke(rowScopes, '$destroy');
 
-          $scope.rows = $scope.indexPattern.getFields().map(function (field) {
+          var fields = filter($scope.indexPattern.getFields(), $scope.fieldFilter);
+
+          $scope.rows = fields.map(function (field) {
             var childScope = $scope.$new();
             rowScopes.push(childScope);
             childScope.field = field;
@@ -53,7 +59,7 @@ define(function (require) {
               }
             ];
           });
-        });
+        }
       }
     };
   });
