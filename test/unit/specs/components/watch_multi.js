@@ -82,23 +82,48 @@ define(function (require) {
       ]);
     });
 
-    it('does not pass args unless the function will use them', function () {
-      var calls = 0;
+    it('the current value is always up to date', function () {
+      var count = 0;
 
-      $scope.one = 'a';
-      $scope.two = 'b';
-      $scope.three = 'c';
-      $scope.$watchMulti([
-        'one',
-        'two',
-        'three'
-      ], function () {
-        calls++;
-        expect(arguments).to.have.length(0);
+      $scope.vals = [1, 0];
+      $scope.$watchMulti([ 'vals[0]', 'vals[1]' ], function (cur, prev) {
+        expect(cur).to.eql($scope.vals);
+        count++;
       });
-      $rootScope.$apply();
 
-      expect(calls).to.be(1);
+      var $child = $scope.$new();
+      $child.$watch('vals[0]', function (cur) {
+        $child.vals[1] = cur;
+      });
+
+      $rootScope.$apply();
+      expect(count).to.be(2);
+    });
+
+    it('returns a working unwatch function', function () {
+      $scope.a = 0;
+      $scope.b = 0;
+      var triggers = 0;
+      var unwatch = $scope.$watchMulti(['a', 'b'], function () { triggers++; });
+
+      // initial watch
+      $scope.$apply();
+      expect(triggers).to.be(1);
+
+      // prove that it triggers on chagne
+      $scope.a++;
+      $scope.$apply();
+      expect(triggers).to.be(2);
+
+      // remove watchers
+      expect($scope.$$watchers).to.not.eql([]);
+      unwatch();
+      expect($scope.$$watchers).to.eql([]);
+
+      // prove that it doesn't trigger anymore
+      $scope.a++;
+      $scope.$apply();
+      expect(triggers).to.be(2);
     });
   });
 });

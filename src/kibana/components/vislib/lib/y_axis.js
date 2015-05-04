@@ -2,7 +2,6 @@ define(function (require) {
   return function YAxisFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var numeral = require('numeral');
     var errors = require('errors');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
@@ -18,6 +17,7 @@ define(function (require) {
       this.el = args.el;
       this.yMin = args.yMin;
       this.yMax = args.yMax;
+      this.yAxisFormatter = args.yAxisFormatter;
       this._attr = args._attr || {};
     }
 
@@ -74,6 +74,10 @@ define(function (require) {
       return [Math.max(1, yMin), yMax];
     };
 
+    YAxis.prototype._setDefaultYExtents = function () {
+      return this._attr.defaultYExtents;
+    };
+
     /**
      * Returns the domain, i.e. the extent of the y axis
      *
@@ -83,6 +87,7 @@ define(function (require) {
      * @returns {*[]}
      */
     YAxis.prototype.getDomain = function (scale, yMin, yMax) {
+      if (this._setDefaultYExtents()) return [yMin, yMax];
       if (scale === 'log') return this.returnLogDomain(yMin, yMax); // Negative values cannot be displayed with a log scale.
       if (yMin === 0 && yMax === 0) return this.throwNoResultsError(); // yMin and yMax can never both be equal to zero
 
@@ -97,24 +102,22 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      return this.yScale = this.getScaleType(this._attr.scale)
+      this.yScale = this.getScaleType(this._attr.scale)
       .domain(this.getDomain(this._attr.scale, this.yMin, this.yMax))
-      .range([height, 0])
-      .nice();
+      .range([height, 0]);
+
+      // Nicing the scale, rounds values down or up to make the scale look better
+      // When defaultYExtents are selected, the extents (i.e. min and max) should
+      // be shown without any rounding.
+      if (!this._attr.defaultYExtents) return this.yScale.nice();
+      return this.yScale;
     };
 
-    /**
-     * By default, d3.format('s') returns billion values
-     * with a `G` instead of a `B`. @method formatAxisLabel returns
-     * billion values with a B instead of a G. Else, it defaults
-     * to the d3.format('s') value.
-     *
-     * @method formatAxisLabel
-     * @param d {Number}
-     * @returns {*}
-     */
-    YAxis.prototype.formatAxisLabel = function (d) {
-      return numeral(d).format('0.[0]a');
+    YAxis.prototype.tickFormat = function () {
+      var isPercentage = this._attr.mode === 'percentage';
+      if (isPercentage) return d3.format('%');
+      if (this.yAxisFormatter) return this.yAxisFormatter;
+      return d3.format('n');
     };
 
     /**
@@ -126,16 +129,6 @@ define(function (require) {
      */
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
-      var isPercentage = (this._attr.mode === 'percentage');
-      var tickFormat;
-
-      if (isPercentage) {
-        tickFormat = d3.format('%');
-      } else if (this.yMax <= 100 && this.yMin >= -100 && !isPercentage) {
-        tickFormat = d3.format('n');
-      } else {
-        tickFormat = this.formatAxisLabel;
-      }
 
       // y scale should never be `NaN`
       if (!yScale || _.isNaN(yScale)) {
@@ -145,7 +138,7 @@ define(function (require) {
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
         .scale(yScale)
-        .tickFormat(tickFormat)
+        .tickFormat(this.tickFormat())
         .ticks(this.tickScale(height))
         .orient('left');
 
