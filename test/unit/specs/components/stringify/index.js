@@ -183,6 +183,17 @@ define(function (require) {
           expect(url.convert('url', 'text')).to.be('');
         });
 
+        it('does not get values from the prototype chain', function () {
+          Object.prototype.cantStopMeNow = {
+            toString: function () {
+              return 'fail';
+            }
+          };
+
+          var url = new Url({ template: '{{ cantStopMeNow }}' });
+          expect(url.convert('url', 'text')).to.be('');
+        });
+
       });
     });
 

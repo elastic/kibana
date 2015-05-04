@@ -83,8 +83,10 @@ define(function (require) {
         var i = -1;
         while (++i < parts.length) {
           if (i % 2) {
-            var local = locals[parts[i]];
-            output += local == null ? '' : local;
+            if (locals.hasOwnProperty(parts[i])) {
+              var local = locals[parts[i]];
+              output += local == null ? '' : local;
+            }
           } else {
             output += parts[i];
           }
