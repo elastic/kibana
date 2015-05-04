@@ -35,7 +35,7 @@ define(function (require) {
     Url.templateMatchRE = /{{([\s\S]+?)}}/g;
     Url.paramDefaults = {
       type: 'a',
-      template: null,
+      urlTemplate: null,
       labelTemplate: null
     };
 
@@ -45,7 +45,7 @@ define(function (require) {
     ];
 
     Url.prototype._formatUrl = function (value) {
-      var template = this.param('template');
+      var template = this.param('urlTemplate');
       if (!template) return value;
 
       return this._compileTemplate(template)({
