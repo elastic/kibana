@@ -7,7 +7,7 @@ define(function (require) {
   .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
-
+    var Field = Private(require('components/index_patterns/_field'));
     var scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
     var scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
 
@@ -40,7 +40,7 @@ define(function (require) {
         self.save = function () {
           var indexPattern = self.indexPattern;
           var fields = indexPattern.fields;
-          var field = self.field;
+          var field = self.field.toActualField();
 
           _.remove(fields, { name: field.name });
           fields.push(field);
@@ -90,7 +90,14 @@ define(function (require) {
         // which is mutable, and capture the changed seperately.
         function shadowCopy(field) {
           var changes = {};
-          var shadowProps = {};
+          var shadowProps = {
+            toActualField: {
+              // bring the shadow copy out of the shadows
+              value: function toActualField() {
+                return new Field(self.indexPattern, _.defaults({}, changes, field.$$spec));
+              }
+            }
+          };
 
           Object.getOwnPropertyNames(field).forEach(function (prop) {
             var desc = Object.getOwnPropertyDescriptor(field, prop);
