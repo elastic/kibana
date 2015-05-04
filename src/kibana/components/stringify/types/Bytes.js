@@ -4,7 +4,7 @@ define(function (require) {
     return Numeral.factory({
       id: 'bytes',
       title: 'Bytes',
-      samples: [1024, 5150000, 1990000000]
+      sampleInputs: [1024, 5150000, 1990000000]
     });
   };
 });

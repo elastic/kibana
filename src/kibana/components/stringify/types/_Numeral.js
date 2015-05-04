@@ -40,7 +40,7 @@ define(function (require) {
         template: opts.editorTemplate || require('text!components/field_format_editor/numeral/numeral.html'),
         controllerAs: 'cntrl',
         controller: opts.controller || function () {
-          this.samples = opts.samples;
+          this.sampleInputs = opts.sampleInputs;
         }
       };
 

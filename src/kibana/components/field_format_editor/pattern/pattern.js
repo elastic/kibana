@@ -12,7 +12,7 @@ define(function (require) {
       link: function ($scope, $el, attrs, cntrls) {
         var ngModelCntrl = cntrls[0];
 
-        $scope.$bind('inputs', attrs.samples);
+        $scope.$bind('inputs', attrs.inputs);
         $scope.$bind('placeholder', attrs.placeholder);
 
         // bind our local model with the outside ngModel

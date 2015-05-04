@@ -28,7 +28,7 @@ define(function (require) {
       template: require('text!components/stringify/editors/url.html'),
       controllerAs: 'url',
       controller: function () {
-        this.samples = [ 'john', '/some/pathname/asset.png', 1234 ];
+        this.sampleInputs = [ 'john', '/some/pathname/asset.png', 1234 ];
       }
     };
 

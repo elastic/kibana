@@ -25,14 +25,14 @@ define(function (require) {
       controllerAs: 'cntrl',
       controller: function ($interval, $scope) {
         var self = this;
-        self.samples = [
+        self.sampleInputs = [
           Date.now(),
           +moment().startOf('year'),
           +moment().endOf('year')
         ];
 
         $scope.$on('$destroy', $interval(function () {
-          self.samples[0] = Date.now();
+          self.sampleInputs[0] = Date.now();
         }, 1000));
       }
     };

@@ -4,7 +4,7 @@ define(function (require) {
     return Numeral.factory({
       id: 'number',
       title: 'Number',
-      samples: [
+      sampleInputs: [
         10000, 12.345678, -1, -999, 0.52
       ]
     });

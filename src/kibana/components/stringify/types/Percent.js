@@ -12,7 +12,7 @@ define(function (require) {
         pattern: '=format:percent:defaultPattern',
         fractional: true
       }),
-      samples: [
+      sampleInputs: [
         0.10, 0.99999, 1, 100, 1000
       ],
       prototype: {

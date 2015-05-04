@@ -39,7 +39,7 @@ define(function (require) {
       { id: 'short', name: 'Short Dots' }
     ];
 
-    _String.sampleStrings = [
+    _String.sampleInputs = [
       'A Quick Brown Fox.',
       'com.organizations.project.ClassName',
       'hostname.net'
