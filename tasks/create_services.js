@@ -31,7 +31,18 @@ function createServices(grunt) {
 
     // TODO(sissel): Detect if 'pleaserun' is found, and provide a useful error
     // to the user if it is missing.
-    Promise.map(services, createService).finally(done);
+    mkdirp.mkdirpAsync(distPath)
+      .then(function () {
+        return Promise.map(services, createService);
+      })
+      .then(function (arg) {
+        // Create the user-management scripts
+        var output = join(distPath, 'user');
+        return mkdirp.mkdirpAsync(output).then(function () {
+          return execFile('please-manage-user', ['--output', output, 'kibana'], { cwd: distPath });
+        });
+      }, function (err) { console.log('please-manage-user failed: ' + err + '.'); })
+      .finally(done);
   });
 }
 
