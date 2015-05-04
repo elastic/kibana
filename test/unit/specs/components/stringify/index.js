@@ -183,17 +183,25 @@ define(function (require) {
           expect(url.convert('url', 'text')).to.be('');
         });
 
-        it('does not get values from the prototype chain', function () {
-          Object.prototype.cantStopMeNow = {
-            toString: function () {
-              return 'fail';
-            }
-          };
+        describe('', function () {
+          before(function () {
+            Object.prototype.cantStopMeNow = {
+              toString: function () {
+                return 'fail';
+              },
+              cantStopMeNow: null
+            };
+          });
 
-          var url = new Url({ template: '{{ cantStopMeNow }}' });
-          expect(url.convert('url', 'text')).to.be('');
+          it('does not get values from the prototype chain', function () {
+            var url = new Url({ template: '{{ cantStopMeNow }}' });
+            expect(url.convert('url', 'text')).to.be('');
+          });
+
+          after(function () {
+            delete Object.prototype.cantStopMeNow;
+          });
         });
-
       });
     });
 
