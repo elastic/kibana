@@ -35,7 +35,8 @@ define(function (require) {
     Url.templateMatchRE = /{{([\s\S]+?)}}/g;
     Url.paramDefaults = {
       type: 'a',
-      template: null
+      template: null,
+      labelTemplate: null
     };
 
     Url.urlTypes = [
@@ -43,25 +44,45 @@ define(function (require) {
       { id: 'img', name: 'Image' }
     ];
 
+    Url.prototype._formatUrl = function (value) {
+      var template = this.param('template');
+      if (!template) return value;
+
+      return this._compileTemplate(template)({
+        value: encodeURIComponent(value),
+        rawValue: value
+      });
+    };
+
+    Url.prototype._formatLabel = function (value, url) {
+      var template = this.param('labelTemplate');
+      if (url == null) url = this._formatUrl(value);
+      if (!template) return url;
+
+      return this._compileTemplate(template)({
+        value: value,
+        url: url
+      });
+    };
+
     Url.prototype._convert = {
       text: function (value) {
-        var template = this.param('template');
-        return !template ? value : this._compileTemplate(template)(value);
+        return this._formatLabel(value);
       },
 
       html: function (rawValue, field, hit) {
-        var url = _.escape(this.convert(rawValue, 'text'));
-        var value = _.escape(rawValue);
+        var url = _.escape(this._formatUrl(rawValue));
+        var label = _.escape(this._formatLabel(rawValue, url));
 
         switch (this.param('type')) {
-        case 'img': return '<img src="' + url + '" alt="' + value + '" title="' + value + '">';
+        case 'img':
+          return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
         default:
-          var urlDisplay = url;
           if (hit && hit.highlight && hit.highlight[field.name]) {
-            urlDisplay = highlightFilter(url, hit.highlight[field.name]);
+            label = highlightFilter(label, hit.highlight[field.name]);
           }
 
-          return '<a href="' + url + '" target="_blank">' + urlDisplay + '</a>';
+          return '<a href="' + url + '" target="_blank">' + label + '</a>';
         }
       }
     };
@@ -72,12 +93,7 @@ define(function (require) {
         return (i % 2) ? part.trim() : part;
       });
 
-      return function (val) {
-        var locals = {
-          value: encodeURIComponent(val),
-          rawValue: val
-        };
-
+      return function (locals) {
         // replace all the odd bits with their local var
         var output = '';
         var i = -1;
