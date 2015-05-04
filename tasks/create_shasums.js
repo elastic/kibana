@@ -1,6 +1,7 @@
 var createPackages = require('./create_packages');
+var child_process = require('child_process');
 var Promise = require('bluebird');
-var exec = createPackages.exec;
+var exec = Promise.promisify(child_process.exec);
 var getBaseNames = createPackages.getBaseNames;
 var _ = require('lodash');
 module.exports = function (grunt) {
