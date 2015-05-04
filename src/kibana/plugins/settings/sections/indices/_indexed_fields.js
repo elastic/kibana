@@ -30,7 +30,7 @@ define(function (require) {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
 
-          $scope.rows = $scope.indexPattern.fields.map(function (field) {
+          $scope.rows = $scope.indexPattern.getNonScriptedFields().map(function (field) {
             var childScope = _.assign($scope.$new(), { field: field });
             rowScopes.push(childScope);
 

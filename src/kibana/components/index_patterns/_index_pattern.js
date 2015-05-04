@@ -130,7 +130,7 @@ define(function (require) {
       self.addScriptedField = function (name, script, type, lang) {
         type = type || 'string';
 
-        var scriptFields = _.pluck(self.getFields('scripted'), 'name');
+        var scriptFields = _.pluck(self.getScriptedFields(), 'name');
 
         if (_.contains(scriptFields, name)) {
           throw new errors.DuplicateField(name);
@@ -171,8 +171,12 @@ define(function (require) {
         }
       };
 
-      self.getFields = function (type) {
-        return _.where(self.fields, { scripted: type === 'scripted' });
+      self.getNonScriptedFields = function () {
+        return _.where(self.fields, { scripted: false });
+      };
+
+      self.getScriptedFields = function () {
+        return _.where(self.fields, { scripted: true });
       };
 
       self.getInterval = function () {
@@ -240,7 +244,7 @@ define(function (require) {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
           // append existing scripted fields
-          fields = fields.concat(self.getFields('scripted'));
+          fields = fields.concat(self.getScriptedFields());
 
           // initialize self.field with this field list
           initFields(fields);

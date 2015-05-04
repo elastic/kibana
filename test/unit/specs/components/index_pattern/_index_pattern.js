@@ -102,13 +102,13 @@ define(function (require) {
     describe('getFields', function () {
       it('should return all non-scripted fields', function () {
         var notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
-        var respNames = _.pluck(indexPattern.getFields(), 'name');
+        var respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
         expect(respNames).to.eql(notScriptedNames);
       });
 
       it('should return all scripted fields', function () {
         var scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
-        var respNames = _.pluck(indexPattern.getFields('scripted'), 'name');
+        var respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
         expect(respNames).to.eql(scriptedNames);
       });
     });
@@ -151,7 +151,7 @@ define(function (require) {
         ])
         .then(function (data) {
           var expected = data[0]; // just the fields in the index
-          var fields = indexPattern.getFields(); // get all but scripted fields
+          var fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
 
           expect(_.pluck(fields, 'name')).to.eql(_.pluck(expected, 'name'));
         });
@@ -180,7 +180,7 @@ define(function (require) {
       it('should append the scripted field', function () {
         // keep a copy of the current scripted field count
         var saveSpy = sinon.spy(indexPattern, 'save');
-        var oldCount = indexPattern.getFields('scripted').length;
+        var oldCount = indexPattern.getScriptedFields().length;
 
         // add a new scripted field
         var scriptedField = {
@@ -191,7 +191,7 @@ define(function (require) {
         indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
         indexPattern._indexFields(); // normally triggered by docSource.onUpdate()
 
-        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedFields = indexPattern.getScriptedFields();
         expect(saveSpy.callCount).to.equal(1);
         expect(scriptedFields).to.have.length(oldCount + 1);
         expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
@@ -199,19 +199,19 @@ define(function (require) {
 
       it('should remove scripted field, by name', function () {
         var saveSpy = sinon.spy(indexPattern, 'save');
-        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedFields = indexPattern.getScriptedFields();
         var oldCount = scriptedFields.length;
         var scriptedField = _.last(scriptedFields);
 
         indexPattern.removeScriptedField(scriptedField.name);
 
         expect(saveSpy.callCount).to.equal(1);
-        expect(indexPattern.getFields('scripted').length).to.equal(oldCount - 1);
+        expect(indexPattern.getScriptedFields().length).to.equal(oldCount - 1);
         expect(indexPattern.fields.byName[scriptedField.name]).to.equal(undefined);
       });
 
       it('should not allow duplicate names', function () {
-        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedFields = indexPattern.getScriptedFields();
         var scriptedField = _.last(scriptedFields);
         expect(function () {
           indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');

@@ -15,7 +15,8 @@ define(function (require) {
       this.id = pattern;
       this.popularizeField = sinon.spy();
       this.timeFieldName = timeField;
-      this.getFields = sinon.spy();
+      this.getNonScriptedFields = sinon.spy();
+      this.getScriptedFields = sinon.spy();
       this.metaFields = ['_id', '_type', '_source'];
       this.fieldFormatMap = {};
       this.routes = IndexPattern.prototype.routes;

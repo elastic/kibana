@@ -31,7 +31,7 @@ define(function (require) {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
-          $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
+          $scope.rows = $scope.indexPattern.getScriptedFields().map(function (field) {
             var rowScope = $scope.$new();
             rowScope.field = field;
             rowScopes.push(rowScope);
