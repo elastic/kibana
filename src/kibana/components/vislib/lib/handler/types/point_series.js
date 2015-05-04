@@ -1,7 +1,5 @@
 define(function (require) {
   return function ColumnHandler(d3, Private) {
-    var $ = require('jquery');
-
     var injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
     var Handler = Private(require('components/vislib/lib/handler/handler'));
     var Data = Private(require('components/vislib/lib/data'));
@@ -45,7 +43,8 @@ define(function (require) {
             el   : vis.el,
             yMin : data.getYMin(),
             yMax : data.getYMax(),
-            _attr: vis._attr
+            _attr: vis._attr,
+            tickFormat: data.get('yAxisFormatter')
           })
         });
       };

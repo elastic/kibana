@@ -6,6 +6,7 @@ define(function (require) {
   var YAxis;
   var Data;
   var el;
+  var buildYAxis;
   var yAxis;
   var yAxisDiv;
 
@@ -70,14 +71,18 @@ define(function (require) {
       defaultYMin: true
     });
 
-    yAxis = new YAxis({
-      el: node,
-      yMin: dataObj.getYMin(),
-      yMax: dataObj.getYMax(),
-      _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
-      }
-    });
+    buildYAxis = function (params) {
+      return new YAxis(_.merge({}, params, {
+        el: node,
+        yMin: dataObj.getYMin(),
+        yMax: dataObj.getYMax(),
+        _attr: {
+          margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        }
+      }));
+    };
+
+    yAxis = buildYAxis();
   }
 
   describe('Vislib yAxis Class Test Suite', function () {
@@ -204,19 +209,22 @@ define(function (require) {
           checkRange();
         });
       });
-    });
 
-    describe('formatAxisLabel method', function () {
-      var num = 1e9;
-      var val;
+      describe('should not return a nice scale when defaultYExtents is true', function () {
+        beforeEach(function () {
+          createData(defaultGraphData);
+          yAxis._attr.defaultYExtents = true;
+          yAxis.getYAxis(height);
+          yAxis.render();
+        });
 
-      beforeEach(function () {
-        createData(defaultGraphData);
-        val = yAxis.formatAxisLabel(num);
-      });
-
-      it('should return a string with suffix B', function () {
-        expect(val).to.be('1b');
+        it('not return a nice scale', function () {
+          var min = _.min(_.flatten(defaultGraphData));
+          var max = _.max(_.flatten(defaultGraphData));
+          var domain = yAxis.yAxis.scale().domain();
+          expect(domain[0]).to.be(min);
+          expect(domain[1]).to.be(max);
+        });
       });
     });
 
@@ -260,6 +268,13 @@ define(function (require) {
     });
 
     describe('getDomain method', function () {
+      beforeEach(function () {
+        // Need to set this to false before each test since its
+        // status changes in one of the tests below. Having this set to
+        // true causes other tests to fail that need this attr to be set to false.
+        yAxis._attr.defaultYExtents = false;
+      });
+
       it('should return a log domain', function () {
         var scale = 'log';
         var yMin = 0;
@@ -268,6 +283,19 @@ define(function (require) {
 
         // Log scales have a yMin value of 1
         expect(domain[0]).to.be(1);
+      });
+
+      it('should return the default y axis extents (i.e. the min and max values)', function () {
+        var scale = 'linear';
+        var yMin = 25;
+        var yMax = 150;
+        var domain;
+
+        yAxis._attr.defaultYExtents = true;
+        domain = yAxis.getDomain(scale, yMin, yMax);
+
+        expect(domain[0]).to.be(yMin);
+        expect(domain[1]).to.be(yMax);
       });
 
       it('should throw a no results error if yMin and yMax values are both 0', function () {
@@ -358,6 +386,35 @@ define(function (require) {
         expect(yAxis.tickScale(1000)).to.be(11);
         expect(yAxis.tickScale(40)).to.be(3);
         expect(yAxis.tickScale(20)).to.be(0);
+      });
+    });
+
+    describe('#tickFormat()', function () {
+      var formatter = function () {};
+
+      it('returns a basic number formatter by default', function () {
+        var yAxis = buildYAxis();
+        expect(yAxis.tickFormat()).to.not.be(formatter);
+        expect(yAxis.tickFormat()(1)).to.be('1');
+      });
+
+      it('returns the yAxisFormatter when passed', function () {
+        var yAxis = buildYAxis({
+          yAxisFormatter: formatter
+        });
+        expect(yAxis.tickFormat()).to.be(formatter);
+      });
+
+      it('returns a percentage formatter when the vis is in percentage mode', function () {
+        var yAxis = buildYAxis({
+          yAxisFormatter: formatter,
+          _attr: {
+            mode: 'percentage'
+          }
+        });
+
+        expect(yAxis.tickFormat()).to.not.be(formatter);
+        expect(yAxis.tickFormat()(1)).to.be('100%');
       });
     });
   });
