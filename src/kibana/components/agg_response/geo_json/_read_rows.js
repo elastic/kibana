@@ -1,5 +1,6 @@
 define(function (require) {
   var decodeGeoHash = require('utils/decode_geo_hash');
+  var _ = require('lodash');
 
   function readRows(table, agg, index, chart) {
     var geoJson = chart.geoJson;
@@ -8,6 +9,7 @@ define(function (require) {
     props.length = table.rows.length;
     props.min = null;
     props.max = null;
+    props.agg = agg;
 
     table.rows.forEach(function (row) {
       var geohash = row[index.geo].value;

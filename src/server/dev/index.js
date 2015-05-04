@@ -19,7 +19,7 @@ module.exports = function (app) {
     filter: function (filename) {
       return filename.match(/.*\/src\/.*\.js$/)
         && !filename.match(/.*\/src\/kibana\/bower_components\/.*\.js$/)
-        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick|rison)\.js$/);
+        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|rison)\.js$/);
     }
   }));
 
@@ -29,7 +29,7 @@ module.exports = function (app) {
     filter: function (filename) {
       return filename.match(/.*\/src\/.*\.js$/)
         && !filename.match(/.*\/src\/kibana\/bower_components\/.*\.js$/)
-        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick|rison)\.js$/);
+        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|rison)\.js$/);
     }
   }));
 

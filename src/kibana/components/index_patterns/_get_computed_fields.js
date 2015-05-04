@@ -9,7 +9,7 @@ define(function (require) {
 
     fielddataFields = _.pluck(self.fields.byType.date, 'name');
 
-    _.each(self.getFields('scripted'), function (field) {
+    _.each(self.getScriptedFields(), function (field) {
       scriptFields[field.name] = { script: field.script, lang: field.lang };
     });
 

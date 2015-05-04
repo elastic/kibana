@@ -1,0 +1,10 @@
+<div class="form-group">
+  <label>Transform</label>
+  <select
+    ng-model="editor.formatParams.transform"
+    ng-options="opt.id as opt.name for opt in editor.field.format.type.transformOpts"
+    class="form-control">
+  </select>
+</div>
+
+<field-format-editor-samples inputs="editor.field.format.type.sampleInputs"></field-format-editor-samples>

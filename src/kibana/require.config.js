@@ -29,6 +29,7 @@ require.config({
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
+    'leaflet-draw': 'bower_components/leaflet-draw/dist/leaflet.draw',
     lodash_src: 'bower_components/lodash/dist/lodash',
     'lodash-deep': 'bower_components/lodash-deep/factory',
     moment: 'bower_components/moment/moment',
@@ -59,6 +60,9 @@ require.config({
     },
     file_saver: {
       exports: 'saveAs'
+    },
+    'leaflet-draw': {
+      deps: ['leaflet', 'css!bower_components/leaflet-draw/dist/leaflet.draw.css']
     },
     leaflet: {
       deps: ['css!bower_components/leaflet/dist/leaflet.css']

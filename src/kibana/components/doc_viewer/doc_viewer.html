@@ -49,12 +49,27 @@
               tooltip-placement="top"
               tooltip="Objects in arrays are not well supported."
               class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
-            <div class="doc-viewer-value" ng-bind-html="(typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field]) | highlight : hit.highlight[field] | trustAsHtml"></div>
+            <div class="doc-viewer-value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div id="json-ace" ng-show="mode == 'json'" readonly ui-ace="{ useWrapMode: true, advanced: { highlightActiveLine: false }, rendererOptions: { showPrintMargin: false, maxLines: 4294967296 }, mode: 'json' }" ng-model="hit_json"></div>
+    <div
+      id="json-ace"
+      ng-show="mode == 'json'"
+      ng-model="hitJson"
+      readonly
+      ui-ace="{
+        useWrapMode: true,
+        advanced: {
+          highlightActiveLine: false
+        },
+        rendererOptions: {
+          showPrintMargin: false,
+          maxLines: 4294967296
+        },
+        mode: 'json'
+      }"></div>
   </div>
 </div>

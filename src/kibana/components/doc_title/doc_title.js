@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
 
   require('modules').get('kibana')
   .run(function ($rootScope, docTitle) {
@@ -27,7 +28,7 @@ define(function (require) {
         parts.push(baseTitle);
       }
 
-      return parts.filter(Boolean).join(' - ');
+      return _(parts).flatten().compact().join(' - ');
     }
 
     self.change = function (title, complete) {
