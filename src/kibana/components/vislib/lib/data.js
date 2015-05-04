@@ -265,18 +265,9 @@ define(function (require) {
      * @param thing {String} Data object key
      * @returns {*} Data object value
      */
-    Data.prototype.get = function (thing) {
-      var data;
-
-      if (this.data.rows) {
-        data = this.data.rows;
-      } else if (this.data.columns) {
-        data = this.data.columns;
-      } else {
-        data = [this.data];
-      }
-
-      return _.pluck(data, thing)[0];
+    Data.prototype.get = function (thing, def) {
+      var source = (this.data.rows || this.data.columns || [this.data])[0];
+      return _.get(source, thing, def);
     };
 
     /**
@@ -410,7 +401,7 @@ define(function (require) {
      * @returns {*} Array of data objects with x, y, y0 keys
      */
     Data.prototype.stackData = function (series) {
-      // SHould not stack values on line chart
+      // Should not stack values on line chart
       if (this._attr.type === 'line') return series;
       return this._attr.stack(series);
     };
