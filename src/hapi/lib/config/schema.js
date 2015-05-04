@@ -25,7 +25,11 @@ module.exports = Joi.object({
       port: Joi.number().default(5601),
       maxSockets: Joi.any().default(Infinity),
       pidFile: Joi.string(),
-      root: Joi.string().default(path.normalize(path.join(__dirname, '..')))
+      root: Joi.string().default(path.normalize(path.join(__dirname, '..'))),
+      ssl: Joi.object({
+        cert: Joi.string(),
+        key: Joi.string()
+      }).default()
     }).default(),
     index: Joi.string().default('.kibana'),
     publicFolder: Joi.string().default(publicFolder),
@@ -41,8 +45,10 @@ module.exports = Joi.object({
     preserveHost: Joi.boolean().default(true),
     username: Joi.string(),
     password: Joi.string(),
-    sharedTimeout: Joi.number().default(0),
+    shardTimeout: Joi.number().default(0),
     requestTimeout: Joi.number().default(30000),
+    pingTimeout: Joi.number().default(30000),
+    startupTimeout: Joi.number().default(5000),
     ssl: Joi.object({
       verify: Joi.boolean().default(true),
       ca: Joi.string(),
@@ -54,7 +60,7 @@ module.exports = Joi.object({
     quiet: Joi.boolean().default(false),
     file: Joi.string(),
     console: Joi.object({
-      ops: Joi.any().default('*'),
+      ops: Joi.any(),
       log: Joi.any().default('*'),
       response: Joi.any().default('*'),
       error: Joi.any().default('*'),
