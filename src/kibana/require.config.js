@@ -61,7 +61,7 @@ require.config({
       deps: ['leaflet', 'css!bower_components/leaflet-draw/dist/leaflet.draw.css']
     },
     leaflet: {
-      deps: ['css!bower_components/leaflet/dist/leaflet.css']
+      deps: ['components/vislib/components/leaflet-canvas', 'css!bower_components/leaflet/dist/leaflet.css']
     },
     marked: {
       exports: 'marked'
