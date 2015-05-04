@@ -19,6 +19,7 @@ function createServices(grunt) {
       var pleaserun_args = ['--install', '--no-install-actions',
                             '--install-prefix', output, '--overwrite',
                             '--user', 'kibana',
+                            '--sysv-log-path', '/var/log/kibana/',
                             '-p', service, '-v', service_version,
                             '/opt/kibana/bin/kibana'];
 
