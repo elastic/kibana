@@ -236,7 +236,7 @@ define(function (require) {
         var p0 = coordinates[0];
         var p1 = coordinates[1];
 
-        return map.getBounds().contains([p1, p0]);
+        return map.getBounds().pad(0.2).contains([p1, p0]);
       };
     };
 
@@ -266,14 +266,22 @@ define(function (require) {
      * @param mapData {mapData Object}
      * @return {undefined}
      */
-    TileMap.prototype.showTooltip = function (map, feature, latLng) {
+    TileMap.prototype.showTooltip = function (map, feature, latlng) {
       var content = this.tooltipFormatter(feature);
       if (!content) {
         return;
       }
 
+      var eventLatLng = latlng;
+      var featureLatLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+      var tipLatLng = featureLatLng;
+
+      if (eventLatLng.lat > featureLatLng.lat) {
+        tipLatLng.lat = eventLatLng.lat;
+      }
+
       L.popup({autoPan: false})
-       .setLatLng(latLng)
+       .setLatLng(tipLatLng)
        .setContent(content)
        .openOn(map);
     };

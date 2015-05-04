@@ -21,6 +21,7 @@ define(function (require) {
     var vis;
     var visLibParams = {
       isDesaturated: true,
+      addTooltip: true,
       type: 'tile_map',
       mapType: type
     };
