@@ -73,7 +73,7 @@ function onListening() {
 }
 
 function start() {
-  var port = config.port || 3000;
+  var port = config.port || process.env.PORT || 3000;
   var host = config.host || '127.0.0.1';
   var listen = Promise.promisify(server.listen.bind(server));
   app.set('port', port);
