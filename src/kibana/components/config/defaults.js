@@ -1,6 +1,6 @@
-define(function (require) {
-  return function () {
-    var _ = require('lodash');
+define(function () {
+  return function configDefaultsProvider() {
+    // wraped in provider so that a new instance is given to each app/test
 
     return {
       'query:queryString:options': {
@@ -87,6 +87,36 @@ define(function (require) {
         value: 5,
         description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
           'patterns from which to query the field mapping.'
+      },
+      'format:defaultTypeMap': {
+        type: 'json',
+        value: [
+          '{',
+          '  "ip": { "id": "ip", "params": {} },',
+          '  "date": { "id": "date", "params": {} },',
+          '  "number": { "id": "number", "params": {} },',
+          '  "_source": { "id": "_source", "params": {} },',
+          '  "_default_": { "id": "string", "params": {} }',
+          '}',
+        ].join('\n'),
+        description: 'Map of the format name to use by default for each field type. ' +
+          '"_default_" is used if the field type is not mentioned explicitly.'
+      },
+      'format:number:defaultPattern': {
+        type: 'string',
+        value: '0,0.[000]'
+      },
+      'format:bytes:defaultPattern': {
+        type: 'string',
+        value: '0,0.[000]b'
+      },
+      'format:percent:defaultPattern': {
+        type: 'string',
+        value: '0,0.[000]%'
+      },
+      'format:currency:defaultPattern': {
+        type: 'string',
+        value: '($0,0.[00])'
       }
     };
   };

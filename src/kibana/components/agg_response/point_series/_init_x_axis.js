@@ -1,4 +1,4 @@
-define(function (require) {
+define(function () {
   return function PointSeriesInitX() {
     return function initXAxis(chart) {
       var x = chart.aspects.x;

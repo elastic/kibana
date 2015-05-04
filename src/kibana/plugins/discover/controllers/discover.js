@@ -348,38 +348,37 @@ define(function (require) {
         }
 
         var rows = $scope.rows;
-        var counts = rows.fieldCounts;
+        var counts = rows.fieldCounts || (rows.fieldCounts = {});
+        var indexPattern = $scope.searchSource.get('index');
 
         // merge the rows and the hits, use a new array to help watchers
         rows = $scope.rows = rows.concat(resp.hits.hits);
-        rows.fieldCounts = counts;
 
         if (sortFn) {
-          rows.sort(sortFn);
-          rows = $scope.rows = rows.slice(0, totalSize);
-          counts = rows.fieldCounts = {};
+          notify.event('resort rows', function () {
+            rows.sort(sortFn);
+            rows = $scope.rows = rows.slice(0, totalSize);
+            counts = rows.fieldCounts = {};
+          });
         }
 
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it and we are NOT sorting.
-          // ---
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response
-          if (hit.$$_formatted && !sortFn) return;
+        notify.event('flatten hit and count fields', function () {
+          $scope.rows.forEach(function (hit) {
+            // skip this work if we have already done it and we are NOT sorting.
+            // ---
+            // when we are sorting results, we need to redo the counts each time because the
+            // "top 500" may change with each response
+            if (hit.$$_counted && !sortFn) return;
+            hit.$$_counted = true;
 
-          var formatAndCount = function (value, name) {
-            // add up the counts for each field name
-            counts[name] = counts[name] ? counts[name] + 1 : 1;
-
-            var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-            var field = $scope.indexPattern.fields.byName[name];
-            var formatter = (field && field.format) ? field.format : defaultFormat;
-
-            return formatter.convert(value);
-          };
-
-          var flatHit = $scope.indexPattern.flattenHit(hit);
-          hit.$$_formatted = _.mapValues(flatHit, formatAndCount);
+            var fields = _.keys(indexPattern.flattenHit(hit));
+            var n = fields.length;
+            var field;
+            while (field = fields[--n]) {
+              if (counts[field]) counts[field] += 1;
+              else counts[field] = 1;
+            }
+          });
         });
 
       }));
