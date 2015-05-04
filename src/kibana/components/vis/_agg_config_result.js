@@ -1,4 +1,4 @@
-define(function (require) {
+define(function () {
   function AggConfigResult(aggConfig, parent, value, key) {
     this.$parent = parent;
     this.key = key;
@@ -32,8 +32,8 @@ define(function (require) {
     return this.aggConfig.createFilter(this.key);
   };
 
-  AggConfigResult.prototype.toString = function () {
-    return this.aggConfig.fieldFormatter()(this.value);
+  AggConfigResult.prototype.toString = function (contentType) {
+    return this.aggConfig.fieldFormatter(contentType)(this.value);
   };
 
   AggConfigResult.prototype.valueOf = function () {
