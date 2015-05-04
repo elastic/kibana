@@ -45,7 +45,7 @@ function createPackages(grunt) {
       if (/linux-x(86|64)$/.test(name)) {
         // kibana.rpm and kibana.deb
         var sysv_init = join(distPath, 'services', 'sysv') + '/etc/=/etc/';
-        commands.push(fpm_options.concat(['-t', 'rpm', '-a', arch, fpm_files, sysv_init]));
+        commands.push(fpm_options.concat(['-t', 'rpm', '-a', arch, '--rpm-os', 'linux', fpm_files, sysv_init]));
         commands.push(fpm_options.concat(['-t', 'deb', '-a', arch, fpm_files, sysv_init]));
       } else if (/darwin-x(86|64)$/.test(name)) {
         // kibana.pkg
