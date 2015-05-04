@@ -66,7 +66,8 @@ define(function (require) {
           // methods
           expect(indexPattern).to.have.property('refreshFields');
           expect(indexPattern).to.have.property('popularizeField');
-          expect(indexPattern).to.have.property('getFields');
+          expect(indexPattern).to.have.property('getScriptedFields');
+          expect(indexPattern).to.have.property('getNonScriptedFields');
           expect(indexPattern).to.have.property('getInterval');
           expect(indexPattern).to.have.property('addScriptedField');
           expect(indexPattern).to.have.property('removeScriptedField');
@@ -99,18 +100,21 @@ define(function (require) {
       });
     });
 
-    describe('getFields', function () {
+    describe('getScriptedFields', function () {
+      it('should return all scripted fields', function () {
+        var scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
+        var respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
+        expect(respNames).to.eql(scriptedNames);
+      });
+    });
+
+    describe('getNonScriptedFields', function () {
       it('should return all non-scripted fields', function () {
         var notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
         var respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
         expect(respNames).to.eql(notScriptedNames);
       });
 
-      it('should return all scripted fields', function () {
-        var scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
-        var respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
-        expect(respNames).to.eql(scriptedNames);
-      });
     });
 
     describe('refresh fields', function () {
@@ -161,13 +165,13 @@ define(function (require) {
         // ensure that all fields will be included in the returned docSource
         setDocsourcePayload(docSourceResponse(indexPatternId));
 
-        // add spy to indexPattern.getFields
-        var getFieldsSpy = sinon.spy(indexPattern, 'getFields');
+        // add spy to indexPattern.getScriptedFields
+        var scriptedFieldsSpy = sinon.spy(indexPattern, 'getScriptedFields');
 
         // refresh fields, which will fetch
         return indexPattern.refreshFields().then(function () {
           // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
-          expect(getFieldsSpy.callCount).to.equal(1);
+          expect(scriptedFieldsSpy.callCount).to.equal(1);
 
           var scripted = _.where(mockLogstashFields, { scripted: true });
           var expected = _.filter(indexPattern.fields, { scripted: true });
