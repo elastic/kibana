@@ -1,8 +1,6 @@
 define(function (require) {
   return function transformMappingIntoFields(Private, configFile, config) {
     var _ = require('lodash');
-    var MappingConflict = require('errors').MappingConflict;
-    var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
     var mapField = Private(require('components/index_patterns/_map_field'));
 
 
@@ -19,7 +17,7 @@ define(function (require) {
       var fields = {};
       _.each(response, function (index, indexName) {
         if (indexName === configFile.kibana_index) return;
-        _.each(index.mappings, function (mappings, typeName) {
+        _.each(index.mappings, function (mappings) {
           _.each(mappings, function (field, name) {
             var keys = Object.keys(field.mapping);
             if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;

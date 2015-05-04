@@ -5,84 +5,85 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var getFakeRow = require('fixtures/fake_row');
 
+  describe('Doc Table', function () {
 
-  // Load the kibana app dependencies.
-  require('angular-route');
+    // Load the kibana app dependencies.
+    require('angular-route');
 
-  require('plugins/discover/index');
+    require('plugins/discover/index');
 
-  var $parentScope, $scope, config;
+    var $parentScope, $scope, config;
 
-  // Stub out a minimal mapping of 4 fields
-  var mapping;
+    // Stub out a minimal mapping of 4 fields
+    var mapping;
 
-  // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-  var init = function ($elem, props) {
-    module('kibana');
-    inject(function ($rootScope, $compile, _config_, Private) {
+    beforeEach(module('kibana', 'apps/discover'));
+    beforeEach(inject(function (_config_, $rootScope, Private) {
       config = _config_;
       $parentScope = $rootScope;
-
-      _.assign($parentScope, props);
       $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       mapping = $parentScope.indexPattern.fields.byName;
+    }));
 
-      $compile($elem)($parentScope);
-      $elem.scope().$digest();
-      $scope = $elem.isolateScope();
-    });
-  };
+    // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
+    var init = function ($elem, props) {
+      inject(function ($compile) {
+        _.assign($parentScope, props);
+        $compile($elem)($parentScope);
+        $elem.scope().$digest();
+        $scope = $elem.isolateScope();
+      });
+    };
 
-  var destroy = function () {
-    $scope.$destroy();
-    $parentScope.$destroy();
-  };
+    var destroy = function () {
+      $scope.$destroy();
+      $parentScope.$destroy();
+    };
 
-  // For testing column removing/adding for the header and the rows
-  //
-  var columnTests = function (elemType, parentElem) {
+    // For testing column removing/adding for the header and the rows
+    //
+    var columnTests = function (elemType, parentElem) {
 
-    it('should create a time column if the timefield is defined', function (done) {
-      var childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      done();
-    });
+      it('should create a time column if the timefield is defined', function (done) {
+        var childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(2);
+        done();
+      });
 
-    it('should be able to add and remove columns', function (done) {
-      var childElems;
-      // Should include a column for toggling and the time column by default
-      $parentScope.columns = ['bytes'];
-      parentElem.scope().$digest();
-      childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('bytes');
+      it('should be able to add and remove columns', function (done) {
+        var childElems;
+        // Should include a column for toggling and the time column by default
+        $parentScope.columns = ['bytes'];
+        parentElem.scope().$digest();
+        childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(3);
+        expect($(childElems[2]).text()).to.contain('bytes');
 
-      $parentScope.columns = ['bytes', 'request_body'];
-      parentElem.scope().$digest();
-      childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(4);
-      expect($(childElems[3]).text()).to.contain('request_body');
+        $parentScope.columns = ['bytes', 'request_body'];
+        parentElem.scope().$digest();
+        childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(4);
+        expect($(childElems[3]).text()).to.contain('request_body');
 
-      $parentScope.columns = ['request_body'];
-      parentElem.scope().$digest();
-      childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('request_body');
-      done();
-    });
+        $parentScope.columns = ['request_body'];
+        parentElem.scope().$digest();
+        childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(3);
+        expect($(childElems[2]).text()).to.contain('request_body');
+        done();
+      });
 
-    it('should create only the toggle column if there is no timeField', function (done) {
-      delete parentElem.scope().indexPattern.timeFieldName;
-      parentElem.scope().$digest();
+      it('should create only the toggle column if there is no timeField', function (done) {
+        delete parentElem.scope().indexPattern.timeFieldName;
+        parentElem.scope().$digest();
 
-      var childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(1);
-      done();
-    });
+        var childElems = parentElem.find(elemType);
+        expect(childElems.length).to.be(1);
+        done();
+      });
 
-  };
+    };
 
-  describe('Doc Table', function () {
 
     describe('kbnTableHeader', function () {
 
@@ -314,7 +315,6 @@ define(function (require) {
       var $root;
       var $before;
 
-      beforeEach(module('kibana', 'apps/discover'));
       beforeEach(inject(function ($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
@@ -342,7 +342,6 @@ define(function (require) {
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
         expect($before.eq(1).text().trim()).to.match(/^time_formatted/);
-        expect($before.eq(2).find('dl dt').length).to.be(_.keys($scope.row.$$_flattened).length);
       }));
 
       afterEach(function () {
@@ -444,7 +443,7 @@ define(function (require) {
       });
 
       it('handles two columns with the same content', function () {
-        $root.row.$$_formatted.request_body = $root.row.$$_formatted.bytes;
+        $root.row.$$_partialFormatted.request_body = $root.row.$$_partialFormatted.bytes;
         $root.columns.length = 0;
         $root.columns.push('bytes');
         $root.columns.push('request_body');

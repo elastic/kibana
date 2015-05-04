@@ -5,8 +5,7 @@ define(function (require) {
   require('modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
-    var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
-    var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
+    var controlsHtml = require('text!plugins/settings/sections/indices/_field_controls.html');
 
     var notify = new Notifier();
 
@@ -14,20 +13,17 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/settings/sections/indices/_scripted_fields.html'),
       scope: true,
-      link: function ($scope, $el, attr) {
+      link: function ($scope) {
         var dateScripts = require('plugins/settings/sections/indices/_date_scripts');
 
         var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
         $scope.perPage = 25;
-        $scope.popularityField = {name: null};
-
         $scope.columns = [
           { title: 'name' },
           { title: 'script' },
-          { title: 'type' },
-          { title: 'popularity', info: 'A gauge of how often this field is used' },
+          { title: 'format' },
           { title: 'controls', sortable: false }
         ];
 
@@ -35,21 +31,20 @@ define(function (require) {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
-          $scope.rows = $scope.indexPattern.getFields('scripted').map(function (field) {
+          $scope.rows = $scope.indexPattern.getScriptedFields().map(function (field) {
             var rowScope = $scope.$new();
-            var columns = [field.name, field.script, field.type];
             rowScope.field = field;
             rowScopes.push(rowScope);
 
-            columns.push({
-              markup: popularityHtml,
-              scope: rowScope
-            }, {
-              markup: controlsHtml,
-              scope: rowScope
-            });
-
-            return columns;
+            return [
+              field.name,
+              field.script,
+              _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
+              {
+                markup: controlsHtml,
+                scope: rowScope
+              }
+            ];
           });
         });
 
