@@ -85,7 +85,6 @@ define(function (require) {
             subdomains: '1234'
           });
 
-
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
             if (!self.events.dispatch[drawShape]) {
@@ -190,7 +189,7 @@ define(function (require) {
               'leading': true,
               'trailing': false
             }));
-            map.on('mouseout', function () {
+            map.on('mouseout', function (e) {
               map.closePopup();
             });
             map.on('mousedown', function () {
@@ -204,6 +203,9 @@ define(function (require) {
 
           function mouseMoveLocation(e) {
             map.closePopup();
+
+            // unhighlight all svgs
+            d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
 
             if (!mapData.features.length || self._attr.disableTooltips) {
               return;
@@ -268,6 +270,7 @@ define(function (require) {
      */
     TileMap.prototype.showTooltip = function (map, feature, latlng) {
       var content = this.tooltipFormatter(feature);
+
       if (!content) {
         return;
       }
@@ -275,10 +278,14 @@ define(function (require) {
       var eventLatLng = latlng;
       var featureLatLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
       var tipLatLng = featureLatLng;
+      var selector = 'path.geohash-' + feature.properties.geohash;
 
       if (eventLatLng.lat > featureLatLng.lat) {
         tipLatLng.lat = eventLatLng.lat;
       }
+
+      // highlight svg marker for feature
+      var marker = d3.select(selector, this.chartEl).classed('geohash-hover', true);
 
       L.popup({autoPan: false})
        .setLatLng(tipLatLng)
@@ -615,13 +622,14 @@ define(function (require) {
       var self = this;
       var count = feature.properties.count;
       var color = self.quantizeColorScale(count, min, max);
-
+      var className = 'geohash geohash-' + feature.properties.geohash;
       return {
         fillColor: color,
         color: self.darkerColor(color),
         weight: 1.5,
         opacity: 1,
-        fillOpacity: 0.75
+        fillOpacity: 0.75,
+        className: className
       };
     };
 

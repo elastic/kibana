@@ -145,7 +145,7 @@
 }
 
 .leaflet-draw-tooltip {
-    display: none;
+  display: none;
 }
 
 /* filter to desaturate mapquest tiles */
@@ -162,4 +162,14 @@ img.leaflet-tile.filters-off {
 
 .leaflet-clickable {
   pointer-events: none;
+}
+
+/* highlight svg map markers */
+
+path.geohash {
+  stroke-width: 1.5px;
+}
+
+path.geohash-hover {
+  stroke-width: 6px;
 }
