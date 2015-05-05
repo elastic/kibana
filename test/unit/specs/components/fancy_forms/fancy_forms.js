@@ -2,10 +2,6 @@ define(function (require) {
   var $ = require('jquery');
 
   describe('fancy forms', function () {
-    var $baseEl = $('<form>').append(
-      $('<input ng-model="val" required>')
-    );
-
     var $el;
     var $scope;
     var $compile;
@@ -13,13 +9,19 @@ define(function (require) {
     var ngForm;
     var ngModel;
 
+    function generateEl() {
+      return $('<form>').html(
+        $('<input ng-model="val" required>')
+      );
+    }
+
     beforeEach(module('kibana'));
     beforeEach(inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
 
       $scope = $rootScope.$new();
-      $el = $baseEl.clone();
+      $el = generateEl();
 
       $compile($el)($scope);
       $scope.$apply();
@@ -71,7 +73,7 @@ define(function (require) {
       it('sets the model dirty when it moves from valid to invalid', function () {
         // clear out the old scope/el
         $scope.$destroy();
-        $el = $baseEl.clone();
+        $el = generateEl();
         $scope = $rootScope.$new();
 
         // start with a valid value

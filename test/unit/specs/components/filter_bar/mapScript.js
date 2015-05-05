@@ -29,7 +29,7 @@ define(function (require) {
         };
         mapScript(filter).then(function (result) {
           expect(result).to.have.property('key', 'script number');
-          expect(result).to.have.property('value', 35);
+          expect(result).to.have.property('value', '35');
           done();
         });
         $rootScope.$apply();

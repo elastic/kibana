@@ -1,5 +1,6 @@
 define(function (require) {
   var decodeGeoHash = require('utils/decode_geo_hash');
+  var _ = require('lodash');
 
   function readRows(table, agg, index, chart) {
     var geoJson = chart.geoJson;

@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    require('leaflet-draw');
 
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
@@ -79,6 +80,21 @@ define(function (require) {
             subdomains: '1234'
           });
 
+
+          var drawOptions = {draw: {}};
+          _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
+            if (!self.events.dispatch[drawShape]) {
+              drawOptions.draw[drawShape] = false;
+            } else {
+              drawOptions.draw[drawShape] = {
+                shapeOptions: {
+                  stroke: false,
+                  color: '#000'
+                }
+              };
+            }
+          });
+
           var mapOptions = {
             minZoom: 1,
             maxZoom: 18,
@@ -88,10 +104,14 @@ define(function (require) {
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
-            fadeAnimation: false
+            fadeAnimation: false,
           };
 
           var map = L.map(div[0], mapOptions);
+
+          if (data.geoJson.features.length) {
+            map.addControl(new L.Control.Draw(drawOptions));
+          }
 
           tileLayer.on('tileload', function () {
             self.saturateTiles();
@@ -106,6 +126,31 @@ define(function (require) {
           map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.mapZoom = map.getZoom();
             mapCenter = self._attr.mapCenter = map.getCenter();
+            featureLayer.clearLayers();
+            featureLayer = self.markerType(map, mapData).addTo(map);
+          });
+
+          map.on('draw:created', function (e) {
+            var drawType = e.layerType;
+            if (!self.events.dispatch[drawType]) return;
+
+            // TODO: Different drawTypes need differ info. Need a switch on the object creation
+            var bounds = e.layer.getBounds();
+
+            self.events.dispatch[drawType]({
+              e: e,
+              data: self.chartData,
+              bounds: {
+                top_left: {
+                  lat: bounds.getNorthWest().lat,
+                  lon: bounds.getNorthWest().lng
+                },
+                bottom_right: {
+                  lat: bounds.getSouthEast().lat,
+                  lon: bounds.getSouthEast().lng
+                }
+              }
+            });
           });
 
           map.on('zoomend', function () {
@@ -145,6 +190,19 @@ define(function (require) {
 
           self.maps.push(map);
         });
+      };
+    };
+
+    /**
+     * Return features within the map bounds
+     */
+    TileMap.prototype._filterToMapBounds = function (map) {
+      return function (feature) {
+        var coordinates = feature.geometry.coordinates;
+        var p0 = coordinates[0];
+        var p1 = coordinates[1];
+
+        return map.getBounds().contains([p1, p0]);
       };
     };
 
@@ -229,7 +287,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -268,7 +327,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -323,7 +383,8 @@ define(function (require) {
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
-        }
+        },
+        filter: self._filterToMapBounds(map)
       });
 
       // add legend
@@ -366,6 +427,10 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
+      var isLegend = $('div.tilemap-legend').length;
+
+      if (isLegend) return; // Don't add Legend if already one
+
       var legend = L.control({position: 'bottomright'});
       legend.onAdd = function () {
         var div = L.DomUtil.create('div', 'tilemap-legend');
@@ -448,6 +513,7 @@ define(function (require) {
     TileMap.prototype.bindPopup = function (feature, layer) {
       var props = feature.properties;
       var popup = L.popup({
+        className: 'leaflet-popup-kibana',
         autoPan: false
       })
       .setContent(
@@ -562,6 +628,9 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
+      // Cleanup hanging DOM nodes
+      $(this.chartEl).find('[class*=" leaflet"]').remove();
+
       this.maps.forEach(function (map) {
         map.remove();
       });

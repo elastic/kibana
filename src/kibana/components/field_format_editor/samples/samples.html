@@ -1,0 +1,32 @@
+<div class="form-group hintbox" ng-if="error">
+  <h4 class="hintbox-heading">
+    <i class="fa fa-danger text-danger"></i> Format error
+  </h4>
+  <p>
+    An error occured while trying to use this format configuration.
+  </p>
+  <pre>{{ error.message }}</pre>
+</div>
+
+<div class="form-group" ng-if="samples">
+  <hr>
+  <label>Samples</label>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          Input
+        </th>
+        <th>
+          Formatted
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="sample in samples">
+        <td ng-bind="sample[0]"></td>
+        <td ng-bind-html="sample[1]"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
