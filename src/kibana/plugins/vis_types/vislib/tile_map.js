@@ -29,7 +29,7 @@ define(function (require) {
           // event.limit is the configurable max geohash precision
           // default max precision is 7, configurable up to 12
           var zoomPrecision = {
-            1: 1,
+            1: 2,
             2: 2,
             3: 2,
             4: 3,
