@@ -203,7 +203,7 @@ define(function (require) {
 
             svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + width + ',' + margin.top + ')')
+            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(yAxis);
 
             var container = svg.select('g.y.axis').node();
@@ -211,7 +211,7 @@ define(function (require) {
               var cWidth = Math.max(width, container.getBBox().width);
               svg.attr('width', cWidth);
               svg.select('g')
-              .attr('transform', 'translate(' + cWidth + ',' + margin.top + ')');
+              .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
             }
           }
         });
