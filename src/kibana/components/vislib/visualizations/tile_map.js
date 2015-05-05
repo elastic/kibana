@@ -177,7 +177,7 @@ define(function (require) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
               $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
               $(container).on('click', function () {
-                self.fitBounds(map, featureLayer);
+                self.fitBounds(map, mapData);
               });
               return container;
             }
@@ -213,8 +213,8 @@ define(function (require) {
      * @param featureLayer {Leaflet object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.fitBounds = function (map, featureLayer) {
-
+    TileMap.prototype.fitBounds = function (map, mapData) {
+      var featureLayer = L.geoJson(mapData);
       map.fitBounds(featureLayer.getBounds());
     };
 
