@@ -59,15 +59,18 @@ define(function (require) {
         var flip = false;
         unwatchers.push($scope.$watch(function () {
           if (fire) {
-            fire = false;
             flip = !flip;
           }
           return flip;
         }, function () {
-          fn(vals.slice(0), prev.slice(0));
-          vals.forEach(function (v, i) {
-            prev[i] = v;
-          });
+          if (fire) {
+            fire = false;
+
+            fn(vals.slice(0), prev.slice(0));
+            vals.forEach(function (v, i) {
+              prev[i] = v;
+            });
+          }
         }));
 
         return _.partial(_.callEach, unwatchers);
