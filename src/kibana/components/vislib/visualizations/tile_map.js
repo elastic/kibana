@@ -271,8 +271,8 @@ define(function (require) {
      * add Leaflet latLng to mapData properties
      *
      * @method addLatLng
-     * @param mapData {mapData Object}
-     * @return mapData {Object}
+     * @param mapData {geoJson Object}
+     * @return mapData {geoJson Object}
      */
     TileMap.prototype.addLatLng = function (mapData) {
       for (var i = 0; i < mapData.features.length; i++) {
@@ -287,7 +287,7 @@ define(function (require) {
      * zoom map to fit all features in featureLayer
      *
      * @method fitBounds
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @param mapData {geoJson Object}
      * @return {undefined}
      */
@@ -390,7 +390,7 @@ define(function (require) {
      * @method showTooltip
      * @param e {Event}
      * @param map {Leaflet Object}
-     * @param mapData {mapData Object}
+     * @param mapData {geoJson Object}
      * @return {undefined}
      */
     TileMap.prototype.showTooltip = function (map, feature) {
@@ -414,7 +414,7 @@ define(function (require) {
      * creates featurelayer from mapData (geoJson)
      *
      * @method markerType
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
@@ -444,7 +444,7 @@ define(function (require) {
      * with circle markers that are scaled to illustrate values
      *
      * @method scaledCircleMarkers
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
@@ -486,8 +486,8 @@ define(function (require) {
      * with circle markers that are shaded to illustrate values
      *
      * @method shadedCircleMarkers
-     * @param map {Object}
-     * @param mapData {mapData Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
@@ -526,8 +526,8 @@ define(function (require) {
      * with rectangles that show the geohash grid bounds
      *
      * @method geohashGrid
-     * @param map {Object}
-     * @param mapData {mapData Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return {undefined}
      */
     TileMap.prototype.shadedGeohashGrid = function (map, mapData) {
@@ -582,8 +582,8 @@ define(function (require) {
      * with leaflet.heat plugin
      *
      * @method heatMap
-     * @param map {Object}
-     * @param mapData {mapData Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return featureLayer {Leaflet object}
      */
     TileMap.prototype.heatMap = function (map, mapData) {
@@ -608,7 +608,7 @@ define(function (require) {
      *
      * @method addLabel
      * @param mapLabel {String}
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @return {undefined}
      */
     TileMap.prototype.addLabel = function (mapLabel, map) {
@@ -630,7 +630,7 @@ define(function (require) {
      *
      * @method addLegend
      * @param data {Object}
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @return {undefined}
      */
     TileMap.prototype.addLegend = function (data, map) {
@@ -743,7 +743,7 @@ define(function (require) {
      * get bounds of features from geoJson
      *
      * @method getBounds
-     * @param mapData {mapData Object}
+     * @param mapData {geoJson Object}
      * @return {Leaflet}
      */
     TileMap.prototype.getBounds = function (mapData) {
@@ -756,7 +756,7 @@ define(function (require) {
      * if heatNormalizeData attribute is checked/true
      • normalizes data for heat map intensity
      *
-     * @param mapData {mapData Object}
+     * @param mapData {geoJson Object}
      * @param nax {Number}
      * @method dataToHeatArray
      * @return {Array}
