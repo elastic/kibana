@@ -81,7 +81,6 @@ define(function (require) {
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-          var featureLayer = new L.layerGroup();
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
@@ -111,10 +110,7 @@ define(function (require) {
 
           var map = L.map(div[0], mapOptions);
 
-          var features = self.markerType(map, mapData);
-
-          featureLayer.addLayer(features);
-          map.addLayer(featureLayer);
+          var featureLayer = self.markerType(map, mapData).addTo(map);
 
           if (data.geoJson.features.length) {
             map.addControl(new L.Control.Draw(drawOptions));
@@ -133,7 +129,8 @@ define(function (require) {
           map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.mapZoom = map.getZoom();
             mapCenter = self._attr.mapCenter = map.getCenter();
-            featureLayer.clearLayers();
+
+            map.removeLayer(featureLayer);
             featureLayer = self.markerType(map, mapData).addTo(map);
           });
 
@@ -221,7 +218,11 @@ define(function (require) {
     };
 
     /**
-     * Return features within the map bounds
+     * return whether feature is within map bounds
+     *
+     * @method _filterToMapBounds
+     * @param map {Leaflet Object}
+     * @return {boolean}
      */
     TileMap.prototype._filterToMapBounds = function (map) {
       return function (feature) {
