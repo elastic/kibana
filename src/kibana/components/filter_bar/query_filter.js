@@ -4,6 +4,7 @@ define(function (require) {
   return function (Private, $rootScope, getAppState, globalState) {
     var EventEmitter = Private(require('factories/events'));
     var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
+    var onlyStateChanged = require('components/filter_bar/lib/onlyStateChanged');
     var uniqFilters = require('components/filter_bar/lib/uniqFilters');
     var compareFilters = require('components/filter_bar/lib/compareFilters');
 
@@ -282,11 +283,15 @@ define(function (require) {
         return $rootScope.$watchMulti(stateWatchers, function (next, prev) {
           var doUpdate = false;
           var doFetch = false;
+          var newFilters = [];
+          var oldFilters = [];
 
           // iterate over each state type, checking for changes
           stateWatchers.forEach(function (watcher, i) {
             var nextVal = next[i];
             var prevVal = prev[i];
+            newFilters = newFilters.concat(nextVal);
+            oldFilters = oldFilters.concat(prevVal);
 
             // no update or fetch if there was no change
             if (nextVal === prevVal) return;
@@ -295,6 +300,11 @@ define(function (require) {
             // don't trigger fetch when only disabled filters
             if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
           });
+
+          // make sure change wasn't only a state move
+          if (doFetch) {
+            if (onlyStateChanged(newFilters, oldFilters)) doFetch = false;
+          }
 
           // reconcile filter in global and app states
           var filters = mergeAndMutateFilters(next[0], next[1]);
