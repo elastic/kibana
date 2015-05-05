@@ -5,6 +5,8 @@ define(function (require) {
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
     var dataLabel = require('components/vislib/lib/_data_label');
     var AggConfigResult = require('components/vis/_agg_config_result');
+    var color = Private(require('components/vislib/components/color/color'));
+    var getLabels = Private(require('components/vislib/components/labels/labels'));
 
     require('css!components/vislib/styles/main');
 
@@ -24,19 +26,13 @@ define(function (require) {
         return new Legend(vis, data);
       }
 
-      var isPie = (vis._attr.type === 'pie');
-
-      if (isPie) {
-        this.dataLabels = this._transformPieData(data.pieData());
-      } else {
-        this.dataLabels = this._transformSeriesData(data.getVisData());
-      }
-
-      this.vis = vis;
-      this.data = data;
-      this.el = vis.el;
       this.events = new Dispatch();
-      this.color = isPie ? data.getPieColorFunc() : data.color;
+      this.vis = vis;
+      this.el = vis.el;
+      this.data = this._getData(data);
+      this.labels = getLabels(data, vis._attr.type);
+      this.color = color(this.labels);
+
       this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
@@ -46,6 +42,22 @@ define(function (require) {
         'isOpen' : true
       });
     }
+
+    Legend.prototype._getLabels = function (data) {
+      if (data.series) {
+        if (data.series.length === 1 && getLabels(data)[0] === '') {
+          return [(this.get('yAxisLabel'))];
+        } else {
+          return getLabels(data);
+        }
+      } else if (this.type === 'slices') {
+        return this.pieNames();
+      }
+    };
+
+    Legend.prototype._getData = function (data) {
+      return data.columns || data.rows || [data.series] || [data.slices];
+    };
 
     /**
      * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
@@ -122,7 +134,7 @@ define(function (require) {
      * @param args {Object|*} Legend options
      * @returns {*} HTML element
      */
-    Legend.prototype.header = function (el, args) {
+    Legend.prototype._header = function (el, args) {
       return el.append('div')
       .attr('class', 'header')
       .append('div')
@@ -141,7 +153,7 @@ define(function (require) {
      * @param args {Object|*} Legend options
      * @returns {D3.Selection} HTML element with list of labels attached
      */
-    Legend.prototype.list = function (el, arrOfLabels, args) {
+    Legend.prototype._list = function (el, arrOfLabels, args) {
       var self = this;
 
       return el.append('ul')
@@ -185,8 +197,8 @@ define(function (require) {
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.dataLabels;
-      this.header(legendDiv, this);
-      this.list(legendDiv, items, this);
+      this._header(legendDiv, this);
+      this._list(legendDiv, items, this);
 
       var headerIcon = visEl.select('.legend-toggle');
 

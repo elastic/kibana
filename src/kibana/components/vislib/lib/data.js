@@ -37,21 +37,8 @@ define(function (require) {
 
       this.data = data;
       this.type = this.getDataType();
-
-      this.labels;
-
-      if (this.type === 'series') {
-        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
-          this.labels = [(this.get('yAxisLabel'))];
-        } else {
-          this.labels = getLabels(data);
-        }
-      } else if (this.type === 'slices') {
-        this.labels = this.pieNames();
-      }
-
+      this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels) : undefined;
-
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -72,6 +59,18 @@ define(function (require) {
         });
       }
     }
+
+    Data.prototype._getLabels = function (data) {
+      if (this.type === 'series') {
+        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
+          return [(this.get('yAxisLabel'))];
+        } else {
+          return getLabels(data);
+        }
+      } else if (this.type === 'slices') {
+        return this.pieNames();
+      }
+    };
 
     /**
      * Returns true for positive numbers
@@ -530,9 +529,8 @@ define(function (require) {
      * @method pieNames
      * @returns {Array} Array of unique names (strings)
      */
-    Data.prototype.pieNames = function () {
+    Data.prototype.pieNames = function (data) {
       var self = this;
-      var data = this.getVisData();
       var names = [];
 
       _.forEach(data, function (obj) {
@@ -596,7 +594,7 @@ define(function (require) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     Data.prototype.getPieColorFunc = function () {
-      return color(this.pieNames());
+      return color(this.pieNames(this.getVisData()));
     };
 
     /**
