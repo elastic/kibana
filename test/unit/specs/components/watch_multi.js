@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   describe('$scope.$watchMulti', function () {
     var sinon = require('test_utils/auto_release_sinon');
 
@@ -165,6 +166,34 @@ define(function (require) {
 
         expect(stub.firstCall.args[0]).to.eql([firstValue, secondValue]);
         expect(stub.firstCall.args[1]).to.eql([firstValue, secondValue]);
+      });
+    });
+
+    describe('nested watchers', function () {
+      it('should trigger the handler at least once', function () {
+        var $scope = $rootScope.$new();
+        $scope.$$watchers = [{
+          get: _.noop,
+          fn: _.noop,
+          eq: false,
+          last: false
+        }, {
+          get: _.noop,
+          fn: registerWatchers,
+          eq: false,
+          last: false
+        }];
+
+        var first = sinon.stub();
+        var second = sinon.stub();
+
+        function registerWatchers() {
+          $scope.$watchMulti([first, second], function () {
+            expect(first.callCount).to.be.greaterThan(0);
+            expect(second.callCount).to.be.greaterThan(0);
+          });
+        }
+        $scope.$digest();
       });
     });
   });
