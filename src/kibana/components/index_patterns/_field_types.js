@@ -16,7 +16,9 @@ define(function (require) {
         { name: 'geo_point',  sortable: false,  filterable: false },
         { name: 'geo_shape',  sortable: false,  filterable: false },
         { name: 'attachment', sortable: false,  filterable: false },
-        { name: 'murmur3',    sortable: false,  filterable: false }
+        { name: 'murmur3',    sortable: false,  filterable: false },
+        { name: 'unknown',    sortable: false,  filterable: false },
+        { name: '_source',    sortable: false,  filterable: false },
       ]
     });
   };

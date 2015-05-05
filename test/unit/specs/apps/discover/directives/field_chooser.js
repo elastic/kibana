@@ -8,7 +8,12 @@ define(function (require) {
   require('services/private');
   require('plugins/discover/components/field_chooser/field_chooser');
 
-  var $parentScope, $scope, config, indexPattern, indexPatternList;
+  var $parentScope;
+  var $scope;
+  var config;
+  var hits;
+  var indexPattern;
+  var indexPatternList;
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   var init = function ($elem, props) {
@@ -48,16 +53,17 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(function () {
       inject(function (Private) {
+        hits = Private(require('fixtures/hits'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         indexPatternList = [ 'b', 'a', 'c' ];
       });
 
-      var hits = _.each(require('fixtures/hits.js'), indexPattern.flattenHit);
+      var flatHits = _.each(hits, indexPattern.flattenHit);
 
       init($elem, {
         columns: [],
         toggle: sinon.spy(),
-        data: hits,
+        data: flatHits,
         filter: sinon.spy(),
         indexPattern: indexPattern,
         indexPatternList: indexPatternList
@@ -172,7 +178,6 @@ define(function (require) {
       });
 
       it('should increase the field popularity when called', function (done) {
-        var counter = field.count;
         indexPattern.popularizeField = sinon.spy();
         $scope.details(field);
         expect(indexPattern.popularizeField.called).to.be(true);
@@ -205,7 +210,7 @@ define(function (require) {
         $scope.details(field);
         expect(field.details.buckets).to.not.be(undefined);
         expect(field.details.buckets[0].value).to.be(40.141592);
-        expect(field.details.buckets[0].display).to.be(40.142);
+        expect(field.details.buckets[0].display).to.be('40.142');
         done();
       });
 

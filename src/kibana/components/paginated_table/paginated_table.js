@@ -1,7 +1,7 @@
 define(function (require) {
   require('modules')
   .get('kibana')
-  .directive('paginatedTable', function ($filter, config, Private) {
+  .directive('paginatedTable', function ($filter) {
     var _ = require('lodash');
     var orderBy = $filter('orderBy');
 
@@ -63,17 +63,23 @@ define(function (require) {
         };
 
         // update the sordedRows result
-        $scope.$watch('rows', rowSorter);
-        $scope.$watchCollection('paginatedTable.sort', rowSorter);
-
-        function rowSorter() {
-          if (self.sort.direction == null) {
-            $scope.sortedRows = $scope.rows.slice(0);
+        $scope.$watchMulti([
+          'rows',
+          'columns',
+          '[]paginatedTable.sort'
+        ], function resortRows() {
+          if (!$scope.rows || !$scope.columns) {
+            $scope.sortedRows = false;
             return;
           }
 
-          $scope.sortedRows = orderBy($scope.rows, self.sort.getter, self.sort.direction === 'desc');
-        }
+          var sort = self.sort;
+          if (sort.direction == null) {
+            $scope.sortedRows = $scope.rows.slice(0);
+          } else {
+            $scope.sortedRows = orderBy($scope.rows, sort.getter, sort.direction === 'desc');
+          }
+        });
       }
     };
   });

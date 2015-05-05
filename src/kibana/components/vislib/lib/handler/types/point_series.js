@@ -44,7 +44,7 @@ define(function (require) {
             yMin : data.getYMin(),
             yMax : data.getYMax(),
             _attr: vis._attr,
-            tickFormat: data.get('yAxisFormatter')
+            yAxisFormatter: data.get('yAxisFormatter')
           })
         });
       };

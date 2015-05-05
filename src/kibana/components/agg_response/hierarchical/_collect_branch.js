@@ -1,5 +1,4 @@
-define(function (require) {
-  var _ = require('lodash');
+define(function () {
   return function (leaf) {
     // walk up the branch for each parent
     function walk(item, memo) {
