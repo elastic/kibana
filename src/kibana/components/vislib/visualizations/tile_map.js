@@ -419,23 +419,23 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map, mapData) {
-      var features;
+      var featureLayer;
 
       if (mapData) {
         if (this._attr.mapType === 'Scaled Circle Markers') {
-          features = this.scaledCircleMarkers(map, mapData);
+          featureLayer = this.scaledCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Circle Markers') {
-          features = this.shadedCircleMarkers(map, mapData);
+          featureLayer = this.shadedCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
-          features = this.shadedGeohashGrid(map, mapData);
+          featureLayer = this.shadedGeohashGrid(map, mapData);
         } else if (this._attr.mapType === 'Heatmap') {
-          features = this.heatMap(map, mapData);
+          featureLayer = this.heatMap(map, mapData);
         } else {
-          features = this.scaledCircleMarkers(map, mapData);
+          featureLayer = this.scaledCircleMarkers(map, mapData);
         }
       }
 
-      return features;
+      return featureLayer;
     };
 
     /**
