@@ -11,8 +11,8 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
-    var mapCenter = [15, 5];
-    var mapZoom = 2;
+    var defaultMapCenter = [15, 5];
+    var defaultMapZoom = 2;
 
     /**
      * Tile Map Visualization: renders maps
@@ -60,14 +60,11 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       return function (selection) {
-        selection.each(function (data) {
 
-          if (self._attr.mapZoom) {
-            mapZoom = self._attr.mapZoom;
-          }
-          if (self._attr.mapCenter) {
-            mapCenter = self._attr.mapCenter;
-          }
+        self._attr.mapZoom = self._attr.mapZoom || defaultMapZoom;
+        self._attr.mapCenter = self._attr.mapCenter || defaultMapCenter;
+
+        selection.each(function (data) {
 
           var mapData = data.geoJson;
           var div = $(this).addClass('tilemap');
@@ -99,8 +96,8 @@ define(function (require) {
             minZoom: 1,
             maxZoom: 18,
             layers: tileLayer,
-            center: mapCenter,
-            zoom: mapZoom,
+            center: self._attr.mapCenter,
+            zoom: self._attr.mapZoom,
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
@@ -124,8 +121,9 @@ define(function (require) {
           });
 
           map.on('moveend', function setZoomCenter() {
-            mapZoom = self._attr.mapZoom = map.getZoom();
-            mapCenter = self._attr.mapCenter = map.getCenter();
+            self._attr.mapZoom = map.getZoom();
+            self._attr.mapCenter = map.getCenter();
+
             featureLayer.clearLayers();
             featureLayer = self.markerType(map, mapData).addTo(map);
           });
@@ -428,7 +426,7 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
-      var isLegend = $('div.tilemap-legend').length;
+      var isLegend = $(this.chartEl).find('div.tilemap-legend').length;
 
       if (isLegend) return; // Don't add Legend if already one
 
