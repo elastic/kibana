@@ -112,7 +112,8 @@ define(function (require) {
           }
 
           var attrs = {
-            'agg-param': 'agg.type.params[' + idx + ']'
+            'agg-param': 'agg.type.params[' + idx + ']',
+            'ng-hide': '!indexedFields.length && ' + idx + ' > 0' // if there are no fields, and this is one of the extra options
           };
 
           if (param.advanced) {
