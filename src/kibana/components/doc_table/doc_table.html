@@ -2,6 +2,17 @@
 <div
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
+
+  <div class="export">
+    <small>Export:</small>&nbsp;&nbsp;
+    <a class="small" ng-click="exportAsCsv(false)">
+      Raw <i aria-hidden="true" class="fa fa-download"></i>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a class="small" ng-click="exportAsCsv(true)">
+      Formatted <i aria-hidden="true" class="fa fa-download"></i>
+    </a>
+  </div>
+
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
     <table class="kbn-table table" ng-if="indexPattern">
       <thead
