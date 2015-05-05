@@ -135,8 +135,7 @@ define(function (require) {
             var events = self.events ? self.events.eventResponse(d, i) : d;
             return render(tooltipFormatter(events));
           })
-          .on('mouseout.tip', function () {
-            console.log('mouseoutevent', id);
+          .on('mouseleave.tip', function () {
             render();
           });
         });

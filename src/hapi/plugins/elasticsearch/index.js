@@ -1,10 +1,12 @@
 var url = require('url');
 var http = require('http');
 var fs = require('fs');
+var resolve = require('url').resolve;
 var querystring = require('querystring');
 var kibana = require('../../');
 var healthCheck = require('./lib/health_check');
 var exposeClient = require('./lib/expose_client');
+var createProxy = require('./lib/create_proxy');
 
 module.exports = new kibana.Plugin({
 
@@ -17,44 +19,28 @@ module.exports = new kibana.Plugin({
     // Set up the health check service
     healthCheck(this, server);
 
-    var target = url.parse(config.elasticsearch);
+    createProxy(server, 'GET', '/elasticsearch/{paths*}');
+    createProxy(server, 'POST', '/elasticsearch/_mget');
+    createProxy(server, 'POST', '/elasticsearch/_msearch');
 
-    var agentOptions = {
-      rejectUnauthorized: config.kibana.verify_ssl
-    };
-
-    var customCA;
-    if (/^https/.test(target.protocol) && config.kibana.ca) {
-      customCA = fs.readFileSync(config.kibana.ca, 'utf8');
-      agentOptions.ca = [customCA];
-    }
-
-    // Add client certificate and key if required by elasticsearch
-    if (/^https/.test(target.protocol) &&
-        config.kibana.kibana_elasticsearch_client_crt &&
-        config.kibana.kibana_elasticsearch_client_key) {
-      agentOptions.crt = fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt, 'utf8');
-      agentOptions.key = fs.readFileSync(config.kibana.kibana_elasticsearch_client_key, 'utf8');
-    }
-
-    server.route({
-      method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      path: '/elasticsearch/{path*}',
-      handler: {
-        proxy: {
-          mapUri: function (request, callback) {
-            var url = config.elasticsearch;
-            if (!/\/$/.test(url)) url += '/';
-            if (request.params.path) url += request.params.path;
-            var query = querystring.stringify(request.query);
-            if (query) url += '?' + query;
-            callback(null, url);
-          },
-          passThrough: true,
-          agent: new http.Agent(agentOptions)
-        }
+    function noBulkCheck(request, reply) {
+      if (/\/_bulk/.test(request.path)) {
+        return reply({
+          error: 'You can not send _bulk requests to this interface.'
+        }).code(400).takeover();
       }
-    });
+      return reply.continue();
+    }
+
+    createProxy(
+      server,
+      ['PUT', 'POST', 'DELETE'],
+      '/elasticsearch/' + config.get('kibana.index') + '/{paths*}',
+      {
+        prefix: '/' + config.get('kibana.index'),
+        config: { pre: [ noBulkCheck ] }
+      }
+    );
 
   }
 });

@@ -8,7 +8,7 @@ module.exports = new kibana.Plugin({
       path: '/{param*}',
       handler: {
         directory: {
-          path: config.public_folder
+          path: config.get('kibana.publicFolder')
         }
       }
     });

@@ -1,10 +1,13 @@
+var _ = require('lodash');
 var Promise = require('bluebird');
 var Hapi = require('hapi');
-var requirePlugins = require('./require_plugins');
-var validatePlugin = require('./validate_plugin');
+var requirePlugins = require('./plugins/require_plugins');
+var validatePlugin = require('./plugins/validate_plugin');
 var extendHapi = require('./extend_hapi');
+var join = require('path').join;
 
-module.exports = function (plugins) {
+
+module.exports = function (settings, plugins) {
   // Plugin authors can use this to add plugins durring development
   plugins = plugins || [];
 
@@ -18,13 +21,24 @@ module.exports = function (plugins) {
   // Extend Hapi with Kibana
   extendHapi(server);
 
+  var config = server.config();
+  if (settings) config.set(settings);
+
   // Create a new connection
-  server.connection({ host: server.config().host, port: server.config().port });
+  server.connection({
+    host: config.get('kibana.server.host'),
+    port: config.get('kibana.server.port')
+  });
 
   // Load external plugins
   var externalPlugins = [];
-  if (server.config().external_plugins_folder) {
-    externalPlugins = requirePlugins(server.config().external_plugins_folder);
+  var externalPluginsFolder = config.get('kibana.externalPluginsFolder');
+  if (externalPluginsFolder) {
+    externalPlugins = _([externalPluginsFolder])
+      .flatten()
+      .map(requirePlugins)
+      .flatten()
+      .value();
   }
 
   // Load the plugins
@@ -41,6 +55,7 @@ module.exports = function (plugins) {
   })
   .catch(function (err) {
     server.log('fatal', err);
+    console.log(err.stack);
     return Promise.reject(err);
   });
 };

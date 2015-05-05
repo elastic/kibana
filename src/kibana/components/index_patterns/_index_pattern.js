@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config, Promise) {
+  return function IndexPatternFactory(Private, timefilter, Notifier, config, Promise) {
     var _ = require('lodash');
     var angular = require('angular');
     var errors = require('errors');
@@ -9,9 +9,9 @@ define(function (require) {
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
     var fieldTypes = Private(require('components/index_patterns/_field_types'));
-    var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
-    var flattenHit = require('components/index_patterns/_flatten_hit');
+    var flattenHit = Private(require('components/index_patterns/_flatten_hit'));
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
+    var shortDotsFilter = Private(require('filters/short_dots'));
 
 
     var DocSource = Private(require('components/courier/data_source/doc_source'));
@@ -43,7 +43,7 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibana_index)
+        .index(config.file.kibana_index)
         .type(type)
         .id(self.id);
 
@@ -104,7 +104,7 @@ define(function (require) {
                 }
               },
               filterable: {
-                value: field.name === '_id' || ((field.indexed && type.filterable) || field.scripted)
+                value: field.name === '_id' || ((field.indexed && type && type.filterable) || field.scripted)
               },
               format: {
                 get: function () {
@@ -113,7 +113,7 @@ define(function (require) {
                 }
               },
               sortable: {
-                value: field.indexed && type.sortable
+                value: field.indexed && type && type.sortable
               },
               scripted: {
                 // enumerable properties end up in the JSON
@@ -275,13 +275,10 @@ define(function (require) {
         return '' + self.toJSON();
       };
 
-      self.metaFields = config.get('metaFields');
-      self.flattenSearchResponse = flattenSearchResponse.bind(self);
-      self.flattenHit = flattenHit.bind(self);
+      self.flattenHit = _.partial(flattenHit, self);
       self.getComputedFields = getComputedFields.bind(self);
-
-
     }
+
     return IndexPattern;
   };
 });

@@ -24,10 +24,25 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+      var charts = this.handler.data.getVisData();
+      this._validatePieData(charts);
+
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false
       });
     }
+
+    /**
+     * Checks whether pie slices have all zero values.
+     * If so, an error is thrown.
+     */
+    PieChart.prototype._validatePieData = function (charts) {
+      var isAllZeros = charts.every(function (chart) {
+        return chart.slices.children.length === 0;
+      });
+
+      if (isAllZeros) { throw new errors.PieContainsAllZeros(); }
+    };
 
     /**
      * Adds Events to SVG paths
@@ -83,10 +98,19 @@ define(function (require) {
      * @returns {D3.Selection} SVG with paths attached
      */
     PieChart.prototype.addPath = function (width, height, svg, slices) {
+      var self = this;
       var marginFactor = 0.95;
-      var isDonut = this._attr.isDonut;
+      var isDonut = self._attr.isDonut;
       var radius = (Math.min(width, height) / 2) * marginFactor;
-      var color = this.handler.data.getPieColorFunc();
+      var color = self.handler.data.getPieColorFunc();
+      var tooltip = self.tooltip;
+      var isTooltip = self._attr.addTooltip;
+
+      var format = function (d, label) {
+        var formatter = d.aggConfig ? d.aggConfig.fieldFormatter() : String;
+        return formatter(label);
+      };
+
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
@@ -115,16 +139,8 @@ define(function (require) {
       .outerRadius(function (d) {
         return Math.max(0, y(d.y + d.dy));
       });
-      var tooltip = this.tooltip;
-      var isTooltip = this._attr.addTooltip;
-      var self = this;
-      var path;
-      var format = function (d, label) {
-        var formatter = d.aggConfig ? d.aggConfig.fieldFormatter() : String;
-        return formatter(label);
-      };
 
-      path = svg
+      var path = svg
       .datum(slices)
       .selectAll('path')
       .data(partition.nodes)
@@ -133,8 +149,9 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
-          return 'slice ' + self.colorToClass(color(format(d, d.name)));
+          return 'slice';
         })
+        .call(self._addIdentifier, 'name')
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
@@ -146,6 +163,15 @@ define(function (require) {
       }
 
       return path;
+    };
+
+    PieChart.prototype._validateContainerSize = function (width, height) {
+      var minWidth = 20;
+      var minHeight = 20;
+
+      if (width <= minWidth || height <= minHeight) {
+        throw new errors.ContainerTooSmall();
+      }
     };
 
     /**
@@ -160,17 +186,15 @@ define(function (require) {
       return function (selection) {
         selection.each(function (data) {
           var slices = data.slices;
-          var el = this;
-          var div = d3.select(el);
-          var width = $(el).width();
-          var height = $(el).height();
-          var minWidth = 20;
-          var minHeight = 20;
+          var div = d3.select(this);
+          var width = $(this).width();
+          var height = $(this).height();
           var path;
 
-          if (width <= minWidth || height <= minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
+          if (!slices.children.length) return;
+
+          self.convertToPercentage(slices);
+          self._validateContainerSize(width, height);
 
           var svg = div.append('svg')
           .attr('width', width)
@@ -178,7 +202,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-          self.convertToPercentage(slices);
           path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 

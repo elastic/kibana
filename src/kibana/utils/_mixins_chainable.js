@@ -65,7 +65,7 @@ define(function (require) {
      */
     toggleInOut: function (arr, value) {
       if (_.contains(arr, value)) {
-        arr = _.without(arr, value);
+        arr.splice(arr.indexOf(value), 1);
       } else {
         arr.push(value);
       }
@@ -250,11 +250,38 @@ define(function (require) {
     },
 
     /**
-     * Shortcut for the simple version of _.deepGet
+     * Shortcut for the simple version of _.deepGet with support for default
+     * values added
+     *
+     * @param {obj} any - the value to read from
+     * @param {string|array} path - the location of the value to return as
+     *                           a dot-notated string or array of keys.
+     * @param {any} def - when the value is null or undefined return this instead
      * @return {any}
      */
-    get: function (obj, path) {
-      return _.deepGet(obj, path);
+    get: function (obj, path, def) {
+      var val = _.deepGet(obj, path);
+      return (val == null && def != null) ? def : val;
+    },
+
+    /**
+     * Parse a comma-seperated list into an array
+     * efficiently, or just return if already an array
+     *
+     * @param {string|array} input  - the comma-seperated list
+     * @return {array}
+     */
+    commaSeperatedList: function (input) {
+      if (_.isArray(input)) return input;
+
+      var source = String(input || '').split(',');
+      var list = [];
+      while (source.length) {
+        var item = source.shift().trim();
+        if (item) list.push(item);
+      }
+
+      return list;
     },
   };
 });

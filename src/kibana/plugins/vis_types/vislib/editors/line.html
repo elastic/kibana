@@ -4,6 +4,7 @@
   </label>
   <select class="form-control" ng-model="vis.params.scale" ng-options="mode for mode in vis.type.params.scales"></select>
 <!-- vis type specific options -->
+<line-interpolation-option></line-interpolation-option>
 <div class="vis-option-item">
   <div>
     <label>
@@ -19,3 +20,4 @@
   </div>
 </div>
 <vislib-basic-options></vislib-basic-options>
+<point-series-options></point-series-options>

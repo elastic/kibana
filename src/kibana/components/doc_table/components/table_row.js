@@ -12,7 +12,7 @@ define(function (require) {
   require('filters/short_dots');
 
 
-  // guestimate at the minimum number of chars wide cells in the table should be
+  // guesstimate at the minimum number of chars wide cells in the table should be
   var MIN_LINE_LENGTH = 20;
 
   /**
@@ -226,7 +226,7 @@ define(function (require) {
          * Create the $$_formatted key on a row
          */
         function _formatRow(row) {
-          row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
+          $scope.indexPattern.flattenHit(row);
           row.$$_formatted = row.$$_formatted || _.mapValues(row.$$_flattened, _formatField);
           return row.$$_formatted;
         }

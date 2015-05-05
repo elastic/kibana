@@ -13,13 +13,17 @@ define(function (require) {
      */
 
     function Dispatch(handler) {
+
+      var stockEvents = ['brush', 'click', 'hover', 'mouseup', 'mousedown', 'mouseover', 'mouseout'];
+      var customEvents = _.deepGet(handler, 'vis.eventTypes.enabled');
+      var eventTypes = customEvents ? stockEvents.concat(customEvents) : stockEvents;
+
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
       }
 
       this.handler = handler;
-      this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover', 'mouseout');
+      this.dispatch = d3.dispatch.apply(this, eventTypes);
     }
 
     /**
@@ -227,14 +231,15 @@ define(function (require) {
      * @method highlightLegend
      */
     Dispatch.prototype.highlightLegend = function (element) {
-      var classList = d3.select(this).node().classList;
-      var liClass = d3.select(this).node().classList[1];
+      var label = this.getAttribute('data-label');
+
+      if (!label) return;
 
       d3.select(element)
         .select('.legend-ul')
         .selectAll('li.color')
         .filter(function (d, i) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
     };

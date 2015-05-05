@@ -16,9 +16,13 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          smoothLines: false,
           scale: 'linear',
           mode: 'stacked',
-          defaultYExtents: false
+          interpolate: 'linear',
+          defaultYExtents: false,
+          times: [],
+          addTimeMarker: false
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],

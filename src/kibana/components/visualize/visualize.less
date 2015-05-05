@@ -27,6 +27,19 @@ visualize {
       display: none;
     }
   }
+
+  .loading {
+    opacity: @loading-opacity;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    opacity: @loading-opacity;
+  }
 }
 
 .visualize-error {
@@ -71,7 +84,6 @@ visualize-spy {
     &-tab {
       margin: 0px auto;
       margin-top: -1px;
-
       border: 1px solid #ecf0f1;
       border-top: 0px;
       border-width: 0px 1px 1px 1px;
@@ -79,9 +91,13 @@ visualize-spy {
       border-bottom-right-radius: @border-radius-base;
       width: 50px;
       background: @body-bg;
+      text-align: center;
 
-    text-align: center;
+      &:hover {
+        background-color: @gray-lighter;
+      }
     }
+
 
     i {
       padding: 0 10px;

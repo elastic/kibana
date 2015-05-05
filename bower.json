@@ -50,7 +50,8 @@
     "lodash-deep": "spenceralger/lodash-deep#compat",
     "marked": "~0.3.2",
     "numeral": "~1.5.3",
-    "angularjs-nvd3-directives": "~0.0.7"
+    "angularjs-nvd3-directives": "~0.0.7",
+    "leaflet-draw": "~0.2.4"
   },
   "devDependencies": {}
 }

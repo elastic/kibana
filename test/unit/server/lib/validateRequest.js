@@ -1,8 +1,9 @@
 var _ = require('lodash');
 var root = require('requirefrom')('');
-var validateRequest = root('src/server/lib/validateRequest');
+var validateRequest = root('src/hapi/plugins/elasticsearch/lib/validate');
 var expect = require('expect.js');
-var config = root('src/server/config');
+var server =  { config: root('src/hapi/lib/config') };
+var config = server.config();
 
 describe('lib/isValid', function () {
 
@@ -29,10 +30,10 @@ describe('lib/isValid', function () {
 
     var pass = false;
     try {
-      validateRequest({
-        method: method,
-        url: path,
-        rawBody: body
+      validateRequest(server, {
+        method: method.toLowerCase(),
+        path: path,
+        payload: body
       });
       pass = true;
     } catch (e) {}
@@ -52,11 +53,11 @@ describe('lib/isValid', function () {
 
   describe('index management', function () {
     it('allows creating kibana index', function () {
-      send('/' + config.kibana.kibana_index, true);
+      send('/' + config.get('kibana.index'), true);
     });
 
     it('allows deleting the kibana index', function () {
-      del('/' + config.kibana.kibana_index, true);
+      del('/' + config.get('kibana.index'), true);
     });
 
     it('blocks creating a non-kibana index', function () {
@@ -70,24 +71,24 @@ describe('lib/isValid', function () {
 
   describe('doc management', function () {
     it('allows indexing to the kibana index', function () {
-      send('/' + config.kibana.kibana_index, true);
-      send('/' + config.kibana.kibana_index + '/index-patterns', true);
-      send('/' + config.kibana.kibana_index + '/index-patterns/pattern-id', true);
+      send('/' + config.get('kibana.index'), true);
+      send('/' + config.get('kibana.index') + '/index-patterns', true);
+      send('/' + config.get('kibana.index') + '/index-patterns/pattern-id', true);
     });
 
     it('allows deleting kibana documents', function () {
-      del('/' + config.kibana.kibana_index + '/index-patterns', true);
-      del('/' + config.kibana.kibana_index + '/index-patterns/pattern-id', true);
+      del('/' + config.get('kibana.index') + '/index-patterns', true);
+      del('/' + config.get('kibana.index') + '/index-patterns/pattern-id', true);
     });
   });
 
   describe('allows any destructive non-bulk requests against kibana index', function () {
     it('refresh', function () {
-      send('/' + config.kibana.kibana_index + '/_refresh', true);
+      send('/' + config.get('kibana.index') + '/_refresh', true);
     });
 
     it('delete', function () {
-      del('/' + config.kibana.kibana_index + '/pasta/lasagna', true);
+      del('/' + config.get('kibana.index') + '/pasta/lasagna', true);
     });
   });
 
@@ -99,10 +100,10 @@ describe('lib/isValid', function () {
       run('GET', '/_aliases', true);
       run('GET', '/_nodes/', true);
       run('HEAD', '/', true);
-      run('HEAD', '/' + config.kibana.kibana_index, true);
+      run('HEAD', '/' + config.get('kibana.index'), true);
       run('HEAD', '/other-index', true);
       run('GET', '/_cluster/health', true);
-      run('POST', '/' + config.kibana.kibana_index + '/__notRealIndex__/_validate/query?q=foo:bar', true);
+      run('POST', '/' + config.get('kibana.index') + '/__notRealIndex__/_validate/query?q=foo:bar', true);
       run('POST', '/_validate', true);
       run('POST', '/_search', true);
     });
@@ -111,26 +112,26 @@ describe('lib/isValid', function () {
   describe('bulk indexing', function () {
     it('valid', function () {
       send('/_bulk', [
-        { create: { _index: config.kibana.kibana_index, _type: 'index-pattern' } },
+        { create: { _index: config.get('kibana.index'), _type: 'index-pattern' } },
         { fields: [] },
-        { create: { _index: config.kibana.kibana_index, _type: 'vis' } },
+        { create: { _index: config.get('kibana.index'), _type: 'vis' } },
         { aggs: [] }
       ], true);
 
-      send('/' + config.kibana.kibana_index + '/_bulk', [
+      send('/' + config.get('kibana.index') + '/_bulk', [
         // implicit index
         { create: { _type: 'index-pattern' } },
         { fields: [] },
 
         // explicit index
-        { create: { _index: config.kibana.kibana_index, _type: 'vis' } },
+        { create: { _index: config.get('kibana.index'), _type: 'vis' } },
         { aggs: [] }
 
       ], true);
     });
 
     it('rejects bulks including even one other index', function () {
-      send('/' + config.kibana.kibana_index + '/_bulk', [
+      send('/' + config.get('kibana.index') + '/_bulk', [
         // implicit index
         { create: { _type: 'index-pattern' } },
         { fields: [] },
