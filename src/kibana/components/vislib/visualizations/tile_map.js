@@ -156,6 +156,7 @@ define(function (require) {
           map.on('zoomend', function () {
             if (!self.events.dispatch.mapZoomEnd) return;
             var mapInfo = {
+              autoPrecision: self._attr.autoPrecision,
               data: mapData,
               limit: config.get('visualization:tileMap:maxPrecision'),
               zoom: map.getZoom(),

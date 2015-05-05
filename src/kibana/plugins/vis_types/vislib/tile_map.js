@@ -34,6 +34,8 @@ define(function (require) {
           pushFilter(filter, false, indexPatternName);
         },
         mapZoomEnd: function (event) {
+          if (!event.autoPrecision) return;
+
           var agg = _.deepGet(event, 'data.properties.agg.geo');
           if (!agg) return;
 
