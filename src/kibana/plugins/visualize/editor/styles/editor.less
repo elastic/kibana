@@ -92,6 +92,14 @@
       color: @sidebar-header-color !important;
       background-color: @sidebar-bg !important;
     }
+
+    label {
+      .flex(2 0 0);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
   }
 
   .visualization-options {
@@ -151,14 +159,6 @@
         .flex(1, 1, auto);
         .ellipsis();
         font-weight: bold;
-      }
-
-      &-growing {
-        .flex(2 0 0);
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        margin-bottom: 0;
       }
 
       &-description {
