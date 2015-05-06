@@ -56,6 +56,7 @@ define(function (require) {
 
       // create a new maps array
       self.maps = [];
+      self.popups = [];
 
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
@@ -158,23 +159,28 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
+          var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
+
           // Add button to fit container to points
           var FitControl = L.Control.extend({
             options: {
               position: 'topleft'
             },
             onAdd: function (map) {
-              var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
-              $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-              $(container).on('click', function () {
+              $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
+              $(fitContainer).on('click', function () {
                 self.fitBounds(map, featureLayer);
               });
-              return container;
+              return fitContainer;
+            },
+            onRemove: function (map) {
+              $(fitContainer).off('click');
             }
           });
+          map.fitControl = new FitControl();
 
           if (mapData && mapData.features.length > 0) {
-            map.addControl(new FitControl());
+            map.addControl(map.fitControl);
           }
 
           self.maps.push(map);
@@ -517,6 +523,8 @@ define(function (require) {
       .on('mouseout', function (e) {
         layer.closePopup();
       });
+
+      this.popups.push({elem: popup, layer: layer});
     };
 
     /**
@@ -617,13 +625,18 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
-      if (this.maps && this.maps.length) {
+      if (this.popups) {
+        this.popups.forEach(function (popup) {
+          popup.elem.off('mouseover').off('mouseout');
+          popup.layer.unbindPopup(popup.elem);
+        });
+        this.popups = [];
+      }
+
+      if (this.maps) {
         this.maps.forEach(function (map) {
-          // Cleanup hanging DOM nodes
-          // TODO: The correct way to handle this is to ensure all listeners are properly removed
-          var children = $(map._container).find('*');
+          map.removeControl(map.fitControl);
           map.remove();
-          children.remove();
         });
       }
 
