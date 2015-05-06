@@ -122,11 +122,10 @@ define(function (require) {
     $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
-    $scope.$watchCollection('state.columns', function (columns) {
+    $scope.$watchCollection('state.columns', function () {
       $state.save();
     });
 
-    var metaFields = config.get('metaFields');
     filterManager.init($state);
 
     $scope.opts = {
@@ -184,7 +183,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('vis.aggs', function (aggs) {
+        $scope.$watch('vis.aggs', function () {
           var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
           if (buckets && buckets.length === 1) {
@@ -205,7 +204,7 @@ define(function (require) {
             NO_RESULTS: 'none' // no results came back
           };
 
-          function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
+          function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we are loading
             if (rows == null && oldRows == null) return status.LOADING;
 
@@ -296,7 +295,7 @@ define(function (require) {
         $scope.hits = 0;
         $scope.faliures = [];
         $scope.rows = [];
-        $scope.rows.fieldCounts = {};
+        $scope.fieldCounts = {};
       }
 
       if (!$scope.rows) flushResponseData();
@@ -348,7 +347,7 @@ define(function (require) {
         }
 
         var rows = $scope.rows;
-        var counts = rows.fieldCounts || (rows.fieldCounts = {});
+        var counts = $scope.fieldCounts || ($scope.fieldCounts = {});
         var indexPattern = $scope.searchSource.get('index');
 
         // merge the rows and the hits, use a new array to help watchers
@@ -358,7 +357,7 @@ define(function (require) {
           notify.event('resort rows', function () {
             rows.sort(sortFn);
             rows = $scope.rows = rows.slice(0, totalSize);
-            counts = rows.fieldCounts = {};
+            counts = $scope.fieldCounts = {};
           });
         }
 
@@ -437,16 +436,6 @@ define(function (require) {
       $window.scrollTo(0, 0);
     };
 
-    // TODO: Move to utility class
-    var addSlashes = function (str) {
-      if (!_.isString(str)) return str;
-      str = str.replace(/\\/g, '\\\\');
-      str = str.replace(/\'/g, '\\\'');
-      str = str.replace(/\"/g, '\\"');
-      str = str.replace(/\0/g, '\\0');
-      return str;
-    };
-
     var loadingVis;
     var setupVisualization = function () {
       // If we're not setting anything up we need to return an empty promise
@@ -478,7 +467,6 @@ define(function (require) {
         return Promise.resolve($scope.vis);
       }
 
-      // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
         type: 'histogram',
         params: {
