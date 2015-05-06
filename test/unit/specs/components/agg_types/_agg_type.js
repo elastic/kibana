@@ -117,6 +117,10 @@ define(function (require) {
         });
 
         describe('params', function () {
+          beforeEach(function () {
+            AggParams.reset();
+          });
+
           it('defaults to AggParams object with JSON param', function () {
             var aggType = new AggType({
               name: 'smart agg'
