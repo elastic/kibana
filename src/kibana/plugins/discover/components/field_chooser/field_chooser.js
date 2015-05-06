@@ -10,7 +10,7 @@ define(function (require) {
     var _ = require('lodash');
     var rison = require('utils/rison');
     var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
-    var Field = Private(require('components/index_patterns/_field'));
+    var FieldList = Private(require('components/index_patterns/_field_list'));
 
     return {
       restrict: 'E',
@@ -214,32 +214,28 @@ define(function (require) {
 
           if (!indexPattern || !hits || !fieldCounts) return;
 
-          var fieldNames = _.keys(fieldCounts);
-          var ipFieldNames = _.keys(indexPattern.fields.byName);
-          var unknownFieldNames = _.difference(fieldNames, ipFieldNames);
-          var unknownFields = unknownFieldNames.map(function (name) {
-            return new Field(indexPattern, {
-              name: name,
+          var fieldSpecs = indexPattern.fields.slice(0);
+
+          var fieldNamesInDocs = _.keys(fieldCounts);
+          var fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
+
+          _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
+          .forEach(function (unknownFieldName) {
+            fieldSpecs.push({
+              name: unknownFieldName,
               type: 'unknown'
             });
           });
 
-          return [].concat(indexPattern.fields.raw, unknownFields).map(function (f) {
-            // clone the field with Object.create so that
-            // we can edit it without leaking our changes
-            // and so non-enumerable props/getters are
-            // preserved
-            var field = Object.create(f);
-
+          var fields = new FieldList(indexPattern, fieldSpecs);
+          fields.forEach(function (field) {
             field.displayOrder = _.indexOf($scope.columns, field.name) + 1;
             field.display = !!field.displayOrder;
             field.rowCount = $scope.fieldCounts[field.name];
-
-            var prev = _.find(prevFields, { name: field.name });
-            field.details = _.get(prev, 'details');
-
-            return field;
+            field.details = _.get(prevFields, ['byName', field.name, 'details']);
           });
+
+          return fields;
         }
       }
     };
