@@ -42,7 +42,8 @@ define(function (require) {
       '<disc-field-chooser' +
       '  columns="columns"' +
       '  toggle="toggle"' +
-      '  data="data"' +
+      '  hits="hits"' +
+      '  field-counts="fieldCounts"' +
       '  filter="filter"' +
       '  index-pattern="indexPattern"' +
       '  index-pattern-list="indexPatternList"' +
@@ -58,12 +59,17 @@ define(function (require) {
         indexPatternList = [ 'b', 'a', 'c' ];
       });
 
-      var flatHits = _.each(hits, indexPattern.flattenHit);
+      var fieldCounts = _.transform(hits, function (counts, hit) {
+        _(indexPattern.flattenHit(hit)).keys().each(function (key) {
+          counts[key] = (counts[key] || 0) + 1;
+        });
+      }, {});
 
       init($elem, {
         columns: [],
         toggle: sinon.spy(),
-        data: flatHits,
+        hits: hits,
+        fieldCounts: fieldCounts,
         filter: sinon.spy(),
         indexPattern: indexPattern,
         indexPatternList: indexPatternList
@@ -130,7 +136,7 @@ define(function (require) {
         init($elem, {
           columns: [],
           toggle: sinon.spy(),
-          data: require('fixtures/hits'),
+          hits: require('fixtures/hits'),
           filter: sinon.spy(),
           indexPattern: indexPattern
         });

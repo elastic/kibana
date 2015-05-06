@@ -16,7 +16,7 @@ define(function (require) {
       restrict: 'E',
       scope: {
         columns: '=',
-        rows: '=',
+        hits: '=',
         fieldCounts: '=',
         state: '=',
         indexPattern: '=',
@@ -61,14 +61,14 @@ define(function (require) {
             var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
             var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
             var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
-            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+            var scritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
             var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
             return !field.display
               && matchFilter
               && isAnalyzed
               && isIndexed
-              && rowsScritpedOrMissing
+              && scritpedOrMissing
               && matchName
             ;
           },
@@ -96,7 +96,8 @@ define(function (require) {
 
         $scope.$watchMulti([
           '[]fieldCounts',
-          '[]columns'
+          '[]columns',
+          '[]hits'
         ], function () {
           var fields = getFields($scope.indexPattern, $scope.rows);
           var columns = $scope.columns;
@@ -192,7 +193,7 @@ define(function (require) {
         $scope.details = function (field, recompute) {
           if (_.isUndefined(field.details) || recompute) {
             field.details = fieldCalculator.getFieldValueCounts({
-              data: $scope.rows,
+              hits: $scope.hits,
               field: field,
               count: 5,
               grouped: false
