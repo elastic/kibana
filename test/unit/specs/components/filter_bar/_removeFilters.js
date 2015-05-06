@@ -1,6 +1,7 @@
 define(function (require) {
   return ['remove filters', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var MockState = require('fixtures/mock_state');
     var storeNames = {
       app: 'appState',
@@ -66,6 +67,21 @@ define(function (require) {
         expect(globalState.filters).to.have.length(3);
         queryFilter.removeFilter(filters[0]);
         expect(globalState.filters).to.have.length(2);
+      });
+
+      it('should fire the update and fetch events', function () {
+        var emitSpy = sinon.spy(queryFilter, 'emit');
+        appState.filters = filters;
+
+        // set up the watchers
+        $rootScope.$digest();
+        queryFilter.removeFilter(filters[0]);
+        // trigger the digest loop to fire the watchers
+        $rootScope.$digest();
+
+        expect(emitSpy.callCount).to.be(2);
+        expect(emitSpy.firstCall.args[0]).to.be('update');
+        expect(emitSpy.secondCall.args[0]).to.be('fetch');
       });
 
       it('should only remove matching instances', function () {

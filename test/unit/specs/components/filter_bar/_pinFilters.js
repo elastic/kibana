@@ -1,6 +1,7 @@
 define(function (require) {
   return ['pin filters', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var MockState = require('fixtures/mock_state');
     var storeNames = {
       app: 'appState',
@@ -101,6 +102,21 @@ define(function (require) {
         expect(appState.filters).to.contain(filter);
         expect(globalState.filters).to.have.length(1);
         expect(appState.filters).to.have.length(7);
+      });
+
+
+      it('should only fire the update event', function () {
+        var filter = appState.filters[1];
+        var emitSpy = sinon.spy(queryFilter, 'emit');
+
+        // set up the watchers
+        $rootScope.$digest();
+        queryFilter.pinFilter(filter);
+        // trigger the digest loop to fire the watchers
+        $rootScope.$digest();
+
+        expect(emitSpy.callCount).to.be(1);
+        expect(emitSpy.firstCall.args[0]).to.be('update');
       });
     });
 

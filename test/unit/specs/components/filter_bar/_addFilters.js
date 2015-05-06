@@ -1,6 +1,7 @@
 define(function (require) {
   return ['add filters', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var MockState = require('fixtures/mock_state');
     var storeNames = {
       app: 'appState',
@@ -60,16 +61,30 @@ define(function (require) {
         expect(globalState.filters.length).to.be(0);
       });
 
+      it('should add filters to globalState', function () {
+        queryFilter.addFilters(filters, true);
+        expect(appState.filters.length).to.be(0);
+        expect(globalState.filters.length).to.be(3);
+      });
+
       it('should accept a single filter', function () {
         queryFilter.addFilters(filters[0]);
         expect(appState.filters.length).to.be(1);
         expect(globalState.filters.length).to.be(0);
       });
 
-      it('should add filters to globalState', function () {
-        queryFilter.addFilters(filters, true);
-        expect(appState.filters.length).to.be(0);
-        expect(globalState.filters.length).to.be(3);
+      it('should fire the update and fetch events', function () {
+        var emitSpy = sinon.spy(queryFilter, 'emit');
+
+        // set up the watchers
+        $rootScope.$digest();
+        queryFilter.addFilters(filters);
+        // trigger the digest loop to fire the watchers
+        $rootScope.$digest();
+
+        expect(emitSpy.callCount).to.be(2);
+        expect(emitSpy.firstCall.args[0]).to.be('update');
+        expect(emitSpy.secondCall.args[0]).to.be('fetch');
       });
     });
 
