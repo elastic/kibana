@@ -38,7 +38,7 @@ define(function (require) {
 
       if (source.history) {
         source.history.push(this);
-        source.history = _.last(source.history, 20);
+        source.history = _.last(source.history, 1);
       }
     };
 
