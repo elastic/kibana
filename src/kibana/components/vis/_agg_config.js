@@ -255,7 +255,7 @@ define(function (require) {
     };
 
     AggConfig.prototype.getKey = function (bucket, key) {
-      return this.type.getKey(bucket, key);
+      return this.type.getKey(bucket, key, this);
     };
 
     AggConfig.prototype.makeLabel = function () {
