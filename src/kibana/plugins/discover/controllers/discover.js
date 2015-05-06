@@ -347,7 +347,6 @@ define(function (require) {
         }
 
         var rows = $scope.rows;
-        var counts = $scope.fieldCounts || ($scope.fieldCounts = {});
         var indexPattern = $scope.searchSource.get('index');
 
         // merge the rows and the hits, use a new array to help watchers
@@ -357,11 +356,12 @@ define(function (require) {
           notify.event('resort rows', function () {
             rows.sort(sortFn);
             rows = $scope.rows = rows.slice(0, totalSize);
-            counts = $scope.fieldCounts = {};
+            $scope.fieldCounts = {};
           });
         }
 
         notify.event('flatten hit and count fields', function () {
+          var counts = $scope.fieldCounts;
           $scope.rows.forEach(function (hit) {
             // skip this work if we have already done it and we are NOT sorting.
             // ---

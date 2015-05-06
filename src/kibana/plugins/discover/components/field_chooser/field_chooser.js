@@ -17,6 +17,7 @@ define(function (require) {
       scope: {
         columns: '=',
         data: '=',
+        fieldCounts: '=',
         state: '=',
         indexPattern: '=',
         indexPatternList: '=',
