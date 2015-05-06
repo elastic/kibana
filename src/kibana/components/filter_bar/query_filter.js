@@ -302,7 +302,7 @@ define(function (require) {
           });
 
           // make sure change wasn't only a state move
-          if (doFetch) {
+          if (doFetch && newFilters.length === oldFilters.length) {
             if (onlyStateChanged(newFilters, oldFilters)) doFetch = false;
           }
 
