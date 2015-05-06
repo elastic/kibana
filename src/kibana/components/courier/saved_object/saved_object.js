@@ -241,6 +241,7 @@ define(function (require) {
             return self.id;
           });
         };
+
         return docSource.doCreate(source)
         .then(finish)
         .catch(function (err) {
