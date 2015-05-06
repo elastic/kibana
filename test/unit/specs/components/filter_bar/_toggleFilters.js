@@ -1,6 +1,7 @@
 define(function (require) {
   return ['toggle filters', function () {
     var _ = require('lodash');
+    var sinon = require('test_utils/auto_release_sinon');
     var MockState = require('fixtures/mock_state');
     var storeNames = {
       app: 'appState',
@@ -72,6 +73,21 @@ define(function (require) {
 
         queryFilter.toggleFilter(filters[1]);
         expect(globalState.filters[1].meta.disabled).to.be(true);
+      });
+
+      it('should fire the update and fetch events', function () {
+        var emitSpy = sinon.spy(queryFilter, 'emit');
+        appState.filters = filters;
+
+        // set up the watchers
+        $rootScope.$digest();
+        queryFilter.toggleFilter(filters[1]);
+        // trigger the digest loop to fire the watchers
+        $rootScope.$digest();
+
+        expect(emitSpy.callCount).to.be(2);
+        expect(emitSpy.firstCall.args[0]).to.be('update');
+        expect(emitSpy.secondCall.args[0]).to.be('fetch');
       });
 
       it('should always enable the filter', function () {
