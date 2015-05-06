@@ -5,7 +5,6 @@ define(function (require) {
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
     var dataLabel = require('components/vislib/lib/_data_label');
     var AggConfigResult = require('components/vis/_agg_config_result');
-    var color = Private(require('components/vislib/components/color/color'));
     var getLabels = Private(require('components/vislib/components/labels/labels'));
 
     require('css!components/vislib/styles/main');
@@ -21,9 +20,9 @@ define(function (require) {
      * @param color {Function} Color function
      * @param _attr {Object|*} Reference to Vis options
      */
-    function Legend(vis, data) {
+    function Legend(vis, data, color) {
       if (!(this instanceof Legend)) {
-        return new Legend(vis, data);
+        return new Legend(vis, data, color);
       }
 
       this.events = new Dispatch();
@@ -31,7 +30,7 @@ define(function (require) {
       this.el = vis.el;
       this.data = this._getData(data);
       this.labels = this._getLabels(data, vis._attr.type);
-      this.color = color(this.labels);
+      this.color = color;
 
       this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
@@ -70,27 +69,26 @@ define(function (require) {
      * Filter out zero injected objects
      */
     Legend.prototype._filterZeroInjectedValues = function (d) {
-      return d.aggConfigResult !== undefined;
+      return (d.aggConfigResult !== undefined);
     };
 
     Legend.prototype._modifyPointSeriesLabels = function (data, labels) {
-      var self = this;
-
       return labels.map(function (label) {
-        var values = data.map(function (datum) {
-          if (datum.series) {
-            return datum.series.map(function (d) {
-              if (d.label !== label) return;
-              return d.values.map(self._value);
-            })
-            .filter(self._filter)
-            .reduce(self._reduce);
-          }
-        })
-        .reduce(self._reduce)
-        .filter(self._filterZeroInjectedValues);
+        var values = [];
         var prevAggConfigResult;
         var aggConfigResult;
+
+        data.forEach(function (datum) {
+          datum.series.forEach(function (d) {
+            if (d.label === label) {
+              d.values.forEach(function (e) {
+                if (e.aggConfigResult) {
+                  values.push(e);
+                }
+              });
+            }
+          });
+        });
 
         if (values.length && values[0].aggConfigResult) {
           prevAggConfigResult = values[0].aggConfigResult.$parent;
@@ -110,27 +108,33 @@ define(function (require) {
      * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
      * for the pie chart.
      */
-    Legend.prototype._modifyPieLabels = function (data) {
-      var labels = [];
+    Legend.prototype._modifyPieLabels = function (data, labels) {
+      return labels.map(function (label) {
+        var values = [];
+        var aggConfigResult;
 
-      data.forEach(function (chart) {
-        chart.slices.children.map(function recurse(obj) {
-          if (obj.children) {
-            recurse(obj.children).reverse().forEach(function (d) { labels.unshift(d); });
-          }
+        data.forEach(function (datum) {
+          datum.slices.children.forEach(function traverse(d) {
+            if (d.children) d.children.forEach(traverse);
+            if (d.name === label) values.push(d);
+          });
+        });
 
-          return obj;
-        })
-        .reverse()
-        .forEach(function (d) { labels.unshift(d); });
+        if (values.length && values[0].aggConfigResult) {
+          aggConfigResult = values[0].aggConfigResult;
+          if (aggConfigResult.$parent) aggConfigResult.$parent = undefined;
+        }
+
+        return {
+          label: label,
+          aggConfigResult: aggConfigResult,
+          values: values
+        };
       });
-
-      labels.map(function (d) { d.aggConfigResult.$parent = undefined; });
-      return _.unique(labels, function (d) { return d.name; });
     };
 
     Legend.prototype._getDataLabels = function (data, type, labels) {
-      if (type === 'pie') return this._modifyPieLabels(data);
+      if (type === 'pie') return this._modifyPieLabels(data, labels);
       return this._modifyPointSeriesLabels(data, labels);
     };
 
