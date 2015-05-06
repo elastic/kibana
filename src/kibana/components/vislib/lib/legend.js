@@ -30,7 +30,7 @@ define(function (require) {
       this.vis = vis;
       this.el = vis.el;
       this.data = this._getData(data);
-      this.labels = getLabels(data, vis._attr.type);
+      this.labels = this._getLabels(data, vis._attr.type);
       this.color = color(this.labels);
 
       this._attr = _.defaults(vis._attr || {}, {
@@ -43,87 +43,95 @@ define(function (require) {
       });
     }
 
-    Legend.prototype._getLabels = function (data) {
-      if (data.series) {
-        if (data.series.length === 1 && getLabels(data)[0] === '') {
-          return [(this.get('yAxisLabel'))];
-        } else {
-          return getLabels(data);
-        }
-      } else if (this.type === 'slices') {
-        return this.pieNames();
+    Legend.prototype._getLabels = function (data, type) {
+      if (data.series && data.series.length === 1 && getLabels(data)[0] === '') {
+        return [data.yAxisLabel];
       }
+      return getLabels(data, type);
     };
 
     Legend.prototype._getData = function (data) {
-      return data.columns || data.rows || [data.series] || [data.slices];
+      return data.columns || data.rows || [data];
+    };
+
+    Legend.prototype._filter = function (item) {
+      if (item !== undefined) return item;
+    };
+
+    Legend.prototype._reduce = function (a, b) {
+      return a.concat(b);
+    };
+
+    Legend.prototype._value = function (d) {
+      return d;
+    };
+
+    /**
+     * Filter out zero injected objects
+     */
+    Legend.prototype._filterZeroInjectedValues = function (d) {
+      return d.aggConfigResult !== undefined;
+    };
+
+    Legend.prototype._modifyPointSeriesLabels = function (data, labels) {
+      var self = this;
+
+      return labels.map(function (label) {
+        var values = data.map(function (datum) {
+          if (datum.series) {
+            return datum.series.map(function (d) {
+              if (d.label !== label) return;
+              return d.values.map(self._value);
+            })
+            .filter(self._filter)
+            .reduce(self._reduce);
+          }
+        })
+        .reduce(self._reduce)
+        .filter(self._filterZeroInjectedValues);
+        var prevAggConfigResult;
+        var aggConfigResult;
+
+        if (values.length && values[0].aggConfigResult) {
+          prevAggConfigResult = values[0].aggConfigResult.$parent;
+          aggConfigResult = new AggConfigResult(prevAggConfigResult.aggConfig, null,
+            prevAggConfigResult.value, prevAggConfigResult.key);
+        }
+
+        return {
+          label: label,
+          aggConfigResult: aggConfigResult,
+          values: values
+        };
+      });
     };
 
     /**
      * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
      * for the pie chart.
      */
-    Legend.prototype._transformPieData = function (arr) {
-      var data = [];
-      var recurse = function (obj) {
-        if (obj.children) {
-          recurse(obj.children).reverse().forEach(function (d) { data.unshift(d); });
-        }
-        return obj;
-      };
+    Legend.prototype._modifyPieLabels = function (data) {
+      var labels = [];
 
-      arr.forEach(function (chart) {
-        chart.slices.children.map(recurse)
-        .reverse().forEach(function (d) { data.unshift(d); });
+      data.forEach(function (chart) {
+        chart.slices.children.map(function recurse(obj) {
+          if (obj.children) {
+            recurse(obj.children).reverse().forEach(function (d) { labels.unshift(d); });
+          }
+
+          return obj;
+        })
+        .reverse()
+        .forEach(function (d) { labels.unshift(d); });
       });
 
-      return _.unique(data, function (d) { return d.name; });
+      labels.map(function (d) { d.aggConfigResult.$parent = undefined; });
+      return _.unique(labels, function (d) { return d.name; });
     };
 
-    /**
-     * Filter out zero injected objects
-     */
-    Legend.prototype._filterZeroInjectedValues = function (arr) {
-      return arr.filter(function (d) {
-        return d.aggConfigResult !== undefined;
-      });
-    };
-
-    /**
-     * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
-     * for the point series charts.
-     */
-    Legend.prototype._transformSeriesData = function (arr) {
-      var data = [];
-      var self = this;
-
-      arr.forEach(function (chart) {
-        chart.series.forEach(function (obj, i) {
-          var currentObj = data[i];
-          if (!currentObj) data.push(obj);
-
-          // Copies first aggConfigResults object to data object.
-          if (obj.values && obj.values.length) {
-            var values = self._filterZeroInjectedValues(obj.values);
-            var aggConfigResult;
-
-            if (values.length && values[0].aggConfigResult) {
-              aggConfigResult = values[0].aggConfigResult.$parent;
-            }
-
-            if (aggConfigResult) {
-              obj.aggConfigResult = new AggConfigResult(aggConfigResult.aggConfig, null,
-                  aggConfigResult.value, aggConfigResult.key);
-            }
-          }
-          // Joins all values arrays that share a common label
-          if (currentObj && currentObj.label === obj.label) {
-            currentObj.values = currentObj.values.concat(obj.values);
-          }
-        });
-      });
-
-      return data;
+    Legend.prototype._getDataLabels = function (data, type, labels) {
+      if (type === 'pie') return this._modifyPieLabels(data);
+      return this._modifyPointSeriesLabels(data, labels);
     };
 
     /**
@@ -169,7 +177,6 @@ define(function (require) {
         .each(self._addIdentifier)
         .html(function (d, i) {
           var label = d.label ? d.label : d.name;
-          if (!label) { label = self.data.get('yAxisLabel'); }
           return '<i class="fa fa-circle dots" style="color:' + args.color(label) + '"></i>' + label;
         });
     };
@@ -196,7 +203,7 @@ define(function (require) {
       var self = this;
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
-      var items = this.dataLabels;
+      var items = this._getDataLabels(this.data, this._attr.type, this.labels);
       this._header(legendDiv, this);
       this._list(legendDiv, items, this);
 
