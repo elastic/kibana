@@ -34,8 +34,7 @@ define(function (require) {
         label: table.title(),
         length: 0,
         min: 0,
-        max: 0,
-        metricType : agg.metric._opts.type
+        max: 0
       };
 
       if (agg.metric._opts.params && agg.metric._opts.params.field) {

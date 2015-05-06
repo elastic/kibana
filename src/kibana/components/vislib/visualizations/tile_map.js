@@ -73,7 +73,9 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          var mapData = data.geoJson;
+          // add leaflet latLngs to properties for tooltip
+          var mapData = self.addLatLng(data.geoJson);
+
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
@@ -744,7 +746,7 @@ define(function (require) {
      *
      * @method getBounds
      * @param mapData {geoJson Object}
-     * @return {Leaflet}
+     * @return bounds {Leaflet Object}
      */
     TileMap.prototype.getBounds = function (mapData) {
       var bounds = L.geoJson(mapData).getBounds();

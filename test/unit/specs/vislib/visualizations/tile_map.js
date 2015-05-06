@@ -208,17 +208,29 @@ define(function (require) {
           });
         });
 
-        it('should return a min number', function () {
+        it('should return the min of all features.properties.count', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
-            expect(_.isFinite(chart.getMinMax(data).min)).to.be(true);
+            var min = _.chain(data.geoJson.features)
+            .map(function (n) {
+              return n.properties.count;
+            })
+            .min()
+            .value();
+            expect(chart.getMinMax(data).min).to.be(min);
           });
         });
 
-        it('should return a max number', function () {
+        it('should return the max of all features.properties.count', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
-            expect(_.isFinite(chart.getMinMax(data).max)).to.be(true);
+            var max = _.chain(data.geoJson.features)
+            .map(function (n) {
+              return n.properties.count;
+            })
+            .max()
+            .value();
+            expect(chart.getMinMax(data).max).to.be(max);
           });
         });
       });
@@ -239,6 +251,48 @@ define(function (require) {
             expect(chart.dataToHeatArray(mapData, max).length).to.be(mapData.features.length);
           });
         });
+
+        it('should return an array item with lat, lng, metric for each feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var max = mapData.properties.allmax;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var lat = feature.geometry.coordinates[1];
+            var lng = feature.geometry.coordinates[0];
+            var intensity = feature.properties.count;
+            var array = chart.dataToHeatArray(mapData, max);
+            console.log(array);
+            console.log(feature);
+            console.log(i, array[i][0], array[i][1], array[i][2]);
+            console.log(i, lat, lng, intensity);
+            expect(array[i][0]).to.be(lat);
+            expect(array[i][1]).to.be(lng);
+            expect(array[i][2]).to.be(intensity);
+          });
+        });
+
+        it('should return an array item with lat, lng, normalized metric for each feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            chart._attr.heatNormalizeData = true;
+            var mapData = chart.chartData.geoJson;
+            var max = mapData.properties.allmax;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var lat = feature.geometry.coordinates[1];
+            var lng = feature.geometry.coordinates[0];
+            var intensity = parseInt(feature.properties.count / max * 100);
+            var array = chart.dataToHeatArray(mapData, max);
+            console.log(array);
+            console.log(feature);
+            console.log(i, array[i][0], array[i][1], array[i][2]);
+            console.log(i, lat, lng, intensity);
+            expect(array[i][0]).to.be(lat);
+            expect(array[i][1]).to.be(lng);
+            expect(array[i][2]).to.be(intensity);
+          });
+        });
+
       });
 
       describe('applyShadingStyle method', function () {
@@ -253,6 +307,129 @@ define(function (require) {
           });
         });
       });
+
+      describe('getBounds method', function () {
+        it('should return bounds object that contains every point in mapData', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var containsPoint = [];
+            var bounds = chart.getBounds(mapData);
+            for (var i = 0; i < mapData.features.length; i++) {
+              var pt = [mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]];
+              containsPoint.push(bounds.contains(pt));
+            }
+            containsPoint = _.compact(containsPoint);
+            expect(containsPoint.length).to.be(mapData.features.length);
+          });
+        });
+      });
+
+      describe('showTooltip method', function () {
+        it('should create a .leaflet-popup-kibana div for the tooltip', function () {
+          vis.handler.charts.forEach(function (chart) {
+            chart.tooltipFormatter = function (str) {
+              return str;
+            };
+            var map = chart.maps[0];
+            var mapData = chart.chartData.geoJson;
+            var layerIds = _.keys(map._layers);
+            var id = layerIds[_.random(1, layerIds.length - 1)]; // layer 0 is tileLayer
+            map._layers[id].fire('mouseover');
+            expect($(vis.el).find('.leaflet-popup-kibana').length).to.be(1);
+          });
+        });
+      });
+
+      describe('tooltipProximity method', function () {
+        it('should return true if feature is close enough to event latlng to display tooltip', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
+            var zoom = _.random(1, 12);
+            var map = chart.maps[0];
+            expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(true);
+          });
+        });
+
+        it('should return false if feature is not close enough to event latlng to display tooltip', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var point = L.latLng(90, -180);
+            var zoom = _.random(1, 12);
+            var feature = mapData.features[i];
+            var map = chart.maps[0];
+            expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(false);
+          });
+        });
+      });
+
+      describe('nearestFeature method', function () {
+        it('should return an object', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
+            expect(_.isObject(chart.nearestFeature(point, mapData))).to.be(true);
+          });
+        });
+
+        it('should return a geoJson feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
+            expect(chart.nearestFeature(point, mapData).type).to.be('Feature');
+          });
+        });
+
+        it('should return the geoJson feature with same latlng as point', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var mapData = chart.chartData.geoJson;
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            var point = feature.properties.latLng;
+            expect(chart.nearestFeature(point, mapData)).to.be(feature);
+          });
+        });
+      });
+
+      describe('addLatLng method', function () {
+        it('should add object to properties of each feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var map = chart.maps[0];
+            var mapData = chart.addLatLng(chart.chartData.geoJson);
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            expect(_.isObject(feature.properties.latLng)).to.be(true);
+          });
+        });
+
+        it('should add latLng with lat to properties of each feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var map = chart.maps[0];
+            var mapData = chart.addLatLng(chart.chartData.geoJson);
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            expect(_.isFinite(feature.properties.latLng.lat)).to.be(true);
+          });
+        });
+
+        it('should add latLng with lng to properties of each feature', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var map = chart.maps[0];
+            var mapData = chart.addLatLng(chart.chartData.geoJson);
+            var i = _.random(0, mapData.features.length - 1);
+            var feature = mapData.features[i];
+            expect(_.isFinite(feature.properties.latLng.lng)).to.be(true);
+          });
+        });
+      });
+
     });
 
   });
