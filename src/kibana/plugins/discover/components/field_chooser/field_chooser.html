@@ -25,7 +25,7 @@
   </div>
   <ul
     bindonce class="list-unstyled discover-selected-fields" >
-    <discover-field ng-repeat="field in fields.raw|filter:{display:true}">
+    <discover-field ng-repeat="field in fields|filter:{display:true}">
     </discover-field>
   </ul>
 

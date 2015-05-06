@@ -16,7 +16,7 @@ define(function (require) {
       restrict: 'E',
       scope: {
         columns: '=',
-        data: '=',
+        rows: '=',
         fieldCounts: '=',
         state: '=',
         indexPattern: '=',
@@ -61,7 +61,7 @@ define(function (require) {
             var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
             var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
             var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
-            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.inData);
+            var rowsScritpedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
             var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
             return !field.display
@@ -94,66 +94,41 @@ define(function (require) {
           _.toggleInOut($scope.columns, fieldName);
         };
 
-        var calculateFields = function (newFields) {
-          // Find the top N most popular fields
-          $scope.popularFields = _(newFields)
-          .where(function (field) {
-            return field.count > 0;
+        $scope.$watchMulti([
+          '[]fieldCounts',
+          '[]columns'
+        ], function () {
+          var fields = getFields($scope.indexPattern, $scope.rows);
+          var columns = $scope.columns;
+          if (!fields || !columns) return;
+
+          $scope.fields = fields;
+
+          // group the fields into popular and up-popular lists
+          _(fields)
+          .sortBy(function (field) {
+            return (field.count || 0) * -1;
           })
-          .sortBy('count')
-          .reverse()
-          .slice(0, config.get('fields:popularLimit'))
-          .sortBy('name')
-          .value();
+          .groupBy(function (field) {
+            if (field.display) return 'selected';
+            return field.count > 0 ? 'popular' : 'unpopular';
+          })
+          .tap(function (groups) {
+            groups.selected = _.sortBy(groups.selected || [], 'displayOrder');
 
-          // Find the top N most popular fields
-          $scope.unpopularFields = _.sortBy(_.sortBy(newFields, 'count')
-            .reverse()
-            .slice($scope.popularFields.length), 'name');
+            groups.popular = groups.popular || [];
+            groups.unpopular = groups.unpopular || [];
 
-          $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
-          // push undefined so the user can clear the filter
-          $scope.fieldTypes.unshift(undefined);
-        };
-
-        $scope.$watch('fields', calculateFields);
-
-        $scope.$watch('indexPattern', function (indexPattern) {
-          $scope.fields = new IndexedArray ({
-            index: ['name'],
-            initialSet: _($scope.indexPattern.fields)
-              .sortBy('name')
-              .transform(function (fields, field) {
-                // clone the field with Object.create so that its getters
-                // and non-enumerable props are preserved
-                var clone = Object.create(field);
-                clone.display = _.contains($scope.columns, field.name);
-                fields.push(clone);
-              }, [])
-              .value()
+            // move excess popular fields to un-popular list
+            var extras = groups.popular.splice(config.get('fields:popularLimit'));
+            groups.unpopular = extras.concat(groups.unpopular);
+          })
+          .each(function (group, name) {
+            $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
           });
 
-        });
-
-        $scope.$watchCollection('columns', function (columns, oldColumns) {
-          _.each($scope.fields, function (field) {
-            field.display = _.contains(columns, field.name) ? true : false;
-          });
-        });
-
-        $scope.$watch('data', function () {
-
-          // Get all fields current in data set
-          var currentFields = _.chain($scope.data).map(function (d) {
-            return _.keys($scope.indexPattern.flattenHit(d));
-          }).flatten().unique().sort().value();
-
-          _.each($scope.fields, function (field) {
-            field.inData = _.contains(currentFields, field.name) ? true : false;
-            if (field.details) {
-              $scope.details(field, true);
-            }
-          });
+          // include undefined so the user can clear the filter
+          $scope.fieldTypes = _.union([undefined], _.pluck(fields, 'type'));
         });
 
         $scope.increaseFieldCounter = function (fieldName) {
@@ -217,7 +192,7 @@ define(function (require) {
         $scope.details = function (field, recompute) {
           if (_.isUndefined(field.details) || recompute) {
             field.details = fieldCalculator.getFieldValueCounts({
-              data: $scope.data,
+              data: $scope.rows,
               field: field,
               count: 5,
               grouped: false
@@ -230,6 +205,42 @@ define(function (require) {
             delete field.details;
           }
         };
+
+        function getFields(indexPattern, rows) {
+          if (!indexPattern || !rows || !$scope.fieldCounts) return;
+
+          var ipFields = getIpFields(indexPattern);
+          var rowFieldNames = _.keys($scope.fieldCounts);
+          var unknownFieldNames = _.difference(rowFieldNames, ipFields.fieldNames);
+
+          var unknownFields = unknownFieldNames.map(function (name) {
+            return new Field(indexPattern, {
+              name: name,
+              type: 'unknown'
+            });
+          });
+
+          return ipFields.concat(unknownFields).map(decorateField);
+        }
+
+        function getIpFields(indexPattern) {
+          var ipFields = indexPattern.fields.map(function (field) {
+            // clone the field with Object.create so that its getters
+            // and non-enumerable props are preserved
+            return Object.create(field);
+          });
+
+          ipFields.fieldNames = _.pluck(ipFields, 'name');
+
+          return ipFields;
+        }
+
+        function decorateField(field) {
+          field.displayOrder = _.indexOf($scope.columns, field.name) + 1;
+          field.display = !!field.displayOrder;
+          field.rowCount = $scope.fieldCounts[field.name];
+          return field;
+        }
 
       }
     };
