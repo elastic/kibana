@@ -416,7 +416,7 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
-      var isLegend = $('div.tilemap-legend').length;
+      var isLegend = $(this.chartEl).find('div.tilemap-legend').length;
 
       if (isLegend) return; // Don't add Legend if already one
 
