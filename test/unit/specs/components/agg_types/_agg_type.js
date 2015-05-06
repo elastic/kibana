@@ -102,7 +102,7 @@ define(function (require) {
             });
             aggConfig = vis.aggs.byTypeName.count[0];
 
-            expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('number'));
+            expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('string'));
           });
 
           it('can be overridden via config', function () {

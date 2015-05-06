@@ -133,7 +133,7 @@ define(function (require) {
      */
     AggType.prototype.getFormat = function (agg) {
       var field = agg.field();
-      return field ? field.format : fieldFormats.getDefaultInstance('number');
+      return field ? field.format : fieldFormats.getDefaultInstance('string');
     };
 
     return AggType;

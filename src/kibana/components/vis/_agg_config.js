@@ -272,7 +272,7 @@ define(function (require) {
       var format = field && field.format;
       var strFormat = fieldFormats.getDefaultInstance('string');
 
-      if (this.type && this.type.getFormat) {
+      if (this.type) {
         format = this.type.getFormat(this) || format;
       }
 
