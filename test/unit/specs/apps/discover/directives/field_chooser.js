@@ -169,72 +169,65 @@ define(function (require) {
 
     describe('details processing', function () {
       var field;
+      function getField() { return _.find($scope.fields, { name: 'bytes' }); }
 
       beforeEach(function () {
-        field = indexPattern.fields.byName.bytes;
+        field = getField();
       });
 
-      afterEach(function () {
-        delete field.details;
-      });
-
-      it('should have a details function', function (done) {
+      it('should have a details function', function () {
         expect($scope.details).to.be.a(Function);
-        done();
       });
 
-      it('should increase the field popularity when called', function (done) {
+      it('should increase the field popularity when called', function () {
         indexPattern.popularizeField = sinon.spy();
         $scope.details(field);
         expect(indexPattern.popularizeField.called).to.be(true);
-        done();
       });
 
-      it('should append a details object to the field', function (done) {
+      it('should append a details object to the field', function () {
         $scope.details(field);
         expect(field.details).to.not.be(undefined);
-        done();
       });
 
-      it('should delete the field details if they already exist', function (done) {
+      it('should delete the field details if they already exist', function () {
         $scope.details(field);
         expect(field.details).to.not.be(undefined);
         $scope.details(field);
         expect(field.details).to.be(undefined);
-        done();
       });
 
-      it('... unless recompute is true', function (done) {
+      it('... unless recompute is true', function () {
         $scope.details(field);
         expect(field.details).to.not.be(undefined);
         $scope.details(field, true);
         expect(field.details).to.not.be(undefined);
-        done();
       });
 
-      it('should create buckets with formatted and raw values', function (done) {
+      it('should create buckets with formatted and raw values', function () {
         $scope.details(field);
         expect(field.details.buckets).to.not.be(undefined);
         expect(field.details.buckets[0].value).to.be(40.141592);
         expect(field.details.buckets[0].display).to.be('40.142');
-        done();
       });
 
 
-      it('should recalculate the details on open fields if the data changes', function () {
-        $scope.details(field);
-        sinon.stub($scope, 'details');
-        $scope.data = [];
+      it('should recalculate the details on open fields if the hits change', function () {
+        $scope.hits = [
+          { _source: { bytes: 1024 } }
+        ];
         $scope.$apply();
-        expect($scope.details.called).to.be(true);
-        $scope.details.restore();
 
-        // close the field, make sure details isnt called again
+        field = getField();
         $scope.details(field);
-        sinon.stub($scope, 'details');
-        $scope.data = ['foo'];
+        expect(getField().details.total).to.be(1);
+
+        $scope.hits = [
+          { _source: { notbytes: 1024 } }
+        ];
         $scope.$apply();
-        expect($scope.details.called).to.be(false);
+        field = getField();
+        expect(field.details).to.not.have.property('total');
       });
     });
   });

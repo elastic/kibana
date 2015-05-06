@@ -99,9 +99,8 @@ define(function (require) {
           '[]columns',
           '[]hits'
         ], function () {
-          var fields = getFields($scope.indexPattern, $scope.rows);
-          var columns = $scope.columns;
-          if (!fields || !columns) return;
+          var fields = getFields();
+          if (!fields || !$scope.columns) return;
 
           $scope.fields = fields;
 
@@ -207,13 +206,17 @@ define(function (require) {
           }
         };
 
-        function getFields(indexPattern, rows) {
-          if (!indexPattern || !rows || !$scope.fieldCounts) return;
+        function getFields() {
+          var prevFields = $scope.fields;
+          var indexPattern = $scope.indexPattern;
+          var hits = $scope.hits;
+          var fieldCounts = $scope.fieldCounts;
 
-          var ipFields = getIpFields(indexPattern);
-          var rowFieldNames = _.keys($scope.fieldCounts);
-          var unknownFieldNames = _.difference(rowFieldNames, ipFields.fieldNames);
+          if (!indexPattern || !hits || !fieldCounts) return;
 
+          var fieldNames = _.keys(fieldCounts);
+          var ipFieldNames = _.keys(indexPattern.fields.byName);
+          var unknownFieldNames = _.difference(fieldNames, ipFieldNames);
           var unknownFields = unknownFieldNames.map(function (name) {
             return new Field(indexPattern, {
               name: name,
@@ -221,28 +224,23 @@ define(function (require) {
             });
           });
 
-          return ipFields.concat(unknownFields).map(decorateField);
-        }
+          return [].concat(indexPattern.fields.raw, unknownFields).map(function (f) {
+            // clone the field with Object.create so that
+            // we can edit it without leaking our changes
+            // and so non-enumerable props/getters are
+            // preserved
+            var field = Object.create(f);
 
-        function getIpFields(indexPattern) {
-          var ipFields = indexPattern.fields.map(function (field) {
-            // clone the field with Object.create so that its getters
-            // and non-enumerable props are preserved
-            return Object.create(field);
+            field.displayOrder = _.indexOf($scope.columns, field.name) + 1;
+            field.display = !!field.displayOrder;
+            field.rowCount = $scope.fieldCounts[field.name];
+
+            var prev = _.find(prevFields, { name: field.name });
+            field.details = _.get(prev, 'details');
+
+            return field;
           });
-
-          ipFields.fieldNames = _.pluck(ipFields, 'name');
-
-          return ipFields;
         }
-
-        function decorateField(field) {
-          field.displayOrder = _.indexOf($scope.columns, field.name) + 1;
-          field.display = !!field.displayOrder;
-          field.rowCount = $scope.fieldCounts[field.name];
-          return field;
-        }
-
       }
     };
   });
