@@ -10,10 +10,8 @@ define(function (require) {
      */
 
     return function (vis) {
-      var data = new Data(vis.data, vis._attr);
-
       return new Handler(vis, {
-        legend: new Legend(vis, vis.data, data.getPieColorFunc()),
+        legend: new Legend(vis, vis.data),
         chartTitle: new ChartTitle(vis.el)
       });
     };

@@ -6,6 +6,7 @@ define(function (require) {
     var dataLabel = require('components/vislib/lib/_data_label');
     var AggConfigResult = require('components/vis/_agg_config_result');
     var getLabels = Private(require('components/vislib/components/labels/labels'));
+    var color = Private(require('components/vislib/components/color/color'));
 
     require('css!components/vislib/styles/main');
 
@@ -20,9 +21,9 @@ define(function (require) {
      * @param color {Function} Color function
      * @param _attr {Object|*} Reference to Vis options
      */
-    function Legend(vis, data, color) {
+    function Legend(vis, data) {
       if (!(this instanceof Legend)) {
-        return new Legend(vis, data, color);
+        return new Legend(vis, data);
       }
 
       this.events = new Dispatch();
@@ -30,7 +31,7 @@ define(function (require) {
       this.el = vis.el;
       this.data = this._getData(data);
       this.labels = this._getLabels(data, vis._attr.type);
-      this.color = color;
+      this.color = color(this.labels);
 
       this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
@@ -51,25 +52,6 @@ define(function (require) {
 
     Legend.prototype._getData = function (data) {
       return data.columns || data.rows || [data];
-    };
-
-    Legend.prototype._filter = function (item) {
-      if (item !== undefined) return item;
-    };
-
-    Legend.prototype._reduce = function (a, b) {
-      return a.concat(b);
-    };
-
-    Legend.prototype._value = function (d) {
-      return d;
-    };
-
-    /**
-     * Filter out zero injected objects
-     */
-    Legend.prototype._filterZeroInjectedValues = function (d) {
-      return (d.aggConfigResult !== undefined);
     };
 
     Legend.prototype._modifyPointSeriesLabels = function (data, labels) {
@@ -133,7 +115,7 @@ define(function (require) {
       });
     };
 
-    Legend.prototype._getDataLabels = function (data, type, labels) {
+    Legend.prototype._getDataLabels = function (data, labels, type) {
       if (type === 'pie') return this._modifyPieLabels(data, labels);
       return this._modifyPointSeriesLabels(data, labels);
     };
@@ -207,7 +189,7 @@ define(function (require) {
       var self = this;
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
-      var items = this._getDataLabels(this.data, this._attr.type, this.labels);
+      var items = this._getDataLabels(this.data, this.labels, this._attr.type);
       this._header(legendDiv, this);
       this._list(legendDiv, items, this);
 
