@@ -1,19 +1,17 @@
 define(function (require) {
   var app = require('modules').get('apps/discover');
-  var html = require('text!plugins/discover/components/field_chooser/field_chooser.html');
-  var _ = require('lodash');
-  var rison = require('utils/rison');
-  var qs = require('utils/query_string');
-  var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
-  var IndexedArray = require('utils/indexed_array/index');
-
 
   require('directives/css_truncate');
   require('directives/field_name');
   require('filters/unique');
   require('plugins/discover/components/field_chooser/discover_field');
 
-  app.directive('discFieldChooser', function ($location, globalState, config) {
+  app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
+    var _ = require('lodash');
+    var rison = require('utils/rison');
+    var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
+    var Field = Private(require('components/index_patterns/_field'));
+
     return {
       restrict: 'E',
       scope: {
@@ -24,8 +22,8 @@ define(function (require) {
         indexPatternList: '=',
         updateFilterInQuery: '=filter'
       },
-      template: html,
-      controller: function ($scope, $route) {
+      template: require('text!plugins/discover/components/field_chooser/field_chooser.html'),
+      link: function ($scope) {
         $scope.setIndexPattern = function (indexPattern) {
           $scope.state.index = indexPattern;
           $scope.state.save();
@@ -86,7 +84,7 @@ define(function (require) {
         // set the initial values to the defaults
         filter.reset();
 
-        $scope.$watchCollection('filter.vals', function (newFieldFilters) {
+        $scope.$watchCollection('filter.vals', function () {
           filter.active = filter.getActive();
         });
 

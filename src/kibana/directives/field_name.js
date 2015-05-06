@@ -1,7 +1,5 @@
 define(function (require) {
   var module = require('modules').get('kibana');
-  var $ = require('jquery');
-  var _ = require('lodash');
   require('filters/short_dots');
 
   module.directive('fieldName', function ($compile, $rootScope, $filter) {
@@ -12,7 +10,7 @@ define(function (require) {
         'fieldName': '=',
         'fieldType': '='
       },
-      link: function ($scope, $el, attrs) {
+      link: function ($scope, $el) {
 
         var typeIcon = function (fieldType) {
           switch (fieldType) {
