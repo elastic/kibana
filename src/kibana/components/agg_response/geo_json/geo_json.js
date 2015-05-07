@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
 
     var readRows = require('components/agg_response/geo_json/_read_rows');
+    var tooltipFormatter = Private(require('components/agg_response/geo_json/_tooltip_formatter'));
+
     function findCol(table, name) {
       return _.findIndex(table.columns, function (col) {
         return col.aggConfig.schema.name === name;
@@ -25,6 +27,7 @@ define(function (require) {
       });
 
       var chart = {};
+      chart.tooltipFormatter = tooltipFormatter;
       var geoJson = chart.geoJson = {
         type: 'FeatureCollection',
         features: []

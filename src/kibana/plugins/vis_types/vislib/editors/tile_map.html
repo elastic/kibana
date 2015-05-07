@@ -1,7 +1,12 @@
 <!-- vis type specific options -->
 <div class="form-group">
   <label>Map type</label>
-    <select name="agg" class="form-control" ng-model="vis.params.mapType" ng-init="vis.params.mapType || vis.type.params.mapTypes[0]" ng-options="mapType as mapType for mapType in vis.type.params.mapTypes">
+    <select name="agg"
+    class="form-control"
+    ng-model="vis.params.mapType"
+    ng-init="vis.params.mapType || vis.type.params.mapTypes[0]"
+    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes"
+    >
   </select>
 </div>
 
@@ -90,7 +95,7 @@
       </div>
     </div>
   </div>
-  <div>
+  <div class="form-group">
       <span class="hintbox-label" ng-click="heatNormalizeData = !heatNormalizeData">
         <label>
           <input type="checkbox" value="{{heatNormalizeData}}" ng-model="vis.params.heatNormalizeData" name="heatNormalizeData" ng-checked="vis.params.heatNormalizeData">
@@ -100,10 +105,16 @@
       </span>
       <div class="hintbox" ng-show="heatNormalizeData">Default is checked to show heatmap intensity of bucket count as a percent of max count. Uncheck to show heatmap intensity simply as bucket count.</div>
   </div>
+
+  <div class="form-group">
+    <label>
+      <input type="checkbox" ng-model="vis.params.addTooltip">
+      Show Tooltip
+    </label>
+  </div>
 </div>
 
-<div class="vis-option-item">
-  </br>
+<div class="vis-option-item form-group">
   <label>
     <input type="checkbox" value="{{isDesaturated}}" ng-model="vis.params.isDesaturated" name="isDesaturated" ng-checked="vis.params.isDesaturated">
     Desaturate map tiles

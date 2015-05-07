@@ -19,7 +19,8 @@ define(function (require) {
           heatMinOpacity: 0.1,
           heatRadius: 25,
           heatBlur: 15,
-          heatNormalizeData: true
+          heatNormalizeData: true,
+          addTooltip: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')

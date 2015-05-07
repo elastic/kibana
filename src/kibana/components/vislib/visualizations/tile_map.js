@@ -183,37 +183,6 @@ define(function (require) {
             map.addControl(new FitControl());
           }
 
-          // add tooltips
-          if (self._attr.addLeafletPopup && self.tooltipFormatter) {
-            map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
-              'leading': true,
-              'trailing': false
-            }));
-            map.on('mouseout', function () {
-              map.closePopup();
-            });
-          }
-
-          function mouseMoveLocation(e) {
-            map.closePopup();
-
-            if (!mapData.features.length) {
-              return;
-            }
-
-            var latlng = e.latlng;
-
-            // find nearest feature to event latlng
-            var feature = self.nearestFeature(latlng, mapData);
-
-            var zoom = map.getZoom();
-
-            // show tooltip if close enough to event latlng
-            if (self.tooltipProximity(latlng, zoom, feature, map)) {
-              self.showTooltip(map, feature);
-            }
-          }
-
           self.maps.push(map);
         });
       };
@@ -601,6 +570,46 @@ define(function (require) {
       };
 
       var featureLayer = L.heatLayer(points, options);
+
+      if (self._attr.addTooltip && self.tooltipFormatter && !self._attr.disableTooltips) {
+        map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
+          'leading': true,
+          'trailing': false
+        }));
+        map.on('mouseout', function (e) {
+          map.closePopup();
+        });
+        map.on('mousedown', function () {
+          self._attr.disableTooltips = true;
+          map.closePopup();
+        });
+        map.on('mouseup', function () {
+          self._attr.disableTooltips = false;
+        });
+      }
+
+      function mouseMoveLocation(e) {
+        map.closePopup();
+
+        // unhighlight all svgs
+        d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
+
+        if (!mapData.features.length || self._attr.disableTooltips) {
+          return;
+        }
+
+        var latlng = e.latlng;
+
+        // find nearest feature to event latlng
+        var feature = self.nearestFeature(latlng, mapData);
+
+        var zoom = map.getZoom();
+
+        // show tooltip if close enough to event latlng
+        if (self.tooltipProximity(latlng, zoom, feature, map)) {
+          self.showTooltip(map, feature, latlng);
+        }
+      }
 
       return featureLayer;
     };
