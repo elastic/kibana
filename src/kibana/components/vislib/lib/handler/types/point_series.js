@@ -45,8 +45,8 @@ define(function (require) {
           alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
             el   : vis.el,
-            yMin : (isUserDefinedYAxis) ? vis._attr.yAxis.min : data.getYMin(),
-            yMax : (isUserDefinedYAxis) ? vis._attr.yAxis.max : data.getYMax(),
+            yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
+            yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
             _attr: vis._attr
           })
         });
