@@ -162,7 +162,7 @@
           <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
             <h2 class="title">{{chart.niceName}}</h2>
             <h1 class="average">
-              <span ng-repeat="average in chart.average"><span ng-if="$index">, </span>{{average}}</span>
+              <span ng-repeat="average in chart.average track by $index"><span ng-if="$index">, </span>{{average}}</span>
             </h1>
             <nvd3 options="ui.chartOptions" data="chart.data"></nvd3>
           </div>
