@@ -106,21 +106,27 @@ define(function (require) {
     });
 
     describe('Custom event handlers', function () {
-      it('should attach whatever gets passed on vis.on() to dispatch', function (done) {
-        var vis;
-        var chart;
+      var vis;
+
+      beforeEach(function () {
         module('AreaChartFactory');
+      });
+
+      beforeEach(function () {
         inject(function (Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
-          vis.on('someEvent', _.noop);
+          vis.on('click', _.noop);
           vis.render(data);
+        });
+      });
 
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.events.dispatch.someEvent).to.be.a(Function);
-          });
+      afterEach(function () {
+        destroyVis(vis);
+      });
 
-          destroyVis(vis);
-          done();
+      it('should attach whatever gets passed on vis.on() to dispatch', function () {
+        vis.handler.charts.forEach(function (chart) {
+          expect(chart.events.dispatch.click).to.be.a(Function);
         });
       });
     });

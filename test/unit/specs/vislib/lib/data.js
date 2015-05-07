@@ -217,6 +217,7 @@ define(function (require) {
       };
       var DataFactory;
       var data;
+      var slices;
 
       beforeEach(function () {
         module('DataFactory');
@@ -226,12 +227,11 @@ define(function (require) {
         inject(function (Private) {
           DataFactory = Private(require('components/vislib/lib/data'));
           data = new DataFactory(pieData, {});
-          data._removeZeroSlices(pieData.slices);
+          slices = data._removeZeroSlices(pieData.slices);
         });
       });
 
       it('should remove zero values', function () {
-        var slices = data.data.slices;
         expect(slices.children.length).to.be(2);
       });
     });

@@ -64,14 +64,13 @@ define(function (require) {
           datum.series.forEach(function (d) {
             if (d.label === label) {
               d.values.forEach(function (e) {
-                if (e.aggConfigResult) {
-                  values.push(e);
-                }
+                values.push(e);
               });
             }
           });
         });
 
+        values = values.filter(function (d) { return d.aggConfigResult; }); // Remove zero injected values
         if (values.length && values[0].aggConfigResult) {
           prevAggConfigResult = values[0].aggConfigResult.$parent;
           aggConfigResult = new AggConfigResult(prevAggConfigResult.aggConfig, null,
