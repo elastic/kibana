@@ -161,26 +161,27 @@ define(function (require) {
 
           var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
 
-          // Add button to fit container to points
-          var FitControl = L.Control.extend({
-            options: {
-              position: 'topleft'
-            },
-            onAdd: function (map) {
-              $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-              $(fitContainer).on('click', function () {
-                self.fitBounds(map, featureLayer);
-              });
-              return fitContainer;
-            },
-            onRemove: function (map) {
-              $(fitContainer).off('click');
-            }
-          });
-          map.fitControl = new FitControl();
-
           if (mapData && mapData.features.length > 0) {
+            // Add button to fit container to points
+            var FitControl = L.Control.extend({
+              options: {
+                position: 'topleft'
+              },
+              onAdd: function (map) {
+                $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
+                $(fitContainer).on('click', function () {
+                  self.fitBounds(map, featureLayer);
+                });
+                return fitContainer;
+              },
+              onRemove: function (map) {
+                $(fitContainer).off('click');
+              }
+            });
+            map.fitControl = new FitControl();
             map.addControl(map.fitControl);
+          } else {
+            map.fitControl = undefined;
           }
 
           self.maps.push(map);
@@ -635,11 +636,12 @@ define(function (require) {
 
       if (this.maps) {
         this.maps.forEach(function (map) {
-          map.removeControl(map.fitControl);
+          if (map.fitControl) {
+            map.fitControl.removeFrom(map);
+          }
           map.remove();
         });
       }
-
     };
 
     return TileMap;
