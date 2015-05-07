@@ -42,24 +42,28 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
     }
 
     function formatNumber(num, which) {
-      var format;
-      if(which === 'byte') {
-        format = '0.0b';
-      } else if( which === 'time') {
-        return moment(num).format('HH:MM:SS');
-      } else {
-        format = '0.00';
+      var format = '0.00';
+      var postfix = '';
+      switch(which) {
+        case 'time':
+          return moment(num).format('HH:MM:SS');
+        case 'byte':
+          format += 'b';
+          break;
+        case 'ms':
+          postfix = 'ms'
+          break;
       }
-      return numeral(num).format(format);
+      return numeral(num).format(format) + postfix;
     }
     function numberType(key) {
       var byteMetrics = ['heapTotal', 'heapUsed', 'rss'];
-      var timeMetrics = ['delay', 'responseTimeAvg'];
-      var preciseMetric = ['requests', 'load', 'responseTimeMax'];
+      var msMetrics = ['delay', 'responseTimeAvg', 'responseTimeMax'];
+      var preciseMetric = ['requests', 'load'];
       if( byteMetrics.indexOf(key) > -1 ) {
         return 'byte';
-      } else if (timeMetrics.indexOf(key) > -1 ) {
-        return 'time';
+      } else if (msMetrics.indexOf(key) > -1 ) {
+        return 'ms';
       } else {
         return 'precise';
       }
@@ -103,8 +107,11 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
               type: 'lineChart',
               height: 200,
               showLegend: false,
-              showYAxis: false,
               showXAxis: false,
+              showYAxis: false,
+              useInteractiveGuideline: true,
+              tooltips: true,
+              pointSize: 0,
               color: ['#444', '#777', '#aaa'],
               margin: {
                 top: 10,
@@ -119,12 +126,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                 tickFormat: function(d) { return formatNumber(d); },
               },
               y: function(d) { return d.y; },
-              x: function(d) { return d.x; },
-              tooltip: {
-                contentGenerator: function(obj) {
-                  debugger;
-                }
-              }
+              x: function(d) { return d.x; }
             }
           }
         };
@@ -174,7 +176,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                   return formatNumber(uglySum / data.values.length, numberType(name));
                 });
 
-                return { data: metricList, options: _.clone($scope.ui.chartOptions), average: average, niceName: niceName(name) };
+                return { data: metricList, average: average, niceName: niceName(name) };
               });
 
               // give the plugins their proper name so CSS classes can be properply applied
@@ -183,9 +185,8 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                 return plugin;
               });
 
-
               // go ahead and get another status in 5 seconds
-              // setTimeout(getAppStatus, 5000);
+              setTimeout(getAppStatus, 5000);
             })
             .error(function() {
               alert('Something went terribly wrong while making the request!!!');

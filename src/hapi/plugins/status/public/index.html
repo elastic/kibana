@@ -45,6 +45,20 @@
         background: linear-gradient(to right, #da1e04 0%,#ff730f 100%);
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#da1e04', endColorstr='#ff730f',GradientType=1 );
       }
+      .system_status_wrapper.system_status_warning {
+        border-color: #fdee00;
+      }
+      .system_status_wrapper.system_status_warning .title {
+        border-color: #fdee00;
+        background: #fdee00;
+        background: -moz-linear-gradient(left, #fdee00 0%, #c16f00 100%);
+        background: -webkit-gradient(linear, left top, right top, color-stop(0%,#fdee00), color-stop(100%,#c16f00));
+        background: -webkit-linear-gradient(left, #fdee00 0%,#c16f00 100%);
+        background: -o-linear-gradient(left, #fdee00 0%,#c16f00 100%);
+        background: -ms-linear-gradient(left, #fdee00 0%,#c16f00 100%);
+        background: linear-gradient(to right, #fdee00 0%,#c16f00 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fdee00', endColorstr='#c16f00',GradientType=1 );
+      }
       #plugin_table {
         margin: 0 15px 15px 15px;
       }
@@ -99,7 +113,7 @@
         padding-top: 20px;
       }
       .status_chart_wrapper .average {
-        font-size: 56px;
+        font-size: 51px;
         line-height: 48px;
         margin-top: 0;
         font-weight: bold;
@@ -148,9 +162,9 @@
           <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
             <h2 class="title">{{chart.niceName}}</h2>
             <h1 class="average">
-              <span ng-repeat="average in chart.average">{{average}}</span>
+              <span ng-repeat="average in chart.average"><span ng-if="$index">, </span>{{average}}</span>
             </h1>
-            <nvd3 options="chart.options" data="chart.data"></nvd3>
+            <nvd3 options="ui.chartOptions" data="chart.data"></nvd3>
           </div>
           <div class="clearfix"></div>
         </div>
