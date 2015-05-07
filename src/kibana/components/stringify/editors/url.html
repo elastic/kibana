@@ -92,30 +92,27 @@
       <thead>
         <tr>
           <th>Value</th>
-          <th>Url/Label Template</th>
+          <th>Url Template</th>
+          <th>Label Template</th>
           <th>Result</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td rowspan="2">1234</td>
+          <td>1234</td>
           <td>http://company.net/profiles?user_id={&shy;{value}&shy;}</td>
-          <td rowspan="2">
+          <td>User #{&shy;{value}&shy;}</td>
+          <td>
             <a href="http://company.net/profiles?user_id=1234">User #1234</a>
           </td>
         </tr>
         <tr>
-          <td>User #{&shy;{value}&shy;}</td>
-        </tr>
-        <tr>
-          <td rowspan="2">/assets/main.css</td>
+          <td>/assets/main.css</td>
           <td>http://site.com{&shy;{rawValue}&shy;}</td>
-          <td rowspan="2">
+          <td>View Asset</td>
+          <td>
             <a href="http://site.com/assets/main.css">View Asset</a>
           </td>
-        </tr>
-        <tr>
-          <td>View Asset</td>
         </tr>
       </tbody>
     </table>
