@@ -1,0 +1,127 @@
+<form ng-submit="editor.save()" name="form">
+  <div ng-if="editor.creating" class="form-group">
+    <label>Name</label>
+    <input
+      ng-model="editor.field.name"
+      required
+      placeholder="New Scripted Field"
+      input-focus
+      class="form-control">
+  </div>
+  <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.field.name]" class="hintbox">
+    <p>
+      <i class="fa fa-danger text-danger"></i>
+      <strong>Mapping Conflict:</strong>
+      You already have a field with the name {{ editor.field.name }}. Naming your scripted
+      field with the same name means you won't be able to query both fields at the same time.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <label>Type</label>
+    <input
+      ng-model="editor.field.type"
+      readonly
+      class="form-control">
+  </div>
+
+  <div class="form-group">
+    <span class="pull-right text-warning hintbox-label" ng-click="editor.showFormatHelp = !editor.showFormatHelp">
+      <i class="fa fa-warning"></i> Warning
+    </span>
+
+    <label>Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
+
+    <div class="hintbox" ng-if="editor.showFormatHelp">
+      <h4 class="hintbox-heading">
+        <i class="fa fa-warning text-warning"></i> Format Warning
+      </h4>
+
+      <p>
+        Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
+      </p>
+    </div>
+
+    <select
+      ng-model="editor.selectedFormatId"
+      ng-options="format.id as format.title for format in editor.fieldFormatTypes"
+      class="form-control">
+    </select>
+    <fieldset
+      field-format-editor
+      ng-if="editor.selectedFormatId"
+      field="editor.field"
+      format-params="editor.formatParams">
+    </fieldset>
+  </div>
+
+  <div class="form-group">
+    <label for="editor.field.count">Popularity</label>
+    <div class="input-group">
+
+      <input
+        ng-model="editor.field.count"
+        type="number"
+        class="form-control">
+
+      <span class="input-group-btn">
+        <button
+          type="button"
+          ng-click="editor.field.count = editor.field.count + 1"
+          aria-label="Plus"
+          class="btn btn-default">
+          <i aria-hidden="true" class="fa fa-plus"></i>
+        </button>
+        <button
+          type="button"
+          ng-click="editor.field.count = editor.field.count - 1"
+          aria-label="Minus"
+          class="btn btn-default">
+          <i aria-hidden="true" class="fa fa-minus"></i>
+        </button>
+      </span>
+    </div>
+  </div>
+
+  <div ng-if="editor.field.scripted">
+    <div class="form-group">
+      <label>Script</label>
+      <textarea required class="form-control text-monospace" ng-model="editor.field.script"></textarea>
+    </div>
+
+    <div class="form-group">
+      <div ng-bind-html="editor.scriptingWarning" class="hintbox"></div>
+    </div>
+
+    <div class="form-group">
+      <div ng-bind-html="editor.scriptingInfo" class="hintbox"></div>
+    </div>
+
+  </div>
+
+  <div class="form-group">
+    <button
+      type="button"
+      ng-click="editor.cancel()"
+      aria-label="Cancel"
+      class="btn btn-primary">
+      Cancel
+    </button>
+    <button
+      type="button"
+      ng-if="editor.field.scripted && !editor.creating"
+      confirm-click="editor.delete()"
+      confirmation="Are you sure want to delete '{{ editor.field.name }}'? This action is irreversible!"
+      aria-label="Delete"
+      class="btn btn-danger">
+      Delete Field
+    </button>
+    <button
+      ng-disabled="form.$invalid"
+      type="submit"
+      aria-label="{{ editor.creating ? 'Create' : 'Update' }} Field"
+      class="btn btn-success">
+      {{ editor.creating ? 'Create' : 'Update' }} Field
+    </button>
+  </div>
+</form>

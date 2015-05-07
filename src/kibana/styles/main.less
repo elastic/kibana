@@ -79,6 +79,15 @@ button {
   color: @brand-danger;
 }
 
+.text-monospace {
+  font-family: @font-family-monospace;
+}
+
+code {
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
 // alias for alert types - allows class="fa fa-{{alertType}}"
 .fa-success:before { content: @fa-var-check; }
 .fa-danger:before { content: @fa-var-exclamation-circle; }
@@ -464,10 +473,29 @@ style-compile {
 
 @import '../components/filter_bar/filter_bar.less';
 
+
+.cell-hover {
+  background-color: white;
+  &-show {
+    // so that the cell doesn't change size on hover
+    visibility: hidden;
+  }
+}
 .cell-hover:hover {
   background-color: @gray-lighter;
+
+  .cell-hover-show {
+    visibility: visible;
+  }
 }
 
 mark, .mark {
   background-color: rgba(252, 229, 113, 1);
+}
+
+fieldset {
+  margin: @form-group-margin-bottom;
+  padding: @form-group-margin-bottom;
+  border: 1px solid @input-border;
+  border-radius: @input-border-radius;
 }

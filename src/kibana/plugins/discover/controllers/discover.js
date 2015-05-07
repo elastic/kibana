@@ -3,7 +3,6 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var ConfigTemplate = require('utils/config_template');
-  var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
   var rison = require('utils/rison');
 
@@ -69,7 +68,8 @@ define(function (require) {
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
+    var filterManager = Private(require('components/filter_manager/filter_manager'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -115,7 +115,7 @@ define(function (require) {
         columns: savedSearch.columns || ['_source'],
         index: $scope.indexPattern.id,
         interval: 'auto',
-        filters: _.cloneDeep($scope.searchSource.get('filter'))
+        filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
       };
     }
 
@@ -127,7 +127,6 @@ define(function (require) {
     });
 
     var metaFields = config.get('metaFields');
-    filterManager.init($state);
 
     $scope.opts = {
       // number of records to fetch, then paginate through
@@ -165,13 +164,15 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        filterBarWatchFilters($scope)
-        .on('update', function () {
+        // update data source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
-        })
-        .on('fetch', $scope.fetch);
+        });
+
+        // fetch data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
@@ -348,38 +349,37 @@ define(function (require) {
         }
 
         var rows = $scope.rows;
-        var counts = rows.fieldCounts;
+        var counts = rows.fieldCounts || (rows.fieldCounts = {});
+        var indexPattern = $scope.searchSource.get('index');
 
         // merge the rows and the hits, use a new array to help watchers
         rows = $scope.rows = rows.concat(resp.hits.hits);
-        rows.fieldCounts = counts;
 
         if (sortFn) {
-          rows.sort(sortFn);
-          rows = $scope.rows = rows.slice(0, totalSize);
-          counts = rows.fieldCounts = {};
+          notify.event('resort rows', function () {
+            rows.sort(sortFn);
+            rows = $scope.rows = rows.slice(0, totalSize);
+            counts = rows.fieldCounts = {};
+          });
         }
 
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it and we are NOT sorting.
-          // ---
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response
-          if (hit.$$_formatted && !sortFn) return;
+        notify.event('flatten hit and count fields', function () {
+          $scope.rows.forEach(function (hit) {
+            // skip this work if we have already done it and we are NOT sorting.
+            // ---
+            // when we are sorting results, we need to redo the counts each time because the
+            // "top 500" may change with each response
+            if (hit.$$_counted && !sortFn) return;
+            hit.$$_counted = true;
 
-          var formatAndCount = function (value, name) {
-            // add up the counts for each field name
-            counts[name] = counts[name] ? counts[name] + 1 : 1;
-
-            var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-            var field = $scope.indexPattern.fields.byName[name];
-            var formatter = (field && field.format) ? field.format : defaultFormat;
-
-            return formatter.convert(value);
-          };
-
-          var flatHit = $scope.indexPattern.flattenHit(hit);
-          hit.$$_formatted = _.mapValues(flatHit, formatAndCount);
+            var fields = _.keys(indexPattern.flattenHit(hit));
+            var n = fields.length;
+            var field;
+            while (field = fields[--n]) {
+              if (counts[field]) counts[field] += 1;
+              else counts[field] = 1;
+            }
+          });
         });
 
       }));
@@ -425,7 +425,7 @@ define(function (require) {
         fields: {'*': {}},
         fragment_size: 2147483647 // Limit of an integer.
       })
-      .set('filter', $state.filters || []);
+      .set('filter', queryFilter.getFilters());
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms

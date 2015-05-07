@@ -130,7 +130,7 @@ define(function (require) {
 
     describe('JSON mode', function () {
       it('has pretty JSON', function () {
-        expect($scope.hit_json).to.equal(angular.toJson(hit, true));
+        expect($scope.hitJson).to.equal(angular.toJson(hit, true));
       });
 
       it('should have a global ACE object', function () {
@@ -141,10 +141,10 @@ define(function (require) {
         expect($elem.find('div[id="json-ace"]').length).to.be(1);
       });
 
-      it('should contain the same code as hit_json', function () {
+      it('should contain the same code as hitJson', function () {
         var editor = window.ace.edit($elem.find('div[id="json-ace"]')[0]);
         var code = editor.getSession().getValue();
-        expect(code).to.equal($scope.hit_json);
+        expect(code).to.equal($scope.hitJson);
       });
     });
   });

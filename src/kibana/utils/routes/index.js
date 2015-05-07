@@ -7,7 +7,7 @@ define(function (require) {
 
   function RouteManager() {
     var when = [];
-    var additions = [];
+    var defaults = [];
     var otherwise;
 
     return {
@@ -17,8 +17,8 @@ define(function (require) {
       },
       // before attaching the routes to the routeProvider, test the RE
       // against the .when() path and add/override the resolves if there is a match
-      addResolves: function (RE, additionalResolves) {
-        additions.push([RE, additionalResolves]);
+      defaults: function (RE, def) {
+        defaults.push([RE, def]);
         return this;
       },
       otherwise: function (route) {
@@ -30,10 +30,10 @@ define(function (require) {
           var path = args[0];
           var route = args[1] || {};
 
-          // merge in any additions
-          additions.forEach(function (addition) {
-            if (addition[0].test(path)) {
-              route.resolve = _.assign(route.resolve || {}, addition[1]);
+          // merge in any defaults
+          defaults.forEach(function (args) {
+            if (args[0].test(path)) {
+              _.merge(route, args[1]);
             }
           });
 

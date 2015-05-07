@@ -26,7 +26,7 @@ define(function (require) {
         var filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
         mapRange(filter).then(function (result) {
           expect(result).to.have.property('key', 'bytes');
-          expect(result).to.have.property('value', '1024 to 2048');
+          expect(result).to.have.property('value', '1,024 to 2,048');
           done();
         });
         $rootScope.$apply();
@@ -36,7 +36,7 @@ define(function (require) {
         var filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
         mapRange(filter).then(function (result) {
           expect(result).to.have.property('key', 'bytes');
-          expect(result).to.have.property('value', '1024 to 2048');
+          expect(result).to.have.property('value', '1,024 to 2,048');
           done();
         });
         $rootScope.$apply();

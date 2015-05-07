@@ -4,17 +4,13 @@ define(function (require) {
     var _ = require('lodash');
 
     var flattenHit;
-    var indexPattern;
     var config;
     var hit;
     var flat;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      flattenHit = Private(require('components/index_patterns/_flatten_hit')).uncached;
-      config = $injector.get('config');
-
-      indexPattern = {
+      var indexPattern = {
         fields: {
           byName: {
             'message': { type: 'string' },
@@ -33,6 +29,9 @@ define(function (require) {
           }
         }
       };
+
+      flattenHit = Private(require('components/index_patterns/_flatten_hit'))(indexPattern).uncached;
+      config = $injector.get('config');
 
       hit = {
         _source: {
@@ -60,7 +59,7 @@ define(function (require) {
         }
       };
 
-      flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(hit);
     }));
 
     it('flattens keys as far down as the mapping goes', function () {
@@ -109,14 +108,14 @@ define(function (require) {
     it('ignores fields that start with an _ and are not in the metaFields', function () {
       config.set('metaFields', ['_metaKey']);
       hit.fields._notMetaKey = [100];
-      flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(hit);
       expect(flat).to.not.have.property('_notMetaKey');
     });
 
     it('includes underscore-prefixed keys that are in the metaFields', function () {
       config.set('metaFields', ['_metaKey']);
       hit.fields._metaKey = [100];
-      flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(hit);
       expect(flat).to.have.property('_metaKey', 100);
     });
 
@@ -124,18 +123,18 @@ define(function (require) {
       hit.fields._metaKey = [100];
 
       config.set('metaFields', ['_metaKey']);
-      flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(hit);
       expect(flat).to.have.property('_metaKey', 100);
 
       config.set('metaFields', []);
-      flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(hit);
       expect(flat).to.not.have.property('_metaKey');
     });
 
     it('handles fields that are not arrays, like _timestamp', function () {
       hit.fields._metaKey = 20000;
       config.set('metaFields', ['_metaKey']);
-      flat = flattenHit(indexPattern, hit);
+      flat = flattenHit(hit);
       expect(flat).to.have.property('_metaKey', 20000);
     });
   });
