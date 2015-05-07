@@ -98,10 +98,19 @@
       .status_chart_wrapper:nth-child(n + 4) {
         padding-top: 20px;
       }
+      .status_chart_wrapper .average {
+        font-size: 56px;
+        line-height: 48px;
+        margin-top: 0;
+        font-weight: bold;
+      }
       .status_chart_wrapper .title {
-        margin: 0 0 15px 0;
+        margin: 0 0 5px 0;
         text-transform: capitalize;
 
+      }
+      .nv-axis.nv-x .tick line {
+        display: none;
       }
     </style>
   </head>
@@ -138,15 +147,10 @@
         <div id="chart_cont" class="row">
           <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
             <h2 class="title">{{chart.niceName}}</h2>
-            <h1 class="average">{{chart.average}}</h1>
-            <nvd3-sparkline-chart
-              id="{{key}}-chart"
-              data="chart.data"
-              x="ui.chartOptions.getX"
-              y="ui.chartOptions.getY"
-              xtickformat="ui.chartOptions.formatX">
-              <svg class="status_chart"></svg>
-            </nvd3-sparkline-chart>
+            <h1 class="average">
+              <span ng-repeat="average in chart.average">{{average}}</span>
+            </h1>
+            <nvd3 options="chart.options" data="chart.data"></nvd3>
           </div>
           <div class="clearfix"></div>
         </div>

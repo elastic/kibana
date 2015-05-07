@@ -1,4 +1,4 @@
-define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_directives'],
+define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
   function (angular, $, _, moment) {
 
     // Make sure we don't have to deal with statuses by hand
@@ -46,7 +46,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_direct
       if(which === 'byte') {
         format = '0.0b';
       } else if( which === 'time') {
-        format = '00:00:00';
+        return moment(num).format('HH:MM:SS');
       } else {
         format = '0.00';
       }
@@ -66,7 +66,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_direct
     }
 
     // The Kibana App
-    angular.module('KibanaStatusApp', ['nvd3ChartDirectives'])
+    angular.module('KibanaStatusApp', ['nvd3'])
       .controller('StatusPage', ['$scope', '$http', function($scope, $http) {
         // the object representing all of the elements the ui touches
         $scope.ui = {
@@ -99,24 +99,33 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_direct
           plugins: [],
           chartAverages: [],
           chartOptions: {
-            getX: function(d) { return d[0]; },
-            getY: function(d) {
-              if(d) {
-                if(_.isArray(d[1])) {
-                  return d[1][0];
+            chart: {
+              type: 'lineChart',
+              height: 200,
+              showLegend: false,
+              showYAxis: false,
+              showXAxis: false,
+              color: ['#444', '#777', '#aaa'],
+              margin: {
+                top: 10,
+                left: 0,
+                right: 0,
+                bottom: 20
+              },
+              xAxis: {
+                tickFormat: function(d) { return formatNumber(d, 'time'); }
+              },
+              yAxis: {
+                tickFormat: function(d) { return formatNumber(d); },
+              },
+              y: function(d) { return d.y; },
+              x: function(d) { return d.x; },
+              tooltip: {
+                contentGenerator: function(obj) {
+                  debugger;
                 }
               }
-              return d[1];
-            },
-            formatX: function(d) {
-              return moment(d).format('hh:mm:ss');
-            },
-            formatY: function(d) {
-              // TODO
-              // switch between different metric value types
             }
-          },
-          nvd3Config: {
           }
         };
 
@@ -130,32 +139,42 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_direct
               // setup The charts
               // wrap the metrics data and append the average
               $scope.ui.charts = _.mapValues(data.metrics, function(metric, name) {
-                var sum = metric.reduce(function(prev, vector) {
-                  return prev + $scope.ui.chartOptions.getY(vector);
-                }, 0);
 
-                var average = formatNumber(sum / metric.length, numberType(name))
+                // Metric Values format
+                // metric: [[xValue, yValue], ...]
+                // LoadMetric:
+                // metric: [[xValue, [yValue, yValue2, yValue3]], ...]
+                // return [
+                //    {type: 'line', key: name, yAxis: 1, values: [{x: xValue, y: yValue}, ...]},
+                //    {type: 'line', key: name, yAxis: 1, values: [{x: xValue, y: yValue1}, ...]},
+                //    {type: 'line', key: name, yAxis: 1, values: [{x: xValue, y: yValue2}, ...]}]
+                //
+                // Go through all of the metric values and split the values out.
+                // returns an array of all of the averages
+                var metricList = [];
 
-                // Split out the metrics for the load between the 5, 10 and 15 marks
-                if(_.isArray(metric[0][1])) {
-                  var splitMetrics = [];
-                  // Go through each value for the Y and create a place to put the data
-                  // so it can be charted properly.
-                  metric[0][1].forEach(function(name, idx) {
-                    splitMetrics.push({key: idx, values: []});
+                metric.forEach(function(vector) {
+                  var _vector = _(vector).flatten();
+                  var x = _vector.shift();
+                  _vector.forEach(function(yValue, idx) {
+                    if (!metricList[idx]) {
+                      metricList[idx] = {
+                        key: name + idx,
+                        values: []
+                      };
+                    }
+                    metricList[idx].values.push({x: x, y: yValue});
                   });
-                  // Go through all of the metric values and split the values out.
-                  metric.forEach(function(metricVector) {
-                    metricVector[1].forEach(function(value, idx) {
-                      splitMetrics[idx].values.push([metricVector[0], value]);
-                    });
-                  });
+                });
 
+                var average = metricList.map(function(data) {
+                  var uglySum = data.values.reduce(function(sumSoFar, vector) {
+                    return sumSoFar + vector.y;
+                  }, 0);
+                  return formatNumber(uglySum / data.values.length, numberType(name));
+                });
 
-                  metric = splitMetrics;
-                }
-
-                return { data: metric, average: average, niceName: niceName(name) };
+                return { data: metricList, options: _.clone($scope.ui.chartOptions), average: average, niceName: niceName(name) };
               });
 
               // give the plugins their proper name so CSS classes can be properply applied
@@ -166,7 +185,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_direct
 
 
               // go ahead and get another status in 5 seconds
-              setTimeout(getAppStatus, 5000);
+              // setTimeout(getAppStatus, 5000);
             })
             .error(function() {
               alert('Something went terribly wrong while making the request!!!');
@@ -181,7 +200,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3', 'nvd3_direct
     return {
       init: function() {
         $(function() {
-          angular.bootstrap(document, ['nvd3ChartDirectives', 'KibanaStatusApp']);
+          angular.bootstrap(document, ['nvd3', 'KibanaStatusApp']);
         });
       }
     };
