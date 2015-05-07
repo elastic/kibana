@@ -20,7 +20,6 @@ define(function (require) {
           $scope.modes = modes;
 
           $scope.toggleDisplay = function () {
-            $scope.showPageToggle = !$scope.fullScreenSpy;
             $scope.setSpyMode($scope.spy.mode ? null : defaultMode);
           };
 

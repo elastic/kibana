@@ -58,7 +58,7 @@ define(function (require) {
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
@@ -152,18 +152,15 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      filterBarWatchFilters($scope)
-      .on('update', function () {
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
-        }
+      // update the searchSource when filters update
+      $scope.$listen(queryFilter, 'update', function () {
+        searchSource.set('filter', queryFilter.getFilters());
         $state.save();
-      })
-      .on('fetch', function () {
-        $scope.fetch();
       });
+
+      // fetch data when filters fire fetch event
+      $scope.$listen(queryFilter, 'fetch', $scope.fetch);
+
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
         if (_.contains(keys, 'linked') && $state.linked === true) {
@@ -187,7 +184,7 @@ define(function (require) {
         }
 
         if (_.isEqual(keys, ['filters'])) {
-          // updates will happen in filterBarWatchFilters() if needed
+          // updates will happen in filter watcher if needed
           return;
         }
 
@@ -210,7 +207,7 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      searchSource.set('filter', $state.filters);
+      searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);
       if ($scope.vis.type.requiresSearch) {
         courier.fetch();

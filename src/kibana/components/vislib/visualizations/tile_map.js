@@ -890,12 +890,16 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
-      // Cleanup hanging DOM nodes
-      $(this.chartEl).find('[class*=" leaflet"]').remove();
+      if (this.maps && this.maps.length) {
+        this.maps.forEach(function (map) {
+          // Cleanup hanging DOM nodes
+          // TODO: The correct way to handle this is to ensure all listeners are properly removed
+          var children = $(map._container).find('*');
+          map.remove();
+          children.remove();
+        });
+      }
 
-      this.maps.forEach(function (map) {
-        map.remove();
-      });
     };
 
     return TileMap;

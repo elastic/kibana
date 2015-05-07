@@ -99,8 +99,8 @@ filter-bar .bar {
     }
 
     > .filter-actions {
-      font-size: 1.3em;
-      line-height: 1.1em;
+      font-size: 1.1em;
+      line-height: 1.4em;
       position: absolute;
       padding: 4px 8px;
       top: 0;
@@ -109,18 +109,22 @@ filter-bar .bar {
       display: none;
       text-align: center;
       white-space: nowrap;
-    }
 
-    > .filter-actions > .action {
-      border-right: 1px solid rgba(255, 255, 255, 0.4);
-      padding-right: 6px;
-      margin-right: 8px;
-    }
+      > * {
+        border-right: 1px solid rgba(255, 255, 255, 0.4);
+        padding-right: 0;
+        margin-right: 5px;
 
-    > .filter-actions > .action:last-child {
-      border-right: 0;
-      padding-right: 0;
-      margin-right: 0;
+        &:last-child {
+          border-right: 0;
+          padding-right: 0;
+          margin-right: 0;
+        }
+
+        .unpinned {
+          .opacity(.7);
+        }
+      }
     }
 
     &.negate {

@@ -1,12 +1,12 @@
 define(function (require) {
   var moment = require('moment');
-  var filterManager = require('components/filter_manager/filter_manager');
   var $ = require('jquery');
   require('modules')
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $compile) {
     var _ = require('lodash');
     var loadPanel = Private(require('plugins/dashboard/components/panel/lib/load_panel'));
+    var filterManager = Private(require('components/filter_manager/filter_manager'));
     var notify = new Notifier();
 
     require('components/visualize/visualize');
@@ -32,7 +32,6 @@ define(function (require) {
             $scope.edit = panelConfig.edit;
             $scope.$on('$destroy', panelConfig.savedObj.destroy);
 
-            filterManager.init($state);
             $scope.filter = function (field, value, operator) {
               var index = $scope.savedObj.searchSource.get('index').id;
               filterManager.add(field, value, operator, index);
