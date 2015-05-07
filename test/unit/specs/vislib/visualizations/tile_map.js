@@ -262,10 +262,6 @@ define(function (require) {
             var lng = feature.geometry.coordinates[0];
             var intensity = feature.properties.count;
             var array = chart.dataToHeatArray(mapData, max);
-            console.log(array);
-            console.log(feature);
-            console.log(i, array[i][0], array[i][1], array[i][2]);
-            console.log(i, lat, lng, intensity);
             expect(array[i][0]).to.be(lat);
             expect(array[i][1]).to.be(lng);
             expect(array[i][2]).to.be(intensity);
@@ -283,10 +279,6 @@ define(function (require) {
             var lng = feature.geometry.coordinates[0];
             var intensity = parseInt(feature.properties.count / max * 100);
             var array = chart.dataToHeatArray(mapData, max);
-            console.log(array);
-            console.log(feature);
-            console.log(i, array[i][0], array[i][1], array[i][2]);
-            console.log(i, lat, lng, intensity);
             expect(array[i][0]).to.be(lat);
             expect(array[i][1]).to.be(lng);
             expect(array[i][2]).to.be(intensity);
