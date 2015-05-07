@@ -5,13 +5,13 @@ define(function (require) {
     return {
       require: 'ngModel',
       link: function ($scope, $el, $attr, ngModel) {
-        var val = $attr.greaterThan || 0;
         ngModel.$parsers.push(validator);
         ngModel.$formatters.push(validator);
 
         function validator(value) {
+          var val = +$attr.greaterThan || 0;
           var valid = false;
-          if (!isNaN(value)) valid = value > val;
+          if (!isNaN(value)) valid = +value > val;
           ngModel.$setValidity('greaterThan', valid);
           return value;
         }
