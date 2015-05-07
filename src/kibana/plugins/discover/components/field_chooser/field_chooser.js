@@ -98,8 +98,9 @@ define(function (require) {
           '[]fieldCounts',
           '[]columns',
           '[]hits'
-        ], function () {
-          var fields = getFields();
+        ], function (cur, prev) {
+          var newHits = cur[2] !== prev[2];
+          var fields = ($scope.fields && !newHits) ? $scope.fields : getFields();
           if (!fields || !$scope.columns) return;
 
           $scope.fields = fields;
