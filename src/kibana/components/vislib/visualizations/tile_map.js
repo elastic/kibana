@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private) {
+  return function TileMapFactory(d3, Private, config) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -11,8 +11,8 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
-    var mapCenter = [15, 5];
-    var mapZoom = 2;
+    var defaultMapCenter = [15, 5];
+    var defaultMapZoom = 2;
 
     /**
      * Tile Map Visualization: renders maps
@@ -60,14 +60,11 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       return function (selection) {
-        selection.each(function (data) {
 
-          if (self._attr.mapZoom) {
-            mapZoom = self._attr.mapZoom;
-          }
-          if (self._attr.mapCenter) {
-            mapCenter = self._attr.mapCenter;
-          }
+        self._attr.mapZoom = self._attr.mapZoom || defaultMapZoom;
+        self._attr.mapCenter = self._attr.mapCenter || defaultMapCenter;
+
+        selection.each(function (data) {
 
           var mapData = data.geoJson;
           var div = $(this).addClass('tilemap');
@@ -99,8 +96,8 @@ define(function (require) {
             minZoom: 1,
             maxZoom: 18,
             layers: tileLayer,
-            center: mapCenter,
-            zoom: mapZoom,
+            center: self._attr.mapCenter,
+            zoom: self._attr.mapZoom,
             noWrap: true,
             maxBounds: worldBounds,
             scrollWheelZoom: false,
@@ -124,8 +121,9 @@ define(function (require) {
           });
 
           map.on('moveend', function setZoomCenter() {
-            mapZoom = self._attr.mapZoom = map.getZoom();
-            mapCenter = self._attr.mapCenter = map.getCenter();
+            self._attr.mapZoom = map.getZoom();
+            self._attr.mapCenter = map.getCenter();
+
             featureLayer.clearLayers();
             featureLayer = self.markerType(map, mapData).addTo(map);
           });
@@ -153,6 +151,18 @@ define(function (require) {
             });
           });
 
+          map.on('zoomend', function () {
+            if (!self.events.dispatch.mapZoomEnd) return;
+            var mapInfo = {
+              autoPrecision: self._attr.autoPrecision,
+              data: mapData,
+              limit: config.get('visualization:tileMap:maxPrecision'),
+              zoom: map.getZoom(),
+              zoomPct: map.getZoom() / 18
+            };
+            self.events.dispatch.mapZoomEnd(mapInfo);
+          });
+
           // add label for splits
           if (mapData.properties.label) {
             self.addLabel(mapData.properties.label, map);
@@ -167,7 +177,7 @@ define(function (require) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
               $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
               $(container).on('click', function () {
-                self.fitBounds(map, featureLayer);
+                self.fitBounds(map, mapData);
               });
               return container;
             }
@@ -203,8 +213,8 @@ define(function (require) {
      * @param featureLayer {Leaflet object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.fitBounds = function (map, featureLayer) {
-
+    TileMap.prototype.fitBounds = function (map, mapData) {
+      var featureLayer = L.geoJson(mapData);
       map.fitBounds(featureLayer.getBounds());
     };
 
@@ -416,7 +426,7 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
-      var isLegend = $('div.tilemap-legend').length;
+      var isLegend = $(this.chartEl).find('div.tilemap-legend').length;
 
       if (isLegend) return; // Don't add Legend if already one
 
