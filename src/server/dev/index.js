@@ -48,7 +48,7 @@ module.exports = function (app) {
         return path.basename(filename).charAt(0) !== '_';
       })
       .map(function (filename) {
-        return path.relative(unit, filename).replace(/\.js$/, '');
+        return path.relative(unit, filename).replace(/\\/g, '/').replace(/\.js$/, '');
       });
 
       res.end(JSON.stringify(moduleIds));

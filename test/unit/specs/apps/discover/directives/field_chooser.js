@@ -147,6 +147,7 @@ define(function (require) {
         var section = getSections($elem);
         $scope.columns.push('bytes');
         $scope.$digest();
+
         expect(section.selected.text()).to.contain('bytes');
         expect(section.popular.text()).to.not.contain('bytes');
 
