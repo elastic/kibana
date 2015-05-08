@@ -833,8 +833,9 @@ define(function (require) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
       var exp = 0.6;
-      var maxr = this.geohashMinDistance(feature);
-      return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
+      var maxRadius = this.geohashMinDistance(feature);
+      var pct = count / max;
+      return Math.pow(pct, exp) * maxRadius;
     };
 
     /**
