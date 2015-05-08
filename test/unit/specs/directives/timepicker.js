@@ -111,6 +111,21 @@ define(function (require) {
         done();
       });
 
+      it('should disable the looper when paused', function (done) {
+        $scope.setRefreshInterval({ value : 1000, pause: true});
+        $elem.scope().$digest();
+        expect($courier.searchLooper.loopInterval()).to.be(0);
+        expect($scope.interval.value).to.be(1000);
+        done();
+      });
+
+      it('but keep interval.value set', function (done) {
+        $scope.setRefreshInterval({ value : 1000, pause: true});
+        $elem.scope().$digest();
+        expect($scope.interval.value).to.be(1000);
+        done();
+      });
+
       it('should highlight the current active interval', function (done) {
         $scope.setRefreshInterval({ value: 300000 });
         $elem.scope().$digest();
