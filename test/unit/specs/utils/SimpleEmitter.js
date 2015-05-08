@@ -55,12 +55,12 @@ define(function (require) {
         expect(emitter.listenerCount('a')).to.be(2);
       });
 
-      it('only registers a specific listener once', function () {
+      it('allows the same function to be registered multiple times', function () {
         var handler = function () {};
         emitter.on('a', handler);
         expect(emitter.listenerCount()).to.be(1);
         emitter.on('a', handler);
-        expect(emitter.listenerCount()).to.be(1);
+        expect(emitter.listenerCount()).to.be(2);
       });
     });
 
