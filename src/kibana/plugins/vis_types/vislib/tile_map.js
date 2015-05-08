@@ -14,6 +14,7 @@ define(function (require) {
       params: {
         defaults: {
           mapType: 'Scaled Circle Markers',
+          scaleFactor: 10,
           isDesaturated: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid'],

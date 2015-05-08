@@ -169,7 +169,7 @@ define(function (require) {
               },
               onAdd: function (map) {
                 $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-                $(fitContainer).on('click', function () {
+                $(fitContainer).on('click', function fitClick() {
                   self.fitBounds(map, featureLayer);
                 });
                 return fitContainer;
@@ -269,14 +269,14 @@ define(function (require) {
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
-
-      var radiusScaler = 2.5;
+      var zoom = map.getZoom();
+      var precision = mapData.properties.precision;
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var scaledRadius = self.radiusScale(count, max, feature) * 2;
-          return L.circle(latlng, scaledRadius);
+          var scaledRadius = self.radiusScale(count, max, zoom, precision);
+          return L.circleMarker(latlng).setRadius(scaledRadius);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -556,21 +556,27 @@ define(function (require) {
     /**
      * radiusScale returns a number for scaled circle markers
      * approx. square root of count
-     * which is multiplied by a factor based on the geohash precision
+     * multiplied by user input scaleFactor and
+     * radius based on square of map zoom
      * for relative sizing of markers
      *
      * @method radiusScale
      * @param count {Number}
      * @param max {Number}
+     * @param zoom {Number}
      * @param precision {Number}
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (count, max, feature) {
+    TileMap.prototype.radiusScale = function (count, max, zoom, precision) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
-      var exp = 0.6;
-      var maxr = this.geohashMinDistance(feature);
-      return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
+      var exp = 0.5;
+      var pct = count / max;
+      var constantZoomRadius = 0.5 * Math.pow(2, zoom);
+      var scaleFactor = +this._attr.scaleFactor;
+      var precisionScale = 20 / Math.pow(5, precision);
+
+      return Math.pow(pct, exp) * constantZoomRadius * scaleFactor * precisionScale;
     };
 
     /**
