@@ -156,8 +156,10 @@ define(function (require) {
       // if this is the first listener added for the event
       // and charts are available, bind the event to the chart(s)
       // `on` method
-      if (chartCount > 0) {
-        throw new Error('Event listeners can\'t be added after the visualization has rendered.');
+      if (listeners === 1 && chartCount > 0) {
+        charts.forEach(function (chart) {
+          this.handler.enable(event, chart);
+        }, this);
       }
 
       // Keep track of enabled events
