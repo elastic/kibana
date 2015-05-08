@@ -11,12 +11,13 @@ function createInit() {
 }
 
 describe('server/lib/register_plugins', function () {
-  var server;
+  var server, get;
 
   beforeEach(function () {
+    get = sinon.stub();
     server = {
       register: sinon.stub(),
-      config: sinon.stub.returns({}),
+      config: sinon.stub().returns({ get: get }),
       expose: sinon.stub(),
       log: sinon.stub()
     };
