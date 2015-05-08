@@ -18,7 +18,7 @@ define(function (require) {
     }
 
     AbstractReq.prototype.canStart = function () {
-      return !this.stopped && !this.source._fetchDisabled;
+      return Boolean(!this.stopped && !this.source._fetchDisabled);
     };
 
     AbstractReq.prototype.start = function () {
