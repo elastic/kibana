@@ -1,13 +1,13 @@
 <div class="sidebar-list">
   <div ng-show="indexPatternList.length > 1">
     <div class="index-pattern" ng-click="showIndexPatternSelection = !showIndexPatternSelection">
-      <div css-truncate>{{ indexPattern.id }}</div>
+      <div css-truncate title="{{indexPattern.id}}">{{indexPattern.id}}</div>
       <i ng-hide="showIndexPatternSelection" class="fa fa-caret-down"></i>
       <i ng-show="showIndexPatternSelection" class="fa fa-caret-up"></i>
     </div>
     <div ng-show="showIndexPatternSelection">
       <ul class="list-unstyled sidebar-item index-pattern-selection">
-        <li css-truncate class="sidebar-item-title" ng-repeat="id in indexPatternList | orderBy" ng-show="indexPattern.id != id" ng-click="setIndexPattern(id)">{{id}}</li>
+        <li css-truncate class="sidebar-item-title" title="{{id}}" ng-repeat="id in indexPatternList | orderBy" ng-show="indexPattern.id != id" ng-click="setIndexPattern(id)">{{id}}</li>
       </ul>
       <div ng-click="showIndexPatternSelection = !showIndexPatternSelection" class="discover-field-details-close">
         <i class="fa fa-chevron-up"></i>
