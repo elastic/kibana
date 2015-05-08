@@ -74,13 +74,9 @@ define(function (require) {
           if (_.isUndefined(field.details) || recompute) {
             // This is inherited from fieldChooser
             $scope.details(field, recompute);
-
-
-            var fieldMapping = $scope.indexPattern.fields.byName[$scope.field.name];
-
             detailScope.$destroy();
             detailScope = $scope.$new();
-            detailScope.warnings = getWarnings(fieldMapping);
+            detailScope.warnings = getWarnings(field);
 
             detailsElem = $(detailsHtml);
             $compile(detailsElem)(detailScope);

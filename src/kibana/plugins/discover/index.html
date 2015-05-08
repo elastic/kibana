@@ -64,7 +64,8 @@
         <disc-field-chooser
           columns="state.columns"
           refresh="refreshFieldList"
-          data="rows"
+          hits="rows"
+          field-counts="fieldCounts"
           filter="filterQuery"
           index-pattern="searchSource.get('index')"
           index-pattern-list="opts.indexPatternList"

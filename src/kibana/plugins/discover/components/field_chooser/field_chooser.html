@@ -23,8 +23,7 @@
   <div class="sidebar-list-header">
     <h5>Selected Fields</h5>
   </div>
-  <ul
-    bindonce class="list-unstyled discover-selected-fields" >
+  <ul class="list-unstyled discover-selected-fields" >
     <discover-field ng-repeat="field in fields.raw|filter:{display:true}">
     </discover-field>
   </ul>
@@ -104,16 +103,23 @@
     </div>
   </div>
 
-  <ul bindonce
+  <ul
     ng-show="(popularFields | filter:filter.isFieldFiltered).length > 0"
-    class="list-unstyled sidebar-well discover-popular-fields" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }">
-    <li class="sidebar-item sidebar-list-header"><h6>Popular</h6></li>
-    <discover-field ng-repeat="field in popularFields | filter:filter.isFieldFiltered">
+    ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }"
+    class="list-unstyled sidebar-well discover-popular-fields">
+    <li class="sidebar-item sidebar-list-header">
+      <h6>Popular</h6>
+    </li>
+    <discover-field
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered">
     </discover-field>
   </ul>
 
-  <ul bindonce class="list-unstyled discover-unpopular-fields" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }">
-    <discover-field ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered">
+  <ul
+    ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
+    class="list-unstyled discover-unpopular-fields">
+    <discover-field
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered">
     </discover-field>
   </ul>
 
