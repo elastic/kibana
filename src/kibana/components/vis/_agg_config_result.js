@@ -1,9 +1,12 @@
 define(function () {
+  var i = 0;
+
   function AggConfigResult(aggConfig, parent, value, key) {
-    this.$parent = parent;
     this.key = key;
     this.value = value;
     this.aggConfig = aggConfig;
+    this.$parent = parent;
+    this.$order = ++i;
 
     if (aggConfig.schema.group === 'buckets') {
       this.type = 'bucket';
