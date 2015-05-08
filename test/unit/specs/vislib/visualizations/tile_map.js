@@ -201,7 +201,7 @@ define(function (require) {
         it('should return an object', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
-            expect(_.isObject(chart.getMinMax(data))).to.be(true);
+            expect(chart.getMinMax(data)).to.be.an(Object);
           });
         });
 
@@ -209,9 +209,7 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var min = _.chain(data.geoJson.features)
-            .map(function (n) {
-              return n.properties.count;
-            })
+            .deepPluck('properties.count')
             .min()
             .value();
             expect(chart.getMinMax(data).min).to.be(min);
@@ -222,9 +220,7 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var max = _.chain(data.geoJson.features)
-            .map(function (n) {
-              return n.properties.count;
-            })
+            .deepPluck('properties.count')
             .max()
             .value();
             expect(chart.getMinMax(data).max).to.be(max);
