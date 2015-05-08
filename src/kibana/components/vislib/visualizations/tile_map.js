@@ -85,7 +85,7 @@ define(function (require) {
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
-            if (!self.events.dispatch[drawShape]) {
+            if (!self.events.listenerCount(drawShape)) {
               drawOptions.draw[drawShape] = false;
             } else {
               drawOptions.draw[drawShape] = {
@@ -134,12 +134,12 @@ define(function (require) {
 
           map.on('draw:created', function (e) {
             var drawType = e.layerType;
-            if (!self.events.dispatch[drawType]) return;
+            if (!self.events.listenerCount(drawType)) return;
 
             // TODO: Different drawTypes need differ info. Need a switch on the object creation
             var bounds = e.layer.getBounds();
 
-            self.events.dispatch[drawType]({
+            self.events.emit(drawType, {
               e: e,
               data: self.chartData,
               bounds: {
