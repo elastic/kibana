@@ -100,11 +100,11 @@ define(function (require) {
          * clean up event handlers every time it destroys the chart
          * rebind them every time it creates the charts
          */
-        if (chart.events.dispatch) {
+        if (chart.events) {
           enabledEvents = self.vis.eventTypes.enabled;
 
           // Copy dispatch.on methods to chart object
-          d3.rebind(chart, chart.events.dispatch, 'on');
+          d3.rebind(chart, chart.events, 'on');
 
           // Bind events to chart(s)
           if (enabledEvents.length) {

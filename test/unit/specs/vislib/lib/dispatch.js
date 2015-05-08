@@ -57,7 +57,7 @@ define(function (require) {
 
         it('should attach a hover event', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.events.dispatch.hover)).to.be(true);
+            expect(chart.events.listenerCount('hover')).to.be.above(0);
           });
         });
       });
@@ -73,7 +73,7 @@ define(function (require) {
 
         it('should attach a click event', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.events.dispatch.click)).to.be(true);
+            expect(chart.events.listenerCount('click')).to.be.above(0);
           });
         });
       });
@@ -89,7 +89,7 @@ define(function (require) {
 
         it('should attach a brush event', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.events.dispatch.brush)).to.be(true);
+            expect(chart.events.listenerCount('brush')).to.be.above(0);
           });
         });
       });
@@ -106,7 +106,7 @@ define(function (require) {
     });
 
     describe('Custom event handlers', function () {
-      it('should attach whatever gets passed on vis.on() to dispatch', function (done) {
+      it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
         var vis;
         var chart;
         module('AreaChartFactory');
@@ -116,7 +116,7 @@ define(function (require) {
           vis.render(data);
 
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.events.dispatch.someEvent).to.be.a(Function);
+            expect(chart.events.listenerCount('someEvent')).to.be.above(0);
           });
 
           destroyVis(vis);
