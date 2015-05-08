@@ -24,9 +24,8 @@ define(function (require) {
    * @returns {string}
    */
   BaseObject.prototype.toRISON = function () {
-    var obj = this.toObject();
-    // Use Angular to remove the private vars
-    return rison.encode(JSON.parse(angular.toJson(obj)));
+    // Use Angular to remove the private vars, and JSON.stringify to serialize
+    return rison.encode(JSON.parse(angular.toJson(this)));
   };
 
   /**
