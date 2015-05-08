@@ -295,5 +295,19 @@ define(function (require) {
 
       return list;
     },
+
+    pushAll: function (source, dest) {
+      var start = dest.length;
+      var adding = source.length;
+
+      // allocate - http://goo.gl/e2i0S0
+      dest.length = start + adding;
+
+      // fill sparse positions
+      var i = -1;
+      while (++i < adding) dest[start + i] = source[i];
+
+      return dest;
+    }
   };
 });
