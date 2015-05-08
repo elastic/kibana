@@ -2,6 +2,7 @@ define(function (require) {
   return function AggTypeFactory(Private) {
     var _ = require('lodash');
     var AggParams = Private(require('components/agg_types/_agg_params'));
+    var fieldFormats = Private(require('registry/field_formats'));
 
     /**
      * Generic AggType Constructor
@@ -116,7 +117,24 @@ define(function (require) {
        * is created, giving the agg type a chance to modify the agg config
        */
       this.decorateAggConfig = config.decorateAggConfig || null;
+
+      if (config.getFormat) {
+        this.getFormat = config.getFormat;
+      }
     }
+
+    /**
+     * Pick a format for the values produced by this agg type,
+     * overriden by several metrics that always output a simple
+     * number
+     *
+     * @param  {agg} agg - the agg to pick a format for
+     * @return {FieldFromat}
+     */
+    AggType.prototype.getFormat = function (agg) {
+      var field = agg.field();
+      return field ? field.format : fieldFormats.getDefaultInstance('string');
+    };
 
     return AggType;
   };
