@@ -100,13 +100,23 @@ define(function (require) {
           '[]hits'
         ], function (cur, prev) {
           var newHits = cur[2] !== prev[2];
-          var fields = ($scope.fields && !newHits) ? $scope.fields : getFields();
-          if (!fields || !$scope.columns) return;
+          var fields = $scope.fields;
+          var columns = $scope.columns || [];
+          var fieldCounts = $scope.fieldCounts;
 
-          $scope.fields = fields;
+          if (!fields || newHits) {
+            $scope.fields = fields = getFields();
+          }
+
+          if (!fields) return;
 
           // group the fields into popular and up-popular lists
-          _(fields)
+          _.chain(fields)
+          .each(function (field) {
+            field.displayOrder = _.indexOf(columns, field.name) + 1;
+            field.display = !!field.displayOrder;
+            field.rowCount = fieldCounts[field.name];
+          })
           .sortBy(function (field) {
             return (field.count || 0) * -1;
           })
@@ -229,12 +239,12 @@ define(function (require) {
           });
 
           var fields = new FieldList(indexPattern, fieldSpecs);
-          fields.forEach(function (field) {
-            field.displayOrder = _.indexOf($scope.columns, field.name) + 1;
-            field.display = !!field.displayOrder;
-            field.rowCount = $scope.fieldCounts[field.name];
-            field.details = _.get(prevFields, ['byName', field.name, 'details']);
-          });
+
+          if (prevFields) {
+            fields.forEach(function (field) {
+              field.details = _.get(prevFields, ['byName', field.name, 'details']);
+            });
+          }
 
           return fields;
         }
