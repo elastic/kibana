@@ -21,5 +21,8 @@ define(function (require) {
       }
     };
 
+    $scope.toggleRefresh = function () {
+      timefilter.refreshInterval.pause = !timefilter.refreshInterval.pause;
+    };
   };
 });

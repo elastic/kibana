@@ -137,6 +137,7 @@ define(function (require) {
         };
 
         $scope.setRefreshInterval = function (interval) {
+          interval.pause = false;
           $scope.interval = interval;
         };
 

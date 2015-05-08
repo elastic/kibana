@@ -150,7 +150,7 @@ define(function (require) {
 
       $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'update', function () {
+        $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
 

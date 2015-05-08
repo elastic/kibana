@@ -32,6 +32,7 @@ define(function (require) {
 
       var refreshIntervalDefaults = {
         display: 'Off',
+        pause: false,
         section: 0,
         value: 0
       };
@@ -61,6 +62,7 @@ define(function (require) {
         '$$timefilter.time.mode',
         '$$timefilter.time',
         '$$timefilter.refreshInterval',
+        '$$timefilter.refreshInterval.pause',
         '$$timefilter.refreshInterval.value'
       ], (function () {
         var oldTime;
@@ -69,6 +71,10 @@ define(function (require) {
         return function () {
           if (diff(self.time, oldTime) || diff(self.refreshInterval, oldRefreshInterval)) {
             self.emit('update');
+            if (!self.refreshInterval.pause) {
+              self.emit('fetch');
+            }
+
           }
 
           oldTime = _.clone(self.time);
