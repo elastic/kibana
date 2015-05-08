@@ -26,6 +26,7 @@ define(function (require) {
      */
     _(TileMap).inherits(Chart);
     function TileMap(handler, chartEl, chartData) {
+
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);
       }
@@ -33,6 +34,8 @@ define(function (require) {
 
       // track the map objects
       this.maps = [];
+
+      this.tooltipFormatter = chartData.tooltipFormatter;
 
       this.events = new Dispatch(handler);
 
@@ -70,7 +73,9 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          var mapData = data.geoJson;
+          // add leaflet latLngs to properties for tooltip
+          var mapData = self.addLatLng(data.geoJson);
+
           var div = $(this).addClass('tilemap');
 
           var featureLayer;
@@ -80,7 +85,6 @@ define(function (require) {
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
@@ -184,6 +188,49 @@ define(function (require) {
             map.fitControl = undefined;
           }
 
+          // add tooltips
+          self._attr.disableTooltips = false;
+
+          if (self._attr.addTooltip && self.tooltipFormatter && !self._attr.disableTooltips) {
+            map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
+              'leading': true,
+              'trailing': false
+            }));
+            map.on('mouseout', function (e) {
+              map.closePopup();
+            });
+            map.on('mousedown', function () {
+              self._attr.disableTooltips = true;
+              map.closePopup();
+            });
+            map.on('mouseup', function () {
+              self._attr.disableTooltips = false;
+            });
+          }
+
+          function mouseMoveLocation(e) {
+            map.closePopup();
+
+            // unhighlight all svgs
+            d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
+
+            if (!mapData.features.length || self._attr.disableTooltips) {
+              return;
+            }
+
+            var latlng = e.latlng;
+
+            // find nearest feature to event latlng
+            var feature = self.nearestFeature(latlng, mapData);
+
+            var zoom = map.getZoom();
+
+            // show tooltip if close enough to event latlng
+            if (self.tooltipProximity(latlng, zoom, feature, map)) {
+              self.showTooltip(map, feature, latlng);
+            }
+          }
+
           self.maps.push(map);
         });
       };
@@ -198,8 +245,59 @@ define(function (require) {
         var p0 = coordinates[0];
         var p1 = coordinates[1];
 
-        return map.getBounds().contains([p1, p0]);
+        return map.getBounds().pad(0.2).contains([p1, p0]);
       };
+    };
+
+    /**
+     * add Leaflet latLng to mapData properties
+     *
+     * @method addLatLng
+     * @param mapData {mapData Object}
+     * @return mapData {Object}
+     */
+    TileMap.prototype.addLatLng = function (mapData) {
+      for (var i = 0; i < mapData.features.length; i++) {
+        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
+        mapData.features[i].properties.latLng = latLng;
+      }
+
+      return mapData;
+    };
+
+    /**
+     * Checks if event latlng is within bounds of mapData
+     * features and shows tooltip for that feature
+     *
+     * @method showTooltip
+     * @param e {Event}
+     * @param map {Leaflet Object}
+     * @param mapData {mapData Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.showTooltip = function (map, feature, latlng) {
+      var content = this.tooltipFormatter(feature);
+
+      if (!content) {
+        return;
+      }
+
+      var eventLatLng = latlng;
+      var featureLatLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+      var tipLatLng = featureLatLng;
+      var selector = 'path.geohash-' + feature.properties.geohash;
+
+      if (eventLatLng.lat > featureLatLng.lat) {
+        tipLatLng.lat = eventLatLng.lat;
+      }
+
+      // highlight svg marker for feature
+      var marker = d3.select(selector, this.chartEl).classed('geohash-hover', true);
+
+      L.popup({autoPan: false})
+       .setLatLng(tipLatLng)
+       .setContent(content)
+       .openOn(map);
     };
 
     /**
@@ -225,6 +323,81 @@ define(function (require) {
       if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
+    };
+
+    /**
+     * Finds nearest feature in mapData to event latlng
+     *
+     * @method nearestFeature
+     * @param point {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return nearestPoint {Leaflet Object}
+     */
+    TileMap.prototype.nearestFeature = function (point, mapData) {
+      var self = this;
+      var distance = Infinity;
+      var nearest;
+
+      if (point.lng < -180 || point.lng > 180) {
+        return;
+      }
+
+      for (var i = 0; i < mapData.features.length; i++) {
+        var dist = point.distanceTo(mapData.features[i].properties.latLng);
+        if (dist < distance) {
+          distance = dist;
+          nearest = mapData.features[i];
+        }
+      }
+      nearest.properties.eventDistance = distance;
+
+      return nearest;
+    };
+
+    /**
+     * display tooltip if feature is close enough to event latlng
+     *
+     * @method tooltipProximity
+     * @param latlng {Leaflet Object}
+     * @param zoom {Number}
+     * @param feature {geoJson Object}
+     * @param map {Leaflet Object}
+     * @return boolean
+     */
+    TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
+      if (!feature) {
+        return;
+      }
+
+      var showTip = false;
+
+      // zoomScale takes map zoom and returns proximity value for tooltip display
+      // domain (input values) is map zoom (min 1 and max 18)
+      // range (output values) is distance in meters
+      // used to compare proximity of event latlng to feature latlng
+      var zoomScale = d3.scale.linear()
+      .domain([1, 4, 7, 10, 13, 16, 18])
+      .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
+
+      var proximity = zoomScale(zoom);
+      var distance = latlng.distanceTo(feature.properties.latLng);
+
+      // maxLngDif is max difference in longitudes
+      // to prevent feature tooltip from appearing 360°
+      // away from event latlng
+      var maxLngDif = 40;
+      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
+
+      if (distance < proximity && lngDif < maxLngDif) {
+        showTip = true;
+      }
+
+      delete feature.properties.eventDistance;
+
+      var testScale = d3.scale.pow().exponent(0.2)
+      .domain([1, 18])
+      .range([1500000, 50]);
+      return showTip;
     };
 
     /**
@@ -278,9 +451,6 @@ define(function (require) {
           var scaledRadius = self.radiusScale(count, max, feature) * 2;
           return L.circle(latlng, scaledRadius);
         },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
         },
@@ -317,9 +487,6 @@ define(function (require) {
           var count = feature.properties.count;
           var radius = self.geohashMinDistance(feature);
           return L.circle(latlng, radius);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -364,18 +531,6 @@ define(function (require) {
             [geohashRect[1][1], geohashRect[1][0]]
           ];
           return L.rectangle(bounds);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-          layer.on({
-            mouseover: function (e) {
-              var layer = e.target;
-              // bring layer to front if not older browser
-              if (!L.Browser.ie && !L.Browser.opera) {
-                layer.bringToFront();
-              }
-            }
-          });
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -474,13 +629,14 @@ define(function (require) {
       var self = this;
       var count = feature.properties.count;
       var color = self.quantizeColorScale(count, min, max);
-
+      var className = 'geohash geohash-' + feature.properties.geohash;
       return {
         fillColor: color,
         color: self.darkerColor(color),
         weight: 1.5,
         opacity: 1,
-        fillOpacity: 0.75
+        fillOpacity: 0.75,
+        className: className
       };
     };
 
@@ -529,8 +685,8 @@ define(function (require) {
     };
 
     /**
-     * geohashMinDistance returns a min distance in meters for sizing
-     * circle markers to fit within geohash grid rectangle
+     * geohashMinDistance returns a max distance in meters for sizing
+     * circle markers to fit within min distance of geohash grid rectangle
      *
      * @method geohashMinDistance
      * @param feature {Object}
@@ -542,7 +698,7 @@ define(function (require) {
 
       // get lat[1] and lng[0] of geohash center point
       // apply lat to east[2] and lng to north[3] sides of rectangle
-      // to get radius at center of geohash grid recttangle
+      // to get radius at center of geohash grid rectangle
       var center = L.latLng([centerPoint[1], centerPoint[0]]);
       var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
       var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
