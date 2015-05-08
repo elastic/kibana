@@ -48,7 +48,7 @@ define(function (require) {
         // parse the keys and respond with the value that matches
         return _.find(bucket[agg.parentId].values, function (value, key) {
           return agg.key === parseFloat(key);
-        });
+        }) / 100;
       }
     });
   };
