@@ -7,7 +7,6 @@ define(function (require) {
 
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var errors = require('errors');
 
     require('css!components/vislib/styles/main');
 
@@ -453,17 +452,19 @@ define(function (require) {
      * uses d3 scale from TileMap.prototype.quantizeColorScale
      *
      * @method addLegend
-     * @param data {Object}
-     * @param map {Object}
+     * @param mapData {geoJson Object}
+     * @param map {Leaflet Object}
      * @return {undefined}
      */
-    TileMap.prototype.addLegend = function (data, map) {
+    TileMap.prototype.addLegend = function (mapData, map) {
       var self = this;
       var isLegend = $('div.tilemap-legend', this.chartEl).length;
 
       if (isLegend) return; // Don't add Legend if already one
 
+      var valueFormatter = mapData.properties.valueFormatter;
       var legend = L.control({position: 'bottomright'});
+
       legend.onAdd = function () {
         var div = L.DomUtil.create('div', 'tilemap-legend');
         var colors = self._attr.colors;
@@ -472,13 +473,13 @@ define(function (require) {
         var vals;
         var strokecol;
 
-        if (data.properties.min === data.properties.max) {
+        if (mapData.properties.min === mapData.properties.max) {
           // 1 val for legend
           vals = self._attr.cScale.invertExtent(colors[i]);
           strokecol = self.darkerColor(colors[i]);
           labels.push(
             '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-            vals[0].toFixed(0));
+            valueFormatter(vals[0].toFixed(0)));
         } else {
           // 3 to 5 vals for legend
           if (colors) {
@@ -486,7 +487,7 @@ define(function (require) {
               vals = self._attr.cScale.invertExtent(colors[i]);
               strokecol = self.darkerColor(colors[i]);
               labels.push('<i style="background:' + colors[i] + ';border-color:' +
-              strokecol + '"></i> ' + vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
+              strokecol + '"></i> ' + valueFormatter(vals[0]) + ' &ndash; ' + valueFormatter(vals[1]));
             }
           }
         }
@@ -543,7 +544,6 @@ define(function (require) {
      * return {undefined}
      */
     TileMap.prototype.bindPopup = function (feature, layer) {
-
       var self = this;
       var lat = feature.geometry.coordinates[1];
       var lng = feature.geometry.coordinates[0];

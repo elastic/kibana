@@ -16,7 +16,7 @@ define(function (require) {
 
       var metric = {
         label: feature.properties.valueLabel,
-        value: feature.properties.count
+        value: feature.properties.valueFormatted
       };
       var location = {
         label: 'Geohash center',
@@ -26,6 +26,7 @@ define(function (require) {
       details.push(metric, location);
 
       $tooltipScope.$apply();
+
       return $tooltip[0].outerHTML;
     };
   };
