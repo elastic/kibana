@@ -34,6 +34,8 @@ define(function (require) {
       // track the map objects
       this.maps = [];
 
+      this.tooltipFormatter = chartData.tooltipFormatter;
+
       this.events = new Dispatch(handler);
 
       // add allmin and allmax to geoJson
@@ -541,18 +543,24 @@ define(function (require) {
      * return {undefined}
      */
     TileMap.prototype.bindPopup = function (feature, layer) {
-      var props = feature.properties;
-      var popup = L.popup({
-        className: 'leaflet-popup-kibana',
-        autoPan: false
-      })
-      .setContent(
-        'Geohash: ' + props.geohash + '<br>' +
-        'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
-        props.valueLabel + ': ' + props.count
-      );
+
+      var self = this;
+      var lat = feature.geometry.coordinates[1];
+      var lng = feature.geometry.coordinates[0];
+      var latLng = L.latLng(lat, lng);
+
+      var popup = L.popup({autoPan: false})
+       .setLatLng(latLng);
+
       layer.bindPopup(popup)
       .on('mouseover', function (e) {
+        var content = self.tooltipFormatter(feature);
+        console.log(content);
+        if (!content) {
+          return;
+        }
+
+        popup.setContent(content);
         layer.openPopup();
       })
       .on('mouseout', function (e) {
