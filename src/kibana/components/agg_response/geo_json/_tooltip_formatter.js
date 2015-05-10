@@ -19,8 +19,8 @@ define(function (require) {
         value: feature.properties.count
       };
       var location = {
-        label: 'Center',
-        value: lat.toFixed(4) + ', ' + lng.toFixed(4)
+        label: 'Geohash center',
+        value: lat.toFixed(3) + ', ' + lng.toFixed(3)
       };
 
       details.push(metric, location);

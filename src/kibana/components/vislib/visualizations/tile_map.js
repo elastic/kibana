@@ -555,7 +555,6 @@ define(function (require) {
       layer.bindPopup(popup)
       .on('mouseover', function (e) {
         var content = self.tooltipFormatter(feature);
-        console.log(content);
         if (!content) {
           return;
         }
