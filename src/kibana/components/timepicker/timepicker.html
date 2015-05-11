@@ -19,30 +19,30 @@
     }
   </style>
 
-  <ul class="nav nav-tabs" role="tablist" ng-init="tab = 'filter'">
-    <li ng-class="{active:tab== 'filter'}">
-      <a href ng-click="tab = 'filter'">Time Filter</a>
+  <ul class="nav nav-tabs" role="tablist">
+    <li ng-class="{active: activeTab === 'filter'}">
+      <a href ng-click="activeTab = 'filter'">Time Filter</a>
     </li>
-    <li ng-class="{active:tab== 'interval'}">
-      <a href ng-click="tab = 'interval'">Refresh Interval</a>
+    <li ng-class="{active: activeTab === 'interval'}">
+      <a href ng-click="activeTab = 'interval'">Refresh Interval</a>
     </li>
   </ul>
 
   <div class="tab-content">
 
     <!-- Filters -->
-    <div ng-show="tab == 'filter'" role="tabpanel" class="tab-pane active">
+    <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
       <br>
       <div class="row">
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
-            <li ng-class="{active: mode=='quick'}">
+            <li ng-class="{active: mode === 'quick' }">
               <a ng-click="setMode('quick')">quick</a>
             </li>
-            <li ng-class="{active: mode=='relative'}">
+            <li ng-class="{active: mode === 'relative' }">
               <a ng-click="setMode('relative')">relative</a>
             </li>
-            <li ng-class="{active: mode=='absolute'}">
+            <li ng-class="{active: mode === 'absolute' }">
               <a ng-click="setMode('absolute')">absolute</a>
             </li>
           </ul>
@@ -167,12 +167,12 @@
     </div>
 
     <!-- Refresh Intervals -->
-    <div ng-show="tab == 'interval'" role="tabpanel" class="tab-pane active">
+    <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
       <br>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">
-            <a class="refresh-interval" ng-class="{ 'refresh-interval-active': interval.value == inter.value }" ng-click="setRefreshInterval(inter)">
+            <a class="refresh-interval" ng-class="{ 'refresh-interval-active': interval.value === inter.value }" ng-click="setRefreshInterval(inter)">
               {{inter.display}}
             </a>
           </li>

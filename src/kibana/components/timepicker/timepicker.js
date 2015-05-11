@@ -18,7 +18,8 @@ define(function (require) {
         from: '=',
         to: '=',
         mode: '=',
-        interval: '='
+        interval: '=',
+        activeTab: '='
       },
       template: html,
       controller: function ($scope) {
@@ -28,6 +29,8 @@ define(function (require) {
 
         $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
         $scope.modes = ['quick', 'relative', 'absolute'];
+        $scope.activeTab = $scope.activeTab || 'filter';
+
         if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
 
         $scope.quickLists = _(quickRanges).groupBy('section').values().value();

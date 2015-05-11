@@ -24,7 +24,7 @@
 
       <ul ng-if="setupComplete" ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
         <li>
-          <a  ng-click="toggleTimepicker()"
+          <a  ng-click="toggleTimepicker('interval')"
               ng-show="timefilter.refreshInterval.value > 0"
               class="navbar-timepicker-auto-refresh-desc">
             {{timefilter.refreshInterval.display}}
