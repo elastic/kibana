@@ -30,7 +30,6 @@ define(function (require) {
         'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
 
-      this.layout = new Layout(vis.el, vis.data, vis._attr.type);
       this.xAxis = opts.xAxis;
       this.yAxis = opts.yAxis;
       this.chartTitle = opts.chartTitle;
@@ -40,6 +39,8 @@ define(function (require) {
       if (this._attr.addLegend) {
         this.legend = opts.legend;
       }
+
+      this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
 
       this.renderArray = _.filter([
         this.layout,

@@ -20,13 +20,14 @@ define(function (require) {
      * @param data {Object} Elasticsearch query results for this specific chart
      * @param chartType {Object} Reference to chart functions, i.e. Pie
      */
-    function Layout(el, data, chartType) {
+    function Layout(el, data, chartType, opts) {
       if (!(this instanceof Layout)) {
-        return new Layout(el, data, chartType);
+        return new Layout(el, data, chartType, opts);
       }
 
       this.el = el;
       this.data = data;
+      this.opts = opts;
       this.layoutType = layoutType[chartType](this.el, this.data);
     }
 
