@@ -1871,7 +1871,10 @@ define(function () {
         'max': 608,
         'precision': 1,
         'allmin': 1,
-        'allmax': 608
+        'allmax': 608,
+        'valueFormatter': function (str) {
+          return str;
+        }
       }
     },
     'hits': 5033
