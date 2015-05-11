@@ -52,6 +52,7 @@ define(function (require) {
         ' from="timefilter.time.from"' +
         ' to="timefilter.time.to"' +
         ' mode="timefilter.time.mode"' +
+        ' active-tab="timefilter.timepickerActiveTab"' +
         ' interval="timefilter.refreshInterval">' +
         '</kbn-timepicker>'
       );
