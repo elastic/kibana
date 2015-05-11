@@ -1,15 +1,16 @@
 module.exports = function (grunt) {
   grunt.registerTask('kibana_server', function (keepalive) {
     var done = this.async();
-    var config = require('../src/server/config');
-    config.quiet = !grunt.option('debug') && !grunt.option('verbose');
-    var server = require('../src/server');
+    var kibana = require('../');
+    var devStatics = require('./utils/dev_statics');
+    var quiet = !grunt.option('debug') && !grunt.option('verbose');
+    var settings = { 'logging.quiet': quiet };
 
-    server.start(function (err) {
-      if (err) return done(err);
-      grunt.log.ok('Server started on port', config.kibana.port);
+    kibana.start(settings, [devStatics]).then(function (server) {
+      grunt.log.ok('Server started: ' + server.info.uri);
       if (keepalive !== 'keepalive') done();
-    });
+    }).catch(done);
+
   });
 };
 
