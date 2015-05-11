@@ -174,13 +174,41 @@ define(function (require) {
       });
 
       describe('radiusScale method', function () {
-        it('should return a number', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var count = Math.random() * 50;
-            var max = 50;
-            var precision = 1;
-            var feature = chart.chartData.geoJson.features[0];
-            expect(_.isNumber(chart.radiusScale(count, max, feature))).to.be(true);
+        var countdata = [0, 10, 20, 30, 40, 50, 60];
+        var max = 60;
+        var zoom = _.random(1, 18);
+        var constantZoomRadius = 0.5 * Math.pow(2, zoom);
+        var precision = _.random(1, 12);
+        var precisionScale = 200 / Math.pow(5, precision);
+        var prev = -1;
+
+        it('test array should return a number equal to radius', function () {
+          countdata.forEach(function (data, i) {
+            vis.handler.charts.forEach(function (chart) {
+              var count = data;
+              var pct = count / max;
+              var exp = 0.5;
+              var radius = Math.pow(pct, exp) * constantZoomRadius * precisionScale;
+              var test = chart.radiusScale(count, max, zoom, precision);
+
+              expect(_.isNumber(test)).to.be(true);
+              expect(test).to.be(radius);
+            });
+          });
+        });
+
+        it('test array should return a radius greater than previous', function () {
+          countdata.forEach(function (data, i) {
+            vis.handler.charts.forEach(function (chart) {
+              var count = data;
+              var pct = count / max;
+              var exp = 0.5;
+              var radius = Math.pow(pct, exp) * constantZoomRadius * precisionScale;
+              var test = chart.radiusScale(count, max, zoom, precision);
+
+              expect(test).to.be.above(prev);
+              prev = chart.radiusScale(count, max, zoom, precision);
+            });
           });
         });
       });

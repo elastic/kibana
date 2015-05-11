@@ -307,7 +307,7 @@ define(function (require) {
       var precision = mapData.properties.precision;
 
       // multiplier to reduce size of all circles
-      var scaleFactor = 0.9;
+      var scaleFactor = 0.6;
 
       var radiusScaler = 2.5;
 
@@ -352,7 +352,7 @@ define(function (require) {
       var max = mapData.properties.allmax;
 
       // multiplier to reduce size of all circles
-      var scaleFactor = 0.9;
+      var scaleFactor = 0.8;
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
@@ -615,7 +615,7 @@ define(function (require) {
       var exp = 0.5;
       var pct = count / max;
       var constantZoomRadius = 0.5 * Math.pow(2, zoom);
-      var precisionScale = 160 / Math.pow(5, precision);
+      var precisionScale = 200 / Math.pow(5, precision);
 
       return Math.pow(pct, exp) * constantZoomRadius * precisionScale;
     };
