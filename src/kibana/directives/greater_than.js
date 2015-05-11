@@ -9,9 +9,10 @@ define(function (require) {
         ngModel.$formatters.push(validator);
 
         function validator(value) {
-          var val = +$attr.greaterThan || 0;
+          var val = $attr.greaterThan;
           var valid = false;
-          if (!isNaN(value)) valid = +value > val;
+
+          if (!isNaN(value)) valid = +value > +val;
           ngModel.$setValidity('greaterThan', valid);
           return value;
         }
