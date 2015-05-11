@@ -165,7 +165,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                         values: []
                       };
                     }
-                    metricList[idx].values.push({x: x, y: yValue});
+                    metricList[idx].values.unshift({x: x, y: yValue});
                   });
                 });
 
