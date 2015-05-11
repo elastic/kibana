@@ -27,8 +27,20 @@ define(function (require) {
     Url.editor = {
       template: require('text!components/stringify/editors/url.html'),
       controllerAs: 'url',
-      controller: function () {
-        this.sampleInputs = [ 'john', '/some/pathname/asset.png', 1234 ];
+      controller: function ($scope) {
+        var iconPattern = 'components/stringify/icons/{{value}}.png';
+
+        this.samples = {
+          a: [ 'john', '/some/pathname/asset.png', 1234 ],
+          img: [ 'go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv' ]
+        };
+
+        $scope.$watch('editor.formatParams.type', function (type, prev) {
+          var params = $scope.editor.formatParams;
+          if (type === 'img' && type !== prev && !params.urlTemplate) {
+            params.urlTemplate = iconPattern;
+          }
+        });
       }
     };
 
