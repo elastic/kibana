@@ -77,7 +77,7 @@ define(function (require) {
         it('should add events to chart and emit to the Events class', function () {
           charts.forEach(function (chart) {
             events.forEach(function (event) {
-              expect(typeof chart.on(event)).to.be('function');
+              expect(chart.events.listenerCount(event)).to.be.above(0);
             });
           });
         });
@@ -99,7 +99,7 @@ define(function (require) {
         it('should remove events from the chart', function () {
           charts.forEach(function (chart) {
             events.forEach(function (event) {
-              expect(typeof chart.on(event)).to.be('undefined');
+              expect(chart.events.listenerCount(event)).to.be(0);
             });
           });
         });

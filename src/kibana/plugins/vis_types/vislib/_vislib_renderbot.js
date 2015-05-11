@@ -17,11 +17,12 @@ define(function (require) {
 
       self.vislibParams = self._getVislibParams();
       self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
-      if (this.chartData) self.vislibVis.render(this.chartData);
 
       _.each(self.vis.listeners, function (listener, event) {
         self.vislibVis.on(event, listener);
       });
+
+      if (this.chartData) self.vislibVis.render(this.chartData);
     };
 
     VislibRenderbot.prototype._getVislibParams = function () {

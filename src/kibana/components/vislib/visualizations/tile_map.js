@@ -37,8 +37,9 @@ define(function (require) {
       this.events = new Dispatch(handler);
 
       // add allmin and allmax to geoJson
-      chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
-      chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
+      var allMinMax = this.getMinMax(handler.data.data);
+      chartData.geoJson.properties.allmin = allMinMax.min;
+      chartData.geoJson.properties.allmax = allMinMax.max;
     }
 
     /**
@@ -84,7 +85,7 @@ define(function (require) {
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
-            if (!self.events.dispatch[drawShape]) {
+            if (!self.events.listenerCount(drawShape)) {
               drawOptions.draw[drawShape] = false;
             } else {
               drawOptions.draw[drawShape] = {
@@ -133,12 +134,12 @@ define(function (require) {
 
           map.on('draw:created', function (e) {
             var drawType = e.layerType;
-            if (!self.events.dispatch[drawType]) return;
+            if (!self.events.listenerCount(drawType)) return;
 
             // TODO: Different drawTypes need differ info. Need a switch on the object creation
             var bounds = e.layer.getBounds();
 
-            self.events.dispatch[drawType]({
+            self.events.emit(drawType, {
               e: e,
               data: self.chartData,
               bounds: {
@@ -200,6 +201,39 @@ define(function (require) {
 
         return map.getBounds().contains([p1, p0]);
       };
+    };
+
+    /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @param data {Object}
+     * @return {Object}
+     */
+    TileMap.prototype.getMinMax = function (data) {
+      var min = [];
+      var max = [];
+      var allData;
+
+      if (data.rows) {
+        allData = data.rows;
+      } else if (data.columns) {
+        allData = data.columns;
+      } else {
+        allData = [data];
+      }
+
+      allData.forEach(function (datum) {
+        min.push(datum.geoJson.properties.min);
+        max.push(datum.geoJson.properties.max);
+      });
+
+      var minMax = {
+        min: _.min(min),
+        max: _.max(max)
+      };
+
+      return minMax;
     };
 
     /**
@@ -423,7 +457,7 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
-      var isLegend = $('div.tilemap-legend').length;
+      var isLegend = $('div.tilemap-legend', this.chartEl).length;
 
       if (isLegend) return; // Don't add Legend if already one
 

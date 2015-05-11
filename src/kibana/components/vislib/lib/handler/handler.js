@@ -51,6 +51,15 @@ define(function (require) {
         this.xAxis,
         this.yAxis
       ], Boolean);
+
+      // memoize so that the same function is returned every time,
+      // allowing us to remove/re-add the same function
+      this.getProxyHandler = _.memoize(function (event) {
+        var self = this;
+        return function (e) {
+          self.vis.emit(event, e);
+        };
+      });
     }
 
     /**
@@ -120,6 +129,10 @@ define(function (require) {
       .each(function (chartData) {
         var chart = new self.ChartClass(self, this, chartData);
 
+        self.vis.activeEvents().forEach(function (event) {
+          self.enable(event, chart);
+        });
+
         self._addEventListeners(chart);
         charts.push(chart);
         chart.render();
@@ -130,33 +143,34 @@ define(function (require) {
     /**
      * Enables events, i.e. binds specific events to the chart
      * object(s) `on` method. For example, `click` or `mousedown` events.
-     * Emits the event to the Events class.
      *
      * @method enable
      * @param event {String} Event type
      * @param chart {Object} Chart
      * @returns {*}
      */
-    Handler.prototype.enable = function (event, chart) {
-      return chart.on(event, function (e) {
-        this.vis.emit(event, e);
-      }.bind(this));
-    };
+    Handler.prototype.enable = chartEventProxyToggle('on');
 
     /**
-     * Disables events by passing null to the event listener.
-     * According to the D3 documentation for event handling:
-     * https://github.com/mbostock/d3/wiki/Selections#on, to remove all
-     * listeners for a particular event type, pass null as the listener.
+     * Disables events for all charts
      *
      * @method disable
      * @param event {String} Event type
      * @param chart {Object} Chart
      * @returns {*}
      */
-    Handler.prototype.disable = function (event, chart) {
-      return chart.on(event, null);
-    };
+    Handler.prototype.disable = chartEventProxyToggle('off');
+
+
+    function chartEventProxyToggle(method) {
+      return function (event, chart) {
+        var proxyHandler = this.getProxyHandler(event);
+
+        _.each(chart ? [chart] : this.charts, function (chart) {
+          chart.events[method](event, proxyHandler);
+        });
+      };
+    }
 
     /**
      * Removes all DOM elements from the HTML element provided
