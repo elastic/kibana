@@ -47,8 +47,8 @@ define(function (require) {
         this.axisTitle,
         this.chartTitle,
         this.alerts,
-        this.yAxis,
         this.xAxis,
+        this.yAxis,
       ], Boolean);
     }
 
