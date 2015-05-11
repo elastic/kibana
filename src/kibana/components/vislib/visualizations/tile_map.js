@@ -306,12 +306,15 @@ define(function (require) {
       var zoom = map.getZoom();
       var precision = mapData.properties.precision;
 
+      // multiplier to reduce size of all circles
+      var scaleFactor = 0.9;
+
       var radiusScaler = 2.5;
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var scaledRadius = self.radiusScale(count, max, zoom, precision);
+          var scaledRadius = self.radiusScale(count, max, zoom, precision) * scaleFactor;
           return L.circleMarker(latlng).setRadius(scaledRadius);
         },
         onEachFeature: function (feature, layer) {
@@ -347,7 +350,9 @@ define(function (require) {
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
-      var scaleFactor = 0.8;
+
+      // multiplier to reduce size of all circles
+      var scaleFactor = 0.9;
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
