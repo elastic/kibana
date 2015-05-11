@@ -55,6 +55,7 @@ module.exports = Joi.object({
       cert: Joi.string(),
       key: Joi.string()
     }).default(),
+    minimumVerison: Joi.string().default('1.4.4')
   }).default(),
   logging: Joi.object({
     quiet: Joi.boolean().default(false),

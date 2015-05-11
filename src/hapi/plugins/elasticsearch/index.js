@@ -16,8 +16,6 @@ module.exports = new kibana.Plugin({
     // Expose the client to the server
     exposeClient(server);
 
-    // Set up the health check service
-    healthCheck(this, server);
 
     createProxy(server, 'GET', '/elasticsearch/{paths*}');
     createProxy(server, 'POST', '/elasticsearch/_mget');
@@ -41,6 +39,9 @@ module.exports = new kibana.Plugin({
         config: { pre: [ noBulkCheck ] }
       }
     );
+
+    // Set up the health check service and start it.
+    healthCheck(this, server).start();
 
   }
 });

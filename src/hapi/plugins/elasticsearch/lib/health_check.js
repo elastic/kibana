@@ -1,6 +1,9 @@
 var Promise = require('bluebird');
 var elasticsearch = require('elasticsearch');
 var exposeClient = require('./expose_client');
+var migrateConfig = require('./migrate_config');
+var createKibanaIndex = require('./create_kibana_index');
+var checkEsVersion = require('./check_es_version');
 var NoConnections = elasticsearch.errors.NoConnections;
 var util = require('util');
 var format = util.format;
@@ -30,8 +33,8 @@ module.exports = function (plugin, server) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
       if (resp.timed_out) {
-        plugin.status.red('No existing Kibana index found');
-        return;
+        plugin.status.yellow('No existing Kibana index found');
+        return createKibanaIndex(server);
       }
 
       // If status === "red" that means that index(es) were found
@@ -46,17 +49,42 @@ module.exports = function (plugin, server) {
     });
   }
 
+  var running = false;
+
   function runHealthCheck() {
-    setTimeout(healthCheck, 2500);
+    if (running) {
+      setTimeout(function () {
+        healthCheck()
+        .then(runHealthCheck)
+        .catch(function (err) {
+          server.log('error', err);
+          runHealthCheck();
+        });
+      }, 2500);
+    }
   }
 
   function healthCheck() {
-    waitForPong()
+    return waitForPong()
+    .then(checkEsVersion(server))
     .then(waitForShards)
-    .then(runHealthCheck)
-    .catch(runHealthCheck);
+    .then(migrateConfig(server));
   }
 
-  healthCheck();
+  return {
+    isRunning: function () {
+      return running;
+    },
+    run: function () {
+      return healthCheck();
+    },
+    start: function () {
+      running = true;
+      return healthCheck().then(runHealthCheck, runHealthCheck);
+    },
+    stop: function () {
+      running = false;
+    }
+  };
 
 };
