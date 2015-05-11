@@ -6,7 +6,8 @@ var plugins = function (dir) {
   if (!dir) return [];
   var files = glob.sync(path.join(dir, '*', 'index.js')) || [];
   return files.map(function (file) {
-    return file.replace(dir, 'plugins').replace(/\.js$/, '');
+    var relative = path.relative(dir, file);
+    return path.join('plugins', relative).replace(/\\/g, '/').replace(/\.js$/, '');
   });
 };
 

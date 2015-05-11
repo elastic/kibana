@@ -7,8 +7,11 @@ define(function (require) {
 
     return function getPoint(x, series, yScale, row, y, z) {
       var zRow = z && row[z.i];
+      var xRow = row[x.i];
+
       var point = {
-        x: unwrap(row[x.i], '_all'),
+        x: unwrap(xRow, '_all'),
+        xi: xRow && xRow.$order,
         y: unwrap(row[y.i]),
         z: zRow && unwrap(zRow),
         aggConfigResult: row[y.i],

@@ -44,15 +44,28 @@ define(function (require) {
     },
 
     /**
-     * Remove an element at a specific index from an array
+     * Patched version of _.remove that supports IndexedArrays
      *
-     * @param  {array} arr
-     * @param  {number} index
-     * @return {array} arr
+     * @param  {array} array
+     * @param  {object|function|str} - a lodash selector/predicate
+     * @return {array} the elements that were removed
      */
-    remove: function (arr, index) {
-      arr.splice(index, 1);
-      return arr;
+    remove: function (array, where) {
+      var index = -1;
+      var length = array ? array.length : 0;
+      var result = [];
+
+      var callback = _.createCallback(where, this, 3);
+      while (++index < length) {
+        var value = array[index];
+        if (callback(value, index, array)) {
+          result.push(value);
+          array.splice(index--, 1);
+          length--;
+        }
+      }
+
+      return result;
     },
 
     /**
@@ -90,7 +103,6 @@ define(function (require) {
      * @return {object}
      */
     flattenWith: function (dot, nestedObj, flattenArrays) {
-      var key; // original key
       var stack = []; // track key stack
       var flatObj = {};
       (function flattenObj(obj) {
@@ -283,5 +295,19 @@ define(function (require) {
 
       return list;
     },
+
+    pushAll: function (source, dest) {
+      var start = dest.length;
+      var adding = source.length;
+
+      // allocate - http://goo.gl/e2i0S0
+      dest.length = start + adding;
+
+      // fill sparse positions
+      var i = -1;
+      while (++i < adding) dest[start + i] = source[i];
+
+      return dest;
+    }
   };
 });

@@ -73,7 +73,7 @@ define(function (require) {
      */
     Chart.prototype.destroy = function () {
       var selection = d3.select(this.chartEl);
-
+      this.events.removeAllListeners();
       selection.remove();
       selection = null;
     };

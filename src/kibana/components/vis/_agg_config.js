@@ -1,7 +1,7 @@
 define(function (require) {
   return function AggConfigFactory(Private, fieldTypeFilter) {
     var _ = require('lodash');
-    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    var fieldFormats = Private(require('registry/field_formats'));
 
     function AggConfig(vis, opts) {
       var self = this;
@@ -255,7 +255,7 @@ define(function (require) {
     };
 
     AggConfig.prototype.getKey = function (bucket, key) {
-      return this.type.getKey(bucket, key);
+      return this.type.getKey(bucket, key, this);
     };
 
     AggConfig.prototype.makeLabel = function () {
@@ -267,16 +267,16 @@ define(function (require) {
       return this.params.field;
     };
 
-    AggConfig.prototype.fieldFormatter = function () {
+    AggConfig.prototype.fieldFormatter = function (contentType) {
       var field = this.field();
       var format = field && field.format;
-      var strFormat = fieldFormats.defaultByType.string;
+      var strFormat = fieldFormats.getDefaultInstance('string');
 
-      if (this.type.getFormat) {
+      if (this.type) {
         format = this.type.getFormat(this) || format;
       }
 
-      return (format || strFormat).convert;
+      return (format || strFormat).getConverterFor(contentType);
     };
 
     AggConfig.prototype.fieldName = function () {

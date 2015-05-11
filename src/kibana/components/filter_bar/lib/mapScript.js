@@ -1,5 +1,4 @@
-define(function (require) {
-  var _ = require('lodash');
+define(function () {
   return function mapScriptProvider(Promise, courier) {
     return function (filter) {
       var key, value, field;

@@ -66,7 +66,8 @@ define(function (require) {
           // methods
           expect(indexPattern).to.have.property('refreshFields');
           expect(indexPattern).to.have.property('popularizeField');
-          expect(indexPattern).to.have.property('getFields');
+          expect(indexPattern).to.have.property('getScriptedFields');
+          expect(indexPattern).to.have.property('getNonScriptedFields');
           expect(indexPattern).to.have.property('getInterval');
           expect(indexPattern).to.have.property('addScriptedField');
           expect(indexPattern).to.have.property('removeScriptedField');
@@ -99,18 +100,21 @@ define(function (require) {
       });
     });
 
-    describe('getFields', function () {
-      it('should return all non-scripted fields', function () {
-        var expected = _.pluck(_.where(mockLogstashFields, { scripted: false }), name).sort();
-        var result = _.pluck(indexPattern.getFields(), name).sort();
-
-        expect(result).to.eql(expected);
-      });
-
+    describe('getScriptedFields', function () {
       it('should return all scripted fields', function () {
-        var scripted = _.where(mockLogstashFields, { scripted: true });
-        expect(indexPattern.getFields('scripted')).to.eql(scripted);
+        var scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
+        var respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
+        expect(respNames).to.eql(scriptedNames);
       });
+    });
+
+    describe('getNonScriptedFields', function () {
+      it('should return all non-scripted fields', function () {
+        var notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
+        var respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
+        expect(respNames).to.eql(notScriptedNames);
+      });
+
     });
 
     describe('refresh fields', function () {
@@ -142,12 +146,18 @@ define(function (require) {
         // ensure that all fields will be included in the returned docSource
         setDocsourcePayload(docSourceResponse(indexPatternId));
 
-        // refresh fields, which will fetch
-        return indexPattern.refreshFields().then(function () {
-          // compare non-scripted fields to the mapper.getFieldsForIndexPattern fields
-          return mapper.getFieldsForIndexPattern().then(function (fields) {
-            expect(indexPattern.getFields()).to.eql(fields);
-          });
+        return Promise.all([
+          // read fields from elasticsearch
+          mapper.getFieldsForIndexPattern(),
+
+          // tell the index pattern to do the same
+          indexPattern.refreshFields(),
+        ])
+        .then(function (data) {
+          var expected = data[0]; // just the fields in the index
+          var fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
+
+          expect(_.pluck(fields, 'name')).to.eql(_.pluck(expected, 'name'));
         });
       });
 
@@ -155,16 +165,17 @@ define(function (require) {
         // ensure that all fields will be included in the returned docSource
         setDocsourcePayload(docSourceResponse(indexPatternId));
 
-        // add spy to indexPattern.getFields
-        var getFieldsSpy = sinon.spy(indexPattern, 'getFields');
+        // add spy to indexPattern.getScriptedFields
+        var scriptedFieldsSpy = sinon.spy(indexPattern, 'getScriptedFields');
 
         // refresh fields, which will fetch
         return indexPattern.refreshFields().then(function () {
           // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
-          expect(getFieldsSpy.callCount).to.equal(1);
+          expect(scriptedFieldsSpy.callCount).to.equal(1);
 
           var scripted = _.where(mockLogstashFields, { scripted: true });
-          expect(_.filter(indexPattern.fields, { scripted: true })).to.eql(scripted);
+          var expected = _.filter(indexPattern.fields, { scripted: true });
+          expect(_.pluck(expected, 'name')).to.eql(_.pluck(scripted, 'name'));
         });
       });
     });
@@ -173,7 +184,7 @@ define(function (require) {
       it('should append the scripted field', function () {
         // keep a copy of the current scripted field count
         var saveSpy = sinon.spy(indexPattern, 'save');
-        var oldCount = indexPattern.getFields('scripted').length;
+        var oldCount = indexPattern.getScriptedFields().length;
 
         // add a new scripted field
         var scriptedField = {
@@ -184,7 +195,7 @@ define(function (require) {
         indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
         indexPattern._indexFields(); // normally triggered by docSource.onUpdate()
 
-        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedFields = indexPattern.getScriptedFields();
         expect(saveSpy.callCount).to.equal(1);
         expect(scriptedFields).to.have.length(oldCount + 1);
         expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
@@ -192,19 +203,19 @@ define(function (require) {
 
       it('should remove scripted field, by name', function () {
         var saveSpy = sinon.spy(indexPattern, 'save');
-        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedFields = indexPattern.getScriptedFields();
         var oldCount = scriptedFields.length;
         var scriptedField = _.last(scriptedFields);
 
         indexPattern.removeScriptedField(scriptedField.name);
 
         expect(saveSpy.callCount).to.equal(1);
-        expect(indexPattern.getFields('scripted').length).to.equal(oldCount - 1);
+        expect(indexPattern.getScriptedFields().length).to.equal(oldCount - 1);
         expect(indexPattern.fields.byName[scriptedField.name]).to.equal(undefined);
       });
 
       it('should not allow duplicate names', function () {
-        var scriptedFields = indexPattern.getFields('scripted');
+        var scriptedFields = indexPattern.getScriptedFields();
         var scriptedField = _.last(scriptedFields);
         expect(function () {
           indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');

@@ -41,6 +41,8 @@ define(function (require) {
         var vals = new Array(expressions.length);
         var prev = new Array(expressions.length);
         var fire = false;
+        var init = 0;
+        var neededInits = expressions.length;
 
         // first, register all of the multi-watchers
         var unwatchers = expressions.map(function (expr, i) {
@@ -48,6 +50,10 @@ define(function (require) {
           if (!expr) return;
 
           return expr.fn.call($scope, expr.get, function (newVal, oldVal) {
+            if (newVal === oldVal) {
+              init += 1;
+            }
+
             vals[i] = newVal;
             prev[i] = oldVal;
             fire = true;
@@ -58,12 +64,16 @@ define(function (require) {
         // the other watchers triggered this cycle
         var flip = false;
         unwatchers.push($scope.$watch(function () {
+          if (init < neededInits) return init;
+
           if (fire) {
             fire = false;
             flip = !flip;
           }
           return flip;
         }, function () {
+          if (init < neededInits) return false;
+
           fn(vals.slice(0), prev.slice(0));
           vals.forEach(function (v, i) {
             prev[i] = v;
