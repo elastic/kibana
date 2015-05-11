@@ -5,7 +5,7 @@
   </p>
 
   <div ng-show="agg.params.ipRangeType != 'mask'">
-    <table class="vis-editor-agg-editor-ranges form-group">
+    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.fromTo.length">
       <tr>
         <th>
           <label>From</label>
@@ -43,6 +43,14 @@
       </tr>
     </table>
 
+    <input ng-if="agg.params.ipRangeType != 'mask'" ng-model="agg.params.ranges.fromTo.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+    <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+      <p>
+        <i class="fa fa-danger text-danger"></i>
+        <strong>Required:</strong> You must specify at least one IP range.
+      </p>
+    </div>
+
     <div
       ng-click="agg.params.ranges.fromTo.push({})"
       class="sidebar-item-button primary">
@@ -51,7 +59,7 @@
   </div>
 
   <div ng-show="agg.params.ipRangeType == 'mask'">
-    <table class="vis-editor-agg-editor-ranges form-group">
+    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.mask.length">
       <tr>
         <th>
           <label>Mask</label>
@@ -78,6 +86,14 @@
         </td>
       </tr>
     </table>
+
+    <input ng-if="agg.params.ipRangeType == 'mask'" ng-model="agg.params.ranges.mask.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+    <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+      <p>
+        <i class="fa fa-danger text-danger"></i>
+        <strong>Required:</strong> You must specify at least one IP range.
+      </p>
+    </div>
 
     <div
       ng-click="agg.params.ranges.mask.push({})"
