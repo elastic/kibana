@@ -78,28 +78,6 @@ define(function (require) {
     };
 
     /**
-     * Adds event listeners
-     */
-    Handler.prototype._addEventListeners = function (chart) {
-      var self = this;
-      var enabledEvents;
-
-      if (chart.events.dispatch) {
-        enabledEvents = this.vis.eventTypes.enabled;
-
-        // Copy dispatch.on methods to chart object
-        d3.rebind(chart, chart.events.dispatch, 'on');
-
-        // Bind events to chart(s)
-        if (enabledEvents.length) {
-          enabledEvents.forEach(function (event) {
-            self.enable(event, chart);
-          });
-        }
-      }
-    };
-
-    /**
      * Renders the constructors that create the visualization,
      * including the chart constructor
      *
@@ -116,7 +94,9 @@ define(function (require) {
       this._validateData();
       this.renderArray.forEach(function (property) {
         if (property instanceof Legend) {
-          self._addEventListeners(property);
+          self.vis.activeEvents().forEach(function (event) {
+            self.enable(event, property);
+          });
         }
 
         if (typeof property.render === 'function') {
@@ -133,7 +113,6 @@ define(function (require) {
           self.enable(event, chart);
         });
 
-        self._addEventListeners(chart);
         charts.push(chart);
         chart.render();
       });
