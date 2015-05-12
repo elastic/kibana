@@ -37,9 +37,7 @@ describe('lib/status/index.js', function () {
 
   it('should serialize the statuses when toJSON is called', function () {
     status.createStatus(plugin);
-    expect(JSON.stringify(status)).to.eql(JSON.stringify({
-      test: { state: 'yellow', message: 'Initializing' }
-    }));
+    expect(JSON.stringify(status)).to.eql(JSON.stringify(status.data));
   });
 
 });

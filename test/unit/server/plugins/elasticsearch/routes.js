@@ -1,6 +1,6 @@
 var root = require('requirefrom')('');
 var expect = require('expect.js');
-var kibana = root('src/server');
+var Kibana = root('src/server');
 var findPort = root('test/utils/find_port');
 root('test/utils/ensure_elasticsearch');
 var util = require('util');
@@ -13,8 +13,9 @@ describe('plugins/elasticsearch', function () {
 
     beforeEach(function () {
       return findPort(7000, 8000).then(function (port) {
-        config = { 'kibana.server.port': port, 'logging.quiet': true };
-        return kibana.start(config).then(function (_server) {
+        config = { 'kibana.server.port': port, 'logging.quiet': true};
+        var kibana = new Kibana(config);
+        return kibana.listen().then(function (_server) {
           server = _server;
         });
       });
@@ -48,15 +49,15 @@ describe('plugins/elasticsearch', function () {
     });
 
     testRoute({
-      method: 'GET',
-      url: '/elasticsearch/.kibana'
-    });
-
-    testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana',
       payload: '{settings: {number_of_shards: 1, number_of_replicas: 1}}',
       statusCode: 201
+    });
+
+    testRoute({
+      method: 'GET',
+      url: '/elasticsearch/.kibana'
     });
 
     testRoute({
