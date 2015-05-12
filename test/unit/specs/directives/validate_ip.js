@@ -13,6 +13,22 @@ define(function (require) {
       $rootScope = _$rootScope_;
     }));
 
+    it('should allow empty input', function () {
+      var element = $compile(html)($rootScope);
+
+      $rootScope.value = '';
+      $rootScope.$digest();
+      expect(element.hasClass('ng-valid')).to.be.ok();
+
+      $rootScope.value = null;
+      $rootScope.$digest();
+      expect(element.hasClass('ng-valid')).to.be.ok();
+
+      $rootScope.value = undefined;
+      $rootScope.$digest();
+      expect(element.hasClass('ng-valid')).to.be.ok();
+    });
+
     it('should allow valid IP addresses', function () {
       var element = $compile(html)($rootScope);
 
@@ -35,10 +51,6 @@ define(function (require) {
 
     it('should disallow invalid IP addresses', function () {
       var element = $compile(html)($rootScope);
-
-      $rootScope.value = '';
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
 
       $rootScope.value = 'hello, world';
       $rootScope.$digest();
