@@ -87,20 +87,16 @@ If the saved search is associated with a different index pattern than is current
 [float]
 [[select-pattern]]
 ==== Changing Which Indices You're Searching
-When you submit a search request, the indices that match the currently-selected index pattern are searched. The current index pattern is shown below the search field. To change which indices you are searching, select a different index pattern.
-
-To select a different index pattern:
-
-. Click the *Settings* button image:images/SettingsButton.jpg[Settings 
-button] in the Discover toolbar.
-. Select the pattern you want to use from the Index Pattern list.
+When you submit a search request, the indices that match the currently-selected index pattern are searched. The current 
+index pattern is shown below the search field. To change which indices you are searching, click the name of the current
+index pattern to display a list of the configured index patterns and select a different index pattern.
 
 For more information about index patterns, see <<settings-create-pattern, Creating an Index Pattern>>.
 
 [float]
 [[auto-refresh]]
 === Automatically Refreshing the Page
-You can  configure a refresh interval to automatically refresh the Discover page with the latest
+You can configure a refresh interval to automatically refresh the Discover page with the latest
 index data. This periodically resubmits the search query.
 
 When a refresh interval is set, it is displayed to the left of the Time Filter in the menu bar.

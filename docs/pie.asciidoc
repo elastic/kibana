@@ -28,6 +28,13 @@ intervals in the histogram.
 *Range*:: With a {ref}/search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges 
 of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove 
 a range.
+*Date Range*:: A {ref}/search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values 
+that are within a range of dates that you specify. You can specify the ranges for the dates using 
+{ref}/mapping-date-format.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints. 
+Click the red *(/)* symbol to remove a range.
+*IPv4 Range*:: The {ref}search-aggregations-bucket-iprange-aggregation.html[_IPv4 range_] aggregation enables you to
+specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(/)* symbol to 
+remove a range.
 *Terms*:: A {ref}/search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top 
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
 *Filters*:: You can specify a set of {ref}/search-aggregations-bucket-filters-aggregation.html[_filters_] for the data. 
@@ -61,8 +68,11 @@ NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you
 
 The availability of these options varies depending on the aggregation you choose.
 
-Select *view options* to change the following aspects of the table:
+Select the *Options* tab to change the following aspects of the table:
 
 *Donut*:: Display the chart as a sliced ring instead of a sliced pie.
 *Show Tooltip*:: Check this box to enable the display of tooltips.
 *Show Legend*:: Check this box to enable the display of a legend next to the chart.
+
+After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+changes* button to keep your visualization in its current state.

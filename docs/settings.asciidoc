@@ -157,6 +157,16 @@ To delete an index pattern:
 . Confirm that you want to remove the index pattern.
 
 [float]
+[[managing-fields]]
+=== Managing Fields
+The fields for the index pattern are listed in a table. Click a column header to sort the table by that column. Click 
+the *Controls* button in the rightmost column for a given field to edit the field's properties. You can manually set 
+the field's format from the *Format* drop-down. Format options vary based on the field's type.
+
+You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the 
+*Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
+
+[float]
 [[create-scripted-field]]
 === Creating a Scripted Field
 Scripted fields compute data on the fly from the data in your
@@ -239,8 +249,8 @@ To set advanced options:
 . Click the *Save* button.
 
 === Managing Saved Searches, Visualizations, and Dashboards ===
-You can view, edit, and delete saved searches, visualizations,
-and dashboards from *Settings > Objects*. 
+You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
+export or import sets of searches, visualizations, and dashboards.
 
 Viewing a saved object displays the selected item in the *Discover*, *Visualize*, 
 or *Dashboard* page. To view a saved object:
@@ -281,6 +291,19 @@ To delete a saved object:
 . Select the object you want to delete. 
 . Click the *Delete* button.
 . Confirm that you really want to delete the object.
+
+To export a set of objects:
+
+. Go to *Settings > Objects*.
+. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations. 
+. Click the selection box for the objects you want to export, or click the *Select All* box.
+. Click *Export* to select a location to write the exported JSON.
+
+To import a set of objects:
+. Go to *Settings > Objects*.
+. Click *Import* to navigate to the JSON file representing the set of objects to import.
+. Click *Open* after selecting the JSON file.
+. If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
 
 === Setting Kibana Server Properties
 
