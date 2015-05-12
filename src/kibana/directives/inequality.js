@@ -1,51 +1,40 @@
 define(function (require) {
-  var _ = require('lodash');
-  var inequalityMaps = {};
 
-  function attachInequality() {
-    return function ($scope, $el, $attr, controllers) {
-      var ngModel = controllers[0];
-      var ngForm = controllers[1];
-      var name = $attr.inequality.slice(1);
+  function makeDirectiveDef(id, compare) {
+    return function ($parse) {
+      return {
+        require: 'ngModel',
+        link: function ($scope, $el, $attr, ngModel) {
+          var getBound = function () { return $parse($attr[id])(); };
+          var defaultVal = {
+            'greaterThan': -Infinity,
+            'lessThan': Infinity
+          }[id];
 
-      inequalityMaps[$attr.name] = name;
-      ngModel.$parsers.push(validator);
-      ngModel.$formatters.push(validator);
+          ngModel.$parsers.push(validate);
+          ngModel.$formatters.push(validate);
 
-      function validator(thisVal) {
-        var sign = $attr.inequality.slice(0, 1);
-        var valid = false;
-        var otherElem = ngForm[name];
-        var otherVal = +otherElem.$modelValue || 0;
-        var hasCompliment = (inequalityMaps[name] === $attr.name);
+          $scope.$watch(getBound, function () {
+            validate(ngModel.$viewValue);
+          });
 
-        if (!isNaN(thisVal)) {
-          switch (sign) {
-            case ('<'):
-              valid = +thisVal < otherVal;
-              break;
-            case ('>'):
-              valid = +thisVal > otherVal;
-              break;
+          function validate(val) {
+            var bound = !isNaN(getBound()) ? +getBound() : defaultVal;
+            var valid = !isNaN(bound) && !isNaN(val) && compare(val, bound);
+            ngModel.$setValidity(id, valid);
+            return val;
           }
         }
-
-        ngModel.$setValidity('inequality', valid);
-        if (hasCompliment) {
-          otherElem.$setValidity('inequality', valid);
-        }
-
-        return thisVal;
-      }
+      };
     };
   }
 
   require('modules')
-  .get('kibana')
-  .directive('inequality', function () {
-    return {
-      require: ['ngModel', '^form'],
-      link: attachInequality()
-    };
-  });
+    .get('kibana')
+    .directive('greaterThan', makeDirectiveDef('greaterThan', function (a, b) {
+      return a > b;
+    }))
+    .directive('lessThan', makeDirectiveDef('lessThan', function (a, b) {
+      return a < b;
+    }));
 });
