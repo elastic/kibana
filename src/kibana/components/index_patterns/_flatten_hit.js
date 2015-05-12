@@ -2,7 +2,6 @@
 // returns a flattened version
 define(function (require) {
   return function FlattenHitProvider(config, $rootScope) {
-
     var _ = require('lodash');
 
     var metaFields = config.get('metaFields');
@@ -49,13 +48,15 @@ define(function (require) {
       return flat;
     }
 
-    function cachedFlatten(indexPattern, hit) {
-      return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
-    }
+    return function (indexPattern) {
+      function cachedFlatten(hit) {
+        return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
+      }
 
-    cachedFlatten.uncached = flattenHit;
+      cachedFlatten.uncached = _.partial(flattenHit, indexPattern);
 
-    return cachedFlatten;
+      return cachedFlatten;
+    };
   };
 
 });

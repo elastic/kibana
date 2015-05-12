@@ -8,8 +8,6 @@ define(function (require) {
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
     var _ = require('lodash');
 
-    var orderBy = $filter('orderBy');
-
     return {
       restrict: 'E',
       template: require('text!components/agg_table/agg_table.html'),
@@ -54,7 +52,7 @@ define(function (require) {
           }
 
           // escape each cell in each row
-          var csvRows = rows.map(function (row, i) {
+          var csvRows = rows.map(function (row) {
             return row.map(escape);
           });
 
@@ -72,16 +70,13 @@ define(function (require) {
           var table = $scope.table;
 
           if (!table) {
-            $scope.formattedRows = null;
+            $scope.rows = null;
             $scope.formattedColumns = null;
             return;
           }
 
-          setFormattedRows(table);
-          setFormattedColumns(table);
-        });
-
-        function setFormattedColumns(table) {
+          self.csv.filename = (table.title() || 'table') + '.csv';
+          $scope.rows = table.rows;
           $scope.formattedColumns = table.columns.map(function (col, i) {
             var agg = $scope.table.aggConfig(col);
             var field = agg.field();
@@ -98,14 +93,7 @@ define(function (require) {
 
             return formattedColumn;
           });
-        }
-
-        function setFormattedRows(table) {
-          $scope.rows = table.rows;
-
-          // update the csv file's title
-          self.csv.filename = (table.title() || 'table') + '.csv';
-        }
+        });
       }
     };
   });

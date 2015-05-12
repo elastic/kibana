@@ -73,7 +73,6 @@ define(function (require) {
       });
     });
 
-
     describe('Leaflet controls', function () {
       var vis;
       var leafletContainer;
@@ -141,6 +140,30 @@ define(function (require) {
         destroyVis(vis);
       });
 
+      describe('_filterToMapBounds method', function () {
+        it('should filter out data points that are outside of the map bounds', function () {
+          vis.handler.charts.forEach(function (chart) {
+            chart.maps.forEach(function (map) {
+              var featuresLength = chart.chartData.geoJson.features.length;
+              var mapFeatureLength;
+
+              function getSize(obj) {
+                var size = 0;
+                var key;
+
+                for (key in obj) { if (obj.hasOwnProperty(key)) size++; }
+                return size;
+              }
+
+              map.setZoom(13); // Zoom in on the map!
+              mapFeatureLength = getSize(map._layers);
+
+              expect(mapFeatureLength).to.be.lessThan(featuresLength);
+            });
+          });
+        });
+      });
+
       describe('geohashMinDistance method', function () {
         it('should return a number', function () {
           vis.handler.charts.forEach(function (chart) {
@@ -170,6 +193,37 @@ define(function (require) {
             var min = 0;
             var max = 300;
             expect(_.indexOf(reds, chart.quantizeColorScale(count, min, max))).to.not.be(-1);
+          });
+        });
+      });
+
+      describe('getMinMax method', function () {
+        it('should return an object', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var data = chart.handler.data.data;
+            expect(chart.getMinMax(data)).to.be.an(Object);
+          });
+        });
+
+        it('should return the min of all features.properties.count', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var data = chart.handler.data.data;
+            var min = _.chain(data.geoJson.features)
+            .deepPluck('properties.count')
+            .min()
+            .value();
+            expect(chart.getMinMax(data).min).to.be(min);
+          });
+        });
+
+        it('should return the max of all features.properties.count', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var data = chart.handler.data.data;
+            var max = _.chain(data.geoJson.features)
+            .deepPluck('properties.count')
+            .max()
+            .value();
+            expect(chart.getMinMax(data).max).to.be(max);
           });
         });
       });

@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var d3 = require('d3');
 
   // Data
   var data = require('vislib_fixtures/mock_data/date_histogram/_series');
@@ -15,87 +16,96 @@ define(function (require) {
       vis = null;
     }
 
+    function getEls(n, type) {
+      return d3.select().data(new Array(n)).enter().append(type);
+    }
+
+    describe('', function () {
+      var vis;
+      var SimpleEmitter;
+
+      beforeEach(module('AreaChartFactory'));
+      beforeEach(inject(function (Private) {
+        vis = Private(require('vislib_fixtures/_vis_fixture'))();
+        vis.render(data);
+        SimpleEmitter = require('utils/SimpleEmitter');
+      }));
+
+      afterEach(function () {
+        destroyVis(vis);
+      });
+
+      it('extends the SimpleEmitter class', function () {
+        var events = _.pluck(vis.handler.charts, 'events');
+        expect(events.length).to.be.above(0);
+        events.forEach(function (dispatch) {
+          expect(dispatch).to.be.a(SimpleEmitter);
+        });
+      });
+    });
+
     describe('Stock event handlers', function () {
       var vis;
 
-      beforeEach(function () {
-        module('AreaChartFactory');
-      });
+      beforeEach(module('AreaChartFactory'));
+      beforeEach(inject(function (Private) {
+        vis = Private(require('vislib_fixtures/_vis_fixture'))();
+        require('css!components/vislib/styles/main');
 
-      beforeEach(function () {
-        inject(function (Private) {
-          vis = Private(require('vislib_fixtures/_vis_fixture'))();
-          require('css!components/vislib/styles/main');
+        vis.on('brush', _.noop);
 
-          vis.on('brush', _.noop);
-
-          vis.render(data);
-        });
-      });
+        vis.render(data);
+      }));
 
       afterEach(function () {
         destroyVis(vis);
       });
 
       describe('addEvent method', function () {
-        it('should return a function', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var addEvent = chart.events.addEvent;
-            expect(_.isFunction(addEvent('click', _.noop))).to.be(true);
+        it('returns a function that binds the passed event to a selection', function () {
+          var chart = _.first(vis.handler.charts);
+          var apply = chart.events.addEvent('event', _.noop);
+          expect(apply).to.be.a('function');
+
+          var els = getEls(3, 'div');
+          apply(els);
+          els.each(function () {
+            expect(d3.select(this).on('event')).to.be(_.noop);
           });
         });
       });
 
-      describe('addHoverEvent method', function () {
-        it('should return a function', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var hover = chart.events.addHoverEvent;
+      // test the addHoverEvent, addClickEvent, addBrushEvent methods by
+      // checking that they return function which bind the events expected
+      function checkBoundAddMethod(name, event) {
+        describe(name + ' method', function () {
+          it('should be a function', function () {
+            vis.handler.charts.forEach(function (chart) {
+              expect(chart.events[name]).to.be.a('function');
+            });
+          });
 
-            expect(_.isFunction(hover)).to.be(true);
+          it('returns a function that binds ' + event + ' events to a selection', function () {
+            var chart = _.first(vis.handler.charts);
+            var apply = chart.events[name](d3.select(document.createElement('svg')));
+            expect(apply).to.be.a('function');
+
+            var els = getEls(3, 'div');
+            apply(els);
+            els.each(function () {
+              expect(d3.select(this).on(event)).to.be.a('function');
+            });
           });
         });
+      }
 
-        it('should attach a hover event', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.events.dispatch.hover)).to.be(true);
-          });
-        });
-      });
-
-      describe('addClickEvent method', function () {
-        it('should return a function', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var click = chart.events.addClickEvent;
-
-            expect(_.isFunction(click)).to.be(true);
-          });
-        });
-
-        it('should attach a click event', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.events.dispatch.click)).to.be(true);
-          });
-        });
-      });
-
-      describe('addBrushEvent method', function () {
-        it('should return a function', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var brush = chart.events.addBrushEvent;
-
-            expect(_.isFunction(brush)).to.be(true);
-          });
-        });
-
-        it('should attach a brush event', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.events.dispatch.brush)).to.be(true);
-          });
-        });
-      });
+      checkBoundAddMethod('addHoverEvent', 'mouseover');
+      checkBoundAddMethod('addMouseoutEvent', 'mouseout');
+      checkBoundAddMethod('addClickEvent', 'click');
+      checkBoundAddMethod('addBrushEvent', 'mousedown');
 
       describe('addMousePointer method', function () {
-        it('should return a function', function () {
+        it('should be a function', function () {
           vis.handler.charts.forEach(function (chart) {
             var pointer = chart.events.addMousePointer;
 
@@ -106,7 +116,7 @@ define(function (require) {
     });
 
     describe('Custom event handlers', function () {
-      it('should attach whatever gets passed on vis.on() to dispatch', function (done) {
+      it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
         var vis;
         var chart;
         module('AreaChartFactory');
@@ -116,11 +126,28 @@ define(function (require) {
           vis.render(data);
 
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.events.dispatch.someEvent).to.be.a(Function);
+            expect(chart.events.listenerCount('someEvent')).to.be(1);
           });
 
           destroyVis(vis);
           done();
+        });
+      });
+
+      it('can be added after rendering', function () {
+        var vis;
+        var chart;
+        module('AreaChartFactory');
+        inject(function (Private) {
+          vis = Private(require('vislib_fixtures/_vis_fixture'))();
+          vis.render(data);
+          vis.on('someEvent', _.noop);
+
+          vis.handler.charts.forEach(function (chart) {
+            expect(chart.events.listenerCount('someEvent')).to.be(1);
+          });
+
+          destroyVis(vis);
         });
       });
     });

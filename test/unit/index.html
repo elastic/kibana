@@ -8,7 +8,6 @@
     <script src="/node_modules/mocha/mocha.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
-
     <script>(function () {
       var COVERAGE = !!(/coverage/i.test(window.location.search));
       var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
@@ -48,6 +47,7 @@
             ],
             exports: 'angular'
           },
+          'angular-route': ['angular'],
           'sinon/sinon': {
             deps: [
               'sinon/sinon-timers-1.8.2'

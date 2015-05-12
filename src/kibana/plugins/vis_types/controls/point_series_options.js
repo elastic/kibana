@@ -2,8 +2,6 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var module = require('modules').get('kibana');
-  //require('directives/greater_than');
-  //require('directives/less_than');
   require('directives/inequality');
 
   module.directive('pointSeriesOptions', function ($parse, $compile) {
