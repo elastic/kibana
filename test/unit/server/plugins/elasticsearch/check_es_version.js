@@ -1,6 +1,6 @@
 var root = require('requirefrom')('');
 var _ = require('lodash');
-var checkEsVersion = root('src/hapi/plugins/elasticsearch/lib/check_es_version');
+var checkEsVersion = root('src/server/plugins/elasticsearch/lib/check_es_version');
 var Promise = require('bluebird');
 var sinon = require('sinon');
 

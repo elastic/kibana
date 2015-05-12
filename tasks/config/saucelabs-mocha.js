@@ -1,5 +1,5 @@
 var config = require('../utils/server-config');
-var unitTestUrl = require('util').format('http://localhost:%d/test/unit/?saucelabs=true', config.kibana.port);
+var unitTestUrl = require('util').format('http://localhost:%d/test/unit/?saucelabs=true', config.get('kibana.server.port'));
 var buildId = 'test build';
 if (process.env.TRAVIS_BUILD_ID) {
   buildId = 'travis build #' + process.env.TRAVIS_BUILD_ID;

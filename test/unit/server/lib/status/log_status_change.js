@@ -1,6 +1,6 @@
 var expect = require('expect.js');
 var sinon = require('sinon');
-var logStatusChange = require('../../../../../src/hapi/lib/status/log_status_change');
+var logStatusChange = require('../../../../../src/server/lib/status/log_status_change');
 
 describe('lib/status/log_status_change', function () {
 

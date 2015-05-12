@@ -3,8 +3,8 @@ var _ = require('lodash');
 _.mixin(require('lodash-deep'));
 var sinon = require('sinon');
 var expect = require('expect.js');
-var createKibanaIndex = root('src/hapi/plugins/elasticsearch/lib/create_kibana_index');
-var SetupError = root('src/hapi/plugins/elasticsearch/lib/setup_error');
+var createKibanaIndex = root('src/server/plugins/elasticsearch/lib/create_kibana_index');
+var SetupError = root('src/server/plugins/elasticsearch/lib/setup_error');
 var Promise = require('bluebird');
 
 describe('plugins/elasticsearch', function () {

@@ -1,6 +1,6 @@
 var root = require('requirefrom')('');
 var _ = require('lodash');
-var SetupError = root('src/hapi/plugins/elasticsearch/lib/setup_error');
+var SetupError = root('src/server/plugins/elasticsearch/lib/setup_error');
 var expect = require('expect.js');
 
 describe('plugins/elasticsearch', function () {

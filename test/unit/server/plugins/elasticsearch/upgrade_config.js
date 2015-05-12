@@ -1,6 +1,6 @@
 var root = require('requirefrom')('');
 var _ = require('lodash');
-var upgradeConfig = root('src/hapi/plugins/elasticsearch/lib/upgrade_config');
+var upgradeConfig = root('src/server/plugins/elasticsearch/lib/upgrade_config');
 var Promise = require('bluebird');
 var sinon = require('sinon');
 var expect = require('expect.js');

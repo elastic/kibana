@@ -1,6 +1,6 @@
 var root = require('requirefrom')('');
 var expect = require('expect.js');
-var kibana = root('src/hapi');
+var kibana = root('src/server');
 var findPort = root('test/utils/find_port');
 root('test/utils/ensure_elasticsearch');
 var util = require('util');

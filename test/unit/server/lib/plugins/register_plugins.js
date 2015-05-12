@@ -1,9 +1,9 @@
 var _ = require('lodash');
 var expect = require('expect.js');
 var sinon = require('sinon');
-var registerPlugins = require('../../../../../src/hapi/lib/plugins/register_plugins');
-var Status = require('../../../../../src/hapi/lib/status/status');
-var systemStatus = require('../../../../../src/hapi/lib/status');
+var registerPlugins = require('../../../../../src/server/lib/plugins/register_plugins');
+var Status = require('../../../../../src/server/lib/status/status');
+var systemStatus = require('../../../../../src/server/lib/status');
 var Promise = require('bluebird');
 
 function createInit() {

@@ -1,7 +1,7 @@
 var expect = require('expect.js');
 var sinon = require('sinon');
-var status = require('../../../../../src/hapi/lib/status');
-var Status = require('../../../../../src/hapi/lib/status/status');
+var status = require('../../../../../src/server/lib/status');
+var Status = require('../../../../../src/server/lib/status/status');
 
 describe('lib/status/index.js', function () {
 

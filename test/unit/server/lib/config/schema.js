@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var schema = root('src/hapi/lib/config/schema');
+var schema = root('src/server/glib/config/schema');
 var expect = require('expect.js');
 var _ = require('lodash');
 var Joi = require('joi');

@@ -62,4 +62,3 @@ verify_ssl: true
 # If you would like to send the log output to a file you can set the path below.
 # This will also turn off the STDOUT log output.
 # log_file: ./kibana.log
-

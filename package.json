@@ -12,7 +12,7 @@
   ],
   "private": false,
   "version": "4.1.0-snapshot",
-  "main": "src/hapi/index.js",
+  "main": "src/server/index.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "test": "grunt test",
-    "start": "node ./src/hapi/index.js",
+    "start": "node ./src/server/index.js",
     "server": "node ./src/server/bin/kibana.js",
     "precommit": "grunt lintStagedFiles"
   },
