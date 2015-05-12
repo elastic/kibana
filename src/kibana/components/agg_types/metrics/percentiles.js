@@ -41,9 +41,6 @@ define(function (require) {
           return new ValueAggConfig(percent);
         });
       },
-      getFormat: function () {
-        return fieldFormats.getInstance('percent') || fieldFormats.getDefaultInstance('number');
-      },
       getValue: function (agg, bucket) {
         // percentiles for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
         // parse the keys and respond with the value that matches

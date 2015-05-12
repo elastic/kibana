@@ -1,8 +1,5 @@
 define(function (require) {
-  var angular = require('angular');
-  var $ = require('jquery');
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
   var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
 
   // Load the kibana app dependencies.
@@ -10,7 +7,7 @@ define(function (require) {
 
   var indexPattern;
 
-  describe('fieldCalculator', function (done) {
+  describe('fieldCalculator', function () {
     beforeEach(module('kibana'));
     beforeEach(function () {
       inject(function (Private) {
@@ -19,10 +16,9 @@ define(function (require) {
     });
 
 
-    it('should have a _countMissing that counts nulls & undefineds in an array', function (done) {
+    it('should have a _countMissing that counts nulls & undefineds in an array', function () {
       var values = [['foo', 'bar'], 'foo', 'foo', undefined, ['foo', 'bar'], 'bar', 'baz', null, null, null, 'foo', undefined];
       expect(fieldCalculator._countMissing(values)).to.be(5);
-      done();
     });
 
     describe('_groupValues', function () {
@@ -33,55 +29,48 @@ define(function (require) {
         groups = fieldCalculator._groupValues(values, params);
       });
 
-      it('should have a _groupValues that counts values', function (done) {
+      it('should have a _groupValues that counts values', function () {
         expect(groups).to.be.an(Object);
-        done();
       });
 
-      it('should throw an error if any value is a plain object', function (done) {
+      it('should throw an error if any value is a plain object', function () {
         expect(function () { fieldCalculator._groupValues([{}, true, false], params); })
           .to.throwError();
-        done();
       });
 
-      it('should have a a key for value in the array when not grouping array terms', function (done) {
+      it('should have a a key for value in the array when not grouping array terms', function () {
         expect(_.keys(groups).length).to.be(3);
         expect(groups.foo).to.be.a(Object);
         expect(groups.bar).to.be.a(Object);
         expect(groups.baz).to.be.a(Object);
-        done();
       });
 
-      it('should count array terms independently', function (done) {
+      it('should count array terms independently', function () {
         expect(groups['foo,bar']).to.be(undefined);
         expect(groups.foo.count).to.be(5);
         expect(groups.bar.count).to.be(3);
         expect(groups.baz.count).to.be(1);
-        done();
       });
 
-      describe('grouped array terms', function (done) {
+      describe('grouped array terms', function () {
         beforeEach(function () {
           params.grouped = true;
           groups = fieldCalculator._groupValues(values, params);
         });
 
-        it('should group array terms when passed params.grouped', function (done) {
+        it('should group array terms when passed params.grouped', function () {
           expect(_.keys(groups).length).to.be(4);
           expect(groups['foo,bar']).to.be.a(Object);
-          done();
         });
 
-        it('should contain the original array as the value', function (done) {
+        it('should contain the original array as the value', function () {
           expect(groups['foo,bar'].value).to.eql(['foo', 'bar']);
-          done();
         });
 
-        it('should count the pairs seperately from the values they contain', function (done) {
+        it('should count the pairs seperately from the values they contain', function () {
           expect(groups['foo,bar'].count).to.be(2);
           expect(groups.foo.count).to.be(3);
           expect(groups.bar.count).to.be(1);
-          done();
         });
       });
     });
@@ -113,7 +102,7 @@ define(function (require) {
       var params;
       beforeEach(function () {
         params = {
-          data: require('fixtures/real_hits.js'),
+          hits: require('fixtures/real_hits.js'),
           field: indexPattern.fields.byName.extension,
           count: 3
         };
@@ -139,13 +128,13 @@ define(function (require) {
         expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
       });
 
-      it('fails to analyze fields that are in the mapping, but not the data', function () {
+      it('fails to analyze fields that are in the mapping, but not the hits', function () {
         params.field = indexPattern.fields.byName.ip;
         expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
       });
 
       it('counts the total hits', function () {
-        expect(fieldCalculator.getFieldValueCounts(params).total).to.be(params.data.length);
+        expect(fieldCalculator.getFieldValueCounts(params).total).to.be(params.hits.length);
       });
 
       it('counts the hits the field exists in', function () {

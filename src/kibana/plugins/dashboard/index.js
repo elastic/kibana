@@ -50,7 +50,7 @@ define(function (require) {
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile, Private, getAppState) {
-        var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+        var queryFilter = Private(require('components/filter_bar/query_filter'));
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -110,22 +110,24 @@ define(function (require) {
         }
 
         function updateQueryOnRootSource() {
-          var filters = $state.filters;
+          var filters = queryFilter.getFilters();
           if ($state.query) {
-            dash.searchSource.set('filter', _.union($state.filters, [{
-              query:  $state.query
+            dash.searchSource.set('filter', _.union(filters, [{
+              query: $state.query
             }]));
           } else {
             dash.searchSource.set('filter', filters);
           }
         }
 
-        filterBarWatchFilters($scope)
-        .on('update', function () {
+        // update root source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           updateQueryOnRootSource();
           $state.save();
-        })
-        .on('fetch', $scope.refresh);
+        });
+
+        // update data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});

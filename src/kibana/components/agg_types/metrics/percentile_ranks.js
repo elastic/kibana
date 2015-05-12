@@ -12,7 +12,10 @@ define(function (require) {
 
     var valueProps = {
       makeLabel: function () {
-        return 'Percentile rank ' + this.key + ' of "' + this.fieldDisplayName() + '"';
+        var field = this.field();
+        var format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+
+        return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + this.fieldDisplayName() + '"';
       }
     };
 
@@ -48,7 +51,7 @@ define(function (require) {
         // parse the keys and respond with the value that matches
         return _.find(bucket[agg.parentId].values, function (value, key) {
           return agg.key === parseFloat(key);
-        });
+        }) / 100;
       }
     });
   };

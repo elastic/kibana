@@ -8,11 +8,10 @@ define(function (require) {
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
     var intervals = Private(require('components/index_patterns/_intervals'));
-    var Field = Private(require('components/index_patterns/_field'));
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
-    var IndexedArray = require('utils/indexed_array/index');
+    var FieldList = Private(require('components/index_patterns/_field_list'));
 
     var flattenHit = Private(require('components/index_patterns/_flatten_hit'));
     var formatHit = require('components/index_patterns/_format_hit');
@@ -107,14 +106,7 @@ define(function (require) {
       };
 
       function initFields(fields) {
-        fields = fields || self.fields || [];
-        self.fields = new IndexedArray({
-          index: ['name'],
-          group: ['type'],
-          initialSet: fields.map(function (field) {
-            return new Field(self, field);
-          })
-        });
+        self.fields = new FieldList(self, fields || self.fields || []);
       }
 
       self._indexFields = function () {

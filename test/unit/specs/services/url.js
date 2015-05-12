@@ -2,6 +2,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var faker = require('faker');
   var _ = require('lodash');
+  var MockState = require('fixtures/mock_state');
 
   // global vars, injected and mocked in init()
   var kbnUrl;
@@ -29,8 +30,7 @@ define(function (require) {
       });
 
       $provide.service('globalState', function () {
-        globalStateMock = {};
-        globalStateMock.on = globalStateMock.off = _.noop;
+        globalStateMock = new MockState();
         globalStateMock.removeFromUrl = function (url) {
           return url;
         };

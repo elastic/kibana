@@ -255,7 +255,7 @@ define(function (require) {
     };
 
     AggConfig.prototype.getKey = function (bucket, key) {
-      return this.type.getKey(bucket, key);
+      return this.type.getKey(bucket, key, this);
     };
 
     AggConfig.prototype.makeLabel = function () {
@@ -272,7 +272,7 @@ define(function (require) {
       var format = field && field.format;
       var strFormat = fieldFormats.getDefaultInstance('string');
 
-      if (this.type && this.type.getFormat) {
+      if (this.type) {
         format = this.type.getFormat(this) || format;
       }
 

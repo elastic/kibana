@@ -13,7 +13,7 @@ define(function (require) {
 
       inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
-        BaseObject = Private(require('factories/base_object'));
+        BaseObject = require('utils/BaseObject');
       });
     });
 
