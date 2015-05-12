@@ -68,6 +68,31 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
         return 'precise';
       }
     }
+    var makeChartOptions = _.memoize(function (type) {
+      return {
+        chart: {
+          type: 'lineChart',
+          height: 200,
+          showLegend: false,
+          showXAxis: false,
+          showYAxis: false,
+          useInteractiveGuideline: true,
+          tooltips: true,
+          pointSize: 0,
+          color: ['#444', '#777', '#aaa'],
+          margin: {
+            top: 10,
+            left: 0,
+            right: 0,
+            bottom: 20
+          },
+          xAxis: { tickFormat: function(d) { return formatNumber(d, 'time'); } },
+          yAxis: { tickFormat: function(d) { return formatNumber(d, type); }, },
+          y: function(d) { return d.y; },
+          x: function(d) { return d.x; }
+        }
+      };
+    });
 
     // The Kibana App
     angular.module('KibanaStatusApp', ['nvd3'])
@@ -103,31 +128,6 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
           plugins: [],
           chartAverages: [],
           chartOptions: {
-            chart: {
-              type: 'lineChart',
-              height: 200,
-              showLegend: false,
-              showXAxis: false,
-              showYAxis: false,
-              useInteractiveGuideline: true,
-              tooltips: true,
-              pointSize: 0,
-              color: ['#444', '#777', '#aaa'],
-              margin: {
-                top: 10,
-                left: 0,
-                right: 0,
-                bottom: 20
-              },
-              xAxis: {
-                tickFormat: function(d) { return formatNumber(d, 'time'); }
-              },
-              yAxis: {
-                tickFormat: function(d) { return formatNumber(d); },
-              },
-              y: function(d) { return d.y; },
-              x: function(d) { return d.x; }
-            }
           }
         };
 
@@ -154,6 +154,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                 // Go through all of the metric values and split the values out.
                 // returns an array of all of the averages
                 var metricList = [];
+                var metricNumberType = numberType(name);
 
                 metric.forEach(function(vector) {
                   var _vector = _(vector).flatten();
@@ -173,10 +174,11 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                   var uglySum = data.values.reduce(function(sumSoFar, vector) {
                     return sumSoFar + vector.y;
                   }, 0);
-                  return formatNumber(uglySum / data.values.length, numberType(name));
+                  return formatNumber(uglySum / data.values.length, metricNumberType);
                 });
+                var options = makeChartOptions(metricNumberType);
 
-                return { data: metricList, average: average, niceName: niceName(name) };
+                return { data: metricList, average: average, niceName: niceName(name), options: options };
               });
 
               // give the plugins their proper name so CSS classes can be properply applied
@@ -185,6 +187,8 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                 return plugin;
               });
 
+
+              console.log((new Date()).getTime());
               // go ahead and get another status in 5 seconds
               setTimeout(getAppStatus, 5000);
             })

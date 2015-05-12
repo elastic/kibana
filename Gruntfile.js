@@ -43,6 +43,7 @@ module.exports = function (grunt) {
       '<%= src %>/kibana/components/*/*.less',
       '<%= src %>/kibana/styles/main.less',
       '<%= src %>/kibana/components/vislib/styles/main.less',
+      '<%= src %>/hapi/plugins/status/styles/main.less',
       '<%= plugins %>/dashboard/styles/main.less',
       '<%= plugins %>/discover/styles/main.less',
       '<%= plugins %>/settings/styles/main.less',
