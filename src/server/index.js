@@ -25,7 +25,7 @@ function Kibana(settings, plugins) {
       .value();
   }
 
-  this.plugins.concat(plugins);
+  this.plugins = this.plugins.concat(plugins);
 
 }
 
