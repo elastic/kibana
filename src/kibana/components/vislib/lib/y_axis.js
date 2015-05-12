@@ -117,8 +117,7 @@ define(function (require) {
 
       this.yScale = scale
       .domain(domain)
-      .range([height, 0])
-      .clamp(true);
+      .range([height, 0]);
 
       if (!this._isUserDefined()) this.yScale.nice(); // round extents when not user defined
       return this.yScale;
