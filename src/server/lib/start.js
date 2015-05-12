@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
-var Hapi = require('server');
+var Hapi = require('hapi');
 var requirePlugins = require('./plugins/require_plugins');
 var validatePlugin = require('./plugins/validate_plugin');
 var extendHapi = require('./extend_hapi');
