@@ -68,7 +68,7 @@ define(function (require) {
       $rootScope.$digest();
       expect(element.hasClass('ng-invalid')).to.be.ok();
 
-      $rootScope.value = Number.MAX_SAFE_INTEGER;
+      $rootScope.value = Number.MAX_VALUE;
       $rootScope.$digest();
       expect(element.hasClass('ng-invalid')).to.be.ok();
     });
