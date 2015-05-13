@@ -3,11 +3,11 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    require('leaflet-heat');
     require('leaflet-draw');
 
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var errors = require('errors');
 
     require('css!components/vislib/styles/main');
 
@@ -29,10 +29,13 @@ define(function (require) {
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);
       }
+
       TileMap.Super.apply(this, arguments);
 
       // track the map objects
       this.maps = [];
+
+      this.tooltipFormatter = chartData.tooltipFormatter;
 
       this.events = new Dispatch(handler);
 
@@ -55,7 +58,7 @@ define(function (require) {
       // clean up old maps
       self.destroy();
 
-      // create a new maps array
+      // clear maps array
       self.maps = [];
       self.popups = [];
 
@@ -71,17 +74,16 @@ define(function (require) {
             mapCenter = self._attr.mapCenter;
           }
 
-          var mapData = data.geoJson;
-          var div = $(this).addClass('tilemap');
+          // add leaflet latLngs to properties for tooltip
+          var mapData = self.addLatLng(data.geoJson);
 
-          var featureLayer;
+          var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
@@ -111,24 +113,27 @@ define(function (require) {
 
           var map = L.map(div[0], mapOptions);
 
+          var featureLayer = self.markerType(map, mapData).addTo(map);
+
           if (data.geoJson.features.length) {
             map.addControl(new L.Control.Draw(drawOptions));
           }
 
-          tileLayer.on('tileload', function () {
+          function saturateTiles() {
             self.saturateTiles();
-          });
+          }
 
-          featureLayer = self.markerType(map, mapData).addTo(map);
+          tileLayer.on('tileload', saturateTiles);
 
           map.on('unload', function () {
-            tileLayer.off('tileload', self.saturateTiles);
+            tileLayer.off('tileload', saturateTiles);
           });
 
           map.on('moveend', function setZoomCenter() {
             mapZoom = self._attr.mapZoom = map.getZoom();
             mapCenter = self._attr.mapCenter = map.getCenter();
-            featureLayer.clearLayers();
+
+            map.removeLayer(featureLayer);
             featureLayer = self.markerType(map, mapData).addTo(map);
           });
 
@@ -191,7 +196,11 @@ define(function (require) {
     };
 
     /**
-     * Return features within the map bounds
+     * return whether feature is within map bounds
+     *
+     * @method _filterToMapBounds
+     * @param map {Leaflet Object}
+     * @return {boolean}
      */
     TileMap.prototype._filterToMapBounds = function (map) {
       return function (feature) {
@@ -237,20 +246,36 @@ define(function (require) {
     };
 
     /**
-     * zoom map to fit all features in featureLayer
+     * add Leaflet latLng to mapData properties
      *
-     * @method fitBounds
-     * @param map {Object}
-     * @param featureLayer {Leaflet object}
-     * @return {Leaflet object} featureLayer
+     * @method addLatLng
+     * @param mapData {geoJson Object}
+     * @return mapData {geoJson Object}
      */
-    TileMap.prototype.fitBounds = function (map, featureLayer) {
+    TileMap.prototype.addLatLng = function (mapData) {
+      for (var i = 0; i < mapData.features.length; i++) {
+        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
+        mapData.features[i].properties.latLng = latLng;
+      }
 
-      map.fitBounds(featureLayer.getBounds());
+      return mapData;
     };
 
     /**
-     * remove css class on map tiles
+     * zoom map to fit all features in featureLayer
+     *
+     * @method fitBounds
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.fitBounds = function (map, mapData) {
+
+      map.fitBounds(this.getBounds(mapData));
+    };
+
+    /**
+     * remove css class for desat filters on map tiles
      *
      * @method saturateTiles
      * @return {Leaflet object} featureLayer
@@ -262,16 +287,118 @@ define(function (require) {
     };
 
     /**
+     * Finds nearest feature in mapData to event latlng
+     *
+     * @method nearestFeature
+     * @param point {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return nearestPoint {Leaflet Object}
+     */
+    TileMap.prototype.nearestFeature = function (point, mapData) {
+      var self = this;
+      var distance = Infinity;
+      var nearest;
+
+      if (point.lng < -180 || point.lng > 180) {
+        return;
+      }
+
+      for (var i = 0; i < mapData.features.length; i++) {
+        var dist = point.distanceTo(mapData.features[i].properties.latLng);
+        if (dist < distance) {
+          distance = dist;
+          nearest = mapData.features[i];
+        }
+      }
+      nearest.properties.eventDistance = distance;
+
+      return nearest;
+    };
+
+    /**
+     * display tooltip if feature is close enough to event latlng
+     *
+     * @method tooltipProximity
+     * @param latlng {Leaflet Object}
+     * @param zoom {Number}
+     * @param feature {geoJson Object}
+     * @param map {Leaflet Object}
+     * @return boolean
+     */
+    TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
+      if (!feature) {
+        return;
+      }
+
+      var showTip = false;
+
+      // zoomScale takes map zoom and returns proximity value for tooltip display
+      // domain (input values) is map zoom (min 1 and max 18)
+      // range (output values) is distance in meters
+      // used to compare proximity of event latlng to feature latlng
+      var zoomScale = d3.scale.linear()
+      .domain([1, 4, 7, 10, 13, 16, 18])
+      .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
+
+      var proximity = zoomScale(zoom);
+      var distance = latlng.distanceTo(feature.properties.latLng);
+
+      // maxLngDif is max difference in longitudes
+      // to prevent feature tooltip from appearing 360°
+      // away from event latlng
+      var maxLngDif = 40;
+      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
+
+      if (distance < proximity && lngDif < maxLngDif) {
+        showTip = true;
+      }
+
+      delete feature.properties.eventDistance;
+
+      var testScale = d3.scale.pow().exponent(0.2)
+      .domain([1, 18])
+      .range([1500000, 50]);
+      return showTip;
+    };
+
+    /**
+     * Checks if event latlng is within bounds of mapData
+     * features and shows tooltip for that feature
+     *
+     * @method showTooltip
+     * @param e {Event}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.showTooltip = function (map, feature) {
+      var content = this.tooltipFormatter(feature);
+      if (!content) {
+        return;
+      }
+
+      var lat = feature.geometry.coordinates[1];
+      var lng = feature.geometry.coordinates[0];
+      var latLng = L.latLng(lat, lng);
+
+      L.popup({autoPan: false})
+       .setLatLng(latLng)
+       .setContent(content)
+       .openOn(map);
+    };
+
+    /**
      * Switch type of data overlay for map:
      * creates featurelayer from mapData (geoJson)
      *
      * @method markerType
-     * @param map {Object}
-     * @param mapData {Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map, mapData) {
       var featureLayer;
+
       if (mapData) {
         if (this._attr.mapType === 'Scaled Circle Markers') {
           featureLayer = this.scaledCircleMarkers(map, mapData);
@@ -279,6 +406,8 @@ define(function (require) {
           featureLayer = this.shadedCircleMarkers(map, mapData);
         } else if (this._attr.mapType === 'Shaded Geohash Grid') {
           featureLayer = this.shadedGeohashGrid(map, mapData);
+        } else if (this._attr.mapType === 'Heatmap') {
+          featureLayer = this.heatMap(map, mapData);
         } else {
           featureLayer = this.scaledCircleMarkers(map, mapData);
         }
@@ -293,8 +422,8 @@ define(function (require) {
      * with circle markers that are scaled to illustrate values
      *
      * @method scaledCircleMarkers
-     * @param map {Object}
-     * @param mapData {Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
@@ -335,8 +464,8 @@ define(function (require) {
      * with circle markers that are shaded to illustrate values
      *
      * @method shadedCircleMarkers
-     * @param map {Object}
-     * @param mapData {Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
@@ -375,8 +504,8 @@ define(function (require) {
      * with rectangles that show the geohash grid bounds
      *
      * @method geohashGrid
-     * @param map {Object}
-     * @param mapData {Object}
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
      * @return {undefined}
      */
     TileMap.prototype.shadedGeohashGrid = function (map, mapData) {
@@ -392,12 +521,12 @@ define(function (require) {
         pointToLayer: function (feature, latlng) {
           var geohashRect = feature.properties.rectangle;
           // get bounds from northEast[3] and southWest[1]
-          // points in geohash rectangle
-          var bounds = [
+          // corners in geohash rectangle
+          var corners = [
             [geohashRect[3][1], geohashRect[3][0]],
             [geohashRect[1][1], geohashRect[1][0]]
           ];
-          return L.rectangle(bounds);
+          return L.rectangle(corners);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);
@@ -426,11 +555,78 @@ define(function (require) {
     };
 
     /**
+     * Type of data overlay for map:
+     * creates canvas layer from mapData (geoJson)
+     * with leaflet.heat plugin
+     *
+     * @method heatMap
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return featureLayer {Leaflet object}
+     */
+    TileMap.prototype.heatMap = function (map, mapData) {
+      var self = this;
+      var max = mapData.properties.allmax;
+      var points = this.dataToHeatArray(mapData, max);
+
+      var options = {
+        radius: +this._attr.heatRadius,
+        blur: +this._attr.heatBlur,
+        maxZoom: +this._attr.heatMaxZoom,
+        minOpacity: +this._attr.heatMinOpacity
+      };
+
+      var featureLayer = L.heatLayer(points, options);
+
+      if (self._attr.addTooltip && self.tooltipFormatter && !self._attr.disableTooltips) {
+        map.on('mousemove', _.debounce(mouseMoveLocation, 15, {
+          'leading': true,
+          'trailing': false
+        }));
+        map.on('mouseout', function (e) {
+          map.closePopup();
+        });
+        map.on('mousedown', function () {
+          self._attr.disableTooltips = true;
+          map.closePopup();
+        });
+        map.on('mouseup', function () {
+          self._attr.disableTooltips = false;
+        });
+      }
+
+      function mouseMoveLocation(e) {
+        map.closePopup();
+
+        // unhighlight all svgs
+        d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
+
+        if (!mapData.features.length || self._attr.disableTooltips) {
+          return;
+        }
+
+        var latlng = e.latlng;
+
+        // find nearest feature to event latlng
+        var feature = self.nearestFeature(latlng, mapData);
+
+        var zoom = map.getZoom();
+
+        // show tooltip if close enough to event latlng
+        if (self.tooltipProximity(latlng, zoom, feature, map)) {
+          self.showTooltip(map, feature, latlng);
+        }
+      }
+
+      return featureLayer;
+    };
+
+    /**
      * Adds label div to each map when data is split
      *
      * @method addLabel
      * @param mapLabel {String}
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @return {undefined}
      */
     TileMap.prototype.addLabel = function (mapLabel, map) {
@@ -452,7 +648,7 @@ define(function (require) {
      *
      * @method addLegend
      * @param data {Object}
-     * @param map {Object}
+     * @param map {Leaflet Object}
      * @return {undefined}
      */
     TileMap.prototype.addLegend = function (data, map) {
@@ -522,6 +718,7 @@ define(function (require) {
      * Invalidate the size of the map, so that leaflet will resize to fit.
      * then moves to center
      *
+     * @method resizeArea
      * @return {undefined}
      */
     TileMap.prototype.resizeArea = function () {
@@ -563,6 +760,48 @@ define(function (require) {
     };
 
     /**
+     * get bounds of features from geoJson
+     *
+     * @method getBounds
+     * @param mapData {geoJson Object}
+     * @return bounds {Leaflet Object}
+     */
+    TileMap.prototype.getBounds = function (mapData) {
+      var bounds = L.geoJson(mapData).getBounds();
+      return bounds;
+    };
+
+    /**
+     * retuns data for data for heat map intensity
+     * if heatNormalizeData attribute is checked/true
+     • normalizes data for heat map intensity
+     *
+     * @param mapData {geoJson Object}
+     * @param nax {Number}
+     * @method dataToHeatArray
+     * @return {Array}
+     */
+    TileMap.prototype.dataToHeatArray = function (mapData, max) {
+      var self = this;
+
+      return mapData.features.map(function (feature) {
+        var lat = feature.geometry.coordinates[1];
+        var lng = feature.geometry.coordinates[0];
+        var heatIntensity;
+
+        if (!self._attr.heatNormalizeData) {
+          // show bucket count on heatmap
+          heatIntensity = feature.properties.count;
+        } else {
+          // show bucket count normalized to max value
+          heatIntensity = parseInt(feature.properties.count / max * 100);
+        }
+
+        return [lat, lng, heatIntensity];
+      });
+    };
+
+    /**
      * geohashMinDistance returns a min distance in meters for sizing
      * circle markers to fit within geohash grid rectangle
      *
@@ -596,15 +835,16 @@ define(function (require) {
      * @method radiusScale
      * @param count {Number}
      * @param max {Number}
-     * @param precision {Number}
+     * @param feature {Object}
      * @return {Number}
      */
     TileMap.prototype.radiusScale = function (count, max, feature) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
       var exp = 0.6;
-      var maxr = this.geohashMinDistance(feature);
-      return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
+      var maxRadius = this.geohashMinDistance(feature);
+      var pct = count / max;
+      return Math.pow(pct, exp) * maxRadius;
     };
 
     /**
