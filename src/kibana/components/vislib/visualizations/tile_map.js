@@ -37,8 +37,9 @@ define(function (require) {
       this.events = new Dispatch(handler);
 
       // add allmin and allmax to geoJson
-      chartData.geoJson.properties.allmin = chartData.geoJson.properties.min;
-      chartData.geoJson.properties.allmax = chartData.geoJson.properties.max;
+      var allMinMax = this.getMinMax(handler.data.data);
+      chartData.geoJson.properties.allmin = allMinMax.min;
+      chartData.geoJson.properties.allmax = allMinMax.max;
     }
 
     /**
@@ -56,6 +57,7 @@ define(function (require) {
 
       // create a new maps array
       self.maps = [];
+      self.popups = [];
 
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
@@ -80,7 +82,7 @@ define(function (require) {
 
           var drawOptions = {draw: {}};
           _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
-            if (!self.events.dispatch[drawShape]) {
+            if (!self.events.listenerCount(drawShape)) {
               drawOptions.draw[drawShape] = false;
             } else {
               drawOptions.draw[drawShape] = {
@@ -130,12 +132,12 @@ define(function (require) {
 
           map.on('draw:created', function (e) {
             var drawType = e.layerType;
-            if (!self.events.dispatch[drawType]) return;
+            if (!self.events.listenerCount(drawType)) return;
 
             // TODO: Different drawTypes need differ info. Need a switch on the object creation
             var bounds = e.layer.getBounds();
 
-            self.events.dispatch[drawType]({
+            self.events.emit(drawType, {
               e: e,
               data: self.chartData,
               bounds: {
@@ -152,15 +154,13 @@ define(function (require) {
           });
 
           map.on('zoomend', function () {
-            if (!self.events.dispatch.mapZoomEnd) return;
-            var mapInfo = {
+            self.events.emit('mapZoomEnd', {
               autoPrecision: self._attr.autoPrecision,
               data: mapData,
               limit: config.get('visualization:tileMap:maxPrecision'),
               zoom: map.getZoom(),
               zoomPct: map.getZoom() / 18
-            };
-            self.events.dispatch.mapZoomEnd(mapInfo);
+            });
           });
 
           // add label for splits
@@ -168,23 +168,29 @@ define(function (require) {
             self.addLabel(mapData.properties.label, map);
           }
 
-          // Add button to fit container to points
-          var FitControl = L.Control.extend({
-            options: {
-              position: 'topleft'
-            },
-            onAdd: function (map) {
-              var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
-              $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-              $(container).on('click', function () {
-                self.fitBounds(map, mapData);
-              });
-              return container;
-            }
-          });
-
           if (mapData && mapData.features.length > 0) {
-            map.addControl(new FitControl());
+            var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
+
+            // Add button to fit container to points
+            var FitControl = L.Control.extend({
+              options: {
+                position: 'topleft'
+              },
+              onAdd: function (map) {
+                $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
+                $(fitContainer).on('click', function () {
+                  self.fitBounds(map, featureLayer);
+                });
+                return fitContainer;
+              },
+              onRemove: function (map) {
+                $(fitContainer).off('click');
+              }
+            });
+            map.fitControl = new FitControl();
+            map.addControl(map.fitControl);
+          } else {
+            map.fitControl = undefined;
           }
 
           self.maps.push(map);
@@ -203,6 +209,39 @@ define(function (require) {
 
         return map.getBounds().contains([p1, p0]);
       };
+    };
+
+    /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @param data {Object}
+     * @return {Object}
+     */
+    TileMap.prototype.getMinMax = function (data) {
+      var min = [];
+      var max = [];
+      var allData;
+
+      if (data.rows) {
+        allData = data.rows;
+      } else if (data.columns) {
+        allData = data.columns;
+      } else {
+        allData = [data];
+      }
+
+      allData.forEach(function (datum) {
+        min.push(datum.geoJson.properties.min);
+        max.push(datum.geoJson.properties.max);
+      });
+
+      var minMax = {
+        min: _.min(min),
+        max: _.max(max)
+      };
+
+      return minMax;
     };
 
     /**
@@ -426,7 +465,7 @@ define(function (require) {
      */
     TileMap.prototype.addLegend = function (data, map) {
       var self = this;
-      var isLegend = $(this.chartEl).find('div.tilemap-legend').length;
+      var isLegend = $('div.tilemap-legend', this.chartEl).length;
 
       if (isLegend) return; // Don't add Legend if already one
 
@@ -527,6 +566,8 @@ define(function (require) {
       .on('mouseout', function (e) {
         layer.closePopup();
       });
+
+      this.popups.push({elem: popup, layer: layer});
     };
 
     /**
@@ -627,12 +668,22 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
-      // Cleanup hanging DOM nodes
-      $(this.chartEl).find('[class*=" leaflet"]').remove();
+      if (this.popups) {
+        this.popups.forEach(function (popup) {
+          popup.elem.off('mouseover').off('mouseout');
+          popup.layer.unbindPopup(popup.elem);
+        });
+        this.popups = [];
+      }
 
-      this.maps.forEach(function (map) {
-        map.remove();
-      });
+      if (this.maps) {
+        this.maps.forEach(function (map) {
+          if (map.fitControl) {
+            map.fitControl.removeFrom(map);
+          }
+          map.remove();
+        });
+      }
     };
 
     return TileMap;
