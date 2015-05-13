@@ -56,7 +56,7 @@
   <div>
     <label>
       Maximum zoom
-      &nbsp;<kbn-info placement="right" info="Map zoom at which all dots are display at full intensity. Default: 16"></kbn-info>
+      &nbsp;<kbn-info placement="right" info="Map zoom at which all dots are displayed at full intensity. Default: 16"></kbn-info>
     </label>
     <div class="vis-editor-agg-form-row">
       <input
@@ -94,16 +94,6 @@
         {{vis.params.heatMinOpacity}}
       </div>
     </div>
-  </div>
-  <div class="form-group">
-      <span class="hintbox-label" ng-click="heatNormalizeData = !heatNormalizeData">
-        <label>
-          <input type="checkbox" value="{{heatNormalizeData}}" ng-model="vis.params.heatNormalizeData" name="heatNormalizeData" ng-checked="vis.params.heatNormalizeData">
-          Normalize data for heatmap intesity
-        </label>
-        <i class="fa fa-info-circle"></i>
-      </span>
-      <div class="hintbox" ng-show="heatNormalizeData">Default is checked to show heatmap intensity of bucket count as a percent of max count. Uncheck to show heatmap intensity simply as bucket count.</div>
   </div>
 
   <div class="form-group">

@@ -442,7 +442,7 @@ define(function (require) {
           return L.circle(latlng, scaledRadius);
         },
         onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
+          self.bindPopup(feature, layer, map);
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -482,7 +482,7 @@ define(function (require) {
           return L.circle(latlng, radius);
         },
         onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
+          self.bindPopup(feature, layer, map);
         },
         style: function (feature) {
           return self.applyShadingStyle(feature, min, max);
@@ -529,7 +529,7 @@ define(function (require) {
           return L.rectangle(corners);
         },
         onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
+          self.bindPopup(feature, layer, map);
           layer.on({
             mouseover: function (e) {
               var layer = e.target;
@@ -737,26 +737,24 @@ define(function (require) {
      * @param layer {Object}
      * return {undefined}
      */
-    TileMap.prototype.bindPopup = function (feature, layer) {
-      var props = feature.properties;
-      var popup = L.popup({
-        className: 'leaflet-popup-kibana',
-        autoPan: false
-      })
-      .setContent(
-        'Geohash: ' + props.geohash + '<br>' +
-        'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
-        props.valueLabel + ': ' + props.count
-      );
-      layer.bindPopup(popup)
-      .on('mouseover', function (e) {
-        layer.openPopup();
-      })
-      .on('mouseout', function (e) {
-        layer.closePopup();
+    TileMap.prototype.bindPopup = function (feature, layer, map) {
+      var self = this;
+      var popup = layer.on({
+        mouseover: function (e) {
+          var layer = e.target;
+          // bring layer to front if not older browser
+          if (!L.Browser.ie && !L.Browser.opera) {
+            layer.bringToFront();
+          }
+          var latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
+          self.showTooltip(map, feature, latlng);
+        },
+        mouseout: function (e) {
+          map.closePopup();
+        }
       });
 
-      this.popups.push({elem: popup, layer: layer});
+      this.popups.push(popup);
     };
 
     /**
@@ -902,8 +900,7 @@ define(function (require) {
     TileMap.prototype.destroy = function () {
       if (this.popups) {
         this.popups.forEach(function (popup) {
-          popup.elem.off('mouseover').off('mouseout');
-          popup.layer.unbindPopup(popup.elem);
+          popup.off('mouseover').off('mouseout');
         });
         this.popups = [];
       }
