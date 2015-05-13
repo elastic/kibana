@@ -185,35 +185,40 @@ define(function (require) {
       var margin = this._attr.margin;
       var mode = this._attr.mode;
       var isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
-      var div;
-      var width;
-      var height;
-      var svg;
 
       return function (selection) {
         selection.each(function () {
           var el = this;
 
-          div = d3.select(el);
-          width = $(el).width();
-          height = $(el).height() - margin.top - margin.bottom;
+          var div = d3.select(el);
+          var width = $(el).parent().width();
+          var height = $(el).height();
+          var adjustedHeight = height - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
-          self.validateWidthandHeight(width, height);
+          self.validateWidthandHeight(width, adjustedHeight);
 
-          var yAxis = self.getYAxis(height);
+          var yAxis = self.getYAxis(adjustedHeight);
 
           // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
           if (!isWiggleOrSilhouette) {
             // Append svg and y axis
-            svg = div.append('svg')
+            var svg = div.append('svg')
             .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom);
+            .attr('height', height);
 
             svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(yAxis);
+
+            var container = svg.select('g.y.axis').node();
+            if (container) {
+              var cWidth = Math.max(width, container.getBBox().width);
+              svg.attr('width', cWidth);
+              svg.select('g')
+              .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
+            }
           }
         });
       };
