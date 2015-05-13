@@ -312,12 +312,12 @@ define(function (require) {
         it('should create a .leaflet-popup-kibana div for the tooltip', function () {
           vis.handler.charts.forEach(function (chart) {
             chart.tooltipFormatter = function (str) {
-              return str;
+              return '<div class="popup-stub"></div>';
             };
             var layerIds = _.keys(map._layers);
             var id = layerIds[_.random(1, layerIds.length - 1)]; // layer 0 is tileLayer
             map._layers[id].fire('mouseover');
-            expect($(vis.el).find('.leaflet-popup-kibana').length).to.be(1);
+            expect($('.popup-stub', vis.el).length).to.be(1);
           });
         });
       });
