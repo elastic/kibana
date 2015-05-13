@@ -10,12 +10,19 @@ define(function (require) {
       return Private(shortDotsFilterProvider);
     });
 
-  function shortDotsFilterProvider(config) {
+  function shortDotsFilterProvider(config, $rootScope) {
+    var filter;
+
+    function updateFilter() {
+      filter = config.get('shortDots:enable') ? _.shortenDottedString : _.identity;
+    }
+
+    updateFilter();
+    $rootScope.$on('change:config.shortDots:enable', updateFilter);
+    $rootScope.$on('init:config', updateFilter);
+
     return function (str) {
-      if (!_.isString(str) || config.get('shortDots:enable') !== true) {
-        return str;
-      }
-      return str.replace(/(.+?\.)/g, function (v) { return v[0] + '.'; });
+      return filter(str);
     };
   }
 

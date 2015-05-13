@@ -74,6 +74,10 @@ define(function (require) {
       return [Math.max(1, yMin), yMax];
     };
 
+    YAxis.prototype._setDefaultYExtents = function () {
+      return this._attr.defaultYExtents;
+    };
+
     /**
      * Returns the domain, i.e. the extent of the y axis
      *
@@ -83,6 +87,7 @@ define(function (require) {
      * @returns {*[]}
      */
     YAxis.prototype.getDomain = function (scale, yMin, yMax) {
+      if (this._setDefaultYExtents()) return [yMin, yMax];
       if (scale === 'log') return this.returnLogDomain(yMin, yMax); // Negative values cannot be displayed with a log scale.
       if (yMin === 0 && yMax === 0) return this.throwNoResultsError(); // yMin and yMax can never both be equal to zero
 
@@ -97,10 +102,15 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      return this.yScale = this.getScaleType(this._attr.scale)
+      this.yScale = this.getScaleType(this._attr.scale)
       .domain(this.getDomain(this._attr.scale, this.yMin, this.yMax))
-      .range([height, 0])
-      .nice();
+      .range([height, 0]);
+
+      // Nicing the scale, rounds values down or up to make the scale look better
+      // When defaultYExtents are selected, the extents (i.e. min and max) should
+      // be shown without any rounding.
+      if (!this._attr.defaultYExtents) return this.yScale.nice();
+      return this.yScale;
     };
 
     YAxis.prototype.tickFormat = function () {

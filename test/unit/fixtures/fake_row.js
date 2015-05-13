@@ -1,18 +1,22 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var longString = Array(200).join('_');
 
   return function (id, mapping) {
-    var fake = {
-      $$_formatted: _.mapValues(mapping, function (f, c) { return c + '_formatted_' + id + longString; }),
-      $$_flattened: _.mapValues(mapping, function (f, c) { return c + '_flattened_' + id + longString; }),
-      _source: _.mapValues(mapping, function (f, c) { return c + '_original_' + id + longString; }),
+    function fakeVals(type) {
+      return _.mapValues(mapping, function (f, c) {
+        return c + '_' + type + '_' + id + longString;
+      });
+    }
+
+    return {
       _id: id,
       _index: 'test',
-      sort: [id]
+      _source: fakeVals('original'),
+      sort: [id],
+      $$_formatted: fakeVals('formatted'),
+      $$_partialFormatted: fakeVals('formatted'),
+      $$_flattened: fakeVals('_flattened')
     };
-
-    return fake;
   };
 });
