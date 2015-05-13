@@ -62,7 +62,11 @@ module.exports = function (server, plugins) {
       var options = config.get(plugin.name) || {};
       server.register({ register: register, options: options }, function (err) {
         if (err) return reject(err);
-        plugin.status.green('Ready');
+        // Only change the plugin status to green if the intial status has not
+        // been updated from yellow - Initializing
+        if (plugin.status.message === 'Initializing' && plugin.status.state === 'yellow') {
+          plugin.status.green('Ready');
+        }
         resolve(plugin);
       });
     });
