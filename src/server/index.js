@@ -6,6 +6,7 @@ var extendHapi = require('./lib/extend_hapi');
 var join = require('path').join;
 
 function Kibana(settings, plugins) {
+  plugins = plugins || [];
   this.server = new Hapi.Server();
 
   // Extend Hapi with Kibana
