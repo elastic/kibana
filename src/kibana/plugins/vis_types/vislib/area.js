@@ -22,7 +22,8 @@ define(function (require) {
           interpolate: 'linear',
           defaultYExtents: false,
           times: [],
-          addTimeMarker: false
+          addTimeMarker: false,
+          emote: 'fa fa-meh-o'
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],

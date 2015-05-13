@@ -36,6 +36,8 @@ define(function (require) {
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
+      this.emote = opts.emote;
+
 
       if (this._attr.addLegend) {
         this.legend = opts.legend;
@@ -48,7 +50,8 @@ define(function (require) {
         this.chartTitle,
         this.alerts,
         this.xAxis,
-        this.yAxis
+        this.yAxis,
+        this.emote
       ], Boolean);
     }
 
@@ -185,7 +188,8 @@ define(function (require) {
         .attr('class', 'text-center visualize-error visualize-chart ng-scope')
         .append('div').attr('class', 'item top')
         .append('div').attr('class', 'item')
-        .append('h2').html('<i class="fa fa-meh-o"></i>')
+        .append('h2')
+        .append('i').attr('class', this.emote)
         .append('h4').text(message);
 
         div.append('div').attr('class', 'item bottom');
