@@ -1,12 +1,13 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Private, $rootScope, getAppState, globalState) {
+  return function (Private, $rootScope, Promise, getAppState, globalState) {
     var EventEmitter = Private(require('factories/events'));
     var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var onlyStateChanged = require('components/filter_bar/lib/onlyStateChanged');
     var uniqFilters = require('components/filter_bar/lib/uniqFilters');
     var compareFilters = require('components/filter_bar/lib/compareFilters');
+    var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
 
     var queryFilter = new EventEmitter();
 
@@ -232,23 +233,26 @@ define(function (require) {
       compareOptions = _.defaults(compareOptions || {}, { disabled: true, negate: true });
 
       // existing globalFilters should be mutated by appFilters
-      appFilters = _.filter(appFilters, function (filter) {
+      _.each(appFilters, function (filter, i) {
         var match = _.find(globalFilters, function (globalFilter) {
           return compareFilters(globalFilter, filter, compareOptions);
         });
 
-        // if the filter remains, it doesn't match any filters in global state
-        if (!match) return true;
+        // no match, do nothing
+        if (!match) return;
 
-        // filter matches a filter in globalFilters, mutate existing global filter
+        // matching filter in globalState, update global and remove from appState
         _.assign(match.meta, filter.meta);
-        return false;
+        appFilters.splice(i, 1);
       });
 
       appFilters = uniqFilters(appFilters, { disabled: true });
       globalFilters = uniqFilters(globalFilters, { disabled: true });
 
-      return [globalFilters, appFilters];
+      return Promise.all([
+        mapAndFlattenFilters(globalFilters),
+        mapAndFlattenFilters(appFilters)
+      ]);
     }
 
     /**
