@@ -127,6 +127,20 @@ define(function (require) {
         done();
       });
 
+      it('should unpause when setRefreshInterval is called without pause:true', function (done) {
+        $scope.setRefreshInterval({ value : 1000, pause: true});
+        expect($scope.interval.pause).to.be(true);
+
+        $scope.setRefreshInterval({ value : 1000, pause: false});
+        expect($scope.interval.pause).to.be(false);
+
+        $scope.setRefreshInterval({ value : 1000});
+        expect($scope.interval.pause).to.be(false);
+
+        done();
+      });
+
+
       it('should highlight the current active interval', function (done) {
         $scope.setRefreshInterval({ value: 300000 });
         $elem.scope().$digest();

@@ -140,7 +140,11 @@ define(function (require) {
         };
 
         $scope.setRefreshInterval = function (interval) {
-          interval.pause = interval.pause == null ? false : true;
+          interval = _.clone(interval);
+          console.log('before: ' + interval.pause);
+          interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
+
+          console.log('after: ' + interval.pause);
           $scope.interval = interval;
         };
 
