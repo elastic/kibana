@@ -85,6 +85,10 @@ define(function (require) {
         expect(emitSpy.callCount).to.be(2);
         expect(emitSpy.firstCall.args[0]).to.be('update');
         expect(emitSpy.secondCall.args[0]).to.be('fetch');
+
+        // updates should trigger state saves
+        expect(appState.save.callCount).to.be(1);
+        expect(globalState.save.callCount).to.be(1);
       });
     });
 

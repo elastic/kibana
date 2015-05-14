@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Private, $rootScope, Promise, getAppState, globalState) {
+  return function (Private, $rootScope, getAppState, globalState) {
     var EventEmitter = Private(require('factories/events'));
     var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
     var onlyStateChanged = require('components/filter_bar/lib/onlyStateChanged');
@@ -249,10 +249,14 @@ define(function (require) {
       appFilters = uniqFilters(appFilters, { disabled: true });
       globalFilters = uniqFilters(globalFilters, { disabled: true });
 
-      return Promise.all([
-        mapAndFlattenFilters(globalFilters),
-        mapAndFlattenFilters(appFilters)
-      ]);
+      return mapAndFlattenFilters(globalFilters)
+      .then(function (globals) {
+        globalFilters = globals;
+        return mapAndFlattenFilters(appFilters);
+      }).then(function (apps) {
+        appFilters = apps;
+        return [globalFilters, appFilters];
+      });
     }
 
     /**
@@ -283,34 +287,46 @@ define(function (require) {
         return $rootScope.$watchMulti(stateWatchers, function (next, prev) {
           var doUpdate = false;
           var doFetch = false;
-          var newFilters = [];
-          var oldFilters = [];
+          var originals = {
+            global: _.cloneDeep(next[0]),
+            app: _.cloneDeep(next[1])
+          };
 
           // reconcile filter in global and app states
-          var filters = mergeAndMutateFilters(next[0], next[1])
+          return mergeAndMutateFilters(next[0], next[1])
           .then(function (filters) {
             var globalFilters = filters[0];
             var appFilters = filters[1];
             var appState = getAppState();
 
-            getActions();
+            // save the state, as it may have updated
+            var globalChanged = !_.isEqual(originals.global, globalFilters);
+            var appChanged = !_.isEqual(originals.app, appFilters);
 
-            // if there's no update, we're done
+            // the filters were changed, apply to state (re-triggers this watcher)
+            if (globalChanged || appChanged) {
+              globalState.filters = globalFilters;
+              if (appState) appState.filters = appFilters;
+              return;
+            }
+
+            // check for actions, bail if we're done
+            getActions();
             if (!doUpdate) return;
 
-            // save the state, as it may have updated
+            // save states and emit the required events
             saveState();
-
-            // emit the required events
-            return queryFilter.emit('update')
+            queryFilter.emit('update')
             .then(function () {
               if (!doFetch) return;
-              return queryFilter.emit('fetch');
+              queryFilter.emit('fetch');
             });
           });
 
           // iterate over each state type, checking for changes
           function getActions() {
+            var newFilters = [];
+            var oldFilters = [];
             stateWatchers.forEach(function (watcher, i) {
               var nextVal = next[i];
               var prevVal = prev[i];
@@ -326,6 +342,7 @@ define(function (require) {
             });
 
             // make sure change wasn't only a state move
+            // checking length first is an optimization
             if (doFetch && newFilters.length === oldFilters.length) {
               if (onlyStateChanged(newFilters, oldFilters)) doFetch = false;
             }
