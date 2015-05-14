@@ -286,42 +286,50 @@ define(function (require) {
           var newFilters = [];
           var oldFilters = [];
 
-          // iterate over each state type, checking for changes
-          stateWatchers.forEach(function (watcher, i) {
-            var nextVal = next[i];
-            var prevVal = prev[i];
-            newFilters = newFilters.concat(nextVal);
-            oldFilters = oldFilters.concat(prevVal);
-
-            // no update or fetch if there was no change
-            if (nextVal === prevVal) return;
-            if (nextVal) doUpdate = true;
-
-            // don't trigger fetch when only disabled filters
-            if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
-          });
-
-          // make sure change wasn't only a state move
-          if (doFetch && newFilters.length === oldFilters.length) {
-            if (onlyStateChanged(newFilters, oldFilters)) doFetch = false;
-          }
-
           // reconcile filter in global and app states
-          var filters = mergeAndMutateFilters(next[0], next[1]);
-          globalState.filters = filters[0];
-          var appState = getAppState();
-          if (appState) {
-            appState.filters = filters[1];
-          }
-          saveState();
+          var filters = mergeAndMutateFilters(next[0], next[1])
+          .then(function (filters) {
+            var globalFilters = filters[0];
+            var appFilters = filters[1];
+            var appState = getAppState();
 
-          if (!doUpdate) return;
+            getActions();
 
-          return queryFilter.emit('update')
-          .then(function () {
-            if (!doFetch) return;
-            return queryFilter.emit('fetch');
+            // if there's no update, we're done
+            if (!doUpdate) return;
+
+            // save the state, as it may have updated
+            saveState();
+
+            // emit the required events
+            return queryFilter.emit('update')
+            .then(function () {
+              if (!doFetch) return;
+              return queryFilter.emit('fetch');
+            });
           });
+
+          // iterate over each state type, checking for changes
+          function getActions() {
+            stateWatchers.forEach(function (watcher, i) {
+              var nextVal = next[i];
+              var prevVal = prev[i];
+              newFilters = newFilters.concat(nextVal);
+              oldFilters = oldFilters.concat(prevVal);
+
+              // no update or fetch if there was no change
+              if (nextVal === prevVal) return;
+              if (nextVal) doUpdate = true;
+
+              // don't trigger fetch when only disabled filters
+              if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
+            });
+
+            // make sure change wasn't only a state move
+            if (doFetch && newFilters.length === oldFilters.length) {
+              if (onlyStateChanged(newFilters, oldFilters)) doFetch = false;
+            }
+          }
         });
       }
     }
