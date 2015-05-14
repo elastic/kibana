@@ -18,6 +18,7 @@ define(function (require) {
       // Close if already open
       if ($scope.globalConfigTemplate === timepickerHtml && timefilter.timepickerActiveTab === tab) {
         delete $scope.globalConfigTemplate;
+        delete timefilter.timepickerActiveTab;
       } else {
         timefilter.timepickerActiveTab = tab;
         $scope.globalConfigTemplate = timepickerHtml;
