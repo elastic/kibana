@@ -48,11 +48,7 @@ define(function (require) {
         globalState.filters = globalState.filters.concat(filters);
       } else if (appState) {
         if (!appState.filters) appState.filters = [];
-        var mergeOptions = { disabled: true, negate: false };
-        var appFilters = appState.filters.concat(filters);
-        var merged = mergeAndMutateFilters(globalState.filters, appFilters, mergeOptions);
-        globalState.filters = merged[0];
-        appState.filters = merged[1];
+        appState.filters = appState.filters.concat(filters);
       }
 
       return saveState();
