@@ -13,7 +13,7 @@ define(function (require) {
 
     var timepickerHtml = require('text!plugins/kibana/_timepicker.html');
     $scope.toggleTimepicker = function (tab) {
-      tab = tab || 'filter';
+      tab = tab || timefilter.timepickerActiveTab || 'filter';
 
       // Close if already open
       if ($scope.globalConfigTemplate === timepickerHtml && timefilter.timepickerActiveTab === tab) {
