@@ -288,11 +288,11 @@ define(function (require) {
 
       it('should return a function', function () {
         fnNames.forEach(function (fnName) {
-          expect(typeof yAxis._getScaleType(fnName)).to.be('function');
+          expect(yAxis._getScaleType(fnName)).to.be.a(Function);
         });
 
         // if no value is provided to the function, scale should default to a linear scale
-        expect(typeof yAxis._getScaleType()).to.be('function');
+        expect(yAxis._getScaleType()).to.be.a(Function);
       });
 
       it('should throw an error if function name is undefined', function () {
