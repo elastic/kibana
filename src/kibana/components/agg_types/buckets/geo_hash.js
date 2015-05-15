@@ -39,12 +39,11 @@ define(function (require) {
           default: defaultPrecision,
           editor: require('text!components/agg_types/controls/precision.html'),
           controller: function ($scope) {
-            $scope.$watch('agg.params.autoPrecision', function (auto, prev) {
-              if (auto === prev) return;
-              if (auto) return;
-
-              var params = $scope.agg.params;
-              params.precision = _.get($scope.outputAgg, 'params.precision') || params.precision;
+            $scope.$watchMulti([
+              'agg.params.autoPrecision',
+              'outputAgg.params.precision'
+            ], function (cur, prev) {
+              if (cur[1]) $scope.agg.params.precision = cur[1];
             });
           },
           deserialize: getPrecision,
