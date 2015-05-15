@@ -87,7 +87,9 @@ define(function (require) {
     };
 
     Vis.prototype.clone = function () {
-      return new Vis(this.indexPattern, this.getState());
+      var clone = new Vis(this.indexPattern, this.getState());
+      clone.clonedFrom = this;
+      return clone;
     };
 
     Vis.prototype.requesting = function () {
