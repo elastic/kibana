@@ -69,12 +69,14 @@ define(function (require) {
         var oldRefreshInterval;
 
         return function () {
-          if (diff(self.time, oldTime) || diff(self.refreshInterval, oldRefreshInterval)) {
+          if (diff(self.time, oldTime)) {
             self.emit('update');
-            if (!self.refreshInterval.pause) {
+            self.emit('fetch');
+          } else if (diff(self.refreshInterval, oldRefreshInterval)) {
+            self.emit('update');
+            if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
               self.emit('fetch');
             }
-
           }
 
           oldTime = _.clone(self.time);
