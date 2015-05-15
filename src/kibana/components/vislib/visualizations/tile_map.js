@@ -252,8 +252,7 @@ define(function (require) {
      * @param featureLayer {Leaflet object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.fitBounds = function (map, mapData) {
-      var featureLayer = L.geoJson(mapData);
+    TileMap.prototype.fitBounds = function (map, featureLayer) {
       map.fitBounds(featureLayer.getBounds());
     };
 
