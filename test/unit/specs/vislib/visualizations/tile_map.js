@@ -191,7 +191,7 @@ define(function (require) {
               var radius = Math.pow(pct, exp) * constantZoomRadius * precisionScale;
               var test = chart.radiusScale(count, max, zoom, precision);
 
-              expect(_.isNumber(test)).to.be(true);
+              expect(test).to.be.a('number');
               expect(test).to.be(radius);
             });
           });

@@ -613,9 +613,11 @@ define(function (require) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
       var exp = 0.5;
+      var precisionBiasNumerator = 200;
+      var precisionBiasBase = 5;
       var pct = count / max;
       var constantZoomRadius = 0.5 * Math.pow(2, zoom);
-      var precisionScale = 200 / Math.pow(5, precision);
+      var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
       return Math.pow(pct, exp) * constantZoomRadius * precisionScale;
     };
