@@ -156,9 +156,7 @@ define(function (require) {
           map.on('zoomend', function () {
             self.events.emit('mapZoomEnd', {
               data: mapData,
-              limit: config.get('visualization:tileMap:maxPrecision'),
-              zoom: map.getZoom(),
-              zoomPct: map.getZoom() / 18
+              zoom: map.getZoom()
             });
           });
 

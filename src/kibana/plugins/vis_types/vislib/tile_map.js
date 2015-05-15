@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapVisType(Private, getAppState, courier) {
+  return function TileMapVisType(Private, getAppState, courier, config) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
@@ -60,7 +60,7 @@ define(function (require) {
             18: 12
           };
 
-          agg.params.precision = Math.min(zoomPrecision[event.zoom], event.limit);
+          agg.params.precision = Math.min(zoomPrecision[event.zoom], config.get('visualization:tileMap:maxPrecision'));
 
           courier.fetch();
         }
