@@ -226,10 +226,6 @@ define(function (require) {
       });
 
       describe('validate user defined values', function () {
-        var newDomain;
-        var min;
-        var max;
-
         beforeEach(function () {
           yAxis._attr.mode = 'stacked';
           yAxis._attr.setYExtents = false;
@@ -237,8 +233,8 @@ define(function (require) {
         });
 
         it('should throw a NaN error', function () {
-          min = 'Not a number';
-          max = 12;
+          var min = 'Not a number';
+          var max = 12;
 
           expect(function () {
             yAxis._validateUserExtents(min, max);
@@ -251,7 +247,7 @@ define(function (require) {
           domain = [];
           domain[0] = yAxis._attr.yAxis.min = 20;
           domain[1] = yAxis._attr.yAxis.max = 80;
-          newDomain = yAxis._validateUserExtents(domain);
+          var newDomain = yAxis._validateUserExtents(domain);
 
           expect(newDomain[0]).to.be(domain[0] / 100);
           expect(newDomain[1]).to.be(domain[1] / 100);
@@ -259,7 +255,7 @@ define(function (require) {
 
         it('should return the user defined value', function () {
           domain = [20, 50];
-          newDomain = yAxis._validateUserExtents(domain);
+          var newDomain = yAxis._validateUserExtents(domain);
 
           expect(newDomain[0]).to.be(domain[0]);
           expect(newDomain[1]).to.be(domain[1]);
@@ -267,12 +263,9 @@ define(function (require) {
       });
 
       describe('should throw an error when', function () {
-        var min;
-        var max;
-
         it('min === max', function () {
-          min = 12;
-          max = 12;
+          var min = 12;
+          var max = 12;
 
           expect(function () {
             yAxis._validateAxisExtents(min, max);
@@ -280,8 +273,8 @@ define(function (require) {
         });
 
         it('min > max', function () {
-          min = 30;
-          max = 10;
+          var min = 30;
+          var max = 10;
 
           expect(function () {
             yAxis._validateAxisExtents(min, max);
@@ -290,39 +283,16 @@ define(function (require) {
       });
     });
 
-    //describe('formatAxisLabel method', function () {
-    //  var num = 1e9;
-    //  var val;
-    //
-    //  describe('should not return a nice scale when defaultYExtents is true', function () {
-    //    beforeEach(function () {
-    //      createData(defaultGraphData);
-    //      yAxis._attr.defaultYExtents = true;
-    //      yAxis.getYAxis(height);
-    //      yAxis.render();
-    //    });
-    //
-    //    it('not return a nice scale', function () {
-    //      var min = _.min(_.flatten(defaultGraphData));
-    //      var max = _.max(_.flatten(defaultGraphData));
-    //      var domain = yAxis.yAxis.scale().domain();
-    //      expect(domain[0]).to.be(min);
-    //      expect(domain[1]).to.be(max);
-    //    });
-    //  });
-    //});
-
     describe('getScaleType method', function () {
       var fnNames = ['linear', 'log', 'square root'];
 
       it('should return a function', function () {
         fnNames.forEach(function (fnName) {
-          var isFunction = (typeof yAxis._getScaleType(fnName) === 'function');
-          expect(isFunction).to.be(true);
+          expect(typeof yAxis._getScaleType(fnName)).to.be('function');
         });
 
         // if no value is provided to the function, scale should default to a linear scale
-        expect(typeof yAxis._getScaleType()).to.be('function');
+        expect(typeof yAxis._getScaleType()).to.be(Function);
       });
 
       it('should throw an error if function name is undefined', function () {

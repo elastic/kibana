@@ -120,6 +120,8 @@ define(function (require) {
       .range([height, 0]);
 
       if (!this._isUserDefined()) this.yScale.nice(); // round extents when not user defined
+      // Prevents bars from going off the chart when the y extents are within the domain range
+      if (this._attr.type === 'histogram') this.yScale.clamp(true);
       return this.yScale;
     };
 
