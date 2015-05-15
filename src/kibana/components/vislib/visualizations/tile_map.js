@@ -270,8 +270,7 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.fitBounds = function (map, mapData) {
-
-      map.fitBounds(this.getBounds(mapData));
+      map.fitBounds(mapData._latlngs || mapData.getBounds());
     };
 
     /**
@@ -755,18 +754,6 @@ define(function (require) {
       });
 
       this.popups.push(popup);
-    };
-
-    /**
-     * get bounds of features from geoJson
-     *
-     * @method getBounds
-     * @param mapData {geoJson Object}
-     * @return bounds {Leaflet Object}
-     */
-    TileMap.prototype.getBounds = function (mapData) {
-      var bounds = L.geoJson(mapData).getBounds();
-      return bounds;
     };
 
     /**

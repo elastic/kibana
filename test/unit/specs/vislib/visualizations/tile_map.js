@@ -293,21 +293,6 @@ define(function (require) {
         });
       });
 
-      describe('getBounds method', function () {
-        it('should return bounds object that contains every point in mapData', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var containsPoint = [];
-            var bounds = chart.getBounds(mapData);
-            for (var i = 0; i < mapData.features.length; i++) {
-              var pt = [mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]];
-              containsPoint.push(bounds.contains(pt));
-            }
-            containsPoint = _.compact(containsPoint);
-            expect(containsPoint.length).to.be(mapData.features.length);
-          });
-        });
-      });
-
       describe('showTooltip method', function () {
         it('should create a .leaflet-popup-kibana div for the tooltip', function () {
           vis.handler.charts.forEach(function (chart) {
