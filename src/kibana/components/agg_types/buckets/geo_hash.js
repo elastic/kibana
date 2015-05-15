@@ -30,20 +30,21 @@ define(function (require) {
           filterFieldTypes: 'geo_point'
         },
         {
+          name: 'autoPrecision',
+          default: true,
+          write: _.noop
+        },
+        {
           name: 'precision',
           default: defaultPrecision,
           editor: require('text!components/agg_types/controls/precision.html'),
           controller: function ($scope) {
-            $scope.$watch('editableVis.params.autoPrecision', function (auto, prev) {
+            $scope.$watch('agg.params.autoPrecision', function (auto, prev) {
               if (auto === prev) return;
               if (auto) return;
 
-              var precision = _.get($scope.editableVis, 'clonedFrom.aggs.byTypeName.geohash_grid[0].params.precision');
-              if (precision) {
-                _.each($scope.editableVis.aggs.byTypeName.geohash_grid, function (agg) {
-                  agg.params.precision = precision;
-                });
-              }
+              var params = $scope.agg.params;
+              params.precision = _.get($scope.outputAgg, 'params.precision') || params.precision;
             });
           },
           deserialize: getPrecision,

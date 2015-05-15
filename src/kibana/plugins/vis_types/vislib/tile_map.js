@@ -14,8 +14,7 @@ define(function (require) {
       params: {
         defaults: {
           mapType: 'Scaled Circle Markers',
-          isDesaturated: true,
-          autoPrecision: true
+          isDesaturated: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
@@ -34,10 +33,8 @@ define(function (require) {
           pushFilter(filter, false, indexPatternName);
         },
         mapZoomEnd: function (event) {
-          if (!event.autoPrecision) return;
-
           var agg = _.deepGet(event, 'data.properties.agg.geo');
-          if (!agg) return;
+          if (!agg || !agg.params.autoPrecision) return;
 
           // zoomPrecision maps event.zoom to a geohash precision value
           // event.limit is the configurable max geohash precision
