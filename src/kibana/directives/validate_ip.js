@@ -13,6 +13,11 @@ define(function (require) {
         },
         link: function ($scope, elem, attr, ngModel) {
           function validateIp(ipAddress) {
+            if (ipAddress == null || ipAddress === '') {
+              ngModel.$setValidity('ipInput', true);
+              return null;
+            }
+
             try {
               ipAddress = new Ipv4Address(ipAddress);
               ngModel.$setValidity('ipInput', true);
