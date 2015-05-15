@@ -1,4 +1,4 @@
-define(function (require) {
+  define(function (require) {
   require('modules')
   .get('kibana')
   .service('timefilter', function (Private, globalState, $rootScope) {
@@ -22,6 +22,8 @@ define(function (require) {
       Timefilter.Super.call(this);
 
       var self = this;
+      var diffTime = Private(require('components/timefilter/lib/diff_time'))(self);
+      var diffInterval = Private(require('components/timefilter/lib/diff_interval'))(self);
 
       self.enabled = false;
 
@@ -56,33 +58,19 @@ define(function (require) {
       });
 
       $rootScope.$$timefilter = self;
+
       $rootScope.$watchMulti([
+        '$$timefilter.time',
         '$$timefilter.time.from',
         '$$timefilter.time.to',
-        '$$timefilter.time.mode',
-        '$$timefilter.time',
+        '$$timefilter.time.mode'
+      ], diffTime);
+
+      $rootScope.$watchMulti([
         '$$timefilter.refreshInterval',
         '$$timefilter.refreshInterval.pause',
         '$$timefilter.refreshInterval.value'
-      ], (function () {
-        var oldTime;
-        var oldRefreshInterval;
-
-        return function () {
-          if (diff(self.time, oldTime)) {
-            self.emit('update');
-            self.emit('fetch');
-          } else if (diff(self.refreshInterval, oldRefreshInterval)) {
-            self.emit('update');
-            if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
-              self.emit('fetch');
-            }
-          }
-
-          oldTime = _.clone(self.time);
-          oldRefreshInterval = _.clone(self.refreshInterval);
-        };
-      }()));
+      ], diffInterval);
     }
 
     Timefilter.prototype.get = function (indexPattern) {
