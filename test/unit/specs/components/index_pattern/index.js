@@ -5,6 +5,7 @@ define(function (require) {
     run(require('specs/components/index_pattern/_map_field'));
     run(require('specs/components/index_pattern/_pattern_to_wildcard'));
     run(require('specs/components/index_pattern/_get_computed_fields'));
+    run(require('specs/components/index_pattern/_FieldFormat'));
 
     function run(mod) { describe(mod[0], mod[1]); }
   });

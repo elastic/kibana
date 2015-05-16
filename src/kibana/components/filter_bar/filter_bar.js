@@ -4,34 +4,43 @@ define(function (require) {
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
-  var toggleFilter = require('components/filter_bar/lib/toggleFilter');
-  var toggleAll = require('components/filter_bar/lib/toggleAll');
-  var invertFilter = require('components/filter_bar/lib/invertFilter');
-  var invertAll = require('components/filter_bar/lib/invertAll');
-  var removeFilter = require('components/filter_bar/lib/removeFilter');
-  var removeAll = require('components/filter_bar/lib/removeAll');
-
-  var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
-
-  module.directive('filterBar', function (Private, Promise) {
+  module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
     var filterOutTimeBasedFilter = Private(require('components/filter_bar/lib/filterOutTimeBasedFilter'));
+    var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
 
     return {
       restrict: 'E',
       template: template,
-      scope: {
-        state: '='
-      },
+      scope: {},
       link: function ($scope, $el, attrs) {
+        // bind query filter actions to the scope
+        [
+          'addFilters',
+          'toggleFilter',
+          'toggleAll',
+          'pinFilter',
+          'pinAll',
+          'invertFilter',
+          'invertAll',
+          'removeFilter',
+          'removeAll'
+        ].forEach(function (method) {
+          $scope[method] = queryFilter[method];
+        });
+
+        $scope.state = getAppState();
 
         $scope.applyFilters = function (filters) {
-          var newFilters = filterAppliedAndUnwrap(filters);
-          $scope.state.filters = _.union($scope.state.filters, newFilters);
+          // add new filters
+          $scope.addFilters(filterAppliedAndUnwrap(filters));
           $scope.newFilters = [];
+
+          // change time filter
           if ($scope.changeTimeFilter && $scope.changeTimeFilter.meta && $scope.changeTimeFilter.meta.apply) {
             changeTimeFilter($scope.changeTimeFilter);
           }
@@ -42,10 +51,20 @@ define(function (require) {
           $scope.changeTimeFilter = null;
         };
 
+        // update the scope filter list on filter changes
+        $scope.$listen(queryFilter, 'update', function () {
+          updateFilters();
+        });
+
+        // when appState changes, update scope's state
+        $scope.$watch(getAppState, function (appState) {
+          $scope.state = appState;
+        });
+
         $scope.$watch('state.$newFilters', function (filters) {
           if (!filters) return;
 
-          // If the filters is not undefined and the length is greater then
+          // If filters is not undefined and the length is greater than
           // one we need to set the newFilters attribute and allow the
           // users to decide what they want to apply.
           if (filters.length > 1) {
@@ -72,24 +91,22 @@ define(function (require) {
               return filters;
             })
             .then(filterOutTimeBasedFilter)
-            .then(function (filters) {
-              $scope.state.filters = _.union($scope.state.filters, filters);
-            });
+            .then($scope.addFilters);
           }
         });
 
-        $scope.$watch('state.filters', function (filters) {
+        function updateFilters() {
+          var filters = queryFilter.getFilters();
           mapAndFlattenFilters(filters).then(function (results) {
-            $scope.filters = results;
+            // used to display the current filters in the state
+            $scope.filters = _.sortBy(results, function (filter) {
+              return !filter.meta.pinned;
+            });
+            $scope.$emit('filterbar:updated');
           });
-        });
+        }
 
-        $scope.toggleFilter = toggleFilter($scope);
-        $scope.toggleAll = toggleAll($scope);
-        $scope.invertFilter = invertFilter($scope);
-        $scope.invertAll = invertAll($scope);
-        $scope.removeFilter = removeFilter($scope);
-        $scope.removeAll = removeAll($scope);
+        updateFilters();
       }
     };
   });

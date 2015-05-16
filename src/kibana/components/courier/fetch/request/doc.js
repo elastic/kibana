@@ -17,18 +17,14 @@ define(function (require) {
       var parent = DocRequest.Super.prototype.canStart.call(this);
       if (!parent) return false;
 
-      // _getStoredVersion updates the internal
-      // cache returned by _getVersion, so _getVersion
-      // must be called first
-      var version = this.source._getVersion();
+      var version = this.source._version;
       var storedVersion = this.source._getStoredVersion();
 
       // conditions that equal "fetch This DOC!"
-      var unknownVersion = !version && !storedVersion;
-      var versionMismatch = version !== storedVersion;
-      var localVersionCleared = version && !storedVersion;
+      var unkown = !version && !storedVersion;
+      var mismatch = version !== storedVersion;
 
-      if (unknownVersion || versionMismatch || localVersionCleared) return true;
+      return Boolean(mismatch || (unkown && !this.started));
     };
 
     DocRequest.prototype.handleResponse = function (resp) {

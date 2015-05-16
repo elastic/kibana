@@ -22,8 +22,9 @@ define(function (require) {
             var clickHandler = filterBarClickHandler($state);
             $cell.scope = $scope.$new();
             $cell.addClass('cell-hover');
-            $cell.attr('ng-click', 'clickHandler()');
-            $cell.scope.clickHandler = function () {
+            $cell.attr('ng-click', 'clickHandler($event)');
+            $cell.scope.clickHandler = function (event) {
+              if ($(event.target).is('a')) return; // Don't add filter if a link was clicked
               clickHandler({ point: { aggConfigResult: aggConfigResult } });
             };
             return $compile($cell)($cell.scope);

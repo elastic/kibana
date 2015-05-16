@@ -5,6 +5,7 @@ define(function (require) {
       { name: 'ssl',                type: 'boolean',    indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 20 },
       { name: '@timestamp',         type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 30 },
       { name: 'time',               type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 30 },
+      { name: '@tags',              type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: 'utc_time',           type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: 'phpmemory',          type: 'number',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
       { name: 'ip',                 type: 'ip',         indexed: true,  analyzed: true, sortable:  true,  filterable: true },

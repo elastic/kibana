@@ -1,6 +1,7 @@
 @hintbox-background-color: @gray-lighter;
 @hintbox-spacing-vertical: 10px;
 @hintbox-spacing-horizontal: 12px;
+@hintbox-table-border-color: #BFC9CA;
 
 .hintbox {
   padding: @hintbox-spacing-vertical @hintbox-spacing-horizontal;
@@ -37,5 +38,26 @@
 
   > * + * {
     margin-top: @hintbox-spacing-vertical;
+  }
+
+  // https://github.com/twbs/bootstrap/blob/2aa102bfd40859d15790febed1939e0111a6fb1a/less/tables.less#L88-L106
+  .table-bordered {
+    border: 1px solid @hintbox-table-border-color;
+    > thead,
+    > tbody,
+    > tfoot {
+      > tr {
+        > th,
+        > td {
+          border: 1px solid @hintbox-table-border-color;
+        }
+      }
+    }
+    > thead > tr {
+      > th,
+      > td {
+        border-bottom-width: 2px;
+      }
+    }
   }
 }

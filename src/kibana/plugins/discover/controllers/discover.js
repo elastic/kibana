@@ -3,7 +3,6 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var ConfigTemplate = require('utils/config_template');
-  var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
   var rison = require('utils/rison');
 
@@ -69,7 +68,8 @@ define(function (require) {
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
+    var filterManager = Private(require('components/filter_manager/filter_manager'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -115,19 +115,16 @@ define(function (require) {
         columns: savedSearch.columns || ['_source'],
         index: $scope.indexPattern.id,
         interval: 'auto',
-        filters: _.cloneDeep($scope.searchSource.get('filter'))
+        filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
       };
     }
 
     $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
-    $scope.$watchCollection('state.columns', function (columns) {
+    $scope.$watchCollection('state.columns', function () {
       $state.save();
     });
-
-    var metaFields = config.get('metaFields');
-    filterManager.init($state);
 
     $scope.opts = {
       // number of records to fetch, then paginate through
@@ -165,13 +162,15 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        filterBarWatchFilters($scope)
-        .on('update', function () {
+        // update data source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
-        })
-        .on('fetch', $scope.fetch);
+        });
+
+        // fetch data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
@@ -184,7 +183,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('vis.aggs', function (aggs) {
+        $scope.$watch('vis.aggs', function () {
           var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
           if (buckets && buckets.length === 1) {
@@ -205,7 +204,7 @@ define(function (require) {
             NO_RESULTS: 'none' // no results came back
           };
 
-          function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
+          function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we are loading
             if (rows == null && oldRows == null) return status.LOADING;
 
@@ -296,7 +295,7 @@ define(function (require) {
         $scope.hits = 0;
         $scope.faliures = [];
         $scope.rows = [];
-        $scope.rows.fieldCounts = {};
+        $scope.fieldCounts = {};
       }
 
       if (!$scope.rows) flushResponseData();
@@ -348,7 +347,6 @@ define(function (require) {
         }
 
         var rows = $scope.rows;
-        var counts = rows.fieldCounts || (rows.fieldCounts = {});
         var indexPattern = $scope.searchSource.get('index');
 
         // merge the rows and the hits, use a new array to help watchers
@@ -358,11 +356,12 @@ define(function (require) {
           notify.event('resort rows', function () {
             rows.sort(sortFn);
             rows = $scope.rows = rows.slice(0, totalSize);
-            counts = rows.fieldCounts = {};
+            $scope.fieldCounts = {};
           });
         }
 
         notify.event('flatten hit and count fields', function () {
+          var counts = $scope.fieldCounts;
           $scope.rows.forEach(function (hit) {
             // skip this work if we have already done it and we are NOT sorting.
             // ---
@@ -424,7 +423,7 @@ define(function (require) {
         fields: {'*': {}},
         fragment_size: 2147483647 // Limit of an integer.
       })
-      .set('filter', $state.filters || []);
+      .set('filter', queryFilter.getFilters());
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -435,16 +434,6 @@ define(function (require) {
 
     $scope.toTop = function () {
       $window.scrollTo(0, 0);
-    };
-
-    // TODO: Move to utility class
-    var addSlashes = function (str) {
-      if (!_.isString(str)) return str;
-      str = str.replace(/\\/g, '\\\\');
-      str = str.replace(/\'/g, '\\\'');
-      str = str.replace(/\"/g, '\\"');
-      str = str.replace(/\0/g, '\\0');
-      return str;
     };
 
     var loadingVis;
@@ -478,7 +467,6 @@ define(function (require) {
         return Promise.resolve($scope.vis);
       }
 
-      // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
         type: 'histogram',
         params: {

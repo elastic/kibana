@@ -6,30 +6,29 @@ define(function (require) {
     var types = {
       html: function (format, convert) {
         return function recurse(value, field, hit) {
-          var type = typeof value;
-
-          if (type === 'object' && typeof value.map === 'function') {
-            if (value.$$_formattedField) return value.$$_formattedField;
-
-            var subVals = value.map(recurse);
-            var useMultiLine = subVals.some(function (sub) {
-              return sub.indexOf('\n') > -1;
-            });
-
-            return value.$$_formattedField = subVals.join(',' + (useMultiLine ? '\n' : ' '));
+          if (!value || typeof value.map !== 'function') {
+            return convert.call(format, value, field, hit);
           }
 
-          return convert.call(format, value, field, hit);
+          var subVals = value.map(function (v) {
+            return recurse(v, field, hit);
+          });
+          var useMultiLine = subVals.some(function (sub) {
+            return sub.indexOf('\n') > -1;
+          });
+
+          return subVals.join(',' + (useMultiLine ? '\n' : ' '));
         };
       },
 
       text: function (format, convert) {
         return function recurse(value) {
-          if (value && typeof value.map === 'function') {
-            return angular.toJson(value.map(recurse), true);
+          if (!value || typeof value.map !== 'function') {
+            return convert.call(format, value);
           }
 
-          return convert.call(format, value);
+          // format a list of values. In text contexts we just use JSON encoding
+          return angular.toJson(value.map(recurse), true);
         };
       }
     };
