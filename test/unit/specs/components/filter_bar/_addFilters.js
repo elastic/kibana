@@ -9,7 +9,7 @@ define(function (require) {
     };
     var filters;
     var queryFilter;
-    var $rootScope, appState, globalState;
+    var $rootScope, getIndexPatternStub, appState, globalState;
 
     beforeEach(module('kibana'));
 
@@ -20,21 +20,26 @@ define(function (require) {
       filters = [
         {
           query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
-          meta: { negate: false, disabled: false }
+          meta: { index: 'logstash-*', negate: false, disabled: false }
         },
         {
           query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
-          meta: { negate: false, disabled: false }
+          meta: { index: 'logstash-*', negate: false, disabled: false }
         },
         {
           query: { match: { '_type': { query: 'nginx', type: 'phrase' } } },
-          meta: { negate: false, disabled: false }
+          meta: { index: 'logstash-*', negate: false, disabled: false }
         }
       ];
     });
 
     beforeEach(function () {
       module('kibana/global_state', function ($provide) {
+        $provide.service('courier', function () {
+          var courier = { indexPatterns: { get: getIndexPatternStub } };
+          return courier;
+        });
+
         $provide.service('getAppState', function () {
           return function () {
             return appState;
@@ -48,7 +53,11 @@ define(function (require) {
     });
 
     beforeEach(function () {
-      inject(function (_$rootScope_, Private) {
+      getIndexPatternStub = sinon.stub();
+
+      inject(function (_$rootScope_, Private, Promise) {
+        var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        getIndexPatternStub.returns(Promise.resolve(indexPattern));
         $rootScope = _$rootScope_;
         queryFilter = Private(require('components/filter_bar/query_filter'));
       });
@@ -76,19 +85,20 @@ define(function (require) {
       it('should fire the update and fetch events', function () {
         var emitSpy = sinon.spy(queryFilter, 'emit');
 
-        // set up the watchers
+        // set up the watchers, add new filters, and crank the digest loop
         $rootScope.$digest();
         queryFilter.addFilters(filters);
-        // trigger the digest loop to fire the watchers
         $rootScope.$digest();
-
-        expect(emitSpy.callCount).to.be(2);
-        expect(emitSpy.firstCall.args[0]).to.be('update');
-        expect(emitSpy.secondCall.args[0]).to.be('fetch');
 
         // updates should trigger state saves
         expect(appState.save.callCount).to.be(1);
         expect(globalState.save.callCount).to.be(1);
+
+        // this time, events should be emitted
+        expect(emitSpy.callCount).to.be(2);
+        expect(emitSpy.firstCall.args[0]).to.be('update');
+        expect(emitSpy.secondCall.args[0]).to.be('fetch');
+
       });
     });
 
