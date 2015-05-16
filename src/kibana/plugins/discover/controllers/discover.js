@@ -17,7 +17,7 @@ define(function (require) {
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
   require('components/state_management/app_state');
-  require('services/timefilter');
+  require('components/timefilter/timefilter');
   require('components/highlight/highlight_tags');
 
   var app = require('modules').get('apps/discover', [
@@ -148,7 +148,7 @@ define(function (require) {
 
       $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'update', function () {
+        $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
 

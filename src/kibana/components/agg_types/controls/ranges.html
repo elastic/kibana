@@ -1,4 +1,4 @@
-<table class="vis-editor-agg-editor-ranges form-group">
+<table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.length">
   <tr>
     <th>
       <label>From</label>
@@ -36,6 +36,14 @@
     </td>
   </tr>
 </table>
+
+<input ng-model="agg.params.ranges.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+<div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+  <p>
+    <i class="fa fa-danger text-danger"></i>
+    <strong>Required:</strong> You must specify at least one range.
+  </p>
+</div>
 
 <div
   ng-click="agg.params.ranges.push({})"
