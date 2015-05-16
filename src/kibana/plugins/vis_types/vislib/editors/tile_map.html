@@ -10,6 +10,30 @@
   </select>
 </div>
 
+<div ng-if="vis.params.mapType === 'Scaled Circle Markers'" class="form-group">
+  <div>
+    <label>
+      Scale circle markers
+      &nbsp;<kbn-info placement="right" info="Adjust relative scaling circle markers. Default: 10"></kbn-info>
+    </label>
+    <div class="vis-editor-agg-form-row">
+      <input
+        name="scaleFactor"
+        ng-model="vis.params.scaleFactor"
+        required
+        class="form-control"
+        type="range"
+        min="1"
+        max="100"
+        step="1"
+        >
+      <div class="form-group vis-editor-agg-form-value">
+        {{vis.params.scaleFactor}}
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="vis-option-item">
   <label>
     <input type="checkbox"
