@@ -1,7 +1,6 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
   var $ = require('jquery');
 
   require('components/filter_bar/filter_bar');
