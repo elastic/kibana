@@ -151,7 +151,7 @@ define(function (require) {
      * Pins the filter to the global state
      * @param {object} filter The filter to pin
      * @param {boolean} force pinned state
-     * @returns {object} filter passed in
+     * @returns {object} updated filter
      */
     queryFilter.pinFilter = function (filter, force) {
       var appState = getAppState();
@@ -162,18 +162,19 @@ define(function (require) {
       if (!_.isArray(appState.filters)) appState.filters = [];
 
       var appIndex = _.indexOf(appState.filters, filter);
-      var globalIndex = _.indexOf(globalState.filters, filter);
-      if (appIndex === -1 && globalIndex === -1) return;
 
       if (appIndex !== -1 && force !== false) {
         appState.filters.splice(appIndex, 1);
         globalState.filters.push(filter);
-      } else if (globalIndex !== -1 && force !== true) {
+      } else {
+        var globalIndex = _.indexOf(globalState.filters, filter);
+
+        if (globalIndex === -1 || force === true) return filter;
+
         globalState.filters.splice(globalIndex, 1);
         appState.filters.push(filter);
       }
 
-      saveState();
       return filter;
     };
 
