@@ -34,7 +34,7 @@ define(function (require) {
      * Adds new filters to the scope and state
      * @param {object|array} fitlers Filter(s) to add
      * @param {bool} global Should be added to global state
-     * @returns {object} Resulting new filter list
+     * @retuns {Promise} filter map promise
      */
     queryFilter.addFilters = function (filters, global) {
       var appState = getAppState();
@@ -44,15 +44,16 @@ define(function (require) {
         filters = [filters];
       }
 
-      if (global) {
-        // simply concat global filters, they will be deduped
-        globalState.filters = globalState.filters.concat(filters);
-      } else if (appState) {
-        if (!appState.filters) appState.filters = [];
-        appState.filters = appState.filters.concat(filters);
-      }
-
-      return saveState();
+      return mapAndFlattenFilters(filters)
+      .then(function (filters) {
+        if (global) {
+          // simply concat global filters, they will be deduped
+          globalState.filters = globalState.filters.concat(filters);
+        } else if (appState) {
+          if (!appState.filters) appState.filters = [];
+          appState.filters = appState.filters.concat(filters);
+        }
+      });
     };
 
     /**
@@ -227,10 +228,11 @@ define(function (require) {
       globalState.filters.concat(appFilters).forEach(fn);
     }
 
-    function mergeAndMutateFilters(globalFilters, appFilters, compareOptions) {
-      appFilters = appFilters || [];
-      globalFilters = globalFilters || [];
-      compareOptions = _.defaults(compareOptions || {}, { disabled: true, negate: true });
+    function mergeStateFilters(gFilters, aFilters, compareOptions) {
+      // ensure we don't mutate the filters passed in
+      var globalFilters = gFilters ? _.cloneDeep(gFilters) : [];
+      var appFilters = aFilters ? _.cloneDeep(aFilters) : [];
+      compareOptions = _.defaults(compareOptions || {}, { disabled: true });
 
       // existing globalFilters should be mutated by appFilters
       _.each(appFilters, function (filter, i) {
@@ -246,17 +248,10 @@ define(function (require) {
         appFilters.splice(i, 1);
       });
 
-      appFilters = uniqFilters(appFilters, { disabled: true });
-      globalFilters = uniqFilters(globalFilters, { disabled: true });
-
-      return mapAndFlattenFilters(globalFilters)
-      .then(function (globals) {
-        globalFilters = globals;
-        return mapAndFlattenFilters(appFilters);
-      }).then(function (apps) {
-        appFilters = apps;
-        return [globalFilters, appFilters];
-      });
+      return [
+        uniqFilters(globalFilters, { disabled: true }),
+        uniqFilters(appFilters, { disabled: true })
+      ];
     }
 
     /**
@@ -290,46 +285,41 @@ define(function (require) {
 
           var doUpdate = false;
           var doFetch = false;
-          var originals = {
-            global: _.cloneDeep(next[0]),
-            app: _.cloneDeep(next[1])
-          };
 
           // reconcile filter in global and app states
-          return mergeAndMutateFilters(next[0], next[1])
-          .then(function (filters) {
-            var globalFilters = filters[0];
-            var appFilters = filters[1];
-            var appState = getAppState();
+          var filters = mergeStateFilters(next[0], next[1]);
+          var globalFilters = filters[0];
+          var appFilters = filters[1];
+          var appState = getAppState();
 
-            // save the state, as it may have updated
-            var globalChanged = !_.isEqual(originals.global, globalFilters);
-            var appChanged = !_.isEqual(originals.app, appFilters);
+          // save the state, as it may have updated
+          var globalChanged = !_.isEqual(next[0], globalFilters);
+          var appChanged = !_.isEqual(next[1], appFilters);
 
-            // the filters were changed, apply to state (re-triggers this watcher)
-            if (globalChanged || appChanged) {
-              globalState.filters = globalFilters;
-              if (appState) appState.filters = appFilters;
-              return;
-            }
+          // the filters were changed, apply to state (re-triggers this watcher)
+          if (globalChanged || appChanged) {
+            globalState.filters = globalFilters;
+            if (appState) appState.filters = appFilters;
+            return;
+          }
 
-            // check for actions, bail if we're done
-            getActions();
-            if (!doUpdate) return;
+          // check for actions, bail if we're done
+          getActions();
+          if (!doUpdate) return;
 
-            // save states and emit the required events
-            saveState();
-            queryFilter.emit('update')
-            .then(function () {
-              if (!doFetch) return;
-              queryFilter.emit('fetch');
-            });
+          // save states and emit the required events
+          saveState();
+          queryFilter.emit('update')
+          .then(function () {
+            if (!doFetch) return;
+            queryFilter.emit('fetch');
           });
 
           // iterate over each state type, checking for changes
           function getActions() {
             var newFilters = [];
             var oldFilters = [];
+
             stateWatchers.forEach(function (watcher, i) {
               var nextVal = next[i];
               var prevVal = prev[i];
@@ -338,6 +328,7 @@ define(function (require) {
 
               // no update or fetch if there was no change
               if (nextVal === prevVal) return;
+
               if (nextVal) doUpdate = true;
 
               // don't trigger fetch when only disabled filters
