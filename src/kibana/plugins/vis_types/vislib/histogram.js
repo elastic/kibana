@@ -16,9 +16,11 @@ define(function (require) {
           addLegend: true,
           scale: 'linear',
           mode: 'stacked',
-          defaultYExtents: false,
           times: [],
-          addTimeMarker: false
+          addTimeMarker: false,
+          defaultYExtents: false,
+          setYExtents: false,
+          yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'percentage', 'grouped'],
