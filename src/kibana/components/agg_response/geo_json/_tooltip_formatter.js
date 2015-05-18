@@ -1,33 +1,41 @@
 define(function (require) {
-  return function TileMapTooltipFormatter($compile, $rootScope) {
+  return function TileMapTooltipFormatter($compile, $rootScope, Private) {
     var $ = require('jquery');
+    var _ = require('lodash');
 
+    var fieldFormats = Private(require('registry/field_formats'));
     var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('text!components/agg_response/geo_json/_tooltip.html'));
-    $compile($tooltip)($tooltipScope);
+    var $el = $('<div>').html(require('text!components/agg_response/geo_json/_tooltip.html'));
+    $compile($el)($tooltipScope);
 
     return function tooltipFormatter(feature) {
       if (!feature) return '';
 
-      var details = $tooltipScope.details = [];
+      var value = feature.properties.value;
+      var acr = feature.properties.aggConfigResult;
+      var vis = acr.aggConfig.vis;
 
-      var lat = feature.geometry.coordinates[1];
-      var lng = feature.geometry.coordinates[0];
+      var metricAgg = acr.aggConfig;
+      var geoFormat = _.get(vis.aggs, 'byTypeName.geohash_grid[0].format');
+      if (!geoFormat) geoFormat = fieldFormats.getDefaultInstance('geo_point');
 
-      var metric = {
-        label: feature.properties.valueLabel,
-        value: feature.properties.valueFormatted
-      };
-      var location = {
-        label: 'Geohash center',
-        value: lat.toFixed(3) + ', ' + lng.toFixed(3)
-      };
-
-      details.push(metric, location);
+      $tooltipScope.details = [
+        {
+          label: metricAgg.makeLabel(),
+          value: metricAgg.fieldFormatter()(value)
+        },
+        {
+          label: 'Geohash center',
+          value: geoFormat.convert({
+            lat: feature.geometry.coordinates[1],
+            lon: feature.geometry.coordinates[0]
+          })
+        }
+      ];
 
       $tooltipScope.$apply();
 
-      return $tooltip[0].outerHTML;
+      return $el.html();
     };
   };
 });

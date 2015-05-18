@@ -1,5 +1,8 @@
-define(function () {
+define(function (require) {
+  var _ = require('lodash');
+
   return {
+    'valueFormatter': _.identity,
     'geoJson': {
       'type': 'FeatureCollection',
       'features': [
@@ -13,8 +16,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 608,
+            'value': 608,
             'geohash': 's',
             'center': [
               22.5,
@@ -75,8 +77,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 522,
+            'value': 522,
             'geohash': 'w',
             'center': [
               112.5,
@@ -137,8 +138,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 517,
+            'value': 517,
             'geohash': '6',
             'center': [
               -67.5,
@@ -199,8 +199,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 446,
+            'value': 446,
             'geohash': 'd',
             'center': [
               -67.5,
@@ -261,8 +260,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 426,
+            'value': 426,
             'geohash': 'u',
             'center': [
               22.5,
@@ -323,8 +321,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 413,
+            'value': 413,
             'geohash': 't',
             'center': [
               67.5,
@@ -385,8 +382,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 362,
+            'value': 362,
             'geohash': 'k',
             'center': [
               22.5,
@@ -447,8 +443,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 352,
+            'value': 352,
             'geohash': '9',
             'center': [
               -112.5,
@@ -509,8 +504,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 216,
+            'value': 216,
             'geohash': 'e',
             'center': [
               -22.5,
@@ -571,8 +565,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 183,
+            'value': 183,
             'geohash': 'v',
             'center': [
               67.5,
@@ -633,8 +626,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 158,
+            'value': 158,
             'geohash': 'r',
             'center': [
               157.5,
@@ -695,8 +687,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 139,
+            'value': 139,
             'geohash': 'y',
             'center': [
               112.5,
@@ -757,8 +748,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 110,
+            'value': 110,
             'geohash': 'c',
             'center': [
               -112.5,
@@ -819,8 +809,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 101,
+            'value': 101,
             'geohash': 'q',
             'center': [
               112.5,
@@ -881,8 +870,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 101,
+            'value': 101,
             'geohash': '7',
             'center': [
               -22.5,
@@ -943,8 +931,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 92,
+            'value': 92,
             'geohash': 'f',
             'center': [
               -67.5,
@@ -1005,8 +992,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 75,
+            'value': 75,
             'geohash': 'b',
             'center': [
               -157.5,
@@ -1067,8 +1053,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 64,
+            'value': 64,
             'geohash': 'g',
             'center': [
               -22.5,
@@ -1129,8 +1114,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 36,
+            'value': 36,
             'geohash': 'z',
             'center': [
               157.5,
@@ -1191,8 +1175,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 34,
+            'value': 34,
             'geohash': 'x',
             'center': [
               157.5,
@@ -1253,8 +1236,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 30,
+            'value': 30,
             'geohash': '4',
             'center': [
               -67.5,
@@ -1315,8 +1297,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 16,
+            'value': 16,
             'geohash': 'm',
             'center': [
               67.5,
@@ -1377,8 +1358,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 10,
+            'value': 10,
             'geohash': '5',
             'center': [
               -22.5,
@@ -1439,8 +1419,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 6,
+            'value': 6,
             'geohash': 'p',
             'center': [
               157.5,
@@ -1501,8 +1480,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 6,
+            'value': 6,
             'geohash': '2',
             'center': [
               -157.5,
@@ -1563,8 +1541,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 4,
+            'value': 4,
             'geohash': 'h',
             'center': [
               22.5,
@@ -1625,8 +1602,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 2,
+            'value': 2,
             'geohash': 'n',
             'center': [
               112.5,
@@ -1687,8 +1663,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 2,
+            'value': 2,
             'geohash': 'j',
             'center': [
               67.5,
@@ -1749,8 +1724,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 1,
+            'value': 1,
             'geohash': '3',
             'center': [
               -112.5,
@@ -1811,8 +1785,7 @@ define(function () {
             ]
           },
           'properties': {
-            'valueLabel': 'Count',
-            'count': 1,
+            'value': 1,
             'geohash': '1',
             'center': [
               -112.5,
@@ -1865,18 +1838,9 @@ define(function () {
         }
       ],
       'properties': {
-        'label': null,
-        'length': 30,
         'min': 1,
-        'max': 608,
-        'precision': 1,
-        'allmin': 1,
-        'allmax': 608,
-        'valueFormatter': function (str) {
-          return str;
-        }
+        'max': 608
       }
     },
-    'hits': 5033
   };
 });

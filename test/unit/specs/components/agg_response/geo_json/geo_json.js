@@ -54,10 +54,20 @@ define(function (require) {
       describe('with table ' + JSON.stringify(tableOpts), function () {
 
         it('outputs a chart', function () {
-          var chart = makeSingleChart();
-          expect(chart).to.have.property('tooltipFormatter');
+          var table = makeTable();
+          var chart = makeSingleChart(table);
+          expect(chart).to.only.have.keys(
+            'title',
+            'tooltipFormatter',
+            'valueFormatter',
+            'geohashGridAgg',
+            'geoJson'
+          );
+
+          expect(chart.title).to.be(table.title());
           expect(chart.tooltipFormatter).to.be.a('function');
-          expect(chart).to.have.property('geoJson');
+          expect(chart.valueFormatter).to.be(aggs.metric.fieldFormatter());
+          expect(chart.geohashGridAgg).to.be(aggs.geo);
           expect(chart.geoJson).to.be.an('object');
         });
 
@@ -77,37 +87,15 @@ define(function (require) {
 
           // props
           expect(props).to.be.an('object');
+          expect(props).to.only.have.keys('min', 'max');
 
-          // props.agg
-          expect(props).to.have.property('agg');
+          // props.min
+          expect(props.min).to.be.a('number');
+          expect(props.min).to.be.greaterThan(0);
 
-          // props.agg.metric
-          expect(props.agg).to.have.property('metric');
-          expect(props.agg.metric).to.be(aggs.metric);
-
-          // props.agg.geo
-          expect(props.agg).to.have.property('geo');
-          expect(props.agg.geo).to.be(aggs.geo);
-
-          // props.label
-          expect(props).to.have.property('label');
-          expect(props.label).to.be.a('string');
-
-          // props.length
-          expect(props).to.have.property('length');
-          expect(props.length).to.be(geoJson.features.length);
-
-          // props.metricField
-          expect(props).to.have.property('metricField');
-          expect(props.metricField).to.be(aggs.metric.fieldName());
-
-          // props.precision
-          expect(props).to.have.property('precision');
-          expect(props.precision).to.be(aggs.geo.params.precision);
-
-          // props.valueFormatter
-          expect(props).to.have.property('valueFormatter');
-          expect(props.valueFormatter).to.be(aggs.metric.fieldFormatter());
+          // props.max
+          expect(props.max).to.be.a('number');
+          expect(props.max).to.be.greaterThan(0);
         });
 
         describe('properties', function () {
@@ -134,28 +122,31 @@ define(function (require) {
 
               var props = feature.properties;
               expect(props).to.be.an('object');
-              expect(props).to.have.keys('center', 'count', 'geohash', 'valueFormatted', 'valueLabel');
+              expect(props).to.only.have.keys(
+                'value', 'geohash', 'aggConfigResult',
+                'rectangle', 'center'
+              );
+
               expect(props.center).to.eql(geometry.coordinates);
-              if (props.count != null) expect(props.count).to.be.a('number');
+              if (props.value != null) expect(props.value).to.be.a('number');
               expect(props.geohash).to.be.a('string');
-              expect(props.valueFormatted).to.be(aggs.metric.fieldFormatter()(props.count));
-              expect(props.valueLabel).to.be(aggs.metric.makeLabel());
 
               if (tableOpts.asAggConfigResults) {
                 expect(props.aggConfigResult).to.be(row[metricColI]);
-                expect(props.count).to.be(row[metricColI].value);
+                expect(props.value).to.be(row[metricColI].value);
                 expect(props.geohash).to.be(row[geoColI].value);
               } else {
                 expect(props.aggConfigResult).to.be(null);
-                expect(props.count).to.be(row[metricColI]);
+                expect(props.value).to.be(row[metricColI]);
                 expect(props.geohash).to.be(row[geoColI]);
               }
             });
           });
         });
-
       });
     });
+
+    describe('geoJson tooltip formatter', function () {});
   });
 
 });

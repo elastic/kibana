@@ -205,22 +205,22 @@ define(function (require) {
           });
         });
 
-        it('should return the min of all features.properties.count', function () {
+        it('should return the min of all features.properties.value', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var min = _.chain(data.geoJson.features)
-            .deepPluck('properties.count')
+            .deepPluck('properties.value')
             .min()
             .value();
             expect(chart.getMinMax(data).min).to.be(min);
           });
         });
 
-        it('should return the max of all features.properties.count', function () {
+        it('should return the max of all features.properties.value', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var max = _.chain(data.geoJson.features)
-            .deepPluck('properties.count')
+            .deepPluck('properties.value')
             .max()
             .value();
             expect(chart.getMinMax(data).max).to.be(max);
