@@ -9,7 +9,7 @@ define(function (require) {
     };
     var filters;
     var queryFilter;
-    var $rootScope, getIndexPatternStub, appState, globalState;
+    var $rootScope, appState, globalState;
 
     beforeEach(module('kibana'));
 
@@ -54,12 +54,11 @@ define(function (require) {
     });
 
     beforeEach(function () {
-      module('kibana/global_state', function ($provide) {
-        $provide.service('courier', function () {
-          var courier = { indexPatterns: { get: getIndexPatternStub } };
-          return courier;
-        });
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', require('fixtures/mock_courier'));
+      });
 
+      module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
             return appState;
@@ -73,11 +72,7 @@ define(function (require) {
     });
 
     beforeEach(function () {
-      getIndexPatternStub = sinon.stub();
-
       inject(function (_$rootScope_, Private, Promise) {
-        var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
         $rootScope = _$rootScope_;
         queryFilter = Private(require('components/filter_bar/query_filter'));
       });

@@ -9,7 +9,7 @@ define(function (require) {
 
   describe('Filter Bar Directive', function () {
     var $rootScope, $compile, $timeout, Promise;
-    var appState, queryFilter, mapFilter, getIndexPatternStub, indexPattern, $el;
+    var appState, queryFilter, mapFilter, $el;
     // require('test_utils/no_digest_promises').activateForSuite();
 
     beforeEach(function () {
@@ -28,13 +28,8 @@ define(function (require) {
       // load the application
       module('kibana');
 
-      getIndexPatternStub = sinon.stub();
-
       module('kibana/courier', function ($provide) {
-        $provide.service('courier', function () {
-          var courier = { indexPatterns: { get: getIndexPatternStub } };
-          return courier;
-        });
+        $provide.service('courier', require('fixtures/mock_courier'));
       });
 
       inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
@@ -43,9 +38,6 @@ define(function (require) {
         $timeout = _$timeout_;
         Promise = $injector.get('Promise');
         mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
-
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
 
         var queryFilter = Private(require('components/filter_bar/query_filter'));
         queryFilter.getFilters = function () {
