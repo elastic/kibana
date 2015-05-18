@@ -7,7 +7,6 @@ define(function (require) {
     return Numeral.factory({
       id: 'percent',
       title: 'Percentage',
-      editorTemplate: require('text!components/stringify/editors/_numeral.html'),
       paramDefaults: new BoundToConfigObj({
         pattern: '=format:percent:defaultPattern',
         fractional: true
