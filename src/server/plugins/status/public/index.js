@@ -1,34 +1,34 @@
-define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
-  function (angular, $, _, moment) {
+window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
+  function (angular, $, _, moment, numeral) {
 
     // Make sure we don't have to deal with statuses by hand
     function getStatus(plugin) {
-        var statusMap = {
-          green: {
-            label: 'success',
-            msg: 'Ready',
-            idx: 1
-          },
-          yellow: {
-            label: 'warning',
-            msg: 'S.N.A.F.U.',
-            idx: 2
-          },
-          red: {
-            label: 'danger',
-            msg: 'Danger Will Robinson! Danger!',
-            idx: 3
-          },
-          loading: {
-            label: 'info',
-            msg: 'Loading...',
-            idx: 0
-          }
-        };
-        if(!_.isObject(plugin) || _.isUndefined(plugin)) {
-          plugin = {state: plugin};
+      var statusMap = {
+        green: {
+          label: 'success',
+          msg: 'Ready',
+          idx: 1
+        },
+        yellow: {
+          label: 'warning',
+          msg: 'S.N.A.F.U.',
+          idx: 2
+        },
+        red: {
+          label: 'danger',
+          msg: 'Danger Will Robinson! Danger!',
+          idx: 3
+        },
+        loading: {
+          label: 'info',
+          msg: 'Loading...',
+          idx: 0
         }
-        return statusMap[plugin.state];
+      };
+      if (!_.isObject(plugin) || _.isUndefined(plugin)) {
+        plugin = {state: plugin};
+      }
+      return statusMap[plugin.state];
     }
     function getLabel(plugin) { return getStatus(plugin).label; }
 
@@ -37,21 +37,21 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
     function niceName(name) {
       return name
         .split(/(?=[A-Z])/)
-        .map(function(word) { return word[0].toUpperCase() + _.rest(word).join(''); })
+        .map(function (word) { return word[0].toUpperCase() + _.rest(word).join(''); })
         .join(' ');
     }
 
     function formatNumber(num, which) {
       var format = '0.00';
       var postfix = '';
-      switch(which) {
+      switch (which) {
         case 'time':
           return moment(num).format('HH:MM:SS');
         case 'byte':
           format += 'b';
           break;
         case 'ms':
-          postfix = 'ms'
+          postfix = 'ms';
           break;
       }
       return numeral(num).format(format) + postfix;
@@ -60,7 +60,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
       var byteMetrics = ['heapTotal', 'heapUsed', 'rss'];
       var msMetrics = ['delay', 'responseTimeAvg', 'responseTimeMax'];
       var preciseMetric = ['requests', 'load'];
-      if( byteMetrics.indexOf(key) > -1 ) {
+      if ( byteMetrics.indexOf(key) > -1 ) {
         return 'byte';
       } else if (msMetrics.indexOf(key) > -1 ) {
         return 'ms';
@@ -86,31 +86,31 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
             right: 0,
             bottom: 20
           },
-          xAxis: { tickFormat: function(d) { return formatNumber(d, 'time'); } },
-          yAxis: { tickFormat: function(d) { return formatNumber(d, type); }, },
-          y: function(d) { return d.y; },
-          x: function(d) { return d.x; }
+          xAxis: { tickFormat: function (d) { return formatNumber(d, 'time'); } },
+          yAxis: { tickFormat: function (d) { return formatNumber(d, type); }, },
+          y: function (d) { return d.y; },
+          x: function (d) { return d.x; }
         }
       };
     });
 
     // The Kibana App
     angular.module('KibanaStatusApp', ['nvd3'])
-      .controller('StatusPage', ['$scope', '$http', function($scope, $http) {
+      .controller('StatusPage', ['$scope', '$http', function ($scope, $http) {
         // the object representing all of the elements the ui touches
         $scope.ui = {
           // show the system status by going through all of the plugins,
           // and making sure they're green.
-          systemStatus: function() {
+          systemStatus: (function () {
             // for convenience
             function getIdx(plugin) { return getStatus(plugin).idx; }
 
-            return function() {
+            return function () {
               var currentStatus = 'loading';
               var currentIdx = getIdx(currentStatus);
 
               // FIXME eh, not too thrilled about this.
-              var status = _.reduce($scope.ui.plugins, function(curr, plugin, key) {
+              var status = _.reduce($scope.ui.plugins, function (curr, plugin, key) {
                   var pluginIdx = getIdx(plugin);
                   if (pluginIdx > currentIdx) {
                     // set the current status
@@ -122,8 +122,8 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
 
               // give the ui the label for colors and such
               return getStatus(status);
-            }
-          }(),
+            };
+          }()),
           charts: [],
           plugins: [],
           chartAverages: [],
@@ -135,12 +135,12 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
           // go ahead and get the info you want
           $http
             .get('/status/health')
-            .success(function(data) {
+            .success(function (data) {
               // Assign the propper variables to the scope and change them as necessary
 
               // setup The charts
               // wrap the metrics data and append the average
-              $scope.ui.charts = _.mapValues(data.metrics, function(metric, name) {
+              $scope.ui.charts = _.mapValues(data.metrics, function (metric, name) {
 
                 // Metric Values format
                 // metric: [[xValue, yValue], ...]
@@ -156,10 +156,10 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                 var metricList = [];
                 var metricNumberType = numberType(name);
 
-                metric.forEach(function(vector) {
+                metric.forEach(function (vector) {
                   var _vector = _(vector).flatten();
                   var x = _vector.shift();
-                  _vector.forEach(function(yValue, idx) {
+                  _vector.forEach(function (yValue, idx) {
                     if (!metricList[idx]) {
                       metricList[idx] = {
                         key: name + idx,
@@ -170,8 +170,8 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
                   });
                 });
 
-                var average = metricList.map(function(data) {
-                  var uglySum = data.values.reduce(function(sumSoFar, vector) {
+                var average = metricList.map(function (data) {
+                  var uglySum = data.values.reduce(function (sumSoFar, vector) {
                     return sumSoFar + vector.y;
                   }, 0);
                   return formatNumber(uglySum / data.values.length, metricNumberType);
@@ -182,7 +182,7 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
               });
 
               // give the plugins their proper name so CSS classes can be properply applied
-              $scope.ui.plugins = _.mapValues(data.status, function(plugin) {
+              $scope.ui.plugins = _.mapValues(data.status, function (plugin) {
                 plugin.uiStatus = getLabel(plugin);
                 return plugin;
               });
@@ -192,8 +192,8 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
               // go ahead and get another status in 5 seconds
               setTimeout(getAppStatus, 5000);
             })
-            .error(function() {
-              alert('Something went terribly wrong while making the request!!!');
+            .error(function () {
+              window.alert('Something went terribly wrong while making the request!!! Perhaps your server is down?');
             });
         }
 
@@ -203,9 +203,9 @@ define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directives'],
       }]);
 
     return {
-      init: function() {
-        $(function() {
-          angular.bootstrap(document, ['nvd3', 'KibanaStatusApp']);
+      init: function () {
+        $(function () {
+          angular.bootstrap(window.document, ['nvd3', 'KibanaStatusApp']);
         });
       }
     };
