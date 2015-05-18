@@ -90,6 +90,7 @@ define(function (require) {
         expect(vis.params).to.have.property('addTooltip', true);
         expect(vis.params).to.have.property('mode', 'stacked');
         expect(vis.params).to.have.property('shareYAxis', true);
+        expect(vis.params).to.have.property('emote', 'fa fa-meh-o');
       });
     });
 

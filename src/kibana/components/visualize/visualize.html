@@ -3,7 +3,11 @@
   class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
-    <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+    <h2 aria-hidden="true">
+      <i ng-if="vis.params.emote === 'fa fa-meh-o'" aria-hidden="true" class="fa fa-meh-o"></i>
+      <i ng-if="vis.params.emote === 'fa fa-smile-o'" aria-hidden="true" class="fa fa-smile-o"></i>
+      <i ng-if="vis.params.emote === 'fa fa-frown-o'" aria-hidden="true" class="fa fa-frown-o"></i>
+    </h2>
     <h4>No results found</h4>
   </div>
   <div class="item bottom"></div>

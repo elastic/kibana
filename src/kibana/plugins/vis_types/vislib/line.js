@@ -22,7 +22,8 @@ define(function (require) {
           scale: 'linear',
           defaultYExtents: false,
           times: [],
-          addTimeMarker: false
+          addTimeMarker: false,
+          emote: 'fa fa-meh-o'
         },
         scales: ['linear', 'log', 'square root'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')

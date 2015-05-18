@@ -14,7 +14,8 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
-          isDonut: false
+          isDonut: false,
+          emote: 'fa fa-meh-o'
         },
         editor: require('text!plugins/vis_types/vislib/editors/pie.html')
       },
