@@ -25,7 +25,7 @@ define(function (require) {
           value: metricAgg.fieldFormatter()(value)
         },
         {
-          label: 'Geohash center',
+          label: 'Center',
           value: geoFormat.convert({
             lat: feature.geometry.coordinates[1],
             lon: feature.geometry.coordinates[0]

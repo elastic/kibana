@@ -10,14 +10,14 @@ define(function (require) {
             return convert.call(format, value, field, hit);
           }
 
-          // format a list of values. Lists of values will have their formatted values cached
-          if (value.$$_formattedField) return value.$$_formattedField;
-          var subVals = value.map(recurse);
+          var subVals = value.map(function (v) {
+            return recurse(v, field, hit);
+          });
           var useMultiLine = subVals.some(function (sub) {
             return sub.indexOf('\n') > -1;
           });
 
-          return value.$$_formattedField = subVals.join(',' + (useMultiLine ? '\n' : ' '));
+          return subVals.join(',' + (useMultiLine ? '\n' : ' '));
         };
       },
 

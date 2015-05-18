@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapVisType(Private, getAppState) {
+  return function TileMapVisType(Private, getAppState, courier, config) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
@@ -14,14 +14,20 @@ define(function (require) {
       params: {
         defaults: {
           mapType: 'Scaled Circle Markers',
-          isDesaturated: true
+          isDesaturated: true,
+          heatMaxZoom: 16,
+          heatMinOpacity: 0.1,
+          heatRadius: 25,
+          heatBlur: 15,
+          heatNormalizeData: true,
+          addTooltip: true
         },
-        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid'],
+        mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       listeners: {
         rectangle: function (event) {
-          var agg = _.deepGet(event, 'data.geohashGridAgg');
+          var agg = _.deepGet(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
           var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
@@ -31,6 +37,38 @@ define(function (require) {
           filter.geo_bounding_box[field] = event.bounds;
 
           pushFilter(filter, false, indexPatternName);
+        },
+        mapZoomEnd: function (event) {
+          var agg = _.deepGet(event, 'chart.geohashGridAgg');
+          if (!agg || !agg.params.autoPrecision) return;
+
+          // zoomPrecision maps event.zoom to a geohash precision value
+          // event.limit is the configurable max geohash precision
+          // default max precision is 7, configurable up to 12
+          var zoomPrecision = {
+            1: 2,
+            2: 2,
+            3: 2,
+            4: 3,
+            5: 3,
+            6: 4,
+            7: 4,
+            8: 5,
+            9: 5,
+            10: 6,
+            11: 6,
+            12: 7,
+            13: 7,
+            14: 8,
+            15: 9,
+            16: 10,
+            17: 11,
+            18: 12
+          };
+
+          agg.params.precision = Math.min(zoomPrecision[event.zoom], config.get('visualization:tileMap:maxPrecision'));
+
+          courier.fetch();
         }
       },
       responseConverter: geoJsonConverter,

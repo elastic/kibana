@@ -12,11 +12,11 @@ define(function (require) {
   }
 
   function convertRowsToFeatures(table, geoI, metricI) {
-    return table.rows.map(function (row) {
-
+    return _.transform(table.rows, function (features, row) {
       var geohash = unwrap(row[geoI]);
-      var location = decodeGeoHash(geohash);
+      if (!geohash) return;
 
+      var location = decodeGeoHash(geohash);
       var center = [
         location.longitude[2],
         location.latitude[2]
@@ -29,7 +29,7 @@ define(function (require) {
         [location.longitude[0], location.latitude[1]]
       ];
 
-      return {
+      features.push({
         type: 'Feature',
         geometry: {
           type: 'Point',
@@ -42,8 +42,8 @@ define(function (require) {
           center: center,
           rectangle: rectangle
         }
-      };
-    });
+      });
+    }, []);
   }
 
   return convertRowsToFeatures;
