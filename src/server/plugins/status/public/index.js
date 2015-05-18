@@ -96,7 +96,7 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
 
     // The Kibana App
     angular.module('KibanaStatusApp', ['nvd3'])
-      .controller('StatusPage', ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+      .controller('StatusPage', ['$scope', '$http', '$window', '$timeout', function ($scope, $http, $window, $timeout) {
         // the object representing all of the elements the ui touches
         $scope.ui = {
           // show the system status by going through all of the plugins,
@@ -130,6 +130,15 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
           chartOptions: {
           }
         };
+
+        var windowHasFocus = true;
+        angular.element($window).bind({
+          blur: function () { windowHasFocus = false; },
+          focus: function () {
+            windowHasFocus = true;
+            getAppStatus();
+          }
+        });
 
         function getAppStatus() {
           // go ahead and get the info you want
@@ -187,8 +196,10 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
                 return plugin;
               });
 
-              // go ahead and get another status in 5 seconds
-              $timeout(getAppStatus, 5000);
+              if (windowHasFocus) {
+                // go ahead and get another status in 5 seconds
+                $timeout(getAppStatus, 5000);
+              }
             })
             .error(function () {
               window.alert('Something went terribly wrong while making the request!!! Perhaps your server is down?');
