@@ -65,19 +65,31 @@ define(function (require) {
 
     describe('adding filters', function () {
       it('should add filters to appState', function () {
+        $rootScope.$digest();
+
         queryFilter.addFilters(filters);
+        $rootScope.$digest();
+
         expect(appState.filters.length).to.be(3);
         expect(globalState.filters.length).to.be(0);
       });
 
       it('should add filters to globalState', function () {
+        $rootScope.$digest();
+
         queryFilter.addFilters(filters, true);
+        $rootScope.$digest();
+
         expect(appState.filters.length).to.be(0);
         expect(globalState.filters.length).to.be(3);
       });
 
       it('should accept a single filter', function () {
+        $rootScope.$digest();
+
         queryFilter.addFilters(filters[0]);
+        $rootScope.$digest();
+
         expect(appState.filters.length).to.be(1);
         expect(globalState.filters.length).to.be(0);
       });
@@ -106,6 +118,7 @@ define(function (require) {
       it('should de-dupe appState filters being added', function () {
         var newFilter = _.cloneDeep(filters[1]);
         appState.filters = filters;
+        $rootScope.$digest();
         expect(appState.filters.length).to.be(3);
 
         queryFilter.addFilters(newFilter);
@@ -116,6 +129,7 @@ define(function (require) {
       it('should de-dupe globalState filters being added', function () {
         var newFilter = _.cloneDeep(filters[1]);
         globalState.filters = filters;
+        $rootScope.$digest();
         expect(globalState.filters.length).to.be(3);
 
         queryFilter.addFilters(newFilter, true);
@@ -126,10 +140,12 @@ define(function (require) {
       it('should mutate global filters on appState filter changes', function () {
         var idx = 1;
         globalState.filters = filters;
+        $rootScope.$digest();
+
         var appFilter = _.cloneDeep(filters[idx]);
         appFilter.meta.negate = true;
-        // use addFilters here, so custom adding logic can be applied
         queryFilter.addFilters(appFilter);
+        $rootScope.$digest();
 
         var res = queryFilter.getFilters();
         expect(res).to.have.length(3);
