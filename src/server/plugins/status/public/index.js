@@ -46,7 +46,7 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
       var postfix = '';
       switch (which) {
         case 'time':
-          return moment(num).format('HH:MM:SS');
+          return moment(num).format('HH:MM:ss');
         case 'byte':
           format += 'b';
           break;
@@ -96,7 +96,7 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
 
     // The Kibana App
     angular.module('KibanaStatusApp', ['nvd3'])
-      .controller('StatusPage', ['$scope', '$http', function ($scope, $http) {
+      .controller('StatusPage', ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
         // the object representing all of the elements the ui touches
         $scope.ui = {
           // show the system status by going through all of the plugins,
@@ -187,16 +187,13 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
                 return plugin;
               });
 
-
-              console.log((new Date()).getTime());
               // go ahead and get another status in 5 seconds
-              setTimeout(getAppStatus, 5000);
+              $timeout(getAppStatus, 5000);
             })
             .error(function () {
               window.alert('Something went terribly wrong while making the request!!! Perhaps your server is down?');
             });
         }
-
 
         // Start it all up
         getAppStatus();
