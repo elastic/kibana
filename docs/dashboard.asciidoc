@@ -8,7 +8,7 @@ dashboard to share or reload at a later time.
 image:images/NYCTA-Dashboard.jpg[Example dashboard]
 
 [float]
-[[getting-started]]
+[[dashboard-getting-started]]
 === Getting Started
 
 You need at least one saved <<visualize, visualization>> to use a dashboard.

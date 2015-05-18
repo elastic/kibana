@@ -42,7 +42,8 @@ kibana_elasticsearch_password: kibana4-password
 ----
 
 Kibana 4 users also need access to the `.kibana` index so they can save and load searches, visualizations, and dashboards.
-For more information, see {shield}/_shield_with_kibana_4.html#kibana4-roles[Configuring Roles for Kibana 4 Users] in the Shield documentation.
+For more information, see {shield}/_shield_with_kibana_4.html#kibana4-roles[Configuring Roles for Kibana 4 Users] in 
+the Shield documentation.
 
 [float]
 [[enabling-ssl]]
@@ -50,7 +51,8 @@ For more information, see {shield}/_shield_with_kibana_4.html#kibana4-roles[Conf
 Kibana supports SSL encryption for both client requests and the requests the Kibana server 
 sends to Elasticsearch.
 
-To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file `and `ssl_cert_file` properties in `kibana.yml`:
+To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file `and 
+`ssl_cert_file` properties in `kibana.yml`:
 
 [source,text]
 ----
@@ -101,7 +103,8 @@ If you have multiple nodes in your Elasticsearch cluster, the easiest way to dis
 across the nodes is to run an Elasticsearch _client_ node on the same machine as Kibana. 
 Elasticsearch client nodes are essentially smart load balancers that are part of the cluster. They
 process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and 
-gather and return the results. For more information, see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html[Node] in the Elasticsearch reference.
+gather and return the results. For more information, see 
+http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html[Node] in the Elasticsearch reference.
 
 To use a local client node to load balance Kibana requests:
 

@@ -54,5 +54,3 @@ image:images/TFL-Dashboard.jpg[Dashboard]
 
 For more information about creating and sharing visualizations and dashboards, see the <<visualize, Visualize>> 
 and <<dashboard, Dashboard>> topics.
-
-

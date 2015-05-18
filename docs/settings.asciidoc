@@ -309,7 +309,8 @@ To import a set of objects:
 
 The Kibana server reads properties from the `kibana.yml` file on startup. The default
 settings configure Kibana to run on `localhost:5601`. To change the host or port number, or
-connect to Elasticsearch running on a different machine, you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
+connect to Elasticsearch running on a different machine, you'll need to update your `kibana.yml` file. You can also 
+enable SSL and set a variety of other options.
 
 .Kibana Server Properties
 |===
@@ -328,13 +329,15 @@ connect to Elasticsearch running on a different machine, you'll need to update y
 |`elasticsearch_preserve_host`
 |By default, the host specified in the incoming request from the browser is specified as the host in the 
 corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host
-specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default. Default: `elasticsearch_preserve_host: true`.
+specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default. 
+Default: `elasticsearch_preserve_host: true`.
 
 |`kibana_index`
 |The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
 
 |`default_app_id` 
-|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: `default_app_id: "discover"`. 
+|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: 
+`default_app_id: "discover"`. 
 
 |`request_timeout` 
 |How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000`.
@@ -343,7 +346,8 @@ specified in `elasticsearch_url`. You probably don't need to worry about this se
 |How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default: `shard_timeout: 0`.
 
 |`verify_ssl`
-|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. Default: `verify_ssl: true`.
+|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. 
+Default: `verify_ssl: true`.
 
 |`ca`
 |The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate 
@@ -356,6 +360,7 @@ so the certificate can be verified. (Otherwise, you have to disable `verify_ssl`
 |The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana. Default: none.
 
 |`pid_file`
-|The location where you want to store the process ID file. If not specified, the PID file is stored in `/var/run/kibana.pid`. Default: none.
+|The location where you want to store the process ID file. If not specified, the PID file is stored in 
+`/var/run/kibana.pid`. Default: none.
 
 |===

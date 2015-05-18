@@ -91,6 +91,8 @@ shades based on the metric aggregation's value.
 After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 
+[float]
+[[navigating-map]]
 ==== Navigating the Map
 Once your tilemap visualization is ready, you can explore the map in several ways. Click and hold anywhere on the map 
 and move the cursor to move the map center. Hold Shift and drag a bounding box across the map to zoom in on the 

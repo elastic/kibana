@@ -8,6 +8,8 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
+include::getting-started.asciidoc[]
+
 include::access.asciidoc[]
 
 include::discover.asciidoc[]
