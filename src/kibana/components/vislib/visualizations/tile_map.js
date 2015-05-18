@@ -208,12 +208,12 @@ define(function (require) {
      * @return {boolean}
      */
     TileMap.prototype._filterToMapBounds = function (map) {
+      function cloneAndReverse(arr) { return _(_.clone(arr)).reverse().value(); }
       return function (feature) {
-        var coordinates = feature.geometry.coordinates;
-        var p0 = coordinates[0];
-        var p1 = coordinates[1];
+        var mapBounds = map.getBounds();
+        var bucketRectBounds = feature.properties.rectangle.map(cloneAndReverse);
 
-        return map.getBounds().contains([p1, p0]);
+        return mapBounds.intersects(bucketRectBounds);
       };
     };
 
@@ -436,14 +436,19 @@ define(function (require) {
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
+      var zoom = map.getZoom();
+      var precision = mapData.properties.precision;
+
+      // multiplier to reduce size of all circles
+      var scaleFactor = 0.6;
 
       var radiusScaler = 2.5;
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var scaledRadius = self.radiusScale(count, max, feature) * 2;
-          return L.circle(latlng, scaledRadius);
+          var scaledRadius = self.radiusScale(count, max, zoom, precision) * scaleFactor;
+          return L.circleMarker(latlng).setRadius(scaledRadius);
         },
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer, map);
@@ -479,10 +484,13 @@ define(function (require) {
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
 
+      // multiplier to reduce size of all circles
+      var scaleFactor = 0.8;
+
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var radius = self.geohashMinDistance(feature);
+          var radius = self.geohashMinDistance(feature) * scaleFactor;
           return L.circle(latlng, radius);
         },
         onEachFeature: function (feature, layer) {
@@ -818,23 +826,33 @@ define(function (require) {
 
     /**
      * radiusScale returns a number for scaled circle markers
-     * approx. square root of count
-     * which is multiplied by a factor based on the geohash precision
+     * square root of count / max
+     * multiplied by a value based on map zoom
+     * multiplied by a value based on data precision
      * for relative sizing of markers
      *
      * @method radiusScale
      * @param count {Number}
      * @param max {Number}
+<<<<<<< HEAD
      * @param feature {Object}
+=======
+     * @param zoom {Number}
+     * @param precision {Number}
+>>>>>>> f0414d554915d151e2cdc3501bd3c7fd1889a0a8
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (count, max, feature) {
+    TileMap.prototype.radiusScale = function (count, max, zoom, precision) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
-      var exp = 0.6;
-      var maxRadius = this.geohashMinDistance(feature);
+      var exp = 0.5;
+      var precisionBiasNumerator = 200;
+      var precisionBiasBase = 5;
       var pct = count / max;
-      return Math.pow(pct, exp) * maxRadius;
+      var constantZoomRadius = 0.5 * Math.pow(2, zoom);
+      var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
+
+      return Math.pow(pct, exp) * constantZoomRadius * precisionScale;
     };
 
     /**
