@@ -4,6 +4,10 @@ define(function (require) {
     var sinon = require('test_utils/auto_release_sinon');
     var AggType;
     var AggParams;
+    var AggConfig;
+    var indexPattern;
+    var fieldFormat;
+    var Vis;
 
     require('services/private');
 
@@ -13,7 +17,11 @@ define(function (require) {
       AggParams = sinon.spy(Private(AggParamsPM));
       Private.stub(AggParamsPM, AggParams);
 
+      Vis = Private(require('components/vis/vis'));
+      fieldFormat = Private(require('registry/field_formats'));
       AggType = Private(require('components/agg_types/_agg_type'));
+      AggConfig = Private(require('components/vis/_agg_config'));
+      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 
     describe('constructor', function () {
@@ -65,7 +73,54 @@ define(function (require) {
           });
         });
 
+        describe('getFormat', function () {
+          it('returns the formatter for the aggConfig', function () {
+            var aggType = new AggType({});
+
+            var vis = new Vis(indexPattern, {
+              type: 'histogram',
+              aggs: [
+                {
+                  type: 'date_histogram',
+                  schema: 'segment'
+                }
+              ]
+            });
+
+            var aggConfig = vis.aggs.byTypeName.date_histogram[0];
+
+            expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('date'));
+
+            vis = new Vis(indexPattern, {
+              type: 'metric',
+              aggs: [
+                {
+                  type: 'count',
+                  schema: 'metric'
+                }
+              ]
+            });
+            aggConfig = vis.aggs.byTypeName.count[0];
+
+            expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('string'));
+          });
+
+          it('can be overridden via config', function () {
+            var someGetter = function () {};
+
+            var aggType = new AggType({
+              getFormat: someGetter
+            });
+
+            expect(aggType.getFormat).to.be(someGetter);
+          });
+        });
+
         describe('params', function () {
+          beforeEach(function () {
+            AggParams.reset();
+          });
+
           it('defaults to AggParams object with JSON param', function () {
             var aggType = new AggType({
               name: 'smart agg'

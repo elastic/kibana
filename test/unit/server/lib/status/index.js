@@ -1,7 +1,7 @@
 var expect = require('expect.js');
 var sinon = require('sinon');
-var status = require('../../../../../src/hapi/lib/status');
-var Status = require('../../../../../src/hapi/lib/status/status');
+var status = require('../../../../../src/server/lib/status');
+var Status = require('../../../../../src/server/lib/status/status');
 
 describe('lib/status/index.js', function () {
 
@@ -37,9 +37,7 @@ describe('lib/status/index.js', function () {
 
   it('should serialize the statuses when toJSON is called', function () {
     status.createStatus(plugin);
-    expect(JSON.stringify(status)).to.eql(JSON.stringify({
-      test: { state: 'yellow', message: 'Initializing' }
-    }));
+    expect(JSON.stringify(status)).to.eql(JSON.stringify(status.data));
   });
 
 });

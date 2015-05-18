@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var checkPath = root('src/hapi/lib/config/check_path');
+var checkPath = root('src/server/lib/config/check_path');
 var expect = require('expect.js');
 var path = require('path');
 var _ = require('lodash');

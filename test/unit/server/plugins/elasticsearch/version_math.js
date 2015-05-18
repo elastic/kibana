@@ -1,6 +1,6 @@
 var root = require('requirefrom')('');
 var _ = require('lodash');
-var versionMath = root('src/hapi/plugins/elasticsearch/lib/version_math');
+var versionMath = root('src/server/plugins/elasticsearch/lib/version_math');
 var expect = require('expect.js');
 var versions = [
   '1.1.12',

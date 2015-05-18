@@ -21,6 +21,8 @@ define(function (require) {
       _.each(self.vis.listeners, function (listener, event) {
         self.vislibVis.on(event, listener);
       });
+
+      if (this.chartData) self.vislibVis.render(this.chartData);
     };
 
     VislibRenderbot.prototype._getVislibParams = function () {
@@ -36,8 +38,8 @@ define(function (require) {
 
     VislibRenderbot.prototype.buildChartData = buildChartData;
     VislibRenderbot.prototype.render = function (esResponse) {
-      var chartData = this.buildChartData(esResponse);
-      this.vislibVis.render(chartData);
+      this.chartData = this.buildChartData(esResponse);
+      this.vislibVis.render(this.chartData);
     };
 
     VislibRenderbot.prototype.destroy = function () {

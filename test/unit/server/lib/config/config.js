@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var Config = root('src/hapi/lib/config/config');
+var Config = root('src/server/lib/config/config');
 var expect = require('expect.js');
 var _ = require('lodash');
 var Joi = require('joi');

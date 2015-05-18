@@ -6,9 +6,7 @@ define(function (require) {
     var AggType;
     var AggConfig;
     var indexPattern;
-    var dateFormat;
-    var stringFormat;
-    var numberFormat;
+    var fieldFormat;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
@@ -16,10 +14,7 @@ define(function (require) {
       AggType = Private(require('components/agg_types/_agg_type'));
       AggConfig = Private(require('components/vis/_agg_config'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-
-      dateFormat = indexPattern.fields.byName['@timestamp'].format.convert;
-      stringFormat = indexPattern.fields.byName.extension.format.convert;
-      numberFormat = indexPattern.fields.byName.bytes.format.convert;
+      fieldFormat = Private(require('registry/field_formats'));
     }));
 
     describe('#toDsl', function () {
@@ -215,57 +210,10 @@ define(function (require) {
     });
 
     describe('#fieldFormatter', function () {
-      it('returns number formatter for metrics on boolean', function () {
+      it('returns the fields format unless the agg type has a custom getFormat handler', function () {
         var vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
-            {
-              type: 'avg',
-              schema: 'metric',
-              params: { field: 'ssl' }
-            },
-            {
-              type: 'terms',
-              schema: 'segment',
-              params: { field: 'ssl' }
-            }
-          ]
-        });
-
-        expect(vis.aggs[0].fieldFormatter()).to.be(numberFormat);
-        expect(vis.aggs[1].fieldFormatter()).to.be(stringFormat);
-      });
-
-      it('returns number formatter for metrics on strings', function () {
-        var vis = new Vis(indexPattern, {
-          type: 'histogram',
-          aggs: [
-            {
-              type: 'cardinality',
-              schema: 'metric',
-              params: { field: 'extension' }
-            },
-            {
-              type: 'terms',
-              schema: 'segment',
-              params: { field: 'extension' }
-            }
-          ]
-        });
-
-        expect(vis.aggs[0].fieldFormatter()).to.be(numberFormat);
-        expect(vis.aggs[1].fieldFormatter()).to.be(stringFormat);
-      });
-
-      it('returns date formatter for metrics on date fields', function () {
-        var vis = new Vis(indexPattern, {
-          type: 'histogram',
-          aggs: [
-            {
-              type: 'cardinality',
-              schema: 'metric',
-              params: { field: '@timestamp' }
-            },
             {
               type: 'date_histogram',
               schema: 'segment',
@@ -273,9 +221,19 @@ define(function (require) {
             }
           ]
         });
+        expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].field().format.getConverterFor());
 
-        expect(vis.aggs[0].fieldFormatter()).to.be(dateFormat);
-        expect(vis.aggs[1].fieldFormatter()).to.be(dateFormat);
+        vis = new Vis(indexPattern, {
+          type: 'metric',
+          aggs: [
+            {
+              type: 'count',
+              schema: 'metric',
+              params: { field: '@timestamp' }
+            }
+          ]
+        });
+        expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getDefaultInstance('number').getConverterFor());
       });
 
       it('returns the string format if the field does not have a format', function () {
@@ -292,9 +250,8 @@ define(function (require) {
 
         var agg = vis.aggs[0];
         agg.params.field = { type: 'date', format: null };
-        expect(agg.fieldFormatter()).to.be(stringFormat);
+        expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
       });
-
 
       it('returns the string format if their is no field', function () {
         var vis = new Vis(indexPattern, {
@@ -310,7 +267,23 @@ define(function (require) {
 
         var agg = vis.aggs[0];
         delete agg.params.field;
-        expect(agg.fieldFormatter()).to.be(stringFormat);
+        expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      });
+
+      it('returns the html converter if "html" is passed in', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'avg',
+              schema: 'metric',
+              params: { field: 'ssl' }
+            }
+          ]
+        });
+
+        var field = indexPattern.fields.byName.ssl;
+        expect(vis.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
       });
     });
   }];

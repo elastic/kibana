@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var explodeBy = root('src/hapi/lib/config/explode_by');
+var explodeBy = root('src/server/lib/config/explode_by');
 var expect = require('expect.js');
 var _ = require('lodash');
 

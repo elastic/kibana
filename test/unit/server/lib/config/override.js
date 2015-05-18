@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var override = root('src/hapi/lib/config/override');
+var override = root('src/server/lib/config/override');
 var expect = require('expect.js');
 var _ = require('lodash');
 

@@ -1,5 +1,5 @@
 var expect = require('expect.js');
-var Plugin = require('../../../../../src/hapi/lib/plugins/plugin');
+var Plugin = require('../../../../../src/server/lib/plugins/plugin');
 
 describe('lib/plugins/plugin', function () {
 

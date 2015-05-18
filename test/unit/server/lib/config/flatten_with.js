@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var flattenWith = root('src/hapi/lib/config/flatten_with');
+var flattenWith = root('src/server/lib/config/flatten_with');
 var expect = require('expect.js');
 var _ = require('lodash');
 

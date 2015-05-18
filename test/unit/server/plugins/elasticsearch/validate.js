@@ -1,8 +1,8 @@
 var _ = require('lodash');
 var root = require('requirefrom')('');
-var validateRequest = root('src/hapi/plugins/elasticsearch/lib/validate');
+var validateRequest = root('src/server/plugins/elasticsearch/lib/validate');
 var expect = require('expect.js');
-var server =  { config: root('src/hapi/lib/config') };
+var server =  { config: root('src/server/lib/config') };
 var config = server.config();
 
 describe('plugins/elasticsearch', function () {

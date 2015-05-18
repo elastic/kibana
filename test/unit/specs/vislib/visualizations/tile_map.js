@@ -196,6 +196,37 @@ define(function (require) {
           });
         });
       });
+
+      describe('getMinMax method', function () {
+        it('should return an object', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var data = chart.handler.data.data;
+            expect(chart.getMinMax(data)).to.be.an(Object);
+          });
+        });
+
+        it('should return the min of all features.properties.count', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var data = chart.handler.data.data;
+            var min = _.chain(data.geoJson.features)
+            .deepPluck('properties.count')
+            .min()
+            .value();
+            expect(chart.getMinMax(data).min).to.be(min);
+          });
+        });
+
+        it('should return the max of all features.properties.count', function () {
+          vis.handler.charts.forEach(function (chart) {
+            var data = chart.handler.data.data;
+            var max = _.chain(data.geoJson.features)
+            .deepPluck('properties.count')
+            .max()
+            .value();
+            expect(chart.getMinMax(data).max).to.be(max);
+          });
+        });
+      });
     });
 
   });

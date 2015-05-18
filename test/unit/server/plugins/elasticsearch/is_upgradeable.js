@@ -1,5 +1,5 @@
 var root = require('requirefrom')('');
-var isUpgradeable = root('src/hapi/plugins/elasticsearch/lib/is_upgradeable');
+var isUpgradeable = root('src/server/plugins/elasticsearch/lib/is_upgradeable');
 var expect = require('expect.js');
 var util = require('util');
 var package = root('package.json');

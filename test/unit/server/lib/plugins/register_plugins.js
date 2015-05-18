@@ -1,9 +1,9 @@
 var _ = require('lodash');
 var expect = require('expect.js');
 var sinon = require('sinon');
-var registerPlugins = require('../../../../../src/hapi/lib/plugins/register_plugins');
-var Status = require('../../../../../src/hapi/lib/status/status');
-var systemStatus = require('../../../../../src/hapi/lib/status');
+var registerPlugins = require('../../../../../src/server/lib/plugins/register_plugins');
+var Status = require('../../../../../src/server/lib/status/status');
+var systemStatus = require('../../../../../src/server/lib/status');
 var Promise = require('bluebird');
 
 function createInit() {
@@ -11,12 +11,13 @@ function createInit() {
 }
 
 describe('server/lib/register_plugins', function () {
-  var server;
+  var server, get;
 
   beforeEach(function () {
+    get = sinon.stub();
     server = {
       register: sinon.stub(),
-      config: sinon.stub.returns({}),
+      config: sinon.stub().returns({ get: get }),
       expose: sinon.stub(),
       log: sinon.stub()
     };
