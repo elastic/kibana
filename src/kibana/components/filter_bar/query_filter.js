@@ -59,14 +59,27 @@ define(function (require) {
     /**
      * Removes the filter from the proper state
      * @param {object} matchFilter The filter to remove
-     * @returns {object} Resulting new filter list
      */
     queryFilter.removeFilter = function (matchFilter) {
-      var state = getStateByFilter(matchFilter);
-      if (!state) return;
+      var appState = getAppState();
+      var filter = _.omit(matchFilter, ['$$hashKey']);
+      var state;
+      var index;
 
-      _.pull(state.filters, matchFilter);
-      return saveState();
+      // check for filter in appState
+      if (appState) {
+        index = _.findIndex(appState.filters, filter);
+        if (index !== -1) state = appState;
+      }
+
+      // if not found, check for filter in globalState
+      if (!state) {
+        index = _.findIndex(globalState.filters, filter);
+        if (index !== -1) state = globalState;
+        else return; // not found in either state, do nothing
+      }
+
+      state.filters.splice(index, 1);
     };
 
     /**
@@ -200,20 +213,6 @@ define(function (require) {
         };
         return filter;
       };
-    }
-
-    // get state (app or global) or the filter passed in
-    function getStateByFilter(filter) {
-      var appState = getAppState();
-      if (appState) {
-        var appIndex = _.indexOf(appState.filters, filter);
-        if (appIndex !== -1) return appState;
-      }
-
-      var globalIndex = _.indexOf(globalState.filters, filter);
-      if (globalIndex !== -1) return globalState;
-
-      return false;
     }
 
     // helper to run a function on all filters in all states
