@@ -199,12 +199,12 @@ define(function (require) {
      * Return features within the map bounds
      */
     TileMap.prototype._filterToMapBounds = function (map) {
+      function cloneAndReverse(arr) { return _(_.clone(arr)).reverse().value(); }
       return function (feature) {
-        var coordinates = feature.geometry.coordinates;
-        var p0 = coordinates[0];
-        var p1 = coordinates[1];
+        var mapBounds = map.getBounds();
+        var bucketRectBounds = feature.properties.rectangle.map(cloneAndReverse);
 
-        return map.getBounds().contains([p1, p0]);
+        return mapBounds.intersects(bucketRectBounds);
       };
     };
 
