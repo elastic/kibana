@@ -30,7 +30,7 @@ define(function (require) {
       this.vis = vis;
       this.el = vis.el;
       this.data = this._getData(data);
-      this.labels = this._getLabels(data, vis._attr.type);
+      this.labels = this._getLabels(this.data, vis._attr.type);
       this.color = color(this.labels);
 
       this._attr = _.defaults(vis._attr || {}, {
@@ -44,10 +44,19 @@ define(function (require) {
     }
 
     Legend.prototype._getLabels = function (data, type) {
-      if (data.series && data.series.length === 1 && getLabels(data)[0] === '') {
-        return [data.yAxisLabel];
-      }
-      return getLabels(data, type);
+      var labelArray = [];
+
+      data.forEach(function (d) {
+        if (d.series && d.series.length === 1 && getLabels(d)[0] === '') {
+          return labelArray.push(d.yAxisLabel);
+        }
+
+        getLabels(d, type).forEach(function (label) {
+          return labelArray.push(label);
+        });
+      });
+
+      return _.unique(labelArray);
     };
 
     Legend.prototype._getData = function (data) {
