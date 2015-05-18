@@ -1,6 +1,11 @@
 define(function (require) {
   var decodeGeoHash = require('utils/decode_geo_hash');
+  var AggConfigResult = require('components/vis/_agg_config_result');
   var _ = require('lodash');
+
+  function unwrap(val) {
+    return (val instanceof AggConfigResult) ? val.value : val;
+  }
 
   function readRows(table, agg, index, chart) {
     var geoJson = chart.geoJson;
@@ -15,9 +20,9 @@ define(function (require) {
     props.valueFormatter = metricFormatter;
 
     table.rows.forEach(function (row) {
-      var geohash = row[index.geo].value;
-      var valResult = row[index.metric];
-      var val = valResult.value;
+      var geohash = unwrap(row[index.geo]);
+      var valResult = (row[index.metric] instanceof AggConfigResult) ? row[index.metric] : null;
+      var val = unwrap(row[index.metric]);
       var formatted = metricFormatter(val);
 
       if (props.min === null || val < props.min) props.min = val;
