@@ -322,10 +322,7 @@ define(function (require) {
         filter: self._filterToMapBounds(map)
       });
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
+      self.addLegend(mapData, map);
 
       return featureLayer;
     };
@@ -362,10 +359,7 @@ define(function (require) {
         filter: self._filterToMapBounds(map)
       });
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
+      self.addLegend(mapData, map);
 
       return featureLayer;
     };
@@ -418,10 +412,7 @@ define(function (require) {
         filter: self._filterToMapBounds(map)
       });
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
+      self.addLegend(mapData, map);
 
       return featureLayer;
     };
@@ -457,6 +448,9 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.addLegend = function (mapData, map) {
+      // only draw the legend for maps with multiple items
+      if (mapData.features.length <= 1) return;
+
       var self = this;
       var isLegend = $('div.tilemap-legend', this.chartEl).length;
 
@@ -466,34 +460,23 @@ define(function (require) {
       var legend = L.control({position: 'bottomright'});
 
       legend.onAdd = function () {
-        var div = L.DomUtil.create('div', 'tilemap-legend');
-        var colors = self._attr.colors;
-        var labels = [];
-        var i = 0;
-        var vals;
-        var strokecol;
+        var $div = $('<div>').addClass('tilemap-legend');
 
-        if (mapData.properties.min === mapData.properties.max) {
-          // 1 val for legend
-          vals = self._attr.cScale.invertExtent(colors[i]);
-          strokecol = self.darkerColor(colors[i]);
-          labels.push(
-            '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-            valueFormatter(vals[0].toFixed(0)));
-        } else {
-          // 3 to 5 vals for legend
-          if (colors) {
-            for (i = 0; i < colors.length; i++) {
-              vals = self._attr.cScale.invertExtent(colors[i]);
-              strokecol = self.darkerColor(colors[i]);
-              labels.push('<i style="background:' + colors[i] + ';border-color:' +
-              strokecol + '"></i> ' + valueFormatter(vals[0]) + ' &ndash; ' + valueFormatter(vals[1]));
-            }
-          }
-        }
-        div.innerHTML = labels.join('<br>');
+        _.each(self._attr.colors, function (color, i) {
+          var icon = $('<i>').css({
+            background: color,
+            'border-color': self.darkerColor(color)
+          });
 
-        return div;
+          var range = self._attr.cScale
+          .invertExtent(color)
+          .map(valueFormatter)
+          .join(' – ');
+
+          $div.append(i > 0 ? '<br>' : '').append(icon).append(range);
+        });
+
+        return $div.get(0);
       };
       legend.addTo(map);
     };
