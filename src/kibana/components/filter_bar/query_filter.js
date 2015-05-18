@@ -84,13 +84,11 @@ define(function (require) {
 
     /**
      * Removes all filters
-     * @returns {object} Resulting new filter list
      */
     queryFilter.removeAll = function () {
       var appState = getAppState();
       appState.filters = [];
       globalState.filters = [];
-      return saveState();
     };
 
     /**
@@ -103,16 +101,12 @@ define(function (require) {
       // Toggle the disabled flag
       var disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
       filter.meta.disabled = disabled;
-
-      // Save the filters back to the searchSource
-      saveState();
       return filter;
     };
 
     /**
      * Disables all filters
      * @params {boolean} force Disable/enable all filters
-     * @returns {object} Resulting updated filter list
      */
     queryFilter.toggleAll = function (force) {
       function doToggle(filter) {
@@ -120,7 +114,6 @@ define(function (require) {
       }
 
       executeOnFilters(doToggle);
-      return queryFilter.getFilters();
     };
 
 
@@ -132,8 +125,6 @@ define(function (require) {
     queryFilter.invertFilter = function (filter) {
       // Toggle the negate meta state
       filter.meta.negate = !filter.meta.negate;
-
-      saveState();
       return filter;
     };
 
@@ -143,7 +134,6 @@ define(function (require) {
      */
     queryFilter.invertAll = function () {
       executeOnFilters(queryFilter.invertFilter);
-      return queryFilter.getFilters();
     };
 
 
@@ -181,7 +171,6 @@ define(function (require) {
     /**
      * Pins all filters
      * @params {boolean} force Pin/Unpin all filters
-     * @returns {object} Resulting updated filter list
      */
     queryFilter.pinAll = function (force) {
       function pin(filter) {
@@ -189,7 +178,6 @@ define(function (require) {
       }
 
       executeOnFilters(pin);
-      return queryFilter.getFilters();
     };
 
     initWatchers();
@@ -204,7 +192,6 @@ define(function (require) {
       var appState = getAppState();
       if (appState) appState.save();
       globalState.save();
-      return queryFilter.getFilters();
     }
 
     function appendStoreType(type) {
