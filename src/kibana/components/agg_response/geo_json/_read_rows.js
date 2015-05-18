@@ -6,15 +6,19 @@ define(function (require) {
     var geoJson = chart.geoJson;
     var props = geoJson.properties;
     var metricLabel = agg.metric.makeLabel();
+    var metricFormatter = agg.metric.fieldFormatter();
+
     props.length = table.rows.length;
     props.min = null;
     props.max = null;
     props.agg = agg;
+    props.valueFormatter = metricFormatter;
 
     table.rows.forEach(function (row) {
       var geohash = row[index.geo].value;
       var valResult = row[index.metric];
       var val = valResult.value;
+      var formatted = metricFormatter(val);
 
       if (props.min === null || val < props.min) props.min = val;
       if (props.max === null || val > props.max) props.max = val;
@@ -36,6 +40,7 @@ define(function (require) {
         },
         properties: {
           valueLabel: metricLabel,
+          valueFormatted: formatted,
           count: val,
           geohash: geohash,
           center: center,

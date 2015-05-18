@@ -1851,7 +1851,10 @@ define(function () {
             'length': 23,
             'min': 1,
             'max': 39,
-            'precision': 1
+            'precision': 1,
+            'valueFormatter': function (str) {
+              return str;
+            }
           }
         },
         'label': 'Top 2 geo.dest: CN'
@@ -3706,7 +3709,10 @@ define(function () {
             'length': 23,
             'min': 1,
             'max': 31,
-            'precision': 1
+            'precision': 1,
+            'valueFormatter': function (str) {
+              return str;
+            }
           }
         },
         'label': 'Top 2 geo.dest: IN'
