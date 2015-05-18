@@ -1,7 +1,5 @@
 <div>
-  <small><a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#date-math">Accepted Date Formats <i class="fa-link fa"></i></a></small>
-
-    <table class="vis-editor-agg-editor-ranges form-group">
+    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.length">
       <tr>
         <th>
           <label>From</label>
@@ -37,7 +35,22 @@
           </button>
         </td>
       </tr>
+      <tr>
+        <td colspan="3">
+          <small>
+            <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#date-math">Accepted Date Formats <i class="fa-link fa"></i></a>
+          </small>
+        </td>
+      </tr>
     </table>
+
+    <input ng-model="agg.params.ranges.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+    <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+      <p>
+        <i class="fa fa-danger text-danger"></i>
+        <strong>Required:</strong> You must specify at least one date range.
+      </p>
+    </div>
 
     <div
       ng-click="agg.params.ranges.push({})"

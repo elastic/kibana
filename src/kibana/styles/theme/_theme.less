@@ -4,6 +4,9 @@
 
 //@import url("//fonts.googleapis.com/css?family=Lato:400,700,400italic");
 
+@import (reference) "../_mixins.less";
+
+
 // Navbar =====================================================================
 
 .navbar {
@@ -32,26 +35,7 @@
     }
 
     .navbar-nav > .active > a {
-
-      @media (max-width: @screen-sm-min) {
-        &:before {
-          display: none !important;
-        }
-      }
-
-      &:before {
-        content:"";
-        display:inline-block;
-        position:absolute;
-        border:@navbar-arrow-size solid @body-bg;
-        border-color:transparent transparent @body-bg transparent;
-        top:(@navbar-height - @navbar-arrow-size*2);
-        left: 0;
-        right: 0;
-        margin: 0 auto;
-        width: 0;
-        height: 0;
-      }
+      .nav-active-arrow(@body-bg);
     }
 
   }
@@ -73,26 +57,14 @@
       color: lighten(@navbar-inverse-bg, 10%);
     }
 
-    .navbar-nav > .active > a {
 
-      @media (max-width: @screen-sm-min) {
-        &:before {
-          display: none !important;
-        }
+    .navbar-nav {
+      > .active > a {
+        .nav-active-arrow(@navbar-default-bg);
       }
 
-      &:before {
-        content:"";
-        display:inline-block;
-        position:absolute;
-        border:@navbar-arrow-size solid @navbar-default-bg;
-        border-color:transparent transparent @navbar-default-bg transparent;
-        top:(@navbar-height - @navbar-arrow-size*2);
-        left: 0;
-        right: 0;
-        margin: 0 auto;
-        width: 0;
-        height: 0;
+      > .active.to-body > a {
+        .nav-active-arrow(@body-bg);
       }
     }
 
