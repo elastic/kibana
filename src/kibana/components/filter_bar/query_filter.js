@@ -285,6 +285,9 @@ define(function (require) {
 
         // when states change, use event emitter to trigger updates and fetches
         return $rootScope.$watchMulti(stateWatchers, function (next, prev) {
+          // prevent execution on watcher instantiation
+          if (_.isEqual(next, prev)) return;
+
           var doUpdate = false;
           var doFetch = false;
           var originals = {
