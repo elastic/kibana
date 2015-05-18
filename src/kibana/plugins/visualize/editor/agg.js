@@ -19,6 +19,7 @@ define(function (require) {
       template: require('text!plugins/visualize/editor/agg.html'),
       require: 'form',
       link: function ($scope, $el, attrs, kbnForm) {
+        $scope.$bind('outputAgg', 'outputVis.aggs.byId[agg.id]', $scope);
         $scope.editorOpen = !!$scope.agg.brandNew;
         if (!$scope.editorOpen) {
           $scope.$evalAsync(kbnForm.$setTouched);

@@ -1,7 +1,8 @@
 <div class="sidebar-container">
   <form class="sidebar-list"
         ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
-        name="visualizeEditor">
+        name="visualizeEditor"
+        novalidate><!-- see http://goo.gl/9kgz5w -->
 
     <div css-truncate title="{{indexPattern.id}}" ng-if="vis.type.requiresSearch" class="index-pattern">
       {{ indexPattern.id }}

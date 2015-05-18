@@ -14,6 +14,7 @@ define(function (require) {
       controllerAs: 'sidebar',
       controller: function ($scope) {
         $scope.$bind('vis', 'editableVis');
+        $scope.$bind('outputVis', 'vis');
         this.section = _.get($scope, 'vis.type.requiresSearch') ? 'data' : 'options';
       }
     };
