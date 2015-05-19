@@ -113,7 +113,16 @@ define(function (require) {
         expect(globalState.filters[1].meta.disabled).to.be(true);
         queryFilter.toggleFilter(filters[1], true);
         expect(globalState.filters[1].meta.disabled).to.be(true);
+      });
 
+      it('should work without appState', function () {
+        appState = undefined;
+        globalState.filters = filters;
+
+        expect(globalState.filters[1].meta.disabled).to.be(false);
+        expect(queryFilter.getFilters()).to.have.length(3);
+        queryFilter.toggleFilter(filters[1]);
+        expect(globalState.filters[1].meta.disabled).to.be(true);
       });
     });
 
@@ -153,6 +162,21 @@ define(function (require) {
         });
         _.each(globalState.filters, function (filter) {
           expect(filter.meta.disabled).to.be(false);
+        });
+      });
+
+      it('should work without appState', function () {
+        appState = undefined;
+        globalState.filters = filters;
+
+        _.each(globalState.filters, function (filter) {
+          expect(filter.meta.disabled).to.be(false);
+        });
+
+        queryFilter.toggleAll();
+
+        _.each(globalState.filters, function (filter) {
+          expect(filter.meta.disabled).to.be(true);
         });
       });
     });
