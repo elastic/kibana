@@ -237,8 +237,7 @@ define(function (require) {
         .select('.legend-ul')
         .selectAll('li.color')
         .filter(function (d, i) {
-          var thisLabel = d.label ? d.label : d.name;
-          return thisLabel !== label;
+          return d.label.toString() !== label;
         })
         .classed('blur_shape', true);
     };

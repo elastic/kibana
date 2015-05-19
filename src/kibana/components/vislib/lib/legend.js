@@ -170,7 +170,9 @@ define(function (require) {
         .attr('class', 'color')
         .each(self._addIdentifier)
         .html(function (d, i) {
-          return '<i class="fa fa-circle dots" style="color:' + args.color(d.label) + '"></i>' + d.label;
+          var aggConfig = d.aggConfigResult ? d.aggConfigResult.aggConfig : undefined;
+          var fieldFormatter = aggConfig ? aggConfig.fieldFormatter() : String;
+          return '<i class="fa fa-circle dots" style="color:' + args.color(d.label) + '"></i>' + fieldFormatter(d.label);
         });
     };
 
