@@ -123,11 +123,6 @@ define(function (require) {
           map.on('moveend', function setZoomCenter() {
             self._attr.mapZoom = map.getZoom();
             self._attr.mapCenter = map.getCenter();
-            featureLayer.clearLayers();
-            featureLayer = self.markerType(map).addTo(map);
-
-            self._attr.mapZoom = map.getZoom();
-            self._attr.mapCenter = map.getCenter();
 
             map.removeLayer(featureLayer);
 
