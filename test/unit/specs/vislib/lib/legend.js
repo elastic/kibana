@@ -168,7 +168,7 @@ define(function (require) {
               return path.getAttribute('data-label');
             })
             .filter(function (dataLabel) {
-              return dataLabel === d;
+              return dataLabel === d.toString();
             })
             .value();
 
