@@ -40,16 +40,18 @@ define(function (require) {
       };
       var Legend;
       var vis;
+      var $el;
 
       beforeEach(function () {
         module('LegendFactory');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        inject(function (Private, d3) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           Legend = Private(require('components/vislib/lib/legend'));
           require('css!components/vislib/styles/main');
+          $el = d3.select('body').append('div').attr('class', 'fake-legend');
 
           vis.render(data);
         });
@@ -57,6 +59,7 @@ define(function (require) {
 
       afterEach(function () {
         $(vis.el).remove();
+        $('.fake-legend').remove();
         vis = null;
       });
 
@@ -187,6 +190,22 @@ define(function (require) {
         });
         it('should contain a list of items', function () {
           expect($(vis.el).find('li').length).to.be.greaterThan(1);
+        });
+        it('should not return an undefined value', function () {
+          var emptyObject = {
+            label: ''
+          };
+          var labels = [emptyObject, emptyObject, emptyObject];
+          var args = {
+            _attr: {isOpen: true},
+            color: function () { return 'blue'; }
+          };
+
+          Legend.prototype._list($el, labels, args);
+
+          $el.selectAll('li').each(function (d) {
+            expect(d.label).not.to.be(undefined);
+          });
         });
       });
 

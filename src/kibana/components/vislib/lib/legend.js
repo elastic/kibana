@@ -170,8 +170,7 @@ define(function (require) {
         .attr('class', 'color')
         .each(self._addIdentifier)
         .html(function (d, i) {
-          var label = d.label ? d.label : d.name;
-          return '<i class="fa fa-circle dots" style="color:' + args.color(label) + '"></i>' + label;
+          return '<i class="fa fa-circle dots" style="color:' + args.color(d.label) + '"></i>' + d.label;
         });
     };
 
@@ -182,10 +181,8 @@ define(function (require) {
      * @param label {string} label to use
      */
     Legend.prototype._addIdentifier = function (d) {
-      var label = d.label ? d.label : d.name;
-      dataLabel(this, label);
+      dataLabel(this, d.label);
     };
-
 
     /**
      * Renders legend
@@ -225,7 +222,7 @@ define(function (require) {
 
       legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {
-        var label = d.label ? d.label : d.name;
+        var label = d.label;
         var charts = visEl.selectAll('.chart');
 
         function filterLabel() {
@@ -273,7 +270,7 @@ define(function (require) {
       });
 
       legendDiv.selectAll('li.color').each(function (d) {
-        var label = d.label ? d.label : d.name;
+        var label = d.label;
         if (label !== undefined && label !== '_all') {
           d3.select(this).call(self.events.addClickEvent());
         }
