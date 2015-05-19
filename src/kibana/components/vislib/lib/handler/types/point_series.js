@@ -18,7 +18,9 @@ define(function (require) {
       opts = opts || {};
 
       return function (vis) {
+        var isUserDefinedYAxis = vis._attr.setYExtents;
         var data;
+
         if (opts.zeroFill) {
           data = new Data(injectZeros(vis.data), vis._attr);
         } else {
@@ -41,12 +43,13 @@ define(function (require) {
           alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
             el   : vis.el,
-            yMin : data.getYMin(),
-            yMax : data.getYMax(),
-            _attr: vis._attr,
-            yAxisFormatter: data.get('yAxisFormatter')
+            yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
+            yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
+            yAxisFormatter: data.get('yAxisFormatter'),
+            _attr: vis._attr
           })
         });
+
       };
     }
 
@@ -79,4 +82,3 @@ define(function (require) {
     };
   };
 });
-

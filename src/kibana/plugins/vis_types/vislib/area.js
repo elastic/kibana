@@ -18,11 +18,13 @@ define(function (require) {
           addLegend: true,
           smoothLines: false,
           scale: 'linear',
-          mode: 'stacked',
           interpolate: 'linear',
-          defaultYExtents: false,
+          mode: 'stacked',
           times: [],
-          addTimeMarker: false
+          addTimeMarker: false,
+          defaultYExtents: false,
+          setYExtents: false,
+          yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],
         modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
