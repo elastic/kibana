@@ -181,7 +181,7 @@ define(function (require) {
               onAdd: function (map) {
                 $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
                 $(fitContainer).on('click', function () {
-                  self.fitBounds(map, featureLayer);
+                  self.fitBounds(map, mapData.features);
                 });
                 return fitContainer;
               },
@@ -275,7 +275,8 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.fitBounds = function (map, mapData) {
-      map.fitBounds(mapData._latlngs || mapData.getBounds());
+      var latLngBounds = new L.LatLngBounds(_.deepPluck(mapData, 'properties.latLng'));
+      map.fitBounds(latLngBounds);
     };
 
     /**
