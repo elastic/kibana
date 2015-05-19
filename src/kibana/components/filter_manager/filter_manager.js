@@ -71,7 +71,7 @@ define(function (require) {
         newFilters.push(filter);
       });
 
-      queryFilter.addFilters(newFilters);
+      return queryFilter.addFilters(newFilters);
     };
 
     return filterManager;

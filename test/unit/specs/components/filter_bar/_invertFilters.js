@@ -34,6 +34,10 @@ define(function (require) {
     });
 
     beforeEach(function () {
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', require('fixtures/mock_courier'));
+      });
+
       module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {

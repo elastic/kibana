@@ -16,10 +16,10 @@ define(function (require) {
     // The mappers to apply. Each mapper will either return
     // a result object with a key and value attribute or
     // undefined. If undefined is return then the next
-    // mapper will get the oppertunity to map the filter.
+    // mapper will get the opportunity to map the filter.
     // To create a new mapper you just need to create a function
-    // that either handles the mapping opperation or not
-    // and add it here.
+    // that either handles the mapping operation or not
+    // and add it here. ProTip: These are executed in order listed
     var mappers = [
       Private(require('./mapTerms')),
       Private(require('./mapRange')),
@@ -28,7 +28,7 @@ define(function (require) {
       Private(require('./mapQueryString')),
       Private(require('./mapGeoBoundingBox')),
       Private(require('./mapScript')),
-      Private(require('./mapDefault')) // ProTip: last one to get applied
+      Private(require('./mapDefault'))
     ];
 
     var noop = function () {
