@@ -27,19 +27,19 @@ define(function (require) {
       },
       listeners: {
         rectangle: function (event) {
-          var agg = _.deepGet(event, 'data.geoJson.properties.agg');
+          var agg = _.deepGet(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
           var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
-          var indexPatternName = agg.geo.vis.indexPattern.id;
-          var field = agg.geo.fieldName();
+          var indexPatternName = agg.vis.indexPattern.id;
+          var field = agg.fieldName();
           var filter = {geo_bounding_box: {}};
           filter.geo_bounding_box[field] = event.bounds;
 
           pushFilter(filter, false, indexPatternName);
         },
         mapZoomEnd: function (event) {
-          var agg = _.deepGet(event, 'data.properties.agg.geo');
+          var agg = _.deepGet(event, 'chart.geohashGridAgg');
           if (!agg || !agg.params.autoPrecision) return;
 
           // zoomPrecision maps event.zoom to a geohash precision value

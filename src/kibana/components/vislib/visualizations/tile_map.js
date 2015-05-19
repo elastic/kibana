@@ -6,7 +6,6 @@ define(function (require) {
     require('leaflet-heat');
     require('leaflet-draw');
 
-    var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
     require('css!components/vislib/styles/main');
@@ -40,26 +39,24 @@ define(function (require) {
 
       // track the map objects
       this.maps = [];
-
-      this.tooltipFormatter = chartData.tooltipFormatter;
-
-      this.events = new Dispatch(handler);
+      this.originalConfig = chartData || {};
+      _.assign(this, this.originalConfig);
 
       // add allmin and allmax to geoJson
       var allMinMax = this.getMinMax(handler.data.data);
-      chartData.geoJson.properties.allmin = allMinMax.min;
-      chartData.geoJson.properties.allmax = allMinMax.max;
+      this.geoJson.properties.allmin = allMinMax.min;
+      this.geoJson.properties.allmax = allMinMax.max;
     }
 
     /**
      * Renders tile map
      *
      * @method draw
-     * @param selection
-     * @return {Function} Creates the map
+     * @return {Function} - function to add a map to a selection
      */
     TileMap.prototype.draw = function () {
       var self = this;
+      var mapData = this.geoJson;
 
       // clean up old maps
       self.destroy();
@@ -71,14 +68,12 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       return function (selection) {
-
         self._attr.mapZoom = self._attr.mapZoom || defaultMapZoom;
         self._attr.mapCenter = self._attr.mapCenter || defaultMapCenter;
 
-        selection.each(function (data) {
-
+        selection.each(function () {
           // add leaflet latLngs to properties for tooltip
-          var mapData = self.addLatLng(data.geoJson);
+          self.addLatLng(self.geoJson);
 
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
@@ -115,10 +110,9 @@ define(function (require) {
           };
 
           var map = L.map(div[0], mapOptions);
+          var featureLayer = self.markerType(map).addTo(map);
 
-          var featureLayer = self.markerType(map, mapData).addTo(map);
-
-          if (data.geoJson.features.length) {
+          if (mapData.features.length) {
             map.addControl(new L.Control.Draw(drawOptions));
           }
 
@@ -138,7 +132,7 @@ define(function (require) {
 
             map.removeLayer(featureLayer);
 
-            featureLayer = self.markerType(map, mapData).addTo(map);
+            featureLayer = self.markerType(map).addTo(map);
           });
 
           map.on('draw:created', function (e) {
@@ -150,7 +144,7 @@ define(function (require) {
 
             self.events.emit(drawType, {
               e: e,
-              data: self.chartData,
+              chart: self.originalConfig,
               bounds: {
                 top_left: {
                   lat: bounds.getNorthWest().lat,
@@ -166,14 +160,14 @@ define(function (require) {
 
           map.on('zoomend', function () {
             self.events.emit('mapZoomEnd', {
-              data: mapData,
+              chart: self.originalConfig,
               zoom: map.getZoom()
             });
           });
 
-          // add label for splits
-          if (mapData.properties.label) {
-            self.addLabel(mapData.properties.label, map);
+          // add title for splits
+          if (self.title) {
+            self.addTitle(self.title, map);
           }
 
           if (mapData && mapData.features.length > 0) {
@@ -256,32 +250,30 @@ define(function (require) {
     };
 
     /**
-     *  Get the Rectangles representing the geohash grid
+     * Get the Rectangles representing the geohash grid
      *
-     * @param mapData [Buckets] [{properties: {rectangle: [[lng, lat], [lng, lat], [lng, lat], [lng, lat]]}}]
      * @return {LatLngRectangles[]}
      */
-    TileMap.prototype._getDataRectangles = function (mapData) {
-      return _(mapData)
-        .deepPluck('properties.rectangle')
-        .map(function (rectangle) { return rectangle.map(cloneAndReverse); })
-        .value();
+    TileMap.prototype._getDataRectangles = function () {
+      return _(this.geoJson.features)
+      .deepPluck('properties.rectangle')
+      .map(function (rectangle) { return rectangle.map(cloneAndReverse); })
+      .value();
     };
 
     /**
      * add Leaflet latLng to mapData properties
      *
      * @method addLatLng
-     * @param mapData {geoJson Object}
-     * @return mapData {geoJson Object}
+     * @return undefined
      */
-    TileMap.prototype.addLatLng = function (mapData) {
-      for (var i = 0; i < mapData.features.length; i++) {
-        var latLng = L.latLng(mapData.features[i].geometry.coordinates[1], mapData.features[i].geometry.coordinates[0]);
-        mapData.features[i].properties.latLng = latLng;
-      }
-
-      return mapData;
+    TileMap.prototype.addLatLng = function () {
+      this.geoJson.features.forEach(function (feature) {
+        feature.properties.latLng = L.latLng(
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0]
+        );
+      });
     };
 
     /**
@@ -289,18 +281,17 @@ define(function (require) {
      *
      * @method fitBounds
      * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return {undefined}
+     * @return {boolean}
      */
-    TileMap.prototype.fitBounds = function (map, mapData) {
-      map.fitBounds(this._getDataRectangles(mapData));
+    TileMap.prototype.fitBounds = function (map) {
+      map.fitBounds(this._getDataRectangles());
     };
 
     /**
      * remove css class for desat filters on map tiles
      *
      * @method saturateTiles
-     * @return {Leaflet object} featureLayer
+     * @return undefined
      */
     TileMap.prototype.saturateTiles = function () {
       if (!this._attr.isDesaturated) {
@@ -313,11 +304,10 @@ define(function (require) {
      *
      * @method nearestFeature
      * @param point {Leaflet Object}
-     * @param mapData {geoJson Object}
      * @return nearestPoint {Leaflet Object}
      */
-    TileMap.prototype.nearestFeature = function (point, mapData) {
-      var self = this;
+    TileMap.prototype.nearestFeature = function (point) {
+      var mapData = this.geoJson;
       var distance = Infinity;
       var nearest;
 
@@ -348,9 +338,7 @@ define(function (require) {
      * @return boolean
      */
     TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
-      if (!feature) {
-        return;
-      }
+      if (!feature) return;
 
       var showTip = false;
 
@@ -388,16 +376,15 @@ define(function (require) {
      * features and shows tooltip for that feature
      *
      * @method showTooltip
-     * @param e {Event}
-     * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return {undefined}
+     * @param map {LeafletMap}
+     * @param feature {LeafletFeature}
+     * @return undefined
      */
     TileMap.prototype.showTooltip = function (map, feature) {
+      if (!this.tooltipFormatter) return;
+
       var content = this.tooltipFormatter(feature);
-      if (!content) {
-        return;
-      }
+      if (!content) return;
 
       var lat = feature.geometry.coordinates[1];
       var lng = feature.geometry.coordinates[0];
@@ -418,24 +405,24 @@ define(function (require) {
      * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.markerType = function (map, mapData) {
-      var featureLayer;
-
-      if (mapData) {
-        if (this._attr.mapType === 'Scaled Circle Markers') {
-          featureLayer = this.scaledCircleMarkers(map, mapData);
-        } else if (this._attr.mapType === 'Shaded Circle Markers') {
-          featureLayer = this.shadedCircleMarkers(map, mapData);
-        } else if (this._attr.mapType === 'Shaded Geohash Grid') {
-          featureLayer = this.shadedGeohashGrid(map, mapData);
-        } else if (this._attr.mapType === 'Heatmap') {
-          featureLayer = this.heatMap(map, mapData);
-        } else {
-          featureLayer = this.scaledCircleMarkers(map, mapData);
-        }
+    TileMap.prototype.markerType = function (map) {
+      if (this._attr.mapType === 'Scaled Circle Markers') {
+        return this.scaledCircleMarkers(map);
       }
 
-      return featureLayer;
+      if (this._attr.mapType === 'Heatmap') {
+        return this.heatMap(map);
+      }
+
+      if (this._attr.mapType === 'Shaded Circle Markers') {
+        return this.shadedCircleMarkers(map);
+      }
+
+      if (this._attr.mapType === 'Shaded Geohash Grid') {
+        return this.shadedGeohashGrid(map);
+      }
+
+      return this.scaledCircleMarkers(map);
     };
 
     /**
@@ -448,14 +435,17 @@ define(function (require) {
      * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
+    TileMap.prototype.scaledCircleMarkers = function (map) {
       var self = this;
+      var mapData = self.geoJson;
 
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
       var zoom = map.getZoom();
-      var precision = mapData.properties.precision;
+      var precision = _.max(mapData.features.map(function (feature) {
+        return String(feature.properties.geohash).length;
+      }));
 
       // multiplier to reduce size of all circles
       var scaleFactor = 0.6;
@@ -464,8 +454,8 @@ define(function (require) {
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
-          var count = feature.properties.count;
-          var scaledRadius = self.radiusScale(count, max, zoom, precision) * scaleFactor;
+          var value = feature.properties.value;
+          var scaledRadius = self.radiusScale(value, max, zoom, precision) * scaleFactor;
           return L.circleMarker(latlng).setRadius(scaledRadius);
         },
         onEachFeature: function (feature, layer) {
@@ -477,10 +467,7 @@ define(function (require) {
         filter: self._filterToMapBounds(map)
       });
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
+      self.addLegend(map);
 
       return featureLayer;
     };
@@ -495,9 +482,9 @@ define(function (require) {
      * @param mapData {geoJson Object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
+    TileMap.prototype.shadedCircleMarkers = function (map) {
       var self = this;
-
+      var mapData = self.geoJson;
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
@@ -507,7 +494,6 @@ define(function (require) {
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
-          var count = feature.properties.count;
           var radius = self.geohashMinDistance(feature) * scaleFactor;
           return L.circle(latlng, radius);
         },
@@ -520,10 +506,7 @@ define(function (require) {
         filter: self._filterToMapBounds(map)
       });
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
+      self.addLegend(map);
 
       return featureLayer;
     };
@@ -538,8 +521,9 @@ define(function (require) {
      * @param mapData {geoJson Object}
      * @return {undefined}
      */
-    TileMap.prototype.shadedGeohashGrid = function (map, mapData) {
+    TileMap.prototype.shadedGeohashGrid = function (map) {
       var self = this;
+      var mapData = self.geoJson;
 
       // super min and max from all chart data
       var min = mapData.properties.allmin;
@@ -576,10 +560,7 @@ define(function (require) {
         filter: self._filterToMapBounds(map)
       });
 
-      // add legend
-      if (mapData.features.length > 1) {
-        self.addLegend(mapData, map);
-      }
+      self.addLegend(map);
 
       return featureLayer;
     };
@@ -594,10 +575,10 @@ define(function (require) {
      * @param mapData {geoJson Object}
      * @return featureLayer {Leaflet object}
      */
-    TileMap.prototype.heatMap = function (map, mapData) {
+    TileMap.prototype.heatMap = function (map) {
       var self = this;
-      var max = mapData.properties.allmax;
-      var points = this.dataToHeatArray(mapData, max);
+      var mapData = this.geoJson;
+      var points = this.dataToHeatArray(mapData.properties.allmax);
 
       var options = {
         radius: +this._attr.heatRadius,
@@ -638,7 +619,7 @@ define(function (require) {
         var latlng = e.latlng;
 
         // find nearest feature to event latlng
-        var feature = self.nearestFeature(latlng, mapData);
+        var feature = self.nearestFeature(latlng);
 
         var zoom = map.getZoom();
 
@@ -654,12 +635,12 @@ define(function (require) {
     /**
      * Adds label div to each map when data is split
      *
-     * @method addLabel
+     * @method addTitle
      * @param mapLabel {String}
      * @param map {Leaflet Object}
      * @return {undefined}
      */
-    TileMap.prototype.addLabel = function (mapLabel, map) {
+    TileMap.prototype.addTitle = function (mapLabel, map) {
       var label = L.control();
       label.onAdd = function () {
         this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
@@ -677,46 +658,39 @@ define(function (require) {
      * uses d3 scale from TileMap.prototype.quantizeColorScale
      *
      * @method addLegend
-     * @param data {Object}
      * @param map {Leaflet Object}
      * @return {undefined}
      */
-    TileMap.prototype.addLegend = function (data, map) {
+    TileMap.prototype.addLegend = function (map) {
+      // only draw the legend for maps with multiple items
+      if (this.geoJson.features.length <= 1) return;
+
       var self = this;
       var isLegend = $('div.tilemap-legend', this.chartEl).length;
 
       if (isLegend) return; // Don't add Legend if already one
 
+      var valueFormatter = this.valueFormatter || _.identity;
       var legend = L.control({position: 'bottomright'});
+
       legend.onAdd = function () {
-        var div = L.DomUtil.create('div', 'tilemap-legend');
-        var colors = self._attr.colors;
-        var labels = [];
-        var i = 0;
-        var vals;
-        var strokecol;
+        var $div = $('<div>').addClass('tilemap-legend');
 
-        if (data.properties.min === data.properties.max) {
-          // 1 val for legend
-          vals = self._attr.cScale.invertExtent(colors[i]);
-          strokecol = self.darkerColor(colors[i]);
-          labels.push(
-            '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-            vals[0].toFixed(0));
-        } else {
-          // 3 to 5 vals for legend
-          if (colors) {
-            for (i = 0; i < colors.length; i++) {
-              vals = self._attr.cScale.invertExtent(colors[i]);
-              strokecol = self.darkerColor(colors[i]);
-              labels.push('<i style="background:' + colors[i] + ';border-color:' +
-              strokecol + '"></i> ' + vals[0].toFixed(0) + ' &ndash; ' + vals[1].toFixed(0));
-            }
-          }
-        }
-        div.innerHTML = labels.join('<br>');
+        _.each(self._attr.colors, function (color, i) {
+          var icon = $('<i>').css({
+            background: color,
+            'border-color': self.darkerColor(color)
+          });
 
-        return div;
+          var range = self._attr.cScale
+          .invertExtent(color)
+          .map(valueFormatter)
+          .join(' – ');
+
+          $div.append(i > 0 ? '<br>' : '').append(icon).append(range);
+        });
+
+        return $div.get(0);
       };
       legend.addTo(map);
     };
@@ -732,8 +706,8 @@ define(function (require) {
      */
     TileMap.prototype.applyShadingStyle = function (feature, min, max) {
       var self = this;
-      var count = feature.properties.count;
-      var color = self.quantizeColorScale(count, min, max);
+      var value = feature.properties.value;
+      var color = self.quantizeColorScale(value, min, max);
 
       return {
         fillColor: color,
@@ -797,8 +771,9 @@ define(function (require) {
      * @method dataToHeatArray
      * @return {Array}
      */
-    TileMap.prototype.dataToHeatArray = function (mapData, max) {
+    TileMap.prototype.dataToHeatArray = function (max) {
       var self = this;
+      var mapData = this.geoJson;
 
       return mapData.features.map(function (feature) {
         var lat = feature.geometry.coordinates[1];
@@ -806,11 +781,11 @@ define(function (require) {
         var heatIntensity;
 
         if (!self._attr.heatNormalizeData) {
-          // show bucket count on heatmap
-          heatIntensity = feature.properties.count;
+          // show bucket value on heatmap
+          heatIntensity = feature.properties.value;
         } else {
-          // show bucket count normalized to max value
-          heatIntensity = parseInt(feature.properties.count / max * 100);
+          // show bucket value normalized to max value
+          heatIntensity = parseInt(feature.properties.value / max * 100);
         }
 
         return [lat, lng, heatIntensity];
@@ -844,25 +819,25 @@ define(function (require) {
 
     /**
      * radiusScale returns a number for scaled circle markers
-     * square root of count / max
+     * square root of value / max
      * multiplied by a value based on map zoom
      * multiplied by a value based on data precision
      * for relative sizing of markers
      *
      * @method radiusScale
-     * @param count {Number}
+     * @param value {Number}
      * @param max {Number}
      * @param zoom {Number}
      * @param precision {Number}
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (count, max, zoom, precision) {
+    TileMap.prototype.radiusScale = function (value, max, zoom, precision) {
       // exp = 0.5 for square root ratio
       // exp = 1 for linear ratio
       var exp = 0.5;
       var precisionBiasNumerator = 200;
       var precisionBiasBase = 5;
-      var pct = count / max;
+      var pct = value / max;
       var constantZoomRadius = 0.5 * Math.pow(2, zoom);
       var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
@@ -874,12 +849,12 @@ define(function (require) {
      * used for marker fill color
      *
      * @method quantizeColorScale
-     * @param count {Number}
+     * @param value {Number}
      * @param min {Number}
      * @param max {Number}
      * @return {String} hex color
      */
-    TileMap.prototype.quantizeColorScale = function (count, min, max) {
+    TileMap.prototype.quantizeColorScale = function (value, min, max) {
       var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
       var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
       var reds1 = ['#ff6128'];
@@ -898,7 +873,7 @@ define(function (require) {
       if (max === min) {
         return colors[0];
       } else {
-        return cScale(count);
+        return cScale(value);
       }
     };
 
