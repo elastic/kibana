@@ -310,6 +310,11 @@ specified in `elasticsearch_url`. You probably don't need to worry about this se
 |`kibana_index`
 |The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
 
+|`kibana_index_replicas`
+|Number of replicas the Kibana index should be setup to have when created in Elasticsearch. This setting is only
+applied if no index with the name specified by `kibana_index` exists in Elasticsearch and a new index is created.
+Changing this setting will have no effect on an existing Kibana index. Default: `kibana_index_replicas: 1`.
+
 |`default_app_id` 
 |The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: `default_app_id: "discover"`. 
 

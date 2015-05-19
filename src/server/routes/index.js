@@ -6,6 +6,7 @@ var _ = require('lodash');
 router.get('/config', function (req, res, next) {
   var keys = [
     'kibana_index',
+    'kibana_index_replicas',
     'default_app_id',
     'shard_timeout'
   ];
