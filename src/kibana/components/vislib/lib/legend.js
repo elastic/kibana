@@ -102,6 +102,7 @@ define(function (require) {
       return labels.map(function (label) {
         var values = [];
         var aggConfigResult;
+        var aggConfig;
 
         data.forEach(function (datum) {
           datum.slices.children.forEach(function traverse(d) {
@@ -115,8 +116,13 @@ define(function (require) {
           if (aggConfigResult.$parent) aggConfigResult.$parent = undefined;
         }
 
+        if (values.length && values[0].aggConfig) {
+          aggConfig = values[0].aggConfig;
+        }
+
         return {
           label: label,
+          aggConfig: aggConfig,
           aggConfigResult: aggConfigResult,
           values: values
         };
@@ -170,7 +176,7 @@ define(function (require) {
         .attr('class', 'color')
         .each(self._addIdentifier)
         .html(function (d, i) {
-          var aggConfig = d.aggConfigResult ? d.aggConfigResult.aggConfig : undefined;
+          var aggConfig = d.aggConfig ? d.aggConfig : undefined;
           var fieldFormatter = aggConfig ? aggConfig.fieldFormatter() : String;
           return '<i class="fa fa-circle dots" style="color:' + args.color(d.label) + '"></i>' + fieldFormatter(d.label);
         });
