@@ -14,6 +14,12 @@ define(function (require) {
     var defaultMapCenter = [15, 5];
     var defaultMapZoom = 2;
 
+    // Convenience function to turn around the LngLat recieved from ES
+    function cloneAndReverse(arr) {
+      var l = arr.length;
+      return arr.map(function (curr, idx) { return arr[l - (idx + 1)]; });
+    }
+
     /**
      * Tile Map Visualization: renders maps
      *
@@ -176,7 +182,7 @@ define(function (require) {
               onAdd: function (map) {
                 $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
                 $(fitContainer).on('click', function () {
-                  self.fitBounds(map, featureLayer);
+                  self.fitBounds(map, mapData.features);
                 });
                 return fitContainer;
               },
@@ -242,6 +248,19 @@ define(function (require) {
     };
 
     /**
+     *  Get the Rectangles representing the geohash grid
+     *
+     * @param mapData [Buckets] [{properties: {rectangle: [[lng, lat], [lng, lat], [lng, lat], [lng, lat]]}}]
+     * @return {LatLngRectangles[]}
+     */
+    TileMap.prototype._getDataRectangles = function (mapData) {
+      return _(mapData)
+        .deepPluck('properties.rectangle')
+        .map(function (rectangle) { return rectangle.map(cloneAndReverse); })
+        .value();
+    };
+
+    /**
      * zoom map to fit all features in featureLayer
      *
      * @method fitBounds
@@ -249,8 +268,8 @@ define(function (require) {
      * @param featureLayer {Leaflet object}
      * @return {Leaflet object} featureLayer
      */
-    TileMap.prototype.fitBounds = function (map, featureLayer) {
-      map.fitBounds(featureLayer.getBounds());
+    TileMap.prototype.fitBounds = function (map, mapData) {
+      map.fitBounds(this._getDataRectangles(mapData));
     };
 
     /**
