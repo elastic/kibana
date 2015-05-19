@@ -30,7 +30,7 @@ define(function () {
       if (!yAxis) return;
 
       var padding = 5;
-      var height = parseInt(el.style('height'));
+      var height = parseInt(el.node().clientHeight, 10);
 
       // render svg and get the width of the bounding box
       var svg = d3.select('body')

@@ -32,8 +32,7 @@ define(function (require) {
   var visLibParams = {
     type: 'area',
     addLegend: true,
-    addTooltip: true,
-    defaultYExtents: false
+    addTooltip: true
   };
 
   angular.module('AreaChartFactory', ['kibana']);
@@ -228,8 +227,8 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var yAxis = chart.handler.yAxis;
 
-            expect(yAxis.yMin).to.not.be(undefined);
-            expect(yAxis.yMax).to.not.be(undefined);
+            expect(yAxis.domain[0]).to.not.be(undefined);
+            expect(yAxis.domain[1]).to.not.be(undefined);
           });
         });
 
@@ -270,8 +269,8 @@ define(function (require) {
             var yAxis = chart.handler.yAxis;
             var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
-            expect(yAxis.yMin).to.equal(yVals[0]);
-            expect(yAxis.yMax).to.equal(yVals[1]);
+            expect(yAxis.domain[0]).to.equal(yVals[0]);
+            expect(yAxis.domain[1]).to.equal(yVals[1]);
           });
         });
       });

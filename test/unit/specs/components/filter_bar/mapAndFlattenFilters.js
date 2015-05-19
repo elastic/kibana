@@ -2,25 +2,19 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('mapAndFlattenFilters()', function () {
       var sinon = require('test_utils/auto_release_sinon');
-      var mapAndFlattenFilters, $rootScope, indexPattern, getIndexPatternStub;
+      var mapAndFlattenFilters, $rootScope;
 
       beforeEach(module('kibana'));
 
       beforeEach(function () {
-        getIndexPatternStub = sinon.stub();
         module('kibana/courier', function ($provide) {
-          $provide.service('courier', function () {
-            var courier = { indexPatterns: { get: getIndexPatternStub } };
-            return courier;
-          });
+          $provide.service('courier', require('fixtures/mock_courier'));
         });
       });
 
-      beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(inject(function (Private, _$rootScope_) {
         mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
         $rootScope = _$rootScope_;
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
       }));
 
       var filters = [

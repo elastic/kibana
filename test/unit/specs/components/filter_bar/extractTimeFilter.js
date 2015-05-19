@@ -3,27 +3,19 @@ define(function (require) {
     describe('extractTimeFilter()', function () {
       var sinon = require('test_utils/auto_release_sinon');
       var extractTimeFilter,
-          $rootScope,
-          indexPattern,
-          getIndexPatternStub;
+          $rootScope;
 
       beforeEach(module('kibana'));
 
       beforeEach(function () {
-        getIndexPatternStub = sinon.stub();
         module('kibana/courier', function ($provide) {
-          $provide.service('courier', function () {
-            var courier = { indexPatterns: { get: getIndexPatternStub } };
-            return courier;
-          });
+          $provide.service('courier', require('fixtures/mock_courier'));
         });
       });
 
       beforeEach(inject(function (Private, _$rootScope_, Promise) {
         extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
         $rootScope = _$rootScope_;
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
       }));
 
       it('should return the matching filter for the defualt time field', function (done) {
