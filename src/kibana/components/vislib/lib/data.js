@@ -62,14 +62,10 @@ define(function (require) {
 
     Data.prototype._getLabels = function (data) {
       if (this.type === 'series') {
-        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
-          return [(this.get('yAxisLabel'))];
-        } else {
-          return getLabels(data);
-        }
-      } else if (this.type === 'slices') {
-        return this.pieNames();
+        if (getLabels(data).length === 1 && getLabels(data)[0] === '') return [(this.get('yAxisLabel'))];
+        return getLabels(data);
       }
+      return this.pieNames();
     };
 
     /**

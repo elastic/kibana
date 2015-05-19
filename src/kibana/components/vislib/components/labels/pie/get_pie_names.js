@@ -8,15 +8,13 @@ define(function (require) {
       var slices = data.slices;
 
       if (slices.children) {
-        var namedObj = returnNames(slices.children, 0, columns);
-
-        return _(namedObj)
-          .sortBy(function (obj) {
-            return obj.index;
-          })
-          .pluck('key')
-          .unique()
-          .value();
+        return _(returnNames(slices.children, 0, columns))
+        .sortBy(function (obj) {
+          return obj.index;
+        })
+        .pluck('key')
+        .unique()
+        .value();
       }
     };
   };

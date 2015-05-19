@@ -7,9 +7,7 @@ define(function () {
         names.push({ key: obj.name, index: index });
 
         if (obj.children) {
-          var plusIndex = index + 1;
-
-          returnNames(obj.children, plusIndex, columns).forEach(function (namedObj) {
+          returnNames(obj.children, (index + 1), columns).forEach(function (namedObj) {
             names.push(namedObj);
           });
         }

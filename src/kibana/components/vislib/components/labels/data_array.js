@@ -11,7 +11,7 @@ define(function (require) {
         throw new TypeError('GetArrayUtilService expects an object with a series, rows, or columns key');
       }
 
-      if (!obj.series) { return flattenSeries(obj); }
+      if (!obj.series) return flattenSeries(obj);
       return obj.series;
     };
   };

@@ -21,16 +21,16 @@ define(function (require) {
      * @param color {Function} Color function
      * @param _attr {Object|*} Reference to Vis options
      */
-    function Legend(vis, data) {
+    function Legend(vis) {
       if (!(this instanceof Legend)) {
-        return new Legend(vis, data);
+        return new Legend(vis);
       }
 
       this.events = new Dispatch();
       this.vis = vis;
       this.el = vis.el;
-      this.data = this._getData(data);
-      this.labels = this._getLabels(this.data, vis._attr.type);
+      this.dataValues = this._getData(vis.data);
+      this.labels = this._getLabels(this.dataValues, vis._attr.type);
       this.color = color(this.labels);
 
       this._attr = _.defaults(vis._attr || {}, {
@@ -202,7 +202,7 @@ define(function (require) {
       var self = this;
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
-      var items = this._getDataLabels(this.data, this.labels, this._attr.type);
+      var items = this._getDataLabels(this.dataValues, this.labels, this._attr.type);
       this._header(legendDiv, this);
       this._list(legendDiv, items, this);
 
