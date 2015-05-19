@@ -22,6 +22,7 @@ kibana.host = kibana.host || '0.0.0.0';
 kibana.elasticsearch_url = kibana.elasticsearch_url || 'http://localhost:9200';
 kibana.maxSockets = kibana.maxSockets || Infinity;
 kibana.log_file = kibana.log_file || null;
+kibana.kibana_index_replicas = kibana.kibana_index_replicas == null ? 1 : kibana.kibana_index_replicas;
 
 kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
