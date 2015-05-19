@@ -279,7 +279,6 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.fitBounds = function (map, mapData) {
-      map.fitBounds(mapData._latlngs || mapData.getBounds());
       var dataBounds = mapData.reduce(function (prevBounds, esBucket) {
         var swBound = prevBounds[0];
         var neBound = prevBounds[1];
