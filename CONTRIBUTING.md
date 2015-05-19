@@ -97,6 +97,6 @@ Remember, someone is blocked by a pull awaiting review, make it count. Be thorou
 3. **Read the code**. Understanding the changes will help you find additional things to test. Contact the submitter if you don't understand something
 4. **Go line-by-line**. Are there [style guide](https://github.com/elastic/kibana/blob/master/STYLEGUIDE.md) violations? Strangely named variables? Magic numbers? Do the abstractions make sense to you? Are things arranged in a testable way?
 5. **Speaking of tests** Are they there? If a new function was added does it have tests? Do the tests, well, TEST anything? Do they just run the function or do they properly check the output?
-6. If there are changes needed, be explicit, comment on the lines in the code that you'd like changed. You might consider suggesting fixes. If you can't identify the problem, animated screenshots can help the review understand what's going on.
-7. Re-assign the submitter to the pull, repeat until mergable. 
+6. **Suggest improvements** If there are changes needed, be explicit, comment on the lines in the code that you'd like changed. You might consider suggesting fixes. If you can't identify the problem, animated screenshots can help the review understand what's going on.
+7. **Hand it back** Re-assign the submitter to the pull, repeat until mergable. 
 
