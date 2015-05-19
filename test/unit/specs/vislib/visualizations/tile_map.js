@@ -161,7 +161,7 @@ define(function (require) {
         it('should filter out data points that are outside of the map bounds', function () {
           vis.handler.charts.forEach(function (chart) {
             chart.maps.forEach(function (map) {
-              var featuresLength = chart.chartData.geoJson.features.length;
+              var featuresLength = chart.geoJson.features.length;
               var mapFeatureLength;
 
               function getSize(obj) {
@@ -275,13 +275,13 @@ define(function (require) {
       describe('dataToHeatArray method', function () {
         it('should return an array', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.dataToHeatArray(chart, max)).to.be.an(Array);
+            expect(chart.dataToHeatArray(max)).to.be.an(Array);
           });
         });
 
         it('should return an array item for each feature', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.dataToHeatArray(chart, max).length).to.be(mapData.features.length);
+            expect(chart.dataToHeatArray(max).length).to.be(mapData.features.length);
           });
         });
 
@@ -290,7 +290,7 @@ define(function (require) {
             var lat = feature.geometry.coordinates[1];
             var lng = feature.geometry.coordinates[0];
             var intensity = feature.properties.value;
-            var array = chart.dataToHeatArray(chart, max);
+            var array = chart.dataToHeatArray(max);
             expect(array[i][0]).to.be(lat);
             expect(array[i][1]).to.be(lng);
             expect(array[i][2]).to.be(intensity);
@@ -303,7 +303,7 @@ define(function (require) {
             var lat = feature.geometry.coordinates[1];
             var lng = feature.geometry.coordinates[0];
             var intensity = parseInt(feature.properties.value / max * 100);
-            var array = chart.dataToHeatArray(chart, max);
+            var array = chart.dataToHeatArray(max);
             expect(array[i][0]).to.be(lat);
             expect(array[i][1]).to.be(lng);
             expect(array[i][2]).to.be(intensity);
@@ -352,19 +352,19 @@ define(function (require) {
       describe('nearestFeature method', function () {
         it('should return an object', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point, mapData)).to.be.an(Object);
+            expect(chart.nearestFeature(point)).to.be.an(Object);
           });
         });
 
         it('should return a geoJson feature', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point, mapData).type).to.be('Feature');
+            expect(chart.nearestFeature(point).type).to.be('Feature');
           });
         });
 
         it('should return the geoJson feature with same latlng as point', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point, mapData)).to.be(feature);
+            expect(chart.nearestFeature(point)).to.be(feature);
           });
         });
       });

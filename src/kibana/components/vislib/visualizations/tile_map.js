@@ -6,7 +6,6 @@ define(function (require) {
     require('leaflet-heat');
     require('leaflet-draw');
 
-    var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
     require('css!components/vislib/styles/main');
@@ -47,8 +46,7 @@ define(function (require) {
      * Renders tile map
      *
      * @method draw
-     * @param selection
-     * @return {Function} Creates the map
+     * @return {Function} - function to add a map to a selection
      */
     TileMap.prototype.draw = function () {
       var self = this;
@@ -255,8 +253,7 @@ define(function (require) {
      * add Leaflet latLng to mapData properties
      *
      * @method addLatLng
-     * @param mapData {geoJson Object}
-     * @return mapData {geoJson Object}
+     * @return undefined
      */
     TileMap.prototype.addLatLng = function () {
       this.geoJson.features.forEach(function (feature) {
@@ -271,7 +268,7 @@ define(function (require) {
      * remove css class for desat filters on map tiles
      *
      * @method saturateTiles
-     * @return {Leaflet object} featureLayer
+     * @return undefined
      */
     TileMap.prototype.saturateTiles = function () {
       if (!this._attr.isDesaturated) {
@@ -284,11 +281,10 @@ define(function (require) {
      *
      * @method nearestFeature
      * @param point {Leaflet Object}
-     * @param mapData {geoJson Object}
      * @return nearestPoint {Leaflet Object}
      */
-    TileMap.prototype.nearestFeature = function (point, mapData) {
-      var self = this;
+    TileMap.prototype.nearestFeature = function (point) {
+      var mapData = this.geoJson;
       var distance = Infinity;
       var nearest;
 
@@ -319,9 +315,7 @@ define(function (require) {
      * @return boolean
      */
     TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
-      if (!feature) {
-        return;
-      }
+      if (!feature) return;
 
       var showTip = false;
 
@@ -359,10 +353,9 @@ define(function (require) {
      * features and shows tooltip for that feature
      *
      * @method showTooltip
-     * @param e {Event}
-     * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return {undefined}
+     * @param map {LeafletMap}
+     * @param feature {LeafletFeature}
+     * @return undefined
      */
     TileMap.prototype.showTooltip = function (map, feature) {
       if (!this.tooltipFormatter) return;
@@ -562,8 +555,7 @@ define(function (require) {
     TileMap.prototype.heatMap = function (map) {
       var self = this;
       var mapData = this.geoJson;
-      var max = mapData.properties.allmax;
-      var points = this.dataToHeatArray(max);
+      var points = this.dataToHeatArray(mapData.properties.allmax);
 
       var options = {
         radius: +this._attr.heatRadius,
@@ -604,7 +596,7 @@ define(function (require) {
         var latlng = e.latlng;
 
         // find nearest feature to event latlng
-        var feature = self.nearestFeature(latlng, mapData);
+        var feature = self.nearestFeature(latlng);
 
         var zoom = map.getZoom();
 
