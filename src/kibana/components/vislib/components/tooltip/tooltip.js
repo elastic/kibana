@@ -30,6 +30,7 @@ define(function (require) {
       this.tooltipClass = 'vis-tooltip';
       this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
       this.showCondition = _.constant(true);
+      this.$chart = $(this.el).find('.' + this.containerClass);
     }
 
     Tooltip.prototype.$get = _.once(function () {
@@ -52,6 +53,34 @@ define(function (require) {
      */
     var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
 
+    Tooltip.prototype.show = function () {
+      var $tooltip = this.$get();
+      var html = $tooltip.html();
+
+      var placement = positionTooltip({
+        $window: $(window),
+        $chart: this.$chart,
+        $el: $tooltip,
+        $sizer: this.$getSizer(),
+        event: d3.event
+      }, html);
+
+      $tooltip.css({
+        visibility: 'visible',
+        left: placement.left,
+        top: placement.top
+      });
+    };
+
+    Tooltip.prototype.hide = function () {
+      var $tooltip = this.$get();
+      $tooltip.css({
+        visibility: 'hidden',
+        left: '-500px',
+        top: '-500px'
+      });
+    };
+
     /**
      * Renders tooltip
      *
@@ -60,14 +89,9 @@ define(function (require) {
      */
     Tooltip.prototype.render = function () {
       var self = this;
-      var tooltipFormatter = this.formatter;
-
-      var $window = $(window);
-      var $chart = $(this.el).find('.' + this.containerClass);
 
       return function (selection) {
         var $tooltip = self.$get();
-        var $sizer = self.$getSizer();
         var id = self.id;
         var order = self.order;
 
@@ -77,10 +101,10 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
-        $chart.on('mouseleave', function (event) {
+        self.$chart.on('mouseleave', function (event) {
           // only clear when we leave the chart, so that
           // moving between points doesn't make it reposition
-          $chart.removeData('previousPlacement');
+          self.$chart.removeData('previousPlacement');
         });
 
         selection.each(function (d, i) {
@@ -100,27 +124,10 @@ define(function (require) {
             .join('\n');
 
             if (allHtml) {
-              var placement = positionTooltip({
-                $window: $window,
-                $chart: $chart,
-                $el: $tooltip,
-                $sizer: $sizer,
-                event: d3.event
-              }, allHtml);
-
-              $tooltip
-              .html(allHtml)
-              .css({
-                visibility: 'visible',
-                left: placement.left,
-                top: placement.top
-              });
+              $tooltip.html(allHtml);
+              self.show();
             } else {
-              $tooltip.css({
-                visibility: 'hidden',
-                left: '-500px',
-                top: '-500px'
-              });
+              self.hide();
             }
           }
 
@@ -131,7 +138,7 @@ define(function (require) {
             }
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
-            return render(tooltipFormatter(events));
+            return render(self.tooltipFormatter(events));
           })
           .on('mouseleave.tip', function () {
             render();
