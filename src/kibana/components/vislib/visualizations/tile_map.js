@@ -14,10 +14,6 @@ define(function (require) {
     var defaultMapCenter = [15, 5];
     var defaultMapZoom = 2;
 
-
-    // Convenience function to make up for ES returning  [lng, lat] instead of [lat, lng]
-    function cloneAndReverse(arr) { return _(_.clone(arr)).reverse().value(); }
-
     /**
      * Tile Map Visualization: renders maps
      *
@@ -279,27 +275,8 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.fitBounds = function (map, mapData) {
-      var dataBounds = mapData.reduce(function (prevBounds, esBucket) {
-        var swBound = prevBounds[0];
-        var neBound = prevBounds[1];
-        var pointSwBound = cloneAndReverse(esBucket.properties.rectangle[0]);
-        var pointNeBound = cloneAndReverse(esBucket.properties.rectangle[2]);
-        if (swBound[0] > pointSwBound[0]) {
-          swBound[0] = pointSwBound[0];
-        }
-        if (swBound[1] > pointSwBound[1]) {
-          swBound[1] = pointSwBound[1];
-        }
-        if (neBound[0] < pointNeBound[0]) {
-          neBound[0] = pointNeBound[0];
-        }
-        if (neBound[1] < pointNeBound[1]) {
-          neBound[1] = pointNeBound[1];
-        }
-        return [swBound, neBound];
-      }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
-      console.log(dataBounds);
-      map.fitBounds(dataBounds);
+      var latLngBounds = new L.LatLngBounds(_.deepPluck(mapData, 'properties.latLng'));
+      map.fitBounds(latLngBounds);
     };
 
     /**
