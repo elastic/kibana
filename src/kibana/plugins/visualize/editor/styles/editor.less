@@ -19,6 +19,10 @@
     }
   }
 
+  .btn-xs {
+    line-height: 1.3;
+  }
+
   navbar {
     .bitty-modal-container {
       position: relative;
@@ -94,6 +98,10 @@
         > .vis-edit-sidebar-buttons {
           .flex(0, 0, auto)
         }
+
+        label {
+          margin-bottom: 0px;
+        }
       }
     }
 
@@ -102,12 +110,18 @@
       font-weight: bold;
       border: inherit !important;
       background-color: @gray-lighter;
-      margin-bottom: 5px;
+      margin-bottom: @vis-editor-agg-editor-spacing;
+      padding: 2px 5px !important;
     }
 
     .sidebar-item-title:hover {
       color: @text-color !important;
       background-color: @gray-lighter !important;
+    }
+
+    .hintbox {
+      padding: @vis-editor-agg-editor-spacing;
+      margin-bottom: @vis-editor-agg-editor-spacing;
     }
   }
 
@@ -115,7 +129,7 @@
     padding: @vis-editor-agg-editor-spacing;
 
     .form-group {
-      margin-bottom: 5px;
+      margin-bottom: @vis-editor-agg-editor-spacing;
     }
     .form-horizontal .control-label {
       text-align: left;

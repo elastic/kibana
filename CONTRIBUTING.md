@@ -22,6 +22,13 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   ```sh
   npm install -g grunt-cli bower
   ```
+  
+- Clone the kibana repo and move into it
+
+  ```sh
+  git clone https://github.com/elastic/kibana.git kibana
+  cd kibana
+  ```
 
 - Install node and bower dependencies
 

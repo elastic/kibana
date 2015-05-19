@@ -30,9 +30,22 @@ define(function (require) {
           filterFieldTypes: 'geo_point'
         },
         {
+          name: 'autoPrecision',
+          default: true,
+          write: _.noop
+        },
+        {
           name: 'precision',
           default: defaultPrecision,
           editor: require('text!components/agg_types/controls/precision.html'),
+          controller: function ($scope) {
+            $scope.$watchMulti([
+              'agg.params.autoPrecision',
+              'outputAgg.params.precision'
+            ], function (cur, prev) {
+              if (cur[1]) $scope.agg.params.precision = cur[1];
+            });
+          },
           deserialize: getPrecision,
           write: function (aggConfig, output) {
             output.params.precision = getPrecision(aggConfig.params.precision);

@@ -1,13 +1,11 @@
 define(function (require) {
-  var angular = require('angular');
-  var $ = require('jquery');
 
   // Load the kibana app dependencies.
   require('angular-route');
 
   require('plugins/doc/index');
 
-  var $scope, createController, $route, timefilter;
+  var $scope, createController, timefilter;
 
   var init = function (index, type, id) {
 
@@ -67,11 +65,8 @@ define(function (require) {
     });
 
     // Create the scope
-    inject(function ($rootScope, $controller, _$route_, _timefilter_) {
-
-      $route = _$route_;
+    inject(function ($rootScope, $controller, _timefilter_) {
       $scope = $rootScope.$new();
-
       timefilter = _timefilter_;
 
       createController = function () {

@@ -1,9 +1,9 @@
 define(function (require) {
   return function CourierFetchRequestStatus() {
     return {
-      ABORTED: {},
-      DUPLICATE: {},
-      INCOMPLETE: {}
+      ABORTED: { CourierFetchRequestStatus: 'aborted' },
+      DUPLICATE: { CourierFetchRequestStatus: 'duplicate' },
+      INCOMPLETE: { CourierFetchRequestStatus: 'incomplete' }
     };
   };
 });

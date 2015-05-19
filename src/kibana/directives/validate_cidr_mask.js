@@ -14,6 +14,11 @@ define(function (require) {
         ngModel.$formatters.unshift(validateCidrMask);
 
         function validateCidrMask(mask) {
+          if (mask == null || mask === '') {
+            ngModel.$setValidity('cidrMaskInput', true);
+            return null;
+          }
+
           try {
             mask = new CidrMask(mask);
             ngModel.$setValidity('cidrMaskInput', true);

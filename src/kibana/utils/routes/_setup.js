@@ -16,7 +16,7 @@ define(function (require) {
           kbnSetup(),
           config.init(),
           courier.SearchSource.ready,
-          $rootScope.kibana.ready
+          $rootScope.kibana && $rootScope.kibana.ready
         ])
         .then(function () {
           var path = $route.current.$$route.originalPath;

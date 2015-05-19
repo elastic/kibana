@@ -50,7 +50,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise, config) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -58,7 +58,7 @@ define(function (require) {
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
@@ -125,16 +125,6 @@ define(function (require) {
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
-      editableVis.listeners.mapZoomEnd = vis.listeners.mapZoomEnd = function (event) {
-        if (!vis.params.autoPrecision) return;
-
-        var geoHash = _.find(vis.aggs, function (agg) {
-          return agg.type.name === 'geohash_grid';
-        });
-
-        geoHash.params.precision = autoPrecision(event.zoom, config.get('visualization:tileMap:maxPrecision'));
-        $scope.fetch();
-      };
 
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -162,18 +152,15 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      filterBarWatchFilters($scope)
-      .on('update', function () {
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
-        }
+      // update the searchSource when filters update
+      $scope.$listen(queryFilter, 'update', function () {
+        searchSource.set('filter', queryFilter.getFilters());
         $state.save();
-      })
-      .on('fetch', function () {
-        $scope.fetch();
       });
+
+      // fetch data when filters fire fetch event
+      $scope.$listen(queryFilter, 'fetch', $scope.fetch);
+
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
         if (_.contains(keys, 'linked') && $state.linked === true) {
@@ -197,7 +184,7 @@ define(function (require) {
         }
 
         if (_.isEqual(keys, ['filters'])) {
-          // updates will happen in filterBarWatchFilters() if needed
+          // updates will happen in filter watcher if needed
           return;
         }
 
@@ -207,7 +194,7 @@ define(function (require) {
       // Without this manual emission, we'd miss filters and queries that were on the $state initially
       $state.emit('fetch_with_changes');
 
-      $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
+      $scope.$listen(timefilter, 'fetch', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');
@@ -220,7 +207,7 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      searchSource.set('filter', $state.filters);
+      searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);
       if ($scope.vis.type.requiresSearch) {
         courier.fetch();
@@ -296,10 +283,6 @@ define(function (require) {
 
         if (fetch) $scope.fetch();
       };
-    }
-
-    function autoPrecision(zoom, limit) {
-      return Math.min(Math.round(0.02 * Math.pow(zoom, 2) + 0.24 * zoom + 0.723), limit);
     }
 
     init();

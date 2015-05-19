@@ -44,15 +44,28 @@ define(function (require) {
     },
 
     /**
-     * Remove an element at a specific index from an array
+     * Patched version of _.remove that supports IndexedArrays
      *
-     * @param  {array} arr
-     * @param  {number} index
-     * @return {array} arr
+     * @param  {array} array
+     * @param  {object|function|str} - a lodash selector/predicate
+     * @return {array} the elements that were removed
      */
-    remove: function (arr, index) {
-      arr.splice(index, 1);
-      return arr;
+    remove: function (array, where) {
+      var index = -1;
+      var length = array ? array.length : 0;
+      var result = [];
+
+      var callback = _.createCallback(where, this, 3);
+      while (++index < length) {
+        var value = array[index];
+        if (callback(value, index, array)) {
+          result.push(value);
+          array.splice(index--, 1);
+          length--;
+        }
+      }
+
+      return result;
     },
 
     /**
@@ -90,7 +103,6 @@ define(function (require) {
      * @return {object}
      */
     flattenWith: function (dot, nestedObj, flattenArrays) {
-      var key; // original key
       var stack = []; // track key stack
       var flatObj = {};
       (function flattenObj(obj) {
@@ -250,11 +262,18 @@ define(function (require) {
     },
 
     /**
-     * Shortcut for the simple version of _.deepGet
+     * Shortcut for the simple version of _.deepGet with support for default
+     * values added
+     *
+     * @param {obj} any - the value to read from
+     * @param {string|array} path - the location of the value to return as
+     *                           a dot-notated string or array of keys.
+     * @param {any} def - when the value is null or undefined return this instead
      * @return {any}
      */
-    get: function (obj, path) {
-      return _.deepGet(obj, path);
+    get: function (obj, path, def) {
+      var val = _.deepGet(obj, path);
+      return (val == null && def != null) ? def : val;
     },
 
     /**
@@ -276,5 +295,19 @@ define(function (require) {
 
       return list;
     },
+
+    pushAll: function (source, dest) {
+      var start = dest.length;
+      var adding = source.length;
+
+      // allocate - http://goo.gl/e2i0S0
+      dest.length = start + adding;
+
+      // fill sparse positions
+      var i = -1;
+      while (++i < adding) dest[start + i] = source[i];
+
+      return dest;
+    }
   };
 });

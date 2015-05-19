@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var nextTick = require('utils/next_tick');
   var $ = require('jquery');
   var modules = require('modules');
   var module = modules.get('kibana/notify');
