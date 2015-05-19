@@ -13,6 +13,12 @@ define(function (require) {
     var defaultMapCenter = [15, 5];
     var defaultMapZoom = 2;
 
+    // Convenience function to turn around the LngLat recieved from ES
+    function cloneAndReverse(arr) {
+      var l = arr.length;
+      return arr.map(function (curr, idx) { return arr[l - (idx + 1)]; });
+    }
+
     /**
      * Tile Map Visualization: renders maps
      *
@@ -175,7 +181,7 @@ define(function (require) {
               onAdd: function (map) {
                 $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
                 $(fitContainer).on('click', function () {
-                  map.fitBounds(mapData._latlngs || featureLayer.getBounds());
+                  self.fitBounds(map, mapData.features);
                 });
                 return fitContainer;
               },
@@ -202,7 +208,6 @@ define(function (require) {
      * @return {boolean}
      */
     TileMap.prototype._filterToMapBounds = function (map) {
-      function cloneAndReverse(arr) { return _(_.clone(arr)).reverse().value(); }
       return function (feature) {
         var mapBounds = map.getBounds();
         var bucketRectBounds = feature.properties.rectangle.map(cloneAndReverse);
@@ -245,6 +250,18 @@ define(function (require) {
     };
 
     /**
+     * Get the Rectangles representing the geohash grid
+     *
+     * @return {LatLngRectangles[]}
+     */
+    TileMap.prototype._getDataRectangles = function () {
+      return _(this.geoJson.features)
+      .deepPluck('properties.rectangle')
+      .map(function (rectangle) { return rectangle.map(cloneAndReverse); })
+      .value();
+    };
+
+    /**
      * add Leaflet latLng to mapData properties
      *
      * @method addLatLng
@@ -257,6 +274,17 @@ define(function (require) {
           feature.geometry.coordinates[0]
         );
       });
+    };
+
+    /**
+     * zoom map to fit all features in featureLayer
+     *
+     * @method fitBounds
+     * @param map {Leaflet Object}
+     * @return {boolean}
+     */
+    TileMap.prototype.fitBounds = function (map) {
+      map.fitBounds(this._getDataRectangles());
     };
 
     /**
