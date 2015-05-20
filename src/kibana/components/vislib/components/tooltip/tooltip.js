@@ -69,6 +69,7 @@ define(function (require) {
 
     Tooltip.prototype.hide = function () {
       var $tooltip = this.$get();
+      allContents = [];
       $tooltip.css({
         visibility: 'hidden',
         left: '-500px',
