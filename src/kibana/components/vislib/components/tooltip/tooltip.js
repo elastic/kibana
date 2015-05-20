@@ -2,6 +2,7 @@ define(function (require) {
   return function TooltipFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
 
     var allContents = [];
 
@@ -30,7 +31,6 @@ define(function (require) {
       this.tooltipClass = 'vis-tooltip';
       this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
       this.showCondition = _.constant(true);
-      this.$chart = $(this.el).find('.' + this.containerClass);
     }
 
     Tooltip.prototype.$get = _.once(function () {
@@ -45,21 +45,16 @@ define(function (require) {
         .appendTo(document.body);
     });
 
-    /**
-     * Calculates values for the tooltip placement
-     *
-     * @param event {Object} D3 Events Object
-     * @returns {{Object}} Coordinates for tooltip
-     */
-    var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
-
     Tooltip.prototype.show = function () {
       var $tooltip = this.$get();
+      var $chart = this.$getChart();
       var html = $tooltip.html();
+
+      if (!$chart) return;
 
       var placement = positionTooltip({
         $window: $(window),
-        $chart: this.$chart,
+        $chart: $chart,
         $el: $tooltip,
         $sizer: this.$getSizer(),
         event: d3.event
@@ -81,6 +76,10 @@ define(function (require) {
       });
     };
 
+    Tooltip.prototype.$getChart = function () {
+      return this.container && $(this.container.node());
+    };
+
     /**
      * Renders tooltip
      *
@@ -90,6 +89,12 @@ define(function (require) {
     Tooltip.prototype.render = function () {
       var self = this;
 
+      /**
+       * Calculates values for the tooltip placement
+       *
+       * @param event {Object} D3 Events Object
+       * @returns undefined
+       */
       return function (selection) {
         var $tooltip = self.$get();
         var id = self.id;
@@ -101,10 +106,11 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
-        self.$chart.on('mouseleave', function (event) {
+        var $chart = self.$getChart();
+        $chart.on('mouseleave', function (event) {
           // only clear when we leave the chart, so that
           // moving between points doesn't make it reposition
-          self.$chart.removeData('previousPlacement');
+          $chart.removeData('previousPlacement');
         });
 
         selection.each(function (d, i) {
