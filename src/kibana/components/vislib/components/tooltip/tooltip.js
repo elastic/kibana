@@ -2,6 +2,7 @@ define(function (require) {
   return function TooltipFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
+    var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
 
     var allContents = [];
 
@@ -32,42 +33,93 @@ define(function (require) {
       this.showCondition = _.constant(true);
     }
 
+    /**
+     * Get jquery reference to the tooltip node
+     *
+     * @return {Object} jQuery node object
+     */
     Tooltip.prototype.$get = _.once(function () {
       return $('<div>').addClass(this.tooltipClass).appendTo(document.body);
     });
 
+    /**
+     * Get jquery reference to the tooltip sizer node
+     *
+     * @return {Object} jQuery node object
+     */
     Tooltip.prototype.$getSizer = _.once(function () {
       return this.$get()
       .clone()
-        .removeClass(this.tooltipClass)
-        .addClass(this.tooltipSizerClass)
-        .appendTo(document.body);
+      .removeClass(this.tooltipClass)
+      .addClass(this.tooltipSizerClass)
+      .appendTo(document.body);
     });
 
     /**
-     * Calculates values for the tooltip placement
-     *
-     * @param event {Object} D3 Events Object
-     * @returns {{Object}} Coordinates for tooltip
+     * Show the tooltip, positioning it based on the content and chart container
      */
-    var positionTooltip = require('components/vislib/components/tooltip/_position_tooltip');
+    Tooltip.prototype.show = function () {
+      var $tooltip = this.$get();
+      var $chart = this.$getChart();
+      var html = $tooltip.html();
+
+      if (!$chart) return;
+
+      var placement = positionTooltip({
+        $window: $(window),
+        $chart: $chart,
+        $el: $tooltip,
+        $sizer: this.$getSizer(),
+        event: d3.event
+      }, html);
+
+      $tooltip.css({
+        visibility: 'visible',
+        left: placement.left,
+        top: placement.top
+      });
+    };
+
+    /**
+     * Hide the tooltip, clearing its contents
+     */
+    Tooltip.prototype.hide = function () {
+      var $tooltip = this.$get();
+      allContents = [];
+      $tooltip.css({
+        visibility: 'hidden',
+        left: '-500px',
+        top: '-500px'
+      });
+    };
+
+    /**
+     * Get the jQuery chart node, based on the container object
+     * NOTE: the container is a d3 selection
+     *
+     * @return {Object} jQuery node for the chart
+     */
+    Tooltip.prototype.$getChart = function () {
+      var chart = $(this.container && this.container.node());
+      return chart.size() ? chart : false;
+    };
 
     /**
      * Renders tooltip
      *
      * @method render
-     * @returns {Function} Renders tooltip on a D3 selection
+     * @return {Function} Renders tooltip on a D3 selection
      */
     Tooltip.prototype.render = function () {
       var self = this;
-      var tooltipFormatter = this.formatter;
 
-      var $window = $(window);
-      var $chart = $(this.el).find('.' + this.containerClass);
-
+      /**
+       * Calculates values for the tooltip placement
+       *
+       * @param {Object} selection D3 selection object
+       */
       return function (selection) {
         var $tooltip = self.$get();
-        var $sizer = self.$getSizer();
         var id = self.id;
         var order = self.order;
 
@@ -77,11 +129,14 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
-        $chart.on('mouseleave', function (event) {
-          // only clear when we leave the chart, so that
-          // moving between points doesn't make it reposition
-          $chart.removeData('previousPlacement');
-        });
+        var $chart = self.$getChart();
+        if ($chart) {
+          $chart.on('mouseleave', function (event) {
+            // only clear when we leave the chart, so that
+            // moving between points doesn't make it reposition
+            $chart.removeData('previousPlacement');
+          });
+        }
 
         selection.each(function (d, i) {
           var element = d3.select(this);
@@ -100,27 +155,10 @@ define(function (require) {
             .join('\n');
 
             if (allHtml) {
-              var placement = positionTooltip({
-                $window: $window,
-                $chart: $chart,
-                $el: $tooltip,
-                $sizer: $sizer,
-                event: d3.event
-              }, allHtml);
-
-              $tooltip
-              .html(allHtml)
-              .css({
-                visibility: 'visible',
-                left: placement.left,
-                top: placement.top
-              });
+              $tooltip.html(allHtml);
+              self.show();
             } else {
-              $tooltip.css({
-                visibility: 'hidden',
-                left: '-500px',
-                top: '-500px'
-              });
+              self.hide();
             }
           }
 
@@ -131,7 +169,7 @@ define(function (require) {
             }
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
-            return render(tooltipFormatter(events));
+            return render(self.formatter(events));
           })
           .on('mouseleave.tip', function () {
             render();
