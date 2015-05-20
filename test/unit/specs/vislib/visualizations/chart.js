@@ -116,6 +116,20 @@ define(function (require) {
       expect(myChart instanceof Chart).to.be(true);
     });
 
+    it('should return properly formatted values based on the field formatter', function () {
+      var datum = {
+        label: 1408734060000,
+        aggConfig: {
+          fieldFormatter: function () {
+            return function (d) { return new Date(d); };
+          }
+        }
+      };
+      var labels = [1, 2, 3];
+      var label = myChart._resolveLabel('label', labels, datum);
+      expect(label).to.be.a(Date);
+    });
+
     it('should have a render method', function () {
       expect(typeof myChart.render === 'function').to.be(true);
     });
