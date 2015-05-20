@@ -33,18 +33,31 @@ define(function (require) {
       this.showCondition = _.constant(true);
     }
 
+    /**
+     * Get jquery reference to the tooltip node
+     *
+     * @returns jQuery object
+     */
     Tooltip.prototype.$get = _.once(function () {
       return $('<div>').addClass(this.tooltipClass).appendTo(document.body);
     });
 
+    /**
+     * Get jquery reference to the tooltip sizer node
+     *
+     * @returns jQuery object
+     */
     Tooltip.prototype.$getSizer = _.once(function () {
       return this.$get()
       .clone()
-        .removeClass(this.tooltipClass)
-        .addClass(this.tooltipSizerClass)
-        .appendTo(document.body);
+      .removeClass(this.tooltipClass)
+      .addClass(this.tooltipSizerClass)
+      .appendTo(document.body);
     });
 
+    /**
+     * Show the tooltip, positioning it based on the content and chart container
+     */
     Tooltip.prototype.show = function () {
       var $tooltip = this.$get();
       var $chart = this.$getChart();
@@ -67,6 +80,9 @@ define(function (require) {
       });
     };
 
+    /**
+     * Hide the tooltip, clearing its contents
+     */
     Tooltip.prototype.hide = function () {
       var $tooltip = this.$get();
       allContents = [];
@@ -77,6 +93,12 @@ define(function (require) {
       });
     };
 
+    /**
+     * Get the jQuery chart node, based on the container object
+     * NOTE: the container is a d3 selection
+     *
+     * @returns jQuery node for the chart
+     */
     Tooltip.prototype.$getChart = function () {
       var chart = this.container && $(this.container.node());
       if (!chart || !chart.length) return undefined;
