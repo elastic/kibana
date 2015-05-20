@@ -63,9 +63,11 @@ define(function (require) {
       var labels = this.handler.data.labels;
 
       function resolveLabel(datum) {
+        var fieldFormatter = datum && datum.aggConfig ? datum.aggConfig.fieldFormatter() : String;
+
         if (labels.length === 1) return labels[0];
         if (datum[0]) return datum[0][labelProp];
-        return datum[labelProp];
+        return fieldFormatter(datum[labelProp]);
       }
 
       selection.each(function (datum) {
