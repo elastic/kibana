@@ -30,6 +30,9 @@ for the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dime
 aggregation for details on the area specified by each precision level. As of the 4.1 release, Kibana supports a maximum 
 geohash length of 7.
 
+NOTE: Higher precisions increase memory usage for the browser displaying Kibana as well as for the underlying 
+Elasticsearch cluster.
+
 Once you've specified a buckets aggregation, you can define sub-aggregations to refine the visualization. Tile maps 
 only support sub-aggregations as split charts. Click *+ Add Sub Aggregation*, then *Split Chart* to select a 
 sub-aggregation from the list of types:
@@ -63,6 +66,8 @@ add another filter.
 *Geohash*:: The {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points 
 based on the geohash coordinates.
 
+NOTE: By default, the *Change precision on map zoom* box is checked. Uncheck the box to disable this behavior.
+
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
@@ -82,10 +87,21 @@ The availability of these options varies depending on the aggregation you choose
 
 Select the *Options* tab to change the following aspects of the chart:
 
-*Shaded Circle Markers*:: Displays the markers with different shades based on the metric aggregation's value.
-*Scaled Circle Markers*:: Scale the size of the markers based on the metric aggregation's value.
-*Shaded Geohash Grid*:: Displays the rectangular cells of the geohash grid instead of circular markers, with different 
+*Map type*:: Select one of the following options from the drop-down.
+*_Scaled Circle Markers_*:: Scale the size of the markers based on the metric aggregation's value.
+*_Shaded Circle Markers_*:: Displays the markers with different shades based on the metric aggregation's value.
+*_Shaded Geohash Grid_*:: Displays the rectangular cells of the geohash grid instead of circular markers, with different 
 shades based on the metric aggregation's value.
+*_Heatmap_*:: A heat map applies blurring to the circle markers and applies shading based on the amount of overlap. 
+Heatmaps have the following options:
+
+* *Radius*: Sets the size of the individual heatmap dots.
+* *Blur*: Sets the amount of blurring for the heatmap dots.
+* *Maximum zoom*: Tilemaps in Kibana support 18 zoom levels. This slider defines the maximum zoom level at which the 
+heatmap dots appear at full intensity.
+* *Minimum opacity*: Sets the opacity cutoff for the dots.
+* *Show Tooltip*: Check this box to have a tooltip with the values for a given dot when the cursor is on that dot.
+
 *Desaturate map tiles*:: Desaturate the map's color in order to make the markers stand out more clearly.
 
 After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
@@ -94,7 +110,10 @@ changes* button to keep your visualization in its current state.
 [float]
 [[navigating-map]]
 ==== Navigating the Map
-Once your tilemap visualization is ready, you can explore the map in several ways. Click and hold anywhere on the map 
-and move the cursor to move the map center. Hold Shift and drag a bounding box across the map to zoom in on the 
-selection. Click the *Fit Data Bounds* button to automatically crop the map boundaries to the geohash buckets that have 
-at least one result.
+Once your tilemap visualization is ready, you can explore the map in several ways:
+* Click and hold anywhere on the map and move the cursor to move the map center. Hold Shift and drag a bounding box 
+across the map to zoom in on the selection. 
+* Click the *Fit Data Bounds* button to automatically crop the map boundaries to the geohash buckets that have at least 
+one result.
+* Click the *Latitude/Longitude Filter* button, then drag a bounding box across the map, to create a filter for the box
+coordinates.
