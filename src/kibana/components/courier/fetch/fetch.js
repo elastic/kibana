@@ -2,9 +2,9 @@ define(function (require) {
   return function fetchService(Private, Promise) {
     var _ = require('lodash');
 
+    
     var strategies = this.strategies = {
       doc: Private(require('components/courier/fetch/strategy/doc')),
-      search: Private(require('components/courier/fetch/strategy/search'))
     };
 
     var requestQueue = Private(require('components/courier/_request_queue'));

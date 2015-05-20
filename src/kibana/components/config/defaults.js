@@ -118,6 +118,13 @@ define(function () {
         type: 'string',
         value: '($0,0.[00])'
       },
+      'timepicker:timeDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          from: 'now-15m',
+          to: 'now'
+        }, null, 2)
+      },
       'timepicker:quickRanges': {
         type: 'json',
         value: JSON.stringify([
