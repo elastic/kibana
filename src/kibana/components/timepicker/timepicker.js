@@ -7,10 +7,9 @@ define(function (require) {
 
   require('directives/input_datetime');
   require('directives/inequality');
-  require('components/timepicker/refresh_intervals');
   require('components/timepicker/time_units');
 
-  module.directive('kbnTimepicker', function (config, timeUnits, refreshIntervals) {
+  module.directive('kbnTimepicker', function (config, timeUnits) {
     return {
       restrict: 'E',
       scope: {
@@ -34,6 +33,7 @@ define(function (require) {
 
         var quickRanges = config.get('timepicker:quickRanges');
         $scope.quickLists = _(quickRanges).groupBy('section').values().value();
+        var refreshIntervals = config.get('timepicker:refreshIntervals');
         $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
         $scope.relative = {
