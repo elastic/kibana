@@ -100,9 +100,8 @@ define(function (require) {
      * @return {Object} jQuery node for the chart
      */
     Tooltip.prototype.$getChart = function () {
-      var chart = this.container && $(this.container.node());
-      if (!chart || !chart.length) return undefined;
-      return chart;
+      var chart = $(this.container && this.container.node());
+      return chart.size() ? chart : false;
     };
 
     /**
