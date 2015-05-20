@@ -138,7 +138,7 @@ define(function (require) {
             }
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
-            return render(self.tooltipFormatter(events));
+            return render(self.formatter(events));
           })
           .on('mouseleave.tip', function () {
             render();
