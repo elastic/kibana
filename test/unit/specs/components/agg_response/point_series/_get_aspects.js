@@ -4,7 +4,6 @@ define(function (require) {
     var moment = require('moment');
 
     var Vis;
-    var Table;
     var AggConfig;
     var indexPattern;
     var getAspects;
@@ -12,7 +11,6 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
       Vis = Private(require('components/vis/vis'));
-      Table = Private(require('components/agg_response/point_series/_add_to_siri'));
       AggConfig = Private(require('components/vis/_agg_config'));
       getAspects = Private(require('components/agg_response/point_series/_get_aspects'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

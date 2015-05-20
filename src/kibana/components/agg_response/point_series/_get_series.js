@@ -2,55 +2,58 @@ define(function (require) {
   return function PointSeriesGetSeries(Private) {
     var _ = require('lodash');
     var getPoint = Private(require('components/agg_response/point_series/_get_point'));
-    var addToSiri = Private(require('components/agg_response/point_series/_add_to_siri'));
 
-    return function getSeries(rows, chart) {
+    return function getSeries(rows, chart, vis) {
       var aspects = chart.aspects;
-      var multiY = _.isArray(aspects.y);
       var yScale = chart.yScale;
-      var partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
 
-      var series = _(rows)
-      .transform(function (series, row) {
+      // the area vis has an overlap mode, which requires that "large" series
+      // be rendered last or else they will hide the "small" series. Since we
+      // since the size of a series is very subjective, we simply invert the
+      // values created by a series if it is sorted descending.
+      var areaVis = _.get(vis, 'type.name') === 'area';
+      var areaOverlapping = areaVis && _.get(vis, 'params.mode') === 'overlap';
+      var seriesDesc = _.get(aspects, 'series.agg.params.order.val') === 'desc';
+      var invertBuckets = areaOverlapping && seriesDesc;
 
-        if (!multiY) {
-          var point = partGetPoint(row, aspects.y, aspects.z);
-          if (point) addToSiri(series, point, point.series);
-          return;
-        }
+      // collect the y value for a y-aspect from all of the rows
+      // and produce an array of siris.
+      function collect(y) {
+        var seriesMap = {};
+        var series = [];
 
-        aspects.y.forEach(function (y) {
-          var point = partGetPoint(row, y, aspects.z);
+        rows.forEach(function (row) {
+          var point = getPoint(aspects.x, aspects.series, yScale, row, y, aspects.z);
           if (!point) return;
 
-          var prefix = point.series ? point.series + ': ' : '';
-          var seriesId = prefix + y.agg.id;
-          var seriesLabel = prefix + y.col.title;
+          var subSeries = point.series == null ? '' : point.series + '';
+          var siriId = subSeries + (y.title && subSeries ? ': ' : '') + y.title;
+          var siri = seriesMap[siriId];
 
-          addToSiri(series, point, seriesId, seriesLabel);
-        });
-
-      }, {})
-      .values()
-      .value();
-
-      if (multiY) {
-        series = _.sortBy(series, function (siri) {
-          var firstVal = siri.values[0];
-          var y;
-
-          if (firstVal) {
-            var agg = firstVal.aggConfigResult.aggConfig;
-            y = _.find(aspects.y, function (y) {
-              return y.agg === agg;
-            });
+          if (!siri) {
+            siri = seriesMap[siriId] = {
+              label: siriId,
+              values: [point]
+            };
+            series.push(siri);
+          } else {
+            siri.values.push(point);
           }
-
-          return y ? y.i : series.length;
         });
+
+        if (invertBuckets) series.reverse();
+        return series;
       }
 
-      return series;
+      if (!_.isArray(aspects.y)) {
+        return collect(aspects.y);
+      } else {
+        return _(aspects.y)
+        .sortBy('i')
+        .map(collect)
+        .flatten(true)
+        .value();
+      }
     };
   };
 });

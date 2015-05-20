@@ -23,7 +23,7 @@ define(function (require) {
         setupOrderedDateXAxis(vis, chart);
       }
 
-      chart.series = getSeries(table.rows, chart);
+      chart.series = getSeries(table.rows, chart, vis);
 
       delete chart.aspects;
       return chart;
