@@ -121,13 +121,13 @@ define(function (require) {
         label: 1408734060000,
         aggConfig: {
           fieldFormatter: function () {
-            return function (d) { return new Date(d); };
+            return function (d) { return String(d); };
           }
         }
       };
       var labels = [1, 2, 3];
       var label = myChart._resolveLabel('label', labels, datum);
-      expect(label).to.be.a(Date);
+      expect(label).to.be(String(datum.label));
     });
 
     it('should have a render method', function () {
