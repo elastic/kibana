@@ -130,11 +130,13 @@ define(function (require) {
         }
 
         var $chart = self.$getChart();
-        $chart.on('mouseleave', function (event) {
-          // only clear when we leave the chart, so that
-          // moving between points doesn't make it reposition
-          $chart.removeData('previousPlacement');
-        });
+        if ($chart) {
+          $chart.on('mouseleave', function (event) {
+            // only clear when we leave the chart, so that
+            // moving between points doesn't make it reposition
+            $chart.removeData('previousPlacement');
+          });
+        }
 
         selection.each(function (d, i) {
           var element = d3.select(this);
