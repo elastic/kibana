@@ -78,7 +78,9 @@ define(function (require) {
     };
 
     Tooltip.prototype.$getChart = function () {
-      return this.container && $(this.container.node());
+      var chart = this.container && $(this.container.node());
+      if (!chart || !chart.length) return undefined;
+      return chart;
     };
 
     /**
