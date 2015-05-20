@@ -36,7 +36,7 @@ define(function (require) {
     /**
      * Get jquery reference to the tooltip node
      *
-     * @returns jQuery object
+     * @return {Object} jQuery node object
      */
     Tooltip.prototype.$get = _.once(function () {
       return $('<div>').addClass(this.tooltipClass).appendTo(document.body);
@@ -45,7 +45,7 @@ define(function (require) {
     /**
      * Get jquery reference to the tooltip sizer node
      *
-     * @returns jQuery object
+     * @return {Object} jQuery node object
      */
     Tooltip.prototype.$getSizer = _.once(function () {
       return this.$get()
@@ -97,7 +97,7 @@ define(function (require) {
      * Get the jQuery chart node, based on the container object
      * NOTE: the container is a d3 selection
      *
-     * @returns jQuery node for the chart
+     * @return {Object} jQuery node for the chart
      */
     Tooltip.prototype.$getChart = function () {
       var chart = this.container && $(this.container.node());
@@ -109,7 +109,7 @@ define(function (require) {
      * Renders tooltip
      *
      * @method render
-     * @returns {Function} Renders tooltip on a D3 selection
+     * @return {Function} Renders tooltip on a D3 selection
      */
     Tooltip.prototype.render = function () {
       var self = this;
@@ -117,8 +117,7 @@ define(function (require) {
       /**
        * Calculates values for the tooltip placement
        *
-       * @param event {Object} D3 Events Object
-       * @returns undefined
+       * @param {Object} selection D3 selection object
        */
       return function (selection) {
         var $tooltip = self.$get();
