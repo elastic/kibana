@@ -39,7 +39,10 @@ sub-aggregation from the list of types:
 
 *Date Histogram*:: A {ref}/search-aggregations-bucket-datehistogram-aggregation.html[_date histogram_] is built from a 
 numeric field and organized by date. You can specify a time frame for the intervals in seconds, minutes, hours, days, 
-weeks, months, or years.
+weeks, months, or years. You can also specify a custom interval frame by selecting *Custom* as the interval and 
+specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes, 
+*h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision, 
+down to one second.
 *Histogram*:: A standard {ref}/search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a 
 numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty 
 intervals in the histogram.
@@ -111,9 +114,11 @@ changes* button to keep your visualization in its current state.
 [[navigating-map]]
 ==== Navigating the Map
 Once your tilemap visualization is ready, you can explore the map in several ways:
+
 * Click and hold anywhere on the map and move the cursor to move the map center. Hold Shift and drag a bounding box 
 across the map to zoom in on the selection. 
-* Click the *Fit Data Bounds* button to automatically crop the map boundaries to the geohash buckets that have at least 
-one result.
-* Click the *Latitude/Longitude Filter* button, then drag a bounding box across the map, to create a filter for the box
-coordinates.
+* Click the *Zoom In/Out* image:images/viz-zoom.png[] buttons to change the zoom level manually.
+* Click the *Fit Data Bounds* image:images/viz-fit-bounds.png[] button to automatically crop the map boundaries to the 
+geohash buckets that have at least one result.
+* Click the *Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[] button, then drag a bounding box across the 
+map, to create a filter for the box coordinates.

@@ -156,7 +156,6 @@ To delete an index pattern:
 . Click the pattern's *Delete* button.
 . Confirm that you want to remove the index pattern.
 
-[float]
 [[managing-fields]]
 === Managing Fields
 The fields for the index pattern are listed in a table. Click a column header to sort the table by that column. Click 
@@ -230,7 +229,6 @@ To delete a scripted field:
 . Click the *Delete* button for the scripted field you want to remove.
 . Confirm that you really want to delete the field.
 
-[float]
 [[advanced-options]]
 === Setting Advanced Options
 The Advanced Settings page enables you to directly edit settings that control
@@ -248,7 +246,10 @@ To set advanced options:
 . Enter a new value for the option. 
 . Click the *Save* button.
 
-=== Managing Saved Searches, Visualizations, and Dashboards ===
+[float]
+[[managing-saved-objects]]
+=== Managing Saved Searches, Visualizations, and Dashboards 
+
 You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
 export or import sets of searches, visualizations, and dashboards.
 
@@ -300,11 +301,13 @@ To export a set of objects:
 . Click *Export* to select a location to write the exported JSON.
 
 To import a set of objects:
+
 . Go to *Settings > Objects*.
 . Click *Import* to navigate to the JSON file representing the set of objects to import.
 . Click *Open* after selecting the JSON file.
 . If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
 
+[[kibana-server-properties]]
 === Setting Kibana Server Properties
 
 The Kibana server reads properties from the `kibana.yml` file on startup. The default
@@ -362,5 +365,9 @@ so the certificate can be verified. (Otherwise, you have to disable `verify_ssl`
 |`pid_file`
 |The location where you want to store the process ID file. If not specified, the PID file is stored in 
 `/var/run/kibana.pid`. Default: none.
+
+|`log_file`
+|The location where you want to store the Kibana's log output. If not specified, log output is written to standard 
+output and not stored. Specifying a log file suppresses log writes to standard output. Default: none.
 
 |===
