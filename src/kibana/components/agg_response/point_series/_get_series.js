@@ -6,15 +6,7 @@ define(function (require) {
     return function getSeries(rows, chart, vis) {
       var aspects = chart.aspects;
       var yScale = chart.yScale;
-
-      // the area vis has an overlap mode, which requires that "large" series
-      // be rendered last or else they will hide the "small" series. Since we
-      // since the size of a series is very subjective, we simply invert the
-      // values created by a series if it is sorted descending.
-      var areaVis = _.get(vis, 'type.name') === 'area';
-      var areaOverlapping = areaVis && _.get(vis, 'params.mode') === 'overlap';
-      var seriesDesc = _.get(aspects, 'series.agg.params.order.val') === 'desc';
-      var invertBuckets = areaOverlapping && seriesDesc;
+      var invertBuckets = vis.type.seriesShouldBeInverted(vis);
 
       // collect the y value for a y-aspect from all of the rows
       // and produce an array of siris.

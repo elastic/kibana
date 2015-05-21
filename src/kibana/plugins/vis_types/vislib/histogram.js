@@ -1,9 +1,9 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
+    var PointSeriesVisType = Private(require('plugins/vis_types/vislib/_PointSeriesVisType'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
 
-    return new VislibVisType({
+    return new PointSeriesVisType({
       name: 'histogram',
       title: 'Vertical bar chart',
       icon: 'fa-bar-chart',
