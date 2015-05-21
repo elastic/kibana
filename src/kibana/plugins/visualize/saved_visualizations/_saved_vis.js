@@ -17,17 +17,11 @@ define(function (require) {
 
       SavedVis.Super.call(self, {
         type: SavedVis.type,
+        mapping: SavedVis.mapping,
+        searchSource: SavedVis.searchSource,
 
         id: opts.id,
-
-        mapping: {
-          title: 'string',
-          visState: 'json',
-          description: 'string',
-          savedSearchId: 'string',
-          version: 'long'
-        },
-
+        indexPattern: opts.indexPattern,
         defaults: {
           title: 'New Visualization',
           visState: (function () {
@@ -41,14 +35,21 @@ define(function (require) {
           version: 1
         },
 
-        searchSource: true,
-        indexPattern: opts.indexPattern,
-
         afterESResp: this._afterEsResp
       });
     }
 
     SavedVis.type = 'visualization';
+
+    SavedVis.mapping = {
+      title: 'string',
+      visState: 'json',
+      description: 'string',
+      savedSearchId: 'string',
+      version: 'integer'
+    };
+
+    SavedVis.searchSource = true;
 
     SavedVis.prototype._afterEsResp = function () {
       var self = this;
