@@ -350,6 +350,12 @@ saved-object-finder {
 
   div.finder-form {
     position: relative;
+
+    &-options {
+      .flex-parent();
+      .flex-direction(row);
+      .justify-content(flex-end);
+    }
   }
 
   span.finder-hit-count {
