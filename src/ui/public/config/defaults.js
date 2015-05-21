@@ -136,6 +136,14 @@ define(function () {
           to: 'now',
           mode: 'quick'
         }, null, 2)
+      },
+      'timepicker:refreshIntervalDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          display: 'Off',
+          pause: false,
+          value: 0
+        }, null, 2)
       }
     };
   };

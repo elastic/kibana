@@ -29,12 +29,7 @@ define(function (require) {
 
       var timeDefaults = config.get('timepicker:timeDefaults');
 
-      var refreshIntervalDefaults = {
-        display: 'Off',
-        pause: false,
-        section: 0,
-        value: 0
-      };
+      var refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 
       // These can be date math strings or moments.
       self.time = _.defaults(globalState.time || {}, timeDefaults);
