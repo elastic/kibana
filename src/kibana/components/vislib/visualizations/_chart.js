@@ -52,6 +52,11 @@ define(function (require) {
       selection.call(this.draw());
     };
 
+    /**
+     * Returns properly formatted labels
+     * @method _resolveLabel
+     * @private
+     */
     Chart.prototype._resolveLabel = function (labelProp, labels, datum) {
       var fieldFormatter = datum && datum.aggConfig ? datum.aggConfig.fieldFormatter() : String;
 
