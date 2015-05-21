@@ -161,6 +161,15 @@ define(function () {
           { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 3 },
         ], null, 2)
       },
+      'timepicker:refreshIntervalDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          display: 'Off',
+          pause: false,
+          section: 0,
+          value: 0
+        }, null, 2)
+      },
       'timepicker:refreshIntervals': {
         type: 'json',
         value: JSON.stringify([
