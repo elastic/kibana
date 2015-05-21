@@ -52,6 +52,14 @@ define(function (require) {
       selection.call(this.draw());
     };
 
+    Chart.prototype._resolveLabel = function (labelProp, labels, datum) {
+      var fieldFormatter = datum && datum.aggConfig ? datum.aggConfig.fieldFormatter() : String;
+
+      if (labels.length === 1) return labels[0];
+      if (datum[0]) return datum[0][labelProp];
+      return fieldFormatter(datum[labelProp]);
+    };
+
     /**
      * Append the data label to the element
      *
@@ -61,15 +69,10 @@ define(function (require) {
     Chart.prototype._addIdentifier = function (selection, labelProp) {
       labelProp = labelProp || 'label';
       var labels = this.handler.data.labels;
-
-      function resolveLabel(datum) {
-        if (labels.length === 1) return labels[0];
-        if (datum[0]) return datum[0][labelProp];
-        return datum[labelProp];
-      }
+      var self = this;
 
       selection.each(function (datum) {
-        var label = resolveLabel(datum);
+        var label = self._resolveLabel(labelProp, labels, datum);
         if (label != null) dataLabel(this, label);
       });
     };
