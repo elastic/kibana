@@ -21,10 +21,10 @@ define(function (require) {
         // if type:dashboard has no mapping, we push this mapping into ES
         mapping: {
           title: 'string',
-          hits: 'integer',
+          hits: 'long',
           description: 'string',
           panelsJSON: 'string',
-          version: 'integer',
+          version: 'long',
           timeRestore: 'boolean',
           timeTo: 'string',
           timeFrom: 'string'

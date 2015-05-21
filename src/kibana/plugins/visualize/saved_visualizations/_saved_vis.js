@@ -25,7 +25,7 @@ define(function (require) {
           visState: 'json',
           description: 'string',
           savedSearchId: 'string',
-          version: 'integer'
+          version: 'long'
         },
 
         defaults: {
