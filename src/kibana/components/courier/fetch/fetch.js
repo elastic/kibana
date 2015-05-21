@@ -19,21 +19,9 @@ define(function (require) {
       else return fetchThese(requests);
     }
 
-    /**
-     * Fetch all pending docs that are ready to be fetched
-     * @async
-     */
-    this.docs = _.partial(fetchQueued, strategies.doc);
-
-    /**
-     * Fetch all pending search requests
-     * @async
-     */
-    this.searches = _.partial(fetchQueued, strategies.search);
-
+    this.fetchQueued = fetchQueued;
 
     function fetchASource(source, strategy) {
-      strategy = strategy || strategies[source._getType()];
       var defer = Promise.defer();
 
       fetchThese([
