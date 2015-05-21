@@ -347,9 +347,15 @@ saved-object-finder {
       .border-top-radius(0) !important;
     }
   }
-
+  
   div.finder-form {
     position: relative;
+
+    &-options {
+      .flex-parent();
+      .flex-direction(row);
+      .justify-content(flex-end);
+    }
   }
 
   span.finder-hit-count {
@@ -357,12 +363,6 @@ saved-object-finder {
     right: 10px;
     top: 25px;
     font-size: 0.85em;
-  }
-
-  div.finder-form-options{
-    .flex-parent();
-    .flex-direction(row);
-    .justify-content(flex-end);
   }
 
   .finder-options {
