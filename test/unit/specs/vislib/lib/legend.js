@@ -65,16 +65,11 @@ define(function (require) {
           var items = vis.handler.legend.labels;
 
           items.forEach(function (label) {
-            var path = _(paths)
-            .map(function (path) {
-              return path.getAttribute('data-label');
-            })
-            .filter(function (dataLabel) {
-              return dataLabel === label;
-            })
-            .value();
+            var path = _.find(paths, function (path) {
+              return path.getAttribute('data-label') === String(label);
+            });
 
-            expect(path.length).to.be.greaterThan(0);
+            expect(path).to.be.ok();
           });
         });
       });
