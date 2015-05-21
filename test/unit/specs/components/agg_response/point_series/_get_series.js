@@ -4,6 +4,7 @@ define(function (require) {
     var getSeries;
 
     var agg = { fieldFormatter: _.constant(_.identity) };
+    var vis = { type: { seriesShouldBeInverted: _.constant(false) } };
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
@@ -27,13 +28,13 @@ define(function (require) {
 
       var chart = {
         aspects: {
-          x: { i: 0 },
-          y: { i: 1 },
-          z: { i: 2 }
+          x: { i: 0, title: '' },
+          y: { i: 1, title: '' },
+          z: { i: 2, title: '' }
         }
       };
 
-      var series = getSeries(rows, chart);
+      var series = getSeries(rows, chart, vis);
 
       expect(series)
         .to.be.an('array')
@@ -68,15 +69,15 @@ define(function (require) {
 
       var chart = {
         aspects: {
-          x: { i: 0 },
+          x: { i: 0, title: '' },
           y: [
-            { i: 1, col: { title: '0' }, agg: { id: 1 } },
-            { i: 2, col: { title: '1' }, agg: { id: 2 } },
+            { i: 1, title: '0', col: { title: '0' }, agg: { id: 1 } },
+            { i: 2, title: '1', col: { title: '1' }, agg: { id: 2 } },
           ]
         }
       };
 
-      var series = getSeries(rows, chart);
+      var series = getSeries(rows, chart, vis);
 
       expect(series)
         .to.be.an('array')
@@ -114,13 +115,13 @@ define(function (require) {
 
       var chart = {
         aspects: {
-          x: { i: -1 },
-          series: { i: 0, agg: agg },
-          y: { i: 1, col: { title: '0' } }
+          x: { i: -1, title: '' },
+          series: { i: 0, agg: agg, title: '' },
+          y: { i: 1, title: '', col: { title: '0' } }
         }
       };
 
-      var series = getSeries(rows, chart);
+      var series = getSeries(rows, chart, vis);
 
       expect(series)
         .to.be.an('array')
@@ -144,7 +145,7 @@ define(function (require) {
       });
     });
 
-    it('produces multiple series if there is a series aspect and multipl y aspects', function () {
+    it('produces multiple series if there is a series aspect and multiple y aspects', function () {
       var rows = [
         ['0', 3, 4],
         ['1', 3, 4],
@@ -156,25 +157,25 @@ define(function (require) {
 
       var chart = {
         aspects: {
-          x: { i: -1 },
-          series: { i: 0, agg: agg },
+          x: { i: -1, title: '' },
+          series: { i: 0, title: '', agg: agg },
           y: [
-            { i: 1, col: { title: '0' }, agg: { id: 1 } },
-            { i: 2, col: { title: '1' }, agg: { id: 2 } }
+            { i: 1, title: '2', col: { title: '2' }, agg: { id: 1 } },
+            { i: 2, title: '3', col: { title: '3' }, agg: { id: 2 } }
           ]
         }
       };
 
-      var series = getSeries(rows, chart);
+      var series = getSeries(rows, chart, vis);
 
       expect(series)
         .to.be.an('array')
         .and.to.have.length(4); // two series * two metrics
 
-      checkSiri(series[0], '0: 0', 3);
-      checkSiri(series[1], '0: 1', 4);
-      checkSiri(series[2], '1: 0', 3);
-      checkSiri(series[3], '1: 1', 4);
+      checkSiri(series[0], '0: 2', 3);
+      checkSiri(series[1], '1: 2', 3);
+      checkSiri(series[2], '0: 3', 4);
+      checkSiri(series[3], '1: 3', 4);
 
       function checkSiri(siri, label, y) {
         expect(siri)
@@ -206,33 +207,30 @@ define(function (require) {
 
       var chart = {
         aspects: {
-          x: { i: -1 },
-          series: { i: 0, agg: agg },
+          x: { i: -1, title: '' },
+          series: { i: 0, title: '', agg: agg },
           y: [
-            { i: 1, col: { title: '0' }, agg: { id: 1 } },
-            { i: 2, col: { title: '1' }, agg: { id: 2 } }
+            { i: 1, title: '2', col: { title: '2' }, agg: { id: 1 } },
+            { i: 2, title: '3', col: { title: '3' }, agg: { id: 2 } }
           ]
         }
       };
 
-      var series = getSeries(rows, chart);
-      expect(series[0]).to.have.property('label', '0: 0');
-      expect(series[1]).to.have.property('label', '0: 1');
-      expect(series[2]).to.have.property('label', '1: 0');
-      expect(series[3]).to.have.property('label', '1: 1');
+      var series = getSeries(rows, chart, vis);
+      expect(series[0]).to.have.property('label', '0: 2');
+      expect(series[1]).to.have.property('label', '1: 2');
+      expect(series[2]).to.have.property('label', '0: 3');
+      expect(series[3]).to.have.property('label', '1: 3');
 
 
       // switch the order of the y columns
       chart.aspects.y = chart.aspects.y.reverse();
-      chart.aspects.y.forEach(function (y, i) {
-        y.i = i;
-      });
 
-      var series2 = getSeries(rows, chart);
-      expect(series2[0]).to.have.property('label', '0: 1');
-      expect(series2[1]).to.have.property('label', '0: 0');
-      expect(series2[2]).to.have.property('label', '1: 1');
-      expect(series2[3]).to.have.property('label', '1: 0');
+      var series2 = getSeries(rows, chart, vis);
+      expect(series2[0]).to.have.property('label', '0: 3');
+      expect(series2[1]).to.have.property('label', '1: 3');
+      expect(series2[2]).to.have.property('label', '0: 2');
+      expect(series2[3]).to.have.property('label', '1: 2');
     });
   }];
 });

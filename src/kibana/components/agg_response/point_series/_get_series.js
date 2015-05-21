@@ -11,26 +11,19 @@ define(function (require) {
       // collect the y value for a y-aspect from all of the rows
       // and produce an array of siris.
       function collect(y) {
-        var seriesMap = {};
         var series = [];
+        var getSiri = _.memoize(function (id, order) {
+          var siri = { label: id, values: [], order: order };
+          return series[series.push(siri) - 1];
+        });
 
         rows.forEach(function (row) {
           var point = getPoint(aspects.x, aspects.series, yScale, row, y, aspects.z);
           if (!point) return;
 
-          var subSeries = point.series == null ? '' : point.series + '';
-          var siriId = subSeries + (y.title && subSeries ? ': ' : '') + y.title;
-          var siri = seriesMap[siriId];
-
-          if (!siri) {
-            siri = seriesMap[siriId] = {
-              label: siriId,
-              values: [point]
-            };
-            series.push(siri);
-          } else {
-            siri.values.push(point);
-          }
+          var series = point.series == null ? '' : point.series + '';
+          var id = series + (y.title && series ? ': ' : '') + y.title;
+          getSiri(id).values.push(point);
         });
 
         if (invertBuckets) series.reverse();
@@ -41,7 +34,6 @@ define(function (require) {
         return collect(aspects.y);
       } else {
         return _(aspects.y)
-        .sortBy('i')
         .map(collect)
         .flatten(true)
         .value();
