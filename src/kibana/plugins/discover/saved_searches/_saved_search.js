@@ -19,10 +19,10 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          hits: 'integer',
+          hits: 'long',
           columns: 'string',
           sort: 'string',
-          version: 'integer'
+          version: 'long'
         },
 
         defaults: {
