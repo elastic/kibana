@@ -106,11 +106,6 @@ define(function (require) {
       var tooltip = self.tooltip;
       var isTooltip = self._attr.addTooltip;
 
-      var format = function (d, label) {
-        var formatter = d.aggConfig ? d.aggConfig.fieldFormatter() : String;
-        return formatter(label);
-      };
-
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
@@ -155,7 +150,7 @@ define(function (require) {
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
-          return color(format(d, d.name));
+          return color(d.name);
         });
 
       if (isTooltip) {
