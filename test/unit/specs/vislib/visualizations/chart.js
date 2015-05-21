@@ -116,6 +116,31 @@ define(function (require) {
       expect(myChart instanceof Chart).to.be(true);
     });
 
+    it('should format label as String by default', function () {
+      var datum = {
+        label: 1408734060000
+      };
+      var labels = [1, 2, 3];
+      var label = myChart._resolveLabel('label', labels, datum);
+      expect(label).to.be(String(datum.label));
+    });
+
+    it('should use the aggConfig field formatter', function () {
+      var formatter = function (d) {
+        return String(d) + ' test';
+      };
+
+      var datum = {
+        label: 1408734060000,
+        aggConfig: {
+          fieldFormatter: function () { return formatter; }
+        }
+      };
+      var labels = [1, 2, 3];
+      var label = myChart._resolveLabel('label', labels, datum);
+      expect(label).to.be(formatter(datum.label));
+    });
+
     it('should have a render method', function () {
       expect(typeof myChart.render === 'function').to.be(true);
     });
