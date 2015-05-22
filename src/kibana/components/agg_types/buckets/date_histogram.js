@@ -59,6 +59,10 @@ define(function (require) {
             return agg.vis.indexPattern.timeFieldName;
           },
           onChange: function (agg) {
+            if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
+              delete agg.params.interval;
+            }
+
             setBounds(agg, true);
           }
         },
