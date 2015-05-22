@@ -71,9 +71,8 @@ to find entries that have 4xx status codes and have an extension of `php` or `ht
 499] AND (extension:php OR extension:html)`.
 +
 NOTE: These examples use the Lucene query syntax. You can also submit queries using the Elasticsearch Query DSL. For 
-examples, see 
-http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax[query string syntax] 
-in the Elasticsearch Reference.
+examples, see {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax] in the Elasticsearch 
+Reference.
 +
 . Press *Enter* or click the *Search* button to submit your search query.
 
@@ -146,13 +145,18 @@ To add a filter from the Documents table:
 
 . Expand a document in the Documents table by clicking the *Expand* button image:images/ExpandButton.jpg[Expand Button] 
 to the left of the document's entry in the first column (the first column is usually Time). To the right of each field 
-name, there are two magnifying glass buttons--one for adding a regular (positive) filter, and one for adding a negative filter. 
+name, there are two magnifying glass buttons--one for adding a regular (positive) filter, and one for adding a negative 
+filter. 
 . To add a positive filter  based on the document's value in a field, click the 
 *Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. This filters out documents that don't 
 contain the specified value in that field.
 . To add a negative filter based on the document's value in a field, click the 
 *Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. This excludes documents that contain 
 the specified value in that field. 
+
+[float]
+[[discover-filters]]
+include::filter-pinning.asciidoc[]
 
 [float]
 [[document-data]]
@@ -192,12 +196,14 @@ of the field name. Clicking the field name a second time reverses the sort order
 [[adding-columns]]
 ==== Adding Field Columns to the Documents Table
 By default, the Documents table shows the localized version of the time field specified in the selected index pattern 
-and the document `_source`. You can add fields to the table from the Fields list.
+and the document `_source`. You can add fields to the table from the Fields list or from a document's expanded view.
 
 To add field columns to the Documents table:
 
 . Mouse over a field in the Fields list and click its  *add* button image:images/AddFieldButton.jpg[Add Field Button].  
 . Repeat until you've added all the fields you want to display in the Documents table.
+. Alternately, add a field column directly from a document's expanded view by clicking the 
+image:images/add-column-button.png[Add Column] *Toggle column in table* button.
 
 The added field columns replace the `_source` column in the Documents table. The added fields are also
 listed in the *Selected Fields* section at the top of the field list. 
@@ -228,6 +234,5 @@ To view field data statistics:
 Fields, or the list of other fields. 
 
 image:images/Discover-FieldStats.jpg[Field Statistics]
-
 
 TIP: To create a visualization based on the field, click the *Visualize* button below the field statistics.

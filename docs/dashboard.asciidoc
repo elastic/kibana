@@ -139,3 +139,7 @@ image:images/NYCTA-Statistics.jpg[]
 
 Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the 
 visualization in the <<visualize,Visualize>> page.
+
+[float]
+[[dashboard-filters]]
+include::filter-pinning.asciidoc[]

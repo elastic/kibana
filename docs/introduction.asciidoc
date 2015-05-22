@@ -53,4 +53,5 @@ that displays several visualizations of the TFL data:
 image:images/TFL-Dashboard.jpg[Dashboard]
 
 For more information about creating and sharing visualizations and dashboards, see the <<visualize, Visualize>> 
-and <<dashboard, Dashboard>> topics.
+and <<dashboard, Dashboard>> topics. A complete <<getting-started,tutorial>> covering several aspects of Kibana's 
+functionality is also available.

@@ -132,6 +132,10 @@ To render the visualization on the _preview canvas_, click the green *Apply Chan
 Aggregation Builder.
 
 [float]
+[[visualize-filters]]
+include::filter-pinning.asciidoc[]
+
+[float]
 [[preview-canvas]]
 ===== Preview Canvas
 

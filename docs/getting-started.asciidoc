@@ -19,17 +19,15 @@ The material in this section assumes you have a working Kibana install connected
 The tutorials in this section rely on the following data sets:
 
 * The complete works of William Shakespeare, suitably parsed into fields. Download this data set by clicking here: 
-https://www.elastic.co/guide/en/kibana/3.0/snippets/shakespeare.json[shakespeare.json.gz].
+https://www.elastic.co/guide/en/kibana/3.0/snippets/shakespeare.json[shakespeare.json].
 * A set of fictitious accounts with randomly generated data. Download this data set by clicking here: 
-https://github.com/bly2k/files/blob/master/accounts.zip?raw=true[accounts.json.gz]
+https://github.com/bly2k/files/blob/master/accounts.zip?raw=true[accounts.json]
 * A set of randomly generated log files. Download this data set by clicking here: [logstash.json.gz]
 
-The data sets are compressed with the `gzip` utility. Unzip the files after downloading them with the following 
-commands:
+Two of the data sets are compressed. Use the following commands to extract the files:
 
 [source,shell]
-gunzip shakespeare.json.gz
-gunzip accounts.json.gz
+unzip accounts.zip
 gunzip logstash.json.gz
 
 The Shakespeare data set is organized in the following schema:
@@ -124,7 +122,6 @@ yellow open   logstash-2015.05.18   5   1       4631            0     15.6mb    
 yellow open   logstash-2015.05.19   5   1       4624            0     15.7mb         15.7mb
 yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb         16.4mb
 
-[float]
 [[tutorial-define-index]]
 === Defining Your Index Patterns
 
@@ -175,7 +172,6 @@ display from the full text of five records to a simple list of five account numb
 
 image::images/tutorial-discover-3.png[]
 
-[float]
 [[tutorial-visualizing]]
 === Data Visualization: Beyond Discovery
 
@@ -277,9 +273,10 @@ this:
 
 image::images/tutorial-visualize-map-2.png[]
 
-You can navigate the map by clicking and dragging, zoom with the *+/-* buttons, or hit the *Fit Data Bounds* button to
-zoom to the lowest level that includes all the points. You can also create a filter to define a rectangle on the map, 
-either to include or exclude, by clicking the *Latitude/Longitude Filter* button and drawing a bounding box on the map. 
+You can navigate the map by clicking and dragging, zoom with the image:images/viz-zoom.png[] buttons, or hit the *Fit 
+Data Bounds* image:images/viz-fit-bounds.png[] button to zoom to the lowest level that includes all the points. You can 
+also create a filter to define a rectangle on the map, either to include or exclude, by clicking the 
+*Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[] button and drawing a bounding box on the map. 
 A green oval with the filter definition displays right under the query box:
 
 image::images/tutorial-visualize-map-3.png[]
@@ -305,7 +302,6 @@ image::images/tutorial-visualize-md-2.png[]
 
 Save this visualization with the name _Markdown Example_.
 
-[float]
 [[tutorial-dashboard]]
 === Putting it all Together with Dashboards
 
