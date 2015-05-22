@@ -60,8 +60,8 @@ disable the *Index contains time-based events* option.
 create index names* option and select the *Index pattern interval*. This improves search performance by enabling Kibana 
 to search only those indices that could contain data in the time range you specify. This is primarily applicable if you 
 are using Logstash to feed data into Elasticsearch.
-. Click *Create* to add the index pattern. This first pattern is automatically configured as the default. When you have 
-more than one index pattern, you can designate which one to use as the default from *Settings > Indices*.
+. Click *Create* to add the index pattern. This first pattern is automatically configured as the default. 
+When you have more than one index pattern, you can designate which one to use as the default from *Settings > Indices*.
 
 Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for 
 the matching index.
@@ -75,4 +75,5 @@ You're ready to dive in to your data:
 * Chart and map your data from the <<visualize, Visualize>> page.
 * Create and view custom dashboards from the <<dashboard, Dashboard>> page.
 
-For a brief tutorial to these core Kibana concepts, take a look at the <<getting-started, Getting Started>> page!
+For a brief tutorial that explores these core Kibana concepts, take a look at the <<getting-started, Getting 
+Started>> page.
