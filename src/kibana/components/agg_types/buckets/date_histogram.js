@@ -21,6 +21,7 @@ define(function (require) {
     }
 
     require('filters/field_type');
+    require('components/validateDateInterval');
 
     return new BucketAggType({
       name: 'date_histogram',

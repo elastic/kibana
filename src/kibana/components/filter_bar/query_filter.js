@@ -206,13 +206,13 @@ define(function (require) {
     // helper to run a function on all filters in all states
     function executeOnFilters(fn) {
       var appState = getAppState();
-      var appFilters;
-      if (appState && appState.filters) {
-        appFilters = appState.filters;
-      } else {
-        appFilters = [];
-      }
-      globalState.filters.concat(appFilters).forEach(fn);
+      var globalFilters = [];
+      var appFilters = [];
+
+      if (globalState.filters) globalFilters = globalState.filters;
+      if (appState && appState.filters) appFilters = appState.filters;
+
+      globalFilters.concat(appFilters).forEach(fn);
     }
 
     function mergeStateFilters(gFilters, aFilters, compareOptions) {
