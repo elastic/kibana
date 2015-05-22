@@ -34,7 +34,7 @@ define(function (require) {
         return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
       },
       createFilter: createFilter,
-      decorateAggConfig: function () {
+      aggConfigDecoratations: function () {
         var buckets;
         return {
           buckets: {

@@ -116,12 +116,57 @@ define(function (require) {
        * A function that will be called each time an aggConfig of this type
        * is created, giving the agg type a chance to modify the agg config
        */
-      this.decorateAggConfig = config.decorateAggConfig || null;
+      this.getAggConfigDecorations = config.aggConfigDecoratations || _.noop;
 
       if (config.getFormat) {
         this.getFormat = config.getFormat;
       }
     }
+
+    /**
+     * Apply the decorations provided by the config's decorateAggConfig function
+     *
+     * @param  {AggConfig} agg - the aggConfig object to decorate
+     * @return {function} - a function that will remove the decorations when called
+     */
+    AggType.prototype.decorateAggConfig = function (agg) {
+      var typeDescriptors = this.getAggConfigDecorations(agg);
+
+      if (!typeDescriptors) return _.noop;
+
+      // the keys that a type descriptor might have, according the ES5 spec
+      var typeDescriptorKeys = ['configurable', 'enumerable', 'value', 'writable', 'get', 'set'];
+      function throwTypeDescriptorError() {
+        throw new TypeError(
+          'agg decorations must be a set of type descriptors in the same format ' +
+          'as the second argument to Object::defineProperties(). See https://goo.gl/YzVlzs'
+        );
+      }
+
+      // verify type descriptors are in the right
+      // format and are configurable
+      if (!_.isPlainObject(typeDescriptors)) throwTypeDescriptorError();
+
+      _.forOwn(typeDescriptors, function (prop, desc) {
+        if (!_.isPlainObject(desc)) throwTypeDescriptorError();
+
+        var badKeys = _.difference(_.keys(desc), typeDescriptorKeys);
+        if (badKeys.length) {
+          var msg = 'invalid type descriptor key' + (badKeys.length === 1 ? '' : 's');
+          throw new TypeError(msg + ': ' + badKeys.join(', '));
+        }
+
+        desc.configurable = true; // ensure that the descriptor can be removed later
+      }, {});
+
+      Object.defineProperties(agg, typeDescriptors);
+
+      return function () {
+        _.forOwn(typeDescriptors, function (prop) {
+          delete agg[prop];
+        });
+      };
+    };
 
     /**
      * Pick a format for the values produced by this agg type,
