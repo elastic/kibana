@@ -79,8 +79,14 @@ define(function (require) {
         .attr('class', function (d) {
           return 'color ' + self.colorToClass(args.color(d));
         })
-        .html(function (d) {
-          return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
+        .each(function (label) {
+          var li = d3.select(this);
+
+          li.append('i')
+          .attr('class', 'fa fa-circle dots')
+          .attr('style', 'color:' + args.color(label));
+
+          li.append('span').text(label);
         });
     };
 

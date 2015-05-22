@@ -282,7 +282,7 @@ define(function (require) {
         return this._div;
       };
       label.update = function () {
-        this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
+        this._div.innerHTML = '<h2>' + _.escape(mapLabel) + '</h2>';
       };
       label.setPosition('bottomright').addTo(map);
     };
@@ -391,7 +391,7 @@ define(function (require) {
       .setContent(
         'Geohash: ' + props.geohash + '<br>' +
         'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
-        props.valueLabel + ': ' + props.count
+        _.escape(props.valueLabel) + ': ' + _.escape(props.count)
       );
 
       // TODO: tooltip-like formatter passed in?

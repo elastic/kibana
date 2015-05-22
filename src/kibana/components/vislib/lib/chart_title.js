@@ -21,7 +21,7 @@ define(function (require) {
 
       this.el = el;
       this.tooltip = new Tooltip('chart-title', el, function (d) {
-        return '<p>' + d.label + '</p>';
+        return '<p>' + _.escape(d.label) + '</p>';
       });
     }
 
