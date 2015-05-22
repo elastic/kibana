@@ -20,8 +20,10 @@
   </select>
   <input
     type="text"
+    name="customInterval"
     ng-model="agg.params.customInterval"
-    ng-change="agg.write()"
+    validate-date-interval
+    ng-change="aggForm.customInterval.$valid && agg.write()"
     ng-if="agg.params.interval.val == 'custom'"
     class="form-control"
     required />
