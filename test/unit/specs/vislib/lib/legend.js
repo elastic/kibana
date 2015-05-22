@@ -70,7 +70,7 @@ define(function (require) {
               return path.getAttribute('data-label');
             })
             .filter(function (dataLabel) {
-              return dataLabel === label;
+              return dataLabel === label + '';
             })
             .value();
 
