@@ -18,6 +18,16 @@
         reporter: 'html'
       });
 
+      window.describe = (function (originalDescribe) {
+        return function (name, body) {
+          if (!body && name && name instanceof Array) {
+            originalDescribe(name[0], name[1]);
+          } else {
+            originalDescribe(name, body);
+          }
+        };
+      }(window.describe))
+
       require.config({
         baseUrl: '/',
         paths: {
