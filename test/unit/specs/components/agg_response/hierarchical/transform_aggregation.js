@@ -1,58 +1,65 @@
 define(function (require) {
   describe('buildHierarchicalData()', function () {
     describe('transformAggregation()', function () {
-
+      var _ = require('lodash');
       var transform;
+      var fixture;
+
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
         transform = Private(require('components/agg_response/hierarchical/_transform_aggregation'));
       }));
 
-      var fixture = {};
-      fixture.agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }, getKey: function () {},
-        _next: { id: 'agg_3', name: 'example', schema: { group: 'buckets' }, getKey: function () {} } };
-      fixture.metric = { id: 'agg_1' };
-      fixture.aggData = {
-        buckets: [
-          { key: 'foo', doc_count: 2, agg_3: { buckets: [ { key: 'win', doc_count: 1 }, { key: 'mac', doc_count: 1 }]}},
-          { key: 'bar', doc_count: 4, agg_3: {  buckets: [ { key: 'win', doc_count: 2 }, { key: 'mac', doc_count: 2 }]}}
-        ]
-      };
+      beforeEach(function () {
 
-      it('should return an array of objects with the doc_count as the size if the metric does not exist', function () {
-        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }, getKey: function () {}};
-        var aggData = {
+        function fakeAgg(id, name) {
+          return {
+            id: id,
+            name: name,
+            schema: { group: 'buckets' },
+            getKey: _.noop,
+            fieldFormatter: _.constant(String)
+          };
+        }
+
+        fixture = {};
+        fixture.agg = fakeAgg('agg_2', 'test');
+        fixture.agg._next = fakeAgg('agg_3', 'example');
+
+        fixture.metric = fakeAgg('agg_1', 'metric');
+        fixture.metric.getValue = function (b) { return _.has(b, this.id) ? b[this.id] : b.doc_count; };
+
+        fixture.aggData = {
           buckets: [
-            { key: 'foo', doc_count: 1 },
-            { key: 'bar', doc_count: 2 }
+            { key: 'foo', doc_count: 2, agg_3: { buckets: [ { key: 'win', doc_count: 1 }, { key: 'mac', doc_count: 1 }]}},
+            { key: 'bar', doc_count: 4, agg_3: {  buckets: [ { key: 'win', doc_count: 2 }, { key: 'mac', doc_count: 2 }]}}
           ]
         };
 
-        var children = transform(agg, fixture.metric, aggData);
-        expect(children).to.be.an(Array);
-        expect(children).to.have.length(2);
-        expect(children[0]).to.have.property('size', 1);
-        expect(children[1]).to.have.property('size', 2);
       });
 
-      it('should return an array of objects with the metric agg value as the size', function () {
-        var agg = { id: 'agg_2', name: 'test', schema: { group: 'buckets' }, getKey: function () {} };
+      it('relies on metricAgg#getValue() for the size of the children', function () {
         var aggData = {
           buckets: [
-            { key: 'foo', doc_count: 1, agg_1: { value: 0 } },
-            { key: 'bar', doc_count: 2, agg_1: { value: 4 } }
+            { key: 'foo' },
+            { key: 'bar' }
           ]
         };
 
-        var children = transform(agg, fixture.metric, aggData);
+        var football = {};
+        fixture.metric.getValue = _.constant(football);
+
+        var children = transform(fixture.agg, fixture.metric, aggData);
         expect(children).to.be.an(Array);
         expect(children).to.have.length(2);
-        expect(children[0]).to.have.property('size', 0);
-        expect(children[1]).to.have.property('size', 4);
+        expect(children[0]).to.have.property('size', football);
+        expect(children[1]).to.have.property('size', football);
       });
 
       it('should create two levels of metrics', function () {
         var children = transform(fixture.agg, fixture.metric, fixture.aggData);
+        fixture.metric.getValue = function (b) { return b.doc_count; };
+
         expect(children).to.be.an(Array);
         expect(children).to.have.length(2);
         expect(children[0]).to.have.property('children');
