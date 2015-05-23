@@ -297,6 +297,8 @@ define(function (require) {
             timeMarker = new TimeMarker(times, xScale, height);
           }
 
+          if (self._attr.scale === 'log') self._checkForNegVals(data);
+
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
