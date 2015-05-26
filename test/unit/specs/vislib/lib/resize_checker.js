@@ -11,48 +11,60 @@ define(function (require) {
     var EventEmitter;
     var checker;
     var reflowWatcher;
-    var spyReflowOn;
+    var reflowSpies = {};
+
+    function makeChecker() {
+      var $el = $(document.createElement('div'))
+      .appendTo('body')
+      .css('visibility', 'hidden')
+      .get(0);
+
+      return new ResizeChecker($el);
+    }
+
+    function cleanChecker(checker) {
+      checker.$el.remove();
+      checker.destroy();
+    }
 
     beforeEach(module('kibana'));
+
     beforeEach(inject(function (Private) {
       window.DISABLE_RESIZE_CHECKER = false;
       ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
       EventEmitter = Private(require('factories/events'));
       reflowWatcher = Private(require('components/reflow_watcher'));
-
-      spyReflowOn = sinon.spy(reflowWatcher, 'on');
-      checker = new ResizeChecker(
-        $(document.createElement('div'))
-          .appendTo('body')
-          .css('visibility', 'hidden')
-          .get(0)
-      );
-      spyReflowOn.restore();
+      reflowSpies.on = sinon.spy(reflowWatcher, 'on');
+      reflowSpies.off = sinon.spy(reflowWatcher, 'off');
+      checker = makeChecker();
     }));
 
     afterEach(function () {
       window.DISABLE_RESIZE_CHECKER = true;
-      checker.$el.remove();
-      checker.destroy();
+      cleanChecker(checker);
+      // reflowSpies.on.restore();
+      // reflowSpies.off.restore();
     });
 
     it('is an event emitter', function () {
       expect(checker).to.be.a(EventEmitter);
     });
 
-    it('emits a "resize" event when the el is resized', function (done) {
-      checker.on('resize', function () {
-        done();
+    describe('instantiation', function () {
+      it('listens for the "reflow" event of the reflowWatchers', function () {
+        expect(reflowSpies.on).to.have.property('callCount', 1);
+        var call = reflowSpies.on.getCall(0);
+        expect(call.args[0]).to.be('reflow');
       });
 
-      checker.$el.text('haz contents');
-      checker.check();
-    });
+      it('emits a "resize" event when the el is resized', function (done) {
+        checker.on('resize', function () {
+          done();
+        });
 
-    it('listens for the "reflow" event of the reflowWatchers', function () {
-      expect(spyReflowOn).to.have.property('callCount', 1);
-      var call = spyReflowOn.getCall(0);
-      expect(call.args[0]).to.be('reflow');
+        checker.$el.text('haz contents');
+        checker.check();
+      });
     });
 
     describe('#read', function () {
@@ -142,6 +154,20 @@ define(function (require) {
       });
     });
 
+    describe('#destroy()', function () {
+      it('removes the "reflow" event from the reflowWatcher', function () {
+        checker.destroy();
+        expect(reflowSpies.off).to.have.property('callCount', 1);
+        expect(reflowSpies.off.calledWith('reflow')).to.be.ok();
+      });
+
+      it('clears the timeout', function () {
+        var spy = sinon.spy(window, 'clearTimeout');
+        checker.destroy();
+        expect(spy).to.have.property('callCount', 1);
+      });
+    });
+
     describe('scheduling', function () {
       var clock;
       var schedule;
@@ -180,21 +206,6 @@ define(function (require) {
           var timer = clock.timeouts[checker.continueSchedule()];
           expect(timer).to.have.property('callAt', last);
         });
-      });
-    });
-
-    describe('#destroy()', function () {
-      it('removes the "reflow" event from the reflowWatcher', function () {
-        var stub = sinon.stub(reflowWatcher, 'off');
-        checker.destroy();
-        expect(stub).to.have.property('callCount', 1);
-        expect(stub.calledWith('reflow')).to.be.ok();
-      });
-
-      it('clears the timeout', function () {
-        var spy = sinon.spy(window, 'clearTimeout');
-        checker.destroy();
-        expect(spy).to.have.property('callCount', 1);
       });
     });
   });
