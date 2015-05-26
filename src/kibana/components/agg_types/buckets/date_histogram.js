@@ -86,7 +86,7 @@ define(function (require) {
             var scaleMetrics = interval.scaled && interval.scale < 1;
             if (scaleMetrics) {
               scaleMetrics = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
-                return agg.type.name === 'count' || agg.type.name === 'sum';
+                return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
               });
             }
 
