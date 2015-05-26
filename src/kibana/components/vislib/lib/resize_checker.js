@@ -198,7 +198,7 @@ define(function (require) {
      * @return {void}
      */
     ResizeChecker.prototype.destroy = function () {
-      reflowWatcher.off('reflow', this.check);
+      reflowWatcher.off('reflow', this.onReflow);
       clearTimeout(this._timerId);
     };
 
