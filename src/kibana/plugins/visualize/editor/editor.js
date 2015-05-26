@@ -170,6 +170,8 @@ define(function (require) {
         }
 
         if (_.contains(keys, 'vis')) {
+          $state.vis.listeners = _.defaults($state.vis.listeners || {}, vis.listeners);
+
           // only update when we need to, otherwise colors change and we
           // risk loosing an in-progress result
           vis.setState($state.vis);
