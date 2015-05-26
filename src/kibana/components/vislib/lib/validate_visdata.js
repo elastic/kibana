@@ -14,7 +14,6 @@ define(function (require) {
       if (!(this instanceof ValidateVisData)) {
         return new ValidateVisData(data, chartType);
       }
-
       this.visData = this._validate(data, chartType);
     }
 
