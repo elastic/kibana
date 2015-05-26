@@ -13,20 +13,6 @@ define(function (require) {
     var reflowWatcher;
     var reflowSpies = {};
 
-    function makeChecker() {
-      var $el = $(document.createElement('div'))
-      .appendTo('body')
-      .css('visibility', 'hidden')
-      .get(0);
-
-      return new ResizeChecker($el);
-    }
-
-    function cleanChecker(checker) {
-      checker.$el.remove();
-      checker.destroy();
-    }
-
     beforeEach(module('kibana'));
 
     beforeEach(inject(function (Private) {
@@ -36,14 +22,19 @@ define(function (require) {
       reflowWatcher = Private(require('components/reflow_watcher'));
       reflowSpies.on = sinon.spy(reflowWatcher, 'on');
       reflowSpies.off = sinon.spy(reflowWatcher, 'off');
-      checker = makeChecker();
+
+      var $el = $(document.createElement('div'))
+      .appendTo('body')
+      .css('visibility', 'hidden')
+      .get(0);
+
+      checker = new ResizeChecker($el);
     }));
 
     afterEach(function () {
       window.DISABLE_RESIZE_CHECKER = true;
-      cleanChecker(checker);
-      // reflowSpies.on.restore();
-      // reflowSpies.off.restore();
+      checker.$el.remove();
+      checker.destroy();
     });
 
     it('is an event emitter', function () {
