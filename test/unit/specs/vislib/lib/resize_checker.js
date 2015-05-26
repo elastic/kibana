@@ -56,17 +56,12 @@ define(function (require) {
     });
 
     describe('#read', function () {
-      it('uses jquery to get the width and height of the element', function () {
-        var stubw = sinon.spy($.fn, 'width');
-        var stubh = sinon.spy($.fn, 'height');
+      it('gets the proper dimensions for the element', function () {
+        var dimensions = checker.read();
+        var windowWidth = window.innerWidth;
 
-        checker.read();
-
-        expect(stubw).to.have.property('callCount', 1);
-        expect(stubw.getCall(0)).to.have.property('thisValue', checker.$el);
-
-        expect(stubh).to.have.property('callCount', 1);
-        expect(stubh.getCall(0)).to.have.property('thisValue', checker.$el);
+        expect(dimensions.w).to.equal(windowWidth);
+        expect(dimensions.h).to.equal(0);
       });
     });
 
