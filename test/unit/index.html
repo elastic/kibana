@@ -13,20 +13,31 @@
       var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
       var DISABLE_RESIZE_CHECKER = true;
 
+
+      var mochaSuiteOn = mocha.suite.on;
+      mocha.suite.on = function (eventName, fn) {
+        if (eventName !== 'pre-require') {
+          return mochaSuiteOn.call(this, eventName, fn);
+        }
+
+        return mochaSuiteOn.call(this, eventName, function (context, file, mocha) {
+          fn.call(this, context, file, mocha);
+
+          var contextDescribe = context.describe;
+          context.describe = function (name, body) {
+            if (!body && name && name instanceof Array) {
+              contextDescribe(name[0], name[1]);
+            } else {
+              contextDescribe(name, body);
+            }
+          };
+        });
+      };
+
       mocha.setup({
         ui: 'bdd',
         reporter: 'html'
       });
-
-      window.describe = (function (originalDescribe) {
-        return function (name, body) {
-          if (!body && name && name instanceof Array) {
-            originalDescribe(name[0], name[1]);
-          } else {
-            originalDescribe(name, body);
-          }
-        };
-      }(window.describe))
 
       require.config({
         baseUrl: '/',
@@ -153,6 +164,7 @@
           }
         });
       }
+
 
       if (COVERAGE) {
         setupCoverage(runTests);
