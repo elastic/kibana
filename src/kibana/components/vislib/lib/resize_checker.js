@@ -52,8 +52,8 @@ define(function (require) {
      */
     ResizeChecker.prototype.read = function () {
       return {
-        w: this.$el.width(),
-        h: this.$el.height()
+        w: this.$el[0].clientWidth,
+        h: this.$el[0].clientHeight
       };
     };
 
