@@ -37,11 +37,11 @@ define(function (require) {
       checker.destroy();
     });
 
-    it('is an event emitter', function () {
-      expect(checker).to.be.a(EventEmitter);
-    });
+    describe('basic functionality', function () {
+      it('is an event emitter', function () {
+        expect(checker).to.be.a(EventEmitter);
+      });
 
-    describe('instantiation', function () {
       it('listens for the "reflow" event of the reflowWatchers', function () {
         expect(reflowSpies.on).to.have.property('callCount', 1);
         var call = reflowSpies.on.getCall(0);
