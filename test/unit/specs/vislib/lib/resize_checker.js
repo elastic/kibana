@@ -156,9 +156,12 @@ define(function (require) {
 
     describe('#destroy()', function () {
       it('removes the "reflow" event from the reflowWatcher', function () {
+        var onCall = reflowSpies.on.getCall(0);
+        var handler = onCall.args[1];
+
         checker.destroy();
         expect(reflowSpies.off).to.have.property('callCount', 1);
-        expect(reflowSpies.off.calledWith('reflow')).to.be.ok();
+        expect(reflowSpies.off.calledWith('reflow', handler)).to.be.ok();
       });
 
       it('clears the timeout', function () {
