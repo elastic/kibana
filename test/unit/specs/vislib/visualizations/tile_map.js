@@ -326,9 +326,11 @@ define(function (require) {
             chart.tooltipFormatter = function (str) {
               return '<div class="popup-stub"></div>';
             };
-            var layerIds = _.keys(map._layers);
-            var id = layerIds[_.random(1, layerIds.length - 1)]; // layer 0 is tileLayer
-            map._layers[id].fire('mouseover');
+
+            var featureLayer = _.sample(_.filter(map._layers, 'feature'));
+
+            expect($('.popup-stub', vis.el).length).to.be(0);
+            featureLayer.fire('mouseover');
             expect($('.popup-stub', vis.el).length).to.be(1);
           });
         });
