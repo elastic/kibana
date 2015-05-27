@@ -10,7 +10,7 @@ define(function (require) {
 
   require('components/notify/notify');
   require('components/timepicker/timepicker');
-  require('directives/fixed_scroll');
+  require('components/fixedScroll');
   require('directives/validate_json');
   require('components/validate_query/validate_query');
   require('filters/moment');

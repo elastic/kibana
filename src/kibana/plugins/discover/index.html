@@ -179,10 +179,7 @@
               <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
             </div>
 
-            <div class="discover-table"
-              fixed-scroll='table'
-              fixed-scroll-trigger="state.columns">
-
+            <div class="discover-table" fixed-scroll>
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"
