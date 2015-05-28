@@ -1,7 +1,6 @@
 define(function (require) {
   return function PointSeriesChartProvider(d3, Private) {
     var _ = require('lodash');
-    var errors = require('errors');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
@@ -41,13 +40,11 @@ define(function (require) {
     };
 
     PointSeriesChart.prototype._checkForNegVals = function (data) {
-      var hasNegVals = data.series.some(function (d) {
+      return data.series.some(function (d) {
         return d.values.some(function (e) {
           return e.y < 0;
         });
       });
-
-      if (hasNegVals) throw new errors.CannotLogScaleNegVals();
     };
 
     /**
