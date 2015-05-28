@@ -179,7 +179,7 @@ define(function (require) {
                 position: 'topleft'
               },
               onAdd: function (map) {
-                $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
+                $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" href="#" title="Fit Data Bounds"></a>');
                 $(fitContainer).on('click', function () {
                   self.fitBounds(map, mapData.features);
                 });
