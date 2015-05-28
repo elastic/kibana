@@ -103,8 +103,6 @@ define(function (require) {
       var addEvent = this.addEvent;
 
       function hover(d, i) {
-        d3.event.stopPropagation();
-
         // Add pointer if item is clickable
         if (isClickable) {
           self.addMousePointer.call(this, arguments);
@@ -126,7 +124,6 @@ define(function (require) {
       var addEvent = this.addEvent;
 
       function click(d, i) {
-        d3.event.stopPropagation();
         self.dispatch.click.call(this, self.eventResponse(d, i));
       }
 
