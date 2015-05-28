@@ -8,7 +8,8 @@
       <option ng-repeat="mode in vis.type.params.modes"
               ng-selected="mode === vis.params.mode"
               value="{{mode}}"
-              ng-hide="!vis.hasSchemaAgg('segment', 'date_histogram') && mode === 'wiggle'">
+              ng-disabled="!vis.hasSchemaAgg('segment', 'date_histogram') && mode === 'wiggle'"
+              required>
         {{mode}}
       </option>
     </select>
