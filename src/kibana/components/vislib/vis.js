@@ -4,7 +4,7 @@ define(function (require) {
 
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
-    var ValidateData = Private(require('components/vislib/lib/validate_visdata'));
+    var validateData = Private(require('components/vislib/lib/validate_visdata'));
     var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('components/vislib/visualizations/vis_types'));
     var errors = require('errors');
@@ -42,7 +42,6 @@ define(function (require) {
      */
     Vis.prototype.render = function (data) {
       var chartType = this._attr.type;
-      var validData = new ValidateData(data, chartType).visData;
 
       if (!data) {
         throw new Error('No valid data!');
@@ -53,7 +52,7 @@ define(function (require) {
         this._runOnHandler('destroy');
       }
 
-      this.data = validData;
+      this.data = validateData(data, chartType);
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
     };

@@ -8,38 +8,32 @@ define(function (require) {
   describe('Vislib ValidateVisData Test Suite', function () {
     function generateData(length, size, type) {
       function generateValues(size, type) {
-        return Array.apply(null, new Array(size))
-        .map(function () {
+        return Array.apply(null, _.times(size, function () {
           if (type === 'pie') {
-            return {
-              size: +(Math.random() * 100).toFixed(0)
-            };
+            return { size: _.random(1, 100) };
           }
 
           return {
-            x: +(Math.random() * 100).toFixed(0),
-            y: +(Math.random() * 100).toFixed(0)
+            x: _.random(1, 100),
+            y: _.random(1, 100)
           };
-        });
+        }));
       }
 
       return {
-        rows: Array.apply(null, new Array(length))
-        .map(function () {
+        rows: Array.apply(null, _.times(length, function () {
           if (type === 'pie') {
             return {
-              slices: {
-                children: generateValues(size, type)
-              }
+              slices: { children: generateValues(size, type) }
             };
           }
 
           return { series: generateValues(size) };
-        })
+        }))
       };
     }
 
-    // Add emp ty array
+    // Add empty array
     function addNullValues(data) {
       _.forIn(data, function (value, key) {
         if (key === 'pie') { value.rows.push({slices: {children: []}}); }
@@ -58,57 +52,33 @@ define(function (require) {
       pie: generateData(length, size, 'pie'),
       series: generateData(length, size)
     };
-    var ValidateVisData;
-    var validData;
+    var validateVisData;
+    var validSeriesData;
+    var validPieData;
 
     addNullValues(data);
 
     beforeEach(function () {
       module('ValidateVisDataFactory');
       inject(function (Private) {
-        ValidateVisData = Private(require('components/vislib/lib/validate_visdata'));
-        validData = new ValidateVisData(data.series);
+        validateVisData = Private(require('components/vislib/lib/validate_visdata'));
+        validSeriesData = validateVisData(data.series);
+        validPieData = validateVisData(data.pie, 'pie');
       });
     });
 
     afterEach(function () {
-      validData = null;
+      validSeriesData = null;
+      validPieData = null;
     });
 
-    describe('_validate method', function () {
+    describe('validate method', function () {
       it('should remove null arrays from chart objects', function () {
-        var validSeriesData = validData._validate(data.series, 'histogram');
-        var validPieData = validData._validate(data.pie, 'pie');
         var validLength = length - 1;
 
         expect(validSeriesData.rows.length).to.be(validLength);
         expect(validPieData.rows.length).to.be(validLength);
       });
     });
-
-    describe('_returnValidData method', function () {
-      it('should remove null arrays', function () {
-        var conditional = function (d) { return d.series.length; };
-        var newLength = length - 1;
-        var filteredData = validData._returnValidData(data.series, 'rows', conditional);
-
-        expect(filteredData.rows.length).to.be(newLength);
-
-        filteredData.rows.forEach(function (d) {
-          expect(d.series.length).to.be.greaterThan(0);
-        });
-      });
-    });
-
-    describe('_getAccessor method', function () {
-      it('should the object key for the data array', function () {
-        var seriesAccessor = validData._getAccessor(data.series);
-        var pieAccessor = validData._getAccessor(data.pie, 'pie');
-
-        expect(seriesAccessor).to.be('rows');
-        expect(pieAccessor).to.be('rows');
-      });
-    });
-
   });
 });
