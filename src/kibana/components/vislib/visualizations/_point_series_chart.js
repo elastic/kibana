@@ -56,6 +56,7 @@ define(function (require) {
      * @returns {D3.Selection}
      */
     PointSeriesChart.prototype.createEndZones = function (svg) {
+      var self = this;
       var xAxis = this.handler.xAxis;
       var xScale = xAxis.xScale;
       var yScale = xAxis.yScale;
@@ -108,18 +109,21 @@ define(function (require) {
 
       function callPlay(event) {
         var boundData = event.target.__data__;
+        var mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
         var wholeBucket = boundData && boundData.x != null;
 
+        // the min and max that the endzones start in
         var min = leftEndzone.w;
         var max = rightEndzone.x;
 
         // bounds of the cursor to consider
-        var xLeft = event.offsetX;
-        var xRight = event.offsetX;
+        var xLeft = mouseChartXCoord;
+        var xRight = mouseChartXCoord;
         if (wholeBucket) {
           xLeft = xScale(boundData.x);
           xRight = xScale(xAxis.addInterval(boundData.x));
         }
+
 
         return {
           wholeBucket: wholeBucket,
