@@ -162,21 +162,35 @@ define(function (require) {
             }
           }
 
-          element
-          .on('mousemove.tip', function update() {
+          fakeD3Bind(this, 'mousemove', function () {
             if (!self.showCondition.call(element, d, i)) {
               return render();
             }
 
             var events = self.events ? self.events.eventResponse(d, i) : d;
             return render(self.formatter(events));
-          })
-          .on('mouseleave.tip', function () {
+          });
+
+          fakeD3Bind(this, 'mouseleave', function () {
             render();
           });
+
         });
       };
     };
+
+    function fakeD3Bind(el, event, handler) {
+      $(el).on(event, function (e) {
+        // mimicing https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
+        var o = d3.event; // Events can be reentrant (e.g., focus).
+        d3.event = e;
+        try {
+          handler.apply(this, [this.__data__]);
+        } finally {
+          d3.event = o;
+        }
+      });
+    }
 
     return Tooltip;
   };
