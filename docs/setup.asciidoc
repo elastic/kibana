@@ -31,6 +31,31 @@ After installing, run Kibana from the install directory: `bin/kibana` (Linux/Mac
 That's it! Kibana is now running on port 5601.
 
 [float]
+[[kibana-dynamic-mapping]]
+==== Kibana and Elasticsearch Dynamic Mapping
+By default, Elasticsearch enables {ref}/dynamic-mapping.html[dynamic mapping] for fields. Kibana needs dynamic mapping 
+to use fields in visualizations correctly, as well as to manage the `.kibana` index where saved searches, 
+visualizations, and dashboards are stored.
+
+If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide mappings for 
+fields that Kibana uses to create visualizations. You also need to manually enable dynamic mapping for the `.kibana` 
+index.
+
+The following procedure assumes that the `.kibana` index does not already exist in Elasticsearch and that the
+`index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
+
+. Start Elasticsearch.
+. Create the `.kibana` index with dynamic mapping enabled just for that index:
++
+[source,shell]
+PUT .kibana
+{
+	"index.mapper.dynamic": true
+}
++
+. Start Kibana and navigate to the web UI and verify that there are no error messages related to dynamic mapping.
+
+[float]
 [[connect]]
 === Connect Kibana with Elasticsearch
 Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore. The first time 

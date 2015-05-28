@@ -45,6 +45,9 @@ Kibana 4 users also need access to the `.kibana` index so they can save and load
 For more information, see {shield}/_shield_with_kibana_4.html#kibana4-roles[Configuring Roles for Kibana 4 Users] in 
 the Shield documentation.
 
+TIP: See <<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>> for important information on Kibana and 
+the dynamic mapping feature in Elasticsearch.
+
 [float]
 [[enabling-ssl]]
 === Enabling SSL
