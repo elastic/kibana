@@ -5,43 +5,48 @@
   </p>
 
   <div ng-show="agg.params.ipRangeType != 'mask'">
-    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.fromTo.length">
-      <tr>
-        <th>
+    <kbn-grid class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.fromTo.length">
+      <gr>
+        <gh>
           <label>From</label>
-        </th>
-        <th colspan="2">
+        </gh>
+        <gh>
           <label>To</label>
-        </th>
-      </tr>
+        </gh>
+        <gh no-flex>
+          <button type="button" class="btn btn-xs" style="visibility:hidden">
+            <i class="fa fa-ban" ></i>
+          </button>
+        </gh>
+      </gr>
 
-      <tr
+      <gr
         ng-repeat="range in agg.params.ranges.fromTo track by $index">
-        <td>
+        <gd>
           <input
             validate-ip
             ng-model="range.from"
             type="text"
             class="form-control"
             name="range.from" />
-        </td>
-        <td>
+        </gd>
+        <gd>
           <input
             validate-ip
             ng-model="range.to"
             class="form-control"
             name="range.to" />
-        </td>
-        <td>
+        </gd>
+        <gd no-flex>
           <button
             type="button"
             ng-click="agg.params.ranges.fromTo.splice($index, 1)"
             class="btn btn-danger btn-xs">
             <i class="fa fa-ban" ></i>
           </button>
-        </td>
-      </tr>
-    </table>
+        </gd>
+      </gr>
+    </kbn-grid>
 
     <input ng-if="agg.params.ipRangeType != 'mask'" ng-model="agg.params.ranges.fromTo.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
     <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
@@ -59,33 +64,30 @@
   </div>
 
   <div ng-show="agg.params.ipRangeType == 'mask'">
-    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.mask.length">
-      <tr>
-        <th>
+    <kbn-grid class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.mask.length">
+      <gr>
+        <gh>
           <label>Mask</label>
-        </th>
-      </tr>
+        </gh>
+        <gh no-flex>
+          <button type="button" class="btn btn-xs" style="visibility:hidden">
+            <i class="fa fa-ban" ></i>
+          </button>
+        </gh>
+      </gr>
 
-      <tr
+      <gr
         ng-repeat="range in agg.params.ranges.mask track by $index">
-        <td>
+        <gd>
           <input
             validate-cidr-mask
             ng-model="range.mask"
             type="text"
             class="form-control"
             name="range.from" />
-        </td>
-        <td>
-          <button
-            type="button"
-            ng-click="agg.params.ranges.mask.splice($index, 1)"
-            class="btn btn-danger btn-xs">
-            <i class="fa fa-ban" ></i>
-          </button>
-        </td>
-      </tr>
-    </table>
+        </gd>
+      </gr>
+    </kbn-grid>
 
     <input ng-if="agg.params.ipRangeType == 'mask'" ng-model="agg.params.ranges.mask.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
     <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
