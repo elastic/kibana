@@ -1,0 +1,51 @@
+kbn-grid {
+  .display(flex);
+  .flex-direction(column);
+
+  .container(@dir, @startFlexed, @start, @end) {
+    .display(flex);
+    .flex-direction(@dir);
+
+    [align="center"] {
+      text-align: inherit;
+      .align-items(center);
+    }
+
+    [align=@{start}] {
+      .align-items(flex-start);
+    }
+
+    [align=@{end}] {
+      .align-items(flex-end);
+    }
+
+    > gh, > gd, > gc, > gr {
+      & when (@startFlexed = true) {
+        .flex(1, 1, 1px);
+
+        &[no-flex] {
+          .flex(0, 0, auto);
+        }
+      }
+
+      & when (@startFlexed = false) {
+        .flex(0, 0, auto);
+
+        &[flex] {
+          .flex(1, 1, 1px);
+        }
+      }
+    }
+  }
+
+  gr { .container(row, true, "top", "bottom"); }
+  gc { .container(column, false, "left", "right"); }
+
+  gd, gh {
+    display: block;
+  }
+
+  gh {
+    font-weight: bold;
+  }
+}
