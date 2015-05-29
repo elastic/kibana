@@ -117,6 +117,79 @@ define(function () {
       'format:currency:defaultPattern': {
         type: 'string',
         value: '($0,0.[00])'
+      },
+      'timepicker:timeDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          from: 'now-15m',
+          to: 'now'
+        }, null, 2)
+      },
+      'timepicker:quickRanges': {
+        type: 'json',
+        value: JSON.stringify([
+          { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
+          { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
+          { from: 'now/M',    to: 'now/M',    display: 'This month',            section: 0 },
+          { from: 'now/y',    to: 'now/y',    display: 'This year',             section: 0 },
+          { from: 'now/d',    to: 'now',      display: 'The day so far',        section: 0 },
+          { from: 'now/w',    to: 'now',      display: 'Week to date',          section: 0 },
+          { from: 'now/M',    to: 'now',      display: 'Month to date',         section: 0 },
+          { from: 'now/y',    to: 'now',      display: 'Year to date',          section: 0 },
+
+          { from: 'now-1d/d', to: 'now-1d/d', display: 'Yesterday',             section: 1 },
+          { from: 'now-2d/d', to: 'now-2d/d', display: 'Day before yesterday',  section: 1 },
+          { from: 'now-7d/d', to: 'now-7d/d', display: 'This day last week',    section: 1 },
+          { from: 'now-1w/w', to: 'now-1w/w', display: 'Previous week',         section: 1 },
+          { from: 'now-1M/M', to: 'now-1M/M', display: 'Previous month',        section: 1 },
+          { from: 'now-1y/y', to: 'now-1y/y', display: 'Previous year',         section: 1 },
+
+          { from: 'now-15m',  to: 'now',      display: 'Last 15 minutes',       section: 2 },
+          { from: 'now-30m',  to: 'now',      display: 'Last 30 minutes',       section: 2 },
+          { from: 'now-1h',   to: 'now',      display: 'Last 1 hour',           section: 2 },
+          { from: 'now-4h',   to: 'now',      display: 'Last 4 hours',          section: 2 },
+          { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 2 },
+          { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 2 },
+          { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 2 },
+
+          { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 3 },
+          { from: 'now-60d',  to: 'now',      display: 'Last 60 days',          section: 3 },
+          { from: 'now-90d',  to: 'now',      display: 'Last 90 days',          section: 3 },
+          { from: 'now-6M',   to: 'now',      display: 'Last 6 months',         section: 3 },
+          { from: 'now-1y',   to: 'now',      display: 'Last 1 year',           section: 3 },
+          { from: 'now-2y',   to: 'now',      display: 'Last 2 years',          section: 3 },
+          { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 3 },
+        ], null, 2)
+      },
+      'timepicker:refreshIntervalDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          display: 'Off',
+          pause: false,
+          section: 0,
+          value: 0
+        }, null, 2)
+      },
+      'timepicker:refreshIntervals': {
+        type: 'json',
+        value: JSON.stringify([
+          { value : 0, display: 'Off', section: 0},
+
+          { value : 5000, display: '5 seconds', section: 1},
+          { value : 10000, display: '10 seconds', section: 1},
+          { value : 30000, display: '30 seconds', section: 1},
+          { value : 45000, display: '45 seconds', section: 1},
+
+          { value : 60000, display: '1 minute', section: 2},
+          { value : 300000, display: '5 minutes', section: 2},
+          { value : 900000, display: '15 minutes', section: 2},
+          { value : 1800000, display: '30 minutes', section: 2},
+
+          { value : 3600000, display: '1 hour', section: 3},
+          { value : 7200000, display: '2 hour', section: 3},
+          { value : 43200000, display: '12 hour', section: 3},
+          { value : 86400000, display: '1 day', section: 3}
+        ], null, 2)
       }
     };
   };

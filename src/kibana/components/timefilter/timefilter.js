@@ -1,7 +1,7 @@
   define(function (require) {
   require('modules')
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope) {
+  .service('timefilter', function (Private, globalState, $rootScope, config) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -27,35 +27,32 @@
 
       self.enabled = false;
 
-      var timeDefaults = {
-        from: 'now-15m',
-        to: 'now'
-      };
+      initConfig();
+      $rootScope.$on('init:config', initConfig);
 
-      var refreshIntervalDefaults = {
-        display: 'Off',
-        pause: false,
-        section: 0,
-        value: 0
-      };
+      function initConfig() {
+        var timeDefaults = config.get('timepicker:timeDefaults');
 
-      // These can be date math strings or moments.
-      self.time = _.defaults(globalState.time || {}, timeDefaults);
-      self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
+        var refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 
-      globalState.on('fetch_with_changes', function () {
-        // clone and default to {} in one
-        var newTime = _.defaults({}, globalState.time, timeDefaults);
-        var newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
+        // These can be date math strings or moments.
+        self.time = _.defaults(globalState.time || {}, timeDefaults);
+        self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
 
-        if (newTime) {
-          if (newTime.to) newTime.to = convertISO8601(newTime.to);
-          if (newTime.from) newTime.from = convertISO8601(newTime.from);
-        }
+        globalState.on('fetch_with_changes', function () {
+          // clone and default to {} in one
+          var newTime = _.defaults({}, globalState.time, timeDefaults);
+          var newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
 
-        self.time = newTime;
-        self.refreshInterval = newRefreshInterval;
-      });
+          if (newTime) {
+            if (newTime.to) newTime.to = convertISO8601(newTime.to);
+            if (newTime.from) newTime.from = convertISO8601(newTime.from);
+          }
+
+          self.time = newTime;
+          self.refreshInterval = newRefreshInterval;
+        });
+      }
 
       $rootScope.$$timefilter = self;
 

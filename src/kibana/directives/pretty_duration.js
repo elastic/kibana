@@ -4,10 +4,9 @@ define(function (require) {
   var datemath = require('utils/datemath');
   var moment = require('moment');
 
-  require('components/timepicker/quick_ranges');
   require('components/timepicker/time_units');
 
-  module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
+  module.directive('prettyDuration', function (config, timeUnits) {
     return {
       restrict: 'E',
       scope: {
@@ -18,6 +17,8 @@ define(function (require) {
         var dateFormat = config.get('dateFormat');
 
         var lookupByRange = {};
+
+        var quickRanges = config.get('timepicker:quickRanges');
         _.each(quickRanges, function (frame) {
           lookupByRange[frame.from + ' to ' + frame.to] = frame;
         });
