@@ -29,6 +29,24 @@ define(function (require) {
       return Math.abs(a - b) <= n;
     }
 
+    function appendRandomChildren($el) {
+      var min = 100;
+      var max = 300;
+      var n = _.random(5, 50);
+
+      var opts = _.shuffle(_.range(min, max));
+      var sizes = _.take(opts, n);
+      sizes.forEach(function (size) {
+        $el.append(
+          $('<gd></gd>').append(
+            $('<div>').css({ width: size, height: size })
+          )
+        );
+      });
+
+      return $el;
+    }
+
     afterEach(function () {
       trash.splice(0).forEach(function ($el) {
         $el.remove();
@@ -75,6 +93,51 @@ define(function (require) {
           expect($cell.width()).to.be.greaterThan($content.width());
           $cell.attr('no-flex', 'no-flex');
           expect(plusMinus(1, $cell.width(), $content.width())).to.be(true);
+        });
+      });
+
+      describe('child alignment', function () {
+        it('center aligns by default', function () {
+          var $row = render(basicRows).find('gr').first().empty();
+          appendRandomChildren($row);
+
+          var $children = $row.children();
+          var childrenByHeight = _.sortBy($children, function (el) {
+            return $(el).height();
+          });
+
+          var childrenByOffsetTop = _.sortBy($children, function (el) {
+            return $(el).offset().top * -1;
+          });
+
+          childrenByHeight.forEach(function (child, i) {
+            expect(child).to.be(childrenByOffsetTop[i]);
+          });
+        });
+
+        it('aligns to the top with align=top', function () {
+          var $row = render(basicRows).find('gr').first().empty();
+          $row.attr('align', 'top');
+          appendRandomChildren($row);
+
+          var offsetTops = _.map($row.children(), function (el) {
+            return $(el).offset().top;
+          });
+
+          expect(_.min(offsetTops)).to.be(_.max(offsetTops));
+        });
+
+        it('aligns to the bottom with align=bottom', function () {
+          var $row = render(basicRows).find('gr').first().empty();
+          $row.attr('align', 'bottom');
+          appendRandomChildren($row);
+
+          var offsetBottoms = _.map($row.children(), function (el) {
+            var $el = $(el);
+            return $el.offset().top + $el.height();
+          });
+
+          expect(_.min(offsetBottoms)).to.be(_.max(offsetBottoms));
         });
       });
     });
@@ -137,6 +200,52 @@ define(function (require) {
           var preExpand = $cell.height();
           $cell.attr('flex', 'flex');
           expect(plusMinus(1, $cell.height(), preExpand + myExtraSpace)).to.be(true);
+        });
+      });
+
+
+      describe('child alignment', function () {
+        it('center aligns by default', function () {
+          var $col = render(basicColumns).find('gc').first().empty();
+          $col.width(300);
+          appendRandomChildren($col);
+
+          var $children = $col.children();
+          var childrenByWidth = _.sortBy($children, function (el) {
+            return $(el).width();
+          });
+
+          var childrenByOffsetLeft = _.sortBy($children, function (el) {
+            return $(el).offset().left;
+          }).reverse();
+
+          childrenByWidth.forEach(function (child, i) {
+            expect(child).to.be(childrenByOffsetLeft[i]);
+          });
+        });
+
+        it('aligns to the left with align=left', function () {
+          var $col = render(basicColumns).find('gc').first().empty();
+          $col.attr('align', 'left').width(300);
+          appendRandomChildren($col);
+
+          var offsetLefts = _.map($col.children(), function (el) {
+            return $(el).offset().left;
+          });
+
+          expect(_.min(offsetLefts)).to.be(_.max(offsetLefts));
+        });
+
+        it('aligns to the right with align=right', function () {
+          var $col = render(basicColumns).find('gc').first().empty();
+          $col.attr('align', 'right').width(300);
+          appendRandomChildren($col);
+
+          var offsetRights = _.map($col.children(), function (el) {
+            return $(el).offset().left + $(el).width();
+          });
+
+          expect(_.min(offsetRights)).to.be(_.max(offsetRights));
         });
       });
     });

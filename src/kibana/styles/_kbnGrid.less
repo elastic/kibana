@@ -5,17 +5,13 @@ kbn-grid {
   .container(@dir, @startFlexed, @start, @end) {
     .display(flex);
     .flex-direction(@dir);
+    .align-items(center);
 
-    [align="center"] {
-      text-align: inherit;
-      .align-items(center);
-    }
-
-    [align=@{start}] {
+    &[align=@{start}] {
       .align-items(flex-start);
     }
 
-    [align=@{end}] {
+    &[align=@{end}] {
       .align-items(flex-end);
     }
 
