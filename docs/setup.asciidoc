@@ -21,11 +21,11 @@ To get Kibana up and running:
 . Download the https://www.elastic.co/downloads/kibana[Kibana 4 binary package] for your platform.
 . Extract the `.zip` or `tar.gz` archive file.
 
-On Unix, you can instead run the package manager suited for your distribution.
-
-[float]
-include::kibana-repositories.asciidoc[]
-
+// On Unix, you can instead run the package manager suited for your distribution.
+// 
+// [float]
+// include::kibana-repositories.asciidoc[]
+// 
 After installing, run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
 
 That's it! Kibana is now running on port 5601.
