@@ -53,5 +53,8 @@
     "numeral": "~1.5.3",
     "leaflet-draw": "~0.2.4"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "resolutions": {
+    "angular-bootstrap": "~0.12"
+  }
 }

@@ -334,9 +334,9 @@ define(function (require) {
           .append('line')
           .attr('class', 'base-line')
           .attr('x1', startLineX)
-          .attr('y1', height)
+          .attr('y1', yScale(0))
           .attr('x2', width)
-          .attr('y2', height)
+          .attr('y2', yScale(0))
           .style('stroke', '#ddd')
           .style('stroke-width', lineStrokeWidth);
 
