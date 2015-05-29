@@ -24,8 +24,8 @@ define(function (require) {
 
           var percent;
           if (i > 0) {
-            var parentMetric = rows[i - 1].metric;
-            percent = row.metric / parentMetric;
+            var parentMetric = Math.abs(rows[i - 1].metric);
+            percent = Math.abs(row.metric / parentMetric);
           }
           else if (row.item.percentOfGroup != null) {
             percent = row.item.percentOfGroup;
