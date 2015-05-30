@@ -5,6 +5,9 @@ define(function (require) {
     var rowsToFeatures = require('components/agg_response/geo_json/rowsToFeatures');
     var tooltipFormatter = Private(require('components/agg_response/geo_json/_tooltip_formatter'));
 
+    var defaultMapZoom = 2;
+    var defaultMapCenter = [15, 5];
+
     return function (vis, table) {
 
       function columnIndex(schema) {
@@ -33,7 +36,9 @@ define(function (require) {
           features: features,
           properties: {
             min: _.min(values),
-            max: _.max(values)
+            max: _.max(values),
+            zoom: (geoAgg) ? geoAgg.params.mapZoom : defaultMapZoom,
+            center: (geoAgg) ? geoAgg.params.mapCenter : defaultMapCenter,
           }
         }
       };

@@ -10,9 +10,6 @@ define(function (require) {
 
     require('css!components/vislib/styles/main');
 
-    var defaultMapCenter = [15, 5];
-    var defaultMapZoom = 2;
-
     // Convenience function to turn around the LngLat recieved from ES
     function cloneAndReverse(arr) {
       var l = arr.length;
@@ -37,10 +34,14 @@ define(function (require) {
 
       TileMap.Super.apply(this, arguments);
 
+
       // track the map objects
       this.maps = [];
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
+
+      this._attr.mapZoom = this.geoJson.properties.zoom;
+      this._attr.mapCenter = this.geoJson.properties.center;
 
       // add allmin and allmax to geoJson
       var allMinMax = this.getMinMax(handler.data.data);
@@ -68,9 +69,6 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       return function (selection) {
-        self._attr.mapZoom = self._attr.mapZoom || defaultMapZoom;
-        self._attr.mapCenter = self._attr.mapCenter || defaultMapCenter;
-
         selection.each(function () {
           // add leaflet latLngs to properties for tooltip
           self.addLatLng(self.geoJson);
