@@ -68,7 +68,7 @@ define(function (require) {
     var savedVis = $route.current.locals.savedVis;
 
     var vis = savedVis.vis;
-    var editableVis = vis.clone();
+    var editableVis = vis.createEditableVis();
     vis.requesting = function () {
       var requesting = editableVis.requesting;
       requesting.call(vis);
