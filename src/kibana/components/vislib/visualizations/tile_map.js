@@ -128,6 +128,12 @@ define(function (require) {
             self._attr.mapZoom = map.getZoom();
             self._attr.mapCenter = map.getCenter();
 
+            self.events.emit('mapMoveEnd', {
+              chart: self.originalConfig,
+              zoom: self._attr.mapZoom,
+              center: self._attr.mapCenter
+            });
+
             map.removeLayer(featureLayer);
 
             featureLayer = self.markerType(map).addTo(map);

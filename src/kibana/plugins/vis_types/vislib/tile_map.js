@@ -38,6 +38,22 @@ define(function (require) {
 
           pushFilter(filter, false, indexPatternName);
         },
+        mapMoveEnd: function (event) {
+          var agg = _.deepGet(event, 'chart.geohashGridAgg');
+          if (!agg) return;
+
+          agg.params.mapZoom = event.zoom;
+          agg.params.mapCenter = [event.center.lat, event.center.lng];
+
+          var editableVis = agg.vis.getEditableVis();
+          if (!editableVis) return;
+
+          var editableAgg = editableVis.aggs.byId[agg.id];
+          if (editableAgg) {
+            editableAgg.params.mapZoom = event.zoom;
+            editableAgg.params.mapCenter = [event.center.lat, event.center.lng];
+          }
+        },
         mapZoomEnd: function (event) {
           var agg = _.deepGet(event, 'chart.geohashGridAgg');
           if (!agg || !agg.params.autoPrecision) return;
