@@ -5,7 +5,15 @@ module.exports = {
   options: {
     log: true,
     logErrors: true,
-    run: false
+    run: false,
+    page: {
+      settings: {
+        viewportSize: {
+          width: 2400,
+          height: 1250
+        }
+      }
+    }
   },
   unit: {
     options: {

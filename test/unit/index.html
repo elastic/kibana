@@ -6,12 +6,25 @@
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
     <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/test/utils/Nonsense.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
     <script>(function () {
-      var COVERAGE = !!(/coverage/i.test(window.location.search));
-      var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
-      var DISABLE_RESIZE_CHECKER = true;
+      /* globals mocha,Nonsense */
+
+      var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
+      var SAUCELABS = window.SAUCELABS = !!(/saucelabs/i.test(window.location.search));
+      var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
+
+      var seed = parseFloat((window.location.search.match(/[&?]seed=([^&]+)(?:&|$)/) || [])[1]);
+      if (isNaN(seed)) seed = Date.now();
+      console.log('nonsense seed: ' + seed);
+
+      Math.nonsense = new Nonsense(seed);
+      Math.random = function () {
+        return Math.nonsense.frac();
+      };
+
 
 
       var mochaSuiteOn = mocha.suite.on;
@@ -23,14 +36,24 @@
         return mochaSuiteOn.call(this, eventName, function (context, file, mocha) {
           fn.call(this, context, file, mocha);
 
-          var contextDescribe = context.describe;
-          context.describe = function (name, body) {
-            if (!body && name && name instanceof Array) {
-              contextDescribe(name[0], name[1]);
-            } else {
-              contextDescribe(name, body);
-            }
-          };
+          function unwindProxy(self, method) {
+            var fn = function (name, body) {
+              if (!body && name && name instanceof Array) {
+                body = name[1];
+                name = name[0];
+              }
+
+              return fn.orig.call(self, name, body);
+            };
+
+            fn.orig = self[method];
+
+            return fn;
+          }
+
+          var only = unwindProxy(context.describe, 'only');
+          context.describe = unwindProxy(context, 'describe');
+          context.describe.only = only;
         });
       };
 
@@ -140,7 +163,7 @@
 
               (suite.tests || [])
               .filter(function (test) {
-                return test.state !== 'passed' && test.state !== 'pending';
+                return test.state && test.state !== 'passed' && test.state !== 'pending';
               })
               .forEach(function (test) {
                 fails.push({
