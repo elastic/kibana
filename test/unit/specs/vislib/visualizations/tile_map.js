@@ -25,7 +25,6 @@ define(function (require) {
       mapType: type
     };
 
-
     module('TileMapFactory');
     inject(function (Private) {
       vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
