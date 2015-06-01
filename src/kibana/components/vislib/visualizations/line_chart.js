@@ -309,19 +309,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          if (yMin < 0) {
-
-            // Draw line at yScale 0 value
-            svg.append('line')
-              .attr('class', 'zero-line')
-              .attr('x1', 0)
-              .attr('y1', yScale(0))
-              .attr('x2', width)
-              .attr('y2', yScale(0))
-              .style('stroke', '#ddd')
-              .style('stroke-width', 1);
-          }
-
           self.addClipPath(svg, width, height);
           if (self._attr.drawLinesBetweenPoints) {
             lines = self.addLines(svg, data.series);
@@ -330,15 +317,17 @@ define(function (require) {
           self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
 
-          var line = svg
-          .append('line')
-          .attr('class', 'base-line')
-          .attr('x1', startLineX)
-          .attr('y1', yScale(0))
-          .attr('x2', width)
-          .attr('y2', yScale(0))
-          .style('stroke', '#ddd')
-          .style('stroke-width', lineStrokeWidth);
+          if (yScale(0)) {
+            var line = svg
+              .append('line')
+              .attr('class', 'base-line')
+              .attr('x1', startLineX)
+              .attr('y1', yScale(0))
+              .attr('x2', width)
+              .attr('y2', yScale(0))
+              .style('stroke', '#ddd')
+              .style('stroke-width', lineStrokeWidth);
+          }
 
           if (addTimeMarker) {
             timeMarker.render(svg);
