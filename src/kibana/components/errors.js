@@ -252,7 +252,7 @@ define(function (require) {
    */
   errors.CannotLogScaleNegVals = function CannotLogScaleNegVals() {
     KbnError.call(this,
-      'Negative values cannot be displayed on a log scale',
+      'Values less than 1 cannot be displayed on a log scale',
       errors.CannotLogScaleNegVals);
   };
   inherits(errors.CannotLogScaleNegVals, KbnError);
