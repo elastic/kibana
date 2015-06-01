@@ -39,6 +39,14 @@ define(function (require) {
       }));
     };
 
+    PointSeriesChart.prototype._checkForNegVals = function (data) {
+      return data.series.some(function (d) {
+        return d.values.some(function (e) {
+          return e.y < 0;
+        });
+      });
+    };
+
     /**
      * Creates rects to show buckets outside of the ordered.min and max, returns rects
      *
