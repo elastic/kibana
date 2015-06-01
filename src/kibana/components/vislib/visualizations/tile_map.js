@@ -5,10 +5,11 @@ define(function (require) {
     var L = require('leaflet');
     require('leaflet-heat');
     require('leaflet-draw');
+    require('css!components/vislib/styles/main');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-
-    require('css!components/vislib/styles/main');
+    var defaultMapZoom = 2;
+    var defaultMapCenter = [15, 5];
 
     // Convenience function to turn around the LngLat recieved from ES
     function cloneAndReverse(arr) {
@@ -40,8 +41,8 @@ define(function (require) {
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
 
-      this._attr.mapZoom = this.geoJson.properties.zoom;
-      this._attr.mapCenter = this.geoJson.properties.center;
+      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || defaultMapZoom;
+      this._attr.mapCenter = _.deepGet(this.geoJson, 'properties.center') || defaultMapCenter;
 
       // add allmin and allmax to geoJson
       var allMinMax = this.getMinMax(handler.data.data);
