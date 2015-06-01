@@ -3,7 +3,8 @@
   <label>
     Chart Mode
     <select class="form-control" ng-model="vis.params.mode"
-            ng-options="mode for mode in vis.type.params.modes"></select>
+            ng-options="mode for mode in vis.type.params.modes"
+            options-disabled="(!vis.hasSchemaAgg('segment', 'date_histogram') && mode === 'wiggle') for mode in vis.type.params.modes"></select>
     <!--<select class="form-control" ng-model="vis.params.mode">-->
       <!--<option ng-repeat="mode in vis.type.params.modes"-->
               <!--ng-selected="mode === vis.params.mode"-->
