@@ -40,8 +40,8 @@ define(function (require) {
     };
 
     PointSeriesChart.prototype._checkForNegVals = function (data) {
-      return data.series.some(function (d) {
-        return d.values.some(function (e) {
+      return data.series && data.series.some(function (d) {
+        return d.values && d.values.some(function (e) {
           return e.y < 0;
         });
       });
