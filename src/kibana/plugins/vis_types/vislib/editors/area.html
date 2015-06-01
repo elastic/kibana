@@ -2,17 +2,17 @@
 <div>
   <label>
     Chart Mode
-    <!-- <select class="form-control" ng-model="vis.params.mode"
-            ng-options="mode for mode in vis.type.params.modes"></select> -->
-    <select class="form-control" ng-model="vis.params.mode">
-      <option ng-repeat="mode in vis.type.params.modes"
-              ng-selected="mode === vis.params.mode"
-              value="{{mode}}"
-              ng-hide="(!vis.hasSchemaAgg('segment', 'date_histogram') &&
-               !vis.hasSchemaAgg('segment', 'histogram')) && mode === 'wiggle'">
-        {{mode}}
-      </option>
-    </select>
+    <select class="form-control" ng-model="vis.params.mode"
+            ng-options="mode for mode in vis.type.params.modes"></select>
+    <!--<select class="form-control" ng-model="vis.params.mode">-->
+      <!--<option ng-repeat="mode in vis.type.params.modes"-->
+              <!--ng-selected="mode === vis.params.mode"-->
+              <!--value="{{mode}}"-->
+              <!--ng-disabled="(!vis.hasSchemaAgg('segment', 'date_histogram') &&-->
+               <!--!vis.hasSchemaAgg('segment', 'histogram')) && mode === 'wiggle'">-->
+        <!--{{mode}}-->
+      <!--</option>-->
+    <!--</select>-->
   </label>
 </div>
 <line-interpolation-option></line-interpolation-option>
