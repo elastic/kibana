@@ -91,8 +91,8 @@
         .flex-parent(1, 1, auto);
 
         > div.vis-editor-config {
-          .flex(1, 1, auto);
-          overflow-y: auto;
+          .flex-parent(1, 1, 1px);
+          overflow: auto;
         }
 
         > .vis-edit-sidebar-buttons {
@@ -157,7 +157,7 @@
     }
 
     &-group {
-      .flex-parent();
+      .flex-parent(0, 1, auto);
       color: @text-color;
     }
 
@@ -298,6 +298,10 @@
     }
   }
 
+  vis-editor-agg-group {
+    .flex-parent(0, 1, auto);
+  }
+
   &-canvas {
     .flex(1, 0, @screen-md-min - @vis-editor-sidebar-basis);
     .display(flex);
@@ -337,7 +341,8 @@ vis-editor-agg-group,
 vis-editor-agg,
 vis-editor-agg-params,
 vis-editor-agg-param,
-vis-editor-vis-options {
+vis-editor-vis-options,
+vis-editor-vis-options > * {
   .flex-parent();
 }
 
