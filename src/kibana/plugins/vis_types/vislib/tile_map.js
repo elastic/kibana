@@ -4,20 +4,7 @@ define(function (require) {
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
     var _ = require('lodash');
-
-    var canDesaturate = (function () {
-      var e = document.createElement('img');
-      var rules = ['webkitFilter', 'mozFilter', 'msFilter', 'filter'];
-      var test = 'grayscale(1)';
-      rules.forEach(function (rule) { e.style[rule] = test; });
-
-      document.body.appendChild(e);
-      var styles = window.getComputedStyle(e);
-      var can = _(styles).pick(rules).contains(test);
-      document.body.removeChild(e);
-
-      return can;
-    }());
+    var supports = require('utils/supports');
 
     return new VislibVisType({
       name: 'tile_map',
@@ -37,7 +24,7 @@ define(function (require) {
           addTooltip: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
-        canDesaturate: canDesaturate,
+        canDesaturate: !!supports.cssFilters,
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       listeners: {
