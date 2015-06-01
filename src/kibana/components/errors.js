@@ -250,12 +250,12 @@ define(function (require) {
   /**
    * error thrown when no results are returned from an elasticsearch query
    */
-  errors.CannotLogScaleNegVals = function CannotLogScaleNegVals() {
+  errors.InvalidLogScaleValues = function InvalidLogScaleValues() {
     KbnError.call(this,
       'Values less than 1 cannot be displayed on a log scale',
-      errors.CannotLogScaleNegVals);
+      errors.InvalidLogScaleValues);
   };
-  inherits(errors.CannotLogScaleNegVals, KbnError);
+  inherits(errors.InvalidLogScaleValues, KbnError);
 
   return errors;
 });

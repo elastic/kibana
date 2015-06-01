@@ -298,7 +298,7 @@ define(function (require) {
           }
 
           if (self._attr.scale === 'log' && self._invalidLogScaleValues(data)) {
-            throw new errors.CannotLogScaleNegVals();
+            throw new errors.InvalidLogScaleValues();
           }
 
           if (width < minWidth || height < minHeight) {
