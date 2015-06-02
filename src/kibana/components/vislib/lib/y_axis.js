@@ -125,6 +125,10 @@ define(function (require) {
       return this.yScale;
     };
 
+    YAxis.prototype.getScaleType = function () {
+      return this._attr.scale;
+    };
+
     YAxis.prototype.tickFormat = function () {
       var isPercentage = this._attr.mode === 'percentage';
       if (isPercentage) return d3.format('%');
