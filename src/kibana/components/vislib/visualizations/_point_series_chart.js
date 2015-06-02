@@ -39,10 +39,10 @@ define(function (require) {
       }));
     };
 
-    PointSeriesChart.prototype._checkForNegVals = function (data) {
+    PointSeriesChart.prototype._invalidLogScaleValues = function (data) {
       return data.series && data.series.some(function (d) {
         return d.values && d.values.some(function (e) {
-          return e.y < 0;
+          return e.y < 1;
         });
       });
     };
