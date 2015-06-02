@@ -10,27 +10,23 @@ define(function (require) {
   var histogramColumns = require('vislib_fixtures/mock_data/histogram/_columns');
   var rangeRows = require('vislib_fixtures/mock_data/range/_rows');
   var termSeries = require('vislib_fixtures/mock_data/terms/_series');
-  var dateHistogramArray = [
-    seriesPos,
-    seriesPosNeg,
-    seriesNeg,
-    histogramColumns,
-    rangeRows,
-    termSeries,
-  ];
-  var names = [
-    'series pos',
-    'series pos neg',
-    'series neg',
-    'histogram columns',
-    'range rows',
-    'term series',
+
+  var dataTypes = [
+    ['series pos', seriesPos],
+    ['series pos neg', seriesPosNeg],
+    ['series neg', seriesNeg],
+    ['histogram columns', histogramColumns],
+    ['range rows', rangeRows],
+    ['term series', termSeries],
   ];
 
   angular.module('LineChartFactory', ['kibana']);
 
-  dateHistogramArray.forEach(function (data, i) {
-    describe('VisLib Line Chart Test Suite for ' + names[i] + ' Data', function () {
+  dataTypes.forEach(function (type, i) {
+    var name = type[0];
+    var data = type[1];
+
+    describe('VisLib Line Chart Test Suite for ' + name + ' Data', function () {
       var vis;
       var visLibParams = {
         type: 'line',
