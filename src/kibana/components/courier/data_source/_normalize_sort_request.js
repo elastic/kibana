@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  return function normalizeSortRequest() {
+  return function normalizeSortRequest(config) {
     /**
      * Decorate queries with default parameters
      * @param {query} query object
@@ -8,10 +8,7 @@ define(function (require) {
      */
     return function (sortObject) {
       if (!_.isArray(sortObject)) sortObject = [sortObject];
-      var defaultSortOptions = {
-        // Will cause indices missing the field to use null as sort.
-        unmapped_type: 'boolean'
-      };
+      var defaultSortOptions = config.get('sort:options');
 
       /*
         Normalize the sort description to the more verbose format:
