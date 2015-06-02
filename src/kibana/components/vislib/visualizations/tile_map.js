@@ -179,11 +179,12 @@ define(function (require) {
                 position: 'topleft'
               },
               onAdd: function (map) {
-                $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>');
-                $(fitContainer).on('click', function (e) {
+                $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+                .on('click', function (e) {
                   e.preventDefault();
                   self.fitBounds(map, mapData.features);
                 });
+
                 return fitContainer;
               },
               onRemove: function (map) {
