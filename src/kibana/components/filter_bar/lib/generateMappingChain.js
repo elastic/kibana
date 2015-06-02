@@ -14,7 +14,7 @@ define(function (require) {
             if (result === filter) {
               return next(filter);
             }
-            throw result;
+            return Promise.reject(result);
           });
         };
       };

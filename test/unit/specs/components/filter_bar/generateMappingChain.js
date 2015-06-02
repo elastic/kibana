@@ -15,13 +15,14 @@ define(function (require) {
 
 
       it('should create a chaning function which calls the next function if the promise is rejected', function (done) {
+        var filter = {};
         var mapping = sinon.stub();
-        mapping.returns(Promise.reject());
+        mapping.returns(Promise.reject(filter));
         var mappingChainFn = generateMappingChain(mapping);
         var next = sinon.stub();
         next.returns(Promise.resolve('good'));
         var chain = mappingChainFn(next);
-        chain({}).then(function (result) {
+        chain(filter).then(function (result) {
           expect(result).to.be('good');
           sinon.assert.calledOnce(next);
           done();
