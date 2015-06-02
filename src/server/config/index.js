@@ -44,6 +44,9 @@ try {
   packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
 }
 
+var requestTimeout = kibana.request_timeout || 0;
+var pingTimeout = kibana.ping_timeout == null ? requestTimeout : kibana.ping_timeout;
+
 var config = module.exports = {
   port                    : kibana.port,
   host                    : kibana.host,
@@ -59,8 +62,8 @@ var config = module.exports = {
   buildNum                : '@@buildNum',
   maxSockets              : kibana.maxSockets,
   log_file                : kibana.log_file,
-  request_timeout         : kibana.request_timeout,
-  ping_timeout            : kibana.ping_timeout
+  request_timeout         : requestTimeout,
+  ping_timeout            : pingTimeout
 };
 
 config.plugins = listPlugins(config);
