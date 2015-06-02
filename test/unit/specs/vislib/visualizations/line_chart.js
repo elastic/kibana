@@ -28,18 +28,19 @@ define(function (require) {
 
     describe('VisLib Line Chart Test Suite for ' + name + ' Data', function () {
       var vis;
-      var visLibParams = {
-        type: 'line',
-        addLegend: true,
-        addTooltip: true,
-        drawLinesBetweenPoints: true
-      };
 
       beforeEach(function () {
         module('LineChartFactory');
       });
 
       beforeEach(function () {
+        var visLibParams = {
+          type: 'line',
+          addLegend: true,
+          addTooltip: true,
+          drawLinesBetweenPoints: true
+        };
+
         inject(function (Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
