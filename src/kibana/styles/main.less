@@ -512,3 +512,15 @@ fieldset {
   border: 1px solid @input-border;
   border-radius: @input-border-radius;
 }
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0px;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
