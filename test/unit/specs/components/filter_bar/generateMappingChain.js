@@ -76,13 +76,14 @@ define(function (require) {
       });
 
       it('should resolve result for the next function', function (done) {
+        var filter = {};
         var mapping = sinon.stub();
-        mapping.returns(Promise.reject());
+        mapping.returns(Promise.reject(filter));
         var mappingChainFn = generateMappingChain(mapping);
         var next = sinon.stub();
         next.returns(Promise.resolve({ key: 'test', value: 'example' }));
         var chain = mappingChainFn(next);
-        chain({}).then(function (result) {
+        chain(filter).then(function (result) {
           sinon.assert.calledOnce(mapping);
           sinon.assert.calledOnce(next);
           expect(result).to.eql({ key: 'test', value: 'example' });
@@ -92,13 +93,14 @@ define(function (require) {
       });
 
       it('should reject with an error if no functions match', function (done) {
+        var filter = {};
         var mapping = sinon.stub();
-        mapping.returns(Promise.reject());
+        mapping.returns(Promise.reject(filter));
         var mappingChainFn = generateMappingChain(mapping);
         var chain = mappingChainFn();
-        chain({}).catch(function (err) {
+        chain(filter).catch(function (err) {
           expect(err).to.be.an(Error);
-          expect(err.message).to.be('No mapping have been found for filter.');
+          expect(err.message).to.be('No mappings have been found for filter.');
           done();
         });
         $rootScope.$apply();
