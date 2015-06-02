@@ -4,7 +4,6 @@ define(function (require) {
 
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
-    var validateData = Private(require('components/vislib/lib/validate_visdata'));
     var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('components/vislib/visualizations/vis_types'));
     var errors = require('errors');
