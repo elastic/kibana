@@ -180,7 +180,8 @@ define(function (require) {
               },
               onAdd: function (map) {
                 $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" href="#" title="Fit Data Bounds"></a>');
-                $(fitContainer).on('click', function () {
+                $(fitContainer).on('click', function (e) {
+                  e.preventDefault();
                   self.fitBounds(map, mapData.features);
                 });
                 return fitContainer;
