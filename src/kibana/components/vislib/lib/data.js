@@ -118,7 +118,9 @@ define(function (require) {
       var data = this.chartData();
       var dataLengths = {};
 
-      dataLengths.charts = data.length;
+      dataLengths.charts = data.filter(function (d) {
+        return d.series.length;
+      }).length;
       dataLengths.stacks = data[i].series.length;
       dataLengths.values = data[i].series[j].values.length;
 
@@ -351,7 +353,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        min = Math.min(min, self._getYExtent(chart, 'min', getValue));
+        min = Math.min(min, self._getYExtent(chart, 'min', getValue) || Infinity);
       });
 
       return min;
@@ -387,7 +389,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        max = Math.max(max, self._getYExtent(chart, 'max', getValue));
+        max = Math.max(max, self._getYExtent(chart, 'max', getValue) || -Infinity);
       });
 
       return max;

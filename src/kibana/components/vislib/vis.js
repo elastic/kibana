@@ -52,7 +52,7 @@ define(function (require) {
         this._runOnHandler('destroy');
       }
 
-      this.data = validateData(data, chartType);
+      this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
     };
