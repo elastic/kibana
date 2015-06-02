@@ -10,6 +10,7 @@ var target = url.parse(config.elasticsearch);
 var join = require('path').join;
 var logger = require('../lib/logger');
 var validateRequest = require('../lib/validateRequest');
+var addIndexTypeHeader = require('../lib/addIndexTypeHeader');
 
 
 // If the target is backed by an SSL and a CA is provided via the config
@@ -110,6 +111,9 @@ router.use(function (req, res, next) {
   if (config.kibana.elasticsearch_preserve_host) {
     options.headers.host = target.host;
   }
+
+  // Add more headers to identify indexes on proxies
+  addIndexTypeHeader(config, path, options);
 
   // Create the request and pipe the response
   var esRequest = request(options);
