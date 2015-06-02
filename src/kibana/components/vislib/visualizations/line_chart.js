@@ -312,19 +312,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          if (yMin < 0) {
-
-            // Draw line at yScale 0 value
-            svg.append('line')
-              .attr('class', 'zero-line')
-              .attr('x1', 0)
-              .attr('y1', yScale(0))
-              .attr('x2', width)
-              .attr('y2', yScale(0))
-              .style('stroke', '#ddd')
-              .style('stroke-width', 1);
-          }
-
           self.addClipPath(svg, width, height);
           if (self._attr.drawLinesBetweenPoints) {
             lines = self.addLines(svg, data.series);
