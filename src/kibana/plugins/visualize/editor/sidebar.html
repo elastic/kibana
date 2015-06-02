@@ -51,22 +51,16 @@
     </nav>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
-      <ul class="list-unstyled">
-        <!-- metrics -->
-        <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
+      <!-- metrics -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
 
-        <!-- buckets -->
-        <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
-      </ul>
+      <!-- buckets -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
     </div>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'options'">
-      <ul class="list-unstyled">
-
-        <!-- vis options -->
-        <vis-editor-vis-options vis="vis"></vis-editor-vis-options>
-
-      </ul>
+      <!-- vis options -->
+      <vis-editor-vis-options vis="vis"></vis-editor-vis-options>
     </div>
 
 

@@ -32,6 +32,7 @@
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
     "server": "node ./src/server/bin/kibana.js",
+    "postinstall": "bower install",
     "precommit": "grunt lintStagedFiles"
   },
   "repository": {
