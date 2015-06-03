@@ -71,8 +71,8 @@ define(function (require) {
       throw new Error(message);
     };
 
-    YAxis.prototype._throwCannotLogScaleNegVals = function () {
-      throw new errors.CannotLogScaleNegVals();
+    YAxis.prototype._throwLogScaleValuesError = function () {
+      throw new errors.InvalidLogScaleValues();
     };
 
     /**
@@ -100,7 +100,7 @@ define(function (require) {
      * @returns {*[]}
      */
     YAxis.prototype._logDomain = function (min, max) {
-      if (min < 0 || max < 0) return this._throwCannotLogScaleNegVals();
+      if (min < 0 || max < 0) return this._throwLogScaleValuesError();
       return [Math.max(1, min), max];
     };
 
@@ -123,6 +123,10 @@ define(function (require) {
       // Prevents bars from going off the chart when the y extents are within the domain range
       if (this._attr.type === 'histogram') this.yScale.clamp(true);
       return this.yScale;
+    };
+
+    YAxis.prototype.getScaleType = function () {
+      return this._attr.scale;
     };
 
     YAxis.prototype.tickFormat = function () {

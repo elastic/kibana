@@ -23,11 +23,7 @@ define(function (require) {
           row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
 
           var percent;
-          if (i > 0) {
-            var parentMetric = rows[i - 1].metric;
-            percent = row.metric / parentMetric;
-          }
-          else if (row.item.percentOfGroup != null) {
+          if (row.item.percentOfGroup != null) {
             percent = row.item.percentOfGroup;
           }
 

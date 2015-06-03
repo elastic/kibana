@@ -52,7 +52,6 @@ define(function (require) {
       }
 
       describe('with table ' + JSON.stringify(tableOpts), function () {
-
         it('outputs a chart', function () {
           var table = makeTable();
           var chart = makeSingleChart(table);
@@ -87,7 +86,7 @@ define(function (require) {
 
           // props
           expect(props).to.be.an('object');
-          expect(props).to.only.have.keys('min', 'max');
+          expect(props).to.have.keys('min', 'max');
 
           // props.min
           expect(props.min).to.be.a('number');
@@ -100,6 +99,8 @@ define(function (require) {
 
         describe('properties', function () {
           it('includes one feature per row in the table', function () {
+            this.timeout(0);
+
             var table = makeTable();
             var chart = makeSingleChart(table);
             var geoColI = _.findIndex(table.columns, { aggConfig: aggs.geo });

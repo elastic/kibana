@@ -86,6 +86,14 @@ define(function (require) {
       };
     };
 
+    Vis.prototype.createEditableVis = function () {
+      return this._editableVis || (this._editableVis = this.clone());
+    };
+
+    Vis.prototype.getEditableVis = function () {
+      return this._editableVis || undefined;
+    };
+
     Vis.prototype.clone = function () {
       return new Vis(this.indexPattern, this.getState());
     };

@@ -60,6 +60,10 @@ define(function (require) {
             return agg.vis.indexPattern.timeFieldName;
           },
           onChange: function (agg) {
+            if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
+              delete agg.params.interval;
+            }
+
             setBounds(agg, true);
           }
         },
@@ -86,7 +90,7 @@ define(function (require) {
             var scaleMetrics = interval.scaled && interval.scale < 1;
             if (scaleMetrics) {
               scaleMetrics = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
-                return agg.type.name === 'count' || agg.type.name === 'sum';
+                return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
               });
             }
 

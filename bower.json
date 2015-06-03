@@ -31,7 +31,7 @@
     "bluebird": "~2.1.3",
     "bootstrap": "~3.3.1",
     "d3": "~3.4.8",
-    "elasticsearch": "~3.1.1",
+    "elasticsearch": "~4.1.0",
     "Faker": "~1.1.0",
     "FileSaver": "*",
     "font-awesome": "~4.2.0",
@@ -53,5 +53,9 @@
     "numeral": "~1.5.3",
     "leaflet-draw": "~0.2.4"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "resolutions": {
+    "angular-bootstrap": "~0.12",
+    "elasticsearch": "~4.1.0"
+  }
 }

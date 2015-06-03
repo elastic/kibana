@@ -108,7 +108,11 @@
   <label>
     <input type="checkbox"
     name="isDesaturated"
+    ng-disabled="!vis.type.params.canDesaturate"
     ng-model="vis.params.isDesaturated">
+
     Desaturate map tiles
+
+    <kbn-info info="Reduce the vibrancy of tile colors, this does not work in any version of Internet Explorer"
   </label>
 </div>

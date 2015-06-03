@@ -5,13 +5,11 @@ define(function (require) {
     var L = require('leaflet');
     require('leaflet-heat');
     require('leaflet-draw');
-
-    var Chart = Private(require('components/vislib/visualizations/_chart'));
-
     require('css!components/vislib/styles/main');
 
-    var defaultMapCenter = [15, 5];
+    var Chart = Private(require('components/vislib/visualizations/_chart'));
     var defaultMapZoom = 2;
+    var defaultMapCenter = [15, 5];
 
     // Convenience function to turn around the LngLat recieved from ES
     function cloneAndReverse(arr) {
@@ -37,10 +35,14 @@ define(function (require) {
 
       TileMap.Super.apply(this, arguments);
 
+
       // track the map objects
       this.maps = [];
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
+
+      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || defaultMapZoom;
+      this._attr.mapCenter = _.deepGet(this.geoJson, 'properties.center') || defaultMapCenter;
 
       // add allmin and allmax to geoJson
       var allMinMax = this.getMinMax(handler.data.data);
@@ -68,9 +70,6 @@ define(function (require) {
       var worldBounds = L.latLngBounds([-90, -220], [90, 220]);
 
       return function (selection) {
-        self._attr.mapZoom = self._attr.mapZoom || defaultMapZoom;
-        self._attr.mapCenter = self._attr.mapCenter || defaultMapCenter;
-
         selection.each(function () {
           // add leaflet latLngs to properties for tooltip
           self.addLatLng(self.geoJson);
@@ -130,6 +129,12 @@ define(function (require) {
             self._attr.mapZoom = map.getZoom();
             self._attr.mapCenter = map.getCenter();
 
+            self.events.emit('mapMoveEnd', {
+              chart: self.originalConfig,
+              zoom: self._attr.mapZoom,
+              center: self._attr.mapCenter
+            });
+
             map.removeLayer(featureLayer);
 
             featureLayer = self.markerType(map).addTo(map);
@@ -171,7 +176,7 @@ define(function (require) {
           }
 
           if (mapData && mapData.features.length > 0) {
-            var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
+            var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
 
             // Add button to fit container to points
             var FitControl = L.Control.extend({
@@ -179,10 +184,12 @@ define(function (require) {
                 position: 'topleft'
               },
               onAdd: function (map) {
-                $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-                $(fitContainer).on('click', function () {
+                $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+                .on('click', function (e) {
+                  e.preventDefault();
                   self.fitBounds(map, mapData.features);
                 });
+
                 return fitContainer;
               },
               onRemove: function (map) {

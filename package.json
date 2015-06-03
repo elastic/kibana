@@ -32,6 +32,7 @@
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
     "server": "node ./src/server/bin/kibana.js",
+    "postinstall": "bower install",
     "precommit": "grunt lintStagedFiles"
   },
   "repository": {
@@ -93,7 +94,7 @@
     "marked": "^0.3.2",
     "marked-text-renderer": "^0.1.0",
     "mkdirp": "^0.5.0",
-    "mocha": "~1.20.1",
+    "mocha": "^2.2.5",
     "mocha-screencast-reporter": "~0.1.4",
     "opn": "~1.0.0",
     "path-browserify": "0.0.0",
