@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
-    var defaultPrecision = 3;
+    var defaultPrecision = 2;
 
     function getPrecision(precision) {
       var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
@@ -30,9 +30,30 @@ define(function (require) {
           filterFieldTypes: 'geo_point'
         },
         {
+          name: 'autoPrecision',
+          default: true,
+          write: _.noop
+        },
+        {
+          name: 'mapZoom',
+          write: _.noop
+        },
+        {
+          name: 'mapCenter',
+          write: _.noop
+        },
+        {
           name: 'precision',
           default: defaultPrecision,
           editor: require('text!components/agg_types/controls/precision.html'),
+          controller: function ($scope) {
+            $scope.$watchMulti([
+              'agg.params.autoPrecision',
+              'outputAgg.params.precision'
+            ], function (cur, prev) {
+              if (cur[1]) $scope.agg.params.precision = cur[1];
+            });
+          },
           deserialize: getPrecision,
           write: function (aggConfig, output) {
             output.params.precision = getPrecision(aggConfig.params.precision);

@@ -68,7 +68,7 @@ define(function (require) {
     var savedVis = $route.current.locals.savedVis;
 
     var vis = savedVis.vis;
-    var editableVis = vis.clone();
+    var editableVis = vis.createEditableVis();
     vis.requesting = function () {
       var requesting = editableVis.requesting;
       requesting.call(vis);
@@ -170,6 +170,8 @@ define(function (require) {
         }
 
         if (_.contains(keys, 'vis')) {
+          $state.vis.listeners = _.defaults($state.vis.listeners || {}, vis.listeners);
+
           // only update when we need to, otherwise colors change and we
           // risk loosing an in-progress result
           vis.setState($state.vis);
@@ -194,7 +196,7 @@ define(function (require) {
       // Without this manual emission, we'd miss filters and queries that were on the $state initially
       $state.emit('fetch_with_changes');
 
-      $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
+      $scope.$listen(timefilter, 'fetch', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');

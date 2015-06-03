@@ -18,6 +18,7 @@ define(function (require) {
     });
 
     this.type = SavedVis.type;
+    this.Class = SavedVis;
 
     this.get = function (id) {
       return (new SavedVis(id)).init();

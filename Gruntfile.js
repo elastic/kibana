@@ -16,6 +16,7 @@ module.exports = function (grunt) {
 
     nodeVersion: '0.10.35',
     platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
+    services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
 
     unitTestDir: __dirname + '/test/unit',
     testUtilsDir: __dirname + '/test/utils',

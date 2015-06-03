@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  require('directives/greater_than');
+  require('directives/inequality');
 
   describe('greater_than model validator directive', function () {
     var $compile, $rootScope;
@@ -27,16 +27,16 @@ define(function (require) {
         expect(element.hasClass('ng-valid')).to.be.ok();
       });
 
-      it('should be invalid for 0', function () {
+      it('should be valid for 0', function () {
         $rootScope.value = '0';
         $rootScope.$digest();
-        expect(element.hasClass('ng-invalid')).to.be.ok();
+        expect(element.hasClass('ng-valid')).to.be.ok();
       });
 
-      it('should be invalid for negatives', function () {
+      it('should be valid for negatives', function () {
         $rootScope.value = '-10';
         $rootScope.$digest();
-        expect(element.hasClass('ng-invalid')).to.be.ok();
+        expect(element.hasClass('ng-valid')).to.be.ok();
       });
     });
 

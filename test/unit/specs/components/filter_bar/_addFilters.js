@@ -20,20 +20,24 @@ define(function (require) {
       filters = [
         {
           query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
-          meta: { negate: false, disabled: false }
+          meta: { index: 'logstash-*', negate: false, disabled: false }
         },
         {
           query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
-          meta: { negate: false, disabled: false }
+          meta: { index: 'logstash-*', negate: false, disabled: false }
         },
         {
           query: { match: { '_type': { query: 'nginx', type: 'phrase' } } },
-          meta: { negate: false, disabled: false }
+          meta: { index: 'logstash-*', negate: false, disabled: false }
         }
       ];
     });
 
     beforeEach(function () {
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', require('fixtures/mock_courier'));
+      });
+
       module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
@@ -56,19 +60,31 @@ define(function (require) {
 
     describe('adding filters', function () {
       it('should add filters to appState', function () {
+        $rootScope.$digest();
+
         queryFilter.addFilters(filters);
+        $rootScope.$digest();
+
         expect(appState.filters.length).to.be(3);
         expect(globalState.filters.length).to.be(0);
       });
 
       it('should add filters to globalState', function () {
+        $rootScope.$digest();
+
         queryFilter.addFilters(filters, true);
+        $rootScope.$digest();
+
         expect(appState.filters.length).to.be(0);
         expect(globalState.filters.length).to.be(3);
       });
 
       it('should accept a single filter', function () {
+        $rootScope.$digest();
+
         queryFilter.addFilters(filters[0]);
+        $rootScope.$digest();
+
         expect(appState.filters.length).to.be(1);
         expect(globalState.filters.length).to.be(0);
       });
@@ -76,15 +92,20 @@ define(function (require) {
       it('should fire the update and fetch events', function () {
         var emitSpy = sinon.spy(queryFilter, 'emit');
 
-        // set up the watchers
+        // set up the watchers, add new filters, and crank the digest loop
         $rootScope.$digest();
         queryFilter.addFilters(filters);
-        // trigger the digest loop to fire the watchers
         $rootScope.$digest();
 
+        // updates should trigger state saves
+        expect(appState.save.callCount).to.be(1);
+        expect(globalState.save.callCount).to.be(1);
+
+        // this time, events should be emitted
         expect(emitSpy.callCount).to.be(2);
         expect(emitSpy.firstCall.args[0]).to.be('update');
         expect(emitSpy.secondCall.args[0]).to.be('fetch');
+
       });
     });
 
@@ -92,6 +113,7 @@ define(function (require) {
       it('should de-dupe appState filters being added', function () {
         var newFilter = _.cloneDeep(filters[1]);
         appState.filters = filters;
+        $rootScope.$digest();
         expect(appState.filters.length).to.be(3);
 
         queryFilter.addFilters(newFilter);
@@ -102,6 +124,7 @@ define(function (require) {
       it('should de-dupe globalState filters being added', function () {
         var newFilter = _.cloneDeep(filters[1]);
         globalState.filters = filters;
+        $rootScope.$digest();
         expect(globalState.filters.length).to.be(3);
 
         queryFilter.addFilters(newFilter, true);
@@ -112,10 +135,12 @@ define(function (require) {
       it('should mutate global filters on appState filter changes', function () {
         var idx = 1;
         globalState.filters = filters;
+        $rootScope.$digest();
+
         var appFilter = _.cloneDeep(filters[idx]);
         appFilter.meta.negate = true;
-        // use addFilters here, so custom adding logic can be applied
         queryFilter.addFilters(appFilter);
+        $rootScope.$digest();
 
         var res = queryFilter.getFilters();
         expect(res).to.have.length(3);

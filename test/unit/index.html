@@ -9,9 +9,33 @@
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
     <script>(function () {
-      var COVERAGE = !!(/coverage/i.test(window.location.search));
-      var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
-      var DISABLE_RESIZE_CHECKER = true;
+      /* globals mocha */
+
+      var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
+      var SAUCELABS = window.SAUCELABS = !!(/saucelabs/i.test(window.location.search));
+      var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
+
+      function wrap(obj, method, fn) {
+        var orig = obj[method];
+        return obj[method] = function methodProxy() {
+          return fn.apply(this, [orig].concat([].slice.call(arguments)));
+        };
+      }
+
+      wrap(mocha, 'ui', function (orig, ui) {
+        var ret = orig.call(this, ui);
+
+        var _desc = window.describe;
+        window.describe = wrap(window, 'describe', unwindDescribeArrays);
+        window.describe.only = wrap(_desc, 'only', unwindDescribeArrays);
+        function unwindDescribeArrays(describe, name, body) {
+          if (!body && name && name instanceof Array) {
+            body = name[1]; name = name[0];
+          }
+
+          return describe.call(this, name, body);
+        }
+      });
 
       mocha.setup({
         ui: 'bdd',
@@ -143,6 +167,7 @@
           }
         });
       }
+
 
       if (COVERAGE) {
         setupCoverage(runTests);

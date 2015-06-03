@@ -34,6 +34,10 @@ define(function (require) {
     });
 
     beforeEach(function () {
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', require('fixtures/mock_courier'));
+      });
+
       module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
@@ -78,11 +82,9 @@ define(function (require) {
       it('should fire the update and fetch events', function () {
         var emitSpy = sinon.spy(queryFilter, 'emit');
         appState.filters = filters;
-
-        // set up the watchers
         $rootScope.$digest();
+
         queryFilter.toggleFilter(filters[1]);
-        // trigger the digest loop to fire the watchers
         $rootScope.$digest();
 
         expect(emitSpy.callCount).to.be(2);
@@ -111,7 +113,16 @@ define(function (require) {
         expect(globalState.filters[1].meta.disabled).to.be(true);
         queryFilter.toggleFilter(filters[1], true);
         expect(globalState.filters[1].meta.disabled).to.be(true);
+      });
 
+      it('should work without appState', function () {
+        appState = undefined;
+        globalState.filters = filters;
+
+        expect(globalState.filters[1].meta.disabled).to.be(false);
+        expect(queryFilter.getFilters()).to.have.length(3);
+        queryFilter.toggleFilter(filters[1]);
+        expect(globalState.filters[1].meta.disabled).to.be(true);
       });
     });
 
@@ -151,6 +162,21 @@ define(function (require) {
         });
         _.each(globalState.filters, function (filter) {
           expect(filter.meta.disabled).to.be(false);
+        });
+      });
+
+      it('should work without appState', function () {
+        appState = undefined;
+        globalState.filters = filters;
+
+        _.each(globalState.filters, function (filter) {
+          expect(filter.meta.disabled).to.be(false);
+        });
+
+        queryFilter.toggleAll();
+
+        _.each(globalState.filters, function (filter) {
+          expect(filter.meta.disabled).to.be(true);
         });
       });
     });

@@ -36,6 +36,7 @@ define(function (require) {
       }
 
       this._attr = _.defaults(handler._attr || {}, {});
+      this._addIdentifier = _.bind(this._addIdentifier, this);
     }
 
     /**
@@ -59,10 +60,17 @@ define(function (require) {
      */
     Chart.prototype._addIdentifier = function (selection, labelProp) {
       labelProp = labelProp || 'label';
+      var labels = this.handler.data.labels;
+
+      function resolveLabel(datum) {
+        if (labels.length === 1) return labels[0];
+        if (datum[0]) return datum[0][labelProp];
+        return datum[labelProp];
+      }
+
       selection.each(function (datum) {
-        var label = datum[0] ? datum[0][labelProp] : datum[labelProp];
-        if (label == null) return;
-        dataLabel(this, label);
+        var label = resolveLabel(datum);
+        if (label != null) dataLabel(this, label);
       });
     };
 
@@ -74,6 +82,7 @@ define(function (require) {
     Chart.prototype.destroy = function () {
       var selection = d3.select(this.chartEl);
       this.events.removeAllListeners();
+      if (this.tooltip) this.tooltip.hide();
       selection.remove();
       selection = null;
     };

@@ -17,8 +17,8 @@ define(function (require) {
 
       // segmented request specific state
       this._initFn = initFn;
-      this._totalSize = false;
-      this._remainingSize = false;
+      this._desiredSize = false;
+      this._hitsReceived = 0;
       this._direction = 'desc';
       this._handle = new SegmentedHandle(this);
 
@@ -70,15 +70,8 @@ define(function (require) {
         var index = self._active = self._queue.shift();
 
         params.index = index;
-
-        // Only subtract from remaining size if dealing with the indexPattern's timefield
-        var timefield = self.source.get('index').timeFieldName;
-        if (_.keys(params.body.sort)[0] !== timefield) {
-          self._remainingSize = false;
-        }
-
-        if (self._remainingSize !== false) {
-          params.body.size = self._remainingSize;
+        if (self._desiredSize !== false) {
+          params.body.size = Math.max(self._desiredSize - self._hitsReceived, 0);
         }
 
         return params;
@@ -115,6 +108,35 @@ define(function (require) {
      ** SegmentedReq specific methods
      *********/
 
+    /**
+     * Set the sort direction for the request.
+     *
+     * @param {string} dir - one of 'asc' or 'desc'
+     */
+    SegmentedReq.prototype.setDirection = function (dir) {
+      switch (dir) {
+      case 'asc':
+      case 'desc':
+        return (this._direction = dir);
+      default:
+        throw new TypeError('unkown sort direction "' + dir + '"');
+      }
+    };
+
+    /**
+     * Set the sort total number of documents to
+     * emit
+     *
+     * Setting to false will not limit the documents,
+     * if a number is set the size of the request to es
+     * will be updated on each new request
+     *
+     * @param {number|false}
+     */
+    SegmentedReq.prototype.setSize = function (totalSize) {
+      this._desiredSize = _.parseInt(totalSize) || false;
+    };
+
     SegmentedReq.prototype._createQueue = function () {
       var timeBounds = timefilter.getBounds();
       var indexPattern = this.source.get('index');
@@ -135,18 +157,9 @@ define(function (require) {
         hitCount: this._mergedResp.hits.hits.length
       });
     };
+
     SegmentedReq.prototype._getFlattenedSource = function () {
-      var self = this;
-
-      return self.source._flatten()
-      .then(function (flatSource) {
-        var size = _.parseInt(_.deepGet(flatSource, 'body.size'));
-        if (_.isNumber(size)) {
-          self._totalSize = self._remainingSize = size;
-        }
-
-        return flatSource;
-      });
+      return this.source._flatten();
     };
 
     SegmentedReq.prototype._consumeSegment = function (seg) {
@@ -161,10 +174,7 @@ define(function (require) {
 
       this._mergeSegment(seg);
       this.resp = _.omit(this._mergedResp, '_bucketIndex');
-
-      if (this._remainingSize !== false) {
-        this._remainingSize -= seg.hits.hits.length;
-      }
+      this._hitsReceived += seg.hits.hits.length;
 
       if (firstHits) this._handle.emit('first', seg);
       if (gotHits)   this._handle.emit('segment', seg);

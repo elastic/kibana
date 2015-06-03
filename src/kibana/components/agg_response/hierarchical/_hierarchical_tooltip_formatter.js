@@ -16,18 +16,18 @@ define(function (require) {
         // Collect the current leaf and parents into an array of values
         $tooltipScope.rows = collectBranch(datum);
 
+        var metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
+
         // Map those values to what the tooltipSource.rows format.
         _.forEachRight($tooltipScope.rows, function (row, i, rows) {
           row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
 
           var percent;
-          if (i > 0) {
-            var parentMetric = rows[i - 1].metric;
-            percent = row.metric / parentMetric;
-          }
-          else if (row.item.percentOfGroup != null) {
+          if (row.item.percentOfGroup != null) {
             percent = row.item.percentOfGroup;
           }
+
+          row.metric = metricCol.aggConfig.fieldFormatter()(row.metric);
 
           if (percent != null) {
             row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
@@ -35,8 +35,6 @@ define(function (require) {
 
           return row;
         });
-
-        $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
         $tooltipScope.$apply();
         return $tooltip[0].outerHTML;

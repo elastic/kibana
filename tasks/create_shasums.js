@@ -1,7 +1,8 @@
-var createPackages = require('./create_packages');
+var child_process = require('child_process');
 var Promise = require('bluebird');
-var exec = createPackages.exec;
-var getBaseNames = createPackages.getBaseNames;
+var fs = require('fs');
+var readdir = Promise.promisify(fs.readdir);
+var exec = Promise.promisify(child_process.exec);
 var _ = require('lodash');
 module.exports = function (grunt) {
   grunt.registerTask('create_shasums', function () {
@@ -14,14 +15,12 @@ module.exports = function (grunt) {
       return exec(shacmd, options);
     };
 
-    var filenames = _(getBaseNames(grunt))
-      .map(function (basename) {
-        return [ basename + '.tar.gz', basename + '.zip' ];
-      })
-      .flatten()
-      .value();
-
-    Promise.map(filenames, createShasum).finally(done);
-
+    readdir(target).then(function (files) {
+      // Look for all files in the target dir that are not .sha1.txt files
+      var artifacts = _(files)
+        .reject(function (f) { return /\.sha1\.txt$/.test(f); })
+        .value();
+      return Promise.map(artifacts, createShasum).finally(done);
+    });
   });
 };

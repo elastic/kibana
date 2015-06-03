@@ -461,8 +461,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = obj.aggConfig ? obj.aggConfig.fieldFormatter() : String;
-        names.push({ key: fieldFormatter(obj.name), index: index });
+        names.push({ key: obj.name, index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;

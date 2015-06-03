@@ -250,12 +250,20 @@ define(function (require) {
   /**
    * error thrown when no results are returned from an elasticsearch query
    */
-  errors.CannotLogScaleNegVals = function CannotLogScaleNegVals() {
+  errors.InvalidLogScaleValues = function InvalidLogScaleValues() {
     KbnError.call(this,
-      'Negative values cannot be displayed on a log scale',
-      errors.CannotLogScaleNegVals);
+      'Values less than 1 cannot be displayed on a log scale',
+      errors.InvalidLogScaleValues);
   };
-  inherits(errors.CannotLogScaleNegVals, KbnError);
+  inherits(errors.InvalidLogScaleValues, KbnError);
+
+  /** error thrown when wiggle chart is selected for non linear data */
+  errors.InvalidWiggleSelection = function InvalidWiggleSelection() {
+    KbnError.call(this,
+      'In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.',
+      errors.InvalidWiggleSelection);
+  };
+  inherits(errors.InvalidWiggleSelection, KbnError);
 
   return errors;
 });

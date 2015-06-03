@@ -39,6 +39,14 @@ define(function (require) {
       }));
     };
 
+    PointSeriesChart.prototype._invalidLogScaleValues = function (data) {
+      return data.series && data.series.some(function (d) {
+        return d.values && d.values.some(function (e) {
+          return e.y < 1;
+        });
+      });
+    };
+
     /**
      * Creates rects to show buckets outside of the ordered.min and max, returns rects
      *
@@ -48,12 +56,13 @@ define(function (require) {
      * @returns {D3.Selection}
      */
     PointSeriesChart.prototype.createEndZones = function (svg) {
+      var self = this;
       var xAxis = this.handler.xAxis;
       var xScale = xAxis.xScale;
-      var yScale = xAxis.yScale;
       var ordered = xAxis.ordered;
+      var missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 
-      if (!ordered || ordered.endzones === false) return;
+      if (missingMinMax || ordered.endzones === false) return;
 
       var attr = this.handler._attr;
       var height = attr.height;
@@ -100,18 +109,21 @@ define(function (require) {
 
       function callPlay(event) {
         var boundData = event.target.__data__;
+        var mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
         var wholeBucket = boundData && boundData.x != null;
 
+        // the min and max that the endzones start in
         var min = leftEndzone.w;
         var max = rightEndzone.x;
 
         // bounds of the cursor to consider
-        var xLeft = event.offsetX;
-        var xRight = event.offsetX;
+        var xLeft = mouseChartXCoord;
+        var xRight = mouseChartXCoord;
         if (wholeBucket) {
           xLeft = xScale(boundData.x);
           xRight = xScale(xAxis.addInterval(boundData.x));
         }
+
 
         return {
           wholeBucket: wholeBucket,

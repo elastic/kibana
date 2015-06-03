@@ -17,12 +17,14 @@ define(function (require) {
           showCircles: true,
           smoothLines: false,
           interpolate: 'linear',
+          scale: 'linear',
           drawLinesBetweenPoints: true,
           radiusRatio: 9,
-          scale: 'linear',
-          defaultYExtents: false,
           times: [],
-          addTimeMarker: false
+          addTimeMarker: false,
+          defaultYExtents: false,
+          setYExtents: false,
+          yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],
         editor: require('text!plugins/vis_types/vislib/editors/line.html')

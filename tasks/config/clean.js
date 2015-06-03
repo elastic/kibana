@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  var notIncludedComponents = '{font-awesome,requirejs,zeroclipboard}';
+  var notIncludedComponents = '{font-awesome,requirejs,zeroclipboard,leaflet-draw}';
   return {
     build: '<%= build %>',
     target: '<%= target %>',
@@ -16,6 +16,7 @@ module.exports = function (grunt) {
         '!<%= build %>/kibana/public/bower_components/requirejs/require.js',
         '!<%= build %>/kibana/public/bower_components/font-awesome/fonts',
         '!<%= build %>/kibana/public/bower_components/zeroclipboard/dist',
+        '!<%= build %>/kibana/public/bower_components/leaflet-draw/dist',
 
         // delete the contents of the dist dir, except the ZeroClipboard.swf file
         '<%= build %>/kibana/public/bower_components/zeroclipboard/dist/*',
