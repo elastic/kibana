@@ -189,7 +189,8 @@ define(function (require) {
 
         // get stack and value count for next chart
         this._cache.count.stacks = data[this._cache.index.chart].series.length; // number of stack layers
-        this._cache.count.values = data[this._cache.index.chart].series[this._cache.index.stack].values.length; // number of values
+        this._cache.count.values = this._cache.count.stacks ?
+          data[this._cache.index.chart].series[this._cache.index.stack].values.length : 0; // number of values
       }
     };
 
