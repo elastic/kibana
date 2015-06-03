@@ -59,10 +59,10 @@ define(function (require) {
       var self = this;
       var xAxis = this.handler.xAxis;
       var xScale = xAxis.xScale;
-      var yScale = xAxis.yScale;
       var ordered = xAxis.ordered;
+      var missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 
-      if (!ordered || ordered.endzones === false) return;
+      if (missingMinMax || ordered.endzones === false) return;
 
       var attr = this.handler._attr;
       var height = attr.height;
