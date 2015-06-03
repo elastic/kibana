@@ -3,6 +3,9 @@ module.exports = function (grunt) {
     var done = this.async();
     var config = require('../src/server/config');
     config.quiet = !grunt.option('debug') && !grunt.option('verbose');
+    if (grunt.option('port')) {
+      config.port = config.kibana.port = grunt.option('port');
+    }
     var server = require('../src/server');
 
     server.start(function (err) {
