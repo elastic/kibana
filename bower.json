@@ -23,7 +23,7 @@
     "angular": "1.2.28",
     "angular-bindonce": "~0.3.1",
     "angular-bootstrap": "~0.10.0",
-    "angular-elastic": "~2.3.3",
+    "angular-elastic": "~2.4.2",
     "angular-mocks": "~1.2.14",
     "angular-route": "~1.2.14",
     "angular-ui-ace": "~0.2.3",
