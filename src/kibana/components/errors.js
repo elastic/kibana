@@ -260,7 +260,7 @@ define(function (require) {
   /** error thrown when wiggle chart is selected for non linear data */
   errors.InvalidWiggleSelection = function InvalidWiggleSelection() {
     KbnError.call(this,
-      'The wiggle option can only be used with the Date Histogram or Histogram aggregation.',
+      'In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.',
       errors.InvalidWiggleSelection);
   };
   inherits(errors.InvalidWiggleSelection, KbnError);
