@@ -79,10 +79,10 @@ define(function (require) {
           type: service.type,
           id: $routeParams.id
         })
-        .then(function (resp) {
-          $scope.obj = resp.docs[0];
-          $scope.link = service.urlFor($scope.obj._id);
-          $scope.fields = _.reduce($scope.obj._source, createField, []);
+        .then(function (obj) {
+          $scope.obj = obj;
+          $scope.link = service.urlFor(obj._id);
+          $scope.fields =  _.reduce(obj._source, createField, []);
         })
         .catch(notify.fatal);
 
