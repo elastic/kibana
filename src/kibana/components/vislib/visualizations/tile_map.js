@@ -171,7 +171,7 @@ define(function (require) {
           }
 
           if (mapData && mapData.features.length > 0) {
-            var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
+            var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
 
             // Add button to fit container to points
             var FitControl = L.Control.extend({
@@ -179,10 +179,12 @@ define(function (require) {
                 position: 'topleft'
               },
               onAdd: function (map) {
-                $(fitContainer).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
-                $(fitContainer).on('click', function () {
+                $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+                .on('click', function (e) {
+                  e.preventDefault();
                   self.fitBounds(map, mapData.features);
                 });
+
                 return fitContainer;
               },
               onRemove: function (map) {
