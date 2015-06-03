@@ -355,7 +355,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        min = Math.min(min, self._getYExtent(chart, 'min', getValue) || Infinity);
+        var calculatedMin = self._getYExtent(chart, 'min', getValue);
+        if (calculatedMin !== undefined) {
+          min = Math.min(min, calculatedMin);
+        }
       });
 
       return min;
@@ -391,7 +394,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        max = Math.max(max, self._getYExtent(chart, 'max', getValue) || -Infinity);
+        var calculatedMax = self._getYExtent(chart, 'max', getValue);
+        if (calculatedMax !== undefined) {
+          max = Math.max(max, calculatedMax);
+        }
       });
 
       return max;
