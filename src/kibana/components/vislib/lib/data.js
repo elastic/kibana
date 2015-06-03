@@ -118,9 +118,10 @@ define(function (require) {
       var data = this.chartData();
       var dataLengths = {};
 
-      dataLengths.charts = data.filter(function (d) {
-        return d.series.length;
-      }).length;
+      //dataLengths.charts = data.filter(function (d) {
+      //  return d.series.length;
+      //}).length;
+      dataLengths.charts = data.length;
       dataLengths.stacks = data[i].series.length;
       dataLengths.values = data[i].series[j].values.length;
 
