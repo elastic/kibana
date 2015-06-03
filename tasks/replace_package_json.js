@@ -8,14 +8,9 @@ module.exports = function (grunt) {
       description: pkg.description,
       keywords: pkg.keywords,
       version: pkg.version,
-      buildNum: grunt.config.get('buildNum'),
-      commitSha: grunt.config.get('commitSha'),
-      bin: {
-        kibana: './bin/kibana.sh',
-        'kibana.bat': './bin/kibana.bat'
-      },
-      scripts: {
-        start: 'node ./bin/kibana.js',
+      build: {
+        number: grunt.config.get('buildNum'),
+        sha: grunt.config.get('commitSha')
       },
       repository: pkg.repository,
       dependencies: pkg.dependencies
