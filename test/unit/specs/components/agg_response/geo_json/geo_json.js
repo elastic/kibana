@@ -86,7 +86,7 @@ define(function (require) {
 
           // props
           expect(props).to.be.an('object');
-          expect(props).to.only.have.keys('min', 'max');
+          expect(props).to.have.keys('min', 'max');
 
           // props.min
           expect(props.min).to.be.a('number');

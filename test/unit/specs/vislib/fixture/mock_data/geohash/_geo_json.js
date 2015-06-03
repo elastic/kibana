@@ -1839,7 +1839,9 @@ define(function (require) {
       ],
       'properties': {
         'min': 1,
-        'max': 608
+        'max': 608,
+        'zoom': 2,
+        'center': [5, 15]
       }
     },
   };
