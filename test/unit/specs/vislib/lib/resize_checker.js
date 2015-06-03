@@ -61,7 +61,7 @@ define(function (require) {
     describe('#read', function () {
       it('gets the proper dimensions for the element', function () {
         var dimensions = checker.read();
-        var windowWidth = window.innerWidth;
+        var windowWidth = document.documentElement.clientWidth;
 
         expect(dimensions.w).to.equal(windowWidth);
         expect(dimensions.h).to.equal(0);
