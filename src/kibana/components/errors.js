@@ -257,5 +257,13 @@ define(function (require) {
   };
   inherits(errors.InvalidLogScaleValues, KbnError);
 
+  /** error thrown when wiggle chart is selected for non linear data */
+  errors.InvalidWiggleSelection = function InvalidWiggleSelection() {
+    KbnError.call(this,
+      'The wiggle option can only be used with the Date Histogram or Histogram aggregation.',
+      errors.InvalidWiggleSelection);
+  };
+  inherits(errors.InvalidWiggleSelection, KbnError);
+
   return errors;
 });
