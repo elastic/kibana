@@ -9,7 +9,6 @@ define(function (require) {
     var inputValue = 'Input Text Value';
 
     beforeEach(module('kibana'));
-
     beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
@@ -31,7 +30,10 @@ define(function (require) {
       $rootScope.$digest();
       $timeout.flush();
       selectedEl = document.activeElement;
-      selectedText = window.getSelection().toString();
+      selectedText = selectedEl.value.slice(
+        selectedEl.selectionStart,
+        selectedEl.selectionEnd
+      );
     }
 
 
