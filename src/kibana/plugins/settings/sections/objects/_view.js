@@ -74,14 +74,10 @@ define(function (require) {
 
         $scope.title = inflection.singularize(serviceObj.title);
 
-        es.mget({
-          body: {
-            docs: [{
-              _index: config.file.kibana_index,
-              _type: service.type,
-              _id: $routeParams.id
-            }]
-          }
+        es.get({
+          index: config.file.kibana_index,
+          type: service.type,
+          id: $routeParams.id
         })
         .then(function (resp) {
           $scope.obj = resp.docs[0];
