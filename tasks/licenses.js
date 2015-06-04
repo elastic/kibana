@@ -34,14 +34,17 @@ module.exports = function (grunt) {
 
       if (!checkQueueLength) {
         var licenseStats = _.map(result, processPackage);
-        if (grunt.option('check-validity')) {
-          var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
-          if (invalidLicenses.length) {
-            console.log(invalidLicenses);
-            grunt.fail.warn('Dependencies with non-conforming licenses found', invalidLicenses.length);
-          }
+        var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
+
+        if (grunt.option('only-invalid')) {
+          console.log(invalidLicenses);
         } else {
-          console.log(_.indexBy(licenseStats, 'name'));
+          console.log(licenseStats);
+        }
+
+        if (invalidLicenses.length) {
+          grunt.fail.warn('Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', ') +
+            '. Use --only-invalid for details.', invalidLicenses.length);
         }
         done();
       }
