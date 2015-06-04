@@ -27,7 +27,7 @@ define(function (require) {
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/cell.html')));
-    var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
+    var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!partials/truncate_by_height.html')));
 
     return {
       restrict: 'A',
@@ -105,10 +105,10 @@ define(function (require) {
           }
 
           $scope.columns.forEach(function (column) {
-            newHtmls.push(noWhiteSpace(cellTemplate({
+            newHtmls.push(cellTemplate({
               timefield: false,
               formatted: _displayField(row, column, true)
-            })));
+            }));
           });
 
           var $cells = $el.children();
