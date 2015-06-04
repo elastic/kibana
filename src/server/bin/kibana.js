@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var _ = require('lodash');
-var kibana = require('../');
+var Kibana = require('../');
 var program = require('commander');
 var path = require('path');
 var writePidFile = require('../lib/write_pid_file');
@@ -58,7 +58,8 @@ if (program.config) {
 
 
 // Start the Kibana server with the settings fromt he CLI and YAML file
-kibana.start(settings)
+var kibana = new Kibana(settings);
+kibana.listen()
 .then(writePidFile)
 .catch(function (err) {
   process.exit(1);
