@@ -63,7 +63,7 @@
     "through": "2.3.7"
   },
   "devDependencies": {
-    "bower": "~1.4.1",
+    "bower": "1.4.1",
     "event-stream": "3.1.7",
     "expect.js": "0.3.1",
     "grunt": "0.4.5",
@@ -76,7 +76,7 @@
     "grunt-contrib-less": "0.10.0",
     "grunt-contrib-requirejs": "0.4.4",
     "grunt-contrib-watch": "0.5.3",
-    "grunt-esvm": "0.3.4",
+    "grunt-esvm": "0.3.5",
     "grunt-jscs": "1.8.0",
     "grunt-mocha": "0.4.12",
     "grunt-replace": "0.7.9",
