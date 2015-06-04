@@ -46,6 +46,12 @@ define(function () {
         value: 500,
         description: 'The number of rows to show in the table',
       },
+      'courier:maxSegmentCount': {
+        value: 30,
+        description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
+          'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
+          'cause requests to take much longer to process.'
+      },
       'fields:popularLimit': {
         value: 10,
         description: 'The top N most popular fields to show',
