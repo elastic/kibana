@@ -36,6 +36,9 @@ define(function (require) {
     'stacked'
   ];
 
+  var min;
+  var max;
+
   angular.module('ColumnChartFactory', ['kibana']);
 
   dataArray.forEach(function (data, i) {
@@ -59,6 +62,9 @@ define(function (require) {
 
           vis.on('brush', _.noop);
           vis.render(data);
+
+          min = vis.handler.data.getYMin();
+          max = vis.handler.data.getYMax();
         });
       });
 
@@ -206,10 +212,9 @@ define(function (require) {
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
             var yAxis = chart.handler.yAxis;
-            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
-            expect(yAxis.domain[0]).to.equal(yVals[0]);
-            expect(yAxis.domain[1]).to.equal(yVals[1]);
+            expect(yAxis.domain[0]).to.equal(min);
+            expect(yAxis.domain[1]).to.equal(max);
           });
         });
       });
