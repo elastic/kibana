@@ -1,3 +1,3 @@
-<td <%= timefield ? 'class="discover-table-timefield"  width="1%"' : 'class="discover-table-datafield"' %>>
+<td <%= timefield ? 'class="discover-table-timefield"  width="1%"' : sourcefield ? 'class="discover-table-sourcefield"' : 'class="discover-table-datafield"' %>>
   <%= formatted %>
 </td>
