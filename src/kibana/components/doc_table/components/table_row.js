@@ -23,9 +23,10 @@ define(function (require) {
    * ```
    */
   module.directive('kbnTableRow', function ($compile) {
+    var noWhiteSpace = require('utils/no_white_space');
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
-    var cellTemplate = _.template(require('text!components/doc_table/components/table_row/cell.html'));
+    var cellTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/cell.html')));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
 
     return {
@@ -104,10 +105,10 @@ define(function (require) {
           }
 
           $scope.columns.forEach(function (column) {
-            newHtmls.push(cellTemplate({
+            newHtmls.push(noWhiteSpace(cellTemplate({
               timefield: false,
               formatted: _displayField(row, column, true)
-            }));
+            })));
           });
 
           var $cells = $el.children();
