@@ -64,6 +64,7 @@
     "through": "^2.3.6"
   },
   "devDependencies": {
+    "bower-license": "^0.2.6",
     "connect": "~2.19.5",
     "event-stream": "~3.1.5",
     "expect.js": "~0.3.1",
@@ -89,6 +90,7 @@
     "http-proxy": "~1.8.1",
     "husky": "~0.6.0",
     "istanbul": "~0.2.4",
+    "license-checker": "^3.0.3",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
     "marked": "^0.3.2",
@@ -96,6 +98,7 @@
     "mkdirp": "^0.5.0",
     "mocha": "^2.2.5",
     "mocha-screencast-reporter": "~0.1.4",
+    "npm": "^2.11.0",
     "opn": "~1.0.0",
     "path-browserify": "0.0.0",
     "progress": "^1.1.8",
