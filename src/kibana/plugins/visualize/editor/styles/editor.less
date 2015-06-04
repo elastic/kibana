@@ -91,7 +91,12 @@
         .flex-parent(1, 1, auto);
 
         > div.vis-editor-config {
-          .flex-parent(1, 1, 1px);
+          @media (min-width: @screen-md-min) {
+            .flex-parent(1, 1, 1px);
+          }
+          @media (max-width: @screen-md-min) {
+            .flex-parent(1, 1, auto);
+          }
           overflow: auto;
         }
 
