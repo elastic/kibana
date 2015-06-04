@@ -331,7 +331,6 @@ define(function (require) {
       }
 
       $scope.updateTime();
-
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
       segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
 
