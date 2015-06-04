@@ -64,6 +64,7 @@
     "through": "^2.3.6"
   },
   "devDependencies": {
+    "bower": "~1.4.1",
     "connect": "~2.19.5",
     "event-stream": "~3.1.5",
     "expect.js": "~0.3.1",
