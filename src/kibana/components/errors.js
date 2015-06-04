@@ -257,5 +257,13 @@ define(function (require) {
   };
   inherits(errors.InvalidLogScaleValues, KbnError);
 
+  /** error thrown when wiggle chart is selected for non linear data */
+  errors.InvalidWiggleSelection = function InvalidWiggleSelection() {
+    KbnError.call(this,
+      'In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.',
+      errors.InvalidWiggleSelection);
+  };
+  inherits(errors.InvalidWiggleSelection, KbnError);
+
   return errors;
 });
