@@ -28,11 +28,9 @@ define(function (require) {
 
         if (y >= 0) {
           d.y0 = currentStackOffsets[1];
-          d.y = y;
           currentStackOffsets[1] += y;
         } else {
-          d.y0 = currentStackOffsets[0] + y;
-          d.y = -y;
+          d.y0 = currentStackOffsets[0];
           currentStackOffsets[0] += y;
         }
       };
