@@ -118,12 +118,9 @@ define(function (require) {
       var data = this.chartData();
       var dataLengths = {};
 
-      //dataLengths.charts = data.filter(function (d) {
-      //  return d.series.length;
-      //}).length;
       dataLengths.charts = data.length;
-      dataLengths.stacks = data[i].series.length;
-      dataLengths.values = data[i].series[j].values.length;
+      dataLengths.stacks = dataLengths.charts ? data[i].series.length : 0;
+      dataLengths.values = dataLengths.stacks ? data[i].series[j].values.length : 0;
 
       return dataLengths;
     };
