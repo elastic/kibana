@@ -12,11 +12,14 @@ var plugins = function (dir) {
 
 var cache;
 
-module.exports = function (config) {
+module.exports = function (server) {
+  var config = server.config();
   if (!cache) {
     var bundled_plugin_ids = config.get('kibana.bundledPluginIds') || [];
     var bundled_plugins = plugins(config.get('kibana.bundledPluginsFolder'));
-    var external_plugins = plugins(config.get('kibana.externalPluginsFolder'));
+    var external_plugins = _(server.plugins).map(function (plugin, name) {
+      return plugin.self && plugin.self.publicPlugins || [];
+    }).flatten().value();
     cache = bundled_plugin_ids.concat(bundled_plugins, external_plugins);
   }
   return cache;

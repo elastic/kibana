@@ -15,10 +15,18 @@ module.exports = function (globPath) {
     }
 
     // has a public folder?
-    var publicPath = join(path.dirname(file), 'public');
+    var publicPath = module.publicPath || join(path.dirname(file), 'public');
     if (checkPath(publicPath)) {
       module.publicPath = publicPath;
+      if (!module.publicPlugins) {
+        module.publicPlugins = glob.sync(join(publicPath, 'plugins', '*', 'index.js'));
+        module.publicPlugins = module.publicPlugins.map(function (file) {
+          console.log(publicPath);
+          return file.replace(publicPath, module.name).replace(/\.js$/, '');
+        });
+      }
     }
+
     return module;
   });
 };

@@ -55,6 +55,7 @@ module.exports = function (server, plugins) {
     return new Promise(function (resolve, reject) {
       var register = function (server, options, next) {
         plugin.server = server;
+        plugin.server.expose('self', plugin);
         status.createStatus(plugin);
         Promise.try(plugin.init, [server, options], plugin).nodeify(next);
       };
