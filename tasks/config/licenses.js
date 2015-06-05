@@ -24,8 +24,10 @@ module.exports = function (grunt) {
         'Public-Domain'
       ],
       overrides: {
+        'assert-plus@0.1.5': ['MIT'],
         'angular-bootstrap@0.10.0': ['MIT'],
         'angular-ui-ace@0.2.3': ['MIT'],
+        'commander@2.2.0': ['MIT'],
         'leaflet@0.7.2': ['BSD-2-Clause'],
         'moment-timezone@0.0.6': ['MIT'],
         'zeroclipboard@2.2.0': ['MIT'],
