@@ -12,7 +12,6 @@
       /* globals mocha */
 
       var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
-      var SAUCELABS = window.SAUCELABS = !!(/saucelabs/i.test(window.location.search));
       var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
 
       function wrap(obj, method, fn) {
@@ -54,9 +53,7 @@
           sinon: '../../test/utils/sinon',
           bluebird: 'bower_components/bluebird/js/browser/bluebird',
           angular: 'bower_components/angular-mocks/angular-mocks',
-          angular_src: 'bower_components/angular/angular',
-          screencast_reporter_css: '../../node_modules/mocha-screencast-reporter/screencast-reporter',
-          ScreencastReporter: '../../node_modules/mocha-screencast-reporter/screencast-reporter'
+          angular_src: 'bower_components/angular/angular'
         },
         shim: {
           angular_src: {
@@ -90,16 +87,6 @@
           'test_utils/istanbul_reporter/reporter'
         ], function (IstanbulReporter) {
           mocha.reporter(IstanbulReporter);
-          done();
-        });
-      }
-
-      function setupSaucelabsReporter(done) {
-        require([
-          'ScreencastReporter',
-          'css!screencast_reporter_css'
-        ], function (ScreencastReporter) {
-          mocha.reporter(ScreencastReporter);
           done();
         });
       }
@@ -169,15 +156,8 @@
       }
 
 
-      if (COVERAGE) {
-        setupCoverage(runTests);
-      }
-      else if (SAUCELABS) {
-        setupSaucelabsReporter(runTests);
-      }
-      else {
-        runTests();
-      }
+      if (COVERAGE) setupCoverage(runTests);
+      else runTests();
 
     })();</script>
   </head>
