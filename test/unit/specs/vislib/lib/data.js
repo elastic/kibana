@@ -4,7 +4,8 @@ define(function (require) {
 
   var Data;
   var dataSeries = require('vislib_fixtures/mock_data/date_histogram/_series');
-  var stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
+  var dataSeriesNeg = require('vislib_fixtures/mock_data/date_histogram/_series_neg');
+  var dataStacked = require('vislib_fixtures/mock_data/stacked/_stacked');
 
   var seriesData = {
     'label': '',
@@ -185,13 +186,16 @@ define(function (require) {
 
     describe('getYMin method', function () {
       var visData;
-      var stackedVisData;
+      var visDataNeg;
+      var visDataStacked;
       var minValue = 4;
-      var stackedMinValue = 15;
+      var minValueNeg = -41;
+      var minValueStacked = 15;
 
       beforeEach(function () {
         visData = new Data(dataSeries, {});
-        stackedVisData = new Data(stackedDataSeries, { type: 'histogram' });
+        visDataNeg = new Data(dataSeriesNeg, {});
+        visDataStacked = new Data(dataStacked, { type: 'histogram' });
       });
 
       // The first value in the time series is less than the min date in the
@@ -199,14 +203,15 @@ define(function (require) {
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain min value', function () {
         expect(visData.getYMin()).to.be(minValue);
-        expect(stackedVisData.getYMin()).to.be(stackedMinValue);
+        expect(visDataNeg.getYMin()).to.be(minValueNeg);
+        expect(visDataStacked.getYMin()).to.be(minValueStacked);
       });
 
       it('should have a minimum date value that is greater than the max value within the date range', function () {
         var series = _.pluck(visData.chartData(), 'series');
-        var stackedSeries = _.pluck(stackedVisData.chartData(), 'series');
+        var stackedSeries = _.pluck(visDataStacked.chartData(), 'series');
         expect(_.min(series.values, function (d) { return d.x; })).to.be.greaterThan(minValue);
-        expect(_.min(stackedSeries.values, function (d) { return d.x; })).to.be.greaterThan(stackedMinValue);
+        expect(_.min(stackedSeries.values, function (d) { return d.x; })).to.be.greaterThan(minValueStacked);
       });
 
       it('allows passing a value getter for manipulating the values considered', function () {
@@ -218,13 +223,16 @@ define(function (require) {
 
     describe('getYMax method', function () {
       var visData;
-      var stackedVisData;
+      var visDataNeg;
+      var visDataStacked;
       var maxValue = 41;
-      var stackedMaxValue = 115;
+      var maxValueNeg = -4;
+      var maxValueStacked = 115;
 
       beforeEach(function () {
         visData = new Data(dataSeries, {});
-        stackedVisData = new Data(stackedDataSeries, { type: 'histogram' });
+        visDataNeg = new Data(dataSeriesNeg, {});
+        visDataStacked = new Data(dataStacked, { type: 'histogram' });
       });
 
       // The first value in the time series is less than the min date in the
@@ -232,14 +240,15 @@ define(function (require) {
       // when calculating the Y max value since it falls outside of the range.
       it('should return the Y domain min value', function () {
         expect(visData.getYMax()).to.be(maxValue);
-        expect(stackedVisData.getYMax()).to.be(stackedMaxValue);
+        expect(visDataNeg.getYMax()).to.be(maxValueNeg);
+        expect(visDataStacked.getYMax()).to.be(maxValueStacked);
       });
 
       it('should have a minimum date value that is greater than the max value within the date range', function () {
         var series = _.pluck(visData.chartData(), 'series');
-        var stackedSeries = _.pluck(stackedVisData.chartData(), 'series');
+        var stackedSeries = _.pluck(visDataStacked.chartData(), 'series');
         expect(_.min(series, function (d) { return d.x; })).to.be.greaterThan(maxValue);
-        expect(_.min(stackedSeries, function (d) { return d.x; })).to.be.greaterThan(stackedMaxValue);
+        expect(_.min(stackedSeries, function (d) { return d.x; })).to.be.greaterThan(maxValueStacked);
       });
 
       it('allows passing a value getter for manipulating the values considered', function () {
