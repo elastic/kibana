@@ -185,9 +185,9 @@ define(function (require) {
         }
 
         // get stack and value count for next chart
-        this._cache.count.stacks = data[this._cache.index.chart].series.length; // number of stack layers
-        this._cache.count.values = this._cache.count.stacks ?
-          data[this._cache.index.chart].series[this._cache.index.stack].values.length : 0; // number of values
+        var chartSeries = data[this._cache.index.chart].series;
+        this._cache.count.stacks = chartSeries.length;
+        this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
       }
     };
 
@@ -353,7 +353,7 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
         var calculatedMin = self._getYExtent(chart, 'min', getValue);
-        if (calculatedMin !== undefined) {
+        if (!_.isUndefined(calculatedMin)) {
           min = Math.min(min, calculatedMin);
         }
       });
@@ -392,7 +392,7 @@ define(function (require) {
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
         var calculatedMax = self._getYExtent(chart, 'max', getValue);
-        if (calculatedMax !== undefined) {
+        if (!_.isUndefined(calculatedMax)) {
           max = Math.max(max, calculatedMax);
         }
       });
