@@ -21,7 +21,10 @@ define(function (require) {
         _timestamp: {
           indexed: true,
           type: 'date'
-        }
+        },
+        _index: { type: 'string' },
+        _type: { type: 'string' },
+        _id: { type: 'string' }
       };
 
       if (!mapping.index || mapping.index === 'no') {
