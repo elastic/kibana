@@ -16,23 +16,24 @@ define(function (require) {
     }
 
     PointSeriesChart.prototype._stackMixedValues = function (stackCount) {
-      var currentStackOffsets = [];
+      var currentStackOffsets = [0, 0];
       var currentStackIndex = 0;
 
       return function (d, y0, y) {
-        if (currentStackIndex++ % stackCount === 0) {
+        var firstStack = currentStackIndex % stackCount === 0;
+        var lastStack = ++currentStackIndex === stackCount;
 
-          // if the current stack index has reached the final stack, reset the stack count
+        if (firstStack) {
           currentStackOffsets = [0, 0];
         }
 
+        if (lastStack) currentStackIndex = 0;
+
         if (y >= 0) {
           d.y0 = currentStackOffsets[1];
-          d.y = y;
           currentStackOffsets[1] += y;
         } else {
-          d.y0 = currentStackOffsets[0] + y;
-          d.y = -y;
+          d.y0 = currentStackOffsets[0];
           currentStackOffsets[0] += y;
         }
       };
