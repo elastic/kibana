@@ -77,6 +77,9 @@
       // margin-bottom: (@input-height-base * 2) - 3;
     }
 
+    nav {
+      border-radius: 0px;
+    }
 
     .sidebar-item {
       border-top: 0 !important;
@@ -91,8 +94,13 @@
         .flex-parent(1, 1, auto);
 
         > div.vis-editor-config {
-          .flex-parent(1, 1, 1px);
-          overflow: auto;
+          @media (min-width: @screen-md-min) {
+            .flex-parent(1, 1, 1px);
+            overflow: auto;
+          }
+          @media (max-width: @screen-md-min) {
+            .flex-parent(1, 1, auto);
+          }
         }
 
         > .vis-edit-sidebar-buttons {

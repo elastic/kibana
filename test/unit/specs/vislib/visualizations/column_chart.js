@@ -11,41 +11,31 @@ define(function (require) {
   var termsColumns = require('vislib_fixtures/mock_data/terms/_columns');
   //var histogramRows = require('vislib_fixtures/mock_data/histogram/_rows');
   var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
-  var dataArray = [
-    series,
-    seriesPosNeg,
-    seriesNeg,
-    termsColumns,
-    //histogramRows,
-    stackedSeries
-  ];
-  var names = [
-    'series',
-    'series with positive and negative values',
-    'series with negative values',
-    'terms columns',
-    //'histogram rows',
-    'stackedSeries'
-  ];
-  var modes = [
-    'stacked',
-    'stacked',
-    'stacked',
-    'grouped',
-    //'percentage',
-    'stacked'
+
+  // tuple, with the format [description, mode, data]
+  var dataTypesArray = [
+    ['series', 'stacked', series],
+    ['series with positive and negative values', 'stacked', seriesPosNeg],
+    ['series with negative values', 'stacked', seriesNeg],
+    ['terms columns', 'grouped', termsColumns],
+    // ['histogram rows', 'percentage', histogramRows],
+    ['stackedSeries', 'stacked', stackedSeries],
   ];
 
   angular.module('ColumnChartFactory', ['kibana']);
 
-  dataArray.forEach(function (data, i) {
-    describe('VisLib Column Chart Test Suite for ' + names[i] + ' Data', function () {
+  dataTypesArray.forEach(function (dataType, i) {
+    var name = dataType[0];
+    var mode = dataType[1];
+    var data = dataType[2];
+
+    describe('VisLib Column Chart Test Suite for ' + name + ' Data', function () {
       var vis;
       var visLibParams = {
         type: 'histogram',
         addLegend: true,
         addTooltip: true,
-        mode: modes[i]
+        mode: mode
       };
 
       beforeEach(function () {
@@ -206,10 +196,11 @@ define(function (require) {
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
             var yAxis = chart.handler.yAxis;
-            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+            var min = vis.handler.data.getYMin();
+            var max = vis.handler.data.getYMax();
 
-            expect(yAxis.domain[0]).to.equal(yVals[0]);
-            expect(yAxis.domain[1]).to.equal(yVals[1]);
+            expect(yAxis.domain[0]).to.equal(min);
+            expect(yAxis.domain[1]).to.equal(max);
           });
         });
       });
