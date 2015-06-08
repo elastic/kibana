@@ -27,7 +27,7 @@
     "angular-mocks": "1.4.0",
     "angular-route": "1.4.0",
     "angular-ui-ace": "0.2.3",
-    "bluebird": "~2.1.3",
+    "bluebird": "2.1.3",
     "bootstrap": "3.3.4",
     "d3": "3.4.13",
     "elasticsearch": "4.1.0",
