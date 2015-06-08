@@ -1,6 +1,6 @@
 <kbn-settings-app section="indices">
   <kbn-settings-indices>
-    <div ng-controller="settingsIndicesEdit" bindonce>
+    <div ng-controller="settingsIndicesEdit">
       <div class="page-header">
         <kbn-settings-index-header
           index-pattern="indexPattern"
@@ -10,7 +10,7 @@
         </kbn-settings-index-header>
 
         <p>
-          This page lists every field in the <strong>{{indexPattern.id}}</strong>
+          This page lists every field in the <strong>{{::indexPattern.id}}</strong>
           index and the field's associated core type as recorded by Elasticsearch.
           While this list allows you to view the core type of each field, changing
           field types must be done using Elasticsearch's
@@ -20,7 +20,7 @@
           </a>
         </p>
         <div ng-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
-          This index uses a <strong>Time-based index pattern</strong> which repeats <span bo-text="indexPattern.getInterval().display"></span>
+          This index uses a <strong>Time-based index pattern</strong> which repeats <span ng-bind="::indexPattern.getInterval().display"></span>
         </div>
         <div ng-if="conflictFields.length" class="alert alert-warning">
           <strong>Mapping conflict!</strong> {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.

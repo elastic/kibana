@@ -1,6 +1,6 @@
 <kbn-notifications list="notifList"></kbn-notifications>
 <div class="content" style="display: none;">
-  <nav ng-class="{show: appEmbedded === false}" bindonce class="hide navbar navbar-inverse navbar-static-top">
+  <nav ng-class="{show: appEmbedded === false}" class="hide navbar navbar-inverse navbar-static-top">
     <div class="navbar-header">
       <button ng-click="showCollapsed = !showCollapsed" type="button" class="navbar-toggle">
         <span class="sr-only">Toggle navigation</span>
@@ -17,8 +17,8 @@
     <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
       <ul class="nav navbar-nav" role="navigation">
         <li aria-label="Kibana Barcode Logo" class="logo hidden-xs"></li>
-        <li ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}">
-          <a ng-href="#{{app === activeApp ? app.rootPath : app.lastPath}}" bo-text="app.name"></a>
+        <li ng-repeat="app in ::apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}">
+          <a ng-href="#{{app === activeApp ? app.rootPath : app.lastPath}}" ng-bind="::app.name"></a>
         </li>
       </ul>
 

@@ -46,7 +46,7 @@
               <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
                 <ul class="list-unstyled">
                   <li ng-repeat="option in list">
-                    <a ng-click="setQuick(option.from, option.to)" bo-text="option.display"></a>
+                    <a ng-click="setQuick(option.from, option.to)" ng-bind="::option.display"></a>
                   </li>
                 </ul>
               </div>
