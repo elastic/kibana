@@ -72,7 +72,7 @@ define(function (require) {
         {
           name: 'interval',
           type: 'optioned',
-          deserialize: function (state, agg) {
+          deserialize: function (state) {
             var interval = _.find(intervalOptions, {val: state});
             return interval || _.find(intervalOptions, function (option) {
               // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
