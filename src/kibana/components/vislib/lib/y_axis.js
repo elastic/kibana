@@ -61,9 +61,10 @@ define(function (require) {
       var min = domain[0];
       var max = domain[1];
 
+      if (this._isUserDefined()) return this._validateUserExtents(domain);
+      if (this._isYExtents()) return domain;
       if (this._attr.scale === 'log') return this._logDomain(min, max); // Negative values cannot be displayed with a log scale.
       if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
-      if (this._isUserDefined()) return this._validateUserExtents(domain);
       return domain;
     };
 
