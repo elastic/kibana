@@ -75,10 +75,10 @@ define(function (require) {
           deserialize: function (state, agg) {
             var interval = _.find(intervalOptions, {val: state});
             return interval || _.find(intervalOptions, function (option) {
-                // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
-                // but this maps the old values to the new values
-                return Number(moment.duration(1, state)) === Number(moment.duration(1, option.val));
-              });
+              // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
+              // but this maps the old values to the new values
+              return Number(moment.duration(1, state)) === Number(moment.duration(1, option.val));
+            });
           },
           default: 'auto',
           options: intervalOptions,
