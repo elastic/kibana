@@ -1,4 +1,4 @@
-# Kibana 4.0.3
+# Kibana 4.0.4-SNAPSHOT
 
 [![Build Status](http://travis-ci.org/elastic/kibana.svg?branch=4.0)](http://travis-ci.org/elastic/kibana?branch=4.0)
 
