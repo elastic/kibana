@@ -101,7 +101,7 @@ define(function (require) {
      */
     YAxis.prototype._logDomain = function (min, max) {
       if (min < 0 || max < 0) return this._throwLogScaleValuesError();
-      return [Math.max(1, min), max];
+      return [1, max];
     };
 
     /**
