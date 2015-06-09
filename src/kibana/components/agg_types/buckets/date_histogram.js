@@ -5,6 +5,7 @@ define(function (require) {
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var TimeBuckets = Private(require('components/time_buckets/time_buckets'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/date_histogram'));
+    var intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
 
     var tzOffset = moment().format('Z');
 
@@ -71,8 +72,16 @@ define(function (require) {
         {
           name: 'interval',
           type: 'optioned',
+          deserialize: function (state) {
+            var interval = _.find(intervalOptions, {val: state});
+            return interval || _.find(intervalOptions, function (option) {
+              // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
+              // but this maps the old values to the new values
+              return Number(moment.duration(1, state)) === Number(moment.duration(1, option.val));
+            });
+          },
           default: 'auto',
-          options: Private(require('components/agg_types/buckets/_interval_options')),
+          options: intervalOptions,
           editor: require('text!components/agg_types/controls/interval.html'),
           onRequest: function (agg) {
             setBounds(agg, true);
