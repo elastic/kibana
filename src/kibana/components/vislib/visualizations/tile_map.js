@@ -655,7 +655,7 @@ define(function (require) {
         return this._div;
       };
       label.update = function () {
-        this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
+        this._div.innerHTML = '<h2>' + _.escape(mapLabel) + '</h2>';
       };
       label.addTo(map);
     };

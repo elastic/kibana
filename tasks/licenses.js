@@ -17,7 +17,7 @@ module.exports = function (grunt) {
     function processPackage(info, dependency) {
       var pkgInfo = {};
       pkgInfo.name = dependency;
-      pkgInfo.licenses = config.overrides[dependency] || info.licenses;
+      pkgInfo.licenses = config.overrides[dependency] || (info && info.licenses);
       pkgInfo.licenses = _.isArray(pkgInfo.licenses) ? pkgInfo.licenses : [pkgInfo.licenses];
       pkgInfo.valid = (function () {
         if (_.intersection(pkgInfo.licenses, config.licenses).length > 0) {
