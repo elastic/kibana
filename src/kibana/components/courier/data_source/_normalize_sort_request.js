@@ -6,7 +6,7 @@ define(function (require) {
      * @param {query} query object
      * @returns {object}
      */
-    return function (sortObject) {
+    return function (sortObject, indexPattern) {
       if (!_.isArray(sortObject)) sortObject = [sortObject];
       var defaultSortOptions = config.get('sort:options');
 
@@ -17,11 +17,26 @@ define(function (require) {
       _.each(sortObject, function (sortable) {
         var sortField = _.keys(sortable)[0];
         var sortValue = sortable[sortField];
-        if (_.isString(sortValue)) {
-          sortValue = sortable[sortField] = { order: sortValue };
+        var indexField = indexPattern.fields.byName[sortField];
+
+        if (indexField && indexField.scripted && indexField.sortable) {
+          var direction = sortValue;
+          delete(sortable[sortField]);
+          sortField = '_script';
+
+          sortValue = sortable[sortField] = {
+            script: indexField.script,
+            type: indexField.type,
+            order: direction
+          };
+        } else {
+          if (_.isString(sortValue)) {
+            sortValue = sortable[sortField] = { order: sortValue };
+          }
+          _.defaults(sortValue, defaultSortOptions);
         }
-        _.defaults(sortValue, defaultSortOptions);
       });
+
       return sortObject;
     };
   };
