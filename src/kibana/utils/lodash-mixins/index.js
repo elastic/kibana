@@ -10,7 +10,11 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src').runInContext(window);
-  require('utils/_mixins_chainable')(_);
-  require('utils/_mixins_notchainable')(_);
+  require('utils/lodash-mixins/string')(_);
+  require('utils/lodash-mixins/lang')(_);
+  require('utils/lodash-mixins/object')(_);
+  require('utils/lodash-mixins/collection')(_);
+  require('utils/lodash-mixins/function')(_);
+  require('utils/lodash-mixins/oop')(_);
   return _;
 });

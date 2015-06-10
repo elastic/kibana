@@ -6,7 +6,7 @@ require.config({
     routes: 'utils/routes/index',
     errors: 'components/errors',
     modules: 'utils/modules',
-    lodash: 'utils/_mixins',
+    lodash: 'utils/lodash-mixins/index',
 
     // bower_components
     'angular-bindonce': 'bower_components/angular-bindonce/bindonce',
