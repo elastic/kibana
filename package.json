@@ -12,7 +12,7 @@
   ],
   "private": false,
   "version": "4.2.0-snapshot",
-  "main": "src/server/app.js",
+  "main": "src/server/index.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
