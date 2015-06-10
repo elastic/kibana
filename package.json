@@ -52,7 +52,7 @@
     "glob": "^4.3.2",
     "http-auth": "^2.2.5",
     "js-yaml": "^3.2.5",
-    "lodash": "^2.4.1",
+    "lodash": "^3.9.3",
     "request": "^2.40.0",
     "requirefrom": "^0.2.0",
     "semver": "^4.2.0",

@@ -47,7 +47,6 @@
     "require-css": "0.1.8",
     "requirejs": "2.1.18",
     "requirejs-text": "2.0.14",
-    "lodash-deep": "spenceralger/lodash-deep#1a7eca8344",
     "marked": "0.3.3",
     "numeral": "1.5.3",
     "leaflet-draw": "0.2.4"

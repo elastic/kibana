@@ -9,8 +9,7 @@ define(function (require) {
    * this module, which provides a modified version
    * of lodash.
    */
-  var _ = require('lodash_src');
-  require('lodash-deep')(_);
+  var _ = require('lodash_src').runInContext(window);
   _.mixin(require('utils/_mixins_chainable'), { chain: true });
   _.mixin(require('utils/_mixins_notchainable'), { chain: false });
 
