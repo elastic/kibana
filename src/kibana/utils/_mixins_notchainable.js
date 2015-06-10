@@ -10,20 +10,19 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src');
+  var classExtensions = require('utils/_classExtensions');
   var DOT_PREFIX_RE = /(.).+?\./g;
 
   return {
     /**
-     * Check if an object or class implements a behavior
+     * Add class-related behavior to a function, currently this
+     * only attaches an .inherits() method.
      *
-     * @param  {Class|obj} instClass - Class or instance to test
-     * @param  {behavior} behavior - behavior to test for
-     * @return {Boolean}
+     * @param  {Constructor} ClassConstructor - The function that should be extended
+     * @return {Constructor} - the constructor passed in;
      */
-    hasBehavior: function (instClass, behavior) {
-      if (_.isObject(instClass)) instClass = instClass.constructor;
-      if (!_.isFunction(instClass) || !behavior) return;
-      return _.contains(instClass.$$_behaviors, behavior);
+    class: function (ClassConstructor) {
+      return Object.defineProperties(ClassConstructor, classExtensions);
     },
 
     /**
