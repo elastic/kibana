@@ -60,8 +60,12 @@ define(function (require) {
           order: direction
         }
       };
-      var result = normalizeSortRequest([sortState], indexPattern);
 
+      var result = normalizeSortRequest(sortState, indexPattern);
+      expect(result).to.eql([normalizedSort]);
+
+      sortState[fieldName] = { order: direction };
+      result = normalizeSortRequest([sortState], indexPattern);
       expect(result).to.eql([normalizedSort]);
     });
 
