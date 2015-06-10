@@ -72,6 +72,7 @@ define(function (require) {
         params.index = index;
         if (self._desiredSize !== false) {
           params.body.size = Math.max(self._desiredSize - self._hitsReceived, 0);
+          if (params.body.size === 0) params.search_type = 'count';
         }
 
         return params;
