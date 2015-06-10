@@ -41,8 +41,8 @@ define(function (require) {
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
 
-      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || defaultMapZoom;
-      this._attr.mapCenter = _.deepGet(this.geoJson, 'properties.center') || defaultMapCenter;
+      this._attr.mapZoom = _.get(this.geoJson, 'properties.zoom') || defaultMapZoom;
+      this._attr.mapCenter = _.get(this.geoJson, 'properties.center') || defaultMapCenter;
 
       // add allmin and allmax to geoJson
       var allMinMax = this.getMinMax(handler.data.data);

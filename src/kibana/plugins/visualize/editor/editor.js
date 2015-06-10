@@ -137,7 +137,7 @@ define(function (require) {
         $scope.responseValueAggs = null;
         try {
           $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
-            return _.deepGet(agg, 'schema.group') === 'metrics';
+            return _.get(agg, 'schema.group') === 'metrics';
           });
         } catch (e) {
           // this can fail when the agg.type is changed but the

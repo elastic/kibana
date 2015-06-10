@@ -30,7 +30,7 @@ require.config({
     jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
     'leaflet-draw': 'bower_components/leaflet-draw/dist/leaflet.draw',
-    lodash_src: 'bower_components/lodash/dist/lodash',
+    lodash_src: 'bower_components/lodash/lodash',
     'lodash-deep': 'bower_components/lodash-deep/factory',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
