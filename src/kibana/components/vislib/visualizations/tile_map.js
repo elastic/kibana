@@ -461,7 +461,7 @@ define(function (require) {
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
-          var value = feature.properties.value;
+          var value = Math.abs(feature.properties.value);
           var scaledRadius = self.radiusScale(value, max, zoom, precision) * scaleFactor;
           return L.circleMarker(latlng).setRadius(scaledRadius);
         },
