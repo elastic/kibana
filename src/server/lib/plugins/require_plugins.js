@@ -21,7 +21,6 @@ module.exports = function (globPath) {
       if (!module.publicPlugins) {
         module.publicPlugins = glob.sync(join(publicPath, 'plugins', '*', 'index.js'));
         module.publicPlugins = module.publicPlugins.map(function (file) {
-          console.log(publicPath);
           return file.replace(publicPath, module.name).replace(/\.js$/, '');
         });
       }
