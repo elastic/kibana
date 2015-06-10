@@ -40,7 +40,7 @@
     "leaflet": "0.7.3",
     "Leaflet.heat": "Leaflet/Leaflet.heat#627ede7c11bbe43",
     "lesshat": "3.0.2",
-    "lodash": "2.4.2",
+    "lodash": "3.9.3",
     "moment": "2.9.0",
     "moment-timezone": "0.0.6",
     "ng-clip": "0.2.6",
