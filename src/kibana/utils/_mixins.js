@@ -10,8 +10,7 @@ define(function (require) {
    * of lodash.
    */
   var _ = require('lodash_src').runInContext(window);
-  _.mixin(require('utils/_mixins_chainable'), { chain: true });
-  _.mixin(require('utils/_mixins_notchainable'), { chain: false });
-
+  require('utils/_mixins_chainable')(_);
+  require('utils/_mixins_notchainable')(_);
   return _;
 });
