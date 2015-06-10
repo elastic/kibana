@@ -6,7 +6,7 @@ define(function (require) {
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var DocRequest = Private(require('components/courier/fetch/request/doc'));
 
-    _(DocSource).inherits(SourceAbstract);
+    _.class(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {
       DocSource.Super.call(this, initialState);
     }

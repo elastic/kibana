@@ -27,7 +27,7 @@ define(function (require) {
      * @param chartEl {HTMLElement} HTML element to which the map will be appended
      * @param chartData {Object} Elasticsearch query results for this map
      */
-    _(TileMap).inherits(Chart);
+    _.class(TileMap).inherits(Chart);
     function TileMap(handler, chartEl, chartData) {
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);

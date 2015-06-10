@@ -24,7 +24,7 @@ define(function (require) {
      * @class ResizeChecker
      * @param {HtmlElement} el - the element to track the size of
      */
-    _(ResizeChecker).inherits(EventEmitter);
+    _.class(ResizeChecker).inherits(EventEmitter);
     function ResizeChecker(el) {
       ResizeChecker.Super.call(this);
 

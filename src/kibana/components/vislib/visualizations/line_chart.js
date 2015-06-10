@@ -18,7 +18,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(LineChart).inherits(PointSeriesChart);
+    _.class(LineChart).inherits(PointSeriesChart);
     function LineChart(handler, chartEl, chartData) {
       if (!(this instanceof LineChart)) {
         return new LineChart(handler, chartEl, chartData);

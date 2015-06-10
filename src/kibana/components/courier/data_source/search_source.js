@@ -8,7 +8,7 @@ define(function (require) {
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
     var normalizeSortRequest = Private(require('components/courier/data_source/_normalize_sort_request'));
 
-    _(SearchSource).inherits(SourceAbstract);
+    _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
       SearchSource.Super.call(this, initialState);
     }

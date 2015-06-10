@@ -17,7 +17,7 @@
       return obj.isValid() ? obj : stringTime;
     }
 
-    _(Timefilter).inherits(Events);
+    _.class(Timefilter).inherits(Events);
     function Timefilter() {
       Timefilter.Super.call(this);
 

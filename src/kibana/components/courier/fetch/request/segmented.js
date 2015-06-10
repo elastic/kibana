@@ -9,7 +9,7 @@ define(function (require) {
       location: 'Segmented Fetch'
     });
 
-    _(SegmentedReq).inherits(SearchReq);
+    _.class(SegmentedReq).inherits(SearchReq);
     function SegmentedReq(source, defer, initFn) {
       SearchReq.call(this, source, defer);
 

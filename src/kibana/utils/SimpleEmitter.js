@@ -8,7 +8,7 @@ define(function (require) {
    *
    * @class
    */
-  _(SimpleEmitter).inherits(BaseObject);
+  _.class(SimpleEmitter).inherits(BaseObject);
   function SimpleEmitter() {
     this._listeners = {};
   }

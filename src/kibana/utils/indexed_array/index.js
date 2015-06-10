@@ -27,7 +27,7 @@ define(function (require) {
    *                                       that this IndexedArray should not be modified. It's modification
    *                                       methods are also removed
    */
-  _(IndexedArray).inherits(Array);
+  _.class(IndexedArray).inherits(Array);
   function IndexedArray(config) {
     IndexedArray.Super.call(this);
 

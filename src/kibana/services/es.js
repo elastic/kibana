@@ -16,7 +16,7 @@ define(function (require) {
 
           // esFactory automatically injects the AngularConnector to the config
           // https://github.com/elastic/elasticsearch-js/blob/master/src/lib/connectors/angular.js
-          _(CustomAngularConnector).inherits(config.connectionClass);
+          _.class(CustomAngularConnector).inherits(config.connectionClass);
           function CustomAngularConnector(host, config) {
             CustomAngularConnector.Super.call(this, host, config);
 

@@ -6,7 +6,7 @@ define(function (require) {
 
     AggConfig.aggTypes = Private(require('components/agg_types/index'));
 
-    _(AggConfigs).inherits(IndexedArray);
+    _.class(AggConfigs).inherits(IndexedArray);
     function AggConfigs(vis, configStates) {
       var self = this;
       self.vis = vis;
