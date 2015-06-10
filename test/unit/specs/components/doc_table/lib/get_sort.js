@@ -43,32 +43,6 @@ define(function (require) {
         expect(getSort(['foo'], indexPattern)).to.eql({_score: 'desc'});
         expect(getSort({foo: 'bar'}, indexPattern)).to.eql({_score: 'desc'});
       });
-
-      it('should provide script based sorting for scripted fields', function () {
-        expect(getSort(['script number', 'asc'], indexPattern)).to.eql({
-          _script: {
-            script: '1234',
-            type: 'number',
-            order: 'asc'
-          }
-        });
-
-        expect(getSort(['script string', 'asc'], indexPattern)).to.eql({
-          _script: {
-            script: '\'i am a string\'',
-            type: 'string',
-            order: 'asc'
-          }
-        });
-      });
-
-      it('should mimic normal sorting given a third truthy parameter', function () {
-        expect(getSort(['script number', 'asc'], indexPattern, true)).to.eql({ 'script number': 'asc' });
-      });
-
-      it('should sort by the default when passed an unsortable scripted field', function () {
-        expect(getSort(['script murmur3', 'asc'], indexPattern)).to.eql(defaultSort);
-      });
     });
 
     describe('getSort.array function', function () {
@@ -78,10 +52,6 @@ define(function (require) {
 
       it('should return an array for sortable fields', function () {
         expect(getSort.array(['bytes', 'desc'], indexPattern)).to.eql([ 'bytes', 'desc' ]);
-      });
-
-      it('should return an array for scripted fields', function () {
-        expect(getSort.array(['script string', 'asc'], indexPattern)).to.eql([ 'script string', 'asc' ]);
       });
     });
   });
