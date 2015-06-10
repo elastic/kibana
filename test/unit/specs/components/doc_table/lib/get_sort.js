@@ -4,14 +4,13 @@ define(function (require) {
   var indexPattern;
 
   describe('docTable', function () {
+    beforeEach(module('kibana'));
+
+    beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    }));
+
     describe('getSort function', function () {
-
-      beforeEach(module('kibana'));
-
-      beforeEach(inject(function (Private, _$rootScope_, Promise) {
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      }));
-
       it('should be a function', function () {
         expect(getSort).to.be.a(Function);
       });
@@ -63,8 +62,26 @@ define(function (require) {
         });
       });
 
+      it('should mimic normal sorting given a third truthy parameter', function () {
+        expect(getSort(['script number', 'asc'], indexPattern, true)).to.eql({ 'script number': 'asc' });
+      });
+
       it('should sort by the default when passed an unsortable scripted field', function () {
         expect(getSort(['script murmur3', 'asc'], indexPattern)).to.eql(defaultSort);
+      });
+    });
+
+    describe('getSort.array function', function () {
+      it('should have an array method', function () {
+        expect(getSort.array).to.be.a(Function);
+      });
+
+      it('should return an array for sortable fields', function () {
+        expect(getSort.array(['bytes', 'desc'], indexPattern)).to.eql([ 'bytes', 'desc' ]);
+      });
+
+      it('should return an array for scripted fields', function () {
+        expect(getSort.array(['script string', 'asc'], indexPattern)).to.eql([ 'script string', 'asc' ]);
       });
     });
   });
