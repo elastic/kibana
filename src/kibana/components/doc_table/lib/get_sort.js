@@ -5,9 +5,10 @@ define(function (require) {
    * Take a sorting array and make it into an object
    * @param {array} 2 item array [fieldToSort, directionToSort]
    * @param {object} indexPattern used for determining default sort
+   * @param {boolean} asDefaultSort always return an object as { fieldName: direction }
    * @returns {object} a sort object suitable for returning to elasticsearch
    */
-  function getSort(sort, indexPattern) {
+  function getSort(sort, indexPattern, asDefaultSort) {
     var sortObj = {};
     var field, direction;
 
@@ -36,7 +37,7 @@ define(function (require) {
 
     if (field) {
       // sorting on a scripted field requires the script value
-      if (field.scripted) {
+      if (field.scripted && !asDefaultSort) {
         sortObj._script = {
           script: field.script,
           type: field.type,
@@ -53,7 +54,7 @@ define(function (require) {
   }
 
   getSort.array = function (sort, indexPattern) {
-    return _(getSort(sort, indexPattern)).pairs().pop();
+    return _(getSort(sort, indexPattern, true)).pairs().pop();
   };
 
   return getSort;
