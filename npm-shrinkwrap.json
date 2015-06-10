@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "version": "4.1.0",
+  "version": "4.1.1-snapshot",
   "dependencies": {
     "ansicolors": {
       "version": "0.3.2",
@@ -146,13 +146,13 @@
       }
     },
     "compression": {
-      "version": "1.4.4",
+      "version": "1.5.0",
       "from": "compression@>=1.3.0 <2.0.0",
-      "resolved": "http://registry.npmjs.org/compression/-/compression-1.4.4.tgz",
+      "resolved": "http://registry.npmjs.org/compression/-/compression-1.5.0.tgz",
       "dependencies": {
         "accepts": {
           "version": "1.2.9",
-          "from": "accepts@>=1.2.7 <1.3.0",
+          "from": "accepts@>=1.2.9 <1.3.0",
           "resolved": "http://registry.npmjs.org/accepts/-/accepts-1.2.9.tgz",
           "dependencies": {
             "mime-types": {
@@ -175,13 +175,13 @@
           }
         },
         "bytes": {
-          "version": "1.0.0",
-          "from": "bytes@1.0.0",
-          "resolved": "http://registry.npmjs.org/bytes/-/bytes-1.0.0.tgz"
+          "version": "2.1.0",
+          "from": "bytes@2.1.0",
+          "resolved": "http://registry.npmjs.org/bytes/-/bytes-2.1.0.tgz"
         },
         "compressible": {
           "version": "2.0.3",
-          "from": "compressible@>=2.0.2 <2.1.0",
+          "from": "compressible@>=2.0.3 <2.1.0",
           "resolved": "http://registry.npmjs.org/compressible/-/compressible-2.0.3.tgz",
           "dependencies": {
             "mime-db": {
@@ -235,7 +235,7 @@
     "elasticsearch": {
       "version": "3.1.3",
       "from": "elasticsearch@>=3.1.1 <4.0.0",
-      "resolved": "http://registry.npmjs.org/elasticsearch/-/elasticsearch-3.1.3.tgz",
+      "resolved": "https://registry.npmjs.org/elasticsearch/-/elasticsearch-3.1.3.tgz",
       "dependencies": {
         "chalk": {
           "version": "0.5.1",
@@ -249,7 +249,7 @@
             },
             "escape-string-regexp": {
               "version": "1.0.3",
-              "from": "escape-string-regexp@>=1.0.0 <2.0.0",
+              "from": "escape-string-regexp@>=1.0.2 <2.0.0",
               "resolved": "http://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.3.tgz"
             },
             "has-ansi": {
@@ -259,7 +259,7 @@
               "dependencies": {
                 "ansi-regex": {
                   "version": "0.2.1",
-                  "from": "ansi-regex@>=0.2.0 <0.3.0",
+                  "from": "ansi-regex@>=0.2.1 <0.3.0",
                   "resolved": "http://registry.npmjs.org/ansi-regex/-/ansi-regex-0.2.1.tgz"
                 }
               }
@@ -271,7 +271,7 @@
               "dependencies": {
                 "ansi-regex": {
                   "version": "0.2.1",
-                  "from": "ansi-regex@>=0.2.0 <0.3.0",
+                  "from": "ansi-regex@>=0.2.1 <0.3.0",
                   "resolved": "http://registry.npmjs.org/ansi-regex/-/ansi-regex-0.2.1.tgz"
                 }
               }
@@ -771,7 +771,7 @@
                 },
                 "inherits": {
                   "version": "2.0.1",
-                  "from": "inherits@>=2.0.1 <2.1.0",
+                  "from": "inherits@>=2.0.0 <3.0.0",
                   "resolved": "http://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
                 }
               }
@@ -957,7 +957,7 @@
                   "dependencies": {
                     "ansi-regex": {
                       "version": "1.1.1",
-                      "from": "ansi-regex@>=1.1.0 <2.0.0",
+                      "from": "ansi-regex@>=1.0.0 <2.0.0",
                       "resolved": "http://registry.npmjs.org/ansi-regex/-/ansi-regex-1.1.1.tgz"
                     },
                     "get-stdin": {
