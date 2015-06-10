@@ -20,18 +20,22 @@ define(function (require) {
       }];
     }));
 
-    it('make sure sort is an array', function () {
-      var result = normalizeSortRequest({ someField: 'desc'}, indexPattern);
+    it('should return an array', function () {
+      var sortable = { someField: 'desc'};
+      var result = normalizeSortRequest(sortable, indexPattern);
       expect(result).to.be.an(Array);
       expect(result).to.eql(normalizedSort);
+      // ensure object passed in is not mutated
+      expect(result[0]).to.not.be.equal(sortable);
+      expect(sortable).to.eql({ someField: 'desc'});
     });
 
-    it('makes plain string sort into the more verbose format', function () {
+    it('should make plain string sort into the more verbose format', function () {
       var result = normalizeSortRequest([{ someField: 'desc'}], indexPattern);
       expect(result).to.eql(normalizedSort);
     });
 
-    it('appends default sort options', function () {
+    it('should append default sort options', function () {
       var sortState = [{
         someField: {
           order: 'desc',
