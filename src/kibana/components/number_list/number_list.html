@@ -1,0 +1,34 @@
+<div
+  ng-repeat="value in numberListCntr.getList() track by $index"
+  class="form-group vis-editor-agg-form-row vis-editor-agg-form-row">
+
+  <input
+    ng-model="numberListCntr.getList()[$index]"
+    kbn-number-list-input
+    input-focus
+    class="form-control">
+
+  <button
+    ng-click="numberListCntr.remove($index, 1)"
+    class="btn btn-danger btn-xs"
+    type="button">
+    <i class="fa fa-times"></i>
+  </button>
+
+</div>
+
+<p ng-show="numberListCntr.invalidLength()" class="text-danger text-center">
+  You must specify at least one {{numberListCntr.getUnitName()}}
+</p>
+
+<p ng-show="numberListCntr.undefinedLength()" class="text-primary text-center">
+  <!-- be a bit more polite when the form is first init'd -->
+  Please specify at least one {{numberListCntr.getUnitName()}}
+</p>
+
+<button
+  ng-click="numberListCntr.add()"
+  type="button"
+  class="sidebar-item-button primary">
+  <i class="fa fa-plus"></i> Add {{numberListCntr.getUnitName()}}
+</button>

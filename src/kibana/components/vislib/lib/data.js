@@ -119,8 +119,8 @@ define(function (require) {
       var dataLengths = {};
 
       dataLengths.charts = data.length;
-      dataLengths.stacks = data[i].series.length;
-      dataLengths.values = data[i].series[j].values.length;
+      dataLengths.stacks = dataLengths.charts ? data[i].series.length : 0;
+      dataLengths.values = dataLengths.stacks ? data[i].series[j].values.length : 0;
 
       return dataLengths;
     };
@@ -185,8 +185,9 @@ define(function (require) {
         }
 
         // get stack and value count for next chart
-        this._cache.count.stacks = data[this._cache.index.chart].series.length; // number of stack layers
-        this._cache.count.values = data[this._cache.index.chart].series[this._cache.index.stack].values.length; // number of values
+        var chartSeries = data[this._cache.index.chart].series;
+        this._cache.count.stacks = chartSeries.length;
+        this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
       }
     };
 
@@ -265,18 +266,9 @@ define(function (require) {
      * @param thing {String} Data object key
      * @returns {*} Data object value
      */
-    Data.prototype.get = function (thing) {
-      var data;
-
-      if (this.data.rows) {
-        data = this.data.rows;
-      } else if (this.data.columns) {
-        data = this.data.columns;
-      } else {
-        data = [this.data];
-      }
-
-      return _.pluck(data, thing)[0];
+    Data.prototype.get = function (thing, def) {
+      var source = (this.data.rows || this.data.columns || [this.data])[0];
+      return _.get(source, thing, def);
     };
 
     /**
@@ -360,7 +352,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        min = Math.min(min, self._getYExtent(chart, 'min', getValue));
+        var calculatedMin = self._getYExtent(chart, 'min', getValue);
+        if (!_.isUndefined(calculatedMin)) {
+          min = Math.min(min, calculatedMin);
+        }
       });
 
       return min;
@@ -396,7 +391,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        max = Math.max(max, self._getYExtent(chart, 'max', getValue));
+        var calculatedMax = self._getYExtent(chart, 'max', getValue);
+        if (!_.isUndefined(calculatedMax)) {
+          max = Math.max(max, calculatedMax);
+        }
       });
 
       return max;
@@ -410,7 +408,7 @@ define(function (require) {
      * @returns {*} Array of data objects with x, y, y0 keys
      */
     Data.prototype.stackData = function (series) {
-      // SHould not stack values on line chart
+      // Should not stack values on line chart
       if (this._attr.type === 'line') return series;
       return this._attr.stack(series);
     };
@@ -470,8 +468,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = obj.aggConfig ? obj.aggConfig.fieldFormatter() : String;
-        names.push({ key: fieldFormatter(obj.name), index: index });
+        names.push({ key: obj.name, index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;
@@ -512,30 +509,24 @@ define(function (require) {
     };
 
     /**
-     * Checks whether all pie slices have zero values.
-     * If so, an error is thrown.
+     * Removes zeros from pie chart data
+     * @param slices
+     * @returns {*}
      */
-    Data.prototype._validatePieData = function () {
-      var visData = this.getVisData();
+    Data.prototype._removeZeroSlices = function (slices) {
+      var self = this;
 
-      visData.forEach(function (chartData) {
-        chartData.slices = (function withoutZeroSlices(slices) {
-          if (!slices.children) return slices;
+      if (!slices.children) return slices;
 
-          slices = _.clone(slices);
-          slices.children = slices.children.reduce(function (children, child) {
-            if (child.size !== 0) {
-              children.push(withoutZeroSlices(child));
-            }
-            return children;
-          }, []);
-          return slices;
-        }(chartData.slices));
-
-        if (chartData.slices.children.length === 0) {
-          throw new errors.PieContainsAllZeros();
+      slices = _.clone(slices);
+      slices.children = slices.children.reduce(function (children, child) {
+        if (child.size !== 0) {
+          children.push(self._removeZeroSlices(child));
         }
-      });
+        return children;
+      }, []);
+
+      return slices;
     };
 
     /**
@@ -547,12 +538,12 @@ define(function (require) {
      */
     Data.prototype.pieNames = function () {
       var self = this;
+      var data = this.getVisData();
       var names = [];
 
-      this._validatePieData();
-
-      _.forEach(this.getVisData(), function (obj) {
+      _.forEach(data, function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;
+        obj.slices = self._removeZeroSlices(obj.slices);
 
         _.forEach(self.getNames(obj, columns), function (name) {
           names.push(name);

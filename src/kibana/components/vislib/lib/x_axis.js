@@ -254,7 +254,7 @@ define(function (require) {
 
           div = d3.select(this);
           width = parentWidth / n;
-          height = $(this).height();
+          height = $(this.parentElement).height();
 
           self.validateWidthandHeight(width, height);
 

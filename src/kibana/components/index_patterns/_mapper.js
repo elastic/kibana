@@ -1,5 +1,5 @@
 define(function (require) {
-  return function MapperService(Private, Promise, es, configFile) {
+  return function MapperService(Private, Promise, es, config) {
     var _ = require('lodash');
     var moment = require('moment');
 
@@ -33,7 +33,7 @@ define(function (require) {
 
         if (!skipIndexPatternCache) {
           return es.get({
-            index: configFile.kibana_index,
+            index: config.file.kibana_index,
             type: 'index-pattern',
             id: id,
             _sourceInclude: ['fields']
@@ -51,7 +51,7 @@ define(function (require) {
           promise = self.getIndicesForIndexPattern(indexPattern)
           .then(function (existing) {
             if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-            return existing.matches.slice(-5); // Grab the most recent 5
+            return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
           });
         }
 

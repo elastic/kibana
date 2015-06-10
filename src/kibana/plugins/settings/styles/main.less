@@ -48,12 +48,18 @@ kbn-settings-objects {
       font-weight: normal;
     }
 
-    .delete-all {
+    .btn {
       font-size: 10px;
       margin-left: 20px;
     }
   }
 
+  .header {
+    .title, .controls {
+      padding-right: 1em;
+      display: inline-block;
+    }
+  }
 }
 
 kbn-settings-advanced {
@@ -149,27 +155,29 @@ kbn-settings-objects-view {
       .flex(4, 0, auto);
     }
   }
-
-  .scripted-field-script {
-    font-family: @font-family-monospace;
-  }
 }
 
-kbn-settings-indices .fields {
-  & th:first-child,
-  & td:first-child {
-    width: 35%;
-  }
-}
+kbn-settings-indices {
+  .fields {
+    table {
+      .table-striped()
+    }
 
-kbn-settings-indices .scripted-fields {
-  & header {
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+  }
+
+  .indexed-fields {
+    th:first-child,
+    td:first-child {
+      width: 35%;
+    }
+  }
+
+  .scripted-fields header {
     margin: 5px 0;
-    text-align: right;
-  }
-
-  & th:last-child,
-  & td:last-child {
     text-align: right;
   }
 }

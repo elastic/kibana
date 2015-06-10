@@ -6,7 +6,7 @@ define(function (require) {
   var moment = require('moment');
 
   require('directives/input_datetime');
-  require('directives/greater_than');
+  require('directives/inequality');
   require('components/timepicker/quick_ranges');
   require('components/timepicker/refresh_intervals');
   require('components/timepicker/time_units');
@@ -18,7 +18,8 @@ define(function (require) {
         from: '=',
         to: '=',
         mode: '=',
-        interval: '='
+        interval: '=',
+        activeTab: '='
       },
       template: html,
       controller: function ($scope) {
@@ -28,6 +29,8 @@ define(function (require) {
 
         $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
         $scope.modes = ['quick', 'relative', 'absolute'];
+        $scope.activeTab = $scope.activeTab || 'filter';
+
         if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
 
         $scope.quickLists = _(quickRanges).groupBy('section').values().value();
@@ -137,6 +140,11 @@ define(function (require) {
         };
 
         $scope.setRefreshInterval = function (interval) {
+          interval = _.clone(interval);
+          console.log('before: ' + interval.pause);
+          interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
+
+          console.log('after: ' + interval.pause);
           $scope.interval = interval;
         };
 

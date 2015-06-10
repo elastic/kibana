@@ -1,6 +1,5 @@
 define(function (require) {
   return function PointSeriesTooltipFormatter($compile, $rootScope) {
-    var _ = require('lodash');
     var $ = require('jquery');
 
     var $tooltipScope = $rootScope.$new();

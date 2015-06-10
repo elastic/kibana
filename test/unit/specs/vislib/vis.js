@@ -27,6 +27,7 @@ define(function (require) {
       var beforeEvent = 'click';
       var afterEvent = 'brush';
       var vis;
+      var secondVis;
       var numberOfCharts;
 
       beforeEach(function () {
@@ -36,12 +37,14 @@ define(function (require) {
       beforeEach(function () {
         inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
+          secondVis = Private(require('vislib_fixtures/_vis_fixture'))();
           require('css!components/vislib/styles/main');
         });
       });
 
       afterEach(function () {
         $(vis.el).remove();
+        $(secondVis.el).remove();
         vis = null;
       });
 
@@ -86,11 +89,17 @@ define(function (require) {
 
       describe('destroy Method', function () {
         beforeEach(function () {
-          vis.destroy();
+          vis.render(data);
+          secondVis.render(data);
+          secondVis.destroy();
         });
 
         it('should remove all DOM elements from el', function () {
-          expect($('.vis-wrapper').length).to.be(0);
+          expect($(secondVis.el).find('.vis-wrapper').length).to.be(0);
+        });
+
+        it('should not remove visualizations that have not been destroyed', function () {
+          expect($(vis.el).find('.vis-wrapper').length).to.be(1);
         });
       });
 
@@ -129,11 +138,10 @@ define(function (require) {
         var listener2;
 
         beforeEach(function () {
-          listeners = [];
-          listener1 = function () {};
-          listener2 = function () {};
-          listeners.push(listener1);
-          listeners.push(listener2);
+          listeners = [
+            listener1 = function () {},
+            listener2 = function () {}
+          ];
 
           // Add event and listeners to chart
           listeners.forEach(function (listener) {
@@ -154,35 +162,22 @@ define(function (require) {
           vis.off(afterEvent);
         });
 
-        it('should add an event and its listeners to the _listeners object', function () {
-          // Test for presence of beforeEvent in _listener object
-          expect(vis._listeners[beforeEvent] instanceof Array).to.be(true);
-
-          vis._listeners[beforeEvent].forEach(function (listener, i) {
-            expect(typeof listener.handler).to.be('function');
-            expect(listener.handler).to.be(listeners[i]);
+        it('should add an event and its listeners', function () {
+          listeners.forEach(function (listener) {
+            expect(vis.listeners(beforeEvent)).to.contain(listener);
           });
 
-          vis._listeners[afterEvent].forEach(function (listener, i) {
-            expect(typeof listener.handler).to.be('function');
-            expect(listener.handler).to.be(listeners[i]);
+          listeners.forEach(function (listener) {
+            expect(vis.listeners(afterEvent)).to.contain(listener);
           });
         });
 
-        it('should add an event to the eventTypes.enabled array', function () {
-          vis.eventTypes.enabled.forEach(function (eventType, i) {
-            expect(eventType).to.be(events[i]);
-          });
-        });
-
-        it('should attach an event and its listeners to the chart', function () {
+        it('should cause a listener for each event to be attached to each chart', function () {
           var charts = vis.handler.charts;
 
           charts.forEach(function (chart, i) {
-            expect(typeof chart.on(beforeEvent) === 'function');
-            expect(typeof chart.on(afterEvent) === 'function');
-            expect(chart.on(beforeEvent) === listeners[i]);
-            expect(chart.on(afterEvent) === listeners[i]);
+            expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
+            expect(chart.events.listenerCount(afterEvent)).to.be.above(0);
           });
         });
       });
@@ -224,30 +219,19 @@ define(function (require) {
           vis.off(afterEvent);
         });
 
-        it('should remove a listener from the _listeners[event] array', function () {
+        it('should remove a listener', function () {
           var charts = vis.handler.charts;
 
-          expect(vis._listeners[beforeEvent].length).to.be(1);
-          expect(vis._listeners[afterEvent].length).to.be(1);
+          expect(vis.listeners(beforeEvent)).to.not.contain(listener1);
+          expect(vis.listeners(beforeEvent)).to.contain(listener2);
 
-          // should still have the 2 events in the eventTypes enabled array
-          expect(vis.eventTypes.enabled.length).to.be(2);
-
-          // Test that listener that was not removed is still present
-          vis._listeners[beforeEvent].forEach(function (listener) {
-            expect(typeof listener.handler).to.be('function');
-            expect(listener.handler).to.be(listener2);
-          });
-
-          vis._listeners[afterEvent].forEach(function (listener) {
-            expect(typeof listener.handler).to.be('function');
-            expect(listener.handler).to.be(listener2);
-          });
+          expect(vis.listeners(afterEvent)).to.not.contain(listener1);
+          expect(vis.listeners(afterEvent)).to.contain(listener2);
 
           // Events should still be attached to charts
           charts.forEach(function (chart) {
-            expect(typeof chart.on(beforeEvent)).to.be('function');
-            expect(typeof chart.on(afterEvent)).to.be('function');
+            expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
+            expect(chart.events.listenerCount(afterEvent)).to.be.above(0);
           });
         });
 
@@ -255,28 +239,25 @@ define(function (require) {
           var charts = vis.handler.charts;
           vis.off(afterEvent);
 
-          // should remove 'brush' from _listeners object
-          expect(vis._listeners[afterEvent]).to.be(undefined);
-
-          // should remove 'brush' from eventTypes.enabled array
-          expect(vis.eventTypes.enabled.length).to.be(1);
+          // should remove 'brush' event
+          expect(vis.listeners(beforeEvent)).to.contain(listener2);
+          expect(vis.listeners(afterEvent)).to.not.contain(listener2);
 
           // should remove the event from the charts
           charts.forEach(function (chart) {
-            expect(typeof chart.on(afterEvent)).to.be('undefined');
+            expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
+            expect(chart.events.listenerCount(afterEvent)).to.be(0);
           });
         });
 
-        it('should remove the event from the eventTypes.enabled array as well as ' +
-        'from the chart when the _listeners array has a length of 0', function () {
+        it('should remove the event from the chart when the last listener is removed', function () {
           var charts = vis.handler.charts;
           vis.off(afterEvent, listener2);
 
-          expect(vis._listeners[afterEvent].length).to.be(0);
-          expect(vis.eventTypes.enabled.length).to.be(1);
+          expect(vis.listenerCount(afterEvent)).to.be(0);
 
           charts.forEach(function (chart) {
-            expect(typeof chart.on(afterEvent)).to.be('undefined');
+            expect(chart.events.listenerCount(afterEvent)).to.be(0);
           });
         });
       });

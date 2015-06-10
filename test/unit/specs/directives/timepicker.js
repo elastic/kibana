@@ -52,6 +52,7 @@ define(function (require) {
         ' from="timefilter.time.from"' +
         ' to="timefilter.time.to"' +
         ' mode="timefilter.time.mode"' +
+        ' active-tab="timefilter.timepickerActiveTab"' +
         ' interval="timefilter.refreshInterval">' +
         '</kbn-timepicker>'
       );
@@ -110,6 +111,35 @@ define(function (require) {
         expect($courier.searchLooper.loopInterval()).to.be(1000);
         done();
       });
+
+      it('should disable the looper when paused', function (done) {
+        $scope.setRefreshInterval({ value : 1000, pause: true});
+        $elem.scope().$digest();
+        expect($courier.searchLooper.loopInterval()).to.be(0);
+        expect($scope.interval.value).to.be(1000);
+        done();
+      });
+
+      it('but keep interval.value set', function (done) {
+        $scope.setRefreshInterval({ value : 1000, pause: true});
+        $elem.scope().$digest();
+        expect($scope.interval.value).to.be(1000);
+        done();
+      });
+
+      it('should unpause when setRefreshInterval is called without pause:true', function (done) {
+        $scope.setRefreshInterval({ value : 1000, pause: true});
+        expect($scope.interval.pause).to.be(true);
+
+        $scope.setRefreshInterval({ value : 1000, pause: false});
+        expect($scope.interval.pause).to.be(false);
+
+        $scope.setRefreshInterval({ value : 1000});
+        expect($scope.interval.pause).to.be(false);
+
+        done();
+      });
+
 
       it('should highlight the current active interval', function (done) {
         $scope.setRefreshInterval({ value: 300000 });

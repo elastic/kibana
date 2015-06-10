@@ -1,9 +1,12 @@
-define(function (require) {
+define(function () {
+  var i = 0;
+
   function AggConfigResult(aggConfig, parent, value, key) {
-    this.$parent = parent;
     this.key = key;
     this.value = value;
     this.aggConfig = aggConfig;
+    this.$parent = parent;
+    this.$order = ++i;
 
     if (aggConfig.schema.group === 'buckets') {
       this.type = 'bucket';
@@ -32,8 +35,8 @@ define(function (require) {
     return this.aggConfig.createFilter(this.key);
   };
 
-  AggConfigResult.prototype.toString = function () {
-    return this.aggConfig.fieldFormatter()(this.value);
+  AggConfigResult.prototype.toString = function (contentType) {
+    return this.aggConfig.fieldFormatter(contentType)(this.value);
   };
 
   AggConfigResult.prototype.valueOf = function () {

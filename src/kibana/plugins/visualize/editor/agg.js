@@ -15,10 +15,18 @@ define(function (require) {
     });
 
     return {
-      restrict: 'E',
+      restrict: 'A',
       template: require('text!plugins/visualize/editor/agg.html'),
-      link: function ($scope, $el) {
-        $scope.editorOpen = $scope.agg.brandNew;
+      require: 'form',
+      link: function ($scope, $el, attrs, kbnForm) {
+        $scope.$bind('outputAgg', 'outputVis.aggs.byId[agg.id]', $scope);
+        $scope.editorOpen = !!$scope.agg.brandNew;
+
+        $scope.$watch('editorOpen', function (open) {
+          // make sure that all of the form inputs are "touched"
+          // so that their errors propogate
+          if (!open) kbnForm.$setTouched();
+        });
 
         $scope.$watchMulti([
           '$index',

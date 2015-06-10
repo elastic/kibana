@@ -17,6 +17,7 @@ define(function () {
       arr.forEach(function (val) {
         zeroFilledArray.push({
           x: val,
+          xi: Infinity,
           y: 0
         });
       });

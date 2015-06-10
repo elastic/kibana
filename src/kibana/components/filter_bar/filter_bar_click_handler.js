@@ -29,8 +29,7 @@ define(function (require) {
 
           if (!filters.length) return;
 
-          filters = uniqFilters(filters);
-          filters = dedupFilters($state.filters, filters);
+          filters = dedupFilters($state.filters, uniqFilters(filters));
           // We need to add a bunch of filter deduping here.
           $state.$newFilters = filters;
         }

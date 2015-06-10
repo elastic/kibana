@@ -1,0 +1,11 @@
+<h4>
+  <i class="fa fa-warning text-warning"></i> Proceed with caution
+</h4>
+
+<p>
+  Please familiarize yourself with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-script-fields.html#search-request-script-fields">script fields <i class="fa-link fa"></i></a> and with <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script">scripts in aggregations <i class="fa-link fa"></i></a> before using scripted fields.
+</p>
+
+<p>
+  Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
+</p>

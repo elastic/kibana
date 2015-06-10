@@ -2,24 +2,18 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('mapScript()', function () {
       var sinon = require('test_utils/auto_release_sinon');
-      var indexPattern, mapScript, $rootScope, getIndexPatternStub;
+      var mapScript, $rootScope;
       beforeEach(module('kibana'));
 
       beforeEach(function () {
-        getIndexPatternStub = sinon.stub();
         module('kibana/courier', function ($provide) {
-          $provide.service('courier', function () {
-            var courier = { indexPatterns: { get: getIndexPatternStub } };
-            return courier;
-          });
+          $provide.service('courier', require('fixtures/mock_courier'));
         });
       });
 
-      beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
         mapScript = Private(require('components/filter_bar/lib/mapScript'));
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
       }));
 
       it('should return the key and value for matching filters', function (done) {
@@ -29,7 +23,7 @@ define(function (require) {
         };
         mapScript(filter).then(function (result) {
           expect(result).to.have.property('key', 'script number');
-          expect(result).to.have.property('value', 35);
+          expect(result).to.have.property('value', '35');
           done();
         });
         $rootScope.$apply();

@@ -16,6 +16,17 @@ function checkPath(path) {
   }
 }
 
+// Set defaults for config file stuff
+kibana.port = kibana.port || 5601;
+kibana.host = kibana.host || '0.0.0.0';
+kibana.elasticsearch_url = kibana.elasticsearch_url || 'http://localhost:9200';
+kibana.maxSockets = kibana.maxSockets || Infinity;
+kibana.log_file = kibana.log_file || null;
+
+kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
+kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
+kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;
+
 // Check if the local public folder is present. This means we are running in
 // the NPM module. If it's not there then we are running in the git root.
 var public_folder = path.resolve(__dirname, '..', 'public');
@@ -34,9 +45,9 @@ try {
 }
 
 var config = module.exports = {
-  port                    : kibana.port || 5601,
-  host                    : kibana.host || '0.0.0.0',
-  elasticsearch           : kibana.elasticsearch_url || 'http://localhost:9200',
+  port                    : kibana.port,
+  host                    : kibana.host,
+  elasticsearch           : kibana.elasticsearch_url,
   root                    : path.normalize(path.join(__dirname, '..')),
   quiet                   : false,
   public_folder           : public_folder,
@@ -46,8 +57,10 @@ var config = module.exports = {
   package                 : require(packagePath),
   htpasswd                : htpasswdPath,
   buildNum                : '@@buildNum',
-  maxSockets              : kibana.maxSockets || Infinity,
-  log_file                : kibana.log_file || null
+  maxSockets              : kibana.maxSockets,
+  log_file                : kibana.log_file,
+  request_timeout         : kibana.request_timeout,
+  ping_timeout            : kibana.ping_timeout
 };
 
 config.plugins = listPlugins(config);

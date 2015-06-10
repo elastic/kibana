@@ -1,6 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
+  var moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
   module.factory('SavedDashboard', function (courier) {
@@ -11,37 +12,47 @@ define(function (require) {
     function SavedDashboard(id) {
       // Gives our SavedDashboard the properties of a SavedObject
       courier.SavedObject.call(this, {
-        // this object will be saved at {{configFile.kibana_index}}/dashboard/{{id}}
         type: SavedDashboard.type,
+        mapping: SavedDashboard.mapping,
+        searchSource: SavedDashboard.searchsource,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,
 
-        // if type:dashboard has no mapping, we push this mapping into ES
-        mapping: {
-          title: 'string',
-          hits: 'integer',
-          description: 'string',
-          panelsJSON: 'string',
-          version: 'integer'
-        },
-
-        // defeult values to assign to the doc
+        // default values that will get assigned if the doc is new
         defaults: {
           title: 'New Dashboard',
           hits: 0,
           description: '',
           panelsJSON: '[]',
-          version: 1
+          version: 1,
+          timeRestore: false,
+          timeTo: undefined,
+          timeFrom: undefined
         },
 
-        searchSource: true,
-
+        // if an indexPattern was saved with the searchsource of a SavedDashboard
+        // object, clear it. It was a mistake
         clearSavedIndexPattern: true
       });
     }
 
+    // save these objects with the 'dashboard' type
     SavedDashboard.type = 'dashboard';
+
+    // if type:dashboard has no mapping, we push this mapping into ES
+    SavedDashboard.mapping = {
+      title: 'string',
+      hits: 'integer',
+      description: 'string',
+      panelsJSON: 'string',
+      version: 'integer',
+      timeRestore: 'boolean',
+      timeTo: 'string',
+      timeFrom: 'string'
+    };
+
+    SavedDashboard.searchsource = true;
 
     return SavedDashboard;
   });

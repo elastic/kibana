@@ -35,7 +35,8 @@ define(function (require) {
 
             if (field.analyzed && field.type === 'string') {
               warnings.push('This is an analyzed string field.' +
-                ' Analyzed strings are highly unique and can use a lot of memory to visualize.');
+                ' Analyzed strings are highly unique and can use a lot of memory to visualize.' +
+                ' Values such as foo-bar will be broken into foo and bar.');
             }
 
             if (!field.indexed) {
@@ -73,13 +74,9 @@ define(function (require) {
           if (_.isUndefined(field.details) || recompute) {
             // This is inherited from fieldChooser
             $scope.details(field, recompute);
-
-
-            var fieldMapping = $scope.indexPattern.fields.byName[$scope.field.name];
-
             detailScope.$destroy();
             detailScope = $scope.$new();
-            detailScope.warnings = getWarnings(fieldMapping);
+            detailScope.warnings = getWarnings(field);
 
             detailsElem = $(detailsHtml);
             $compile(detailsElem)(detailScope);

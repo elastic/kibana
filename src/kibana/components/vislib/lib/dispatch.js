@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
+    var SimpleEmitter = require('utils/SimpleEmitter');
 
     /**
      * Handles event responses
@@ -12,14 +13,15 @@ define(function (require) {
      * @param handler {Object} Reference to Handler Class Object
      */
 
+    _(Dispatch).inherits(SimpleEmitter);
     function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
       }
 
+      Dispatch.Super.call(this);
       this.handler = handler;
-      this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
-        'mousedown', 'mouseover', 'mouseout');
+      this._listeners = {};
     }
 
     /**
@@ -92,7 +94,6 @@ define(function (require) {
       };
     };
 
-
     /**
      *
      * @method addHoverEvent
@@ -100,20 +101,18 @@ define(function (require) {
      */
     Dispatch.prototype.addHoverEvent = function () {
       var self = this;
-      var isClickable = (this.dispatch.on('click'));
+      var isClickable = this.listenerCount('click') > 0;
       var addEvent = this.addEvent;
       var $el = this.handler.el;
 
       function hover(d, i) {
-        d3.event.stopPropagation();
-
         // Add pointer if item is clickable
         if (isClickable) {
           self.addMousePointer.call(this, arguments);
         }
 
         self.highlightLegend.call(this, $el);
-        self.dispatch.hover.call(this, self.eventResponse(d, i));
+        self.emit('hover', self.eventResponse(d, i));
       }
 
       return addEvent('mouseover', hover);
@@ -130,8 +129,6 @@ define(function (require) {
       var $el = this.handler.el;
 
       function mouseout() {
-        d3.event.stopPropagation();
-
         self.unHighlightLegend.call(this, $el);
       }
 
@@ -148,8 +145,7 @@ define(function (require) {
       var addEvent = this.addEvent;
 
       function click(d, i) {
-        d3.event.stopPropagation();
-        self.dispatch.click.call(this, self.eventResponse(d, i));
+        self.emit('click', self.eventResponse(d, i));
       }
 
       return addEvent('click', click);
@@ -173,7 +169,7 @@ define(function (require) {
      * @returns {Boolean}
      */
     Dispatch.prototype.isBrushable = function () {
-      return this.allowBrushing() && (typeof this.dispatch.on('brush') === 'function');
+      return this.allowBrushing() && this.listenerCount('brush') > 0;
     };
 
     /**
@@ -227,14 +223,15 @@ define(function (require) {
      * @method highlightLegend
      */
     Dispatch.prototype.highlightLegend = function (element) {
-      var classList = d3.select(this).node().classList;
-      var liClass = d3.select(this).node().classList[1];
+      var label = this.getAttribute('data-label');
+
+      if (!label) return;
 
       d3.select(element)
         .select('.legend-ul')
         .selectAll('li.color')
         .filter(function (d, i) {
-          return d3.select(this).node().classList[1] !== liClass;
+          return this.getAttribute('data-label') !== label;
         })
         .classed('blur_shape', true);
     };
@@ -260,8 +257,8 @@ define(function (require) {
      * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
      */
     Dispatch.prototype.createBrush = function (xScale, svg) {
-      var dispatch = this.dispatch;
-      var attr = this.handler._attr;
+      var self = this;
+      var attr = self.handler._attr;
       var height = attr.height;
       var margin = attr.margin;
 
@@ -281,7 +278,7 @@ define(function (require) {
         });
         var range = isTimeSeries ? brush.extent() : selected;
 
-        return dispatch.brush({
+        return self.emit('brush', {
           range: range,
           config: attr,
           e: d3.event,
@@ -290,7 +287,7 @@ define(function (require) {
       });
 
       // if `addBrushing` is true, add brush canvas
-      if (dispatch.on('brush')) {
+      if (self.listenerCount('brush')) {
         svg.insert('g', 'g')
         .attr('class', 'brush')
         .call(brush)

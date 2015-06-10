@@ -2,7 +2,6 @@ define(function (require) {
   return function YAxisFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var numeral = require('numeral');
     var errors = require('errors');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
@@ -16,8 +15,9 @@ define(function (require) {
      */
     function YAxis(args) {
       this.el = args.el;
-      this.yMin = args.yMin;
-      this.yMax = args.yMax;
+      this.scale = null;
+      this.domain = [args.yMin, args.yMax];
+      this.yAxisFormatter = args.yAxisFormatter;
       this._attr = args._attr || {};
     }
 
@@ -33,16 +33,47 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    YAxis.prototype.throwCustomError = function (message) {
+    YAxis.prototype._isPercentage = function () {
+      return (this._attr.mode === 'percentage');
+    };
+
+    YAxis.prototype._isUserDefined = function () {
+      return (this._attr.setYExtents);
+    };
+
+    YAxis.prototype._isYExtents = function () {
+      return (this._attr.defaultYExtents);
+    };
+
+    YAxis.prototype._validateUserExtents = function (domain) {
+      var self = this;
+
+      return domain.map(function (val) {
+        val = parseInt(val, 10);
+
+        if (isNaN(val)) throw new Error(val + ' is not a valid number');
+        if (self._isPercentage() && self._attr.setYExtents) return val / 100;
+        return val;
+      });
+    };
+
+    YAxis.prototype._getExtents = function (domain) {
+      var min = domain[0];
+      var max = domain[1];
+
+      if (this._isUserDefined()) return this._validateUserExtents(domain);
+      if (this._isYExtents()) return domain;
+      if (this._attr.scale === 'log') return this._logDomain(min, max); // Negative values cannot be displayed with a log scale.
+      if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
+      return domain;
+    };
+
+    YAxis.prototype._throwCustomError = function (message) {
       throw new Error(message);
     };
 
-    YAxis.prototype.throwCannotLogScaleNegVals = function () {
-      throw new errors.CannotLogScaleNegVals();
-    };
-
-    YAxis.prototype.throwNoResultsError = function () {
-      throw new errors.NoResults();
+    YAxis.prototype._throwLogScaleValuesError = function () {
+      throw new errors.InvalidLogScaleValues();
     };
 
     /**
@@ -51,11 +82,11 @@ define(function (require) {
      * @param fnName {String} D3 scale
      * @returns {*}
      */
-    YAxis.prototype.getScaleType = function (fnName) {
+    YAxis.prototype._getScaleType = function (fnName) {
       if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
       fnName = fnName || 'linear';
 
-      if (typeof d3.scale[fnName] !== 'function') return this.throwCustomError('YAxis.getScaleType: ' + fnName + ' is not a function');
+      if (typeof d3.scale[fnName] !== 'function') return this._throwCustomError('YAxis.getScaleType: ' + fnName + ' is not a function');
 
       return d3.scale[fnName]();
     };
@@ -69,24 +100,9 @@ define(function (require) {
      * @param yMax
      * @returns {*[]}
      */
-    YAxis.prototype.returnLogDomain = function (yMin, yMax) {
-      if (yMin < 0 || yMax < 0) return this.throwCannotLogScaleNegVals();
-      return [Math.max(1, yMin), yMax];
-    };
-
-    /**
-     * Returns the domain, i.e. the extent of the y axis
-     *
-     * @param scale {String} Kibana scale
-     * @param yMin {Number} Y-axis minimum value
-     * @param yMax {Number} Y-axis maximum value
-     * @returns {*[]}
-     */
-    YAxis.prototype.getDomain = function (scale, yMin, yMax) {
-      if (scale === 'log') return this.returnLogDomain(yMin, yMax); // Negative values cannot be displayed with a log scale.
-      if (yMin === 0 && yMax === 0) return this.throwNoResultsError(); // yMin and yMax can never both be equal to zero
-
-      return [Math.min(0, yMin), Math.max(0, yMax)];
+    YAxis.prototype._logDomain = function (min, max) {
+      if (min < 0 || max < 0) return this._throwLogScaleValuesError();
+      return [1, max];
     };
 
     /**
@@ -97,24 +113,32 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      return this.yScale = this.getScaleType(this._attr.scale)
-      .domain(this.getDomain(this._attr.scale, this.yMin, this.yMax))
-      .range([height, 0])
-      .nice();
+      var scale = this._getScaleType(this._attr.scale);
+      var domain = this._getExtents(this.domain);
+
+      this.yScale = scale
+      .domain(domain)
+      .range([height, 0]);
+
+      if (!this._isUserDefined()) this.yScale.nice(); // round extents when not user defined
+      // Prevents bars from going off the chart when the y extents are within the domain range
+      if (this._attr.type === 'histogram') this.yScale.clamp(true);
+      return this.yScale;
     };
 
-    /**
-     * By default, d3.format('s') returns billion values
-     * with a `G` instead of a `B`. @method formatAxisLabel returns
-     * billion values with a B instead of a G. Else, it defaults
-     * to the d3.format('s') value.
-     *
-     * @method formatAxisLabel
-     * @param d {Number}
-     * @returns {*}
-     */
-    YAxis.prototype.formatAxisLabel = function (d) {
-      return numeral(d).format('0.[0]a');
+    YAxis.prototype.getScaleType = function () {
+      return this._attr.scale;
+    };
+
+    YAxis.prototype.tickFormat = function () {
+      var isPercentage = this._attr.mode === 'percentage';
+      if (isPercentage) return d3.format('%');
+      if (this.yAxisFormatter) return this.yAxisFormatter;
+      return d3.format('n');
+    };
+
+    YAxis.prototype._validateYScale = function (yScale) {
+      if (!yScale || _.isNaN(yScale)) throw new Error('yScale is ' + yScale);
     };
 
     /**
@@ -126,26 +150,12 @@ define(function (require) {
      */
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
-      var isPercentage = (this._attr.mode === 'percentage');
-      var tickFormat;
-
-      if (isPercentage) {
-        tickFormat = d3.format('%');
-      } else if (this.yMax <= 100 && this.yMin >= -100 && !isPercentage) {
-        tickFormat = d3.format('n');
-      } else {
-        tickFormat = this.formatAxisLabel;
-      }
-
-      // y scale should never be `NaN`
-      if (!yScale || _.isNaN(yScale)) {
-        throw new Error('yScale is ' + yScale);
-      }
+      this._validateYScale(yScale);
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
         .scale(yScale)
-        .tickFormat(tickFormat)
+        .tickFormat(this.tickFormat(this.domain))
         .ticks(this.tickScale(height))
         .orient('left');
 
@@ -182,36 +192,40 @@ define(function (require) {
       var margin = this._attr.margin;
       var mode = this._attr.mode;
       var isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
-      var div;
-      var width;
-      var height;
-      var svg;
 
       return function (selection) {
-
         selection.each(function () {
           var el = this;
 
-          div = d3.select(el);
-          width = $(el).width();
-          height = $(el).height() - margin.top - margin.bottom;
+          var div = d3.select(el);
+          var width = $(el).parent().width();
+          var height = $(el).height();
+          var adjustedHeight = height - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
-          self.validateWidthandHeight(width, height);
+          self.validateWidthandHeight(width, adjustedHeight);
 
-          var yAxis = self.getYAxis(height);
+          var yAxis = self.getYAxis(adjustedHeight);
 
           // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
           if (!isWiggleOrSilhouette) {
             // Append svg and y axis
-            svg = div.append('svg')
+            var svg = div.append('svg')
             .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom);
+            .attr('height', height);
 
             svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(yAxis);
+
+            var container = svg.select('g.y.axis').node();
+            if (container) {
+              var cWidth = Math.max(width, container.getBBox().width);
+              svg.attr('width', cWidth);
+              svg.select('g')
+              .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
+            }
           }
         });
       };

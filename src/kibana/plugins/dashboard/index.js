@@ -49,14 +49,20 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
-        var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+      controller: function ($scope, $route, $routeParams, $location, configFile, Private, getAppState) {
+        var queryFilter = Private(require('components/filter_bar/query_filter'));
 
         var notify = new Notifier({
           location: 'Dashboard'
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
+
+        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
+          timefilter.time.to = dash.timeTo;
+          timefilter.time.from = dash.timeFrom;
+        }
+
         $scope.$on('$destroy', dash.destroy);
 
         var matchQueryFilter = function (filter) {
@@ -88,7 +94,7 @@ define(function (require) {
 
         timefilter.enabled = true;
         $scope.timefilter = timefilter;
-        $scope.$listen(timefilter, 'update', $scope.refresh);
+        $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
         courier.setRootSearchSource(dash.searchSource);
 
@@ -104,22 +110,24 @@ define(function (require) {
         }
 
         function updateQueryOnRootSource() {
-          var filters = $state.filters;
+          var filters = queryFilter.getFilters();
           if ($state.query) {
-            dash.searchSource.set('filter', _.union($state.filters, [{
-              query:  $state.query
+            dash.searchSource.set('filter', _.union(filters, [{
+              query: $state.query
             }]));
           } else {
             dash.searchSource.set('filter', filters);
           }
         }
 
-        filterBarWatchFilters($scope)
-        .on('update', function () {
+        // update root source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           updateQueryOnRootSource();
           $state.save();
-        })
-        .on('fetch', $scope.refresh);
+        });
+
+        // update data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});
@@ -135,6 +143,8 @@ define(function (require) {
           $state.title = dash.id = dash.title;
           $state.save();
           dash.panelsJSON = angular.toJson($state.panels);
+          dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
+          dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
 
           dash.save()
           .then(function (id) {

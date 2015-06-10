@@ -6,6 +6,26 @@
   width: 100%;
 }
 
-.markdown-vis-options textarea {
-  font-family: monospace;
+.vis-editor {
+
+  &.vis-type-markdown {
+
+    .visualization-options {
+      .flex-parent();
+      .flex(1, 1, auto);
+    }
+
+    .markdown-vis-options {
+      .flex-parent();
+      .flex(1, 1, auto);
+
+      textarea {
+        .flex(1, 1, auto);
+        resize: none;
+      }
+
+    }
+
+  }
+
 }

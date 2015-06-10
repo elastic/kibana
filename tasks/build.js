@@ -12,6 +12,7 @@ module.exports = function (grunt) {
     'requirejs',
     'clean:unneeded_source_in_build',
     'copy:server_src',
+    'replace_package_json',
     'replace:dist',
     'copy:dist',
     'compile_dist_readme',
@@ -23,6 +24,7 @@ module.exports = function (grunt) {
     'clean:test_from_node_modules',
     'download_node_binaries',
     'copy:versioned_dist',
+    'create_services',
     'create_packages',
     'create_shasums'
   ]);

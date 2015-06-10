@@ -20,14 +20,15 @@ define(function (require) {
      * @param data {Object} Elasticsearch query results for this specific chart
      * @param chartType {Object} Reference to chart functions, i.e. Pie
      */
-    function Layout(el, data, chartType) {
+    function Layout(el, data, chartType, opts) {
       if (!(this instanceof Layout)) {
-        return new Layout(el, data, chartType);
+        return new Layout(el, data, chartType, opts);
       }
 
       this.el = el;
       this.data = data;
-      this.layoutType = layoutType[chartType](el, data);
+      this.opts = opts;
+      this.layoutType = layoutType[chartType](this.el, this.data);
     }
 
     // Render the layout
@@ -91,11 +92,11 @@ define(function (require) {
       }
 
       if (obj.splits) {
-        d3.select(this.el).select('.' + obj.class).call(obj.splits, obj.parent);
+        childEl.call(obj.splits, obj.parent, this.opts);
       }
 
       if (obj.children) {
-        var newParent = d3.select(this.el).select('.' + obj.class)[0][0];
+        var newParent = childEl[0][0];
 
         _.forEach(obj.children, function (obj) {
           if (!obj.parent) {

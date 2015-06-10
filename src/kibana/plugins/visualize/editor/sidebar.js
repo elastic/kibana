@@ -11,8 +11,11 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/visualize/editor/sidebar.html'),
       scope: true,
-      link: function ($scope) {
+      controllerAs: 'sidebar',
+      controller: function ($scope) {
         $scope.$bind('vis', 'editableVis');
+        $scope.$bind('outputVis', 'vis');
+        this.section = _.get($scope, 'vis.type.requiresSearch') ? 'data' : 'options';
       }
     };
   });

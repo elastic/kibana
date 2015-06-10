@@ -4,7 +4,10 @@ define(function (require) {
     var $ = require('jquery');
     var moment = require('moment');
 
+    var DataClass = Private(require('components/vislib/lib/data'));
+
     var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
+    var TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -68,9 +71,7 @@ define(function (require) {
       bars
       .enter()
       .append('rect')
-      .attr('class', function (d) {
-        return 'color ' + self.colorToClass(color(d.label));
-      })
+      .call(this._addIdentifier)
       .attr('fill', function (d) {
         return color(d.label);
       });
@@ -216,16 +217,7 @@ define(function (require) {
         return yScale(d.y);
       })
       .attr('height', function (d) {
-        if (d.y < 0) {
-          return Math.abs(yScale(0) - yScale(d.y));
-        }
-
-        // if there is a negative yMin value, use yScale(0) instead of height
-        if (yMin < 0) {
-          return yScale(0) - yScale(d.y);
-        }
-
-        return height - yScale(d.y);
+        return Math.abs(yScale(0) - yScale(d.y));
       });
 
       return bars;
@@ -271,8 +263,12 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var yMin = this.handler.yAxis.yMin;
       var yScale = this.handler.yAxis.yScale;
+      var xScale = this.handler.xAxis.xScale;
       var minWidth = 20;
       var minHeight = 20;
+      var addTimeMarker = this._attr.addTimeMarker;
+      var times = this._attr.times || [];
+      var timeMarker;
       var div;
       var svg;
       var width;
@@ -286,6 +282,10 @@ define(function (require) {
 
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
+
+          if (addTimeMarker) {
+            timeMarker = new TimeMarker(times, xScale, height);
+          }
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
@@ -308,23 +308,14 @@ define(function (require) {
           var line = svg.append('line')
           .attr('class', 'base-line')
           .attr('x1', 0)
-          .attr('y1', height)
+          .attr('y1', yScale(0))
           .attr('x2', width)
-          .attr('y2', height)
+          .attr('y2', yScale(0))
           .style('stroke', '#ddd')
           .style('stroke-width', 1);
 
-          if (yMin < 0) {
-
-            // Draw line at yScale 0 value
-            svg.append('line')
-            .attr('class', 'zero-line')
-            .attr('x1', 0)
-            .attr('y1', yScale(0))
-            .attr('x2', width)
-            .attr('y2', yScale(0))
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
+          if (addTimeMarker) {
+            timeMarker.render(svg);
           }
 
           return svg;

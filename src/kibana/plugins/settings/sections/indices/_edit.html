@@ -2,38 +2,12 @@
   <kbn-settings-indices>
     <div ng-controller="settingsIndicesEdit" bindonce>
       <div class="page-header">
-        <div class="index-pattern-name">
-          <h1 class="title" css-truncate>
-            <i aria-hidden="true" ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
-            {{indexPattern.id}}
-          </h1>
-          <div class="controls">
-            <button
-              ng-click="setDefaultPattern()"
-              tooltip="Set as default index"
-              class="btn btn-success">
-              <span class="sr-only">Set as default index</span>
-              <i aria-hidden="true" class="fa fa-star"></i>
-            </button>
-            <button
-              confirm-click="indexPattern.refreshFields()"
-              confirmation="This will reset the field popularity counters. Are you sure you want to reload your fields?"
-              tooltip="Reload field list"
-              class="btn btn-warning">
-              <span class="sr-only">Reload field list</span>
-              <i aria-hidden="true" class="fa fa-refresh"></i>
-            </button>
-            <button
-              aria-label="Remove index pattern"
-              confirm-click="removePattern()"
-              confirmation="Are you sure you want to remove this index pattern?"
-              tooltip="Remove index pattern"
-              class="btn btn-danger">
-              <span class="sr-only">Remove index pattern</span>
-              <i aria-hidden="true" class="fa fa-trash"></i>
-            </button>
-          </div>
-        </div>
+        <kbn-settings-index-header
+          index-pattern="indexPattern"
+          set-default="setDefaultPattern()"
+          refresh-fields="indexPattern.refreshFields()"
+          delete="removePattern()">
+        </kbn-settings-index-header>
 
         <p>
           This page lists every field in the <strong>{{indexPattern.id}}</strong>
@@ -45,10 +19,10 @@
             <i aria-hidden="true" class="fa-link fa"></i>
           </a>
         </p>
-        <div bo-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
+        <div ng-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
           This index uses a <strong>Time-based index pattern</strong> which repeats <span bo-text="indexPattern.getInterval().display"></span>
         </div>
-        <div bo-if="conflictFields.length" class="alert alert-warning">
+        <div ng-if="conflictFields.length" class="alert alert-warning">
           <strong>Mapping conflict!</strong> {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
         </div>
       </div>
@@ -62,9 +36,8 @@
         </li>
       </ul>
 
-      <indexed-fields ng-show="state.tab == 'indexedFields'" class="fields"></indexed-fields>
-
-      <scripted-fields ng-show="state.tab == 'scriptedFields'" class="scripted-fields"></scripted-fields>
+      <indexed-fields ng-show="state.tab == 'indexedFields'" class="fields indexed-fields"></indexed-fields>
+      <scripted-fields ng-show="state.tab == 'scriptedFields'" class="fields scripted-fields"></scripted-fields>
 
     </div>
   </kbn-settings-indices>

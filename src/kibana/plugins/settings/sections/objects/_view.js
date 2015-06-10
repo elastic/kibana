@@ -15,9 +15,9 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
         var notify = new Notifier({ location: 'SavedObject view' });
-
+        var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
 
@@ -29,7 +29,7 @@ define(function (require) {
          *
          * @param {array} memo The stack of fields
          * @param {mixed} value The value of the field
-         * @param {stirng} key The key of the field
+         * @param {string} key The key of the field
          * @param {object} collection This is a reference the collection being reduced
          * @param {array} parents The parent keys to the field
          * @returns {array}
@@ -55,11 +55,12 @@ define(function (require) {
           } else if (_.isArray(field.value)) {
             field.type = 'array';
             field.value = angular.toJson(field.value, true);
+          } else if (_.isBoolean(field.value)) {
+            field.type = 'boolean';
+            field.value = field.value;
           } else if (_.isPlainObject(field.value)) {
             // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
-          } else {
-            return;
           }
 
           memo.push(field);
@@ -68,6 +69,34 @@ define(function (require) {
           // to remove it since we've hit the end of the branch.
           parents.pop();
           return memo;
+        };
+
+        var readObjectClass = function (fields, Class) {
+          var fieldMap = _.indexBy(fields, 'name');
+
+          _.forOwn(Class.mapping, function (esType, name) {
+            if (fieldMap[name]) return;
+
+            fields.push({
+              name: name,
+              type: (function () {
+                switch (castMappingType(esType)) {
+                case 'string': return 'text';
+                case 'number': return 'number';
+                case 'boolean': return 'boolean';
+                default: return 'json';
+                }
+              }())
+            });
+          });
+
+          if (Class.searchSource && !fieldMap['kibanaSavedObjectMeta.searchSourceJSON']) {
+            fields.push({
+              name: 'kibanaSavedObjectMeta.searchSourceJSON',
+              type: 'json',
+              value: '{}'
+            });
+          }
         };
 
         $scope.notFound = $routeParams.notFound;
@@ -82,7 +111,10 @@ define(function (require) {
         .then(function (obj) {
           $scope.obj = obj;
           $scope.link = service.urlFor(obj._id);
-          $scope.fields = _.reduce(obj._source, createField, []);
+
+          var fields =  _.reduce(obj._source, createField, []);
+          if (service.Class) readObjectClass(fields, service.Class);
+          $scope.fields = _.sortBy(fields, 'name');
         })
         .catch(notify.fatal);
 

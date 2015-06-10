@@ -8,6 +8,7 @@ define(function (require) {
   require('directives/saved_object_finder');
   require('components/visualize/visualize');
   require('components/clipboard/clipboard');
+  require('components/comma_list_filter');
 
   require('filters/uriescape');
 
@@ -57,7 +58,7 @@ define(function (require) {
     var Notifier = require('components/notify/_notifier');
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
@@ -67,7 +68,7 @@ define(function (require) {
     var savedVis = $route.current.locals.savedVis;
 
     var vis = savedVis.vis;
-    var editableVis = vis.clone();
+    var editableVis = vis.createEditableVis();
     vis.requesting = function () {
       var requesting = editableVis.requesting;
       requesting.call(vis);
@@ -151,18 +152,15 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      filterBarWatchFilters($scope)
-      .on('update', function () {
-        if ($state.filters && $state.filters.length) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', []);
-        }
+      // update the searchSource when filters update
+      $scope.$listen(queryFilter, 'update', function () {
+        searchSource.set('filter', queryFilter.getFilters());
         $state.save();
-      })
-      .on('fetch', function () {
-        $scope.fetch();
       });
+
+      // fetch data when filters fire fetch event
+      $scope.$listen(queryFilter, 'fetch', $scope.fetch);
+
 
       $scope.$listen($state, 'fetch_with_changes', function (keys) {
         if (_.contains(keys, 'linked') && $state.linked === true) {
@@ -172,6 +170,8 @@ define(function (require) {
         }
 
         if (_.contains(keys, 'vis')) {
+          $state.vis.listeners = _.defaults($state.vis.listeners || {}, vis.listeners);
+
           // only update when we need to, otherwise colors change and we
           // risk loosing an in-progress result
           vis.setState($state.vis);
@@ -186,7 +186,7 @@ define(function (require) {
         }
 
         if (_.isEqual(keys, ['filters'])) {
-          // updates will happen in filterBarWatchFilters() if needed
+          // updates will happen in filter watcher if needed
           return;
         }
 
@@ -196,7 +196,7 @@ define(function (require) {
       // Without this manual emission, we'd miss filters and queries that were on the $state initially
       $state.emit('fetch_with_changes');
 
-      $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
+      $scope.$listen(timefilter, 'fetch', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');
@@ -209,7 +209,7 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
-      searchSource.set('filter', $state.filters);
+      searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);
       if ($scope.vis.type.requiresSearch) {
         courier.fetch();
