@@ -30,7 +30,7 @@
     "bluebird": "~2.1.3",
     "bootstrap": "3.3.4",
     "d3": "3.5.5",
-    "elasticsearch": "4.1.0",
+    "elasticsearch": "~5.0.0",
     "Faker": "1.1.0",
     "FileSaver": "babc6d9d8f",
     "font-awesome": "4.2.0",
