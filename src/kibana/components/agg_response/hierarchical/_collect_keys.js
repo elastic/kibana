@@ -4,9 +4,9 @@ define(function (require) {
     var nextChildren = _.pluck(children, 'children');
     var keys = _.pluck(children, 'name');
     return _(nextChildren)
-      .map(collectKeys)
-      .flatten()
-      .union(keys)
-      .value();
+    .map(collectKeys)
+    .flatten()
+    .union(keys)
+    .value();
   };
 });

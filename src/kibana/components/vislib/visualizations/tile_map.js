@@ -263,8 +263,8 @@ define(function (require) {
      */
     TileMap.prototype._getDataRectangles = function () {
       return _(this.geoJson.features)
-      .deepPluck('properties.rectangle')
-      .map(function (rectangle) { return rectangle.map(cloneAndReverse); })
+      .pluck('properties.rectangle')
+      .invoke('map', cloneAndReverse)
       .value();
     };
 

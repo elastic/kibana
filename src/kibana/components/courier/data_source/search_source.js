@@ -155,17 +155,12 @@ define(function (require) {
       case 'filter':
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
         state.filters = _([ state.filters || [], val ])
-          .flatten(true)
-          // Yo Dawg! I heard you needed to filter out your filters
-          .filter(function (filter) {
-            if (!filter) return false;
-            // return true for anything that is either empty or false
-            // return false for anything that is explicitly set to true
-            if (filter.meta)
-              return !filter.meta.disabled;
-            return true;
-          })
-          .value();
+        .flatten(true)
+        // Yo Dawg! I heard you needed to filter out your filters
+        .reject(function (filter) {
+          return !filter || _.get(filter, 'meta.disabled');
+        })
+        .value();
         return;
       case 'index':
       case 'type':

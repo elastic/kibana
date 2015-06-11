@@ -41,7 +41,8 @@ define(function (require) {
               self.push(new AggConfig(vis, state));
             });
           }
-        });
+        })
+        .commit();
       }
     }
 
@@ -61,7 +62,8 @@ define(function (require) {
             config: agg,
             dsl: agg.toDsl()
           };
-        });
+        })
+        .value();
       }
 
       this.getRequestAggs()

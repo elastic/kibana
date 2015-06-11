@@ -19,16 +19,8 @@ define(function (require) {
       };
     };
 
-    var targetKeys = _(target)
-      .keys()
-      .filter(filterPrivateAndMethods(target))
-      .value();
-
-    var sourceKeys = _(source)
-      .keys()
-      .filter(filterPrivateAndMethods(source))
-      .value();
-
+    var targetKeys = _.keys(target).filter(filterPrivateAndMethods(target));
+    var sourceKeys = _.keys(source).filter(filterPrivateAndMethods(source));
 
     // Find the keys to be removed
     diff.removed = _.difference(targetKeys, sourceKeys);

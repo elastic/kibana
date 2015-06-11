@@ -21,7 +21,9 @@ define(function (require) {
     }
 
     // Create the columns
-    results.columns = _(aggs).flatten().map(function (agg) {
+    results.columns = _(aggs)
+    .flatten()
+    .map(function (agg) {
       return {
         categoryName: agg.schema.name,
         id: agg.id,
@@ -30,7 +32,8 @@ define(function (require) {
         field: agg.params.field,
         label: agg.type.makeLabel(agg)
       };
-    }).value();
+    })
+    .value();
 
 
     // if there are no buckets then we need to just set the value and return

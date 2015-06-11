@@ -260,9 +260,12 @@ define(function (require) {
       parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
 
       // copy over all state except "aggs" and filter, which is already copied
-      _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
+      _(parent.toJSON())
+      .omit('aggs')
+      .forOwn(function (val, key) {
         searchSource.set(key, val);
-      });
+      })
+      .commit();
 
       $state.query = searchSource.get('query');
       $state.filters = searchSource.get('filter');

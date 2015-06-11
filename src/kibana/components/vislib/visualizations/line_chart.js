@@ -74,14 +74,20 @@ define(function (require) {
       var ordered = this.handler.data.get('ordered');
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+
       var radii = _(data)
-        .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
-        .flatten()
-        .reduce(function (result, val) {
-          if (result.min > val) result.min = val;
-          if (result.max < val) result.max = val;
-          return result;
-        }, {min: Infinity, max: -Infinity});
+      .map(function (series) {
+        return _.pluck(series, '_input.z');
+      })
+      .flatten()
+      .reduce(function (result, val) {
+        if (result.min > val) result.min = val;
+        if (result.max < val) result.max = val;
+        return result;
+      }, {
+        min: Infinity,
+        max: -Infinity
+      });
 
       var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
