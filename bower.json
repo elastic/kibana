@@ -31,7 +31,7 @@
     "bootstrap": "3.3.4",
     "d3": "3.5.5",
     "elasticsearch": "4.1.0",
-    "Faker": "1.1.0",
+    "Faker": "2.1.5",
     "FileSaver": "babc6d9d8f",
     "font-awesome": "4.2.0",
     "gridster": "0.5.6",

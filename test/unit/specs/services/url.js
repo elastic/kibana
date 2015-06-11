@@ -150,7 +150,7 @@ define(function (require) {
 
       it('should uri encode replaced params', function () {
         var url = '/some/path/';
-        var params = { replace: faker.Lorem.words(3).join(' ') };
+        var params = { replace: faker.lorem.words(3).join(' ') };
         var check = encodeURIComponent(params.replace);
         sinon.stub($location, 'url');
 
@@ -169,14 +169,14 @@ define(function (require) {
         var filters = ['', 'uppercase', '', 'uppercase', 'rison'];
 
         // the words (template keys) used must all be unique
-        var words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
+        var words = _.uniq(faker.lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
           if (filters[i].length) {
             return word + '|' + filters[i];
           }
           return word;
         });
 
-        var replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
+        var replacements = faker.lorem.words(urlParts.length).map(function (word, i) {
           // make selected replacement into an object
           if (i === objIndex) {
             return { replace: word };
