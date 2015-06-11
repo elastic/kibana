@@ -16,8 +16,8 @@ define(function (require) {
       vis = null;
     }
 
-    function getEls(n, type) {
-      return d3.select().data(new Array(n)).enter().append(type);
+    function getEls(el, n, type) {
+      return d3.select(el).data(new Array(n)).enter().append(type);
     }
 
     describe('', function () {
@@ -67,7 +67,7 @@ define(function (require) {
           var apply = chart.events.addEvent('event', _.noop);
           expect(apply).to.be.a('function');
 
-          var els = getEls(3, 'div');
+          var els = getEls(vis.el, 3, 'div');
           apply(els);
           els.each(function () {
             expect(d3.select(this).on('event')).to.be(_.noop);
@@ -90,7 +90,7 @@ define(function (require) {
             var apply = chart.events[name](d3.select(document.createElement('svg')));
             expect(apply).to.be.a('function');
 
-            var els = getEls(3, 'div');
+            var els = getEls(vis.el, 3, 'div');
             apply(els);
             els.each(function () {
               expect(d3.select(this).on(event)).to.be.a('function');

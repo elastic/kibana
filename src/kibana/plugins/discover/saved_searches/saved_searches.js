@@ -23,6 +23,7 @@ define(function (require) {
     });
 
     this.type = SavedSearch.type;
+    this.Class = SavedSearch;
 
     this.get = function (id) {
       return (new SavedSearch(id)).init();

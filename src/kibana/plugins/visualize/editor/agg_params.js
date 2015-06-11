@@ -159,13 +159,6 @@ define(function (require) {
             initialSet: fields
           });
         }
-
-        // bind a property from our scope a child scope, with one-way binding
-        function setupBoundProp($child, get, set) {
-          var getter = _.partial($parse(get), $scope);
-          var setter = _.partial($parse(set).assign, $child);
-          $scope.$watch(getter, setter);
-        }
       }
     };
   });

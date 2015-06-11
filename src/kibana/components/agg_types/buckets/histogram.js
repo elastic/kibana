@@ -5,6 +5,8 @@ define(function (require) {
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/histogram'));
 
+    require('components/validateDateInterval');
+
     return new BucketAggType({
       name: 'histogram',
       title: 'Histogram',

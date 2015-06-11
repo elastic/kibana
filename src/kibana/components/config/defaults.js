@@ -8,6 +8,11 @@ define(function () {
         description: 'Options for the lucene query string parser',
         type: 'json'
       },
+      'sort:options': {
+        value: '{ "unmapped_type": "boolean" }',
+        description: 'Options the Elasticsearch sort parameter',
+        type: 'json'
+      },
       'dateFormat': {
         value: 'MMMM Do YYYY, HH:mm:ss.SSS',
         description: 'When displaying a pretty formatted date, use this format',

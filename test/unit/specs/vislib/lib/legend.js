@@ -162,17 +162,12 @@ define(function (require) {
           var paths = $(vis.el).find(chartSelectors[chartType]).toArray();
           var items = vis.handler.legend.labels;
 
-          items.forEach(function (d) {
-            var path = _(paths)
-            .map(function (path) {
-              return path.getAttribute('data-label');
-            })
-            .filter(function (dataLabel) {
-              return dataLabel === d.toString();
-            })
-            .value();
+          items.forEach(function (label) {
+            var path = _.find(paths, function (path) {
+              return path.getAttribute('data-label') === String(label);
+            });
 
-            expect(path.length).to.be.greaterThan(0);
+            expect(path).to.be.ok();
           });
         });
       });

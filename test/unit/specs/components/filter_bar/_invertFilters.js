@@ -34,6 +34,10 @@ define(function (require) {
     });
 
     beforeEach(function () {
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', require('fixtures/mock_courier'));
+      });
+
       module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
@@ -107,6 +111,16 @@ define(function (require) {
         });
         _.each(globalState.filters, function (filter) {
           expect(filter.meta.negate).to.be(false);
+        });
+      });
+
+      it('should work without global state filters', function () {
+        // remove global filters
+        delete globalState.filters;
+
+        queryFilter.invertAll();
+        _.each(appState.filters, function (filter) {
+          expect(filter.meta.negate).to.be(true);
         });
       });
     });

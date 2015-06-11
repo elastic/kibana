@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var morgan = require('morgan');
 var env = process.env.NODE_ENV || 'development';
 var bunyan = require('bunyan');
 var fs = require('fs');

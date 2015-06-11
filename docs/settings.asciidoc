@@ -156,6 +156,15 @@ To delete an index pattern:
 . Click the pattern's *Delete* button.
 . Confirm that you want to remove the index pattern.
 
+[[managing-fields]]
+=== Managing Fields
+The fields for the index pattern are listed in a table. Click a column header to sort the table by that column. Click 
+the *Controls* button in the rightmost column for a given field to edit the field's properties. You can manually set 
+the field's format from the *Format* drop-down. Format options vary based on the field's type.
+
+You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the 
+*Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
+
 [float]
 [[create-scripted-field]]
 === Creating a Scripted Field
@@ -220,7 +229,6 @@ To delete a scripted field:
 . Click the *Delete* button for the scripted field you want to remove.
 . Confirm that you really want to delete the field.
 
-[float]
 [[advanced-options]]
 === Setting Advanced Options
 The Advanced Settings page enables you to directly edit settings that control
@@ -238,9 +246,12 @@ To set advanced options:
 . Enter a new value for the option. 
 . Click the *Save* button.
 
-=== Managing Saved Searches, Visualizations, and Dashboards ===
-You can view, edit, and delete saved searches, visualizations,
-and dashboards from *Settings > Objects*. 
+[float]
+[[managing-saved-objects]]
+=== Managing Saved Searches, Visualizations, and Dashboards 
+
+You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
+export or import sets of searches, visualizations, and dashboards.
 
 Viewing a saved object displays the selected item in the *Discover*, *Visualize*, 
 or *Dashboard* page. To view a saved object:
@@ -282,11 +293,27 @@ To delete a saved object:
 . Click the *Delete* button.
 . Confirm that you really want to delete the object.
 
+To export a set of objects:
+
+. Go to *Settings > Objects*.
+. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations. 
+. Click the selection box for the objects you want to export, or click the *Select All* box.
+. Click *Export* to select a location to write the exported JSON.
+
+To import a set of objects:
+
+. Go to *Settings > Objects*.
+. Click *Import* to navigate to the JSON file representing the set of objects to import.
+. Click *Open* after selecting the JSON file.
+. If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
+
+[[kibana-server-properties]]
 === Setting Kibana Server Properties
 
 The Kibana server reads properties from the `kibana.yml` file on startup. The default
 settings configure Kibana to run on `localhost:5601`. To change the host or port number, or
-connect to Elasticsearch running on a different machine, you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
+connect to Elasticsearch running on a different machine, you'll need to update your `kibana.yml` file. You can also 
+enable SSL and set a variety of other options.
 
 .Kibana Server Properties
 |===
@@ -305,13 +332,15 @@ connect to Elasticsearch running on a different machine, you'll need to update y
 |`elasticsearch_preserve_host`
 |By default, the host specified in the incoming request from the browser is specified as the host in the 
 corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host
-specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default. Default: `elasticsearch_preserve_host: true`.
+specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default. 
+Default: `elasticsearch_preserve_host: true`.
 
 |`kibana_index`
 |The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
 
 |`default_app_id` 
-|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: `default_app_id: "discover"`. 
+|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: 
+`default_app_id: "discover"`. 
 
 |`request_timeout` 
 |How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000`.
@@ -320,7 +349,8 @@ specified in `elasticsearch_url`. You probably don't need to worry about this se
 |How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default: `shard_timeout: 0`.
 
 |`verify_ssl`
-|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. Default: `verify_ssl: true`.
+|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. 
+Default: `verify_ssl: true`.
 
 |`ca`
 |The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate 
@@ -333,6 +363,11 @@ so the certificate can be verified. (Otherwise, you have to disable `verify_ssl`
 |The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana. Default: none.
 
 |`pid_file`
-|The location where you want to store the process ID file. If not specified, the PID file is stored in `/var/run/kibana.pid`. Default: none.
+|The location where you want to store the process ID file. If not specified, the PID file is stored in 
+`/var/run/kibana.pid`. Default: none.
+
+|`log_file`
+|The location where you want to store the Kibana's log output. If not specified, log output is written to standard 
+output and not stored. Specifying a log file suppresses log writes to standard output. Default: none.
 
 |===

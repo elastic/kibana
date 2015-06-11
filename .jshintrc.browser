@@ -8,6 +8,7 @@
     "define": true,
     "require": true,
     "console": false,
-    "-event": true
+    "-event": true,
+    "-name": true
   }
 }

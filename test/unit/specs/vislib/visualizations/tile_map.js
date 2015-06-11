@@ -25,7 +25,6 @@ define(function (require) {
       mapType: type
     };
 
-
     module('TileMapFactory');
     inject(function (Private) {
       vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
@@ -161,7 +160,7 @@ define(function (require) {
         it('should filter out data points that are outside of the map bounds', function () {
           vis.handler.charts.forEach(function (chart) {
             chart.maps.forEach(function (map) {
-              var featuresLength = chart.chartData.geoJson.features.length;
+              var featuresLength = chart.geoJson.features.length;
               var mapFeatureLength;
 
               function getSize(obj) {
@@ -249,22 +248,22 @@ define(function (require) {
           });
         });
 
-        it('should return the min of all features.properties.count', function () {
+        it('should return the min of all features.properties.value', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var min = _.chain(data.geoJson.features)
-            .deepPluck('properties.count')
+            .deepPluck('properties.value')
             .min()
             .value();
             expect(chart.getMinMax(data).min).to.be(min);
           });
         });
 
-        it('should return the max of all features.properties.count', function () {
+        it('should return the max of all features.properties.value', function () {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var max = _.chain(data.geoJson.features)
-            .deepPluck('properties.count')
+            .deepPluck('properties.value')
             .max()
             .value();
             expect(chart.getMinMax(data).max).to.be(max);
@@ -275,13 +274,13 @@ define(function (require) {
       describe('dataToHeatArray method', function () {
         it('should return an array', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.dataToHeatArray(mapData, max)).to.be.an(Array);
+            expect(chart.dataToHeatArray(max)).to.be.an(Array);
           });
         });
 
         it('should return an array item for each feature', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.dataToHeatArray(mapData, max).length).to.be(mapData.features.length);
+            expect(chart.dataToHeatArray(max).length).to.be(mapData.features.length);
           });
         });
 
@@ -289,8 +288,8 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var lat = feature.geometry.coordinates[1];
             var lng = feature.geometry.coordinates[0];
-            var intensity = feature.properties.count;
-            var array = chart.dataToHeatArray(mapData, max);
+            var intensity = feature.properties.value;
+            var array = chart.dataToHeatArray(max);
             expect(array[i][0]).to.be(lat);
             expect(array[i][1]).to.be(lng);
             expect(array[i][2]).to.be(intensity);
@@ -302,8 +301,8 @@ define(function (require) {
             chart._attr.heatNormalizeData = true;
             var lat = feature.geometry.coordinates[1];
             var lng = feature.geometry.coordinates[0];
-            var intensity = parseInt(feature.properties.count / max * 100);
-            var array = chart.dataToHeatArray(mapData, max);
+            var intensity = parseInt(feature.properties.value / max * 100);
+            var array = chart.dataToHeatArray(max);
             expect(array[i][0]).to.be(lat);
             expect(array[i][1]).to.be(lng);
             expect(array[i][2]).to.be(intensity);
@@ -326,9 +325,11 @@ define(function (require) {
             chart.tooltipFormatter = function (str) {
               return '<div class="popup-stub"></div>';
             };
-            var layerIds = _.keys(map._layers);
-            var id = layerIds[_.random(1, layerIds.length - 1)]; // layer 0 is tileLayer
-            map._layers[id].fire('mouseover');
+
+            var featureLayer = _.sample(_.filter(map._layers, 'feature'));
+
+            expect($('.popup-stub', vis.el).length).to.be(0);
+            featureLayer.fire('mouseover');
             expect($('.popup-stub', vis.el).length).to.be(1);
           });
         });
@@ -352,19 +353,19 @@ define(function (require) {
       describe('nearestFeature method', function () {
         it('should return an object', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point, mapData)).to.be.an(Object);
+            expect(chart.nearestFeature(point)).to.be.an(Object);
           });
         });
 
         it('should return a geoJson feature', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point, mapData).type).to.be('Feature');
+            expect(chart.nearestFeature(point).type).to.be('Feature');
           });
         });
 
         it('should return the geoJson feature with same latlng as point', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point, mapData)).to.be(feature);
+            expect(chart.nearestFeature(point)).to.be(feature);
           });
         });
       });
