@@ -11,15 +11,10 @@ define(function (require) {
     return function (sortObject, indexPattern) {
       var normalizedSort = [];
 
-      if (_.isArray(sortObject)) {
-        normalizedSort = _.map(sortObject, function (sortable) {
-          return normalize(sortable, indexPattern);
-        });
-      } else {
-        normalizedSort.push(normalize(sortObject, indexPattern));
-      }
-
-      return normalizedSort;
+      // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
+      return [].concat(sortObject).map(function (sortable) {
+        return normalize(sortable, indexPattern);
+      });
     };
 
     /*
