@@ -461,7 +461,7 @@ define(function (require) {
 
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
-          var value = Math.abs(feature.properties.value);
+          var value = feature.properties.value;
           var scaledRadius = self.radiusScale(value, max, zoom, precision) * scaleFactor;
           return L.circleMarker(latlng).setRadius(scaledRadius);
         },
@@ -844,7 +844,7 @@ define(function (require) {
       var exp = 0.5;
       var precisionBiasNumerator = 200;
       var precisionBiasBase = 5;
-      var pct = value / max;
+      var pct = Math.abs(value) / Math.abs(max);
       var constantZoomRadius = 0.5 * Math.pow(2, zoom);
       var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
