@@ -1,7 +1,6 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
-  var faker = require('faker');
 
   // Load the kibana app dependencies.
   require('angular-route');
