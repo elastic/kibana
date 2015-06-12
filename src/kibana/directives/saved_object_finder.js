@@ -76,7 +76,7 @@ define(function (require) {
           }
 
           return '#';
-        }
+        };
 
         /**
          * Called when a hit object is clicked, can override the
@@ -109,13 +109,13 @@ define(function (require) {
         self.selector = {
           enabled: false,
           index: -1
-        }
+        };
 
         //key handler for the filter text box
         self.filterKeyDown = function ($event) {
           if (keymap[$event.keyCode] !== 'tab')
             return;
-          
+
           $timeout(function () {
             self.selector.index = 0;
             self.selector.enabled = true;
@@ -124,7 +124,7 @@ define(function (require) {
           });
 
           $event.preventDefault();
-        }
+        };
 
         //key handler for the list items
         self.hitKeyDown = function ($event, page, paginate) {
@@ -210,12 +210,12 @@ define(function (require) {
               $input.focus();
               break;
           }
-        }
+        };
 
         self.hitBlur = function ($event) {
           self.selector.index = -1;
           self.selector.enabled = false;
-        }
+        };
 
         self.manageObjects = function (type) {
           $location.url('/settings/objects?_a=' + rison.encode({tab: type}));
@@ -254,7 +254,7 @@ define(function (require) {
           } else if ('scrollIntoView' in el) {
             el.scrollIntoView(snapTop);
           }
-        };
+        }
       }
     };
   });
