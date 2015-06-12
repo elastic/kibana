@@ -9,7 +9,7 @@ define(function (require) {
    * this module, which provides a modified version
    * of lodash.
    */
-  var _ = require('lodash_src').runInContext(window);
+  var _ = require('lodash_src').runInContext();
   require('utils/lodash-mixins/string')(_);
   require('utils/lodash-mixins/lang')(_);
   require('utils/lodash-mixins/object')(_);
