@@ -655,7 +655,7 @@ define(function (require) {
         return this._div;
       };
       label.update = function () {
-        this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
+        this._div.innerHTML = '<h2>' + _.escape(mapLabel) + '</h2>';
       };
       label.addTo(map);
     };
@@ -844,7 +844,7 @@ define(function (require) {
       var exp = 0.5;
       var precisionBiasNumerator = 200;
       var precisionBiasBase = 5;
-      var pct = value / max;
+      var pct = Math.abs(value) / Math.abs(max);
       var constantZoomRadius = 0.5 * Math.pow(2, zoom);
       var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
