@@ -84,7 +84,7 @@
     "html-entities": "^1.1.1",
     "http-proxy": "^1.8.1",
     "husky": "^0.8.1",
-    "istanbul": "^0.2.4",
+    "istanbul": "^0.3.15",
     "jade": "^1.8.2",
     "license-checker": "3.0.3",
     "load-grunt-config": "^0.7.0",
