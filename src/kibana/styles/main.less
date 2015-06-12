@@ -225,7 +225,15 @@ notifications {
 
 .list-group-menu {
 
+  &.select-mode a{
+     outline: none;
+     color: @link-color;
+  }
+
   .list-group-menu-item {
+    list-style: none;
+    color: @link-color;
+
     &.active {
       font-weight: bold;
       background-color: @well-bg;
