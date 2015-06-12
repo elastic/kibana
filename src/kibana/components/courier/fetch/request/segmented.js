@@ -18,7 +18,7 @@ define(function (require) {
       // segmented request specific state
       this._initFn = initFn;
       this._desiredSize = false;
-      this._maxSegments = config.get('discover:maxSegmentCount');
+      this._maxSegments = config.get('courier:maxSegmentCount');
       this._hitsReceived = 0;
       this._direction = 'desc';
       this._handle = new SegmentedHandle(this);
