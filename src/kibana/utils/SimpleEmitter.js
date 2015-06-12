@@ -67,10 +67,8 @@ define(function (require) {
    * @param  {*} [arg...] - any number of arguments that will be applied to each handler
    * @return {SimpleEmitter} - this, for chaining
    */
-  SimpleEmitter.prototype.emit = function (name, arg) {
+  SimpleEmitter.prototype.emit = _.restParam(function (name, args) {
     if (!this._listeners[name]) return this;
-
-    var args = _.rest(arguments);
     var listeners = this.listeners(name);
     var i = -1;
 
@@ -79,7 +77,7 @@ define(function (require) {
     }
 
     return this;
-  };
+  });
 
   /**
    * Get a list of the event names that currently have listeners
