@@ -33,7 +33,7 @@ define(function (require) {
           this.options = options;
         }
 
-        PersistedLogMock.prototype.add = sinon.stub();
+        PersistedLogMock.prototype.add = sinon.stub().returns(typeaheadItems);
         PersistedLogMock.prototype.get = sinon.stub().returns(typeaheadItems);
 
         return PersistedLogMock;
