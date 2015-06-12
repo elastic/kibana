@@ -47,6 +47,7 @@ define(function (require) {
       $parentScope.agg = {
         id: 1,
         params: {},
+        type: {params: []},
         schema: makeConfig()
       };
       $parentScope.groupName = 'metrics';

@@ -59,7 +59,7 @@ define(function (require) {
       });
     });
 
-    describe('ngModelController', function () {
+    xdescribe('ngModelController', function () {
       it('gives access to the ngFormController', function () {
         expect(ngModel.$getForm()).to.be(ngForm);
       });
