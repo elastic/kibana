@@ -113,13 +113,12 @@ define(function (require) {
 
         //key handler for the filter text box
         self.filterKeyDown = function ($event) {
-          if (keymap[$event.keyCode] !== 'tab')
-            return;
+          if (keymap[$event.keyCode] !== 'tab') return;
+
+          self.selector.index = 0;
+          self.selector.enabled = true;
 
           $timeout(function () {
-            self.selector.index = 0;
-            self.selector.enabled = true;
-
             $list.find('a:first').focus();
           });
 
@@ -130,20 +129,21 @@ define(function (require) {
         self.hitKeyDown = function ($event, page, paginate) {
           switch (keymap[$event.keyCode]) {
             case 'tab':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
+
+              $list.find('li.active a').focus();
 
               self.selector.index = -1;
               self.selector.enabled = false;
 
-              if ($event.shiftKey)
+              if ($event.shiftKey) {
                 $input.focus();
+              }
 
               $event.preventDefault();
               break;
             case 'down':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
 
               if (self.selector.index + 1 < page.length) {
                 self.selector.index += 1;
@@ -151,8 +151,7 @@ define(function (require) {
               $event.preventDefault();
               break;
             case 'up':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
 
               if (self.selector.index > 0) {
                 self.selector.index -= 1;
@@ -160,46 +159,41 @@ define(function (require) {
               $event.preventDefault();
               break;
             case 'right':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
 
               if (page.number < page.count) {
                 paginate.goToPage(page.number + 1);
+                self.selector.index = 0;
                 $timeout(function () {
-                  self.selector.index = 0;
                   $list.find('a:first').focus();
                 });
               }
               $event.preventDefault();
               break;
             case 'left':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
 
               if (page.number > 1) {
                 paginate.goToPage(page.number - 1);
+                self.selector.index = 0;
                 $timeout(function () {
-                  self.selector.index = 0;
                   $list.find('a:first').focus();
                 });
               }
               $event.preventDefault();
               break;
             case 'escape':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
 
               $input.focus();
               $event.preventDefault();
               break;
             case 'enter':
-              if (!self.selector.enabled)
-                break;
+              if (!self.selector.enabled) break;
 
               var hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
               var hit = self.hits[hitIndex];
-              if (!hit)
-                break;
+              if (!hit) break;
 
               self.onChoose(hit, $event);
               $event.preventDefault();
