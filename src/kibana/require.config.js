@@ -22,7 +22,7 @@ require.config({
     css: 'bower_components/require-css/css',
     d3: 'bower_components/d3/d3',
     elasticsearch: 'bower_components/elasticsearch/elasticsearch.angular',
-    faker: 'bower_components/Faker/faker',
+    faker: 'bower_components/Faker/build/build/faker',
     file_saver: 'bower_components/FileSaver/FileSaver',
     gridster: 'bower_components/gridster/dist/jquery.gridster',
     'leaflet-heat': 'bower_components/Leaflet.heat/dist/leaflet-heat',
