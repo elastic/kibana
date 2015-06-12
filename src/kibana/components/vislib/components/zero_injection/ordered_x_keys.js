@@ -55,7 +55,7 @@ define(function (require) {
 
         return vals;
       })
-      .flatten(true)
+      .flatten()
       .value();
     };
   };

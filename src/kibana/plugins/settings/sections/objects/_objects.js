@@ -89,7 +89,7 @@ define(function (require) {
           var objs = $scope.services.map(function (service) {
             return service.data.map(_.partialRight(_.extend, {type: service.type}));
           });
-          retrieveAndExportDocs(_.flatten(objs));
+          retrieveAndExportDocs(_.flattenDeep(objs));
         };
 
         function retrieveAndExportDocs(objs) {
@@ -130,7 +130,7 @@ define(function (require) {
             if (existingDocs.length === 0 || window.confirm(confirmMessage + _.pluck(existingDocs, '_id').join('\n'))) {
               return es.bulk({
                 index: config.file.kibana_index,
-                body: _.flatten(docs.map(transformToBulk))
+                body: _.flattenDeep(docs.map(transformToBulk))
               })
               .then(refreshIndex)
               .then(refreshData, notify.error);

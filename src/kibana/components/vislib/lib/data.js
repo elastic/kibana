@@ -282,9 +282,9 @@ define(function (require) {
     Data.prototype.flatten = function () {
       return _(this.chartData())
       .pluck('series')
-      .flatten()
+      .flattenDeep()
       .pluck('values')
-      .flatten()
+      .flattenDeep()
       .value();
     };
 

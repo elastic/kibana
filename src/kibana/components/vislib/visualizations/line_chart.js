@@ -79,7 +79,7 @@ define(function (require) {
       .map(function (series) {
         return _.pluck(series, '_input.z');
       })
-      .flatten()
+      .flattenDeep()
       .reduce(function (result, val) {
         if (result.min > val) result.min = val;
         if (result.max < val) result.max = val;

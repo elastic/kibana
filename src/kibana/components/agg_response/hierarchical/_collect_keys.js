@@ -5,7 +5,7 @@ define(function (require) {
     var keys = _.pluck(children, 'name');
     return _(nextChildren)
     .map(collectKeys)
-    .flatten()
+    .flattenDeep()
     .union(keys)
     .value();
   };

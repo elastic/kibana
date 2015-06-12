@@ -11,7 +11,7 @@ module.exports = function (grunt) {
       basename + '.zip.sha1.txt'
     ];
   })
-  .flatten()
+  .flattenDeep()
   .map(function (filename) {
     return {
       src: 'target/' + filename,

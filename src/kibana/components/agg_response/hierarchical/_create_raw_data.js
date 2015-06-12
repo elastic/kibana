@@ -22,7 +22,7 @@ define(function (require) {
 
     // Create the columns
     results.columns = _(aggs)
-    .flatten()
+    .flattenDeep()
     .map(function (agg) {
       return {
         categoryName: agg.schema.name,
@@ -61,7 +61,7 @@ define(function (require) {
       // iterate through all the buckets
       _.each(extractBuckets(data[agg.id]), function (bucket) {
 
-        var _record = _.flatten([record, bucket.key]);
+        var _record = _.flattenDeep([record, bucket.key]);
         _.each(metrics, function (metric) {
           var value = bucket.doc_count;
           if (bucket[metric.id] && !_.isUndefined(bucket[metric.id].value)) {

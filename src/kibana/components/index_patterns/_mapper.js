@@ -94,7 +94,7 @@ define(function (require) {
               return key;
             }
           })
-          .flatten()
+          .flattenDeep()
           .sort()
           .uniq(true)
           .value();

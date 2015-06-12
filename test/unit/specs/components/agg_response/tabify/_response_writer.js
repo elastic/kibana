@@ -223,7 +223,7 @@ define(function (require) {
             });
           });
 
-          var tables = _.flatten(_.pluck(writer.response().tables, 'tables'));
+          var tables = _.flattenDeep(_.pluck(writer.response().tables, 'tables'));
           expect(tables.length).to.be(types.length);
 
           // collect the far left acr from each table

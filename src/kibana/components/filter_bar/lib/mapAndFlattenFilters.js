@@ -4,7 +4,7 @@ define(function (require) {
     var mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
     return function (filters) {
       return _(filters)
-      .flatten(true)
+      .flatten()
       .compact()
       .map(mapFilter)
       .thru(Promise.all)
