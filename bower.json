@@ -21,7 +21,6 @@
   ],
   "dependencies": {
     "angular": "1.4.0",
-    "angular-bindonce": "0.3.3",
     "angular-bootstrap": "0.13.0",
     "angular-elastic": "2.4.2",
     "angular-mocks": "1.4.0",

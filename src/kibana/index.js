@@ -10,14 +10,12 @@ define(function (require) {
 
   require('elasticsearch');
   require('angular-route');
-  require('angular-bindonce');
 
   var configFile = JSON.parse(require('text!config'));
 
   var kibana = modules.get('kibana', [
     // list external requirements here
     'elasticsearch',
-    'pasvaz.bindonce',
     'ngRoute',
     'ngClipboard'
   ]);
