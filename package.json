@@ -83,7 +83,7 @@
     "grunt-simple-mocha": "^0.4.0",
     "html-entities": "^1.1.1",
     "http-proxy": "^1.8.1",
-    "husky": "^0.6.0",
+    "husky": "^0.8.1",
     "istanbul": "^0.2.4",
     "jade": "^1.8.2",
     "license-checker": "3.0.3",
