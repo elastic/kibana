@@ -101,7 +101,7 @@
     "simple-git": "^0.11.0",
     "sinon": "^1.12.2",
     "sinon-as-promised": "^2.0.3",
-    "tar": "^1.0.1"
+    "tar": "^2.1.1"
   },
   "engines": {
     "node": "~0.10 || ~0.12",
