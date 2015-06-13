@@ -47,8 +47,14 @@ define(function (require) {
           }).catch(function (e) {
             $scope.error = e.message;
 
-            var service = _.find(services, {type: $scope.panel.type});
-            $scope.edit = '#settings/objects/' + (service && service.name);
+            // If the savedObjectType matches the panel type, this means the object itself has been deleted,
+            // so we shouldn't even have an edit link. If they don't match, it means something else is wrong
+            // with the object (but the object still exists), so we link to the object editor instead.
+            var objectHasBeenDeleted = e.savedObjectType === $scope.panel.type;
+            if (!objectHasBeenDeleted) {
+              var service = _.find(services, {type: $scope.panel.type});
+              $scope.edit = '#settings/objects/' + (service && service.name);
+            }
           });
 
         });
