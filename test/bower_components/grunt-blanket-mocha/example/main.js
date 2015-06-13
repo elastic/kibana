@@ -1,8 +1,0 @@
-"use strict";
-
-define([
-
-], function(
-) {
-
-});
