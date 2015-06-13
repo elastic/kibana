@@ -1,68 +1,93 @@
-# Installing the last release of Marvel
+Sense
+=====
 
-The easiest way to play/get to know Marvel is to install the latest release version of it. To do so, just run the following command on every node on your cluster (restart node for it to have effect):
+A JSON aware developer's interface to ElasticSearch. Comes with handy machinery such as syntax highlighting, autocomplete,
+formatting and code folding.
 
-```
-./bin/plugin -i elasticsearch/marvel/latest
-```
+[![Build Status](https://travis-ci.org/bleskes/sense.png)](https://travis-ci.org/bleskes/sense)
 
-Once done, open up the following url (assuming standard ES config): http://localhost:9200/_plugin/marvel  . This will take you to the Overview Dashboard. Use Kibana's Load dashboard menu to navigate to the Cluster Pulse dashboard
+Installation
+------------
 
+Sense is installed as a Chrome Extension. Install it from
+the [Chrome Webstore](http://bit.ly/es_sense) .
 
-## I just want to run Sense
+Screenshots
+-----------
 
-To run Sense, checkout a copy of this repo. You can now double click `sense/index.html` and it will open in your default browser.
+### Syntax highlighting
+![Syntax highlighting](https://github.com/bleskes/sense/raw/master/docs/syntaxhighlighting.png)
 
-For a cleaner experience, we recommend using something like http://anvilformac.com and point it at the repo checkout. Once done you can access Sense via `http://webserver/sense/`, for example http://elasticsearch-marvel.dev/sense if using Anvil.
+### Auto complete
+![Auto complete](https://github.com/bleskes/sense/raw/master/docs/autocomplete.png)
 
-Note: to run the Kibana side of Marvel, you'd need to install grunt as described bellow.
+### Broken JSON detection
+![Broken JSON](https://github.com/bleskes/sense/raw/master/docs/broken.png)
 
-## Grunt build system (for running the UI from a code checkout)
-This grunt-based build system handles Kibana development environment setup for Marvel as well as building, packaging and distribution of the Marvel plugin. Note that you **must** run *grunt setup* before any other tasks as this build system reuses parts of the Kibana build system that must be fetched
+### History
+![History](https://github.com/bleskes/sense/raw/master/docs/history.png)
 
-### Installing
-You will need node.js+npm and grunt. Node is available via brew, install grunt with the command below. Once grunt is installed you may run grunt tasks to setup your environment and build Marvel
+Other goodies
+-----
 
-```npm install -g grunt-cli```
+- Keep multiple requests at hand:
 
-```npm install```
+  ![Multiple requests](https://github.com/bleskes/sense/raw/master/docs/requestformat.png)
+- Copy and paste requests as cURL
+- Resizable panels
+- Friendly keyboard shortcuts (for a complete list, click the help button):
+    * `Ctrl/Cmd + I`         - Auto indent current request.
+    * `Ctrl + Space`         - Open Auto complete (even if not typing).
+    * `Ctrl/Cmd + Enter`     - Submit request.
+    * `Ctrl/Cmd + Shift + C` - Copy request in cURL format.
+    * `Ctrl/Cmd + Up/Down`   - Jump to the previous/next request start or end.
+    * `Ctrl/Cmd + Alt + L`   - Collapse/expand current scope.
 
-### Tasks
+Changes
+-------
 
-```grunt setup```
+### v0.8
+- Major rewrite to support multiple requests in the editor.
+- You can now move the split between editor & output.
+- New shortcuts to navigate through requests quickly (see help).
+- Improved help popup.
+- Added editor support for request with multiple documents, separated by a new line.
+- Auto indent now toggels between single line per doc and multi-line formatted & indented.
+- Use Tab (as well as Enter) to select autocomplete suggestions.
+- Auto complete suggestion now sort prefix matches first.
+- Added a welcome message (which will only be shown once)
 
-**Run this first.** It will download the right Kibana version to ./vendor/kibana, copies the appropriate config.js to the right place and make any symlinks needed for a proper marvel/kibana environment
+### v0.7
+- Increased history size to 500 elements
+- Add mappings to the KB.
+- Auto complete menu opens automatically when typing (read help for details on keyboard usage)
+- Added the possibility to indicate an endpoint needs one or more indexes to KB (previously had 0 or more).
+- GET request ignore editor content and the editor is visually disabled.
+- Double a click a history item to select it and close.
+- Changed icons to latest ES icons (thanks to @spenceralger)
+- Reduced size of method selector (v0.7.9)
 
-```grunt server```
+### v0.6
+- Added support for username passwords in the url.
+- Added support for cURL copy & paste.
+    - You can now copy current request in curl format (using menu button or a keyboard shortcut)
+    - Paste a curl command into the editor and it will be parsed and all the correct fields populated
 
-Starts a web server on http://127.0.0.1:5601 pointing at the kibana directory, while also serving custom marvel panels.
+### v0.5
+- Mapping integration - autocomplete on indices, aliases and fields.
+- Added facets to the KB.
+- Enabled soft wrap in both input and output editors
 
-You can use `grunt server --port=5601 --es_host=9200` to control the ports used for kibana and the elasticsearch port used.
+### v0.4
+- Completed knowledge base and autocomplete for Query DSL
 
-```grunt jshint```
+### v0.3
+- Moved to a Chrome Extension for better deployment and upgrading infrastructure.
+- Introduced a knowledge base system to better manage growing size.
+- Added an automated test suite.
 
-Lints code without building
+### v0.2
+- History support
 
-```grunt build```
-
-Merges kibana and marvel code, builds Kibana and the plugin (via mvn) and puts them in ./build.
-
-```grunt package```
-
-Zips and tar+gzips the build in build/packages. Includes grunt build
-
-```grunt release```
-
-Uploads created archives to download.elasticsearch.org/elasticsearch/marvel/marvel-VERSION.extention. You will need S3 credentials in .aws-config.json. Format as so:
-
-```
-{
-  "key":"MY_KEY_HERE",
-  "secret":"your/long/secret/string"
-}
-
-```
-
-To upload the current archive as the "latest" release, use:
-
-```grunt release --latest```
+### v0.1
+- Initial release
