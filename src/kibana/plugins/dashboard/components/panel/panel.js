@@ -3,11 +3,19 @@ define(function (require) {
   var $ = require('jquery');
   require('modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $compile) {
+  .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
     var _ = require('lodash');
     var loadPanel = Private(require('plugins/dashboard/components/panel/lib/load_panel'));
     var filterManager = Private(require('components/filter_manager/filter_manager'));
     var notify = new Notifier();
+
+    var services = require('plugins/settings/saved_object_registry').all().map(function (serviceObj) {
+      var service = $injector.get(serviceObj.service);
+      return {
+        type: service.type,
+        name: serviceObj.service
+      };
+    });
 
     require('components/visualize/visualize');
     require('components/doc_table/doc_table');
@@ -38,6 +46,9 @@ define(function (require) {
             };
           }).catch(function (e) {
             $scope.error = e.message;
+
+            var service = _.find(services, {type: $scope.panel.type});
+            $scope.edit = '#settings/objects/' + (service && service.name);
           });
 
         });
