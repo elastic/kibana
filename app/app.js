@@ -300,22 +300,6 @@ define([
       return false;
     });
 
-    /*
-     * initialize navigation menu
-     */
-    $.get('../common/marvelLinks.json', function (marvelLinks) {
-      var linkMenu = $("#nav_btn ul");
-      _.map(marvelLinks.links, function (link) {
-        var li = $('<li><a></a></li>');
-        var a = li.find('a');
-        a.attr('href', link.url);
-        a.text(link.name);
-        if (a[0].href != window.location.href) {
-          li.appendTo(linkMenu);
-        }
-      });
-    });
-
     /**
      * Display the welcome popup if it has not been shown yet
      */
@@ -339,16 +323,6 @@ define([
 
     if (marvelOpts.status && marvelOpts.version && marvelOpts.report) {
       ga.pageview();
-    }
-
-    if (marvelOpts.status === 'trial') {
-      $('#developer-tag').removeClass('hide');
-      $('#developer-tag').html('Development Trial');
-    }
-
-    if (marvelOpts.status === 'registered') {
-      $('#developer-tag').removeClass('hide');
-      $('#developer-tag').html('Development Mode');
     }
 
   });
