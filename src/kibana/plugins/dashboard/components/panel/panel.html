@@ -2,8 +2,12 @@
   <div class="panel-heading">
     <span class="panel-title">{{savedObj.title}}</span>
     <div class="btn-group">
-      <a aria-label="Edit" ng-show="!appEmbedded && edit" ng-href="{{edit}}/{{panel.id | uriescape}}"><i aria-hidden="true" class="fa fa-pencil"></i></a>
-      <a aria-label="Remove" ng-show="!appEmbedded" ng-click="remove()"><i aria-hidden="true" class="fa fa-times"></i></a>
+      <a aria-label="Edit" ng-show="!appEmbedded && editUrl" ng-href="{{editUrl}}">
+        <i aria-hidden="true" class="fa fa-pencil"></i>
+      </a>
+      <a aria-label="Remove" ng-show="!appEmbedded" ng-click="remove()">
+        <i aria-hidden="true" class="fa fa-times"></i>
+      </a>
     </div>
     <div class="clearfix"></div>
   </div>
