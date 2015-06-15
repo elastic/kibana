@@ -51,7 +51,7 @@ if (program.logFile) {
   settings['logging.file'] = program.logFile;
 }
 
-var configPath = process.env.CONFIG_PATH || program.config;
+var configPath = program.config || process.env.CONFIG_PATH;
 if (configPath) {
   settings = _.defaults(settings, loadSettingsFromYAML(configPath));
 }
