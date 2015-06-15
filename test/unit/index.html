@@ -14,15 +14,8 @@
       var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
       var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
 
-      function wrap(obj, method, fn) {
-        var orig = obj[method];
-        return obj[method] = function methodProxy() {
-          return fn.apply(this, [orig].concat([].slice.call(arguments)));
-        };
-      }
-
-      wrap(mocha, 'ui', function (orig, ui) {
-        var ret = orig.call(this, ui);
+      mocha.ui = _.wrap(mocha.ui, function (mochaUi, ui) {
+        var ret = mochaUi.call(this, ui);
 
         var _desc = window.describe;
         window.describe = wrap(window, 'describe', unwindDescribeArrays);

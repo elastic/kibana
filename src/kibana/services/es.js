@@ -20,15 +20,13 @@ define(function (require) {
           function CustomAngularConnector(host, config) {
             CustomAngularConnector.Super.call(this, host, config);
 
-            var originalRequest = this.request;
-            this.request = function (params) {
+            this.request = _.wrap(this.request, function (request, params) {
               if (String(params.method).toUpperCase() === 'GET') {
-                params.query = params.query || {};
-                params.query._ = Date.now();
+                params.query = _.defaults({ _: Date.now() }, params.query);
               }
 
-              return originalRequest.apply(this, arguments);
-            };
+              return request.apply(this, arguments);
+            });
           }
 
           config.connectionClass = CustomAngularConnector;
