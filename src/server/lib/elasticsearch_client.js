@@ -24,6 +24,7 @@ if (config.kibana.ca) {
 module.exports = new elasticsearch.Client({
   host: url.format(uri),
   ssl: ssl,
+  apiVersion: '1.4',
   pingTimeout: config.ping_timeout,
   log: function (config) {
     this.error = function (err) {
