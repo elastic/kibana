@@ -37,7 +37,7 @@ define(function (require) {
           loadPanel($scope.panel, $scope).then(function (panelConfig) {
             // These could be done in loadPanel, putting them here to make them more explicit
             $scope.savedObj = panelConfig.savedObj;
-            $scope.edit = panelConfig.edit;
+            $scope.editUrl = panelConfig.editUrl;
             $scope.$on('$destroy', panelConfig.savedObj.destroy);
 
             $scope.filter = function (field, value, operator) {
@@ -50,11 +50,15 @@ define(function (require) {
             // If the savedObjectType matches the panel type, this means the object itself has been deleted,
             // so we shouldn't even have an edit link. If they don't match, it means something else is wrong
             // with the object (but the object still exists), so we link to the object editor instead.
-            var objectHasBeenDeleted = e.savedObjectType === $scope.panel.type;
-            if (!objectHasBeenDeleted) {
-              var service = _.find(services, {type: $scope.panel.type});
-              $scope.edit = '#settings/objects/' + (service && service.name);
-            }
+            var objectItselfDeleted = e.savedObjectType === $scope.panel.type;
+            if (objectItselfDeleted) return;
+
+            var type = $scope.panel.type;
+            var id = $scope.panel.id;
+            var service = _.find(services, { type: type });
+            if (!service) return;
+
+            $scope.editUrl = '#settings/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
           });
 
         });
