@@ -12,6 +12,7 @@ define(function (require) {
         host: configFile.elasticsearch,
         log: 'info',
         requestTimeout: 0,
+        apiVersion: '1.4',
         plugins: [function (Client, config) {
 
           // esFactory automatically injects the AngularConnector to the config
