@@ -1,5 +1,4 @@
 var os = require('os');
-var config = require('./utils/server-config');
 
 module.exports = function (grunt) {
   grunt.registerTask('run_build', [
