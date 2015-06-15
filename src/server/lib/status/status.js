@@ -4,8 +4,8 @@ var EventEmitter = require('events').EventEmitter;
 util.inherits(Status, EventEmitter);
 function Status(name) {
   this.name = name;
-  this.state = 'red';
-  this.message = '';
+  this.state = undefined;
+  this.message = 'uninitialized';
   EventEmitter.call(this);
   var self = this;
 }

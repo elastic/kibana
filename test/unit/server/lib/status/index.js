@@ -26,13 +26,8 @@ describe('lib/status/index.js', function () {
 
   it('should attach a logger to the change status', function () {
     status.createStatus(plugin);
+    plugin.status.green('Ready!');
     sinon.assert.calledOnce(plugin.server.log);
-  });
-
-  it('should call the yellow status method with "Initializing"', function () {
-    status.createStatus(plugin);
-    sinon.assert.calledOnce(yellowSpy);
-    expect(yellowSpy.args[0][0]).to.be('Initializing');
   });
 
   it('should serialize the statuses when toJSON is called', function () {

@@ -65,7 +65,7 @@ module.exports = function (server, plugins) {
         if (err) return reject(err);
         // Only change the plugin status to green if the intial status has not
         // been updated from yellow - Initializing
-        if (plugin.status.message === 'Initializing' && plugin.status.state === 'yellow') {
+        if (plugin.status.state === undefined) {
           plugin.status.green('Ready');
         }
         resolve(plugin);

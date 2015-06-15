@@ -4,9 +4,10 @@ var Status = require('../../../../../src/server/lib/status/status');
 
 describe('lib/status/status.js', function () {
 
-  it('should have a red state when initialized', function () {
+  it('should have a undefined state when initialized', function () {
     var obj = new Status('test');
-    expect(obj).to.have.property('state', 'red');
+    expect(obj).to.have.property('state');
+    expect(obj.statue).to.be(undefined);
   });
 
   it('should only trigger the change listner when something changes', function () {
@@ -39,7 +40,7 @@ describe('lib/status/status.js', function () {
       var message = 'testing ' + color;
       obj.on('change', function (current, previous) {
         expect(current).to.eql({ state: color, message: message });
-        expect(previous).to.eql({ state: 'red', message: '' });
+        expect(previous).to.eql({ state: undefined, message: 'uninitialized' });
         done();
       });
       obj[color](message);
@@ -50,7 +51,7 @@ describe('lib/status/status.js', function () {
       var message = 'testing ' + color;
       obj.on(color, function (msg, prev) {
         expect(msg).to.be(message);
-        expect(prev).to.eql({ state: 'red', message: '' });
+        expect(prev).to.eql({ state: undefined, message: 'uninitialized' });
         done();
       });
       obj[color](message);
