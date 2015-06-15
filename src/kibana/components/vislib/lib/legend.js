@@ -4,7 +4,6 @@ define(function (require) {
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
     var dataLabel = require('components/vislib/lib/_data_label');
-    var AggConfigResult = require('components/vis/_agg_config_result');
     var getLabels = Private(require('components/vislib/components/labels/labels'));
     var color = Private(require('components/vislib/components/color/color'));
 
@@ -26,12 +25,24 @@ define(function (require) {
         return new Legend(vis);
       }
 
+      var data = vis.data.columns || vis.data.rows || [vis.data];
+      var type = vis._attr.type;
+      var labelValues;
+
+      function getValues(arr) {
+        return arr.map()
+      }
+
       this.events = new Dispatch();
       this.vis = vis;
       this.el = vis.el;
-      this.dataValues = this._getData(vis.data);
-      this.labels = this._getLabels(this.dataValues, vis._attr.type);
-      this.color = color(this.labels);
+      this.labels = this._getLabels(data, type);
+
+      labelValues = this.labels.map(function (obj) {
+        return obj.label;
+      });
+
+      this.color = color(labelValues);
 
       this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
@@ -43,95 +54,43 @@ define(function (require) {
       });
     }
 
+    Legend.prototype._getSeriesLabels = function (data) {
+      if (data && data.length === 1 && data[0].series.length === 1 && data[0].series[0].label === '') {
+        return data[0].yAxisLabel;
+      }
+
+      return data.map(function (chart) {
+        return chart.series.map(function (series) {
+          return series;
+        });
+      }).reduce(function (a, b) {
+        return a.concat(b);
+      });
+    };
+
     Legend.prototype._getLabels = function (data, type) {
-      var labelArray = [];
+      if (type === 'pie') {
+        return this._modifyPieLabels(data);
+      }
 
-      data.forEach(function (d) {
-        if (d.series && d.series.length === 1 && getLabels(d)[0] === '') {
-          return labelArray.push(d.yAxisLabel);
-        }
+      return this._getSeriesLabels(data);
 
-        getLabels(d, type).forEach(function (label) {
-          return labelArray.push(label);
-        });
-      });
-
-      return _.unique(labelArray);
-    };
-
-    Legend.prototype._getData = function (data) {
-      return data.columns || data.rows || [data];
-    };
-
-    Legend.prototype._modifyPointSeriesLabels = function (data, labels) {
-      return labels.map(function (label) {
-        var values = [];
-        var prevAggConfigResult;
-        var aggConfigResult;
-
-        data.forEach(function (datum) {
-          datum.series.forEach(function (d) {
-            if (d.label === label) {
-              d.values.forEach(function (e) {
-                values.push(e);
-              });
-            }
-          });
-        });
-
-        values = values.filter(function (d) { return d.aggConfigResult; }); // Remove zero injected values
-        if (values.length && values[0].aggConfigResult) {
-          prevAggConfigResult = values[0].aggConfigResult.$parent;
-          aggConfigResult = new AggConfigResult(prevAggConfigResult.aggConfig, null,
-            prevAggConfigResult.value, prevAggConfigResult.key);
-        }
-
-        return {
-          label: label,
-          aggConfigResult: aggConfigResult,
-          values: values
-        };
-      });
-    };
-
-    /**
-     * Returns an arr of data objects that includes labels, aggConfig, and an array of data values
-     * for the pie chart.
-     */
-    Legend.prototype._modifyPieLabels = function (data, labels) {
-      return labels.map(function (label) {
-        var values = [];
-        var aggConfigResult;
-        var aggConfig;
-
-        data.forEach(function (datum) {
-          datum.slices.children.forEach(function traverse(d) {
-            if (d.children) d.children.forEach(traverse);
-            if (d.name === label) values.push(d);
-          });
-        });
-
-        if (values.length && values[0].aggConfigResult) {
-          aggConfigResult = values[0].aggConfigResult;
-          if (aggConfigResult.$parent) aggConfigResult.$parent = undefined;
-        }
-
-        if (values.length && values[0].aggConfig) {
-          aggConfig = values[0].aggConfig;
-        }
-
-        return {
-          label: label,
-          aggConfig: aggConfig,
-          aggConfigResult: aggConfigResult,
-          values: values
-        };
-      });
-    };
-
-    Legend.prototype._getDataLabels = function (data, labels, type) {
-      if (type === 'pie') return this._modifyPieLabels(data, labels);
-      return this._modifyPointSeriesLabels(data, labels);
+      //var labelArray = [];
+      //
+      //if (data && data.length === 1 && data[0].label === '') {
+      //  return labelArray.push()
+      //}
+      //data.forEach(function (d) {
+      //  if (d && d.length === 1 && getLabels(chart)[0] === '') {
+      //    return labelArray.push(chart.yAxisLabel);
+      //  }
+      //
+      //  getLabels(chart, type).forEach(function (label) {
+      //    return labelArray.push(label);
+      //  });
+      //});
+      //
+      //return _.unique(labelArray);
     };
 
     /**
