@@ -4,7 +4,6 @@ define(function (require) {
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
     var dataLabel = require('components/vislib/lib/_data_label');
-    var getLabels = Private(require('components/vislib/components/labels/labels'));
     var color = Private(require('components/vislib/components/color/color'));
 
     require('css!components/vislib/styles/main');
@@ -27,23 +26,13 @@ define(function (require) {
 
       var data = vis.data.columns || vis.data.rows || [vis.data];
       var type = vis._attr.type;
-      var labelValues;
-
-      function getValues(arr) {
-        return arr.map()
-      }
+      var labels = this.labels = this._getLabels(data, type);
+      var labelsArray = labels.map(function (obj) { return obj.label; });
 
       this.events = new Dispatch();
       this.vis = vis;
       this.el = vis.el;
-      this.labels = this._getLabels(data, type);
-
-      labelValues = this.labels.map(function (obj) {
-        return obj.label;
-      });
-
-      this.color = color(labelValues);
-
+      this.color = color(labelsArray);
       this._attr = _.defaults(vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
@@ -54,43 +43,44 @@ define(function (require) {
       });
     }
 
-    Legend.prototype._getSeriesLabels = function (data) {
-      if (data && data.length === 1 && data[0].series.length === 1 && data[0].series[0].label === '') {
-        return data[0].yAxisLabel;
-      }
+    Legend.prototype._modifyPieLabels = function (data) {
+      var values = [];
 
-      return data.map(function (chart) {
+      data.forEach(function (datum) {
+        datum.slices.children.forEach(function traverse(d) {
+          if (d.children) d.children.forEach(traverse);
+          values.push({
+            label: d.name,
+            values: d
+          });
+        });
+      });
+
+      return _.uniq(values, 'label');
+    };
+
+    Legend.prototype._getSeriesLabels = function (data) {
+      var isOneSeries = data.every(function (chart) {
+        return chart.series.length === 1;
+      });
+
+      var values = data.map(function (chart) {
+        var yLabel = isOneSeries ? chart.yAxisLabel : undefined;
+
         return chart.series.map(function (series) {
+          if (yLabel) series.label = yLabel;
           return series;
         });
       }).reduce(function (a, b) {
         return a.concat(b);
       });
+
+      return _.uniq(values, 'label');
     };
 
     Legend.prototype._getLabels = function (data, type) {
-      if (type === 'pie') {
-        return this._modifyPieLabels(data);
-      }
-
+      if (type === 'pie') return this._modifyPieLabels(data);
       return this._getSeriesLabels(data);
-
-      //var labelArray = [];
-      //
-      //if (data && data.length === 1 && data[0].label === '') {
-      //  return labelArray.push()
-      //}
-      //data.forEach(function (d) {
-      //  if (d && d.length === 1 && getLabels(chart)[0] === '') {
-      //    return labelArray.push(chart.yAxisLabel);
-      //  }
-      //
-      //  getLabels(chart, type).forEach(function (label) {
-      //    return labelArray.push(label);
-      //  });
-      //});
-      //
-      //return _.unique(labelArray);
     };
 
     /**
@@ -133,15 +123,15 @@ define(function (require) {
       .enter()
         .append('li')
         .attr('class', 'color')
-        .each(function (label) {
+        .each(function (d) {
           var li = d3.select(this);
-          self._addIdentifier.call(this, label);
+          self._addIdentifier.call(this, d);
 
           li.append('i')
           .attr('class', 'fa fa-circle dots')
-          .attr('style', 'color:' + args.color(label));
+          .attr('style', 'color:' + args.color(d.label));
 
-          li.append('span').text(label);
+          li.append('span').text(d.label);
         });
     };
 
@@ -165,7 +155,7 @@ define(function (require) {
       var self = this;
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
-      var items = this._getDataLabels(this.dataValues, this.labels, this._attr.type);
+      var items = this.labels;
       this._header(legendDiv, this);
       this._list(legendDiv, items, this);
 
@@ -242,7 +232,7 @@ define(function (require) {
 
       legendDiv.selectAll('li.color').each(function (d) {
         var label = d.label;
-        if (label !== undefined && label !== '_all') {
+        if (label && label !== '_all') {
           d3.select(this).call(self.events.addClickEvent());
         }
       });
