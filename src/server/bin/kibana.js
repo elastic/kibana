@@ -6,7 +6,7 @@ var program = require('commander');
 var path = require('path');
 var writePidFile = require('../lib/write_pid_file');
 var loadSettingsFromYAML = require('../lib/load_settings_from_yaml');
-var settings = {};
+var settings = { 'logging.console.json': true };
 
 var env = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'development';
 var packagePath = path.resolve(__dirname, '..', '..', '..', 'package.json');
@@ -51,10 +51,11 @@ if (program.logFile) {
   settings['logging.file'] = program.logFile;
 }
 
-if (program.config) {
-  // Create the settings with the overrides from the YAML config file.
-  settings = _.defaults(settings, loadSettingsFromYAML(program.config));
+var configPath = process.env.CONFIG_PATH || program.config;
+if (configPath) {
+  settings = _.defaults(settings, loadSettingsFromYAML(configPath));
 }
+
 
 
 // Start the Kibana server with the settings fromt he CLI and YAML file
