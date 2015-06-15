@@ -21,12 +21,12 @@ define(function (require) {
           function CustomAngularConnector(host, config) {
             CustomAngularConnector.Super.call(this, host, config);
 
-            this.request = _.wrap(this.request, function (request, params) {
+            this.request = _.wrap(this.request, function (request, params, cb) {
               if (String(params.method).toUpperCase() === 'GET') {
                 params.query = _.defaults({ _: Date.now() }, params.query);
               }
 
-              return request.apply(this, arguments);
+              return request.call(this, params, cb);
             });
           }
 
