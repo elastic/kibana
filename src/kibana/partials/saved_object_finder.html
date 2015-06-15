@@ -29,8 +29,9 @@
         <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
     </li>
-    <li ng-if="finder.hits.length === 0">
-      <p ng-bind="'No matching ' + nouns + ' found.'"></p>
+    <li class="list-group-item list-group-no-results"
+        ng-if="finder.hits.length === 0">
+      <p ng-bind="'No matching ' + finder.objectType.nouns + ' found.'"></p>
     </li>
   </ul>
 </paginate>

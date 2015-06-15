@@ -10,17 +10,20 @@ define(function (require) {
       searches: {
         service: savedSearches,
         name: 'searches',
-        noun: 'Saved Search'
+        noun: 'Saved Search',
+        nouns: 'searches'
       },
       visualizations: {
         service: savedVisualizations,
         name: 'visualizations',
-        noun: 'Visualization'
+        noun: 'Visualization',
+        nouns: 'visualizations'
       },
       dashboards: {
         service: savedDashboards,
         name: 'dashboards',
-        noun: 'Dashboard'
+        noun: 'Dashboard',
+        nouns: 'dashboards'
       }
     };
 
@@ -114,6 +117,8 @@ define(function (require) {
         //key handler for the filter text box
         self.filterKeyDown = function ($event) {
           if (keymap[$event.keyCode] !== 'tab') return;
+
+          if (self.hits.length === 0) return;
 
           self.selector.index = 0;
           self.selector.enabled = true;
