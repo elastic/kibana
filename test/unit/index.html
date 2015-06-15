@@ -14,27 +14,6 @@
       var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
       var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
 
-      mocha.ui = _.wrap(mocha.ui, function (mochaUi, ui) {
-        var ret = mochaUi.call(this, ui);
-
-        var _desc = window.describe;
-        window.describe = wrap(window, 'describe', unwindDescribeArrays);
-        window.describe.only = wrap(_desc, 'only', unwindDescribeArrays);
-        function unwindDescribeArrays(describe, name, body) {
-          if (!body && name && name instanceof Array) {
-            body = name[1]; name = name[0];
-          }
-
-          return describe.call(this, name, body);
-        }
-      });
-
-      mocha.setup({
-        ui: 'bdd',
-        timeout: 5000,
-        reporter: 'html'
-      });
-
       require.config({
         baseUrl: '/',
         paths: {
@@ -74,6 +53,38 @@
         // mark all requested files with instrument query param
         urlArgs: COVERAGE ? 'instrument=true' : void 0
       });
+
+      function setupMocha() {
+        require(['lodash'], function (_) {
+
+          mocha.ui = _.wrap(mocha.ui, function (mochaUi, ui) {
+            var ret = mochaUi.call(this, ui);
+
+            var oldDescribe = window.describe;
+            window.describe = _.wrap(oldDescribe, unwindDescribeArrays);
+            window.describe.only = _.wrap(oldDescribe.only, unwindDescribeArrays);
+            function unwindDescribeArrays(fn, name, body) {
+              if (!body && name && name instanceof Array) {
+                body = name[1]; name = name[0];
+              }
+
+              return fn.call(this, name, body);
+            }
+
+            return ret;
+          });
+
+          mocha.setup({
+            ui: 'bdd',
+            timeout: 5000,
+            reporter: 'html'
+          });
+
+          if (COVERAGE) setupCoverage(runTests);
+          else runTests();
+
+        });
+      }
 
       function setupCoverage(done) {
         document.title = document.title.replace('Tests', 'Coverage');
@@ -149,9 +160,7 @@
         });
       }
 
-
-      if (COVERAGE) setupCoverage(runTests);
-      else runTests();
+      setupMocha();
 
     })();</script>
   </head>
