@@ -1,29 +1,53 @@
 define(function (require) {
   var _ = require('lodash');
   return function normalizeSortRequest(config) {
+    var defaultSortOptions = config.get('sort:options');
+
     /**
      * Decorate queries with default parameters
      * @param {query} query object
      * @returns {object}
      */
-    return function (sortObject) {
-      if (!_.isArray(sortObject)) sortObject = [sortObject];
-      var defaultSortOptions = config.get('sort:options');
+    return function (sortObject, indexPattern) {
+      var normalizedSort = [];
 
-      /*
-        Normalize the sort description to the more verbose format:
-        { someField: "desc" } into { someField: { "order": "desc"}}
-      */
-      _.each(sortObject, function (sortable) {
-        var sortField = _.keys(sortable)[0];
-        var sortValue = sortable[sortField];
-        if (_.isString(sortValue)) {
-          sortValue = sortable[sortField] = { order: sortValue };
-        }
-        _.defaults(sortValue, defaultSortOptions);
+      // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
+      return [].concat(sortObject).map(function (sortable) {
+        return normalize(sortable, indexPattern);
       });
-      return sortObject;
     };
+
+    /*
+      Normalize the sort description to the more verbose format:
+      { someField: "desc" } into { someField: { "order": "desc"}}
+    */
+    function normalize(sortable, indexPattern) {
+      var normalized = {};
+      var sortField = _.keys(sortable)[0];
+      var sortValue = sortable[sortField];
+      var indexField = indexPattern.fields.byName[sortField];
+
+      if (indexField && indexField.scripted && indexField.sortable) {
+        var direction;
+        if (_.isString(sortValue)) direction = sortValue;
+        if (_.isObject(sortValue) && sortValue.order) direction = sortValue.order;
+
+        sortField = '_script';
+        sortValue = {
+          script: indexField.script,
+          type: indexField.type,
+          order: direction
+        };
+      } else {
+        if (_.isString(sortValue)) {
+          sortValue = { order: sortValue };
+        }
+        sortValue = _.defaults({}, sortValue, defaultSortOptions);
+      }
+
+      normalized[sortField] = sortValue;
+      return normalized;
+    }
   };
 });
 

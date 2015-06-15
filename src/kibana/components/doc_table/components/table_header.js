@@ -23,7 +23,8 @@ define(function (require) {
         };
 
         $scope.tooltip = function (column) {
-          if (!sortableField(column)) return ''; else return 'Sort by ' + shortDotsFilter(column);
+          if (!sortableField(column)) return '';
+          return 'Sort by ' + shortDotsFilter(column);
         };
 
         $scope.canRemove = function (name) {
