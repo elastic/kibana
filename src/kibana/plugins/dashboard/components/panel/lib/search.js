@@ -17,7 +17,7 @@ define(function (require) {
           return {
             savedObj: savedSearch,
             panel: panel,
-            edit: savedSearches.urlFor(panel.id)
+            editUrl: savedSearches.urlFor(panel.id)
           };
         });
     };
