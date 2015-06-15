@@ -26,7 +26,7 @@ define(function (require) {
         }
 
         below = !!below;
-        qualifier = _.createCallback(qualifier, null, 2);
+        qualifier = _.callback(qualifier, null, 2);
 
         var above = !below;
         var finder = below ? _.findIndex : _.findLastIndex;
@@ -96,7 +96,7 @@ define(function (require) {
         var length = array ? array.length : 0;
         var result = [];
 
-        var callback = _.createCallback(where, this, 3);
+        var callback = _.callback(where, this, 3);
         while (++index < length) {
           var value = array[index];
           if (callback(value, index, array)) {
