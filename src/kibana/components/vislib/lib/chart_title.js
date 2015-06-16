@@ -13,7 +13,7 @@ define(function (require) {
      * @constructor
      * @param el {HTMLElement} Reference to DOM element
      */
-    _.class(ChartTitle, ErrorHandler);
+    _.class(ChartTitle).inherits(ErrorHandler);
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
