@@ -33,8 +33,8 @@ define(function (require) {
 
         if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
 
-        $scope.quickLists = _.sortBy(quickRanges, 'section');
-        $scope.refreshLists = _.sortBy(refreshIntervals, 'section');
+        $scope.quickLists = _(quickRanges).groupBy('section').values().value();
+        $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
         $scope.relative = {
           count: 1,
