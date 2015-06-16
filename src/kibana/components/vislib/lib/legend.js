@@ -110,7 +110,7 @@ define(function (require) {
      * @param args {Object|*} Legend options
      * @returns {D3.Selection} HTML element with list of labels attached
      */
-    Legend.prototype._list = function (el, arrOfLabels, args) {
+    Legend.prototype._list = function (el, data, args) {
       var self = this;
 
       return el.append('ul')
@@ -119,7 +119,7 @@ define(function (require) {
         return 'legend-ul hidden';
       })
       .selectAll('li')
-      .data(arrOfLabels)
+      .data(data)
       .enter()
         .append('li')
         .attr('class', 'color')
