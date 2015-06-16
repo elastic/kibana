@@ -227,9 +227,7 @@ define(function (require) {
           expect(tables.length).to.be(types.length);
 
           // collect the far left acr from each table
-          var leftAcrs = _.pluck(tables, function (table) {
-            return table.rows[0][0];
-          });
+          var leftAcrs = _.pluck(tables, 'rows[0][0]');
 
           leftAcrs.forEach(function (acr, i, acrs) {
             expect(acr.aggConfig).to.be(vis.aggs[0]);
