@@ -26,7 +26,7 @@ define(function (require) {
         }
 
         below = !!below;
-        qualifier = _.callback(qualifier, null, 2);
+        qualifier = _.callback(qualifier);
 
         var above = !below;
         var finder = below ? _.findIndex : _.findLastIndex;
@@ -84,30 +84,11 @@ define(function (require) {
         return buckets;
       },
 
-      /**
-       * Patched version of _.remove that supports IndexedArrays
-       *
-       * @param  {array} array
-       * @param  {object|function|str} - a lodash selector/predicate
-       * @return {array} the elements that were removed
-       */
-      remove: function (array, where) {
-        var index = -1;
-        var length = array ? array.length : 0;
-        var result = [];
-
-        var callback = _.callback(where, this, 3);
-        while (++index < length) {
-          var value = array[index];
-          if (callback(value, index, array)) {
-            result.push(value);
-            array.splice(index--, 1);
-            length--;
-          }
-        }
-
-        return result;
-      },
+      remove: _.wrap(_.remove, function (remove, arr, predicate, cntx) {
+        var out = remove.call(this, arr, predicate, cntx);
+        if (arr._clearIndices) arr._clearIndices();
+        return out;
+      }),
 
       /**
        * Remove or add a value to an array based on it's presense in the
