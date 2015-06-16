@@ -8,6 +8,8 @@ cache:
   - esvm
   - node_modules
   - src/kibana/bower_components
+before_cache:
+  - rm -rf esvm/*/logs # log files shouldn't invalidate the build
 notifications:
   email:
   - rashid.khan@elastic.co
