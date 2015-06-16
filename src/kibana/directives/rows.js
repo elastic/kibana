@@ -2,7 +2,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var module = require('modules').get('kibana');
-  var AggConfigResult = require('components/vis/_agg_config_result');
+  var AggConfigResult = require('components/vis/AggConfigResult');
 
   module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));

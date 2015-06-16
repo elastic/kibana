@@ -1,11 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var sinon = require('test_utils/auto_release_sinon');
-
-  return ['renderbot', exportWrapper];
-
-  function exportWrapper() {
+  return ['renderbot', function exportWrapper() {
+    var _ = require('lodash');
+    var $ = require('jquery');
+    var sinon = require('test_utils/auto_release_sinon');
     var vislib;
     var Vis;
     var Renderbot;
@@ -21,8 +18,8 @@ define(function (require) {
       inject(function ($injector, Private, _vislib_) {
         vislib = _vislib_;
         Vis = Private(require('components/vislib/vis'));
-        Renderbot = Private(require('plugins/vis_types/_renderbot'));
-        VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
+        Renderbot = Private(require('components/vis/Renderbot'));
+        VislibRenderbot = Private(require('components/vislib_vis_type/VislibRenderbot'));
         normalizeChartData = Private(require('components/agg_response/index'));
       });
     }
@@ -167,5 +164,5 @@ define(function (require) {
         expect(spy.callCount).to.be(1);
       });
     });
-  }
+  }];
 });

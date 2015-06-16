@@ -1,25 +1,25 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var VislibVisType = Private(require('components/vislib_vis_type/VislibVisType'));
+    var Schemas = Private(require('components/vis/Schemas'));
 
     return new VislibVisType({
-      name: 'area',
-      title: 'Area chart',
-      icon: 'fa-area-chart',
-      description: 'Great for stacked timelines in which the total of all series is more important ' +
-        'than comparing any two or more series. Less useful for assessing the relative change of ' +
-        'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
-        'effect on the series above it.',
+      name: 'line',
+      title: 'Line chart',
+      icon: 'fa-line-chart',
+      description: 'Often the best chart for high density time series. Great for comparing one series to another. ' +
+        'Be careful with sparse sets as the connection between points can be misleading.',
       params: {
         defaults: {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          showCircles: true,
           smoothLines: false,
-          scale: 'linear',
           interpolate: 'linear',
-          mode: 'stacked',
+          scale: 'linear',
+          drawLinesBetweenPoints: true,
+          radiusRatio: 9,
           times: [],
           addTimeMarker: false,
           defaultYExtents: false,
@@ -27,8 +27,7 @@ define(function (require) {
           yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],
-        modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
-        editor: require('text!plugins/vis_types/vislib/editors/area.html')
+        editor: require('text!plugins/kbn_vislib_vis_types/editors/line.html')
       },
       schemas: new Schemas([
         {
@@ -36,10 +35,17 @@ define(function (require) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
-          aggFilter: '!std_dev',
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
+        },
+        {
+          group: 'metrics',
+          name: 'radius',
+          title: 'Dot Size',
+          min: 0,
+          max: 1,
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
         },
         {
           group: 'buckets',
@@ -52,7 +58,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Area',
+          title: 'Split Lines',
           min: 0,
           max: 1,
           aggFilter: '!geohash_grid'

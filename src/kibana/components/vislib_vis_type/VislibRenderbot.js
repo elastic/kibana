@@ -1,8 +1,8 @@
 define(function (require) {
   return function VislibRenderbotFactory(Private, vislib) {
     var _ = require('lodash');
-    var Renderbot = Private(require('plugins/vis_types/_renderbot'));
-    var buildChartData = Private(require('plugins/vis_types/vislib/_build_chart_data'));
+    var Renderbot = Private(require('components/vis/Renderbot'));
+    var buildChartData = Private(require('components/vislib_vis_type/buildChartData'));
 
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {

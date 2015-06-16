@@ -2,15 +2,14 @@ define(function (require) {
   return function VislibVisTypeFactory(Private) {
     var _ = require('lodash');
 
-    var VisTypeSchemas = Private(require('plugins/vis_types/_schemas'));
-    var VisType = Private(require('plugins/vis_types/_vis_type'));
+    var VisTypeSchemas = Private(require('components/vis/Schemas'));
+    var VisType = Private(require('components/vis/VisType'));
     var pointSeries = Private(require('components/agg_response/point_series/point_series'));
-    var VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
+    var VislibRenderbot = Private(require('components/vislib_vis_type/VislibRenderbot'));
 
-    require('plugins/vis_types/controls/vislib_basic_options');
-    require('plugins/vis_types/controls/point_series_options');
-    require('plugins/vis_types/controls/line_interpolation_option');
-    require('plugins/vis_types/controls/point_series_options');
+    require('plugins/kbn_vislib_vis_types/controls/vislib_basic_options');
+    require('plugins/kbn_vislib_vis_types/controls/point_series_options');
+    require('plugins/kbn_vislib_vis_types/controls/line_interpolation_option');
 
     _(VislibVisType).inherits(VisType);
     function VislibVisType(opts) {
