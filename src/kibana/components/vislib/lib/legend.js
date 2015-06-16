@@ -48,11 +48,12 @@ define(function (require) {
 
       data.forEach(function (datum) {
         datum.slices.children.forEach(function traverse(d) {
-          if (d.children) d.children.forEach(traverse);
           values.push({
             label: d.name,
             values: d
           });
+
+          if (d.children) d.children.forEach(traverse);
         });
       });
 
