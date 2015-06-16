@@ -246,7 +246,7 @@ define([
         api = "kb/api_1_0";
       }
       else if (version[0] === "2") {
-        api = "kb/api_1_0";
+        api = "kb/api_2_0";
       }
       else {
         api = "kb/api_0_90";
