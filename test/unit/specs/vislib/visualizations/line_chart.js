@@ -22,7 +22,7 @@ define(function (require) {
 
   angular.module('LineChartFactory', ['kibana']);
 
-  describe('VisLib Line Chart', function () {
+  xdescribe('VisLib Line Chart', function () {
     dataTypes.forEach(function (type, i) {
       var name = type[0];
       var data = type[1];
