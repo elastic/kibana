@@ -175,11 +175,20 @@ define(function (require) {
         return;
       case 'source':
         key = '_source';
-        /* fall through */
+        defaultCase(state, key, val);
+        break;
       case 'sort':
         val = normalizeSortRequest(val, this.get('index'));
-        /* fall through */
+        defaultCase(state, key, val);
+        break;
       default:
+        defaultCase(state, key, val);
+      }
+
+      /**
+       * Default case of the switch
+       */
+      function defaultCase(state, key, val) {
         state.body = state.body || {};
         // ignore if we already have a value
         if (state.body[key] == null) {
