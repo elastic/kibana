@@ -18,12 +18,13 @@ define(function (require) {
 
       // Override the mapping, even if elasticsearch says otherwise
       var mappingOverrides = {
+        _source: { type: '_source' },
+        _index: { type: 'string' },
+        _type: { type: 'string' },
+        _id: { type: 'string' },
         _timestamp: {
           type: 'date',
           indexed: true
-        },
-        _source: {
-          type: '_source'
         },
         _score: {
           type: 'number',

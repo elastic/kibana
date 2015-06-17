@@ -21,7 +21,7 @@ define(function (require) {
 
       this.el = el;
       this.tooltip = new Tooltip('chart-title', el, function (d) {
-        return '<p>' + d.label + '</p>';
+        return '<p>' + _.escape(d.label) + '</p>';
       });
     }
 
@@ -108,11 +108,16 @@ define(function (require) {
           div.append('svg')
           .attr('width', function () {
             if (dataType === 'rows') {
-              return 15;
+              return height;
             }
             return width;
           })
-          .attr('height', height)
+          .attr('height', function () {
+            if (dataType === 'rows') {
+              return width;
+            }
+            return height;
+          })
           .append('text')
           .attr('transform', function () {
             if (dataType === 'rows') {
@@ -121,9 +126,7 @@ define(function (require) {
             return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
           })
           .attr('text-anchor', 'middle')
-          .text(function (d) {
-            return d.label;
-          });
+          .text(function (d) { return d.label; });
 
           // truncate long chart titles
           div.selectAll('text')

@@ -25,11 +25,15 @@ define(function (require) {
       },
       template: require('text!plugins/discover/components/field_chooser/field_chooser.html'),
       link: function ($scope) {
-        $scope.setIndexPattern = function (indexPattern) {
-          $scope.state.index = indexPattern;
+        $scope.setIndexPattern = function (id) {
+          $scope.state.index = id;
           $scope.state.save();
-          $route.reload();
         };
+
+        $scope.$watch('state.index', function (id, previousId) {
+          if (previousId == null || previousId === id) return;
+          $route.reload();
+        });
 
         var filter = $scope.filter = {
           props: [
