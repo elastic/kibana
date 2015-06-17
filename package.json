@@ -114,8 +114,7 @@
     "rjs-build-analysis": "0.0.3",
     "simple-git": "^1.3.0",
     "sinon": "^1.12.2",
-    "sinon-as-promised": "^4.0.0",
-    "tar": "^1.0.1"
+    "tar": "^2.1.1"
   },
   "engines": {
     "node": "~0.10 || ~0.12",
