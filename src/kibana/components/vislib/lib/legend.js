@@ -74,6 +74,11 @@ define(function (require) {
         });
       }).reduce(function (a, b) {
         return a.concat(b);
+      }).filter(function (series) {
+        // Return only objects with an aggConfigResult
+        return series.values.some(function (d) {
+          return d.aggConfigResult;
+        });
       });
 
       return _.uniq(values, 'label');

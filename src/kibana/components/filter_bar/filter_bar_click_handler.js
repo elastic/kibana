@@ -9,13 +9,22 @@ define(function (require) {
         // Hierarchical and tabular data set their aggConfigResult parameter
         // differently because of how the point is rewritten between the two. So
         // we need to check if the point.orig is set, if not use try the point.aggConfigResult
-        var aggConfigResult = event.point.orig && event.point.orig.aggConfigResult || event.point.aggConfigResult;
+        var aggConfigResult = event.point.orig && event.point.orig.aggConfigResult ||
+          event.point.values && event.point.values[_.findIndex(event.point.values, 'aggConfigResult')].aggConfigResult
+          || event.point.aggConfigResult;
         var notify = new Notifier({
           location: 'Filter bar'
         });
 
         if (aggConfigResult) {
+          var isLegendLabel = !!event.point.values;
           var results = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
+
+          results = isLegendLabel ? _.filter(results, function (obj) {
+            var formatter = obj.aggConfig.fieldFormatter();  // TODO: find out if there is always a fieldFormatter
+            return formatter(obj.key) === event.label;
+          }) : results;
+
           var filters = _(results)
             .map(function (result) {
               try {
