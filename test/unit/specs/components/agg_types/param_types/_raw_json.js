@@ -83,6 +83,20 @@ define(function (require) {
         aggParam.write(aggConfig, output);
         expect(output.params).to.eql(JSON.parse(jsonData));
       });
+
+      it('should drop nulled params', function () {
+        var jsonData = JSON.stringify({
+          new_param: 'should exist in output',
+          field: null
+        });
+
+        output.params.field = 'extensions';
+        aggConfig.params[paramName] = jsonData;
+
+        aggParam.write(aggConfig, output);
+        expect(Object.keys(output.params)).to.contain('new_param');
+        expect(Object.keys(output.params)).to.not.contain('field');
+      });
     });
   }];
 });
