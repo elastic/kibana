@@ -1,103 +1,68 @@
-/**
- * Module dependencies.
- */
-
-var app = require('./app');
-var fs = require('fs');
-var config = require('./config');
-var http = require('http');
-var https = require('https');
-http.globalAgent.maxSockets = config.maxSockets;
-https.globalAgent.maxSockets = config.maxSockets;
-var logger = require('./lib/logger');
+var _ = require('lodash');
 var Promise = require('bluebird');
-var initialization = require('./lib/serverInitialization');
-var key, cert;
-try {
-  key = fs.readFileSync(config.kibana.ssl_key_file, 'utf8');
-  cert = fs.readFileSync(config.kibana.ssl_cert_file, 'utf8');
-} catch (err) {
-  if (err.code === 'ENOENT') {
-    logger.fatal('Failed to read %s', err.path);
-    process.exit(1);
-  }
-}
+var Hapi = require('hapi');
+var requirePlugins = require('./lib/plugins/require_plugins');
+var extendHapi = require('./lib/extend_hapi');
+var join = require('path').join;
 
+function Kibana(settings, plugins) {
+  plugins = plugins || [];
+  this.server = new Hapi.Server();
 
-/**
- * Create HTTPS/HTTP server.
- */
-var server;
-if (key && cert) {
-  server = https.createServer({
-    key: key,
-    cert: cert
-  }, app);
-} else {
-  server = http.createServer(app);
-}
-server.on('error', onError);
-server.on('listening', onListening);
+  // Extend Hapi with Kibana
+  extendHapi(this.server);
 
-/**
- * Event listener for HTTP server "error" event.
- */
+  var config = this.server.config();
+  if (settings) config.set(settings);
 
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
+  // Load external plugins
+  this.plugins = [];
+  var externalPluginsFolder = config.get('kibana.externalPluginsFolder');
+  if (externalPluginsFolder) {
+    this.plugins = _([externalPluginsFolder])
+      .flatten()
+      .map(requirePlugins)
+      .flatten()
+      .value();
   }
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      logger.error({ err: error }, 'Port %s requires elevated privileges', app.get('port'));
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      logger.error({ err: error }, 'Port %s is already in use', app.get('port'));
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+  this.plugins = this.plugins.concat(plugins);
+
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
+Kibana.prototype.listen = function () {
+  var config = this.server.config();
+  var self = this;
+  // Create a new connection
+  this.server.connection({
+    host: config.get('kibana.server.host'),
+    port: config.get('kibana.server.port')
+  });
 
-function onListening() {
-  var address = server.address();
-  logger.info('Listening on %s:%d', address.address, address.port);
-}
-
-function start() {
-  var port = config.port || 3000;
-  var host = config.host || '127.0.0.1';
-  var listen = Promise.promisify(server.listen.bind(server));
-  app.set('port', port);
-  return listen(port, host);
-}
-
-module.exports = {
-  server: server,
-  start: function (cb) {
-    return initialization()
-      .then(start)
-      .then(function () {
-        cb && cb();
-      }, function (err) {
-        logger.error({ err: err });
-        if (cb) {
-          cb(err);
-        } else {
-          process.exit();
-        }
+  return this.server.loadKibanaPlugins(this.plugins)
+  .then(function () {
+    // Start the server
+    return new Promise(function (resolve, reject) {
+      self.server.start(function (err) {
+        if (err) return reject(err);
+        self.server.log('server', 'Server running at ' + self.server.info.uri);
+        resolve(self.server);
       });
-  }
+    });
+  })
+  .catch(function (err) {
+    self.server.log('fatal', err);
+    console.log(err.stack);
+    return Promise.reject(err);
+  });
 };
 
+Kibana.Plugin = require('./lib/plugins/plugin');
+module.exports = Kibana;
+
 if (require.main === module) {
-  module.exports.start();
+  var kibana = new Kibana();
+  kibana.listen().catch(function (err) {
+    process.exit(1);
+  });
 }
