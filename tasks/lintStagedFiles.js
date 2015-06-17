@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     'Run staged files through JSHint/JSCS',
     function () {
 
-      diff('--name-only --cached')
+      diff(['--name-only', '--cached'])
       .then(function (files) {
         // match these patterns
         var patterns = grunt.config.get('lintThese');

@@ -113,6 +113,16 @@ define(function (require) {
           expect(filter.meta.negate).to.be(false);
         });
       });
+
+      it('should work without global state filters', function () {
+        // remove global filters
+        delete globalState.filters;
+
+        queryFilter.invertAll();
+        _.each(appState.filters, function (filter) {
+          expect(filter.meta.negate).to.be(true);
+        });
+      });
     });
   }];
 });

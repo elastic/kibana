@@ -12,6 +12,7 @@ module.exports = function (grunt) {
     'requirejs',
     'clean:unneeded_source_in_build',
     'copy:server_src',
+    'replace_package_json',
     'replace:dist',
     'copy:dist',
     'compile_dist_readme',

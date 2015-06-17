@@ -6,15 +6,49 @@
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
     <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/test/utils/Nonsense.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
     <script>(function () {
-      var COVERAGE = !!(/coverage/i.test(window.location.search));
-      var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
-      var DISABLE_RESIZE_CHECKER = true;
+      /* globals mocha,Nonsense */
+
+      var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
+      var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
+
+      var SEED = parseFloat((window.location.search.match(/[&?]SEED=([^&]+)(?:&|$)/) || [])[1]);
+      if (isNaN(SEED)) SEED = Date.now();
+      console.log('Random-ness seed: ' + SEED);
+
+      Math.nonsense = new Nonsense(SEED);
+      Math.random = function () {
+        return Math.nonsense.frac();
+      };
+
+      function wrap(obj, method, fn) {
+        var orig = obj[method];
+        return obj[method] = function methodProxy() {
+          return fn.apply(this, [orig].concat([].slice.call(arguments)));
+        };
+      }
+
+      wrap(mocha, 'ui', function (orig, ui) {
+        var ret = orig.call(this, ui);
+
+        var _desc = window.describe;
+        window.describe = wrap(window, 'describe', unwindDescribeArrays);
+        window.describe.only = wrap(_desc, 'only', unwindDescribeArrays);
+        function unwindDescribeArrays(describe, name, body) {
+          if (!body && name && name instanceof Array) {
+            body = name[1]; name = name[0];
+          }
+
+          return describe.call(this, name, body);
+        }
+      });
 
       mocha.setup({
         ui: 'bdd',
+        timeout: 5000,
         reporter: 'html'
       });
 
@@ -30,9 +64,7 @@
           sinon: '../../test/utils/sinon',
           bluebird: 'bower_components/bluebird/js/browser/bluebird',
           angular: 'bower_components/angular-mocks/angular-mocks',
-          angular_src: 'bower_components/angular/angular',
-          screencast_reporter_css: '../../node_modules/mocha-screencast-reporter/screencast-reporter',
-          ScreencastReporter: '../../node_modules/mocha-screencast-reporter/screencast-reporter'
+          angular_src: 'bower_components/angular/angular'
         },
         shim: {
           angular_src: {
@@ -66,16 +98,6 @@
           'test_utils/istanbul_reporter/reporter'
         ], function (IstanbulReporter) {
           mocha.reporter(IstanbulReporter);
-          done();
-        });
-      }
-
-      function setupSaucelabsReporter(done) {
-        require([
-          'ScreencastReporter',
-          'css!screencast_reporter_css'
-        ], function (ScreencastReporter) {
-          mocha.reporter(ScreencastReporter);
           done();
         });
       }
@@ -119,7 +141,7 @@
 
               (suite.tests || [])
               .filter(function (test) {
-                return test.state !== 'passed' && test.state !== 'pending';
+                return test.state && test.state !== 'passed' && test.state !== 'pending';
               })
               .forEach(function (test) {
                 fails.push({
@@ -144,15 +166,9 @@
         });
       }
 
-      if (COVERAGE) {
-        setupCoverage(runTests);
-      }
-      else if (SAUCELABS) {
-        setupSaucelabsReporter(runTests);
-      }
-      else {
-        runTests();
-      }
+
+      if (COVERAGE) setupCoverage(runTests);
+      else runTests();
 
     })();</script>
   </head>

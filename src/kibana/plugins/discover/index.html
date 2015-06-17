@@ -78,7 +78,7 @@
         <div class="discover-info">
           <span ng-show="opts.savedSearch.id" class="discover-info-title">
             <span bindonce bo-bind="opts.savedSearch.title"></span>
-            <i aria-label="Reload saved query" tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo small"></i>
+            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
           </span>
 
           <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
@@ -179,10 +179,7 @@
               <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
             </div>
 
-            <div class="discover-table"
-              fixed-scroll='table'
-              fixed-scroll-trigger="state.columns">
-
+            <div class="discover-table" fixed-scroll>
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"
@@ -194,8 +191,9 @@
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 <center>
-                  These are the first {{opts.sampleSize}} results matching your query,
-                  refine your search to see more. <a ng-click="toTop()" title="Back to top">Back to top.</a>
+                  These are the first {{opts.sampleSize}} documents matching
+                  your search, refine your search to see others.
+                  <a ng-click="toTop()" title="Back to top">Back to top.</a>
                 </center>
               </div>
             </div>

@@ -2,6 +2,7 @@ module.exports = {
   options: {
     sourceMapBasepath: '<%= src %>/kibana',
     sourceMapRootpath: '/',
+    sourceMapFileInline: true,
     ieCompat: false,
     paths: [
       '<%= src %>/kibana/bower_components/lesshat/build/'

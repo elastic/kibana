@@ -10,7 +10,7 @@ define(function (require) {
 
   require('components/notify/notify');
   require('components/timepicker/timepicker');
-  require('directives/fixed_scroll');
+  require('components/fixedScroll');
   require('directives/validate_json');
   require('components/validate_query/validate_query');
   require('filters/moment');
@@ -167,6 +167,11 @@ define(function (require) {
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
+        });
+
+        // update data source when hitting forward/back and the query changes
+        $scope.$listen($state, 'fetch_with_changes', function (diff) {
+          if (diff.indexOf('query') >= 0) $scope.fetch();
         });
 
         // fetch data when filters fire fetch event
@@ -328,6 +333,7 @@ define(function (require) {
       $scope.updateTime();
 
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
+      segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
 
       // triggered when the status updated
       segmented.on('status', function (status) {

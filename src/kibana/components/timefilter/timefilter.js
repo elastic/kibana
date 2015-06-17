@@ -29,7 +29,8 @@
 
       var timeDefaults = {
         from: 'now-15m',
-        to: 'now'
+        to: 'now',
+        mode: 'quick'
       };
 
       var refreshIntervalDefaults = {
