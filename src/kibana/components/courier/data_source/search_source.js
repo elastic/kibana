@@ -1,16 +1,15 @@
 define(function (require) {
-
-
   return function SearchSourceFactory(Promise, Private) {
     var _ = require('lodash');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var SearchRequest = Private(require('components/courier/fetch/request/search'));
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var normalizeSortRequest = Private(require('components/courier/data_source/_normalize_sort_request'));
 
     _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
-      SearchSource.Super.call(this, initialState);
+      SearchSource.Super.call(this, initialState, searchStrategy);
     }
 
     // expose a ready state for the route setup to read

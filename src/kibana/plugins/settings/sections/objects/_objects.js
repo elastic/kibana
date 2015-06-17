@@ -46,6 +46,10 @@ define(function (require) {
           });
         };
 
+        $scope.$watch('state.tab', function (tab) {
+          if (!tab) $scope.changeTab($scope.services[0]);
+        });
+
         $scope.toggleAll = function () {
           if ($scope.selectedItems.length === $scope.currentTab.data.length) {
             $scope.selectedItems.length = 0;
