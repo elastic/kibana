@@ -84,7 +84,8 @@ define(function (require) {
             18: 12
           };
 
-          agg.params.precision = Math.min(zoomPrecision[event.zoom], config.get('visualization:tileMap:maxPrecision'));
+          var precision = config.get('visualization:tileMap:maxPrecision');
+          agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
 
           courier.fetch();
         }
