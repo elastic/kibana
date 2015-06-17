@@ -39,19 +39,37 @@ define(function (require) {
         return;
       }
 
-      function filterNulledVals(obj, nullable) {
-        _.forOwn(obj, function (val, key) {
-          if (nullable[key] === null) {
-            obj[key] = nullable[key] = undefined;
-          }
-          else if (_.isPlainObject(val) && _.isPlainObject(nullable[key])) {
-            filterNulledVals(val, nullable[key]);
-          }
-        });
+      function filteredCombine(srcA, srcB) {
+        function mergeObjs(a, b) {
+          return _(a)
+          .keys()
+          .union(_.keys(b))
+          .transform(function (dest, key) {
+            var val = compare(a[key], b[key]);
+            if (val !== undefined) dest[key] = val;
+          }, {})
+          .value();
+        }
+
+        function mergeArrays(a, b) {
+          // attempt to merge each value
+          return _.times(Math.max(a.length, b.length), function (i) {
+            return compare(a[i], b[i]);
+          });
+        }
+
+        function compare(a, b) {
+          if (_.isPlainObject(a) && _.isPlainObject(b)) return mergeObjs(a, b);
+          if (_.isArray(a) && _.isArray(b)) return mergeArrays(a, b);
+          if (b === null) return undefined;
+          if (b !== undefined) return b;
+          return a;
+        }
+
+        return compare(srcA, srcB);
       }
 
-      filterNulledVals(output.params, paramJSON);
-      _.assign(output.params, paramJSON);
+      output.params = filteredCombine(output.params, paramJSON);
       return;
     };
 
