@@ -39,6 +39,18 @@ define(function (require) {
         return;
       }
 
+      function filterNulledVals(obj, nullable) {
+        _.forOwn(obj, function (val, key) {
+          if (nullable[key] === null) {
+            obj[key] = nullable[key] = undefined;
+          }
+          else if (_.isPlainObject(val) && _.isPlainObject(nullable[key])) {
+            filterNulledVals(val, nullable[key]);
+          }
+        });
+      }
+
+      filterNulledVals(output.params, paramJSON);
       _.assign(output.params, paramJSON);
       return;
     };
