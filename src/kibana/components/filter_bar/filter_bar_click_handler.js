@@ -10,20 +10,26 @@ define(function (require) {
         // differently because of how the point is rewritten between the two. So
         // we need to check if the point.orig is set, if not use try the point.aggConfigResult
         var aggConfigResult = event.point.orig && event.point.orig.aggConfigResult ||
-          event.point.values && event.point.values[_.findIndex(event.point.values, 'aggConfigResult')].aggConfigResult
-          || event.point.aggConfigResult;
+          event.point.values && findAggConfig(event.point.values) || event.point.aggConfigResult;
         var notify = new Notifier({
           location: 'Filter bar'
         });
+
+        function findAggConfig(values) {
+          return values.aggConfigResult || values[_.findIndex(values, 'aggConfigResult')].aggConfigResult;
+        }
 
         if (aggConfigResult) {
           var isLegendLabel = !!event.point.values;
           var results = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 
-          results = isLegendLabel ? _.filter(results, function (obj) {
-            var formatter = obj.aggConfig.fieldFormatter();  // TODO: find out if there is always a fieldFormatter
-            return formatter(obj.key) === event.label;
-          }) : results;
+          if (isLegendLabel) {
+            // TODO: find out if there is always a fieldFormatter
+            results = _.filter(results, function (obj) {
+              var formatter = obj.aggConfig.fieldFormatter();
+              return formatter(obj.key) === event.label;
+            });
+          }
 
           var filters = _(results)
             .map(function (result) {
