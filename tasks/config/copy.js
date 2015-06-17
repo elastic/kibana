@@ -44,6 +44,12 @@ module.exports = function (grunt) {
         },
         {
           expand: true,
+          cwd: '<%= server %>/plugins/',
+          src: '**',
+          dest: '<%= build %>/kibana/plugins'
+        },
+        {
+          expand: true,
           cwd: '<%= server %>/routes/',
           src: '**',
           dest: '<%= build %>/kibana/routes'
