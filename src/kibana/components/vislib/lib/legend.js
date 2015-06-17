@@ -78,9 +78,15 @@ define(function (require) {
       .enter()
         .append('li')
         .attr('class', 'color')
-        .each(self._addIdentifier)
-        .html(function (d) {
-          return '<i class="fa fa-circle dots" style="color:' + args.color(d) + '"></i>' + d;
+        .each(function (label) {
+          var li = d3.select(this);
+          self._addIdentifier.call(this, label);
+
+          li.append('i')
+          .attr('class', 'fa fa-circle dots')
+          .attr('style', 'color:' + args.color(label));
+
+          li.append('span').text(label);
         });
     };
 

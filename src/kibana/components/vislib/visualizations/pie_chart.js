@@ -69,11 +69,11 @@ define(function (require) {
         var parentPercent = parent.percentOfParent;
 
         var sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
-          return sum + child.size;
+          return sum + Math.abs(child.size);
         }, 0));
 
         children.forEach(function (child) {
-          child.percentOfGroup = child.size / sum;
+          child.percentOfGroup = Math.abs(child.size) / sum;
           child.percentOfParent = child.percentOfGroup;
 
           if (parentPercent != null) {

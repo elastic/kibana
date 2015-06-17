@@ -1,16 +1,18 @@
 language: node_js
-node_js:
-- '0.10'
-install:
-- npm install -g grunt-cli bower
-- npm install
-- bower install
-script:
-- npm test
+node_js: '0.12'
+install: npm install
+script: npm test
+sudo: false
+cache:
+  directories:
+  - esvm
+  - node_modules
+  - src/kibana/bower_components
+before_cache:
+  - rm -rf esvm/*/logs esvm/data_dir
 notifications:
   email:
   - rashid.khan@elastic.co
-  - spencer.alger@elastic.co
   hipchat:
     rooms:
       secure: UKrVR+5KztHarodQruQe97UJfwftutD6RNdXlVkr+oIr2GqccisDIIN9pAzS/kxl+eAnP1uT6VHzc9YI/jgbrmiSkz3DHViw+MwDwY2aIDgI8aHEbd/4B2ihtb15+OYTVbb+lytyz4+W8A8hSmbkTR/P/uFIJ+EYcBeYZfw1elo=

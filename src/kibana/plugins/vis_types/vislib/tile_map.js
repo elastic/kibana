@@ -4,6 +4,7 @@ define(function (require) {
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
     var _ = require('lodash');
+    var supports = require('utils/supports');
 
     return new VislibVisType({
       name: 'tile_map',
@@ -23,6 +24,7 @@ define(function (require) {
           addTooltip: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
+        canDesaturate: !!supports.cssFilters,
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       listeners: {
@@ -37,6 +39,22 @@ define(function (require) {
           filter.geo_bounding_box[field] = event.bounds;
 
           pushFilter(filter, false, indexPatternName);
+        },
+        mapMoveEnd: function (event) {
+          var agg = _.deepGet(event, 'chart.geohashGridAgg');
+          if (!agg) return;
+
+          agg.params.mapZoom = event.zoom;
+          agg.params.mapCenter = [event.center.lat, event.center.lng];
+
+          var editableVis = agg.vis.getEditableVis();
+          if (!editableVis) return;
+
+          var editableAgg = editableVis.aggs.byId[agg.id];
+          if (editableAgg) {
+            editableAgg.params.mapZoom = event.zoom;
+            editableAgg.params.mapCenter = [event.center.lat, event.center.lng];
+          }
         },
         mapZoomEnd: function (event) {
           var agg = _.deepGet(event, 'chart.geohashGridAgg');

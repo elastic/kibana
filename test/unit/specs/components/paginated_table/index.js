@@ -1,6 +1,7 @@
 define(function (require) {
   require('components/paginated_table/paginated_table');
   var _ = require('lodash');
+  var $ = require('jquery');
   var sinon = require('sinon/sinon');
 
   describe('paginated table', function () {
@@ -240,7 +241,7 @@ define(function (require) {
       it('should should have duplicate column titles', function () {
         var columns = $el.find('thead th span');
         columns.each(function () {
-          expect(this.innerText).to.be(colText);
+          expect($(this).text()).to.be(colText);
         });
       });
 

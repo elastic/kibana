@@ -274,6 +274,10 @@ notifications {
   }
 }
 
+kbn-info i {
+  cursor: help;
+}
+
 .kbn-timepicker .btn-default {
   background: transparent;
   color: @text-color;
@@ -507,4 +511,16 @@ fieldset {
   padding: @form-group-margin-bottom;
   border: 1px solid @input-border;
   border-radius: @input-border-radius;
+}
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0px;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
 }
