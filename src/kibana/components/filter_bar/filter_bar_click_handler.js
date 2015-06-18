@@ -16,20 +16,24 @@ define(function (require) {
         });
 
         function findAggConfig(values) {
-          return values.aggConfigResult || values[_.findIndex(values, 'aggConfigResult')].aggConfigResult;
+          if (_.isArray(values)) { // point series chart
+            var index = _.findIndex(values, 'aggConfigResult');
+            return values[index].aggConfigResult;
+          }
+          return values.aggConfigResult; // pie chart
+        }
+
+        function findLabel(obj) {
+          // TODO: find out if there is always a fieldFormatter
+          var formatter = obj.aggConfig.fieldFormatter();
+          return formatter(obj.key) === event.label;
         }
 
         if (aggConfigResult) {
           var isLegendLabel = !!event.point.values;
           var results = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 
-          if (isLegendLabel) {
-            // TODO: find out if there is always a fieldFormatter
-            results = _.filter(results, function (obj) {
-              var formatter = obj.aggConfig.fieldFormatter();
-              return formatter(obj.key) === event.label;
-            });
-          }
+          if (isLegendLabel) results = _.filter(results, findLabel); // filter results array by legend label
 
           var filters = _(results)
             .map(function (result) {

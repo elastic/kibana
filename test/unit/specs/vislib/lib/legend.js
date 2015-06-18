@@ -63,108 +63,15 @@ define(function (require) {
         vis = null;
       });
 
-      describe('_modifyPieLabels method', function () {
-        var labels = ['m', 'n', 'b', 's', 't', 'u'];
-        var pieData = [{
-          slices: {
-            children: [
-              { name: 'm', size: 20 },
-              {
-                name: 'n',
-                size: 30,
-                children: [
-                  { name: 's', size: 10 },
-                  { name: 't', size: 20 },
-                  { name: 'u', size: 4 }
-                ]
-              },
-              { name: 'b', size: 40 }
-            ]
-          }
-        }];
-
-        it('should flatten the nested objects', function () {
-          var items = Legend.prototype._modifyPieLabels(pieData, labels);
-          expect(items.length).to.be(6);
-        });
-      });
-
-      describe('_modifyPointSeriesLabels method', function () {
-        var labels = ['html', 'css', 'png'];
-        var seriesData = [
-          {
-            series: [
-              {
-                label: 'html',
-                values: [{y: 2}, {y: 3}, {y: 4}]
-              },
-              {
-                label: 'css',
-                values: [{y: 5}, {y: 6}, {y: 7}]
-              },
-              {
-                label: 'png',
-                values: [{y: 8}, {y: 9}, {y: 10}]
-              }
-            ]
-          },
-          {
-            series: [
-              {
-                label: 'html',
-                values: [{y: 2}, {y: 3}, {y: 4}]
-              },
-              {
-                label: 'css',
-                values: [{y: 5}, {y: 6}, {y: 7}]
-              },
-              {
-                label: 'png',
-                values: [{y: 8}, {y: 9}, {y: 10}]
-              }
-            ]
-          }
-        ];
-
-        it('should combine values arrays of objects with identical labels', function () {
-          seriesData.forEach(function (obj) {
-            obj.series.forEach(function (data) {
-              data.values.forEach(function (d) {
-                d.aggConfigResult = {
-                  $parent: {
-                    $parent: undefined,
-                    aggConfig: {
-                      schema: {
-                        group: 'bucket'
-                      }
-                    },
-                    key: data.label,
-                    type: 'bucket',
-                    value: data.label
-                  },
-                };
-              });
-            });
-          });
-
-          var items = Legend.prototype._modifyPointSeriesLabels(seriesData, labels);
-          expect(items.length).to.be(3);
-
-          items.forEach(function (item) {
-            expect(item.values.length).to.be(6);
-          });
-        });
-      });
-
       describe('legend item label matches vis item label', function () {
         it('should match the slice label', function () {
           var chartType = chartTypes[i];
           var paths = $(vis.el).find(chartSelectors[chartType]).toArray();
           var items = vis.handler.legend.labels;
 
-          items.forEach(function (label) {
+          items.forEach(function (d) {
             var path = _.find(paths, function (path) {
-              return path.getAttribute('data-label') === String(label);
+              return path.getAttribute('data-label') === String(d.label);
             });
 
             expect(path).to.be.ok();

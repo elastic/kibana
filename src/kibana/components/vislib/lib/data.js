@@ -463,7 +463,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        names.push({ key: obj.name, index: index });
+        names.push({ label: obj.name, values: obj, index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;
@@ -497,8 +497,10 @@ define(function (require) {
         .sortBy(function (obj) {
           return obj.index;
         })
-        .pluck('key')
-        .unique()
+        //.pluck('key')
+        .unique(function (d) {
+          return d.label;
+        })
         .value();
       }
     };
@@ -596,7 +598,9 @@ define(function (require) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     Data.prototype.getPieColorFunc = function () {
-      return color(this.pieNames(this.getVisData()));
+      return color(this.pieNames(this.getVisData()).map(function (d) {
+        return d.label;
+      }));
     };
 
     /**

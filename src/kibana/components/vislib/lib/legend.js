@@ -2,6 +2,7 @@ define(function (require) {
   return function LegendFactory(d3, Private) {
     var _ = require('lodash');
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
+    var Data = Private(require('components/vislib/lib/data'));
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
     var dataLabel = require('components/vislib/lib/_data_label');
     var color = Private(require('components/vislib/components/color/color'));
@@ -43,21 +44,8 @@ define(function (require) {
       });
     }
 
-    Legend.prototype._modifyPieLabels = function (data) {
-      var values = [];
-
-      data.forEach(function (datum) {
-        datum.slices.children.forEach(function traverse(d) {
-          values.push({
-            label: d.name,
-            values: d
-          });
-
-          if (d.children) d.children.forEach(traverse);
-        });
-      });
-
-      return _.uniq(values, 'label');
+    Legend.prototype._getPieLabels = function (data) {
+      return Data.prototype.pieNames(data);
     };
 
     Legend.prototype._getSeriesLabels = function (data) {
@@ -72,20 +60,16 @@ define(function (require) {
           if (yLabel) series.label = yLabel;
           return series;
         });
-      }).reduce(function (a, b) {
+      })
+      .reduce(function (a, b) {
         return a.concat(b);
-      }).filter(function (series) {
-        // Return only objects with an aggConfigResult
-        return series.values.some(function (d) {
-          return d.aggConfigResult;
-        });
       });
 
       return _.uniq(values, 'label');
     };
 
     Legend.prototype._getLabels = function (data, type) {
-      if (type === 'pie') return this._modifyPieLabels(data);
+      if (type === 'pie') return this._getPieLabels(data);
       return this._getSeriesLabels(data);
     };
 
@@ -238,7 +222,7 @@ define(function (require) {
 
       legendDiv.selectAll('li.color').each(function (d) {
         var label = d.label;
-        if (label && label !== '_all') {
+        if (label !== undefined && label !== '_all') {
           d3.select(this).call(self.events.addClickEvent());
         }
       });
