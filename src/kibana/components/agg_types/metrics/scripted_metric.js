@@ -14,6 +14,9 @@ define(function (require) {
       getFormat: function () {
         return fieldFormats.getDefaultInstance('number') || fieldFormats.getDefaultInstance('percent');
       },
+      getResponseAggs: function (agg) {
+        return [];
+      },
       params: [
         {
           name: 'init_script',
