@@ -546,7 +546,7 @@ define(function (require) {
         });
       });
 
-      return _.uniq(names);
+      return _.uniq(names, 'label');
     };
 
     /**
