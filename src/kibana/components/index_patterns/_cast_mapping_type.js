@@ -31,10 +31,10 @@ define(function (require) {
      * @return {String} - the most specific type that we care for
      */
     function castMappingType(name) {
-      var match = castMappingType.types.byName[name];
+      if (!name) return 'unknown';
 
-      if (match) return match.type;
-      return 'string';
+      var match = castMappingType.types.byName[name];
+      return match ? match.type : 'string';
     }
 
     return castMappingType;

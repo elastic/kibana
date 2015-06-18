@@ -5,10 +5,11 @@ define(function (require) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var DocRequest = Private(require('components/courier/fetch/request/doc'));
+    var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
 
     _(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {
-      DocSource.Super.call(this, initialState);
+      DocSource.Super.call(this, initialState, docStrategy);
     }
 
     DocSource.prototype.onUpdate = SourceAbstract.prototype.onResults;

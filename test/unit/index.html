@@ -6,13 +6,23 @@
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
     <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/test/utils/Nonsense.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
     <script>(function () {
-      /* globals mocha */
+      /* globals mocha,Nonsense */
 
       var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
       var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
+
+      var SEED = parseFloat((window.location.search.match(/[&?]SEED=([^&]+)(?:&|$)/) || [])[1]);
+      if (isNaN(SEED)) SEED = Date.now();
+      console.log('Random-ness seed: ' + SEED);
+
+      Math.nonsense = new Nonsense(SEED);
+      Math.random = function () {
+        return Math.nonsense.frac();
+      };
 
       function wrap(obj, method, fn) {
         var orig = obj[method];
@@ -131,7 +141,7 @@
 
               (suite.tests || [])
               .filter(function (test) {
-                return test.state !== 'passed' && test.state !== 'pending';
+                return test.state && test.state !== 'passed' && test.state !== 'pending';
               })
               .forEach(function (test) {
                 fails.push({
