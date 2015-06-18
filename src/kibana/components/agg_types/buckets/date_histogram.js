@@ -15,6 +15,18 @@ define(function (require) {
       return interval;
     }
 
+    function getLabelParts(params, agg) {
+      var output = params.write(agg);
+
+      return {
+        field: output.params.field,
+        isScaled: !!output.bucketInterval.scaled,
+        intervalText: output.metricScaleText || output.bucketInterval.description,
+        intervalScale: output.metricScaleText,
+        intervalDescription: output.bucketInterval.description
+      };
+    }
+
     function setBounds(agg, force) {
       if (agg.buckets._alreadySet && !force) return;
       agg.buckets._alreadySet = true;
@@ -31,9 +43,22 @@ define(function (require) {
         date: true
       },
       makeLabel: function (agg) {
-        var output = this.params.write(agg);
-        var params = output.params;
-        return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
+        var label = getLabelParts(this.params, agg);
+        var output = label.field + ' per ' + label.intervalDescription;
+
+        if (label.isScaled) {
+          if (label.intervalScale) {
+            output += ' (scaled to per ' + label.intervalScale + ')';
+          }
+
+          return output;
+        }
+
+        return this.makeShortLabel(agg);
+      },
+      makeShortLabel: function (agg) {
+        var label = getLabelParts(this.params, agg);
+        return label.field + ' per ' + label.intervalText;
       },
       createFilter: createFilter,
       decorateAggConfig: function () {

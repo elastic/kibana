@@ -263,6 +263,11 @@ define(function (require) {
       return this.type.makeLabel(this);
     };
 
+    AggConfig.prototype.makeShortLabel = function () {
+      if (!this.type) return '';
+      return this.type.makeShortLabel(this);
+    };
+
     AggConfig.prototype.field = function () {
       return this.params.field;
     };
