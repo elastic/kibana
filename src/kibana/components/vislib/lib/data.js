@@ -497,7 +497,6 @@ define(function (require) {
         .sortBy(function (obj) {
           return obj.index;
         })
-        //.pluck('key')
         .unique(function (d) {
           return d.label;
         })
