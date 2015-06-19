@@ -1,8 +1,6 @@
 .legend-col-wrapper {
-  .flex(0 1 auto);
+  .flex-parent(0, 0, auto);
   z-index: 10;
-  overflow-x: hidden;
-  overflow-y: auto;
   min-height: 0;
 
   .legend-toggle {
@@ -26,11 +24,13 @@
   }
 
   .legend-ul {
+    .flex(1, 1, 1px);
+    overflow-x: hidden;
+    overflow-y: auto;
+
     list-style-type: none;
     padding: 0;
     visibility: visible;
-    .display(flex);
-    .flex-direction(column);
     min-height: 0;
     min-width: 60px;
     margin-right: 5px;
@@ -44,7 +44,6 @@
       color: #666;
       cursor: default;
       text-align: left;
-      .flex-grow(2);
       white-space: nowrap;
       overflow-x: hidden;
       text-overflow: ellipsis;

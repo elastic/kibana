@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var expect = require('expect.js');
 var sinon = require('sinon');
 var registerPlugins = require('../../../../../src/server/lib/plugins/register_plugins');
@@ -93,7 +92,7 @@ describe('server/lib/register_plugins', function () {
         expect(createStatus.args[0][0]).to.eql(plugin);
       });
     });
-    it('should set the status to yellow and "Initializing" before init is called', function () {
+    it('should not set the status before init is called', function () {
       var next = function (err) {
         server.register.args[0][1](err);
       };
@@ -101,9 +100,7 @@ describe('server/lib/register_plugins', function () {
       var plugin = { name: 'first', init: createInit() };
       var plugins = [plugin];
       return registerPlugins(server, plugins).then(function () {
-        sinon.assert.calledOnce(yellowSpy);
-        expect(plugin.init.calledAfter(yellowSpy)).to.be(true);
-        expect(yellowSpy.args[0][0]).to.be('Initializing');
+        expect(yellowSpy).to.have.property('callCount', 0);
       });
     });
 

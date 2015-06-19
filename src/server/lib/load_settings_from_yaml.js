@@ -23,6 +23,7 @@ module.exports = function (path) {
   if (config.ssl_key_file) settings['kibana.server.ssl.key'] = config.ssl_key_file;
   if (config.pid_file) settings['config.server.pidFile'] = config.pid_file;
   if (config.log_file) settings['logging.file'] = config.log_file;
+  if (config.bundled_plugin_ids) settings['kibana.bundledPluginIds'] = config.bundled_plugin_ids;
   return settings;
 };
 

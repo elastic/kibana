@@ -53,8 +53,6 @@ You can choose a new or saved search to serve as the data source for your visual
 an index or a set of indexes. When you select _new search_ on a system with multiple indices configured, select an 
 index pattern from the drop-down to bring up the visualization editor. 
 
-// How is this drop-down populated? Is it just a list of all indices in the cluster? Can I configure the contents?
-
 When you create a visualization from a saved search and save the visualization, the search is tied to the visualization.
 When you make changes to the search that is linked to the visualization, the visualization updates automatically.
 
@@ -70,6 +68,10 @@ main elements:
 3. <<preview-canvas,Preview Canvas>>
 
 image:images/VizEditor.jpg[]
+
+[float]
+[[viz-autorefresh]]
+include::autorefresh.asciidoc[]
 
 [float]
 [[toolbar-panel]]
@@ -91,7 +93,7 @@ Use the aggregation builder on the left of the page to configure the {ref}/searc
 visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
 {ref}/search-aggregations.html[Elasticsearch aggregations reference].
 
-In bar or line chart visualizations, use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
+Bar, line, or area chart visualizations use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
 colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of 
 slices.
 
@@ -126,7 +128,12 @@ inside each bucket, which in this example is a one-hour interval.
 
 NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
 
-To render the visualization on the _preview canvas_, click the *Apply* button at the bottom of the aggregation builder.
+To render the visualization on the _preview canvas_, click the green *Apply Changes* button at the top right of the
+Aggregation Builder.
+
+[float]
+[[visualize-filters]]
+include::filter-pinning.asciidoc[]
 
 [float]
 [[preview-canvas]]

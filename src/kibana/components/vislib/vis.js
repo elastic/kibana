@@ -17,7 +17,7 @@ define(function (require) {
      * @param $el {HTMLElement} jQuery selected HTML element
      * @param config {Object} Parameters that define the chart type and chart options
      */
-    _(Vis).inherits(Events);
+    _.class(Vis).inherits(Events);
     function Vis($el, config) {
       if (!(this instanceof Vis)) {
         return new Vis($el, config);
@@ -82,7 +82,8 @@ define(function (require) {
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
         if (error instanceof errors.ContainerTooSmall ||
-          error instanceof errors.CannotLogScaleNegVals ||
+          error instanceof errors.InvalidWiggleSelection ||
+          error instanceof errors.InvalidLogScaleValues ||
           error instanceof errors.PieContainsAllZeros ||
           error instanceof errors.NotEnoughData ||
           error instanceof errors.NoResults) {

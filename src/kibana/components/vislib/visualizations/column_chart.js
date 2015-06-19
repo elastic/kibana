@@ -4,6 +4,8 @@ define(function (require) {
     var $ = require('jquery');
     var moment = require('moment');
 
+    var DataClass = Private(require('components/vislib/lib/data'));
+
     var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
     var errors = require('errors');
@@ -19,7 +21,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(ColumnChart).inherits(PointSeriesChart);
+    _.class(ColumnChart).inherits(PointSeriesChart);
     function ColumnChart(handler, chartEl, chartData) {
       if (!(this instanceof ColumnChart)) {
         return new ColumnChart(handler, chartEl, chartData);
@@ -215,16 +217,7 @@ define(function (require) {
         return yScale(d.y);
       })
       .attr('height', function (d) {
-        if (d.y < 0) {
-          return Math.abs(yScale(0) - yScale(d.y));
-        }
-
-        // if there is a negative yMin value, use yScale(0) instead of height
-        if (yMin < 0) {
-          return yScale(0) - yScale(d.y);
-        }
-
-        return height - yScale(d.y);
+        return Math.abs(yScale(0) - yScale(d.y));
       });
 
       return bars;
@@ -315,24 +308,11 @@ define(function (require) {
           var line = svg.append('line')
           .attr('class', 'base-line')
           .attr('x1', 0)
-          .attr('y1', height)
+          .attr('y1', yScale(0))
           .attr('x2', width)
-          .attr('y2', height)
+          .attr('y2', yScale(0))
           .style('stroke', '#ddd')
           .style('stroke-width', 1);
-
-          if (yMin < 0) {
-
-            // Draw line at yScale 0 value
-            svg.append('line')
-            .attr('class', 'zero-line')
-            .attr('x1', 0)
-            .attr('y1', yScale(0))
-            .attr('x2', width)
-            .attr('y2', yScale(0))
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
-          }
 
           if (addTimeMarker) {
             timeMarker.render(svg);

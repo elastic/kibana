@@ -1,6 +1,5 @@
 var root = require('requirefrom')('');
 var _ = require('lodash');
-_.mixin(require('lodash-deep'));
 var sinon = require('sinon');
 var expect = require('expect.js');
 var createKibanaIndex = root('src/server/plugins/elasticsearch/lib/create_kibana_index');
@@ -19,10 +18,10 @@ describe('plugins/elasticsearch', function () {
       get.returns(config);
       get.withArgs('kibana.index').returns(config.kibana.index);
       config = function () { return { get: get }; };
-      _.deepSet(client, 'indices.create', sinon.stub());
-      _.deepSet(client, 'cluster.health', sinon.stub());
-      _.deepSet(server, 'plugins.elasticsearch.client', client);
-      _.deepSet(server, 'config', config);
+      _.set(client, 'indices.create', sinon.stub());
+      _.set(client, 'cluster.health', sinon.stub());
+      _.set(server, 'plugins.elasticsearch.client', client);
+      _.set(server, 'config', config);
     });
 
     describe('successful requests', function () {

@@ -15,7 +15,7 @@ module.exports = new kibana.Plugin({
           kibana_index: config.get('kibana.index'),
           default_app_id: config.get('kibana.defaultAppId'),
           shard_timeout: config.get('elasticsearch.shardTimeout'),
-          plugins: listPlugins(config)
+          plugins: listPlugins(server)
         });
       }
     });

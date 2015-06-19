@@ -68,7 +68,7 @@ define(function (require) {
     var savedVis = $route.current.locals.savedVis;
 
     var vis = savedVis.vis;
-    var editableVis = vis.clone();
+    var editableVis = vis.createEditableVis();
     vis.requesting = function () {
       var requesting = editableVis.requesting;
       requesting.call(vis);
@@ -137,7 +137,7 @@ define(function (require) {
         $scope.responseValueAggs = null;
         try {
           $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
-            return _.deepGet(agg, 'schema.group') === 'metrics';
+            return _.get(agg, 'schema.group') === 'metrics';
           });
         } catch (e) {
           // this can fail when the agg.type is changed but the
@@ -170,6 +170,8 @@ define(function (require) {
         }
 
         if (_.contains(keys, 'vis')) {
+          $state.vis.listeners = _.defaults($state.vis.listeners || {}, vis.listeners);
+
           // only update when we need to, otherwise colors change and we
           // risk loosing an in-progress result
           vis.setState($state.vis);
@@ -194,7 +196,7 @@ define(function (require) {
       // Without this manual emission, we'd miss filters and queries that were on the $state initially
       $state.emit('fetch_with_changes');
 
-      $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
+      $scope.$listen(timefilter, 'fetch', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');
@@ -258,9 +260,12 @@ define(function (require) {
       parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
 
       // copy over all state except "aggs" and filter, which is already copied
-      _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
+      _(parent.toJSON())
+      .omit('aggs')
+      .forOwn(function (val, key) {
         searchSource.set(key, val);
-      });
+      })
+      .commit();
 
       $state.query = searchSource.get('query');
       $state.filters = searchSource.get('filter');

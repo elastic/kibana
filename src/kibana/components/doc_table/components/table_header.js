@@ -18,12 +18,13 @@ define(function (require) {
 
         var sortableField = function (field) {
           if (!$scope.indexPattern) return;
-          var sortable = _.deepGet($scope.indexPattern.fields.byName[field], 'sortable');
+          var sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
           return sortable;
         };
 
         $scope.tooltip = function (column) {
-          if (!sortableField(column)) return ''; else return 'Sort by ' + shortDotsFilter(column);
+          if (!sortableField(column)) return '';
+          return 'Sort by ' + shortDotsFilter(column);
         };
 
         $scope.canRemove = function (name) {

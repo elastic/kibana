@@ -4,7 +4,7 @@ define(function (require) {
     var AggType = Private(require('components/agg_types/_agg_type'));
     var fieldFormats = Private(require('registry/field_formats'));
 
-    _(MetricAggType).inherits(AggType);
+    _.class(MetricAggType).inherits(AggType);
     function MetricAggType(config) {
       MetricAggType.Super.call(this, config);
 

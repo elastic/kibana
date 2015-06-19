@@ -1,27 +1,24 @@
-var createPackages = require('./create_packages');
+var child_process = require('child_process');
 var Promise = require('bluebird');
-var exec = createPackages.exec;
-var getBaseNames = createPackages.getBaseNames;
+var fs = require('fs');
+var readdir = Promise.promisify(fs.readdir);
+var exec = Promise.promisify(child_process.exec);
 var _ = require('lodash');
 module.exports = function (grunt) {
+
   grunt.registerTask('create_shasums', function () {
-    var done = this.async();
-    var target = grunt.config.get('target');
-    var options = { cwd: target };
+    var targetDir = grunt.config.get('target');
 
-    var createShasum = function (filename) {
-      var shacmd = 'shasum ' + filename + ' > ' + filename + '.sha1.txt';
-      return exec(shacmd, options);
-    };
+    readdir(targetDir)
+    .map(function (archive) {
+      // only sha the archives
+      if (!archive.match(/\.zip$|\.tar.gz$/)) return;
 
-    var filenames = _(getBaseNames(grunt))
-      .map(function (basename) {
-        return [ basename + '.tar.gz', basename + '.zip' ];
-      })
-      .flatten()
-      .value();
-
-    Promise.map(filenames, createShasum).finally(done);
-
+      return exec('shasum ' + archive + ' > ' + archive + '.sha1.txt', {
+        cwd: targetDir
+      });
+    })
+    .nodeify(this.async());
   });
+
 };

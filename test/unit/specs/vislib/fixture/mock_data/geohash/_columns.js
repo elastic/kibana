@@ -1,7 +1,10 @@
-define(function () {
+define(function (require) {
+  var _ = require('lodash');
   return {
     'columns': [
         {
+          'title': 'Top 2 geo.dest: CN',
+          'valueFormatter': _.identity,
           'geoJson': {
             'type': 'FeatureCollection',
             'features': [
@@ -15,8 +18,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 42,
+                  'value': 42,
                   'geohash': 's',
                   'center': [
                     22.5,
@@ -95,8 +97,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 31,
+                  'value': 31,
                   'geohash': 'd',
                   'center': [
                     -67.5,
@@ -175,8 +176,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 30,
+                  'value': 30,
                   'geohash': 'w',
                   'center': [
                     112.5,
@@ -255,8 +255,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 25,
+                  'value': 25,
                   'geohash': '9',
                   'center': [
                     -112.5,
@@ -335,8 +334,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 22,
+                  'value': 22,
                   'geohash': 't',
                   'center': [
                     67.5,
@@ -415,8 +413,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 22,
+                  'value': 22,
                   'geohash': 'k',
                   'center': [
                     22.5,
@@ -495,8 +492,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 21,
+                  'value': 21,
                   'geohash': '6',
                   'center': [
                     -67.5,
@@ -575,8 +571,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 19,
+                  'value': 19,
                   'geohash': 'u',
                   'center': [
                     22.5,
@@ -655,8 +650,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 18,
+                  'value': 18,
                   'geohash': 'v',
                   'center': [
                     67.5,
@@ -735,8 +729,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 11,
+                  'value': 11,
                   'geohash': 'c',
                   'center': [
                     -112.5,
@@ -815,8 +808,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 10,
+                  'value': 10,
                   'geohash': 'r',
                   'center': [
                     157.5,
@@ -895,8 +887,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 9,
+                  'value': 9,
                   'geohash': 'y',
                   'center': [
                     112.5,
@@ -975,8 +966,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 9,
+                  'value': 9,
                   'geohash': 'e',
                   'center': [
                     -22.5,
@@ -1055,8 +1045,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 8,
+                  'value': 8,
                   'geohash': 'f',
                   'center': [
                     -67.5,
@@ -1135,8 +1124,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 8,
+                  'value': 8,
                   'geohash': '7',
                   'center': [
                     -22.5,
@@ -1215,8 +1203,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 6,
+                  'value': 6,
                   'geohash': 'q',
                   'center': [
                     112.5,
@@ -1295,8 +1282,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 6,
+                  'value': 6,
                   'geohash': 'g',
                   'center': [
                     -22.5,
@@ -1375,8 +1361,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 4,
+                  'value': 4,
                   'geohash': 'x',
                   'center': [
                     157.5,
@@ -1455,8 +1440,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 3,
+                  'value': 3,
                   'geohash': 'b',
                   'center': [
                     -157.5,
@@ -1535,8 +1519,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 2,
+                  'value': 2,
                   'geohash': 'z',
                   'center': [
                     157.5,
@@ -1615,8 +1598,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': 'm',
                   'center': [
                     67.5,
@@ -1695,8 +1677,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': '5',
                   'center': [
                     -22.5,
@@ -1775,8 +1756,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': '4',
                   'center': [
                     -67.5,
@@ -1855,8 +1835,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': '3',
                   'center': [
                     -112.5,
@@ -1927,16 +1906,14 @@ define(function () {
               }
             ],
             'properties': {
-              'label': 'Top 2 geo.dest: CN',
-              'length': 24,
               'min': 1,
-              'max': 42,
-              'precision': 1
+              'max': 42
             }
-          },
-          'label': 'Top 2 geo.dest: CN'
+          }
         },
         {
+          'label': 'Top 2 geo.dest: IN',
+          'valueFormatter': _.identity,
           'geoJson': {
             'type': 'FeatureCollection',
             'features': [
@@ -1950,8 +1927,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 32,
+                  'value': 32,
                   'geohash': 's',
                   'center': [
                     22.5,
@@ -2030,8 +2006,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 31,
+                  'value': 31,
                   'geohash': '6',
                   'center': [
                     -67.5,
@@ -2110,8 +2085,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 28,
+                  'value': 28,
                   'geohash': 'd',
                   'center': [
                     -67.5,
@@ -2190,8 +2164,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 27,
+                  'value': 27,
                   'geohash': 'w',
                   'center': [
                     112.5,
@@ -2270,8 +2243,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 24,
+                  'value': 24,
                   'geohash': 't',
                   'center': [
                     67.5,
@@ -2350,8 +2322,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 23,
+                  'value': 23,
                   'geohash': 'k',
                   'center': [
                     22.5,
@@ -2430,8 +2401,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 17,
+                  'value': 17,
                   'geohash': 'u',
                   'center': [
                     22.5,
@@ -2510,8 +2480,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 16,
+                  'value': 16,
                   'geohash': '9',
                   'center': [
                     -112.5,
@@ -2590,8 +2559,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 14,
+                  'value': 14,
                   'geohash': 'v',
                   'center': [
                     67.5,
@@ -2670,8 +2638,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 13,
+                  'value': 13,
                   'geohash': 'e',
                   'center': [
                     -22.5,
@@ -2750,8 +2717,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 9,
+                  'value': 9,
                   'geohash': 'r',
                   'center': [
                     157.5,
@@ -2830,8 +2796,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 6,
+                  'value': 6,
                   'geohash': 'y',
                   'center': [
                     112.5,
@@ -2910,8 +2875,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 6,
+                  'value': 6,
                   'geohash': 'g',
                   'center': [
                     -22.5,
@@ -2990,8 +2954,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 6,
+                  'value': 6,
                   'geohash': 'f',
                   'center': [
                     -67.5,
@@ -3070,8 +3033,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 5,
+                  'value': 5,
                   'geohash': 'c',
                   'center': [
                     -112.5,
@@ -3150,8 +3112,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 4,
+                  'value': 4,
                   'geohash': 'b',
                   'center': [
                     -157.5,
@@ -3230,8 +3191,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 3,
+                  'value': 3,
                   'geohash': 'q',
                   'center': [
                     112.5,
@@ -3310,8 +3270,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 2,
+                  'value': 2,
                   'geohash': '4',
                   'center': [
                     -67.5,
@@ -3390,8 +3349,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': 'z',
                   'center': [
                     157.5,
@@ -3470,8 +3428,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': 'x',
                   'center': [
                     157.5,
@@ -3550,8 +3507,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': 'p',
                   'center': [
                     157.5,
@@ -3630,8 +3586,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': 'm',
                   'center': [
                     67.5,
@@ -3710,8 +3665,7 @@ define(function () {
                   ]
                 },
                 'properties': {
-                  'valueLabel': 'Count',
-                  'count': 1,
+                  'value': 1,
                   'geohash': '7',
                   'center': [
                     -22.5,
@@ -3782,16 +3736,11 @@ define(function () {
               }
             ],
             'properties': {
-              'label': 'Top 2 geo.dest: IN',
-              'length': 23,
               'min': 1,
-              'max': 32,
-              'precision': 1
+              'max': 32
             }
-          },
-          'label': 'Top 2 geo.dest: IN'
+          }
         }
-      ],
-      'hits': 1638
-    };
+      ]
+  };
 });

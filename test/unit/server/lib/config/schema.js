@@ -1,7 +1,6 @@
 var root = require('requirefrom')('');
 var schema = root('src/server/lib/config/schema');
 var expect = require('expect.js');
-var _ = require('lodash');
 var Joi = require('joi');
 var package = root('./package.json');
 var path = require('path');

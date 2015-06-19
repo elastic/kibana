@@ -2,7 +2,6 @@ var Promise = require('bluebird');
 var Joi = require('joi');
 var _ = require('lodash');
 var override = require('./override');
-_.mixin(require('lodash-deep'));
 
 function Config(schema, config) {
   config = config || {};
@@ -32,7 +31,7 @@ Config.prototype.set = function (key, value) {
   if (_.isPlainObject(key)) {
     config = override(config, key);
   } else {
-    _.deepSet(config, key, value);
+    _.set(config, key, value);
   }
   var results = Joi.validate(config, this.schema);
   if (results.error) {
@@ -46,7 +45,7 @@ Config.prototype.get = function (key) {
     return _.cloneDeep(this.config);
   }
 
-  var value = _.deepGet(this.config, key);
+  var value = _.get(this.config, key);
   if (value === undefined) {
     if (!this.has(key)) {
       throw new Error('Unknown config key: ' + key);

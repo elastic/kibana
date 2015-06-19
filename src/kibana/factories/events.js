@@ -5,7 +5,7 @@ define(function (require) {
     var SimpleEmitter = require('utils/SimpleEmitter');
     var notify = new Notifier({ location: 'EventEmitter' });
 
-    _(Events).inherits(SimpleEmitter);
+    _.class(Events).inherits(SimpleEmitter);
     function Events() {
       Events.Super.call(this);
       this._listeners = {};

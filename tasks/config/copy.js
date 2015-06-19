@@ -44,6 +44,12 @@ module.exports = function (grunt) {
         },
         {
           expand: true,
+          cwd: '<%= server %>/plugins/',
+          src: '**',
+          dest: '<%= build %>/kibana/plugins'
+        },
+        {
+          expand: true,
           cwd: '<%= server %>/routes/',
           src: '**',
           dest: '<%= build %>/kibana/routes'
@@ -71,6 +77,12 @@ module.exports = function (grunt) {
           cwd: '<%= server %>/config/',
           src: 'kibana.yml',
           dest: '<%= build %>/dist/kibana/config/'
+        },
+        {
+          expand: true,
+          cwd: '<%= bowerComponentsDir %>/ace-builds/src-noconflict/',
+          src: 'worker-json.js',
+          dest: '<%= build %>/dist/kibana/src/public/'
         }
       ]
     },

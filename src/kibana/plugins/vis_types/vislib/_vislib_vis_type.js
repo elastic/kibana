@@ -8,10 +8,11 @@ define(function (require) {
     var VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
 
     require('plugins/vis_types/controls/vislib_basic_options');
+    require('plugins/vis_types/controls/point_series_options');
     require('plugins/vis_types/controls/line_interpolation_option');
     require('plugins/vis_types/controls/point_series_options');
 
-    _(VislibVisType).inherits(VisType);
+    _.class(VislibVisType).inherits(VisType);
     function VislibVisType(opts) {
       opts = opts || {};
 

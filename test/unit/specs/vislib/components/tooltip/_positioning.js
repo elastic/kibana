@@ -157,7 +157,7 @@ define(function (require) {
         });
 
         function check(xPercent, yPercent/*, prev, directions... */) {
-          var directions = _.rest(arguments, 2);
+          var directions = _.drop(arguments, 2);
           var event = makeEvent(xPercent, yPercent);
           var placement = posTT({
             $window: $window,

@@ -7,7 +7,7 @@ define(function (require) {
 
     require('components/field_format_editor/pattern/pattern');
 
-    _(DateTime).inherits(FieldFormat);
+    _.class(DateTime).inherits(FieldFormat);
     function DateTime(params) {
       DateTime.Super.call(this, params);
     }

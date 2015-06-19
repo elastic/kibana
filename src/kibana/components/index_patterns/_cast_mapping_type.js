@@ -21,7 +21,7 @@ define(function (require) {
         { name: 'geo_shape',    type: 'geo_shape',  group: 'geo'    },
         { name: 'ip',           type: 'ip',         group: 'other'  },
         { name: 'attachment',   type: 'attachment', group: 'other'  },
-        { name: 'murmur3',      type: 'murmur3',    group: 'hash'  }
+        { name: 'murmur3',      type: 'murmur3',    group: 'hash'   }
       ]
     });
 
@@ -31,10 +31,10 @@ define(function (require) {
      * @return {String} - the most specific type that we care for
      */
     function castMappingType(name) {
-      var match = castMappingType.types.byName[name];
+      if (!name) return 'unknown';
 
-      if (match) return match.type;
-      return 'string';
+      var match = castMappingType.types.byName[name];
+      return match ? match.type : 'string';
     }
 
     return castMappingType;

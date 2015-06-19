@@ -54,6 +54,10 @@ define(function (require) {
     });
 
     beforeEach(function () {
+      module('kibana/courier', function ($provide) {
+        $provide.service('courier', require('fixtures/mock_courier'));
+      });
+
       module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
@@ -106,13 +110,11 @@ define(function (require) {
 
 
       it('should only fire the update event', function () {
-        var filter = appState.filters[1];
         var emitSpy = sinon.spy(queryFilter, 'emit');
-
-        // set up the watchers
+        var filter = appState.filters[1];
         $rootScope.$digest();
+
         queryFilter.pinFilter(filter);
-        // trigger the digest loop to fire the watchers
         $rootScope.$digest();
 
         expect(emitSpy.callCount).to.be(1);

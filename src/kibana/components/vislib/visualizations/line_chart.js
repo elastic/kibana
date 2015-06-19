@@ -18,7 +18,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(LineChart).inherits(PointSeriesChart);
+    _.class(LineChart).inherits(PointSeriesChart);
     function LineChart(handler, chartEl, chartData) {
       if (!(this instanceof LineChart)) {
         return new LineChart(handler, chartEl, chartData);
@@ -74,14 +74,20 @@ define(function (require) {
       var ordered = this.handler.data.get('ordered');
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+
       var radii = _(data)
-        .map(function (series) { return _.map(series, function (point) { return point._input.z; }); })
-        .flatten()
-        .reduce(function (result, val) {
-          if (result.min > val) result.min = val;
-          if (result.max < val) result.max = val;
-          return result;
-        }, {min: Infinity, max: -Infinity});
+      .map(function (series) {
+        return _.pluck(series, '_input.z');
+      })
+      .flattenDeep()
+      .reduce(function (result, val) {
+        if (result.min > val) result.min = val;
+        if (result.max < val) result.max = val;
+        return result;
+      }, {
+        min: Infinity,
+        max: -Infinity
+      });
 
       var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
@@ -257,6 +263,7 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var scaleType = this.handler.yAxis.getScaleType();
       var yMin = this.handler.yAxis.yMin;
       var yScale = this.handler.yAxis.yScale;
       var xScale = this.handler.xAxis.xScale;
@@ -297,6 +304,10 @@ define(function (require) {
             timeMarker = new TimeMarker(times, xScale, height);
           }
 
+          if (self._attr.scale === 'log' && self._invalidLogScaleValues(data)) {
+            throw new errors.InvalidLogScaleValues();
+          }
+
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
@@ -309,19 +320,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          if (yMin < 0) {
-
-            // Draw line at yScale 0 value
-            svg.append('line')
-              .attr('class', 'zero-line')
-              .attr('x1', 0)
-              .attr('y1', yScale(0))
-              .attr('x2', width)
-              .attr('y2', yScale(0))
-              .style('stroke', '#ddd')
-              .style('stroke-width', 1);
-          }
-
           self.addClipPath(svg, width, height);
           if (self._attr.drawLinesBetweenPoints) {
             lines = self.addLines(svg, data.series);
@@ -330,15 +328,17 @@ define(function (require) {
           self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
 
-          var line = svg
-          .append('line')
-          .attr('class', 'base-line')
-          .attr('x1', startLineX)
-          .attr('y1', height)
-          .attr('x2', width)
-          .attr('y2', height)
-          .style('stroke', '#ddd')
-          .style('stroke-width', lineStrokeWidth);
+          var scale = (scaleType === 'log') ? yScale(1) : yScale(0);
+          if (scale) {
+            svg.append('line')
+            .attr('class', 'base-line')
+            .attr('x1', startLineX)
+            .attr('y1', scale)
+            .attr('x2', width)
+            .attr('y2', scale)
+            .style('stroke', '#ddd')
+            .style('stroke-width', lineStrokeWidth);
+          }
 
           if (addTimeMarker) {
             timeMarker.render(svg);

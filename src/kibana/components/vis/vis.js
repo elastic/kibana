@@ -70,7 +70,7 @@ define(function (require) {
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
-      this.params = _.defaults({}, state.params || {}, this.type.params.defaults || {});
+      this.params = _.defaults({}, _.cloneDeep(state.params || {}), this.type.params.defaults || {});
 
       this.aggs = new AggConfigs(this, state.aggs);
     };
@@ -84,6 +84,14 @@ define(function (require) {
         }).filter(Boolean),
         listeners: this.listeners
       };
+    };
+
+    Vis.prototype.createEditableVis = function () {
+      return this._editableVis || (this._editableVis = this.clone());
+    };
+
+    Vis.prototype.getEditableVis = function () {
+      return this._editableVis || undefined;
     };
 
     Vis.prototype.clone = function () {

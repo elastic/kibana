@@ -3,24 +3,18 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('mapFlattenAndWrapFilters()', function () {
       var sinon = require('test_utils/auto_release_sinon');
-      var mapFlattenAndWrapFilters, $rootScope, indexPattern, getIndexPatternStub;
+      var mapFlattenAndWrapFilters, $rootScope;
       beforeEach(module('kibana'));
 
       beforeEach(function () {
-        getIndexPatternStub = sinon.stub();
         module('kibana/courier', function ($provide) {
-          $provide.service('courier', function () {
-            var courier = { indexPatterns: { get: getIndexPatternStub } };
-            return courier;
-          });
+          $provide.service('courier', require('fixtures/mock_courier'));
         });
       });
 
-      beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(inject(function (Private, _$rootScope_) {
         mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
         $rootScope = _$rootScope_;
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        getIndexPatternStub.returns(Promise.resolve(indexPattern));
       }));
 
       var filters = [

@@ -13,7 +13,7 @@ define(function (require) {
      * @param handler {Object} Reference to Handler Class Object
      */
 
-    _(Dispatch).inherits(SimpleEmitter);
+    _.class(Dispatch).inherits(SimpleEmitter);
     function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
@@ -106,8 +106,6 @@ define(function (require) {
       var $el = this.handler.el;
 
       function hover(d, i) {
-        d3.event.stopPropagation();
-
         // Add pointer if item is clickable
         if (isClickable) {
           self.addMousePointer.call(this, arguments);
@@ -131,8 +129,6 @@ define(function (require) {
       var $el = this.handler.el;
 
       function mouseout() {
-        d3.event.stopPropagation();
-
         self.unHighlightLegend.call(this, $el);
       }
 
@@ -149,7 +145,6 @@ define(function (require) {
       var addEvent = this.addEvent;
 
       function click(d, i) {
-        d3.event.stopPropagation();
         self.emit('click', self.eventResponse(d, i));
       }
 

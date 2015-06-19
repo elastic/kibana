@@ -35,7 +35,7 @@ define(function (require) {
     });
 
     it('should work with inherited objects', function () {
-      _(MyEventedObject).inherits(Events);
+      _.class(MyEventedObject).inherits(Events);
       function MyEventedObject() {
         MyEventedObject.Super.call(this);
       }

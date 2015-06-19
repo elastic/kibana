@@ -5,7 +5,7 @@ define(function (require) {
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var editorHtml = require('text!components/agg_types/controls/regular_expression.html');
 
-    _(RegexAggParam).inherits(BaseAggParam);
+    _.class(RegexAggParam).inherits(BaseAggParam);
     function RegexAggParam(config) {
       // Java RegExp flags
       var flags = [

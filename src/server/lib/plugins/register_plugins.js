@@ -15,9 +15,12 @@ function checkForCircularDependency(plugins) {
     deps[task.name] = [];
     if (task.require) deps[task.name] = task.require;
   });
-  return _(deps).keys().map(function (task) {
+  return _(deps)
+  .keys()
+  .map(function (task) {
     return checkDependencies(task, deps);
-  }).every(function (result) {
+  })
+  .every(function (result) {
     return result;
   });
 }
@@ -55,6 +58,7 @@ module.exports = function (server, plugins) {
     return new Promise(function (resolve, reject) {
       var register = function (server, options, next) {
         plugin.server = server;
+        plugin.server.expose('self', plugin);
         status.createStatus(plugin);
         Promise.try(plugin.init, [server, options], plugin).nodeify(next);
       };
@@ -64,7 +68,7 @@ module.exports = function (server, plugins) {
         if (err) return reject(err);
         // Only change the plugin status to green if the intial status has not
         // been updated from yellow - Initializing
-        if (plugin.status.message === 'Initializing' && plugin.status.state === 'yellow') {
+        if (plugin.status.state === undefined) {
           plugin.status.green('Ready');
         }
         resolve(plugin);

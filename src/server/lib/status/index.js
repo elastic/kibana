@@ -10,7 +10,6 @@ SystemStatus.prototype.createStatus = function (plugin) {
   plugin.server.expose('status', plugin.status);
   plugin.status.on('change', logStatusChange(plugin));
   this.data[plugin.name] = plugin.status;
-  plugin.status.yellow('Initializing');
 };
 
 SystemStatus.prototype.toJSON = function () {
