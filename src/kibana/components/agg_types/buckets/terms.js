@@ -54,21 +54,6 @@ define(function (require) {
           default: 5
         },
         {
-          name: 'order',
-          type: 'optioned',
-          default: 'desc',
-          editor: require('text!components/agg_types/controls/order_and_size.html'),
-          options: [
-            { display: 'Descending', val: 'desc' },
-            { display: 'Ascending', val: 'asc' }
-          ],
-          write: _.noop // prevent default write, it's handled by orderAgg
-        },
-        {
-          name: 'orderBy',
-          write: _.noop // prevent default write, it's handled by orderAgg
-        },
-        {
           name: 'orderAgg',
           type: AggConfig,
           default: null,
@@ -170,6 +155,21 @@ define(function (require) {
             output.subAggs = (output.subAggs || []).concat(orderAgg);
             order[orderAggId] = dir;
           }
+        },
+        {
+          name: 'order',
+          type: 'optioned',
+          default: 'desc',
+          editor: require('text!components/agg_types/controls/order_and_size.html'),
+          options: [
+            { display: 'Descending', val: 'desc' },
+            { display: 'Ascending', val: 'asc' }
+          ],
+          write: _.noop // prevent default write, it's handled by orderAgg
+        },
+        {
+          name: 'orderBy',
+          write: _.noop // prevent default write, it's handled by orderAgg
         }
       ]
     });
