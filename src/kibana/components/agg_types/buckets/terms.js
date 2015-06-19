@@ -28,7 +28,7 @@ define(function (require) {
       title: 'Terms',
       makeLabel: function (agg) {
         var params = agg.params;
-        return params.order.display + ' ' + params.size + ' ' + params.field.displayName;
+        return params.field.displayName + ': ' + params.order.display;
       },
       createFilter: createFilter,
       params: [
@@ -59,8 +59,8 @@ define(function (require) {
           default: 'desc',
           editor: require('text!components/agg_types/controls/order_and_size.html'),
           options: [
-            { display: 'Top', val: 'desc' },
-            { display: 'Bottom', val: 'asc' }
+            { display: 'Descending', val: 'desc' },
+            { display: 'Ascending', val: 'asc' }
           ],
           write: _.noop // prevent default write, it's handled by orderAgg
         },
@@ -122,6 +122,12 @@ define(function (require) {
               // we aren't creating a custom aggConfig
               if (!orderBy || orderBy !== 'custom') {
                 params.orderAgg = null;
+
+                if (orderBy === '_term') {
+                  params.orderBy = '_term';
+                  return;
+                }
+
                 // ensure that orderBy is set to a valid agg
                 if (!_.find($scope.responseValueAggs, { id: orderBy })) {
                   params.orderBy = null;
@@ -146,8 +152,13 @@ define(function (require) {
               output.params.valueType = agg.field().type === 'number' ? 'float' : agg.field().type;
             }
 
-            if (!orderAgg || orderAgg.type.name === 'count') {
+            if (orderAgg && orderAgg.type.name === 'count') {
               order._count = dir;
+              return;
+            }
+
+            if (!orderAgg) {
+              order[agg.params.orderBy || '_count'] = dir;
               return;
             }
 
