@@ -51,8 +51,8 @@ define(function (require) {
       }
 
       var moments = _(bounds)
-        .map(function (time) { return moment(time); })
-        .sortBy(Number);
+      .map(_.ary(moment, 1))
+      .sortBy(Number);
 
       var valid = moments.size() === 2 && moments.every(isValidMoment);
       if (!valid) {

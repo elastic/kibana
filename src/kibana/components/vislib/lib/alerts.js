@@ -3,15 +3,13 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
     /**
-     * Appends chart titles to the visualization
+     * Adds allerts that float in front of a visualization
      *
      * @class Alerts
      * @constructor
      * @param el {HTMLElement} Reference to DOM element
      */
-
     function Alerts(vis, data, alertDefs) {
       if (!(this instanceof Alerts)) {
         return new Alerts(vis, data, alertDefs);

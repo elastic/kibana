@@ -34,8 +34,8 @@ define(function (require) {
           properties: {
             min: _.min(values),
             max: _.max(values),
-            zoom: _.deepGet(geoAgg, 'params.mapZoom'),
-            center: _.deepGet(geoAgg, 'params.mapCenter')
+            zoom: _.get(geoAgg, 'params.mapZoom'),
+            center: _.get(geoAgg, 'params.mapCenter')
           }
         }
       };

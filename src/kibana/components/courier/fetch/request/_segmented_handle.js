@@ -14,7 +14,7 @@ define(function (require) {
      *
      * @param {SegmentedRequest} - req - the requst this handle relates to
      */
-    _(SegmentedHandle).inherits(Events);
+    _.class(SegmentedHandle).inherits(Events);
     function SegmentedHandle(req) {
       SegmentedHandle.Super.call(this);
 

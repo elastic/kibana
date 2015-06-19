@@ -6,7 +6,7 @@ define(function (require) {
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
     var touchdownTmpl = _.template(require('text!components/vislib/partials/touchdown.tmpl.html'));
 
-    _(PointSeriesChart).inherits(Chart);
+    _.class(PointSeriesChart).inherits(Chart);
     function PointSeriesChart(handler, chartEl, chartData) {
       if (!(this instanceof PointSeriesChart)) {
         return new PointSeriesChart(handler, chartEl, chartData);

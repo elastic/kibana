@@ -9,7 +9,7 @@ define(function (require) {
     return function (query) {
       var queryOptions = config.get('query:queryString:options');
 
-      if (_.deepHas(query, 'query_string.query')) {
+      if (_.has(query, 'query_string.query')) {
         _.extend(query.query_string, queryOptions);
       }
 

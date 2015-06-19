@@ -12,7 +12,7 @@ define(function (require) {
     require('plugins/vis_types/controls/line_interpolation_option');
     require('plugins/vis_types/controls/point_series_options');
 
-    _(VislibVisType).inherits(VisType);
+    _.class(VislibVisType).inherits(VisType);
     function VislibVisType(opts) {
       opts = opts || {};
 
