@@ -246,7 +246,7 @@ define(function (require) {
         .then(finish)
         .catch(function (err) {
           // record exists, confirm overwriting
-          if (_.deepGet(err, 'origError.status') === 409) {
+          if (_.get(err, 'origError.status') === 409) {
             var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
             if (window.confirm(confirmMessage)) {

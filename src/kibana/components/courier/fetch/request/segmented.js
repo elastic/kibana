@@ -1,5 +1,5 @@
 define(function (require) {
-  return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter) {
+  return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
     var _ = require('lodash');
     var SearchReq = Private(require('components/courier/fetch/request/search'));
     var requestQueue = Private(require('components/courier/_request_queue'));
@@ -9,7 +9,7 @@ define(function (require) {
       location: 'Segmented Fetch'
     });
 
-    _(SegmentedReq).inherits(SearchReq);
+    _.class(SegmentedReq).inherits(SearchReq);
     function SegmentedReq(source, defer, initFn) {
       SearchReq.call(this, source, defer);
 
@@ -18,6 +18,7 @@ define(function (require) {
       // segmented request specific state
       this._initFn = initFn;
       this._desiredSize = false;
+      this._maxSegments = config.get('courier:maxSegmentCount');
       this._hitsReceived = 0;
       this._direction = 'desc';
       this._handle = new SegmentedHandle(this);
@@ -67,12 +68,21 @@ define(function (require) {
       return self._getFlattenedSource()
       .then(function (flatSource) {
         var params = _.cloneDeep(flatSource);
-        var index = self._active = self._queue.shift();
 
-        params.index = index;
+        // calculate the number of indices to fetch in this request in order to prevent
+        // more than self._maxSegments requests. We use Math.max(1, n) to ensure that each request
+        // has at least one index pattern, and Math.floor() to make sure that if the
+        // number of indices does not round out evenly the extra index is tacked onto the last
+        // request, making sure the first request returns faster.
+        var remainingSegments = self._maxSegments - self._segments.length;
+        var indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
+        params.index = self._active = self._queue.splice(0, indexCount);
+
         if (self._desiredSize !== false) {
           params.body.size = Math.max(self._desiredSize - self._hitsReceived, 0);
         }
+
+        if (params.body.size === 0) params.search_type = 'count';
 
         return params;
       });
@@ -153,7 +163,6 @@ define(function (require) {
         total: this._all.length,
         complete: this._complete.length,
         remaining: this._queue.length,
-        active: this._active,
         hitCount: this._mergedResp.hits.hits.length
       });
     };
@@ -167,8 +176,8 @@ define(function (require) {
       this._complete.push(index);
       if (!seg) return; // segment was ignored/filtered, don't store it
 
-      var hadHits = _.deepGet(this._mergedResp, 'hits.hits.length') > 0;
-      var gotHits = _.deepGet(seg, 'hits.hits.length') > 0;
+      var hadHits = _.get(this._mergedResp, 'hits.hits.length') > 0;
+      var gotHits = _.get(seg, 'hits.hits.length') > 0;
       var firstHits = !hadHits && gotHits;
       var haveHits = hadHits || gotHits;
 

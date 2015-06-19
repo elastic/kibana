@@ -29,7 +29,7 @@ exported.
 years.
 * {k4pull}3273[Pull Request 3273]: Line smoothing for for line and area charts.
 * {k4pull}3464[Pull Request 3464]: You can now specify the extent of the Y axis for charts.
-* {k4pull}3526[Pull Request 3526]: You can add columns to Dicover's list of results directly from an entry's table of 
+* {k4pull}3526[Pull Request 3526]: You can add columns to Discover's list of results directly from an entry's table of 
 fields.
 * {k4pull}3671[Pull Request 3671]: Tile maps now support latitude/longitude filtering.
 * {k4pull}3800[Pull Request 3800]: You can now pause auto-refresh on a dashboard.

@@ -39,9 +39,7 @@ define(function (require) {
   });
 
   // helper
-  sinon.decorateWithSpy = function (/* prop... */) {
-    var props = _.rest(arguments, 0);
-
+  sinon.decorateWithSpy = _.restParam(function (props) {
     return function ($delegate) {
       props.forEach(function (prop) {
         sinon.spy($delegate, prop);
@@ -49,7 +47,7 @@ define(function (require) {
 
       return $delegate;
     };
-  };
+  });
 
   afterEach(function () {
     if (!toRestore.length) return;

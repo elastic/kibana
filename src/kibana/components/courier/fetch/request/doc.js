@@ -5,7 +5,7 @@ define(function (require) {
     var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
     var AbstractRequest = Private(require('components/courier/fetch/request/request'));
 
-    _(DocRequest).inherits(AbstractRequest);
+    _.class(DocRequest).inherits(AbstractRequest);
     function DocRequest(source, defer) {
       DocRequest.Super.call(this, source, defer);
 

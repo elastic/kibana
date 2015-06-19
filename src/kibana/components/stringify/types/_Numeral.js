@@ -6,7 +6,7 @@ define(function (require) {
     var numeral = require('numeral')();
     require('components/field_format_editor/numeral/numeral');
 
-    _(Numeral).inherits(FieldFormat);
+    _.class(Numeral).inherits(FieldFormat);
     function Numeral(params) {
       Numeral.Super.call(this, params);
     }
@@ -23,7 +23,7 @@ define(function (require) {
 
 
     Numeral.factory = function (opts) {
-      _(Class).inherits(Numeral);
+      _.class(Class).inherits(Numeral);
       function Class(params) {
         Class.Super.call(this, params);
       }

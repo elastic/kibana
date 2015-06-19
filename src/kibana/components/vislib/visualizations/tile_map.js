@@ -27,7 +27,7 @@ define(function (require) {
      * @param chartEl {HTMLElement} HTML element to which the map will be appended
      * @param chartData {Object} Elasticsearch query results for this map
      */
-    _(TileMap).inherits(Chart);
+    _.class(TileMap).inherits(Chart);
     function TileMap(handler, chartEl, chartData) {
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);
@@ -41,8 +41,8 @@ define(function (require) {
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
 
-      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || defaultMapZoom;
-      this._attr.mapCenter = _.deepGet(this.geoJson, 'properties.center') || defaultMapCenter;
+      this._attr.mapZoom = _.get(this.geoJson, 'properties.zoom') || defaultMapZoom;
+      this._attr.mapCenter = _.get(this.geoJson, 'properties.center') || defaultMapCenter;
 
       // add allmin and allmax to geoJson
       var allMinMax = this.getMinMax(handler.data.data);
@@ -263,8 +263,8 @@ define(function (require) {
      */
     TileMap.prototype._getDataRectangles = function () {
       return _(this.geoJson.features)
-      .deepPluck('properties.rectangle')
-      .map(function (rectangle) { return rectangle.map(cloneAndReverse); })
+      .pluck('properties.rectangle')
+      .invoke('map', cloneAndReverse)
       .value();
     };
 

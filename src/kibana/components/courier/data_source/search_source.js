@@ -1,16 +1,15 @@
 define(function (require) {
-
-
   return function SearchSourceFactory(Promise, Private) {
     var _ = require('lodash');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var SearchRequest = Private(require('components/courier/fetch/request/search'));
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var normalizeSortRequest = Private(require('components/courier/data_source/_normalize_sort_request'));
 
-    _(SearchSource).inherits(SourceAbstract);
+    _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
-      SearchSource.Super.call(this, initialState);
+      SearchSource.Super.call(this, initialState, searchStrategy);
     }
 
     // expose a ready state for the route setup to read
@@ -155,17 +154,12 @@ define(function (require) {
       case 'filter':
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
         state.filters = _([ state.filters || [], val ])
-          .flatten(true)
-          // Yo Dawg! I heard you needed to filter out your filters
-          .filter(function (filter) {
-            if (!filter) return false;
-            // return true for anything that is either empty or false
-            // return false for anything that is explicitly set to true
-            if (filter.meta)
-              return !filter.meta.disabled;
-            return true;
-          })
-          .value();
+        .flatten()
+        // Yo Dawg! I heard you needed to filter out your filters
+        .reject(function (filter) {
+          return !filter || _.get(filter, 'meta.disabled');
+        })
+        .value();
         return;
       case 'index':
       case 'type':

@@ -252,7 +252,7 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var min = _.chain(data.geoJson.features)
-            .deepPluck('properties.value')
+            .pluck('properties.value')
             .min()
             .value();
             expect(chart.getMinMax(data).min).to.be(min);
@@ -263,7 +263,7 @@ define(function (require) {
           vis.handler.charts.forEach(function (chart) {
             var data = chart.handler.data.data;
             var max = _.chain(data.geoJson.features)
-            .deepPluck('properties.value')
+            .pluck('properties.value')
             .max()
             .value();
             expect(chart.getMinMax(data).max).to.be(max);
