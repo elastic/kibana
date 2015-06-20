@@ -70,12 +70,10 @@ define(function (require) {
      *
      * @method applyShadingStyle
      * @param feature {Object}
-     * @param min {Number}
-     * @param max {Number}
      * @return {Object}
      */
-    BaseMarker.prototype.applyShadingStyle = function (value, min, max) {
-      this.quantizeLegendColors(min, max);
+    BaseMarker.prototype.applyShadingStyle = function (value) {
+      this.quantizeLegendColors();
       var color = this._legendQuantizer(value);
 
       return {
@@ -213,13 +211,11 @@ define(function (require) {
      * d3 quantize scale returns a hex color, used for marker fill color
      *
      * @method quantizeLegendColors
-     * @param min {Number}
-     * @param max {Number}
      * return {undefined}
      */
-    BaseMarker.prototype.quantizeLegendColors = function (min, max) {
-      min = min || 0;
-      max = max || 1;
+    BaseMarker.prototype.quantizeLegendColors = function () {
+      var min = _.get(this.geoJson, 'properties.allmin') || 0;
+      var max = _.get(this.geoJson, 'properties.allmax') || 1;
 
       var reds1 = ['#ff6128'];
       var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
