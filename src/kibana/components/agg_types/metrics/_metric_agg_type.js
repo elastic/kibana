@@ -27,16 +27,22 @@ define(function (require) {
 
     /**
      * Pick a format for the values produced by this agg type,
-     * overriden by several metrics that always output a simple
+     * overidden by several metrics that always output a simple
      * number
      *
      * @param  {agg} agg - the agg to pick a format for
-     * @return {FieldFromat}
+     * @return {FieldFormat}
      */
     MetricAggType.prototype.getFormat = function (agg) {
       var field = agg.field();
       return field ? field.format : fieldFormats.getDefaultInstance('number');
     };
+
+    /**
+     * Specify if this metric aggregation may be used in orderBy clauses of sub-aggs
+     * @type {boolean}
+     */
+    MetricAggType.prototype.supportsOrderBy = true;
 
     return MetricAggType;
   };

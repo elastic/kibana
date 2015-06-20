@@ -81,7 +81,7 @@ define(function (require) {
     var configTemplate = new ConfigTemplate({
       save: require('text!plugins/visualize/editor/panels/save.html'),
       load: require('text!plugins/visualize/editor/panels/load.html'),
-      share: require('text!plugins/visualize/editor/panels/share.html'),
+      share: require('text!plugins/visualize/editor/panels/share.html')
     });
 
     if (savedVis.id) {
@@ -137,7 +137,7 @@ define(function (require) {
         $scope.responseValueAggs = null;
         try {
           $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
-            return _.deepGet(agg, 'schema.group') === 'metrics';
+            return _.deepGet(agg, 'schema.group') === 'metrics' && _.deepGet(agg, 'type.supportOrderBy');
           });
         } catch (e) {
           // this can fail when the agg.type is changed but the

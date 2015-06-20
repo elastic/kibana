@@ -8,15 +8,13 @@ define(function (require) {
     return new MetricAggType({
       name: 'scripted_metric',
       title: 'Scripted Metric',
-      makeLabel: function (aggConfig) {
+      makeLabel: function (/*aggConfig*/) {
         return 'Scripted Metric';
       },
       getFormat: function () {
         return fieldFormats.getDefaultInstance('number') || fieldFormats.getDefaultInstance('percent');
       },
-      getResponseAggs: function (agg) {
-        return [];
-      },
+      supportsOrderBy: false,
       params: [
         {
           name: 'init_script',
