@@ -10,7 +10,7 @@ define(function (require) {
      *
      * @param map {Leaflet Object}
      * @param mapData {geoJson Object}
-     * @return {Leaflet object} featureLayer
+     * @param params {Object}
      */
     _.class(ScaledCircleMarker).inherits(BaseMarker);
     function ScaledCircleMarker(map, geoJson, params) {
@@ -27,7 +27,6 @@ define(function (require) {
 
       // multiplier to reduce size of all circles
       var scaleFactor = 0.6;
-      var radiusScaler = 2.5;
 
       this._markerGroup = L.geoJson(this.geoJson, {
         pointToLayer: function (feature, latlng) {
@@ -39,13 +38,42 @@ define(function (require) {
           self.bindPopup(feature, layer);
         },
         style: function (feature) {
-          return self.applyShadingStyle(feature.properties.value, min, max);
+          var value = _.get(feature, 'properties.value');
+          return self.applyShadingStyle(value, min, max);
         },
         filter: self._filterToMapBounds()
       });
 
       this.addToMap();
     }
+
+    /**
+     * radiusScale returns a number for scaled circle markers
+     * square root of value / max
+     * multiplied by a value based on map zoom
+     * multiplied by a value based on data precision
+     * for relative sizing of markers
+     *
+     * @method radiusScale
+     * @param value {Number}
+     * @param max {Number}
+     * @param zoom {Number}
+     * @param precision {Number}
+     * @return {Number}
+     */
+    ScaledCircleMarker.prototype.radiusScale = function (value, max, zoom, precision) {
+      // exp = 0.5 for square root ratio
+      // exp = 1 for linear ratio
+      var exp = 0.5;
+      var precisionBiasNumerator = 200;
+      var precisionBiasBase = 5;
+      var pct = Math.abs(value) / Math.abs(max);
+      var constantZoomRadius = 0.5 * Math.pow(2, zoom);
+      var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
+
+      return Math.pow(pct, exp) * constantZoomRadius * precisionScale;
+    };
+
 
     return ScaledCircleMarker;
   };

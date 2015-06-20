@@ -3,7 +3,6 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
-    require('leaflet-heat');
     require('leaflet-draw');
 
     var defaultMapZoom = 2;
@@ -19,8 +18,8 @@ define(function (require) {
     };
     var markerTypes = {
       'Scaled Circle Markers': Private(require('components/vislib/visualizations/marker_types/scaled_circles')),
-      // 'Shaded Circle Markers': Private(require('components/vislib/visualizations/marker_types/shaded_circles')),
-      // 'Shaded Geohash Grid': Private(require('components/vislib/visualizations/marker_types/geohash_grid')),
+      'Shaded Circle Markers': Private(require('components/vislib/visualizations/marker_types/shaded_circles')),
+      'Shaded Geohash Grid': Private(require('components/vislib/visualizations/marker_types/geohash_grid')),
       // 'Heatmap': Private(require('components/vislib/visualizations/marker_types/heatmap')),
     };
 

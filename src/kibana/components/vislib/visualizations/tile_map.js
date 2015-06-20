@@ -76,6 +76,7 @@ define(function (require) {
             isDesaturated: self._attr.isDesaturated,
             tooltipFormatter: self.tooltipFormatter,
             valueFormatter: self.valueFormatter,
+            addTooltip: self._attr.addTooltip
           });
 
           // add title for splits
@@ -143,78 +144,6 @@ define(function (require) {
     };
 
     /**
-     * Finds nearest feature in mapData to event latlng
-     *
-     * @method nearestFeature
-     * @param point {Leaflet Object}
-     * @return nearestPoint {Leaflet Object}
-     */
-    TileMap.prototype.nearestFeature = function (point) {
-      var mapData = this.geoJson;
-      var distance = Infinity;
-      var nearest;
-
-      if (point.lng < -180 || point.lng > 180) {
-        return;
-      }
-
-      for (var i = 0; i < mapData.features.length; i++) {
-        var dist = point.distanceTo(mapData.features[i].properties.latLng);
-        if (dist < distance) {
-          distance = dist;
-          nearest = mapData.features[i];
-        }
-      }
-      nearest.properties.eventDistance = distance;
-
-      return nearest;
-    };
-
-    /**
-     * display tooltip if feature is close enough to event latlng
-     *
-     * @method tooltipProximity
-     * @param latlng {Leaflet Object}
-     * @param zoom {Number}
-     * @param feature {geoJson Object}
-     * @param map {Leaflet Object}
-     * @return boolean
-     */
-    TileMap.prototype.tooltipProximity = function (latlng, zoom, feature, map) {
-      if (!feature) return;
-
-      var showTip = false;
-
-      // zoomScale takes map zoom and returns proximity value for tooltip display
-      // domain (input values) is map zoom (min 1 and max 18)
-      // range (output values) is distance in meters
-      // used to compare proximity of event latlng to feature latlng
-      var zoomScale = d3.scale.linear()
-      .domain([1, 4, 7, 10, 13, 16, 18])
-      .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
-
-      var proximity = zoomScale(zoom);
-      var distance = latlng.distanceTo(feature.properties.latLng);
-
-      // maxLngDif is max difference in longitudes
-      // to prevent feature tooltip from appearing 360°
-      // away from event latlng
-      var maxLngDif = 40;
-      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
-
-      if (distance < proximity && lngDif < maxLngDif) {
-        showTip = true;
-      }
-
-      delete feature.properties.eventDistance;
-
-      var testScale = d3.scale.pow().exponent(0.2)
-      .domain([1, 18])
-      .range([1500000, 50]);
-      return showTip;
-    };
-
-    /**
      * Invalidate the size of the map, so that leaflet will resize to fit.
      * then moves to center
      *
@@ -225,62 +154,6 @@ define(function (require) {
       this.maps.forEach(function (map) {
         map.updateSize();
       });
-    };
-
-    /**
-     * retuns data for data for heat map intensity
-     * if heatNormalizeData attribute is checked/true
-     • normalizes data for heat map intensity
-     *
-     * @param mapData {geoJson Object}
-     * @param nax {Number}
-     * @method dataToHeatArray
-     * @return {Array}
-     */
-    TileMap.prototype.dataToHeatArray = function (max) {
-      var self = this;
-      var mapData = this.geoJson;
-
-      return mapData.features.map(function (feature) {
-        var lat = feature.geometry.coordinates[1];
-        var lng = feature.geometry.coordinates[0];
-        var heatIntensity;
-
-        if (!self._attr.heatNormalizeData) {
-          // show bucket value on heatmap
-          heatIntensity = feature.properties.value;
-        } else {
-          // show bucket value normalized to max value
-          heatIntensity = parseInt(feature.properties.value / max * 100);
-        }
-
-        return [lat, lng, heatIntensity];
-      });
-    };
-
-    /**
-     * geohashMinDistance returns a min distance in meters for sizing
-     * circle markers to fit within geohash grid rectangle
-     *
-     * @method geohashMinDistance
-     * @param feature {Object}
-     * @return {Number}
-     */
-    TileMap.prototype.geohashMinDistance = function (feature) {
-      var centerPoint = feature.properties.center;
-      var geohashRect = feature.properties.rectangle;
-
-      // get lat[1] and lng[0] of geohash center point
-      // apply lat to east[2] and lng to north[3] sides of rectangle
-      // to get radius at center of geohash grid recttangle
-      var center = L.latLng([centerPoint[1], centerPoint[0]]);
-      var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
-      var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
-
-      var eastRadius  = Math.floor(center.distanceTo(east));
-      var northRadius = Math.floor(center.distanceTo(north));
-
-      return _.min([eastRadius, northRadius]);
     };
 
     /**

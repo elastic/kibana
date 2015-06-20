@@ -4,6 +4,13 @@ define(function (require) {
     var $ = require('jquery');
     var L = require('leaflet');
 
+    /**
+     * Base map marker overlay, all other markers inherit from this class
+     *
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @param params {Object}
+     */
     function BaseMarker(map, geoJson, params) {
       this.map = map;
       this.geoJson = geoJson;
@@ -98,8 +105,7 @@ define(function (require) {
           if (!L.Browser.ie && !L.Browser.opera) {
             layer.bringToFront();
           }
-          var latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
-          self._showTooltip(feature, latlng);
+          self._showTooltip(feature);
         },
         mouseout: function (e) {
           self._hidePopup();
@@ -168,33 +174,6 @@ define(function (require) {
     };
 
     /**
-     * radiusScale returns a number for scaled circle markers
-     * square root of value / max
-     * multiplied by a value based on map zoom
-     * multiplied by a value based on data precision
-     * for relative sizing of markers
-     *
-     * @method radiusScale
-     * @param value {Number}
-     * @param max {Number}
-     * @param zoom {Number}
-     * @param precision {Number}
-     * @return {Number}
-     */
-    BaseMarker.prototype.radiusScale = function (value, max, zoom, precision) {
-      // exp = 0.5 for square root ratio
-      // exp = 1 for linear ratio
-      var exp = 0.5;
-      var precisionBiasNumerator = 200;
-      var precisionBiasBase = 5;
-      var pct = Math.abs(value) / Math.abs(max);
-      var constantZoomRadius = 0.5 * Math.pow(2, zoom);
-      var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
-
-      return Math.pow(pct, exp) * constantZoomRadius * precisionScale;
-    };
-
-    /**
      * Checks if event latlng is within bounds of mapData
      * features and shows tooltip for that feature
      *
@@ -202,15 +181,14 @@ define(function (require) {
      * @param feature {LeafletFeature}
      * @return undefined
      */
-    BaseMarker.prototype._showTooltip = function (feature) {
+    BaseMarker.prototype._showTooltip = function (feature, latLng) {
       if (!this.map) return;
+      var lat = _.get(feature, 'geometry.coordinates.1');
+      var lng = _.get(feature, 'geometry.coordinates.0');
+      latLng = latLng || L.latLng(lat, lng);
 
       var content = this._tooltipFormatter(feature);
       if (!content) return;
-
-      var lat = feature.geometry.coordinates[1];
-      var lng = feature.geometry.coordinates[0];
-      var latLng = L.latLng(lat, lng);
 
       L.popup({autoPan: false})
        .setLatLng(latLng)

@@ -1,37 +1,73 @@
 define(function (require) {
-  /**
-   * Map overlay: circle markers that are shaded to illustrate values
-   *
-   * @param map {Leaflet Object}
-   * @param mapData {geoJson Object}
-   * @return {Leaflet object} featureLayer
-   */
-  return function (map) {
-    var self = this;
-    var mapData = self.geoJson;
-    // super min and max from all chart data
-    var min = mapData.properties.allmin;
-    var max = mapData.properties.allmax;
+  return function ShadedCircleMarkerFactory(Private) {
+    var _ = require('lodash');
+    var L = require('leaflet');
 
-    // multiplier to reduce size of all circles
-    var scaleFactor = 0.8;
+    var BaseMarker = Private(require('components/vislib/visualizations/marker_types/base_marker'));
 
-    var featureLayer = L.geoJson(mapData, {
-      pointToLayer: function (feature, latlng) {
-        var radius = self.geohashMinDistance(feature) * scaleFactor;
-        return L.circle(latlng, radius);
-      },
-      onEachFeature: function (feature, layer) {
-        self.bindPopup(feature, layer, map);
-      },
-      style: function (feature) {
-        return self.applyShadingStyle(feature, min, max);
-      },
-      filter: self._filterToMapBounds(map)
-    });
+    /**
+     * Map overlay: circle markers that are shaded to illustrate values
+     *
+     * @param map {Leaflet Object}
+     * @param mapData {geoJson Object}
+     * @return {Leaflet object} featureLayer
+     */
+    _.class(ShadedCircleMarker).inherits(BaseMarker);
+    function ShadedCircleMarker(map, geoJson, params) {
+      var self = this;
+      ShadedCircleMarker.Super.apply(this, arguments);
 
-    self.addLegend(map);
+      // super min and max from all chart data
+      var min = this.geoJson.properties.allmin;
+      var max = this.geoJson.properties.allmax;
 
-    return featureLayer;
+      // multiplier to reduce size of all circles
+      var scaleFactor = 0.8;
+
+      this._markerGroup = L.geoJson(this.geoJson, {
+        pointToLayer: function (feature, latlng) {
+          var radius = self.geohashMinDistance(feature) * scaleFactor;
+          return L.circle(latlng, radius);
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer, map);
+        },
+        style: function (feature) {
+          var value = _.get(feature, 'properties.value');
+          return self.applyShadingStyle(value, min, max);
+        },
+        filter: self._filterToMapBounds(map)
+      });
+
+      this.addToMap();
+    }
+
+
+    /**
+     * geohashMinDistance returns a min distance in meters for sizing
+     * circle markers to fit within geohash grid rectangle
+     *
+     * @method geohashMinDistance
+     * @param feature {Object}
+     * @return {Number}
+     */
+    ShadedCircleMarker.prototype.geohashMinDistance = function (feature) {
+      var centerPoint = feature.properties.center;
+      var geohashRect = feature.properties.rectangle;
+
+      // get lat[1] and lng[0] of geohash center point
+      // apply lat to east[2] and lng to north[3] sides of rectangle
+      // to get radius at center of geohash grid recttangle
+      var center = L.latLng([centerPoint[1], centerPoint[0]]);
+      var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
+      var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
+
+      var eastRadius  = Math.floor(center.distanceTo(east));
+      var northRadius = Math.floor(center.distanceTo(north));
+
+      return _.min([eastRadius, northRadius]);
+    };
+
+    return ShadedCircleMarker;
   };
 });
