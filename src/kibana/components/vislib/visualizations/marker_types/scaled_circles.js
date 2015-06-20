@@ -28,23 +28,13 @@ define(function (require) {
       // multiplier to reduce size of all circles
       var scaleFactor = 0.6;
 
-      this._markerGroup = L.geoJson(this.geoJson, {
+      this._createMarkerGroup({
         pointToLayer: function (feature, latlng) {
           var value = feature.properties.value;
           var scaledRadius = self.radiusScale(value, max, zoom, precision) * scaleFactor;
           return L.circleMarker(latlng).setRadius(scaledRadius);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        },
-        style: function (feature) {
-          var value = _.get(feature, 'properties.value');
-          return self.applyShadingStyle(value, min, max);
-        },
-        filter: self._filterToMapBounds()
+        }
       });
-
-      this.addToMap();
     }
 
     /**

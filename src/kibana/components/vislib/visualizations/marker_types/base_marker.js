@@ -147,6 +147,35 @@ define(function (require) {
       }
     };
 
+    BaseMarker.prototype._addToMap = function () {
+      this.map.addLayer(this._markerGroup);
+    };
+
+    /**
+     * Creates leaflet marker group, passing options to L.geoJson
+     *
+     * @method _createMarkerGroup
+     * @param options {Object} Options to pass to L.geoJson
+     */
+    BaseMarker.prototype._createMarkerGroup = function (options) {
+      var self = this;
+      var min = this.geoJson.properties.allmin;
+      var max = this.geoJson.properties.allmax;
+      var defaultOptions = {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        },
+        style: function (feature) {
+          var value = _.get(feature, 'properties.value');
+          return self.applyShadingStyle(value);
+        },
+        filter: self._filterToMapBounds()
+      };
+
+      this._markerGroup = L.geoJson(this.geoJson, _.defaults(defaultOptions, options));
+      this._addToMap();
+    };
+
     /**
      * return whether feature is within map bounds
      *
@@ -165,10 +194,6 @@ define(function (require) {
 
         return mapBounds.intersects(bucketRectBounds);
       };
-    };
-
-    BaseMarker.prototype.addToMap = function () {
-      this.map.addLayer(this._markerGroup);
     };
 
     /**

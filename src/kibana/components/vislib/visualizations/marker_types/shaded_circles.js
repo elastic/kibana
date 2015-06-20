@@ -24,34 +24,24 @@ define(function (require) {
       // multiplier to reduce size of all circles
       var scaleFactor = 0.8;
 
-      this._markerGroup = L.geoJson(this.geoJson, {
+      this._createMarkerGroup({
         pointToLayer: function (feature, latlng) {
-          var radius = self.geohashMinDistance(feature) * scaleFactor;
+          var radius = self._geohashMinDistance(feature) * scaleFactor;
           return L.circle(latlng, radius);
-        },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer, map);
-        },
-        style: function (feature) {
-          var value = _.get(feature, 'properties.value');
-          return self.applyShadingStyle(value, min, max);
-        },
-        filter: self._filterToMapBounds(map)
+        }
       });
 
-      this.addToMap();
     }
 
-
     /**
-     * geohashMinDistance returns a min distance in meters for sizing
+     * _geohashMinDistance returns a min distance in meters for sizing
      * circle markers to fit within geohash grid rectangle
      *
-     * @method geohashMinDistance
+     * @method _geohashMinDistance
      * @param feature {Object}
      * @return {Number}
      */
-    ShadedCircleMarker.prototype.geohashMinDistance = function (feature) {
+    ShadedCircleMarker.prototype._geohashMinDistance = function (feature) {
       var centerPoint = feature.properties.center;
       var geohashRect = feature.properties.rectangle;
 
