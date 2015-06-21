@@ -105,11 +105,11 @@ define(function (require) {
       expect(flat).to.have.property('random', 0.12345);
     });
 
-    it('ignores fields that start with an _ and are not in the metaFields', function () {
+    it('does not ignore fields that start with an _', function () {
       config.set('metaFields', ['_metaKey']);
-      hit.fields._notMetaKey = [100];
+      hit.fields._myUnderscoreField = [100];
       flat = flattenHit(hit);
-      expect(flat).to.not.have.property('_notMetaKey');
+      expect(flat).to.have.property('_myUnderscoreField');
     });
 
     it('includes underscore-prefixed keys that are in the metaFields', function () {
@@ -128,7 +128,7 @@ define(function (require) {
 
       config.set('metaFields', []);
       flat = flattenHit(hit);
-      expect(flat).to.not.have.property('_metaKey');
+      expect(flat).to.have.property('_metaKey');
     });
 
     it('handles fields that are not arrays, like _timestamp', function () {

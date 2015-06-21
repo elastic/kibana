@@ -41,7 +41,6 @@ define(function (require) {
 
       // unwrap computed fields
       _.forOwn(hit.fields, function (val, key) {
-        if (key[0] === '_' && !_.contains(metaFields, key)) return;
         flat[key] = _.isArray(val) && val.length === 1 ? val[0] : val;
       });
 
