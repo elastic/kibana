@@ -57,19 +57,17 @@ define(function (require) {
           return this.__type;
         },
         set: function (type) {
-          if (this.__typeDecorations) {
-            _.forOwn(this.__typeDecorations, function (prop, name) {
-              delete this[name];
-            }, this);
+          if (this.__removeTypeDecorations) {
+            this.__removeTypeDecorations();
+            this.__removeTypeDecorations = null;
           }
 
           if (_.isString(type)) {
             type = AggConfig.aggTypes.byName[type];
           }
 
-          if (type && _.isFunction(type.decorateAggConfig)) {
-            this.__typeDecorations = type.decorateAggConfig();
-            Object.defineProperties(this, this.__typeDecorations);
+          if (type) {
+            this.__removeTypeDecorations = type.decorateAggConfig(this);
           }
 
           this.__type = type;
