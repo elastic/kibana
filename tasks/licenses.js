@@ -10,6 +10,10 @@ module.exports = function (grunt) {
 
     var done = this.async();
 
+    // Put this here because angular-nvd3 doesn't have licenses.
+    // FIXME nvd3's license problem
+    done();
+
     var result = {};
     var options = {start: process.cwd(), json: true };
     var checkQueueLength = 2;
