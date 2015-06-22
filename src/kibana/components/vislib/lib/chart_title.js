@@ -106,18 +106,20 @@ define(function (require) {
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-          .attr('width', function () {
-            if (dataType === 'rows') {
-              return height;
-            }
-            return width;
-          })
-          .attr('height', function () {
-            if (dataType === 'rows') {
-              return width;
-            }
-            return height;
-          })
+            .attr('width', '100%')
+            .attr('height', '100%')
+          //.attr('width', function () {
+          //  if (dataType === 'rows') {
+          //    return height;
+          //  }
+          //  return width;
+          //})
+          //.attr('height', function () {
+          //  if (dataType === 'rows') {
+          //    return width;
+          //  }
+          //  return height;
+          //})
           .append('text')
           .attr('transform', function () {
             if (dataType === 'rows') {
@@ -128,9 +130,10 @@ define(function (require) {
           .attr('text-anchor', 'middle')
           .text(function (d) { return d.label; });
 
+          var truncate = self.truncate(size);
           // truncate long chart titles
           div.selectAll('text')
-          .call(self.truncate(size));
+          .call(truncate);
         });
       };
     };
