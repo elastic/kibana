@@ -1,0 +1,220 @@
+{
+  "title":"CSS box-decoration-break",
+  "description":"Controls whether the box's margins, borders, padding, and other decorations wrap the broken edges of the box fragments (when the box is split by a break (page/column/region/line).",
+  "spec":"http://www.w3.org/TR/css3-break/#break-decoration",
+  "status":"wd",
+  "links":[
+    {
+      "url":"https://developer.mozilla.org/en-US/docs/Web/CSS/box-decoration-break",
+      "title":"MDN article"
+    },
+    {
+      "url":"http://jsbin.com/xojoro/edit?css,output",
+      "title":"Demo of effect on box border"
+    }
+  ],
+  "bugs":[
+    
+  ],
+  "categories":[
+    "CSS3"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "TP":"n"
+    },
+    "firefox":{
+      "2":"n",
+      "3":"n",
+      "3.5":"n",
+      "3.6":"n",
+      "4":"n",
+      "5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "12":"n",
+      "13":"n",
+      "14":"n",
+      "15":"n",
+      "16":"n",
+      "17":"n",
+      "18":"n",
+      "19":"n",
+      "20":"n",
+      "21":"n",
+      "22":"n",
+      "23":"n",
+      "24":"n",
+      "25":"n",
+      "26":"n",
+      "27":"n",
+      "28":"n",
+      "29":"n",
+      "30":"n",
+      "31":"n",
+      "32":"y",
+      "33":"y",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y"
+    },
+    "chrome":{
+      "4":"n",
+      "5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "12":"n",
+      "13":"n",
+      "14":"n",
+      "15":"n",
+      "16":"n",
+      "17":"n",
+      "18":"n",
+      "19":"n",
+      "20":"n",
+      "21":"n",
+      "22":"y x",
+      "23":"y x",
+      "24":"y x",
+      "25":"y x",
+      "26":"y x",
+      "27":"y x",
+      "28":"y x",
+      "29":"y x",
+      "30":"y x",
+      "31":"y x",
+      "32":"y x",
+      "33":"y x",
+      "34":"y x",
+      "35":"y x",
+      "36":"y x",
+      "37":"y x",
+      "38":"y x",
+      "39":"y x",
+      "40":"y x",
+      "41":"y x",
+      "42":"y x",
+      "43":"y x"
+    },
+    "safari":{
+      "3.1":"n",
+      "3.2":"n",
+      "4":"n",
+      "5":"n",
+      "5.1":"n",
+      "6":"n",
+      "6.1":"y x",
+      "7":"y x",
+      "7.1":"y x",
+      "8":"y x"
+    },
+    "opera":{
+      "9":"u",
+      "9.5-9.6":"u",
+      "10.0-10.1":"u",
+      "10.5":"u",
+      "10.6":"u",
+      "11":"y",
+      "11.1":"y",
+      "11.5":"y",
+      "11.6":"y",
+      "12":"y",
+      "12.1":"y",
+      "15":"y x",
+      "16":"y x",
+      "17":"y x",
+      "18":"y x",
+      "19":"y x",
+      "20":"y x",
+      "21":"y x",
+      "22":"y x",
+      "23":"y x",
+      "24":"y x",
+      "25":"y x",
+      "26":"y x",
+      "27":"y x",
+      "28":"y x",
+      "29":"y x"
+    },
+    "ios_saf":{
+      "3.2":"n",
+      "4.0-4.1":"n",
+      "4.2-4.3":"n",
+      "5.0-5.1":"n",
+      "6.0-6.1":"n",
+      "7.0-7.1":"y x",
+      "8":"y x",
+      "8.1":"y x"
+    },
+    "op_mini":{
+      "5.0-8.0":"y"
+    },
+    "android":{
+      "2.1":"n",
+      "2.2":"n",
+      "2.3":"n",
+      "3":"n",
+      "4":"n",
+      "4.1":"n",
+      "4.2-4.3":"n",
+      "4.4":"y x",
+      "4.4.3-4.4.4":"y x",
+      "37":"y x"
+    },
+    "bb":{
+      "7":"u",
+      "10":"y x"
+    },
+    "op_mob":{
+      "10":"u",
+      "11":"y",
+      "11.1":"y",
+      "11.5":"y",
+      "12":"y",
+      "12.1":"y",
+      "24":"y x"
+    },
+    "and_chr":{
+      "40":"y x"
+    },
+    "and_ff":{
+      "33":"y"
+    },
+    "ie_mob":{
+      "10":"n",
+      "11":"n"
+    },
+    "and_uc":{
+      "9.9":"n"
+    }
+  },
+  "notes":"",
+  "notes_by_num":{
+    
+  },
+  "usage_perc_y":71.97,
+  "usage_perc_a":0,
+  "ucprefix":false,
+  "parent":"",
+  "keywords":"box-decoration,box decoration,break",
+  "ie_id":"",
+  "chrome_id":"",
+  "shown":true
+}

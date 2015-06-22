@@ -1,0 +1,245 @@
+{
+  "title":"Drag and Drop",
+  "description":"Method of easily dragging and dropping elements on a page, requiring minimal JavaScript.",
+  "spec":"https://html.spec.whatwg.org/multipage/interaction.html#dnd",
+  "status":"ls",
+  "links":[
+    {
+      "url":"http://html5doctor.com/native-drag-and-drop/",
+      "title":"HTML5 Doctor article"
+    },
+    {
+      "url":"http://nettutsplus.s3.amazonaws.com/64_html5dragdrop/demo/index.html",
+      "title":"Shopping cart demo"
+    },
+    {
+      "url":"http://html5demos.com/drag",
+      "title":"Demo with link blocks"
+    },
+    {
+      "url":"http://docs.webplatform.org/wiki/dom/DragEvent",
+      "title":"WebPlatform Docs"
+    },
+    {
+      "url":"https://github.com/MihaiValentin/setDragImage-IE",
+      "title":"Polyfill for setDragImage in IE"
+    },
+    {
+      "url":"http://blog.teamtreehouse.com/implementing-native-drag-and-drop",
+      "title":"Implementing Native Drag and Drop"
+    }
+  ],
+  "bugs":[
+    {
+      "description":"In Chrome, DataTransfer.addElement is not implemented. There is no other way to implement a draggable object, that updates during the drag due to some other circumstances (e.g. changes color on a valid drop spot), as it is just a static image if addElement is not supported.\r\n"
+    },
+    {
+      "description":"In Firefox, the dragstart event does not fire on button elements. This effectively disables drag and drop for button elements.\r\n"
+    },
+    {
+      "description":"In IE9-10 draggable attribute could be effectively applied for link and image elements. For div and span elements you should call 'element.dragDrop()' to start drag event.\r\n"
+    }
+  ],
+  "categories":[
+    "HTML5"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"a #1",
+      "6":"a #1",
+      "7":"a #1",
+      "8":"a #1",
+      "9":"a #1",
+      "10":"a #2",
+      "11":"a #2",
+      "TP":"a #2"
+    },
+    "firefox":{
+      "2":"p",
+      "3":"p",
+      "3.5":"y",
+      "3.6":"y",
+      "4":"y",
+      "5":"y",
+      "6":"y",
+      "7":"y",
+      "8":"y",
+      "9":"y",
+      "10":"y",
+      "11":"y",
+      "12":"y",
+      "13":"y",
+      "14":"y",
+      "15":"y",
+      "16":"y",
+      "17":"y",
+      "18":"y",
+      "19":"y",
+      "20":"y",
+      "21":"y",
+      "22":"y",
+      "23":"y",
+      "24":"y",
+      "25":"y",
+      "26":"y",
+      "27":"y",
+      "28":"y",
+      "29":"y",
+      "30":"y",
+      "31":"y",
+      "32":"y",
+      "33":"y",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y"
+    },
+    "chrome":{
+      "4":"y",
+      "5":"y",
+      "6":"y",
+      "7":"y",
+      "8":"y",
+      "9":"y",
+      "10":"y",
+      "11":"y",
+      "12":"y",
+      "13":"y",
+      "14":"y",
+      "15":"y",
+      "16":"y",
+      "17":"y",
+      "18":"y",
+      "19":"y",
+      "20":"y",
+      "21":"y",
+      "22":"y",
+      "23":"y",
+      "24":"y",
+      "25":"y",
+      "26":"y",
+      "27":"y",
+      "28":"y",
+      "29":"y",
+      "30":"y",
+      "31":"y",
+      "32":"y",
+      "33":"y",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y",
+      "39":"y",
+      "40":"y",
+      "41":"y",
+      "42":"y",
+      "43":"y"
+    },
+    "safari":{
+      "3.1":"y",
+      "3.2":"y",
+      "4":"y",
+      "5":"y",
+      "5.1":"y",
+      "6":"y",
+      "6.1":"y",
+      "7":"y",
+      "7.1":"y",
+      "8":"y"
+    },
+    "opera":{
+      "9":"p",
+      "9.5-9.6":"p",
+      "10.0-10.1":"p",
+      "10.5":"p",
+      "10.6":"p",
+      "11":"p",
+      "11.1":"p",
+      "11.5":"p",
+      "11.6":"p",
+      "12":"y",
+      "12.1":"y",
+      "15":"y",
+      "16":"y",
+      "17":"y",
+      "18":"y",
+      "19":"y",
+      "20":"y",
+      "21":"y",
+      "22":"y",
+      "23":"y",
+      "24":"y",
+      "25":"y",
+      "26":"y",
+      "27":"y",
+      "28":"y",
+      "29":"y"
+    },
+    "ios_saf":{
+      "3.2":"n",
+      "4.0-4.1":"n",
+      "4.2-4.3":"n",
+      "5.0-5.1":"n",
+      "6.0-6.1":"n",
+      "7.0-7.1":"n",
+      "8":"n",
+      "8.1":"n"
+    },
+    "op_mini":{
+      "5.0-8.0":"n"
+    },
+    "android":{
+      "2.1":"n",
+      "2.2":"n",
+      "2.3":"n",
+      "3":"n",
+      "4":"n",
+      "4.1":"n",
+      "4.2-4.3":"n",
+      "4.4":"n",
+      "4.4.3-4.4.4":"n",
+      "37":"n"
+    },
+    "bb":{
+      "7":"n",
+      "10":"n"
+    },
+    "op_mob":{
+      "10":"p",
+      "11":"p",
+      "11.1":"p",
+      "11.5":"p",
+      "12":"p",
+      "12.1":"y",
+      "24":"n"
+    },
+    "and_chr":{
+      "40":"n"
+    },
+    "and_ff":{
+      "33":"n"
+    },
+    "ie_mob":{
+      "10":"y",
+      "11":"y"
+    },
+    "and_uc":{
+      "9.9":"n"
+    }
+  },
+  "notes":"`dataTransfer.items` only supported by Chrome.\r\n\r\nCurrently no browser supports the `dropzone` attribute.\r\n\r\nFirefox supports any kind of DOM elements for `.setDragImage`. Chrome must have either an `HTMLImageElement` or any kind of DOM elements attached to the DOM and within the viewport of the browser for `.setDragImage`.",
+  "notes_by_num":{
+    "1":"Partial support refers to no support for the `dataTransfer.files` or `.types` objects and limited supported formats for `dataTransfer.setData`/`getData`.",
+    "2":"Partial support refers to not supporting `.setDragImage`"
+  },
+  "usage_perc_y":51.5,
+  "usage_perc_a":14.51,
+  "ucprefix":false,
+  "parent":"",
+  "keywords":"draganddrop",
+  "ie_id":"",
+  "chrome_id":"",
+  "shown":true
+}

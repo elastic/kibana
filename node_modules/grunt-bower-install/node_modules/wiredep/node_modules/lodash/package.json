@@ -1,0 +1,101 @@
+{
+  "name": "lodash",
+  "version": "1.3.1",
+  "description": "A utility library delivering consistency, customization, performance, and extras.",
+  "homepage": "http://lodash.com/",
+  "license": "MIT",
+  "main": "./dist/lodash.js",
+  "keywords": [
+    "browser",
+    "client",
+    "functional",
+    "performance",
+    "server",
+    "speed",
+    "util"
+  ],
+  "author": {
+    "name": "John-David Dalton",
+    "email": "john.david.dalton@gmail.com",
+    "url": "http://allyoucanleet.com/"
+  },
+  "contributors": [
+    {
+      "name": "John-David Dalton",
+      "email": "john.david.dalton@gmail.com",
+      "url": "http://allyoucanleet.com/"
+    },
+    {
+      "name": "Blaine Bublitz",
+      "email": "blaine@iceddev.com",
+      "url": "http://iceddev.com/"
+    },
+    {
+      "name": "Kit Cambridge",
+      "email": "github@kitcambridge.be",
+      "url": "http://kitcambridge.be/"
+    },
+    {
+      "name": "Mathias Bynens",
+      "email": "mathias@qiwi.be",
+      "url": "http://mathiasbynens.be/"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/lodash/lodash/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lodash/lodash.git"
+  },
+  "engines": [
+    "node",
+    "rhino"
+  ],
+  "jam": {
+    "main": "./dist/lodash.compat.js"
+  },
+  "volo": {
+    "type": "directory",
+    "ignore": [
+      ".*",
+      "*.custom.*",
+      "*.min.*",
+      "*.template.*",
+      "*.d.ts",
+      "*.map",
+      "*.md",
+      "*.txt",
+      "lodash.js",
+      "index.js",
+      "bower.json",
+      "component.json",
+      "doc",
+      "modularize",
+      "node_modules",
+      "perf",
+      "test",
+      "vendor"
+    ]
+  },
+  "_id": "lodash@1.3.1",
+  "dist": {
+    "shasum": "a4663b53686b895ff074e2ba504dfb76a8e2b770",
+    "tarball": "http://registry.npmjs.org/lodash/-/lodash-1.3.1.tgz"
+  },
+  "_from": "lodash@>=1.3.0 <1.4.0",
+  "_npmVersion": "1.3.8",
+  "_npmUser": {
+    "name": "jdalton",
+    "email": "john.david.dalton@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "jdalton",
+      "email": "john.david.dalton@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "a4663b53686b895ff074e2ba504dfb76a8e2b770",
+  "_resolved": "https://registry.npmjs.org/lodash/-/lodash-1.3.1.tgz"
+}

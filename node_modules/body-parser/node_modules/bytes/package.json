@@ -1,0 +1,50 @@
+{
+  "name": "bytes",
+  "author": {
+    "name": "TJ Holowaychuk",
+    "email": "tj@vision-media.ca",
+    "url": "http://tjholowaychuk.com"
+  },
+  "description": "byte size string parser / serializer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visionmedia/bytes.js.git"
+  },
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "component": {
+    "scripts": {
+      "bytes/index.js": "index.js"
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/visionmedia/bytes.js/issues"
+  },
+  "homepage": "https://github.com/visionmedia/bytes.js",
+  "_id": "bytes@1.0.0",
+  "dist": {
+    "shasum": "3569ede8ba34315fab99c3e92cb04c7220de1fa8",
+    "tarball": "http://registry.npmjs.org/bytes/-/bytes-1.0.0.tgz"
+  },
+  "_from": "bytes@1.0.0",
+  "_npmVersion": "1.4.3",
+  "_npmUser": {
+    "name": "tjholowaychuk",
+    "email": "tj@vision-media.ca"
+  },
+  "maintainers": [
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    }
+  ],
+  "directories": {},
+  "_shasum": "3569ede8ba34315fab99c3e92cb04c7220de1fa8",
+  "_resolved": "https://registry.npmjs.org/bytes/-/bytes-1.0.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

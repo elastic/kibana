@@ -1,0 +1,40 @@
+<div class="header">
+  <h1 class="text-muted">
+    <div class="preloader" ng-class="running ? 'running' : 'paused'"></div>
+    Timesheet
+    <small>
+      Functional time series composer for Elasticsearch
+      <small>
+        <span class="fa-stack new-sheet" ng-click="newSheet()">
+          <i class="fa fa-file-o fa-stack-2x"></i>
+          <i class="fa fa-plus fa-stack-1x"></i>
+        </span>
+      </small>
+    </small>
+  </h1>
+</div>
+
+<form>
+  <div class="form-group function-form" ng-submit="search()">
+    <input type="text"
+      class="form-control top-agg-input"
+      ng-model="input.expressions[input.row][input.column]"
+      id="search"
+      placeholder="Enter Expression">
+    <button style="display:none"
+      type="submit"
+      ng-click="search()">Run</button>
+  </div>
+</form>
+
+
+<div class="row" ng-repeat="row in input.expressions track by $index">
+  <div class="chart-container col-md-4"
+    ng-repeat="column in row track by $index"
+    ng-click="setActiveCell($parent.$index, $index)"
+    ng-class="{active: $parent.$index === input.row && $index === input.column, running: running}"
+    >
+    <div class="cell-id">{{getCellId($parent.$index, $index)}}</div>
+    <div chart="sheet[$parent.$index][$index]" cell="[$parent.$index, $index]"></div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+{
+  "name": "scmp",
+  "version": "1.0.0",
+  "description": "safe, constant-time string-comparison",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "posttest": "matcha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/freewil/scmp.git"
+  },
+  "keywords": [
+    "safe-compare",
+    "compare",
+    "time-equivalent-comparison",
+    "time equivalent",
+    "constant-time",
+    "constant time"
+  ],
+  "author": {
+    "name": "Sean Lavine"
+  },
+  "license": "BSD",
+  "devDependencies": {
+    "mocha": "~1.13.0",
+    "matcha": "~0.4.0"
+  },
+  "gitHead": "c8c37d3daed05ea20a761694680b13cb998c0557",
+  "bugs": {
+    "url": "https://github.com/freewil/scmp/issues"
+  },
+  "homepage": "https://github.com/freewil/scmp",
+  "_id": "scmp@1.0.0",
+  "_shasum": "a0b272c3fc7292f77115646f00618b0262514e04",
+  "_from": "scmp@1.0.0",
+  "_npmVersion": "1.4.27",
+  "_npmUser": {
+    "name": "freewil",
+    "email": "sean@eternalrise.com"
+  },
+  "maintainers": [
+    {
+      "name": "freewil",
+      "email": "sean@eternalrise.com"
+    }
+  ],
+  "dist": {
+    "shasum": "a0b272c3fc7292f77115646f00618b0262514e04",
+    "tarball": "http://registry.npmjs.org/scmp/-/scmp-1.0.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/scmp/-/scmp-1.0.0.tgz"
+}

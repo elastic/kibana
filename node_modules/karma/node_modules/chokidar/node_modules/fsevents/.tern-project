@@ -1,0 +1,8 @@
+{
+  "libs": [
+    "ecma5"
+  ],
+  "plugins": {
+    "node": {}
+  }
+}

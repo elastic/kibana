@@ -1,0 +1,80 @@
+{
+  "name": "grunt-karma",
+  "version": "0.8.3",
+  "description": "grunt plugin for karma test runner",
+  "main": "tasks/grunt-karma.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karma-runner/grunt-karma.git"
+  },
+  "keywords": [
+    "gruntplugin",
+    "karma",
+    "grunt",
+    "test",
+    "unit",
+    "runner",
+    "TDD"
+  ],
+  "scripts": {
+    "test": "grunt test"
+  },
+  "author": {
+    "name": "Dave Geddes"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "~2.4.1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.3",
+    "expect.js": "~0.2.0",
+    "grunt-release": "~0.5.1",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt-conventional-changelog": "~0.0.12",
+    "karma-mocha": "~0.1.3",
+    "karma": "~0.12.0",
+    "karma-firefox-launcher": "~0.1.3",
+    "karma-chrome-launcher": "~0.1.2"
+  },
+  "peerDependencies": {
+    "grunt": "0.4.x",
+    "karma": "~0.12.0"
+  },
+  "bugs": {
+    "url": "https://github.com/karma-runner/grunt-karma/issues"
+  },
+  "homepage": "https://github.com/karma-runner/grunt-karma",
+  "_id": "grunt-karma@0.8.3",
+  "dist": {
+    "shasum": "e9ecf718153af1914aa53602a37f85de04310e7f",
+    "tarball": "http://registry.npmjs.org/grunt-karma/-/grunt-karma-0.8.3.tgz"
+  },
+  "_from": "grunt-karma@>=0.8.3 <0.9.0",
+  "_npmVersion": "1.4.6",
+  "_npmUser": {
+    "name": "dignifiedquire",
+    "email": "dignifiedquire@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "geddski",
+      "email": "heygeddski@gmail.com"
+    },
+    {
+      "name": "dignifiedquire",
+      "email": "dignifiedquire@gmail.com"
+    },
+    {
+      "name": "vojtajina",
+      "email": "vojta.jina@gmail.com"
+    },
+    {
+      "name": "karmarunnerbot",
+      "email": "karmarunnerbot@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "e9ecf718153af1914aa53602a37f85de04310e7f",
+  "_resolved": "https://registry.npmjs.org/grunt-karma/-/grunt-karma-0.8.3.tgz"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "requirejs",
+  "version": "2.1.16",
+  "homepage": "http://requirejs.org",
+  "authors": [
+    "jrburke.com"
+  ],
+  "description": "A file and module loader for JavaScript",
+  "main": "require.js",
+  "keywords": [
+    "AMD"
+  ],
+  "license": "new BSD, and MIT"
+}

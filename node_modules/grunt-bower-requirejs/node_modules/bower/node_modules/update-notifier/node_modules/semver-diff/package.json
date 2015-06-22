@@ -1,0 +1,61 @@
+{
+  "name": "semver-diff",
+  "version": "0.1.0",
+  "description": "Get the diff type of two semver versions: 0.0.1 0.0.2 → patch",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sindresorhus/semver-diff"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "semver",
+    "version",
+    "semantic",
+    "diff",
+    "difference"
+  ],
+  "dependencies": {
+    "semver": "^2.2.1"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "bugs": {
+    "url": "https://github.com/sindresorhus/semver-diff/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/semver-diff",
+  "_id": "semver-diff@0.1.0",
+  "_shasum": "4f6057ca3eba23cc484b51f64aaf88b131a3855d",
+  "_from": "semver-diff@>=0.1.0 <0.2.0",
+  "_npmVersion": "1.4.9",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "4f6057ca3eba23cc484b51f64aaf88b131a3855d",
+    "tarball": "http://registry.npmjs.org/semver-diff/-/semver-diff-0.1.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/semver-diff/-/semver-diff-0.1.0.tgz"
+}

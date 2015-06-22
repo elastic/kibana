@@ -1,0 +1,43 @@
+{
+  "name": "angular-motion",
+  "description": "AngularMotion - Fancy CSS3 animations for AngularJS 1.2+",
+  "version": "0.3.2",
+  "keywords": [
+    "angular",
+    "animation"
+  ],
+  "homepage": "https://github.com/mgcrea/angular-motion",
+  "bugs": "https://github.com/mgcrea/angular-motion/issues",
+  "author": {
+    "name": "Olivier Louvignes",
+    "email": "olivier@mg-crea.com",
+    "url": "https://github.com/mgcrea"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mgcrea/angular-motion.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "main": [
+    "dist/angular-motion.css"
+  ],
+  "ignore": [
+    "docs",
+    "test",
+    "CONTRIBUTING.md"
+  ],
+  "dependencies": {
+    "angular": "^1.2",
+    "angular-animate": "^1.2"
+  },
+  "devDependencies": {
+    "bootstrap": "^3.0",
+    "angular-mocks": "^1.2",
+    "angular-strap": "^2.0",
+    "fastclick": "~1.0.3"
+  }
+}

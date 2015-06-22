@@ -1,0 +1,75 @@
+{
+  "name": "grunt-legacy-log",
+  "description": "The Grunt 0.4.x logger.",
+  "version": "0.1.1",
+  "author": {
+    "name": "\"Cowboy\" Ben Alman",
+    "url": "http://benalman.com/"
+  },
+  "homepage": "http://gruntjs.com/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gruntjs/grunt-legacy-log.git"
+  },
+  "bugs": {
+    "url": "http://github.com/gruntjs/grunt-legacy-log/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/gruntjs/grunt-legacy-log/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "keywords": [
+    "grunt",
+    "legacy"
+  ],
+  "dependencies": {
+    "hooker": "~0.2.3",
+    "lodash": "~2.4.1",
+    "underscore.string": "~2.3.3",
+    "colors": "~0.6.2"
+  },
+  "devDependencies": {
+    "grunt": "0.4.4",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-nodeunit": "~0.3.3",
+    "grunt-contrib-watch": "~0.6.1",
+    "hooker": "~0.2.3"
+  },
+  "_id": "grunt-legacy-log@0.1.1",
+  "dist": {
+    "shasum": "d41f1a6abc9b0b1256a2b5ff02f4c3298dfcd57a",
+    "tarball": "http://registry.npmjs.org/grunt-legacy-log/-/grunt-legacy-log-0.1.1.tgz"
+  },
+  "_from": "grunt-legacy-log@>=0.1.0 <0.2.0",
+  "_npmVersion": "1.4.4",
+  "_npmUser": {
+    "name": "cowboy",
+    "email": "cowboy@rj3.net"
+  },
+  "maintainers": [
+    {
+      "name": "cowboy",
+      "email": "cowboy@rj3.net"
+    },
+    {
+      "name": "tkellen",
+      "email": "tyler@sleekcode.net"
+    },
+    {
+      "name": "vladikoff",
+      "email": "vlad@vladikoff.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "d41f1a6abc9b0b1256a2b5ff02f4c3298dfcd57a",
+  "_resolved": "https://registry.npmjs.org/grunt-legacy-log/-/grunt-legacy-log-0.1.1.tgz"
+}

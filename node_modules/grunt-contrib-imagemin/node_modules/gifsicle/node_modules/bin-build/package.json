@@ -1,0 +1,61 @@
+{
+  "name": "bin-build",
+  "version": "0.1.1",
+  "description": "Easily build binaries",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kevva/bin-build"
+  },
+  "author": {
+    "name": "Kevin Mårtensson",
+    "email": "kevinmartensson@gmail.com",
+    "url": "https://github.com/kevva"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha --reporter list --timeout 0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "binary",
+    "build",
+    "make"
+  ],
+  "dependencies": {
+    "download": "^0.1.16",
+    "rimraf": "^2.2.6",
+    "tempfile": "^0.1.3"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2"
+  },
+  "bugs": {
+    "url": "https://github.com/kevva/bin-build/issues"
+  },
+  "homepage": "https://github.com/kevva/bin-build",
+  "_id": "bin-build@0.1.1",
+  "_shasum": "d337b34f1040529f9fea9b2a3e2a4a0fda2d3df4",
+  "_from": "bin-build@>=0.1.0 <0.2.0",
+  "_npmVersion": "1.4.7",
+  "_npmUser": {
+    "name": "kevva",
+    "email": "kevinmartensson@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "kevva",
+      "email": "kevinmartensson@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "d337b34f1040529f9fea9b2a3e2a4a0fda2d3df4",
+    "tarball": "http://registry.npmjs.org/bin-build/-/bin-build-0.1.1.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/bin-build/-/bin-build-0.1.1.tgz"
+}

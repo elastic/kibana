@@ -1,0 +1,53 @@
+{
+  "name": "angular-strap",
+  "description": "AngularStrap - AngularJS directives for Bootstrap",
+  "version": "2.1.6",
+  "keywords": [
+    "angular",
+    "bootstrap"
+  ],
+  "homepage": "http://mgcrea.github.io/angular-strap",
+  "bugs": "https://github.com/mgcrea/angular-strap/issues",
+  "author": {
+    "name": "Olivier Louvignes",
+    "email": "olivier@mg-crea.com",
+    "url": "https://github.com/mgcrea"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mgcrea/angular-strap.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mgcrea/angular-strap/blob/master/LICENSE.md"
+    }
+  ],
+  "main": [
+    "dist/angular-strap.js",
+    "dist/angular-strap.tpl.js"
+  ],
+  "ignore": [
+    "docs",
+    "test",
+    "CONTRIBUTING.md"
+  ],
+  "dependencies": {
+    "angular": "^1.2.21",
+    "bootstrap": "^3.2.0",
+    "angular-motion": "^0.3.3"
+  },
+  "devDependencies": {
+    "angular-animate": "^1.2.21",
+    "angular-i18n": "^1.2.21",
+    "angular-mocks": "^1.2.21",
+    "angular-route": "^1.2.21",
+    "angular-sanitize": "^1.2.21",
+    "angular-scenario": "^1.2.21",
+    "highlightjs": "^8.0.0",
+    "jquery": "^2.1.1",
+    "font-awesome": "^4.1.0",
+    "fastclick": "^1.0.3",
+    "bootstrap-additions": "~0.2.3"
+  }
+}

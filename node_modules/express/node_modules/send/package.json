@@ -1,0 +1,85 @@
+{
+  "name": "send",
+  "description": "Better streaming static file server with Range and conditional-GET support",
+  "version": "0.11.1",
+  "author": {
+    "name": "TJ Holowaychuk",
+    "email": "tj@vision-media.ca"
+  },
+  "contributors": [
+    {
+      "name": "Douglas Christopher Wilson",
+      "email": "doug@somethingdoug.com"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tj/send"
+  },
+  "keywords": [
+    "static",
+    "file",
+    "server"
+  ],
+  "dependencies": {
+    "debug": "~2.1.1",
+    "depd": "~1.0.0",
+    "destroy": "1.0.3",
+    "escape-html": "1.0.1",
+    "etag": "~1.5.1",
+    "fresh": "0.2.4",
+    "mime": "1.2.11",
+    "ms": "0.7.0",
+    "on-finished": "~2.2.0",
+    "range-parser": "~1.0.2"
+  },
+  "devDependencies": {
+    "after": "0.8.1",
+    "istanbul": "0.3.5",
+    "mocha": "~2.1.0",
+    "supertest": "~0.15.0"
+  },
+  "files": [
+    "History.md",
+    "LICENSE",
+    "index.js"
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "mocha --check-leaks --reporter spec --bail",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --check-leaks --reporter dot",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --check-leaks --reporter spec"
+  },
+  "gitHead": "1e18c059e94879ededcea3d58f52eec6791560ee",
+  "bugs": {
+    "url": "https://github.com/tj/send/issues"
+  },
+  "homepage": "https://github.com/tj/send",
+  "_id": "send@0.11.1",
+  "_shasum": "1beabfd42f9e2709f99028af3078ac12b47092d5",
+  "_from": "send@0.11.1",
+  "_npmVersion": "1.4.28",
+  "_npmUser": {
+    "name": "dougwilson",
+    "email": "doug@somethingdoug.com"
+  },
+  "maintainers": [
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    },
+    {
+      "name": "dougwilson",
+      "email": "doug@somethingdoug.com"
+    }
+  ],
+  "dist": {
+    "shasum": "1beabfd42f9e2709f99028af3078ac12b47092d5",
+    "tarball": "http://registry.npmjs.org/send/-/send-0.11.1.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/send/-/send-0.11.1.tgz"
+}

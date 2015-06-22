@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "0.10"
+
+before_script:
+  - export DISPLAY=:99.0
+  - export PHANTOMJS_BIN=/usr/local/phantomjs/bin/phantomjs
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
+  - npm install -gq grunt-cli bower coveralls
+  - bower install --dev
+  - date --rfc-2822
+
+script:
+  - grunt jshint test build

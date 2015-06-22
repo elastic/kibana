@@ -1,0 +1,43 @@
+{
+  "name": "semver",
+  "version": "1.1.4",
+  "description": "The semantic version parser used by npm.",
+  "main": "semver.js",
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "devDependencies": {
+    "tap": "0.x >=0.0.4"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/isaacs/semver/raw/master/LICENSE"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/isaacs/node-semver.git"
+  },
+  "bin": {
+    "semver": "./bin/semver"
+  },
+  "_id": "semver@1.1.4",
+  "dist": {
+    "shasum": "2e5a4e72bab03472cc97f72753b4508912ef5540",
+    "tarball": "http://registry.npmjs.org/semver/-/semver-1.1.4.tgz"
+  },
+  "_from": "semver@>=1.1.4 <1.2.0",
+  "_npmVersion": "1.2.12",
+  "_npmUser": {
+    "name": "isaacs",
+    "email": "i@izs.me"
+  },
+  "maintainers": [
+    {
+      "name": "isaacs",
+      "email": "i@izs.me"
+    }
+  ],
+  "directories": {},
+  "_shasum": "2e5a4e72bab03472cc97f72753b4508912ef5540",
+  "_resolved": "https://registry.npmjs.org/semver/-/semver-1.1.4.tgz"
+}

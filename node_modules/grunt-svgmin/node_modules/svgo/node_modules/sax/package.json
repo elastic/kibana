@@ -1,0 +1,81 @@
+{
+  "name": "sax",
+  "description": "An evented streaming XML parser in JavaScript",
+  "author": {
+    "name": "Isaac Z. Schlueter",
+    "email": "i@izs.me",
+    "url": "http://blog.izs.me/"
+  },
+  "version": "0.5.8",
+  "main": "lib/sax.js",
+  "license": "BSD",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/isaacs/sax-js.git"
+  },
+  "contributors": [
+    {
+      "name": "Isaac Z. Schlueter",
+      "email": "i@izs.me"
+    },
+    {
+      "name": "Stein Martin Hustad",
+      "email": "stein@hustad.com"
+    },
+    {
+      "name": "Mikeal Rogers",
+      "email": "mikeal.rogers@gmail.com"
+    },
+    {
+      "name": "Laurie Harper",
+      "email": "laurie@holoweb.net"
+    },
+    {
+      "name": "Jann Horn",
+      "email": "jann@Jann-PC.fritz.box"
+    },
+    {
+      "name": "Elijah Insua",
+      "email": "tmpvar@gmail.com"
+    },
+    {
+      "name": "Henry Rawas",
+      "email": "henryr@schakra.com"
+    },
+    {
+      "name": "Justin Makeig",
+      "email": "jmpublic@makeig.com"
+    },
+    {
+      "name": "Mike Schilling",
+      "email": "mike@emotive.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/isaacs/sax-js/issues"
+  },
+  "homepage": "https://github.com/isaacs/sax-js",
+  "_id": "sax@0.5.8",
+  "dist": {
+    "shasum": "d472db228eb331c2506b0e8c15524adb939d12c1",
+    "tarball": "http://registry.npmjs.org/sax/-/sax-0.5.8.tgz"
+  },
+  "_from": "sax@>=0.5.0 <0.6.0",
+  "_npmVersion": "1.3.15",
+  "_npmUser": {
+    "name": "isaacs",
+    "email": "i@izs.me"
+  },
+  "maintainers": [
+    {
+      "name": "isaacs",
+      "email": "i@izs.me"
+    }
+  ],
+  "directories": {},
+  "_shasum": "d472db228eb331c2506b0e8c15524adb939d12c1",
+  "_resolved": "https://registry.npmjs.org/sax/-/sax-0.5.8.tgz"
+}

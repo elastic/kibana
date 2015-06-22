@@ -1,0 +1,32 @@
+{
+  "name": "pause",
+  "version": "0.0.1",
+  "description": "Pause streams...",
+  "keywords": [],
+  "author": {
+    "name": "TJ Holowaychuk",
+    "email": "tj@vision-media.ca"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "main": "index",
+  "_id": "pause@0.0.1",
+  "dist": {
+    "shasum": "1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d",
+    "tarball": "http://registry.npmjs.org/pause/-/pause-0.0.1.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    }
+  ],
+  "directories": {},
+  "_shasum": "1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d",
+  "_resolved": "https://registry.npmjs.org/pause/-/pause-0.0.1.tgz",
+  "_from": "pause@0.0.1",
+  "readme": "ERROR: No README data found!"
+}

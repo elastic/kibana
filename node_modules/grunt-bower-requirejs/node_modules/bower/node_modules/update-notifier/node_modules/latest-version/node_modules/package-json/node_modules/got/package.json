@@ -1,0 +1,66 @@
+{
+  "name": "got",
+  "version": "0.3.0",
+  "description": "Simplified HTTP/HTTPS requests",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sindresorhus/got"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "http",
+    "https",
+    "get",
+    "got",
+    "url",
+    "uri",
+    "request",
+    "util",
+    "utility",
+    "simple"
+  ],
+  "dependencies": {
+    "object-assign": "^0.3.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "bugs": {
+    "url": "https://github.com/sindresorhus/got/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/got",
+  "_id": "got@0.3.0",
+  "_shasum": "888ec66ca4bc735ab089dbe959496d0f79485493",
+  "_from": "got@>=0.3.0 <0.4.0",
+  "_npmVersion": "1.4.9",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "888ec66ca4bc735ab089dbe959496d0f79485493",
+    "tarball": "http://registry.npmjs.org/got/-/got-0.3.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/got/-/got-0.3.0.tgz"
+}

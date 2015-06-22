@@ -1,0 +1,184 @@
+
+// Slide
+//
+
+@slide-duration: .3s;
+@slide-timing-function: ease-in-out;
+
+.am-slide-top {
+
+  animation-duration: @slide-duration;
+  animation-timing-function: @slide-timing-function;
+  animation-fill-mode: backwards;
+
+  &.am-slide-top-add, &.ng-hide-remove, &.ng-move {
+    animation-name: slideFromTop;
+  }
+  &.am-slide-top-remove, &.ng-hide {
+    animation-name: slideToTop;
+  }
+
+  &.ng-enter {
+    visibility: hidden;
+    animation-name: slideFromTop;
+    animation-play-state: paused;
+    &.ng-enter-active {
+      visibility: visible;
+      animation-play-state: running;
+    }
+  }
+  &.ng-leave {
+    animation-name: slideToTop;
+    animation-play-state: paused;
+    &.ng-leave-active {
+      animation-play-state: running;
+    }
+  }
+
+}
+
+.am-slide-right {
+
+  animation-duration: @slide-duration;
+  animation-timing-function: @slide-timing-function;
+  animation-fill-mode: backwards;
+
+  &.am-slide-right-add, &.ng-hide-remove, &.ng-move {
+    animation-name: slideFromRight;
+  }
+  &.am-slide-right-remove, &.ng-hide {
+    animation-name: slideToRight;
+  }
+
+  &.ng-enter {
+    visibility: hidden;
+    animation-name: slideFromRight;
+    animation-play-state: paused;
+    &.ng-enter-active {
+      visibility: visible;
+      animation-play-state: running;
+    }
+  }
+  &.ng-leave {
+    animation-name: slideToRight;
+    animation-play-state: paused;
+    &.ng-leave-active {
+      animation-play-state: running;
+    }
+  }
+
+}
+
+.am-slide-bottom {
+
+  animation-duration: @slide-duration;
+  animation-timing-function: @slide-timing-function;
+  animation-fill-mode: backwards;
+
+  &.am-slide-bottom-add, &.ng-hide-remove, &.ng-move {
+    animation-name: slideFromBottom;
+  }
+  &.am-slide-bottom-remove, &.ng-hide {
+    animation-name: slideToBottom;
+  }
+
+  &.ng-enter {
+    visibility: hidden;
+    animation-name: slideFromBottom;
+    animation-play-state: paused;
+    &.ng-enter-active {
+      visibility: visible;
+      animation-play-state: running;
+    }
+  }
+  &.ng-leave {
+    animation-name: slideToBottom;
+    animation-play-state: paused;
+    &.ng-leave-active {
+      animation-play-state: running;
+    }
+  }
+
+}
+
+.am-slide-left {
+
+  animation-duration: @slide-duration;
+  animation-timing-function: @slide-timing-function;
+  animation-fill-mode: backwards;
+
+  &.am-slide-left-add, &.ng-hide-remove, &.ng-move {
+    animation-name: slideFromLeft;
+  }
+  &.am-slide-left-remove, &.ng-hide {
+    animation-name: slideToLeft;
+  }
+
+  &.ng-enter {
+    visibility: hidden;
+    animation-name: slideFromLeft;
+    animation-play-state: paused;
+    &.ng-enter-active {
+      visibility: visible;
+      animation-play-state: running;
+    }
+  }
+  &.ng-leave {
+    animation-name: slideToLeft;
+    animation-play-state: paused;
+    &.ng-leave-active {
+      animation-play-state: running;
+    }
+  }
+
+}
+
+
+// Keyframes
+//
+
+@keyframes slideFromTop {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slideToTop {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slideFromRight {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes slideToRight {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideFromBottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes slideToBottom {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@keyframes slideToLeft {
+  to {
+    transform: translateX(-100%);
+  }
+}

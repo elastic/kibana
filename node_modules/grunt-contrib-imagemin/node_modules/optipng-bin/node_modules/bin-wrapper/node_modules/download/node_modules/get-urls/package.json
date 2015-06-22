@@ -1,0 +1,70 @@
+{
+  "name": "get-urls",
+  "version": "0.1.2",
+  "description": "Get all urls in a string",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sindresorhus/get-urls"
+  },
+  "main": "get-urls.js",
+  "bin": {
+    "get-urls": "cli.js"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "get-urls.js",
+    "cli.js"
+  ],
+  "keywords": [
+    "urls",
+    "url",
+    "uri",
+    "get",
+    "extract",
+    "find",
+    "scrape",
+    "text",
+    "string",
+    "bin",
+    "cli",
+    "browser"
+  ],
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "bugs": {
+    "url": "https://github.com/sindresorhus/get-urls/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/get-urls",
+  "_id": "get-urls@0.1.2",
+  "dist": {
+    "shasum": "92a3e5ce2b9af2d2764ff5198681db373227b844",
+    "tarball": "http://registry.npmjs.org/get-urls/-/get-urls-0.1.2.tgz"
+  },
+  "_from": "get-urls@>=0.1.1 <0.2.0",
+  "_npmVersion": "1.4.6",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "92a3e5ce2b9af2d2764ff5198681db373227b844",
+  "_resolved": "https://registry.npmjs.org/get-urls/-/get-urls-0.1.2.tgz"
+}

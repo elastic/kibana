@@ -1,0 +1,93 @@
+
+// Fade
+//
+
+@fade-duration: .3s;
+@fade-timing-function: linear;
+
+.am-fade {
+
+  animation-duration: @fade-duration;
+  animation-timing-function: @fade-timing-function;
+  animation-fill-mode: backwards;
+  opacity: 1;
+
+  &.am-fade-add, &.ng-hide-remove, &.ng-move  {
+    animation-name: fadeIn;
+  }
+  &.am-fade-remove, &.ng-hide {
+    animation-name: fadeOut;
+  }
+
+  &.ng-enter {
+    visibility: hidden;
+    animation-name: fadeIn;
+    animation-play-state: paused;
+    &.ng-enter-active {
+      visibility: visible;
+      animation-play-state: running;
+    }
+  }
+  &.ng-leave {
+    animation-name: fadeOut;
+    animation-play-state: paused;
+    &.ng-leave-active {
+      animation-play-state: running;
+    }
+  }
+
+}
+
+
+// Keyframes
+//
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// Bootstrap 3
+//
+
+.tab-pane {
+
+  &.am-fade {
+
+    &.active-remove {
+      display: none !important;
+    }
+    &.active-add {
+      animation-name: fadeIn;
+    }
+
+  }
+
+}
+
+.modal-backdrop, .aside-backdrop {
+
+  &.am-fade {
+
+    background: rgba(0, 0, 0, .5);
+    animation-duration: @fade-duration / 2;
+    &.ng-leave {
+      animation-delay: @fade-duration;
+    }
+
+  }
+
+}

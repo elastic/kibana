@@ -1,0 +1,68 @@
+{
+  "name": "autoprefixer-core",
+  "version": "3.1.2",
+  "description": "CLI-less core of Autoprefixer to use in plugins",
+  "keywords": [
+    "autoprefixer",
+    "css",
+    "prefix",
+    "postprocessor",
+    "postcss"
+  ],
+  "author": {
+    "name": "Andrey Sitnik",
+    "email": "andrey@sitnik.ru"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/postcss/autoprefixer-core.git"
+  },
+  "dependencies": {
+    "caniuse-db": "^1.0.30000006",
+    "postcss": "~2.2.5"
+  },
+  "devDependencies": {
+    "vinyl-source-stream": "1.0.0",
+    "gulp-json-editor": "2.1.0",
+    "jshint-stylish": "1.0.0",
+    "gulp-replace": "0.4.0",
+    "gulp-jshint": "1.8.5",
+    "gulp-coffee": "2.2.0",
+    "gulp-mocha": "1.1.1",
+    "browserify": "6.1.0",
+    "fs-extra": "0.12.0",
+    "should": "4.0.4",
+    "mocha": "1.21.5",
+    "gulp": "3.8.8",
+    "coffee-script": "1.8.0"
+  },
+  "scripts": {
+    "test": "gulp"
+  },
+  "main": "lib/autoprefixer",
+  "bugs": {
+    "url": "https://github.com/postcss/autoprefixer-core/issues"
+  },
+  "homepage": "https://github.com/postcss/autoprefixer-core",
+  "_id": "autoprefixer-core@3.1.2",
+  "_shasum": "ade5ce9e2d9d71bb7ffc31d696fa5e87aebeb634",
+  "_from": "autoprefixer-core@>=3.0.0 <4.0.0",
+  "_npmVersion": "2.0.0",
+  "_npmUser": {
+    "name": "ai",
+    "email": "andrey@sitnik.ru"
+  },
+  "maintainers": [
+    {
+      "name": "ai",
+      "email": "andrey@sitnik.ru"
+    }
+  ],
+  "dist": {
+    "shasum": "ade5ce9e2d9d71bb7ffc31d696fa5e87aebeb634",
+    "tarball": "http://registry.npmjs.org/autoprefixer-core/-/autoprefixer-core-3.1.2.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/autoprefixer-core/-/autoprefixer-core-3.1.2.tgz"
+}

@@ -1,0 +1,40 @@
+{
+  "name": "cookie-signature",
+  "version": "1.0.1",
+  "description": "Sign and unsign cookies",
+  "keywords": [
+    "cookie",
+    "sign",
+    "unsign"
+  ],
+  "author": {
+    "name": "TJ Holowaychuk",
+    "email": "tj@learnboost.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "main": "index",
+  "_id": "cookie-signature@1.0.1",
+  "dist": {
+    "shasum": "44e072148af01e6e8e24afbf12690d68ae698ecb",
+    "tarball": "http://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.1.tgz"
+  },
+  "_from": "cookie-signature@1.0.1",
+  "_npmVersion": "1.2.14",
+  "_npmUser": {
+    "name": "tjholowaychuk",
+    "email": "tj@vision-media.ca"
+  },
+  "maintainers": [
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    }
+  ],
+  "directories": {},
+  "_shasum": "44e072148af01e6e8e24afbf12690d68ae698ecb",
+  "_resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.1.tgz"
+}

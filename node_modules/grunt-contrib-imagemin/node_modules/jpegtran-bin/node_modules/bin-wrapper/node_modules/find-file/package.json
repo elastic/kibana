@@ -1,0 +1,58 @@
+{
+  "name": "find-file",
+  "version": "0.1.4",
+  "description": "Search for a file in an array of paths",
+  "keywords": [
+    "find",
+    "file",
+    "path",
+    "search"
+  ],
+  "homepage": "https://github.com/kevva/find-file",
+  "bugs": {
+    "url": "https://github.com/kevva/find-file/issues"
+  },
+  "author": {
+    "name": "Kevin Mårtensson",
+    "email": "kevinmartensson@gmail.com",
+    "url": "https://github.com/kevva"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kevva/find-file.git"
+  },
+  "scripts": {
+    "test": "mocha --reporter list"
+  },
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "devDependencies": {
+    "mocha": "~1.17.0"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "_id": "find-file@0.1.4",
+  "dist": {
+    "shasum": "f806bb8132a8265232bf1c9ef95ba0746511d871",
+    "tarball": "http://registry.npmjs.org/find-file/-/find-file-0.1.4.tgz"
+  },
+  "_from": "find-file@>=0.1.2 <0.2.0",
+  "_npmVersion": "1.4.3",
+  "_npmUser": {
+    "name": "kevva",
+    "email": "kevinmartensson@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "kevva",
+      "email": "kevinmartensson@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "f806bb8132a8265232bf1c9ef95ba0746511d871",
+  "_resolved": "https://registry.npmjs.org/find-file/-/find-file-0.1.4.tgz"
+}

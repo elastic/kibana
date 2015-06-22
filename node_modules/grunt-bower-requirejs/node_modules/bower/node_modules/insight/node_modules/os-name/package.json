@@ -1,0 +1,75 @@
+{
+  "name": "os-name",
+  "version": "1.0.3",
+  "description": "Get the name of the current operating system. Example: OS X Mavericks",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sindresorhus/os-name"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "bin": {
+    "os-name": "cli.js"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js",
+    "cli.js"
+  ],
+  "keywords": [
+    "cli",
+    "bin",
+    "os",
+    "operating",
+    "system",
+    "platform",
+    "name",
+    "title",
+    "release",
+    "version",
+    "osx",
+    "windows",
+    "linux"
+  ],
+  "dependencies": {
+    "osx-release": "^1.0.0",
+    "win-release": "^1.0.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "gitHead": "b731d05cc7fbb3271c05f1b84d4296ea229dc1c5",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/os-name/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/os-name",
+  "_id": "os-name@1.0.3",
+  "_shasum": "1b379f64835af7c5a7f498b357cb95215c159edf",
+  "_from": "os-name@>=1.0.0 <2.0.0",
+  "_npmVersion": "1.4.28",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "1b379f64835af7c5a7f498b357cb95215c159edf",
+    "tarball": "http://registry.npmjs.org/os-name/-/os-name-1.0.3.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/os-name/-/os-name-1.0.3.tgz"
+}

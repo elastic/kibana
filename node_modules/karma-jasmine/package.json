@@ -1,0 +1,70 @@
+{
+  "name": "karma-jasmine",
+  "version": "0.1.5",
+  "description": "A Karma plugin - adapter for Jasmine testing framework.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/karma-runner/karma-jasmine.git"
+  },
+  "keywords": [
+    "karma-plugin",
+    "karma-adapter",
+    "jasmine"
+  ],
+  "author": {
+    "name": "Vojta Jina",
+    "email": "vojta.jina@gmail.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6",
+    "karma": "~0.9",
+    "karma-jasmine": "*",
+    "grunt-karma": "~0.4",
+    "grunt-auto-release": "~0.0.2",
+    "grunt-npm": "~0.0.2",
+    "grunt-bump": "~0.0.7"
+  },
+  "peerDependencies": {
+    "karma": ">=0.9"
+  },
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Friedel Ziegelmayer",
+      "email": "friedel.ziegelmayer@gmail.com"
+    },
+    {
+      "name": "Barry Fitzgerald",
+      "email": "barfitzgerald@gmail.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/karma-runner/karma-jasmine/issues"
+  },
+  "_id": "karma-jasmine@0.1.5",
+  "dist": {
+    "shasum": "924c02ddb5d93737eb82832cffd5d75186d34a26",
+    "tarball": "http://registry.npmjs.org/karma-jasmine/-/karma-jasmine-0.1.5.tgz"
+  },
+  "_from": "karma-jasmine@>=0.1.5 <0.2.0",
+  "_npmVersion": "1.3.11",
+  "_npmUser": {
+    "name": "vojtajina",
+    "email": "vojta.jina@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "vojtajina",
+      "email": "vojta.jina@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "924c02ddb5d93737eb82832cffd5d75186d34a26",
+  "_resolved": "https://registry.npmjs.org/karma-jasmine/-/karma-jasmine-0.1.5.tgz"
+}

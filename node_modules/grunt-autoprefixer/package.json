@@ -1,0 +1,73 @@
+{
+  "name": "grunt-autoprefixer",
+  "version": "1.0.1",
+  "description": "Parse CSS and add vendor-prefixed CSS properties using the Can I Use database. Based on Autoprefixer.",
+  "author": {
+    "name": "Dmitry Nikitenko",
+    "email": "dima.nikitenko@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nDmitry/grunt-autoprefixer"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "keywords": [
+    "gruntplugin",
+    "css",
+    "postprocessor",
+    "prefix",
+    "autoprefixer"
+  ],
+  "files": [
+    "tasks",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "autoprefixer-core": "^3.0.0",
+    "diff": "~1.0.8",
+    "chalk": "~0.5.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-contrib-nodeunit": "~0.4.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "load-grunt-tasks": "~0.6.0",
+    "time-grunt": "~1.0.0"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.2"
+  },
+  "gitHead": "8b63bc6b9ce2de94d8fcde53bbffcb58d9008fde",
+  "bugs": {
+    "url": "https://github.com/nDmitry/grunt-autoprefixer/issues"
+  },
+  "homepage": "https://github.com/nDmitry/grunt-autoprefixer",
+  "_id": "grunt-autoprefixer@1.0.1",
+  "_shasum": "4d0db047e4a7488d71e5bda98a18435aee0b4446",
+  "_from": "grunt-autoprefixer@>=1.0.1 <1.1.0",
+  "_npmVersion": "1.4.23",
+  "_npmUser": {
+    "name": "weiss",
+    "email": "dima.nikitenko@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "weiss",
+      "email": "dima.nikitenko@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "4d0db047e4a7488d71e5bda98a18435aee0b4446",
+    "tarball": "http://registry.npmjs.org/grunt-autoprefixer/-/grunt-autoprefixer-1.0.1.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/grunt-autoprefixer/-/grunt-autoprefixer-1.0.1.tgz"
+}

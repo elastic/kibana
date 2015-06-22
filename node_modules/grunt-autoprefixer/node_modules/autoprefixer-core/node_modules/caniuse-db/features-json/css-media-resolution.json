@@ -1,0 +1,220 @@
+{
+  "title":"Media Queries: resolution feature",
+  "description":"Allows a media query to be set based on the device pixels used per CSS unit. While the standard uses `min`/`max-resolution` for this, some browsers support the older non-standard `device-pixel-ratio` media query.",
+  "spec":"http://www.w3.org/TR/css3-mediaqueries/#resolution",
+  "status":"rec",
+  "links":[
+    {
+      "url":"http://www.w3.org/blog/CSS/2012/06/14/unprefix-webkit-device-pixel-ratio/",
+      "title":"How to unprefix -webkit-device-pixel-ratio"
+    }
+  ],
+  "bugs":[
+    
+  ],
+  "categories":[
+    "CSS",
+    "CSS3"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"a #1",
+      "10":"a #1",
+      "11":"a #1",
+      "TP":"a #2"
+    },
+    "firefox":{
+      "2":"n",
+      "3":"n",
+      "3.5":"a #3",
+      "3.6":"a #3",
+      "4":"a #3",
+      "5":"a #3",
+      "6":"a #3",
+      "7":"a #3",
+      "8":"a #3",
+      "9":"a #3",
+      "10":"a #3",
+      "11":"a #3",
+      "12":"a #3",
+      "13":"a #3",
+      "14":"a #3",
+      "15":"a #3",
+      "16":"y",
+      "17":"y",
+      "18":"y",
+      "19":"y",
+      "20":"y",
+      "21":"y",
+      "22":"y",
+      "23":"y",
+      "24":"y",
+      "25":"y",
+      "26":"y",
+      "27":"y",
+      "28":"y",
+      "29":"y",
+      "30":"y",
+      "31":"y",
+      "32":"y",
+      "33":"y",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y"
+    },
+    "chrome":{
+      "4":"a x #4",
+      "5":"a x #4",
+      "6":"a x #4",
+      "7":"a x #4",
+      "8":"a x #4",
+      "9":"a x #4",
+      "10":"a x #4",
+      "11":"a x #4",
+      "12":"a x #4",
+      "13":"a x #4",
+      "14":"a x #4",
+      "15":"a x #4",
+      "16":"a x #4",
+      "17":"a x #4",
+      "18":"a x #4",
+      "19":"a x #4",
+      "20":"a x #4",
+      "21":"a x #4",
+      "22":"a x #4",
+      "23":"a x #4",
+      "24":"a x #4",
+      "25":"a x #4",
+      "26":"a x #4",
+      "27":"a x #4",
+      "28":"a x #4",
+      "29":"y",
+      "30":"y",
+      "31":"y",
+      "32":"y",
+      "33":"y",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y",
+      "39":"y",
+      "40":"y",
+      "41":"y",
+      "42":"y",
+      "43":"y"
+    },
+    "safari":{
+      "3.1":"n",
+      "3.2":"n",
+      "4":"a x #4",
+      "5":"a x #4",
+      "5.1":"a x #4",
+      "6":"a x #4",
+      "6.1":"a x #4",
+      "7":"a x #4",
+      "7.1":"a x #4",
+      "8":"a x #4"
+    },
+    "opera":{
+      "9":"n",
+      "9.5-9.6":"a x #4",
+      "10.0-10.1":"a x #4",
+      "10.5":"a x #4",
+      "10.6":"a x #4",
+      "11":"a x #4",
+      "11.1":"a x #4",
+      "11.5":"a x #4",
+      "11.6":"a x #4",
+      "12":"a x #4",
+      "12.1":"y",
+      "15":"y",
+      "16":"y",
+      "17":"y",
+      "18":"y",
+      "19":"y",
+      "20":"y",
+      "21":"y",
+      "22":"y",
+      "23":"y",
+      "24":"y",
+      "25":"y",
+      "26":"y",
+      "27":"y",
+      "28":"y",
+      "29":"y"
+    },
+    "ios_saf":{
+      "3.2":"u",
+      "4.0-4.1":"a x #4",
+      "4.2-4.3":"a x #4",
+      "5.0-5.1":"a x #4",
+      "6.0-6.1":"a x #4",
+      "7.0-7.1":"a x #4",
+      "8":"a x #4",
+      "8.1":"a x #4"
+    },
+    "op_mini":{
+      "5.0-8.0":"a #1"
+    },
+    "android":{
+      "2.1":"u",
+      "2.2":"u",
+      "2.3":"u",
+      "3":"u",
+      "4":"a x #4",
+      "4.1":"a x #4",
+      "4.2-4.3":"a x #4",
+      "4.4":"y",
+      "4.4.3-4.4.4":"y",
+      "37":"y"
+    },
+    "bb":{
+      "7":"a x #4",
+      "10":"a x #4"
+    },
+    "op_mob":{
+      "10":"u",
+      "11":"u",
+      "11.1":"u",
+      "11.5":"u",
+      "12":"u",
+      "12.1":"y",
+      "24":"y"
+    },
+    "and_chr":{
+      "40":"y"
+    },
+    "and_ff":{
+      "33":"y"
+    },
+    "ie_mob":{
+      "10":"a #1",
+      "11":"a #1"
+    },
+    "and_uc":{
+      "9.9":"a x #4"
+    }
+  },
+  "notes":"",
+  "notes_by_num":{
+    "1":"Supports the `dpi` unit, but does not support `dppx` or `dpcm` units.",
+    "2":"Supports the `dpi` and `dppx` units, but does not support `dpcm` units.",
+    "3":"Firefox before 16 supports only `dpi` unit, but you can set `2dppx` per `min--moz-device-pixel-ratio: 2`",
+    "4":"Supporte the non-standard `min`/`max-device-pixel-ratio`"
+  },
+  "usage_perc_y":60.15,
+  "usage_perc_a":33.69,
+  "ucprefix":false,
+  "parent":"css-mediaqueries",
+  "keywords":"@media,device-pixel-ratio,resolution",
+  "ie_id":"mediaqueriesresolutionfeature,dppxunitfortheresolutionmediaquery",
+  "chrome_id":"5944509615570944",
+  "shown":true
+}

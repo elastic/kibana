@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+
+<title>Demo of Angular Local Storage Module</title>
+
+<meta name="description" content="Demo of Angular Local Storage Module">
+<meta name="author" content="Gregory Pike">
+
+<link rel="stylesheet" href="http://necolas.github.com/normalize.css/2.0.1/normalize.css">
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
+<link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet">
+<link href="demo-style.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<body onload="prettyPrint()">
+
+<!-- BEGIN DEMO -->
+
+<div class="container" ng-app="demoModule">
+
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <a class="brand" href="#">Angular Local Storage</a>
+    </div>
+  </div>
+
+  <div class="hero-unit">
+
+    <h1>Give it a try</h1>
+
+    <div ng-controller="DemoCtrl">
+      <p><input type="text" ng-model="localStorageDemo" placeholder="Start typing..."></p>
+
+      <blockquote class="well" ng-show="localStorageDemoValue">
+        <p ng-bind="localStorageDemoValue"></p>
+        <small>{{storageType}} value</small>
+      </blockquote>
+
+      <p><button ng-click="clearAll()">Clear All</button></p>
+    </div>
+
+    <p>The Angular Local Storage Module is meant to be a plug-and-play Angular module for accessing the browsers Local Storage API.</p>
+
+  </div>
+
+  <p>Angular Local Storage offers you access to the browser local storage API through Angular but also allows has the following features:</p>
+
+  <ul>
+    <li>Control local storage access through key prefices (e.g. "myApp.keyName")</li>
+    <li>Checks browser support and falls back to cookies for antiquated browsers</li>
+    <li>Allows programmatic access to remove all keys for a given app</li>
+  </ul>
+
+  <h3>Usage</h3>
+
+  <!-- Sorry guys, I need to earn a living -->
+  <div style="float: right">
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <!-- ALS Leaderboard -->
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-8242772837340688"
+         data-ad-slot="1586567981"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <h6>Dependencies:</h6>
+  <ul>
+    <li><code>AngularJS</code> <small><a href="http://angularjs.org/">http://angularjs.org/</a></small></li>
+    <li><code>Angular Local Storage Module</code> <small><a href="../src/angular-local-storage.js">angular-local-storage.js</a></small></li>
+  </ul>
+
+  <h6>JS Example</h6>
+  <pre class="prettyprint lang-js">
+var YourCtrl = function($scope, localStorageService, ...) {
+  // To add to local storage
+  localStorageService.set('localStorageKey','Add this!');
+  // Read that value back
+  var value = localStorageService.get('localStorageKey');
+  // To remove a local storage
+  localStorageService.remove('localStorageKey');
+  // Removes all local storage
+  localStorageService.clearAll();
+  // You can also play with cookies the same way
+  localStorageService.cookie.set('localStorageKey','I am a cookie value now');
+}</pre>
+
+  <h3>API Access</h3>
+
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Call</th>
+        <th>Arguments</th>
+        <th>Action</th>
+        <th>Returns</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>isSupported</code></td>
+        <td class="muted"><small>n/a</small></td>
+        <td>Checks the browsers support for local storage</td>
+        <td>Boolean for success</td>
+      </tr>
+      <tr>
+        <td><code>set</code></td>
+        <td><small>key, value</small></td>
+        <td>Adds a key-value pair to the browser local storage</td>
+        <td>Boolean for success</td>
+      </tr>
+      <tr>
+        <td><code>get</code></td>
+        <td><small>key</small></td>
+        <td>Gets a value from local storage</td>
+        <td>Stored value</td>
+      </tr>
+      <tr>
+        <td><code>remove</code></td>
+        <td><small>key, ...</small></td>
+        <td>Removes a key-value pairs from the browser local storage</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td><code>clearAll</code></td>
+        <td class="muted">n/a</td>
+        <td><span class="label label-warning">Warning</span> Removes all local storage key-value pairs for this app. It will optionally take a string, which is converted to a regular expression, and then clears keys based on that regular expression.</td>
+        <td>Boolean for success</td>
+      </tr>
+      <tr>
+        <td><code>cookie</code></td>
+        <td><small>set | get | remove | clearAll</small></td>
+        <td>Each function within cookie uses the same arguments as the coresponding local storage functions</td>
+        <td>n/a</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- END DEMO -->
+
+<!-- JAVASCRIPT -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.1/angular.min.js"></script>
+<script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js"></script>
+<script src="https://rawgit.com/grevory/angular-local-storage/master/dist/angular-local-storage.min.js"></script>
+<script src="demo-app.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "name": "infinity-agent",
+  "version": "1.0.2",
+  "description": "Creates HTTP/HTTPS Agent with Infinity maxSockets",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floatdrop/infinity-agent"
+  },
+  "keywords": [
+    "http",
+    "https",
+    "agent",
+    "maxSockets"
+  ],
+  "author": {
+    "name": "Vsevolod Strukchinsky",
+    "email": "floatdrop@gmail.com"
+  },
+  "license": "MIT",
+  "files": [
+    "index.js"
+  ],
+  "devDependencies": {
+    "mocha": "^2.1.0"
+  },
+  "gitHead": "106dafef5abbaddc31073554c53c56d029ab1e91",
+  "bugs": {
+    "url": "https://github.com/floatdrop/infinity-agent/issues"
+  },
+  "homepage": "https://github.com/floatdrop/infinity-agent",
+  "_id": "infinity-agent@1.0.2",
+  "_shasum": "2e9da2c070b9864a8bc66c0194e1791ed8058025",
+  "_from": "infinity-agent@>=1.0.0 <2.0.0",
+  "_npmVersion": "1.4.28",
+  "_npmUser": {
+    "name": "floatdrop",
+    "email": "floatdrop@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "floatdrop",
+      "email": "floatdrop@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "2e9da2c070b9864a8bc66c0194e1791ed8058025",
+    "tarball": "http://registry.npmjs.org/infinity-agent/-/infinity-agent-1.0.2.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/infinity-agent/-/infinity-agent-1.0.2.tgz"
+}

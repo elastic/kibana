@@ -1,0 +1,21 @@
+{
+  "name": "json3",
+  "version": "3.2.6",
+  "main": "lib/json3.min.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bestiejs/json3.git"
+  },
+  "ignore": [
+    ".*",
+    "build.js",
+    "index.html",
+    "index.js",
+    "component.json",
+    "package.json",
+    "benchmark",
+    "page",
+    "test",
+    "vendor"
+  ]
+}

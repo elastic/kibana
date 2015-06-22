@@ -1,0 +1,109 @@
+{
+  "name": "karma-ng-html2js-preprocessor",
+  "version": "0.1.2",
+  "description": "A Karma plugin. Compile AngularJS templates to JavaScript on the fly.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/karma-runner/karma-ng-html2js-preprocessor.git"
+  },
+  "keywords": [
+    "karma-plugin",
+    "karma-preprocessor",
+    "angularjs",
+    "angular",
+    "html2js"
+  ],
+  "author": {
+    "name": "Vojta Jina",
+    "email": "vojta.jina@gmail.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-simple-mocha": "~0.4",
+    "grunt-contrib-jshint": "~0.6",
+    "chai": "~1.4",
+    "mocha": "~1.8",
+    "grunt-npm": "~0.0.2",
+    "grunt-bump": "~0.0.7",
+    "grunt-auto-release": "~0.0.2"
+  },
+  "peerDependencies": {
+    "karma": ">=0.9"
+  },
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Friedel Ziegelmayer",
+      "email": "friedel.ziegelmayer@gmail.com"
+    },
+    {
+      "name": "Lukasz Bandzarewicz",
+      "email": "lucassus@gmail.com"
+    },
+    {
+      "name": "BrianLenzo",
+      "email": "brian.lenzo@gmail.com"
+    },
+    {
+      "name": "Friedel Ziegelmayer",
+      "email": "dignifiedquire@gmail.com"
+    },
+    {
+      "name": "Jan Dudulski",
+      "email": "jan@dudulski.pl"
+    },
+    {
+      "name": "Lucas Galfasó",
+      "email": "lgalfaso@gmail.com"
+    },
+    {
+      "name": "Mike Frawley",
+      "email": "frawl021@gmail.com"
+    },
+    {
+      "name": "Murphy McMahon",
+      "email": "pandeiro@gmail.com"
+    },
+    {
+      "name": "Pawel Kozlowski",
+      "email": "pkozlowski.opensource@gmail.com"
+    },
+    {
+      "name": "Robin Roestenburg",
+      "email": "robin@roestenburg.io"
+    },
+    {
+      "name": "Sahat Yalkabov",
+      "email": "sakhat@gmail.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/karma-runner/karma-ng-html2js-preprocessor/issues"
+  },
+  "homepage": "https://github.com/karma-runner/karma-ng-html2js-preprocessor",
+  "_id": "karma-ng-html2js-preprocessor@0.1.2",
+  "dist": {
+    "shasum": "c9402cb577d891bfed1a9ff064f0cdb9a4fdc9b1",
+    "tarball": "http://registry.npmjs.org/karma-ng-html2js-preprocessor/-/karma-ng-html2js-preprocessor-0.1.2.tgz"
+  },
+  "_from": "karma-ng-html2js-preprocessor@>=0.1.0 <0.2.0",
+  "_npmVersion": "1.4.4",
+  "_npmUser": {
+    "name": "vojtajina",
+    "email": "vojta.jina@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "vojtajina",
+      "email": "vojta.jina@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "c9402cb577d891bfed1a9ff064f0cdb9a4fdc9b1",
+  "_resolved": "https://registry.npmjs.org/karma-ng-html2js-preprocessor/-/karma-ng-html2js-preprocessor-0.1.2.tgz"
+}

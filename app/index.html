@@ -1,0 +1,44 @@
+<!doctype html>
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8" id="ng-app" ng-app=""> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9" id="ng-app" ng-app=""> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" ng-app>
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/sass-bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
+
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css({.tmp,app}) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+</head>
+
+<body ng-app="connectApp">
+    <analytics></analytics>
+    <!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+    <!-- Add your site or application content here -->
+    <div class="container-fluid" ui-view="appview"></div>
+    <!--[if lt IE 9]>
+<script src="bower_components/es5-shim/es5-shim.js"></script>
+<script src="bower_components/json3/lib/json3.min.js"></script>
+<![endif]-->
+    <script src="bower_components/requirejs/require.js" data-main="scripts/main.js"></script>
+</body>
+
+</html>

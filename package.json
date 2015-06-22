@@ -1,0 +1,54 @@
+{
+  "name": "yo",
+  "version": "0.0.0",
+  "dependencies": {
+    "body-parser": "^1.12.0",
+    "elasticsearch": "^3.1.3",
+    "express": "^4.11.2"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-autoprefixer": "~1.0.1",
+    "grunt-bower-install": "~0.7.0",
+    "grunt-bower-requirejs": "~1.1.0",
+    "grunt-concurrent": "~0.4.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-compass": "~0.6.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-connect": "~0.5.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-cssmin": "~0.7.0",
+    "grunt-contrib-htmlmin": "~0.1.3",
+    "grunt-contrib-imagemin": "~0.3.0",
+    "grunt-contrib-jshint": "~0.7.1",
+    "grunt-contrib-requirejs": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.2",
+    "grunt-express-server": "^0.4.19",
+    "grunt-google-cdn": "~0.2.0",
+    "grunt-karma": "^0.8.3",
+    "grunt-newer": "~0.5.4",
+    "grunt-ngmin": "~0.0.2",
+    "grunt-open": "^0.2.3",
+    "grunt-rev": "~0.1.0",
+    "grunt-svgmin": "~0.2.0",
+    "grunt-text-replace": "~0.3.12",
+    "grunt-usemin": "~2.4.0",
+    "jshint-stylish": "~0.1.3",
+    "karma": "^0.12.14",
+    "karma-chrome-launcher": "^0.1.3",
+    "karma-jasmine": "^0.1.5",
+    "karma-ng-html2js-preprocessor": "^0.1.0",
+    "karma-ng-scenario": "^0.1.0",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-requirejs": "^0.2.1",
+    "load-grunt-tasks": "~0.2.0",
+    "requirejs": "^2.1.11",
+    "time-grunt": "~0.2.1"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  }
+}

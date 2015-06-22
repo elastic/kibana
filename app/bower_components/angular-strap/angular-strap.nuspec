@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+    <metadata>
+        <id>angular-strap</id>
+        <version>2.1.2</version>
+        <authors>Olivier Louvignes and contributors</authors>
+        <owners>mgcrea</owners>
+        <licenseUrl>https://raw.github.com/mgcrea/angular-strap/master/LICENSE.md</licenseUrl>
+        <projectUrl>https://github.com/mgcrea/angular-strap</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>AngularStrap - AngularJS directives for Bootstrap</description>
+        <copyright>Copyright Olivier Louvignes 2014</copyright>
+        <tags>angular bootstrap</tags>
+        <dependencies>
+            <dependency id="bootstrap" version="[3.0.0, 4.0.0)" />
+            <dependency id="AngularJS.Core" version="[1.2.0, 1.3.0, 2.0.0)" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="dist\*.*" target="content\Scripts" />
+    </files>
+</package>

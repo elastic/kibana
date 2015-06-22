@@ -1,0 +1,86 @@
+{
+  "name": "decompress-zip",
+  "version": "0.0.8",
+  "description": "A library for reading data from zip files",
+  "main": "lib/decompress-zip.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "bin": {
+    "decompress-zip": "bin/decompress-zip"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bower/decompress-zip.git"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "keywords": [
+    "zip",
+    "unzip",
+    "tar",
+    "untar",
+    "compress",
+    "decompress",
+    "archive",
+    "extract",
+    "zlib"
+  ],
+  "author": {
+    "name": "The Bower authors"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/bower/bower/blob/master/LICENSE"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/bower/decompress-zip/issues"
+  },
+  "devDependencies": {
+    "grunt-exec": "~0.4.2",
+    "chai": "~1.8.0",
+    "grunt-contrib-jshint": "~0.6.2",
+    "grunt-contrib-watch": "~0.5.1",
+    "grunt": "~0.4.1",
+    "istanbul": "~0.1.43",
+    "grunt-simple-mocha": "~0.4.0",
+    "mocha": "~1.13.0",
+    "glob": "~3.2.6",
+    "tmp": "0.0.21",
+    "request": "~2.27.0"
+  },
+  "dependencies": {
+    "q": "~1.0.0",
+    "mkpath": "~0.1.0",
+    "binary": "~0.3.0",
+    "touch": "0.0.2",
+    "readable-stream": "~1.1.8",
+    "nopt": "~2.2.0",
+    "graceful-fs": "~3.0.0"
+  },
+  "homepage": "https://github.com/bower/decompress-zip",
+  "_id": "decompress-zip@0.0.8",
+  "_shasum": "4a265b22c7b209d7b24fa66f2b2dfbced59044f3",
+  "_from": "decompress-zip@0.0.8",
+  "_npmVersion": "1.4.9",
+  "_npmUser": {
+    "name": "wibblymat",
+    "email": "mat@wibbly.org.uk"
+  },
+  "maintainers": [
+    {
+      "name": "wibblymat",
+      "email": "mat@wibbly.org.uk"
+    }
+  ],
+  "dist": {
+    "shasum": "4a265b22c7b209d7b24fa66f2b2dfbced59044f3",
+    "tarball": "http://registry.npmjs.org/decompress-zip/-/decompress-zip-0.0.8.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/decompress-zip/-/decompress-zip-0.0.8.tgz",
+  "readme": "ERROR: No README data found!"
+}

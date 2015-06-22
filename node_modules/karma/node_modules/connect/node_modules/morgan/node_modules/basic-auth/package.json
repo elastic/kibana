@@ -1,0 +1,55 @@
+{
+  "name": "basic-auth",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visionmedia/node-basic-auth"
+  },
+  "description": "generic basic auth parser",
+  "keywords": [
+    "basic",
+    "auth",
+    "authorization",
+    "basicauth"
+  ],
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "files": [
+    "index.js"
+  ],
+  "license": "MIT",
+  "gitHead": "099e8c703ea3994d72240492aba9b115517cf45e",
+  "bugs": {
+    "url": "https://github.com/visionmedia/node-basic-auth/issues"
+  },
+  "homepage": "https://github.com/visionmedia/node-basic-auth",
+  "_id": "basic-auth@1.0.0",
+  "_shasum": "111b2d9ff8e4e6d136b8c84ea5e096cb87351637",
+  "_from": "basic-auth@1.0.0",
+  "_npmVersion": "1.4.16",
+  "_npmUser": {
+    "name": "jonathanong",
+    "email": "jonathanrichardong@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    },
+    {
+      "name": "jonathanong",
+      "email": "jonathanrichardong@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "111b2d9ff8e4e6d136b8c84ea5e096cb87351637",
+    "tarball": "http://registry.npmjs.org/basic-auth/-/basic-auth-1.0.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/basic-auth/-/basic-auth-1.0.0.tgz"
+}

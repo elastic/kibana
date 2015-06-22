@@ -1,0 +1,58 @@
+{
+  "name": "uid-safe",
+  "description": "URL and cookie safe UIDs",
+  "version": "1.0.1",
+  "author": {
+    "name": "Jonathan Ong",
+    "email": "me@jongleberry.com",
+    "url": "http://jongleberry.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/crypto-utils/uid-safe"
+  },
+  "dependencies": {
+    "mz": "1",
+    "base64-url": "1"
+  },
+  "devDependencies": {
+    "bluebird": "2",
+    "mocha": "1"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec --bail"
+  },
+  "bugs": {
+    "url": "https://github.com/crypto-utils/uid-safe/issues"
+  },
+  "homepage": "https://github.com/crypto-utils/uid-safe",
+  "_id": "uid-safe@1.0.1",
+  "_shasum": "5bd148460a2e84f54f193fd20352c8c3d7de6ac8",
+  "_from": "uid-safe@1.0.1",
+  "_npmVersion": "1.4.9",
+  "_npmUser": {
+    "name": "jongleberry",
+    "email": "jonathanrichardong@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "jongleberry",
+      "email": "jonathanrichardong@gmail.com"
+    },
+    {
+      "name": "dougwilson",
+      "email": "doug@somethingdoug.com"
+    },
+    {
+      "name": "fishrock123",
+      "email": "fishrock123@rocketmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "5bd148460a2e84f54f193fd20352c8c3d7de6ac8",
+    "tarball": "http://registry.npmjs.org/uid-safe/-/uid-safe-1.0.1.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-1.0.1.tgz"
+}

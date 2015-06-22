@@ -1,0 +1,224 @@
+{
+  "title":"CSS Masks",
+  "description":"Method of displaying part of an element, using a selected image as a mask",
+  "spec":"http://www.w3.org/TR/css-masking/",
+  "status":"cr",
+  "links":[
+    {
+      "url":"http://docs.webplatform.org/wiki/css/properties/mask",
+      "title":"WebPlatform Docs"
+    },
+    {
+      "url":"http://www.html5rocks.com/en/tutorials/masking/adobe/",
+      "title":"HTML5 Rocks article"
+    },
+    {
+      "url":"http://thenittygritty.co/css-masking",
+      "title":"Detailed blog post"
+    }
+  ],
+  "bugs":[
+    
+  ],
+  "categories":[
+    "CSS"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "TP":"n"
+    },
+    "firefox":{
+      "2":"n",
+      "3":"n",
+      "3.5":"a",
+      "3.6":"a",
+      "4":"a",
+      "5":"a",
+      "6":"a",
+      "7":"a",
+      "8":"a",
+      "9":"a",
+      "10":"a",
+      "11":"a",
+      "12":"a",
+      "13":"a",
+      "14":"a",
+      "15":"a",
+      "16":"a",
+      "17":"a",
+      "18":"a",
+      "19":"a",
+      "20":"a",
+      "21":"a",
+      "22":"a",
+      "23":"a",
+      "24":"a",
+      "25":"a",
+      "26":"a",
+      "27":"a",
+      "28":"a",
+      "29":"a",
+      "30":"a",
+      "31":"a",
+      "32":"a",
+      "33":"a",
+      "34":"a",
+      "35":"a",
+      "36":"a",
+      "37":"a",
+      "38":"a"
+    },
+    "chrome":{
+      "4":"a x",
+      "5":"a x",
+      "6":"a x",
+      "7":"a x",
+      "8":"a x",
+      "9":"a x",
+      "10":"a x",
+      "11":"a x",
+      "12":"a x",
+      "13":"a x",
+      "14":"a x",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"a x",
+      "21":"a x",
+      "22":"a x",
+      "23":"a x",
+      "24":"a x",
+      "25":"a x",
+      "26":"a x",
+      "27":"a x",
+      "28":"a x",
+      "29":"a x",
+      "30":"a x",
+      "31":"a x",
+      "32":"a x",
+      "33":"a x",
+      "34":"a x",
+      "35":"a x",
+      "36":"a x",
+      "37":"a x",
+      "38":"a x",
+      "39":"a x",
+      "40":"a x",
+      "41":"a x",
+      "42":"a x",
+      "43":"a x"
+    },
+    "safari":{
+      "3.1":"n",
+      "3.2":"n",
+      "4":"a x",
+      "5":"a x",
+      "5.1":"a x",
+      "6":"a x",
+      "6.1":"a x",
+      "7":"a x",
+      "7.1":"a x",
+      "8":"a x"
+    },
+    "opera":{
+      "9":"n",
+      "9.5-9.6":"n",
+      "10.0-10.1":"n",
+      "10.5":"n",
+      "10.6":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"n",
+      "11.6":"n",
+      "12":"n",
+      "12.1":"n",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"a x",
+      "21":"a x",
+      "22":"a x",
+      "23":"a x",
+      "24":"a x",
+      "25":"a x",
+      "26":"a x",
+      "27":"a x",
+      "28":"a x",
+      "29":"a x"
+    },
+    "ios_saf":{
+      "3.2":"a x",
+      "4.0-4.1":"a x",
+      "4.2-4.3":"a x",
+      "5.0-5.1":"a x",
+      "6.0-6.1":"a x",
+      "7.0-7.1":"a x",
+      "8":"a x",
+      "8.1":"a x"
+    },
+    "op_mini":{
+      "5.0-8.0":"n"
+    },
+    "android":{
+      "2.1":"a x",
+      "2.2":"a x",
+      "2.3":"a x",
+      "3":"a x",
+      "4":"a x",
+      "4.1":"a x",
+      "4.2-4.3":"a x",
+      "4.4":"a x",
+      "4.4.3-4.4.4":"a x",
+      "37":"a x"
+    },
+    "bb":{
+      "7":"a x",
+      "10":"a x"
+    },
+    "op_mob":{
+      "10":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"n",
+      "12":"n",
+      "12.1":"n",
+      "24":"a x"
+    },
+    "and_chr":{
+      "40":"a x"
+    },
+    "and_ff":{
+      "33":"a"
+    },
+    "ie_mob":{
+      "10":"n",
+      "11":"n"
+    },
+    "and_uc":{
+      "9.9":"a x"
+    }
+  },
+  "notes":"Partial support in WebKit/Blink browsers refers to supporting the mask-image and mask-box-image properties, but lacks support for other parts of the spec. Partial support in Firefox refers to only support for inline SVG mask elements i.e. mask: url(#foo).",
+  "notes_by_num":{
+    
+  },
+  "usage_perc_y":0,
+  "usage_perc_a":78.35,
+  "ucprefix":false,
+  "parent":"",
+  "keywords":"",
+  "ie_id":"masks",
+  "chrome_id":"5381559662149632",
+  "shown":true
+}

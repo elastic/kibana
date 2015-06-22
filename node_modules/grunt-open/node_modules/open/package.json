@@ -1,0 +1,68 @@
+{
+  "name": "open",
+  "version": "0.0.5",
+  "description": "open a file or url in the user's preferred application",
+  "keywords": [
+    "start",
+    "open",
+    "browser",
+    "editor",
+    "default"
+  ],
+  "homepage": "https://github.com/jjrdn/node-open",
+  "author": {
+    "name": "J Jordan",
+    "email": "jjrdn@styosis.com"
+  },
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Victor Costan",
+      "email": "victor@costan.us",
+      "url": "http://www.costan.us"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pwnall/node-open.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pwnall/node-open/issues"
+  },
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "optionalDependencies": {},
+  "main": "lib/open.js",
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha"
+  },
+  "_id": "open@0.0.5",
+  "dist": {
+    "shasum": "42c3e18ec95466b6bf0dc42f3a2945c3f0cad8fc",
+    "tarball": "http://registry.npmjs.org/open/-/open-0.0.5.tgz"
+  },
+  "_from": "open@>=0.0.4 <0.1.0",
+  "_npmVersion": "1.4.3",
+  "_npmUser": {
+    "name": "pwnall",
+    "email": "costan@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "jjrdn",
+      "email": "jjrdn@styosis.com"
+    },
+    {
+      "name": "pwnall",
+      "email": "costan@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "42c3e18ec95466b6bf0dc42f3a2945c3f0cad8fc",
+  "_resolved": "https://registry.npmjs.org/open/-/open-0.0.5.tgz"
+}

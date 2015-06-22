@@ -1,0 +1,62 @@
+{
+  "name": "tar-fs",
+  "version": "0.5.2",
+  "description": "filesystem bindings for tar-stream",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:mafintosh/tar-fs.git"
+  },
+  "dependencies": {
+    "mkdirp": "^0.5.0",
+    "pump": "^0.3.5",
+    "tar-stream": "^0.4.6"
+  },
+  "keywords": [
+    "tar",
+    "fs",
+    "file",
+    "tarball",
+    "directory",
+    "stream"
+  ],
+  "devDependencies": {
+    "rimraf": "^2.2.8",
+    "tape": "^3.0.0"
+  },
+  "scripts": {
+    "test": "tape test/index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/mafintosh/tar-fs/issues"
+  },
+  "homepage": "https://github.com/mafintosh/tar-fs",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "author": {
+    "name": "Mathias Buus"
+  },
+  "license": "MIT",
+  "gitHead": "908604dfc8b21fd4df5db8c6dddc46bd5b771e33",
+  "_id": "tar-fs@0.5.2",
+  "_shasum": "0f59424be7eeee45232316e302f66d3f6ea6db3e",
+  "_from": "tar-fs@0.5.2",
+  "_npmVersion": "1.4.23",
+  "_npmUser": {
+    "name": "mafintosh",
+    "email": "mathiasbuus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "mafintosh",
+      "email": "mathiasbuus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "0f59424be7eeee45232316e302f66d3f6ea6db3e",
+    "tarball": "http://registry.npmjs.org/tar-fs/-/tar-fs-0.5.2.tgz"
+  },
+  "_resolved": "https://registry.npmjs.org/tar-fs/-/tar-fs-0.5.2.tgz",
+  "readme": "ERROR: No README data found!"
+}

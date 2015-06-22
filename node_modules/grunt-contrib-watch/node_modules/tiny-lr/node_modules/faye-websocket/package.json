@@ -1,0 +1,59 @@
+{
+  "name": "faye-websocket",
+  "description": "Standards-compliant WebSocket server and client",
+  "homepage": "http://github.com/faye/faye-websocket-node",
+  "author": {
+    "name": "James Coglan",
+    "email": "jcoglan@gmail.com",
+    "url": "http://jcoglan.com/"
+  },
+  "keywords": [
+    "websocket",
+    "eventsource"
+  ],
+  "version": "0.4.4",
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "main": "./lib/faye/websocket",
+  "devDependencies": {
+    "jsclass": "",
+    "pace": ""
+  },
+  "scripts": {
+    "test": "node spec/runner.js"
+  },
+  "bugs": "http://github.com/faye/faye-websocket-node/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git://github.com/faye/faye-websocket-node.git"
+    }
+  ],
+  "_id": "faye-websocket@0.4.4",
+  "dist": {
+    "shasum": "c14c5b3bf14d7417ffbfd990c0a7495cd9f337bc",
+    "tarball": "http://registry.npmjs.org/faye-websocket/-/faye-websocket-0.4.4.tgz"
+  },
+  "_from": "faye-websocket@>=0.4.3 <0.5.0",
+  "_npmVersion": "1.2.10",
+  "_npmUser": {
+    "name": "jcoglan",
+    "email": "jcoglan@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "jcoglan",
+      "email": "jcoglan@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "c14c5b3bf14d7417ffbfd990c0a7495cd9f337bc",
+  "_resolved": "https://registry.npmjs.org/faye-websocket/-/faye-websocket-0.4.4.tgz"
+}

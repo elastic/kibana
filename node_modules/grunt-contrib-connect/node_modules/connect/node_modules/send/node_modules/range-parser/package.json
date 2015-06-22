@@ -1,0 +1,43 @@
+{
+  "name": "range-parser",
+  "author": {
+    "name": "TJ Holowaychuk",
+    "email": "tj@vision-media.ca",
+    "url": "http://tjholowaychuk.com"
+  },
+  "description": "Range header field string parser",
+  "version": "0.0.4",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "_npmUser": {
+    "name": "tjholowaychuk",
+    "email": "tj@vision-media.ca"
+  },
+  "_id": "range-parser@0.0.4",
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "_engineSupported": true,
+  "_npmVersion": "1.1.19",
+  "_nodeVersion": "v0.6.16",
+  "_defaultsLoaded": true,
+  "dist": {
+    "shasum": "c0427ffef51c10acba0782a46c9602e744ff620b",
+    "tarball": "http://registry.npmjs.org/range-parser/-/range-parser-0.0.4.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    }
+  ],
+  "directories": {},
+  "_shasum": "c0427ffef51c10acba0782a46c9602e744ff620b",
+  "_resolved": "https://registry.npmjs.org/range-parser/-/range-parser-0.0.4.tgz",
+  "_from": "range-parser@0.0.4"
+}

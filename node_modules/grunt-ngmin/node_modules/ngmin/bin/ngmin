@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+var program = require('commander'),
+  fs = require('fs'),
+  ngmin = require('../main');
+
+program
+  .version(require('../package.json').version)
+  .usage('<infile> <outfile>')
+  .parse(process.argv);
+
+if (program.args.length !== 0 && program.args.length !== 2) {
+  console.error('ngmin should be called with an input and output file, or no arguments if using stdio');
+  process.exit(1);
+}
+
+if (program.args.length === 2) {
+  var infile = program.args[0];
+  var outfile = program.args[1];
+
+  try {
+    var content = fs.readFileSync(infile, 'utf-8');
+  } catch (e) {
+    console.error('Error opening: ' + infile);
+    process.exit(1);
+  }
+  var generatedCode = ngmin.annotate(content);
+
+  try {
+    fs.writeFileSync(outfile, generatedCode);
+  } catch (e) {
+    console.error('Error writing to: ' + outfile);
+    process.exit(1);
+  }
+
+} else {
+  // else use stdio
+  var buffer = '';
+
+  process.stdin.setEncoding('utf8');
+  process.stdin.resume();
+
+  process.stdin.on('data', function (chunk) {
+    buffer += chunk;
+  });
+
+  process.stdin.on('end', function() {
+    process.stdout.write(ngmin.annotate(buffer));
+  });
+}

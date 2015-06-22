@@ -1,0 +1,72 @@
+{
+  "name": "angular-strap",
+  "description": "AngularStrap - AngularJS directives for Bootstrap",
+  "version": "2.1.6",
+  "keywords": [
+    "angular",
+    "bootstrap"
+  ],
+  "homepage": "http://mgcrea.github.io/angular-strap",
+  "bugs": "https://github.com/mgcrea/angular-strap/issues",
+  "author": {
+    "name": "Olivier Louvignes",
+    "email": "olivier@mg-crea.com",
+    "url": "https://github.com/mgcrea"
+  },
+  "contributors": [
+    {
+      "name": "Vitor Fernandes",
+      "url": "https://github.com/vmlf01"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mgcrea/angular-strap.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mgcrea/angular-strap/blob/master/LICENSE.md"
+    }
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "chalk": "^0.5.1",
+    "gulp": "^3.8.10",
+    "gulp-autoprefixer": "2.0.0",
+    "gulp-changed": "^1.1.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-cleancss": "^0.2.2",
+    "gulp-concat-util": "^0.5.1",
+    "gulp-connect": "^2.2.0",
+    "gulp-htmlmin": "^0.2.0",
+    "gulp-jshint": "^1.9.0",
+    "gulp-less": "^2.0.1",
+    "gulp-ng-annotate": "^0.4.3",
+    "gulp-nginclude": "^0.4.5",
+    "gulp-ngmin": "^0.3.0",
+    "gulp-ngtemplate": "^0.2.3",
+    "gulp-open": "^0.3.1",
+    "gulp-rename": "^1.2.0",
+    "gulp-sourcemaps": "^1.2.8",
+    "gulp-uglify": "^1.0.2",
+    "gulp-usemin": "^0.3.8",
+    "gulp-util": "^3.0.1",
+    "gulp-watch": "^3.0.0",
+    "jshint-stylish": "^1.0.0",
+    "karma": "^0.12.28",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-coverage": "^0.2.7",
+    "karma-jasmine": "^0.3.2",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-sauce-launcher": "^0.2.10",
+    "merge-stream": "^0.1.6",
+    "run-sequence": "^1.0.2"
+  },
+  "engines": {
+    "node": "^0.10"
+  },
+  "scripts": {
+    "test": "gulp jshint karma:unit"
+  }
+}

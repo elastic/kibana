@@ -1,0 +1,57 @@
+{
+  "name": "angular-motion",
+  "description": "AngularMotion - Fancy CSS3 animations for AngularJS 1.2+",
+  "version": "0.3.4",
+  "keywords": [
+    "angular",
+    "animation"
+  ],
+  "homepage": "https://github.com/mgcrea/angular-motion",
+  "bugs": "https://github.com/mgcrea/angular-motion/issues",
+  "author": {
+    "name": "Olivier Louvignes",
+    "email": "olivier@mg-crea.com",
+    "url": "https://github.com/mgcrea"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mgcrea/angular-motion.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-angular-templates": "~0.5.5",
+    "grunt-autoprefixer": "~0.7.6",
+    "grunt-concurrent": "~0.5.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.4.0",
+    "grunt-contrib-connect": "~0.8.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-cssmin": "~0.10.0",
+    "grunt-contrib-htmlmin": "~0.3.0",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-less": "~0.11.3",
+    "grunt-contrib-uglify": "~0.5.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-karma": "~0.8.3",
+    "grunt-newer": "~0.7.0",
+    "grunt-nginclude": "~0.4.1",
+    "grunt-ngmin": "0.0.3",
+    "grunt-rev": "~0.1.0",
+    "grunt-usemin": "~2.2.0",
+    "jshint-stylish": "~0.2.0",
+    "karma-coverage": "~0.2.4",
+    "load-grunt-tasks": "~0.6.0"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  }
+}

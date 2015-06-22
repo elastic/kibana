@@ -1,0 +1,49 @@
+{
+  "author": {
+    "name": "Tim Koschützki",
+    "email": "tim@debuggable.com",
+    "url": "http://debuggable.com/"
+  },
+  "name": "retry",
+  "description": "Abstraction for exponential and custom retry strategies for failed operations.",
+  "version": "0.6.0",
+  "homepage": "https://github.com/tim-kos/node-retry",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/felixge/node-retry.git"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "index",
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "fake": "0.2.0",
+    "far": "0.0.1"
+  },
+  "_npmUser": {
+    "name": "tim-kos",
+    "email": "tim@debuggable.com"
+  },
+  "_id": "retry@0.6.0",
+  "_engineSupported": true,
+  "_npmVersion": "1.0.103",
+  "_nodeVersion": "v0.4.12",
+  "_defaultsLoaded": true,
+  "dist": {
+    "shasum": "1c010713279a6fd1e8def28af0c3ff1871caa537",
+    "tarball": "http://registry.npmjs.org/retry/-/retry-0.6.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "tim-kos",
+      "email": "tim@debuggable.com"
+    }
+  ],
+  "_shasum": "1c010713279a6fd1e8def28af0c3ff1871caa537",
+  "_resolved": "https://registry.npmjs.org/retry/-/retry-0.6.0.tgz",
+  "_from": "retry@0.6.0"
+}

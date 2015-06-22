@@ -1,0 +1,62 @@
+{
+  "name": "cli-color",
+  "version": "0.3.2",
+  "description": "Colors, formatting and other tools for the console",
+  "author": {
+    "name": "Mariusz Nowak",
+    "email": "medyk@medikoo.com",
+    "url": "http://www.medikoo.com/"
+  },
+  "keywords": [
+    "ansi",
+    "color",
+    "console",
+    "terminal",
+    "cli",
+    "shell",
+    "log",
+    "logging",
+    "xterm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/medikoo/cli-color.git"
+  },
+  "dependencies": {
+    "d": "~0.1.1",
+    "es5-ext": "~0.10.2",
+    "memoizee": "0.3.x",
+    "timers-ext": "0.1.x"
+  },
+  "devDependencies": {
+    "tad": "0.2.x"
+  },
+  "scripts": {
+    "test": "node ./node_modules/tad/bin/tad"
+  },
+  "licence": "MIT",
+  "bugs": {
+    "url": "https://github.com/medikoo/cli-color/issues"
+  },
+  "homepage": "https://github.com/medikoo/cli-color",
+  "_id": "cli-color@0.3.2",
+  "dist": {
+    "shasum": "75fa5f728c308cc4ac594b05e06cc5d80daccd86",
+    "tarball": "http://registry.npmjs.org/cli-color/-/cli-color-0.3.2.tgz"
+  },
+  "_from": "cli-color@>=0.3.2 <0.4.0",
+  "_npmVersion": "1.4.3",
+  "_npmUser": {
+    "name": "medikoo",
+    "email": "medikoo+npm@medikoo.com"
+  },
+  "maintainers": [
+    {
+      "name": "medikoo",
+      "email": "medikoo+npm@medikoo.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "75fa5f728c308cc4ac594b05e06cc5d80daccd86",
+  "_resolved": "https://registry.npmjs.org/cli-color/-/cli-color-0.3.2.tgz"
+}

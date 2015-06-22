@@ -1,0 +1,229 @@
+{
+  "title":"CSS Filter Effects",
+  "description":"Method of applying filter effects (like blur, grayscale, brightness, contrast and hue) to elements, previously only possible by using SVG.",
+  "spec":"http://www.w3.org/TR/filter-effects/",
+  "status":"wd",
+  "links":[
+    {
+      "url":"http://html5-demos.appspot.com/static/css/filters/index.html",
+      "title":"Demo file for WebKit browsers"
+    },
+    {
+      "url":"http://www.html5rocks.com/en/tutorials/filters/understanding-css/",
+      "title":"HTML5Rocks article"
+    },
+    {
+      "url":"http://dl.dropbox.com/u/3260327/angular/CSS3ImageManipulation.html",
+      "title":"Filter editor"
+    },
+    {
+      "url":"http://bennettfeely.com/filters/",
+      "title":"Filter Playground"
+    }
+  ],
+  "bugs":[
+    
+  ],
+  "categories":[
+    "CSS",
+    "CSS3"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "TP":"n"
+    },
+    "firefox":{
+      "2":"n",
+      "3":"n",
+      "3.5":"n",
+      "3.6":"a",
+      "4":"a",
+      "5":"a",
+      "6":"a",
+      "7":"a",
+      "8":"a",
+      "9":"a",
+      "10":"a",
+      "11":"a",
+      "12":"a",
+      "13":"a",
+      "14":"a",
+      "15":"a",
+      "16":"a",
+      "17":"a",
+      "18":"a",
+      "19":"a",
+      "20":"a",
+      "21":"a",
+      "22":"a",
+      "23":"a",
+      "24":"a",
+      "25":"a",
+      "26":"a",
+      "27":"a",
+      "28":"a",
+      "29":"a",
+      "30":"a",
+      "31":"a",
+      "32":"a",
+      "33":"a",
+      "34":"a d #1",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y"
+    },
+    "chrome":{
+      "4":"n",
+      "5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "12":"n",
+      "13":"n",
+      "14":"n",
+      "15":"n",
+      "16":"n",
+      "17":"n",
+      "18":"y x",
+      "19":"y x",
+      "20":"y x",
+      "21":"y x",
+      "22":"y x",
+      "23":"y x",
+      "24":"y x",
+      "25":"y x",
+      "26":"y x",
+      "27":"y x",
+      "28":"y x",
+      "29":"y x",
+      "30":"y x",
+      "31":"y x",
+      "32":"y x",
+      "33":"y x",
+      "34":"y x",
+      "35":"y x",
+      "36":"y x",
+      "37":"y x",
+      "38":"y x",
+      "39":"y x",
+      "40":"y x",
+      "41":"y x",
+      "42":"y x",
+      "43":"y x"
+    },
+    "safari":{
+      "3.1":"n",
+      "3.2":"n",
+      "4":"n",
+      "5":"n",
+      "5.1":"n",
+      "6":"y x",
+      "6.1":"y x",
+      "7":"y x",
+      "7.1":"y x",
+      "8":"y x"
+    },
+    "opera":{
+      "9":"n",
+      "9.5-9.6":"n",
+      "10.0-10.1":"n",
+      "10.5":"n",
+      "10.6":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"n",
+      "11.6":"n",
+      "12":"n",
+      "12.1":"n",
+      "15":"y x",
+      "16":"y x",
+      "17":"y x",
+      "18":"y x",
+      "19":"y x",
+      "20":"y x",
+      "21":"y x",
+      "22":"y x",
+      "23":"y x",
+      "24":"y x",
+      "25":"y x",
+      "26":"y x",
+      "27":"y x",
+      "28":"y x",
+      "29":"y x"
+    },
+    "ios_saf":{
+      "3.2":"n",
+      "4.0-4.1":"n",
+      "4.2-4.3":"n",
+      "5.0-5.1":"n",
+      "6.0-6.1":"y x",
+      "7.0-7.1":"y x",
+      "8":"y x",
+      "8.1":"y x"
+    },
+    "op_mini":{
+      "5.0-8.0":"n"
+    },
+    "android":{
+      "2.1":"n",
+      "2.2":"n",
+      "2.3":"n",
+      "3":"n",
+      "4":"n",
+      "4.1":"n",
+      "4.2-4.3":"n",
+      "4.4":"y x",
+      "4.4.3-4.4.4":"y x",
+      "37":"y x"
+    },
+    "bb":{
+      "7":"n",
+      "10":"y x"
+    },
+    "op_mob":{
+      "10":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"n",
+      "12":"n",
+      "12.1":"n",
+      "24":"y x"
+    },
+    "and_chr":{
+      "40":"y x"
+    },
+    "and_ff":{
+      "33":"a"
+    },
+    "ie_mob":{
+      "10":"n",
+      "11":"n"
+    },
+    "and_uc":{
+      "9.9":"y x"
+    }
+  },
+  "notes":"Note that this property is significantly different from and incompatible with Microsoft's [older \"filter\" property](http://msdn.microsoft.com/en-us/library/ie/ms530752%28v=vs.85%29.aspx).\r\n\r\nPartial support in Firefox before version 34 [only implemented the url() function of the filter property](https://developer.mozilla.org/en-US/docs/Web/CSS/filter#Browser_compatibility)",
+  "notes_by_num":{
+    "1":"Supported in Firefox under the `layout.css.filters.enabled` flag."
+  },
+  "usage_perc_y":66.87,
+  "usage_perc_a":7.71,
+  "ucprefix":false,
+  "parent":"",
+  "keywords":"sepia,hue-rotate,invert,saturate",
+  "ie_id":"filters",
+  "chrome_id":"5822463824887808",
+  "shown":true
+}

@@ -1,0 +1,92 @@
+{
+  "name": "esprima",
+  "description": "ECMAScript parsing infrastructure for multipurpose analysis",
+  "homepage": "http://esprima.org",
+  "main": "esprima.js",
+  "bin": {
+    "esparse": "./bin/esparse.js",
+    "esvalidate": "./bin/esvalidate.js"
+  },
+  "version": "2.0.0",
+  "files": [
+    "bin",
+    "test/run.js",
+    "test/runner.js",
+    "test/test.js",
+    "test/compat.js",
+    "test/reflect.js",
+    "esprima.js"
+  ],
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "author": {
+    "name": "Ariya Hidayat",
+    "email": "ariya.hidayat@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "ariya",
+      "email": "ariya.hidayat@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jquery/esprima.git"
+  },
+  "bugs": {
+    "url": "http://issues.esprima.org"
+  },
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "https://github.com/jquery/esprima/raw/master/LICENSE.BSD"
+    }
+  ],
+  "devDependencies": {
+    "eslint": "~0.12.0",
+    "jscs": "~1.10.0",
+    "istanbul": "~0.2.6",
+    "escomplex-js": "1.0.0",
+    "complexity-report": "~1.1.1",
+    "regenerate": "~0.6.2",
+    "unicode-7.0.0": "~0.1.5",
+    "json-diff": "~0.3.1",
+    "optimist": "~0.6.0"
+  },
+  "keywords": [
+    "ast",
+    "ecmascript",
+    "javascript",
+    "parser",
+    "syntax"
+  ],
+  "scripts": {
+    "generate-regex": "node tools/generate-identifier-regex.js",
+    "test": "node test/run.js && npm run lint && npm run coverage",
+    "lint": "npm run check-version && npm run eslint && npm run jscs && npm run complexity",
+    "check-version": "node tools/check-version.js",
+    "jscs": "jscs esprima.js test/*test.js",
+    "eslint": "node node_modules/eslint/bin/eslint.js esprima.js",
+    "complexity": "node tools/list-complexity.js && cr -s -l -w --maxcyc 16 esprima.js",
+    "coverage": "npm run analyze-coverage && npm run check-coverage",
+    "analyze-coverage": "node node_modules/istanbul/lib/cli.js cover test/runner.js",
+    "check-coverage": "node node_modules/istanbul/lib/cli.js check-coverage --statement 100 --branch 100 --function 100",
+    "benchmark": "node test/benchmarks.js",
+    "benchmark-quick": "node test/benchmarks.js quick"
+  },
+  "_id": "esprima@2.0.0",
+  "dist": {
+    "shasum": "609ac5c2667eae5433b41eb9ecece2331b41498f",
+    "tarball": "http://registry.npmjs.org/esprima/-/esprima-2.0.0.tgz"
+  },
+  "_from": "esprima@>=2.0.0 <2.1.0",
+  "_npmVersion": "1.4.3",
+  "_npmUser": {
+    "name": "ariya",
+    "email": "ariya.hidayat@gmail.com"
+  },
+  "directories": {},
+  "_shasum": "609ac5c2667eae5433b41eb9ecece2331b41498f",
+  "_resolved": "https://registry.npmjs.org/esprima/-/esprima-2.0.0.tgz"
+}

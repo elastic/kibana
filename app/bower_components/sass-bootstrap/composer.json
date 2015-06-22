@@ -1,0 +1,28 @@
+{
+    "name": "jlong/sass-bootstrap"
+  , "description": "A sass port of the sleek, intuitive, and powerful front-end framework for faster and easier web development."
+  , "keywords": ["bootstrap", "css", "sass"]
+  , "homepage": "http://github.com/jlong/sass-bootstrap/"
+  , "authors": [
+      {
+        "name": "John W. Long"
+      },
+      {
+        "name": "Mark Otto",
+        "email": "markdotto@gmail.com"
+      },
+      {
+        "name": "Jacob Thornton",
+        "email": "jacobthornton@gmail.com"
+      }
+    ]
+  , "support": {
+      "issues": "https://github.com/twbs/bootstrap/issues"
+    }
+  , "license": "Apache-2.0"
+  , "extra": {
+      "branch-alias": {
+          "dev-master": "3.0.x-dev"
+      }
+  }
+}

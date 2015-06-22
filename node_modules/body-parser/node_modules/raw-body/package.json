@@ -1,0 +1,78 @@
+{
+  "name": "raw-body",
+  "description": "Get and validate the raw body of a readable stream.",
+  "version": "1.3.3",
+  "author": {
+    "name": "Jonathan Ong",
+    "email": "me@jongleberry.com",
+    "url": "http://jongleberry.com"
+  },
+  "contributors": [
+    {
+      "name": "Douglas Christopher Wilson",
+      "email": "doug@somethingdoug.com"
+    },
+    {
+      "name": "Raynos",
+      "email": "raynos2@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stream-utils/raw-body"
+  },
+  "dependencies": {
+    "bytes": "1.0.0",
+    "iconv-lite": "0.4.7"
+  },
+  "devDependencies": {
+    "istanbul": "0.3.5",
+    "mocha": "~2.1.0",
+    "readable-stream": "~1.0.33",
+    "through2": "0.6.3"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "files": [
+    "HISTORY.md",
+    "LICENSE",
+    "README.md",
+    "index.js"
+  ],
+  "scripts": {
+    "test": "mocha --reporter spec --bail test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot test/",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec test/"
+  },
+  "gitHead": "54a27e595f513e03007be907dca4e7e57c88257f",
+  "bugs": {
+    "url": "https://github.com/stream-utils/raw-body/issues"
+  },
+  "homepage": "https://github.com/stream-utils/raw-body",
+  "_id": "raw-body@1.3.3",
+  "_shasum": "8841af3f64ad50a351dc77f229118b40c28fa58c",
+  "_from": "raw-body@1.3.3",
+  "_npmVersion": "1.4.28",
+  "_npmUser": {
+    "name": "dougwilson",
+    "email": "doug@somethingdoug.com"
+  },
+  "maintainers": [
+    {
+      "name": "jongleberry",
+      "email": "jonathanrichardong@gmail.com"
+    },
+    {
+      "name": "dougwilson",
+      "email": "doug@somethingdoug.com"
+    }
+  ],
+  "dist": {
+    "shasum": "8841af3f64ad50a351dc77f229118b40c28fa58c",
+    "tarball": "http://registry.npmjs.org/raw-body/-/raw-body-1.3.3.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/raw-body/-/raw-body-1.3.3.tgz"
+}

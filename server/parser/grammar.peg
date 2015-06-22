@@ -1,0 +1,124 @@
+/*
+ * Timesheet syntax parser
+ */
+
+start
+ = seriesList+
+
+series
+ = function
+ / queryAggOptional
+ / reference
+
+seriesList
+ = series:series ';'? (space*)? { return series }
+
+function
+ = (name:function_name '(' args:args ')' ';'? space?) {
+  return {
+    type: 'function',
+    function: name,
+    arguments: args
+  }
+ }
+
+args
+ = argument+
+
+argument
+ = element:argType ','? (' '*)? {return element}
+
+argType
+ = queryAggOptional
+ / reference
+ / function
+ / number
+ / string
+
+reference
+ = column:column row:integer '@' series:integer {
+  return {
+   type: 'reference',
+   column: column.charCodeAt(0) - 65,
+   row: row,
+   series: series
+  }
+ }
+
+// Only 26 columns supported for now
+column
+ = column:[A-Z]
+
+function_name
+ = (first:[a-z]+ rest:[a-z0-9]* ) { return first.join('') + rest.join('') }
+
+number
+ = number:(integer '.'? integer?) ','? (' '*)? {return parseFloat(number.join(''))}
+
+integer
+ = digits:DIGIT+ {return parseInt(digits.join(''))}
+
+query
+ = '`' q:[^`]* '`' {return q.join('')}
+
+queryAggOptional
+ = query:query agg:agg?
+ {
+  var obj = {query: query, type: 'query'}
+  if (agg) {
+   obj.field = agg.field;
+   obj.metric = agg.metric;
+  }
+  return obj;
+ }
+
+agg
+ = space 'as' space metric:metric ':' field:field
+ {
+  return {
+   field: field,
+   metric: metric
+  }
+ }
+
+metric
+ = metric:[a-z]+ { return metric.join('')}
+
+field
+ = field:[a-zA-Z0-9\-\_\.]+ {return field.join('')}
+
+space
+ = [\ \t]+
+
+ /* ----- Strings, borrowed from the PEGJS JSON parser ----- */
+
+string "string"
+  = quotation_mark chars:char* quotation_mark { return chars.join(''); }
+
+char
+  = unescaped
+  / escape
+    sequence:(
+        '"'
+      / "\\"
+      / "/"
+      / "b" { return "\b"; }
+      / "f" { return "\f"; }
+      / "n" { return "\n"; }
+      / "r" { return "\r"; }
+      / "t" { return "\t"; }
+      / "u" digits:$(HEXDIG HEXDIG HEXDIG HEXDIG) {
+          return String.fromCharCode(parseInt(digits, 16));
+        }
+    )
+    { return sequence; }
+
+escape         = "\\"
+quotation_mark = '"'
+unescaped      = [\x20-\x21\x23-\x5B\x5D-\u10FFFF]
+
+/* ----- Core ABNF Rules ----- */
+
+/* See RFC 4234, Appendix B (http://tools.ietf.org/html/rfc4627). */
+DIGIT  = [0-9]
+HEXDIG = [0-9a-f]i

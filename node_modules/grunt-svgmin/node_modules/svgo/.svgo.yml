@@ -1,0 +1,45 @@
+# replace default config
+# full: true
+
+plugins:
+
+  # - name
+  #
+  # or:
+  # - name: false
+  # - name: true
+  #
+  # or:
+  # - name:
+  #     param1: 1
+  #     param2: 2
+
+  - removeDoctype
+  - removeXMLProcInst
+  - removeComments
+  - removeMetadata
+  - removeEditorsNSData
+  - cleanupAttrs
+  - convertStyleToAttrs
+  - removeRasterImages
+  - cleanupNumericValues
+  - convertColors
+  - removeUnknownsAndDefaults
+  - removeNonInheritableGroupAttrs
+  - removeUselessStrokeAndFill
+  - removeViewBox
+  - cleanupEnableBackground
+  - removeHiddenElems
+  - removeEmptyText
+  - moveElemsAttrsToGroup
+  - collapseGroups
+  - moveGroupAttrsToElems
+  - convertPathData
+  - convertTransform
+  - removeEmptyAttrs
+  - removeEmptyContainers
+  - mergePaths
+  - cleanupIDs
+  - removeUnusedNS
+  - transformsWithOnePath
+  - sortAttrs

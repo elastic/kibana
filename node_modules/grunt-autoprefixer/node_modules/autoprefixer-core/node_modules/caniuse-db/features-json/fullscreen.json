@@ -1,0 +1,242 @@
+{
+  "title":"Full Screen API",
+  "description":"API for allowing content (like a video or canvas element) to take up the entire screen.",
+  "spec":"http://www.w3.org/TR/fullscreen/",
+  "status":"wd",
+  "links":[
+    {
+      "url":"https://developer.mozilla.org/en/DOM/Using_full-screen_mode",
+      "title":"MDN article"
+    },
+    {
+      "url":"http://jlongster.com/2011/11/21/canvas.html",
+      "title":"Blog post"
+    },
+    {
+      "url":"http://hacks.mozilla.org/2012/01/using-the-fullscreen-api-in-web-browsers/",
+      "title":"Mozilla hacks article"
+    },
+    {
+      "url":"http://docs.webplatform.org/wiki/dom/Element/requestFullscreen",
+      "title":"WebPlatform Docs"
+    }
+  ],
+  "bugs":[
+    {
+      "description":"IE 11 doesn't allow going to fullscreen mode when the event that triggers `msRequestFullscreen()` is a `keydown` or `pointerdown` event (`keypress` and `click` do work)"
+    },
+    {
+      "description":"Safari blocks access to keyboard events in fullscreen mode (as a security measure)."
+    },
+    {
+      "description":"IE 11 does not allow scrolling when document.documentElement is set to full screen."
+    },
+    {
+      "description":"IE 11 does not properly support fullscreen when opening from an iframe."
+    },
+    {
+      "description":"Opera 12.1 uses the older specificaton's `:fullscreen-ancestor` pseudo-class instead of the  the `::backdrop` pseudo-element."
+    }
+  ],
+  "categories":[
+    "JS API"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"y x",
+      "TP":"y x"
+    },
+    "firefox":{
+      "2":"n",
+      "3":"n",
+      "3.5":"n",
+      "3.6":"n",
+      "4":"n",
+      "5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"a x",
+      "11":"a x",
+      "12":"a x",
+      "13":"a x",
+      "14":"a x",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"a x",
+      "21":"a x",
+      "22":"a x",
+      "23":"a x",
+      "24":"a x",
+      "25":"a x",
+      "26":"a x",
+      "27":"a x",
+      "28":"a x",
+      "29":"a x",
+      "30":"a x",
+      "31":"a x",
+      "32":"a x",
+      "33":"a x",
+      "34":"a x",
+      "35":"a x",
+      "36":"a x",
+      "37":"a x",
+      "38":"a x"
+    },
+    "chrome":{
+      "4":"n",
+      "5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"n",
+      "10":"n",
+      "11":"n",
+      "12":"n",
+      "13":"n",
+      "14":"n",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"y x",
+      "21":"y x",
+      "22":"y x",
+      "23":"y x",
+      "24":"y x",
+      "25":"y x",
+      "26":"y x",
+      "27":"y x",
+      "28":"y x",
+      "29":"y x",
+      "30":"y x",
+      "31":"y x",
+      "32":"y x",
+      "33":"y x",
+      "34":"y x",
+      "35":"y x",
+      "36":"y x",
+      "37":"y x",
+      "38":"y x",
+      "39":"y x",
+      "40":"y x",
+      "41":"y x",
+      "42":"y x",
+      "43":"y x"
+    },
+    "safari":{
+      "3.1":"n",
+      "3.2":"n",
+      "4":"n",
+      "5":"n",
+      "5.1":"a x",
+      "6":"y x",
+      "6.1":"y x",
+      "7":"y x",
+      "7.1":"y x",
+      "8":"y x"
+    },
+    "opera":{
+      "9":"n",
+      "9.5-9.6":"n",
+      "10.0-10.1":"n",
+      "10.5":"n",
+      "10.6":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"n",
+      "11.6":"n",
+      "12":"n",
+      "12.1":"y",
+      "15":"y x",
+      "16":"y x",
+      "17":"y x",
+      "18":"y x",
+      "19":"y x",
+      "20":"y x",
+      "21":"y x",
+      "22":"y x",
+      "23":"y x",
+      "24":"y x",
+      "25":"y x",
+      "26":"y x",
+      "27":"y x",
+      "28":"y x",
+      "29":"y x"
+    },
+    "ios_saf":{
+      "3.2":"n",
+      "4.0-4.1":"n",
+      "4.2-4.3":"n",
+      "5.0-5.1":"n",
+      "6.0-6.1":"n",
+      "7.0-7.1":"n",
+      "8":"n",
+      "8.1":"n"
+    },
+    "op_mini":{
+      "5.0-8.0":"n"
+    },
+    "android":{
+      "2.1":"n",
+      "2.2":"n",
+      "2.3":"n",
+      "3":"n",
+      "4":"n",
+      "4.1":"n",
+      "4.2-4.3":"n",
+      "4.4":"n",
+      "4.4.3-4.4.4":"n",
+      "37":"n"
+    },
+    "bb":{
+      "7":"n",
+      "10":"a"
+    },
+    "op_mob":{
+      "10":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"n",
+      "12":"n",
+      "12.1":"n",
+      "24":"y x"
+    },
+    "and_chr":{
+      "40":"y x"
+    },
+    "and_ff":{
+      "33":"a x"
+    },
+    "ie_mob":{
+      "10":"n",
+      "11":"y x"
+    },
+    "and_uc":{
+      "9.9":"n"
+    }
+  },
+  "notes":"Partial support refers to supporting an earlier draft of the spec.",
+  "notes_by_num":{
+    
+  },
+  "usage_perc_y":55.97,
+  "usage_perc_a":12.8,
+  "ucprefix":false,
+  "parent":"",
+  "keywords":"full-screen",
+  "ie_id":"fullscreenapi",
+  "chrome_id":"5259513871466496",
+  "shown":true
+}

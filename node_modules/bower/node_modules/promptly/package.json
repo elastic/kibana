@@ -1,0 +1,64 @@
+{
+  "name": "promptly",
+  "version": "0.2.0",
+  "description": "Simple command line prompting utility",
+  "main": "index.js",
+  "dependencies": {
+    "read": "~1.0.4"
+  },
+  "devDependencies": {
+    "mocha": "~1.8.1",
+    "async": "~0.1.22",
+    "expect.js": "~0.2.0"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/IndigoUnited/node-promptly"
+  },
+  "bugs": {
+    "url": "http://github.com/IndigoUnited/node-promptly/issues"
+  },
+  "keywords": [
+    "prompt",
+    "choose",
+    "choice",
+    "cli",
+    "command",
+    "line"
+  ],
+  "author": {
+    "name": "IndigoUnited",
+    "email": "hello@indigounited.com",
+    "url": "http://indigounited.com"
+  },
+  "license": "MIT",
+  "_id": "promptly@0.2.0",
+  "dist": {
+    "shasum": "73ef200fa8329d5d3a8df41798950b8646ca46d9",
+    "tarball": "http://registry.npmjs.org/promptly/-/promptly-0.2.0.tgz"
+  },
+  "_from": "promptly@0.2.0",
+  "_npmVersion": "1.2.21",
+  "_npmUser": {
+    "name": "satazor",
+    "email": "andremiguelcruz@msn.com"
+  },
+  "maintainers": [
+    {
+      "name": "indigounited",
+      "email": "hello@indigounited.com"
+    },
+    {
+      "name": "satazor",
+      "email": "andremiguelcruz@msn.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "73ef200fa8329d5d3a8df41798950b8646ca46d9",
+  "_resolved": "https://registry.npmjs.org/promptly/-/promptly-0.2.0.tgz",
+  "readme": "ERROR: No README data found!",
+  "homepage": "https://github.com/IndigoUnited/node-promptly"
+}

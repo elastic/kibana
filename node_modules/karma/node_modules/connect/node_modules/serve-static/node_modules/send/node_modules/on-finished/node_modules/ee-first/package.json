@@ -1,0 +1,64 @@
+{
+  "name": "ee-first",
+  "description": "return the first event in a set of ee/event pairs",
+  "version": "1.0.5",
+  "author": {
+    "name": "Jonathan Ong",
+    "email": "me@jongleberry.com",
+    "url": "http://jongleberry.com"
+  },
+  "contributors": [
+    {
+      "name": "Douglas Christopher Wilson",
+      "email": "doug@somethingdoug.com"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonathanong/ee-first"
+  },
+  "devDependencies": {
+    "istanbul": "0.3.0",
+    "mocha": "1"
+  },
+  "files": [
+    "index.js",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/"
+  },
+  "gitHead": "c9d9a6881863c0d2fcc2e4ac99a170088c205304",
+  "bugs": {
+    "url": "https://github.com/jonathanong/ee-first/issues"
+  },
+  "homepage": "https://github.com/jonathanong/ee-first",
+  "_id": "ee-first@1.0.5",
+  "_shasum": "8c9b212898d8cd9f1a9436650ce7be202c9e9ff0",
+  "_from": "ee-first@1.0.5",
+  "_npmVersion": "1.4.21",
+  "_npmUser": {
+    "name": "dougwilson",
+    "email": "doug@somethingdoug.com"
+  },
+  "maintainers": [
+    {
+      "name": "jongleberry",
+      "email": "jonathanrichardong@gmail.com"
+    },
+    {
+      "name": "dougwilson",
+      "email": "doug@somethingdoug.com"
+    }
+  ],
+  "dist": {
+    "shasum": "8c9b212898d8cd9f1a9436650ce7be202c9e9ff0",
+    "tarball": "http://registry.npmjs.org/ee-first/-/ee-first-1.0.5.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/ee-first/-/ee-first-1.0.5.tgz",
+  "readme": "ERROR: No README data found!"
+}

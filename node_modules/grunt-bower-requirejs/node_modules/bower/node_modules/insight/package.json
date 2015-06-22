@@ -1,0 +1,91 @@
+{
+  "name": "insight",
+  "version": "0.4.3",
+  "description": "Understand how your tool is being used by anonymously reporting usage metrics to an analtyics vendor, e.g. Google Analytics.",
+  "keywords": [
+    "npm",
+    "package",
+    "stats",
+    "google",
+    "analytics",
+    "track",
+    "metrics"
+  ],
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "main": "lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yeoman/insight"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec test/test.js"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "async": "^0.9.0",
+    "chalk": "^0.5.1",
+    "configstore": "^0.3.1",
+    "inquirer": "^0.6.0",
+    "lodash.debounce": "^2.4.1",
+    "object-assign": "^1.0.0",
+    "os-name": "^1.0.0",
+    "request": "^2.40.0",
+    "tough-cookie": "^0.12.1"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "object-values": "^1.0.0",
+    "sinon": "*"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "license": "BSD",
+  "gitHead": "08e8e41b9015646c27c1a12d2339cab025399176",
+  "bugs": {
+    "url": "https://github.com/yeoman/insight/issues"
+  },
+  "homepage": "https://github.com/yeoman/insight",
+  "_id": "insight@0.4.3",
+  "_shasum": "76d653c5c0d8048b03cdba6385a6948f74614af0",
+  "_from": "insight@0.4.3",
+  "_npmVersion": "1.4.23",
+  "_npmUser": {
+    "name": "rayshan",
+    "email": "ray@shan.io"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    },
+    {
+      "name": "passy",
+      "email": "phartig@rdrei.net"
+    },
+    {
+      "name": "sboudrias",
+      "email": "admin@simonboudrias.com"
+    },
+    {
+      "name": "eddiemonge",
+      "email": "eddie+npm@eddiemonge.com"
+    },
+    {
+      "name": "rayshan",
+      "email": "ray@rayshan.com"
+    }
+  ],
+  "dist": {
+    "shasum": "76d653c5c0d8048b03cdba6385a6948f74614af0",
+    "tarball": "http://registry.npmjs.org/insight/-/insight-0.4.3.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/insight/-/insight-0.4.3.tgz"
+}

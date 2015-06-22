@@ -1,0 +1,61 @@
+{
+  "name": "prepend-http",
+  "version": "1.0.1",
+  "description": "Prepend http:// to humanized URLs like todomvc.com and localhost",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sindresorhus/prepend-http"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "protocol",
+    "scheme",
+    "url",
+    "uri",
+    "prepend",
+    "http"
+  ],
+  "devDependencies": {
+    "ava": "0.0.4"
+  },
+  "gitHead": "b45c718ae57a9405178bfe98f050b35cdb006d0e",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/prepend-http/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/prepend-http",
+  "_id": "prepend-http@1.0.1",
+  "_shasum": "5f13dad9a434fa4f346aa51cf03f3cea15fe4eb3",
+  "_from": "prepend-http@>=1.0.0 <2.0.0",
+  "_npmVersion": "2.1.16",
+  "_nodeVersion": "0.10.32",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "5f13dad9a434fa4f346aa51cf03f3cea15fe4eb3",
+    "tarball": "http://registry.npmjs.org/prepend-http/-/prepend-http-1.0.1.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/prepend-http/-/prepend-http-1.0.1.tgz"
+}

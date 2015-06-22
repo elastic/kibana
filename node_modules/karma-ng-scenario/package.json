@@ -1,0 +1,66 @@
+{
+  "name": "karma-ng-scenario",
+  "version": "0.1.0",
+  "description": "A Karma plugin. Adapter for Angular's Scenario Runner.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/karma-runner/karma-ng-scenario.git"
+  },
+  "keywords": [
+    "karma-plugin",
+    "karma-adapter",
+    "angular",
+    "e2e",
+    "scenario-runner"
+  ],
+  "author": {
+    "name": "Vojta Jina",
+    "email": "vojta.jina@gmail.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6",
+    "karma": "~0.9",
+    "karma-jasmine": "*",
+    "karma-chrome-launcher": "*",
+    "karma-firefox-launcher": "*",
+    "grunt-karma": "~0.4",
+    "grunt-bump": "~0.0.11",
+    "grunt-npm": "~0.0.2",
+    "grunt-auto-release": "~0.0.3"
+  },
+  "peerDependencies": {
+    "karma": ">=0.9"
+  },
+  "license": "MIT",
+  "readme": "# karma-ng-scenario [![Build Status](https://travis-ci.org/karma-runner/karma-ng-scenario.png?branch=master)](https://travis-ci.org/karma-runner/karma-ng-scenario)\n\n> Adapter for the AngularJS Scenario Runner.\n\n**If you are starting a new project, we recommend using [Protractor] for e2e testing AngularJS projects.**\n\n## Installation\n\nThe easiest way is to keep `karma-ng-scenario` as a devDependency in your `package.json`.\n```json\n{\n  \"devDependencies\": {\n    \"karma\": \"~0.10\",\n    \"karma-ng-scenario\": \"~0.1\"\n  }\n}\n```\n\nYou can simple do it by:\n```bash\nnpm install karma-ng-scenario --save-dev\n```\n\n## Configuration\nFollowing code shows the default configuration...\n```js\n// karma.conf.js\nmodule.exports = function(config) {\n  config.set({\n    frameworks: ['ng-scenario'],\n\n    files: [\n      '*.js'\n    ]\n  });\n};\n```\n\n----\n\nFor more information on Karma see the [homepage].\n\n\n[homepage]: http://karma-runner.github.com\n[Protractor]: https://github.com/angular/protractor\n",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/karma-runner/karma-ng-scenario/issues"
+  },
+  "_id": "karma-ng-scenario@0.1.0",
+  "dist": {
+    "shasum": "0d7c8f1348597252178aab450866507f384d08a3",
+    "tarball": "http://registry.npmjs.org/karma-ng-scenario/-/karma-ng-scenario-0.1.0.tgz"
+  },
+  "_from": "karma-ng-scenario@>=0.1.0 <0.2.0",
+  "_npmVersion": "1.3.2",
+  "_npmUser": {
+    "name": "vojtajina",
+    "email": "vojta.jina@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "vojtajina",
+      "email": "vojta.jina@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "0d7c8f1348597252178aab450866507f384d08a3",
+  "_resolved": "https://registry.npmjs.org/karma-ng-scenario/-/karma-ng-scenario-0.1.0.tgz"
+}

@@ -1,0 +1,221 @@
+{
+  "title":"matches() DOM method",
+  "description":"Method of testing whether or not a DOM element matches a given selector. Formerly known (and largely supported with prefix) as matchesSelector.",
+  "spec":"https://dom.spec.whatwg.org/#dom-element-matches",
+  "status":"ls",
+  "links":[
+    {
+      "url":"https://developer.mozilla.org/en/DOM/Element.mozMatchesSelector",
+      "title":"MDN article"
+    },
+    {
+      "url":"http://docs.webplatform.org/wiki/dom/HTMLElement/matchesSelector",
+      "title":"WebPlatform Docs"
+    }
+  ],
+  "bugs":[
+    
+  ],
+  "categories":[
+    "DOM",
+    "JS API"
+  ],
+  "stats":{
+    "ie":{
+      "5.5":"n",
+      "6":"n",
+      "7":"n",
+      "8":"n",
+      "9":"a x",
+      "10":"a x",
+      "11":"a x",
+      "TP":"a x"
+    },
+    "firefox":{
+      "2":"n",
+      "3":"n",
+      "3.5":"n",
+      "3.6":"a x",
+      "4":"a x",
+      "5":"a x",
+      "6":"a x",
+      "7":"a x",
+      "8":"a x",
+      "9":"a x",
+      "10":"a x",
+      "11":"a x",
+      "12":"a x",
+      "13":"a x",
+      "14":"a x",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"a x",
+      "21":"a x",
+      "22":"a x",
+      "23":"a x",
+      "24":"a x",
+      "25":"a x",
+      "26":"a x",
+      "27":"a x",
+      "28":"a x",
+      "29":"a x",
+      "30":"a x",
+      "31":"a x",
+      "32":"a x",
+      "33":"a x",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y"
+    },
+    "chrome":{
+      "4":"a x",
+      "5":"a x",
+      "6":"a x",
+      "7":"a x",
+      "8":"a x",
+      "9":"a x",
+      "10":"a x",
+      "11":"a x",
+      "12":"a x",
+      "13":"a x",
+      "14":"a x",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"a x",
+      "21":"a x",
+      "22":"a x",
+      "23":"a x",
+      "24":"a x",
+      "25":"a x",
+      "26":"a x",
+      "27":"a x",
+      "28":"a x",
+      "29":"a x",
+      "30":"a x",
+      "31":"a x",
+      "32":"a x",
+      "33":"a x",
+      "34":"y",
+      "35":"y",
+      "36":"y",
+      "37":"y",
+      "38":"y",
+      "39":"y",
+      "40":"y",
+      "41":"y",
+      "42":"y",
+      "43":"y"
+    },
+    "safari":{
+      "3.1":"n",
+      "3.2":"n",
+      "4":"n",
+      "5":"a x",
+      "5.1":"a x",
+      "6":"a x",
+      "6.1":"a x",
+      "7":"a x",
+      "7.1":"y",
+      "8":"y"
+    },
+    "opera":{
+      "9":"n",
+      "9.5-9.6":"n",
+      "10.0-10.1":"n",
+      "10.5":"n",
+      "10.6":"n",
+      "11":"n",
+      "11.1":"n",
+      "11.5":"a x",
+      "11.6":"a x",
+      "12":"a x",
+      "12.1":"a x",
+      "15":"a x",
+      "16":"a x",
+      "17":"a x",
+      "18":"a x",
+      "19":"a x",
+      "20":"a x",
+      "21":"y",
+      "22":"y",
+      "23":"y",
+      "24":"y",
+      "25":"y",
+      "26":"y",
+      "27":"y",
+      "28":"y",
+      "29":"y"
+    },
+    "ios_saf":{
+      "3.2":"n",
+      "4.0-4.1":"a x",
+      "4.2-4.3":"a x",
+      "5.0-5.1":"a x",
+      "6.0-6.1":"a x",
+      "7.0-7.1":"a x",
+      "8":"y",
+      "8.1":"y"
+    },
+    "op_mini":{
+      "5.0-8.0":"n"
+    },
+    "android":{
+      "2.1":"n",
+      "2.2":"a x",
+      "2.3":"a x",
+      "3":"a x",
+      "4":"a x",
+      "4.1":"a x",
+      "4.2-4.3":"a x",
+      "4.4":"a x",
+      "4.4.3-4.4.4":"a x",
+      "37":"y"
+    },
+    "bb":{
+      "7":"a x",
+      "10":"a x"
+    },
+    "op_mob":{
+      "10":"n",
+      "11":"n",
+      "11.1":"a x",
+      "11.5":"a x",
+      "12":"a x",
+      "12.1":"a x",
+      "24":"y"
+    },
+    "and_chr":{
+      "40":"y"
+    },
+    "and_ff":{
+      "33":"a x"
+    },
+    "ie_mob":{
+      "10":"a x",
+      "11":"a x"
+    },
+    "and_uc":{
+      "9.9":"a x"
+    }
+  },
+  "notes":"Partial support refers to supporting the older specification's \"matchesSelector\" name rather than just \"matches\".",
+  "notes_by_num":{
+    
+  },
+  "usage_perc_y":59.65,
+  "usage_perc_a":31.06,
+  "ucprefix":false,
+  "parent":"",
+  "keywords":" matchesSelector",
+  "ie_id":"",
+  "chrome_id":"",
+  "shown":true
+}

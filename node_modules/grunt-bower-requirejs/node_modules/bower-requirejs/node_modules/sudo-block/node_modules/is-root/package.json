@@ -1,0 +1,61 @@
+{
+  "name": "is-root",
+  "version": "1.0.0",
+  "description": "Check if the process is running as root user, eg. started with `sudo`.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sindresorhus/is-root"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "sudo",
+    "root",
+    "user",
+    "permissions",
+    "uid",
+    "process",
+    "posix"
+  ],
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "gitHead": "6afc5207f2eb1cedb3c0e2f62e4adcfdba6f1455",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/is-root/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/is-root",
+  "_id": "is-root@1.0.0",
+  "_shasum": "07b6c233bc394cd9d02ba15c966bd6660d6342d5",
+  "_from": "is-root@>=1.0.0 <2.0.0",
+  "_npmVersion": "1.4.14",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "07b6c233bc394cd9d02ba15c966bd6660d6342d5",
+    "tarball": "http://registry.npmjs.org/is-root/-/is-root-1.0.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/is-root/-/is-root-1.0.0.tgz"
+}
