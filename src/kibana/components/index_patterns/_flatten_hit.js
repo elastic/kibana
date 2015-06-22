@@ -31,11 +31,11 @@ define(function (require) {
 
           flatten(val, key);
         });
-      }(hit._source));
+      }(hit._inline || hit._source));
 
       // assign the meta fields
       _.each(metaFields, function (meta) {
-        if (meta === '_source') return;
+        if (meta === '_source' || meta === '_inline') return;
         flat[meta] = hit[meta];
       });
 

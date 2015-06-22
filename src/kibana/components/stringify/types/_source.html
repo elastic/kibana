@@ -1,7 +1,16 @@
 <dl class="source truncate-by-height">
   <% defPairs.forEach(function (def) { %>
     <dt><%- def[0] %>:</dt>
-    <dd><%= def[1] %></dd>
+    <dd>
+      <%= def[1] %>
+      <% if (filterable[def[2]]) { %>
+        <i>&nbsp;</i>
+        <i ng-click="inlineFilter($event)"
+          tooltip="Filter for value"
+          tooltip-append-to-body="1"
+          class="fa fa-search-plus" data-field="<%- def[2] %>" data-value="<%- def[1] %>"></i>
+      <% } %>
+    </dd>
     <%= ' ' %>
   <% }); %>
 </dl>

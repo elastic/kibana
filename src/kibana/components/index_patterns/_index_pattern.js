@@ -106,7 +106,29 @@ define(function (require) {
       };
 
       function initFields(fields) {
-        self.fields = new FieldList(self, fields || self.fields || []);
+        var listFields, inlineMode;
+
+        listFields = fields || self.fields || [];
+        inlineMode = config.get('discover:inlineMode');
+
+        // If mode inline
+        if (inlineMode && !_.find(listFields, {name: '_inline'})) {
+          listFields.push({
+            analyzed: false,
+            count: 0,
+            doc_values: false,
+            indexed: false,
+            name: '_inline',
+            scripted: false,
+            type: '_source'
+          });
+        } else if (!inlineMode && _.find(listFields, {name: '_inline'})) {
+          listFields = _.filter(listFields, function (field) {
+            return field.name !== '_inline';
+          });
+        }
+
+        self.fields = new FieldList(self, listFields, 'name');
       }
 
       self._indexFields = function () {
@@ -252,6 +274,17 @@ define(function (require) {
       };
 
       self.metaFields = config.get('metaFields');
+
+      $rootScope.$on('change:config.discover:inlineMode', function () {
+        var inlineMode = config.get('discover:inlineMode');
+        if (!inlineMode) {
+          self.metaFields = _.filter(self.metaFields, function (field) { return field !== '_inline'; });
+        } else {
+          self.metaFields.push('_inline');
+        }
+        config.set('metaFields', self.metaFields);
+      });
+
       self.getComputedFields = getComputedFields.bind(self);
 
       self.flattenHit = flattenHit(self);

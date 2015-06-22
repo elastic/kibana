@@ -46,6 +46,10 @@ define(function () {
         value: 500,
         description: 'The number of rows to show in the table',
       },
+      'discover:inlineMode': {
+        value: false,
+        description: 'Enable inline mode when select fields',
+      },
       'courier:maxSegmentCount': {
         value: 30,
         description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
