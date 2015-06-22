@@ -32,7 +32,6 @@ define(function (require) {
     });
 
     return vis;
-
   }
 
   function destroyVis(vis) {
@@ -66,7 +65,6 @@ define(function (require) {
             it('should create .leaflet-container as a by product of map rendering', function () {
               expect($(vis.el).find('.leaflet-container').length).to.be.above(0);
             });
-
           });
         });
       });
