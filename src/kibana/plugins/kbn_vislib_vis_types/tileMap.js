@@ -29,7 +29,7 @@ define(function (require) {
       },
       listeners: {
         rectangle: function (event) {
-          var agg = _.deepGet(event, 'chart.geohashGridAgg');
+          var agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
           var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
@@ -41,7 +41,7 @@ define(function (require) {
           pushFilter(filter, false, indexPatternName);
         },
         mapMoveEnd: function (event) {
-          var agg = _.deepGet(event, 'chart.geohashGridAgg');
+          var agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
           agg.params.mapZoom = event.zoom;
@@ -57,7 +57,7 @@ define(function (require) {
           }
         },
         mapZoomEnd: function (event) {
-          var agg = _.deepGet(event, 'chart.geohashGridAgg');
+          var agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg || !agg.params.autoPrecision) return;
 
           // zoomPrecision maps event.zoom to a geohash precision value

@@ -4,7 +4,7 @@ define(function (require) {
     return Promise.method(function (filters) {
       // Assume all the index patterns are the same since they will be added
       // from the same visualization.
-      var id = _.deepGet(filters, '[0].meta.index');
+      var id = _.get(filters, '[0].meta.index');
       if (id == null) return;
 
       return courier.indexPatterns.get(id).then(function (indexPattern) {

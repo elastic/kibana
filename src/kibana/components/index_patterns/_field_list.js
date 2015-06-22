@@ -4,7 +4,7 @@ define(function (require) {
     var IndexedArray = require('utils/indexed_array/index');
     var _ = require('lodash');
 
-    _(FieldList).inherits(IndexedArray);
+    _.class(FieldList).inherits(IndexedArray);
     function FieldList(indexPattern, specs) {
       FieldList.Super.call(this, {
         index: ['name'],

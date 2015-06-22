@@ -104,26 +104,26 @@ define(function (require) {
     var summary = objUtils.summarizeCoverage(covResults);
 
     var dirs = _(covResults)
-      .map(convertFile)
-      .groupBy(function (file) {
-        var dir = path.dirname(file.filename);
-        return dir === '.' ? '' : dir;
-      })
-      .transform(function (dirs, files, dirname) {
-        _.each(files, function (file) {
-          file.relname = dirname ? path.relative(dirname, file.filename) : file.filename;
-        });
+    .map(convertFile)
+    .groupBy(function (file) {
+      var dir = path.dirname(file.filename);
+      return dir === '.' ? '' : dir;
+    })
+    .transform(function (dirs, files, dirname) {
+      _.each(files, function (file) {
+        file.relname = dirname ? path.relative(dirname, file.filename) : file.filename;
+      });
 
-        dirs.push({
-          name: dirname,
-          files: files,
-          coverage: _.reduce(files, function (sum, file) {
-            return sum + file.coverage;
-          }, 0) / files.length
-        });
-      }, [])
-      .sortBy('name')
-      .value();
+      dirs.push({
+        name: dirname,
+        files: files,
+        coverage: _.reduce(files, function (sum, file) {
+          return sum + file.coverage;
+        }, 0) / files.length
+      });
+    }, [])
+    .sortBy('name')
+    .value();
 
     return template({
       cov: {

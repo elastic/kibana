@@ -5,7 +5,7 @@ define(function (require) {
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var AbstractRequest = Private(require('components/courier/fetch/request/request'));
 
-    _(SearchReq).inherits(AbstractRequest);
+    _.class(SearchReq).inherits(AbstractRequest);
     var Super = SearchReq.Super;
     function SearchReq(source, defer) {
       Super.call(this, source, defer);

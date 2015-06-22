@@ -15,9 +15,12 @@ function checkForCircularDependency(plugins) {
     deps[task.name] = [];
     if (task.require) deps[task.name] = task.require;
   });
-  return _(deps).keys().map(function (task) {
+  return _(deps)
+  .keys()
+  .map(function (task) {
     return checkDependencies(task, deps);
-  }).every(function (result) {
+  })
+  .every(function (result) {
     return result;
   });
 }

@@ -4,7 +4,7 @@ define(function (require) {
     var Renderbot = Private(require('components/vis/Renderbot'));
     var buildChartData = Private(require('components/vislib_vis_type/buildChartData'));
 
-    _(VislibRenderbot).inherits(Renderbot);
+    _.class(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {
       VislibRenderbot.Super.call(this, vis, $el);
       this._createVis();

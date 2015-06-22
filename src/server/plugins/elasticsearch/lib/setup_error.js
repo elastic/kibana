@@ -7,7 +7,7 @@ function SetupError(server, template, err) {
   if (err && err instanceof SetupError) return err;
   Error.captureStackTrace(this, this.constructor);
   this.name = this.constructor.name;
-  this.message = _.template(template, config);
+  this.message = _.template(template)(config);
   if (err) {
     this.origError = err;
     if (err.stack) this.stack = err.stack;

@@ -11,7 +11,7 @@ define(function (require) {
     require('plugins/kbn_vislib_vis_types/controls/point_series_options');
     require('plugins/kbn_vislib_vis_types/controls/line_interpolation_option');
 
-    _(VislibVisType).inherits(VisType);
+    _.class(VislibVisType).inherits(VisType);
     function VislibVisType(opts) {
       opts = opts || {};
 

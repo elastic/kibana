@@ -218,7 +218,7 @@ define(function (require) {
     Data.prototype.chartData = function () {
       if (!this.data.series) {
         var arr = this.data.rows ? this.data.rows : this.data.columns;
-        return _.pluck(arr);
+        return _.toArray(arr);
       }
       return [this.data];
     };
@@ -282,9 +282,9 @@ define(function (require) {
     Data.prototype.flatten = function () {
       return _(this.chartData())
       .pluck('series')
-      .flatten()
+      .flattenDeep()
       .pluck('values')
-      .flatten()
+      .flattenDeep()
       .value();
     };
 

@@ -4,7 +4,7 @@ define(function (require) {
     var VisType = Private(require('components/vis/VisType'));
     var TemplateRenderbot = Private(require('components/template_vis_type/TemplateRenderbot'));
 
-    _(TemplateVisType).inherits(VisType);
+    _.class(TemplateVisType).inherits(VisType);
     function TemplateVisType(opts) {
       TemplateVisType.Super.call(this, opts);
 

@@ -6,7 +6,7 @@ define(function (require) {
     var template = _.template(noWhiteSpace(require('text!components/stringify/types/_source.html')));
     var angular = require('angular');
 
-    _(Source).inherits(FieldFormat);
+    _.class(Source).inherits(FieldFormat);
     function Source(params) {
       Source.Super.call(this, params);
     }

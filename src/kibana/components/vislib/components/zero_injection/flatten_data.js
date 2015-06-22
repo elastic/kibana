@@ -20,9 +20,9 @@ define(function (require) {
 
       return _(charts ? charts : [obj])
       .pluck('series')
-      .flatten()
+      .flattenDeep()
       .pluck('values')
-      .flatten()
+      .flattenDeep()
       .filter(Boolean)
       .value();
     };

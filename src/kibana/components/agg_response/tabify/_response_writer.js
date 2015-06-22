@@ -7,7 +7,7 @@ define(function (require) {
 
     var AggConfigResult = require('components/vis/AggConfigResult');
 
-    _(SplitAcr).inherits(AggConfigResult);
+    _.class(SplitAcr).inherits(AggConfigResult);
     function SplitAcr(agg, parent, key) {
       SplitAcr.Super.call(this, agg, parent, key, key);
     }

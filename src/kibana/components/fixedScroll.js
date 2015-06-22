@@ -42,7 +42,7 @@ define(function (require) {
             };
           }
 
-          unlisten = _.compose(
+          unlisten = _.flow(
             bind($el, $scroller),
             bind($scroller, $el),
             function () { unlisten = _.noop; }
