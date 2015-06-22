@@ -14,8 +14,8 @@ define(function (require) {
       Table = Private(require('components/agg_response/tabify/_table'));
       TableGroup = Private(require('components/agg_response/tabify/_table_group'));
       aggResponse = Private(require('components/agg_response/index'));
-      VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
-      buildChartData = Private(require('plugins/vis_types/vislib/_build_chart_data'));
+      VislibRenderbot = Private(require('components/vislib_vis_type/VislibRenderbot'));
+      buildChartData = Private(require('components/vislib_vis_type/buildChartData'));
     }));
 
     describe('for hierarchical vis', function () {

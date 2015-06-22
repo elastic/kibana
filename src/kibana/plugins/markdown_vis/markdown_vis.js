@@ -6,7 +6,7 @@ define(function (require) {
   require('plugins/markdown_vis/markdown_vis_controller');
 
   return function (Private) {
-    var TemplateVisType = Private(require('plugins/vis_types/template/template_vis_type'));
+    var TemplateVisType = Private(require('components/template_vis_type/TemplateVisType'));
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.

@@ -19,7 +19,7 @@ define(function (require) {
 
       timeField = indexPattern.timeFieldName;
       aggTypes = Private(require('components/agg_types/index'));
-      AggConfig = Private(require('components/vis/_agg_config'));
+      AggConfig = Private(require('components/vis/AggConfig'));
 
       paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
       writeInterval = function (interval) {
