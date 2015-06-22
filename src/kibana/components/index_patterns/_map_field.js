@@ -11,7 +11,7 @@ define(function (require) {
      */
     return function mapField(field, name) {
       var keys = Object.keys(field.mapping);
-      if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
+      if (keys.length === 0) return;
 
       var mapping = _.cloneDeep(field.mapping[keys.shift()]);
       mapping.type = castMappingType(mapping.type);
