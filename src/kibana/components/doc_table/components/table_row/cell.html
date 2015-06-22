@@ -8,6 +8,6 @@ if (timefield) {
   attributes='class="discover-table-datafield"';
 }
 %>
-<td <%= attributes %>>
+<td <%= (typeof colspan !== 'undefined') ? 'colspan="' + colspan + '"' : ''  %><%= attributes %>>
   <%= formatted %>
 </td>

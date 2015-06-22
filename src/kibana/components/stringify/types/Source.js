@@ -22,17 +22,23 @@ define(function (require) {
 
         var highlights = (hit && hit.highlight) || {};
         var formatted = field.indexPattern.formatHit(hit);
+        var mapping = field.indexPattern.fields.byName;
         var highlightPairs = [];
         var sourcePairs = [];
+        var filterable = {};
 
         _.keys(formatted).forEach(function (key) {
           var pairs = highlights[key] ? highlightPairs : sourcePairs;
+          filterable[key] = mapping[key] ? mapping[key].filterable : false;
           var field = shortDotsFilter(key);
           var val = formatted[key];
-          pairs.push([field, val]);
+          pairs.push([field, val, key]);
         }, []);
 
-        return template({ defPairs: highlightPairs.concat(sourcePairs) });
+        return template({
+          filterable: filterable,
+          defPairs: highlightPairs.concat(sourcePairs)
+        });
       }
     };
 

@@ -131,6 +131,7 @@ define(function (require) {
 
       // call a private provider and return the instance it creates
       function instantiate(prov, locals) {
+
         if (~privPath.indexOf(prov)) {
           throw new Error(
             'Circular refrence to "' + name(prov) + '"' +
