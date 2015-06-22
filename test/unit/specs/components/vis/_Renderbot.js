@@ -1,14 +1,12 @@
 define(function (require) {
-  var Renderbot;
+  return ['renderbot', function () {
+    var Renderbot;
 
-  return ['renderbot', exportWrapper];
-
-  function exportWrapper() {
     function init() {
       module('kibana');
 
       inject(function (Private) {
-        Renderbot = Private(require('plugins/vis_types/_renderbot'));
+        Renderbot = Private(require('components/vis/Renderbot'));
       });
     }
 
@@ -35,5 +33,5 @@ define(function (require) {
         expect(renderbot.destroy).to.throwError();
       });
     });
-  }
+  }];
 });
