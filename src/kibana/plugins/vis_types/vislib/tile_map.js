@@ -16,12 +16,12 @@ define(function (require) {
         defaults: {
           mapType: 'Scaled Circle Markers',
           isDesaturated: true,
+          addTooltip: true,
           heatMaxZoom: 16,
           heatMinOpacity: 0.1,
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
-          addTooltip: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,

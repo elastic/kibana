@@ -18,6 +18,7 @@ define(function (require) {
 
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._valueFormatter = params.valueFormatter || _.identity;
+      this._attr = params.attr || {};
 
       // set up the default legend colors
       this.quantizeLegendColors();

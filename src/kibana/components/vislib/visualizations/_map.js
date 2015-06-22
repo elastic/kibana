@@ -41,10 +41,10 @@ define(function (require) {
       // keep a reference to all of the optional params
       this._events = _.get(params, 'events');
       this._markerType = markerTypes[params.markerType] ? params.markerType : defaultMarkerType;
-      this._isDesaturated = params.isDesaturated || false;
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
+      this._attr = params.attr || {};
 
       var mapOptions = {
         minZoom: 1,
@@ -143,7 +143,7 @@ define(function (require) {
      * @return undefined
      */
     Map.prototype.saturateTiles = function () {
-      if (!this._isDesaturated) {
+      if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
     };
@@ -180,6 +180,7 @@ define(function (require) {
       this._markers = new MarkerType(this.map, this._geoJson, {
         tooltipFormatter: this._tooltipFormatter,
         valueFormatter: this._valueFormatter,
+        attr: this._attr
       });
 
       if (this._geoJson.features.length > 1) {

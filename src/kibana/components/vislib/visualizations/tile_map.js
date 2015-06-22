@@ -73,10 +73,9 @@ define(function (require) {
             // zoom: self._attr.mapZoom,
             events: self.events,
             markerType: self._attr.mapType,
-            isDesaturated: self._attr.isDesaturated,
             tooltipFormatter: self.tooltipFormatter,
             valueFormatter: self.valueFormatter,
-            addTooltip: self._attr.addTooltip
+            attr: self._attr
           });
 
           // add title for splits
