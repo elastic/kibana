@@ -40,9 +40,9 @@ define(function (require) {
       _.assign(this, this._chartData);
 
       // add allmin and allmax to geoJson
-      var allMinMax = this.getMinMax(handler.data.data);
-      this.geoJson.properties.allmin = allMinMax.min;
-      this.geoJson.properties.allmax = allMinMax.max;
+      var geoMinMax = handler.data.getGeoExtents();
+      this.geoJson.properties.allmin = geoMinMax.min;
+      this.geoJson.properties.allmax = geoMinMax.max;
     }
 
     /**
@@ -92,39 +92,6 @@ define(function (require) {
           self.maps.push(map);
         });
       };
-    };
-
-    /**
-     * get min and max for all cols, rows of data
-     *
-     * @method getMaxMin
-     * @param data {Object}
-     * @return {Object}
-     */
-    TileMap.prototype.getMinMax = function (data) {
-      var min = [];
-      var max = [];
-      var allData;
-
-      if (data.rows) {
-        allData = data.rows;
-      } else if (data.columns) {
-        allData = data.columns;
-      } else {
-        allData = [data];
-      }
-
-      allData.forEach(function (datum) {
-        min.push(datum.geoJson.properties.min);
-        max.push(datum.geoJson.properties.max);
-      });
-
-      var minMax = {
-        min: _.min(min),
-        max: _.max(max)
-      };
-
-      return minMax;
     };
 
     /**
