@@ -16,7 +16,6 @@ define(function (require) {
 
   angular.module('TileMapFactory', ['kibana']);
 
-
   function bootstrapAndRender(data, type) {
     var vis;
     var visLibParams = {
@@ -156,90 +155,6 @@ define(function (require) {
         destroyVis(vis);
       });
 
-      describe('_filterToMapBounds method', function () {
-        it('should filter out data points that are outside of the map bounds', function () {
-          vis.handler.charts.forEach(function (chart) {
-            chart.maps.forEach(function (map) {
-              var featuresLength = chart.geoJson.features.length;
-              var mapFeatureLength;
-
-              function getSize(obj) {
-                var size = 0;
-                var key;
-
-                for (key in obj) { if (obj.hasOwnProperty(key)) size++; }
-                return size;
-              }
-
-              map.setZoom(13); // Zoom in on the map!
-              mapFeatureLength = getSize(map._layers);
-
-              expect(mapFeatureLength).to.be.lessThan(featuresLength);
-            });
-          });
-        });
-      });
-
-      describe('geohashMinDistance method', function () {
-        it('should return a number', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(_.isFinite(chart.geohashMinDistance(feature))).to.be(true);
-          });
-        });
-      });
-
-      describe('radiusScale method', function () {
-        var countdata = [0, 10, 20, 30, 40, 50, 60];
-        var max = 60;
-        var zoom = _.random(1, 18);
-        var constantZoomRadius = 0.5 * Math.pow(2, zoom);
-        var precision = _.random(1, 12);
-        var precisionScale = 200 / Math.pow(5, precision);
-        var prev = -1;
-
-        it('test array should return a number equal to radius', function () {
-          countdata.forEach(function (data, i) {
-            vis.handler.charts.forEach(function (chart) {
-              var count = data;
-              var pct = count / max;
-              var exp = 0.5;
-              var radius = Math.pow(pct, exp) * constantZoomRadius * precisionScale;
-              var test = chart.radiusScale(count, max, zoom, precision);
-
-              expect(test).to.be.a('number');
-              expect(test).to.be(radius);
-            });
-          });
-        });
-
-        it('test array should return a radius greater than previous', function () {
-          countdata.forEach(function (data, i) {
-            vis.handler.charts.forEach(function (chart) {
-              var count = data;
-              var pct = count / max;
-              var exp = 0.5;
-              var radius = Math.pow(pct, exp) * constantZoomRadius * precisionScale;
-              var test = chart.radiusScale(count, max, zoom, precision);
-
-              expect(test).to.be.above(prev);
-              prev = chart.radiusScale(count, max, zoom, precision);
-            });
-          });
-        });
-      });
-
-      describe('quantizeColorScale method', function () {
-        it('should return a hex color', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var reds = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-            var count = Math.random() * 300;
-            var min = 0;
-            var max = 300;
-            expect(_.indexOf(reds, chart.quantizeColorScale(count, min, max))).to.not.be(-1);
-          });
-        });
-      });
-
       describe('getMinMax method', function () {
         it('should return an object', function () {
           vis.handler.charts.forEach(function (chart) {
@@ -267,105 +182,6 @@ define(function (require) {
             .max()
             .value();
             expect(chart.getMinMax(data).max).to.be(max);
-          });
-        });
-      });
-
-      describe('dataToHeatArray method', function () {
-        it('should return an array', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.dataToHeatArray(max)).to.be.an(Array);
-          });
-        });
-
-        it('should return an array item for each feature', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.dataToHeatArray(max).length).to.be(mapData.features.length);
-          });
-        });
-
-        it('should return an array item with lat, lng, metric for each feature', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var lat = feature.geometry.coordinates[1];
-            var lng = feature.geometry.coordinates[0];
-            var intensity = feature.properties.value;
-            var array = chart.dataToHeatArray(max);
-            expect(array[i][0]).to.be(lat);
-            expect(array[i][1]).to.be(lng);
-            expect(array[i][2]).to.be(intensity);
-          });
-        });
-
-        it('should return an array item with lat, lng, normalized metric for each feature', function () {
-          vis.handler.charts.forEach(function (chart) {
-            chart._attr.heatNormalizeData = true;
-            var lat = feature.geometry.coordinates[1];
-            var lng = feature.geometry.coordinates[0];
-            var intensity = parseInt(feature.properties.value / max * 100);
-            var array = chart.dataToHeatArray(max);
-            expect(array[i][0]).to.be(lat);
-            expect(array[i][1]).to.be(lng);
-            expect(array[i][2]).to.be(intensity);
-          });
-        });
-
-      });
-
-      describe('applyShadingStyle method', function () {
-        it('should return an object', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.applyShadingStyle(feature, min, max)).to.be.an(Object);
-          });
-        });
-      });
-
-      describe('showTooltip method', function () {
-        it('should create a .leaflet-popup-kibana div for the tooltip', function () {
-          vis.handler.charts.forEach(function (chart) {
-            chart.tooltipFormatter = function (str) {
-              return '<div class="popup-stub"></div>';
-            };
-
-            var featureLayer = _.sample(_.filter(map._layers, 'feature'));
-
-            expect($('.popup-stub', vis.el).length).to.be(0);
-            featureLayer.fire('mouseover');
-            expect($('.popup-stub', vis.el).length).to.be(1);
-          });
-        });
-      });
-
-      describe('tooltipProximity method', function () {
-        it('should return true if feature is close enough to event latlng to display tooltip', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(true);
-          });
-        });
-
-        it('should return false if feature is not close enough to event latlng to display tooltip', function () {
-          vis.handler.charts.forEach(function (chart) {
-            var point = L.latLng(90, -180);
-            expect(chart.tooltipProximity(point, zoom, feature, map)).to.be(false);
-          });
-        });
-      });
-
-      describe('nearestFeature method', function () {
-        it('should return an object', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point)).to.be.an(Object);
-          });
-        });
-
-        it('should return a geoJson feature', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point).type).to.be('Feature');
-          });
-        });
-
-        it('should return the geoJson feature with same latlng as point', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(chart.nearestFeature(point)).to.be(feature);
           });
         });
       });
