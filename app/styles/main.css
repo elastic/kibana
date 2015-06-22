@@ -6,6 +6,21 @@ body {
   height: 270px;
 }
 
+.chart-container {
+  height: 270px;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  border: 2px dashed transparent;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.chart-container.active {
+  border-color: #ccc;
+}
+
+
 .chart-container.running {
   opacity: 0.50;
 }
@@ -14,7 +29,7 @@ body {
   cursor: pointer;
   font-size: 0.6em;
   line-height: 25px;
-  margin-top: -5px;
+  margin-top: -13px;
   opacity: 0.50;
 }
 
@@ -28,21 +43,8 @@ body {
 
 .header {
   position:relative;
-  padding-left: 35px;
 }
 
-.chart-container {
-  height: 270px;
-  position: relative;
-  box-sizing: border-box;
-  border: 2px dashed transparent;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-}
-
-.chart-container.active {
-  border-color: #ccc;
-}
 
 .cell-id {
   position: absolute;
@@ -57,7 +59,7 @@ body {
   padding: 3px;
   font-weight: bold;
   background-color: #ccc;
-  opacity: 0.75;
+  opacity: 0.50;
   z-index: 999;
 }
 
@@ -86,6 +88,7 @@ body {
 .preloader {
   left:0;
   top: 6px;
+  display: none;
 }
 
 .preloader {

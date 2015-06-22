@@ -10,7 +10,7 @@ define(function (require) {
       var blankSheet = [
         ['`-*`', '`-*`', '`-*`'],
         ['`-*`', '`-*`', '`-*`'],
-        ['`-*`', '`-*`', '`-*`']
+        //['`-*`', '`-*`', '`-*`']
       ];
 
       $scope.newSheet = function () {

@@ -189,17 +189,21 @@ function invoke (fnName, args) {
   });
 }
 
-function invokeTree (tree) {
+function invokeTree (tree, label) {
   if (tree.type === 'query' || tree.type === 'reference') {
     // A hack to get invoke to resolve a query not wrapped by a function
-    return invoke('first', [tree]);
+    if (label) {
+      return invoke('label', [tree]);
+    } else {
+      return invoke('first', [tree]);
+    }
+
   }
   return invoke(tree.function, tree.arguments);
 }
 
-function resolveExpression (expression) {
+function resolveTree (forest) {
   // Forest, a collection of trees
-  var forest = expression;
 
   var keys = client.search({
     index: 'usagov',
@@ -233,8 +237,8 @@ function resolveExpression (expression) {
 
 function resolveSheet (sheet) {
   return _.map(sheet, function (row) {
-    return _.map(row, function (expression) {
-      return aggspretion.parse(expression);
+    return _.map(row, function (column) {
+      return aggspretion.parse(column);
     });
   });
 }
@@ -245,7 +249,7 @@ function processRequest (request) {
 
   return _.map(sheet, function (row) {
     return _.map(row, function (tree) {
-      return Promise.all(resolveExpression(tree)).then(function (columns) {
+      return Promise.all(resolveTree(tree)).then(function (columns) {
         return columns;
       });
     });

@@ -22,7 +22,7 @@ define(function (require) {
             backgroundColor: '#fff',
             borderWidth: 0,
             borderColor: null,
-            margin: 5,
+            margin: 10,
           },
           legend: {
             position: 'nw'
