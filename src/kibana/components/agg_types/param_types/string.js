@@ -5,7 +5,7 @@ define(function (require) {
     var editorHtml = require('text!components/agg_types/controls/string.html');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
 
-    _(ScriptAggParam).inherits(BaseAggParam);
+    _.class(ScriptAggParam).inherits(BaseAggParam);
     function ScriptAggParam(config) {
       ScriptAggParam.Super.call(this, config);
     }

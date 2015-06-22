@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var expect = require('expect.js');
 var sinon = require('sinon');
 var registerPlugins = require('../../../../../src/server/lib/plugins/register_plugins');

@@ -6,7 +6,7 @@ define(function (require) {
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var SavedObjectNotFound = require('errors').SavedObjectNotFound;
 
-    _(FieldAggParam).inherits(BaseAggParam);
+    _.class(FieldAggParam).inherits(BaseAggParam);
     function FieldAggParam(config) {
       FieldAggParam.Super.call(this, config);
     }

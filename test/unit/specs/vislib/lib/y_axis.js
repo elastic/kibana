@@ -179,7 +179,7 @@ define(function (require) {
 
         it('should have domain between 0 and max value', function () {
           var min = 0;
-          var max = _.max(_.flatten(graphData));
+          var max = _.max(_.flattenDeep(graphData));
           var domain = checkDomain(min, max);
           expect(domain[1]).to.be.greaterThan(0);
           checkRange();
@@ -197,7 +197,7 @@ define(function (require) {
         });
 
         it('should have domain between min value and 0', function () {
-          var min = _.min(_.flatten(graphData));
+          var min = _.min(_.flattenDeep(graphData));
           var max = 0;
           var domain = checkDomain(min, max);
           expect(domain[0]).to.be.lessThan(0);
@@ -216,8 +216,8 @@ define(function (require) {
         });
 
         it('should have domain between min and max values', function () {
-          var min = _.min(_.flatten(graphData));
-          var max = _.max(_.flatten(graphData));
+          var min = _.min(_.flattenDeep(graphData));
+          var max = _.max(_.flattenDeep(graphData));
           var domain = checkDomain(min, max);
           expect(domain[0]).to.be.lessThan(0);
           expect(domain[1]).to.be.greaterThan(0);

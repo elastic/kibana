@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var Renderbot = Private(require('plugins/vis_types/_renderbot'));
 
-    _(TemplateRenderbot).inherits(Renderbot);
+    _.class(TemplateRenderbot).inherits(Renderbot);
     function TemplateRenderbot(vis, $el) {
       TemplateRenderbot.Super.call(this, vis, $el);
 

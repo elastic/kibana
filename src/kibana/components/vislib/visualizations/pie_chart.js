@@ -17,7 +17,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(PieChart).inherits(Chart);
+    _.class(PieChart).inherits(Chart);
     function PieChart(handler, chartEl, chartData) {
       if (!(this instanceof PieChart)) {
         return new PieChart(handler, chartEl, chartData);

@@ -13,7 +13,7 @@ define(function (require) {
      * @constructor
      * @param el {HTMLElement} Reference to DOM element
      */
-
+    _.class(ChartTitle).inherits(ErrorHandler);
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
@@ -24,8 +24,6 @@ define(function (require) {
         return '<p>' + _.escape(d.label) + '</p>';
       });
     }
-
-    _(ChartTitle.prototype).extend(ErrorHandler.prototype);
 
     /**
      * Renders chart titles

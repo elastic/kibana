@@ -4,7 +4,7 @@ define(function (require) {
   return function CreateFilterFiltersProvider(Private) {
     return function (aggConfig, key) {
       // have the aggConfig write agg dsl params
-      var dslFilters = _.deepGet(aggConfig.toDsl(), 'filters.filters');
+      var dslFilters = _.get(aggConfig.toDsl(), 'filters.filters');
       var filter = dslFilters[key];
 
       if (filter) {

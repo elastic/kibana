@@ -16,7 +16,7 @@ define(function (require) {
         return reqsFetchParams.map(function (fetchParams) {
           var indexList = fetchParams.index;
 
-          if (_.isFunction(_.deepGet(indexList, 'toIndexList'))) {
+          if (_.isFunction(_.get(indexList, 'toIndexList'))) {
             var timeBounds = timefilter.getBounds();
             indexList = indexList.toIndexList(timeBounds.min, timeBounds.max);
           }

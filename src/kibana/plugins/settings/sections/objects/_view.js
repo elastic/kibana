@@ -183,7 +183,7 @@ define(function (require) {
               value = JSON.parse(field.value);
             }
 
-            _.setValue(source, field.name, value);
+            _.set(source, field.name, value);
           });
 
           es.index({

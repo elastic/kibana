@@ -5,7 +5,7 @@ define(function (require) {
     var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
     require('components/field_format_editor/pattern/pattern');
 
-    _(Url).inherits(FieldFormat);
+    _.class(Url).inherits(FieldFormat);
     function Url(params) {
       Url.Super.call(this, params);
       this._compileTemplate = _.memoize(this._compileTemplate);

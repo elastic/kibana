@@ -8,7 +8,7 @@ define(function (require) {
     filterManager.add = function (field, values, operation, index) {
       values = _.isArray(values) ? values : [values];
       var fieldName = _.isObject(field) ? field.name : field;
-      var filters = _.flatten([queryFilter.getAppFilters()], true);
+      var filters = _.flatten([queryFilter.getAppFilters()]);
       var newFilters = [];
 
       var negate = (operation === '-');

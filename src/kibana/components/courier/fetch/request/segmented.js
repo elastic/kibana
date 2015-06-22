@@ -9,7 +9,7 @@ define(function (require) {
       location: 'Segmented Fetch'
     });
 
-    _(SegmentedReq).inherits(SearchReq);
+    _.class(SegmentedReq).inherits(SearchReq);
     function SegmentedReq(source, defer, initFn) {
       SearchReq.call(this, source, defer);
 
@@ -176,8 +176,8 @@ define(function (require) {
       this._complete.push(index);
       if (!seg) return; // segment was ignored/filtered, don't store it
 
-      var hadHits = _.deepGet(this._mergedResp, 'hits.hits.length') > 0;
-      var gotHits = _.deepGet(seg, 'hits.hits.length') > 0;
+      var hadHits = _.get(this._mergedResp, 'hits.hits.length') > 0;
+      var gotHits = _.get(seg, 'hits.hits.length') > 0;
       var firstHits = !hadHits && gotHits;
       var haveHits = hadHits || gotHits;
 

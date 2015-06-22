@@ -18,7 +18,7 @@ define(function (require) {
 
         var sortableField = function (field) {
           if (!$scope.indexPattern) return;
-          var sortable = _.deepGet($scope.indexPattern.fields.byName[field], 'sortable');
+          var sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
           return sortable;
         };
 

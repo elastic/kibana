@@ -9,7 +9,7 @@ define(function (require) {
       location: 'SavedVis'
     });
 
-    _(SavedVis).inherits(courier.SavedObject);
+    _.class(SavedVis).inherits(courier.SavedObject);
     function SavedVis(opts) {
       var self = this;
       opts = opts || {};

@@ -153,7 +153,7 @@ define(function (require) {
       self.popularizeField = function (fieldName, unit) {
         if (unit == null) unit = 1;
 
-        var field = _.deepGet(self, ['fields', 'byName', fieldName]);
+        var field = _.get(self, ['fields', 'byName', fieldName]);
         if (!field) return;
 
         var count = Math.max((field.count || 0) + unit, 0);
@@ -214,7 +214,7 @@ define(function (require) {
         .then(setId)
         .catch(function (err) {
           var confirmMessage = 'Are you sure you want to overwrite this?';
-          if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
+          if (_.get(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
             return docSource.doIndex(body).then(setId);
           }
           return Promise.resolve(false);

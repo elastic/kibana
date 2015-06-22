@@ -29,11 +29,7 @@ define(function (require) {
 
               decorateQuery(query);
 
-              var label = filter.label;
-              if (!label) {
-                label = _.deepGet(query, 'query_string.query') || angular.toJson(query);
-              }
-
+              var label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
               filters[label] = input;
             }, {});
 
