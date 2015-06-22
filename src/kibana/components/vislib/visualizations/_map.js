@@ -20,7 +20,7 @@ define(function (require) {
       'Scaled Circle Markers': Private(require('components/vislib/visualizations/marker_types/scaled_circles')),
       'Shaded Circle Markers': Private(require('components/vislib/visualizations/marker_types/shaded_circles')),
       'Shaded Geohash Grid': Private(require('components/vislib/visualizations/marker_types/geohash_grid')),
-      // 'Heatmap': Private(require('components/vislib/visualizations/marker_types/heatmap')),
+      'Heatmap': Private(require('components/vislib/visualizations/marker_types/heatmap')),
     };
 
     var defaultMarkerType = 'Scaled Circle Markers';
