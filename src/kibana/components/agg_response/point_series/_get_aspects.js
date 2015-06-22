@@ -20,7 +20,8 @@ define(function (require) {
       var aspect = {
         i: i,
         col: col,
-        agg: col.aggConfig
+        agg: col.aggConfig,
+        title: '' // updated when done if there are multiple y aspects
       };
 
       if (!aspects[name]) aspects[name] = [];
@@ -41,11 +42,20 @@ define(function (require) {
       .transform(columnToAspect, {})
       // unwrap groups that only have one value, and validate groups that have more
       .transform(function (aspects, group, name) {
-        if (name !== 'y' && group.length > 1) {
+        if (group.length === 1) {
+          aspects[name] = group[0];
+          return;
+        }
+
+        if (name !== 'y') {
           throw new TypeError('Only multiple metrics are supported in point series');
         }
 
-        aspects[name] = group.length > 1 ? group : group[0];
+        group.forEach(function (y) {
+          y.title = y.col.title;
+        });
+
+        aspects[name] = group;
       })
       .value();
 

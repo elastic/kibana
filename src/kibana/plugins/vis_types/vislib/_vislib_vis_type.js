@@ -4,7 +4,6 @@ define(function (require) {
 
     var VisTypeSchemas = Private(require('plugins/vis_types/_schemas'));
     var VisType = Private(require('plugins/vis_types/_vis_type'));
-    var pointSeries = Private(require('components/agg_response/point_series/point_series'));
     var VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
 
     require('plugins/vis_types/controls/vislib_basic_options');
@@ -17,10 +16,6 @@ define(function (require) {
       opts = opts || {};
 
       VislibVisType.Super.call(this, opts);
-
-      if (this.responseConverter == null) {
-        this.responseConverter = pointSeries;
-      }
 
       this.listeners = opts.listeners || {};
     }

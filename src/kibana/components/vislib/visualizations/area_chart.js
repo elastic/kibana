@@ -83,6 +83,10 @@ define(function (require) {
       })
       .interpolate(interpolate);
 
+      if (isOverlapping) {
+        layers = layers.slice().reverse();
+      }
+
       // Data layers
       var layer = svg.selectAll('.layer')
       .data(layers)

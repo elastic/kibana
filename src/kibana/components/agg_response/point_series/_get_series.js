@@ -2,55 +2,42 @@ define(function (require) {
   return function PointSeriesGetSeries(Private) {
     var _ = require('lodash');
     var getPoint = Private(require('components/agg_response/point_series/_get_point'));
-    var addToSiri = Private(require('components/agg_response/point_series/_add_to_siri'));
 
-    return function getSeries(rows, chart) {
+    return function getSeries(rows, chart, vis) {
       var aspects = chart.aspects;
-      var multiY = _.isArray(aspects.y);
       var yScale = chart.yScale;
-      var partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
+      var invertBuckets = vis.type.seriesShouldBeInverted(vis);
 
-      var series = _(rows)
-      .transform(function (series, row) {
+      // collect the y value for a y-aspect from all of the rows
+      // and produce an array of siris.
+      function collect(y) {
+        var series = [];
+        var getSiri = _.memoize(function (id, order) {
+          var siri = { label: id, values: [], order: order };
+          return series[series.push(siri) - 1];
+        });
 
-        if (!multiY) {
-          var point = partGetPoint(row, aspects.y, aspects.z);
-          if (point) addToSiri(series, point, point.series);
-          return;
-        }
-
-        aspects.y.forEach(function (y) {
-          var point = partGetPoint(row, y, aspects.z);
+        rows.forEach(function (row) {
+          var point = getPoint(aspects.x, aspects.series, yScale, row, y, aspects.z);
           if (!point) return;
 
-          var prefix = point.series ? point.series + ': ' : '';
-          var seriesId = prefix + y.agg.id;
-          var seriesLabel = prefix + y.col.title;
-
-          addToSiri(series, point, seriesId, seriesLabel);
+          var series = point.series == null ? '' : point.series + '';
+          var id = series + (y.title && series ? ': ' : '') + y.title;
+          getSiri(id).values.push(point);
         });
 
-      }, {})
-      .values()
-      .value();
-
-      if (multiY) {
-        series = _.sortBy(series, function (siri) {
-          var firstVal = siri.values[0];
-          var y;
-
-          if (firstVal) {
-            var agg = firstVal.aggConfigResult.aggConfig;
-            y = _.find(aspects.y, function (y) {
-              return y.agg === agg;
-            });
-          }
-
-          return y ? y.i : series.length;
-        });
+        if (invertBuckets) series.reverse();
+        return series;
       }
 
-      return series;
+      if (!_.isArray(aspects.y)) {
+        return collect(aspects.y);
+      } else {
+        return _(aspects.y)
+        .map(collect)
+        .flatten(true)
+        .value();
+      }
     };
   };
 });

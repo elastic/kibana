@@ -1,7 +1,6 @@
 define(function (require) {
   describe('Point Series Agg Response', function () {
     describe(require('specs/components/agg_response/point_series/_main'));
-    describe(require('specs/components/agg_response/point_series/_add_to_siri'));
     describe(require('specs/components/agg_response/point_series/_fake_x_aspect'));
     describe(require('specs/components/agg_response/point_series/_get_aspects'));
     describe(require('specs/components/agg_response/point_series/_get_point'));
