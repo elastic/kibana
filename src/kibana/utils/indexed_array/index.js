@@ -27,7 +27,7 @@ define(function (require) {
    *                                       that this IndexedArray should not be modified. It's modification
    *                                       methods are also removed
    */
-  _(IndexedArray).inherits(Array);
+  _.class(IndexedArray).inherits(Array);
   function IndexedArray(config) {
     IndexedArray.Super.call(this);
 
@@ -38,7 +38,7 @@ define(function (require) {
 
     // setup indices
     this._indexNames = _.union(
-      this._setupIndices(config.group, inflectIndex, _.groupBy),
+      this._setupIndices(config.group, inflectIndex, _.organizeBy),
       this._setupIndices(config.index, inflectIndex, _.indexBy),
       this._setupIndices(config.order, inflectOrder, _.sortBy)
     );

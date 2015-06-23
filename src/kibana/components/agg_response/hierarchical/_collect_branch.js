@@ -1,5 +1,4 @@
-define(function (require) {
-  var _ = require('lodash');
+define(function () {
   return function (leaf) {
     // walk up the branch for each parent
     function walk(item, memo) {
@@ -14,19 +13,12 @@ define(function (require) {
         || (col && col.label)
         || ('level ' + item.depth);
 
-      // Set the bucket name, and use the converter to format the field if
-      // the field exists.
-      var bucket = item.name;
-      if (col) {
-        bucket = col.fieldFormatter()(bucket);
-      }
-
       // Add the row to the tooltipScope.rows
       memo.unshift({
         aggConfig: col,
         depth: depth,
         field: field,
-        bucket: bucket,
+        bucket: item.name,
         metric: item.size,
         item: item
       });

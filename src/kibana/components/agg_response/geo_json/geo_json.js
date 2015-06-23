@@ -2,55 +2,43 @@ define(function (require) {
   return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
     var _ = require('lodash');
 
-    var readRows = require('components/agg_response/geo_json/_read_rows');
-    function findCol(table, name) {
-      return _.findIndex(table.columns, function (col) {
-        return col.aggConfig.schema.name === name;
-      });
-    }
+    var rowsToFeatures = require('components/agg_response/geo_json/rowsToFeatures');
+    var tooltipFormatter = Private(require('components/agg_response/geo_json/_tooltip_formatter'));
 
-    function createGeoJson(vis, table) {
-      var index = {
-        geo: findCol(table, 'segment'),
-        metric: findCol(table, 'metric')
-      };
+    return function (vis, table) {
 
-      var col = {
-        geo: table.columns[index.geo],
-        metric: table.columns[index.metric],
-      };
-
-      var agg = _.mapValues(col, function (col) {
-        return col && col.aggConfig;
-      });
-
-      var chart = {};
-      var geoJson = chart.geoJson = {
-        type: 'FeatureCollection',
-        features: []
-      };
-
-      var props = geoJson.properties = {
-        label: table.title(),
-        length: 0,
-        min: 0,
-        max: 0
-      };
-
-      // set precision from the bucketting column, if we have one
-      if (agg.geo) {
-        props.precision = _.parseInt(agg.geo.params.precision);
+      function columnIndex(schema) {
+        return _.findIndex(table.columns, function (col) {
+          return col.aggConfig.schema.name === schema;
+        });
       }
 
-      // we're all done if there are no columns
-      if (!col.geo || !col.metric || !table.rows.length) return chart;
+      var geoI = columnIndex('segment');
+      var metricI = columnIndex('metric');
+      var geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
+      var metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
 
-      // read the rows into the geoJson features list
-      readRows(table, agg, index, chart);
+      var features = rowsToFeatures(table, geoI, metricI);
+      var values = features.map(function (feature) {
+        return feature.properties.value;
+      });
 
-      return chart;
-    }
-
-    return createGeoJson;
+      return {
+        title: table.title(),
+        valueFormatter: metricAgg && metricAgg.fieldFormatter(),
+        tooltipFormatter: tooltipFormatter,
+        geohashGridAgg: geoAgg,
+        geoJson: {
+          type: 'FeatureCollection',
+          features: features,
+          properties: {
+            min: _.min(values),
+            max: _.max(values),
+            zoom: _.get(geoAgg, 'params.mapZoom'),
+            center: _.get(geoAgg, 'params.mapCenter')
+          }
+        }
+      };
+    };
   };
 });

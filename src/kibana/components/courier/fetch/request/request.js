@@ -18,7 +18,7 @@ define(function (require) {
     }
 
     AbstractReq.prototype.canStart = function () {
-      return !this.stopped && !this.source._fetchDisabled;
+      return Boolean(!this.stopped && !this.source._fetchDisabled);
     };
 
     AbstractReq.prototype.start = function () {
@@ -36,10 +36,7 @@ define(function (require) {
         source.activeFetchCount = 1;
       }
 
-      if (source.history) {
-        source.history.push(this);
-        source.history = _.last(source.history, 20);
-      }
+      source.history = [this];
     };
 
     AbstractReq.prototype.getFetchParams = function () {

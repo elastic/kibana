@@ -3,7 +3,6 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var ConfigTemplate = require('utils/config_template');
-  var filterManager = require('components/filter_manager/filter_manager');
   var getSort = require('components/doc_table/lib/get_sort');
   var rison = require('utils/rison');
 
@@ -11,14 +10,14 @@ define(function (require) {
 
   require('components/notify/notify');
   require('components/timepicker/timepicker');
-  require('directives/fixed_scroll');
+  require('components/fixedScroll');
   require('directives/validate_json');
   require('components/validate_query/validate_query');
   require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
   require('components/state_management/app_state');
-  require('services/timefilter');
+  require('components/timefilter/timefilter');
   require('components/highlight/highlight_tags');
 
   var app = require('modules').get('apps/discover', [
@@ -69,7 +68,8 @@ define(function (require) {
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
-    var filterBarWatchFilters = Private(require('components/filter_bar/lib/watchFilters'));
+    var queryFilter = Private(require('components/filter_bar/query_filter'));
+    var filterManager = Private(require('components/filter_manager/filter_manager'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -115,19 +115,16 @@ define(function (require) {
         columns: savedSearch.columns || ['_source'],
         index: $scope.indexPattern.id,
         interval: 'auto',
-        filters: _.cloneDeep($scope.searchSource.get('filter'))
+        filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
       };
     }
 
     $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
-    $scope.$watchCollection('state.columns', function (columns) {
+    $scope.$watchCollection('state.columns', function () {
       $state.save();
     });
-
-    var metaFields = config.get('metaFields');
-    filterManager.init($state);
 
     $scope.opts = {
       // number of records to fetch, then paginate through
@@ -151,7 +148,7 @@ define(function (require) {
 
       $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'update', function () {
+        $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
 
@@ -165,13 +162,20 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        filterBarWatchFilters($scope)
-        .on('update', function () {
+        // update data source when filters update
+        $scope.$listen(queryFilter, 'update', function () {
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
-        })
-        .on('fetch', $scope.fetch);
+        });
+
+        // update data source when hitting forward/back and the query changes
+        $scope.$listen($state, 'fetch_with_changes', function (diff) {
+          if (diff.indexOf('query') >= 0) $scope.fetch();
+        });
+
+        // fetch data when filters fire fetch event
+        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled = !!timefield;
@@ -184,7 +188,7 @@ define(function (require) {
           $scope.fetch();
         });
 
-        $scope.$watch('vis.aggs', function (aggs) {
+        $scope.$watch('vis.aggs', function () {
           var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
           if (buckets && buckets.length === 1) {
@@ -205,7 +209,7 @@ define(function (require) {
             NO_RESULTS: 'none' // no results came back
           };
 
-          function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
+          function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we are loading
             if (rows == null && oldRows == null) return status.LOADING;
 
@@ -296,7 +300,7 @@ define(function (require) {
         $scope.hits = 0;
         $scope.faliures = [];
         $scope.rows = [];
-        $scope.rows.fieldCounts = {};
+        $scope.fieldCounts = {};
       }
 
       if (!$scope.rows) flushResponseData();
@@ -327,8 +331,8 @@ define(function (require) {
       }
 
       $scope.updateTime();
-
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
+      segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
 
       // triggered when the status updated
       segmented.on('status', function (status) {
@@ -348,38 +352,37 @@ define(function (require) {
         }
 
         var rows = $scope.rows;
-        var counts = rows.fieldCounts;
+        var indexPattern = $scope.searchSource.get('index');
 
         // merge the rows and the hits, use a new array to help watchers
         rows = $scope.rows = rows.concat(resp.hits.hits);
-        rows.fieldCounts = counts;
 
         if (sortFn) {
-          rows.sort(sortFn);
-          rows = $scope.rows = rows.slice(0, totalSize);
-          counts = rows.fieldCounts = {};
+          notify.event('resort rows', function () {
+            rows.sort(sortFn);
+            rows = $scope.rows = rows.slice(0, totalSize);
+            $scope.fieldCounts = {};
+          });
         }
 
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it and we are NOT sorting.
-          // ---
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response
-          if (hit.$$_formatted && !sortFn) return;
+        notify.event('flatten hit and count fields', function () {
+          var counts = $scope.fieldCounts;
+          $scope.rows.forEach(function (hit) {
+            // skip this work if we have already done it and we are NOT sorting.
+            // ---
+            // when we are sorting results, we need to redo the counts each time because the
+            // "top 500" may change with each response
+            if (hit.$$_counted && !sortFn) return;
+            hit.$$_counted = true;
 
-          var formatAndCount = function (value, name) {
-            // add up the counts for each field name
-            counts[name] = counts[name] ? counts[name] + 1 : 1;
-
-            var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
-            var field = $scope.indexPattern.fields.byName[name];
-            var formatter = (field && field.format) ? field.format : defaultFormat;
-
-            return formatter.convert(value);
-          };
-
-          var flatHit = $scope.indexPattern.flattenHit(hit);
-          hit.$$_formatted = _.mapValues(flatHit, formatAndCount);
+            var fields = _.keys(indexPattern.flattenHit(hit));
+            var n = fields.length;
+            var field;
+            while (field = fields[--n]) {
+              if (counts[field]) counts[field] += 1;
+              else counts[field] = 1;
+            }
+          });
         });
 
       }));
@@ -425,7 +428,7 @@ define(function (require) {
         fields: {'*': {}},
         fragment_size: 2147483647 // Limit of an integer.
       })
-      .set('filter', $state.filters || []);
+      .set('filter', queryFilter.getFilters());
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -436,16 +439,6 @@ define(function (require) {
 
     $scope.toTop = function () {
       $window.scrollTo(0, 0);
-    };
-
-    // TODO: Move to utility class
-    var addSlashes = function (str) {
-      if (!_.isString(str)) return str;
-      str = str.replace(/\\/g, '\\\\');
-      str = str.replace(/\'/g, '\\\'');
-      str = str.replace(/\"/g, '\\"');
-      str = str.replace(/\0/g, '\\0');
-      return str;
     };
 
     var loadingVis;
@@ -479,7 +472,6 @@ define(function (require) {
         return Promise.resolve($scope.vis);
       }
 
-      // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.indexPattern, {
         type: 'histogram',
         params: {

@@ -79,6 +79,20 @@ define(function (require) {
           // build collection of agg params html
           type.params.forEach(function (param, i) {
             var aggParam;
+            // if field param exists, compute allowed fields
+            if (param.name === 'field') {
+              $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+            }
+
+            if ($aggParamEditorsScope.indexedFields) {
+              var hasIndexedFields = $aggParamEditorsScope.indexedFields.length > 0;
+              var isExtraParam = i > 0;
+              if (!hasIndexedFields && isExtraParam) { // don't draw the rest of the options if their are no indexed fields.
+                return;
+              }
+            }
+
+
             var type = 'basic';
             if (param.advanced) type = 'advanced';
 
@@ -86,10 +100,6 @@ define(function (require) {
               aggParamHTML[type].push(aggParam);
             }
 
-            // if field param exists, compute allowed fields
-            if (param.name === 'field') {
-              $aggParamEditorsScope.indexedFields = getIndexedFields(param);
-            }
           });
 
           // compile the paramEditors html elements
@@ -148,13 +158,6 @@ define(function (require) {
              */
             initialSet: fields
           });
-        }
-
-        // bind a property from our scope a child scope, with one-way binding
-        function setupBoundProp($child, get, set) {
-          var getter = _.partial($parse(get), $scope);
-          var setter = _.partial($parse(set).assign, $child);
-          $scope.$watch(getter, setter);
         }
       }
     };

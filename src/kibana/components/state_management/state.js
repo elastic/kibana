@@ -8,7 +8,7 @@ define(function (require) {
   return function StateProvider(Notifier, Private, $rootScope, $location) {
     var Events = Private(require('factories/events'));
 
-    _(State).inherits(Events);
+    _.class(State).inherits(Events);
     function State(urlParam, defaults) {
       State.Super.call(this);
 
@@ -58,8 +58,7 @@ define(function (require) {
     State.prototype.fetch = function () {
       var stash = this._readFromURL();
 
-      // nothing to read from the url?
-      // we should save if were are ordered to persist
+      // nothing to read from the url? save if ordered to persist
       if (stash === null) {
         if (this._persistAcrossApps) {
           return this.save();

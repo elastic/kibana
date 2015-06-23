@@ -9,22 +9,14 @@ define(function (require) {
   ]);
 
   module.factory('SavedSearch', function (courier) {
-    _(SavedSearch).inherits(courier.SavedObject);
+    _.class(SavedSearch).inherits(courier.SavedObject);
     function SavedSearch(id) {
       courier.SavedObject.call(this, {
         type: SavedSearch.type,
+        mapping: SavedSearch.mapping,
+        searchSource: SavedSearch.searchSource,
 
         id: id,
-
-        mapping: {
-          title: 'string',
-          description: 'string',
-          hits: 'integer',
-          columns: 'string',
-          sort: 'string',
-          version: 'integer'
-        },
-
         defaults: {
           title: 'New Saved Search',
           description: '',
@@ -32,13 +24,22 @@ define(function (require) {
           hits: 0,
           sort: [],
           version: 1
-        },
-
-        searchSource: true
+        }
       });
     }
 
     SavedSearch.type = 'search';
+
+    SavedSearch.mapping = {
+      title: 'string',
+      description: 'string',
+      hits: 'integer',
+      columns: 'string',
+      sort: 'string',
+      version: 'integer'
+    };
+
+    SavedSearch.searchSource = true;
 
     return SavedSearch;
   });

@@ -27,7 +27,7 @@ define(function (require) {
     };
 
     self.$$invalidModels = function (predicate) {
-      predicate = _.createCallback(predicate);
+      predicate = _.callback(predicate);
 
       var invalid = [];
 

@@ -1,11 +1,16 @@
-define(function (require) {
-  return function () {
-    var _ = require('lodash');
+define(function () {
+  return function configDefaultsProvider() {
+    // wraped in provider so that a new instance is given to each app/test
 
     return {
       'query:queryString:options': {
         value: '{ "analyze_wildcard": true }',
         description: 'Options for the lucene query string parser',
+        type: 'json'
+      },
+      'sort:options': {
+        value: '{ "unmapped_type": "boolean" }',
+        description: 'Options the Elasticsearch sort parameter',
         type: 'json'
       },
       'dateFormat': {
@@ -34,12 +39,18 @@ define(function (require) {
         description: 'The index to access if no index is set',
       },
       'metaFields': {
-        value: ['_source', '_id', '_type', '_index'],
+        value: ['_source', '_id', '_type', '_index', '_score'],
         description: 'Fields that exist outside of _source to merge into our document when displaying it',
       },
       'discover:sampleSize': {
         value: 500,
         description: 'The number of rows to show in the table',
+      },
+      'courier:maxSegmentCount': {
+        value: 30,
+        description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
+          'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
+          'cause requests to take much longer to process.'
       },
       'fields:popularLimit': {
         value: 10,
@@ -87,6 +98,36 @@ define(function (require) {
         value: 5,
         description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
           'patterns from which to query the field mapping.'
+      },
+      'format:defaultTypeMap': {
+        type: 'json',
+        value: [
+          '{',
+          '  "ip": { "id": "ip", "params": {} },',
+          '  "date": { "id": "date", "params": {} },',
+          '  "number": { "id": "number", "params": {} },',
+          '  "_source": { "id": "_source", "params": {} },',
+          '  "_default_": { "id": "string", "params": {} }',
+          '}',
+        ].join('\n'),
+        description: 'Map of the format name to use by default for each field type. ' +
+          '"_default_" is used if the field type is not mentioned explicitly.'
+      },
+      'format:number:defaultPattern': {
+        type: 'string',
+        value: '0,0.[000]'
+      },
+      'format:bytes:defaultPattern': {
+        type: 'string',
+        value: '0,0.[000]b'
+      },
+      'format:percent:defaultPattern': {
+        type: 'string',
+        value: '0,0.[000]%'
+      },
+      'format:currency:defaultPattern': {
+        type: 'string',
+        value: '($0,0.[00])'
       }
     };
   };

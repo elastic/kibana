@@ -1,0 +1,23 @@
+<div>
+  <label>
+    Y-Axis Scale
+  </label>
+  <select class="form-control" ng-model="vis.params.scale" ng-options="mode for mode in vis.type.params.scales"></select>
+<!-- vis type specific options -->
+<line-interpolation-option></line-interpolation-option>
+<div class="vis-option-item">
+  <div>
+    <label>
+      <input type="checkbox" value="{{drawLinesBetweenPoints}}" ng-disabled="!vis.params.showCircles" ng-model="vis.params.drawLinesBetweenPoints" name="drawLinesBetweenPoints" ng-checked="vis.params.drawLinesBetweenPoints">
+      Show Connecting Lines
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" value="{{showCircles}}" ng-disabled="!vis.params.drawLinesBetweenPoints" ng-model="vis.params.showCircles" name="showCircles"  ng-checked="vis.params.showCircles">
+      Show Circles
+    </label>
+  </div>
+</div>
+<point-series-options></point-series-options>
+<vislib-basic-options></vislib-basic-options>

@@ -16,6 +16,9 @@ define(function (require) {
 
         typeaheadCtrl.setInputModel(model);
 
+        // disable browser autocomplete
+        $el.attr('autocomplete', 'off');
+
         // handle keypresses
         $el.on('keydown', function (ev) {
           typeaheadCtrl.keypressHandler(ev);

@@ -1,21 +1,20 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, configFile, Notifier, shortDotsFilter, config, Promise) {
+  return function IndexPatternFactory(Private, timefilter, Notifier, config, Promise, $rootScope) {
     var _ = require('lodash');
-    var angular = require('angular');
     var errors = require('errors');
+    var angular = require('angular');
 
+    var fieldformats = Private(require('registry/field_formats'));
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
-    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
     var intervals = Private(require('components/index_patterns/_intervals'));
-    var fieldTypes = Private(require('components/index_patterns/_field_types'));
-    var flattenHit = require('components/index_patterns/_flatten_hit');
     var getComputedFields = require('components/index_patterns/_get_computed_fields');
-
-
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
-    var IndexedArray = require('utils/indexed_array/index');
+    var FieldList = Private(require('components/index_patterns/_field_list'));
+
+    var flattenHit = Private(require('components/index_patterns/_flatten_hit'));
+    var formatHit = require('components/index_patterns/_format_hit');
 
     var type = 'index-pattern';
 
@@ -25,26 +24,49 @@ define(function (require) {
       title: 'string',
       timeFieldName: 'string',
       intervalName: 'string',
-      customFormats: 'json',
-      fields: 'json'
+      fields: 'json',
+      fieldFormatMap: {
+        type: 'string',
+        _serialize: function (map) {
+          if (map == null) return;
+
+          var count = 0;
+          var serialized = _.transform(map, function (flat, format, field) {
+            if (!format) return;
+            count++;
+            flat[field] = format;
+          });
+
+          if (count) return angular.toJson(serialized);
+        },
+        _deserialize: function (map) {
+          if (map == null) return {};
+          return _.mapValues(angular.fromJson(map), function (mapping) {
+            var FieldFormat = fieldformats.byId[mapping.id];
+            return FieldFormat && new FieldFormat(mapping.params);
+          });
+        }
+      }
     });
 
     function IndexPattern(id) {
       var self = this;
 
-      // set defaults
-      self.id = id;
-      self.title = id;
-      self.customFormats = {};
+      setId(id);
 
       var docSource = new DocSource();
 
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibana_index)
+        .index(config.file.kibana_index)
         .type(type)
         .id(self.id);
+
+        // listen for config changes and update field list
+        $rootScope.$on('change:config', function () {
+          initFields();
+        });
 
         return mappingSetup.isDefined(type)
         .then(function (defined) {
@@ -68,7 +90,7 @@ define(function (require) {
               }
             });
 
-            // Give obj all of the values in _source.fields
+            // Give obj all of the values in _source
             _.assign(self, resp._source);
 
             self._indexFields();
@@ -83,51 +105,8 @@ define(function (require) {
         });
       };
 
-      function setIndexedValue(key, value) {
-        value = value || self[key];
-        self[key] = new IndexedArray({
-          index: ['name'],
-          group: ['type'],
-          initialSet: value.map(function (field) {
-            field.count = field.count || 0;
-            if (field.hasOwnProperty('format')) return field;
-
-            var type = fieldTypes.byName[field.type];
-            Object.defineProperties(field, {
-              bucketable: {
-                value: field.indexed || field.scripted
-              },
-              displayName: {
-                get: function () {
-                  return shortDotsFilter(field.name);
-                }
-              },
-              filterable: {
-                value: field.name === '_id' || ((field.indexed && type && type.filterable) || field.scripted)
-              },
-              format: {
-                get: function () {
-                  var formatName = self.customFormats && self.customFormats[field.name];
-                  return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
-                }
-              },
-              sortable: {
-                value: field.indexed && type && type.sortable
-              },
-              scripted: {
-                // enumerable properties end up in the JSON
-                enumerable: true,
-                value: !!field.scripted
-              },
-              lang: {
-                enumerable: true,
-                value: field.scripted ? field.lang || 'expression' : undefined
-              }
-            });
-
-            return field;
-          })
-        });
+      function initFields(fields) {
+        self.fields = new FieldList(self, fields || self.fields || []);
       }
 
       self._indexFields = function () {
@@ -135,7 +114,7 @@ define(function (require) {
           if (!self.fields) {
             return self.refreshFields();
           } else {
-            setIndexedValue('fields');
+            initFields();
           }
         }
       };
@@ -143,13 +122,13 @@ define(function (require) {
       self.addScriptedField = function (name, script, type, lang) {
         type = type || 'string';
 
-        var scriptFields = _.pluck(self.getFields('scripted'), 'name');
+        var scriptFields = _.pluck(self.getScriptedFields(), 'name');
 
         if (_.contains(scriptFields, name)) {
           throw new errors.DuplicateField(name);
         }
 
-        var scriptedField = self.fields.push({
+        self.fields.push({
           name: name,
           script: script,
           type: type,
@@ -174,7 +153,7 @@ define(function (require) {
       self.popularizeField = function (fieldName, unit) {
         if (unit == null) unit = 1;
 
-        var field = _.deepGet(self, ['fields', 'byName', fieldName]);
+        var field = _.get(self, ['fields', 'byName', fieldName]);
         if (!field) return;
 
         var count = Math.max((field.count || 0) + unit, 0);
@@ -184,11 +163,12 @@ define(function (require) {
         }
       };
 
-      self.getFields = function (type) {
-        var getScripted = (type === 'scripted');
-        return _.where(self.fields, function (field) {
-          return field.scripted ? getScripted : !getScripted;
-        });
+      self.getNonScriptedFields = function () {
+        return _.where(self.fields, { scripted: false });
+      };
+
+      self.getScriptedFields = function () {
+        return _.where(self.fields, { scripted: true });
       };
 
       self.getInterval = function () {
@@ -222,47 +202,44 @@ define(function (require) {
         // clear the indexPattern list cache
         getIds.clearCache();
         return body;
-
       };
 
-      // index the document
-      var finish =  function (id) {
-        self.id = id;
-        return self.id;
-      };
+      function setId(id) {
+        return self.id = id;
+      }
 
       self.create = function () {
         var body = self.prepBody();
         return docSource.doCreate(body)
-        .then(finish).catch(function (err) {
+        .then(setId)
+        .catch(function (err) {
           var confirmMessage = 'Are you sure you want to overwrite this?';
-          if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
-            return docSource.doIndex(body).then(finish);
+          if (_.get(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
+            return docSource.doIndex(body).then(setId);
           }
           return Promise.resolve(false);
-
         });
       };
 
       self.save = function () {
         var body = self.prepBody();
-        return docSource.doIndex(body).then(finish);
+        return docSource.doIndex(body).then(setId);
       };
 
       self.refreshFields = function () {
         return mapper.clearCache(self)
-        .then(function () {
-          return self._fetchFields()
-          .then(self.save);
-        });
+        .then(self._fetchFields)
+        .then(self.save);
       };
 
       self._fetchFields = function () {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
           // append existing scripted fields
-          fields = fields.concat(self.getFields('scripted'));
-          setIndexedValue('fields', fields);
+          fields = fields.concat(self.getScriptedFields());
+
+          // initialize self.field with this field list
+          initFields(fields);
         });
       };
 
@@ -275,11 +252,20 @@ define(function (require) {
       };
 
       self.metaFields = config.get('metaFields');
-      self.flattenHit = _.partial(flattenHit, self);
       self.getComputedFields = getComputedFields.bind(self);
 
-
+      self.flattenHit = flattenHit(self);
+      self.formatHit = formatHit(self, fieldformats.getDefaultInstance('string'));
+      self.formatField = self.formatHit.formatField;
     }
+
+    IndexPattern.prototype.routes = {
+      edit: '/settings/indices/{{id}}',
+      addField: '/settings/indices/{{id}}/create-field',
+      indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
+      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+    };
+
     return IndexPattern;
   };
 });

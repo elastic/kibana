@@ -4,11 +4,11 @@ define(function (require) {
   return {
     toString: function (range, format) {
       if (!range.from) {
-        return 'Before ' + moment(range.to).format(format);
+        return 'Before ' + format(range.to);
       } else if (!range.to) {
-        return 'After ' + moment(range.from).format(format);
+        return 'After ' + format(range.from);
       } else {
-        return moment(range.from).format(format) + ' to ' + moment(range.to).format(format);
+        return format(range.from) + ' to ' + format(range.to);
       }
     },
     parse: function (rangeString, format) {

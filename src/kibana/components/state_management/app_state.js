@@ -8,7 +8,7 @@ define(function (require) {
     var State = Private(require('components/state_management/state'));
 
 
-    _(AppState).inherits(State);
+    _.class(AppState).inherits(State);
     function AppState(defaults) {
       AppState.Super.call(this, urlParam, defaults);
       getAppState._set(this);

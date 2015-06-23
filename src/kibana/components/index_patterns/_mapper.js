@@ -1,5 +1,5 @@
 define(function (require) {
-  return function MapperService(Private, Promise, es, configFile, config) {
+  return function MapperService(Private, Promise, es, config) {
     var _ = require('lodash');
     var moment = require('moment');
 
@@ -33,7 +33,7 @@ define(function (require) {
 
         if (!skipIndexPatternCache) {
           return es.get({
-            index: configFile.kibana_index,
+            index: config.file.kibana_index,
             type: 'index-pattern',
             id: id,
             _sourceInclude: ['fields']
@@ -86,13 +86,18 @@ define(function (require) {
         })
         .then(function (resp) {
           // var all = Object.keys(resp).sort();
-          var all = _(resp).map(function (index, key) {
+          var all = _(resp)
+          .map(function (index, key) {
             if (index.aliases) {
               return [Object.keys(index.aliases), key];
             } else {
               return key;
             }
-          }).flatten().uniq().value().sort();
+          })
+          .flattenDeep()
+          .sort()
+          .uniq(true)
+          .value();
 
           var matches = all.filter(function (existingIndex) {
             var parsed = moment(existingIndex, indexPattern.id);

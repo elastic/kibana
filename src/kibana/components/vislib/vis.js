@@ -17,7 +17,7 @@ define(function (require) {
      * @param $el {HTMLElement} jQuery selected HTML element
      * @param config {Object} Parameters that define the chart type and chart options
      */
-    _(Vis).inherits(Events);
+    _.class(Vis).inherits(Events);
     function Vis($el, config) {
       if (!(this instanceof Vis)) {
         return new Vis($el, config);
@@ -26,9 +26,6 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults({}, config || {}, {});
-      this.eventTypes = {
-        enabled: []
-      };
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -85,7 +82,8 @@ define(function (require) {
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
         if (error instanceof errors.ContainerTooSmall ||
-          error instanceof errors.CannotLogScaleNegVals ||
+          error instanceof errors.InvalidWiggleSelection ||
+          error instanceof errors.InvalidLogScaleValues ||
           error instanceof errors.PieContainsAllZeros ||
           error instanceof errors.NotEnoughData ||
           error instanceof errors.NoResults) {
@@ -146,26 +144,13 @@ define(function (require) {
      * @returns {*}
      */
     Vis.prototype.on = function (event, listener) {
-      var ret = Events.prototype.on.call(this, event, listener); // Adds event to _listeners array
-      var listeners = this._listeners[event].length;
-      var charts = (this.handler && this.handler.charts);
-      var chartCount = charts ? charts.length : 0;
-      var enabledEvents = this.eventTypes.enabled;
-      var eventAbsent = (enabledEvents.indexOf(event) === -1);
+      var first = this.listenerCount(event) === 0;
+      var ret = Events.prototype.on.call(this, event, listener);
+      var added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
-      // and charts are available, bind the event to the chart(s)
-      // `on` method
-      if (listeners === 1 && chartCount > 0) {
-        charts.forEach(function (chart) {
-          this.handler.enable(event, chart);
-        }, this);
-      }
-
-      // Keep track of enabled events
-      if (eventAbsent) {
-        enabledEvents.push(event);
-      }
+      // enable the event in the handler
+      if (first && added && this.handler) this.handler.enable(event);
 
       return ret;
     };
@@ -178,25 +163,12 @@ define(function (require) {
      * @returns {*}
      */
     Vis.prototype.off = function (event, listener) {
-      var ret = Events.prototype.off.call(this, event, listener);  // Removes event from _listeners array
-      var listeners = (!!this._listeners[event] && this._listeners[event].length !== 0);
-      var charts = (this.handler && this.handler.charts);
-      var chartCount = charts ? charts.length : 0;
-      var eventIndex = this.eventTypes.enabled.indexOf(event);
-      var eventPresent = (eventIndex !== -1);
+      var last = this.listenerCount(event) === 1;
+      var ret = Events.prototype.off.call(this, event, listener);
+      var removed = this.listenerCount(event) === 0;
 
-      // Once the listener array reaches zero, turn off event
-      if (!listeners && eventPresent) {
-        if (chartCount > 0) {
-          charts.forEach(function (chart) {
-            this.handler.disable(event, chart);
-          }, this);
-        }
-
-        // Remove event from enabled array
-        this.eventTypes.enabled.splice(eventIndex, 1);
-      }
-
+      // Once all listeners are removed, disable the events in the handler
+      if (last && removed && this.handler) this.handler.disable(event);
       return ret;
     };
 

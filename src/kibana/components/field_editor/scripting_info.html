@@ -1,0 +1,32 @@
+<h4>
+  <i class="fa fa-question-circle text-info"></i> Scripting Help
+</h4>
+
+<p>
+  By default, Elasticsearch scripts use <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts">Lucene Expressions <i class="fa-link fa"></i></a>, which is a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations. We'll let you do some reading on <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts">Lucene Expressions<i class="fa-link fa"></i></a> To access values in the document use the following format:
+</p>
+
+<p><code>doc['some_field'].value</code></p>
+
+<p>
+  There are a few limitations when using Lucene Expressions:
+</p>
+<ul>
+  <li>Only numeric fields may be accessed</li>
+  <li> Stored fields are not available </li>
+  <li> If a field is sparse (only some documents contain a value), documents missing the field will have a value of 0 </li>
+</ul>
+
+<p>
+  Here are all the operations available to scripted fields:
+</p>
+<ul>
+ <li> Arithmetic operators: + - * / % </li>
+ <li> Bitwise operators: | & ^ ~ << >> >>> </li>
+ <li> Boolean operators (including the ternary operator): && || ! ?: </li>
+ <li> Comparison operators: < <= == >= > </li>
+ <li> Common mathematic functions: abs ceil exp floor ln log10 logn max min sqrt pow </li>
+ <li> Trigonometric library functions: acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan </li>
+ <li> Distance functions: haversin </li>
+ <li> Miscellaneous functions: min, max </li>
+</ul>

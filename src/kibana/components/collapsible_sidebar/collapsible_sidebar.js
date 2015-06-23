@@ -7,9 +7,8 @@ define(function (require) {
   require('modules')
   .get('kibana')
   .directive('collapsibleSidebar', function () {
-    var listOfWidthClasses = 1;
     // simply a list of all of all of angulars .col-md-* classes except 12
-    listOfWidthClasses = _(new Array(11)).map(function (n) { return 'col-md-' + listOfWidthClasses++; });
+    var listOfWidthClasses = _.times(11, function (i) { return 'col-md-' + i; });
 
     return {
       restrict: 'C',

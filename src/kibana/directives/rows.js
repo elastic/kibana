@@ -2,7 +2,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var module = require('modules').get('kibana');
-  var AggConfigResult = require('components/vis/_agg_config_result');
+  var AggConfigResult = require('components/vis/AggConfigResult');
 
   module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
@@ -22,32 +22,40 @@ define(function (require) {
             var clickHandler = filterBarClickHandler($state);
             $cell.scope = $scope.$new();
             $cell.addClass('cell-hover');
-            $cell.attr('ng-click', 'clickHandler()');
-            $cell.scope.clickHandler = function (negate) {
+            $cell.attr('ng-click', 'clickHandler($event)');
+            $cell.scope.clickHandler = function (event) {
+              if ($(event.target).is('a')) return; // Don't add filter if a link was clicked
               clickHandler({ point: { aggConfigResult: aggConfigResult } });
             };
             return $compile($cell)($cell.scope);
           };
 
-
           if (contents instanceof AggConfigResult) {
             if (contents.type === 'bucket' && contents.aggConfig.field() && contents.aggConfig.field().filterable) {
               $cell = createAggConfigResultCell(contents);
             }
-            contents = contents.toString();
+            contents = contents.toString('html');
           }
 
           if (_.isObject(contents)) {
+            if (contents.attr) {
+              $cell.attr(contents.attr);
+            }
+
+            if (contents.class) {
+              $cell.addClass(contents.class);
+            }
+
             if (contents.scope) {
-              $cell.html($compile(contents.markup)(contents.scope));
+              $cell = $compile($cell.html(contents.markup))(contents.scope);
             } else {
-              $cell.html($(contents.markup));
+              $cell.html(contents.markup);
             }
           } else {
             if (contents === '') {
               $cell.html('&nbsp;');
             } else {
-              $cell.text(contents);
+              $cell.html(contents);
             }
           }
 

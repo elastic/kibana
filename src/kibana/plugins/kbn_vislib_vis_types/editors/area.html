@@ -1,0 +1,11 @@
+<!-- vis type specific options -->
+<div>
+  <label>
+    Chart Mode
+    <select class="form-control" ng-model="vis.params.mode"
+            ng-options="mode for mode in vis.type.params.modes"></select>
+  </label>
+</div>
+<line-interpolation-option></line-interpolation-option>
+<point-series-options></point-series-options>
+<vislib-basic-options></vislib-basic-options>

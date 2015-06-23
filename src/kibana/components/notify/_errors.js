@@ -8,7 +8,7 @@ define(function (require) {
   }());
 
   // abstract error class
-  _(KibanaError).inherits(Error);
+  _.class(KibanaError).inherits(Error);
   function KibanaError(msg, constructor) {
     this.message = msg;
 
@@ -65,7 +65,7 @@ define(function (require) {
       'Unable to load ' + modules + ' because of ' + explain + '.',
       errors.ScriptLoadFailure);
   };
-  _(errors.ScriptLoadFailure).inherits(KibanaError);
+  _.class(errors.ScriptLoadFailure).inherits(KibanaError);
 
   return errors;
 });

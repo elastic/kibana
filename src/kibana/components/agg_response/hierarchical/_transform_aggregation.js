@@ -2,22 +2,19 @@ define(function (require) {
   var _ = require('lodash');
   var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');
   return function transformAggregationProvider(Private) {
-    var AggConfigResult = require('components/vis/_agg_config_result');
+    var AggConfigResult = require('components/vis/AggConfigResult');
     return function transformAggregation(agg, metric, aggData, parent) {
       return _.map(extractBuckets(aggData), function (bucket) {
-        // Pick the appropriate value, if the metric doesn't exist then we just
-        // use the count.
-        var value = bucket.doc_count;
-        if (bucket[metric.id] && !_.isUndefined(bucket[metric.id].value)) {
-          value = bucket[metric.id].value;
-        }
+        var aggConfigResult = new AggConfigResult(
+          agg,
+          parent && parent.aggConfigResult,
+          metric.getValue(bucket),
+          agg.getKey(bucket)
+        );
 
-        // Create the new branch record
-        var $parent = parent && parent.aggConfigResult;
-        var aggConfigResult = new AggConfigResult(agg, $parent, value, agg.getKey(bucket));
         var branch = {
-          name: bucket.key,
-          size: value,
+          name: agg.fieldFormatter()(bucket.key),
+          size: aggConfigResult.value,
           aggConfig: agg,
           aggConfigResult: aggConfigResult
         };

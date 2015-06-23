@@ -4,40 +4,41 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .directive('indexedFields', function ($filter) {
+    var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
+    var noTemplate = '';
     var nameHtml = require('text!plugins/settings/sections/indices/_field_name.html');
     var typeHtml = require('text!plugins/settings/sections/indices/_field_type.html');
-    var popularityHtml = require('text!plugins/settings/sections/indices/_field_popularity.html');
+    var controlsHtml = require('text!plugins/settings/sections/indices/_field_controls.html');
     var filter = $filter('filter');
 
     return {
       restrict: 'E',
       template: require('text!plugins/settings/sections/indices/_indexed_fields.html'),
       scope: true,
-      link: function ($scope, $el, attr) {
+      link: function ($scope) {
         var rowScopes = []; // track row scopes, so they can be destroyed as needed
         $scope.perPage = 25;
-        $scope.popularityField = {name: null};
-
         $scope.columns = [
           { title: 'name' },
           { title: 'type' },
+          { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-          { title: 'popularity', info: 'A gauge of how often this field is used' }
+          { title: 'controls', sortable: false }
         ];
 
         $scope.$watchCollection('indexPattern.fields', refreshRows);
         $scope.$watch('fieldFilter', refreshRows);
 
         function refreshRows() {
-          _.invoke(rowScopes, '$destroy');
+          // clear and destroy row scopes
+          _.invoke(rowScopes.splice(0), '$destroy');
 
-          var fields = filter($scope.indexPattern.getFields(), $scope.fieldFilter);
+          var fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
 
           $scope.rows = fields.map(function (field) {
-            var childScope = $scope.$new();
+            var childScope = _.assign($scope.$new(), { field: field });
             rowScopes.push(childScope);
-            childScope.field = field;
 
             return [
               {
@@ -50,12 +51,18 @@ define(function (require) {
                 scope: childScope,
                 value: field.type
               },
-              field.analyzed,
-              field.indexed,
+              _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
               {
-                markup: popularityHtml,
-                scope: childScope,
-                value: field.count
+                markup: field.analyzed ? yesTemplate : noTemplate,
+                value: field.analyzed
+              },
+              {
+                markup: field.indexed ? yesTemplate : noTemplate,
+                value: field.indexed
+              },
+              {
+                markup: controlsHtml,
+                scope: childScope
               }
             ];
           });

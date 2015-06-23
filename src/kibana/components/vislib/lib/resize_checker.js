@@ -24,7 +24,7 @@ define(function (require) {
      * @class ResizeChecker
      * @param {HtmlElement} el - the element to track the size of
      */
-    _(ResizeChecker).inherits(EventEmitter);
+    _.class(ResizeChecker).inherits(EventEmitter);
     function ResizeChecker(el) {
       ResizeChecker.Super.call(this);
 
@@ -52,8 +52,8 @@ define(function (require) {
      */
     ResizeChecker.prototype.read = function () {
       return {
-        w: this.$el.width(),
-        h: this.$el.height()
+        w: this.$el[0].clientWidth,
+        h: this.$el[0].clientHeight
       };
     };
 
@@ -198,7 +198,7 @@ define(function (require) {
      * @return {void}
      */
     ResizeChecker.prototype.destroy = function () {
-      reflowWatcher.off('reflow', this.check);
+      reflowWatcher.off('reflow', this.onReflow);
       clearTimeout(this._timerId);
     };
 

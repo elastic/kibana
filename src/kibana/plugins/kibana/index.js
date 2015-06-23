@@ -17,6 +17,7 @@ define(function (require) {
   require('components/bind');
   require('components/listen');
   require('components/fancy_forms/fancy_forms');
+  require('components/stringify/register');
   require('directives/click_focus');
   require('directives/info');
   require('directives/spinner');
@@ -27,7 +28,11 @@ define(function (require) {
   var Notifier = require('components/notify/_notifier');
 
   // ensure that the kibana module requires ui.bootstrap
-  require('modules').get('kibana', ['ui.bootstrap'])
+  require('modules')
+  .get('kibana', ['ui.bootstrap'])
+  .config(function ($tooltipProvider) {
+    $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
+  })
   .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
     return {
       template: require('text!plugins/kibana/kibana.html'),

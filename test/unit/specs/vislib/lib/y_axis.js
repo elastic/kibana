@@ -6,6 +6,7 @@ define(function (require) {
   var YAxis;
   var Data;
   var el;
+  var buildYAxis;
   var yAxis;
   var yAxisDiv;
 
@@ -70,14 +71,21 @@ define(function (require) {
       defaultYMin: true
     });
 
-    yAxis = new YAxis({
-      el: node,
-      yMin: dataObj.getYMin(),
-      yMax: dataObj.getYMax(),
-      _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
-      }
-    });
+    buildYAxis = function (params) {
+      return new YAxis(_.merge({}, params, {
+        el: node,
+        yMin: dataObj.getYMin(),
+        yMax: dataObj.getYMax(),
+        _attr: {
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+          defaultYMin: true,
+          setYExtents: false,
+          yAxis: {}
+        }
+      }));
+    };
+
+    yAxis = buildYAxis();
   }
 
   describe('Vislib yAxis Class Test Suite', function () {
@@ -121,6 +129,7 @@ define(function (require) {
     describe('getYScale Method', function () {
       var yScale;
       var graphData;
+      var domain;
       var height = 50;
 
       function checkDomain(min, max) {
@@ -146,6 +155,20 @@ define(function (require) {
         });
       });
 
+      describe('should return log values', function () {
+        var domain;
+        var extents;
+
+        it('should return 1', function () {
+          yAxis._attr.scale = 'log';
+          extents = [0, 400];
+          domain = yAxis._getExtents(extents);
+
+          // Log scales have a yMin value of 1
+          expect(domain[0]).to.be(1);
+        });
+      });
+
       describe('positive values', function () {
         beforeEach(function () {
           graphData = defaultGraphData;
@@ -156,7 +179,7 @@ define(function (require) {
 
         it('should have domain between 0 and max value', function () {
           var min = 0;
-          var max = _.max(_.flatten(graphData));
+          var max = _.max(_.flattenDeep(graphData));
           var domain = checkDomain(min, max);
           expect(domain[1]).to.be.greaterThan(0);
           checkRange();
@@ -173,15 +196,13 @@ define(function (require) {
           yScale = yAxis.getYScale(height);
         });
 
-
         it('should have domain between min value and 0', function () {
-          var min = _.min(_.flatten(graphData));
+          var min = _.min(_.flattenDeep(graphData));
           var max = 0;
           var domain = checkDomain(min, max);
           expect(domain[0]).to.be.lessThan(0);
           checkRange();
         });
-
       });
 
       describe('positive and negative values', function () {
@@ -194,29 +215,71 @@ define(function (require) {
           yScale = yAxis.getYScale(height);
         });
 
-
         it('should have domain between min and max values', function () {
-          var min = _.min(_.flatten(graphData));
-          var max = _.max(_.flatten(graphData));
+          var min = _.min(_.flattenDeep(graphData));
+          var max = _.max(_.flattenDeep(graphData));
           var domain = checkDomain(min, max);
           expect(domain[0]).to.be.lessThan(0);
           expect(domain[1]).to.be.greaterThan(0);
           checkRange();
         });
       });
-    });
 
-    describe('formatAxisLabel method', function () {
-      var num = 1e9;
-      var val;
+      describe('validate user defined values', function () {
+        beforeEach(function () {
+          yAxis._attr.mode = 'stacked';
+          yAxis._attr.setYExtents = false;
+          yAxis._attr.yAxis = {};
+        });
 
-      beforeEach(function () {
-        createData(defaultGraphData);
-        val = yAxis.formatAxisLabel(num);
+        it('should throw a NaN error', function () {
+          var min = 'Not a number';
+          var max = 12;
+
+          expect(function () {
+            yAxis._validateUserExtents(min, max);
+          }).to.throwError();
+        });
+
+        it('should return a decimal value', function () {
+          yAxis._attr.mode = 'percentage';
+          yAxis._attr.setYExtents = true;
+          domain = [];
+          domain[0] = yAxis._attr.yAxis.min = 20;
+          domain[1] = yAxis._attr.yAxis.max = 80;
+          var newDomain = yAxis._validateUserExtents(domain);
+
+          expect(newDomain[0]).to.be(domain[0] / 100);
+          expect(newDomain[1]).to.be(domain[1] / 100);
+        });
+
+        it('should return the user defined value', function () {
+          domain = [20, 50];
+          var newDomain = yAxis._validateUserExtents(domain);
+
+          expect(newDomain[0]).to.be(domain[0]);
+          expect(newDomain[1]).to.be(domain[1]);
+        });
       });
 
-      it('should return a string with suffix B', function () {
-        expect(val).to.be('1b');
+      describe('should throw an error when', function () {
+        it('min === max', function () {
+          var min = 12;
+          var max = 12;
+
+          expect(function () {
+            yAxis._validateAxisExtents(min, max);
+          }).to.throwError();
+        });
+
+        it('min > max', function () {
+          var min = 30;
+          var max = 10;
+
+          expect(function () {
+            yAxis._validateAxisExtents(min, max);
+          }).to.throwError();
+        });
       });
     });
 
@@ -225,82 +288,36 @@ define(function (require) {
 
       it('should return a function', function () {
         fnNames.forEach(function (fnName) {
-          var isFunction = (typeof yAxis.getScaleType(fnName) === 'function');
-          expect(isFunction).to.be(true);
+          expect(yAxis._getScaleType(fnName)).to.be.a(Function);
         });
 
         // if no value is provided to the function, scale should default to a linear scale
-        expect(typeof yAxis.getScaleType()).to.be('function');
+        expect(yAxis._getScaleType()).to.be.a(Function);
       });
 
       it('should throw an error if function name is undefined', function () {
         expect(function () {
-          yAxis.getScaleType('square');
+          yAxis._getScaleType('square');
         }).to.throwError();
       });
     });
 
-    describe('returnLogDomain method', function () {
+    describe('_logDomain method', function () {
       it('should throw an error', function () {
         expect(function () {
-          yAxis.returnLogDomain(-10, -5);
+          yAxis._logDomain(-10, -5);
         }).to.throwError();
         expect(function () {
-          yAxis.returnLogDomain(-10, 5);
+          yAxis._logDomain(-10, 5);
         }).to.throwError();
         expect(function () {
-          yAxis.returnLogDomain(0, -5);
+          yAxis._logDomain(0, -5);
         }).to.throwError();
       });
 
       it('should return a yMin value of 1', function () {
-        var yMin = yAxis.returnLogDomain(0, 200)[0];
+        var yMin = yAxis._logDomain(0, 200)[0];
         expect(yMin).to.be(1);
-      });
-    });
-
-    describe('getDomain method', function () {
-      it('should return a log domain', function () {
-        var scale = 'log';
-        var yMin = 0;
-        var yMax = 400;
-        var domain = yAxis.getDomain(scale, yMin, yMax);
-
-        // Log scales have a yMin value of 1
-        expect(domain[0]).to.be(1);
-      });
-
-      it('should throw a no results error if yMin and yMax values are both 0', function () {
-        expect(function () {
-          yAxis.getDomain('linear', 0, 0);
-        }).to.throwError();
-      });
-
-      it('should return the correct min and max values', function () {
-        var extents = [
-          [-5, 20],
-          [-30, -10],
-          [5, 20]
-        ];
-
-        extents.forEach(function (extent) {
-          var domain = yAxis.getDomain('linear', extent[0], extent[1]);
-
-          if (extent[0] < 0 && extent[1] > 0) {
-            expect(domain[0]).to.be(extent[0]);
-            expect(domain[1]).to.be(extent[1]);
-          }
-
-          if (extent[0] < 0 && extent[1] < 0) {
-            expect(domain[0]).to.be(extent[0]);
-            expect(domain[1]).to.be(0);
-          }
-
-          if (extent[0] > 0 && extent[1] > 0) {
-            expect(domain[0]).to.be(0);
-            expect(domain[1]).to.be(extent[1]);
-          }
-        });
       });
     });
 
@@ -358,6 +375,35 @@ define(function (require) {
         expect(yAxis.tickScale(1000)).to.be(11);
         expect(yAxis.tickScale(40)).to.be(3);
         expect(yAxis.tickScale(20)).to.be(0);
+      });
+    });
+
+    describe('#tickFormat()', function () {
+      var formatter = function () {};
+
+      it('returns a basic number formatter by default', function () {
+        var yAxis = buildYAxis();
+        expect(yAxis.tickFormat()).to.not.be(formatter);
+        expect(yAxis.tickFormat()(1)).to.be('1');
+      });
+
+      it('returns the yAxisFormatter when passed', function () {
+        var yAxis = buildYAxis({
+          yAxisFormatter: formatter
+        });
+        expect(yAxis.tickFormat()).to.be(formatter);
+      });
+
+      it('returns a percentage formatter when the vis is in percentage mode', function () {
+        var yAxis = buildYAxis({
+          yAxisFormatter: formatter,
+          _attr: {
+            mode: 'percentage'
+          }
+        });
+
+        expect(yAxis.tickFormat()).to.not.be(formatter);
+        expect(yAxis.tickFormat()(1)).to.be('100%');
       });
     });
   });

@@ -13,6 +13,7 @@ define(function (require) {
 
       var DocSource = Private(require('components/courier/data_source/doc_source'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
+      var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
 
       var requestQueue = Private(require('components/courier/_request_queue'));
       var errorHandlers = Private(require('components/courier/_error_handlers'));
@@ -59,7 +60,7 @@ define(function (require) {
        * individual errors are routed to their respective requests.
        */
       self.fetch = function () {
-        fetch.searches().then(function () {
+        fetch.fetchQueued(searchStrategy).then(function () {
           searchLooper.restart();
         });
       };
@@ -118,9 +119,10 @@ define(function (require) {
       };
 
       // Listen for refreshInterval changes
-      $rootScope.$watch('timefilter.refreshInterval', function () {
-        var refreshValue = _.deepGet($rootScope, 'timefilter.refreshInterval.value');
-        if (_.isNumber(refreshValue)) {
+      $rootScope.$watchCollection('timefilter.refreshInterval', function () {
+        var refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
+        var refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+        if (_.isNumber(refreshValue) && !refreshPause) {
           self.fetchInterval(refreshValue);
         } else {
           self.fetchInterval(0);

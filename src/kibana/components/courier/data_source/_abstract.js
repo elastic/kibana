@@ -7,7 +7,7 @@ define(function (require) {
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var courierFetch = Private(require('components/courier/fetch/fetch'));
 
-    function SourceAbstract(initialState) {
+    function SourceAbstract(initialState, strategy) {
       var self = this;
       self._instanceid = _.uniqueId('data_source');
 
@@ -38,7 +38,7 @@ define(function (require) {
       });
 
       self.history = [];
-      self._fetchStrategy = courierFetch.strategies[self._getType()];
+      self._fetchStrategy = strategy;
     }
 
     /*****
@@ -300,7 +300,7 @@ define(function (require) {
            * @returns {object}
            */
           var cleanFilter = function (filter) {
-            return _.omit(filter, ['$$hashKey', 'meta']);
+            return _.omit(filter, ['meta']);
           };
 
           // switch to filtered query if there are filters
