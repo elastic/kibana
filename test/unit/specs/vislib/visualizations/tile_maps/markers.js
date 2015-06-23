@@ -11,17 +11,8 @@ define(function (require) {
   var bounds = {};
   var MarkerType;
   var map;
-  var d3;
-
-  var markerTypes = [
-    'specs/vislib/visualizations/tile_maps/_shaded_circles',
-    'specs/vislib/visualizations/tile_maps/_scaled_circles',
-    'specs/vislib/visualizations/tile_maps/_geohash_grid',
-    'specs/vislib/visualizations/tile_maps/_heatmap',
-  ];
 
   angular.module('MarkerFactory', ['kibana']);
-
 
   function setBounds(southWest, northEast) {
     bounds.southWest = L.latLng(southWest || defaultSWCoords);
@@ -41,32 +32,37 @@ define(function (require) {
   };
 
   describe('Marker Class Tests', function () {
+    var mapData;
+    var markerLayer;
+
+    function createMarker(MarkerClass) {
+      mapData = _.assign({}, geoJsonData.geoJson);
+      mapData.properties.allmin = mapData.properties.min;
+      mapData.properties.allmax = mapData.properties.max;
+
+      return new MarkerClass(mockMap, mapData, {
+        valueFormatter: geoJsonData.valueFormatter
+      });
+    }
+
     beforeEach(function () {
       setBounds();
+    });
 
-      module('MarkerFactory');
-      inject(function (Private, _d3_) {
-        MarkerType = Private(require('components/vislib/visualizations/marker_types/base_marker'));
-        d3 = _d3_;
-      });
+    afterEach(function () {
+      if (markerLayer) {
+        markerLayer.destroy();
+        markerLayer = undefined;
+      }
     });
 
     describe('Base Methods', function () {
-      var mapData;
-      var markerLayer;
-
       beforeEach(function () {
-        mapData = _.assign({}, geoJsonData.geoJson);
-        mapData.properties.allmin = mapData.properties.min;
-        mapData.properties.allmax = mapData.properties.max;
-
-        markerLayer = new MarkerType(mockMap, mapData, {
-          valueFormatter: geoJsonData.valueFormatter
+        module('MarkerFactory');
+        inject(function (Private) {
+          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/base_marker'));
+          markerLayer = createMarker(MarkerClass);
         });
-      });
-
-      afterEach(function () {
-        markerLayer.destroy();
       });
 
       describe('filterToMapBounds', function () {
@@ -102,20 +98,81 @@ define(function (require) {
         });
       });
 
-      describe('applyShadingStyle method', function () {
-        it('should return an object');
+      describe('applyShadingStyle', function () {
+        it('should return a style object', function () {
+          var style = markerLayer.applyShadingStyle(100);
+          expect(style).to.be.an('object');
+
+          var keys = _.keys(style);
+          var expected = ['fillColor', 'color'];
+          _.each(expected, function (key) {
+            expect(keys).to.contain(key);
+          });
+        });
+
+        it('should use the legendQuantizer', function () {
+          var spy = sinon.spy(markerLayer, '_legendQuantizer');
+          var style = markerLayer.applyShadingStyle(100);
+          expect(spy.callCount).to.equal(1);
+        });
       });
 
-      describe('showTooltip method', function () {
-        it('should create a .leaflet-popup-kibana div for the tooltip');
+      describe('showTooltip', function () {
+        it('should use the tooltip formatter', function () {
+          var content;
+          var sample = _.sample(mapData.features);
+
+          var stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
+            return;
+          });
+
+          markerLayer._showTooltip(sample);
+
+          expect(stub.callCount).to.equal(1);
+          expect(stub.firstCall.calledWith(sample)).to.be(true);
+        });
       });
 
+      describe('addLegend', function () {
+        var addToSpy;
+        var leafletControlStub;
+
+        beforeEach(function () {
+          addToSpy = sinon.spy();
+          leafletControlStub = sinon.stub(L, 'control', function (options) {
+            return {
+              addTo: addToSpy
+            };
+          });
+        });
+
+        it('should do nothing if there is already a legend', function () {
+          markerLayer._legend = { legend: 'exists' }; // anything truthy
+
+          markerLayer.addLegend();
+          expect(leafletControlStub.callCount).to.equal(0);
+        });
+
+        it('should create a leaflet control', function () {
+          markerLayer.addLegend();
+          expect(leafletControlStub.callCount).to.equal(1);
+          expect(addToSpy.callCount).to.equal(1);
+          expect(addToSpy.firstCall.calledWith(markerLayer.map)).to.be(true);
+          expect(markerLayer._legend).to.have.property('onAdd');
+        });
+
+        it('should use the value formatter', function () {
+          var formatterSpy = sinon.spy(markerLayer, '_valueFormatter');
+          // called twice for every legend color defined
+          var expectedCallCount = markerLayer._legendColors.length * 2;
+
+          markerLayer.addLegend();
+          var legend = markerLayer._legend.onAdd();
+
+          expect(formatterSpy.callCount).to.equal(expectedCallCount);
+          expect(legend).to.be.a(HTMLDivElement);
+        });
+      });
     });
-
-    // describe('Marker Types', function () {
-    //   _.each(markerTypes, function (filePath) {
-    //     describe(require(filePath));
-    //   });
-    // });
   });
 });
