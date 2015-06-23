@@ -46,10 +46,12 @@ define(function (require) {
         var $div = $('<div>').addClass('tilemap-legend');
 
         _.each(self._legendColors, function (color, i) {
-          var label = $('<div>').text(self._legendQuantizer
+          var labelText = self._legendQuantizer
           .invertExtent(color)
           .map(self._valueFormatter)
-          .join(' – '));
+          .join(' – ');
+
+          var label = $('<div>').text(labelText);
 
           var icon = $('<i>').css({
             background: color,
@@ -211,14 +213,17 @@ define(function (require) {
       latLng = latLng || L.latLng(lat, lng);
 
       var content = this._tooltipFormatter(feature);
-      if (!content) return;
 
-      L.popup({autoPan: false})
-       .setLatLng(latLng)
-       .setContent(content)
-       .openOn(this.map);
+      if (!content) return;
+      this._createTooltip(content, latLng);
     };
 
+    BaseMarker.prototype._createTooltip = function (content, latLng) {
+      L.popup({autoPan: false})
+      .setLatLng(latLng)
+      .setContent(content)
+      .openOn(this.map);
+    };
 
     /**
      * Closes the tooltip on the map
