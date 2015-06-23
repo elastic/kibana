@@ -45,10 +45,15 @@ define(function (require) {
       var centerPoint = feature.properties.center;
       var geohashRect = feature.properties.rectangle;
 
-      // get lat[1] and lng[0] of geohash center point
-      // apply lat to east[2] and lng to north[3] sides of rectangle
-      // to get radius at center of geohash grid recttangle
+      // centerPoint is an array of [lat, lng]
+      // geohashRect is the 4 corners of the geoHash rectangle
+      //   an array that starts at the southwest corner and proceeds
+      //   counter-clockwise, each value being an array of [lat, lng]
+
+      // get latLng of geohash center point
       var center = L.latLng([centerPoint[1], centerPoint[0]]);
+      // apply lat to east[2] and lng to north[3] sides of rectangle
+      // to get radius at center of geohash grid rectangle
       var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
       var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
 

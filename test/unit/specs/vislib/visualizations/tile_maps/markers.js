@@ -174,5 +174,26 @@ define(function (require) {
         });
       });
     });
+
+    describe('Shaded Circles', function () {
+      beforeEach(function () {
+        module('MarkerFactory');
+        inject(function (Private) {
+          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/shaded_circles'));
+          markerLayer = createMarker(MarkerClass);
+        });
+      });
+
+      describe('geohashMinDistance method', function () {
+        it('should return a finite number', function () {
+          var sample = _.sample(mapData.features);
+          var distance = markerLayer._geohashMinDistance(sample);
+
+          expect(distance).to.be.a('number');
+          expect(_.isFinite(distance)).to.be(true);
+        });
+      });
+    });
+
   });
 });
