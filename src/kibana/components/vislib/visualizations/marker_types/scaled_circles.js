@@ -17,21 +17,13 @@ define(function (require) {
       var self = this;
       ScaledCircleMarker.Super.apply(this, arguments);
 
-      // super min and max from all chart data
-      var min = this.geoJson.properties.allmin;
-      var max = this.geoJson.properties.allmax;
-      var zoom = this.map.getZoom();
-      var precision = _.max(this.geoJson.features.map(function (feature) {
-        return String(feature.properties.geohash).length;
-      }));
-
       // multiplier to reduce size of all circles
       var scaleFactor = 0.6;
 
       this._createMarkerGroup({
         pointToLayer: function (feature, latlng) {
           var value = feature.properties.value;
-          var scaledRadius = self.radiusScale(value, max, zoom, precision) * scaleFactor;
+          var scaledRadius = self._radiusScale(value) * scaleFactor;
           return L.circleMarker(latlng).setRadius(scaledRadius);
         }
       });
@@ -39,29 +31,27 @@ define(function (require) {
 
     /**
      * radiusScale returns a number for scaled circle markers
-     * square root of value / max
-     * multiplied by a value based on map zoom
-     * multiplied by a value based on data precision
      * for relative sizing of markers
      *
-     * @method radiusScale
+     * @method _radiusScale
      * @param value {Number}
-     * @param max {Number}
-     * @param zoom {Number}
-     * @param precision {Number}
      * @return {Number}
      */
-    ScaledCircleMarker.prototype.radiusScale = function (value, max, zoom, precision) {
-      // exp = 0.5 for square root ratio
-      // exp = 1 for linear ratio
-      var exp = 0.5;
-      var precisionBiasNumerator = 200;
+    ScaledCircleMarker.prototype._radiusScale = function (value) {
       var precisionBiasBase = 5;
-      var pct = Math.abs(value) / Math.abs(max);
-      var constantZoomRadius = 0.5 * Math.pow(2, zoom);
+      var precisionBiasNumerator = 200;
+      var zoom = this.map.getZoom();
+      var maxValue = this.geoJson.properties.allmax;
+      var precision = _.max(this.geoJson.features.map(function (feature) {
+        return String(feature.properties.geohash).length;
+      }));
+
+      var pct = Math.abs(value) / Math.abs(maxValue);
+      var zoomRadius = 0.5 * Math.pow(2, zoom);
       var precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
-      return Math.pow(pct, exp) * constantZoomRadius * precisionScale;
+      // square root value percentage
+      return Math.pow(pct, 0.5) * zoomRadius * precisionScale;
     };
 
 
