@@ -19,7 +19,7 @@ define(function (require) {
         yScale: yScale
       };
 
-      if (point.y === 'NaN' || point.y == null) {
+      if (point.y === 'NaN') {
         // filter out NaN from stats and null
         // from metrics that are not based at zero
         return;
