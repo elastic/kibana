@@ -197,7 +197,6 @@ define(function (require) {
     });
 
     describe('Scaled Circles', function () {
-      this.timeout(0);
       var zoom;
 
       beforeEach(function () {
@@ -245,6 +244,56 @@ define(function (require) {
             if (i > 0) {
               expect(radius).to.be.above(results[i - 1]);
             }
+          });
+        });
+      });
+    });
+
+    describe('Heatmaps', function () {
+      beforeEach(function () {
+        module('MarkerFactory');
+
+        inject(function (Private) {
+          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/heatmap'));
+          markerLayer = createMarker(MarkerClass);
+        });
+      });
+
+      describe('dataToHeatArray method', function () {
+        var max;
+
+        beforeEach(function () {
+          max = mapData.properties.allmax;
+        });
+
+        it('should return an array or values for each feature', function () {
+          var arr = markerLayer._dataToHeatArray(max);
+          expect(arr).to.be.an('array');
+          expect(arr).to.have.length(mapData.features.length);
+
+        });
+
+        it('should return an array item with lat, lng, metric for each feature', function () {
+          _.times(3, function () {
+            var arr = markerLayer._dataToHeatArray(max);
+            var index = _.random(mapData.features.length - 1);
+            var feature = mapData.features[index];
+            var featureValue = feature.properties.value;
+            var featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
+            expect(arr[index]).to.eql(featureArr);
+          });
+        });
+
+        it('should return an array item with lat, lng, normalized metric for each feature', function () {
+          _.times(3, function () {
+            markerLayer._attr.heatNormalizeData = true;
+
+            var arr = markerLayer._dataToHeatArray(max);
+            var index = _.random(mapData.features.length - 1);
+            var feature = mapData.features[index];
+            var featureValue = parseInt(feature.properties.value / max * 100);
+            var featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
+            expect(arr[index]).to.eql(featureArr);
           });
         });
       });

@@ -29,7 +29,7 @@ define(function (require) {
 
     HeatmapMarker.prototype._createMarkerGroup = function (options) {
       var max = _.get(this.geoJson, 'properties.allmax');
-      var points = this.dataToHeatArray(max);
+      var points = this._dataToHeatArray(max);
 
       this._markerGroup = L.heatLayer(points, options);
       this._fixTooltips();
@@ -159,10 +159,10 @@ define(function (require) {
      *
      * @param mapData {geoJson Object}
      * @param nax {Number}
-     * @method dataToHeatArray
+     * @method _dataToHeatArray
      * @return {Array}
      */
-    HeatmapMarker.prototype.dataToHeatArray = function (max) {
+    HeatmapMarker.prototype._dataToHeatArray = function (max) {
       var self = this;
       var mapData = this.geoJson;
 
