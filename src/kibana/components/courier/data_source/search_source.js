@@ -170,11 +170,20 @@ define(function (require) {
         return;
       case 'source':
         key = '_source';
-        /* fall through */
+        addToBody();
+        break;
       case 'sort':
         val = normalizeSortRequest(val, this.get('index'));
-        /* fall through */
+        addToBody();
+        break;
       default:
+        addToBody();
+      }
+
+      /**
+       * Add the key and val to the body of the resuest
+       */
+      function addToBody() {
         state.body = state.body || {};
         // ignore if we already have a value
         if (state.body[key] == null) {
