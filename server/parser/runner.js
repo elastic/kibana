@@ -94,8 +94,9 @@ function unzipPairs (timeValObject) {
   return paired;
 }
 
-function zipPairs (pairs) {
-  return _.zipObject(pairs);
+function asSorted (timeValObject, fn) {
+  var data = unzipPairs(timeValObject);
+  return _.zipObject(fn(data));
 }
 
 /**
@@ -162,6 +163,12 @@ var functions = {
       return args[0];
     });
   },
+  linewidth: function (args) {
+    return alter(args, function (args) {
+      args[0].lines = {lineWidth: args[1]};
+      return args[0];
+    });
+  },
   first: function (args) {
     return alter(args, function (args) {
       return args[0];
@@ -169,37 +176,36 @@ var functions = {
   },
   movingaverage: function (args) {
     return alter(args, function (args) {
-      var pairs = unzipPairs(args[0].data);
 
       var windowSize = args[1];
-      pairs =  _.map(pairs, function(point, i) {
-        if (i < windowSize) { return [point[0], null]; }
+      args[0].data = asSorted(args[0].data, function (pairs) {
+        return _.map(pairs, function(point, i) {
+          if (i < windowSize) { return [point[0], null]; }
 
-        var average = _.chain(pairs.slice(i - windowSize, i))
-        .map(function (point) {
-          return point[1];
-        }).reduce(function (memo, num) {
-          return (memo + num);
-        }).value() / windowSize;
+          var average = _.chain(pairs.slice(i - windowSize, i))
+          .map(function (point) {
+            return point[1];
+          }).reduce(function (memo, num) {
+            return (memo + num);
+          }).value() / windowSize;
 
-        return [point[0], average];
+          return [point[0], average];
+        });
       });
 
-
-
-      args[0].data = zipPairs(pairs);
       return args[0];
     });
   },
   derivative: function (args) {
     return alter(args, function (args) {
-      var pairs = unzipPairs(args[0].data);
-      pairs =  _.map(pairs, function(point, i) {
-        if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
-        return [point[0], point[1] - pairs[i - 1][1]];
+
+      args[0].data = asSorted(args[0].data, function (pairs) {
+        return  _.map(pairs, function(point, i) {
+          if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
+          return [point[0], point[1] - pairs[i - 1][1]];
+        });
       });
 
-      args[0].data = zipPairs(pairs);
       return args[0];
     });
   }
@@ -265,12 +271,9 @@ function invokeTree (tree, label) {
 }
 
 function resolveTree (forest) {
-  // Forest, a collection of trees
-
   var seriesList = _.map(forest, function (tree) {
     var values = invokeTree(tree);
 
-    // Add keys to series. This could be done further up, should be
     return values.then(function (args) {
       args.data = unzipPairs(args.data);
 
@@ -307,6 +310,10 @@ function processRequest (request) {
   });
 }
 
+module.exports = processRequest;
+
+
+/*
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
   var rows = _.map(sheet, function (row) {
@@ -317,9 +324,7 @@ function debugSheet (sheet) {
     });
 }
 
-module.exports = processRequest;
-
-
 debugSheet([
   ['movingaverage(`*`, 10)'],
 ]);
+*/

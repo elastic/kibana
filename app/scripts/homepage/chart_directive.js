@@ -26,7 +26,7 @@ define(function (require) {
             position: 'nw'
           },
           yaxes: [ { }, { position: "right", min: 20 } ],
-          colors: ['#01A4A4', '#D0D102', '#E54028', '#616161', '#00A1CB','#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
+          colors: ['#01A4A4', '#c66', '#D0D102', '#616161', '#00A1CB','#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
         };
 
         $scope.$watch('chart', function (val) {
