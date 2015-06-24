@@ -2,7 +2,7 @@ define(function (require) {
   require('flot.time');
   var _ = require('lodash');
   var $ = require('jquery');
-  return function ($window) {
+  return function () {
     return {
       restrict: 'A',
       scope: {
@@ -10,8 +10,6 @@ define(function (require) {
         cell: '='
       },
       link: function ($scope, $elem) {
-        $elem.prepend('<span>lol</span>');
-
         var options = {
           xaxis: {
             mode: 'time',
@@ -42,7 +40,7 @@ define(function (require) {
             series.label = series.label || '';
             series.label = (i + 1) + (series.label ? ': ' + series.label : '');
             if (series.yaxis === 2) {
-              series.label = series.label + ' (right)';
+              series.label = series.label + ' (y2)';
             }
             return _.defaults(series, {
               shadowSize: 0,

@@ -20,10 +20,10 @@ function getRequest (config) {
       series: {
         date_histogram: {
           field: '@timestamp',
-          interval: '2w',
+          interval: '1w',
           extended_bounds: {
-            min: 1375315200000,
-            max: 1435708800000
+            min: 'now-2y',
+            max: 'now'
           },
           min_doc_count: 0
         }
@@ -47,24 +47,24 @@ function getRequest (config) {
  */
 function reduce (arrayOfArrays, fn) {
   return Promise.all(arrayOfArrays).then(function (arrayOfArrays) {
-    return _.reduce(arrayOfArrays, function(destinationArray, argument) {
+    return _.reduce(arrayOfArrays, function(destinationObject, argument) {
 
-      var output = _.map(destinationArray.data, function (point, i) {
+      var output = _.mapValues(destinationObject.data, function (value, key) {
         // Allow function to take 2 arrays of equal length, OR an array and a single number;
         // null points are not drawn
-        if (point == null) {
+        if (value == null) {
           return null;
         }
 
         if (_.isNumber(argument)) {
-          return fn(point, argument);
+          return fn(value, argument);
         }
 
-        if (argument.data[i] == null) {
+        if (argument.data[key] == null) {
           return null;
         }
 
-        return fn(point, argument.data[i] || argument);
+        return fn(value, argument.data[key] || argument);
       });
 
       // Output = single series
@@ -72,7 +72,7 @@ function reduce (arrayOfArrays, fn) {
       output = {
         data: output
       };
-      output = _.defaults(output, destinationArray);
+      output = _.defaults(output, destinationObject);
       return output;
 
     });
@@ -85,12 +85,34 @@ function alter (args, fn) {
   });
 }
 
+function unzipPairs (timeValObject) {
+  var paired = _.chain(timeValObject).pairs().map(function (point) {
+    return [parseInt(point[0], 10), point[1]];
+  }).sortBy(function (point) {
+    return point[0];
+  }).value();
+  return paired;
+}
+
+function zipPairs (pairs) {
+  return _.zipObject(pairs);
+}
+
 /**
  * Modifies an array
  * @param {Array} args - An array of arguments. Usually one or more series, in an array.
  * @return {Array} A single series as modified by the function
  */
 var functions = {
+  abs: function (args) {
+    return alter(args, function (args) {
+      var data = _.mapValues(args[0].data, function (value) {
+        return Math.abs(value);
+      });
+      args[0].data = data;
+      return args[0];
+    });
+  },
   sum: function (args) {
     return reduce(args, function (a, b) {
       return a + b;
@@ -144,6 +166,42 @@ var functions = {
     return alter(args, function (args) {
       return args[0];
     });
+  },
+  movingaverage: function (args) {
+    return alter(args, function (args) {
+      var pairs = unzipPairs(args[0].data);
+
+      var windowSize = args[1];
+      pairs =  _.map(pairs, function(point, i) {
+        if (i < windowSize) { return [point[0], null]; }
+
+        var average = _.chain(pairs.slice(i - windowSize, i))
+        .map(function (point) {
+          return point[1];
+        }).reduce(function (memo, num) {
+          return (memo + num);
+        }).value() / windowSize;
+
+        return [point[0], average];
+      });
+
+
+
+      args[0].data = zipPairs(pairs);
+      return args[0];
+    });
+  },
+  derivative: function (args) {
+    return alter(args, function (args) {
+      var pairs = unzipPairs(args[0].data);
+      pairs =  _.map(pairs, function(point, i) {
+        if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
+        return [point[0], point[1] - pairs[i - 1][1]];
+      });
+
+      args[0].data = zipPairs(pairs);
+      return args[0];
+    });
   }
 };
 
@@ -157,15 +215,19 @@ function invoke (fnName, args) {
     else if (_.isObject(item) && item.type === 'query') {
       return client.search({
         index: 'usagov',
+        filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
+        searchType: 'count',
         body:getRequest(item)
       }).then(function (resp) {
-        var data;
+        var values;
+        var keys = _.pluck(resp.aggregations.series.buckets, 'key');
         if (resp.aggregations.series.buckets[0].metric) {
-          data = _.pluck(_.pluck(resp.aggregations.series.buckets, 'metric'), 'value');
+          values = _.pluck(_.pluck(resp.aggregations.series.buckets, 'metric'), 'value');
         } else {
-          data = _.pluck(resp.aggregations.series.buckets, 'doc_count');
+          values = _.pluck(resp.aggregations.series.buckets, 'doc_count');
         }
-        return {data: data};
+        var data = _.zipObject(keys, values);
+        return { data:  data};
       });
     }
     else if (_.isObject(item) && item.type === 'function') {
@@ -205,25 +267,14 @@ function invokeTree (tree, label) {
 function resolveTree (forest) {
   // Forest, a collection of trees
 
-  var keys = client.search({
-    index: 'usagov',
-    body:getRequest({query: '*'})
-  }).then(function (resp) {
-    var arr = _.pluck(resp.aggregations.series.buckets, 'key');
-    return arr;
-  });
-
   var seriesList = _.map(forest, function (tree) {
     var values = invokeTree(tree);
 
     // Add keys to series. This could be done further up, should be
-    return Promise.all([keys, values]).then(function (args) {
-      var output = {
-        data: _.zip(args[0], args[1].data)
-      };
+    return values.then(function (args) {
+      args.data = unzipPairs(args.data);
 
-      output = _.defaults(output, args[1]);
-      return output;
+      return args;
     });
   });
 
@@ -256,11 +307,19 @@ function processRequest (request) {
   });
 }
 
+function debugSheet (sheet) {
+  sheet = processRequest(sheet);
+  var rows = _.map(sheet, function (row) {
+      return Promise.all(row);
+    });
+    Promise.all(rows).then(function (sheet) {
+      console.log(JSON.stringify(sheet));
+    });
+}
+
 module.exports = processRequest;
 
-/*
-module.exports([
-  ['`*`','`*`'],
-  ['`*`','`*`']
+
+debugSheet([
+  ['movingaverage(`*`, 10)'],
 ]);
-*/
