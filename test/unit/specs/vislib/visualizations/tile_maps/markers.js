@@ -29,6 +29,7 @@ define(function (require) {
     getBounds: getBounds,
     removeControl: _.noop,
     removeLayer: _.noop,
+    getZoom: _.constant(5)
   };
 
   describe('Marker Class Tests', function () {
@@ -191,6 +192,60 @@ define(function (require) {
 
           expect(distance).to.be.a('number');
           expect(_.isFinite(distance)).to.be(true);
+        });
+      });
+    });
+
+    describe('Scaled Circles', function () {
+      this.timeout(0);
+      var zoom;
+
+      beforeEach(function () {
+        module('MarkerFactory');
+
+        zoom = _.random(1, 18);
+        sinon.stub(mockMap, 'getZoom', _.constant(zoom));
+
+        inject(function (Private) {
+          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/scaled_circles'));
+          markerLayer = createMarker(MarkerClass);
+        });
+      });
+
+      describe('radiusScale method', function () {
+        var valueArray = [10, 20, 30, 40, 50, 60];
+        var max = _.max(valueArray);
+        var prev = -1;
+
+        it('should return 0 for value of 0', function () {
+          expect(markerLayer._radiusScale(0)).to.equal(0);
+        });
+
+        it('should return a scaled value for negative and positive numbers', function () {
+          var upperBound = markerLayer._radiusScale(max);
+          var results = [];
+
+          function roundValue(value) {
+            // round number to 6 decimal places
+            var r = Math.pow(10, 6);
+            return Math.round(value * r) / r;
+          }
+
+          _.each(valueArray, function (value, i) {
+            var ratio = Math.pow(value / max, 0.5);
+            var comparison = ratio * upperBound;
+            var radius = markerLayer._radiusScale(value);
+            var negRadius = markerLayer._radiusScale(value * -1);
+            results.push(radius);
+
+            expect(negRadius).to.equal(radius);
+            expect(roundValue(radius)).to.equal(roundValue(comparison));
+
+            // check that the radius is getting larger
+            if (i > 0) {
+              expect(radius).to.be.above(results[i - 1]);
+            }
+          });
         });
       });
     });
