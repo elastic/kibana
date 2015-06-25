@@ -58,6 +58,8 @@ define(function (require) {
       }
 
       function mouseMoveLocation(e) {
+        var latlng = e.latlng;
+
         this.map.closePopup();
 
         // unhighlight all svgs
@@ -67,14 +69,11 @@ define(function (require) {
           return;
         }
 
-        var latlng = e.latlng;
-
         // find nearest feature to event latlng
         var feature = this.nearestFeature(latlng);
-        var zoom = this.map.getZoom();
 
         // show tooltip if close enough to event latlng
-        if (this.tooltipProximity(latlng, feature)) {
+        if (this._tooltipProximity(latlng, feature)) {
           this._showTooltip(feature, latlng);
         }
       }
@@ -84,7 +83,7 @@ define(function (require) {
      * Finds nearest feature in mapData to event latlng
      *
      * @method nearestFeature
-     * @param point {Leaflet Object}
+     * @param point {Leaflet latLng Object}
      * @return nearestPoint {Leaflet Object}
      */
     HeatmapMarker.prototype.nearestFeature = function (point) {
@@ -110,14 +109,12 @@ define(function (require) {
     /**
      * display tooltip if feature is close enough to event latlng
      *
-     * @method tooltipProximity
-     * @param latlng {Leaflet Object}
-     * @param zoom {Number}
+     * @method _tooltipProximity
+     * @param latlng {Leaflet latLng  Object}
      * @param feature {geoJson Object}
-     * @param map {Leaflet Object}
      * @return boolean
      */
-    HeatmapMarker.prototype.tooltipProximity = function (latlng, feature) {
+    HeatmapMarker.prototype._tooltipProximity = function (latlng, feature) {
       if (!feature) return;
 
       var showTip = false;
