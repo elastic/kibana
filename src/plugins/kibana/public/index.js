@@ -2,6 +2,7 @@ define(function (require) {
   require('plugins/kibana/discover/index');
   require('plugins/kibana/visualize/index');
   require('plugins/kibana/dashboard/index');
+  require('plugins/kibana/settings/index');
   require('plugins/kibana/doc/index');
 
   require('chrome')

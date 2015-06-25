@@ -11,7 +11,6 @@ define(function (require) {
   require('components/typeahead/typeahead');
   require('components/clipboard/clipboard');
 
-
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
   require('plugins/kibana/dashboard/services/saved_dashboards');

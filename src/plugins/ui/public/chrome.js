@@ -96,9 +96,11 @@ define(function (require) {
         chrome.embedded = Boolean($location.search().embed);
 
         // listen for route changes, propogate to tabs
-        var onRouteChange = _.bindKey(tabs, 'trackPathUpdate');
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
+        function onRouteChange() {
+          tabs.trackPathUpdate($location.path(), chrome.embedded);
+        }
 
         // chrome is responsible for timepicker ui and state transfer...
         $scope.timefilter = timefilter;
