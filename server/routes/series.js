@@ -1,4 +1,4 @@
-var processRequest = require('../parser/runner.js');
+var processRequest = require('../parser/chain_runner.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
 

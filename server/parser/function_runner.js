@@ -1,4 +1,4 @@
-var aggspretion = require('../parser/grammar.js');
+var aggspretion = require('../parser/function.js');
 var _ = require('lodash');
 var Promise = require('bluebird');
 var elasticsearch = require('elasticsearch');

@@ -56,6 +56,7 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 10px;
+  border: 1px solid #666;
   padding: 3px;
   font-weight: bold;
   background-color: #ccc;
