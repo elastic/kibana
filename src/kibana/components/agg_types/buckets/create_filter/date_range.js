@@ -10,6 +10,7 @@ define(function (require) {
       var filter = {};
       if (range.from) filter.gte = +range.from;
       if (range.to) filter.lt = +range.to;
+      if (range.to && range.from) filter.format = 'epoch_millis';
 
       return buildRangeFilter(agg.params.field, filter, agg.vis.indexPattern);
     };

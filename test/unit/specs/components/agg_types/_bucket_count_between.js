@@ -20,7 +20,7 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       visTypes = Private(require('registry/vis_types'));
       aggTypes = Private(require('components/agg_types/index'));
-      AggConfig = Private(require('components/vis/_agg_config'));
+      AggConfig = Private(require('components/vis/AggConfig'));
       bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
     }));
 
