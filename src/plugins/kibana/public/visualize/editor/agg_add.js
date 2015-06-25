@@ -6,7 +6,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/visualize/editor/agg_add.html'),
+      template: require('text!plugins/kibana/visualize/editor/agg_add.html'),
       controllerAs: 'add',
       controller: function ($scope) {
         var self = this;

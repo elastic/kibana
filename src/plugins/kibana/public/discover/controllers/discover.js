@@ -30,7 +30,7 @@ define(function (require) {
 
   require('routes')
   .when('/discover/:id?', {
-    template: require('text!plugins/discover/index.html'),
+    template: require('text!plugins/kibana/discover/index.html'),
     reloadOnSearch: false,
     resolve: {
       ip: function (Promise, courier, config, $location) {
@@ -69,7 +69,7 @@ define(function (require) {
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-    var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
+    var HitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
     var queryFilter = Private(require('components/filter_bar/query_filter'));
     var filterManager = Private(require('components/filter_manager/filter_manager'));
 
@@ -90,8 +90,8 @@ define(function (require) {
 
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
-      load: require('text!plugins/discover/partials/load_search.html'),
-      save: require('text!plugins/discover/partials/save_search.html')
+      load: require('text!plugins/kibana/discover/partials/load_search.html'),
+      save: require('text!plugins/kibana/discover/partials/save_search.html')
     });
 
     $scope.timefilter = timefilter;

@@ -4,12 +4,12 @@ define(function (require) {
   .directive('visEditorSidebar', function () {
     var _ = require('lodash');
 
-    require('plugins/visualize/editor/agg_group');
-    require('plugins/visualize/editor/vis_options');
+    require('plugins/kibana/visualize/editor/agg_group');
+    require('plugins/kibana/visualize/editor/vis_options');
 
     return {
       restrict: 'E',
-      template: require('text!plugins/visualize/editor/sidebar.html'),
+      template: require('text!plugins/kibana/visualize/editor/sidebar.html'),
       scope: true,
       controllerAs: 'sidebar',
       controller: function ($scope) {

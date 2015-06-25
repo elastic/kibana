@@ -1,9 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('plugins/visualize/saved_visualizations/saved_visualizations');
+  require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
   require('directives/saved_object_finder');
-  require('plugins/discover/saved_searches/saved_searches');
+  require('plugins/kibana/discover/saved_searches/saved_searches');
 
   var templateStep = function (num, txt) {
     return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
@@ -16,7 +16,7 @@ define(function (require) {
   /** Wizard Step 1
   /********/
   routes.when('/visualize/step/1', {
-    template: templateStep(1, require('text!plugins/visualize/wizard/step_1.html'))
+    template: templateStep(1, require('text!plugins/kibana/visualize/wizard/step_1.html'))
   });
 
   module.controller('VisualizeWizardStep1', function ($scope, $route, $location, timefilter, Private) {
@@ -33,7 +33,7 @@ define(function (require) {
   /** Wizard Step 2
   /********/
   routes.when('/visualize/step/2', {
-    template: templateStep(2, require('text!plugins/visualize/wizard/step_2.html')),
+    template: templateStep(2, require('text!plugins/kibana/visualize/wizard/step_2.html')),
     resolve: {
       indexPatternIds: function (courier) {
         return courier.indexPatterns.getIds();

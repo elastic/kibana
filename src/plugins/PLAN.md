@@ -136,13 +136,16 @@ Building apps in the browser won't change at all, the same modules that used to 
 require('chrome')
 .setLogo()
 .setBackgroundColor()
-.setNav([
+.setTabs([
   {
     name: 'Tab 1',
     url: '/tab-1/',
     order: -Infinity
   }
 ])
+.setRootController('myController', function (deps...) {
+  // build the myController value, which will live outside ng-view, and persist across page views
+})
 
 require('routes').when('/', {
   view: requrie('text!plugins/my-kibana-plugin/home.awesome.html')

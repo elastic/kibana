@@ -1,5 +1,7 @@
 define(function (require) {
   return function VisDetailsSpyProvider(Notifier, $filter, $rootScope, config) {
+    require('components/clipboard/clipboard');
+
     return {
       name: 'debug',
       display: 'Debug',

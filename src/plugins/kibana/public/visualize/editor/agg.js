@@ -2,13 +2,13 @@ define(function (require) {
   require('modules')
   .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
-    require('plugins/visualize/editor/agg_params');
-    require('plugins/visualize/editor/agg_add');
+    require('plugins/kibana/visualize/editor/agg_params');
+    require('plugins/kibana/visualize/editor/agg_add');
 
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
-    var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
+    var advancedToggleHtml = require('text!plugins/kibana/visualize/editor/advanced_toggle.html');
 
     var notify = new Notifier({
       location: 'visAggGroup'
@@ -16,7 +16,7 @@ define(function (require) {
 
     return {
       restrict: 'A',
-      template: require('text!plugins/visualize/editor/agg.html'),
+      template: require('text!plugins/kibana/visualize/editor/agg.html'),
       require: 'form',
       link: function ($scope, $el, attrs, kbnForm) {
         $scope.$bind('outputAgg', 'outputVis.aggs.byId[agg.id]', $scope);

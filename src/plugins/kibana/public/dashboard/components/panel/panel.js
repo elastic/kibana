@@ -5,11 +5,11 @@ define(function (require) {
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
     var _ = require('lodash');
-    var loadPanel = Private(require('plugins/dashboard/components/panel/lib/load_panel'));
+    var loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
     var filterManager = Private(require('components/filter_manager/filter_manager'));
     var notify = new Notifier();
 
-    var services = require('plugins/settings/saved_object_registry').all().map(function (serviceObj) {
+    var services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
       var service = $injector.get(serviceObj.service);
       return {
         type: service.type,
@@ -24,7 +24,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/dashboard/components/panel/panel.html'),
+      template: require('text!plugins/kibana/dashboard/components/panel/panel.html'),
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState

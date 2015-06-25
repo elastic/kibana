@@ -1,9 +1,11 @@
 var Joi = require('joi');
 var fs = require('fs');
 var path = require('path');
+var package = require('../utils/closestPackageJson').getSync();
 
 module.exports = Joi.object({
   kibana: Joi.object({
+    package: Joi.any().default(package),
     server: Joi.object({
       host: Joi.string().hostname().default('0.0.0.0'),
       port: Joi.number().default(5601),

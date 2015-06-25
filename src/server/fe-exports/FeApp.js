@@ -15,7 +15,9 @@ FeApp.prototype.mainModuleId = function () {
 };
 
 FeApp.prototype.useModuleIds = function () {
-  return this.feExports.find(_.get(this, 'spec.uses', []));
+  return this.feExports
+  .find(_.get(this, 'spec.uses', []))
+  .concat(this.feExports.aliases.baseEnv || []);
 };
 
 module.exports = FeApp;

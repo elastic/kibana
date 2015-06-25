@@ -1,0 +1,75 @@
+<kbn-notifications list="notifList"></kbn-notifications>
+<div class="content" style="display: none;">
+  <nav ng-class="{show: chrome.embedded === false}" bindonce class="hide navbar navbar-inverse navbar-static-top">
+    <div class="navbar-header">
+      <button ng-click="showCollapsed = !showCollapsed" type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <span class="navbar-brand visible-xs">{{ chrome.getActiveTab().title }}
+        <span ng-show="chrome.httpActive.length" class="spinner"></span>
+      </span>
+    </div>
+
+    <!-- Full navbar -->
+    <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
+      <ul class="nav navbar-nav" role="navigation">
+        <li aria-label="Kibana Barcode Logo" class="logo hidden-xs"></li>
+        <li ng-repeat="tab in chrome.getTabs()" ng-class="{ active: tab.active }">
+          <a ng-href="#{{ tab.active ? tab.id : tab.lastPath }}">
+            {{ tab.title }}
+          </a>
+        </li>
+      </ul>
+
+      <ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
+        <li>
+          <a ng-click="toggleRefresh()" ng-show="timefilter.refreshInterval.value > 0">
+            <i class="fa" ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"></i>
+          </a>
+        </li>
+
+        <li
+          ng-class="{active: pickerTemplate.is('interval') }"
+          ng-show="timefilter.refreshInterval.value > 0 || !!pickerTemplate.current"
+          class="to-body">
+
+          <a ng-click="pickerTemplate.toggle('refreshInterval')" class="navbar-timepicker-auto-refresh-desc">
+            <span ng-show="timefilter.refreshInterval.value === 0"><i class="fa fa-repeat"></i> Auto-refresh</span>
+            <span ng-show="timefilter.refreshInterval.value > 0">{{timefilter.refreshInterval.display}}</span>
+          </a>
+
+        </li>
+
+        <li class="to-body" ng-class="{active: pickerTemplate.is('filter')}">
+          <a
+            ng-click="pickerTemplate.toggle('filter')"
+            aria-haspopup="true"
+            aria-expanded="false"
+            class="navbar-timepicker-time-desc">
+            <i aria-hidden="true" class="fa fa-clock-o"></i>
+            <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
+          </a>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right navbar-timepicker" >
+        <li ng-show="httpActive.length" class="navbar-text hidden-xs">
+          <div class="spinner"></div>
+        </li>
+      </ul>
+      <!-- /Full navbar -->
+    </div>
+  </nav>
+
+  <config
+    ng-show="timefilter.enabled"
+    config-template="globalConfigTemplate"
+    config-object="timefilter"
+    config-close="toggleTimepicker">
+  </config>
+
+  <div class="application"><ng-view></ng-view></div>
+</div>

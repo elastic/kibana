@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('plugins/discover/saved_searches/_saved_search');
+  require('plugins/kibana/discover/saved_searches/_saved_search');
   require('components/notify/notify');
 
   var module = require('modules').get('discover/saved_searches', [
@@ -10,7 +10,7 @@ define(function (require) {
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
-  require('plugins/settings/saved_object_registry').register({
+  require('plugins/kibana/settings/saved_object_registry').register({
     service: 'savedSearches',
     title: 'searches'
   });

@@ -2,58 +2,14 @@
  * main app level module
  */
 define(function (require) {
-  var angular = require('angular');
-  var _ = require('lodash');
-  var $ = require('jquery');
   var modules = require('modules');
   var routes = require('routes');
-
-  require('angular-route');
-  require('angular-bindonce');
-  require('angular-bootstrap');
-  require('elasticsearch');
-
-  require('components/bind');
-  require('components/bound_to_config_obj');
-  require('components/chrome');
-  require('components/config/config');
-  require('components/courier/courier');
-  require('components/debounce');
-  require('components/doc_title/doc_title');
-  require('components/elastic_textarea');
-  require('components/errors');
-  require('components/es');
-  require('components/events');
-  require('components/fancy_forms/fancy_forms');
-  require('components/filter_bar/filter_bar');
-  require('components/filter_manager/filter_manager');
-  require('components/index_patterns/index_patterns');
-  require('components/listen');
-  require('components/modules');
-  require('components/notify/notify');
-  require('components/persisted_log/persisted_log');
-  require('components/private');
-  require('components/promises');
-  require('components/state_management/app_state');
-  require('components/state_management/global_state');
-  require('components/storage/storage');
-  require('components/stringify/register');
-  require('components/style_compile/style_compile');
-  require('components/timefilter/timefilter');
-  require('components/timepicker/timepicker');
-  require('components/tooltip/tooltip');
-  require('components/typeahead/typeahead');
-  require('components/url/url');
-  require('components/validateDateInterval');
-  require('components/validate_query/validate_query');
-  require('components/watch_multi');
 
   var kibana = modules.get('kibana', [
     // list external requirements here
     'elasticsearch',
     'pasvaz.bindonce',
     'ngRoute',
-    'ngClipboard',
     'ui.bootstrap'
   ]);
 
@@ -70,7 +26,7 @@ define(function (require) {
   // url we should use to talk to es
   .constant('esUrl', (function () {
     var a = document.createElement('a');
-    a.href = 'elasticsearch';
+    a.href = '/elasticsearch';
     return a.href;
   }()))
   // This stores the build number, @REV@ is replaced by grunt.
@@ -83,9 +39,10 @@ define(function (require) {
   .constant('sessionId', Date.now())
   // attach the route manager's known routes
   .config(routes.config)
-  .config(['ngClipProvider', function (ngClipProvider) {
+  .config(function (ngClipProvider, $tooltipProvider) {
     ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
-  }]);
+    $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
+  });
 
   // tell the modules util to add it's modules as requirements for kibana
   modules.link(kibana);

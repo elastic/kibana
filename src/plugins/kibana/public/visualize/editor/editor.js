@@ -1,20 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
-  require('plugins/visualize/saved_visualizations/saved_visualizations');
-  require('plugins/visualize/editor/sidebar');
-  require('plugins/visualize/editor/agg_filter');
+  require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
+  require('plugins/kibana/visualize/editor/sidebar');
+  require('plugins/kibana/visualize/editor/agg_filter');
 
-
-  require('directives/saved_object_finder');
   require('components/visualize/visualize');
   require('components/clipboard/clipboard');
-  require('components/comma_list_filter');
-
-  require('filters/uriescape');
 
   require('routes')
   .when('/visualize/create', {
-    template: require('text!plugins/visualize/editor/editor.html'),
+    template: require('text!plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route, Private) {
         var visTypes = Private(require('registry/vis_types'));
@@ -31,7 +26,7 @@ define(function (require) {
     }
   })
   .when('/visualize/edit/:id', {
-    template: require('text!plugins/visualize/editor/editor.html'),
+    template: require('text!plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
@@ -79,9 +74,9 @@ define(function (require) {
 
     // config panel templates
     var configTemplate = new ConfigTemplate({
-      save: require('text!plugins/visualize/editor/panels/save.html'),
-      load: require('text!plugins/visualize/editor/panels/load.html'),
-      share: require('text!plugins/visualize/editor/panels/share.html'),
+      save: require('text!plugins/kibana/visualize/editor/panels/save.html'),
+      load: require('text!plugins/kibana/visualize/editor/panels/load.html'),
+      share: require('text!plugins/kibana/visualize/editor/panels/share.html'),
     });
 
     if (savedVis.id) {

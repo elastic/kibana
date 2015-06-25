@@ -83,7 +83,7 @@ define(function (require) {
         }
 
         return (esPromise = es[strategy.clientMethod]({
-          timeout: shardTimeout,
+          timeout: esShardTimeout,
           ignore_unavailable: true,
           preference: sessionId,
           body: body

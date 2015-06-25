@@ -7,10 +7,10 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
-    var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
-    var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
+    var aggSelectHtml = require('text!plugins/kibana/visualize/editor/agg_select.html');
+    var advancedToggleHtml = require('text!plugins/kibana/visualize/editor/advanced_toggle.html');
     require('filters/match_any');
-    require('plugins/visualize/editor/agg_param');
+    require('plugins/kibana/visualize/editor/agg_param');
 
     var notify = new Notifier({
       location: 'visAggGroup'
@@ -18,7 +18,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/visualize/editor/agg_params.html'),
+      template: require('text!plugins/kibana/visualize/editor/agg_params.html'),
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.$bind('agg', attr.agg);

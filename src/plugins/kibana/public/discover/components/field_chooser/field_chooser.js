@@ -4,12 +4,12 @@ define(function (require) {
   require('directives/css_truncate');
   require('directives/field_name');
   require('filters/unique');
-  require('plugins/discover/components/field_chooser/discover_field');
+  require('plugins/kibana/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
     var _ = require('lodash');
     var rison = require('utils/rison');
-    var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
+    var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
     var FieldList = Private(require('components/index_patterns/_field_list'));
 
     return {
@@ -23,7 +23,7 @@ define(function (require) {
         indexPatternList: '=',
         updateFilterInQuery: '=filter'
       },
-      template: require('text!plugins/discover/components/field_chooser/field_chooser.html'),
+      template: require('text!plugins/kibana/discover/components/field_chooser/field_chooser.html'),
       link: function ($scope) {
         $scope.setIndexPattern = function (id) {
           $scope.state.index = id;

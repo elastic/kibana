@@ -1,0 +1,48 @@
+- var j = JSON.stringify
+
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    meta(name='viewport', content='width=device-width')
+    link(rel='shortcut icon', href='/styles/theme/elk.ico')
+    title
+    link(rel='stylesheet', href='/styles/main.css?_b=#{buildNumber}')
+  body(kbn-chrome, ng-class="'application-' + activeApp.id")
+    .col-md-offset-4.col-md-4.page-header.initial-load
+      center
+        img(width='128', alt='Loading Kibana', src='/images/initial_load.gif')
+        h1
+          strong Kibana
+          small#cache-message
+            |  is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!
+    script.
+      window.KIBANA_VERSION = !{ j(version) };
+      window.KIBANA_BUILD_NUM = !{ j(buildNumber) };
+      window.KIBANA_BUILD_SHA = !{ j(buildSha) };
+      window.KIBANA_INDEX = !{ j(kbnIndex) }
+      window.ES_SHARD_TIMEOUT = !{ j(esShardTimeout) }
+
+      var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
+      if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
+
+    script(src='/bower_components/requirejs/require.js?_b=#{buildNumber}')
+    script(src='/require.config.js?_b=#{buildNumber}')
+    script.
+      if (window.KIBANA_BUILD_NUM.substr(0, 2) !== '@@') {
+        // only cache bust if this is really the build number
+        require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
+      }
+
+      require(!{ j(['bootstrap'].concat(app.useModuleIds() || [])) }, function () {
+        require(!{ j([app.mainModuleId()]) }, function () {
+          $(function () {
+            angular
+              .bootstrap(document, ['kibana'])
+              .invoke(function () {
+                $(document.body).children(':not(style-compile)').show();
+              });
+          });
+        });
+      });

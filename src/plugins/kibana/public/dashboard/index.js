@@ -12,10 +12,10 @@ define(function (require) {
   require('components/clipboard/clipboard');
 
 
-  require('plugins/dashboard/directives/grid');
-  require('plugins/dashboard/components/panel/panel');
-  require('plugins/dashboard/services/saved_dashboards');
-  require('css!plugins/dashboard/styles/main.css');
+  require('plugins/kibana/dashboard/directives/grid');
+  require('plugins/kibana/dashboard/components/panel/panel');
+  require('plugins/kibana/dashboard/services/saved_dashboards');
+  require('css!plugins/kibana/dashboard/styles/main.css');
 
   var app = require('modules').get('app/dashboard', [
     'elasticsearch',
@@ -28,7 +28,7 @@ define(function (require) {
 
   require('routes')
   .when('/dashboard', {
-    template: require('text!plugins/dashboard/index.html'),
+    template: require('text!plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards) {
         return savedDashboards.get();
@@ -36,7 +36,7 @@ define(function (require) {
     }
   })
   .when('/dashboard/:id', {
-    template: require('text!plugins/dashboard/index.html'),
+    template: require('text!plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
@@ -84,10 +84,10 @@ define(function (require) {
         var $state = $scope.state = new AppState(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
-          save: require('text!plugins/dashboard/partials/save_dashboard.html'),
-          load: require('text!plugins/dashboard/partials/load_dashboard.html'),
-          share: require('text!plugins/dashboard/partials/share.html'),
-          pickVis: require('text!plugins/dashboard/partials/pick_visualization.html')
+          save: require('text!plugins/kibana/dashboard/partials/save_dashboard.html'),
+          load: require('text!plugins/kibana/dashboard/partials/load_dashboard.html'),
+          share: require('text!plugins/kibana/dashboard/partials/share.html'),
+          pickVis: require('text!plugins/kibana/dashboard/partials/pick_visualization.html')
         });
 
         $scope.refresh = _.bindKey(courier, 'fetch');
@@ -203,15 +203,6 @@ define(function (require) {
 
         init();
       }
-    };
-  });
-
-  var apps = require('registry/apps');
-  apps.register(function DashboardAppModule() {
-    return {
-      id: 'dashboard',
-      name: 'Dashboard',
-      order: 2
     };
   });
 });

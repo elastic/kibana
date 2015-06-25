@@ -13,7 +13,7 @@ define(function (require) {
     'kibana/index_patterns'
   ]);
 
-  var html = require('text!plugins/doc/index.html');
+  var html = require('text!plugins/kibana/doc/index.html');
 
   var resolveIndexPattern = {
     indexPattern: function (courier, savedSearches, $route) {

@@ -6,6 +6,7 @@ module.exports = function (kibana) {
   var stat = require('fs').statSync;
   var relative = require('path').relative;
   var publicDir = join(__dirname, 'public');
+  var foundModuleIds = require('./foundModuleIds');
 
   return new kibana.Plugin({
     publicDir: false, // we will serve our own public fir
@@ -40,7 +41,7 @@ module.exports = function (kibana) {
           var app = apps[id];
           if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
-          return reply.view('chrome', {
+          return reply.view('bootstrap', {
             app: app,
             version: kibana.package.version,
             buildSha: _.get(kibana, 'package.build.sha', '@@buildSha'),
@@ -118,6 +119,62 @@ module.exports = function (kibana) {
           });
         }
       });
+    },
+    exports: {
+      aliases: {
+        baseEnv: _.union(
+          // default bower_components
+          [
+            'angular-route',
+            'angular-bindonce',
+            'angular-bootstrap',
+            'elasticsearch'
+          ],
+
+          // all directives
+          foundModuleIds.directives,
+
+          // all filters
+          foundModuleIds.filters,
+
+          // default components
+          [
+            'errors',
+            'chrome',
+            'components/bind',
+            'components/bound_to_config_obj',
+            'components/config/config',
+            'components/courier/courier',
+            'components/debounce',
+            'components/doc_title/doc_title',
+            'components/elastic_textarea',
+            'components/es',
+            'components/events',
+            'components/fancy_forms/fancy_forms',
+            'components/filter_bar/filter_bar',
+            'components/filter_manager/filter_manager',
+            'components/index_patterns/index_patterns',
+            'components/listen',
+            'components/notify/notify',
+            'components/persisted_log/persisted_log',
+            'components/private',
+            'components/promises',
+            'components/state_management/app_state',
+            'components/state_management/global_state',
+            'components/storage/storage',
+            'components/stringify/register',
+            'components/style_compile/style_compile',
+            'components/timefilter/timefilter',
+            'components/timepicker/timepicker',
+            'components/tooltip/tooltip',
+            'components/typeahead/typeahead',
+            'components/url/url',
+            'components/validateDateInterval',
+            'components/validate_query/validate_query',
+            'components/watch_multi'
+          ]
+        )
+      }
     }
   });
 };

@@ -3,8 +3,8 @@ define(function (require) {
   return function loadPanelFunction(Private) { // Inject services here
     return function (panel, $scope) { // Function parameters here
       var panelTypes = {
-        visualization: Private(require('plugins/dashboard/components/panel/lib/visualization')),
-        search: Private(require('plugins/dashboard/components/panel/lib/search'))
+        visualization: Private(require('plugins/kibana/dashboard/components/panel/lib/visualization')),
+        search: Private(require('plugins/kibana/dashboard/components/panel/lib/search'))
       };
 
       try {

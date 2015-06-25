@@ -2,13 +2,13 @@ define(function (require) {
   require('modules')
   .get('app/visualize')
   .directive('visEditorAggGroup', function (Private) {
-    require('plugins/visualize/editor/agg');
-    require('plugins/visualize/editor/agg_add');
-    require('plugins/visualize/editor/nesting_indicator');
+    require('plugins/kibana/visualize/editor/agg');
+    require('plugins/kibana/visualize/editor/agg_add');
+    require('plugins/kibana/visualize/editor/nesting_indicator');
 
     return {
       restrict: 'E',
-      template: require('text!plugins/visualize/editor/agg_group.html'),
+      template: require('text!plugins/kibana/visualize/editor/agg_group.html'),
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;
