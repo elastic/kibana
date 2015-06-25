@@ -46,7 +46,7 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
       var postfix = '';
       switch (which) {
         case 'time':
-          return moment(num).format('HH:MM:ss');
+          return moment(num).format('HH:mm:ss');
         case 'byte':
           format += 'b';
           break;
