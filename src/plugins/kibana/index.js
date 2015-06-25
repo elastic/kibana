@@ -9,7 +9,7 @@ module.exports = function (kibana) {
         icon: 'images/logo.png',
         main: 'plugins/kibana/index',
         uses: [
-          'visualizations',
+          'visTypes',
           'spyModes'
         ]
       }

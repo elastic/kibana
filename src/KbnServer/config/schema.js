@@ -20,7 +20,7 @@ module.exports = Joi.object({
     index: Joi.string().default('.kibana'),
     pluginPaths: Joi.array().items(Joi.string()).default([]),
     pluginScanDirs: Joi.array().items(Joi.string()).default([]),
-    defaultAppId: Joi.string().default('kibana'),
+    defaultRoute: Joi.string().default('/app/kibana/'),
     buildNum: Joi.string().default('@@buildNum'),
     bundledPluginIds: Joi.array().items(Joi.string())
   }).default(),

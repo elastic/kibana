@@ -8,7 +8,6 @@ module.exports = function (grunt) {
     'copy:kibana_src',
     'clean:dev_only_plugins',
     'touch_config',
-    'replace:build_props',
     'requirejs',
     'clean:unneeded_source_in_build',
     'copy:server_src',

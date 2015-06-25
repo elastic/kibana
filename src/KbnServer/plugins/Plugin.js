@@ -15,7 +15,7 @@ function Plugin(kibana, path, package, opts) {
   this.externalInit = opts.init || _.noop;
   this.getConfig = opts.config || _.noop;
 
-  kibana.feExports.readExports(this, opts.exports);
+  kibana.uiExports.add(this, opts.exports);
 
   var readyCb;
   var readyPromise = Promise.fromNode(function (cb) { readyCb = cb; });

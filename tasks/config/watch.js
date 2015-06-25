@@ -2,11 +2,7 @@ module.exports = function (grunt) {
   var config = {
     less: {
       files: [
-        '<%= app %>/**/styles/**/*.less',
-        '<%= plugins %>/*/styles/**/*.less',
-        '<%= plugins %>/*/*.less',
-        '<%= app %>/**/components/**/*.less',
-        '<%= app %>/**/components/vislib/components/styles/**/*.less'
+        'src/**/*.less'
       ],
       tasks: ['less:dev']
     },

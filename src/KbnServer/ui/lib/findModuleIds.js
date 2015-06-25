@@ -10,7 +10,7 @@ function hidden(name) {
 }
 
 function scan(type) {
-  var dir = join(__dirname, 'public', type);
+  var dir = join(__dirname, '..', 'public', type);
 
   return readdir(dir)
   .filter(hidden)
@@ -34,7 +34,9 @@ function scan(type) {
   });
 }
 
-module.exports = {
-  directives: scan('directives'),
-  filters: scan('filters')
+module.exports = function () {
+  return {
+    directives: scan('directives'),
+    filters: scan('filters')
+  };
 };

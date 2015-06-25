@@ -18,8 +18,8 @@ define(function (require) {
           $rootScope.kibana && $rootScope.kibana.ready
         ])
         .then(function () {
-          var path = $route.current.$$route.originalPath;
-          var defaultIndexRequired = !path.match(allowedRoutesRE);
+          var path = _.get($route, 'current.$$route.originalPath');
+          var defaultIndexRequired = path && !path.match(allowedRoutesRE);
 
           return courier.indexPatterns.getIds()
           .then(function (patterns) {

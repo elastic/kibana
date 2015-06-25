@@ -71,5 +71,5 @@
     config-close="toggleTimepicker">
   </config>
 
-  <div class="application"><ng-view></ng-view></div>
+  <div class="application" ng-class="'application-' + chrome.getActiveTab().id" ng-view></div>
 </div>

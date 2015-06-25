@@ -4,7 +4,7 @@ module.exports = function (kibana) {
 
     exports: {
       visTypes: [
-        'plugins/metric-vis/index'
+        'plugins/metric_vis/index'
       ]
     }
 

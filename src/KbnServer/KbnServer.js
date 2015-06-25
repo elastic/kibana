@@ -8,24 +8,28 @@ var rootDir = dirname(packagePath);
 var package = require(packagePath);
 
 function KbnServer(settings) {
+  this.name = package.name;
   this.version = package.version;
+  this.build = package.build || false;
   this.rootDir = rootDir;
   this.server = new Hapi.Server();
   this.settings = settings || {};
   this.ready = _.constant(this.mixin(
     require('./config'),
-    require('./connections'),
     require('./logging'),
+    require('./http'),
+    require('./ui'),
     require('./status'),
-    require('./fe-exports'),
     require('./plugins')
   ));
 }
 
 KbnServer.prototype.mixin = function () {
   var self = this;
+  var server = self.server;
+
   return Promise.each(_.toArray(arguments), function (fn) {
-    return fn(self);
+    return fn(self, server, server.config && server.config());
   })
   .then(_.noop);
 };

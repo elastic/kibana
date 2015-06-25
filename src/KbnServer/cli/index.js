@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var KbnServer = require('../../');
+var KbnServer = require('../KbnServer');
 var program = require('commander');
 var package = require('./utils/closestPackageJson').getSync();
 var readYamlConfig = require('./readYamlConfig');
@@ -12,8 +12,16 @@ program.option('-p, --port <port>', 'The port to bind to', parseInt);
 program.option('-q, --quiet', 'Turns off logging');
 program.option('-H, --host <host>', 'The host to bind to');
 program.option('-l, --log-file <path>', 'The file to log to');
-program.option('--plugin-dir <path>', 'A path to scan for plugins, this can be specified multiple times to specify multiple directories');
-program.option('--plugin-path <path>', 'A path to a plugin which should be included by the server, this can be specified multiple times to specify multiple paths');
+program.option(
+  '--plugin-dir <path>',
+  'A path to scan for plugins, this can be specified multiple ' +
+  'times to specify multiple directories'
+);
+program.option(
+  '--plugin-path <path>',
+  'A path to a plugin which should be included by the server, ' +
+  'this can be specified multiple times to specify multiple paths'
+);
 program.option('--plguins <path>', 'an alias for --plugin-dir');
 program.parse(process.argv);
 

@@ -5,14 +5,12 @@ module.exports = function (grunt) {
   var config = {
     pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
-    src: __dirname + '/src', // unbuild version of build
-    build: __dirname + '/build', // copy of source, but optimized
-    app: __dirname + '/src/kibana', // source directory for the app
-    plugins: __dirname + '/src/kibana/plugins', // source directory for the app
-    server: __dirname + '/src/server', // source directory for the server
-    target: __dirname + '/target',  // location of the compressed build targets
-    buildApp: __dirname + '/build/kibana', // build directory for the app
-    configFile: __dirname + '/src/server/config/kibana.yml',
+    src: __dirname + '/src',
+    build: __dirname + '/build', // temporary build directory
+    plugins: __dirname + '/src/plugins',
+    server: __dirname + '/src/KbnServer',
+    target: __dirname + '/target', // location of the compressed build targets
+    configFile: __dirname + '/src/config/kibana.yml',
 
     nodeVersion: '0.10.35',
     platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
@@ -20,7 +18,7 @@ module.exports = function (grunt) {
 
     unitTestDir: __dirname + '/test/unit',
     testUtilsDir: __dirname + '/test/utils',
-    bowerComponentsDir: __dirname + '/src/kibana/bower_components',
+    bowerComponentsDir: __dirname + '/bower_components',
 
     devPlugins: 'vis_debug_spy',
 

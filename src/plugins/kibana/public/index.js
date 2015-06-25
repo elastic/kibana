@@ -5,6 +5,11 @@ define(function (require) {
   require('plugins/kibana/settings/index');
   require('plugins/kibana/doc/index');
 
+  require('routes')
+  .otherwise({
+    redirectTo: '/discover'
+  });
+
   require('chrome')
   .setTabs([
     {

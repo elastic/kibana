@@ -12,7 +12,7 @@
   ],
   "private": false,
   "version": "4.2.0-snapshot",
-  "main": "src/server/index.js",
+  "main": "src/kibana/index.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "test": "grunt test",
-    "start": "node ./src/server/bin/kibana.js",
+    "start": "node ./src/bin/kibana.js",
     "postinstall": "bower install && grunt licenses --check-validity",
     "precommit": "grunt lintStagedFiles"
   },

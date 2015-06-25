@@ -4,7 +4,7 @@ module.exports = function (kibana) {
 
     exports: {
       visTypes: [
-        'plugins/kbn-vislib-vis-types/index'
+        'plugins/kbn_vislib_vis_types/index'
       ]
     }
 

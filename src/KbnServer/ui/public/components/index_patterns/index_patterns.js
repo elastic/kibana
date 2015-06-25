@@ -2,7 +2,7 @@ define(function (require) {
   var module = require('modules').get('kibana/index_patterns');
   require('filters/short_dots');
 
-  module.service('indexPatterns', function (es, Notifier, Private, Promise) {
+  module.service('indexPatterns', function (es, Notifier, Private, Promise, kbnIndex) {
     var self = this;
     var _ = require('lodash');
     var errors = require('errors');
