@@ -16,7 +16,7 @@ define(function (require) {
 
       beforeEach(inject(function (Private) {
         Vis = Private(require('components/vis/vis'));
-        AggConfigs = Private(require('components/vis/_agg_configs'));
+        AggConfigs = Private(require('components/vis/AggConfigs'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       }));
 

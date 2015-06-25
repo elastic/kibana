@@ -28,7 +28,7 @@ define(function (require) {
         parts.push(baseTitle);
       }
 
-      return _(parts).flatten().compact().join(' - ');
+      return _(parts).flattenDeep().compact().join(' - ');
     }
 
     self.change = function (title, complete) {

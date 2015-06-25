@@ -5,7 +5,7 @@ define(function (require) {
 
     require('components/field_format_editor/samples/samples');
 
-    _(_String).inherits(FieldFormat);
+    _.class(_String).inherits(FieldFormat);
     function _String(params) {
       _String.Super.call(this, params);
     }

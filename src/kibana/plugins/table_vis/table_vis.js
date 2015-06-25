@@ -14,8 +14,8 @@ define(function (require) {
 
   // define the TableVisType
   return function TableVisTypeProvider(Private) {
-    var TemplateVisType = Private(require('plugins/vis_types/template/template_vis_type'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var TemplateVisType = Private(require('components/template_vis_type/TemplateVisType'));
+    var Schemas = Private(require('components/vis/Schemas'));
 
     // define the TableVisController which is used in the template
     // by angular's ng-controller directive

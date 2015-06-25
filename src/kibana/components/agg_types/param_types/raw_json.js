@@ -5,7 +5,7 @@ define(function (require) {
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var editorHtml = require('text!components/agg_types/controls/raw_json.html');
 
-    _(RawJSONAggParam).inherits(BaseAggParam);
+    _.class(RawJSONAggParam).inherits(BaseAggParam);
     function RawJSONAggParam(config) {
       // force name override
       config = _.defaults(config, { name: 'json' });

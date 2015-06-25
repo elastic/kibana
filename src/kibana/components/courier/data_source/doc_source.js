@@ -7,7 +7,7 @@ define(function (require) {
     var DocRequest = Private(require('components/courier/fetch/request/doc'));
     var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
 
-    _(DocSource).inherits(SourceAbstract);
+    _.class(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {
       DocSource.Super.call(this, initialState, docStrategy);
     }

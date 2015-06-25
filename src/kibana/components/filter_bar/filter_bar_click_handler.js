@@ -36,15 +36,15 @@ define(function (require) {
           if (isLegendLabel) results = _.filter(results, findLabel); // filter results array by legend label
 
           var filters = _(results)
-            .map(function (result) {
-              try {
-                return result.createFilter();
-              } catch (e) {
-                notify.warning(e.message);
-              }
-            })
-            .filter(Boolean)
-            .value();
+          .map(function (result) {
+            try {
+              return result.createFilter();
+            } catch (e) {
+              notify.warning(e.message);
+            }
+          })
+          .filter(Boolean)
+          .value();
 
           if (!filters.length) return;
 

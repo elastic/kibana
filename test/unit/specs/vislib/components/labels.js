@@ -123,7 +123,7 @@ define(function (require) {
           rowsArr = _.isArray(rowsLabels);
           uniqLabels = _.chain(rowsData.rows)
             .pluck('series')
-            .flatten()
+            .flattenDeep()
             .pluck('label')
             .uniq()
             .value();

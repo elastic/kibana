@@ -5,7 +5,7 @@ define(function (require) {
     var IndexedArray = require('utils/indexed_array/index');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
 
-    _(OptionedAggParam).inherits(BaseAggParam);
+    _.class(OptionedAggParam).inherits(BaseAggParam);
     function OptionedAggParam(config) {
       OptionedAggParam.Super.call(this, config);
 

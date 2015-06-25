@@ -140,7 +140,8 @@ define(function (require) {
           })
           .each(function (group, name) {
             $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
-          });
+          })
+          .commit();
 
           // include undefined so the user can clear the filter
           $scope.fieldTypes = _.union([undefined], _.pluck(fields, 'type'));
@@ -230,7 +231,6 @@ define(function (require) {
           if (!indexPattern || !hits || !fieldCounts) return;
 
           var fieldSpecs = indexPattern.fields.slice(0);
-
           var fieldNamesInDocs = _.keys(fieldCounts);
           var fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
 

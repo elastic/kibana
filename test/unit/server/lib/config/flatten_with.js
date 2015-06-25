@@ -1,7 +1,6 @@
 var root = require('requirefrom')('');
 var flattenWith = root('src/server/lib/config/flatten_with');
 var expect = require('expect.js');
-var _ = require('lodash');
 
 describe('flatten_with(dot, nestedObj)', function () {
 

@@ -13,6 +13,7 @@ define(function (require) {
      * @constructor
      * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
      */
+    _.class(YAxis).inherits(ErrorHandler);
     function YAxis(args) {
       this.el = args.el;
       this.scale = null;
@@ -20,8 +21,6 @@ define(function (require) {
       this.yAxisFormatter = args.yAxisFormatter;
       this._attr = args._attr || {};
     }
-
-    _(YAxis.prototype).extend(ErrorHandler.prototype);
 
     /**
      * Renders the y axis

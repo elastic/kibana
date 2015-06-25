@@ -15,7 +15,7 @@ define(function (require) {
 
       return _.chain(obj)
       .pluck('series')
-      .flatten()
+      .flattenDeep()
       .value();
     };
   };

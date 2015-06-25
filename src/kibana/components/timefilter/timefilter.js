@@ -17,7 +17,7 @@
       return obj.isValid() ? obj : stringTime;
     }
 
-    _(Timefilter).inherits(Events);
+    _.class(Timefilter).inherits(Events);
     function Timefilter() {
       Timefilter.Super.call(this);
 
@@ -83,7 +83,8 @@
         filter = {range : {}};
         filter.range[timefield.name] = {
           gte: bounds.min.valueOf(),
-          lte: bounds.max.valueOf()
+          lte: bounds.max.valueOf(),
+          format: 'epoch_millis'
         };
       }
 

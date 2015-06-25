@@ -1,5 +1,4 @@
 var _ = require('lodash');
-_.mixin(require('lodash-deep'));
 var esBool = require('./es_bool');
 var versionMath = require('./version_math');
 var SetupError = require('./setup_error');
@@ -11,7 +10,7 @@ module.exports = function (server) {
       .then(function (info) {
         var badNodes = _.filter(info.nodes, function (node) {
           // remove client nodes (Logstash)
-          var isClient = _.deepGet(node, 'attributes.client');
+          var isClient = _.get(node, 'attributes.client');
           if (isClient != null && esBool(isClient) === true) {
             return false;
           }

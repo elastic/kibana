@@ -13,7 +13,7 @@ define(function (require) {
 
       document.body.appendChild(e);
       var styles = window.getComputedStyle(e);
-      var can = _(styles).pick(rules).contains(test);
+      var can = _(styles).pick(rules).includes(test);
       document.body.removeChild(e);
 
       return can;

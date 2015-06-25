@@ -13,7 +13,7 @@ define(function (require) {
      * @param handler {Object} Reference to Handler Class Object
      */
 
-    _(Dispatch).inherits(SimpleEmitter);
+    _.class(Dispatch).inherits(SimpleEmitter);
     function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);

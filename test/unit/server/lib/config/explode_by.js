@@ -1,7 +1,6 @@
 var root = require('requirefrom')('');
 var explodeBy = root('src/server/lib/config/explode_by');
 var expect = require('expect.js');
-var _ = require('lodash');
 
 describe('explode_by(dot, flatObject)', function () {
 

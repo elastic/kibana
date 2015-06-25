@@ -36,10 +36,7 @@ define(function (require) {
         source.activeFetchCount = 1;
       }
 
-      if (source.history) {
-        source.history.push(this);
-        source.history = _.last(source.history, 1);
-      }
+      source.history = [this];
     };
 
     AbstractReq.prototype.getFetchParams = function () {
