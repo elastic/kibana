@@ -36,11 +36,14 @@ module.exports = function (grunt) {
         var licenseStats = _.map(result, processPackage);
         var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
 
-        if (grunt.option('only-invalid')) {
-          console.log(invalidLicenses);
-        } else {
-          console.log(licenseStats);
+        if (grunt.option('verbose')) {
+          if (grunt.option('only-invalid')) {
+            console.log(invalidLicenses);
+          } else {
+            console.log(licenseStats);
+          }
         }
+
 
         if (invalidLicenses.length) {
           grunt.fail.warn('Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', ') +
