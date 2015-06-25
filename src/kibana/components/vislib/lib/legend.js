@@ -15,10 +15,6 @@ define(function (require) {
      * @class Legend
      * @constructor
      * @param vis {Object} Reference to Vis Constructor
-     * @param el {HTMLElement} Reference to DOM element
-     * @param labels {Array} Array of chart labels
-     * @param color {Function} Color function
-     * @param _attr {Object|*} Reference to Vis options
      */
     function Legend(vis) {
       if (!(this instanceof Legend)) {
@@ -34,7 +30,7 @@ define(function (require) {
       this.vis = vis;
       this.el = vis.el;
       this.color = color(labelsArray);
-      this._attr = _.defaults(vis._attr || {}, {
+      this._attr = _.defaults({}, vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
