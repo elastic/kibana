@@ -7,7 +7,7 @@ module.exports = {
     paths: [
       'bower_components/lesshat/build/',
       'bower_components',
-      'src/KbnServer/ui/public'
+      'src/ui'
     ]
   },
   dev: {

@@ -4,6 +4,7 @@ require.config({
     // common modules, shortcut for clarity
     lodash: 'utils/lodash-mixins/index',
     errors: 'components/errors',
+    chrome: 'components/chrome/chrome',
     modules: 'components/modules',
     routes: 'components/routes/index',
 

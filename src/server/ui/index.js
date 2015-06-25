@@ -6,11 +6,11 @@ module.exports = function (kibana, server, config) {
   var stat = require('fs').statSync;
   var relative = require('path').relative;
 
-  var UiExports = require('./lib/UiExports');
-  var defaultModuleIds = require('./lib/defaultModuleIds');
-  var findBowerComponents = require('./lib/findBowerComponents');
+  var UiExports = require('./UiExports');
+  var defaultModuleIds = require('./defaultModuleIds');
+  var findBowerComponents = require('./findBowerComponents');
 
-  var publicDir = join(__dirname, 'public');
+  var uiDir = require('./uiDir');
 
   // setup jade for templates
   server.views({
@@ -20,6 +20,7 @@ module.exports = function (kibana, server, config) {
     }
   });
 
+  // export manager
   kibana.uiExports = new UiExports(defaultModuleIds());
 
   server.decorate('server', 'getApps', function () {
@@ -72,11 +73,11 @@ module.exports = function (kibana, server, config) {
   // in this directory and moving out
   server.exposeStaticDir('/bower_components/{path*}', findBowerComponents(__dirname, kibana.rootDir));
 
-  // expose our public files at the server root
+  // expose our public files at the server root explicitly, rather than with a catch all route
   require('fs')
-  .readdirSync(publicDir)
+  .readdirSync(uiDir)
   .forEach(function (name) {
-    var path = join(publicDir, name);
+    var path = join(uiDir, name);
 
     if (stat(path).isDirectory()) {
       server.exposeStaticDir('/' + name + '/{path*}', path);

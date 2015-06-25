@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var join = require('path').join;
 
-var KbnServer = require('../KbnServer/KbnServer');
+var KbnServer = require('../server/KbnServer');
 
 function run(port, quiet) {
   return (new KbnServer({

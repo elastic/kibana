@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     src: __dirname + '/src',
     build: __dirname + '/build', // temporary build directory
     plugins: __dirname + '/src/plugins',
-    server: __dirname + '/src/KbnServer',
+    server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
     configFile: __dirname + '/src/config/kibana.yml',
 

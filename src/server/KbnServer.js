@@ -3,9 +3,8 @@ var Promise = require('bluebird');
 var Hapi = require('hapi');
 var dirname = require('path').dirname;
 
-var packagePath = require('./utils/closestPackageJson').findSync();
-var rootDir = dirname(packagePath);
-var package = require(packagePath);
+var rootDir = require('./utils/fromRoot')('.');
+var package = require('./utils/closestPackageJson').getSync();
 
 function KbnServer(settings) {
   this.name = package.name;
