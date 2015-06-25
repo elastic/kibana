@@ -5,7 +5,9 @@ module.exports = {
     sourceMapFileInline: true,
     ieCompat: false,
     paths: [
-      '<%= src %>/kibana/bower_components/lesshat/build/'
+      'bower_components/lesshat/build/',
+      'bower_components',
+      'src/plugins/ui/public'
     ]
   },
   dev: {
