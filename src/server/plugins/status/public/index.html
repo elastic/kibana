@@ -42,10 +42,10 @@
         <p>Interval of 5 seconds, with a max history of 5 minutes.</p>
         <div id="chart_cont" class="row">
           <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
-            <h2 class="title">{{chart.niceName}}</h2>
-            <h1 class="average">
+            <h3 class="title">{{chart.niceName}}</h2>
+            <h4 class="average">
               <span ng-repeat="average in chart.average track by $index"><span ng-if="$index">, </span>{{average}}</span>
-            </h1>
+            </h4>
             <nvd3 options="chart.options" data="chart.data"></nvd3>
           </div>
           <div class="clearfix"></div>

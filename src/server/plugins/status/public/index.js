@@ -124,11 +124,8 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
               return getStatus(status);
             };
           }()),
-          charts: [],
-          plugins: [],
-          chartAverages: [],
-          chartOptions: {
-          }
+          charts: {},
+          plugins: []
         };
 
         var windowHasFocus = true;
@@ -165,16 +162,18 @@ window.define(['angular', 'jquery', 'lodash', 'moment', 'numeral', 'nvd3_directi
                 var metricList = [];
                 var metricNumberType = numberType(name);
 
+                // convert the [x,y] into {x: x, y: y}
                 metric.forEach(function (vector) {
-                  var _vector = _(vector).flatten();
-                  var x = _vector.shift();
-                  _vector.forEach(function (yValue, idx) {
+                  vector = _.flatten(vector);
+                  var x = vector.shift();
+                  vector.forEach(function (yValue, idx) {
                     if (!metricList[idx]) {
                       metricList[idx] = {
                         key: name + idx,
                         values: []
                       };
                     }
+                    // unshift to make sure they're in the correct order
                     metricList[idx].values.unshift({x: x, y: yValue});
                   });
                 });
