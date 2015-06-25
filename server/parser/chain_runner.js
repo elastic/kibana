@@ -147,6 +147,9 @@ var functions = {
   },
   label: function (args) {
     return alter(args, function (args) {
+      if (args[2] && args[0].label) {
+        return args[0];
+      }
       args[0].label = args[1];
       return args[0];
     });
@@ -267,7 +270,11 @@ function invokeTree (chain, result) {
   var link = chain.shift();
   var promise;
   if (!result) {
-    promise = invoke('first', [link]);
+    if (link.label) {
+      promise = invoke('label', [link, link.label, true]);
+    } else {
+      promise = invoke('first', [link]);
+    }
   } else {
     promise = invoke(link.function, result.concat(link.arguments));
   }

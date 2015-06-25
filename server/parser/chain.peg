@@ -15,6 +15,7 @@ seriesList
 
 chain
  = '(' space? first:chain_init space? ')' rest:chained_function* {
+  first.label = text();
   return [first].concat(rest)
  }
 
