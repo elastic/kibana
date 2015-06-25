@@ -108,6 +108,9 @@ curl -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
 
 These commands may take some time to execute, depending on the computing resources available.
 
+NOTE: These commands assume your Elasticsearch cluster is not using the {shield}[Shield] security plugin. If your
+Elasticsearch cluster has Shield configured, provide suitable credentials with the `-k` and `-u` options.
+
 Verify successful loading with the following command:
 
 [source,shell]
@@ -126,16 +129,18 @@ yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb    
 [[tutorial-define-index]]
 === Defining Your Index Patterns
 
-Each set of data loaded to Elasticsearch has an https://www.elastic.co/guide/en/kibana/current/settings.html#settings-create-pattern[index pattern]. In the previous section, the Shakespeare data set has an index named `shakespeare`, and the accounts 
-data set has an index named `bank`. An _index pattern_ is a string with optional wildcards that can match multiple 
-indices. For example, in the common logging use case, a typical index name contains the date in MM-DD-YYYY 
-format, and an index pattern for May would look something like `logstash-2015.05*`.
+Each set of data loaded to Elasticsearch has an 
+https://www.elastic.co/guide/en/kibana/current/settings.html#settings-create-pattern[index pattern]. 
+In the previous section, the Shakespeare data set has an index named `shakespeare`, and the accounts 
+data set has an index named `accounts`. An _index pattern_ is a string with optional wildcards that can match multiple 
+indices. For example, the list of indices for this tutorial includes three different indices for Logstash data. You can
+search all three indices with the index pattern `logstash-2015.05.*`
 
 For this tutorial, any pattern that matches either of the two indices we've loaded will work. Open a browser and 
 navigate to `localhost:5601`. Click the *Settings* tab, then the *Indices* tab. Click *Add New* to define a new index 
 pattern. Since these data sets don't contain time-series data, make sure the *Index contains time-based events* box is 
-unchecked. Specify `shakes*`  as the index pattern for the Shakespeare data set and click *Create* to define the index 
-pattern, then define a second index pattern named `ba*`.
+unchecked. Specify `shakespeare`  as the index pattern for the Shakespeare data set and click *Create* to define the index 
+pattern, then define a second index pattern named `accounts`.
 
 [float]
 [[tutorial-discovering]]
@@ -156,7 +161,7 @@ You can construct searches by using the field names and the values you're intere
 use comparison operators such as greater than (>), less than (<), or equals (=). You can link elements with the
 logical operators AND, OR, and NOT, all in uppercase.
 
-Try selecting the `ba*` index pattern and putting the following search into the search box:
+Try selecting the `accounts` index pattern and putting the following search into the search box:
 
 [source,text]
 account_number:<100 AND balance:>47500
@@ -183,7 +188,7 @@ Click on the *Visualize* tab to start:
 
 image::images/tutorial-visualize.png[]
 
-Click on *Pie chart*, then *From a new search*. Select the `ba*` index pattern. 
+Click on *Pie chart*, then *From a new search*. Select the `accounts` index pattern. 
 
 Visualizations depend on Elasticsearch {ref}/search-aggregations.html[aggregations] in two different types: _bucket_ 
 aggregations and _metric_ aggregations. A bucket aggregation sorts your data according to criteria you specify. For 
@@ -223,7 +228,7 @@ Save this chart by clicking the *Save Visualization* button to the right of the 
 _Pie Example_.
 
 Next, we're going to make a bar chart. Click on *New Visualization*, then *Vertical bar chart*. Select *From a new 
-search* and the `shakes*` index pattern. You'll see a single big bar, since we haven't defined any buckets yet:
+search* and the `shakespeare` index pattern. You'll see a single big bar, since we haven't defined any buckets yet:
 
 image::images/tutorial-visualize-bar-1.png[]
 
