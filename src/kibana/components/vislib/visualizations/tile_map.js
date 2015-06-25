@@ -2,9 +2,6 @@ define(function (require) {
   return function TileMapFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var L = require('leaflet');
-    require('leaflet-heat');
-    require('leaflet-draw');
     require('css!components/vislib/styles/main');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
@@ -63,9 +60,6 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function () {
-          // add leaflet latLngs to properties for tooltip
-          self.addLatLng(mapData);
-
           var container = $(this).addClass('tilemap');
 
           var map = new Map(container, self._chartData, {
@@ -92,21 +86,6 @@ define(function (require) {
           self.maps.push(map);
         });
       };
-    };
-
-    /**
-     * add Leaflet latLng to mapData properties
-     *
-     * @method addLatLng
-     * @return undefined
-     */
-    TileMap.prototype.addLatLng = function () {
-      this.geoJson.features.forEach(function (feature) {
-        feature.properties.latLng = L.latLng(
-          feature.geometry.coordinates[1],
-          feature.geometry.coordinates[0]
-        );
-      });
     };
 
     /**

@@ -80,28 +80,48 @@ define(function (require) {
     };
 
     /**
+     * returns a memoized Leaflet latLng for given geoJson feature
+     *
+     * @method addLatLng
+     * @param feature {geoJson Object}
+     * @return {Leaflet latLng Object}
+     */
+    HeatmapMarker.prototype._getLatLng = _.memoize(function (feature) {
+      return L.latLng(
+        feature.geometry.coordinates[1],
+        feature.geometry.coordinates[0]
+      );
+    }, function (feature) {
+      // turn coords into a string for the memoize cache
+      return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
+    });
+
+    /**
      * Finds nearest feature in mapData to event latlng
      *
      * @method nearestFeature
      * @param point {Leaflet latLng Object}
      * @return nearestPoint {Leaflet Object}
      */
-    HeatmapMarker.prototype.nearestFeature = function (point) {
-      var distance = Infinity;
+    HeatmapMarker.prototype.nearestFeature = function (latLng) {
+      var self = this;
       var nearest;
 
-      if (point.lng < -180 || point.lng > 180) {
+      if (latLng.lng < -180 || latLng.lng > 180) {
         return;
       }
 
-      for (var i = 0; i < this.geoJson.features.length; i++) {
-        var dist = point.distanceTo(this.geoJson.features[i].properties.latLng);
+      _.reduce(this.geoJson.features, function (distance, feature) {
+        var featureLatLng = self._getLatLng(feature);
+        var dist = latLng.distanceTo(featureLatLng);
+
         if (dist < distance) {
-          distance = dist;
-          nearest = this.geoJson.features[i];
+          nearest = feature;
+          return dist;
         }
-      }
-      nearest.properties.eventDistance = distance;
+
+        return distance;
+      }, Infinity);
 
       return nearest;
     };
@@ -118,6 +138,7 @@ define(function (require) {
       if (!feature) return;
 
       var showTip = false;
+      var featureLatLng = this._getLatLng(feature);
 
       // zoomScale takes map zoom and returns proximity value for tooltip display
       // domain (input values) is map zoom (min 1 and max 18)
@@ -128,19 +149,17 @@ define(function (require) {
       .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
 
       var proximity = zoomScale(this.map.getZoom());
-      var distance = latlng.distanceTo(feature.properties.latLng);
+      var distance = latlng.distanceTo(featureLatLng);
 
       // maxLngDif is max difference in longitudes
       // to prevent feature tooltip from appearing 360°
       // away from event latlng
       var maxLngDif = 40;
-      var lngDif = Math.abs(latlng.lng - feature.properties.latLng.lng);
+      var lngDif = Math.abs(latlng.lng - featureLatLng.lng);
 
       if (distance < proximity && lngDif < maxLngDif) {
         showTip = true;
       }
-
-      delete feature.properties.eventDistance;
 
       var testScale = d3.scale.pow().exponent(0.2)
       .domain([1, 18])
