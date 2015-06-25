@@ -259,7 +259,7 @@ define(function (require) {
         });
       });
 
-      describe('dataToHeatArray method', function () {
+      describe('dataToHeatArray', function () {
         var max;
 
         beforeEach(function () {
@@ -298,7 +298,7 @@ define(function (require) {
         });
       });
 
-      describe('tooltipProximity method', function () {
+      describe('tooltipProximity', function () {
         it('should return true if feature is close enough to event latlng', function () {
           _.times(5, function () {
             var feature = _.sample(mapData.features);
@@ -318,14 +318,34 @@ define(function (require) {
         });
       });
 
-      describe('nearestFeature method', function () {
+      describe('nearestFeature', function () {
         it('should return nearest geoJson feature object', function () {
           _.times(5, function () {
             var feature = _.sample(mapData.features);
             var point = markerLayer._getLatLng(feature);
-            var nearestPoint = markerLayer.nearestFeature(point);
+            var nearestPoint = markerLayer._nearestFeature(point);
             expect(nearestPoint).to.equal(feature);
           });
+        });
+      });
+
+      describe('getLatLng', function () {
+        it('should return a leaflet latLng object', function () {
+          var feature = _.sample(mapData.features);
+          var latLng = markerLayer._getLatLng(feature);
+          var compare = L.latLng(feature.geometry.coordinates.slice(0).reverse());
+          expect(latLng).to.eql(compare);
+        });
+
+        it('should memoize the result', function () {
+          var spy = sinon.spy(L, 'latLng');
+          var feature = _.sample(mapData.features);
+
+          markerLayer._getLatLng(feature);
+          expect(spy.callCount).to.be(1);
+
+          markerLayer._getLatLng(feature);
+          expect(spy.callCount).to.be(1);
         });
       });
     });
