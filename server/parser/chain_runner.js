@@ -284,11 +284,9 @@ function resolveTree (forest) {
 
     return values.then(function (args) {
       args.data = unzipPairs(args.data);
-
       return args;
     });
   });
-
   return Promise.all(seriesList).then(function (args) {
     return args;
   }).catch(function () {
@@ -309,8 +307,8 @@ function processRequest (request) {
   // This is setting the "global" sheet
   sheet = resolveSheet(request);
   return _.map(sheet, function (row) {
-    return _.map(row, function (tree) {
-      return Promise.all(resolveTree(tree)).then(function (columns) {
+    return _.map(row, function (column) {
+      return resolveTree(column).then(function (columns) {
         return columns;
       });
     });
