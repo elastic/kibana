@@ -70,7 +70,7 @@ define(function (require) {
         }
 
         // find nearest feature to event latlng
-        var feature = this.nearestFeature(latlng);
+        var feature = this._nearestFeature(latlng);
 
         // show tooltip if close enough to event latlng
         if (this._tooltipProximity(latlng, feature)) {
@@ -99,11 +99,11 @@ define(function (require) {
     /**
      * Finds nearest feature in mapData to event latlng
      *
-     * @method nearestFeature
+     * @method _nearestFeature
      * @param point {Leaflet latLng Object}
      * @return nearestPoint {Leaflet Object}
      */
-    HeatmapMarker.prototype.nearestFeature = function (latLng) {
+    HeatmapMarker.prototype._nearestFeature = function (latLng) {
       var self = this;
       var nearest;
 

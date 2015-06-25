@@ -285,7 +285,7 @@ define(function (require) {
         });
 
         it('should return an array item with lat, lng, normalized metric for each feature', function () {
-          _.times(3, function () {
+          _.times(5, function () {
             markerLayer._attr.heatNormalizeData = true;
 
             var arr = markerLayer._dataToHeatArray(max);
@@ -294,6 +294,37 @@ define(function (require) {
             var featureValue = parseInt(feature.properties.value / max * 100);
             var featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
             expect(arr[index]).to.eql(featureArr);
+          });
+        });
+      });
+
+      describe('tooltipProximity method', function () {
+        it('should return true if feature is close enough to event latlng', function () {
+          _.times(5, function () {
+            var feature = _.sample(mapData.features);
+            var point = markerLayer._getLatLng(feature);
+            var arr = markerLayer._tooltipProximity(point, feature);
+            expect(arr).to.be(true);
+          });
+        });
+
+        it('should return false if feature is not close enough to event latlng', function () {
+          _.times(5, function () {
+            var feature = _.sample(mapData.features);
+            var point = L.latLng(90, -180);
+            var arr = markerLayer._tooltipProximity(point, feature);
+            expect(arr).to.be(false);
+          });
+        });
+      });
+
+      describe('nearestFeature method', function () {
+        it('should return nearest geoJson feature object', function () {
+          _.times(5, function () {
+            var feature = _.sample(mapData.features);
+            var point = markerLayer._getLatLng(feature);
+            var nearestPoint = markerLayer.nearestFeature(point);
+            expect(nearestPoint).to.equal(feature);
           });
         });
       });
