@@ -3,8 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
-    var AggConfig = Private(require('components/vis/_agg_config'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var AggConfig = Private(require('components/vis/AggConfig'));
+    var Schemas = Private(require('components/vis/Schemas'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
 
     var orderAggSchema = (new Schemas([

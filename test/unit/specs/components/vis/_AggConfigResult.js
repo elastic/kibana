@@ -1,8 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var AggConfigResult = require('components/vis/_agg_config_result');
-
-  describe('AggConfigResult', function () {
+  return ['AggConfigResult', function () {
+    var _ = require('lodash');
+    var AggConfigResult = require('components/vis/AggConfigResult');
 
     var AggConfig;
     var indexPattern;
@@ -11,7 +10,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
       Vis = Private(require('components/vis/vis'));
-      AggConfig = Private(require('components/vis/_agg_config'));
+      AggConfig = Private(require('components/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 
@@ -104,5 +103,5 @@ define(function (require) {
         });
       });
     });
-  });
+  }];
 });

@@ -1,7 +1,7 @@
 define(function (require) {
   return function TileMapVisType(Private, getAppState, courier, config) {
-    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var VislibVisType = Private(require('components/vislib_vis_type/VislibVisType'));
+    var Schemas = Private(require('components/vis/Schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
     var _ = require('lodash');
     var supports = require('utils/supports');
@@ -25,7 +25,7 @@ define(function (require) {
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
-        editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
+        editor: require('text!plugins/kbn_vislib_vis_types/editors/tile_map.html')
       },
       listeners: {
         rectangle: function (event) {

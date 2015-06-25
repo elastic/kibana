@@ -1,25 +1,21 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var VislibVisType = Private(require('components/vislib_vis_type/VislibVisType'));
+    var Schemas = Private(require('components/vis/Schemas'));
 
     return new VislibVisType({
-      name: 'line',
-      title: 'Line chart',
-      icon: 'fa-line-chart',
-      description: 'Often the best chart for high density time series. Great for comparing one series to another. ' +
-        'Be careful with sparse sets as the connection between points can be misleading.',
+      name: 'histogram',
+      title: 'Vertical bar chart',
+      icon: 'fa-bar-chart',
+      description: 'The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, ' +
+      'exact numbers or percentages. If you are not sure which chart your need, you could do worse than to start here.',
       params: {
         defaults: {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
-          showCircles: true,
-          smoothLines: false,
-          interpolate: 'linear',
           scale: 'linear',
-          drawLinesBetweenPoints: true,
-          radiusRatio: 9,
+          mode: 'stacked',
           times: [],
           addTimeMarker: false,
           defaultYExtents: false,
@@ -27,7 +23,8 @@ define(function (require) {
           yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],
-        editor: require('text!plugins/vis_types/vislib/editors/line.html')
+        modes: ['stacked', 'percentage', 'grouped'],
+        editor: require('text!plugins/kbn_vislib_vis_types/editors/histogram.html')
       },
       schemas: new Schemas([
         {
@@ -35,17 +32,10 @@ define(function (require) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
+          aggFilter: '!std_dev',
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
-        },
-        {
-          group: 'metrics',
-          name: 'radius',
-          title: 'Dot Size',
-          min: 0,
-          max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
         },
         {
           group: 'buckets',
@@ -58,7 +48,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Lines',
+          title: 'Split Bars',
           min: 0,
           max: 1,
           aggFilter: '!geohash_grid'
