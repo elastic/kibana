@@ -8,4 +8,25 @@ module.exports = function (kibana) {
     port: config.get('kibana.server.port')
   });
 
+  server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
+    this.route({
+      path: routePath,
+      method: 'GET',
+      handler: {
+        directory: {
+          path: dirPath,
+          listing: true,
+          redirectToSlash: true,
+          lookupCompressed: true
+        }
+      }
+    });
+  });
+
+  server.ext('onPreResponse', function (request, reply) {
+    var response = request.response;
+    response.header('X-App-Name', 'kibana');
+    return reply.continue();
+  });
+
 };

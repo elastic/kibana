@@ -52,46 +52,31 @@ module.exports = function (kibana) {
         }
       });
 
-      // initialize the browser runtime for the app
-      server.route({
-        path: '/app/{id}/{filePath*}',
-        method: 'GET',
-        handler: function (req, reply) {
-          var id = req.params.id;
-          var apps = server.getApps();
+      // provide access to an app's public directories
+      server.exposeStaticDir('/app/{id}/{path*}', function pickDir(req) {
+        var id = req.params.id;
+        var app = server.getApps()[id];
 
-          var app = apps[id];
-          if (!app) return reply(Boom.notFound('Unkown app ' + id));
-
-          return reply.file(join(app.publicDir, req.params.filePath));
-        }
+        if (!app) return Boom.notFound('Unkown app ' + id);
+        return app.publicDir || Boom.notFound(id + ' does not server public files');
       });
 
+      // expose the first bower_components directory found within kibana's rootDir starting
+      // in this directory and moving out
+      server.exposeStaticDir('/bower_components/{path*}', (function findBowerComponents() {
+        var dir = __dirname;
 
-      server.route({
-        path: '/bower_components/{path*}',
-        method: 'GET',
-        handler: {
-          directory: {
-            path: (function findBowerComponents() {
-              // find bower_components by searching up until reaching the kibana dir
-              var dir = __dirname;
+        while (!exists(join(dir, 'bower_components'))) {
+          var prev = dir;
+          dir = join(dir, '..');
 
-              while (!exists(join(dir, 'bower_components'))) {
-                var prev = dir;
-                dir = join(dir, '..');
-
-                if (dir === prev || relative(kibana.rootDir, dir) === '..') {
-                  throw new Error('unable to find bower_components');
-                }
-              }
-
-              return join(dir, 'bower_components');
-            }()),
-            listing: true
+          if (dir === prev || relative(kibana.rootDir, dir) === '..') {
+            throw new Error('unable to find bower_components');
           }
         }
-      });
+
+        return join(dir, 'bower_components');
+      }()));
 
 
       require('fs')

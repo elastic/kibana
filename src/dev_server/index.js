@@ -3,12 +3,10 @@ var join = require('path').join;
 
 var KbnServer = require('../server');
 
-function run(grunt) {
-  var opt = grunt ? _.bindKey(grunt, 'option') : _.noop;
-
+function run(port, quiet) {
   return (new KbnServer({
-    'logging.quiet': opt('debug') && opt('verbose'),
-    'kibana.server.port': opt('port') || 5601,
+    'logging.quiet': quiet,
+    'kibana.server.port': port || 5601,
     'kibana.pluginPaths': [
       join(__dirname, 'dev_statics_plugin')
     ],

@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     options: {
       directory: directory,
       branch: 'master',
-      fresh: true,
+      fresh: !grunt.option('esvm-no-fresh'),
       config: {
         path: {
           data: dataDir

@@ -13,10 +13,10 @@ function KbnServer(settings) {
   this.server = new Hapi.Server();
   this.settings = settings || {};
   this.ready = _.constant(this.mixin(
-    require('./status'),
     require('./config'),
     require('./connections'),
     require('./logging'),
+    require('./status'),
     require('./fe-exports'),
     require('./plugins')
   ));
@@ -42,6 +42,7 @@ KbnServer.prototype.listen = function () {
   .then(
     function () {
       server.log('server', 'Server running at ' + server.info.uri);
+      return server;
     },
     function (err) {
       server.log('fatal', err);

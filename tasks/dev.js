@@ -6,7 +6,7 @@ module.exports = function (grunt) {
       'less:dev',
       'jade',
       'esvm:dev',
-      'maybe_start_kibana',
+      'maybeStartKibana',
       'watch'
     ];
 

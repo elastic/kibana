@@ -1,8 +1,11 @@
 module.exports = function (grunt) {
   var _ = require('lodash');
 
-  grunt.registerTask('kibana_server', function (keepalive) {
-    require('./utils/dev_server')(grunt)
+  grunt.registerTask('devServer', function (keepalive) {
+    var quiet = !(grunt.option('debug') || grunt.option('verbose'));
+    var port = grunt.option('port');
+
+    require('../src/dev_server')(port, quiet)
     .then(function (server) {
       grunt.log.ok('Server started: ' + server.info.uri);
       if (keepalive) {

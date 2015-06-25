@@ -10,7 +10,7 @@ module.exports = function (grunt) {
       'licenses',
       'jshint:source',
       'jscs:source',
-      'maybe_start_kibana',
+      'maybeStartKibana',
       'jade',
       'less:build',
       'simplemocha:all',
@@ -24,7 +24,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('quick-test', function () {
     grunt.task.run([
-      'maybe_start_kibana',
+      'maybeStartKibana',
       'simplemocha:all',
       'mocha:unit'
     ]);
@@ -32,12 +32,12 @@ module.exports = function (grunt) {
 
   grunt.registerTask('coverage', [
     'blanket',
-    'maybe_start_kibana',
+    'maybeStartKibana',
     'mocha:coverage'
   ]);
 
   grunt.registerTask('test:watch', [
-    'maybe_start_kibana',
+    'maybeStartKibana',
     'watch:test'
   ]);
 };
