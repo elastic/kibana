@@ -9,8 +9,8 @@ define(function (require) {
      * Map overlay: rectangles that show the geohash grid bounds
      *
      * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return {undefined}
+     * @param geoJson {geoJson Object}
+     * @param params {Object}
      */
     _.class(GeohashGridMarker).inherits(BaseMarker);
     function GeohashGridMarker(map, geoJson, params) {

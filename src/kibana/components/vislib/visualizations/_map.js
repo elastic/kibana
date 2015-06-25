@@ -30,7 +30,6 @@ define(function (require) {
      *
      * @class Map
      * @constructor
-     * @param container {HTMLElement} HTML element to which the map will be appended
      * @param chartData {Object} Elasticsearch query results for this map
      * @param params {Object} Parameters used to build a map
      */
@@ -107,7 +106,6 @@ define(function (require) {
       });
 
       this._fitControl = new FitControl();
-      // this._fitControl.addTo(this.map);
       this.map.addControl(this._fitControl);
     };
 
@@ -168,9 +166,7 @@ define(function (require) {
      * creates featurelayer from mapData (geoJson)
      *
      * @method _addMarkers
-     * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return {Leaflet object} featureLayer
+     * @return {Leaflet featureLayer} marker layer
      */
     Map.prototype._addMarkers = function () {
       if (!this._geoJson) return;

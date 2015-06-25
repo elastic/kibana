@@ -10,8 +10,8 @@ define(function (require) {
      * Map overlay: canvas layer with leaflet.heat plugin
      *
      * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
-     * @return featureLayer {Leaflet object}
+     * @param geoJson {geoJson Object}
+     * @param params {Object}
      */
     _.class(HeatmapMarker).inherits(BaseMarker);
     function HeatmapMarker(map, geoJson, params) {
@@ -100,8 +100,8 @@ define(function (require) {
      * Finds nearest feature in mapData to event latlng
      *
      * @method _nearestFeature
-     * @param point {Leaflet latLng Object}
-     * @return nearestPoint {Leaflet Object}
+     * @param latLng {Leaflet latLng}
+     * @return nearestPoint {Leaflet latLng}
      */
     HeatmapMarker.prototype._nearestFeature = function (latLng) {
       var self = this;
@@ -132,7 +132,7 @@ define(function (require) {
      * @method _tooltipProximity
      * @param latlng {Leaflet latLng  Object}
      * @param feature {geoJson Object}
-     * @return boolean
+     * @return {Boolean}
      */
     HeatmapMarker.prototype._tooltipProximity = function (latlng, feature) {
       if (!feature) return;
@@ -169,13 +169,12 @@ define(function (require) {
 
 
     /**
-     * retuns data for data for heat map intensity
+     * returns data for data for heat map intensity
      * if heatNormalizeData attribute is checked/true
      • normalizes data for heat map intensity
      *
-     * @param mapData {geoJson Object}
-     * @param nax {Number}
      * @method _dataToHeatArray
+     * @param max {Number}
      * @return {Array}
      */
     HeatmapMarker.prototype._dataToHeatArray = function (max) {

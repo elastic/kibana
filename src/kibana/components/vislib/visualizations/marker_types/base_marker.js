@@ -8,7 +8,7 @@ define(function (require) {
      * Base map marker overlay, all other markers inherit from this class
      *
      * @param map {Leaflet Object}
-     * @param mapData {geoJson Object}
+     * @param geoJson {geoJson Object}
      * @param params {Object}
      */
     function BaseMarker(map, geoJson, params) {
@@ -72,7 +72,7 @@ define(function (require) {
      * Apply style with shading to feature
      *
      * @method applyShadingStyle
-     * @param feature {Object}
+     * @param value {Object}
      * @return {Object}
      */
     BaseMarker.prototype.applyShadingStyle = function (value) {
@@ -129,7 +129,7 @@ define(function (require) {
       return d3.hcl(color).darker(amount).toString();
     };
 
-    BaseMarker.prototype.destroy = function (map) {
+    BaseMarker.prototype.destroy = function () {
       var self = this;
 
       // remove popups
@@ -204,6 +204,7 @@ define(function (require) {
      *
      * @method _showTooltip
      * @param feature {LeafletFeature}
+     * @param latLng? {Leaflet latLng}
      * @return undefined
      */
     BaseMarker.prototype._showTooltip = function (feature, latLng) {

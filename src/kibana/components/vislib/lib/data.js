@@ -247,7 +247,6 @@ define(function (require) {
      * get min and max for all cols, rows of data
      *
      * @method getMaxMin
-     * @param data {Object}
      * @return {Object}
      */
     Data.prototype.getGeoExtents = function () {
