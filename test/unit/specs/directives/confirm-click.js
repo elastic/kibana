@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var sinon = require('sinon/sinon');
 
-  require('directives/confirm_click');
+  require('ui/directives/confirm_click');
 
   // Load the kibana app dependencies.
   require('angular-route');

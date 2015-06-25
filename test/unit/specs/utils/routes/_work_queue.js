@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var WorkQueue = require('utils/routes/_work_queue');
   var sinon = require('test_utils/auto_release_sinon');
-  require('services/promises');
+  require('components/promises');
   require('angular').module('UtilsRouteWorkQueueTests', ['kibana']);
 
   return function () {

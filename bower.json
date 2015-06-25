@@ -11,13 +11,6 @@
   ],
   "license": "Apache 2.0",
   "homepage": "http://www.elastic.co/products/kibana",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
   "dependencies": {
     "angular": "1.2.28",
     "angular-bindonce": "0.3.3",

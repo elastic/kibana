@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var sinon = require('sinon/sinon');
-  require('services/private');
+  require('components/private');
 
 
   describe('Base Object', function () {

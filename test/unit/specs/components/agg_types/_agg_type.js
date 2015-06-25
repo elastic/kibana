@@ -9,7 +9,7 @@ define(function (require) {
     var fieldFormat;
     var Vis;
 
-    require('services/private');
+    require('components/private');
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {

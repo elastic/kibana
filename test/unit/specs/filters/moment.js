@@ -5,7 +5,7 @@ define(function (require) {
 
   // Load the kibana app dependencies.
   require('angular-route');
-  require('filters/moment');
+  require('ui/filters/moment');
 
   var filter, config;
   var anchor = '2014-01-01T06:06:06.666';

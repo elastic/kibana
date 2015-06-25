@@ -1,17 +1,16 @@
 module.exports = function (grunt) {
-  grunt.registerTask('kibana_server', function (keepalive) {
-    var done = this.async();
+  var _ = require('lodash');
 
-    require('./utils/dev_server')({
-      'logging.quiet': !grunt.option('debug') && !grunt.option('verbose'),
-      'kibana.server.port': grunt.option('port')
-    })
+  grunt.registerTask('kibana_server', function (keepalive) {
+    require('./utils/dev_server')(grunt)
     .then(function (server) {
       grunt.log.ok('Server started: ' + server.info.uri);
-      if (keepalive !== 'keepalive') done();
+      if (keepalive) {
+        // return a never resolving promise
+        return new Promise(_.noop);
+      }
     })
-    .catch(done);
-
+    .nodeify(this.async());
   });
 };
 

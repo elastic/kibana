@@ -19,7 +19,7 @@ define(function (require) {
   };
 
   // Load the kibana app dependencies.
-  require('services/private');
+  require('components/private');
   require('components/doc_viewer/doc_viewer');
 
 

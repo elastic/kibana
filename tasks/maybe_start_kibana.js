@@ -1,6 +1,4 @@
 module.exports = function (grunt) {
-  var config = require('./utils/server-config');
-
   var maybeStartServer = function (options) {
     return function () {
       var http = require('http');
@@ -53,7 +51,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('maybe_start_kibana', maybeStartServer({
     name: 'kibana-server',
-    port: grunt.option('port') || config.get('kibana.server.port'),
+    port: grunt.option('port') || 5601,
     tasks: ['kibana_server']
   }));
 };

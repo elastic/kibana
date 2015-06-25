@@ -1,0 +1,3 @@
+{
+  "extends": "../.jshintrc.node"
+}

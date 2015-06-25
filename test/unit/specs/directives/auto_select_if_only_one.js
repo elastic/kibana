@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  require('directives/auto_select_if_only_one');
+  require('ui/directives/auto_select_if_only_one');
 
   describe('Auto-select if only one directive', function () {
     var $compile, $rootScope;

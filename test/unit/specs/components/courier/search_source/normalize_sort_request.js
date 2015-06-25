@@ -1,6 +1,6 @@
 define(function (require) {
   describe('SearchSource#normalizeSortRequest', function () {
-    require('services/private');
+    require('components/private');
     require('angular').module('normalizeSortRequest', ['kibana']);
 
     var normalizeSortRequest;

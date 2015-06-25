@@ -1,68 +1,62 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
 var Hapi = require('hapi');
-var requirePlugins = require('./lib/plugins/require_plugins');
-var extendHapi = require('./lib/extend_hapi');
-var join = require('path').join;
+var dirname = require('path').dirname;
 
-function Kibana(settings, plugins) {
-  plugins = plugins || [];
+var packagePath = require('./utils/closestPackageJson').findSync();
+var rootDir = dirname(packagePath);
+var package = require(packagePath);
+
+function KbnServer(settings) {
+  this.version = package.version;
+  this.rootDir = rootDir;
   this.server = new Hapi.Server();
-
-  // Extend Hapi with Kibana
-  extendHapi(this.server);
-
-  var config = this.server.config();
-  if (settings) config.set(settings);
-
-  // Load external plugins
-  this.plugins = [];
-  var externalPluginsFolder = config.get('kibana.externalPluginsFolder');
-  if (externalPluginsFolder) {
-    this.plugins = _([externalPluginsFolder])
-      .flatten()
-      .map(requirePlugins)
-      .flatten()
-      .value();
-  }
-
-  this.plugins = this.plugins.concat(plugins);
-
+  this.settings = settings || {};
+  this.ready = _.constant(this.mixin(
+    require('./status'),
+    require('./config'),
+    require('./connections'),
+    require('./logging'),
+    require('./fe-exports'),
+    require('./plugins')
+  ));
 }
 
-Kibana.prototype.listen = function () {
-  var config = this.server.config();
+KbnServer.prototype.mixin = function () {
   var self = this;
-  // Create a new connection
-  this.server.connection({
-    host: config.get('kibana.server.host'),
-    port: config.get('kibana.server.port')
-  });
-
-  return this.server.loadKibanaPlugins(this.plugins)
-  .then(function () {
-    // Start the server
-    return new Promise(function (resolve, reject) {
-      self.server.start(function (err) {
-        if (err) return reject(err);
-        self.server.log('server', 'Server running at ' + self.server.info.uri);
-        resolve(self.server);
-      });
-    });
+  return Promise.each(_.toArray(arguments), function (fn) {
+    return fn(self);
   })
-  .catch(function (err) {
-    self.server.log('fatal', err);
-    console.log(err.stack);
-    return Promise.reject(err);
-  });
+  .then(_.noop);
 };
 
-Kibana.Plugin = require('./lib/plugins/plugin');
-module.exports = Kibana;
+KbnServer.prototype.listen = function () {
+  var self = this;
+  var server = self.server;
+  var start = _.ary(Promise.promisify(server.start, server), 0);
+
+  return self.ready()
+  .then(function () {
+    return self.mixin(start, require('./pid'));
+  })
+  .then(
+    function () {
+      server.log('server', 'Server running at ' + server.info.uri);
+    },
+    function (err) {
+      server.log('fatal', err);
+      throw err;
+    }
+  );
+};
 
 if (require.main === module) {
-  var kibana = new Kibana();
-  kibana.listen().catch(function (err) {
+  (new KbnServer())
+  .listen()
+  .catch(function (err) {
+    console.log(err.stack);
     process.exit(1);
   });
+} else {
+  module.exports = KbnServer;
 }

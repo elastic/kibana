@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var sinon = require('test_utils/auto_release_sinon');
-  require('services/private');
+  require('components/private');
 
   describe('Events', function () {
     require('test_utils/no_digest_promises').activateForSuite();
@@ -19,7 +19,7 @@ define(function (require) {
         $rootScope = $injector.get('$rootScope');
         Notifier = $injector.get('Notifier');
         Promise = $injector.get('Promise');
-        Events = Private(require('factories/events'));
+        Events = Private(require('components/events'));
       });
     });
 

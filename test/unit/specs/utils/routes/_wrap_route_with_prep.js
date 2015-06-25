@@ -6,7 +6,7 @@ define(function (require) {
   var _ = require('lodash');
   var stub = require('test_utils/auto_release_sinon').stub;
 
-  require('services/private');
+  require('components/private');
 
   var routes;
 

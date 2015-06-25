@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var sinon = require('sinon/sinon');
-  require('services/private');
+  require('components/private');
 
   describe('State Management', function () {
     var $rootScope, $location, State, Events;
@@ -13,7 +13,7 @@ define(function (require) {
         $location = _$location_;
         $rootScope = _$rootScope_;
         State = Private(require('components/state_management/state'));
-        Events = Private(require('factories/events'));
+        Events = Private(require('components/events'));
       });
     });
 

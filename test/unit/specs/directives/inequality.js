@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  require('directives/inequality');
+  require('ui/directives/inequality');
 
   describe('greater_than model validator directive', function () {
     var $compile, $rootScope;

@@ -7,7 +7,6 @@ cache:
   directories:
   - esvm
   - node_modules
-  - src/kibana/bower_components
 before_cache:
   - rm -rf esvm/*/logs esvm/data_dir
 notifications:

@@ -5,7 +5,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
 
   // Load the kibana app dependencies.
-  require('services/private');
+  require('components/private');
   require('plugins/discover/components/field_chooser/discover_field');
 
   var $parentScope, $scope, indexPattern;
