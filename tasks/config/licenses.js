@@ -19,6 +19,7 @@ module.exports = function (grunt) {
         'Apache2',
         'Apache-2.0',
         'Apache, Version 2.0',
+        'Apache License, v2.0',
         'ISC',
         'WTFPL',
         'Public-Domain'
