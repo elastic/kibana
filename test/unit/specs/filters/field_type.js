@@ -5,7 +5,7 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
   require('plugins/discover/index');
-  require('ui/filters/field_type');
+  require('filters/field_type');
 
   var filter, types;
 

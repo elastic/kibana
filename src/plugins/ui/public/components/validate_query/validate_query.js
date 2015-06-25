@@ -6,7 +6,7 @@ define(function (require) {
 
   require('modules')
     .get('kibana')
-    .directive('validateQuery', function (es, $compile, timefilter, configFile, debounce, Private) {
+    .directive('validateQuery', function (es, $compile, timefilter, kbnIndex, debounce, Private) {
       var fromUser = Private(require('components/validate_query/lib/from_user'));
       var toUser = require('components/validate_query/lib/to_user');
 
@@ -56,7 +56,7 @@ define(function (require) {
             }
 
             function useDefaults() {
-              index = configFile.kibana_index;
+              index = kbnIndex;
               type = '__kibanaQueryValidator';
             }
 

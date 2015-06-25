@@ -1,5 +1,5 @@
 define(function (require) {
-  return function CourierFetchCallClient(Private, Promise, es, configFile, sessionId) {
+  return function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
     var _ = require('lodash');
 
     var isRequest = Private(require('components/courier/fetch/_is_request'));
@@ -83,7 +83,7 @@ define(function (require) {
         }
 
         return (esPromise = es[strategy.clientMethod]({
-          timeout: configFile.shard_timeout,
+          timeout: shardTimeout,
           ignore_unavailable: true,
           preference: sessionId,
           body: body

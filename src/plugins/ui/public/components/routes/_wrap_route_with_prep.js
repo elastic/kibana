@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
 
-  var WorkQueue = require('utils/routes/_work_queue');
+  var WorkQueue = require('components/routes/_work_queue');
   var errors = require('errors');
 
   function wrapRouteWithPrep(route) {
@@ -14,7 +14,7 @@ define(function (require) {
 
     var resolve = {
       __prep__: function (Private, Promise, $route, $injector, Notifier) {
-        var setup = Private(require('utils/routes/_setup'));
+        var setup = Private(require('components/routes/_setup'));
 
         return setup.routeSetupWork()
         .then(function () {

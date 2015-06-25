@@ -1,5 +1,5 @@
 define(function (require) {
-  return function transformMappingIntoFields(Private, configFile, config) {
+  return function transformMappingIntoFields(Private, kbnIndex, config) {
     var _ = require('lodash');
     var mapField = Private(require('components/index_patterns/_map_field'));
 
@@ -16,7 +16,7 @@ define(function (require) {
     return function (response) {
       var fields = {};
       _.each(response, function (index, indexName) {
-        if (indexName === configFile.kibana_index) return;
+        if (indexName === kbnIndex) return;
         _.each(index.mappings, function (mappings) {
           _.each(mappings, function (field, name) {
             var keys = Object.keys(field.mapping);

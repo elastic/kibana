@@ -1,8 +1,8 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
-    require('ui/filters/label');
+    require('filters/label');
     var _ = require('lodash');
-    var IndexedArray = require('utils/indexed_array/index');
+    var IndexedArray = require('components/indexed_array/index');
 
     var paramTypeMap = {
       field: Private(require('components/agg_types/param_types/field')),

@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
-  require('ui/directives/input_focus');
+  require('directives/input_focus');
 
   describe('Input focus directive', function () {
     var $compile, $rootScope, $timeout, element;

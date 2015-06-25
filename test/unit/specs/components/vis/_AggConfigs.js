@@ -28,7 +28,7 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       SpiedAggConfig = Private(require('components/vis/AggConfig'));
       AggConfigs = Private(require('components/vis/AggConfigs'));
-      IndexedArray = require('utils/indexed_array/index');
+      IndexedArray = require('components/indexed_array/index');
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       Schemas = Private(require('components/vis/Schemas'));
     }));

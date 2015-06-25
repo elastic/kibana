@@ -15,7 +15,7 @@ define(function (require) {
     title: 'searches'
   });
 
-  module.service('savedSearches', function (Promise, config, configFile, es, createNotifier, SavedSearch, kbnUrl) {
+  module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl) {
 
 
     var notify = createNotifier({
@@ -58,7 +58,7 @@ define(function (require) {
       }
 
       return es.search({
-        index: configFile.kibana_index,
+        index: kbnIndex,
         type: 'search',
         body: body,
         size: 100

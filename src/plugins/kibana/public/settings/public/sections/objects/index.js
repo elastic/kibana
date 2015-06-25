@@ -4,7 +4,7 @@ define(function (require) {
 
   require('angular-ui-ace');
   require('angular-elastic');
-  require('ui/directives/confirm_click');
+  require('directives/confirm_click');
 
   // add the module deps to this module
   require('modules').get('apps/settings', ['ui.ace', 'monospaced.elastic']);

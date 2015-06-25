@@ -1,5 +1,5 @@
 define(function (require) {
-  var IndexedArray = require('utils/indexed_array/index');
+  var IndexedArray = require('components/indexed_array/index');
 
   require('modules')
   .get('app/visualize')
@@ -9,7 +9,7 @@ define(function (require) {
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('text!plugins/visualize/editor/advanced_toggle.html');
-    require('ui/filters/match_any');
+    require('filters/match_any');
     require('plugins/visualize/editor/agg_param');
 
     var notify = new Notifier({

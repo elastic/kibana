@@ -2,7 +2,7 @@ define(function (require, module, exports) {
   var _ = require('lodash');
 
   require('css!plugins/settings/styles/main.css');
-  require('ui/filters/start_from');
+  require('filters/start_from');
 
   require('routes')
   .when('/settings', {

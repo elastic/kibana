@@ -1,7 +1,7 @@
 define(function (require) {
   var moment = require('moment');
   var dateRange = require('utils/date_range');
-  require('ui/directives/validate_date_math');
+  require('directives/validate_date_math');
 
   return function DateRangeAggDefinition(Private, config) {
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));

@@ -1,5 +1,5 @@
 define(function () {
-  return function MappingSetupService(configFile, es) {
+  return function MappingSetupService(kbnIndex, es) {
     var angular = require('angular');
     var _ = require('lodash');
     var mappingSetup = this;
@@ -23,7 +23,7 @@ define(function () {
      * @return {[type]} [description]
      */
     var getKnownKibanaTypes = _.once(function () {
-      var indexName = configFile.kibana_index;
+      var indexName = kbnIndex;
       return es.indices.getFieldMapping({
         // only concerned with types in this kibana index
         index: indexName,
@@ -82,7 +82,7 @@ define(function () {
         };
 
         return es.indices.putMapping({
-          index: configFile.kibana_index,
+          index: kbnIndex,
           type: type,
           body: body
         }).then(function (resp) {

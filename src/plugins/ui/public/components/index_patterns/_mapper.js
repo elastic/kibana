@@ -1,5 +1,5 @@
 define(function (require) {
-  return function MapperService(Private, Promise, es, config) {
+  return function MapperService(Private, Promise, es, config, kbnIndex) {
     var _ = require('lodash');
     var moment = require('moment');
 
@@ -33,7 +33,7 @@ define(function (require) {
 
         if (!skipIndexPatternCache) {
           return es.get({
-            index: config.file.kibana_index,
+            index: kbnIndex,
             type: 'index-pattern',
             id: id,
             _sourceInclude: ['fields']

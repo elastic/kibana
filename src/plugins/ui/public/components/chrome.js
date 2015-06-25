@@ -1,45 +1,21 @@
 define(function (require) {
-  require('angular-bootstrap');
-  require('components/private');
-  require('components/config/config');
-  require('components/courier/courier');
-  require('components/filter_bar/filter_bar');
-  require('components/notify/notify');
-  require('components/persisted_log/persisted_log');
-  require('components/state_management/app_state');
-  require('components/storage/storage');
-  require('components/url/url');
-  require('components/doc_title/doc_title');
-  require('components/tooltip/tooltip');
-  require('components/style_compile/style_compile');
-  require('components/watch_multi');
-  require('components/bind');
-  require('components/listen');
-  require('components/fancy_forms/fancy_forms');
-  require('components/stringify/register');
-
   require('modules')
-  .get('kibana', ['ui.bootstrap'])
-  .config(function ($tooltipProvider, kbnChromeProvider) {
+  .get('kibana')
+  .config(function ($tooltipProvider) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
-  });
-
-  function Chrome() {
-    var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
-    if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
-  }
-
-  .controller('KibanaChromeController', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
+  })
+  .directive('kbnChrome', function () {
     return {
       template: require('text!plugins/kibana/kibana.html'),
       controllerAs: 'kibana',
       controller: function ($scope) {
         var _ = require('lodash');
+        var self = this;
         var notify = new Notifier({ location: 'Kibana' });
 
         // run init functions before loading the mixins, so that we can ensure that
         // the environment is ready for them to get and use their dependencies
-        self.ready = Promise.all([ kbnSetup(), config.init() ])
+        self.ready = Promise.all([ config.init() ])
         .then(function () {
           // load some "mixins"
           var mixinLocals = { $scope: $scope, notify: notify };

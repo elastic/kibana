@@ -3,18 +3,8 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  var configFile = JSON.parse(require('text!config'));
-  configFile.elasticsearch = (function () {
-    var a = document.createElement('a');
-    a.href = 'elasticsearch';
-    return a.href;
-  }());
-
-  // allow the rest of the app to get the configFile easily
-  module.constant('configFile', configFile);
-
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, Notifier, kbnVersion, kbnSetup, $rootScope, buildNum) {
+  module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
     var config = this;
 
     var angular = require('angular');
@@ -33,15 +23,13 @@ define(function (require) {
 
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var doc = (new DocSource())
-      .index(configFile.kibana_index)
+      .index(kbnIndex)
       .type('config')
       .id(kbnVersion);
 
     /******
      * PUBLIC API
      ******/
-
-    config.file = configFile;
 
     /**
      * Executes once and returns a promise that is resolved once the
@@ -51,8 +39,8 @@ define(function (require) {
      */
     config.init = _.once(function () {
       var complete = notify.lifecycle('config init');
-      return kbnSetup()
-      .then(function getDoc() {
+
+      return (function getDoc() {
 
         // used to apply an entire es response to the vals, silentAndLocal will prevent
         // event/notifications/writes from occuring.
@@ -77,7 +65,7 @@ define(function (require) {
             });
           }
         });
-      })
+      }())
       .then(function () {
         $rootScope.$broadcast('init:config');
       })

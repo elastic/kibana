@@ -7,8 +7,8 @@ define(function (require) {
   require('components/highlight/highlight');
   require('components/highlight/highlight_tags');
   require('components/doc_viewer/doc_viewer');
-  require('ui/filters/trust_as_html');
-  require('ui/filters/short_dots');
+  require('filters/trust_as_html');
+  require('filters/short_dots');
 
 
   // guesstimate at the minimum number of chars wide cells in the table should be
@@ -27,7 +27,7 @@ define(function (require) {
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/cell.html')));
-    var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!ui/partials/truncate_by_height.html')));
+    var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!partials/truncate_by_height.html')));
 
     return {
       restrict: 'A',

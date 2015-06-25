@@ -8,12 +8,14 @@ define(function (require) {
 
   var datemath = require('utils/datemath');
 
+  require('components/doc_table/doc_table');
+  require('components/visualize/visualize');
   require('components/notify/notify');
   require('components/timepicker/timepicker');
   require('components/fixedScroll');
-  require('ui/directives/validate_json');
+  require('directives/validate_json');
   require('components/validate_query/validate_query');
-  require('ui/filters/moment');
+  require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
   require('components/state_management/app_state');

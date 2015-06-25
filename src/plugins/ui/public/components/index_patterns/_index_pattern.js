@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, Notifier, config, Promise, $rootScope) {
+  return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope) {
     var _ = require('lodash');
     var errors = require('errors');
     var angular = require('angular');
@@ -59,7 +59,7 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(config.file.kibana_index)
+        .index(kbnIndex)
         .type(type)
         .id(self.id);
 

@@ -11,7 +11,7 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsObjectsView', function (config, Notifier) {
+  .directive('kbnSettingsObjectsView', function (kbnIndex, Notifier) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
@@ -103,7 +103,7 @@ define(function (require) {
         $scope.title = service.type;
 
         es.get({
-          index: config.file.kibana_index,
+          index: kbnIndex,
           type: service.type,
           id: $routeParams.id
         })
@@ -159,7 +159,7 @@ define(function (require) {
          */
         $scope.delete = function () {
           es.delete({
-            index: config.file.kibana_index,
+            index: kbnIndex,
             type: service.type,
             id: $routeParams.id
           })
@@ -187,7 +187,7 @@ define(function (require) {
           });
 
           es.index({
-            index: config.file.kibana_index,
+            index: kbnIndex,
             type: service.type,
             id: $routeParams.id,
             body: source
@@ -200,7 +200,7 @@ define(function (require) {
 
         function redirectHandler(action) {
           return es.indices.refresh({
-            index: config.file.kibana_index
+            index: kbnIndex
           })
           .then(function (resp) {
             var msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';

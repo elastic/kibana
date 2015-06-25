@@ -11,7 +11,7 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private, Notifier, kbnUrl) {
+  app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
     var visTypes = Private(require('registry/vis_types'));
     var notify = new Notifier({
       location: 'Saved Visualization Service'
@@ -53,7 +53,7 @@ define(function (require) {
       }
 
       return es.search({
-        index: config.file.kibana_index,
+        index: kbnIndex,
         type: 'visualization',
         body: body,
         size: 100,

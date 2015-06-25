@@ -1,5 +1,5 @@
 define(function (require) {
-  return function GetIndexPatternIdsFn(es, configFile) {
+  return function GetIndexPatternIdsFn(es, kbnIndex) {
     var _ = require('lodash');
 
     // many places may require the id list, so we will cache it seperately
@@ -15,7 +15,7 @@ define(function (require) {
       }
 
       cachedPromise = es.search({
-        index: configFile.kibana_index,
+        index: kbnIndex,
         type: 'index-pattern',
         fields: [],
         body: {

@@ -61,9 +61,9 @@ FeExportsCollection.prototype.find = function (patterns) {
     return names.filter(matcher(pattern));
   })
   .flattenDeep()
-  .map(function (name) {
-    return aliases[name];
-  })
+  .reduce(function (found, name) {
+    return found.concat(aliases[name]);
+  }, [])
   .value();
 };
 

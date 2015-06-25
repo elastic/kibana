@@ -4,7 +4,7 @@ define(function (require) {
     var sinon = require('test_utils/auto_release_sinon');
     var Promise = require('bluebird');
     var errors = require('errors');
-    var IndexedArray = require('utils/indexed_array/index');
+    var IndexedArray = require('components/indexed_array/index');
     var IndexPattern;
     var mapper;
     var mappingSetup;

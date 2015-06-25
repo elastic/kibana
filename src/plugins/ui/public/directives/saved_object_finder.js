@@ -31,7 +31,7 @@ define(function (require) {
         // optional on-choose attr, sets the userOnChoose in our scope
         userOnChoose: '=?onChoose'
       },
-      template: require('text!ui/partials/saved_object_finder.html'),
+      template: require('text!partials/saved_object_finder.html'),
       link: function ($scope, $el) {
         // the text input element
         var $input = $el.find('input[ng-model=filter]');

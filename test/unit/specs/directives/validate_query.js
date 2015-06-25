@@ -52,9 +52,7 @@ define(function (require) {
         };
       });
 
-      $provide.constant('configFile', {
-        kibana_index: 'test-index'
-      });
+      $provide.constant('kbnIndex', 'test-index');
     });
 
     // Create the scope

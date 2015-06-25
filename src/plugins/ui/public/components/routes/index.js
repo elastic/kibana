@@ -1,9 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var wrapRouteWithPrep = require('utils/routes/_wrap_route_with_prep');
-
-  require('components/setup/setup');
-  require('components/promises');
+  var wrapRouteWithPrep = require('components/routes/_wrap_route_with_prep');
 
   function RouteManager() {
     var when = [];

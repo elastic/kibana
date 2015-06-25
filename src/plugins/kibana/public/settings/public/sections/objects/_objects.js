@@ -5,7 +5,7 @@ define(function (require) {
   var registry = require('plugins/settings/saved_object_registry');
   var objectIndexHTML = require('text!plugins/settings/sections/objects/_objects.html');
 
-  require('ui/directives/file_upload');
+  require('directives/file_upload');
 
   require('routes')
   .when('/settings/objects', {
@@ -13,7 +13,7 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl) {
+  .directive('kbnSettingsObjects', function (kbnIndex, Notifier, Private, kbnUrl) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, AppState, es) {
@@ -98,7 +98,7 @@ define(function (require) {
 
         function retrieveAndExportDocs(objs) {
           es.mget({
-            index: config.file.kibana_index,
+            index: kbnIndex,
             body: {docs: objs.map(transformToMget)}
           })
           .then(function (response) {
@@ -125,7 +125,7 @@ define(function (require) {
           }
 
           return es.mget({
-            index: config.file.kibana_index,
+            index: kbnIndex,
             body: {docs: docs.map(_.partialRight(_.pick, '_id', '_type'))}
           })
           .then(function (response) {
@@ -133,7 +133,7 @@ define(function (require) {
             var confirmMessage = 'The following objects will be overwritten:\n\n';
             if (existingDocs.length === 0 || window.confirm(confirmMessage + _.pluck(existingDocs, '_id').join('\n'))) {
               return es.bulk({
-                index: config.file.kibana_index,
+                index: kbnIndex,
                 body: _.flattenDeep(docs.map(transformToBulk))
               })
               .then(refreshIndex)
@@ -152,7 +152,7 @@ define(function (require) {
 
         function refreshIndex() {
           return es.indices.refresh({
-            index: config.file.kibana_index
+            index: kbnIndex
           });
         }
 

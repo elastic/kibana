@@ -5,8 +5,8 @@ define(function (require) {
   var getSort = require('components/doc_table/lib/get_sort');
 
   require('css!components/doc_table/doc_table.css');
-  require('ui/directives/truncated');
-  require('ui/directives/infinite_scroll');
+  require('directives/truncated');
+  require('directives/infinite_scroll');
   require('components/doc_table/components/table_header');
   require('components/doc_table/components/table_row');
 

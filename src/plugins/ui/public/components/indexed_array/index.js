@@ -2,8 +2,8 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  var pathGetter = require('utils/indexed_array/_path_getter');
-  var inflector = require('utils/indexed_array/_inflector');
+  var pathGetter = require('components/indexed_array/_path_getter');
+  var inflector = require('components/indexed_array/_inflector');
 
   var inflectIndex = inflector('by');
   var inflectOrder = inflector('in', 'Order');

@@ -45,10 +45,8 @@ module.exports = function (kibana) {
             version: kibana.package.version,
             buildSha: _.get(kibana, 'package.build.sha', '@@buildSha'),
             buildNumber: _.get(kibana, 'package.build.number', '@@buildNum'),
-            config: {
-              kibana_index: config.get('kibana.index'),
-              shard_timeout: config.get('elasticsearch.shardTimeout')
-            },
+            kbnIndex: config.get('kibana.index'),
+            esShardTimeout: config.get('elasticsearch.shardTimeout')
           });
         }
       });

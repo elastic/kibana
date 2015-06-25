@@ -5,7 +5,7 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
   require('plugins/discover/index');
-  require('ui/filters/short_dots');
+  require('filters/short_dots');
 
   var filter, config;
 

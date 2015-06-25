@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
 
   // Load the kibana app dependencies.
-  require('ui/directives/validate_index_name');
+  require('directives/validate_index_name');
 
   describe('Validate index name directive', function () {
     var $compile, $rootScope;

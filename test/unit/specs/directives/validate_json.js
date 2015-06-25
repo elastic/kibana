@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
 
   // Load the kibana app dependencies.
-  require('ui/directives/validate_json');
+  require('directives/validate_json');
 
   var $parentScope;
   var $elemScope;

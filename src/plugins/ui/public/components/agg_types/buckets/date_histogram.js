@@ -21,7 +21,7 @@ define(function (require) {
       agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
     }
 
-    require('ui/filters/field_type');
+    require('filters/field_type');
     require('components/validateDateInterval');
 
     return new BucketAggType({

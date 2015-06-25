@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  require('ui/directives/validate_cidr_mask');
+  require('directives/validate_cidr_mask');
 
   describe('Validate CIDR mask directive', function () {
     var $compile, $rootScope;

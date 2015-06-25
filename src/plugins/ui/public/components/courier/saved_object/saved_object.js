@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(es, configFile, Promise, Private, Notifier, indexPatterns) {
+  return function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, indexPatterns) {
     var angular = require('angular');
     var errors = require('errors');
     var _ = require('lodash');
@@ -58,7 +58,7 @@ define(function (require) {
 
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibana_index)
+        .index(kbnIndex)
         .type(type)
         .id(self.id);
 
@@ -235,7 +235,7 @@ define(function (require) {
         var finish = function (id) {
           self.id = id;
           return es.indices.refresh({
-            index: configFile.kibana_index
+            index: kbnIndex
           })
           .then(function () {
             return self.id;
@@ -278,12 +278,12 @@ define(function (require) {
        */
       self.delete = function () {
         return es.delete({
-          index: configFile.kibana_index,
+          index: kbnIndex,
           type: type,
           id: this.id
         }).then(function () {
           return es.indices.refresh({
-            index: configFile.kibana_index
+            index: kbnIndex
           });
         });
       };

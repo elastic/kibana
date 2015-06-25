@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var module = require('modules').get('app/discover');
 
-  require('ui/filters/short_dots');
+  require('filters/short_dots');
 
   module.directive('kbnTableHeader', function (shortDotsFilter) {
     var headerHtml = require('text!components/doc_table/components/table_header.html');

@@ -1,8 +1,8 @@
 define(function (require) {
-  return function RefreshKibanaIndexFn(es, configFile) {
+  return function RefreshKibanaIndexFn(es, kbnIndex) {
     return function () {
       return es.indices.refresh({
-        index: configFile.kibana_index
+        index: kbnIndex
       });
     };
   };

@@ -7,7 +7,7 @@ define(function (require) {
   .config(function ($tooltipProvider) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
   })
-  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
+  .directive('kibana', function (Private, $rootScope, $injector, Promise, config) {
     return {
       template: require('text!plugins/kibana/kibana.html'),
       controllerAs: 'kibana',
@@ -23,7 +23,7 @@ define(function (require) {
 
         // run init functions before loading the mixins, so that we can ensure that
         // the environment is ready for them to get and use their dependencies
-        self.ready = Promise.all([ kbnSetup(), config.init() ])
+        self.ready = Promise.all([ config.init() ])
         .then(function () {
           // load some "mixins"
           var mixinLocals = { $scope: $scope, notify: notify };

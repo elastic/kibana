@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var IndexedArray = require('utils/indexed_array/index');
+  var IndexedArray = require('components/indexed_array/index');
   var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
   /**

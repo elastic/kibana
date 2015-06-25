@@ -1,17 +1,11 @@
 require.config({
   baseUrl: '../../',
   paths: {
-    chrome: 'plugins/ui/chrome',
-    ui: 'plugins/ui/ui',
-    components: 'plugins/ui/components',
-    utils: 'plugins/ui/utils',
-    routes: 'plugins/ui/routes/index',
-    errors: 'plugins/ui/errors',
-    modules: 'plugins/ui/modules',
-    lodash: 'plugins/ui/mixins',
-
-    // special utils
-    registry: 'components/registry',
+    // common modules, shortcut for clarity
+    lodash: 'utils/lodash-mixins/index',
+    errors: 'components/errors',
+    modules: 'components/modules',
+    routes: 'components/routes/index',
 
     // bower_components
     'angular-bindonce': 'bower_components/angular-bindonce/bindonce',
@@ -34,8 +28,7 @@ require.config({
     jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
     'leaflet-draw': 'bower_components/leaflet-draw/dist/leaflet.draw',
-    lodash_src: 'bower_components/lodash/dist/lodash',
-    'lodash-deep': 'bower_components/lodash-deep/factory',
+    lodash_src: 'bower_components/lodash/lodash',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',

@@ -5,12 +5,12 @@ define(function (require) {
   require('plugins/visualize/editor/agg_filter');
 
 
-  require('ui/directives/saved_object_finder');
+  require('directives/saved_object_finder');
   require('components/visualize/visualize');
   require('components/clipboard/clipboard');
   require('components/comma_list_filter');
 
-  require('ui/filters/uriescape');
+  require('filters/uriescape');
 
   require('routes')
   .when('/visualize/create', {

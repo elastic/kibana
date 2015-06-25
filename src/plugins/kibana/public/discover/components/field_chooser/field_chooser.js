@@ -1,9 +1,9 @@
 define(function (require) {
   var app = require('modules').get('apps/discover');
 
-  require('ui/directives/css_truncate');
-  require('ui/directives/field_name');
-  require('ui/filters/unique');
+  require('directives/css_truncate');
+  require('directives/field_name');
+  require('filters/unique');
   require('plugins/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {

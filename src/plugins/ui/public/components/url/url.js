@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('ui/filters/uriescape');
-  require('ui/filters/rison');
+  require('filters/uriescape');
+  require('filters/rison');
 
   require('modules').get('kibana/url')
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });

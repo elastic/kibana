@@ -1,8 +1,8 @@
 define(function (require) {
   var module = require('modules').get('kibana/index_patterns');
-  require('ui/filters/short_dots');
+  require('filters/short_dots');
 
-  module.service('indexPatterns', function (configFile, es, Notifier, Private, Promise) {
+  module.service('indexPatterns', function (es, Notifier, Private, Promise) {
     var self = this;
     var _ = require('lodash');
     var errors = require('errors');
@@ -27,7 +27,7 @@ define(function (require) {
       self.getIds.clearCache();
       patternCache.delete(pattern.id);
       return es.delete({
-        index: configFile.kibana_index,
+        index: kbnIndex,
         type: 'index-pattern',
         id: pattern.id
       });

@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  require('ui/directives/validate_ip');
+  require('directives/validate_ip');
 
   describe('Validate IP directive', function () {
     var $compile, $rootScope;

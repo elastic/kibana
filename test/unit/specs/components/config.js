@@ -3,19 +3,13 @@ define(function (require) {
     var $scope;
     var config;
     var defaults;
-    var configFile;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function ($injector, Private) {
       config = $injector.get('config');
       $scope = $injector.get('$rootScope');
-      configFile = $injector.get('configFile');
       defaults = Private(require('components/config/defaults'));
     }));
-
-    it('exposes the configFile', function () {
-      expect(config.file).to.be(configFile);
-    });
 
     describe('#get', function () {
 

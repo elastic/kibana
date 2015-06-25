@@ -2,7 +2,7 @@ define(function (require) {
   return function (Private) {
     var _ = require('lodash');
     var sinon = require('sinon/sinon');
-    var IndexedArray = require('utils/indexed_array/index');
+    var IndexedArray = require('components/indexed_array/index');
     var IndexPattern = require('components/index_patterns/_index_pattern');
     var fieldFormats = Private(require('registry/field_formats'));
     var flattenHit = Private(require('components/index_patterns/_flatten_hit'));

@@ -5,11 +5,11 @@ define(function (require) {
   var es; // share the client amoungst all apps
   require('modules')
     .get('kibana', ['elasticsearch', 'kibana/config'])
-    .service('es', function (esFactory, configFile, $q) {
+    .service('es', function (esFactory, esUrl, $q) {
       if (es) return es;
 
       es = esFactory({
-        host: configFile.elasticsearch,
+        host: esUrl,
         log: 'info',
         requestTimeout: 0,
         apiVersion: '1.4',

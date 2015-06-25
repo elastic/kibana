@@ -2,7 +2,7 @@ define(function (require) {
   return function AggConfigsFactory(Private) {
     var _ = require('lodash');
     var AggConfig = Private(require('components/vis/AggConfig'));
-    var IndexedArray = require('utils/indexed_array/index');
+    var IndexedArray = require('components/indexed_array/index');
 
     AggConfig.aggTypes = Private(require('components/agg_types/index'));
 
