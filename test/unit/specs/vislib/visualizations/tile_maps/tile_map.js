@@ -35,6 +35,7 @@ define(function (require) {
   }
 
   function destroyVis(vis) {
+    vis.destroy();
     $(vis.el).remove();
     vis = null;
   }
