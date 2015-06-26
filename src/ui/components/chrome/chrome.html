@@ -17,6 +17,11 @@
     <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
       <ul class="nav navbar-nav" role="navigation">
         <li aria-label="Kibana Barcode Logo" class="logo hidden-xs"></li>
+
+        <li ng-if="chrome.getAppCount() > 1">
+          <a href="/apps"><i class="fa fa-th" alt="Go to app switcher"></i></a>
+        </li>
+
         <li ng-repeat="tab in chrome.getTabs()" ng-class="{ active: tab.active }">
           <a ng-href="#{{ tab.active ? tab.id : tab.lastPath }}">
             {{ tab.title }}

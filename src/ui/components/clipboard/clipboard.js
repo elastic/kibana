@@ -7,7 +7,11 @@ define(function (require) {
   var html = require('text!components/clipboard/clipboard.html');
   var module = require('modules').get('kibana', ['ngClipboard']);
 
-  module.directive('kbnClipboard', function ($compile, $timeout) {
+  module
+  .config(function (ngClipProvider) {
+    ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
+  })
+  .directive('kbnClipboard', function ($compile, $timeout) {
     return {
       restrict: 'E',
       template: html,

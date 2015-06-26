@@ -8,7 +8,7 @@ html(lang='en')
     meta(name='viewport', content='width=device-width')
     link(rel='shortcut icon', href='/ui-styles/theme/elk.ico')
     title
-    link(rel='stylesheet', href='/ui-styles/main.css?_b=#{buildNumber}')
+    link(rel='stylesheet', href='/ui-styles/main.css#{cacheBust}')
   body(kbn-chrome)
     .col-md-offset-4.col-md-4.page-header.initial-load
       center
@@ -18,25 +18,17 @@ html(lang='en')
           small#cache-message
             |  is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!
     script.
-      window.KIBANA_VERSION = !{ j(version) };
-      window.KIBANA_BUILD_NUM = !{ j(buildNumber) };
-      window.KIBANA_BUILD_SHA = !{ j(buildSha) };
-      window.KIBANA_INDEX = !{ j(kbnIndex) }
-      window.ES_SHARD_TIMEOUT = !{ j(esShardTimeout) }
-
       var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
       if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
 
-    script(src='/bower_components/requirejs/require.js?_b=#{buildNumber}')
-    script(src='/require.config.js?_b=#{buildNumber}')
+    script(src='/bower_components/requirejs/require.js#{cacheBust}')
+    script(src='/require.config.js#{cacheBust}')
     script.
-      if (window.KIBANA_BUILD_NUM.substr(0, 2) !== '@@') {
-        // only cache bust if this is really the build number
-        require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
-      }
+      window.KIBANA = !{ j(kibanaPayload) };
 
+      require.config({ urlArgs: !{ j(cacheBust) } });
       require(!{ j(['bootstrap'].concat(app.useModuleIds() || [])) }, function () {
-        require(!{ j([app.mainModuleId()]) }, function () {
+        require(!{ j([app.main]) }, function () {
           $(function () {
             angular
               .bootstrap(document, ['kibana'])

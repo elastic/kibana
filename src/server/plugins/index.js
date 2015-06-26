@@ -12,19 +12,10 @@ module.exports = function (kibana) {
   var scanDirs = [].concat(config.get('kibana.pluginScanDirs'));
   var absolutePaths = [].concat(config.get('kibana.pluginPaths'));
 
-  server.route({
-    path: '/plugins/{id}/{path*}',
-    method: 'GET',
-    handler: function (req, reply) {
-      var id = req.params.id;
-      var path = req.params.path;
-      var plugin = _.get(server.plugins, [id, 'plugin']);
-      if (!plugin || !plugin.publicDir || !path) {
-        return reply(Boom.notFound());
-      }
-
-      return reply.file(join(plugin.publicDir, path));
-    }
+  server.exposeStaticDir('/plugins/{id}/{path*}', function (req) {
+    var id = req.params.id;
+    var plugin = _.get(server.plugins, [id, 'plugin']);
+    return (plugin && plugin.publicDir) ? plugin.publicDir : Boom.notFound();
   });
 
   return Promise.try(scan, [server, scanDirs])

@@ -1,0 +1,43 @@
+@import (reference) "lesshat";
+@import (reference) "ui-styles/theme/_variables";
+
+.application {
+  background-color: @gray-lighter;
+}
+
+.app-links {
+  width: 700px;
+  margin: 25px auto;
+  text-align: justify;
+
+  .app-link {
+    display: inline-block;
+    background: white;
+    width: 200px;
+    margin: 0 30px 30px 0;
+
+    .app-icon {
+      display: block;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .app-info {
+      display: block;
+      padding: 15px;
+    }
+
+    .app-title {
+      margin: 0 0 10px;
+      color: @text-color;
+    }
+
+    .app-description {
+      font-size: 1em;
+      color: @gray;
+      text-align: left;
+      margin: 0;
+    }
+  }
+}

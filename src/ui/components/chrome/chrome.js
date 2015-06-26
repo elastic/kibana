@@ -43,6 +43,16 @@ define(function (require) {
   };
 
   /**
+   * Get the number of currently installed apps
+   */
+  chrome.getAppInfo = _.constant(window.KIBANA.app);
+
+  /**
+   * Get the number of currently installed apps
+   */
+  chrome.getAppCount = _.constant(window.KIBANA.appCount);
+
+  /**
    * Set the background color for the header
    *
    * @param {string} color - css color definition (eg. 'red', 'rgb(68, 68, 68)', or '#ffffff')

@@ -1,5 +1,5 @@
 require.config({
-  baseUrl: '../../',
+  baseUrl: '/',
   paths: {
     // common modules, shortcut for clarity
     lodash: 'utils/lodash-mixins/index',

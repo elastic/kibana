@@ -11,8 +11,10 @@ function KbnServer(settings) {
   this.version = package.version;
   this.build = package.build || false;
   this.rootDir = rootDir;
-  this.server = new Hapi.Server();
   this.settings = settings || {};
+
+  this.server = new Hapi.Server();
+
   this.ready = _.constant(this.mixin(
     require('./config'),
     require('./logging'),

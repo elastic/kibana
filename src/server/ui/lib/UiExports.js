@@ -5,6 +5,7 @@ var UiApp = require('./UiApp');
 
 function UiExports(defaultModules) {
   this.apps = {};
+  this.appCount = 0;
   this.aliases = {};
   this.defaultModules = defaultModules || [];
   this.exportConsumer = _.memoize(this.exportConsumer);
@@ -34,6 +35,7 @@ UiExports.prototype.exportConsumer = function (type) {
       }
 
       self.apps[app.id] = app;
+      self.appCount += 1;
     };
   case 'visTypes':
   case 'fieldFormats':

@@ -1,0 +1,12 @@
+<div class="app-links">
+  <a
+    ng-repeat="app in apps.all"
+    ng-href="/app/{{app.id}}"
+    class="app-link">
+    <span ng-style="{ 'background-image': 'url(' + app.icon + ')' }" class="app-icon"></span>
+    <span class="app-info">
+      <h2 class="app-title">{{ app.title }}</h2>
+      <h3 class="app-description">{{ app.description }}</h3>
+    </span>
+  </a>
+</li>

@@ -1,9 +1,25 @@
 module.exports = function (kibana, server, config) {
+  var Boom = require('boom');
+  var parse = require('url').parse;
+  var format = require('url').format;
 
   // Create a new connection
   server.connection({
     host: config.get('kibana.server.host'),
     port: config.get('kibana.server.port')
+  });
+
+  server.ext('onRequest', function (req, reply) {
+    var path = req.path;
+    if (path.charAt(path.length - 1) !== '/') {
+      return reply.continue();
+    }
+
+    return reply.redirect(format({
+      search: req.url.search,
+      pathname: path.slice(0, -1),
+    }))
+    .permanent(true);
   });
 
   // provide a simple way to expose static directories
@@ -15,7 +31,6 @@ module.exports = function (kibana, server, config) {
         directory: {
           path: dirPath,
           listing: true,
-          redirectToSlash: true,
           lookupCompressed: true
         }
       }
@@ -34,8 +49,8 @@ module.exports = function (kibana, server, config) {
   });
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
-  server.ext('onPreResponse', function (request, reply) {
-    var response = request.response;
+  server.ext('onPreResponse', function (req, reply) {
+    var response = req.response;
 
     if (response.isBoom) {
       response.output.headers['x-app-name'] = kibana.name;
