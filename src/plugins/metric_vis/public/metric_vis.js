@@ -5,7 +5,10 @@ define(function (require) {
   // we also need to load the controller and used by the template
   require('plugins/metric_vis/metric_vis_controller');
 
-  return function (Private) {
+  // register the provider with the visTypes registry
+  require('registry/vis_types').register(MetricVisProvider);
+
+  function MetricVisProvider(Private) {
     var TemplateVisType = Private(require('components/template_vis_type/TemplateVisType'));
     var Schemas = Private(require('components/vis/Schemas'));
 
@@ -36,5 +39,8 @@ define(function (require) {
         }
       ])
     });
-  };
+  }
+
+  // export the provider so that the visType can be required with Private()
+  return MetricVisProvider;
 });

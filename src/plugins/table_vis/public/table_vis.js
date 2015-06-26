@@ -12,8 +12,11 @@ define(function (require) {
   require('components/agg_table/agg_table');
   require('components/agg_table/agg_table_group');
 
+  // register the provider with the visTypes registry
+  require('registry/vis_types').register(TableVisTypeProvider);
+
   // define the TableVisType
-  return function TableVisTypeProvider(Private) {
+  function TableVisTypeProvider(Private) {
     var TemplateVisType = Private(require('components/template_vis_type/TemplateVisType'));
     var Schemas = Private(require('components/vis/Schemas'));
 
@@ -62,5 +65,7 @@ define(function (require) {
         }
       ])
     });
-  };
+  }
+
+  return TableVisTypeProvider;
 });

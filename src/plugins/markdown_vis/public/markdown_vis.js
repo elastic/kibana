@@ -5,7 +5,10 @@ define(function (require) {
   // we also need to load the controller and used by the template
   require('plugins/markdown_vis/markdown_vis_controller');
 
-  return function (Private) {
+  // register the provider with the visTypes registry so that other know it exists
+  require('registry/vis_types').register(MarkdownVisProvider);
+
+  function MarkdownVisProvider(Private) {
     var TemplateVisType = Private(require('components/template_vis_type/TemplateVisType'));
 
     // return the visType object, which kibana will use to display and configure new
@@ -21,5 +24,8 @@ define(function (require) {
       },
       requiresSearch: false
     });
-  };
+  }
+
+  // export the provider so that the visType can be required with Private()
+  return MarkdownVisProvider;
 });

@@ -1,5 +1,8 @@
 define(function (require) {
-  return function VisDetailsSpyProvider(Notifier, $filter, $rootScope, config) {
+  // register the spy mode or it won't show up in the spys
+  require('registry/spy_modes').register(VisDetailsSpyProvider);
+
+  function VisDetailsSpyProvider(Notifier, $filter, $rootScope, config) {
     require('components/clipboard/clipboard');
 
     return {
@@ -13,5 +16,7 @@ define(function (require) {
         });
       }
     };
-  };
+  }
+
+  return VisDetailsSpyProvider;
 });
