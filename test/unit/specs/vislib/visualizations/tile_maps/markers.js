@@ -32,7 +32,7 @@ define(function (require) {
     getZoom: _.constant(5)
   };
 
-  describe('Marker Class Tests', function () {
+  describe('Marker Tests', function () {
     var mapData;
     var markerLayer;
 

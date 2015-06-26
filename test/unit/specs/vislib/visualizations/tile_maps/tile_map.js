@@ -2,132 +2,117 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
-  var L = require('leaflet');
+  var sinon = require('test_utils/auto_release_sinon');
 
-  // Data
-  var dataArray = [
-    ['geojson', require('vislib_fixtures/mock_data/geohash/_geo_json')],
-    ['columns', require('vislib_fixtures/mock_data/geohash/_columns')],
-    ['rows', require('vislib_fixtures/mock_data/geohash/_rows')],
-  ];
+  var geoJsonData = require('vislib_fixtures/mock_data/geohash/_geo_json');
+  var MockMap = require('fixtures/tilemap_map');
+  var mockChartEl = $('<div>');
 
-  // TODO: Test the specific behavior of each these
-  var mapTypes = [
-    'Scaled Circle Markers',
-    'Shaded Circle Markers',
-    'Shaded Geohash Grid',
-    'Heatmap'
-  ];
+  var TileMap;
+  var extentsStub;
+
 
   angular.module('TileMapFactory', ['kibana']);
 
-  function bootstrapAndRender(data, type) {
-    var vis;
-    var visLibParams = {
-      isDesaturated: true,
-      type: 'tile_map',
-      mapType: type
-    };
+  function createTileMap(handler, chartEl, chartData) {
+    handler = handler || {};
+    chartEl = chartEl || mockChartEl;
+    chartData = chartData || geoJsonData;
 
-    module('TileMapFactory');
-    inject(function (Private) {
-      vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-      require('css!components/vislib/styles/main');
-      vis.render(data);
-    });
-
-    return vis;
-  }
-
-  function destroyVis(vis) {
-    vis.destroy();
-    $(vis.el).remove();
-    vis = null;
+    var tilemap = new TileMap(handler, chartEl, chartData);
+    return tilemap;
   }
 
   describe('TileMap Tests', function () {
-    describe('Rendering each types of tile map', function () {
-      dataArray.forEach(function (dataType, i) {
-        var name = dataType[0];
-        var data = dataType[1];
+    var tilemap;
 
-        mapTypes.forEach(function (type, j) {
-          describe('draw() ' + mapTypes[j] + ' with ' + name, function () {
-            var vis;
+    beforeEach(function () {
+      module('TileMapFactory');
+      inject(function (Private) {
+        Private.stub(require('components/vislib/visualizations/_map'), MockMap);
+        TileMap = Private(require('components/vislib/visualizations/tile_map'));
+        extentsStub = sinon.stub(TileMap.prototype, '_appendGeoExtents', _.noop);
+      });
+    });
 
-            beforeEach(function () {
-              vis = bootstrapAndRender(data, type);
-            });
+    beforeEach(function () {
+      tilemap = createTileMap();
+    });
 
-            afterEach(function () {
-              destroyVis(vis);
-            });
+    it('should inherit props from chartData', function () {
+      _.each(geoJsonData, function (val, prop) {
+        expect(tilemap).to.have.property(prop, val);
+      });
+    });
 
-            it('should return a function', function () {
-              vis.handler.charts.forEach(function (chart) {
-                expect(chart.draw()).to.be.a(Function);
-              });
-            });
+    it('should append geoExtents', function () {
+      expect(extentsStub.callCount).to.equal(1);
+    });
 
-            it('should create .leaflet-container as a by product of map rendering', function () {
-              expect($(vis.el).find('.leaflet-container').length).to.be.above(0);
-            });
-          });
+    describe('draw', function () {
+      it('should return a function', function () {
+        expect(tilemap.draw()).to.be.a('function');
+      });
+
+      it('should call destroy for clean state', function () {
+        var destroySpy = sinon.spy(tilemap, 'destroy');
+        tilemap.draw();
+        expect(destroySpy.callCount).to.equal(1);
+      });
+    });
+
+    describe('appendMap', function () {
+      var $selection;
+
+      beforeEach(function () {
+        $selection = $('<div>');
+        expect(tilemap.maps).to.have.length(0);
+        tilemap._appendMap($selection);
+      });
+
+      it('should add the tilemap class', function () {
+        expect($selection.hasClass('tilemap')).to.equal(true);
+      });
+
+      it('should append maps and required controls', function () {
+        expect(tilemap.maps).to.have.length(1);
+        var map = tilemap.maps[0];
+        expect(map.addTitle.callCount).to.equal(0);
+        expect(map.addFitControl.callCount).to.equal(1);
+        expect(map.addBoundingControl.callCount).to.equal(1);
+      });
+
+      it('should append title if set in the data object', function () {
+        var mapTitle = 'Test Title';
+        var tilemap = createTileMap(null, null, _.assign({ title: mapTitle }, geoJsonData));
+        tilemap._appendMap($selection);
+        var map = tilemap.maps[0];
+
+        expect(map.addTitle.callCount).to.equal(1);
+        expect(map.addTitle.firstCall.calledWith(mapTitle)).to.equal(true);
+      });
+    });
+
+    describe('destroy', function () {
+      var maps = [];
+      var mapCount = 5;
+
+      beforeEach(function () {
+        _.times(mapCount, function () {
+          maps.push(new MockMap());
+        });
+        tilemap.maps = maps;
+        expect(tilemap.maps).to.have.length(mapCount);
+        tilemap.destroy();
+      });
+
+      it('should destroy all the maps', function () {
+        expect(tilemap.maps).to.have.length(0);
+        expect(maps).to.have.length(mapCount);
+        _.each(maps, function (map) {
+          expect(map.destroy.callCount).to.equal(1);
         });
       });
     });
-
-    describe('Leaflet controls', function () {
-      var vis;
-      var leafletContainer;
-
-      beforeEach(function () {
-        vis = bootstrapAndRender(dataArray[0][1], 'Scaled Circle Markers');
-        leafletContainer = $(vis.el).find('.leaflet-container');
-      });
-
-      afterEach(function () {
-        destroyVis(vis);
-      });
-
-      it('should attach the zoom controls', function () {
-        expect(leafletContainer.find('.leaflet-control-zoom-in').length).to.be(1);
-        expect(leafletContainer.find('.leaflet-control-zoom-out').length).to.be(1);
-      });
-
-      it('should attach the filter drawing button', function () {
-        expect(leafletContainer.find('.leaflet-draw').length).to.be(1);
-      });
-
-      it('should attach the crop button', function () {
-        expect(leafletContainer.find('.leaflet-control-fit').length).to.be(1);
-      });
-
-      it('should not attach the filter or crop buttons if no data is present', function () {
-        var noData = {
-          geoJson: {
-            features: [],
-            properties: {
-              label: null,
-              length: 30,
-              min: 1,
-              max: 608,
-              precision: 1,
-              allmin: 1,
-              allmax: 608
-            },
-            hits: 20
-          }
-        };
-        vis.render(noData);
-        leafletContainer = $(vis.el).find('.leaflet-container');
-
-        expect(leafletContainer.find('.leaflet-control-fit').length).to.be(0);
-        expect(leafletContainer.find('.leaflet-draw').length).to.be(0);
-
-      });
-
-    });
-
   });
 });
