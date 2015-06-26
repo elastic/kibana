@@ -7,27 +7,45 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var geoJsonData = require('vislib_fixtures/mock_data/geohash/_geo_json');
 
+  // // Data
+  // var dataArray = [
+  //   ['geojson', require('vislib_fixtures/mock_data/geohash/_geo_json')],
+  //   ['columns', require('vislib_fixtures/mock_data/geohash/_columns')],
+  //   ['rows', require('vislib_fixtures/mock_data/geohash/_rows')],
+  // ];
+
+  // // TODO: Test the specific behavior of each these
+  // var mapTypes = [
+  //   'Scaled Circle Markers',
+  //   'Shaded Circle Markers',
+  //   'Shaded Geohash Grid',
+  //   'Heatmap'
+  // ];
+
   angular.module('MapFactory', ['kibana']);
 
   describe('TileMap Map', function () {
+    this.timeout(0);
     var $mockMapEl = $('<div>');
     var Map;
-    var map;
-    var leafletMock = {};
+    var leafletStubs = {};
+    var leafletMocks = {};
 
     beforeEach(function () {
       module('MapFactory');
       inject(function (Private) {
+        // mock parts of leaflet
+        leafletMocks.tileLayer = { on: sinon.stub() };
+        leafletMocks.map = { on: sinon.stub() };
+        leafletStubs.tileLayer = sinon.stub(L, 'tileLayer', _.constant(leafletMocks.tileLayer));
+        leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
+
         Map = Private(require('components/vislib/visualizations/_map'));
-
-        leafletMock.map = {
-          on: sinon.stub()
-        };
       });
-
     });
 
     describe('instantiation', function () {
+      var map;
       var createStub;
 
       beforeEach(function () {
@@ -49,15 +67,10 @@ define(function (require) {
     });
 
     describe('createMap', function () {
-      var stubs;
+      var map;
       var mapStubs;
 
       beforeEach(function () {
-        stubs = {
-          layer: sinon.stub(L, 'tileLayer'),
-          map: sinon.stub(L, 'map', _.constant(leafletMock.map)),
-        };
-
         mapStubs = {
           destroy: sinon.stub(Map.prototype, 'destroy'),
           attachEvents: sinon.stub(Map.prototype, '_attachEvents'),
@@ -68,10 +81,10 @@ define(function (require) {
       });
 
       it('should create the create leaflet objects', function () {
-        expect(stubs.layer.callCount).to.equal(1);
-        expect(stubs.map.callCount).to.equal(1);
+        expect(leafletStubs.tileLayer.callCount).to.equal(1);
+        expect(leafletStubs.map.callCount).to.equal(1);
 
-        var callArgs = stubs.map.firstCall.args;
+        var callArgs = leafletStubs.map.firstCall.args;
         var mapOptions = callArgs[1];
         expect(callArgs[0]).to.be($mockMapEl.get(0));
         expect(mapOptions).to.have.property('zoom');
@@ -87,6 +100,40 @@ define(function (require) {
         expect(mapStubs.destroy.callCount).to.equal(0);
         map._createMap({});
         expect(mapStubs.destroy.callCount).to.equal(1);
+      });
+    });
+
+    describe('attach events', function () {
+      var map;
+
+      beforeEach(function () {
+        sinon.stub(Map.prototype, '_createMap', function () {
+          this._tileLayer = leafletMocks.tileLayer;
+          this.map = leafletMocks.map;
+          this._attachEvents();
+        });
+        map = new Map($mockMapEl, geoJsonData, {});
+      });
+
+      it('should attach interaction events', function () {
+        var expectedTileEvents = ['tileload'];
+        var expectedMapEvents = ['draw:created', 'moveend', 'zoomend', 'unload'];
+        var matchedEvents = {
+          tiles: 0,
+          maps: 0,
+        };
+
+        _.times(leafletMocks.tileLayer.on.callCount, function (index) {
+          var ev = leafletMocks.tileLayer.on.getCall(index).args[0];
+          if (_.includes(expectedTileEvents, ev)) matchedEvents.tiles++;
+        });
+        expect(matchedEvents.tiles).to.equal(expectedTileEvents.length);
+
+        _.times(leafletMocks.map.on.callCount, function (index) {
+          var ev = leafletMocks.map.on.getCall(index).args[0];
+          if (_.includes(expectedMapEvents, ev)) matchedEvents.maps++;
+        });
+        expect(matchedEvents.maps).to.equal(expectedMapEvents.length);
       });
     });
   });

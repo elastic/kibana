@@ -186,7 +186,7 @@ define(function (require) {
       }
     };
 
-    Map.prototype._attachEvents = function (map) {
+    Map.prototype._attachEvents = function () {
       var self = this;
       var saturateTiles = self.saturateTiles.bind(self);
 
