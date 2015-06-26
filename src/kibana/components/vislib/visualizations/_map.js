@@ -210,17 +210,16 @@ define(function (require) {
         // update internal center and zoom references
         self._mapCenter = self.map.getCenter();
         self._mapZoom = self.map.getZoom();
-
-        if (self._events) {
-          self._events.emit('mapMoveEnd', {
-            chart: self._chartData,
-            map: self.map,
-            center: self._mapCenter,
-            zoom: self._mapZoom,
-          });
-        }
-
         self._addMarkers();
+
+        if (!self._events) return;
+
+        self._events.emit('mapMoveEnd', {
+          chart: self._chartData,
+          map: self.map,
+          center: self._mapCenter,
+          zoom: self._mapZoom,
+        });
       });
 
       this.map.on('draw:created', function (e) {
@@ -230,34 +229,31 @@ define(function (require) {
         // TODO: Different drawTypes need differ info. Need a switch on the object creation
         var bounds = e.layer.getBounds();
 
-        if (self._events) {
-          self._events.emit(drawType, {
-            e: e,
-            chart: self.originalConfig,
-            bounds: {
-              top_left: {
-                lat: bounds.getNorthWest().lat,
-                lon: bounds.getNorthWest().lng
-              },
-              bottom_right: {
-                lat: bounds.getSouthEast().lat,
-                lon: bounds.getSouthEast().lng
-              }
+        self._events.emit(drawType, {
+          e: e,
+          chart: self._chartData,
+          bounds: {
+            top_left: {
+              lat: bounds.getNorthWest().lat,
+              lon: bounds.getNorthWest().lng
+            },
+            bottom_right: {
+              lat: bounds.getSouthEast().lat,
+              lon: bounds.getSouthEast().lng
             }
-          });
-        }
+          }
+        });
       });
 
       this.map.on('zoomend', function () {
         self._mapZoom = self.map.getZoom();
+        if (!self._events) return;
 
-        if (self._events) {
-          self._events.emit('mapZoomEnd', {
-            chart: self._chartData,
-            map: self.map,
-            zoom: self._mapZoom,
-          });
-        }
+        self._events.emit('mapZoomEnd', {
+          chart: self._chartData,
+          map: self.map,
+          zoom: self._mapZoom,
+        });
       });
     };
 
