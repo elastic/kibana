@@ -165,5 +165,34 @@ define(function (require) {
         expect(destroyStub.callCount).to.be(1);
       });
     });
+
+    describe('getDataRectangles', function () {
+      var map;
+
+      beforeEach(function () {
+        sinon.stub(Map.prototype, '_createMap');
+        map = new Map($mockMapEl, geoJsonData, {});
+      });
+
+      it('should return an empty array if no data', function () {
+        map = new Map($mockMapEl, {}, {});
+        var rects = map._getDataRectangles();
+        expect(rects).to.have.length(0);
+      });
+
+      it('should return an array of arrays of rectangles', function () {
+        var rects = map._getDataRectangles();
+        _.times(5, function () {
+          var index = _.random(rects.length - 1);
+          var rect = rects[index];
+          var featureRect = geoJsonData.geoJson.features[index].properties.rectangle;
+          expect(rect.length).to.equal(featureRect.length);
+
+          // should swap the array
+          var checkIndex = _.random(rect.length - 1);
+          expect(rect[checkIndex]).to.eql(featureRect[checkIndex].slice(0).reverse());
+        });
+      });
+    });
   });
 });
