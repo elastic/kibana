@@ -7,10 +7,8 @@ module.exports = function (grunt) {
   return {
     options: {
       directory: directory,
-      version: '1.4.4',
-      plugins: [
-        'elasticsearch/marvel/latest'
-      ],
+      branch: 'master',
+      fresh: true,
       config: {
         path: {
           data: dataDir

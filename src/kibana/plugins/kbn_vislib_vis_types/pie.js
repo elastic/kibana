@@ -1,7 +1,7 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var VislibVisType = Private(require('components/vislib_vis_type/VislibVisType'));
+    var Schemas = Private(require('components/vis/Schemas'));
 
     return new VislibVisType({
       name: 'pie',
@@ -16,7 +16,7 @@ define(function (require) {
           addLegend: true,
           isDonut: false
         },
-        editor: require('text!plugins/vis_types/vislib/editors/pie.html')
+        editor: require('text!plugins/kbn_vislib_vis_types/editors/pie.html')
       },
       responseConverter: false,
       hierarchicalData: true,

@@ -1,11 +1,11 @@
 define(function (require) {
-  var _ = require('lodash');
+  return ['Vis Class', function () {
 
-  var indexPattern;
-  var Vis;
-  var visTypes;
+    var _ = require('lodash');
 
-  describe('Vis Class', function () {
+    var indexPattern;
+    var Vis;
+    var visTypes;
 
     var vis;
     var stateFixture = {
@@ -103,5 +103,5 @@ define(function (require) {
       });
     });
 
-  });
+  }];
 });

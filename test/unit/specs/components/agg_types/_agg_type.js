@@ -20,7 +20,7 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       fieldFormat = Private(require('registry/field_formats'));
       AggType = Private(require('components/agg_types/_agg_type'));
-      AggConfig = Private(require('components/vis/_agg_config'));
+      AggConfig = Private(require('components/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 

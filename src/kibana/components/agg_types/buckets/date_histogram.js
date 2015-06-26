@@ -93,8 +93,7 @@ define(function (require) {
             var interval = agg.buckets.getInterval();
             output.bucketInterval = interval;
             output.params.interval = interval.expression;
-            output.params.pre_zone = tzOffset;
-            output.params.pre_zone_adjust_large_interval = true;
+            output.params.time_zone = tzOffset;
 
             var scaleMetrics = interval.scaled && interval.scale < 1;
             if (scaleMetrics) {

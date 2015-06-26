@@ -12,7 +12,7 @@ define(function (require) {
     beforeEach(inject(function (Private) {
       Vis = Private(require('components/vis/vis'));
       AggType = Private(require('components/agg_types/_agg_type'));
-      AggConfig = Private(require('components/vis/_agg_config'));
+      AggConfig = Private(require('components/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       fieldFormat = Private(require('registry/field_formats'));
     }));
