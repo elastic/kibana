@@ -82,6 +82,25 @@ define(function (require) {
         expect(map.addBoundingControl.callCount).to.equal(1);
       });
 
+      it('should only add controls if data exists', function () {
+        var noData = {
+          geoJson: {
+            features: [],
+            properties: {},
+            hits: 20
+          }
+        };
+        var tilemap = createTileMap(null, null, noData);
+
+        tilemap._appendMap($selection);
+        expect(tilemap.maps).to.have.length(1);
+
+        var map = tilemap.maps[0];
+        expect(map.addTitle.callCount).to.equal(0);
+        expect(map.addFitControl.callCount).to.equal(0);
+        expect(map.addBoundingControl.callCount).to.equal(0);
+      });
+
       it('should append title if set in the data object', function () {
         var mapTitle = 'Test Title';
         var tilemap = createTileMap(null, null, _.assign({ title: mapTitle }, geoJsonData));
