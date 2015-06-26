@@ -7,6 +7,8 @@ define(function (require) {
 
     var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];
+    var defaultMarkerType = 'Scaled Circle Markers';
+
     var mapTiles = {
       url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
       options: {
@@ -16,6 +18,7 @@ define(function (require) {
         subdomains: '1234'
       }
     };
+
     var markerTypes = {
       'Scaled Circle Markers': Private(require('components/vislib/visualizations/marker_types/scaled_circles')),
       'Shaded Circle Markers': Private(require('components/vislib/visualizations/marker_types/shaded_circles')),
@@ -23,13 +26,12 @@ define(function (require) {
       'Heatmap': Private(require('components/vislib/visualizations/marker_types/heatmap')),
     };
 
-    var defaultMarkerType = 'Scaled Circle Markers';
-
     /**
      * Tile Map Maps
      *
      * @class Map
      * @constructor
+     * @param container {HTML Element} Element to render map into
      * @param chartData {Object} Elasticsearch query results for this map
      * @param params {Object} Parameters used to build a map
      */
