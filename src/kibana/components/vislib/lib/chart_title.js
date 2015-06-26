@@ -32,9 +32,9 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
     ChartTitle.prototype.render = function () {
-      var $el = d3.select(this.el).select('.chart-title').node();
-      var width = $el ? $el.clientWidth : 0;
-      var height = $el ? $el.clientHeight : 0;
+      var el = d3.select(this.el).select('.chart-title').node();
+      var width = el ? el.clientWidth : 0;
+      var height = el ? el.clientHeight : 0;
 
       return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
     };
