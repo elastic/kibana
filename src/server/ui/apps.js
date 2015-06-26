@@ -2,15 +2,18 @@ module.exports = function (kibana, server, config) {
   var _ = require('lodash');
   var Boom = require('boom');
 
-  var defaultModuleIds = require('./lib/defaultModuleIds');
   var UiExports = require('./lib/UiExports');
   var UiApp = require('./lib/UiApp');
 
   // export manager
-  kibana.uiExports = new UiExports(defaultModuleIds());
+  kibana.uiExports = new UiExports();
   var switcherApp = new UiApp(kibana.uiExports, null, {
     id: 'appSwitcher',
-    main: 'appSwitcher/index'
+    main: 'appSwitcher/index',
+    defaultModules: {
+      angular: [],
+      require: ['chrome']
+    }
   });
 
   // serve the app switcher

@@ -3,11 +3,10 @@ var minimatch = require('minimatch');
 
 var UiApp = require('./UiApp');
 
-function UiExports(defaultModules) {
+function UiExports() {
   this.apps = {};
   this.appCount = 0;
   this.aliases = {};
-  this.defaultModules = defaultModules || [];
   this.exportConsumer = _.memoize(this.exportConsumer);
 }
 
@@ -69,7 +68,6 @@ UiExports.prototype.find = function (patterns) {
   .reduce(function (found, name) {
     return found.concat(aliases[name]);
   }, [])
-  .union(this.defaultModules)
   .value();
 };
 

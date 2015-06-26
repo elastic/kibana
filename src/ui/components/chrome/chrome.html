@@ -29,7 +29,7 @@
         </li>
       </ul>
 
-      <ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
+      <ul chrome-context ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
         <li>
           <a ng-click="toggleRefresh()" ng-show="timefilter.refreshInterval.value > 0">
             <i class="fa" ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"></i>
@@ -76,5 +76,5 @@
     config-close="toggleTimepicker">
   </config>
 
-  <div class="application" ng-class="'application-' + chrome.getActiveTab().id" ng-view></div>
+  <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-')" ng-view></div>
 </div>

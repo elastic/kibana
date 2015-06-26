@@ -1,19 +1,19 @@
 define(function (require) {
   require('css!appSwitcher/appSwitcher.css');
 
-  require('routes')
-  .when('/', {
-    template: require('text!appSwitcher/appSwitcher.html'),
-    resolve: {
-      apps: function ($http) {
-        return $http.get('/api/apps').then(function (resp) {
-          return resp.data;
-        });
-      }
-    },
-    controllerAs: 'apps',
-    controller: function ($route) {
-      this.all = $route.current.locals.apps;
-    }
+  require('chrome')
+  .setRootTemplate(require('text!appSwitcher/appSwitcher.html'))
+  .setRootController('switcher', function SwitcherController($http) {
+    var switcher = {
+      loading: true
+    };
+
+    $http.get('/api/apps')
+    .then(function (resp) {
+      switcher.loading = false;
+      switcher.apps = resp.data;
+    });
+
+    return switcher;
   });
 });

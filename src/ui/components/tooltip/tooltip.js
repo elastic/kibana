@@ -1,7 +1,7 @@
 define(function (require) {
   var html = require('text!components/tooltip/tooltip.html');
 
-  require('modules').get('kibana')
+  require('components/ui-bootstrap/index')
   .config(function ($tooltipProvider) {
     $tooltipProvider.options({
       placement: 'bottom',
