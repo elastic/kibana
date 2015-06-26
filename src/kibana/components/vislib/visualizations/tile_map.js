@@ -36,54 +36,24 @@ define(function (require) {
       this._chartData = chartData || {};
       _.assign(this, this._chartData);
 
-      // add allmin and allmax to geoJson
-      var geoMinMax = handler.data.getGeoExtents();
-      this.geoJson.properties.allmin = geoMinMax.min;
-      this.geoJson.properties.allmax = geoMinMax.max;
+      this._appendGeoExtents();
     }
 
     /**
-     * Renders tile map
+     * Draws tile map, called on chart render
      *
      * @method draw
      * @return {Function} - function to add a map to a selection
      */
     TileMap.prototype.draw = function () {
       var self = this;
-      var mapData = this.geoJson;
 
       // clean up old maps
       self.destroy();
 
-      // clear maps array
-      self.maps = [];
-
       return function (selection) {
         selection.each(function () {
-          var container = $(this).addClass('tilemap');
-
-          var map = new Map(container, self._chartData, {
-            // center: self._attr.mapCenter,
-            // zoom: self._attr.mapZoom,
-            events: self.events,
-            markerType: self._attr.mapType,
-            tooltipFormatter: self.tooltipFormatter,
-            valueFormatter: self.valueFormatter,
-            attr: self._attr
-          });
-
-          // add title for splits
-          if (self.title) {
-            map.addTitle(self.title);
-          }
-
-          // add fit to bounds control
-          if (mapData && mapData.features.length > 0) {
-            map.addFitControl();
-            map.addBoundingControl();
-          }
-
-          self.maps.push(map);
+          self._appendMap(this);
         });
       };
     };
@@ -108,9 +78,55 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
-      this.maps.forEach(function (map) {
+      this.maps = this.maps.filter(function (map) {
         map.destroy();
       });
+    };
+
+    /**
+     * Adds allmin and allmax properties to geoJson data
+     *
+     * @method _appendMap
+     * @param selection {Object} d3 selection
+     */
+    TileMap.prototype._appendGeoExtents = function () {
+      // add allmin and allmax to geoJson
+      var geoMinMax = this.handler.data.getGeoExtents();
+      this.geoJson.properties.allmin = geoMinMax.min;
+      this.geoJson.properties.allmax = geoMinMax.max;
+    };
+
+    /**
+     * Renders map
+     *
+     * @method _appendMap
+     * @param selection {Object} d3 selection
+     */
+    TileMap.prototype._appendMap = function (selection) {
+      var container = $(selection).addClass('tilemap');
+
+      var map = new Map(container, this._chartData, {
+        // center: this._attr.mapCenter,
+        // zoom: this._attr.mapZoom,
+        events: this.events,
+        markerType: this._attr.mapType,
+        tooltipFormatter: this.tooltipFormatter,
+        valueFormatter: this.valueFormatter,
+        attr: this._attr
+      });
+
+      // add title for splits
+      if (this.title) {
+        map.addTitle(this.title);
+      }
+
+      // add fit to bounds control
+      if (_.get(this.geoJson, 'features.length') > 0) {
+        map.addFitControl();
+        map.addBoundingControl();
+      }
+
+      this.maps.push(map);
     };
 
     return TileMap;
