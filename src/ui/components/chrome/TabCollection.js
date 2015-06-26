@@ -24,7 +24,7 @@ define(function (require) {
     };
 
     this.trackPathUpdate = function (path, temporaryChange) {
-      var id = path.split('/')[1];
+      var id = path.split('/')[1] || '';
 
       all.forEach(function (tab) {
         tab.active = (tab.id === id);

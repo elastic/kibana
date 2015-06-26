@@ -42,14 +42,15 @@
 
   &-inverse {
     .logo {
-
-      @media (max-width: @screen-md-max) {
-        width: 45px
-      }
-
-      background-image: url('../images/kibana.png');
       height: @navbar-height;
       width: 252px;
+      background-color: @navbar-inverse-brand-bg;
+    }
+
+    .logo-small {
+      height: @navbar-height;
+      width: 45px;
+      background-color: @navbar-inverse-brand-bg;
     }
 
     .badge {

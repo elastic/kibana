@@ -11,6 +11,8 @@ define(function (require) {
   });
 
   require('chrome')
+  .setLogo('url(/images/kibana.png) left no-repeat', true)
+  .setNavBackground('#222222')
   .setTabs([
     {
       id: 'discover',

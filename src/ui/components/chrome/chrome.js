@@ -8,12 +8,16 @@ define(function (require) {
 
   var TabCollection = require('components/chrome/TabCollection');
 
-  var chrome = {};
   var tabs = new TabCollection();
-  var backgroundColor = '#656A76';
   var rootController = null;
   var rootTemplate = null;
   var payload = null;
+
+  var chrome = {
+    navBackground: '#222222',
+    logo: null,
+    smallLogo: null
+  };
 
   chrome.consumePayload = function (_payload) {
     payload = _payload;
@@ -35,14 +39,37 @@ define(function (require) {
   };
 
   /**
-   * Set the background color for the header
+   * Set the background for the navbar
    *
-   * @param {string} color - css color definition (eg. 'red', 'rgb(68, 68, 68)', or '#ffffff')
+   * @param {string} background - css background definition (eg. 'red')
    * @return {chrome}
    * @chainable
    */
-  chrome.setBackgroundColor = function (color) {
-    backgroundColor = color;
+  chrome.setNavBackground = function (background) {
+    chrome.navBackground = background;
+    return chrome;
+  };
+
+  /**
+   * Set the background for the logo and small logo in the navbar.
+   * When the app is in the "small" category, a modified version of the
+   * logo is displayed that is 45px wide.
+   *
+   * @param {string} logo - css background value eg.
+   *                      'url(/plugins/app/logo.png) center no-repeat'
+   * @param {string|boolean} smallLogo - css background for the small
+   *                                   logo, or true to reuse the logos
+   * @return {chrome}
+   * @chainable
+   */
+  chrome.setLogo = function (logo, smallLogo) {
+    if (smallLogo === true) {
+      smallLogo = logo;
+    }
+
+    chrome.logo = logo;
+    chrome.smallLogo = smallLogo;
+
     return chrome;
   };
 
@@ -118,8 +145,8 @@ define(function (require) {
    *
    * @return {object}
    */
-  chrome.getAppInfo = function () {
-    return payload.app;
+  chrome.getAppTitle = function () {
+    return payload.app.title;
   };
 
   /**
@@ -176,6 +203,7 @@ define(function (require) {
         chrome.embedded = Boolean($location.search().embed);
 
         // listen for route changes, propogate to tabs
+        onRouteChange();
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
         function onRouteChange() {

@@ -9,6 +9,7 @@ module.exports = function (kibana, server, config) {
   kibana.uiExports = new UiExports();
   var switcherApp = new UiApp(kibana.uiExports, null, {
     id: 'appSwitcher',
+    title: 'Apps',
     main: 'appSwitcher/index',
     defaultModules: {
       angular: [],

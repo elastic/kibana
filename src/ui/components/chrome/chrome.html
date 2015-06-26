@@ -1,6 +1,10 @@
 <kbn-notifications list="notifList"></kbn-notifications>
 <div class="content" style="display: none;">
-  <nav ng-class="{show: chrome.embedded === false}" bindonce class="hide navbar navbar-inverse navbar-static-top">
+  <nav
+    ng-style="{ background: chrome.navBackground }"
+    ng-class="{ show: !chrome.embedded }"
+    bindonce
+    class="hide navbar navbar-inverse navbar-static-top">
     <div class="navbar-header">
       <button ng-click="showCollapsed = !showCollapsed" type="button" class="navbar-toggle">
         <span class="sr-only">Toggle navigation</span>
@@ -8,7 +12,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <span class="navbar-brand visible-xs">{{ chrome.getActiveTab().title }}
+      <span class="visible-xs">
+        <span ng-if="chrome.getActiveTab()" bo-bind="chrome.getActiveTab().title" class="navbar-brand"></span>
         <span ng-show="chrome.httpActive.length" class="spinner"></span>
       </span>
     </div>
@@ -16,7 +21,18 @@
     <!-- Full navbar -->
     <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
       <ul class="nav navbar-nav" role="navigation">
-        <li aria-label="Kibana Barcode Logo" class="logo hidden-xs"></li>
+        <li
+          ng-if="chrome.logo"
+          ng-style="{ 'background': chrome.logo }"
+          aria-label="{{ chrome.getAppTitle() }} Logo"
+          class="logo hidden-sm"
+          ></li>
+        <li
+          ng-if="chrome.smallLogo"
+          ng-style="{ 'background': chrome.smallLogo }"
+          aria-label="{{ chrome.getAppTitle() }} Logo"
+          class="logo-small visible-sm hidden-xs"
+          ></li>
 
         <li ng-if="chrome.getAppCount() > 1 && chrome.getAppId() !== 'appSwitcher'">
           <a href="/apps"><i class="fa fa-th" alt="Go to app switcher"></i></a>
