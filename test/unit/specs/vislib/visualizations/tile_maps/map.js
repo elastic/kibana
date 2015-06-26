@@ -38,6 +38,14 @@ define(function (require) {
       it('should create the map', function () {
         expect(createStub.callCount).to.equal(1);
       });
+
+      it('should add zoom controls', function () {
+        var mapOptions = createStub.firstCall.args[0];
+
+        expect(mapOptions).to.be.an('object');
+        if (mapOptions.zoomControl) expect(mapOptions.zoomControl).to.be.ok();
+        else expect(mapOptions.zoomControl).to.be(undefined);
+      });
     });
 
     describe('createMap', function () {
