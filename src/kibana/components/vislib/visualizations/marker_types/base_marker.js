@@ -189,11 +189,7 @@ define(function (require) {
       var self = this;
       return function (feature) {
         var mapBounds = self.map.getBounds();
-        var bucketRectBounds = feature.properties.rectangle.map(function (rect) {
-          // turn around the LngLat recieved from ES into LatLng for leaflet
-          return rect.slice(0).reverse();
-        });
-
+        var bucketRectBounds = _.get(feature, 'properties.rectangle');
         return mapBounds.intersects(bucketRectBounds);
       };
     };

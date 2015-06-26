@@ -299,14 +299,7 @@ define(function (require) {
      */
     Map.prototype._getDataRectangles = function () {
       if (!this._geoJson) return [];
-
-      return _(this._geoJson.features)
-      .pluck('properties.rectangle')
-      .invoke('map', function (rectangle) {
-        // turn around the LngLat recieved from ES into LatLng for leaflet
-        return rectangle.slice(0).reverse();
-      })
-      .value();
+      return _.pluck(this._geoJson.features, 'properties.rectangle');
     };
 
     return Map;

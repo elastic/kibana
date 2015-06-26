@@ -7,12 +7,6 @@ define(function (require) {
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Map = Private(require('components/vislib/visualizations/_map'));
 
-    // Convenience function to turn around the LngLat recieved from ES
-    function cloneAndReverse(arr) {
-      var l = arr.length;
-      return arr.map(function (curr, idx) { return arr[l - (idx + 1)]; });
-    }
-
     /**
      * Tile Map Visualization: renders maps
      *

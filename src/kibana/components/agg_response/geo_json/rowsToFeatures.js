@@ -17,29 +17,39 @@ define(function (require) {
       if (!geohash) return;
 
       var location = decodeGeoHash(geohash);
-      var center = [
+
+      var centerLatLng = [
+        location.latitude[2],
+        location.longitude[2]
+      ];
+
+      // geoJson coords use LngLat coordinates
+      // http://geojson.org/geojson-spec.html#positions
+      // "longitude, latitude, altitude for coordinates in a geographic coordinate reference system"
+      var centerLngLat = [
         location.longitude[2],
         location.latitude[2]
       ];
 
       var rectangle = [
-        [location.longitude[0], location.latitude[0]],
-        [location.longitude[1], location.latitude[0]],
-        [location.longitude[1], location.latitude[1]],
-        [location.longitude[0], location.latitude[1]]
+        [location.latitude[0], location.longitude[0]],
+        [location.latitude[0], location.longitude[1]],
+        [location.latitude[1], location.longitude[1]],
+        [location.latitude[1], location.longitude[0]],
       ];
+
 
       features.push({
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: center
+          coordinates: centerLngLat
         },
         properties: {
           geohash: geohash,
           value: unwrap(row[metricI]),
           aggConfigResult: getAcr(row[metricI]),
-          center: center,
+          center: centerLatLng,
           rectangle: rectangle
         }
       });
