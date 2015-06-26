@@ -6,13 +6,18 @@ define(function (require) {
 
   // Data
   var dataArray = [
-    require('vislib_fixtures/mock_data/geohash/_geo_json'),
-    require('vislib_fixtures/mock_data/geohash/_columns'),
-    require('vislib_fixtures/mock_data/geohash/_rows')
+    ['geojson', require('vislib_fixtures/mock_data/geohash/_geo_json')],
+    ['columns', require('vislib_fixtures/mock_data/geohash/_columns')],
+    ['rows', require('vislib_fixtures/mock_data/geohash/_rows')],
   ];
-  var names = ['geojson', 'columns', 'rows'];
+
   // TODO: Test the specific behavior of each these
-  var mapTypes = ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'];
+  var mapTypes = [
+    'Scaled Circle Markers',
+    'Shaded Circle Markers',
+    'Shaded Geohash Grid',
+    'Heatmap'
+  ];
 
   angular.module('TileMapFactory', ['kibana']);
 
@@ -42,11 +47,12 @@ define(function (require) {
 
   describe('TileMap Tests', function () {
     describe('Rendering each types of tile map', function () {
-      dataArray.forEach(function (data, i) {
+      dataArray.forEach(function (dataType, i) {
+        var name = dataType[0];
+        var data = dataType[1];
 
         mapTypes.forEach(function (type, j) {
-
-          describe('draw() ' + mapTypes[j] + ' with ' + names[i], function () {
+          describe('draw() ' + mapTypes[j] + ' with ' + name, function () {
             var vis;
 
             beforeEach(function () {
@@ -76,7 +82,7 @@ define(function (require) {
       var leafletContainer;
 
       beforeEach(function () {
-        vis = bootstrapAndRender(dataArray[0], 'Scaled Circle Markers');
+        vis = bootstrapAndRender(dataArray[0][1], 'Scaled Circle Markers');
         leafletContainer = $(vis.el).find('.leaflet-container');
       });
 
