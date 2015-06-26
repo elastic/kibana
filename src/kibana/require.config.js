@@ -6,7 +6,7 @@ require.config({
     routes: 'utils/routes/index',
     errors: 'components/errors',
     modules: 'utils/modules',
-    lodash: '/utils/lodash-mixins/index',
+    lodash: 'utils/lodash-mixins/index',
 
     // bower_components
     'angular-bindonce': 'bower_components/angular-bindonce/bindonce',
@@ -16,28 +16,26 @@ require.config({
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     'ace-json': 'bower_components/ace-builds/src-noconflict/mode-json',
-    angular: '/bower_components/angular/angular',
+    angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',
     bower_components: 'bower_components',
-    css: '/bower_components/require-css/css',
-    d3: '/bower_components/d3/d3',
-    nvd3: '/bower_components/nvd3/build/nv.d3',
-    nvd3_directives: '/bower_components/angular-nvd3/dist/angular-nvd3',
+    css: 'bower_components/require-css/css',
+    d3: 'bower_components/d3/d3',
     elasticsearch: 'bower_components/elasticsearch/elasticsearch.angular',
     faker: 'bower_components/Faker/faker',
     file_saver: 'bower_components/FileSaver/FileSaver',
     gridster: 'bower_components/gridster/dist/jquery.gridster',
     'leaflet-heat': 'bower_components/Leaflet.heat/dist/leaflet-heat',
-    jquery: '/bower_components/jquery/dist/jquery',
+    jquery: 'bower_components/jquery/dist/jquery',
     leaflet: 'bower_components/leaflet/dist/leaflet',
     'leaflet-draw': 'bower_components/leaflet-draw/dist/leaflet.draw',
-    lodash_src: '/bower_components/lodash/lodash',
-    moment: '/bower_components/moment/moment',
+    lodash_src: 'bower_components/lodash/lodash',
+    moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
     marked: 'bower_components/marked/lib/marked',
-    numeral: '/bower_components/numeral/numeral'
+    numeral: 'bower_components/numeral/numeral'
   },
   shim: {
     angular: {
@@ -66,9 +64,7 @@ require.config({
     },
     marked: {
       exports: 'marked'
-    },
-    nvd3: ['css!/bower_components/nvd3/build/nv.d3.css', 'd3'],
-    nvd3_directives: ['angular', 'd3', 'nvd3']
+    }
   },
   waitSeconds: 60
 });
