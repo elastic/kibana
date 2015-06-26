@@ -279,7 +279,7 @@ define(function (require) {
             var index = _.random(mapData.features.length - 1);
             var feature = mapData.features[index];
             var featureValue = feature.properties.value;
-            var featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
+            var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
             expect(arr[index]).to.eql(featureArr);
           });
         });
@@ -292,7 +292,7 @@ define(function (require) {
             var index = _.random(mapData.features.length - 1);
             var feature = mapData.features[index];
             var featureValue = parseInt(feature.properties.value / max * 100);
-            var featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
+            var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
             expect(arr[index]).to.eql(featureArr);
           });
         });

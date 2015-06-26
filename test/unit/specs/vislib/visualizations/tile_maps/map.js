@@ -24,7 +24,7 @@ define(function (require) {
 
   angular.module('MapFactory', ['kibana']);
 
-  describe('TileMap Map', function () {
+  describe('TileMap Map Tests', function () {
     this.timeout(0);
     var $mockMapEl = $('<div>');
     var Map;
@@ -190,7 +190,7 @@ define(function (require) {
 
           // should swap the array
           var checkIndex = _.random(rect.length - 1);
-          expect(rect[checkIndex]).to.eql(featureRect[checkIndex].slice(0).reverse());
+          expect(rect[checkIndex]).to.eql(featureRect[checkIndex]);
         });
       });
     });
