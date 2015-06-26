@@ -9,6 +9,7 @@ define(function (require) {
   var tabs = new TabCollection();
   var backgroundColor = '#656A76';
   var rootController = null;
+  var payload = window.KIBANA;
 
   /**
    * Set what tabs should be shown in the header.
@@ -42,15 +43,10 @@ define(function (require) {
     return tabs.getActive();
   };
 
-  /**
-   * Get the number of currently installed apps
-   */
-  chrome.getAppInfo = _.constant(window.KIBANA.app);
+  chrome.getAppCount = _.constant(payload.appCount);
+  chrome.getAppInfo = _.constant(payload.app);
+  chrome.getAppId = _.constant(payload.app.id);
 
-  /**
-   * Get the number of currently installed apps
-   */
-  chrome.getAppCount = _.constant(window.KIBANA.appCount);
 
   /**
    * Set the background color for the header
