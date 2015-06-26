@@ -11,7 +11,7 @@ module.exports = function (kibana, server, config) {
 
   server.ext('onRequest', function (req, reply) {
     var path = req.path;
-    if (path.charAt(path.length - 1) !== '/') {
+    if (path === '/' || path.charAt(path.length - 1) !== '/') {
       return reply.continue();
     }
 
