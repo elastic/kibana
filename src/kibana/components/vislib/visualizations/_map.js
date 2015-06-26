@@ -168,14 +168,12 @@ define(function (require) {
      * creates featurelayer from mapData (geoJson)
      *
      * @method _addMarkers
-     * @return {Leaflet featureLayer} marker layer
      */
     Map.prototype._addMarkers = function () {
       if (!this._geoJson) return;
       if (this._markers) this._markers.destroy();
 
-      var MarkerType = markerTypes[this._markerType];
-      this._markers = new MarkerType(this.map, this._geoJson, {
+      this._markers = this._createMarkers({
         tooltipFormatter: this._tooltipFormatter,
         valueFormatter: this._valueFormatter,
         attr: this._attr
@@ -184,6 +182,18 @@ define(function (require) {
       if (this._geoJson.features.length > 1) {
         this._markers.addLegend();
       }
+    };
+
+    /**
+     * Create the marker instance using the given options
+     *
+     * @method _createMarkers
+     * @param options {Object} options to give to marker class
+     * @return {Object} marker layer
+     */
+    Map.prototype._createMarkers = function (options) {
+      var MarkerType = markerTypes[this._markerType];
+      return new MarkerType(this.map, this._geoJson, options);
     };
 
     Map.prototype._attachEvents = function () {

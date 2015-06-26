@@ -103,7 +103,7 @@ define(function (require) {
       });
     });
 
-    describe('attach events', function () {
+    describe('attachEvents', function () {
       var map;
 
       beforeEach(function () {
@@ -134,6 +134,35 @@ define(function (require) {
           if (_.includes(expectedMapEvents, ev)) matchedEvents.maps++;
         });
         expect(matchedEvents.maps).to.equal(expectedMapEvents.length);
+      });
+    });
+
+
+    describe('addMarkers', function () {
+      var map;
+      var createStub;
+
+      beforeEach(function () {
+        sinon.stub(Map.prototype, '_createMap');
+        createStub = sinon.stub(Map.prototype, '_createMarkers', _.constant({ addLegend: _.noop }));
+        map = new Map($mockMapEl, geoJsonData, {});
+      });
+
+      it('should pass the map options to the marker', function () {
+        map._addMarkers();
+
+        var args = createStub.firstCall.args[0];
+        expect(args).to.have.property('tooltipFormatter');
+        expect(args).to.have.property('valueFormatter');
+        expect(args).to.have.property('attr');
+      });
+
+      it('should destroy existing markers', function () {
+        var destroyStub = sinon.stub();
+        map._markers = { destroy: destroyStub };
+        map._addMarkers();
+
+        expect(destroyStub.callCount).to.be(1);
       });
     });
   });
