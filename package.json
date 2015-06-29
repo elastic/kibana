@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.1.1",
+  "version": "4.1.2-snapshot",
   "main": "src/server/app.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
@@ -31,7 +31,7 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
-    "postinstall": "bower install",
+    "postinstall": "bower install && grunt licenses --check-validity",
     "precommit": "grunt lintStagedFiles"
   },
   "repository": {
