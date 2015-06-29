@@ -31,7 +31,7 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
-    "postinstall": "bower install && grunt licenses --check-validity",
+    "postinstall": "bower install",
     "precommit": "grunt lintStagedFiles"
   },
   "repository": {
@@ -51,6 +51,7 @@
     "express": "^4.10.6",
     "glob": "^4.3.2",
     "http-auth": "^2.2.5",
+    "jade": "^1.8.2",
     "js-yaml": "^3.2.5",
     "lodash": "^2.4.1",
     "request": "^2.40.0",
@@ -85,7 +86,6 @@
     "http-proxy": "^1.8.1",
     "husky": "^0.6.0",
     "istanbul": "^0.2.4",
-    "jade": "^1.8.2",
     "license-checker": "3.0.3",
     "load-grunt-config": "^0.7.0",
     "marked": "^0.3.2",
