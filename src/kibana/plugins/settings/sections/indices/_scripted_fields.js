@@ -29,14 +29,15 @@ define(function (require) {
           { title: 'controls', sortable: false }
         ];
 
-        $scope.$watch('indexPattern.fields', refreshRows);
-        $scope.$watch('fieldFilter', refreshRows);
+        $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter'], refreshRows);
 
         function refreshRows() {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
           var fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
+          _.find($scope.fieldTypes, {index: 'scriptedFields'}).count = fields.length; // Update the tab count
+
           $scope.rows = fields.map(function (field) {
             var rowScope = $scope.$new();
             rowScope.field = field;
