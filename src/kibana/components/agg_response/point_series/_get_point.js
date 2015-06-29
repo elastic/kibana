@@ -20,7 +20,7 @@ define(function (require) {
       };
 
       if (point.y === 'NaN') {
-        // filter out NaN from stats and null
+        // filter out NaN from stats
         // from metrics that are not based at zero
         return;
       }
