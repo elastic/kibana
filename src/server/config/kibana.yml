@@ -16,8 +16,8 @@
 # kibana_index: ".kibana"
 
 # If your Elasticsearch is protected with basic auth, this is the user credentials
-# used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
-# users will still need to authenticate with Elasticsearch (which is proxied thorugh
+# used by the Kibana server to perform maintenance on the kibana_index at statup. Your Kibana
+# users will still need to authenticate with Elasticsearch (which is proxied through
 # the Kibana server)
 # kibana_elasticsearch_username: user
 # kibana_elasticsearch_password: pass
@@ -62,3 +62,9 @@
 # If you would like to send the log output to a file you can set the path below.
 # This will also turn off the STDOUT log output.
 # log_file: ./kibana.log
+
+# Authentication settings for Kibana
+# enable_authentication: false
+# encryption_key:
+# session_timeout: 300000
+# htpasswd: /path/to/.htpasswd
