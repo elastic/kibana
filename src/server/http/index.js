@@ -9,19 +9,6 @@ module.exports = function (kbnServer, server, config) {
     port: config.get('kibana.server.port')
   });
 
-  server.ext('onRequest', function (req, reply) {
-    var path = req.path;
-    if (path === '/' || path.charAt(path.length - 1) !== '/') {
-      return reply.continue();
-    }
-
-    return reply.redirect(format({
-      search: req.url.search,
-      pathname: path.slice(0, -1),
-    }))
-    .permanent(true);
-  });
-
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
     this.route({
@@ -68,6 +55,23 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     handler: function (req, reply) {
       reply.redirect(config.get('kibana.defaultRoute'));
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/{p*}',
+    handler: function (req, reply) {
+      var path = req.path;
+      if (path === '/' || path.charAt(path.length - 1) !== '/') {
+        return reply(Boom.notFound());
+      }
+
+      return reply.redirect(format({
+        search: req.url.search,
+        pathname: path.slice(0, -1),
+      }))
+      .permanent(true);
     }
   });
 };
