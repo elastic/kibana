@@ -4,14 +4,14 @@ var basename = require('path').basename;
 var readdir = require('fs').readdirSync;
 var stat = require('fs').statSync;
 var exists = require('fs').existsSync;
-var uiDir = require('./uiDir');
+var assetsDir = require('../assetsDir');
 
 function hidden(name) {
   return name[0] !== '.' && name[0] !== '_';
 }
 
 function scan(type) {
-  var dir = join(uiDir, type);
+  var dir = join(assetsDir, type);
 
   return readdir(dir)
   .filter(hidden)

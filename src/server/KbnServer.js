@@ -21,7 +21,8 @@ function KbnServer(settings) {
     require('./http'),
     require('./ui'),
     require('./status'),
-    require('./plugins')
+    require('./plugins'),
+    require('./optimize')
   ));
 }
 

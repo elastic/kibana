@@ -9,7 +9,7 @@ module.exports = function (kbnServer, server, config) {
   var Promise = require('bluebird');
 
   var apps = kbnServer.uiExports.apps;
-  var uiDir = require('../../ui/lib/uiDir');
+  var uiDir = require('../ui/assetsDir');
   var glob = _.wrap(Promise.promisify(require('glob')), function (gb, dir) {
     return gb('**/*', {
       cwd: dir,

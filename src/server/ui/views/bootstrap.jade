@@ -1,4 +1,4 @@
-- var j = function (o) { return JSON.stringify(o, null, 2); }
+- var j = function (o) { return JSON.stringify(o); }
 
 doctype html
 html(lang='en')
@@ -21,44 +21,7 @@ html(lang='en')
       var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
       if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
 
-    script(src='/bower_components/requirejs/require.js#{cacheBust}')
-    script(src='/require.config.js#{cacheBust}')
-    script.
-      (function () {
-        var payload = !{ j(kibanaPayload) };
-        var use = !{ j(app.getModules()) };
-        require.config({ urlArgs: !{ j(cacheBust) } });
-
-        require(['modules', 'chrome'], function (modules, chrome) {
-          chrome.consumePayload(payload);
-          var kibana = modules.get('kibana', use.angular);
-
-          kibana
-          .constant('kbnVersion', payload.version)
-          .constant('buildNum', payload.buildNumber)
-          .constant('kbnIndex', payload.kbnIndex)
-          .constant('esShardTimeout', payload.esShardTimeout)
-          .constant('esUrl', (function () {
-            var a = document.createElement('a');
-            a.href = '/elasticsearch';
-            return a.href;
-          }()))
-          .constant('commitSha', payload.buildSha)
-          .constant('cacheBust', payload.cacheBust)
-          .constant('minimumElasticsearchVersion', '2.0.0')
-          .constant('sessionId', Date.now());
-
-          // tell the modules util to add all discovered modules as a requirement in kibana
-          modules.link(kibana);
-
-          // load our main module and bootstrap
-          require(['jquery'].concat(use.main, use.require), function ($) {
-            angular
-            .bootstrap(document, ['kibana'])
-            .invoke(function () {
-              $(document.body).children(':not(style-compile)').show();
-            });
-          });
-        });
-
-      }());
+    script(
+      src='/bundles/#{app.id}.js'
+      payload=j(kibanaPayload)
+    )
