@@ -63,7 +63,7 @@
     "lodash": "^3.9.3",
     "minimatch": "^2.0.8",
     "moment": "^2.10.3",
-    "node-libs-browser": "^0.5.2",
+    "node-libs-browser": "spalger/node-libs-browser",
     "numeral": "^1.5.3",
     "request": "^2.40.0",
     "requirefrom": "^0.2.0",
