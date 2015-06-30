@@ -1,4 +1,4 @@
-module.exports = function (kibana, server, config) {
+module.exports = function (kbnServer, server, config) {
   var Boom = require('boom');
   var parse = require('url').parse;
   var format = require('url').format;
@@ -53,11 +53,11 @@ module.exports = function (kibana, server, config) {
     var response = req.response;
 
     if (response.isBoom) {
-      response.output.headers['x-app-name'] = kibana.name;
-      response.output.headers['x-app-version'] = kibana.version;
+      response.output.headers['x-app-name'] = kbnServer.name;
+      response.output.headers['x-app-version'] = kbnServer.version;
     } else {
-      response.header('x-app-name', kibana.name);
-      response.header('x-app-version', kibana.version);
+      response.header('x-app-name', kbnServer.name);
+      response.header('x-app-version', kbnServer.version);
     }
 
     return reply.continue();

@@ -2,8 +2,10 @@ var Joi = require('joi');
 var fs = require('fs');
 var path = require('path');
 var package = require('../utils/closestPackageJson').getSync();
+var prod = process.env.NODE_ENV === 'production';
 
 module.exports = Joi.object({
+
   kibana: Joi.object({
     package: Joi.any().default(package),
     server: Joi.object({
@@ -18,12 +20,12 @@ module.exports = Joi.object({
       }).default()
     }).default(),
     index: Joi.string().default('.kibana'),
-    pluginPaths: Joi.array().items(Joi.string()).default([]),
-    pluginScanDirs: Joi.array().items(Joi.string()).default([]),
+
     defaultRoute: Joi.string().default('/app/kibana/'),
     buildNum: Joi.string().default('@@buildNum'),
     bundledPluginIds: Joi.array().items(Joi.string())
   }).default(),
+
   elasticsearch: Joi.object({
     url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
     preserveHost: Joi.boolean().default(true),
@@ -41,6 +43,7 @@ module.exports = Joi.object({
     }).default(),
     minimumVerison: Joi.string().default('1.4.4')
   }).default(),
+
   logging: Joi.object({
     quiet: Joi.boolean().default(false),
     file: Joi.string(),
@@ -52,5 +55,12 @@ module.exports = Joi.object({
       json: Joi.boolean().default(false),
     }).default()
   }).default(),
+
+  plugins: {
+    paths: Joi.array().items(Joi.string()).default([]),
+    scanDirs: Joi.array().items(Joi.string()).default([]),
+    optimize: Joi.boolean().default(prod)
+  }
+
 }).default();
 

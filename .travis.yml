@@ -6,6 +6,7 @@ sudo: false
 cache:
   directories:
   - esvm
+  - bower_components
   - node_modules
 before_cache:
   - rm -rf esvm/*/logs esvm/data_dir

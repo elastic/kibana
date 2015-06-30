@@ -1,4 +1,4 @@
-module.exports = function (kibana, server, config) {
+module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var Boom = require('boom');
 
@@ -6,8 +6,8 @@ module.exports = function (kibana, server, config) {
   var UiApp = require('./lib/UiApp');
 
   // export manager
-  kibana.uiExports = new UiExports();
-  var switcherApp = new UiApp(kibana.uiExports, null, {
+  var uiExports = kbnServer.uiExports = new UiExports();
+  var switcherApp = new UiApp(uiExports, null, {
     id: 'appSwitcher',
     title: 'Apps',
     main: 'appSwitcher/index',
@@ -31,7 +31,7 @@ module.exports = function (kibana, server, config) {
     path: '/api/apps',
     method: 'GET',
     handler: function (req, reply) {
-      return reply(_.values(kibana.uiExports.apps));
+      return reply(_.values(uiExports.apps));
     }
   });
 
@@ -40,7 +40,7 @@ module.exports = function (kibana, server, config) {
     method: 'GET',
     handler: function (req, reply) {
       var id = req.params.id;
-      var app = kibana.uiExports.apps[id];
+      var app = uiExports.apps[id];
       if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
       return reply.renderApp(app);

@@ -7,7 +7,7 @@ function UiApp(uiExports, plugin, spec) {
   this.plugin = plugin || null;
   this.spec = spec || {};
 
-  this.id = this.spec.id || _.get(this, 'plugin.name');
+  this.id = this.spec.id || _.get(this, 'plugin.id');
   if (!this.id) {
     throw new Error('Every app must specify it\'s id');
   }

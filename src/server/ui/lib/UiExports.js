@@ -14,7 +14,7 @@ UiExports.prototype.add = function (plugin, exports) {
   var self = this;
   var unkown = _(exports).keys().reject(self.exportConsumer, self).value();
   if (unkown.length) {
-    throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.name);
+    throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
   }
 
   _.forOwn(exports, function (spec, type) {

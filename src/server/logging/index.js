@@ -5,8 +5,8 @@ var join = path.join;
 var Console = require('./good_reporters/console');
 
 
-module.exports = function (kibana) {
-  var server = kibana.server;
+module.exports = function (kbnServer) {
+  var server = kbnServer.server;
 
   return new Promise(function (resolve, reject) {
     var reporters = [];

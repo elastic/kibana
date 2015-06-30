@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  grunt.registerTask('replace_package_json', function () {
+  grunt.registerTask('dist_package_json', function () {
     var path = grunt.config.process('<%= build %>/kibana/package.json');
     var pkg = grunt.config.get('pkg');
 

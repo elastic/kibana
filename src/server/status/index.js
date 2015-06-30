@@ -1,21 +1,21 @@
-module.exports = function (kibana) {
+module.exports = function (kbnServer) {
   var _ = require('lodash');
   var Samples = require('./Samples');
-  var KbnStatus = require('./KbnStatus');
+  var ServerStatus = require('./ServerStatus');
   var join = require('path').join;
 
-  var server = kibana.server;
+  var server = kbnServer.server;
   var config = server.config();
 
-  kibana.status = new KbnStatus(kibana.server);
-  kibana.metrics = new Samples(60);
+  kbnServer.status = new ServerStatus(kbnServer.server);
+  kbnServer.metrics = new Samples(60);
 
   server.exposeStaticDir('/status/{path*}', join(__dirname, 'public'));
 
   server.plugins.good.monitor.on('ops', function (event) {
     var port = config.get('kibana.server.port');
 
-    kibana.metrics.add({
+    kbnServer.metrics.add({
       rss: event.psmem.rss,
       heapTotal: event.psmem.heapTotal,
       heapUsed: event.psmem.heapUsed,
@@ -34,8 +34,8 @@ module.exports = function (kibana) {
     path: '/status/health',
     handler: function (request, reply) {
       return reply({
-        status: kibana.status,
-        metrics: kibana.metrics
+        status: kbnServer.status,
+        metrics: kbnServer.metrics
       });
     }
   });

@@ -1,4 +1,4 @@
-module.exports = function (kibana, server, config) {
+module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var join = require('path').join;
 
@@ -10,7 +10,7 @@ module.exports = function (kibana, server, config) {
     }
   });
 
-  return kibana.mixin(
+  return kbnServer.mixin(
     require('./helpers'),
     require('./statics'),
     require('./apps')

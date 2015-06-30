@@ -59,16 +59,18 @@
     "http-auth": "^2.2.5",
     "joi": "^6.4.3",
     "js-yaml": "^3.2.5",
-    "lodash": "^3.9.3",
     "json-stringify-safe": "^5.0.1",
+    "lodash": "^3.9.3",
     "minimatch": "^2.0.8",
     "moment": "^2.10.3",
+    "node-libs-browser": "^0.5.2",
     "numeral": "^1.5.3",
     "request": "^2.40.0",
     "requirefrom": "^0.2.0",
     "semver": "^4.3.6",
     "serve-favicon": "^2.2.0",
-    "through": "^2.3.6"
+    "through": "^2.3.6",
+    "webpack": "^1.10.0"
   },
   "devDependencies": {
     "bower": "^1.4.1",

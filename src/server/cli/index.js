@@ -50,11 +50,11 @@ if (program.logFile) {
 }
 
 if (program.plugins || program.pluginDir) {
-  settings['kibana.pluginScanDirs'] = [].concat(program.plugins, program.pluginDir).filter(Boolean);
+  settings['plugins.scanDirs'] = [].concat(program.plugins, program.pluginDir).filter(Boolean);
 }
 
 if (program.pluginPath) {
-  settings['kibana.pluginPaths'] = [].concat(program.pluginPath);
+  settings['plugins.paths'] = [].concat(program.pluginPath);
 }
 
 // Start the KbnServer server with the settings fromt he CLI and YAML file

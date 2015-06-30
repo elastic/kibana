@@ -9,7 +9,7 @@ function Plugin(kibana, path, package, opts) {
   this.package = package;
   this.path = path;
 
-  this.name = opts.name || package.name;
+  this.id = opts.id || package.name;
   this.version = opts.version || package.version;
   this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));
   this.externalInit = opts.init || _.noop;
@@ -32,7 +32,7 @@ Plugin.scoped = function (kibana, path, package) {
 
 Plugin.prototype.init = function () {
   var self = this;
-  var name = self.name;
+  var id = self.id;
   var version = self.version;
   var server = this._kibana.server;
   var status = this._kibana.status;
@@ -43,7 +43,7 @@ Plugin.prototype.init = function () {
     return self.getConfig(Joi);
   })
   .then(function (schema) {
-    if (schema) config.extendSchema(name, schema);
+    if (schema) config.extendSchema(id, schema);
   })
   .then(function () {
     return status.decoratePlugin(self);
@@ -55,12 +55,12 @@ Plugin.prototype.init = function () {
       Promise.try(self.externalInit, [server, options], self).nodeify(next);
     };
 
-    register.attributes = { name: name, version: version };
+    register.attributes = { name: id, version: version };
 
     return Promise.fromNode(function (cb) {
       server.register({
         register: register,
-        options: config.has(name) ? config.get(name) : null
+        options: config.has(id) ? config.get(id) : null
       }, cb);
     });
 

@@ -7,10 +7,10 @@ function run(port, quiet) {
   return (new KbnServer({
     'logging.quiet': quiet,
     'kibana.server.port': port || 5601,
-    'kibana.pluginPaths': [
+    'plugins.paths': [
       join(__dirname, 'dev_statics_plugin')
     ],
-    'kibana.pluginScanDirs': [
+    'plugins.scanDirs': [
       join(__dirname, '..', 'plugins')
     ]
   }))

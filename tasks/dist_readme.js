@@ -21,7 +21,7 @@ var process = function (input) {
 
 module.exports = function (grunt) {
 
-  grunt.registerTask('compile_dist_readme', function () {
+  grunt.registerTask('dist_readme', function () {
     var done = this.async();
     var root = grunt.config.get('root');
     var build = grunt.config.get('build');

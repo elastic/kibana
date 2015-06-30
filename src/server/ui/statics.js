@@ -1,4 +1,4 @@
-module.exports = function (kibana, server, config) {
+module.exports = function (kbnServer, server, config) {
   var Boom = require('boom');
   var findBowerComponents = require('./lib/findBowerComponents');
   var uiDir = require('./lib/uiDir');
@@ -16,7 +16,7 @@ module.exports = function (kibana, server, config) {
 
   // expose the first bower_components directory found within kibana's rootDir starting
   // in this directory and moving out
-  server.exposeStaticDir('/bower_components/{path*}', findBowerComponents(__dirname, kibana.rootDir));
+  server.exposeStaticDir('/bower_components/{path*}', findBowerComponents(__dirname, kbnServer.rootDir));
 
   // expose our public files at the server root explicitly, rather than with a catch all route
   require('fs')
