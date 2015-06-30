@@ -1,23 +1,37 @@
-﻿var npm = require('npm');
+﻿var Promise = require('bluebird');
+var fs = require('fs');
 var path = require('path');
-var Promise = require('bluebird');
+var exec = require('child_process').exec;
 
-module.exports = function (dest) {
+module.exports = function (dest, logger) {
   return new Promise(function (resolve, reject) {
-    //var cwd = process.cwd();
-    npm.load(function (err) {
-      process.chdir(dest);
+    //throw an exception if package.json does not exist
+    try {
+      var packageFile = path.join(dest, 'package.json');
+      fs.statSync(packageFile);
+    } catch (e) {
+      if (e.code !== 'ENOENT')
+        throw e;
 
-      var blah = path.join(dest, 'package.json');
-      npm.commands.install([blah], function (er, data) {
-        if (er) {
-          console.error(er);
-        }
-        //process.chdir(cwd);
-      });
-      npm.on('log', function (message) {
-        console.log(message);
-      });
+      reject(new Error('Plugin does not contain package.json file'));
+    }
+
+    var cmd = (process.env.NPM) ? process.env.NPM : 'npm';
+    cmd += ' install';
+
+    var child = exec(cmd, { cwd: dest });
+    child.on('error', function (err) {
+      reject(err);
     });
+    child.on('exit', function (code, signal) {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error('npm install failed.'));
+      }
+    });
+
+    logger.error(child.stderr);
+    logger.log(child.stdout);
   });
 };
