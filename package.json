@@ -99,7 +99,7 @@
     "husky": "^0.8.1",
     "istanbul": "^0.3.15",
     "jade": "^1.8.2",
-    "license-checker": "3.0.3",
+    "license-checker": "^3.1.0",
     "libesvm": "^1.0.1",
     "load-grunt-config": "^0.7.0",
     "marked": "^0.3.3",

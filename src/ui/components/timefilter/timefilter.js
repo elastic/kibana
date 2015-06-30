@@ -1,7 +1,7 @@
   define(function (require) {
   require('modules')
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope) {
+  .service('timefilter', function (Private, globalState, $rootScope, config) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -27,11 +27,7 @@
 
       self.enabled = false;
 
-      var timeDefaults = {
-        from: 'now-15m',
-        to: 'now',
-        mode: 'quick'
-      };
+      var timeDefaults = config.get('timepicker:timeDefaults');
 
       var refreshIntervalDefaults = {
         display: 'Off',
