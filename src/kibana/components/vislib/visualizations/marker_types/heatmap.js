@@ -27,6 +27,14 @@ define(function (require) {
       });
     }
 
+    /**
+     * Does nothing, heatmaps don't have a legend
+     *
+     * @method addLegend
+     * @return {undefined}
+     */
+    HeatmapMarker.prototype.addLegend = _.noop;
+
     HeatmapMarker.prototype._createMarkerGroup = function (options) {
       var max = _.get(this.geoJson, 'properties.allmax');
       var points = this._dataToHeatArray(max);
