@@ -243,6 +243,7 @@ define(function (require) {
     BaseMarker.prototype.quantizeLegendColors = function () {
       var min = _.get(this.geoJson, 'properties.allmin', 0);
       var max = _.get(this.geoJson, 'properties.allmax', 1);
+      var quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
 
       var reds1 = ['#ff6128'];
       var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
@@ -258,7 +259,7 @@ define(function (require) {
         this._legendColors = reds5;
       }
 
-      this._legendQuantizer = d3.scale.quantize().domain([min, max]).range(this._legendColors);
+      this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     };
 
     return BaseMarker;

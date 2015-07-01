@@ -250,8 +250,6 @@ define(function (require) {
      * @return {Object}
      */
     Data.prototype.getGeoExtents = function () {
-      var min = [];
-      var max = [];
       var visData = this.getVisData();
 
       return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {

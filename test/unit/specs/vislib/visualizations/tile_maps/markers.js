@@ -36,8 +36,8 @@ define(function (require) {
     var mapData;
     var markerLayer;
 
-    function createMarker(MarkerClass) {
-      mapData = _.assign({}, geoJsonData.geoJson);
+    function createMarker(MarkerClass, geoJson) {
+      mapData = _.assign({}, geoJsonData.geoJson, geoJson || {});
       mapData.properties.allmin = mapData.properties.min;
       mapData.properties.allmax = mapData.properties.max;
 
@@ -58,10 +58,12 @@ define(function (require) {
     });
 
     describe('Base Methods', function () {
+      var MarkerClass;
+
       beforeEach(function () {
         module('MarkerFactory');
         inject(function (Private) {
-          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/base_marker'));
+          MarkerClass = Private(require('components/vislib/visualizations/marker_types/base_marker'));
           markerLayer = createMarker(MarkerClass);
         });
       });
@@ -96,6 +98,23 @@ define(function (require) {
           expect(maxColor.substring(0, 1)).to.equal('#');
           expect(maxColor).to.have.length(7);
           expect(minColor).to.not.eql(maxColor);
+        });
+
+        it('should return a color with 1 color', function () {
+          var geoJson = { properties: { min: 1, max: 1 } };
+          markerLayer = createMarker(MarkerClass, geoJson);
+
+          // ensure the quantizer domain is correct
+          var color = markerLayer._legendQuantizer(1);
+          expect(color).to.not.be(undefined);
+          expect(color.substring(0, 1)).to.equal('#');
+
+          // should always get the same color back
+          _.times(5, function () {
+            var num = _.random(0, 100);
+            var randColor = markerLayer._legendQuantizer(0);
+            expect(randColor).to.equal(color);
+          });
         });
       });
 
