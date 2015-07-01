@@ -161,8 +161,6 @@ define(function (require) {
      */
     BaseMarker.prototype._createMarkerGroup = function (options) {
       var self = this;
-      var min = this.geoJson.properties.allmin;
-      var max = this.geoJson.properties.allmax;
       var defaultOptions = {
         onEachFeature: function (feature, layer) {
           self.bindPopup(feature, layer);

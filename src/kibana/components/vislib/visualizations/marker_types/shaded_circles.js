@@ -30,7 +30,6 @@ define(function (require) {
           return L.circle(latlng, radius);
         }
       });
-
     }
 
     /**
@@ -42,24 +41,25 @@ define(function (require) {
      * @return {Number}
      */
     ShadedCircleMarker.prototype._geohashMinDistance = function (feature) {
-      var centerPoint = feature.properties.center;
-      var geohashRect = feature.properties.rectangle;
+      var centerPoint = _.get(feature, 'properties.center');
+      var geohashRect = _.get(feature, 'properties.rectangle');
 
       // centerPoint is an array of [lat, lng]
       // geohashRect is the 4 corners of the geoHash rectangle
       //   an array that starts at the southwest corner and proceeds
-      //   counter-clockwise, each value being an array of [lat, lng]
+      //   clockwise, each value being an array of [lat, lng]
+
+      // center lat and southeast lng
+      var east   = L.latLng([centerPoint[0], geohashRect[2][1]]);
+      // southwest lat and center lng
+      var north  = L.latLng([geohashRect[3][0], centerPoint[1]]);
 
       // get latLng of geohash center point
-      var center = L.latLng([centerPoint[1], centerPoint[0]]);
-      // apply lat to east[2] and lng to north[3] sides of rectangle
-      // to get radius at center of geohash grid rectangle
-      var east   = L.latLng([centerPoint[1], geohashRect[2][0]]);
-      var north  = L.latLng([geohashRect[3][1], centerPoint[0]]);
+      var center = L.latLng([centerPoint[0], centerPoint[1]]);
 
+      // get smallest radius at center of geohash grid rectangle
       var eastRadius  = Math.floor(center.distanceTo(east));
       var northRadius = Math.floor(center.distanceTo(north));
-
       return _.min([eastRadius, northRadius]);
     };
 

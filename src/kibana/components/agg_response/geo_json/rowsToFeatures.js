@@ -16,6 +16,7 @@ define(function (require) {
       var geohash = unwrap(row[geoI]);
       if (!geohash) return;
 
+      // fetch latLn of northwest and southeast corners, and center point
       var location = decodeGeoHash(geohash);
 
       var centerLatLng = [
@@ -31,6 +32,7 @@ define(function (require) {
         location.latitude[2]
       ];
 
+      // order is nw, ne, se, sw
       var rectangle = [
         [location.latitude[0], location.longitude[0]],
         [location.latitude[0], location.longitude[1]],
