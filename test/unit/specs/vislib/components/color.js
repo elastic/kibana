@@ -5,9 +5,11 @@ define(function (require) {
   angular.module('SeedColorUtilService', ['kibana']);
   angular.module('ColorObjUtilService', ['kibana']);
   angular.module('ColorPaletteUtilService', ['kibana']);
+  angular.module('MappedColorService', ['kibana']);
 
   describe('Vislib Color Module Test Suite', function () {
     var seedColors;
+    var MappedColors, mappedColors;
 
     describe('Color (main)', function () {
       var getColors;
@@ -30,6 +32,8 @@ define(function (require) {
         inject(function (d3, Private) {
           seedColors = Private(require('components/vislib/components/color/seed_colors'));
           getColors = Private(require('components/vislib/components/color/color'));
+          MappedColors = Private(require('components/vislib/components/color/mapped_colors'));
+          mappedColors = new MappedColors();
           color = getColors(arr);
         });
       });
@@ -101,6 +105,10 @@ define(function (require) {
       it('should return the first hex color in the seed colors array', function () {
         expect(color(arr[0])).to.be(seedColors[0]);
       });
+
+      it('should return the value from the mapped colors', function () {
+        expect(color(arr[1])).to.be(mappedColors.get(arr[1]));
+      });
     });
 
     describe('Seed Colors', function () {
@@ -113,6 +121,45 @@ define(function (require) {
         expect(seedColors instanceof Array).to.be(true);
       });
 
+    });
+
+    describe('Mapped Colors', function () {
+
+      beforeEach(function () {
+        module('MappedColorService');
+      });
+
+      beforeEach(function () {
+        inject(function (d3, Private) {
+          MappedColors = Private(require('components/vislib/components/color/mapped_colors'));
+          mappedColors = new MappedColors();
+        });
+      });
+
+      it('should clear all the keys from the map table', function () {
+        mappedColors.reset();
+        expect(mappedColors.count()).to.be(0);
+      });
+
+      it('should return the color for the added value', function () {
+        mappedColors.reset();
+        mappedColors.add('value1', '#somecolor');
+        expect(mappedColors.get('value1')).to.be('#somecolor');
+      });
+
+      it('should return the count of mapped keys', function () {
+        mappedColors.reset();
+        mappedColors.add('value1', '#color1');
+        mappedColors.add('value2', '#color2');
+        expect(mappedColors.count()).to.be(2);
+      });
+
+      it('should return all the colors in the map', function () {
+        mappedColors.reset();
+        mappedColors.add('value1', '#colors1');
+        mappedColors.add('value3', '#newColor');
+        expect(mappedColors.all()).to.equal(['#colors1', '#newColor']);
+      });
     });
 
     describe('Color Palette', function () {
