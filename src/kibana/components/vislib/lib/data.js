@@ -253,9 +253,10 @@ define(function (require) {
       var visData = this.getVisData();
 
       return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
-        if (minMax.min > props.min) minMax.min = props.min;
-        if (minMax.max < props.max) minMax.max = props.max;
-        return minMax;
+        return {
+          min: Math.min(props.min, minMax.min),
+          max: Math.max(props.max, minMax.max)
+        };
       }, { min: Infinity, max: -Infinity });
     };
 

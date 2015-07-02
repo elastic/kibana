@@ -24,14 +24,6 @@ define(function (require) {
         location.longitude[2]
       ];
 
-      // geoJson coords use LngLat coordinates
-      // http://geojson.org/geojson-spec.html#positions
-      // "longitude, latitude, altitude for coordinates in a geographic coordinate reference system"
-      var centerLngLat = [
-        location.longitude[2],
-        location.latitude[2]
-      ];
-
       // order is nw, ne, se, sw
       var rectangle = [
         [location.latitude[0], location.longitude[0]],
@@ -40,12 +32,13 @@ define(function (require) {
         [location.latitude[1], location.longitude[0]],
       ];
 
-
+      // geoJson coords use LngLat, so we reverse the centerLatLng
+      // See here for details: http://geojson.org/geojson-spec.html#positions
       features.push({
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: centerLngLat
+          coordinates: centerLatLng.slice(0).reverse()
         },
         properties: {
           geohash: geohash,
