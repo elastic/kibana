@@ -38,7 +38,7 @@ define(function (require) {
         partials = hit.$$_partialFormatted = {};
       }
 
-      var val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+      var val = fieldName === '_inline' ? hit._inline : (fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName]);
       return partials[fieldName] = convert(hit, val, fieldName);
     };
 

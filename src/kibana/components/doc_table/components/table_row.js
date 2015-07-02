@@ -22,12 +22,13 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile) {
+  module.directive('kbnTableRow', ['$compile', 'Private', 'config', function ($compile, Private, config) {
     var noWhiteSpace = require('utils/no_white_space');
     var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
     var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/cell.html')));
     var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!partials/truncate_by_height.html')));
+    var filterManager = Private(require('components/filter_manager/filter_manager'));
 
     return {
       restrict: 'A',
@@ -88,6 +89,12 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
+        $scope.inlineFilter = function ($event) {
+          var field = $scope.indexPattern.fields.byName[$($event.target).data().field];
+          $scope.indexPattern.popularizeField(field, 1);
+          filterManager.add(field, $($event.target).data().value, '+', $scope.indexPattern.id);
+        };
+
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {
           var indexPattern = $scope.indexPattern;
@@ -104,13 +111,41 @@ define(function (require) {
             }));
           }
 
-          $scope.columns.forEach(function (column) {
+          // Mode inline.
+          if (config.get('discover:inlineMode') && $scope.columns.length && $scope.columns[0] !== '_source') {
+            row._inline = {};
+
+            $scope.columns.forEach(function (column, index) {
+              row._inline.column = row._source.column;
+            });
+
+            row.$$_formatted = undefined;
+            row.$$_partialFormatted = undefined;
+            row.$$_flattened = undefined;
+
             newHtmls.push(cellTemplate({
               timefield: false,
-              sourcefield: (column === '_source'),
-              formatted: _displayField(row, column, true)
+              colspan: $scope.columns.length + 1,
+              sourcefield: true,
+              formatted: _displayField(row, '_inline', true)
             }));
-          });
+          } else {
+            if (typeof row._inline !== 'undefined') {
+              delete row._inline;
+
+              row.$$_formatted = undefined;
+              row.$$_partialFormatted = undefined;
+              row.$$_flattened = undefined;
+            }
+
+            $scope.columns.forEach(function (column) {
+              newHtmls.push(cellTemplate({
+                timefield: false,
+                sourcefield: (column === '_source'),
+                formatted: _displayField(row, column, true)
+              }));
+            });
+          }
 
           var $cells = $el.children();
           newHtmls.forEach(function (html, i) {
@@ -133,7 +168,7 @@ define(function (require) {
             // rebuild cells since we modified the children
             $cells = $el.children();
 
-            if (i === 0 && !reuse) {
+            if (!reuse) {
               $toggleScope = $scope.$new();
               $compile($target)($toggleScope);
             }
@@ -170,5 +205,5 @@ define(function (require) {
         init();
       }
     };
-  });
+  }]);
 });
