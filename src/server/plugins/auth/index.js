@@ -5,9 +5,10 @@ var hapiAuthCookie = require('hapi-auth-cookie');
 var kibana = require('../../');
 
 module.exports = new kibana.Plugin({
+  require: ['elasticsearch'],
   init: function (server, options) {
     var config = server.config();
-    var isValid = require('./lib/htpasswd')(config.get('kibana.server.auth.htpasswd')); // TODO: Clean up how this is imported
+    var isValid = require('./lib/elasticsearch')(server); // TODO: Clean up how this is imported
 
     server.register(hapiAuthCookie, function (error) {
       if (error != null) return; // TODO: Handle this error
