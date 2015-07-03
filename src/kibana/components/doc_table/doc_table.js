@@ -22,7 +22,7 @@ define(function (require) {
         indexPattern: '=?',
         searchSource: '=?',
         infiniteScroll: '=?',
-        filter: '=?'
+        filter: '=?',
       },
       link: function ($scope) {
         var notify = new Notifier();
