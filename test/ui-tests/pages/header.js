@@ -17,6 +17,21 @@ Header.prototype.selectors = {
 
 Header.prototype.clickTab = function(tabName) {
   switch(tabName){
-    case 'discover' : this.findElement(webDriver.By.css(this.selectors.nav._discover))
+    case 'discover' : {
+      this.findElement(webDriver.By.css(this.selectors.nav._discover));
+      break;
+    }
+    case 'visualize' : {
+      this.findElement(webDriver.By.css(this.selectors.nav._visualize));
+      break;
+    }
+    case 'dashboard': {
+      this.findElement(webDriver.By.css(this.selectors.nav._dashboard));
+      break;
+    }
+    default:{
+      this.findElement(webDriver.By.css(this.selectors.nav._settings));
+      break;
+    }
   }
 };
