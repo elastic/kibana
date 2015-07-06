@@ -63,7 +63,7 @@ dashboard-grid {
       .panel-heading {
         .flex(0 0 auto);
         white-space: nowrap;
-        display: flex;
+        .display(flex);
 
         div.btn-group {
           white-space: nowrap;
@@ -72,8 +72,9 @@ dashboard-grid {
 
         .panel-title {
           font-size: inherit;
+          display: inline-block;
           .ellipsis();
-          .flex(1 1 0);
+          .flex(1 1 0%);
         }
 
         a {
