@@ -52,6 +52,7 @@ define(function () {
       "min": simple_metric,
       "max": simple_metric,
       "avg": simple_metric,
+      "sum": simple_metric,
       "stats": simple_metric,
       "extended_stats": simple_metric,
       "value_count": {
@@ -65,6 +66,16 @@ define(function () {
       },
       "global": {},
       "filter": {},
+      "filters": {
+        __template: {
+          "filters": {
+            "NAME": { __scope_link: "GLOBAL.filter" }
+          }
+        },
+        "filters": {},
+        "other_bucket": { __one_of: [ true, false ] },
+        "other_bucket_key": ""
+      },
       "missing": field_metric,
       "nested": {
         __template: {
@@ -338,7 +349,29 @@ define(function () {
           values: [ 10, 15]
         },
         field: "{field}",
-        values: []
+        values: [],
+        "script": {
+          // populated by a global rule
+        },
+        "compression": 100
+      },
+      "sampler": {
+        __template: {
+
+        },
+        "field": "{field}",
+        "script": {
+          // populated by a global rule
+        },
+        "shard_size": 100,
+        "max_docs_per_value": 3,
+        "execution_hint": { __one_of: ["map", "global_ordinals", "bytes_hash" ] }
+      },
+      "children": {
+        __template: {
+          "type": "",
+        },
+        "type": ""
       },
       "derivative": simple_pipeline,
       "avg_bucket": simple_pipeline,
@@ -362,7 +395,14 @@ define(function () {
           period: 7
         }
       },
-      "series_arithmetic": {
+      "cumulative_sum": {
+        __template: {
+          buckets_path: ""
+        },
+        buckets_path: "",
+        format: ""
+      },
+      "bucket_script": {
         __template: {
           buckets_path: "",
           script: {}
