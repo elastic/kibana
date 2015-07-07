@@ -6,6 +6,7 @@ var plugins = function (dir) {
   if (!dir) return [];
   var files = glob.sync(path.join(dir, '*', 'index.js')) || [];
   return files.map(function (file) {
+    dir = dir.replace(/\\/g, '/');
     return file.replace(dir, 'plugins').replace(/\.js$/, '');
   });
 };
@@ -24,4 +25,3 @@ module.exports = function (server) {
   }
   return cache;
 };
-
