@@ -76,6 +76,14 @@ define(function (require) {
               var hasNeg = data.getYMin(data._getY) < 0;
               return (hasPos && hasNeg);
             }
+          },
+          {
+            type: 'warning',
+            msg: 'Null values are not accurately represented by area charts. A line chart ' +
+                 'is recommended.',
+            test: function (vis, data) {
+              return data.nullsPresent();
+            }
           }
         ]
       })

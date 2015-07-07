@@ -272,6 +272,24 @@ define(function (require) {
     };
 
     /**
+     * Returns true if null values are present
+     * @returns {*}
+     */
+    Data.prototype.nullsPresent = function () {
+      var chartData = this.chartData();
+
+      return chartData.some(function (chart) {
+        return chart.series.map(function (obj) {
+          return obj.values.filter(function (d) {
+            return d.y === null;
+          }).length;
+        }).reduce(function (a, b) {
+          return a + b;
+        });
+      });
+    };
+
+    /**
      * Return an array of all value objects
      * Pluck the data.series array from each data object
      * Create an array of all the value objects from the series array

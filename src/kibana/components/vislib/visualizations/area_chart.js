@@ -162,12 +162,13 @@ define(function (require) {
         .append('g')
         .attr('class', 'points area');
 
-      // append the bars
+      // append the circles
       circles = layer
-      .selectAll('rect')
+      .selectAll('circles')
       .data(function appendData(data) {
         return data.filter(function isNotZero(d) {
-          return d.y !== 0 && !_.isNull(d.y);
+          return !_.isNull(d.y);
+          //return d.y !== 0 && !_.isNull(d.y);
         });
       });
 
