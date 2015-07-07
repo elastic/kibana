@@ -19,8 +19,8 @@ function OptmzUiExports(plugins) {
 
   // webpack loaders map loader configuration to regexps
   var loaders = this.loaders = [
-    { test: /\.less$/, loader: 'style!css!less' },
-    { test: /\.css$/, loader: 'style!css' },
+    { test: /\.less$/, loader: 'style/url!file!less' },
+    { test: /\.css$/, loader: 'style/url!file' },
     { test: /\.html$/, loader: 'raw' },
     {
       test: /\.(woff|woff2|png)(\?v=[0-9]\.[0-9]\.[0-9])?$/,

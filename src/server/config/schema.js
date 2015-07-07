@@ -4,22 +4,6 @@ var path = require('path');
 var package = require('../utils/closestPackageJson').getSync();
 var fromRoot = require('../utils/fromRoot');
 
-var env = (function () {
-  switch (process.env.NODE_ENV) {
-  case 'production':
-  case 'prod':
-  case undefined:
-    return 'production';
-  case 'development':
-  case 'dev':
-    return 'development';
-  default:
-    throw new TypeError(`Unexpected NODE_ENV "${process.env.NODE_ENV}", expected production or development.`);
-  }
-}());
-var dev = env === 'development';
-var prod = env === 'production';
-
 module.exports = Joi.object({
   env: Joi.object({
     name: Joi.string().default(Joi.ref('$env')),
@@ -67,14 +51,24 @@ module.exports = Joi.object({
 
   logging: Joi.object({
     quiet: Joi.boolean().default(false),
-    file: Joi.string(),
-    console: Joi.object({
-      ops: Joi.any(),
-      log: Joi.any().default('*'),
-      response: Joi.any().default('*'),
-      error: Joi.any().default('*'),
-      json: Joi.boolean().default(false),
-    }).default()
+
+    // not nested under a kbnLogger key so that we can ref "quiet"
+    kbnLogger: Joi.boolean().default(true),
+    kbnLoggerConfig: Joi.object({
+      dest: Joi.string().default('stdout'),
+      json: Joi.boolean().default(Joi.ref('$prod'))
+    }).default(),
+    kbnLoggerEvents: Joi.when('quiet', {
+      is: true,
+      then: Joi.object({
+        error: Joi.string().default('*')
+      }).default(),
+      otherwise: Joi.object({
+        log: Joi.string().default('*'),
+        response: Joi.string().default('*'),
+        error: Joi.string().default('*')
+      }).default()
+    })
   }).default(),
 
   plugins: Joi.object({

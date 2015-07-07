@@ -7,8 +7,6 @@ function Config(schema, defaults) {
   this.schema = schema || Joi.object({}).default();
   this.config = {};
   this.set(defaults);
-
-  console.log(this.get('env'));
 }
 
 Config.prototype.extendSchema = function (key, schema) {

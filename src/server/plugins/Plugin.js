@@ -1,86 +1,96 @@
-var _ = require('lodash');
-var inherits = require('util').inherits;
-var Joi = require('joi');
-var Promise = require('bluebird');
-var join = require('path').join;
+'use strict';
 
-function Plugin(kbnServer, path, package, opts) {
-  this.kbnServer = kbnServer;
-  this.package = package;
-  this.path = path;
+let _ = require('lodash');
+let inherits = require('util').inherits;
+let Joi = require('joi');
+let Promise = require('bluebird');
+let join = require('path').join;
 
-  this.id = opts.id || package.name;
-  this.uiExportSpecs = opts.uiExports || {};
-  this.requiredIds = opts.require || [];
-  this.version = opts.version || package.version;
-  this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));
-  this.externalInit = opts.init || _.noop;
-  this.getConfig = opts.config || _.noop;
-  this.init = _.once(this.init);
-}
+module.exports = class Plugin {
+  constructor(kbnServer, path, pkg, opts) {
+    this.kbnServer = kbnServer;
+    this.pkg = pkg;
+    this.path = path;
 
-Plugin.scoped = function (kbnServer, path, package) {
-  function ScopedPlugin(opts) {
-    ScopedPlugin.super_.call(this, kbnServer, path, package, opts || {});
+    this.id = opts.id || pkg.name;
+    this.uiExportSpecs = opts.uiExports || {};
+    this.requiredIds = opts.require || [];
+    this.version = opts.version || pkg.version;
+    this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));
+    this.externalInit = opts.init || _.noop;
+    this.getConfig = opts.config || _.noop;
+    this.init = _.once(this.init);
   }
-  inherits(ScopedPlugin, Plugin);
-  return ScopedPlugin;
-};
 
-Plugin.prototype.init = function () {
-  var self = this;
+  static scoped(kbnServer, path, pkg) {
+    return class ScopedPlugin extends Plugin {
+      constructor(opts) {
+        super(kbnServer, path, pkg, opts || {});
+      }
+    };
+  }
 
-  var id = self.id;
-  var version = self.version;
-  var server = self.kbnServer.server;
-  var status = self.kbnServer.status;
+  init() {
+    let self = this;
 
-  var config = server.config();
-  server.log(['plugin', 'init', 'debug'], {
-    message: 'initializing plugin <%= plugin.id %>',
-    plugin: self
-  });
+    let id = self.id;
+    let version = self.version;
+    let server = self.kbnServer.server;
+    let status = self.kbnServer.status;
 
-  return Promise.try(function () {
-    return self.getConfig(Joi);
-  })
-  .then(function (schema) {
-    if (schema) config.extendSchema(id, schema);
-  })
-  .then(function () {
-    return status.decoratePlugin(self);
-  })
-  .then(function () {
-    return self.kbnServer.uiExports.consumePlugin(self);
-  })
-  .then(function () {
+    let basetags = ['plugin', id];
+    let log = function (tags, data, timestamp) {
 
-    var register = function (server, options, next) {
-
-      Promise.try(self.externalInit, [server, options], self).nodeify(next);
     };
 
-    register.attributes = { name: id, version: version };
-
-    return Promise.fromNode(function (cb) {
-      server.register({
-        register: register,
-        options: config.has(id) ? config.get(id) : null
-      }, cb);
+    let config = server.config();
+    server.log(['plugin', 'debug', 'init'], {
+      message: 'Initializing plugin',
+      plugin: self
     });
 
-  })
-  .then(function () {
-    // Only change the plugin status to green if the
-    // intial status has not been updated
-    if (self.status.state === 'uninitialized') {
-      self.status.green('Ready');
-    }
-  });
-};
+    return Promise.try(function () {
+      return self.getConfig(Joi);
+    })
+    .then(function (schema) {
+      if (schema) config.extendSchema(id, schema);
+    })
+    .then(function () {
+      return status.decoratePlugin(self);
+    })
+    .then(function () {
+      return self.kbnServer.uiExports.consumePlugin(self);
+    })
+    .then(function () {
 
-Plugin.prototype.toString = function () {
-  return `${this.id}@${this.version}`;
-};
+      let register = function (server, options, next) {
+        Promise.try(self.externalInit, [server, options], self).nodeify(next);
+      };
 
-module.exports = Plugin;
+      register.attributes = { name: id, version: version };
+
+      return Promise.fromNode(function (cb) {
+        server.register({
+          register: register,
+          options: config.has(id) ? config.get(id) : null
+        }, cb);
+      });
+
+    })
+    .then(function () {
+      // Only change the plugin status to green if the
+      // intial status has not been updated
+      if (self.status.state === 'uninitialized') {
+        self.status.green('Ready');
+      }
+    });
+  }
+
+  toJSON() {
+    return this.pkg;
+  }
+
+  toString() {
+    return `${this.id}@${this.version}`;
+  }
+};

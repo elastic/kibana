@@ -32,7 +32,7 @@ module.exports = function (kbnServer, server, config) {
     status.green('Optimization complete');
   })
   .on('error', function (err) {
-    server.log(['fatal'], err);
+    server.log('fatal', err);
     status.red('Optimization failure! ' + err.message);
   })
   .init();
