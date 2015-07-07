@@ -7,7 +7,6 @@ for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\node.exe
 set SERVER=%DIR%\src\server\cli
-set NODE_ENV="production"
 set CONFIG_PATH=%DIR%\config\kibana.yml
 
 TITLE Kibana Server @@version

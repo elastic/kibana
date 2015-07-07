@@ -1,7 +1,7 @@
 define(function (require, module, exports) {
   var _ = require('lodash');
 
-  require('css!plugins/kibana/settings/styles/main.css');
+  require('plugins/kibana/settings/styles/main.less');
   require('filters/start_from');
 
   require('routes')
@@ -13,7 +13,7 @@ define(function (require, module, exports) {
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
     return {
       restrict: 'E',
-      template: require('text!plugins/kibana/settings/app.html'),
+      template: require('plugins/kibana/settings/app.html'),
       transclude: true,
       scope: {
         sectionName: '@section'

@@ -7,7 +7,7 @@ define(function (require) {
 
   require('routes')
   .when('/settings/advanced', {
-    template: require('text!plugins/kibana/settings/sections/advanced/index.html')
+    template: require('plugins/kibana/settings/sections/advanced/index.html')
   });
 
   require('modules').get('apps/settings')

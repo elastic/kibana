@@ -23,7 +23,7 @@ define(function (require) {
 
         {
           name: 'interval',
-          editor: require('text!components/agg_types/controls/interval.html'),
+          editor: require('components/agg_types/controls/interval.html'),
           write: function (aggConfig, output) {
             output.params.interval = parseInt(aggConfig.params.interval, 10);
           }
@@ -32,7 +32,7 @@ define(function (require) {
         {
           name: 'min_doc_count',
           default: null,
-          editor: require('text!components/agg_types/controls/min_doc_count.html'),
+          editor: require('components/agg_types/controls/min_doc_count.html'),
           write: function (aggConfig, output) {
             if (aggConfig.params.min_doc_count) {
               output.params.min_doc_count = 0;
@@ -43,7 +43,7 @@ define(function (require) {
         {
           name: 'extended_bounds',
           default: {},
-          editor: require('text!components/agg_types/controls/extended_bounds.html'),
+          editor: require('components/agg_types/controls/extended_bounds.html'),
           write: function (aggConfig, output) {
             var val = aggConfig.params.extended_bounds;
 

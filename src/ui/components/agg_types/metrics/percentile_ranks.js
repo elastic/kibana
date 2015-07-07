@@ -6,7 +6,7 @@ define(function (require) {
     var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
     var fieldFormats = Private(require('registry/field_formats'));
 
-    var valuesEditor = require('text!components/agg_types/controls/percentile_ranks.html');
+    var valuesEditor = require('components/agg_types/controls/percentile_ranks.html');
     // required by the values editor
     require('components/number_list/number_list');
 

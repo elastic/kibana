@@ -1,10 +1,10 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var html = require('text!components/doc_table/doc_table.html');
+  var html = require('components/doc_table/doc_table.html');
   var getSort = require('components/doc_table/lib/get_sort');
 
-  require('css!components/doc_table/doc_table.css');
+  require('components/doc_table/doc_table.less');
   require('directives/truncated');
   require('directives/infinite_scroll');
   require('components/doc_table/components/table_header');

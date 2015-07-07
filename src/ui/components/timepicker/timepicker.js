@@ -1,5 +1,5 @@
 define(function (require) {
-  var html = require('text!components/timepicker/timepicker.html');
+  var html = require('components/timepicker/timepicker.html');
   var module = require('modules').get('components/timepicker');
   var _ = require('lodash');
   var datemath = require('utils/datemath');

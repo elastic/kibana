@@ -1,14 +1,13 @@
-@import (reference) "ui-styles/_mixins.less";
-@import (reference) "lesshat.less";
+@import (reference) "~ui-styles/mixins.less";
 
 .metric-vis {
   width: 100%;
-  .display(flex);
-  .flex-direction(row);
-  .flex-wrap(wrap);
-  .justify-content(space-around);
-  .align-items(center);
-  .align-content(space-around);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  align-content: space-around;
 
   .metric-value {
     font-weight: bold;
@@ -18,6 +17,5 @@
   .metric-container {
     text-align: center;
     padding: 1em;
-    .flex();
   }
 }

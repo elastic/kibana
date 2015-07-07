@@ -1,11 +1,14 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
-var readdir = Promise.promisify(require('fs').readdir);
-var stat = Promise.promisify(require('fs').stat);
-var join = require('path').join;
+module.exports = function (kbnServer, server, config) {
+  var _ = require('lodash');
+  var Promise = require('bluebird');
+  var readdir = Promise.promisify(require('fs').readdir);
+  var stat = Promise.promisify(require('fs').stat);
+  var join = require('path').join;
 
-module.exports = function (server, includeDirs) {
-  return Promise.map(includeDirs, function (dir) {
+  var scanDirs = [].concat(config.get('plugins.scanDirs'));
+  var absolutePaths = [].concat(config.get('plugins.paths'));
+
+  return Promise.map(scanDirs, function (dir) {
     server.log('plugin-scan', 'Scanning ' + dir + ' for plugins');
 
     return readdir(dir).map(function (file) {
@@ -18,8 +21,13 @@ module.exports = function (server, includeDirs) {
       });
     });
   })
-  .then(_.flatten)
-  .then(_.compact)
+  .then(function (dirs) {
+    return _(dirs)
+    .flatten()
+    .compact()
+    .union(absolutePaths)
+    .value();
+  })
   .filter(function (dir) {
     try {
       require(dir);
@@ -29,5 +37,8 @@ module.exports = function (server, includeDirs) {
       server.log('plugin-scan', 'Skipping non-plugin directory at ' + dir);
       return false;
     }
+  })
+  .then(function (pluginPaths) {
+    kbnServer.pluginPaths = pluginPaths;
   });
 };

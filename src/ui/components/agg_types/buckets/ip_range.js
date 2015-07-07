@@ -34,7 +34,7 @@ define(function (require) {
               {mask: '128.0.0.0/2'}
             ]
           },
-          editor: require('text!components/agg_types/controls/ip_ranges.html'),
+          editor: require('components/agg_types/controls/ip_ranges.html'),
           write: function (aggConfig, output) {
             var ipRangeType = aggConfig.params.ipRangeType;
             output.params.ranges = aggConfig.params.ranges[ipRangeType];

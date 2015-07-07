@@ -23,7 +23,7 @@ define(function (require) {
         indexPatternList: '=',
         updateFilterInQuery: '=filter'
       },
-      template: require('text!plugins/kibana/discover/components/field_chooser/field_chooser.html'),
+      template: require('plugins/kibana/discover/components/field_chooser/field_chooser.html'),
       link: function ($scope) {
         $scope.setIndexPattern = function (id) {
           $scope.state.index = id;

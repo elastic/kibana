@@ -6,22 +6,8 @@ html(lang='en')
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     meta(name='viewport', content='width=device-width')
-    link(rel='shortcut icon', href='/ui-styles/theme/elk.ico')
-    title
-    link(rel='stylesheet', href='/ui-styles/main.css#{cacheBust}')
+    link(rel='shortcut icon', href='/images/elk.ico')
+    title Kibana
   body(kbn-chrome)
-    .col-md-offset-4.col-md-4.page-header.initial-load
-      center
-        img(width='128', alt='Loading Kibana', src='/images/initial_load.gif')
-        h1
-          strong Kibana
-          small#cache-message
-            |  is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!
-    script.
-      var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
-      if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
-
-    script(
-      src='/bundles/#{app.id}.js'
-      payload=j(kibanaPayload)
-    )
+    script window.__KBN__ = !{j(kibanaPayload)};
+    script(src='/bundles/#{app.id}.js')

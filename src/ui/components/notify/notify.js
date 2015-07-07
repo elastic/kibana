@@ -35,13 +35,6 @@ define(function (require) {
   //     };
   //   });
 
-  /**
-   * Global Require.js exception handler
-   */
-  window.requirejs.onError = function (err) {
-    rootNotifier.fatal(new errors.ScriptLoadFailure(err));
-  };
-
   window.onerror = function (err, url, line) {
     rootNotifier.fatal(new Error(err + ' (' + url + ':' + line + ')'));
     return true;

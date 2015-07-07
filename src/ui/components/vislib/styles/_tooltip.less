@@ -53,20 +53,20 @@
 .vis-tooltip-header {
   margin: 0 0 @tooltip-space 0;
   padding: @tooltip-space-tight @tooltip-space;
-  .display(flex);
-  .align-items(center);
+  display: flex;
+  align-items: center;
 
   &:last-child {
     margin-bottom: 0;
   }
 
   &-icon {
-    .flex(0, 0, auto);
+    flex: 0 0 auto;
     padding-right: @tooltip-space;
   }
 
   &-text {
-    .flex(1, 1, 200px);
+    flex: 1 1 200px;
   }
 
   + * {

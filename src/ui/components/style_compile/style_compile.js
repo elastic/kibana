@@ -7,7 +7,7 @@ define(function (require) {
   .get('kibana')
   .run(function ($rootScope, $compile, config) {
     var truncateGradientHeight = 15;
-    var template = _.template(require('text!components/style_compile/style_compile.css.tmpl'));
+    var template = _.template(require('raw!components/style_compile/style_compile.css.tmpl'));
     var locals = {};
 
     $rootScope.$on('$destroy', function () {

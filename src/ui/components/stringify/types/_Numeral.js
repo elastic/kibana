@@ -37,7 +37,7 @@ define(function (require) {
       });
 
       Class.editor = {
-        template: opts.editorTemplate || require('text!components/field_format_editor/numeral/numeral.html'),
+        template: opts.editorTemplate || require('components/field_format_editor/numeral/numeral.html'),
         controllerAs: 'cntrl',
         controller: opts.controller || function () {
           this.sampleInputs = opts.sampleInputs;

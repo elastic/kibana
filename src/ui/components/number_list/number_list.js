@@ -8,7 +8,7 @@ define(function (require) {
   .directive('kbnNumberList', function () {
     return {
       restrict: 'E',
-      template: require('text!components/number_list/number_list.html'),
+      template: require('components/number_list/number_list.html'),
       controllerAs: 'numberListCntr',
       require: 'ngModel',
       controller: function ($scope, $attrs, $parse) {

@@ -9,7 +9,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/kibana/visualize/editor/sidebar.html'),
+      template: require('plugins/kibana/visualize/editor/sidebar.html'),
       scope: true,
       controllerAs: 'sidebar',
       controller: function ($scope) {

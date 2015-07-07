@@ -12,6 +12,7 @@ module.exports = function (grunt) {
         'BSD-like',
         'BSD-2-Clause',
         'BSD-3-Clause',
+        'CC-BY',
         'Apache',
         'Apache*',
         'Apache v2',

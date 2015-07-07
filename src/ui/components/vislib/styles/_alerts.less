@@ -21,7 +21,7 @@
     color: white;
     border-radius: @alert-border-radius;
     border: 1px solid white;
-    .display(flex);
+    display: flex;
 
     &-success {
       .alert-variant(fade(@alert-success-bg, 75%); @alert-success-border; @alert-success-text);
@@ -40,12 +40,12 @@
   &-icon {
     margin: 0;
     padding: 0 10px;
-    .flex(0, 0, auto);
-    .align-self(center);
+    flex: 0 0 auto;
+    align-self: center;
   }
 
   &-text {
-    .flex(1, 1, auto);
+    flex: 1 1 auto;
     margin: 0;
     padding: 0;
   }

@@ -7,7 +7,7 @@ define(function (require) {
     var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('components/vislib/visualizations/vis_types'));
     var errors = require('errors');
-    require('css!components/vislib/styles/main.css');
+    require('components/vislib/styles/main.less');
 
     /**
      * Creates the visualizations.

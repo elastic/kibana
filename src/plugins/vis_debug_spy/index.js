@@ -1,8 +1,8 @@
 module.exports = function (kibana) {
   return new kibana.Plugin({
-    exports: {
+    uiExports: {
       spyModes: [
-        'plugins/vis_debug_spy/index'
+        'plugins/vis_debug_spy/vis_debug_spy'
       ]
     }
   });

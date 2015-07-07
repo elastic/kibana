@@ -15,13 +15,14 @@ function KbnServer(settings) {
 
   this.server = new Hapi.Server();
 
+  // mixin server modules
   this.ready = _.constant(this.mixin(
     require('./config'),
     require('./logging'),
     require('./http'),
-    require('./ui'),
-    require('./status'),
-    require('./plugins'),
+    require('./ui'), // sets this.uiExports
+    require('./status'), // sets this.status
+    require('./plugins'), // sets this.plugins
     require('./optimize')
   ));
 }

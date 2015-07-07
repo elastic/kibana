@@ -7,7 +7,7 @@ define(function (require) {
     return {
       restrict: 'A',
       replace: true,
-      template: require('text!plugins/kibana/settings/sections/advanced/advanced_row.html'),
+      template: require('plugins/kibana/settings/sections/advanced/advanced_row.html'),
       scope: {
         conf: '=advancedRow',
         configs: '='

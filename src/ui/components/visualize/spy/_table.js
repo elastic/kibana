@@ -12,7 +12,7 @@ define(function (require) {
       name: 'table',
       display: 'Table',
       order: 1,
-      template: require('text!components/visualize/spy/_table.html'),
+      template: require('components/visualize/spy/_table.html'),
       link: function tableLinkFn($scope, $el) {
         $rootScope.$watchMulti.call($scope, [
           'vis',

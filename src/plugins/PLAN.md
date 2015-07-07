@@ -68,7 +68,7 @@ module.exports = function (kibana) {
     // of modules that this plugin provides to other plugins.
     // For now this only describes the modules exported for
     // the front-end
-    exports: {
+    uiExports: {
 
       // an app is the highest level ui-component that a plugin
       // can export. apps get an icon on the app page and the option
@@ -148,7 +148,7 @@ require('chrome')
 })
 
 require('routes').when('/', {
-  view: requrie('text!plugins/my-kibana-plugin/home.awesome.html')
+  view: requrie('plugins/my-kibana-plugin/home.awesome.html')
 })
 .otherwise({
   redirect: '/'

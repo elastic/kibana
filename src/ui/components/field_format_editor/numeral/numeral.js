@@ -6,7 +6,7 @@ define(function (require) {
   .directive('fieldEditorNumeral', function () {
     return {
       restrict: 'E',
-      template: require('text!components/field_format_editor/numeral/numeral.html')
+      template: require('components/field_format_editor/numeral/numeral.html')
     };
   });
 });

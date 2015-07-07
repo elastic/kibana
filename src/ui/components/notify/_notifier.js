@@ -8,7 +8,7 @@ define(function (require) {
   var clearTO = clearTimeout;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
-  var fatalSplashScreen = require('text!components/notify/partials/fatal_splash_screen.html');
+  var fatalSplashScreen = require('components/notify/partials/fatal_splash_screen.html');
 
   var log = _.noop;
   if (typeof KIBANA_DIST === 'undefined') {
@@ -25,7 +25,7 @@ define(function (require) {
     return function (vars) {
       return (compiled || (compiled = _.template(tmpl)))(vars);
     };
-  }(require('text!components/notify/partials/fatal.html')));
+  }(require('components/notify/partials/fatal.html')));
 
   function now() {
     if (window.performance && window.performance.now) {

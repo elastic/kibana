@@ -4,7 +4,8 @@ module.exports = function (kbnServer, server, config) {
   server.decorate('reply', 'renderApp', function (app) {
     var payload = {
       app: app,
-      appCount: kbnServer.uiExports.appCount,
+      angularModules: app.getModules().angular,
+      appCount: kbnServer.uiExports.apps.length,
       version: kbnServer.version,
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),

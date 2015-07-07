@@ -21,7 +21,7 @@ define(function (require) {
     });
 
     DateTime.editor = {
-      template: require('text!components/stringify/editors/date.html'),
+      template: require('components/stringify/editors/date.html'),
       controllerAs: 'cntrl',
       controller: function ($interval, $scope) {
         var self = this;

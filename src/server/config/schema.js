@@ -2,9 +2,30 @@ var Joi = require('joi');
 var fs = require('fs');
 var path = require('path');
 var package = require('../utils/closestPackageJson').getSync();
-var prod = process.env.NODE_ENV === 'production';
+var fromRoot = require('../utils/fromRoot');
+
+var env = (function () {
+  switch (process.env.NODE_ENV) {
+  case 'production':
+  case 'prod':
+  case undefined:
+    return 'production';
+  case 'development':
+  case 'dev':
+    return 'development';
+  default:
+    throw new TypeError(`Unexpected NODE_ENV "${process.env.NODE_ENV}", expected production or development.`);
+  }
+}());
+var dev = env === 'development';
+var prod = env === 'production';
 
 module.exports = Joi.object({
+  env: Joi.object({
+    name: Joi.string().default(Joi.ref('$env')),
+    dev: Joi.boolean().default(Joi.ref('$dev')),
+    prod: Joi.boolean().default(Joi.ref('$prod'))
+  }).default(),
 
   kibana: Joi.object({
     package: Joi.any().default(package),
@@ -56,11 +77,17 @@ module.exports = Joi.object({
     }).default()
   }).default(),
 
-  plugins: {
+  plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
-    scanDirs: Joi.array().items(Joi.string()).default([]),
-    optimize: Joi.boolean().default(prod)
-  }
+    scanDirs: Joi.array().items(Joi.string()).default([])
+  }),
+
+  optimize: Joi.object({
+    bundleDir: Joi.string().default(fromRoot('src/server/optimize/bundles')),
+    viewCaching: Joi.boolean().default(Joi.ref('$prod')),
+    watch: Joi.boolean().default(Joi.ref('$dev')),
+    sourceMaps: Joi.boolean().default(Joi.ref('$dev'))
+  })
 
 }).default();
 

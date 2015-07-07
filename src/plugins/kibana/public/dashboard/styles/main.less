@@ -1,8 +1,5 @@
-@import (reference) "ui-styles/_bootstrap.less";
-@import (reference) "ui-styles/theme/_theme.less";
-@import (reference) "ui-styles/_mixins.less";
-@import (reference) "lesshat.less";
-
+@import (reference) "~ui-styles/variables";
+@import (reference) "~ui-styles/mixins";
 @dashboard-background: @gray-lighter;
 
 .tab-dashboard {
@@ -56,24 +53,24 @@ dashboard-grid {
       height: 100%;
 
       // flex layout allows us to define the visualize element as "fill available space"
-      .display(flex);
-      .flex-direction(column);
-      .justify-content(flex-start);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
 
       .panel-heading {
-        .flex(0 0 auto);
+        flex: 0 0 auto;
         white-space: nowrap;
         display: flex;
 
         div.btn-group {
           white-space: nowrap;
-          .flex(0 0 auto);
+          flex: 0 0 auto;
         }
 
         .panel-title {
           font-size: inherit;
           .ellipsis();
-          .flex(1 1 0);
+          flex: 1 1 0;
         }
 
         a {
@@ -90,10 +87,10 @@ dashboard-grid {
       .load-error {
         text-align: center;
         font-size: 1em;
-        .display(flex);
-        .flex(1 0 auto);
-        .justify-content(center);
-        .flex-direction(column);
+        display: flex;
+        flex: 1 0 auto;
+        justify-content: center;
+        flex-direction: column;
 
         .fa-exclamation-triangle {
           font-size: 2em;
@@ -103,7 +100,7 @@ dashboard-grid {
 
       .panel-content {
         display: flex;
-        .flex(1, 1, 100%);
+        flex: 1 1 100%;
         height: auto;
       }
     }

@@ -1,28 +1,16 @@
 module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var Boom = require('boom');
-
-  var UiExports = require('./lib/UiExports');
-  var UiApp = require('./lib/UiApp');
-
-  // export manager
-  var uiExports = kbnServer.uiExports = new UiExports();
-  var switcherApp = new UiApp(uiExports, null, {
-    id: 'appSwitcher',
-    title: 'Apps',
-    main: 'appSwitcher/index',
-    defaultModules: {
-      angular: [],
-      require: ['chrome']
-    }
-  });
+  var uiExports = kbnServer.uiExports;
+  var apps = uiExports.apps;
+  var hiddenApps = uiExports.apps.hidden;
 
   // serve the app switcher
   server.route({
     path: '/apps',
     method: 'GET',
     handler: function (req, reply) {
-      return reply.renderApp(switcherApp);
+      return reply.renderApp(hiddenApps.byId.switcher);
     }
   });
 
@@ -31,7 +19,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/api/apps',
     method: 'GET',
     handler: function (req, reply) {
-      return reply(_.values(uiExports.apps));
+      return reply(apps);
     }
   });
 
@@ -40,7 +28,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     handler: function (req, reply) {
       var id = req.params.id;
-      var app = uiExports.apps[id];
+      var app = apps.byId[id];
       if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
       return reply.renderApp(app);

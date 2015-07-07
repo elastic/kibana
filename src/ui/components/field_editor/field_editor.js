@@ -8,12 +8,12 @@ define(function (require) {
     var _ = require('lodash');
     var fieldFormats = Private(require('registry/field_formats'));
     var Field = Private(require('components/index_patterns/_field'));
-    var scriptingInfo = $sce.trustAsHtml(require('text!components/field_editor/scripting_info.html'));
-    var scriptingWarning = $sce.trustAsHtml(require('text!components/field_editor/scripting_warning.html'));
+    var scriptingInfo = $sce.trustAsHtml(require('components/field_editor/scripting_info.html'));
+    var scriptingWarning = $sce.trustAsHtml(require('components/field_editor/scripting_warning.html'));
 
     return {
       restrict: 'E',
-      template: require('text!components/field_editor/field_editor.html'),
+      template: require('components/field_editor/field_editor.html'),
       scope: {
         getIndexPattern: '&indexPattern',
         getField: '&field'

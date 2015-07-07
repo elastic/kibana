@@ -4,27 +4,24 @@ var Joi = require('joi');
 var Promise = require('bluebird');
 var join = require('path').join;
 
-function Plugin(kibana, path, package, opts) {
-  this._kibana = kibana;
+function Plugin(kbnServer, path, package, opts) {
+  this.kbnServer = kbnServer;
   this.package = package;
   this.path = path;
 
   this.id = opts.id || package.name;
+  this.uiExportSpecs = opts.uiExports || {};
+  this.requiredIds = opts.require || [];
   this.version = opts.version || package.version;
   this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));
   this.externalInit = opts.init || _.noop;
   this.getConfig = opts.config || _.noop;
-
-  kibana.uiExports.add(this, opts.exports);
-
-  var readyCb;
-  var readyPromise = Promise.fromNode(function (cb) { readyCb = cb; });
-  this.ready = _.constant(readyPromise);
+  this.init = _.once(this.init);
 }
 
-Plugin.scoped = function (kibana, path, package) {
+Plugin.scoped = function (kbnServer, path, package) {
   function ScopedPlugin(opts) {
-    ScopedPlugin.super_.call(this, kibana, path, package, opts || {});
+    ScopedPlugin.super_.call(this, kbnServer, path, package, opts || {});
   }
   inherits(ScopedPlugin, Plugin);
   return ScopedPlugin;
@@ -32,12 +29,17 @@ Plugin.scoped = function (kibana, path, package) {
 
 Plugin.prototype.init = function () {
   var self = this;
+
   var id = self.id;
   var version = self.version;
-  var server = this._kibana.server;
-  var status = this._kibana.status;
+  var server = self.kbnServer.server;
+  var status = self.kbnServer.status;
 
   var config = server.config();
+  server.log(['plugin', 'init', 'debug'], {
+    message: 'initializing plugin <%= plugin.id %>',
+    plugin: self
+  });
 
   return Promise.try(function () {
     return self.getConfig(Joi);
@@ -49,9 +51,12 @@ Plugin.prototype.init = function () {
     return status.decoratePlugin(self);
   })
   .then(function () {
+    return self.kbnServer.uiExports.consumePlugin(self);
+  })
+  .then(function () {
 
     var register = function (server, options, next) {
-      server.expose('plugin', self);
+
       Promise.try(self.externalInit, [server, options], self).nodeify(next);
     };
 
@@ -68,10 +73,14 @@ Plugin.prototype.init = function () {
   .then(function () {
     // Only change the plugin status to green if the
     // intial status has not been updated
-    if (self.status.state === undefined) {
+    if (self.status.state === 'uninitialized') {
       self.status.green('Ready');
     }
   });
+};
+
+Plugin.prototype.toString = function () {
+  return `${this.id}@${this.version}`;
 };
 
 module.exports = Plugin;

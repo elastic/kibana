@@ -25,7 +25,7 @@ define(function (require) {
     ];
 
     Url.editor = {
-      template: require('text!components/stringify/editors/url.html'),
+      template: require('components/stringify/editors/url.html'),
       controllerAs: 'url',
       controller: function ($scope) {
         var iconPattern = 'components/stringify/icons/{{value}}.png';

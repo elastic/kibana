@@ -6,7 +6,7 @@ define(function (require) {
 
     var allContents = [];
 
-    require('css!components/vislib/styles/main');
+    require('components/vislib/styles/main.less');
 
     /**
      * Add tooltip and listeners to visualization elements

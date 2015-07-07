@@ -9,7 +9,7 @@ define(function (require) {
     var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
     var errors = require('errors');
-    require('css!components/vislib/styles/main');
+    require('components/vislib/styles/main.less');
 
     /**
      * Vertical Bar Chart Visualization: renders vertical and/or stacked bars

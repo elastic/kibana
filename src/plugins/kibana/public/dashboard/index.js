@@ -14,7 +14,7 @@ define(function (require) {
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
   require('plugins/kibana/dashboard/services/saved_dashboards');
-  require('css!plugins/kibana/dashboard/styles/main.css');
+  require('plugins/kibana/dashboard/styles/main.less');
 
   var app = require('modules').get('app/dashboard', [
     'elasticsearch',
@@ -27,7 +27,7 @@ define(function (require) {
 
   require('routes')
   .when('/dashboard', {
-    template: require('text!plugins/kibana/dashboard/index.html'),
+    template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards) {
         return savedDashboards.get();
@@ -35,7 +35,7 @@ define(function (require) {
     }
   })
   .when('/dashboard/:id', {
-    template: require('text!plugins/kibana/dashboard/index.html'),
+    template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
@@ -83,10 +83,10 @@ define(function (require) {
         var $state = $scope.state = new AppState(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
-          save: require('text!plugins/kibana/dashboard/partials/save_dashboard.html'),
-          load: require('text!plugins/kibana/dashboard/partials/load_dashboard.html'),
-          share: require('text!plugins/kibana/dashboard/partials/share.html'),
-          pickVis: require('text!plugins/kibana/dashboard/partials/pick_visualization.html')
+          save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
+          load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
+          share: require('plugins/kibana/dashboard/partials/share.html'),
+          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html')
         });
 
         $scope.refresh = _.bindKey(courier, 'fetch');

@@ -1,8 +1,5 @@
-@import (reference) "lesshat.less";
-@import (reference) "ui-styles/_bootstrap.less";
-@import (reference) "ui-styles/theme/_theme.less";
-@import (reference) "ui-styles/_variables.less";
-@import (reference) "ui-styles/_mixins.less";
+@import (reference) "~ui-styles/theme";
+@import (reference) "~ui-styles/variables";
 
 kibana-settings-app,
 kbn-settings-indices,
@@ -144,15 +141,15 @@ kbn-settings-objects-view {
   }
 
   .index-pattern-name {
-    .display(flex);
-    .align-items(center);
+    display: flex;
+    align-items: center;
 
     .title {
-      .flex(1, 1, auto);
+      flex: 1 1 auto;
     }
 
     .controls {
-      .flex(4, 0, auto);
+      flex: 4 0 auto;
     }
   }
 }

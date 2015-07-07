@@ -6,13 +6,13 @@ define(function (require) {
   .directive('indexedFields', function () {
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';
-    var nameHtml = require('text!plugins/kibana/settings/sections/indices/_field_name.html');
-    var typeHtml = require('text!plugins/kibana/settings/sections/indices/_field_type.html');
-    var controlsHtml = require('text!plugins/kibana/settings/sections/indices/_field_controls.html');
+    var nameHtml = require('plugins/kibana/settings/sections/indices/_field_name.html');
+    var typeHtml = require('plugins/kibana/settings/sections/indices/_field_type.html');
+    var controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');
 
     return {
       restrict: 'E',
-      template: require('text!plugins/kibana/settings/sections/indices/_indexed_fields.html'),
+      template: require('plugins/kibana/settings/sections/indices/_indexed_fields.html'),
       scope: true,
       link: function ($scope) {
         var rowScopes = []; // track row scopes, so they can be destroyed as needed

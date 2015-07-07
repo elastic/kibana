@@ -6,7 +6,9 @@ var override = require('./override');
 function Config(schema, defaults) {
   this.schema = schema || Joi.object({}).default();
   this.config = {};
-  this.set(defaults || {});
+  this.set(defaults);
+
+  console.log(this.get('env'));
 }
 
 Config.prototype.extendSchema = function (key, schema) {
@@ -19,24 +21,48 @@ Config.prototype.extendSchema = function (key, schema) {
 };
 
 Config.prototype.reset = function (obj) {
-  var results = Joi.validate(obj, this.schema);
-  if (results.error) {
-    throw results.error;
-  }
-  this.config = results.value;
+  this._commit(obj);
 };
 
 Config.prototype.set = function (key, value) {
+  // clone and modify the config
   var config = _.cloneDeep(this.config);
   if (_.isPlainObject(key)) {
     config = override(config, key);
   } else {
     _.set(config, key, value);
   }
-  var results = Joi.validate(config, this.schema);
+
+  // attempt to validate the config value
+  this._commit(config);
+};
+
+Config.prototype._commit = function (newConfig) {
+  // resolve the current environment
+  var env = newConfig.env;
+  delete newConfig.env;
+  if (_.isObject(env)) env = env.name;
+  if (!env) env = process.env.NODE_ENV || 'production';
+
+  // pass the environment as context so that it can be refed in config
+  var context = {
+    env: env,
+    prod: env === 'production',
+    dev: env === 'development',
+  };
+
+  if (!context.dev && !context.prod) {
+    throw new TypeError(`Unexpected environment "${env}", expected one of "development" or "production"`);
+  }
+
+  var results = Joi.validate(newConfig, this.schema, {
+    context: context
+  });
+
   if (results.error) {
     throw results.error;
   }
+
   this.config = results.value;
 };
 

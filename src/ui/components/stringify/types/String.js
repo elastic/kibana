@@ -30,7 +30,7 @@ define(function (require) {
       transform: false
     };
 
-    _String.editor = require('text!components/stringify/editors/string.html');
+    _String.editor = require('components/stringify/editors/string.html');
 
     _String.transformOpts = [
       { id: false, name: '- none -' },

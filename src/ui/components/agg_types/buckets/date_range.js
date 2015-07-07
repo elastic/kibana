@@ -40,7 +40,7 @@ define(function (require) {
           from: 'now-1w/w',
           to: 'now'
         }],
-        editor: require('text!components/agg_types/controls/date_ranges.html')
+        editor: require('components/agg_types/controls/date_ranges.html')
       }]
     });
   };

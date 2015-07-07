@@ -46,7 +46,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        .user-select(none);
+        user-select: none;
       }
 
       a {
@@ -60,7 +60,7 @@
 
     // overrides for tablet and desktop
     @media (min-width: @screen-md-min) {
-      .flex-direction(row);
+      flex-direction: row;
     }
   }
 
@@ -71,7 +71,7 @@
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
-      .flex-basis(@vis-editor-sidebar-basis);
+      flex-basis: @vis-editor-sidebar-basis;
       min-width: @vis-editor-sidebar-min-width;
       max-width: @vis-editor-sidebar-min-width;
       // margin-bottom: (@input-height-base * 2) - 3;
@@ -104,7 +104,7 @@
         }
 
         > .vis-edit-sidebar-buttons {
-          .flex(0, 0, auto)
+          flex: 0 0 auto;
         }
 
         label {
@@ -133,7 +133,7 @@
     }
 
     label {
-      .flex(2 0 0);
+      flex: 2 0 0;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -153,8 +153,8 @@
   }
 
   nesting-indicator {
-    .display(flex);
-    .flex(0 0 auto);
+    display: flex;
+    flex: 0 0 auto;
 
     > span {
       width: @vis-editor-nesting-width;
@@ -169,7 +169,7 @@
 
     // wraps the .vis-editor-agg and nesting-indicator ^^
     &-wrapper {
-      .display(flex);
+      display: flex;
     }
 
     &-group {
@@ -178,23 +178,23 @@
     }
 
     &-header {
-      .display(flex);
-      .align-items(center);
-      .flex(1, 0, auto);
+      display: flex;
+      align-items: center;
+      flex: 1 0 auto;
       margin-bottom: @vis-editor-agg-editor-spacing;
 
       &-toggle {
-        .flex(0, 0, auto);
+        flex: 0 0 auto;
         margin-right: @vis-editor-agg-editor-spacing;
       }
 
       &-subagg-icon {
-        .flex(0, 1, auto);
+        flex: 0 1 auto;
         padding-right: @padding-base-vertical;
       }
 
       &-title {
-        .flex(1, 1, auto);
+        flex: 1 1 auto;
         .ellipsis();
         font-weight: bold;
       }
@@ -210,7 +210,7 @@
       }
 
       &-controls {
-        .flex(0, 0, auto);
+        flex: 0 0 auto;
       }
     }
 
@@ -248,10 +248,10 @@
     }
 
     &-form-row {
-      .display(flex);
+      display: flex;
 
       > * {
-        .flex(1, 1, auto);
+        flex: 1 1 auto;
         margin-right: @vis-editor-agg-editor-spacing;
 
         &:last-child {
@@ -260,18 +260,18 @@
       }
 
       > .btn {
-        .align-self(center);
+        align-self: center;
       }
     }
 
     &-form-value {
-      .align-self(center);
+      align-self: center;
       margin: 0 0 0 @vis-editor-agg-editor-spacing;
       font-size: 1.2em;
     }
 
     &-wide-btn {
-      .border-radius(0);
+      border-radius: 0;
       border-top: 2px solid @gray-lighter;
 
       &-add {
@@ -319,20 +319,20 @@
   }
 
   &-canvas {
-    .flex(1, 0, @screen-md-min - @vis-editor-sidebar-basis);
-    .display(flex);
-    .flex-direction(column);
+    flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
+    display: flex;
+    flex-direction: column;
     overflow: auto;
 
     &.embedded {
-      .flex-shrink(1);
-      .flex-basis(100%);
+      flex-shrink: 1;
+      flex-basis: 100%;
     }
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
-      .flex-shrink(1);
-      .flex-basis(100%);
+      flex-shrink: 1;
+      flex-basis: 100%;
     }
 
     &-title {
@@ -342,11 +342,11 @@
 
     visualize {
       .flex-parent();
-      .flex(1, 1, 100%);
+      flex: 1 1 100%;
     }
 
     .visualize-chart {
-      .flex(1, 1, 100%);
+      flex: 1 1 100%;
       position: relative;
     }
   }

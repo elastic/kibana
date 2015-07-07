@@ -5,7 +5,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
-    require('css!components/vislib/styles/main');
+    require('components/vislib/styles/main.less');
 
     /**
      * Pie Chart Visualization

@@ -152,9 +152,9 @@
 /* filter to desaturate mapquest tiles */
 
 img.leaflet-tile {
-  .filter(brightness(1.03) grayscale(0.83) contrast(1.07));
+  filter: brightness(1.03) grayscale(0.83) contrast(1.07);
 }
 
 img.leaflet-tile.filters-off {
-  .filter(none);
+  filter: none;
 }

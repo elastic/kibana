@@ -1,9 +1,9 @@
 module.exports = function (kibana) {
 
   return new kibana.Plugin({
-    exports: {
+    uiExports: {
       visTypes: [
-        'plugins/table_vis/index'
+        'plugins/table_vis/table_vis'
       ]
     }
   });

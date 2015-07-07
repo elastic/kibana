@@ -1,6 +1,6 @@
 define(function (require) {
   // we need to load the css ourselves
-  require('css!plugins/metric_vis/metric_vis.css');
+  require('plugins/metric_vis/metric_vis.less');
 
   // we also need to load the controller and used by the template
   require('plugins/metric_vis/metric_vis_controller');
@@ -20,12 +20,12 @@ define(function (require) {
       description: 'One big number for all of your one big number needs. Perfect for show ' +
         'a count of hits, or the exact average a numeric field.',
       icon: 'fa-calculator',
-      template: require('text!plugins/metric_vis/metric_vis.html'),
+      template: require('plugins/metric_vis/metric_vis.html'),
       params: {
         defaults: {
           fontSize: 60
         },
-        editor: require('text!plugins/metric_vis/metric_vis_params.html')
+        editor: require('plugins/metric_vis/metric_vis_params.html')
       },
       schemas: new Schemas([
         {

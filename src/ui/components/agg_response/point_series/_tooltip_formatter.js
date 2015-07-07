@@ -3,7 +3,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('text!components/agg_response/point_series/_tooltip.html'));
+    var $tooltip = $(require('components/agg_response/point_series/_tooltip.html'));
     $compile($tooltip)($tooltipScope);
 
     return function tooltipFormatter(event) {

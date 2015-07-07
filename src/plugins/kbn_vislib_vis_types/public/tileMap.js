@@ -25,7 +25,7 @@ define(function (require) {
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
-        editor: require('text!plugins/kbn_vislib_vis_types/editors/tile_map.html')
+        editor: require('plugins/kbn_vislib_vis_types/editors/tile_map.html')
       },
       listeners: {
         rectangle: function (event) {

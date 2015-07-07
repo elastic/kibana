@@ -5,7 +5,7 @@ define(function (require) {
     var L = require('leaflet');
     require('leaflet-heat');
     require('leaflet-draw');
-    require('css!components/vislib/styles/main');
+    require('components/vislib/styles/main.less');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var defaultMapZoom = 2;

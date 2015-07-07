@@ -6,7 +6,7 @@ define(function (require) {
   .directive('fieldFormatEditorSamples', function ($sce, Promise) {
     return {
       restrict: 'E',
-      template: require('text!components/field_format_editor/samples/samples.html'),
+      template: require('components/field_format_editor/samples/samples.html'),
       require: ['?^ngModel', '^fieldEditor'],
       scope: true,
       link: function ($scope, $el, attrs, cntrls) {

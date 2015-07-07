@@ -5,7 +5,7 @@ define(function (require) {
 
     var fieldFormats = Private(require('registry/field_formats'));
     var $tooltipScope = $rootScope.$new();
-    var $el = $('<div>').html(require('text!components/agg_response/geo_json/_tooltip.html'));
+    var $el = $('<div>').html(require('components/agg_response/geo_json/_tooltip.html'));
     $compile($el)($tooltipScope);
 
     return function tooltipFormatter(feature) {

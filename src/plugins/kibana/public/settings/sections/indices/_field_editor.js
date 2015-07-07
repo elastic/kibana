@@ -6,7 +6,7 @@ define(function (require) {
   .when('/settings/indices/:indexPatternId/field/:fieldName', { mode: 'edit' })
   .when('/settings/indices/:indexPatternId/create-field/', { mode: 'create' })
   .defaults(/settings\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
-    template: require('text!plugins/kibana/settings/sections/indices/_field_editor.html'),
+    template: require('plugins/kibana/settings/sections/indices/_field_editor.html'),
     resolve: {
       indexPattern: function ($route, courier) {
         return courier.indexPatterns.get($route.current.params.indexPatternId)

@@ -4,5 +4,5 @@ define(function (require, module, exports) {
   require('components/collapsible_sidebar/collapsible_sidebar');
   require('plugins/kibana/discover/components/field_chooser/field_chooser');
   require('plugins/kibana/discover/controllers/discover');
-  require('css!plugins/kibana/discover/styles/main.css');
+  require('plugins/kibana/discover/styles/main.less');
 });

@@ -14,7 +14,7 @@ define(function (require) {
       params: [
         {
           name: 'filters',
-          editor: require('text!components/agg_types/controls/filters.html'),
+          editor: require('components/agg_types/controls/filters.html'),
           default: [ {input: {}, label: ''} ],
           write: function (aggConfig, output) {
             var inFilters = aggConfig.params.filters;

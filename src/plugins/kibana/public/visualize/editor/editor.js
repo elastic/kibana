@@ -9,7 +9,7 @@ define(function (require) {
 
   require('routes')
   .when('/visualize/create', {
-    template: require('text!plugins/kibana/visualize/editor/editor.html'),
+    template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route, Private) {
         var visTypes = Private(require('registry/vis_types'));
@@ -26,7 +26,7 @@ define(function (require) {
     }
   })
   .when('/visualize/edit/:id', {
-    template: require('text!plugins/kibana/visualize/editor/editor.html'),
+    template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
@@ -74,9 +74,9 @@ define(function (require) {
 
     // config panel templates
     var configTemplate = new ConfigTemplate({
-      save: require('text!plugins/kibana/visualize/editor/panels/save.html'),
-      load: require('text!plugins/kibana/visualize/editor/panels/load.html'),
-      share: require('text!plugins/kibana/visualize/editor/panels/share.html'),
+      save: require('plugins/kibana/visualize/editor/panels/save.html'),
+      load: require('plugins/kibana/visualize/editor/panels/load.html'),
+      share: require('plugins/kibana/visualize/editor/panels/share.html'),
     });
 
     if (savedVis.id) {

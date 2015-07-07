@@ -7,7 +7,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!components/paginated_table/paginated_table.html'),
+      template: require('components/paginated_table/paginated_table.html'),
       transclude: true,
       scope: {
         rows: '=',

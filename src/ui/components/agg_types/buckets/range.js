@@ -24,7 +24,7 @@ define(function (require) {
             { from: 0, to: 1000 },
             { from: 1000, to: 2000 }
           ],
-          editor: require('text!components/agg_types/controls/ranges.html'),
+          editor: require('components/agg_types/controls/ranges.html'),
           write: function (aggConfig, output) {
             output.params.ranges = aggConfig.params.ranges;
             output.params.keyed = true;

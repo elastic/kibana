@@ -3,8 +3,8 @@ define(function (require) {
   var angular = require('angular');
   require('angular-ui-ace');
 
-  var html = require('text!components/doc_viewer/doc_viewer.html');
-  require('css!components/doc_viewer/doc_viewer.css');
+  var html = require('components/doc_viewer/doc_viewer.html');
+  require('components/doc_viewer/doc_viewer.less');
 
   require('modules').get('kibana')
   .directive('docViewer', function (config, Private) {

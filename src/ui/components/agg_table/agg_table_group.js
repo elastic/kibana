@@ -7,7 +7,7 @@ define(function (require) {
   .directive('kbnAggTableGroup', function (compileRecursiveDirective) {
     return {
       restrict: 'E',
-      template: require('text!components/agg_table/agg_table_group.html'),
+      template: require('components/agg_table/agg_table_group.html'),
       scope: {
         group: '=',
         perPage: '=?'

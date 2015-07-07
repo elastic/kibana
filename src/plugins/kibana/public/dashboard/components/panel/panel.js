@@ -24,7 +24,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/kibana/dashboard/components/panel/panel.html'),
+      template: require('plugins/kibana/dashboard/components/panel/panel.html'),
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState

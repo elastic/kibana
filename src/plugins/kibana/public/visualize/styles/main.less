@@ -1,4 +1,6 @@
-@import (reference) "ui-styles/main.less";
+@import (reference) "~ui-styles/variables";
+@import (reference) "~bootstrap/less/list-group";
+@import (reference) "~ui-styles/list-group-menu";
 
 .vis-wizard {
   h1 {
@@ -12,30 +14,30 @@
 
   // overrided for tablet and desktop
   @media (min-width: @screen-md-min) {
-    .display(flex);
-    .align-items(flex-start);
+    display: flex;
+    align-items: flex-start;
   }
 
   &-heading {
-    .flex(0 0 200px);
-    .display(flex);
-    .align-items(center);
+    flex: 0 0 200px;
+    display: flex;
+    align-items: center;
     font-size: 1.2em;
 
     .fa {
-      .flex(0 0 auto);
+      flex: 0 0 auto;
       margin-right: @padding-base-horizontal;
       font-size: 1.5em;
       text-align: center;
     }
 
     h4 {
-      .flex(1 0 auto);
+      flex: 1 0 auto;
     }
   }
 
   &-description {
-    .flex(1 1 auto);
+    flex: 1 1 auto;
     color: @brand-primary;
   }
 }

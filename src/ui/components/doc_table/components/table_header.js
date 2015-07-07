@@ -5,7 +5,7 @@ define(function (require) {
   require('filters/short_dots');
 
   module.directive('kbnTableHeader', function (shortDotsFilter) {
-    var headerHtml = require('text!components/doc_table/components/table_header.html');
+    var headerHtml = require('components/doc_table/components/table_header.html');
     return {
       restrict: 'A',
       scope: {

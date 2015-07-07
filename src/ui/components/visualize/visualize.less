@@ -1,11 +1,8 @@
-@import (reference) "ui-styles/_bootstrap.less";
-@import (reference) "ui-styles/theme/_theme.less";
-@import (reference) "ui-styles/_variables.less";
-@import (reference) "lesshat.less";
+@import (reference) "~ui-styles/variables";
 
 visualize {
-  .display(flex);
-  .flex-direction(column);
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
   overflow: auto;
@@ -16,7 +13,7 @@ visualize {
   }
 
   .visualize-chart {
-    .flex(1 1 auto);
+    flex: 1 1 auto;
     overflow: auto;
 
     &.spy-visible {
@@ -43,12 +40,12 @@ visualize {
 }
 
 .visualize-error {
-  .display(flex);
-  .align-items(center);
-  .justify-content(center);
-  .top { .align-self(flext-start); }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .top { align-self: flext-start; }
   .item { }
-  .bottom { .align-self(flext-end); }
+  .bottom { align-self: flext-end; }
 
 }
 
@@ -58,11 +55,11 @@ ul.visualizations .media-body {
 
 visualize-spy {
   // this element should flex
-  .flex(0, 0, auto);
+  flex: 0 0 auto;
 
   // it's children should also flex vertically
-  .flex-direction(column);
-  .display(flex);
+  flex-direction: column;
+  display: flex;
 
   overflow: auto;
 
@@ -71,12 +68,12 @@ visualize-spy {
   }
 
   &.only {
-    .flex(1, 1, auto);
+    flex: 1 1 auto;
     padding-top: 0px;
   }
 
   .visualize-show-spy {
-    .flex(0, 0, auto);
+    flex: 0 0 auto;
 
     border-top: 1px solid #ecf0f1;
     margin-bottom: 3px;
@@ -109,10 +106,10 @@ visualize-spy {
   }
 
   .visualize-spy-container {
-    .flex(1, 1, auto);
+    flex: 1 1 auto;
 
-    .display(flex);
-    .flex-direction(column);
+    display: flex;
+    flex-direction: column;
 
     height: 482px;
     overflow-y: auto;
@@ -122,12 +119,12 @@ visualize-spy {
     }
 
     header + * {
-      .flex(1, 1, auto);
+      flex: 1 1 auto;
       overflow: auto;
     }
 
     > .alert {
-      .flex(0, 0, auto);
+      flex: 0 0 auto;
     }
 
     tr > td {
@@ -140,7 +137,7 @@ visualize-spy {
   }
 
   .visualize-spy-nav {
-    .flex(0, 0, auto);
+    flex: 0 0 auto;
 
     a.btn {
       margin: @padding-small-vertical @padding-small-vertical;

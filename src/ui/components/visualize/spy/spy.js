@@ -13,7 +13,7 @@ define(function (require) {
 
       return {
         restrict: 'E',
-        template: require('text!components/visualize/spy/_spy.html'),
+        template: require('components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
           var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = false;

@@ -1,4 +1,5 @@
 {
+  "esprima": "./node_modules/babel-jscs",
   "maximumLineLength": {
     "value": 140,
     "allowComments": true

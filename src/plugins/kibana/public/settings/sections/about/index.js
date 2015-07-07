@@ -3,7 +3,7 @@ define(function (require) {
 
   require('routes')
   .when('/settings/about', {
-    template: require('text!plugins/kibana/settings/sections/about/index.html')
+    template: require('plugins/kibana/settings/sections/about/index.html')
   });
 
   require('modules').get('apps/settings')

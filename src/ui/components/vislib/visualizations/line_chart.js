@@ -6,7 +6,7 @@ define(function (require) {
 
     var PointSeriesChart = Private(require('components/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
-    require('css!components/vislib/styles/main');
+    require('components/vislib/styles/main.less');
 
     /**
      * Line Chart Visualization

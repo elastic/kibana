@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
     var noWhiteSpace = require('utils/no_white_space');
-    var template = _.template(noWhiteSpace(require('text!components/stringify/types/_source.html')));
+    var template = _.template(noWhiteSpace(require('components/stringify/types/_source.html')));
     var angular = require('angular');
 
     _.class(Source).inherits(FieldFormat);

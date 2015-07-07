@@ -27,7 +27,7 @@ define(function (require) {
           yAxis: {}
         },
         scales: ['linear', 'log', 'square root'],
-        editor: require('text!plugins/kbn_vislib_vis_types/editors/line.html')
+        editor: require('plugins/kbn_vislib_vis_types/editors/line.html')
       },
       schemas: new Schemas([
         {

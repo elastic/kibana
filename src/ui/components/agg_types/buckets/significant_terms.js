@@ -18,7 +18,7 @@ define(function (require) {
         },
         {
           name: 'size',
-          editor: require('text!components/agg_types/controls/order_and_size.html'),
+          editor: require('components/agg_types/controls/order_and_size.html'),
         },
         {
           name: 'exclude',

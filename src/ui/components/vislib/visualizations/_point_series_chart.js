@@ -4,7 +4,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
-    var touchdownTmpl = _.template(require('text!components/vislib/partials/touchdown.tmpl.html'));
+    var touchdownTmpl = _.template(require('components/vislib/partials/touchdown.tmpl.html'));
 
     _.class(PointSeriesChart).inherits(Chart);
     function PointSeriesChart(handler, chartEl, chartData) {

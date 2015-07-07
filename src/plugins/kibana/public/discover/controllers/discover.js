@@ -30,7 +30,7 @@ define(function (require) {
 
   require('routes')
   .when('/discover/:id?', {
-    template: require('text!plugins/kibana/discover/index.html'),
+    template: require('plugins/kibana/discover/index.html'),
     reloadOnSearch: false,
     resolve: {
       ip: function (Promise, courier, config, $location) {
@@ -90,8 +90,8 @@ define(function (require) {
 
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
-      load: require('text!plugins/kibana/discover/partials/load_search.html'),
-      save: require('text!plugins/kibana/discover/partials/save_search.html')
+      load: require('plugins/kibana/discover/partials/load_search.html'),
+      save: require('plugins/kibana/discover/partials/save_search.html')
     });
 
     $scope.timefilter = timefilter;

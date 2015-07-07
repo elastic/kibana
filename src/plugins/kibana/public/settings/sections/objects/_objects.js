@@ -3,7 +3,7 @@ define(function (require) {
   var angular = require('angular');
   var saveAs = require('file_saver');
   var registry = require('plugins/kibana/settings/saved_object_registry');
-  var objectIndexHTML = require('text!plugins/kibana/settings/sections/objects/_objects.html');
+  var objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
 
   require('directives/file_upload');
 

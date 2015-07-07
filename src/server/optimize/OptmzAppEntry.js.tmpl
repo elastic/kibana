@@ -1,0 +1,20 @@
+/**
+ * Optimized application entry file
+ *
+ * This is programatically created and updated, do not modify
+ *
+ * built using: Kibana <%= kbnVersion %>
+ * includes code from:
+<%
+  deps.sort().forEach(function (plugin) {
+    print(` *  - ${plugin}\n`);
+  })
+%> *
+ */
+
+require('chrome');
+<%
+modules.require.forEach(function (id) {
+  if (id !== 'chrome') print(`require('${id}');\n`);
+});
+%>require('chrome').bootstrap(<%= JSON.stringify(modules.angular) %>);

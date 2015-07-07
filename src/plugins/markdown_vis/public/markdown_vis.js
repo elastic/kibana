@@ -1,6 +1,6 @@
 define(function (require) {
   // we need to load the css ourselves
-  require('css!plugins/markdown_vis/markdown_vis.css');
+  require('plugins/markdown_vis/markdown_vis.less');
 
   // we also need to load the controller and used by the template
   require('plugins/markdown_vis/markdown_vis_controller');
@@ -18,9 +18,9 @@ define(function (require) {
       title: 'Markdown widget',
       icon: 'fa-code',
       description: 'Useful for displaying explanations or instructions for dashboards.',
-      template: require('text!plugins/markdown_vis/markdown_vis.html'),
+      template: require('plugins/markdown_vis/markdown_vis.html'),
       params: {
-        editor: require('text!plugins/markdown_vis/markdown_vis_params.html')
+        editor: require('plugins/markdown_vis/markdown_vis_params.html')
       },
       requiresSearch: false
     });

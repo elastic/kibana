@@ -6,7 +6,7 @@ function Status(name, server) {
   Status.super_.call(this);
 
   this.name = name;
-  this.state = undefined;
+  this.state = 'uninitialized';
   this.message = 'uninitialized';
 
   this.on('change', function (current, previous) {

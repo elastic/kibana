@@ -1,5 +1,4 @@
-@import (reference) "lesshat.less";
-@import (reference) "ui-styles/theme/_variables.less";
+@import (reference) "~ui-styles/variables";
 
 kbn-agg-table,
 kbn-agg-table-group {
@@ -7,12 +6,12 @@ kbn-agg-table-group {
 }
 
 .agg-table {
-  .display(flex);
-  .flex(1, 1, auto);
-  .flex-direction(column);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
 
   &-paginated-table {
-    .flex(1, 1, auto);
+    flex: 1 1 auto;
     overflow: auto;
 
     th i.fa-sort {
@@ -21,13 +20,13 @@ kbn-agg-table-group {
   }
 
   &-controls {
-    .flex(0, 0, auto);
-    .display(flex);
-    .align-items(center);
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
     margin: 10px 5px;
 
     > paginate-controls {
-      .flex(1, 0, auto);
+      flex: 1 0 auto;
       margin: 0;
       padding: 0;
     }

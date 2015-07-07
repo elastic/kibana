@@ -57,7 +57,7 @@ define(function (require) {
           name: 'orderAgg',
           type: AggConfig,
           default: null,
-          editor: require('text!components/agg_types/controls/order_agg.html'),
+          editor: require('components/agg_types/controls/order_agg.html'),
           serialize: function (orderAgg) {
             return orderAgg.toJSON();
           },
@@ -160,7 +160,7 @@ define(function (require) {
           name: 'order',
           type: 'optioned',
           default: 'desc',
-          editor: require('text!components/agg_types/controls/order_and_size.html'),
+          editor: require('components/agg_types/controls/order_and_size.html'),
           options: [
             { display: 'Descending', val: 'desc' },
             { display: 'Ascending', val: 'asc' }

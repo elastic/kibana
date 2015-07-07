@@ -5,7 +5,7 @@ define(function (require) {
   .directive('tableVisParams', function () {
     return {
       restrict: 'E',
-      template: require('text!plugins/table_vis/table_vis_params.html'),
+      template: require('plugins/table_vis/table_vis_params.html'),
       link: function ($scope) {
         $scope.$watchMulti([
           'vis.params.showPartialRows',

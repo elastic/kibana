@@ -1,20 +1,13 @@
 module.exports = function (kbnServer, server, config) {
-  var Boom = require('boom');
-  var assetsDir = require('./assetsDir');
-  var join = require('path').join;
-  var stat = require('fs').statSync;
+  var _ = require('lodash');
+  var assets = require('./assets');
 
-  // expose our public files at the server root explicitly, rather than with a catch all route
-  require('fs')
-  .readdirSync(assetsDir)
-  .forEach(function (name) {
-    var path = join(assetsDir, name);
-
-    if (stat(path).isDirectory()) {
-      server.exposeStaticDir('/' + name + '/{path*}', path);
-    }
-    else {
-      server.exposeStaticFile('/' + name, path);
-    }
+  _.forOwn(assets.files, function (path, name) {
+    server.exposeStaticFile('/' + name, path);
   });
+
+  _.forOwn(assets.dirs, function (dir, name) {
+    server.exposeStaticDir('/' + name + '/{path*}', dir);
+  });
+
 };

@@ -3,7 +3,7 @@ define(function (require) {
   var angular = require('angular');
   var rison = require('utils/rison');
   var registry = require('plugins/kibana/settings/saved_object_registry');
-  var objectViewHTML = require('text!plugins/kibana/settings/sections/objects/_view.html');
+  var objectViewHTML = require('plugins/kibana/settings/sections/objects/_view.html');
 
   require('routes')
   .when('/settings/objects/:service/:id', {

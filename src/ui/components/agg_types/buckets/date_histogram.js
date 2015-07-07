@@ -82,7 +82,7 @@ define(function (require) {
           },
           default: 'auto',
           options: intervalOptions,
-          editor: require('text!components/agg_types/controls/interval.html'),
+          editor: require('components/agg_types/controls/interval.html'),
           onRequest: function (agg) {
             setBounds(agg, true);
           },

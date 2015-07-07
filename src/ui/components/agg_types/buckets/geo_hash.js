@@ -45,7 +45,7 @@ define(function (require) {
         {
           name: 'precision',
           default: defaultPrecision,
-          editor: require('text!components/agg_types/controls/precision.html'),
+          editor: require('components/agg_types/controls/precision.html'),
           controller: function ($scope) {
             $scope.$watchMulti([
               'agg.params.autoPrecision',

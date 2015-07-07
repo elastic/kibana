@@ -8,7 +8,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!plugins/kibana/visualize/editor/agg_group.html'),
+      template: require('plugins/kibana/visualize/editor/agg_group.html'),
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;

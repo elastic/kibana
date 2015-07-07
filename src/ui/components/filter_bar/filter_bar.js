@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var module = require('modules').get('kibana');
-  var template = require('text!components/filter_bar/filter_bar.html');
+  var template = require('components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {

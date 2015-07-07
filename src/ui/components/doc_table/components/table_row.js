@@ -24,10 +24,10 @@ define(function (require) {
    */
   module.directive('kbnTableRow', function ($compile) {
     var noWhiteSpace = require('utils/no_white_space');
-    var openRowHtml = require('text!components/doc_table/components/table_row/open.html');
-    var detailsHtml = require('text!components/doc_table/components/table_row/details.html');
-    var cellTemplate = _.template(noWhiteSpace(require('text!components/doc_table/components/table_row/cell.html')));
-    var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!partials/truncate_by_height.html')));
+    var openRowHtml = require('components/doc_table/components/table_row/open.html');
+    var detailsHtml = require('components/doc_table/components/table_row/details.html');
+    var cellTemplate = _.template(noWhiteSpace(require('components/doc_table/components/table_row/cell.html')));
+    var truncateByHeightTemplate = _.template(noWhiteSpace(require('partials/truncate_by_height.html')));
 
     return {
       restrict: 'A',

@@ -21,7 +21,7 @@ define(function (require) {
     return {
       restrict: 'E',
       transclude: true,
-      template: require('text!plugins/kibana/settings/sections/indices/index.html'),
+      template: require('plugins/kibana/settings/sections/indices/index.html'),
       link: function ($scope) {
         $scope.edittingId = $route.current.params.indexPatternId;
         config.$bind($scope, 'defaultIndex');

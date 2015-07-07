@@ -1,5 +1,5 @@
 define(function (require) {
-  require('css!components/collapsible_sidebar/collapsible_sidebar.css');
+  require('components/collapsible_sidebar/collapsible_sidebar.less');
 
   var _ = require('lodash');
   var $ = require('jquery');

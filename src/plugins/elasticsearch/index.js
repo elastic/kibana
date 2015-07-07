@@ -35,7 +35,7 @@ module.exports = function (kibana) {
       );
 
       // Set up the health check service and start it.
-      healthCheck(this, server).start();
+      // healthCheck(this, server).start();
     }
   });
 

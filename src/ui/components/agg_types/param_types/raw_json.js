@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
-    var editorHtml = require('text!components/agg_types/controls/raw_json.html');
+    var editorHtml = require('components/agg_types/controls/raw_json.html');
 
     _.class(RawJSONAggParam).inherits(BaseAggParam);
     function RawJSONAggParam(config) {

@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
-    var editorHtml = require('text!components/agg_types/controls/regular_expression.html');
+    var editorHtml = require('components/agg_types/controls/regular_expression.html');
 
     _.class(RegexAggParam).inherits(BaseAggParam);
     function RegexAggParam(config) {

@@ -2,9 +2,9 @@ module.exports = function (kibana) {
 
   return new kibana.Plugin({
 
-    exports: {
+    uiExports: {
       visTypes: [
-        'plugins/markdown_vis/index'
+        'plugins/markdown_vis/markdown_vis'
       ]
     }
 

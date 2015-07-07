@@ -7,7 +7,7 @@ define(function (require) {
     var ordinalSuffix = require('utils/ordinal_suffix');
     var fieldFormats = Private(require('registry/field_formats'));
 
-    var percentsEditor = require('text!components/agg_types/controls/percentiles.html');
+    var percentsEditor = require('components/agg_types/controls/percentiles.html');
     // required by the percentiles editor
     require('components/number_list/number_list');
 

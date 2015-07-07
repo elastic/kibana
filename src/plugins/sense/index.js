@@ -1,6 +1,6 @@
 module.exports = function (kibana) {
   return new kibana.Plugin({
-    exports: {
+    uiExports: {
       app: {
         title: 'Sense',
         description: 'like cURL, but for elasticsearch and helpfull',
