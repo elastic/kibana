@@ -6,8 +6,8 @@ define(function (require) {
     function validateParent(parent, path) {
       if (_.isUndefined(parent)) return;
 
-      if (!_.isString(path) || path.length <= 0) {
-        throw new errors.PersistedStateError('Child PersistedState objects must contain a path');
+      if (path.length <= 0) {
+        throw new errors.PersistedStateError('PersistedState child objects must contain a path');
       }
 
       if (parent instanceof PersistedState) return;
@@ -21,11 +21,12 @@ define(function (require) {
     }
 
     function PersistedState(value, path, parent) {
-      validateValue(value);
-      validateParent(parent, path);
-
-      this._path = (!_.isUndefined(path)) ? [path] : [];
+      this._path = this._setPath(path);
       this._parent = parent || false;
+
+      validateValue(value);
+      validateParent(parent, this._path);
+
       this.set(value || {});
     }
 
@@ -47,7 +48,7 @@ define(function (require) {
     };
 
     PersistedState.prototype.createChild = function (path, value) {
-      return new PersistedState(value, path, this._parent || this);
+      return new PersistedState(value, this._getIndex(path), this._parent || this);
     };
 
     PersistedState.prototype.destroyChild = function (path) {
@@ -61,6 +62,14 @@ define(function (require) {
     PersistedState.prototype._getIndex = function (key) {
       if (_.isUndefined(key)) return this._path;
       return this._path.concat(key);
+    };
+
+    PersistedState.prototype._setPath = function (path) {
+      var isString = _.isString(path);
+      var isArray = _.isArray(path);
+
+      if (!isString && !isArray) return [];
+      return (isString) ? [path] : path;
     };
 
     PersistedState.prototype._hasPath = function () {
