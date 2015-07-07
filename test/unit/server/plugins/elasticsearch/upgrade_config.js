@@ -21,9 +21,60 @@ describe('pluigns/elasticsearch', function () {
       upgrade = upgradeConfig(server);
     });
 
-    it('should resolve with undefined if nothing is found', function () {
-      return upgrade({ hits: { hits:[] } }).then(function (resp) {
-        expect(resp).to.be(undefined);
+    describe('nothing is found', function () {
+      var env = process.env.NODE_ENV;
+      var response = { hits: { hits:[] } };
+
+      beforeEach(function () {
+        client.create.returns(Promise.resolve());
+      });
+
+      describe('production', function () {
+        beforeEach(function () {
+          process.env.NODE_ENV = 'production';
+        });
+
+        it('should resolve buildNum to kibana.buildNum', function () {
+          get.withArgs('kibana.buildNum').returns(5801);
+          return upgrade(response).then(function (resp) {
+            sinon.assert.calledOnce(client.create);
+            var params = client.create.args[0][0];
+            expect(params.body).to.have.property('buildNum', 5801);
+          });
+        });
+
+        it('should resolve version to kibana.package.version', function () {
+          return upgrade(response).then(function (resp) {
+            var params = client.create.args[0][0];
+            expect(params).to.have.property('id', '4.0.1');
+          });
+        });
+      });
+
+      describe('development', function () {
+        beforeEach(function () {
+          process.env.NODE_ENV = 'development';
+        });
+
+        it('should resolve buildNum to the max integer', function () {
+          return upgrade(response).then(function (resp) {
+            var params = client.create.args[0][0];
+            expect(params.body).to.have.property('buildNum', (Math.pow(2, 53) - 1));
+          });
+        });
+
+        it('should resolve version to @@version', function () {
+          return upgrade(response).then(function (resp) {
+            var params = client.create.args[0][0];
+            expect(params).to.have.property('id', '@@version');
+          });
+        });
+
+
+      });
+
+      afterEach(function () {
+        process.env.NODE_ENV = env;
       });
     });
 
