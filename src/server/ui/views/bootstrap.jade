@@ -8,6 +8,7 @@ html(lang='en')
     meta(name='viewport', content='width=device-width')
     link(rel='shortcut icon', href='/images/elk.ico')
     title Kibana
+    link(rel='stylesheet', href='/bundles/#{app.id}.style.css')
   body(kbn-chrome)
     script window.__KBN__ = !{j(kibanaPayload)};
     script(src='/bundles/#{app.id}.js')

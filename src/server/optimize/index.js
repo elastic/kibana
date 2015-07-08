@@ -1,15 +1,20 @@
 module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var resolve = require('path').resolve;
-  var join = require('path').join;
+  var fromRoot = require('../utils/fromRoot');
 
   var Optimizer = require('./Optimizer');
   var bundleDir = resolve(config.get('optimize.bundleDir'));
   var status = kbnServer.status.create('optimize');
 
   server.exposeStaticDir('/bundles/{path*}', bundleDir);
+  if (config.get('optimize.sourceMaps')) {
+    server.exposeStaticDir('/src/{path*}', fromRoot('src'));
+    server.exposeStaticDir('/node_modules/{paths*}', fromRoot('node_modules'));
+  }
 
   return (new Optimizer({
+    verbose: config.get('logging.verbose'),
     watch: config.get('optimize.watch'),
     sourceMaps: config.get('optimize.sourceMaps'),
     bundleDir: bundleDir,

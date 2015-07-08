@@ -18,16 +18,7 @@ function OptmzUiExports(plugins) {
   var aliases = this.aliases = {};
 
   // webpack loaders map loader configuration to regexps
-  var loaders = this.loaders = [
-    { test: /\.less$/, loader: 'style/url!file!less' },
-    { test: /\.css$/, loader: 'style/url!file' },
-    { test: /\.html$/, loader: 'raw' },
-    {
-      test: /\.(woff|woff2|png)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: 'url-loader?limit=10000&minetype=application/font-woff'
-    },
-    { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader' },
-  ];
+  var loaders = this.loaders = [];
 
   var claimedModuleIds = {};
   _.each(plugins, function (plugin) {
@@ -51,6 +42,7 @@ function OptmzUiExports(plugins) {
       var parse = true;
       var imports = null;
       var exports = null;
+      var expose = null;
 
       // basic style, just a path
       if (_.isString(spec)) path = spec;
@@ -66,6 +58,7 @@ function OptmzUiExports(plugins) {
         parse = _.get(spec, 'parse', parse);
         imports = _.get(spec, 'imports', imports);
         exports = _.get(spec, 'exports', exports);
+        expose = _.get(spec, 'expose', expose);
       }
 
       if (!path) {
@@ -80,6 +73,7 @@ function OptmzUiExports(plugins) {
       }
 
       if (exports) loader.push(`exports?${exports}`);
+      if (expose) loader.push(`expose?${expose}`);
       if (loader.length) loaders.push({ test: asRegExp(path), loader: loader.join('!') });
 
       if (!parse) noParse.push(asRegExp(path));

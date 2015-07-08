@@ -38,14 +38,9 @@ module.exports = class Plugin {
     let server = self.kbnServer.server;
     let status = self.kbnServer.status;
 
-    let basetags = ['plugin', id];
-    let log = function (tags, data, timestamp) {
-
-    };
-
     let config = server.config();
-    server.log(['plugin', 'debug', 'init'], {
-      message: 'Initializing plugin',
+    server.log(['plugins', 'debug'], {
+      tmpl: 'Initializing plugin <%= plugin.id %>',
       plugin: self
     });
 

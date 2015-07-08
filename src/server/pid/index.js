@@ -15,8 +15,8 @@ module.exports = Promise.method(function (kibana) {
   .catch(function (err) {
     if (err.code !== 'EEXIST') throw err;
 
-    server.log(['pid', 'warn'], {
-      message: 'pid file already exists at <%= path %>',
+    server.log(['pid', 'warning'], {
+      tmpl: 'pid file already exists at <%= path %>',
       path: path,
       pid: pid
     });
@@ -26,7 +26,7 @@ module.exports = Promise.method(function (kibana) {
   .then(function () {
 
     server.log(['pid', 'debug'], {
-      message: 'wrote pid file to <%= path %>',
+      tmpl: 'wrote pid file to <%= path %>',
       path: path,
       pid: pid
     });

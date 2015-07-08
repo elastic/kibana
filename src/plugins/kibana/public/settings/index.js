@@ -9,7 +9,10 @@ define(function (require, module, exports) {
     redirectTo: '/settings/indices'
   });
 
-  require('modules').get('apps/settings')
+  var sections = require('plugins/kibana/settings/sections/index');
+
+  require('modules')
+  .get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
     return {
       restrict: 'E',
@@ -20,7 +23,7 @@ define(function (require, module, exports) {
       },
       link: function ($scope, $el) {
         timefilter.enabled = false;
-        $scope.sections = require('plugins/kibana/settings/sections/index');
+        $scope.sections = sections;
         $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 
         $scope.sections.forEach(function (section) {

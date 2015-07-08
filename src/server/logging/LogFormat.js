@@ -121,9 +121,10 @@ module.exports = class TransformObjStream extends Stream.Transform {
       data.message = event.data.message;
       data.error = serializeError(event.data);
     }
-    else if (_.isPlainObject(event.data) && event.data.message) {
+    else if (_.isPlainObject(event.data) && event.data.tmpl) {
       _.assign(data, event.data);
-      data.message = _.template(event.data.message)(event.data);
+      data.tmpl = undefined;
+      data.message = _.template(event.data.tmpl)(event.data);
     }
     else {
       data.message = _.isString(event.data) ? event.data : inspect(event.data);

@@ -10,8 +10,8 @@ function Status(name, server) {
   this.message = 'uninitialized';
 
   this.on('change', function (current, previous) {
-    server.log(['plugin', name, 'status'], {
-      message: 'Change status from <%= prev %> to <%= cur %> - <%= curMsg %>',
+    server.log(['plugins', name, 'info'], {
+      tmpl: 'Change status from <%= prev %> to <%= cur %> - <%= curMsg %>',
       name: name,
       prev: previous.state,
       cur: current.state,

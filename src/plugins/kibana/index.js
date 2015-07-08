@@ -50,7 +50,10 @@ module.exports = function (kibana) {
         'file_saver': ['bower_components/FileSaver/FileSaver', null, 'saveAs'],
         'gridster': ['bower_components/gridster/dist/jquery.gridster', 'jquery,gs=gridster-styles'],
         'gridster-styles': ['bower_components/gridster/dist/jquery.gridster.css'],
-        'jquery': ['bower_components/jquery/dist/jquery'],
+        'jquery':{
+          path: 'bower_components/jquery/dist/jquery',
+          expose: 'jQuery'
+        },
         'leaflet': ['bower_components/leaflet/dist/leaflet', 'ls=leaflet-styles'],
         'leaflet-styles': ['bower_components/leaflet-draw/dist/leaflet.draw.css'],
         'leaflet-heat': ['bower_components/Leaflet.heat/dist/leaflet-heat', 'leaflet'],

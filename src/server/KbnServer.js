@@ -65,7 +65,7 @@ KbnServer.prototype.listen = function () {
   })
   .then(
     function () {
-      server.log('server', 'Server running at ' + server.info.uri);
+      server.log('info', 'Server running at ' + server.info.uri);
       return server;
     },
     function (err) {

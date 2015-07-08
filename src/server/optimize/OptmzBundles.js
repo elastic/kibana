@@ -54,7 +54,7 @@ class OptmzBundles {
 
   init(fresh) {
     return resolve()
-    .then(fresh && this.cleanBundles)
+    .then(fresh ? this.cleanBundles : _.noop)
     .then(this.ensureBundleDir)
     .then(this.syncBundleDir);
   }
@@ -113,7 +113,7 @@ class OptmzBundles {
 
     return readdir(dir).map(function (name) {
       // skip '.', '..', and dot-prefixed files
-      if (name.charAt(0) === '.') return false;
+      if (name.charAt(0) === '.' || name === 'sourcemaps') return false;
       return join(dir, name);
     })
     .then(_.compact);

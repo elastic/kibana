@@ -7,9 +7,10 @@ module.exports = function (kbnServer, server, config) {
 
   var scanDirs = [].concat(config.get('plugins.scanDirs'));
   var absolutePaths = [].concat(config.get('plugins.paths'));
+  var debug = _.bindKey(server, 'log', ['plugins', 'debug']);
 
   return Promise.map(scanDirs, function (dir) {
-    server.log('plugin-scan', 'Scanning ' + dir + ' for plugins');
+    debug({ tmpl: 'Scanning `<%= dir %>` for plugins', dir: dir });
 
     return readdir(dir).map(function (file) {
       if (file === '.' || file === '..') return false;
@@ -31,10 +32,10 @@ module.exports = function (kbnServer, server, config) {
   .filter(function (dir) {
     try {
       require(dir);
-      server.log('plugin-scan', 'Found plugin at ' + dir);
+      debug({ tmpl: 'Found plugin at <%= dir %>', dir: dir });
       return true;
     } catch (e) {
-      server.log('plugin-scan', 'Skipping non-plugin directory at ' + dir);
+      debug({ tmpl: 'Skipping non-plugin directory at <%= dir %>', dir: dir });
       return false;
     }
   })

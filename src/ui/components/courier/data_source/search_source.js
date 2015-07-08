@@ -6,6 +6,7 @@ define(function (require) {
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var normalizeSortRequest = Private(require('components/courier/data_source/_normalize_sort_request'));
+    var rootSearchSource = require('components/courier/data_source/_root_search_source');
 
     _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
@@ -13,13 +14,6 @@ define(function (require) {
     }
 
     // expose a ready state for the route setup to read
-    var rootSearchSource;
-    SearchSource.ready = new Promise(function (resolve) {
-      require(['components/courier/data_source/_root_search_source'], function (PromiseModule) {
-        rootSearchSource = Private(PromiseModule);
-        resolve();
-      });
-    });
 
     /*****
      * PUBLIC API
@@ -76,7 +70,7 @@ define(function (require) {
       var self = this;
       if (self._parent === false) return;
       if (self._parent) return self._parent;
-      return onlyHardLinked ? undefined : rootSearchSource.get();
+      return onlyHardLinked ? undefined : Private(rootSearchSource).get();
     };
 
     /**

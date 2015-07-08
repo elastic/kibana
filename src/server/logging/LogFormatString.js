@@ -12,9 +12,11 @@ let typeColors = {
   res: 'green',
   ops: 'cyan',
   err: 'red',
-  info: 'blue',
+  info: 'green',
   error: 'red',
-  fatal: 'magenta'
+  fatal: 'magenta',
+  plugins: 'yellow',
+  debug: 'brightBlack'
 };
 
 let color = _.memoize(function (name) {
@@ -23,14 +25,18 @@ let color = _.memoize(function (name) {
 
 module.exports = class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
-    let type = color(data.type)(_.padLeft(data.type, 6));
+    let type = _.chain(data.type).padLeft(6).trunc(6).thru(color(data.type)).value();
     let time = color('time')(moment(data.timestamp).format());
     let msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
-    let tags = data.tags.reduce(function (s, t) {
+    let tags = _(data.tags)
+    .sortBy(function (tag) {
+      return color(tag) === _.identity ? `1${tag}` : `0${tag}`;
+    })
+    .reduce(function (s, t) {
       return s + `[${ color(t)(t) }]`;
     }, '');
 
-    return `${type}: [ ${time} ] ${tags} ${msg}`;
+    return `${type}: [${time}] ${tags} ${msg}`;
   }
 };

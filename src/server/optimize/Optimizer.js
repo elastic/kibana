@@ -12,11 +12,13 @@ var fromRoot = require('../utils/fromRoot');
 var OptmzBundles = require('./OptmzBundles');
 var OptmzUiModules = require('./OptmzUiModules');
 var DirectoryNameAsDefaultFile = require('./DirectoryNameAsDefaultFile');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 class Optimizer extends EventEmitter {
   constructor(opts) {
     super();
 
+    this.verbose = opts.verbose;
     this.watch = opts.watch || false;
     this.sourceMaps = opts.sourceMaps || false;
     this.modules = new OptmzUiModules(opts.plugins);
@@ -35,26 +37,37 @@ class Optimizer extends EventEmitter {
     var compiler = webpack({
       entry: bundles.getEntriesToCompile(),
 
-      devtool: this.sourceMaps ? 'inline-source-map' : false,
+      devtool: this.sourceMaps ? '#source-map' : false,
 
       output: {
         path: this.bundles.dir,
+        filename: '[name].js',
+        sourceMapFilename: '[file].map',
         publicPath: '/bundles/',
-        filename: '[name].js'
+        devtoolModuleFilenameTemplate: '[resource-path]'
       },
 
       plugins: [
+        new webpack.ResolverPlugin([
+          new DirectoryNameAsDefaultFile()
+        ]),
         new webpack.NoErrorsPlugin(),
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.ResolverPlugin([
-          new DirectoryNameAsDefaultFile()
-        ])
+        new ExtractTextPlugin('[name].style.css', {
+          allChunks: true
+        })
       ],
 
       module: {
+        loaders: [
+          { test: /\.less$/, loader: ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap') },
+          { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?sourceMap') },
+          { test: /\.html$/, loader: 'raw' },
+          { test: /\.png$/, loader: 'url?limit=2048!file?name=[path][name].[ext]' },
+          { test: /\.(woff|woff2|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file?name=[path][name].[ext]' },
+        ].concat(modules.loaders),
         noParse: modules.noParse,
-        loaders: modules.loaders
       },
 
       resolve: {
@@ -74,8 +87,11 @@ class Optimizer extends EventEmitter {
     compiler.plugin('done', function (stats) {
       var errCount = _.size(stats.compilation.errors);
 
+      if (errCount || self.verbose) {
+        console.log(`\n${ stats.toString({ colors: true }) }`);
+      }
+
       if (errCount) {
-        console.log(stats.toString({ colors: true }));
         self.emit('error', new Error('Failed to compile bundle'));
         return;
       }

@@ -26,7 +26,6 @@ module.exports = function (kbnServer) {
       responseTimeMax: _.get(event, ['responseTimes', port, 'max']),
       requests: _.get(event, ['requests', port, 'total'], 0)
     });
-
   });
 
   server.route({

@@ -10,6 +10,7 @@ program.option('-e, --elasticsearch <uri>', 'Elasticsearch instance');
 program.option('-c, --config <path>', 'Path to the config file');
 program.option('-p, --port <port>', 'The port to bind to', parseInt);
 program.option('-q, --quiet', 'Turns off logging');
+program.option('--verbose', 'Turns on verbose logging');
 program.option('-H, --host <host>', 'The host to bind to');
 program.option('-l, --log-file <path>', 'The file to log to');
 program.option(
@@ -46,7 +47,7 @@ if (program.quiet) {
 }
 
 if (program.logFile) {
-  settings['logging.file'] = program.logFile;
+  settings['logging.dest'] = program.logFile;
 }
 
 if (program.plugins || program.pluginDir) {

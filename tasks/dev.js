@@ -16,4 +16,19 @@ module.exports = function (grunt) {
 
     grunt.task.run(tasks);
   });
+
+  grunt.registerTask('devServer', function (keepalive) {
+    var port = grunt.option('port');
+    var quiet = !(grunt.option('debug') || grunt.option('verbose'));
+
+    require('../src/devServer').run(port, quiet)
+    .then(function (server) {
+      grunt.log.ok('Server started: ' + server.info.uri);
+      if (keepalive) {
+        // return a never resolving promise
+        return new Promise(_.noop);
+      }
+    })
+    .nodeify(this.async());
+  });
 };

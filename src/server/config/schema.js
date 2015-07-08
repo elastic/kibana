@@ -49,27 +49,29 @@ module.exports = Joi.object({
     minimumVerison: Joi.string().default('1.4.4')
   }).default(),
 
-  logging: Joi.object({
-    quiet: Joi.boolean().default(false),
+  logging: Joi.object().keys({
+    silent: Joi.boolean().default(false),
 
-    // not nested under a kbnLogger key so that we can ref "quiet"
-    kbnLogger: Joi.boolean().default(true),
-    kbnLoggerConfig: Joi.object({
-      dest: Joi.string().default('stdout'),
-      json: Joi.boolean().default(Joi.ref('$prod'))
-    }).default(),
-    kbnLoggerEvents: Joi.when('quiet', {
+    quiet: Joi.boolean()
+    .when('silent', {
       is: true,
-      then: Joi.object({
-        error: Joi.string().default('*')
-      }).default(),
-      otherwise: Joi.object({
-        log: Joi.string().default('*'),
-        response: Joi.string().default('*'),
-        error: Joi.string().default('*')
-      }).default()
-    })
-  }).default(),
+      then: Joi.default(true).valid(true),
+      otherwise: Joi.default(false)
+    }),
+
+    verbose: Joi.boolean()
+    .when('quiet', {
+      is: true,
+      then: Joi.valid(false).default(false),
+      otherwise: Joi.default(true)
+    }),
+
+    dest: Joi.string().default('stdout'),
+    json: Joi.boolean().default(Joi.ref('$prod')),
+
+    events: Joi.any().default({})
+  })
+  .default(),
 
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
