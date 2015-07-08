@@ -128,6 +128,14 @@ define(function () {
       'format:currency:defaultPattern': {
         type: 'string',
         value: '($0,0.[00])'
+      },
+      'timepicker:timeDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          from: 'now-15m',
+          to: 'now',
+          mode: 'quick'
+        }, null, 2)
       }
     };
   };

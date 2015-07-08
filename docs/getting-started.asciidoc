@@ -283,7 +283,7 @@ A green oval with the filter definition displays right under the query box:
 image::images/tutorial-visualize-map-3.png[]
 
 Hover on the filter to display the controls to toggle, pin, invert, or delete the filter. Save this chart with the name 
-_Bar Example_.
+_Map Example_.
 
 Finally, we're going to define a sample Markdown widget to display on our dashboard. Click on *New Visualization*, then 
 *Markdown widget*, to display a very simple Markdown entry field:
