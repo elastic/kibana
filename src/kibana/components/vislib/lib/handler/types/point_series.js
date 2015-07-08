@@ -79,8 +79,8 @@ define(function (require) {
           },
           {
             type: 'warning',
-            msg: 'Null values are not accurately represented by area charts. A line chart ' +
-                 'is recommended.',
+            msg: 'Parts of or the entire area chart might not be displayed due to null values in the data.' +
+            ' A line chart is recommended when displaying data with null values.',
             test: function (vis, data) {
               return data.nullsPresent();
             }
