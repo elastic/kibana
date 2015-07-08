@@ -15,6 +15,14 @@ kbn-agg-table-group {
     .flex(1, 1, auto);
     overflow: auto;
 
+    tr:hover td {
+      background-color: lighten(@gray-lighter, 4%);
+    }
+
+    .cell-hover:hover {
+      background-color: @gray-lighter;
+    }
+
     th i.fa-sort {
       color: @gray-light;
     }
