@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
     var getResponseAggConfig = Private(require('components/agg_types/metrics/_get_response_agg_config'));
+    var percentiles = Private(require('components/agg_types/metrics/percentiles'));
 
     return new MetricAggType({
       name: 'median',
@@ -15,22 +16,14 @@ define(function (require) {
         {
           name: 'field',
           filterFieldTypes: 'number'
-        }, {
+        },
+        {
           name: 'percents',
           default: [50]
         }
       ],
-      getResponseAggs: function (agg) {
-        var ValueAggConfig = getResponseAggConfig(agg);
-        return agg.params.percents.map(function (percent) {
-          return new ValueAggConfig(percent);
-        });
-      },
-      getValue: function (agg, bucket) {
-        return _.find(bucket[agg.parentId].values, function (value, key) {
-          return agg.key === parseFloat(key);
-        });
-      }
+      getResponseAggs: percentiles.getResponseAggs,
+      getValue: percentiles.getValue
     });
   };
 });
