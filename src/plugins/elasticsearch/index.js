@@ -4,6 +4,27 @@ module.exports = function (kibana) {
   var createProxy = require('./lib/create_proxy');
 
   return new kibana.Plugin({
+
+    config: function (Joi) {
+      return Joi.object({
+        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        preserveHost: Joi.boolean().default(true),
+        username: Joi.string(),
+        password: Joi.string(),
+        shardTimeout: Joi.number().default(0),
+        requestTimeout: Joi.number().default(30000),
+        pingTimeout: Joi.number().default(30000),
+        startupTimeout: Joi.number().default(5000),
+        ssl: Joi.object({
+          verify: Joi.boolean().default(true),
+          ca: Joi.string(),
+          cert: Joi.string(),
+          key: Joi.string()
+        }).default(),
+        minimumVerison: Joi.string().default('1.4.4')
+      }).default();
+    },
+
     init: function (server, options) {
       var config = server.config();
 
@@ -35,7 +56,7 @@ module.exports = function (kibana) {
       );
 
       // Set up the health check service and start it.
-      // healthCheck(this, server).start();
+      healthCheck(this, server).start();
     }
   });
 

@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var isUpgradeable = require('./is_upgradeable');
+var pkg = require('../../../utils/closestPackageJson').getSync();
 var _ = require('lodash');
 var format = require('util').format;
 module.exports = function (server) {
@@ -12,7 +13,7 @@ module.exports = function (server) {
     if (response.hits.hits.length === 0) return Promise.resolve();
 
     // if we already have a the current version in the index then we need to stop
-    if (_.find(response.hits.hits, { _id: config.get('kibana.package.version') })) {
+    if (_.find(response.hits.hits, { _id: pkg.version })) {
       return Promise.resolve();
     }
 
@@ -29,13 +30,17 @@ module.exports = function (server) {
       body._source.buildNum = parseInt(config.get('kibana.buildNum'), 10);
     }
 
-    var logMsg = format('[ elasticsearch ] Upgrade config from %s to %s', body._id, config.get('kibana.package.version'));
-    server.log('plugin', logMsg);
+    server.log('plugin', {
+      tmpl: '[ elasticsearch ] Upgrade config from <%= prevVersion %> to <%= newVersion %>',
+      prevVersion: body._id,
+      newVersion: pkg.version
+    });
+
     return client.create({
       index: config.get('kibana.index'),
       type: 'config',
       body: body._source,
-      id: config.get('kibana.package.version')
+      id: pkg.version
     });
   };
 };

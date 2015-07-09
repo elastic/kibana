@@ -2,11 +2,12 @@ module.exports = function (kbnServer, server, config) {
   var Boom = require('boom');
   var parse = require('url').parse;
   var format = require('url').format;
+  var getDefaultRoute = require('./getDefaultRoute');
 
   // Create a new connection
   server.connection({
-    host: config.get('kibana.server.host'),
-    port: config.get('kibana.server.port')
+    host: config.get('server.host'),
+    port: config.get('server.port')
   });
 
   // provide a simple way to expose static directories
@@ -54,7 +55,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler: function (req, reply) {
-      reply.redirect(config.get('kibana.defaultRoute'));
+      reply.redirect(getDefaultRoute(kbnServer));
     }
   });
 

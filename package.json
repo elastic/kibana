@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "test": "grunt test",
-    "start": "node ./src/devServer/run.js",
+    "start": "node ./src/server/cli/index.js --dev",
     "postinstall": "bower install && grunt licenses --check-validity",
     "precommit": "grunt lintStagedFiles"
   },

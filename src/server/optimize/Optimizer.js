@@ -8,7 +8,7 @@ var write = require('fs').writeFileSync;
 var webpack = require('webpack');
 
 var assets = require('../ui/assets');
-var fromRoot = require('../utils/fromRoot');
+var fromRoot = require('../../utils/fromRoot');
 var OptmzBundles = require('./OptmzBundles');
 var OptmzUiModules = require('./OptmzUiModules');
 var DirectoryNameAsDefaultFile = require('./DirectoryNameAsDefaultFile');
@@ -22,7 +22,7 @@ class Optimizer extends EventEmitter {
     this.watch = opts.watch || false;
     this.sourceMaps = opts.sourceMaps || false;
     this.modules = new OptmzUiModules(opts.plugins);
-    this.bundles = new OptmzBundles(opts.bundleDir, opts.apps);
+    this.bundles = new OptmzBundles(opts);
   }
 
   init() {
@@ -87,16 +87,11 @@ class Optimizer extends EventEmitter {
     compiler.plugin('done', function (stats) {
       var errCount = _.size(stats.compilation.errors);
 
-      if (errCount || self.verbose) {
-        console.log(`\n${ stats.toString({ colors: true }) }`);
-      }
-
       if (errCount) {
-        self.emit('error', new Error('Failed to compile bundle'));
-        return;
+        self.emit('error', stats, new Error('Failed to compile bundle'));
+      } else {
+        self.emit('done', stats);
       }
-
-      self.emit('done');
     });
 
     compiler.plugin('failed', onFail);

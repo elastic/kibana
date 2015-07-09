@@ -13,7 +13,7 @@ module.exports = function (kbnServer) {
   server.exposeStaticDir('/status/{path*}', join(__dirname, 'public'));
 
   server.plugins.good.monitor.on('ops', function (event) {
-    var port = config.get('kibana.server.port');
+    var port = config.get('server.port');
 
     kbnServer.metrics.add({
       rss: event.psmem.rss,

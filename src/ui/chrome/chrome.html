@@ -1,5 +1,5 @@
 <kbn-notifications list="notifList"></kbn-notifications>
-<div class="content" style="display: none;">
+<div class="content" style="display: none;" chrome-context >
   <nav
     ng-style="{ background: chrome.navBackground }"
     ng-class="{ show: !chrome.embedded }"
@@ -45,7 +45,7 @@
         </li>
       </ul>
 
-      <ul chrome-context ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
+      <ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
         <li>
           <a ng-click="toggleRefresh()" ng-show="timefilter.refreshInterval.value > 0">
             <i class="fa" ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"></i>
@@ -57,7 +57,7 @@
           ng-show="timefilter.refreshInterval.value > 0 || !!pickerTemplate.current"
           class="to-body">
 
-          <a ng-click="pickerTemplate.toggle('refreshInterval')" class="navbar-timepicker-auto-refresh-desc">
+          <a ng-click="pickerTemplate.toggle('interval')" class="navbar-timepicker-auto-refresh-desc">
             <span ng-show="timefilter.refreshInterval.value === 0"><i class="fa fa-repeat"></i> Auto-refresh</span>
             <span ng-show="timefilter.refreshInterval.value > 0">{{timefilter.refreshInterval.display}}</span>
           </a>
@@ -87,9 +87,9 @@
 
   <config
     ng-show="timefilter.enabled"
-    config-template="globalConfigTemplate"
+    config-template="pickerTemplate"
     config-object="timefilter"
-    config-close="toggleTimepicker">
+    config-close="pickerTemplate.close">
   </config>
 
   <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-')" ng-view></div>

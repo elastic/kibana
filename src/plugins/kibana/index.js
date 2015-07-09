@@ -3,6 +3,14 @@ module.exports = function (kibana) {
   var ng = jq.concat('angular');
 
   return new kibana.Plugin({
+
+    config: function (Joi) {
+      return Joi.object({
+        index: Joi.string().default('.kibana'),
+        buildNum: Joi.string().default('@@buildNum')
+      }).default();
+    },
+
     uiExports: {
       app: {
         title: 'Kibana',
@@ -12,7 +20,12 @@ module.exports = function (kibana) {
         uses: [
           'visTypes',
           'spyModes'
-        ]
+        ],
+        constants: function (server, options) {
+          return {
+            defaultAppId: options.defaultAppId
+          };
+        }
       },
 
       modules: {

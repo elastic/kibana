@@ -1,7 +1,7 @@
 module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var resolve = require('path').resolve;
-  var fromRoot = require('../utils/fromRoot');
+  var fromRoot = require('../../utils/fromRoot');
 
   var Optimizer = require('./Optimizer');
   var bundleDir = resolve(config.get('optimize.bundleDir'));
@@ -14,7 +14,6 @@ module.exports = function (kbnServer, server, config) {
   }
 
   return (new Optimizer({
-    verbose: config.get('logging.verbose'),
     watch: config.get('optimize.watch'),
     sourceMaps: config.get('optimize.sourceMaps'),
     bundleDir: bundleDir,
@@ -33,11 +32,12 @@ module.exports = function (kbnServer, server, config) {
   .on('watch-run', _.after(2, function () {
     status.yellow('Source file change detected, reoptimizing source files');
   }))
-  .on('done', function () {
+  .on('done', function (stats) {
+    server.log(['optimize', 'debug'], `\n${ stats.toString({ colors: true }) }`);
     status.green('Optimization complete');
   })
-  .on('error', function (err) {
-    server.log('fatal', err);
+  .on('error', function (stats, err) {
+    server.log(['optimize', 'fatal'], `\n${ stats.toString({ colors: true }) }`);
     status.red('Optimization failure! ' + err.message);
   })
   .init();

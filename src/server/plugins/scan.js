@@ -5,8 +5,8 @@ module.exports = function (kbnServer, server, config) {
   var stat = Promise.promisify(require('fs').stat);
   var join = require('path').join;
 
-  var scanDirs = [].concat(config.get('plugins.scanDirs'));
-  var absolutePaths = [].concat(config.get('plugins.paths'));
+  var scanDirs = [].concat(config.get('plugins.scanDirs') || []);
+  var absolutePaths = [].concat(config.get('plugins.paths') || []);
   var debug = _.bindKey(server, 'log', ['plugins', 'debug']);
 
   return Promise.map(scanDirs, function (dir) {

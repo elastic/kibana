@@ -10,7 +10,9 @@ module.exports = function (kbnServer, server, config) {
     path: '/apps',
     method: 'GET',
     handler: function (req, reply) {
-      return reply.renderApp(hiddenApps.byId.switcher);
+      var switcher = hiddenApps.byId.switcher;
+      if (!switcher) return reply(Boom.notFound('app switcher not installed'));
+      return reply.renderApp(switcher);
     }
   });
 

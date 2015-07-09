@@ -7,14 +7,24 @@ module.exports = function (kbnServer, server, config) {
   return fromNode(function (cb) {
     let events = config.get('logging.events');
 
-    if (config.get('logging.quiet')) {
+    if (config.get('logging.silent')) {
+      _.defaults(events, {});
+    }
+    else if (config.get('logging.quiet')) {
       _.defaults(events, {
         log: ['error', 'fatal'],
         error: '*'
       });
     }
-
-    if (config.get('logging.verbose')) {
+    else if (config.get('logging.verbose')) {
+      _.defaults(events, {
+        log: '*',
+        ops: '*',
+        response: '*',
+        error: '*'
+      });
+    }
+    else {
       _.defaults(events, {
         log: ['info', 'warning', 'error', 'fatal'],
         response: '*',

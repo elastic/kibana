@@ -3,11 +3,8 @@ var Promise = require('bluebird');
 var writeFile = Promise.promisify(require('fs').writeFile);
 var unlink = require('fs').unlinkSync;
 
-module.exports = Promise.method(function (kibana) {
-  var server = kibana.server;
-  var config = server.config();
-
-  var path = config.get('kibana.server.pidFile');
+module.exports = Promise.method(function (kbnServer, server, config) {
+  var path = config.get('server.pidFile');
   var pid = String(process.pid);
   if (!path) return;
 

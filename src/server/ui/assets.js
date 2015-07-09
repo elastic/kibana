@@ -1,4 +1,4 @@
-var fromRoot = require('../utils/fromRoot');
+var fromRoot = require('../../utils/fromRoot');
 var readdir = require('fs').readdirSync;
 var stat = require('fs').statSync;
 var join = require('path').join;

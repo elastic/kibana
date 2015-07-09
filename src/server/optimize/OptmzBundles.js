@@ -15,10 +15,14 @@ let readdir = promify(require('fs').readdir);
 let readSync = require('fs').readFileSync;
 
 let appEntryTmpl = _.template(readSync(join(__dirname, 'OptmzAppEntry.js.tmpl')));
-let kbnVersion = require('../utils/closestPackageJson').getSync().version;
+let serverVersion = require('../../utils/closestPackageJson').getSync().version;
 
 class OptmzBundles {
-  constructor(dir, apps) {
+  constructor(opts) {
+    let dir = _.get(opts, 'bundleDir');
+    let apps = _.get(opts, 'apps');
+    let versionTag = _.get(opts, 'sourceMaps') ? ' (with source maps)' : '';
+
     this.dir = dir;
     if (!_.isString(this.dir)) {
       throw new TypeError('Optimizer requires a working directory');
@@ -34,7 +38,9 @@ class OptmzBundles {
         bundlePath: join(dir, app.id + '.js')
       };
 
-      entry.content = appEntryTmpl(_.defaults({ kbnVersion: kbnVersion }, entry));
+      entry.content = appEntryTmpl(_.defaults({
+        version: `${serverVersion}${versionTag}`
+      }, entry));
 
       return entry;
     });

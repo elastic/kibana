@@ -1,18 +1,19 @@
 var semver = require('semver');
+var pkg = require('../../../utils/closestPackageJson').getSync();
 var rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
 module.exports = function (server, doc) {
   var config = server.config();
   if (/beta|snapshot/i.test(doc._id)) return false;
   if (!doc._id) return false;
-  if (doc._id === config.get('kibana.package.version')) return false;
+  if (doc._id === pkg.version) return false;
 
   var packageRcRelease = Infinity;
   var rcRelease = Infinity;
-  var packageVersion = config.get('kibana.package.version');
+  var packageVersion = pkg.version;
   var version = doc._id;
   var matches = doc._id.match(rcVersionRegex);
-  var packageMatches = config.get('kibana.package.version').match(rcVersionRegex);
+  var packageMatches = pkg.version.match(rcVersionRegex);
 
   if (matches) {
     version = matches[1];
