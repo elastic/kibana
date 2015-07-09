@@ -22,9 +22,9 @@ describe('kibana cli', function () {
         logger = pluginLogger(false);
         downloader = pluginDownloader({}, logger);
         testWorkingPath = join(__dirname, '.test.data');
-        rimraf.sync(testWorkingPath);
         sinon.stub(logger, 'log');
         sinon.stub(logger, 'error');
+        rimraf.sync(testWorkingPath);
       });
 
       afterEach(function () {
@@ -66,13 +66,14 @@ describe('kibana cli', function () {
         return downloader._downloadSingle(source, testWorkingPath, 0, logger)
         .then(function (data) {
           var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([
+          var expected = [
             'README.md',
             'index.js',
             'package.json',
             'public',
             'public/app.js'
-          ]);
+          ];
+          expect(files.sort()).to.eql(expected.sort());
         });
       });
 
@@ -152,13 +153,14 @@ describe('kibana cli', function () {
           expect(logger.log.lastCall.args[0]).to.match(/complete/i);
 
           var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([
+          var expected = [
             'README.md',
             'index.js',
             'package.json',
             'public',
             'public/app.js'
-          ]);
+          ];
+          expect(files.sort()).to.eql(expected.sort());
         });
       });
 
@@ -200,13 +202,14 @@ describe('kibana cli', function () {
           }
 
           var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([
+          var expected = [
             'README.md',
             'index.js',
             'package.json',
             'public',
             'public/app.js'
-          ]);
+          ];
+          expect(files.sort()).to.eql(expected.sort());
         });
       });
 
