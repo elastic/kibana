@@ -1,9 +1,5 @@
 #!/usr/bin/env node
 
-//process.env.NODE_DEBUG = 'net';
-//process.env.NODE_DEBUG = 'request';
-
-var _ = require('lodash');
 var program = require('commander');
 require('../lib/commanderExtensions.js')(program);
 var path = require('path');
