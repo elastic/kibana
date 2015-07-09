@@ -10,7 +10,7 @@ define(function (require) {
     it('decode a base64 string', function () {
       var StringFormat = fieldFormats.getType('string');
       var string = new StringFormat({
-        transform: 'binary'
+        transform: 'base64'
       });
       expect(string.convert('Zm9vYmFy')).to.be('foobar');
     });

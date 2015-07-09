@@ -37,7 +37,7 @@ define(function (require) {
       { id: 'lower', name: 'Lower Case' },
       { id: 'upper', name: 'Upper Case' },
       { id: 'short', name: 'Short Dots' },
-      { id: 'binary', name: 'Base64 Decode'}
+      { id: 'base64', name: 'Base64 Decode'}
     ];
 
     _String.sampleInputs = [
@@ -60,7 +60,7 @@ define(function (require) {
       case 'lower': return String(val).toLowerCase();
       case 'upper': return String(val).toUpperCase();
       case 'short': return _.shortenDottedString(val);
-      case 'binary': return this._base64Decode(val);
+      case 'base64': return this._base64Decode(val);
       default: return _.asPrettyString(val);
       }
     };
