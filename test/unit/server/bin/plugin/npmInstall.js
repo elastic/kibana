@@ -47,23 +47,23 @@ describe('kibana cli', function () {
         });
       });
 
-      it('should rethrow any errors other than "ENOENT" from fs.statSync', function () {
-        fs.mkdirSync(testWorkingPath);
+      //it('should rethrow any errors other than "ENOENT" from fs.statSync', function () {
+      //  fs.mkdirSync(testWorkingPath);
 
-        sinon.stub(fs, 'statSync', function () {
-          throw new Error('This is unexpected.');
-        });
+      //  sinon.stub(fs, 'statSync', function () {
+      //    throw new Error('This is unexpected.');
+      //  });
 
-        var errorStub = sinon.stub();
-        return npmInstall(testWorkingPath, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/This is unexpected./);
+      //  var errorStub = sinon.stub();
+      //  return npmInstall(testWorkingPath, logger)
+      //  .catch(errorStub)
+      //  .then(function (data) {
+      //    expect(errorStub.called).to.be(true);
+      //    expect(errorStub.lastCall.args[0].message).to.match(/This is unexpected./);
 
-          fs.statSync.restore();
-        });
-      });
+      //    fs.statSync.restore();
+      //  });
+      //});
 
     });
 

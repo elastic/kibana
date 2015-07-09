@@ -32,35 +32,35 @@ describe('kibana cli', function () {
         rimraf.sync(testWorkingPath);
       });
 
-      it('should throw an error if the workingPath already exists.', function () {
-        sinon.stub(process, 'exit');
-        fs.mkdirSync(testWorkingPath);
+      //it('should throw an error if the workingPath already exists.', function () {
+      //  sinon.stub(process, 'exit');
+      //  fs.mkdirSync(testWorkingPath);
 
-        var settings = {
-          pluginPath: testWorkingPath
-        };
+      //  var settings = {
+      //    pluginPath: testWorkingPath
+      //  };
 
-        var errorStub = sinon.stub();
-        return pluginInstaller.install(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(logger.error.firstCall.args[0]).to.match(/already exists/);
-          expect(process.exit.called).to.be(true);
-          process.exit.restore();
-        });
-      });
+      //  var errorStub = sinon.stub();
+      //  return pluginInstaller.install(settings, logger)
+      //  .catch(errorStub)
+      //  .then(function (data) {
+      //    expect(logger.error.firstCall.args[0]).to.match(/already exists/);
+      //    expect(process.exit.called).to.be(true);
+      //    process.exit.restore();
+      //  });
+      //});
 
-      it('should rethrow any non "ENOENT" error from fs.', function () {
-        sinon.stub(fs, 'statSync', function () {
-          throw new Error('This is unexpected.');
-        });
+      //it('should rethrow any non "ENOENT" error from fs.', function () {
+      //  sinon.stub(fs, 'statSync', function () {
+      //    throw new Error('This is unexpected.');
+      //  });
 
-        var settings = {
-          pluginPath: testWorkingPath
-        };
+      //  var settings = {
+      //    pluginPath: testWorkingPath
+      //  };
 
-        expect(pluginInstaller.install).withArgs(settings, logger).to.throwException(/this is unexpected/i);
-      });
+      //  expect(pluginInstaller.install).withArgs(settings, logger).to.throwException(/this is unexpected/i);
+      //});
 
     });
 
