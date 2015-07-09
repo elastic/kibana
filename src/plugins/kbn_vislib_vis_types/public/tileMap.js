@@ -16,12 +16,12 @@ define(function (require) {
         defaults: {
           mapType: 'Scaled Circle Markers',
           isDesaturated: true,
+          addTooltip: true,
           heatMaxZoom: 16,
           heatMinOpacity: 0.1,
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
-          addTooltip: true
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
@@ -84,7 +84,8 @@ define(function (require) {
             18: 12
           };
 
-          agg.params.precision = Math.min(zoomPrecision[event.zoom], config.get('visualization:tileMap:maxPrecision'));
+          var precision = config.get('visualization:tileMap:maxPrecision');
+          agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
 
           courier.fetch();
         }

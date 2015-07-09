@@ -3,12 +3,13 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
 
   require('modules').get('apps/settings')
-  .directive('indexedFields', function () {
+  .directive('indexedFields', function ($filter) {
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';
     var nameHtml = require('plugins/kibana/settings/sections/indices/_field_name.html');
     var typeHtml = require('plugins/kibana/settings/sections/indices/_field_type.html');
     var controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');
+    var filter = $filter('filter');
 
     return {
       restrict: 'E',
@@ -26,11 +27,16 @@ define(function (require) {
           { title: 'controls', sortable: false }
         ];
 
-        $scope.$watchCollection('indexPattern.fields', function () {
+        $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter'], refreshRows);
+
+        function refreshRows() {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
 
-          $scope.rows = $scope.indexPattern.getNonScriptedFields().map(function (field) {
+          var fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
+          _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
+
+          $scope.rows = fields.map(function (field) {
             var childScope = _.assign($scope.$new(), { field: field });
             rowScopes.push(childScope);
 
@@ -60,7 +66,7 @@ define(function (require) {
               }
             ];
           });
-        });
+        }
       }
     };
   });
