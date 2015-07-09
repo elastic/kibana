@@ -37,7 +37,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 400 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -49,7 +49,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 401 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -61,7 +61,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 402 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -73,7 +73,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 403 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -85,7 +85,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 404 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -97,7 +97,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 405 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -109,7 +109,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 406 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -121,7 +121,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 407 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -133,7 +133,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 408 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -145,7 +145,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 409 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -157,7 +157,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 410 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -169,7 +169,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 411 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -181,7 +181,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 412 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -193,7 +193,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 413 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -205,7 +205,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 414 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -217,7 +217,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 415 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -229,7 +229,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 416 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -241,7 +241,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 417 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -253,7 +253,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 500 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -265,7 +265,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 501 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -277,7 +277,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 502 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -289,7 +289,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 503 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -301,7 +301,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 504 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -313,7 +313,7 @@ describe('kibana cli', function () {
             progress.handleResponse({ statusCode: 505 });
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(true);
@@ -330,7 +330,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -343,7 +343,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -356,7 +356,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -369,7 +369,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -382,7 +382,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -395,7 +395,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -408,7 +408,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -421,7 +421,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -434,7 +434,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -447,7 +447,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -460,7 +460,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -473,7 +473,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -486,7 +486,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -499,7 +499,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -512,7 +512,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -525,7 +525,7 @@ describe('kibana cli', function () {
             progress.handleEnd();
 
             var errorStub = sinon.stub();
-            return progress.deferred
+            return progress.promise
             .catch(errorStub)
             .then(function (data) {
               expect(errorStub.called).to.be(false);
@@ -544,7 +544,7 @@ describe('kibana cli', function () {
           progress.handleData({ length: 100 });
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(progress.hasError()).to.be(true);
@@ -558,7 +558,7 @@ describe('kibana cli', function () {
           progress.handleEnd();
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(logger.log.callCount).to.be(1);
@@ -572,7 +572,7 @@ describe('kibana cli', function () {
           progress.handleEnd();
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(logger.log.callCount).to.be(2);
@@ -587,7 +587,7 @@ describe('kibana cli', function () {
           progress.handleEnd();
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(logger.log.callCount).to.be(22);
@@ -644,7 +644,7 @@ describe('kibana cli', function () {
           expect(logger.log.callCount).to.be(22);
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(false);
@@ -663,7 +663,7 @@ describe('kibana cli', function () {
           progress.handleEnd();
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.firstCall.args[0].message).to.match(/ENOTFOUND/);
@@ -677,7 +677,7 @@ describe('kibana cli', function () {
           progress.handleEnd();
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(false);
@@ -693,7 +693,7 @@ describe('kibana cli', function () {
           progress.handleError('ERRORMESSAGE', new Error('oops!'));
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(true);
@@ -706,7 +706,7 @@ describe('kibana cli', function () {
           progress.handleError('ERRORMESSAGE', new Error('oops!'));
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(progress.hasError()).to.be(true);
@@ -720,7 +720,7 @@ describe('kibana cli', function () {
           progress.handleError('ERRORMESSAGE', new Error('fourth error!'));
 
           var errorStub = sinon.stub();
-          return progress.deferred
+          return progress.promise
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(true);

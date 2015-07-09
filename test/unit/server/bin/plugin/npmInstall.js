@@ -36,7 +36,7 @@ describe('kibana cli', function () {
       });
 
       it('should throw an error if there is no package.json file in the archive', function () {
-        fs.mkdir(testWorkingPath, function (e) { });
+        fs.mkdirSync(testWorkingPath);
 
         var errorStub = sinon.stub();
         return npmInstall(testWorkingPath, logger)
@@ -48,7 +48,7 @@ describe('kibana cli', function () {
       });
 
       it('should rethrow any errors other than "ENOENT" from fs.statSync', function () {
-        fs.mkdir(testWorkingPath, function (e) {});
+        fs.mkdirSync(testWorkingPath);
 
         sinon.stub(fs, 'statSync', function () {
           throw new Error('This is unexpected.');

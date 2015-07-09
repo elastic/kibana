@@ -120,6 +120,7 @@ describe('kibana cli', function () {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
             'http://www.files.com/badfile2.tar.gz',
+            'I am a bad uri',
             'http://www.files.com/goodfile.tar.gz'
           ],
           workingPath: testWorkingPath,
@@ -146,7 +147,8 @@ describe('kibana cli', function () {
 
           expect(logger.log.getCall(0).args[0]).to.match(/badfile1.tar.gz/);
           expect(logger.log.getCall(1).args[0]).to.match(/badfile2.tar.gz/);
-          expect(logger.log.getCall(2).args[0]).to.match(/goodfile.tar.gz/);
+          expect(logger.log.getCall(2).args[0]).to.match(/I am a bad uri/);
+          expect(logger.log.getCall(3).args[0]).to.match(/goodfile.tar.gz/);
           expect(logger.log.lastCall.args[0]).to.match(/complete/i);
 
           var files = glob.sync('**/*', { cwd: testWorkingPath });
@@ -237,46 +239,6 @@ describe('kibana cli', function () {
         .then(function (data) {
           expect(errorStub.called).to.be(true);
           expect(errorStub.lastCall.args[0].message).to.match(/not a valid/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-        });
-      });
-
-      it('should throw an error when it tries to use an invalid url.', function () {
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'I should break everything',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/invalid/i);
-
-          for (var i = 0; i < logger.log.callCount; i++) {
-            expect(logger.log.getCall(i).args[0]).to.not.match(/badfile3.tar.gz/);
-          }
 
           var files = glob.sync('**/*', { cwd: testWorkingPath });
           expect(files).to.eql([]);

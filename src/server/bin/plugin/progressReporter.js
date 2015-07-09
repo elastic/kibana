@@ -61,7 +61,7 @@ module.exports = function (logger, request) {
   }
 
   return {
-    deferred: promise,
+    promise: promise,
     handleResponse: handleResponse,
     handleError: handleError,
     handleData: handleData,

@@ -34,7 +34,7 @@ describe('kibana cli', function () {
 
       it('should throw an error if the workingPath already exists.', function () {
         sinon.stub(process, 'exit');
-        fs.mkdir(testWorkingPath, function (e) {});
+        fs.mkdirSync(testWorkingPath);
 
         var settings = {
           pluginPath: testWorkingPath

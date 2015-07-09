@@ -19,13 +19,22 @@ module.exports = function (settings, logger) {
 
       logger.log('attempting to download ' + sourceUrl);
 
-      return downloadSingle(sourceUrl, settings.workingPath, settings.timeout, logger)
+      return Promise.try(function () {
+        return downloadSingle(sourceUrl, settings.workingPath, settings.timeout, logger)
+        .catch(function (err) {
+          if (err.message === 'ENOTFOUND') {
+            return tryNext();
+          }
+          if (err.message === 'EEXTRACT') {
+            throw (new Error('Error extracting the plugin archive'));
+          }
+          throw (err);
+        });
+      })
       .catch(function (err) {
-        if (err.message === 'ENOTFOUND') {
+        //Special case for when request.get throws an exception
+        if (err.message.match(/invalid uri/i)) {
           return tryNext();
-        }
-        if (err.message === 'EEXTRACT') {
-          throw (new Error('Error extracting the plugin archive'));
         }
         throw (err);
       });
@@ -44,21 +53,39 @@ module.exports = function (settings, logger) {
       requestOptions.timeout = timeout;
     }
 
-    var req = request.get(requestOptions);
-    var reporter = progressReporter(logger, req);
+    return wrappedRequest(requestOptions)
+    .then(function (req) {
+      //debugger;
+      var reporter = progressReporter(logger, req);
 
-    req
-    .on('response', reporter.handleResponse)
-    .on('data', reporter.handleData)
-    .on('error', _.partial(reporter.handleError, 'ENOTFOUND'))
-    .pipe(gunzip)
-    .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
-    .pipe(tarExtract)
-    .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
-    .on('end', reporter.handleEnd);
+      req
+      .on('response', reporter.handleResponse)
+      .on('data', reporter.handleData)
+      .on('error', _.partial(reporter.handleError, 'ENOTFOUND'))
+      .pipe(gunzip)
+      .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
+      .pipe(tarExtract)
+      .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
+      .on('end', reporter.handleEnd);
 
-    return reporter.deferred;
+      return reporter.promise;
+    });
   }
+
+  function wrappedRequest(requestOptions) {
+    //debugger;
+    return Promise.try(function () {
+      //debugger;
+      return request.get(requestOptions);
+    })
+    .catch(function (err) {
+      if (err.message.match(/invalid uri/i)) {
+        throw new Error('ENOTFOUND');
+      }
+      throw err;
+    });
+  }
+
 
   return {
     download: download,
