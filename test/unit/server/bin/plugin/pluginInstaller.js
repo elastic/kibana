@@ -8,7 +8,6 @@ var fs = require('fs');
 var join = require('path').join;
 var pluginLogger = root('src/server/bin/plugin/pluginLogger');
 var pluginInstaller = root('src/server/bin/plugin/pluginInstaller');
-var cleaner = root('src/server/bin/plugin/pluginCleaner');
 var Promise = require('bluebird');
 
 describe('kibana cli', function () {

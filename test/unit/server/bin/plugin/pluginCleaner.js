@@ -3,7 +3,7 @@ var expect = require('expect.js');
 var sinon = require('sinon');
 var fs = require('fs');
 var rimraf = require('rimraf');
-var cleaner = root('src/server/bin/plugin/pluginCleaner');
+var pluginCleaner = root('src/server/bin/plugin/pluginCleaner');
 var pluginLogger = root('src/server/bin/plugin/pluginLogger');
 
 describe('kibana cli', function () {
@@ -17,6 +17,7 @@ describe('kibana cli', function () {
       };
 
       describe('cleanPrevious', function () {
+        var cleaner;
         var errorStub;
         var logger;
         var progress;
@@ -24,6 +25,7 @@ describe('kibana cli', function () {
         beforeEach(function () {
           errorStub = sinon.stub();
           logger = pluginLogger(false);
+          cleaner = pluginCleaner(settings, logger);
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
           request = {
@@ -47,7 +49,7 @@ describe('kibana cli', function () {
             throw error;
           });
 
-          return cleaner.cleanPrevious(settings, logger)
+          return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(false);
@@ -62,7 +64,7 @@ describe('kibana cli', function () {
           });
 
           var errorStub = sinon.stub();
-          return cleaner.cleanPrevious(settings, logger)
+          return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function () {
             expect(errorStub.called).to.be(true);
@@ -73,7 +75,7 @@ describe('kibana cli', function () {
           sinon.stub(rimraf, 'sync');
           sinon.stub(fs, 'statSync');
 
-          return cleaner.cleanPrevious(settings, logger)
+          return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function (data) {
             expect(logger.log.calledWith('Found previous install attempt. Deleting...')).to.be(true);
@@ -87,7 +89,7 @@ describe('kibana cli', function () {
           });
 
           var errorStub = sinon.stub();
-          return cleaner.cleanPrevious(settings, logger)
+          return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function () {
             expect(errorStub.called).to.be(true);
@@ -98,7 +100,7 @@ describe('kibana cli', function () {
           sinon.stub(rimraf, 'sync');
           sinon.stub(fs, 'statSync');
 
-          return cleaner.cleanPrevious(settings, logger)
+          return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(false);
@@ -108,6 +110,12 @@ describe('kibana cli', function () {
       });
 
       describe('cleanError', function () {
+        var cleaner;
+        var logger;
+        beforeEach(function () {
+          logger = pluginLogger(false);
+          cleaner = pluginCleaner(settings, logger);
+        });
 
         afterEach(function () {
           rimraf.sync.restore();
@@ -116,7 +124,7 @@ describe('kibana cli', function () {
         it('should attempt to delete the working directory', function () {
           sinon.stub(rimraf, 'sync');
 
-          cleaner.cleanError(settings);
+          cleaner.cleanError();
           expect(rimraf.sync.calledWith(settings.workingPath)).to.be(true);
         });
 

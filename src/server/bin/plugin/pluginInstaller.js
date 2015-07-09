@@ -1,5 +1,5 @@
-﻿var downloader = require('./pluginDownloader.js');
-var cleaner = require('./pluginCleaner.js');
+﻿var pluginDownloader = require('./pluginDownloader.js');
+var pluginCleaner = require('./pluginCleaner.js');
 var npmInstall = require('./npmInstall.js');
 var fs = require('fs');
 
@@ -20,9 +20,12 @@ function install(settings, logger) {
       throw e;
   }
 
-  return cleaner.cleanPrevious(settings, logger)
+  var cleaner = pluginCleaner(settings, logger);
+  var downloader = pluginDownloader(settings, logger);
+
+  return cleaner.cleanPrevious()
   .then(function () {
-    return downloader.download(settings, logger);
+    return downloader.download();
   })
   .then(function () {
     return npmInstall(settings.workingPath, logger);
@@ -34,7 +37,7 @@ function install(settings, logger) {
   .catch(function (e) {
     logger.error('Plugin installation was unsuccessful.');
     logger.error(e.message);
-    cleaner.cleanError(settings);
+    cleaner.cleanError();
     process.exit(70);
   });
 }

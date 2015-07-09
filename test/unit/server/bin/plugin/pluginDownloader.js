@@ -6,7 +6,7 @@ var glob = require('glob');
 var rimraf = require('rimraf');
 var join = require('path').join;
 var pluginLogger = root('src/server/bin/plugin/pluginLogger');
-var downloader = root('src/server/bin/plugin/pluginDownloader');
+var pluginDownloader = root('src/server/bin/plugin/pluginDownloader');
 
 describe('kibana cli', function () {
 
@@ -14,11 +14,13 @@ describe('kibana cli', function () {
 
     var testWorkingPath;
     var logger;
+    var downloader;
 
     describe('_downloadSingle', function () {
 
       beforeEach(function () {
         logger = pluginLogger(false);
+        downloader = pluginDownloader({}, logger);
         testWorkingPath = join(__dirname, '.test.data');
         rimraf.sync(testWorkingPath);
         sinon.stub(logger, 'log');
@@ -97,6 +99,7 @@ describe('kibana cli', function () {
 
     describe('download', function () {
 
+      var downloader;
       beforeEach(function () {
         logger = pluginLogger(false);
         sinon.stub(logger, 'log');
@@ -122,6 +125,7 @@ describe('kibana cli', function () {
           workingPath: testWorkingPath,
           timeout: 0
         };
+        downloader = pluginDownloader(settings, logger);
 
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
@@ -168,6 +172,7 @@ describe('kibana cli', function () {
           workingPath: testWorkingPath,
           timeout: 0
         };
+        downloader = pluginDownloader(settings, logger);
 
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
@@ -213,6 +218,7 @@ describe('kibana cli', function () {
           workingPath: testWorkingPath,
           timeout: 0
         };
+        downloader = pluginDownloader(settings, logger);
 
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
@@ -248,6 +254,7 @@ describe('kibana cli', function () {
           workingPath: testWorkingPath,
           timeout: 0
         };
+        downloader = pluginDownloader(settings, logger);
 
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
