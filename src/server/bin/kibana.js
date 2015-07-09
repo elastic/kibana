@@ -3,7 +3,7 @@
 var program = require('commander');
 require('../lib/commanderExtensions.js')(program);
 var path = require('path');
-var startupOptions = require('./startup/startup_options.js');
+var startupOptions = require('./startup/startupOptions.js');
 var startup = require('./startup/startup.js');
 var pluginProgram = require('./plugin/plugin');
 

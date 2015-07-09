@@ -50,13 +50,14 @@ describe('kibana cli', function () {
         });
       });
 
-      it('download and extract a valid plugin', function () {
+      it('should download and extract a valid plugin', function () {
+        var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
         .get('/plugin.tar.gz')
-        .replyWithFile(200, __dirname + '/replies/test-plugin-master.tar.gz');
+        .replyWithFile(200, filename);
 
         var source = 'http://www.files.com/plugin.tar.gz';
 
@@ -74,9 +75,10 @@ describe('kibana cli', function () {
       });
 
       it('should abort the download and extraction for a corrupt archive.', function () {
+        var filename = join(__dirname, 'replies/corrupt.tar.gz');
         var couchdb = nock('http://www.files.com')
         .get('/plugin.tar.gz')
-        .replyWithFile(200, __dirname + '/replies/corrupt.tar.gz');
+        .replyWithFile(200, filename);
 
         var source = 'http://www.files.com/plugin.tar.gz';
 
@@ -94,6 +96,7 @@ describe('kibana cli', function () {
     });
 
     describe('download', function () {
+
       beforeEach(function () {
         logger = pluginLogger(false);
         sinon.stub(logger, 'log');
@@ -108,7 +111,8 @@ describe('kibana cli', function () {
         rimraf.sync(testWorkingPath);
       });
 
-      it('loop through bad urls until it finds a good one.', function () {
+      it('should loop through bad urls until it finds a good one.', function () {
+        var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
@@ -128,7 +132,7 @@ describe('kibana cli', function () {
         .get('/badfile2.tar.gz')
         .reply(404)
         .get('/goodfile.tar.gz')
-        .replyWithFile(200, __dirname + '/replies/test-plugin-master.tar.gz');
+        .replyWithFile(200, filename);
 
         var errorStub = sinon.stub();
         return downloader.download(settings, logger)
@@ -152,7 +156,8 @@ describe('kibana cli', function () {
         });
       });
 
-      it('stop looping through urls when it finds a good one.', function () {
+      it('should stop looping through urls when it finds a good one.', function () {
+        var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
@@ -173,7 +178,7 @@ describe('kibana cli', function () {
         .get('/badfile2.tar.gz')
         .reply(404)
         .get('/goodfile.tar.gz')
-        .replyWithFile(200, __dirname + '/replies/test-plugin-master.tar.gz')
+        .replyWithFile(200, filename)
         .get('/badfile3.tar.gz')
         .reply(404);
 
@@ -198,7 +203,7 @@ describe('kibana cli', function () {
         });
       });
 
-      it('Throw an error when it doesn\'t find a good url.', function () {
+      it('should throw an error when it doesn\'t find a good url.', function () {
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
@@ -232,7 +237,7 @@ describe('kibana cli', function () {
         });
       });
 
-      it('Throw an error when it tries to use an invalid url.', function () {
+      it('should throw an error when it tries to use an invalid url.', function () {
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
