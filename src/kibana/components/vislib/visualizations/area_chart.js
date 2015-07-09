@@ -167,8 +167,7 @@ define(function (require) {
       .selectAll('circles')
       .data(function appendData(data) {
         return data.filter(function isNotZero(d) {
-          return !_.isNull(d.y);
-          //return d.y !== 0 && !_.isNull(d.y);
+          return d.y !== 0 && !_.isNull(d.y);
         });
       });
 
