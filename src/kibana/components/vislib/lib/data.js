@@ -240,6 +240,23 @@ define(function (require) {
     };
 
     /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @return {Object}
+     */
+    Data.prototype.getGeoExtents = function () {
+      var visData = this.getVisData();
+
+      return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
+        return {
+          min: Math.min(props.min, minMax.min),
+          max: Math.max(props.max, minMax.max)
+        };
+      }, { min: Infinity, max: -Infinity });
+    };
+
+    /**
      * Returns array of chart data objects for pie data objects
      *
      * @method pieData

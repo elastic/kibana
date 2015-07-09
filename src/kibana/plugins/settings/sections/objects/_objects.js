@@ -42,13 +42,13 @@ define(function (require) {
             $scope.services = _.sortBy(data, 'title');
             var tab = $scope.services[0];
             if ($state.tab) tab = _.find($scope.services, {title: $state.tab});
-            $scope.changeTab(tab);
+
+            $scope.$watch('state.tab', function (tab) {
+              if (!tab) $scope.changeTab($scope.services[0]);
+            });
           });
         };
 
-        $scope.$watch('state.tab', function (tab) {
-          if (!tab) $scope.changeTab($scope.services[0]);
-        });
 
         $scope.toggleAll = function () {
           if ($scope.selectedItems.length === $scope.currentTab.data.length) {
