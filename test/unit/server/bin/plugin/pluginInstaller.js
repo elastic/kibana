@@ -16,21 +16,21 @@ describe('kibana cli', function () {
 
     describe('pluginInstaller', function () {
 
-      var logger;
-      var testWorkingPath;
-      beforeEach(function () {
-        logger = pluginLogger(false);
-        testWorkingPath = join(__dirname, '.test.data');
-        rimraf.sync(testWorkingPath);
-        sinon.stub(logger, 'log');
-        sinon.stub(logger, 'error');
-      });
+      //var logger;
+      //var testWorkingPath;
+      //beforeEach(function () {
+      //  logger = pluginLogger(false);
+      //  testWorkingPath = join(__dirname, '.test.data');
+      //  rimraf.sync(testWorkingPath);
+      //  sinon.stub(logger, 'log');
+      //  sinon.stub(logger, 'error');
+      //});
 
-      afterEach(function () {
-        logger.log.restore();
-        logger.error.restore();
-        rimraf.sync(testWorkingPath);
-      });
+      //afterEach(function () {
+      //  logger.log.restore();
+      //  logger.error.restore();
+      //  rimraf.sync(testWorkingPath);
+      //});
 
       //it('should throw an error if the workingPath already exists.', function () {
       //  sinon.stub(process, 'exit');
