@@ -6,14 +6,21 @@ define(function (require) {
   return function (Notifier) {
     return function ($state) {
       return function (event) {
-        // Hierarchical and tabular data set their aggConfigResult parameter
-        // differently because of how the point is rewritten between the two. So
-        // we need to check if the point.orig is set, if not use try the point.aggConfigResult
-        var aggConfigResult = event.point.orig && event.point.orig.aggConfigResult ||
-          event.point.values && findAggConfig(event.point.values) || event.point.aggConfigResult;
         var notify = new Notifier({
           location: 'Filter bar'
         });
+        var aggConfigResult;
+
+        // Hierarchical and tabular data set their aggConfigResult parameter
+        // differently because of how the point is rewritten between the two. So
+        // we need to check if the point.orig is set, if not use try the point.aggConfigResult
+        if (event.point.orig) {
+          aggConfigResult = event.point.orig.aggConfigResult;
+        } else if (event.point.values) {
+          aggConfigResult = findAggConfig(event.point.values);
+        } else {
+          aggConfigResult = event.point.aggConfigResult;
+        }
 
         function findAggConfig(values) {
           if (_.isArray(values)) { // point series chart

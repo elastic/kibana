@@ -62,7 +62,8 @@ define(function (require) {
 
     Data.prototype._getLabels = function (data) {
       if (this.type === 'series') {
-        if (getLabels(data).length === 1 && getLabels(data)[0] === '') return [(this.get('yAxisLabel'))];
+        var noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
+        if (noLabel) return [(this.get('yAxisLabel'))];
         return getLabels(data);
       }
       return this.pieNames();
