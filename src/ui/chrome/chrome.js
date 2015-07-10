@@ -80,13 +80,18 @@ define(function (require) {
    * @return {chrome}
    * @chainable
    */
-  chrome.setRootController = function (as, construct) {
-    if (typeof as === 'function') {
-      construct = as;
+  chrome.setRootController = function (as, controllerName) {
+    if (controllerName === undefined) {
+      controllerName = as;
       as = null;
     }
 
-    rootController = { as: as, construct: construct };
+    if (typeof controllerName === 'function') {
+      chrome.$$rootControllerConstruct = controllerName;
+      controllerName = 'chrome.$$rootControllerConstruct';
+    }
+
+    rootController = controllerName + (as ? ' as ' + as : '' );
     return chrome;
   };
 
@@ -201,13 +206,7 @@ define(function (require) {
         var $app = $content.find('.application');
 
         if (rootController) {
-          chrome.$$rootControllerConstruct = rootController.construct;
-          var ngController = 'chrome.$$rootControllerConstruct';
-          if (rootController.as) {
-            ngController += ' as ' + rootController.as;
-          }
-
-          $app.attr('ng-controller', ngController);
+          $app.attr('ng-controller', rootController);
         }
 
         if (rootTemplate) {
