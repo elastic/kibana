@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="shortcut icon" href="/styles/theme/elk.ico">
+    <link rel="stylesheet" href="/status/styles/main.css?_b=@@buildNum">
     <link rel="stylesheet" href="/styles/main.css?_b=@@buildNum">
-    <link rel="stylesheet" href="styles/main.css?_b=@@buildNum">
   </head>
   <body>
     <div class="container" ng-controller="StatusPage">
@@ -27,13 +27,13 @@
           </h3>
           <div id="plugin_table">
             <div class="plugin_table_header plugin_row">
-              <div class="col-md-1 plugin_key">Plugin</div>
-              <div class="col-md-11 plugin_state">Status</div>
+              <div class="col-md-1 col-sm-2 col-xs-4 plugin_key">Plugin</div>
+              <div class="col-md-11 col-sm-10 col-xs-8 plugin_state">Status</div>
               <div class="clearfix"></div>
             </div>
             <div ng-repeat="(key, plugin) in ui.plugins" class="plugin_table_plugin plugin_row plugin_status_{{plugin.uiStatus}}">
-              <div class="col-md-1 plugin_key">{{key}}</div>
-              <div class="col-md-11 plugin_state">{{plugin.message}}</div>
+              <div class="col-md-1 col-sm-2 col-xs-4 plugin_key">{{key}}</div>
+              <div class="col-md-11 col-sm-10 col-xs-8 plugin_state">{{plugin.message}}</div>
               <div class="clearfix"></div>
             </div>
           </div>
@@ -41,14 +41,9 @@
         <h2>Server Metrics</h2>
         <p>Interval of 5 seconds, with a max history of 5 minutes.</p>
         <div id="chart_cont" class="row">
-          <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
-            <h3 class="title">{{chart.niceName}}</h2>
-            <h4 class="average">
-              <span ng-repeat="average in chart.average track by $index"><span ng-if="$index">, </span>{{average}}</span>
-            </h4>
-            <nvd3 options="chart.options" data="chart.data"></nvd3>
+          <div ng-repeat="(key, chart) in ui.charts">
+            <kb-sparkline chart-data="ui.charts[key].data" chart-key="key"></kb-sparkline>
           </div>
-          <div class="clearfix"></div>
         </div>
       </div>
       <footer></footer>
