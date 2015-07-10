@@ -16,30 +16,35 @@ define(function (require) {
       var geohash = unwrap(row[geoI]);
       if (!geohash) return;
 
+      // fetch latLn of northwest and southeast corners, and center point
       var location = decodeGeoHash(geohash);
-      var center = [
-        location.longitude[2],
-        location.latitude[2]
+
+      var centerLatLng = [
+        location.latitude[2],
+        location.longitude[2]
       ];
 
+      // order is nw, ne, se, sw
       var rectangle = [
-        [location.longitude[0], location.latitude[0]],
-        [location.longitude[1], location.latitude[0]],
-        [location.longitude[1], location.latitude[1]],
-        [location.longitude[0], location.latitude[1]]
+        [location.latitude[0], location.longitude[0]],
+        [location.latitude[0], location.longitude[1]],
+        [location.latitude[1], location.longitude[1]],
+        [location.latitude[1], location.longitude[0]],
       ];
 
+      // geoJson coords use LngLat, so we reverse the centerLatLng
+      // See here for details: http://geojson.org/geojson-spec.html#positions
       features.push({
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: center
+          coordinates: centerLatLng.slice(0).reverse()
         },
         properties: {
           geohash: geohash,
           value: unwrap(row[metricI]),
           aggConfigResult: getAcr(row[metricI]),
-          center: center,
+          center: centerLatLng,
           rectangle: rectangle
         }
       });
