@@ -13,7 +13,7 @@ module.exports = function (dest, logger) {
       if (e.code !== 'ENOENT')
         throw e;
 
-      reject(new Error('Plugin does not contain package.json file'));
+      return reject(new Error('Plugin does not contain package.json file'));
     }
 
     var cmd = (process.env.NPM) ? process.env.NPM : 'npm';

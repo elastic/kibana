@@ -17,11 +17,13 @@ describe('kibana cli', function () {
       };
 
       describe('cleanPrevious', function () {
+
         var cleaner;
         var errorStub;
         var logger;
         var progress;
         var request;
+
         beforeEach(function () {
           errorStub = sinon.stub();
           logger = pluginLogger(false);
