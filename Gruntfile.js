@@ -35,10 +35,6 @@ module.exports = function (grunt) {
       '<%= src %>/**/*.js',
       '<%= unitTestDir %>/**/*.js',
       '!<%= unitTestDir %>/specs/vislib/fixture/**/*'
-    ],
-    lessFiles: [
-      '<%= src %>/**/*.less',
-      '!<%= src %>/**/_*.less'
     ]
   };
 

@@ -4,6 +4,7 @@ module.exports = function (grunt) {
       licenses: [
         'MIT',
         'MIT*',
+        'MIT License',
         'MIT/X11',
         'new BSD, and MIT',
         'BSD',
@@ -20,9 +21,11 @@ module.exports = function (grunt) {
         'Apache2',
         'Apache-2.0',
         'Apache, Version 2.0',
+        'Apache License, v2.0',
         'ISC',
         'WTFPL',
-        'Public-Domain'
+        'Public-Domain',
+        'UNLICENSE'
       ],
       overrides: {
         'assert-plus@0.1.5': ['MIT'],
@@ -36,7 +39,10 @@ module.exports = function (grunt) {
         'cycle@1.0.3': ['Public-Domain'],
         'pkginfo@0.2.3': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
-        'amdefine@0.1.1': ['BSD-3-Clause', 'MIT']
+        'amdefine@0.1.1': ['BSD-3-Clause', 'MIT'],
+        'flatten@0.0.1': ['MIT'],
+        'color-name@1.0.0': ['UNLICENSE'],
+        'css-color-names@0.0.1': ['MIT']
       }
     }
   };
