@@ -1,0 +1,41 @@
+<header>
+  <h1>
+    <strong>Kibana</strong>&nbsp;Status Page
+  </h1>
+</header>
+<div>
+  <section class="section">
+    <h4>What is this page?</h4>
+    <p>This page is your sanity check, and your savior. You can check for potential problems</p>
+    <p>Here is the status of your kibana instance and the plugins you have installed along with some, statistics to asses potential problems.</p>
+  </section>
+  <div class="system_status_wrapper system_status_{{ui.systemStatus().label}}">
+    <h3 class="title">
+      <b>System Status:</b> {{ui.systemStatus().msg}}
+    </h3>
+    <div id="plugin_table">
+      <div class="plugin_table_header plugin_row">
+        <div class="col-md-1 plugin_key">Plugin</div>
+        <div class="col-md-11 plugin_state">Status</div>
+        <div class="clearfix"></div>
+      </div>
+      <div ng-repeat="(key, plugin) in ui.plugins" class="plugin_table_plugin plugin_row plugin_status_{{plugin.uiStatus}}">
+        <div class="col-md-1 plugin_key">{{key}}</div>
+        <div class="col-md-11 plugin_state">{{plugin.message}}</div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+  <h2>Server Metrics</h2>
+  <p>Interval of 5 seconds, with a max history of 5 minutes.</p>
+  <div id="chart_cont" class="row">
+    <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
+      <h3 class="title">{{chart.niceName}}</h2>
+      <h4 class="average">
+        <span ng-repeat="average in chart.average track by $index"><span ng-if="$index">, </span>{{average}}</span>
+      </h4>
+      <nvd3 options="chart.options" data="chart.data"></nvd3>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+</div>

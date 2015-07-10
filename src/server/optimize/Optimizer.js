@@ -72,7 +72,6 @@ class Optimizer extends EventEmitter {
 
       resolve: {
         extensions: ['', '.js', '.less'],
-        packageMains: [],
         modulesDirectories: [ fromRoot('node_modules'), assets.root ],
         root: fromRoot(),
         alias: modules.aliases

@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
@@ -11,7 +12,7 @@ function Status(name, server) {
 
   this.on('change', function (current, previous) {
     server.log(['plugins', name, 'info'], {
-      tmpl: 'Change status from <%= prev %> to <%= cur %> - <%= curMsg %>',
+      tmpl: 'Status changed from <%= prev %> to <%= cur %><% curMsg && print(` - ${curMsg}`) %>',
       name: name,
       prev: previous.state,
       cur: current.state,
@@ -23,6 +24,13 @@ function Status(name, server) {
 Status.prototype.green = makeStatusUpdateFn('green');
 Status.prototype.yellow = makeStatusUpdateFn('yellow');
 Status.prototype.red = makeStatusUpdateFn('red');
+
+Status.prototype.disabled = _.wrap(makeStatusUpdateFn('disabled'), function (update, msg) {
+  var ret = update.call(this, msg);
+  this.green = this.yellow = this.red = _.noop;
+  return ret;
+});
+
 function makeStatusUpdateFn(color) {
   return function (message) {
     var previous = {

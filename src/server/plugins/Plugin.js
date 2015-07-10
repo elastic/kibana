@@ -6,6 +6,10 @@ let Joi = require('joi');
 let Promise = require('bluebird');
 let join = require('path').join;
 
+const defaultConfigSchema = Joi.object({
+  enabled: Joi.boolean().default(true)
+}).default();
+
 module.exports = class Plugin {
   constructor(kbnServer, path, pkg, opts) {
     this.kbnServer = kbnServer;
@@ -17,8 +21,9 @@ module.exports = class Plugin {
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
     this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));
+    this.externalCondition = opts.initCondition || _.constant(true);
     this.externalInit = opts.init || _.noop;
-    this.getConfig = opts.config || _.noop;
+    this.getConfigSchema = opts.config || _.noop;
     this.init = _.once(this.init);
   }
 
@@ -45,18 +50,28 @@ module.exports = class Plugin {
     });
 
     return Promise.try(function () {
-      return self.getConfig(Joi);
+      return self.getConfigSchema(Joi);
     })
     .then(function (schema) {
       if (schema) config.extendSchema(id, schema);
+      else config.extendSchema(id, defaultConfigSchema);
     })
     .then(function () {
       return status.decoratePlugin(self);
     })
     .then(function () {
-      return self.kbnServer.uiExports.consumePlugin(self);
+      if (config.get([id, 'enabled'])) {
+        return self.externalCondition(config);
+      }
     })
-    .then(function () {
+    .then(function (enabled) {
+      if (!enabled) {
+        // Only change the plugin status if it wasn't set by the externalCondition
+        if (self.status.state === 'uninitialized') {
+          self.status.disabled();
+        }
+        return;
+      }
 
       let register = function (server, options, next) {
         Promise.try(self.externalInit, [server, options], self).nodeify(next);
@@ -69,15 +84,14 @@ module.exports = class Plugin {
           register: register,
           options: config.has(id) ? config.get(id) : null
         }, cb);
+      })
+      .then(function () {
+        // Only change the plugin status to green if the
+        // intial status has not been updated
+        if (self.status.state === 'uninitialized') {
+          self.status.green('Ready');
+        }
       });
-
-    })
-    .then(function () {
-      // Only change the plugin status to green if the
-      // intial status has not been updated
-      if (self.status.state === 'uninitialized') {
-        self.status.green('Ready');
-      }
     });
   }
 

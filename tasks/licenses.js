@@ -36,17 +36,19 @@ module.exports = function (grunt) {
         var licenseStats = _.map(result, processPackage);
         var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
 
-        if (grunt.option('only-invalid')) {
-          grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
-        } else {
+        if (!grunt.option('only-invalid')) {
           grunt.log.debug(JSON.stringify(licenseStats, null, 2));
         }
 
 
         if (invalidLicenses.length) {
-          grunt.fail.warn('Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', ') +
-            '. Use --only-invalid for details.', invalidLicenses.length);
+          grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
+          grunt.fail.warn(
+            'Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', '),
+            invalidLicenses.length
+          );
         }
+
         done();
       }
     }

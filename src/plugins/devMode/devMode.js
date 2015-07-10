@@ -1,29 +1,33 @@
-module.exports = function devServerPlugin(kibana) {
-  var _ = require('lodash');
-  var KbnServer = require('../server/KbnServer');
+'use strict';
 
-  var glob = require('glob');
-  var join = require('path').join;
-  var basename = require('path').basename;
-  var relative = require('path').relative;
-  var normalize = require('path').normalize;
+module.exports = function devModePlugin(kibana) {
+  let _ = require('lodash');
 
-  var ROOT = join(__dirname, '..', '..', '..');
-  var fromRoot = function () {
-    return normalize(join([ROOT].concat(_.toArray(arguments))));
-  };
+  let glob = require('glob');
+  let join = require('path').join;
+  let basename = require('path').basename;
+  let relative = require('path').relative;
+  let normalize = require('path').normalize;
+  let istanbul = require('./istanbul');
+  let amdWrapper = require('./amdWrapper');
+  let kibanaSrcFilter = require('./kibanaSrcFilter');
 
-  var SRC = fromRoot('src');
-  var NODE_MODULES = fromRoot('node_modules');
-  var UI = fromRoot('src/ui');
-  var TEST = fromRoot('test');
-  var UNIT = fromRoot('test/unit');
-  var SPECS = fromRoot('test/unit/specs/**/*.js');
-  var istanbul = require('./lib/istanbul');
-  var amdWrapper = require('./lib/amd_wrapper');
-  var kibanaSrcFilter = require('./lib/kibana_src_filter');
+
+  let fromRoot = require('../../utils/fromRoot');
+  const ROOT = fromRoot('.');
+  const SRC = fromRoot('src');
+  const NODE_MODULES = fromRoot('node_modules');
+  const UI = fromRoot('src/ui');
+  const TEST = fromRoot('test');
+  const UNIT = fromRoot('test/unit');
+  const SPECS = fromRoot('test/unit/specs/**/*.js');
 
   return new kibana.Plugin({
+
+    initCondition: function (config) {
+      return config.get('env.dev');
+    },
+
     init: function (server, options) {
       server.ext('onPreHandler', istanbul({ root: SRC, displayRoot: SRC, filter: kibanaSrcFilter }));
       server.ext('onPreHandler', istanbul({ root: UI, displayRoot: SRC, filter: kibanaSrcFilter }));

@@ -9,9 +9,14 @@ module.exports = function (kbnServer, server, config) {
 
   return resolve(kbnServer.pluginPaths)
   .map(function (path) {
-    return plugins.load(path);
+    return plugins.new(path);
   })
   .then(function () {
+    if (!config.get('plugins.initialize')) {
+      server.log(['info'], 'Plugin initialization disabled.');
+      return;
+    }
+
     var others = _.indexBy(plugins, 'id');
 
     return Promise.all(plugins.map(function recurse(plugin) {

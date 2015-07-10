@@ -19,6 +19,7 @@ module.exports = Joi.object({
   server: Joi.object({
     host: Joi.string().hostname().default('0.0.0.0'),
     port: Joi.number().default(5601),
+    autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string(),
     ssl: Joi.object({
       cert: Joi.string(),
@@ -52,10 +53,12 @@ module.exports = Joi.object({
 
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
-    scanDirs: Joi.array().items(Joi.string()).default([])
+    scanDirs: Joi.array().items(Joi.string()).default([]),
+    initialize: Joi.boolean().default(true)
   }).default(),
 
   optimize: Joi.object({
+    enable: Joi.boolean().default(true),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(Joi.ref('$dev')),

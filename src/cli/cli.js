@@ -15,7 +15,7 @@ program
 );
 
 // attach commands
-var serve = require('./commands/serve/serve')(program);
+var serve = require('./commands/serve')(program);
 
 // check for no command name
 if (!argv[2] || argv[2][0] === '-') {

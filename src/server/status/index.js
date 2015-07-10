@@ -10,8 +10,6 @@ module.exports = function (kbnServer) {
   kbnServer.status = new ServerStatus(kbnServer.server);
   kbnServer.metrics = new Samples(60);
 
-  server.exposeStaticDir('/status/{path*}', join(__dirname, 'public'));
-
   server.plugins.good.monitor.on('ops', function (event) {
     var port = config.get('server.port');
 

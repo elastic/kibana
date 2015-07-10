@@ -19,12 +19,12 @@ module.exports = class UiApps extends Array {
 
   }
 
-  new(plugin, spec) {
+  new(spec) {
     if (this.hidden && spec.hidden) {
-      return this.hidden.new(plugin, spec);
+      return this.hidden.new(spec);
     }
 
-    let app = new UiApp(this.uiExports, plugin, spec);
+    let app = new UiApp(this.uiExports, spec);
 
     if (_.includes(this.claimedIds, app.id)) {
       throw new Error('Unable to create two apps with the id ' + app.id + '.');
@@ -34,6 +34,7 @@ module.exports = class UiApps extends Array {
 
     this._byId = null;
     this.push(app);
+    return app;
   }
 
   get byId() {

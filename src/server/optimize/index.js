@@ -8,9 +8,10 @@ module.exports = function (kbnServer, server, config) {
   var status = kbnServer.status.create('optimize');
 
   server.exposeStaticDir('/bundles/{path*}', bundleDir);
-  if (config.get('optimize.sourceMaps')) {
-    server.exposeStaticDir('/src/{path*}', fromRoot('src'));
-    server.exposeStaticDir('/node_modules/{paths*}', fromRoot('node_modules'));
+
+  if (!config.get('optimize.enable')) {
+    status.disabled();
+    return;
   }
 
   return (new Optimizer({

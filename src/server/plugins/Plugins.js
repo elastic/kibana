@@ -11,7 +11,7 @@ module.exports = class Plugins extends Array {
     this.kbnServer = kbnServer;
   }
 
-  load(path) {
+  new(path) {
     var self = this;
     var api = new PluginApi(this.kbnServer, path);
 

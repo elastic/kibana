@@ -1,4 +1,5 @@
 {
   "name": "devMode",
+  "main": "./devMode.js",
   "version": "1.0.0"
 }

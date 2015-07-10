@@ -2,9 +2,9 @@
 
 let _ = require('lodash');
 
-let readYamlConfig = require('../../readYamlConfig');
-let fromRoot = require('../../../utils/fromRoot');
-let KbnServer = require('../../../server/KbnServer');
+let readYamlConfig = require('../readYamlConfig');
+let fromRoot = require('../../utils/fromRoot');
+let KbnServer = require('../../server/KbnServer');
 
 module.exports = function (program) {
   program
@@ -35,7 +35,7 @@ module.exports = function (program) {
 
     if (opts.dev && !opts.noWatch && !require('cluster').isWorker) {
       // stop processing the action and handoff to watch cluster manager
-      return require('./watch');
+      return require('../watch/watch');
     }
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));

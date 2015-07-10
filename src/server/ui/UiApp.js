@@ -5,12 +5,11 @@ var join = require('path').join;
 var defAutoload = require('./autoload');
 
 class UiApp {
-  constructor(uiExports, plugin, spec) {
+  constructor(uiExports, spec) {
     this.uiExports = uiExports;
-    this.plugin = plugin || null;
     this.spec = spec || {};
 
-    this.id = this.spec.id || _.get(this, 'plugin.id');
+    this.id = this.spec.id;
     if (!this.id) {
       throw new Error('Every app must specify it\'s id');
     }

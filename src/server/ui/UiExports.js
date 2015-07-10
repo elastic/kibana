@@ -9,9 +9,10 @@ class UiExports {
   constructor(kbnServer) {
     this.kbnServer = kbnServer;
     this.apps = new UiApps(this);
-    this.appCount = 0;
     this.aliases = {};
     this.exportConsumer = _.memoize(this.exportConsumer);
+
+    kbnServer.plugins.forEach(_.bindKey(this, 'consumePlugin'));
   }
 
   consumePlugin(plugin) {
@@ -35,7 +36,8 @@ class UiExports {
     switch (type) {
     case 'app':
       return function (plugin, spec) {
-        self.apps.new(plugin, spec);
+        spec = _.defaults({}, spec, { id: plugin.id });
+        plugin.app = self.apps.new(spec);
       };
 
     case 'visTypes':
