@@ -31,9 +31,24 @@ module.exports = function (kbnServer) {
     path: '/api/status',
     handler: function (request, reply) {
       return reply({
-        status: kbnServer.status,
+        status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       });
+    }
+  });
+
+  server.decorate('reply', 'renderStatusPage', function () {
+    var app = _.get(kbnServer, 'uiExports.apps.hidden.byId.serverStatus');
+    var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
+    resp.code(!!kbnServer.status ? 200 : 503);
+    return resp;
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/status',
+    handler: function (request, reply) {
+      return reply.renderStatusPage();
     }
   });
 };

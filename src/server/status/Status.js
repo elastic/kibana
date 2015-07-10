@@ -2,6 +2,7 @@
 
 let _ = require('lodash');
 let EventEmitter = require('events').EventEmitter;
+let states = require('./states');
 
 class Status extends EventEmitter {
   constructor(name, server) {
@@ -12,14 +13,15 @@ class Status extends EventEmitter {
     this.state = 'uninitialized';
     this.message = 'uninitialized';
 
-    this.on('change', function (current, previous) {
+    this.on('change', function (previous, previousMsg) {
       this.since = new Date();
       server.log(['status', name, 'info'], {
-        tmpl: 'Status changed from <%= prev %> to <%= cur %><% curMsg && print(` - ${curMsg}`) %>',
+        tmpl: 'Status changed from <%= prevState %> to <%= state %><% message && print(` - ${message}`) %>',
         name: name,
-        prev: previous.state,
-        cur: current.state,
-        curMsg: current.message
+        state: this.state,
+        message: this.message,
+        prevState: previous,
+        prevMsg: previousMsg
       });
     });
   }
@@ -28,37 +30,31 @@ class Status extends EventEmitter {
     return {
       name: this.name,
       state: this.state,
+      icon: states.get(this.state).icon,
       message: this.message,
       since: this.since
     };
   }
 }
 
-Status.prototype.green = makeStatusUpdateFn('green');
-Status.prototype.yellow = makeStatusUpdateFn('yellow');
-Status.prototype.red = makeStatusUpdateFn('red');
-Status.prototype.disabled = _.wrap(makeStatusUpdateFn('disabled'), function (update, msg) {
-  let ret = update.call(this, msg);
+states.all.forEach(function (state) {
+  Status.prototype[state.id] = function (message) {
+    if (this.state === 'disabled') return;
 
-  this.green =
-  this.yellow =
-  this.red = _.noop;
+    let previous = this.state;
+    let previousMsg = this.message;
 
-  return ret;
-});
+    this.state = state.id;
+    this.message = message || state.title;
 
-function makeStatusUpdateFn(color) {
-  return function (message) {
-    let previous = {
-      state: this.state,
-      message: this.message
-    };
-    this.state = color;
-    this.message = message;
-    if (previous.state === this.state && previous.message === this.message) return;
-    this.emit(color, message, previous);
-    this.emit('change', this.toJSON(), previous);
+    if (previous === this.state && previousMsg === this.message) {
+      // noop
+      return;
+    }
+
+    this.emit(state.id, previous, previousMsg);
+    this.emit('change', previous, previousMsg);
   };
-}
+});
 
 module.exports = Status;

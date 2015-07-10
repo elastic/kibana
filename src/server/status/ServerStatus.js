@@ -29,20 +29,32 @@ module.exports = class ServerStatus {
   }
 
   overall() {
-    var id = _.sortBy(this._created, function (status) {
-      return states.get(status.state).severity;
-    }).pop().state;
-    var state = states.get(id);
+    var state = _(this._created)
+    .map(function (status) {
+      return states.get(status.state);
+    })
+    .sortBy('severity')
+    .pop();
 
     var statuses = _.where(this._created, { state: state.id });
     var since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
       state: state.id,
-      since: since,
+      title: state.title,
+      nickname: _.sample(state.nicknames),
       icon: state.icon,
-      description: _.sample(state.nicknames) || state.id,
+      since: since,
     };
+  }
+
+  toValue() {
+    return (this.overall().state === 'green');
+  }
+
+  toString() {
+    var overall = this.overall();
+    return `${overall.title} – ${overall.nickname}`;
   }
 
   toJSON() {

@@ -5,6 +5,7 @@ let _ = require('lodash');
 exports.all = [
   {
     id: 'red',
+    title: 'Red',
     icon: 'danger',
     severity: 1000,
     nicknames: [
@@ -13,6 +14,7 @@ exports.all = [
   },
   {
     id: 'uninitialized',
+    title: 'Uninitialized',
     icon: 'spinner',
     severity: 900,
     nicknames: [
@@ -21,6 +23,7 @@ exports.all = [
   },
   {
     id: 'yellow',
+    title: 'Yellow',
     icon: 'warning',
     severity: 800,
     nicknames: [
@@ -30,6 +33,7 @@ exports.all = [
   },
   {
     id: 'green',
+    title: 'Green',
     icon: 'success',
     severity: 0,
     nicknames: [
@@ -38,6 +42,7 @@ exports.all = [
   },
   {
     id: 'disabled',
+    title: 'Disabled',
     severity: -1,
     icon: 'toggle-off',
     nicknames: [

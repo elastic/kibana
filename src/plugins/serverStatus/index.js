@@ -1,26 +1,10 @@
 module.exports = function (kibana) {
   return new kibana.Plugin({
-
-    init: function (server, options) {
-      var app = this.app;
-
-      server.expose('app', app);
-
-      server.route({
-        path: '/status',
-        method: 'GET',
-        handler: function (req, reply) {
-          return reply.renderApp(app);
-        }
-      });
-
-    },
-
     uiExports: {
       app: {
         title: 'Server Status',
         main: 'plugins/serverStatus/serverStatus',
-        hidden: false,
+        hidden: true,
 
         defaultModules: {
           angular: [],

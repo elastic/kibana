@@ -92,7 +92,7 @@ require('modules')
   function getAppStatus() {
     // go ahead and get the info you want
     $http
-    .get('/status/health')
+    .get('/api/status')
     .success(function (data) {
       // Assign the propper variables to the scope and change them as necessary
 
