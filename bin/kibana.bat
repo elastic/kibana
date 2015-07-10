@@ -6,15 +6,20 @@ set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\node.exe
-set SERVER=%DIR%\src\server\cli
-set CONFIG_PATH=%DIR%\config\kibana.yml
+for /f %%i in ('WHERE node') do (set SYS_NODE=%%i)
 
-TITLE Kibana Server @@version
+If Not Exist "%NODE%" (
+  IF Exist "%SYS_NODE%" (
+    set NODE=%SYS_NODE%
+  ) else (
+    Echo unable to find usable node.js executable.
+    Exit /B 1
+  )
+)
 
-"%NODE%" "%SERVER%" %*
+TITLE Kibana Server
+"%NODE%" "%DIR%\src\cli" %*
 
 :finally
 
 ENDLOCAL
-
-

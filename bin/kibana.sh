@@ -13,9 +13,14 @@ while [ -h "$SCRIPT" ] ; do
   fi
 done
 
-DIR=$(dirname "${SCRIPT}")/..
-NODE=${DIR}/node/bin/node
-SERVER=${DIR}/src/server/cli
+DIR="$(dirname "${SCRIPT}")/.."
+NODE="${DIR}/node/bin/node"
+test -x "$NODE" || NODE=$(which node)
+if [ ! -x "$NODE" ]; then
+  echo "unable to find usable node.js executable."
+  exit 1
+fi
 
-CONFIG_PATH="${DIR}/config/kibana.yml" exec "${NODE}" ${SERVER} ${@}
+
+CONFIG_PATH="${DIR}/config/kibana.yml" exec "${NODE}" "${DIR}/src/cli" ${@}
 
