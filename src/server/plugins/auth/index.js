@@ -1,4 +1,6 @@
+var fs = require('fs');
 var _ = require('lodash');
+var Promise = require('bluebird');
 var Boom = require('boom');
 var Joi = require('joi');
 var hapiAuthCookie = require('hapi-auth-cookie');
@@ -8,31 +10,38 @@ module.exports = new kibana.Plugin({
   require: ['elasticsearch'],
   init: function (server, options) {
     var config = server.config();
-    var isValid = require('./lib/elasticsearch')(server); // TODO: Clean up how this is imported
+    if (!config.get('kibana.server.auth.enabled')) return;
+
+    var strategy = require('./lib/strategy/htpasswd')(server); // TODO: Clean up how this is imported
 
     server.register(hapiAuthCookie, function (error) {
       if (error != null) return; // TODO: Handle this error
 
-      server.auth.strategy('session', 'cookie', 'required', {
+      var options = {
         cookie: 'sid',
-        isHttpOnly: false,
+        password: config.get('kibana.server.auth.encryptionKey'),
+        ttl: config.get('kibana.server.auth.sessionTimeout'),
         clearInvalid: true,
         keepAlive: true,
-        redirectTo: '/login',
-        password: config.get('kibana.server.auth.encryptionKey'),
-        isSecure: false, // TODO: If https is enabled, set to true
-        ttl: config.get('kibana.server.auth.sessionTimeout'),
-        validateFunc: function (request, session, callback) {
-          return callback(null, isValid(session.username, session.password), session);
-        }
-      });
+        isSecure: false, // TODO: Switch to true
+        isHttpOnly: false,
+        redirectTo: '/login'
+      };
+
+      if (strategy.validate) {
+        options.validateFunc = function (request, session, callback) {
+          return strategy.validate(request, session).nodeify(callback);
+        };
+      }
+
+      server.auth.strategy('session', 'cookie', 'required', options);
     });
 
     server.route({
       method: 'GET',
       path: '/login',
       handler: function (request, reply) {
-        reply.file('/login/index.html');
+        reply.file('src/server/plugins/auth/public/login.html');
       },
       config: {
         auth: false
@@ -43,12 +52,21 @@ module.exports = new kibana.Plugin({
       method: 'POST',
       path: '/login',
       handler: function (request, reply) {
-        if (isValid(request.payload.username, request.payload.password)) {
-          request.auth.session.set(_.pick(request.payload, 'username', 'password'));
-          reply('Success.');
-        } else {
+        strategy.authenticate(request, request.payload.username, request.payload.password)
+        .then(onSuccessfulLogin, onUnsuccessfulLogin);
+
+        function onSuccessfulLogin(credentials) {
+          request.auth.session.set(credentials);
+          reply({
+            "statusCode": 200,
+            "message": "Success"
+          });
+        }
+
+        function onUnsuccessfulLogin() {
           request.auth.session.clear();
-          reply(Boom.unauthorized('Bad username and/or password.'));
+          var response = Boom.unauthorized('Bad username and/or password.');
+          reply(response);
         }
       },
       config: {
