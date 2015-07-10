@@ -35,7 +35,8 @@ module.exports = function (grunt) {
         'FileSaver@undefined': ['MIT'],
         'cycle@1.0.3': ['Public-Domain'],
         'pkginfo@0.2.3': ['MIT'],
-        'uglify-js@2.2.5': ['BSD']
+        'uglify-js@2.2.5': ['BSD'],
+        'amdefine@0.1.1': ['BSD-3-Clause', 'MIT']
       }
     }
   };

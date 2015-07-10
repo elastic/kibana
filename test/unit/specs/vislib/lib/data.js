@@ -258,5 +258,63 @@ define(function (require) {
       });
     });
 
+    describe('geohashGrid methods', function () {
+      var data;
+      var geohashGridData = {
+        hits: 3954,
+        rows: [{
+          title: 'Top 5 _type: apache',
+          label: 'Top 5 _type: apache',
+          geoJson: {
+            type: 'FeatureCollection',
+            features: [],
+            properties: {
+              min: 2,
+              max: 331,
+              zoom: 3,
+              center: [
+                47.517200697839414,
+                -112.06054687499999
+              ]
+            }
+          },
+        }, {
+          title: 'Top 5 _type: nginx',
+          label: 'Top 5 _type: nginx',
+          geoJson: {
+            type: 'FeatureCollection',
+            features: [],
+            properties: {
+              min: 1,
+              max: 88,
+              zoom: 3,
+              center: [
+                47.517200697839414,
+                -112.06054687499999
+              ]
+            }
+          },
+        }]
+      };
+
+      beforeEach(function () {
+        data = new Data(geohashGridData, {});
+      });
+
+      describe('getVisData', function () {
+        it('should return the rows property', function () {
+          var visData = data.getVisData();
+          expect(visData).to.eql(geohashGridData.rows);
+        });
+      });
+
+      describe('getGeoExtents', function () {
+        it('should return the min and max geoJson properties', function () {
+          var minMax = data.getGeoExtents();
+          expect(minMax.min).to.be(1);
+          expect(minMax.max).to.be(331);
+        });
+      });
+    });
   });
 });
