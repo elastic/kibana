@@ -103,7 +103,8 @@ define(function (require) {
   });
 
   // The Kibana App
-  angular.module('KibanaStatusApp', ['nvd3'])
+  require('modules')
+  .get('KibanaStatusApp', ['nvd3'])
   .controller('StatusPage', function ($scope, $http, $window, $timeout) {
     // the object representing all of the elements the ui touches
     $scope.ui = {
