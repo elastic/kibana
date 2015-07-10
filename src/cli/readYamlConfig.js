@@ -7,7 +7,7 @@ var legacySettingMap = {
   // server
   port: 'server.port',
   host: 'server.host',
-  pid_file: 'server.pidFile',
+  pid_file: 'pid.file',
   ssl_cert_file: 'server.ssl.cert',
   ssl_key_file: 'server.ssl.key',
 

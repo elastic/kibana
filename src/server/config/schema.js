@@ -11,11 +11,15 @@ module.exports = Joi.object({
     prod: Joi.boolean().default(Joi.ref('$prod'))
   }).default(),
 
+  pid: Joi.object({
+    file: Joi.string(),
+    exclusive: Joi.boolean().default(false)
+  }).default(),
+
   server: Joi.object({
     host: Joi.string().hostname().default('0.0.0.0'),
     port: Joi.number().default(5601),
     defaultRoute: Joi.string(),
-    pidFile: Joi.string(),
     ssl: Joi.object({
       cert: Joi.string(),
       key: Joi.string()

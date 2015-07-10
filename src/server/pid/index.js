@@ -4,19 +4,27 @@ var writeFile = Promise.promisify(require('fs').writeFile);
 var unlink = require('fs').unlinkSync;
 
 module.exports = Promise.method(function (kbnServer, server, config) {
-  var path = config.get('server.pidFile');
-  var pid = String(process.pid);
+  var path = config.get('pid.file');
   if (!path) return;
+
+  var pid = String(process.pid);
 
   return writeFile(path, pid, { flag: 'wx' })
   .catch(function (err) {
     if (err.code !== 'EEXIST') throw err;
 
-    server.log(['pid', 'warning'], {
+    var log = {
       tmpl: 'pid file already exists at <%= path %>',
       path: path,
       pid: pid
-    });
+    };
+
+    if (config.get('pid.exclusive')) {
+      server.log(['pid', 'fatal'], log);
+      process.exit(1);
+    } else {
+      server.log(['pid', 'warning'], log);
+    }
 
     return writeFile(path, pid);
   })

@@ -57,7 +57,7 @@
 # server.ssl.key: /path/to/your/server.crt
 
 # Set the path to where you would like the process id file to be created.
-# server.pidFile: /var/run/kibana.pid
+# pid.file: /var/run/kibana.pid
 
 # If you would like to send the log output to a file you can set the path below.
 # logging.dest: stdout
