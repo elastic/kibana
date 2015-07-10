@@ -9,9 +9,10 @@ let cluster = require('cluster');
 let Worker = require('./Worker');
 
 let gaze = new Gaze([
-  'src/**/*.{js,yml}',
-  '!src/**/public/**/*',
+  'src/**/*',
   'config/**/*',
+  '!src/**/public/**/*',
+  '!src/ui/**/*',
 ], {
   cwd: join(__dirname, '..', '..', '..'),
   debounceDelay: 200
