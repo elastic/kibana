@@ -8,6 +8,7 @@ require('chrome')
     title: 'Apps'
   }
 ])
+.linkToAppSwitcher(false)
 .setRootTemplate(require('plugins/appSwitcher/appSwitcher.html'))
 .setRootController('switcher', function SwitcherController($http) {
   var switcher = {

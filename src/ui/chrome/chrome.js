@@ -13,6 +13,7 @@ define(function (require) {
   var tabs = new TabCollection();
   var rootController = null;
   var rootTemplate = null;
+  var linkToSwitcher = true;
   var payload = window.__KBN__;
   window.__KBN__ = null;
 
@@ -160,6 +161,18 @@ define(function (require) {
    */
   chrome.getAppId = function () {
     return payload.app.id;
+  };
+
+  /**
+   * Should the link to the app switcher appear in the header?
+   *
+   * @param  {Bool} val
+   * @return {chrome}
+   */
+  chrome.linkToAppSwitcher = function (val) {
+    if (!arguments.length) return linkToSwitcher;
+    linkToSwitcher = val;
+    return chrome;
   };
 
   /**
