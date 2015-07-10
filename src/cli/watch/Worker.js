@@ -17,27 +17,26 @@ cluster.setupMaster({
 
 module.exports = class Worker {
   constructor(gaze, opts) {
-    var self = this;
     opts = opts || {};
 
-    self.type = opts.type;
-    self.title = opts.title || opts.type;
-    self.filter = opts.filter || _.constant(true);
-    self.changeBuffer = [];
+    this.type = opts.type;
+    this.title = opts.title || opts.type;
+    this.filter = opts.filter || _.constant(true);
+    this.changeBuffer = [];
 
-    self.env = {
-      kbnWorkerType: self.type,
+    this.env = {
+      kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify(baseArgv.concat(opts.args || []))
     };
 
-    self.start = _.debounce(_.bind(self.start, self), 25);
-    cluster.on('exit', function (fork, code) {
-      if (self.fork !== fork) return;
-      self.onExit(code);
-    });
+    _.bindAll(this, ['onExit', 'start']);
+
+    this.start = _.debounce(this.start, 25);
+    cluster.on('exit', this.onExit);
   }
 
-  onExit(code) {
+  onExit(fork, code) {
+    if (this.fork !== fork) return;
     if (code) log.red(`${this.title} crashed`, 'with status code', code);
     else this.start(); // graceful shutdowns happen on restart
   }
@@ -46,10 +45,6 @@ module.exports = class Worker {
     if (!this.filter(path)) return;
     this.changeBuffer.push(path);
     this.start();
-  }
-
-  onOnline() {
-    log.green(`${this.title} started`);
   }
 
   flushChangeBuffer() {
@@ -77,6 +72,5 @@ module.exports = class Worker {
     }
 
     this.fork = cluster.fork(this.env);
-    this.fork.once('online', _.bindKey(this, 'onOnline'));
   }
 };

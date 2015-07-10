@@ -28,7 +28,7 @@ module.exports = function (kbnServer) {
 
   server.route({
     method: 'GET',
-    path: '/status/health',
+    path: '/api/status',
     handler: function (request, reply) {
       return reply({
         status: kbnServer.status,

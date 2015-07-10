@@ -23,7 +23,7 @@ let workers = [
     title: 'optimizer',
     args: ['--plugins.initialize=false', '--server.autoListen=false'],
     filter: function (path) {
-      return /\/server\/optimize\//.test(path);
+      return /\/src\/server\/optimize\//.test(path);
     }
   }),
 

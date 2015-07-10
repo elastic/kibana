@@ -15,10 +15,11 @@ let typeColors = {
   info: 'green',
   error: 'red',
   fatal: 'magenta',
-  plugins: 'yellow',
+  status: 'yellow',
   debug: 'brightBlack',
   server: 'brightBlack',
   optmzr: 'white',
+  optimize: 'magenta',
 };
 
 let color = _.memoize(function (name) {

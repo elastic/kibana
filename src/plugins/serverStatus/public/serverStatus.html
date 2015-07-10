@@ -13,18 +13,19 @@
     <h3 class="title">
       <b>System Status:</b> {{ui.systemStatus().msg}}
     </h3>
-    <div id="plugin_table">
-      <div class="plugin_table_header plugin_row">
-        <div class="col-md-1 plugin_key">Plugin</div>
-        <div class="col-md-11 plugin_state">Status</div>
-        <div class="clearfix"></div>
-      </div>
-      <div ng-repeat="(key, plugin) in ui.plugins" class="plugin_table_plugin plugin_row plugin_status_{{plugin.uiStatus}}">
-        <div class="col-md-1 plugin_key">{{key}}</div>
-        <div class="col-md-11 plugin_state">{{plugin.message}}</div>
-        <div class="clearfix"></div>
-      </div>
-    </div>
+    <table id="plugin_table">
+      <tr class="plugin_table_header plugin_row">
+        <th class="col-xs-1 plugin_key">Plugin</th>
+        <th class="col-xs-11 plugin_state">Status</th>
+      </tr>
+      <tr
+        ng-repeat="(key, status) in ui.statuses"
+        class="plugin_table_plugin plugin_row plugin_status_{{status.uiStatus}}">
+
+        <td class="col-xs-1 plugin_key">{{key}}</td>
+        <td class="col-xs-11 plugin_state">{{status.message || status.state}}</td>
+      </tr>
+    </table>
   </div>
   <h2>Server Metrics</h2>
   <p>Interval of 5 seconds, with a max history of 5 minutes.</p>

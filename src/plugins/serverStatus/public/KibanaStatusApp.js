@@ -5,38 +5,6 @@ var moment = require('moment');
 var numeral = require('numeral');
 require('angular-nvd3');
 
-// Make sure we don't have to deal with statuses by hand
-function getStatus(plugin) {
-  var statusMap = {
-    green: {
-      label: 'success',
-      msg: 'Ready',
-      idx: 1
-    },
-    yellow: {
-      label: 'warning',
-      msg: 'S.N.A.F.U.',
-      idx: 2
-    },
-    red: {
-      label: 'danger',
-      msg: 'Danger Will Robinson! Danger!',
-      idx: 3
-    },
-    loading: {
-      label: 'info',
-      msg: 'Loading...',
-      idx: 0
-    }
-  };
-  if (!_.isObject(plugin) || _.isUndefined(plugin)) {
-    plugin = {state: plugin};
-  }
-  return statusMap[plugin.state];
-}
-
-function getLabel(plugin) { return getStatus(plugin).label; }
-
 // Turns thisIsASentence to
 // This Is A Sentence
 function niceName(name) {
@@ -107,33 +75,9 @@ require('modules')
 .controller('StatusPage', function ($scope, $http, $window, $timeout) {
   // the object representing all of the elements the ui touches
   $scope.ui = {
-    // show the system status by going through all of the plugins,
-    // and making sure they're green.
-    systemStatus: (function () {
-      // for convenience
-      function getIdx(plugin) { return getStatus(plugin).idx; }
-
-      return function () {
-        var currentStatus = 'loading';
-        var currentIdx = getIdx(currentStatus);
-
-        // FIXME eh, not too thrilled about this.
-        var status = _.reduce($scope.ui.plugins, function (curr, plugin, key) {
-            var pluginIdx = getIdx(plugin);
-            if (pluginIdx > currentIdx) {
-              // set the current status
-              currentStatus = plugin.state;
-              currentIdx = getIdx(plugin);
-            }
-            return currentStatus;
-          }, 'loading');
-
-        // give the ui the label for colors and such
-        return getStatus(status);
-      };
-    }()),
-    charts: {},
-    plugins: []
+    overallStatus: null,
+    statuses: [],
+    charts: {}
   };
 
   var windowHasFocus = true;
@@ -198,10 +142,8 @@ require('modules')
       });
 
       // give the plugins their proper name so CSS classes can be properply applied
-      $scope.ui.plugins = _.mapValues(data.status, function (plugin) {
-        plugin.uiStatus = getLabel(plugin);
-        return plugin;
-      });
+      $scope.ui.overallStatus = data.status.overall;
+      $scope.ui.statuses = data.status.statuses;
 
       if (windowHasFocus) {
         // go ahead and get another status in 5 seconds

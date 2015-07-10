@@ -33,6 +33,7 @@ module.exports = function (kibana) {
       },
 
       loaders: [
+        { test: /\/nvd3\//, loader: 'exports?nv' },
         { test: /\/angular-nvd3\//, loader: 'imports?angular,d3' }
       ]
     }
