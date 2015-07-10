@@ -16,9 +16,16 @@ module.exports = function (kibana) {
         }
       },
 
+      modules: {
+        nvd3$: {
+          path: 'nvd3/build/nv.d3.js',
+          exports: 'window.nv',
+          imports: 'd3'
+        }
+      },
+
       loaders: [
-        { test: /\/nvd3\//, loader: 'exports?nv' },
-        { test: /\/angular-nvd3\//, loader: 'imports?angular,d3' }
+        { test: /\/angular-nvd3\//, loader: 'imports?angular,nv=nvd3,d3' }
       ]
     }
   });

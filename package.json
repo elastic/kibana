@@ -39,7 +39,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "angular-nvd3": "^1.0.0-beta",
+    "angular-nvd3": "krispo/angular-nvd3#7f04d396cb69cb0ed944555ffeb95e0d7457c952",
     "ansicolors": "^0.3.2",
     "autoprefixer-loader": "^2.0.0",
     "babel-jscs": "^1.0.3",
@@ -80,7 +80,7 @@
     "moment": "^2.10.3",
     "node-libs-browser": "spalger/node-libs-browser",
     "numeral": "^1.5.3",
-    "nvd3": "^1.8.1",
+    "nvd3": "novus/nvd3#679fe2ff96c194e442970cb9959ebccd79f6bd43",
     "raw-loader": "^0.5.1",
     "request": "^2.40.0",
     "requirefrom": "^0.2.0",
@@ -122,7 +122,6 @@
     "load-grunt-config": "^0.7.0",
     "marked": "^0.3.3",
     "marked-text-renderer": "^0.1.0",
-    "mkdirp": "^0.5.0",
     "mocha": "^2.2.5",
     "nock": "^1.6.0",
     "nodemon": "^1.3.7",
