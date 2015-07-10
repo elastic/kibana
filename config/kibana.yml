@@ -61,5 +61,3 @@
 
 # If you would like to send the log output to a file you can set the path below.
 # logging.dest: stdout
-
-logging.json: false

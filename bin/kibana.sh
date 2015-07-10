@@ -21,6 +21,5 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-
-CONFIG_PATH="${DIR}/config/kibana.yml" exec "${NODE}" "${DIR}/src/cli/cli" ${@}
+exec "${NODE}" "${DIR}/src/cli/cli" ${@}
 
