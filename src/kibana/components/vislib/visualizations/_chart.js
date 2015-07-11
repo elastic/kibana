@@ -27,7 +27,7 @@ define(function (require) {
 
       var events = this.events = new Dispatch(handler);
 
-      if (handler._attr.addTooltip) {
+      if (_.get(this.handler, '_attr.addTooltip')) {
         var $el = this.handler.el;
         var formatter = this.handler.data.get('tooltipFormatter');
 
@@ -35,7 +35,7 @@ define(function (require) {
         this.tooltip = new Tooltip('chart', $el, formatter, events);
       }
 
-      this._attr = _.defaults(handler._attr || {}, {});
+      this._attr = _.defaults(this.handler._attr || {}, {});
       this._addIdentifier = _.bind(this._addIdentifier, this);
     }
 
