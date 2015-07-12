@@ -18,6 +18,14 @@ define(function (require) {
         init();
       };
 
+      $scope.newRow = function () {
+        var newRow = _.map($scope.sheet[0], function () {
+          return '(`-*`)';
+        });
+        $scope.input.expressions.push(newRow);
+        $scope.search();
+      };
+
       $scope.input = {
         expressions: localStorageService.get('expressions') || blankSheet,
         row: 0,

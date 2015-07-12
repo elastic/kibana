@@ -37,6 +37,9 @@ function
   }
  }
 
+function_name
+ = (first:[a-zA-Z]+ rest:[a-zA-Z0-9]* ) { return first.join('') + rest.join('') }
+
 args
  = argument+
 
@@ -63,9 +66,6 @@ reference
 // Only 26 columns supported for now
 column
  = column:[A-Z]
-
-function_name
- = (first:[a-z]+ rest:[a-z0-9]* ) { return first.join('') + rest.join('') }
 
 number
  = number:(integer '.'? integer?) ','? (' '*)? {return parseFloat(number.join(''))}

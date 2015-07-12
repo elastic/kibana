@@ -1,29 +1,53 @@
-var aggspretion = require('../parser/chain.js');
+var Parser = require('../parser/chain.js');
+var unzipPairs = require('../utils/unzipPairs.js');
+
 var _ = require('lodash');
+var glob = require('glob');
 var Promise = require('bluebird');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: 'localhost:9200',
 });
 
+// Load function plugins
+var functions  = _.chain(glob.sync('server/functions/*.js')).map(function (file) {
+  var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
+  return [fnName, require('../functions/' + fnName + '.js')];
+}).zipObject().value();
+
 // Contains the parsed sheet;
 var sheet;
 
+var time = {
+  min: 'now-2y',
+  max: 'now',
+  field: '@timestamp',
+  interval: '1w'
+};
+
 function getRequest (config) {
+  var filter = {range:{}};
+  filter.range[time.field] = {gte: time.min, lte: time.max};
+
   var body = {
     query: {
-      query_string: {
-        query: config.query
+      filtered: {
+        query: {
+          query_string: {
+            query: config.query
+          }
+        },
+        filter: filter
       }
     },
     aggs: {
       series: {
         date_histogram: {
-          field: '@timestamp',
-          interval: '1w',
+          field: time.field,
+          interval: time.interval,
           extended_bounds: {
-            min: 'now-2y',
-            max: 'now'
+            min: time.min,
+            max: time.max
           },
           min_doc_count: 0
         }
@@ -38,181 +62,6 @@ function getRequest (config) {
 
   return body;
 }
-
-/**
- * Reduces multiple arrays into a single array using a function
- * @param {Array} arrayOfArrays - An array of series to reduce into a single series.
- * @params {Function} fn - Function used to combine points at same index in each array
- * @return {Array} A single series as modified by the fn
- */
-function reduce (arrayOfArrays, fn) {
-  return Promise.all(arrayOfArrays).then(function (arrayOfArrays) {
-    return _.reduce(arrayOfArrays, function(destinationObject, argument) {
-
-      var output = _.mapValues(destinationObject.data, function (value, key) {
-        // Allow function to take 2 arrays of equal length, OR an array and a single number;
-        // null points are not drawn
-        if (value == null) {
-          return null;
-        }
-
-        if (_.isNumber(argument)) {
-          return fn(value, argument);
-        }
-
-        if (argument.data[key] == null) {
-          return null;
-        }
-
-        return fn(value, argument.data[key]);
-      });
-
-      // Output = single series
-
-      output = {
-        data: output
-      };
-      output = _.defaults(output, destinationObject);
-      return output;
-
-    });
-  });
-}
-
-function alter (args, fn) {
-  return Promise.all(args).then(function (args) {
-    return fn(args);
-  });
-}
-
-function unzipPairs (timeValObject) {
-  var paired = _.chain(timeValObject).pairs().map(function (point) {
-    return [parseInt(point[0], 10), point[1]];
-  }).sortBy(function (point) {
-    return point[0];
-  }).value();
-  return paired;
-}
-
-function asSorted (timeValObject, fn) {
-  var data = unzipPairs(timeValObject);
-  return _.zipObject(fn(data));
-}
-
-/**
- * Modifies an array
- * @param {Array} args - An array of arguments. Usually one or more series, in an array.
- * @return {Array} A single series as modified by the function
- */
-var functions = {
-  abs: function (args) {
-    return alter(args, function (args) {
-      var data = _.mapValues(args[0].data, function (value) {
-        return Math.abs(value);
-      });
-      args[0].data = data;
-      return args[0];
-    });
-  },
-  sum: function (args) {
-    return reduce(args, function (a, b) {
-      return a + b;
-    });
-  },
-  subtract: function (args) {
-    return reduce(args, function (a, b) {
-      return a - b;
-    });
-  },
-  multiply: function (args) {
-    return reduce(args, function (a, b) {
-      return a * b;
-    });
-  },
-  divide: function (args) {
-    return reduce(args, function (a, b) {
-      return a / b;
-    });
-  },
-  roundTo: function (args) {
-    return reduce(args, function (a, b) {
-      return parseInt(a * Math.pow(10, b), 10) / Math.pow(10, b);
-    });
-  },
-  color: function (args) {
-    return alter(args, function (args) {
-      args[0].color = args[1];
-      return args[0];
-    });
-  },
-  label: function (args) {
-    return alter(args, function (args) {
-      if (args[2] && args[0].label) {
-        return args[0];
-      }
-      args[0].label = args[1];
-      return args[0];
-    });
-  },
-  attr: function (args) {
-    return alter(args, function (args) {
-      args[0][args[1]] = args[2];
-      return args[0];
-    });
-  },
-  yaxis2: function (args) {
-    return alter(args, function (args) {
-      args[0].yaxis = 2;
-      return args[0];
-    });
-  },
-  linewidth: function (args) {
-    return alter(args, function (args) {
-      args[0].lines = {lineWidth: args[1]};
-      return args[0];
-    });
-  },
-  first: function (args) {
-    return alter(args, function (args) {
-      return args[0];
-    });
-  },
-  movingaverage: function (args) {
-    return alter(args, function (args) {
-
-      var windowSize = args[1];
-      args[0].data = asSorted(args[0].data, function (pairs) {
-        return _.map(pairs, function(point, i) {
-          if (i < windowSize) { return [point[0], null]; }
-
-          var average = _.chain(pairs.slice(i - windowSize, i))
-          .map(function (point) {
-            return point[1];
-          }).reduce(function (memo, num) {
-            return (memo + num);
-          }).value() / windowSize;
-
-          return [point[0], average];
-        });
-      });
-
-      return args[0];
-    });
-  },
-  derivative: function (args) {
-    return alter(args, function (args) {
-
-      args[0].data = asSorted(args[0].data, function (pairs) {
-        return  _.map(pairs, function(point, i) {
-          if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
-          return [point[0], point[1] - pairs[i - 1][1]];
-        });
-      });
-
-      return args[0];
-    });
-  }
-};
 
 var invokeTree;
 // Invokes a modifier function, resolving arguments into series as needed
@@ -233,12 +82,14 @@ function invoke (fnName, args) {
         var values;
         var keys = _.pluck(resp.aggregations.series.buckets, 'key');
         if (resp.aggregations.series.buckets[0].metric) {
-          values = _.pluck(_.pluck(resp.aggregations.series.buckets, 'metric'), 'value');
+          values = _.chain(resp.aggregations.series.buckets).pluck('metric').pluck('value').value();
         } else {
           values = _.pluck(resp.aggregations.series.buckets, 'doc_count');
         }
         var data = _.zipObject(keys, values);
         return { data:  data};
+      }).catch(function (e) {
+        throw new Error(e.message.root_cause[0].reason);
       });
     }
     else if (_.isObject(item) && item.type === 'function') {
@@ -252,7 +103,6 @@ function invoke (fnName, args) {
   });
 
   return Promise.all(args).then(function (series) {
-
     if (!functions[fnName]){
       throw new Error('Function not found');
     }
@@ -305,7 +155,7 @@ function resolveTree (forest) {
 function resolveSheet (sheet) {
   return _.map(sheet, function (row) {
     return _.map(row, function (column) {
-      return aggspretion.parse(column);
+      return Parser.parse(column);
     });
   });
 }
@@ -338,6 +188,6 @@ function debugSheet (sheet) {
 }
 
 debugSheet([
-  ['(`geo.country_code:US`);(`*`).sum(A1@1)'],
+  ['(`geo.country_code:US` as sum:bytes);(`*`).sum(A1@1)'],
 ]);
 
