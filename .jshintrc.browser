@@ -9,6 +9,7 @@
     "require": true,
     "console": false,
     "-event": true,
-    "-name": true
+    "-name": true,
+    "module": true
   }
 }

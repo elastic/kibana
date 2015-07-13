@@ -5,7 +5,9 @@
     ng-class="{ show: !chrome.embedded }"
     bindonce
     class="hide navbar navbar-inverse navbar-static-top">
-    <div class="navbar-header">
+
+    <!-- Mobile navbar -->
+    <div class="  -header">
       <button ng-click="showCollapsed = !showCollapsed" type="button" class="navbar-toggle">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
@@ -18,6 +20,7 @@
         <span ng-show="chrome.httpActive.length" class="spinner"></span>
       </span>
     </div>
+    <!-- /Mobile navbar -->
 
     <!-- Full navbar -->
     <div collapse="!showCollapsed" class="navbar-collapse">
@@ -51,7 +54,10 @@
 
       <ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
         <li>
-          <a ng-click="toggleRefresh()" ng-show="timefilter.refreshInterval.value > 0">
+          <a
+            ng-click="toggleRefresh()"
+            ng-show="timefilter.refreshInterval.value > 0">
+
             <i class="fa" ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"></i>
           </a>
         </li>
@@ -85,8 +91,8 @@
           <div class="spinner"></div>
         </li>
       </ul>
-      <!-- /Full navbar -->
     </div>
+    <!-- /Full navbar -->
   </nav>
 
   <config

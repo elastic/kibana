@@ -37,15 +37,6 @@ module.exports = function (kbnServer, server, config) {
       let app = apps.byId[id];
       if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
-      if (kbnServer.status.getState('optimize') === 'yellow') {
-        return reply(`
-          <html>
-            <head><meta http-equiv="refresh" content="1"></head>
-            <body>Optimization in progress, please wait.</body>
-          </html>
-        `);
-      }
-
       if (kbnServer.status.isGreen()) {
         return reply.renderApp(app);
       } else {

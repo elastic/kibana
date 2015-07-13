@@ -11,13 +11,13 @@
     <p>Here is the status of your kibana instance and the plugins you have installed along with some, statistics to asses potential problems.</p>
   </section>
 
-  <div class="system_status_wrapper state_default state_{{ui.overallStatus.state}}">
+  <div class="system_status_wrapper state_default state_{{ui.overall.state}}">
 
     <h3 class="title">
       <b>
         System Status:
       </b>
-      {{ui.overallStatus.nickname || ui.overallStatus.title}}
+      {{ui.overall.nickname || ui.overall.title}}
     </h3>
 
     <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
@@ -44,13 +44,8 @@
   <h2>Server Metrics</h2>
   <p>Interval of 5 seconds, with a max history of 5 minutes.</p>
   <div id="chart_cont" class="row">
-    <div ng-repeat="(key, chart) in ui.charts" class="status_chart_wrapper col-md-4">
-      <h3 class="title">{{chart.niceName}}</h2>
-      <h4 class="average">
-        <span ng-repeat="average in chart.average track by $index"><span ng-if="$index">, </span>{{average}}</span>
-      </h4>
-      <nvd3 options="chart.options" data="chart.data"></nvd3>
+    <div ng-repeat="(name, data) in ui.metrics">
+      <server-status-metric></server-status-metric>
     </div>
-    <div class="clearfix"></div>
   </div>
 </div>

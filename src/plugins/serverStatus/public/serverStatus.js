@@ -1,4 +1,5 @@
-require('plugins/serverStatus/KibanaStatusApp');
+require('plugins/serverStatus/serverStatusController');
+require('plugins/serverStatus/serverStatusMetric');
 require('plugins/serverStatus/serverStatus.less');
 
 require('chrome')
@@ -9,4 +10,4 @@ require('chrome')
   }
 ])
 .setRootTemplate(require('plugins/serverStatus/serverStatus.html'))
-.setRootController('statusPage', 'StatusPage');
+.setRootController('ui', 'ServerStatusController');
