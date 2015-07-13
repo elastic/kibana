@@ -91,6 +91,8 @@ require('modules')
   });
 
   function getAppStatus() {
+    $scope.ui.loading = true;
+
     // go ahead and get the info you want
     $http
     .get('/api/status')
@@ -153,6 +155,9 @@ require('modules')
     })
     .error(function () {
       window.alert('Something went terribly wrong while making the request!!! Perhaps your server is down?');
+    })
+    .finally(function () {
+      $scope.ui.loading = false;
     });
   }
 

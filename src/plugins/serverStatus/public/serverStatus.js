@@ -2,7 +2,6 @@ require('plugins/serverStatus/KibanaStatusApp');
 require('plugins/serverStatus/serverStatus.less');
 
 require('chrome')
-.setNavBackground('grey')
 .setTabs([
   {
     id: '',
