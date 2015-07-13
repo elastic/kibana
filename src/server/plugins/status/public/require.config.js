@@ -10,7 +10,8 @@ require.config({
     moment: '/bower_components/moment/moment',
     nvd3: '/bower_components/nvd3/build/nv.d3',
     nvd3_directives: '/bower_components/angular-nvd3/dist/angular-nvd3',
-    numeral: '/bower_components/numeral/numeral'
+    numeral: '/bower_components/numeral/numeral',
+    text: '/bower_components/requirejs-text/text'
   },
   shim: {
     angular: {
