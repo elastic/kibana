@@ -8,7 +8,7 @@ define(function (require) {
 
     // SavedDashboard constructor. Usually you'd interact with an instance of this.
     // ID is option, without it one will be generated on save.
-    _(SavedDashboard).inherits(courier.SavedObject);
+    _.class(SavedDashboard).inherits(courier.SavedObject);
     function SavedDashboard(id) {
       // Gives our SavedDashboard the properties of a SavedObject
       courier.SavedObject.call(this, {

@@ -13,6 +13,7 @@ define(function (require) {
      * @constructor
      * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
      */
+    _.class(YAxis).inherits(ErrorHandler);
     function YAxis(args) {
       this.el = args.el;
       this.scale = null;
@@ -20,8 +21,6 @@ define(function (require) {
       this.yAxisFormatter = args.yAxisFormatter;
       this._attr = args._attr || {};
     }
-
-    _(YAxis.prototype).extend(ErrorHandler.prototype);
 
     /**
      * Renders the y axis
@@ -61,9 +60,10 @@ define(function (require) {
       var min = domain[0];
       var max = domain[1];
 
+      if (this._isUserDefined()) return this._validateUserExtents(domain);
+      if (this._isYExtents()) return domain;
       if (this._attr.scale === 'log') return this._logDomain(min, max); // Negative values cannot be displayed with a log scale.
       if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
-      if (this._isUserDefined()) return this._validateUserExtents(domain);
       return domain;
     };
 
@@ -101,7 +101,7 @@ define(function (require) {
      */
     YAxis.prototype._logDomain = function (min, max) {
       if (min < 0 || max < 0) return this._throwLogScaleValuesError();
-      return [Math.max(1, min), max];
+      return [1, max];
     };
 
     /**

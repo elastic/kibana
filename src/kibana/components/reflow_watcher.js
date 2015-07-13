@@ -11,7 +11,7 @@ define(function (require) {
     var MOUSE_EVENTS = 'mouseup';
     var WINDOW_EVENTS = 'resize';
 
-    _(ReflowWatcher).inherits(EventEmitter);
+    _.class(ReflowWatcher).inherits(EventEmitter);
     /**
      * Watches global activity which might hint at a change in the content, which
      * in turn provides a hint to resizers that they should check their size

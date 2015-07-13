@@ -21,7 +21,9 @@ define(function (require) {
     }
 
     // Create the columns
-    results.columns = _(aggs).flatten().map(function (agg) {
+    results.columns = _(aggs)
+    .flattenDeep()
+    .map(function (agg) {
       return {
         categoryName: agg.schema.name,
         id: agg.id,
@@ -30,7 +32,8 @@ define(function (require) {
         field: agg.params.field,
         label: agg.type.makeLabel(agg)
       };
-    }).value();
+    })
+    .value();
 
 
     // if there are no buckets then we need to just set the value and return
@@ -58,7 +61,7 @@ define(function (require) {
       // iterate through all the buckets
       _.each(extractBuckets(data[agg.id]), function (bucket) {
 
-        var _record = _.flatten([record, bucket.key]);
+        var _record = _.flattenDeep([record, bucket.key]);
         _.each(metrics, function (metric) {
           var value = bucket.doc_count;
           if (bucket[metric.id] && !_.isUndefined(bucket[metric.id].value)) {

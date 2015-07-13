@@ -17,15 +17,15 @@ define(function (require) {
         if (aggConfigResult) {
           var results = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
           var filters = _(results)
-            .map(function (result) {
-              try {
-                return result.createFilter();
-              } catch (e) {
-                notify.warning(e.message);
-              }
-            })
-            .filter(Boolean)
-            .value();
+          .map(function (result) {
+            try {
+              return result.createFilter();
+            } catch (e) {
+              notify.warning(e.message);
+            }
+          })
+          .filter(Boolean)
+          .value();
 
           if (!filters.length) return;
 

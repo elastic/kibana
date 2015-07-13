@@ -13,7 +13,7 @@ define(function (require) {
           return {
             savedObj: savedVis,
             panel: panel,
-            edit: '#visualize/edit'
+            editUrl: savedVisualizations.urlFor(panel.id)
           };
         });
     };

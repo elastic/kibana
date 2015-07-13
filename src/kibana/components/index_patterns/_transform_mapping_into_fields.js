@@ -36,6 +36,14 @@ define(function (require) {
         });
       });
 
+      config.get('metaFields').forEach(function (meta) {
+        if (fields[meta]) return;
+
+        var field = { mapping: {} };
+        field.mapping[meta] = {};
+        fields[meta] = mapField(field, meta);
+      });
+
       return _.map(fields, function (mapping, name) {
         mapping.name = name;
         return mapping;

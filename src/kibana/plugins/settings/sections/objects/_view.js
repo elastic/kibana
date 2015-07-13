@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var inflection = require('inflection');
   var rison = require('utils/rison');
   var registry = require('plugins/settings/saved_object_registry');
   var objectViewHTML = require('text!plugins/settings/sections/objects/_view.html');
@@ -101,7 +100,7 @@ define(function (require) {
 
         $scope.notFound = $routeParams.notFound;
 
-        $scope.title = inflection.singularize(serviceObj.title);
+        $scope.title = service.type;
 
         es.get({
           index: config.file.kibana_index,
@@ -184,7 +183,7 @@ define(function (require) {
               value = JSON.parse(field.value);
             }
 
-            _.setValue(source, field.name, value);
+            _.set(source, field.name, value);
           });
 
           es.index({

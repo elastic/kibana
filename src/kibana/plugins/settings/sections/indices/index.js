@@ -27,16 +27,15 @@ define(function (require) {
         config.$bind($scope, 'defaultIndex');
 
         $scope.$watch('defaultIndex', function () {
-          $scope.indexPatternList = _($route.current.locals.indexPatternIds)
-            .map(function (id) {
-              return {
-                id: id,
-                url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
-                class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
-                default: $scope.defaultIndex === id
-              };
-            })
-            .value();
+          var ids = $route.current.locals.indexPatternIds;
+          $scope.indexPatternList = ids.map(function (id) {
+            return {
+              id: id,
+              url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
+              class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
+              default: $scope.defaultIndex === id
+            };
+          });
         });
 
         $scope.$emit('application.load');

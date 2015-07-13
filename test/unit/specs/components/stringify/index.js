@@ -3,6 +3,7 @@ define(function (require) {
     describe(require('specs/components/stringify/_conformance'));
     describe(require('specs/components/stringify/_ip'));
     describe(require('specs/components/stringify/_source'));
+    describe(require('specs/components/stringify/_string'));
     describe(require('specs/components/stringify/_url'));
   });
 });

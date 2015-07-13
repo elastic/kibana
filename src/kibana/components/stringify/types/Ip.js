@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
 
-    _(Ip).inherits(FieldFormat);
+    _.class(Ip).inherits(FieldFormat);
     function Ip(params) {
       Ip.Super.call(this, params);
     }

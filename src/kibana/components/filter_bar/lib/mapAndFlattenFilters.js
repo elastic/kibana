@@ -3,14 +3,12 @@ define(function (require) {
   return function mapAndFlattenFiltersProvider(Private, Promise) {
     var mapFilter = Private(require('components/filter_bar/lib/mapFilter'));
     return function (filters) {
-      filters = _(filters)
-        .filter(function (filter) {
-          return filter;
-        })
-        .flatten(true)
-        .value();
-
-      return Promise.map(filters, mapFilter);
+      return _(filters)
+      .flatten()
+      .compact()
+      .map(mapFilter)
+      .thru(Promise.all)
+      .value();
     };
   };
 });

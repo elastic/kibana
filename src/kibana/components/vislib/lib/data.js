@@ -119,8 +119,8 @@ define(function (require) {
       var dataLengths = {};
 
       dataLengths.charts = data.length;
-      dataLengths.stacks = data[i].series.length;
-      dataLengths.values = data[i].series[j].values.length;
+      dataLengths.stacks = dataLengths.charts ? data[i].series.length : 0;
+      dataLengths.values = dataLengths.stacks ? data[i].series[j].values.length : 0;
 
       return dataLengths;
     };
@@ -185,8 +185,9 @@ define(function (require) {
         }
 
         // get stack and value count for next chart
-        this._cache.count.stacks = data[this._cache.index.chart].series.length; // number of stack layers
-        this._cache.count.values = data[this._cache.index.chart].series[this._cache.index.stack].values.length; // number of values
+        var chartSeries = data[this._cache.index.chart].series;
+        this._cache.count.stacks = chartSeries.length;
+        this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
       }
     };
 
@@ -217,7 +218,7 @@ define(function (require) {
     Data.prototype.chartData = function () {
       if (!this.data.series) {
         var arr = this.data.rows ? this.data.rows : this.data.columns;
-        return _.pluck(arr);
+        return _.toArray(arr);
       }
       return [this.data];
     };
@@ -240,6 +241,23 @@ define(function (require) {
       }
 
       return visData;
+    };
+
+    /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @return {Object}
+     */
+    Data.prototype.getGeoExtents = function () {
+      var visData = this.getVisData();
+
+      return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
+        return {
+          min: Math.min(props.min, minMax.min),
+          max: Math.max(props.max, minMax.max)
+        };
+      }, { min: Infinity, max: -Infinity });
     };
 
     /**
@@ -281,9 +299,9 @@ define(function (require) {
     Data.prototype.flatten = function () {
       return _(this.chartData())
       .pluck('series')
-      .flatten()
+      .flattenDeep()
       .pluck('values')
-      .flatten()
+      .flattenDeep()
       .value();
     };
 
@@ -351,7 +369,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        min = Math.min(min, self._getYExtent(chart, 'min', getValue));
+        var calculatedMin = self._getYExtent(chart, 'min', getValue);
+        if (!_.isUndefined(calculatedMin)) {
+          min = Math.min(min, calculatedMin);
+        }
       });
 
       return min;
@@ -387,7 +408,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.each(this.chartData(), function (chart) {
-        max = Math.max(max, self._getYExtent(chart, 'max', getValue));
+        var calculatedMax = self._getYExtent(chart, 'max', getValue);
+        if (!_.isUndefined(calculatedMax)) {
+          max = Math.max(max, calculatedMax);
+        }
       });
 
       return max;

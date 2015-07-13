@@ -6,7 +6,7 @@ define(function (require) {
     var Tooltip = Private(require('components/vislib/components/tooltip/tooltip'));
     var touchdownTmpl = _.template(require('text!components/vislib/partials/touchdown.tmpl.html'));
 
-    _(PointSeriesChart).inherits(Chart);
+    _.class(PointSeriesChart).inherits(Chart);
     function PointSeriesChart(handler, chartEl, chartData) {
       if (!(this instanceof PointSeriesChart)) {
         return new PointSeriesChart(handler, chartEl, chartData);
@@ -14,6 +14,30 @@ define(function (require) {
 
       PointSeriesChart.Super.apply(this, arguments);
     }
+
+    PointSeriesChart.prototype._stackMixedValues = function (stackCount) {
+      var currentStackOffsets = [0, 0];
+      var currentStackIndex = 0;
+
+      return function (d, y0, y) {
+        var firstStack = currentStackIndex % stackCount === 0;
+        var lastStack = ++currentStackIndex === stackCount;
+
+        if (firstStack) {
+          currentStackOffsets = [0, 0];
+        }
+
+        if (lastStack) currentStackIndex = 0;
+
+        if (y >= 0) {
+          d.y0 = currentStackOffsets[1];
+          currentStackOffsets[1] += y;
+        } else {
+          d.y0 = currentStackOffsets[0];
+          currentStackOffsets[0] += y;
+        }
+      };
+    };
 
     /**
      * Stacks chart data values
@@ -24,7 +48,10 @@ define(function (require) {
      */
     PointSeriesChart.prototype.stackData = function (data) {
       var self = this;
+      var isHistogram = (this._attr.type === 'histogram' && this._attr.mode === 'stacked');
       var stack = this._attr.stack;
+
+      if (isHistogram) stack.out(self._stackMixedValues(data.series.length));
 
       return stack(data.series.map(function (d) {
         var label = d.label;
