@@ -4,9 +4,7 @@ var _ = require('lodash');
 var format = require('util').format;
 module.exports = function (server) {
 
-  function getMaxInteger() {
-    return Math.pow(2, 53) - 1;
-  }
+  var MAX_INTEGER = Math.pow(2, 53) - 1;
 
   var client = server.plugins.elasticsearch.client;
   var config = server.config();
@@ -20,7 +18,7 @@ module.exports = function (server) {
           index: config.get('kibana.index'),
           type: 'config',
           body: {
-            buildNum: isProduction ? config.get('kibana.buildNum') : getMaxInteger()
+            buildNum: isProduction ? config.get('kibana.buildNum') : MAX_INTEGER
           },
           id: isProduction ? config.get('kibana.package.version') : '@@version'
         });
@@ -41,7 +39,7 @@ module.exports = function (server) {
 
     // if the build number is still the template string (which it wil be in development)
     // then we need to set it to the max interger. Otherwise we will set it to the build num
-    body._source.buildNum = getMaxInteger();
+    body._source.buildNum = MAX_INTEGER;
     if (!/^@@/.test(config.get('kibana.buildNum'))) {
       body._source.buildNum = parseInt(config.get('kibana.buildNum'), 10);
     }
