@@ -2,13 +2,13 @@ require('plugins/appSwitcher/appSwitcher.less');
 
 require('chrome')
 .setLogo('url(/images/kibana.png) left no-repeat', true)
+.setShowAppsLink(false)
 .setTabs([
   {
     id: '',
     title: 'Apps'
   }
 ])
-.linkToAppSwitcher(false)
 .setRootTemplate(require('plugins/appSwitcher/appSwitcher.html'))
 .setRootController('switcher', function SwitcherController($http) {
   var switcher = {

@@ -7,13 +7,15 @@ define(function (require) {
   require('components/timefilter/timefilter');
   require('components/private');
   require('components/promises');
+  require('components/style_compile');
 
   var TabCollection = require('chrome/TabCollection');
 
   var tabs = new TabCollection();
   var rootController = null;
   var rootTemplate = null;
-  var linkToSwitcher = true;
+  var showAppsLink = true;
+  var brand = null;
   var payload = window.__KBN__;
   window.__KBN__ = null;
 
@@ -21,6 +23,16 @@ define(function (require) {
     navBackground: '#222222',
     logo: null,
     smallLogo: null
+  };
+
+  /**
+   * Set the default configuration for tabs.
+   *
+   * @param {object} defaults - an object that will be applied to all existing and new tabs defined
+   */
+  chrome.setTabDefaults = function (defaults) {
+    tabs.setDefaults(defaults);
+    return chrome;
   };
 
   /**
@@ -92,7 +104,7 @@ define(function (require) {
       controllerName = 'chrome.$$rootControllerConstruct';
     }
 
-    rootController = controllerName + (as ? ' as ' + as : '' );
+    rootController = controllerName + ( as ? ' as ' + as : '' );
     return chrome;
   };
 
@@ -118,6 +130,22 @@ define(function (require) {
     return chrome;
   };
 
+
+  /**
+   * Should the link to the app switcher appear in the header?
+   *
+   * @param  {Bool} val
+   * @return {chrome}
+   */
+  chrome.setShowAppsLink = function (val) {
+    showAppsLink = !!val;
+    return chrome;
+  };
+
+  chrome.setBrand = function (val) {
+    brand = val;
+    return chrome;
+  };
 
   /**
    * Get the tab list
@@ -163,16 +191,12 @@ define(function (require) {
     return payload.app.id;
   };
 
-  /**
-   * Should the link to the app switcher appear in the header?
-   *
-   * @param  {Bool} val
-   * @return {chrome}
-   */
-  chrome.linkToAppSwitcher = function (val) {
-    if (!arguments.length) return linkToSwitcher;
-    linkToSwitcher = val;
-    return chrome;
+  chrome.getShowAppsLink = function () {
+    return showAppsLink;
+  };
+
+  chrome.getBrand = function () {
+    return brand;
   };
 
   /**
@@ -186,6 +210,12 @@ define(function (require) {
     return tab ? tab.id : def;
   };
 
+  /**
+   * Get the id of the active tab
+   *
+   * @param {*} def - the default value if there isn't any active tab
+   * @return {*}
+   */
   chrome.bootstrap = function (angularModules) {
     var kibana = modules.get('kibana', angularModules);
 

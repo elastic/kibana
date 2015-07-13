@@ -4,36 +4,43 @@ define(function (require) {
   function TabCollection() {
     var _ = require('lodash');
 
-    var all = [];
+    var tabs = null;
+    var specs = null;
+    var defaults = null;
     var activeTab = null;
 
-    this.set = function (tabSpecs) {
-      _.invoke(all.splice(0), 'destroy');
+    this.set = function (_specs) {
+      specs = _.cloneDeep([].concat(_specs || []));
+      this._rebuildTabs();
+    };
 
-      _.each(tabSpecs, function (tabSpec) {
-        all.push(new Tab(tabSpec));
-      });
+    this.setDefaults = function () {
+      defaults = _.clone(arguments[0]);
+      this._rebuildTabs();
     };
 
     this.get = function () {
-      return all;
+      return [].concat(tabs || []);
+    };
+
+    this._rebuildTabs = function () {
+      _.invoke(this.get(), 'destroy');
+      tabs = _.map(specs, function (spec) {
+        return new Tab(_.defaults({}, spec, defaults));
+      });
     };
 
     this.getActive = function () {
       return activeTab;
     };
 
-    this.trackPathUpdate = function (path, temporaryChange) {
+    this.trackPathUpdate = function (path, temp) {
       var id = path.split('/')[1] || '';
 
-      all.forEach(function (tab) {
-        tab.active = (tab.id === id);
-        if (tab.active) {
-          activeTab = tab;
-          if (!temporaryChange) {
-            tab.pathUpdate(path);
-          }
-        }
+      this.get().forEach(function (tab) {
+        var active = tab.active = (tab.id === id);
+        if (active) activeTab = tab;
+        if (active && !temp) tab.pathUpdate(path);
       });
     };
   }

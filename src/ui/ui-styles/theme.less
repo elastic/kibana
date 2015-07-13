@@ -32,16 +32,10 @@
   }
 
   &-default {
-
     .badge {
       background-color: #fff;
       color: @navbar-default-bg;
     }
-
-    .navbar-nav > .active > a {
-      .nav-active-arrow(@body-bg);
-    }
-
   }
 
   &-inverse {
@@ -61,18 +55,31 @@
       background-color: #fff;
       color: lighten(@navbar-inverse-bg, 10%);
     }
+  }
 
+  .navbar-nav > .active > a {
+    border-bottom-color: @body-bg; // active-arrow-color
 
-    .navbar-nav {
-      > .active > a {
-        .nav-active-arrow(@navbar-default-bg);
-      }
-
-      > .active.to-body > a {
-        .nav-active-arrow(@body-bg);
-      }
+    // navbar active arrow base styles
+    &:before {
+      content: "";
+      display: inline-block;
+      position: absolute;
+      border: @navbar-arrow-size solid transparent;
+      border-bottom-color: inherit;
+      top: (@navbar-height - @navbar-arrow-size*2);
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      width: 0;
+      height: 0;
     }
 
+    @media (max-width: @screen-sm-min) {
+      &:before {
+        display: none !important;
+      }
+    }
   }
 
   &-brand {

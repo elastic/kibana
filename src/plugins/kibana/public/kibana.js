@@ -13,6 +13,11 @@ define(function (require) {
   require('chrome')
   .setLogo('url(/images/kibana.png) left no-repeat', true)
   .setNavBackground('#222222')
+  .setTabDefaults({
+    resetWhenActive: true,
+    trackLastPath: true,
+    activeIndicatorColor: '#656a76'
+  })
   .setTabs([
     {
       id: 'discover',

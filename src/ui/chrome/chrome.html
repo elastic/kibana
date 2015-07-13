@@ -13,13 +13,14 @@
         <span class="icon-bar"></span>
       </button>
       <span class="visible-xs">
-        <span ng-if="chrome.getActiveTab()" bo-bind="chrome.getActiveTab().title" class="navbar-brand"></span>
+        <span ng-if="chrome.getActiveTab()" class="navbar-brand">{{ chrome.getActiveTab().title }}</span>
+        <span ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</span>
         <span ng-show="chrome.httpActive.length" class="spinner"></span>
       </span>
     </div>
 
     <!-- Full navbar -->
-    <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
+    <div collapse="!showCollapsed" class="navbar-collapse">
       <ul class="nav navbar-nav" role="navigation">
         <li
           ng-if="chrome.logo"
@@ -27,6 +28,7 @@
           aria-label="{{ chrome.getAppTitle() }} Logo"
           class="logo hidden-sm"
           ></li>
+
         <li
           ng-if="chrome.smallLogo"
           ng-style="{ 'background': chrome.smallLogo }"
@@ -34,12 +36,14 @@
           class="logo-small visible-sm hidden-xs"
           ></li>
 
-        <li ng-if="chrome.linkToAppSwitcher()">
+        <li ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</li>
+
+        <li ng-if="chrome.getShowAppsLink()">
           <a href="/apps"><i class="fa fa-th" alt="Go to app switcher"></i></a>
         </li>
 
         <li ng-repeat="tab in chrome.getTabs()" ng-class="{ active: tab.active }">
-          <a ng-href="#{{ tab.active ? tab.id : tab.lastPath }}">
+          <a ng-href="{{ tab.href() }}" ng-style="{ 'border-bottom-color': tab.activeIndicatorColor }">
             {{ tab.title }}
           </a>
         </li>

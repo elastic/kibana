@@ -116,17 +116,17 @@ notifications {
 //== Subnav
 //
 // Use for adding a subnav to your app
-
-.navbar-nav li a {
-  cursor: pointer;
-}
-
 .navbar {
   margin-bottom: 0px!important;
 }
 
 #kibana-primary-navbar {
   margin-right: 15px;
+}
+
+a {
+  // overriden by next rule for a tags that actually have an href
+  cursor: default;
 }
 
 [ng-click], [clip-copy], [href], [confirm-click] {

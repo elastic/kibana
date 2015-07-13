@@ -76,7 +76,8 @@ require('modules')
   // the object representing all of the elements the ui touches
   $scope.ui = {
     overallStatus: null,
-    statuses: [],
+    statuses: null,
+    loading: true,
     charts: {}
   };
 
