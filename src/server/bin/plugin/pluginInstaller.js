@@ -1,6 +1,6 @@
-﻿var pluginDownloader = require('./pluginDownloader.js');
-var pluginCleaner = require('./pluginCleaner.js');
-var npmInstall = require('./npmInstall.js');
+﻿var pluginDownloader = require('./pluginDownloader');
+var pluginCleaner = require('./pluginCleaner');
+var npmInstall = require('./npmInstall');
 var fs = require('fs');
 
 module.exports = {
@@ -35,8 +35,7 @@ function install(settings, logger) {
     logger.log('Plugin installation complete!');
   })
   .catch(function (e) {
-    logger.error('Plugin installation was unsuccessful.');
-    logger.error(e.message);
+    logger.error('Plugin installation was unsuccessful due to error "' + e.message + '"');
     cleaner.cleanError();
     process.exit(70);
   });

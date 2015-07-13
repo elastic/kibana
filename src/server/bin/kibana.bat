@@ -9,7 +9,6 @@ set NODE=%DIR%\node\node.exe
 set SERVER=%DIR%\src\bin\kibana.js
 set NODE_ENV="production"
 set CONFIG_PATH=%DIR%\config\kibana.yml
-set NPM=npm
 
 TITLE Kibana Server @@version
 

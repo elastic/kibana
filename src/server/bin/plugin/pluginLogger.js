@@ -15,12 +15,14 @@
       return;
     }
 
-    if (!sameLine) data += '\n';
     process.stdout.write(data);
+    if (!sameLine) process.stdout.write('\n');
     previousLineEnded = !sameLine;
   }
 
   function error(data) {
+    if (silent) return;
+
     if (!previousLineEnded) {
       process.stderr.write('\n');
     }

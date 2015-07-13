@@ -16,8 +16,7 @@ module.exports = function (dest, logger) {
       return reject(new Error('Plugin does not contain package.json file'));
     }
 
-    var cmd = (process.env.NPM) ? process.env.NPM : 'npm';
-    cmd += ' install';
+    var cmd = '"' + path.resolve(path.dirname(process.execPath), 'npm').replace(/\\/g, '/') + '" install --production';
 
     var child = exec(cmd, { cwd: dest });
     child.on('error', function (err) {
@@ -27,7 +26,7 @@ module.exports = function (dest, logger) {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error('npm install failed.'));
+        reject(new Error('npm install failed with code ' + code));
       }
     });
 

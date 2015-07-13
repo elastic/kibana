@@ -12,52 +12,43 @@ describe('kibana cli', function () {
 
     describe('settings.action', function () {
 
-      var program = {
-        command: function () { return program; },
-        description: function () { return program; },
-        option: function () { return program; },
-        action: function (processCommand) {
-          processCommand();
-        }
-      };
+      function testUsageOfAction(action) {
+        describe('when action is ' + action, function () {
+          before(function () {
+            var program = {
+              command: function () { return program; },
+              description: function () { return program; },
+              option: function () { return program; },
+              action: function (processCommand) {
+                processCommand();
+              }
+            };
 
-      beforeEach(function () {
-        sinon.stub(remover, 'remove');
-        sinon.stub(installer, 'install');
-      });
+            sinon.stub(remover, 'remove');
+            sinon.stub(installer, 'install');
 
-      afterEach(function () {
-        remover.remove.restore();
-        installer.install.restore();
-        settingParser.parse.restore();
-      });
+            sinon
+            .stub(settingParser, 'parse')
+            .returns({ action: action });
 
-      it('should call remove if settings.action is "remove"', function () {
-        sinon.stub(settingParser, 'parse', function () {
-          return {
-            action: 'remove'
-          };
+            plugin(program);
+          });
+
+          it('calls the right function', function () {
+            expect(remover.remove.called).to.be(action === 'remove');
+            expect(installer.install.called).to.be(action === 'install');
+          });
+
+          after(function () {
+            remover.remove.restore();
+            installer.install.restore();
+            settingParser.parse.restore();
+          });
         });
+      }
 
-        plugin(program);
-
-        expect(remover.remove.called).to.be(true);
-        expect(installer.install.called).to.be(false);
-      });
-
-      it('should call install if settings.action is "install"', function () {
-        sinon.stub(settingParser, 'parse', function () {
-          return {
-            action: 'install'
-          };
-        });
-
-        plugin(program);
-
-        expect(remover.remove.called).to.be(false);
-        expect(installer.install.called).to.be(true);
-      });
-
+      testUsageOfAction('remove');
+      testUsageOfAction('install');
     });
 
     describe('commander options', function () {

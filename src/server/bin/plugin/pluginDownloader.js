@@ -3,7 +3,7 @@ var zlib = require('zlib');
 var Promise = require('bluebird');
 var request = require('request');
 var tar = require('tar');
-var progressReporter = require('./progressReporter.js');
+var progressReporter = require('./progressReporter');
 
 module.exports = function (settings, logger) {
 

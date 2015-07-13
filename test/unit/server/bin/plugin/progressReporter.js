@@ -33,505 +33,69 @@ describe('kibana cli', function () {
 
         describe('bad response codes', function () {
 
-          it('should set the state to error for response code = 400', function () {
-            progress.handleResponse({ statusCode: 400 });
+          function testErrorResponse(element, index, array) {
+            it('should set the state to error for response code = ' + element, function () {
+              progress.handleResponse({ statusCode: element });
 
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
+              var errorStub = sinon.stub();
+              return progress.promise
+              .catch(errorStub)
+              .then(function (data) {
+                expect(errorStub.called).to.be(true);
+                expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
+              });
             });
-          });
+          }
 
-          it('should set the state to error for response code = 401', function () {
-            progress.handleResponse({ statusCode: 401 });
+          var badCodes = [
+            '400', '401', '402', '403', '404', '405', '406', '407', '408', '409', '410',
+            '411', '412', '413', '414', '415', '416', '417', '500', '501', '502', '503',
+            '504', '505'
+          ];
 
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 402', function () {
-            progress.handleResponse({ statusCode: 402 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 403', function () {
-            progress.handleResponse({ statusCode: 403 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 404', function () {
-            progress.handleResponse({ statusCode: 404 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 405', function () {
-            progress.handleResponse({ statusCode: 405 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 406', function () {
-            progress.handleResponse({ statusCode: 406 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 407', function () {
-            progress.handleResponse({ statusCode: 407 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 408', function () {
-            progress.handleResponse({ statusCode: 408 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 409', function () {
-            progress.handleResponse({ statusCode: 409 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 410', function () {
-            progress.handleResponse({ statusCode: 410 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 411', function () {
-            progress.handleResponse({ statusCode: 411 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 412', function () {
-            progress.handleResponse({ statusCode: 412 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 413', function () {
-            progress.handleResponse({ statusCode: 413 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 414', function () {
-            progress.handleResponse({ statusCode: 414 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 415', function () {
-            progress.handleResponse({ statusCode: 415 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 416', function () {
-            progress.handleResponse({ statusCode: 416 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 417', function () {
-            progress.handleResponse({ statusCode: 417 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 500', function () {
-            progress.handleResponse({ statusCode: 500 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 501', function () {
-            progress.handleResponse({ statusCode: 501 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 502', function () {
-            progress.handleResponse({ statusCode: 502 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 503', function () {
-            progress.handleResponse({ statusCode: 503 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 504', function () {
-            progress.handleResponse({ statusCode: 504 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
-          it('should set the state to error for response code = 505', function () {
-            progress.handleResponse({ statusCode: 505 });
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(true);
-              expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-            });
-          });
-
+          badCodes.forEach(testErrorResponse);
         });
 
         describe('good response codes', function () {
 
-          it('should set the state to error for response code = 200', function () {
-            progress.handleResponse({ statusCode: 200, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
+          function testSuccessResponse(statusCode, index, array) {
+            it('should set the state to success for response code = ' + statusCode, function () {
+              progress.handleResponse({ statusCode: statusCode, headers: { 'content-length': 1000 } });
+              progress.handleEnd();
 
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
+              var errorStub = sinon.stub();
+              return progress.promise
+              .catch(errorStub)
+              .then(function (data) {
+                expect(errorStub.called).to.be(false);
+                expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
+              });
             });
-          });
+          }
 
-          it('should set the state to error for response code = 201', function () {
-            progress.handleResponse({ statusCode: 201, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
 
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
+          function testUnknownNumber(statusCode, index, array) {
+            it('should log "unknown number of" for response code = ' + statusCode + ' without content-length header', function () {
+              progress.handleResponse({ statusCode: statusCode, headers: {} });
+              progress.handleEnd();
+
+              var errorStub = sinon.stub();
+              return progress.promise
+              .catch(errorStub)
+              .then(function (data) {
+                expect(errorStub.called).to.be(false);
+                expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/unknown number/);
+              });
             });
-          });
+          }
 
-          it('should set the state to error for response code = 202', function () {
-            progress.handleResponse({ statusCode: 202, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
+          var goodCodes = [
+            '200', '201', '202', '203', '204', '205', '206', '300', '301', '302', '303',
+            '304', '305', '306', '307'
+          ];
 
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 203', function () {
-            progress.handleResponse({ statusCode: 203, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 204', function () {
-            progress.handleResponse({ statusCode: 204, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 205', function () {
-            progress.handleResponse({ statusCode: 205, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 206', function () {
-            progress.handleResponse({ statusCode: 206, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 300', function () {
-            progress.handleResponse({ statusCode: 300, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 301', function () {
-            progress.handleResponse({ statusCode: 301, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 302', function () {
-            progress.handleResponse({ statusCode: 302, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 303', function () {
-            progress.handleResponse({ statusCode: 303, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 304', function () {
-            progress.handleResponse({ statusCode: 304, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 305', function () {
-            progress.handleResponse({ statusCode: 305, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 306', function () {
-            progress.handleResponse({ statusCode: 306, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should set the state to error for response code = 307', function () {
-            progress.handleResponse({ statusCode: 307, headers: { 'content-length': 1000 } });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/1000/);
-            });
-          });
-
-          it('should log "unknown number of" for response codes < 400 without content-length header', function () {
-            progress.handleResponse({ statusCode: 200, headers: {} });
-            progress.handleEnd();
-
-            var errorStub = sinon.stub();
-            return progress.promise
-            .catch(errorStub)
-            .then(function (data) {
-              expect(errorStub.called).to.be(false);
-              expect(logger.log.getCall(logger.log.callCount - 2).args[0]).to.match(/unknown number/);
-            });
-          });
+          goodCodes.forEach(testSuccessResponse);
+          goodCodes.forEach(testUnknownNumber);
 
         });
 

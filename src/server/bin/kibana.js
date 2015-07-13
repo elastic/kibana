@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 var program = require('commander');
-require('../lib/commanderExtensions.js')(program);
+require('../lib/commanderExtensions')(program);
 var path = require('path');
-var startupOptions = require('./startup/startupOptions.js');
-var startup = require('./startup/startup.js');
+var startupOptions = require('./startup/startupOptions');
+var startup = require('./startup/startup');
 var pluginProgram = require('./plugin/plugin');
 
 var env = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'development';

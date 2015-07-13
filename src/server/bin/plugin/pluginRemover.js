@@ -18,8 +18,9 @@ function remove(settings, logger) {
     logger.log('Removing ' + settings.package + '...');
 
     rimraf.sync(settings.pluginPath);
-  } catch (ex) {
-    logger.error(ex.message);
+  } catch (err) {
+    var message = 'Unable to remove plugin "' + settings.package + '" because of error: "' + err.message + '"';
+    logger.error(message);
     process.exit(74);
   }
 }
