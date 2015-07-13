@@ -58,11 +58,11 @@ module.exports = Joi.object({
   }).default(),
 
   optimize: Joi.object({
-    enable: Joi.boolean().default(true),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(Joi.ref('$dev')),
-    sourceMaps: Joi.boolean().default(Joi.ref('$dev'))
+    sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
+    _workerRole: Joi.valid('send', 'receive', null).default(null)
   }).default()
 
 }).default();

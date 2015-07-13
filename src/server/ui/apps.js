@@ -1,16 +1,20 @@
+'use strict';
+
 module.exports = function (kbnServer, server, config) {
-  var _ = require('lodash');
-  var Boom = require('boom');
-  var uiExports = kbnServer.uiExports;
-  var apps = uiExports.apps;
-  var hiddenApps = uiExports.apps.hidden;
+  let _ = require('lodash');
+  let Boom = require('boom');
+  let formatUrl = require('url').format;
+
+  let uiExports = kbnServer.uiExports;
+  let apps = uiExports.apps;
+  let hiddenApps = uiExports.apps.hidden;
 
   // serve the app switcher
   server.route({
     path: '/apps',
     method: 'GET',
     handler: function (req, reply) {
-      var switcher = hiddenApps.byId.switcher;
+      let switcher = hiddenApps.byId.switcher;
       if (!switcher) return reply(Boom.notFound('app switcher not installed'));
       return reply.renderApp(switcher);
     }
@@ -29,11 +33,25 @@ module.exports = function (kbnServer, server, config) {
     path: '/app/{id}',
     method: 'GET',
     handler: function (req, reply) {
-      var id = req.params.id;
-      var app = apps.byId[id];
+      let id = req.params.id;
+      let app = apps.byId[id];
       if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
-      return reply.renderApp(app);
+      if (kbnServer.status.getState('optimize') === 'yellow') {
+        return reply(`
+          <html>
+            <head><meta http-equiv="refresh" content="1"></head>
+            <body>Optimization in progress, please wait.</body>
+          </html>
+        `);
+      }
+
+      if (kbnServer.status.isGreen()) {
+        return reply.renderApp(app);
+      } else {
+        return reply.renderStatusPage();
+      }
+
     }
   });
 };

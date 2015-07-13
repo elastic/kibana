@@ -22,7 +22,12 @@ let workers = [
   new Worker(gaze, {
     type: 'optmzr',
     title: 'optimizer',
-    args: ['--plugins.initialize=false', '--server.autoListen=false'],
+    args: [
+      '--logging.quiet=true',
+      '--plugins.initialize=false',
+      '--server.autoListen=false',
+      '--optimize._workerRole=send'
+    ],
     filter: function (path) {
       return /\/src\/server\/optimize\//.test(path);
     }
@@ -30,9 +35,18 @@ let workers = [
 
   new Worker(gaze, {
     type: 'server',
-    args: ['--optimize.enable=false']
+    args: ['--optimize._workerRole=receive']
   })
 ];
+
+workers.forEach(function (worker) {
+  worker.on('broadcast', function (msg) {
+    workers.forEach(function (broadcastTo) {
+      if (broadcastTo === worker) return;
+      broadcastTo.fork.send(msg);
+    });
+  });
+});
 
 gaze.on('all', function (e, path) {
   _.invoke(workers, 'onChange', path);

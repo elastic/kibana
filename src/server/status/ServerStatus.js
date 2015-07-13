@@ -28,6 +28,10 @@ module.exports = class ServerStatus {
     plugin.status = this.create(`plugin:${plugin.id}`);
   }
 
+  getState(name) {
+    return _.get(this._created, [name, 'state'], 'uninitialized');
+  }
+
   overall() {
     var state = _(this._created)
     .map(function (status) {
@@ -48,8 +52,12 @@ module.exports = class ServerStatus {
     };
   }
 
-  toValue() {
+  isGreen() {
     return (this.overall().state === 'green');
+  }
+
+  notGreen() {
+    return !this.isGreen();
   }
 
   toString() {

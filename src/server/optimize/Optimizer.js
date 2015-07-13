@@ -34,13 +34,13 @@ class Optimizer extends EventEmitter {
     var modules = self.modules;
     var bundles = self.bundles;
 
-    var compiler = webpack({
+    this.webpackConfig = {
       entry: bundles.getEntriesToCompile(),
 
       devtool: this.sourceMaps ? '#source-map' : false,
 
       output: {
-        path: this.bundles.dir,
+        path: bundles.dir,
         filename: '[name].js',
         sourceMapFilename: '[file].map',
         publicPath: '/bundles/',
@@ -63,7 +63,7 @@ class Optimizer extends EventEmitter {
         loaders: [
           { test: /\.less$/, loader: ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap') },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?sourceMap') },
-          { test: /\.html$/, loader: 'raw' },
+          { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=2048!file?name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file?name=[path][name].[ext]' },
         ].concat(modules.loaders),
@@ -76,7 +76,9 @@ class Optimizer extends EventEmitter {
         root: fromRoot(),
         alias: modules.aliases
       }
-    });
+    };
+
+    var compiler = webpack(this.webpackConfig);
 
     compiler.plugin('watch-run', function (compiler, cb) {
       self.emit('watch-run');

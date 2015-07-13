@@ -3,6 +3,7 @@
 let _ = require('lodash');
 let cluster = require('cluster');
 let join = require('path').join;
+let EventEmitter = require('events').EventEmitter;
 
 let log = require('./log');
 
@@ -15,9 +16,10 @@ cluster.setupMaster({
   silent: false
 });
 
-module.exports = class Worker {
+module.exports = class Worker extends EventEmitter {
   constructor(gaze, opts) {
     opts = opts || {};
+    super();
 
     this.type = opts.type;
     this.title = opts.title || opts.type;
@@ -29,7 +31,7 @@ module.exports = class Worker {
       kbnWorkerArgv: JSON.stringify(baseArgv.concat(opts.args || []))
     };
 
-    _.bindAll(this, ['onExit', 'start']);
+    _.bindAll(this, ['onExit', 'onMessage', 'start']);
 
     this.start = _.debounce(this.start, 25);
     cluster.on('exit', this.onExit);
@@ -47,6 +49,11 @@ module.exports = class Worker {
     this.start();
   }
 
+  onMessage(msg) {
+    if (!_.isArray(msg) || msg[0] !== 'WORKER_BROADCAST') return;
+    this.emit('broadcast', msg[1]);
+  }
+
   flushChangeBuffer() {
     let files = _.unique(this.changeBuffer.splice(0));
     let prefix = files.length > 1 ? '\n - ' : '';
@@ -59,6 +66,7 @@ module.exports = class Worker {
     if (this.fork) {
       if (!this.fork.isDead()) {
         this.fork.kill();
+        this.fork.removeListener('message', this.onMessage);
         // once "exit" event is received with 0 status, start() is called again
         return;
       }
@@ -72,5 +80,6 @@ module.exports = class Worker {
     }
 
     this.fork = cluster.fork(this.env);
+    this.fork.on('message', this.onMessage);
   }
 };
