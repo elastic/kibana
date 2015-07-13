@@ -34,7 +34,7 @@ module.exports = function (program) {
   .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
   .action(function (opts) {
 
-    if (opts.dev && !opts.noWatch && !isWorker) {
+    if (opts.dev && opts.watch && !isWorker) {
       // stop processing the action and handoff to watch cluster manager
       return require('../watch/watch');
     }
