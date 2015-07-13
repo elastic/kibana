@@ -39,7 +39,7 @@ module.exports = function (grunt) {
         'cycle@1.0.3': ['Public-Domain'],
         'pkginfo@0.2.3': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
-        'amdefine@0.1.1': ['BSD-3-Clause', 'MIT'],
+        'amdefine@1.0.0': ['BSD-3-Clause', 'MIT'],
         'flatten@0.0.1': ['MIT'],
         'color-name@1.0.0': ['UNLICENSE'],
         'css-color-names@0.0.1': ['MIT'],
