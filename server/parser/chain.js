@@ -409,7 +409,7 @@ module.exports = (function() {
           s2 = peg$c2;
         }
         if (s2 !== peg$FAILED) {
-          s3 = peg$parsechain_init();
+          s3 = peg$parseseries();
           if (s3 !== peg$FAILED) {
             s4 = peg$parsespace();
             if (s4 === peg$FAILED) {
@@ -457,17 +457,6 @@ module.exports = (function() {
       } else {
         peg$currPos = s0;
         s0 = peg$c1;
-      }
-
-      return s0;
-    }
-
-    function peg$parsechain_init() {
-      var s0;
-
-      s0 = peg$parsequeryAggOptional();
-      if (s0 === peg$FAILED) {
-        s0 = peg$parsereference();
       }
 
       return s0;
@@ -742,16 +731,13 @@ module.exports = (function() {
     function peg$parseargType() {
       var s0;
 
-      s0 = peg$parsequeryAggOptional();
+      s0 = peg$parseseries();
       if (s0 === peg$FAILED) {
-        s0 = peg$parsereference();
+        s0 = peg$parsefunction();
         if (s0 === peg$FAILED) {
-          s0 = peg$parsefunction();
+          s0 = peg$parsenumber();
           if (s0 === peg$FAILED) {
-            s0 = peg$parsenumber();
-            if (s0 === peg$FAILED) {
-              s0 = peg$parsestring();
-            }
+            s0 = peg$parsestring();
           }
         }
       }

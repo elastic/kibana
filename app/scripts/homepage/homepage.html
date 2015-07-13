@@ -1,14 +1,12 @@
 <div class="header">
   <h1 class="text-muted">
-      <!--
-      <small>
+      <img src="/logo.png">
+      <small class="pull-right">
         <span class="fa-stack new-sheet" ng-click="newSheet()">
           <i class="fa fa-file-o fa-stack-2x"></i>
           <i class="fa fa-plus fa-stack-1x"></i>
         </span>
       </small>
-      -->
-      <img src="/logo.png">
   </h1>
 </div>
 
@@ -35,7 +33,4 @@
     <div class="cell-id">{{getCellId($parent.$index, $index)}}</div>
     <div chart="sheet[$parent.$index][$index]" cell="[$parent.$index, $index]"></div>
   </div>
-</div>
-<div class="row">
-    <button class="btn btn-default col-md-12" ng-click="newRow()">add row</button>
 </div>

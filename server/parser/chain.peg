@@ -14,14 +14,10 @@ seriesList
  = series:series ';'? (space*)? { return series }
 
 chain
- = '(' space? first:chain_init space? ')' rest:chained_function* {
+ = '(' space? first:series space? ')' rest:chained_function* {
   first.label = text();
   return [first].concat(rest)
  }
-
-chain_init
- = queryAggOptional
- / reference
 
 chained_function
  = '.' func:function {
@@ -47,8 +43,7 @@ argument
  = element:argType ','? (' '*)? {return element}
 
 argType
- = queryAggOptional
- / reference
+ = series
  / function
  / number
  / string

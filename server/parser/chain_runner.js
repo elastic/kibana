@@ -63,7 +63,7 @@ function getRequest (config) {
   return body;
 }
 
-var invokeTree;
+var invokeChain;
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
 
@@ -97,7 +97,7 @@ function invoke (fnName, args) {
     }
     else if (_.isObject(item) && item.type === 'reference') {
       var reference = sheet[item.row - 1][item.column][item.series - 1];
-      return invokeTree(reference);
+      return invokeChain(reference);
     }
     return item;
   });
@@ -111,15 +111,18 @@ function invoke (fnName, args) {
   });
 }
 
-function invokeTree (chain, result) {
+function invokeChain (chain, result) {
   if (chain.length === 0) {
     return result[0];
   }
 
   chain = _.clone(chain);
   var link = chain.shift();
+
   var promise;
-  if (!result) {
+  if (_.isArray(link)) {
+    promise = invokeChain(link);
+  } else if (!result) {
     if (link.label) {
       promise = invoke('label', [link, link.label, true]);
     } else {
@@ -130,14 +133,15 @@ function invokeTree (chain, result) {
   }
 
   return promise.then(function (result) {
-    return invokeTree(chain, [result]);
+    console.log(result);
+    return invokeChain(chain, [result]);
   });
 
 }
 
-function resolveTree (forest) {
-  var seriesList = _.map(forest, function (tree) {
-    var values = invokeTree(tree);
+function resolveChainList (chainList) {
+  var seriesList = _.map(chainList, function (chain) {
+    var values = invokeChain(chain);
 
     return values.then(function (args) {
       args.data = unzipPairs(args.data);
@@ -155,6 +159,7 @@ function resolveTree (forest) {
 function resolveSheet (sheet) {
   return _.map(sheet, function (row) {
     return _.map(row, function (column) {
+      console.log(column);
       return Parser.parse(column);
     });
   });
@@ -165,7 +170,7 @@ function processRequest (request) {
   sheet = resolveSheet(request);
   return _.map(sheet, function (row) {
     return _.map(row, function (column) {
-      return resolveTree(column).then(function (columns) {
+      return resolveChainList(column).then(function (columns) {
         return columns;
       });
     });
@@ -182,12 +187,14 @@ function debugSheet (sheet) {
     return Promise.all(row);
   });
 
+
   Promise.all(rows).then(function (sheet) {
     console.log(JSON.stringify(sheet));
   });
 }
 
 debugSheet([
-  ['(`geo.country_code:US` as sum:bytes);(`*`).sum(A1@1)'],
+  ['((`US`).label("beer")).divide(100)'],
+  //['(`*`).divide(100)']
 ]);
 
