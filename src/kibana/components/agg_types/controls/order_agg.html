@@ -15,6 +15,9 @@
       <option value="custom" ng-selected="agg.params.orderBy === 'custom'">
         Custom Metric
       </option>
+      <option value="_term" ng-selected="agg.params.orderBy === 'x_axis'">
+        X-Axis Labels
+      </option>
     </select>
   </div>
   <div ng-show="agg.params.orderAgg" class="vis-editor-agg-order-agg">
