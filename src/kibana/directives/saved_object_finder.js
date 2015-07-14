@@ -81,6 +81,10 @@ define(function (require) {
           return '#';
         };
 
+        self.preventClick = function ($event) {
+          $event.preventDefault();
+        };
+
         /**
          * Called when a hit object is clicked, can override the
          * url behavior if necessary.
@@ -93,7 +97,7 @@ define(function (require) {
           if ($event.isDefaultPrevented()) return;
 
           var url = self.makeUrl(hit);
-          if (!url || url.charAt(0) !== '#') return;
+          if (!url || url === '#' || url.charAt(0) !== '#') return;
 
           $event.preventDefault();
 
@@ -123,9 +127,7 @@ define(function (require) {
           self.selector.index = 0;
           self.selector.enabled = true;
 
-          $timeout(function () {
-            $list.find('a:first').focus();
-          });
+          selectTopHit();
 
           $event.preventDefault();
         };
@@ -169,9 +171,7 @@ define(function (require) {
               if (page.number < page.count) {
                 paginate.goToPage(page.number + 1);
                 self.selector.index = 0;
-                $timeout(function () {
-                  $list.find('a:first').focus();
-                });
+                selectTopHit();
               }
               $event.preventDefault();
               break;
@@ -181,9 +181,7 @@ define(function (require) {
               if (page.number > 1) {
                 paginate.goToPage(page.number - 1);
                 self.selector.index = 0;
-                $timeout(function () {
-                  $list.find('a:first').focus();
-                });
+                selectTopHit();
               }
               $event.preventDefault();
               break;
@@ -219,6 +217,13 @@ define(function (require) {
         self.manageObjects = function (type) {
           $location.url('/settings/objects?_a=' + rison.encode({tab: type}));
         };
+
+        function selectTopHit() {
+          setTimeout(function () {
+            //triggering a focus event kicks off a new angular digest cycle.
+            $list.find('a:first').focus();
+          }, 0);
+        }
 
         function filterResults() {
           if (!self.objectType) return;
