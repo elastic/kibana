@@ -1,9 +1,15 @@
-var Parser = require('../parser/chain.js');
-var unzipPairs = require('../utils/unzipPairs.js');
-
 var _ = require('lodash');
 var glob = require('glob');
 var Promise = require('bluebird');
+
+var fs = require('fs');
+var grammar = fs.readFileSync('server/parser/chain.peg', 'utf8');
+var PEG = require("pegjs");
+var Parser = PEG.buildParser(grammar);
+
+var unzipPairs = require('../utils/unzipPairs.js');
+
+
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: 'localhost:9200',
