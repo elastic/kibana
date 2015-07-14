@@ -75,7 +75,7 @@ define(function (require) {
       .attr('fill', function (d) {
         var label = d.label ;
         if (!label)
-          label = this.dataset.label;
+          label = this.getAttribute('data-label');
         return color(label);
       });
 
