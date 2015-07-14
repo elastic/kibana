@@ -62,7 +62,7 @@ define(function (require) {
           var indexPattern = self.indexPattern;
           var field = self.field;
 
-          _.remove(indexPattern.fields, { name: field.name });
+          indexPattern.fields.remove({ name: field.name });
           return indexPattern.save()
           .then(function () {
             notify.info('Deleted Field "' + field.name + '"');
