@@ -42,7 +42,7 @@ define(function (require) {
           var fields = indexPattern.fields;
           var field = self.field.toActualField();
 
-          _.remove(fields, { name: field.name });
+          fields.remove({ name: field.name });
           fields.push(field);
 
           if (!self.selectedFormatId) {
