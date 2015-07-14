@@ -51,6 +51,7 @@ define(function (require) {
       }, notif.lifetime);
     }
 
+    notif.clear = closeNotif();
     if (notif.actions) {
       notif.actions.forEach(function (action) {
         notif[action] = closeNotif(cb, action);
@@ -66,10 +67,12 @@ define(function (require) {
     if (dup) {
       dup.count += 1;
       dup.stacks = _.union(dup.stacks, [notif.stack]);
-    } else {
-      notif.stacks = [notif.stack];
-      notifs.push(notif);
+      return dup;
     }
+
+    notif.stacks = [notif.stack];
+    notifs.push(notif);
+    return notif;
   }
 
   function formatMsg(msg, from) {
@@ -218,7 +221,7 @@ define(function (require) {
    * @param  {Error|String} err
    */
   Notifier.prototype.error = function (err, cb) {
-    add({
+    return add({
       type: 'danger',
       content: formatMsg(err, this.from),
       icon: 'warning',
@@ -235,7 +238,7 @@ define(function (require) {
    * @return {[type]}     [description]
    */
   Notifier.prototype.warning = function (msg, cb) {
-    add({
+    return add({
       type: 'warning',
       content: formatMsg(msg, this.from),
       icon: 'warning',
@@ -251,7 +254,7 @@ define(function (require) {
    * @return {[type]}     [description]
    */
   Notifier.prototype.info = function (msg, cb) {
-    add({
+    return add({
       type: 'info',
       content: formatMsg(msg, this.from),
       icon: 'info-circle',

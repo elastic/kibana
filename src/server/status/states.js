@@ -29,6 +29,7 @@ exports.all = [
     nicknames: [
       'S.N.A.F.U',
       'I\'ll be back',
+      'brb'
     ]
   },
   {

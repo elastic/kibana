@@ -28,6 +28,10 @@ module.exports = class ServerStatus {
     plugin.status = this.create(`plugin:${plugin.id}`);
   }
 
+  get(name) {
+    return this._created[name];
+  }
+
   getState(name) {
     return _.get(this._created, [name, 'state'], 'uninitialized');
   }

@@ -14,18 +14,23 @@ exports.reload = function () {
   var excludeStyles = [
     'ui-styles/mixins.less',
     'ui-styles/variables.less',
-    'ui-styles/theme.less'
   ];
 
-  exports.styles = scan('ui-styles', true).filter(function (file) {
-    var i = excludeStyles.indexOf(file);
-    if (i > -1) {
-      excludeStyles.splice(i, 1);
-      return false;
-    }
+  exports.styles = _.union(
+    [
+      'ui-styles/theme.less',
+      'ui-styles/base.less'
+    ],
+    scan('ui-styles', true).filter(function (file) {
+      var i = excludeStyles.indexOf(file);
+      if (i > -1) {
+        excludeStyles.splice(i, 1);
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    })
+  );
 
   if (excludeStyles.length) {
     throw new Error(`Styles which were supposed to be excluded from autoload not found! ${excludeStyles}`);

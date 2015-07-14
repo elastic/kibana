@@ -11,24 +11,6 @@ module.exports = function (kbnServer, server, config) {
 
   server.exposeStaticDir('/bundles/{path*}', bundleDir);
 
-  server.ext('onRequest', function (request, reply) {
-    switch (status.state) {
-    case 'yellow':
-      return reply(`
-        <html>
-          <head><meta http-equiv="refresh" content="1"></head>
-          <body>${status.message}</body>
-        </html>
-      `);
-    case 'red':
-      return reply(`
-        <html><body>${status.message}, please wait.</body></html>
-      `);
-    default:
-      return reply.continue();
-    }
-  });
-
   function start() {
     kbnServer.optimizer = new Optimizer({
       watch: config.get('optimize.watch'),

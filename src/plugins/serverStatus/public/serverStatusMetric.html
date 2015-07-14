@@ -1,8 +1,0 @@
-<div class="status_chart_wrapper col-md-4">
-  <h3 class="title">{{chart.niceName}}</h3>
-  <h4 class="average">
-    <span ng-repeat="average in chart.average track by $index"><span ng-if="$index">,&nbsp;</span>{{average}}</span>
-  </h4>
-  <nvd3 options="chart.options" data="chart.data"></nvd3>
-  </h4>
-</div>
