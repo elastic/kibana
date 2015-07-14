@@ -29,7 +29,7 @@
     ng-click="setActiveCell($index)"
     ng-class="{active: $index === input.selected, running: running}"
     >
-    <div class="cell-id" ng-click="removeCell($index)">{{$index + 1}}</div>
+    <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
     <div chart="sheet[$index]" cell="$index"></div>
   </div>
   <div class="chart-container add-chart col-md-4">

@@ -37,12 +37,12 @@ body {
 .add-chart i {
   margin: 10px 0 0 10px;
   font-size: 70px;
-  opacity: 0.25;
+  opacity: 0.20;
 }
 
 .add-chart i:hover {
   font-size: 70px;
-  opacity: 0.50;
+  opacity: 0.40;
 }
 
 .add-chart i:hover:after {
@@ -93,9 +93,17 @@ body {
 }
 
 .cell-id:hover {
-  background-color: #f00;
-  border-color: #c00;
+  background-color: #a00;
+  border-color: #a00;
   color: #fff;
+}
+
+.cell-id:hover span {
+  display: none;
+}
+
+.cell-id:hover:after {
+  content: "X";
 }
 
 .top-agg-input {
