@@ -126,7 +126,6 @@ function invokeChain (chainObj, result) {
   var link = chain.shift();
 
   var promise;
-  console.log(JSON.stringify(link, null , ' '));
   if (link.type === 'chain') {
     promise = invokeChain(link);
   } else if (!result) {
@@ -140,10 +139,6 @@ function invokeChain (chainObj, result) {
   }
 
   return promise.then(function (result) {
-
-    console.log("Link:: " + JSON.stringify(link));
-    console.log("Result:: " + JSON.stringify(result));
-
     return invokeChain({type:'chain', chain: chain}, [result]);
   });
 
@@ -168,7 +163,6 @@ function resolveChainList (chainList) {
 
 function resolveSheet (sheet) {
   return _.map(sheet, function (plot) {
-    console.log(plot);
     return Parser.parse(plot);
   });
 }
