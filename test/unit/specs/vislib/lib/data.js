@@ -277,7 +277,7 @@ define(function (require) {
                 -112.06054687499999
               ]
             }
-          },
+          }
         }, {
           title: 'Top 5 _type: nginx',
           label: 'Top 5 _type: nginx',
@@ -293,7 +293,7 @@ define(function (require) {
                 -112.06054687499999
               ]
             }
-          },
+          }
         }]
       };
 
