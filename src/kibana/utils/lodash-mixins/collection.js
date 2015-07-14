@@ -84,12 +84,6 @@ define(function (require) {
         return buckets;
       },
 
-      remove: _.wrap(_.remove, function (remove, arr, predicate, cntx) {
-        var out = remove.call(this, arr, predicate, cntx);
-        if (arr._clearIndices) arr._clearIndices();
-        return out;
-      }),
-
       /**
        * Remove or add a value to an array based on it's presense in the
        * array initially.
