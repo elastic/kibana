@@ -57,7 +57,7 @@ define(function (require) {
     };
 
     PersistedState.prototype.toJSON = function () {
-      return JSON.stringify(this._state);
+      return JSON.stringify(this.get());
     };
 
     PersistedState.prototype._getIndex = function (key) {
