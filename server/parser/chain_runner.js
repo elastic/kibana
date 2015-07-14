@@ -9,6 +9,8 @@ var client = new elasticsearch.Client({
   host: 'localhost:9200',
 });
 
+var defaultIndex = 'usagov';
+
 // Load function plugins
 var functions  = _.chain(glob.sync('server/functions/*.js')).map(function (file) {
   var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
@@ -74,7 +76,7 @@ function invoke (fnName, args) {
     }
     else if (_.isObject(item) && item.type === 'query') {
       return client.search({
-        index: 'usagov',
+        index: item.index || defaultIndex,
         filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
         searchType: 'count',
         body:getRequest(item)
