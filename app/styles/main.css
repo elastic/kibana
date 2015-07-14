@@ -6,6 +6,10 @@ body {
   height: 270px;
 }
 
+[ng-click] {
+  cursor: pointer;
+}
+
 .chart-container {
   height: 270px;
   cursor: pointer;
@@ -25,6 +29,29 @@ body {
 .chart-container.running {
   opacity: 0.50;
 }
+
+.add-chart {
+  cursor: inherit !important;
+}
+
+.add-chart i {
+  margin: 10px 0 0 10px;
+  font-size: 70px;
+  opacity: 0.25;
+}
+
+.add-chart i:hover {
+  font-size: 70px;
+  opacity: 0.50;
+}
+
+.add-chart i:hover:after {
+  content: 'ADD PLOT';
+  font-weight: bold;
+  font-size: 0.5em;
+  font: normal normal normal normal '.HelveticaNeueDeskInterface-Regular';
+}
+
 
 .new-sheet {
   cursor: pointer;
