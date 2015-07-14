@@ -315,6 +315,29 @@ define(function (require) {
           expect(minMax.max).to.be(331);
         });
       });
+
+      describe('null value check', function () {
+        it('should return false', function () {
+          var data = new Data(rowsData, {});
+          expect(data.nullsPresent()).to.be(false);
+        });
+
+        it('should return true', function () {
+          var nullRowData = { rows: rowsData.rows.slice(0) };
+          nullRowData.rows.push({
+            'label': 'e',
+            'series': [
+              {
+                'label': '200',
+                'values': [{x: 0, y: 1}, {x: 1, y: null}, {x: 2, y: 3}]
+              }
+            ]
+          });
+
+          var data = new Data(nullRowData, {});
+          expect(data.nullsPresent()).to.be(true);
+        });
+      });
     });
   });
 });
