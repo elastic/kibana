@@ -222,5 +222,19 @@ define(function (require) {
         expect(state[childIndex]).to.eql(childStateValue);
       });
     });
+
+    describe('mutation', function () {
+      it('should not mutate the internal object', function () {
+        var persistedStateValue = { hello: 'world' };
+        var insertedObj = { farewell: 'cruel world' };
+        var persistedState = new PersistedState(persistedStateValue);
+
+        var obj = persistedState.get();
+        _.assign(obj, insertedObj);
+
+        expect(obj).to.have.property('farewell');
+        expect(persistedState._state).to.not.have.property('farewell');
+      });
+    });
   });
 });
