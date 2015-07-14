@@ -14,7 +14,7 @@
   <div class="form-group function-form" ng-submit="search()">
     <input type="text"
       class="form-control top-agg-input"
-      ng-model="input.expressions[input.row][input.column]"
+      ng-model="input.expressions[input.selected]"
       id="search"
       placeholder="Enter Expression">
     <button style="display:none"
@@ -24,13 +24,15 @@
 </form>
 
 
-<div class="row" ng-repeat="row in input.expressions track by $index">
   <div class="chart-container col-md-4"
-    ng-repeat="column in row track by $index"
-    ng-click="setActiveCell($parent.$index, $index)"
-    ng-class="{active: $parent.$index === input.row && $index === input.column, running: running}"
+    ng-repeat="cell in input.expressions track by $index"
+    ng-click="setActiveCell($index)"
+    ng-class="{active: $index === input.selected, running: running}"
     >
-    <div class="cell-id">{{getCellId($parent.$index, $index)}}</div>
-    <div chart="sheet[$parent.$index][$index]" cell="[$parent.$index, $index]"></div>
+    <div class="cell-id" ng-click="removeCell($index)">{{$index + 1}}</div>
+    <div chart="sheet[$index]" cell="$index"></div>
+  </div>
+  <div class="chart-container add-chart col-md-4">
+    <button class="btn btn-primary" ng-click="newCell()"><i class="fa fa-plus"></i> Plot</button>
   </div>
 </div>

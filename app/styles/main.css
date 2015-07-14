@@ -14,6 +14,7 @@ body {
   border: 2px dashed transparent;
   padding-left: 0px !important;
   padding-right: 0px !important;
+  margin-bottom: 10px;
 }
 
 .chart-container.active {
@@ -62,6 +63,12 @@ body {
   background-color: #ccc;
   opacity: 0.50;
   z-index: 999;
+}
+
+.cell-id:hover {
+  background-color: #f00;
+  border-color: #c00;
+  color: #fff;
 }
 
 .top-agg-input {

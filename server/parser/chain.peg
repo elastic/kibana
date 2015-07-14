@@ -49,11 +49,10 @@ argType
  / string
 
 reference
- = column:column row:integer '@' series:integer {
+ = '@' plot:integer ':' series:integer {
   return {
    type: 'reference',
-   column: column.charCodeAt(0) - 65,
-   row: row,
+   plot: plot,
    series: series
   }
  }

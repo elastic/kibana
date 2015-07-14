@@ -96,7 +96,7 @@ function invoke (fnName, args) {
       return invoke(item.function, item.arguments);
     }
     else if (_.isObject(item) && item.type === 'reference') {
-      var reference = sheet[item.row - 1][item.column][item.series - 1];
+      var reference = sheet[item.plot - 1][item.series - 1];
       return invokeChain(reference);
     }
     return item;
@@ -157,22 +157,18 @@ function resolveChainList (chainList) {
 }
 
 function resolveSheet (sheet) {
-  return _.map(sheet, function (row) {
-    return _.map(row, function (column) {
-      console.log(column);
-      return Parser.parse(column);
-    });
+  return _.map(sheet, function (plot) {
+    console.log(plot);
+    return Parser.parse(plot);
   });
 }
 
 function processRequest (request) {
   // This is setting the "global" sheet
   sheet = resolveSheet(request);
-  return _.map(sheet, function (row) {
-    return _.map(row, function (column) {
-      return resolveChainList(column).then(function (columns) {
-        return columns;
-      });
+  return _.map(sheet, function (plot) {
+    return resolveChainList(plot).then(function (plots) {
+      return plots;
     });
   });
 }
@@ -193,8 +189,8 @@ function debugSheet (sheet) {
   });
 }
 
-debugSheet([
-  ['((`US`).label("beer")).divide(100)'],
+debugSheet(
+  ['((`US`).label("beer")).divide(100)']
   //['(`*`).divide(100)']
-]);
+);
 

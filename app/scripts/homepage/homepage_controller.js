@@ -7,38 +7,30 @@ define(function (require) {
         $scope.search();
       };
 
-      var blankSheet = [
-        ['(`-*`)', '(`-*`)', '(`-*`)'],
-        ['(`-*`)', '(`-*`)', '(`-*`)'],
-        //['`-*`', '`-*`', '`-*`']
-      ];
+      var blankSheet = ['(`-*`)', '(`-*`)', '(`-*`)'];
 
       $scope.newSheet = function () {
         $scope.input.expressions = _.cloneDeep(blankSheet);
         init();
       };
 
-      $scope.newRow = function () {
-        var newRow = _.map($scope.sheet[0], function () {
-          return '(`-*`)';
-        });
-        $scope.input.expressions.push(newRow);
+      $scope.newCell = function () {
+        $scope.input.expressions.push('(`-*`)');
+        $scope.search();
+      };
+
+      $scope.removeCell = function (index) {
+        _.pullAt($scope.input.expressions, index);
         $scope.search();
       };
 
       $scope.input = {
         expressions: localStorageService.get('expressions') || blankSheet,
-        row: 0,
-        column: 0
+        selected: 0
       };
 
-      $scope.setActiveCell = function (row, column) {
-        $scope.input.row = row;
-        $scope.input.column = column;
-      };
-
-      $scope.getCellId = function (row, column) {
-        return String.fromCharCode(column + 65) + (row + 1);
+      $scope.setActiveCell = function (cell) {
+        $scope.input.selected = cell;
       };
 
       $scope.search = function () {
