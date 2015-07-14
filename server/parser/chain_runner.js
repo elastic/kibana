@@ -24,7 +24,7 @@ var time = {
   min: 'now-2y',
   max: 'now',
   field: '@timestamp',
-  interval: '1w'
+  interval: '5w'
 };
 
 function getRequest (config) {
@@ -101,8 +101,12 @@ function invoke (fnName, args) {
       var reference = sheet[item.plot - 1][item.series - 1];
       return invokeChain(reference);
     }
+    else if (_.isObject(item) && item.type === 'chain') {
+      return invokeChain(item);
+    }
     return item;
   });
+
 
   return Promise.all(args).then(function (series) {
     if (!functions[fnName]){
@@ -113,16 +117,17 @@ function invoke (fnName, args) {
   });
 }
 
-function invokeChain (chain, result) {
-  if (chain.length === 0) {
+function invokeChain (chainObj, result) {
+  if (chainObj.chain.length === 0) {
     return result[0];
   }
 
-  chain = _.clone(chain);
+  var chain = _.clone(chainObj.chain);
   var link = chain.shift();
 
   var promise;
-  if (_.isArray(link)) {
+  console.log(JSON.stringify(link, null , ' '));
+  if (link.type === 'chain') {
     promise = invokeChain(link);
   } else if (!result) {
     if (link.label) {
@@ -135,8 +140,11 @@ function invokeChain (chain, result) {
   }
 
   return promise.then(function (result) {
-    console.log(result);
-    return invokeChain(chain, [result]);
+
+    console.log("Link:: " + JSON.stringify(link));
+    console.log("Result:: " + JSON.stringify(result));
+
+    return invokeChain({type:'chain', chain: chain}, [result]);
   });
 
 }
@@ -192,7 +200,8 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['((`US`).label("beer")).divide(100)']
+  //['(`*`).subtract(10000000000)']
+  ['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );
 

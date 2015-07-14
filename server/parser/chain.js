@@ -44,7 +44,7 @@ module.exports = (function() {
         peg$c9 = { type: "literal", value: ")", description: "\")\"" },
         peg$c10 = function(first, rest) {
           first.label = text();
-          return [first].concat(rest)
+          return {type: "chain", chain: [first].concat(rest)};
          },
         peg$c11 = ".",
         peg$c12 = { type: "literal", value: ".", description: "\".\"" },
