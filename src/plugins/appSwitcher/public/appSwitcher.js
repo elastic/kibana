@@ -6,7 +6,8 @@ require('chrome')
 .setTabs([
   {
     id: '',
-    title: 'Apps'
+    title: 'Apps',
+    activeIndicatorColor: '#ecf0f1'
   }
 ])
 .setRootTemplate(require('plugins/appSwitcher/appSwitcher.html'))
