@@ -237,30 +237,43 @@ define(function (require) {
       });
     });
 
-    describe('JSON exporting', function () {
+    describe('JSON importing and exporting', function () {
       var persistedStateValue;
 
       beforeEach(function () {
         persistedStateValue = { one: 1, two: 2, 'meaning of life': 42 };
       });
 
-      it('should return the full JSON representation', function () {
-        var persistedState = new PersistedState(persistedStateValue);
+      describe('exporting state to JSON', function () {
+        it('should return the full JSON representation', function () {
+          var persistedState = new PersistedState(persistedStateValue);
 
-        var json = persistedState.toJSON();
-        expect(JSON.parse(json)).to.eql(persistedStateValue);
+          var json = persistedState.toJSON();
+          expect(JSON.parse(json)).to.eql(persistedStateValue);
+        });
+
+        it('should return the JSON representation of the child state', function () {
+          var persistedState = new PersistedState(persistedStateValue);
+          var childState = persistedState.createChild('awesome', { pants: false });
+
+          var json = childState.toJSON();
+          expect(JSON.parse(json)).to.eql({ pants: false });
+
+          // verify JSON output of the parent state
+          var parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
+          expect(JSON.parse(persistedState.toJSON())).to.eql(parentCompare);
+        });
       });
 
-      it('should return the JSON representation of the child state', function () {
-        var persistedState = new PersistedState(persistedStateValue);
-        var childState = persistedState.createChild('awesome', { pants: false });
+      describe('importing state from JSON (hydration)', function () {
+        it('should set the state from JSON input', function () {
+          var stateJSON = JSON.stringify(persistedStateValue);
+          var persistedState = new PersistedState();
+          expect(persistedState.get()).to.eql({});
 
-        var json = childState.toJSON();
-        expect(JSON.parse(json)).to.eql({ pants: false });
-
-        // verify JSON output of the parent state
-        var parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
-        expect(JSON.parse(persistedState.toJSON())).to.eql(parentCompare);
+          persistedState.fromJSON(stateJSON);
+          expect(persistedState.get()).to.eql(persistedStateValue);
+        });
       });
     });
   });

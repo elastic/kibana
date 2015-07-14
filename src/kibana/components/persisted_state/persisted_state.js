@@ -60,6 +60,10 @@ define(function (require) {
       return JSON.stringify(this.get());
     };
 
+    PersistedState.prototype.fromJSON = function (input) {
+      return this.set(JSON.parse(input));
+    };
+
     PersistedState.prototype._getIndex = function (key) {
       if (_.isUndefined(key)) return this._path;
       return this._path.concat(key);
