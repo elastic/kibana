@@ -21,7 +21,6 @@ define(function (require) {
 
       afterEach(function () {
         expect(persistedState._state).to.be.an(Object);
-
       });
 
       it('should create an empty state instance', function () {
@@ -104,19 +103,16 @@ define(function (require) {
     describe('child state creation', function () {
       var childState;
 
-      it('should append the child state to the parent, without parent value', function () {
+      it('should not append the child state to the parent, without parent value', function () {
         var childIndex = 'odd.keyname[]';
         var persistedState = new PersistedState();
         childState = persistedState.createChild(childIndex);
 
         // parent state should contain the child and its original state
-        expect(childState.get()).to.eql({});
-
-        // parent state should contain the child and its original empty state
-        expect(persistedState.get()).to.eql(_.set({}, [childIndex], {}));
+        expect(persistedState.get()).to.not.have.property(childIndex);
       });
 
-      it('should append the child state to the parent, with parent value', function () {
+      it('should not append the child state to the parent, with parent value', function () {
         var childIndex = 'i can haz child';
         var childStateValue = {};
         var persistedStateValue = { original: true };
@@ -124,11 +120,10 @@ define(function (require) {
         childState = persistedState.createChild(childIndex);
 
         // child state should be empty, we didn't give it any default data
-        expect(childState.get()).to.eql(childStateValue);
+        expect(childState.get()).to.be(undefined);
 
         // parent state should contain the child and its original state value
-        var compare = _.assign({}, persistedStateValue, _.set({}, [childIndex], childStateValue));
-        expect(persistedState.get()).to.eql(compare);
+        expect(persistedState.get()).to.not.have.property(childIndex);
       });
 
       it('should append the child state to the parent, with parent and child values', function () {
@@ -142,8 +137,10 @@ define(function (require) {
         expect(childState.get()).to.eql(childStateValue);
 
         // parent state should contain the child and its original state value
-        var compare = _.assign({}, persistedStateValue, _.set({}, [childIndex], childStateValue));
-        expect(persistedState.get()).to.eql(compare);
+        var parentState = persistedState.get();
+        expect(parentState).to.have.property('original', true);
+        expect(parentState).to.have.property(childIndex);
+        expect(parentState[childIndex]).to.eql(childStateValue);
       });
     });
 
@@ -166,16 +163,64 @@ define(function (require) {
 
         // second child getter should only return second child value
         expect(children[1].instance.get()).to.eql(children[1].value);
-        // parent should contain first child path, but not second
-        expect(persistedState.get()).to.have.property(children[0].path);
-        expect(persistedState.get()).to.not.have.property(children[1].path);
+
+        // parent should contain original props and first child path, but not the second child path
+        var parentState = persistedState.get();
+        _.keys(persistedStateValue).forEach(function (key) {
+          expect(parentState).to.have.property(key);
+        });
+        expect(parentState).to.have.property(children[0].path);
+        expect(parentState).to.not.have.property(children[1].path);
+
         // second child path should be inside the first child
-        expect(children[0].instance.get()).to.have.property(children[1].path);
+        var firstChildState = children[0].instance.get();
+        expect(firstChildState).to.have.property(children[1].path);
+        expect(firstChildState[children[1].path]).to.eql(children[1].value);
       });
     });
 
     describe('colliding child paths and parent state values', function () {
-      it('should throw if the child path already exists');
+      it('should not change the child path value by default', function () {
+        var childIndex = 'childTest';
+        var persistedStateValue = {};
+        persistedStateValue[childIndex] = { overlapping_index: true };
+
+        var persistedState = new PersistedState(persistedStateValue);
+        var state = persistedState.get();
+        expect(state).to.have.property(childIndex);
+        expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
+
+        var childState = persistedState.createChild(childIndex);
+        expect(childState.get()).to.eql(persistedStateValue[childIndex]);
+
+        // make sure the parent state is still the same
+        state = persistedState.get();
+        expect(state).to.have.property(childIndex);
+        expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
+      });
+
+      it('should clobber data if the child path already', function () {
+        var childIndex = 'childTest';
+        var childStateValue = { clobbered_index: true };
+        var persistedStateValue = {};
+        persistedStateValue[childIndex] = { overlapping_index: true };
+
+        var persistedState = new PersistedState(persistedStateValue);
+        var state = persistedState.get();
+        expect(state).to.have.property(childIndex);
+        expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
+
+        // pass in chidl state value
+        var childState = persistedState.createChild(childIndex, childStateValue);
+        expect(childState.get()).to.eql(childStateValue);
+        // ensure original object is not mutated
+        expect(persistedStateValue[childIndex]).to.not.eql(childStateValue);
+
+        // make sure the parent state matches the passed child state
+        state = persistedState.get();
+        expect(state).to.have.property(childIndex);
+        expect(state[childIndex]).to.eql(childStateValue);
+      });
     });
   });
 });

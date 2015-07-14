@@ -27,7 +27,8 @@ define(function (require) {
       validateValue(value);
       validateParent(parent, this._path);
 
-      this.set(value || {});
+      value = value || (this._parent ? this.get() : {});
+      this.set(_.cloneDeep(value));
     }
 
     PersistedState.prototype.get = function (key, def) {
