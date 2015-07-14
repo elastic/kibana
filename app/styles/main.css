@@ -92,19 +92,25 @@ body {
   z-index: 999;
 }
 
-.cell-id:hover {
+.chart-container:hover .cell-id {
   background-color: #a00;
   border-color: #a00;
   color: #fff;
 }
 
-.cell-id:hover span {
+.chart-container:hover .cell-id span {
   display: none;
 }
 
-.cell-id:hover:after {
+.chart-container:hover .cell-id:after {
   content: "X";
 }
+
+.chart-container:hover .cell-id:hover {
+  opacity: 1;
+}
+
+
 
 .top-agg-input {
     border: 0;
