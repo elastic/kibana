@@ -7,7 +7,7 @@ start
 
 series
  = chain
- / queryAggOptional
+ / request
  / reference
 
 seriesList
@@ -70,24 +70,38 @@ integer
 query
  = '`' q:[^`]* '`' {return q.join('')}
 
-queryAggOptional
- = query:query agg:agg?
+request
+ = query:query index:index? agg:agg?
  {
   var obj = {query: query, type: 'query'}
   if (agg) {
    obj.field = agg.field;
    obj.metric = agg.metric;
   }
+  if (index) {
+   obj.index = index;
+  }
   return obj;
  }
 
 agg
- = space 'as' space metric:metric ':' field:field
+ = (space+)? 'as' (space+)? metric:metric ':' field:field
  {
   return {
    field: field,
    metric: metric
   }
+ }
+
+index
+ = (space+)? 'in' (space+)? indexName:indexName
+ {
+   return indexName
+ }
+
+indexName
+ = indexName:[A-Za-z0-9\-_.*]+ {
+   return indexName.join('')
  }
 
 metric
