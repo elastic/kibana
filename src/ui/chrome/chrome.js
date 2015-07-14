@@ -11,13 +11,14 @@ define(function (require) {
 
   var TabCollection = require('chrome/TabCollection');
 
+  var payload = window.__KBN__;
+  window.__KBN__ = null;
+
   var tabs = new TabCollection();
   var rootController = null;
   var rootTemplate = null;
-  var showAppsLink = true;
+  var showAppsLink = payload.appCount > 1;
   var brand = null;
-  var payload = window.__KBN__;
-  window.__KBN__ = null;
 
   var chrome = {
     navBackground: '#222222',
@@ -161,14 +162,6 @@ define(function (require) {
    */
   chrome.getActiveTab = function () {
     return tabs.getActive();
-  };
-
-  /**
-   * Get the number of apps available on the server
-   * @return {number}
-   */
-  chrome.getAppCount = function () {
-    return payload.appCount;
   };
 
   /**
