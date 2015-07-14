@@ -83,7 +83,7 @@ define(function (require) {
             'values in the data. A line chart is recommended when displaying data ' +
             'with null values.',
             test: function (vis, data) {
-              return data.nullsPresent();
+              return data.hasNullValues();
             }
           }
         ]

@@ -166,7 +166,7 @@ define(function (require) {
       circles = layer
       .selectAll('circles')
       .data(function appendData(data) {
-        return data.filter(function isNotZero(d) {
+        return data.filter(function isZeroOrNull(d) {
           return d.y !== 0 && !_.isNull(d.y);
         });
       });

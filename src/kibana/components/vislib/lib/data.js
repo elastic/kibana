@@ -292,16 +292,14 @@ define(function (require) {
      * Returns true if null values are present
      * @returns {*}
      */
-    Data.prototype.nullsPresent = function () {
+    Data.prototype.hasNullValues = function () {
       var chartData = this.chartData();
 
       return chartData.some(function (chart) {
-        return chart.series.map(function (obj) {
-          return obj.values.filter(function (d) {
+        return chart.series.some(function (obj) {
+          return obj.values.some(function (d) {
             return d.y === null;
-          }).length;
-        }).reduce(function (a, b) {
-          return a + b;
+          });
         });
       });
     };
