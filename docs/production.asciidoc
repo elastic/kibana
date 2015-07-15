@@ -27,7 +27,7 @@ the cluster.
 To configure credentials for the Kibana server:
 
 . Assign the `kibana4_server` role to a user in Shield. For more information, see
-{shield}/_shield_with_kibana_4.html[Configuring a Role for the Kibana 4 Server]
+{shield}/kibana.html#kibana4-server-role[Configuring a Role for the Kibana 4 Server]
 in the Shield documentation.
 
  . Set the `kibana_elasticsearch_username` and
