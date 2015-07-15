@@ -249,29 +249,38 @@ define(function (require) {
           var persistedState = new PersistedState(persistedStateValue);
 
           var json = persistedState.toJSON();
-          expect(JSON.parse(json)).to.eql(persistedStateValue);
+          expect(json).to.eql(persistedStateValue);
         });
 
         it('should return the JSON representation of the child state', function () {
           var persistedState = new PersistedState(persistedStateValue);
           var childState = persistedState.createChild('awesome', { pants: false });
 
-          var json = childState.toJSON();
-          expect(JSON.parse(json)).to.eql({ pants: false });
-
+          expect(childState.toJSON()).to.eql({ pants: false });
           // verify JSON output of the parent state
           var parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
-          expect(JSON.parse(persistedState.toJSON())).to.eql(parentCompare);
+          expect(persistedState.toJSON()).to.eql(parentCompare);
+        });
+
+        it('should export stringified version of state', function () {
+          var persistedState = new PersistedState(persistedStateValue);
+          var childState = persistedState.createChild('awesome', { pants: false });
+
+          var data = childState.toString();
+          expect(JSON.parse(data)).to.eql({ pants: false });
+          // verify JSON output of the parent state
+          var parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
+          expect(JSON.parse(persistedState.toString())).to.eql(parentCompare);
         });
       });
 
-      describe('importing state from JSON (hydration)', function () {
-        it('should set the state from JSON input', function () {
+      describe('importing state from JSON string (hydration)', function () {
+        it('should set the state from JSON string input', function () {
           var stateJSON = JSON.stringify(persistedStateValue);
           var persistedState = new PersistedState();
           expect(persistedState.get()).to.eql({});
 
-          persistedState.fromJSON(stateJSON);
+          persistedState.fromString(stateJSON);
           expect(persistedState.get()).to.eql(persistedStateValue);
         });
       });
