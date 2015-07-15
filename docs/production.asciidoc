@@ -97,7 +97,7 @@ visualization.
 
 To configure access to Kibana using Shield, you create Shield roles
 for Kibana using the `kibana4` default role as a starting point. For more
-information, see http://www.elastic.co/guide/en/shield/current/_shield_with_kibana_4.html[Using Shield with Kibana 4].
+information, see {shield}/kibana.html#_using_kibana_4_with_shield[Shield with Kibana 4][Using Shield with Kibana 4].
 
 [float]
 [[load-balancing]]
