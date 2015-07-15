@@ -35,7 +35,9 @@ module.exports = function (grunt) {
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
       '<%= src %>/kibana/*.js',
-      '<%= src %>/server/**/*.js',
+      '<%= src %>/server/bin/*.js',
+      '<%= src %>/server/{config,lib,plugins}/**/*.js',
+      '<%= src %>/server/bin/{plugin,startup}/**/*.js',
       '<%= src %>/kibana/{components,directives,factories,filters,plugins,registry,services,utils}/**/*.js',
       '<%= unitTestDir %>/**/*.js',
       '!<%= unitTestDir %>/specs/vislib/fixture/**/*'

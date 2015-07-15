@@ -31,7 +31,6 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/bin/kibana.js",
-    "postinstall": "bower install && grunt licenses --check-validity",
     "precommit": "grunt lintStagedFiles"
   },
   "repository": {

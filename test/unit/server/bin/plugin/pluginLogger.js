@@ -14,7 +14,6 @@ describe('kibana cli', function () {
       describe('logger.log', function () {
 
         beforeEach(function () {
-          logger = pluginLogger(false);
           sinon.spy(process.stdout, 'write');
         });
 
@@ -23,6 +22,7 @@ describe('kibana cli', function () {
         });
 
         it('should log messages to the console and append a new line', function () {
+          logger = pluginLogger({ silent: false, quiet: false });
           var message = 'this is my message';
 
           logger.log(message);
@@ -33,6 +33,7 @@ describe('kibana cli', function () {
         });
 
         it('should log messages to the console and append not append a new line', function () {
+          logger = pluginLogger({ silent: false, quiet: false });
           for (var i = 0; i < 10; i++) {
             logger.log('.', true);
           }
@@ -54,8 +55,22 @@ describe('kibana cli', function () {
           expect(process.stdout.write.getCall(12).args[0]).to.be('\n');
         });
 
+        it('should not log any messages when quiet is set', function () {
+          logger = pluginLogger({ silent: false, quiet: true });
+
+          var message = 'this is my message';
+          logger.log(message);
+
+          for (var i = 0; i < 10; i++) {
+            logger.log('.', true);
+          }
+          logger.log('Done!');
+
+          expect(process.stdout.write.callCount).to.be(0);
+        });
+
         it('should not log any messages when silent is set', function () {
-          logger = pluginLogger(true);
+          logger = pluginLogger({ silent: true, quiet: false });
 
           var message = 'this is my message';
           logger.log(message);
@@ -73,7 +88,6 @@ describe('kibana cli', function () {
       describe('logger.error', function () {
 
         beforeEach(function () {
-          logger = pluginLogger(false);
           sinon.spy(process.stderr, 'write');
         });
 
@@ -82,6 +96,15 @@ describe('kibana cli', function () {
         });
 
         it('should log error messages to the console and append a new line', function () {
+          logger = pluginLogger({ silent: false, quiet: false });
+          var message = 'this is my error';
+
+          logger.error(message);
+          expect(process.stderr.write.calledWith(message + '\n')).to.be(true);
+        });
+
+        it('should log error messages to the console when quiet is set', function () {
+          logger = pluginLogger({ silent: false, quiet: true });
           var message = 'this is my error';
 
           logger.error(message);
@@ -89,11 +112,10 @@ describe('kibana cli', function () {
         });
 
         it('should not log any error messages when silent is set', function () {
-          logger = pluginLogger(true);
+          logger = pluginLogger({ silent: true, quiet: false });
           var message = 'this is my error';
 
           logger.error(message);
-
           expect(process.stderr.write.callCount).to.be(0);
         });
 

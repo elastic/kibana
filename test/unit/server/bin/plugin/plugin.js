@@ -10,47 +10,6 @@ describe('kibana cli', function () {
 
   describe('plugin installer', function () {
 
-    describe('settings.action', function () {
-
-      function testUsageOfAction(action) {
-        describe('when action is ' + action, function () {
-          before(function () {
-            var program = {
-              command: function () { return program; },
-              description: function () { return program; },
-              option: function () { return program; },
-              action: function (processCommand) {
-                processCommand();
-              }
-            };
-
-            sinon.stub(remover, 'remove');
-            sinon.stub(installer, 'install');
-
-            sinon
-            .stub(settingParser, 'parse')
-            .returns({ action: action });
-
-            plugin(program);
-          });
-
-          it('calls the right function', function () {
-            expect(remover.remove.called).to.be(action === 'remove');
-            expect(installer.install.called).to.be(action === 'install');
-          });
-
-          after(function () {
-            remover.remove.restore();
-            installer.install.restore();
-            settingParser.parse.restore();
-          });
-        });
-      }
-
-      testUsageOfAction('remove');
-      testUsageOfAction('install');
-    });
-
     describe('commander options', function () {
 
       var program = {

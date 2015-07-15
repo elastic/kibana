@@ -1,9 +1,10 @@
-﻿module.exports = function (silent) {
+﻿module.exports = function (settings) {
   var previousLineEnded = true;
-  silent = !!silent;
+  var silent = !!settings.silent;
+  var quiet = !!settings.quiet;
 
   function log(data, sameLine) {
-    if (silent) return;
+    if (silent || quiet) return;
 
     if (!sameLine && !previousLineEnded) {
       process.stdout.write('\n');
