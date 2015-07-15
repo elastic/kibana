@@ -6,10 +6,10 @@ define(function (require) {
     var getNames = Private(require('components/vislib/components/labels/pie/get_pie_names'));
 
     return function (obj) {
+      if (!_.isObject(obj)) { throw new TypeError('PieLabel expects an object'); }
+
       var data = obj.columns || obj.rows || [obj];
       var names = [];
-
-      if (!_.isObject(obj)) { throw new TypeError('PieLabel expects an object'); }
 
       data.forEach(function (obj) {
         var columns = obj.raw ? obj.raw.columns : undefined;
