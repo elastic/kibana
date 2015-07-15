@@ -29,7 +29,7 @@ var functions  = _.chain(glob.sync('server/functions/*.js')).map(function (file)
 var sheet;
 
 var time = {
-  min: 'now-2y',
+  min: 'now-18M',
   max: 'now',
   field: '@timestamp',
   interval: '1w'
