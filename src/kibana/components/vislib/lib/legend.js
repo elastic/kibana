@@ -59,7 +59,7 @@ define(function (require) {
       })
       .reduce(function (a, b) {
         return a.concat(b);
-      });
+      }, []);
 
       return _.uniq(values, 'label');
     };
