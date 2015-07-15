@@ -36,19 +36,18 @@ body {
 
 .add-chart i {
   margin: 10px 0 0 10px;
-  font-size: 70px;
+  font-size: 60px;
   opacity: 0.20;
 }
 
 .add-chart i:hover {
-  font-size: 70px;
   opacity: 0.40;
 }
 
 .add-chart i:hover:after {
   content: 'ADD PLOT';
   font-weight: bold;
-  font-size: 0.5em;
+  font-size: 0.4em;
   font: normal normal normal normal '.HelveticaNeueDeskInterface-Regular';
 }
 

@@ -17,6 +17,8 @@ var client = new elasticsearch.Client({
 
 var defaultIndex = 'usagov';
 
+var queryCache = {};
+
 // Load function plugins
 var functions  = _.chain(glob.sync('server/functions/*.js')).map(function (file) {
   var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
@@ -81,6 +83,12 @@ function invoke (fnName, args) {
       return item;
     }
     else if (_.isObject(item) && item.type === 'query') {
+      var cacheKey = JSON.stringify(_.omit(item, 'label'));
+
+      if (queryCache[cacheKey]) {
+        return Promise.resolve({data: queryCache[cacheKey]});
+      }
+
       return client.search({
         index: item.index || defaultIndex,
         filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
@@ -95,6 +103,10 @@ function invoke (fnName, args) {
           values = _.pluck(resp.aggregations.series.buckets, 'doc_count');
         }
         var data = _.zipObject(keys, values);
+
+        // Cache the response so we can use it elsewhere in the same sheet
+        queryCache[cacheKey] = data;
+
         return { data:  data};
       }).catch(function (e) {
         throw new Error(e.message.root_cause[0].reason);
