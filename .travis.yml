@@ -1,6 +1,8 @@
 language: node_js
 node_js: '0.12'
-install: npm install
+install:
+  - npm install lodash bluebird
+  - npm run deps
 script: npm test
 sudo: false
 cache:
