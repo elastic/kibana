@@ -113,7 +113,15 @@ define(function (require) {
       }
 
       function cColor(d) {
-        return color(d.label);
+        getColor(d, this);
+      }
+
+      function getColor(d, circleElement) {
+        var label = d.label;
+        if (!label) {
+          label = circleElement.getAttribute('data-label');
+        }
+        return color(label);
       }
 
       function colorCircle(d) {
@@ -123,7 +131,7 @@ define(function (require) {
 
         // If only 1 point exists, show circle
         if (!showCircles && !isVisible) return 'none';
-        return cColor(d);
+        return getColor(d, this);
       }
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
@@ -144,9 +152,9 @@ define(function (require) {
         .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
         .attr('cx', cx)
         .attr('cy', cy)
-        .attr('fill', colorCircle)
         .attr('class', 'circle-decoration')
-        .call(this._addIdentifier);
+        .call(this._addIdentifier)
+        .attr('fill', colorCircle);
 
       circles
       .enter()
@@ -210,7 +218,11 @@ define(function (require) {
       })
       .attr('fill', 'none')
       .attr('stroke', function lineStroke(d) {
-        return color(d.label);
+        var label = d.label;
+        if (!label) {
+          label = this.getAttribute('data-label');
+        }
+        return color(label);
       })
       .attr('stroke-width', 2);
 

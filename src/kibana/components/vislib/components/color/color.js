@@ -29,8 +29,9 @@ define(function (require) {
       var colorObj = _.zipObject(arrayOfStringsOrNumbers, uniqueColors);
 
       return function (value) {
-        if (!mappedColors.get(value))
+        if (!mappedColors.get(value)) {
           mappedColors.add(value, colorObj[value]);
+        }
         return mappedColors.get(value);
       };
     };

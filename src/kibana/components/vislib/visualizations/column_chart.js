@@ -74,8 +74,9 @@ define(function (require) {
       .call(this._addIdentifier)
       .attr('fill', function (d) {
         var label = d.label ;
-        if (!label)
+        if (!label) {
           label = this.getAttribute('data-label');
+        }
         return color(label);
       });
 
