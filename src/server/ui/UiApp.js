@@ -36,8 +36,7 @@ class UiApp {
         this.uiExports.find(_.get(this, 'spec.uses', [])),
       ])
       .flatten()
-      .sort()
-      .uniq(true)
+      .uniq()
       .push(this.main)
       .value()
     };

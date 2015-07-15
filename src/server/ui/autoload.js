@@ -11,30 +11,10 @@ exports.reload = function () {
   exports.directives = scan('directives');
   exports.filters = scan('filters');
 
-  var excludeStyles = [
-    'ui-styles/mixins.less',
-    'ui-styles/variables.less',
-  ];
-
-  exports.styles = _.union(
-    [
-      'ui-styles/theme.less',
-      'ui-styles/base.less'
-    ],
-    scan('ui-styles', true).filter(function (file) {
-      var i = excludeStyles.indexOf(file);
-      if (i > -1) {
-        excludeStyles.splice(i, 1);
-        return false;
-      }
-
-      return true;
-    })
-  );
-
-  if (excludeStyles.length) {
-    throw new Error(`Styles which were supposed to be excluded from autoload not found! ${excludeStyles}`);
-  }
+  var base = ['ui-styles/theme.less', 'ui-styles/base.less'];
+  var exclude = ['ui-styles/mixins.less', 'ui-styles/variables.less'];
+  var found = scan('ui-styles', true);
+  exports.styles = _.difference(_.union(base, found), exclude);
 
   exports.uiComponents = [
     'chrome',

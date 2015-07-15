@@ -11,7 +11,7 @@ var assets = require('../ui/assets');
 var fromRoot = require('../../utils/fromRoot');
 var OptmzBundles = require('./OptmzBundles');
 var OptmzUiModules = require('./OptmzUiModules');
-var DirectoryNameAsDefaultFile = require('./DirectoryNameAsDefaultFile');
+var DirectoryNameAsMain = require('webpack-directory-name-as-main');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 class Optimizer extends EventEmitter {
@@ -49,11 +49,10 @@ class Optimizer extends EventEmitter {
 
       plugins: [
         new webpack.ResolverPlugin([
-          new DirectoryNameAsDefaultFile()
+          new DirectoryNameAsMain()
         ]),
         new webpack.NoErrorsPlugin(),
         new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.OccurenceOrderPlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
         })
@@ -66,6 +65,7 @@ class Optimizer extends EventEmitter {
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=2048!file?name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file?name=[path][name].[ext]' },
+          { test: /\/src\/(plugins|ui)\/.+\.js$/, loader: 'auto-preload-rjscommon-deps' }
         ].concat(modules.loaders),
         noParse: modules.noParse,
       },

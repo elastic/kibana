@@ -41,6 +41,7 @@
   "dependencies": {
     "angular-nvd3": "panda01/angular-nvd3#kibana",
     "ansicolors": "^0.3.2",
+    "auto-preload-rjscommon-deps-loader": "^1.0.1",
     "autoprefixer-loader": "^2.0.0",
     "babel-jscs": "^1.0.3",
     "bluebird": "^2.9.27",
@@ -90,7 +91,8 @@
     "style-loader": "^0.12.3",
     "through": "^2.3.6",
     "url-loader": "^0.5.6",
-    "webpack": "^1.10.0"
+    "webpack": "^1.10.0",
+    "webpack-directory-name-as-main": "^1.0.0"
   },
   "devDependencies": {
     "bower": "^1.4.1",
