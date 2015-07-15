@@ -32,7 +32,7 @@ var time = {
   min: 'now-2y',
   max: 'now',
   field: '@timestamp',
-  interval: '5w'
+  interval: '1w'
 };
 
 function getRequest (config) {
@@ -73,6 +73,10 @@ function getRequest (config) {
   return body;
 }
 
+function getQueryCacheKey (query) {
+  return JSON.stringify(_.omit(query, 'label'));
+}
+
 var invokeChain;
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
@@ -83,34 +87,15 @@ function invoke (fnName, args) {
       return item;
     }
     else if (_.isObject(item) && item.type === 'query') {
-      var cacheKey = JSON.stringify(_.omit(item, 'label'));
+      var cacheKey = getQueryCacheKey(item);
 
       if (queryCache[cacheKey]) {
         return Promise.resolve({data: queryCache[cacheKey]});
+      } else {
+        throw new Error ('Missing query cache! ' + cacheKey);
       }
 
-      return client.search({
-        index: item.index || defaultIndex,
-        filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
-        searchType: 'count',
-        body:getRequest(item)
-      }).then(function (resp) {
-        var values;
-        var keys = _.pluck(resp.aggregations.series.buckets, 'key');
-        if (resp.aggregations.series.buckets[0].metric) {
-          values = _.chain(resp.aggregations.series.buckets).pluck('metric').pluck('value').value();
-        } else {
-          values = _.pluck(resp.aggregations.series.buckets, 'doc_count');
-        }
-        var data = _.zipObject(keys, values);
 
-        // Cache the response so we can use it elsewhere in the same sheet
-        queryCache[cacheKey] = data;
-
-        return { data:  data};
-      }).catch(function (e) {
-        throw new Error(e.message.root_cause[0].reason);
-      });
     }
     else if (_.isObject(item) && item.type === 'function') {
       return invoke(item.function, item.arguments);
@@ -179,6 +164,63 @@ function resolveChainList (chainList) {
 
 }
 
+function preProcessSheet (sheet) {
+  var queries = {};
+  var queriesRun = 0;
+
+  function findQueries(chain) {
+    _.each(chain, function (operator) {
+      if (!_.isObject(operator)) {
+        return;
+      }
+      if (operator.type === 'chain') {
+        //console.log(operator);
+        findQueries(operator.chain);
+      } else if (operator.type === 'function') {
+        findQueries(operator.arguments);
+      } else if (operator.type === 'query') {
+        var cacheKey = getQueryCacheKey(operator);
+        queries[cacheKey] = operator;
+      }
+    });
+  }
+
+  _.each(sheet, function (chainList) {
+    findQueries(chainList);
+  });
+
+  var promises = _.map(queries, function (item, cacheKey) {
+    return client.search({
+        index: item.index || defaultIndex,
+        filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
+        searchType: 'count',
+        body:getRequest(item)
+      }).then(function (resp) {
+        queriesRun++;
+        var values;
+        var keys = _.pluck(resp.aggregations.series.buckets, 'key');
+        if (resp.aggregations.series.buckets[0].metric) {
+          values = _.chain(resp.aggregations.series.buckets).pluck('metric').pluck('value').value();
+        } else {
+          values = _.pluck(resp.aggregations.series.buckets, 'doc_count');
+        }
+        var data = _.zipObject(keys, values);
+
+        // Cache the response so we can use it elsewhere in the same sheet
+        queryCache[cacheKey] = data;
+
+        return { data:  data};
+      }).catch(function (e) {
+        throw new Error(e.message.root_cause[0].reason);
+      });
+  });
+
+  return Promise.all(promises).then(function (cachedQueries) {
+    console.log('Queries executed: ' + queriesRun);
+    return cachedQueries;
+  });
+}
+
 function resolveSheet (sheet) {
   return _.map(sheet, function (plot) {
     return Parser.parse(plot);
@@ -186,11 +228,15 @@ function resolveSheet (sheet) {
 }
 
 function processRequest (request) {
+  queryCache = {};
   // This is setting the "global" sheet
   sheet = resolveSheet(request);
-  return _.map(sheet, function (plot) {
-    return resolveChainList(plot).then(function (plots) {
-      return plots;
+
+  return preProcessSheet(sheet).then(function () {
+    return _.map(sheet, function (chainList) {
+      return resolveChainList(chainList).then(function (plots) {
+        return plots;
+      });
     });
   });
 }
@@ -200,20 +246,15 @@ module.exports = processRequest;
 
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
-
-  var rows = _.map(sheet, function (row) {
-    return Promise.all(row);
-  });
-
-
-  Promise.all(rows).then(function (sheet) {
+  Promise.all(sheet).then(function (sheet) {
     console.log(JSON.stringify(sheet));
+    return sheet;
   });
 }
 
 debugSheet(
-  //['(`*`).subtract(10000000000)']
-  ['(`US`).divide((`*`).sum(1000))']
+  ['(`*`).subtract(10000);(`*`)', '(`US`).divide((`*`).sum(1000))']
+  //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );
 

@@ -77,9 +77,9 @@ body {
   position: absolute;
   bottom:5px;
   left:5px;
-  font-size: 0.7em;
+  font-size: 10px;
+  line-height: 10px;
   text-align: center;
-  line-height: 12px;
   width: 20px;
   height: 20px;
   border-radius: 10px;

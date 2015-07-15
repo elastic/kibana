@@ -1,15 +1,12 @@
-var processRequest = require('../parser/chain_runner.js');
 var Promise = require('bluebird');
-var _ = require('lodash');
 
 module.exports = function (app) {
   app.post('/series', function (req, res) {
 
+    var processRequest = require('../parser/chain_runner.js');
+
     var sheet = processRequest(req.body.sheet);
-    var rows = _.map(sheet, function (row) {
-      return Promise.all(row);
-    });
-    Promise.all(rows).then(function (sheet) {
+    Promise.all(sheet).then(function (sheet) {
       res.send(sheet);
     }).catch(function (e) {
       res.send(e);
