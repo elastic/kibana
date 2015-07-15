@@ -2,6 +2,7 @@ var settingParser = require('./settingParser');
 var installer = require('./pluginInstaller');
 var remover = require('./pluginRemover');
 var pluginLogger = require('./pluginLogger');
+var fromRoot = require('../../utils/fromRoot');
 
 module.exports = function (program) {
   function processCommand(command, options) {
@@ -31,7 +32,16 @@ module.exports = function (program) {
     .option('-q, --quiet', 'Disable all process messaging except errors')
     .option('-s, --silent', 'Disable all process messaging')
     .option('-u, --url <url>', 'Specify download url')
-    .option('-t, --timeout <duration>', 'Length of time before failing; 0 for never fail', settingParser.parseMilliseconds)
+    .option(
+      '-t, --timeout <duration>',
+      'Length of time before failing; 0 for never fail',
+      settingParser.parseMilliseconds
+    )
+    .option(
+      '-d, --plugin-dir <path>',
+      'The path to the directory where plugins are stored',
+      fromRoot('plugins')
+    )
     .description(
       'Maintain Plugins',
 `

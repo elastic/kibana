@@ -14,6 +14,7 @@ let typeColors = {
   err: 'red',
   info: 'green',
   error: 'red',
+  warning: 'red',
   fatal: 'magenta',
   status: 'yellow',
   debug: 'brightBlack',

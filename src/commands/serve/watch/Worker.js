@@ -2,12 +2,12 @@
 
 let _ = require('lodash');
 let cluster = require('cluster');
-let join = require('path').join;
+let resolve = require('path').resolve;
 let EventEmitter = require('events').EventEmitter;
 
 let log = require('./log');
 
-let cliPath = join(__dirname, '..', 'cli.js');
+let cliPath = resolve(__dirname, '../../../cli/cli.js');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 let baseArgv = [process.execPath, cliPath].concat(baseArgs);
 

@@ -2,10 +2,23 @@
 
 let _ = require('lodash');
 let isWorker = require('cluster').isWorker;
+let resolve = require('path').resolve;
 
-let readYamlConfig = require('../readYamlConfig');
+let cwd = process.cwd();
+let readYamlConfig = require('./readYamlConfig');
 let fromRoot = require('../../utils/fromRoot');
 let KbnServer = require('../../server/KbnServer');
+
+let pathCollector = function () {
+  let paths = [];
+  return function (path) {
+    paths.push(resolve(process.cwd(), path));
+    return paths;
+  };
+};
+
+let pluginDirCollector = pathCollector();
+let pluginPathCollector = pathCollector();
 
 module.exports = function (program) {
   program
@@ -22,21 +35,28 @@ module.exports = function (program) {
   .option(
     '--plugin-dir <path>',
     'A path to scan for plugins, this can be specified multiple ' +
-    'times to specify multiple directories'
+    'times to specify multiple directories',
+    pluginDirCollector,
+    [
+      fromRoot('plugins'),
+      fromRoot('src/plugins')
+    ]
   )
   .option(
     '--plugin-path <path>',
     'A path to a plugin which should be included by the server, ' +
-    'this can be specified multiple times to specify multiple paths'
+    'this can be specified multiple times to specify multiple paths',
+    pluginPathCollector,
+    []
   )
-  .option('--plugins <path>', 'an alias for --plugin-dir')
+  .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
   .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
   .action(function (opts) {
 
     if (opts.dev && opts.watch && !isWorker) {
       // stop processing the action and handoff to watch cluster manager
-      return require('../watch/watch');
+      return require('./watch/watch');
     }
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
@@ -56,9 +76,7 @@ module.exports = function (program) {
 
     set('plugins.scanDirs', _.compact([].concat(
       get('plugins.scanDirs'),
-      opts.plugins,
-      opts.pluginDir,
-      fromRoot('src/plugins')
+      opts.pluginDir
     )));
 
     set('plugins.paths', [].concat(opts.pluginPath || []));

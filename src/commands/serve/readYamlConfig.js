@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var fs = require('fs');
 var yaml = require('js-yaml');
-var fromRoot = require('../utils/fromRoot');
+var fromRoot = require('../../utils/fromRoot');
 
 var legacySettingMap = {
   // server

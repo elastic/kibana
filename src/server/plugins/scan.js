@@ -12,7 +12,21 @@ module.exports = function (kbnServer, server, config) {
   return Promise.map(scanDirs, function (dir) {
     debug({ tmpl: 'Scanning `<%= dir %>` for plugins', dir: dir });
 
-    return readdir(dir).map(function (file) {
+    return readdir(dir)
+    .catch(function (err) {
+      if (err.code !== 'ENOENT') {
+        throw err;
+      }
+
+      server.log('warning', {
+        tmpl: 'Plugin dir <%= dir %> does not exist',
+        err: err,
+        dir: dir
+      });
+
+      return [];
+    })
+    .map(function (file) {
       if (file === '.' || file === '..') return false;
       var path = join(dir, file);
 
