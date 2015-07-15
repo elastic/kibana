@@ -164,6 +164,41 @@ define(function (require) {
       });
     });
 
+    it('should pass multiple arguments from the emitter', function () {
+      var obj = new Events();
+      var handler = sinon.stub();
+      var payload = [
+        'one',
+        { hello: 'tests' },
+        null
+      ];
+
+      obj.on('test', handler);
+
+      return obj.emit('test', payload[0], payload[1], payload[2])
+      .then(function () {
+        expect(handler.callCount).to.be(1);
+        expect(handler.calledWithExactly(payload[0], payload[1], payload[2])).to.be(true);
+      });
+    });
+
+    it('should preserve the scope of the handler', function () {
+      var obj = new Events();
+      var expected = 'some value';
+      var testValue;
+
+      function handler(arg1, arg2) {
+        testValue = this.getVal();
+      }
+      handler.getVal = _.constant(expected);
+
+      obj.on('test', handler);
+      return obj.emit('test')
+      .then(function () {
+        expect(testValue).to.equal(expected);
+      });
+    });
+
     it('should always emit in the same order', function () {
       var handler = sinon.stub();
 

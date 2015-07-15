@@ -60,7 +60,7 @@ dashboard-grid {
       .panel-heading {
         flex: 0 0 auto;
         white-space: nowrap;
-        display: flex;
+        .display(flex);
 
         div.btn-group {
           white-space: nowrap;
@@ -69,8 +69,13 @@ dashboard-grid {
 
         .panel-title {
           font-size: inherit;
+
+          // flexbox fix for IE10
+          // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
+          display: inline-block;
+
           .ellipsis();
-          flex: 1 1 0;
+          flex: 1 1 auto;
         }
 
         a {

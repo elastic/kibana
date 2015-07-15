@@ -104,6 +104,20 @@ define(function (require) {
         expect(sumOfGroups).to.eql(expectedCount);
       });
 
+      it('removes items based on a predicate', function () {
+        var reg = new IndexedArray({
+          group: ['group'],
+          order: ['id'],
+          initialSet: users
+        });
+
+        reg.remove({name: 'John'});
+
+        expect(_.eq(reg.raw, reg.slice(0))).to.be(true);
+        expect(reg.length).to.be(3);
+        expect(reg[0].name).to.be('Anon');
+      });
+
       it('updates indices after values are re-ordered', function () {
         var rawUsers = users.slice(0);
 

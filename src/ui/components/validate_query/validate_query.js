@@ -22,7 +22,8 @@ define(function (require) {
           // track request so we can abort it if needed
           var request = {};
 
-          var errorElem = $('<i class="fa fa-ban input-error"></i>').hide();
+          var errorElem = $('<i tooltip={{tooltipMsg}} class="fa fa-ban input-error"></i>').hide();
+          $compile(errorElem)($scope);
 
           var init = function () {
             elem.after(errorElem);
@@ -84,10 +85,7 @@ define(function (require) {
                 msg = resp.body.error;
               }
 
-              errorElem.attr('tooltip', msg);
-
-              // Compile is needed for the tooltip
-              $compile(errorElem)($scope);
+              $scope.tooltipMsg = msg;
               errorElem.show();
 
               return undefined;
