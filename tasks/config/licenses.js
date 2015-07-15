@@ -44,7 +44,8 @@ module.exports = function (grunt) {
         'color-name@1.0.0': ['UNLICENSE'],
         'css-color-names@0.0.1': ['MIT'],
         'inherits@1.0.0': ['ISC'],
-        'jsonpointer@1.1.0': ['MIT']
+        'jsonpointer@1.1.0': ['MIT'],
+        'indexof@0.0.1': ['MIT']
       }
     }
   };
