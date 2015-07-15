@@ -10,17 +10,13 @@ let program = new Command('bin/kibana');
 program
 .version(pkg.version)
 .description(
-  'Kibana is an open source (Apache Licensed), browser based analytics ' +
-  'and search dashboard for Elasticsearch.'
+  'Kibana is an open source (Apache Licensed), browser ' +
+  'based analytics and search dashboard for Elasticsearch.'
 );
 
 // attach commands
-var serve = require('./commands/serve')(program);
-
-// check for no command name
-if (!argv[2] || argv[2][0] === '-') {
-  argv.splice(2, 0, ['serve']);
-}
+require('./commands/serve')(program);
+require('./commands/plugin/plugin')(program);
 
 program
 .command('help <command>')
@@ -36,5 +32,16 @@ program
 .action(function (cmd, options) {
   program.error(`unknown command ${cmd}`);
 });
+
+// check for no command name
+var subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+
+if (!subCommand) {
+  if (_.intersection(argv.slice(2), ['-h', '--help']).length) {
+    program.defaultHelp();
+  } else {
+    argv.splice(2, 0, ['serve']);
+  }
+}
 
 program.parse(argv);

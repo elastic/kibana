@@ -12,3 +12,4 @@ target
 *.log
 esvm
 .htpasswd
+src/server/bin/plugins

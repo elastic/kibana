@@ -14,7 +14,7 @@ module.exports = function (command, spaces) {
   let desc = !command.description() ? '' : command.description();
   let cmdDef = !defCmd ? '' : `=${defCmd._name}`;
 
-  return _.trim(
+  return (
 `
 Usage: ${command._name} [command${cmdDef}] [options]
 
@@ -25,7 +25,7 @@ ${indent(commandsSummary(command), 2)}
 
 ${cmdHelp(defCmd)}
 `
-  ).replace(/^/gm, spaces || '');
+  ).trim().replace(/^/gm, spaces || '');
 };
 
 function indent(str, n) {
@@ -58,13 +58,15 @@ function commandsSummary(program) {
 
 function cmdHelp(cmd) {
   if (!cmd) return '';
-  return _.trim(
+  return (
+
 `
 "${cmd._name}" Options:
 
 ${indent(cmd.optionHelp(), 2)}
 `
-);
+
+  ).trim();
 
 }
 

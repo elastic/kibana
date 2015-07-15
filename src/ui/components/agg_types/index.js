@@ -7,6 +7,7 @@ define(function (require) {
         Private(require('components/agg_types/metrics/count')),
         Private(require('components/agg_types/metrics/avg')),
         Private(require('components/agg_types/metrics/sum')),
+        Private(require('components/agg_types/metrics/median')),
         Private(require('components/agg_types/metrics/min')),
         Private(require('components/agg_types/metrics/max')),
         Private(require('components/agg_types/metrics/std_deviation')),

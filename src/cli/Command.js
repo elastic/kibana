@@ -17,6 +17,19 @@ ${red(' ERROR ')} ${err}
 ${help(this, '  ')}
 `
   );
+
+  process.exit(64);
+};
+
+Command.prototype.defaultHelp = function () {
+  console.log(
+`
+${help(this, '  ')}
+
+`
+  );
+
+  process.exit(64);
 };
 
 Command.prototype.unknownArgv = function (argv) {
