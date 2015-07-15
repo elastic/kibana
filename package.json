@@ -55,7 +55,6 @@
     "good-file": "^4.0.2",
     "good-reporter": "^3.1.0",
     "hapi": "^8.6.1",
-    "http-auth": "^2.2.5",
     "joi": "^6.4.3",
     "js-yaml": "^3.2.5",
     "lodash": "^3.9.3",
