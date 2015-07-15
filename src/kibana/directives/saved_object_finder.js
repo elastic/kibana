@@ -138,13 +138,15 @@ define(function (require) {
             case 'tab':
               if (!self.selector.enabled) break;
 
-              $list.find('li.active a').focus();
-
               self.selector.index = -1;
               self.selector.enabled = false;
 
+              //if the user types shift-tab return to the textbox
+              //if the user types tab, set the focus to the currently selected hit.
               if ($event.shiftKey) {
                 $input.focus();
+              } else {
+                $list.find('li.active a').focus();
               }
 
               $event.preventDefault();
