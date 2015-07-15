@@ -105,6 +105,25 @@ define(function (require) {
             expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('string'));
           });
 
+          it('returns the string formatter for the range aggs', function () {
+            var aggType = new AggType({});
+
+            var vis = new Vis(indexPattern, {
+              type: 'histogram',
+              aggs: [
+                {
+                  type: 'range',
+                  schema: 'segment',
+                }
+              ]
+            });
+
+            var aggConfig = vis.aggs.byTypeName.range[0];
+            aggConfig.params = {field: {format: 'non_used_format'}};
+
+            expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('string'));
+          });
+
           it('can be overridden via config', function () {
             var someGetter = function () {};
 

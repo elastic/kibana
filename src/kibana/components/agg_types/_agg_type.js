@@ -132,6 +132,9 @@ define(function (require) {
      * @return {FieldFromat}
      */
     AggType.prototype.getFormat = function (agg) {
+      if (agg.type && agg.type.dslName === 'range') {
+        return fieldFormats.getDefaultInstance('string');
+      }
       var field = agg.field();
       return field ? field.format : fieldFormats.getDefaultInstance('string');
     };
