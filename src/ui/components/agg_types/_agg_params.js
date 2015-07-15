@@ -1,6 +1,7 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
     require('filters/label');
+
     var _ = require('lodash');
     var IndexedArray = require('components/indexed_array/index');
 

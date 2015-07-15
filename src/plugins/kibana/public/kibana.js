@@ -25,7 +25,10 @@ define(function (require) {
     },
     {
       id: 'visualize',
-      title: 'Visualize'
+      title: 'Visualize',
+      activeIndicatorColor: function () {
+        return (String(this.lastPath).indexOf('/visualize/step/') === 0) ? 'white' : '#656a76';
+      }
     },
     {
       id: 'dashboard',

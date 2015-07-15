@@ -263,7 +263,8 @@ define(function (require) {
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
         function onRouteChange() {
-          tabs.trackPathUpdate($location.path(), chrome.embedded);
+          var id = $location.path().split('/')[1] || '';
+          tabs.trackPathUpdate(id, $location.url(), chrome.embedded);
         }
 
         // and some local values

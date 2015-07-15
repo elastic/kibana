@@ -34,9 +34,7 @@ define(function (require) {
       return activeTab;
     };
 
-    this.trackPathUpdate = function (path, temp) {
-      var id = path.split('/')[1] || '';
-
+    this.trackPathUpdate = function (id, path, temp) {
       this.get().forEach(function (tab) {
         var active = tab.active = (tab.id === id);
         if (active) activeTab = tab;

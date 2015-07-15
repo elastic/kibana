@@ -10,7 +10,14 @@ define(function (require) {
     this.storeKey = spec.trackLastPath ? 'lastPath:' + this.id : null;
     this.rootPath = '/' + this.id;
     this.lastPath = this.storeKey && sessionStorage.getItem(this.storeKey);
+
     this.activeIndicatorColor = spec.activeIndicatorColor || null;
+    if (_.isFunction(this.activeIndicatorColor)) {
+      // convert to a getter
+      Object.defineProperty(this, 'activeIndicatorColor', {
+        get: this.activeIndicatorColor
+      });
+    }
   }
 
   Tab.prototype.pathUpdate = function (path) {
