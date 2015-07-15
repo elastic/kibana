@@ -57,10 +57,14 @@ define(function (require) {
     };
 
     PersistedState.prototype.toJSON = function () {
-      return JSON.stringify(this.get());
+      return this.get();
     };
 
-    PersistedState.prototype.fromJSON = function (input) {
+    PersistedState.prototype.toString = function () {
+      return JSON.stringify(this.toJSON());
+    };
+
+    PersistedState.prototype.fromString = function (input) {
       return this.set(JSON.parse(input));
     };
 
