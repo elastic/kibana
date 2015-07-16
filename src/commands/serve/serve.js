@@ -56,7 +56,7 @@ module.exports = function (program) {
 
     if (opts.dev && opts.watch && !isWorker) {
       // stop processing the action and handoff to watch cluster manager
-      return require('./watch/watch');
+      return require('../watch/watch');
     }
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));

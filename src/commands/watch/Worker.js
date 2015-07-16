@@ -5,9 +5,10 @@ let cluster = require('cluster');
 let resolve = require('path').resolve;
 let EventEmitter = require('events').EventEmitter;
 
-let log = require('./log');
+let log = require('../../cli/log');
+let fromRoot = require('../../utils/fromRoot');
 
-let cliPath = resolve(__dirname, '../../../cli/cli.js');
+let cliPath = fromRoot('src/cli/cli.js');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 let baseArgv = [process.execPath, cliPath].concat(baseArgs);
 

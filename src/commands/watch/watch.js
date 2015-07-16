@@ -1,20 +1,23 @@
 'use strict';
 
-let _ = require('lodash');
-let Gaze = require('gaze').Gaze;
+let cluster = require('cluster');
 let join = require('path').join;
 
-let log = require('./log');
-let cluster = require('cluster');
+let _ = require('lodash');
+let Gaze = require('gaze').Gaze;
+
+let log = require('../../cli/log');
+let fromRoot = require('../../utils/fromRoot');
+
 let Worker = require('./Worker');
 
 let gaze = new Gaze([
-  'src/**/*',
+  'src/{cli,commands,server,utils}/**/*',
+  'src/plugins/*/*', // files at the root of a plugin
+  'src/plugins/*/lib/**/*', // files within a lib directory for a plugin
   'config/**/*',
-  '!src/**/public/**/*',
-  '!src/ui/**/*',
 ], {
-  cwd: join(__dirname, '..', '..', '..'),
+  cwd: fromRoot('.'),
   debounceDelay: 200
 });
 
