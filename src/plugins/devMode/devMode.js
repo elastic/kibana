@@ -3,7 +3,6 @@
 module.exports = function devModePlugin(kibana) {
   let _ = require('lodash');
 
-  let bundle = require('../../server/optimize/testBundler');
   let istanbul = require('./istanbul');
   let kibanaSrcFilter = require('./kibanaSrcFilter');
 
@@ -12,37 +11,35 @@ module.exports = function devModePlugin(kibana) {
   const SRC = fromRoot('src');
   const UI = fromRoot('src/ui');
 
-  if (!kibana.config.get('env.dev')) return;
+  // return new kibana.Plugin({
+  //   init: function (server, options) {
+  //     server.ext('onPreHandler', istanbul({ root: SRC, displayRoot: SRC, filter: kibanaSrcFilter }));
+  //     server.ext('onPreHandler', istanbul({ root: UI, displayRoot: SRC, filter: kibanaSrcFilter }));
 
-  return new kibana.Plugin({
-    init: function (server, options) {
-      server.ext('onPreHandler', istanbul({ root: SRC, displayRoot: SRC, filter: kibanaSrcFilter }));
-      server.ext('onPreHandler', istanbul({ root: UI, displayRoot: SRC, filter: kibanaSrcFilter }));
+  //     let activeBundle = null;
 
-      let activeBundle = null;
+  //     server.route({
+  //       path: '/specs',
+  //       method: 'GET',
+  //       handler: function (request, reply) {
+  //         if (!activeBundle) {
 
-      server.route({
-        path: '/specs',
-        method: 'GET',
-        handler: function (request, reply) {
-          if (!activeBundle) {
+  //           activeBundle = bundle().finally(function () {
+  //             activeBundle = null;
+  //           });
+  //         }
 
-            activeBundle = bundle().finally(function () {
-              activeBundle = null;
-            });
-          }
+  //         activeBundle.then(function (path) {
+  //           return reply.file(path);
+  //         }, reply);
+  //       }
+  //     });
+  //   },
 
-          activeBundle.then(function (path) {
-            return reply.file(path);
-          }, reply);
-        }
-      });
-    },
-
-    uiExports: {
-      spyModes: [
-        'plugins/devMode/visDebugSpyPanel'
-      ]
-    }
-  });
+  //   uiExports: {
+  //     spyModes: [
+  //       'plugins/devMode/visDebugSpyPanel'
+  //     ]
+  //   }
+  // });
 };

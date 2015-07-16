@@ -67,7 +67,7 @@ module.exports = class TransformObjStream extends Stream.Transform {
       if (typeof event.responsePayload === 'object') {
         contentLength = stringify(event.responsePayload).length;
       } else {
-        contentLength = event.responsePayload.toString().length;
+        contentLength = String(event.responsePayload).length;
       }
 
       data.res = {

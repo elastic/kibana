@@ -28,7 +28,7 @@ let color = _.memoize(function (name) {
 });
 
 let type = _.memoize(function (t) {
-  return _.chain(t).pad(6).trunc(6).thru(color(t)).value();
+  return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
 let workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';

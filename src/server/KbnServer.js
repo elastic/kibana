@@ -25,8 +25,8 @@ module.exports = class KbnServer extends EventEmitter {
     let config = this.server.config();
 
     this.ready = _.constant(this.mixin(
-      require('./logging'),
       require('./http'),
+      require('./logging'),
       require('./status'), // sets this.status
       require('./plugins'), // sets this.plugins
       require('./ui'), // sets this.uiExports

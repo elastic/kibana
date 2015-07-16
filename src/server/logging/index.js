@@ -20,6 +20,7 @@ module.exports = function (kbnServer, server, config) {
       _.defaults(events, {
         log: '*',
         ops: '*',
+        request: '*',
         response: '*',
         error: '*'
       });
@@ -27,6 +28,7 @@ module.exports = function (kbnServer, server, config) {
     else {
       _.defaults(events, {
         log: ['info', 'warning', 'error', 'fatal'],
+        request: '*',
         response: '*',
         error: '*'
       });
@@ -36,6 +38,8 @@ module.exports = function (kbnServer, server, config) {
       register: require('good'),
       options: {
         opsInterval: 5000,
+        requestHeaders: true,
+        requestPayload: true,
         reporters: [
           {
             reporter: require('./LogReporter'),
