@@ -88,12 +88,10 @@ class OptmzBundles {
     ])
     .settle()
     .spread(function (readEntry, statBundle) {
-      if (readEntry.isFulfilled() && statBundle.isFulfilled()) {
-        entry.exists = (readEntry.value() === entry.content);
-      } else {
-        entry.exists = false;
-      }
+      let existingEntry = readEntry.isFulfilled() && readEntry.value().toString('utf8');
+      let bundleExists = statBundle.isFulfilled() && !statBundle.value().isDirectory();
 
+      entry.exists = existingEntry && bundleExists && (existingEntry === entry.content);
       if (entry.exists) return;
 
       return clean([entry.path, entry.bundlePath])
