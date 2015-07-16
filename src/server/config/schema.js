@@ -5,6 +5,7 @@ var package = require('../../utils/closestPackageJson').getSync();
 var fromRoot = require('../../utils/fromRoot');
 
 module.exports = Joi.object({
+
   env: Joi.object({
     name: Joi.string().default(Joi.ref('$env')),
     dev: Joi.boolean().default(Joi.ref('$dev')),

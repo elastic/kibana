@@ -5,11 +5,11 @@ module.exports = function (kibana) {
         id: 'switcher',
         main: 'plugins/appSwitcher/appSwitcher',
         hidden: true,
+
         defaultModules: {
           angular: [],
           require: [
-            'ui/chrome',
-            'angular-bootstrap'
+            'ui/chrome'
           ]
           .concat(kibana.autoload.styles)
         }
