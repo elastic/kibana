@@ -177,7 +177,7 @@ define(function (require) {
           return pointLabel !== label.toString();
         }
 
-        if (label && label !== '_all' && label !== 'Count') {
+        if (label && label !== '_all') {
           d3.select(this).style('cursor', 'pointer');
         }
 
