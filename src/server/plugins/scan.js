@@ -19,7 +19,7 @@ module.exports = function (kbnServer, server, config) {
       }
 
       server.log('warning', {
-        tmpl: 'Plugin dir <%= dir %> does not exist',
+        tmpl: '<%= err.code %>: Unable to scan non-existent directory for plugins "<%= dir %>"',
         err: err,
         dir: dir
       });

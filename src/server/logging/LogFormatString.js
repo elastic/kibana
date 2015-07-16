@@ -28,14 +28,14 @@ let color = _.memoize(function (name) {
 });
 
 let type = _.memoize(function (t) {
-  return _.chain(t).padLeft(6).trunc(6).thru(color(t)).value();
+  return _.chain(t).pad(6).trunc(6).thru(color(t)).value();
 });
 
-let workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)}: ` : '';
+let workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
 
 module.exports = class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
-    let time = color('time')(moment(data.timestamp).format());
+    let time = color('time')(moment(data.timestamp).format('LTS'));
     let msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
     let tags = _(data.tags)
@@ -46,6 +46,6 @@ module.exports = class KbnLoggerJsonFormat extends LogFormat {
       return s + `[${ color(t)(t) }]`;
     }, '');
 
-    return `${workerType}${type(data.type)}: [${time}] ${tags} ${msg}`;
+    return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
   }
 };
