@@ -34,14 +34,22 @@ module.exports = function (kbnServer, server, config) {
       status.yellow('Source file change detected, reoptimizing source files');
     }))
     .on('done', function (stats) {
-      server.log(['optimize', 'debug'], `\n${ stats.toString({ colors: true }) }`);
+      logStats('debug', stats);
       status.green('Optimization complete');
     })
     .on('error', function (stats, err) {
-      server.log(['optimize', 'fatal'], `\n${ stats.toString({ colors: true }) }`);
+      logStats('fatal', stats);
       status.red('Optimization failure! ' + err.message);
     })
     .init();
+  }
+
+  function logStats(tag, stats) {
+    if (config.get('logging.json')) {
+      server.log(['optimize', tag], _.pick(stats.toJson(), 'errors', 'warnings'));
+    } else {
+      server.log(['optimize', tag], `\n${ stats.toString({ colors: true }) }`);
+    }
   }
 
   function onMessage(handle, filter) {

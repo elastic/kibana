@@ -44,10 +44,15 @@ module.exports = Joi.object({
       otherwise: Joi.default(false)
     }),
 
+    events: Joi.any().default({}),
     dest: Joi.string().default('stdout'),
-    json: Joi.boolean().default(Joi.ref('$prod')),
 
-    events: Joi.any().default({})
+    json: Joi.boolean()
+    .when('dest', {
+      is: 'stdout',
+      then: Joi.default(!process.stdout.isTTY),
+      otherwise: Joi.default(true)
+    })
   })
   .default(),
 
