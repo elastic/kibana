@@ -43,7 +43,10 @@ module.exports = function (kbnServer, server, config) {
               json: config.get('logging.json'),
               dest: config.get('logging.dest')
             },
-            events: events,
+            events: _.transform(events, function (filtered, val, key) {
+              // provide a string compatible way to remove events
+              if (val !== '!') filtered[key] = val;
+            }, {})
           }
         ]
       }
