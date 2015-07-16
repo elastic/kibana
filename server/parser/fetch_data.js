@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var glob = require('glob');
 
-
 var parseDateMath = require('../utils/date_math.js');
 
 var elasticsearch = require('elasticsearch');
@@ -10,8 +9,8 @@ var client = new elasticsearch.Client({
 });
 
 var time = {
-  min: parseDateMath('now-18M'),
-  max: parseDateMath('now'),
+  min: parseDateMath('now-18M').valueOf(),
+  max: parseDateMath('now').valueOf(),
   field: '@timestamp',
   interval: '1w'
 };
@@ -25,7 +24,7 @@ var operators  = _.chain(glob.sync('server/request_functions/*.js')).map(functio
 
 function buildRequest (config) {
   var filter = {range:{}};
-  filter.range[time.field] = {gte: time.min, lte: time.max};
+  filter.range[time.field] = {gte: time.min, lte: time.max, format: 'epoch_millis'};
 
   var searchRequest = {
     filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
@@ -39,7 +38,7 @@ function buildRequest (config) {
             }
           },
           filter: filter
-        }
+      }
       },
       aggs: {
         series: {
@@ -71,12 +70,16 @@ module.exports = function (config, cacheKey) {
   return client.search(buildRequest(config)).then(function (resp) {
     var values;
     var keys = _.pluck(resp.aggregations.series.buckets, 'key');
-    if (resp.aggregations.series.buckets[0].metric) {
-      values = _.chain(resp.aggregations.series.buckets).pluck('metric').pluck('value').value();
-    } else {
-      values = _.pluck(resp.aggregations.series.buckets, 'doc_count');
-    }
-    var data = _.zipObject(keys, values);
+
+    var data = _.map(resp.aggregations.series.buckets, function (bucket) {
+      var value;
+      if (resp.aggregations.series.buckets[0].metric) {
+        value = bucket.metric.value;
+      } else {
+        value = bucket.doc_count;
+      }
+      return [bucket.key, value];
+    });
 
     _.each(config.operators, function (operatorObj) {
       var fn = operators[operatorObj.operator].result;

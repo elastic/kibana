@@ -23,11 +23,9 @@ var vals = _.transform([
 // match any key from the vals object prececed by an optional number
 var parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
-var toMs = function (expr) {
+module.exports = function (expr) {
   var match = expr.match(parseRE);
   if (match) {
     return parseFloat(match[1] || 1) * vals[match[2]];
   }
 };
-
-module.exports = toMs;

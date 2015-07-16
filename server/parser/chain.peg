@@ -80,7 +80,7 @@ request_operator
  }
 
 request_operator_argument
- = argument:([a-zA-Z0-9\-_\*.]+ / string) ':'? {
+ = argument:([a-zA-Z0-9\-_\*.+]+ / string) ':'? {
   return argument.join('');
  }
 

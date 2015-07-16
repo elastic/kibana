@@ -92,7 +92,7 @@ function resolveChainList (chainList) {
     var values = invokeChain(chain);
 
     return values.then(function (args) {
-      args.data = unzipPairs(args.data);
+      //args.data = unzipPairs(args.data);
       return args;
     });
   });

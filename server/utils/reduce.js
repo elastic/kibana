@@ -12,22 +12,24 @@ module.exports = function reduce (arrayOfArrays, fn) {
   return Promise.all(arrayOfArrays).then(function (arrayOfArrays) {
     return _.reduce(arrayOfArrays, function(destinationObject, argument) {
 
-      var output = _.mapValues(destinationObject.data, function (value, key) {
-        // Allow function to take 2 arrays of equal length, OR an array and a single number;
-        // null points are not drawn
+      var output = _.map(destinationObject.data, function (point, index) {
+
+
+        var value = point[1];
+
+
         if (value == null) {
-          return null;
+          return [point[0], null];
         }
 
         if (_.isNumber(argument)) {
-          return fn(value, argument);
+          return [point[0], fn(value, argument)];
         }
 
-        if (argument.data[key] == null) {
-          return null;
+        if (argument.data[index][1] == null) {
+          return [point[0], null];
         }
-
-        return fn(value, argument.data[key]);
+        return [point[0], fn(value, argument.data[index][1])];
       });
 
       // Output = single series
