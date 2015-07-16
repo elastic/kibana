@@ -2,22 +2,28 @@ define(function (require) {
   var module = require('modules').get('kibana');
   var _ = require('lodash');
   var rison = require('utils/rison');
+  var keymap = require('utils/key_map');
 
   module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, kbnUrl) {
 
-    var vars = {
+    var types = {
       searches: {
         service: savedSearches,
+        name: 'searches',
         noun: 'Saved Search',
-        nouns: 'Saved Searches'
+        nouns: 'searches'
       },
       visualizations: {
         service: savedVisualizations,
-        noun: 'Visualization'
+        name: 'visualizations',
+        noun: 'Visualization',
+        nouns: 'visualizations'
       },
       dashboards: {
         service: savedDashboards,
-        noun: 'Dashboard'
+        name: 'dashboards',
+        noun: 'Dashboard',
+        nouns: 'dashboards'
       }
     };
 
@@ -32,14 +38,17 @@ define(function (require) {
         userOnChoose: '=?onChoose'
       },
       template: require('text!partials/saved_object_finder.html'),
-      link: function ($scope, $el) {
+      controllerAs: 'finder',
+      controller: function ($scope, $element, $timeout) {
+        var self = this;
+
         // the text input element
-        var $input = $el.find('input[ng-model=filter]');
+        var $input = $element.find('input[ng-model=filter]');
 
         // the list that will hold the suggestions
-        var $list = $el.find('.finder-options');
+        var $list = $element.find('ul');
 
-        // the current filter string, used to check that retured results are still useful
+        // the current filter string, used to check that returned results are still useful
         var currentFilter = $scope.filter;
 
         // the most recently entered search/filter
@@ -48,18 +57,19 @@ define(function (require) {
         // the service we will use to find records
         var service;
 
-        // the currently selected jQuery element
-        var $selected = null;
-
         // the list of hits, used to render display
-        $scope.hits = [];
+        self.hits = [];
+
+        self.objectType = types[$scope.type];
+
+        filterResults();
 
         /**
          * Passed the hit objects and will determine if the
          * hit should have a url in the UI, returns it if so
          * @return {string|null} - the url or nothing
          */
-        $scope.makeUrl = function (hit) {
+        self.makeUrl = function (hit) {
           if ($scope.userMakeUrl) {
             return $scope.userMakeUrl(hit);
           }
@@ -67,35 +77,33 @@ define(function (require) {
           if (!$scope.userOnChoose) {
             return hit.url;
           }
+
+          return '#';
+        };
+
+        self.preventClick = function ($event) {
+          $event.preventDefault();
         };
 
         /**
          * Called when a hit object is clicked, can override the
          * url behavior if necessary.
          */
-        $scope.onChoose = function (hit, $event) {
+        self.onChoose = function (hit, $event) {
           if ($scope.userOnChoose) {
             $scope.userOnChoose(hit, $event);
           }
 
           if ($event.isDefaultPrevented()) return;
 
-          var url = $scope.makeUrl(hit);
-          if (!url || url.charAt(0) !== '#') return;
+          var url = self.makeUrl(hit);
+          if (!url || url === '#' || url.charAt(0) !== '#') return;
 
           $event.preventDefault();
 
           // we want the '/path', not '#/path'
           kbnUrl.change(url.substr(1));
         };
-
-        $scope.$watch('type', function (type) {
-          type = vars[type];
-          service = type.service;
-          $scope.noun = type.noun;
-          $scope.nouns = type.nouns || type.noun + 's';
-          filterResults();
-        });
 
         $scope.$watch('filter', function (newFilter) {
           // ensure that the currentFilter changes from undefined to ''
@@ -104,100 +112,124 @@ define(function (require) {
           filterResults();
         });
 
-        $scope.selectedItem = false;
-        $input.on('keydown', (function () {
-          var enter = 13;
-          var up = 38;
-          var down = 40;
-          var left = 37;
-          var right = 39;
-          var esc = 27;
+        //manages the state of the keyboard selector
+        self.selector = {
+          enabled: false,
+          index: -1
+        };
 
-          var scrollIntoView = function ($el, snapTop) {
-            var el = $el[0];
+        //key handler for the filter text box
+        self.filterKeyDown = function ($event) {
+          if (keymap[$event.keyCode] !== 'tab') return;
 
-            if (!el) return;
+          if (self.hits.length === 0) return;
 
-            if ('scrollIntoViewIfNeeded' in el) {
-              el.scrollIntoViewIfNeeded(snapTop);
-            } else if ('scrollIntoView' in el) {
-              el.scrollIntoView(snapTop);
-            }
-          };
+          self.selector.index = 0;
+          self.selector.enabled = true;
 
-          return function (event) {
-            var $next;
-            var goingUp;
+          selectTopHit();
 
-            switch (event.keyCode) {
-            case enter:
-              if (!$selected) return;
+          $event.preventDefault();
+        };
 
-              // get the index of the selected element
-              var i = $list.find('li').index($selected);
+        //key handler for the list items
+        self.hitKeyDown = function ($event, page, paginate) {
+          switch (keymap[$event.keyCode]) {
+            case 'tab':
+              if (!self.selector.enabled) break;
 
-              // get the related hit item
-              var hit = $scope.hits[i];
+              self.selector.index = -1;
+              self.selector.enabled = false;
 
-              if (!hit) return;
+              //if the user types shift-tab return to the textbox
+              //if the user types tab, set the focus to the currently selected hit.
+              if ($event.shiftKey) {
+                $input.focus();
+              } else {
+                $list.find('li.active a').focus();
+              }
 
-              // check if there is a url for this hit
-              var url = $scope.makeUrl(hit);
-
-              if (url) window.location = url;
-              $scope.onChoose(hit);
-
-              return;
-            case up:
-              $next = $selected ? $selected.prev() : $list.find('li:last-child');
-              goingUp = false;
+              $event.preventDefault();
               break;
-            case down:
-              $next = $selected ? $selected.next() : $list.find('li:first-child');
-              goingUp = true;
+            case 'down':
+              if (!self.selector.enabled) break;
+
+              if (self.selector.index + 1 < page.length) {
+                self.selector.index += 1;
+              }
+              $event.preventDefault();
               break;
-            case esc:
-              scrollIntoView($list.find('li:first-child'));
-              $next = null;
+            case 'up':
+              if (!self.selector.enabled) break;
+
+              if (self.selector.index > 0) {
+                self.selector.index -= 1;
+              }
+              $event.preventDefault();
+              break;
+            case 'right':
+              if (!self.selector.enabled) break;
+
+              if (page.number < page.count) {
+                paginate.goToPage(page.number + 1);
+                self.selector.index = 0;
+                selectTopHit();
+              }
+              $event.preventDefault();
+              break;
+            case 'left':
+              if (!self.selector.enabled) break;
+
+              if (page.number > 1) {
+                paginate.goToPage(page.number - 1);
+                self.selector.index = 0;
+                selectTopHit();
+              }
+              $event.preventDefault();
+              break;
+            case 'escape':
+              if (!self.selector.enabled) break;
+
+              $input.focus();
+              $event.preventDefault();
+              break;
+            case 'enter':
+              if (!self.selector.enabled) break;
+
+              var hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
+              var hit = self.hits[hitIndex];
+              if (!hit) break;
+
+              self.onChoose(hit, $event);
+              $event.preventDefault();
+              break;
+            case 'shift':
               break;
             default:
-              return;
-            }
+              $input.focus();
+              break;
+          }
+        };
 
-            if ($next && $next.length === 0) {
-              // we are at one of the ends
-              return;
-            }
+        self.hitBlur = function ($event) {
+          self.selector.index = -1;
+          self.selector.enabled = false;
+        };
 
-            if ($selected && $next && $next.eq($selected).length) {
-              // the selections are the same, bail
-              return;
-            }
-
-            if ($selected) {
-              $selected.removeClass('active');
-              $selected = null;
-            }
-
-            if ($next) {
-              // remove selection stuff from $selected
-              $next.addClass('active');
-              scrollIntoView($next, goingUp);
-              $selected = $next;
-            }
-          };
-        }()));
-
-        $scope.$on('$destroy', function () {
-          $input.off('keydown');
-        });
-
-        $scope.manageObject = function (type) {
+        self.manageObjects = function (type) {
           $location.url('/settings/objects?_a=' + rison.encode({tab: type}));
         };
 
+        function selectTopHit() {
+          setTimeout(function () {
+            //triggering a focus event kicks off a new angular digest cycle.
+            $list.find('a:first').focus();
+          }, 0);
+        }
+
         function filterResults() {
-          if (!service) return;
+          if (!self.objectType) return;
+          if (!self.objectType.service) return;
 
           // track the filter that we use for this search,
           // but ensure that we don't search for the same
@@ -207,16 +239,27 @@ define(function (require) {
           if (prevSearch === filter) return;
 
           prevSearch = filter;
-          service.find(filter)
+          self.objectType.service.find(filter)
           .then(function (hits) {
             // ensure that we don't display old results
             // as we can't really cancel requests
             if (currentFilter === filter) {
               $scope.hitCount = hits.total;
-              $scope.hits = hits.hits;
-              $selected = null;
+              self.hits = _.sortBy(hits.hits, 'title');
             }
           });
+        }
+
+        function scrollIntoView($element, snapTop) {
+          var el = $element[0];
+
+          if (!el) return;
+
+          if ('scrollIntoViewIfNeeded' in el) {
+            el.scrollIntoViewIfNeeded(snapTop);
+          } else if ('scrollIntoView' in el) {
+            el.scrollIntoView(snapTop);
+          }
         }
       }
     };
