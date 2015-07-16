@@ -2,6 +2,7 @@ module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var resolve = require('bluebird').resolve;
   var inspect = require('util').inspect;
+  var Promise = require('bluebird');
 
   var Plugins = require('./Plugins');
   var plugins = kbnServer.plugins = new Plugins(kbnServer);
