@@ -24,7 +24,7 @@ module.exports = function (program) {
   program
   .command('serve')
   .description('Run the kibana server')
-  .allowUnknownOption()
+  .collectUnknownOptions()
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
   .option('-c, --config <path>', 'Path to the config file')
   .option('-p, --port <port>', 'The port to bind to', parseInt)
@@ -83,6 +83,6 @@ module.exports = function (program) {
 
     set('plugins.paths', [].concat(opts.pluginPath || []));
 
-    return new KbnServer(_.merge(settings, this.getUnknownOpts()));
+    return new KbnServer(_.merge(settings, this.getUnknownOptions()));
   });
 };

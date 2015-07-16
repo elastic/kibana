@@ -34,35 +34,46 @@ ${help(this, '  ')}
 
 Command.prototype.unknownArgv = function (argv) {
   if (argv) this.__unkownArgv = argv;
-  return (this.__unkownArgv || []).slice(0);
+  return this.__unkownArgv ? this.__unkownArgv.slice(0) : [];
 };
 
-Command.prototype.getUnknownOpts = function () {
-  let opts = {};
-  let unknowns = this.unknownArgv();
+/**
+ * setup the command to accept arbitrary configuration via the cli
+ * @return {[type]} [description]
+ */
+Command.prototype.collectUnknownOptions = function () {
+  let title = `Extra ${this._name} options`;
 
-  while (unknowns.length) {
-    let opt = unknowns.shift().split('=');
-    if (opt[0].slice(0, 2) !== '--') {
-      this.error(`Server config "${opt[0]}" must start with "--"`);
-    }
+  this.allowUnknownOption();
+  this.getUnknownOptions = function () {
+    let opts = {};
+    let unknowns = this.unknownArgv();
 
-    if (opt.length === 1) {
-      if (!unknowns.length || unknowns[0][0] === '-') {
-        this.error(`Server config "${opt[0]}" must have a value`);
+    while (unknowns.length) {
+      let opt = unknowns.shift().split('=');
+      if (opt[0].slice(0, 2) !== '--') {
+        this.error(`${title} "${opt[0]}" must start with "--"`);
       }
 
-      opt.push(unknowns.shift());
+      if (opt.length === 1) {
+        if (!unknowns.length || unknowns[0][0] === '-') {
+          this.error(`${title} "${opt[0]}" must have a value`);
+        }
+
+        opt.push(unknowns.shift());
+      }
+
+      let val = opt[1];
+      try { val = JSON.parse(opt[1]); }
+      catch (e) { val = opt[1]; }
+
+      _.set(opts, opt[0].slice(2), val);
     }
 
-    let val = opt[1];
-    try { val = JSON.parse(opt[1]); }
-    catch (e) { val = opt[1]; }
+    return opts;
+  };
 
-    _.set(opts, opt[0].slice(2), val);
-  }
-
-  return opts;
+  return this;
 };
 
 Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function (parse, argv) {
