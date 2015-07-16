@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var reqRespStatsHTML = require('ui/visualize/spy/_req_resp_stats.html');
+  var reqRespStatsHTML = require('plugins/spyModes/reqRespStatsSpyMode.html');
 
   var linkReqRespStats = function ($scope, config) {
     $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');

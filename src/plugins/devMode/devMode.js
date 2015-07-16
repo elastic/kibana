@@ -12,12 +12,9 @@ module.exports = function devModePlugin(kibana) {
   const SRC = fromRoot('src');
   const UI = fromRoot('src/ui');
 
+  if (!kibana.config.get('env.dev')) return;
 
   return new kibana.Plugin({
-    initCondition: function (config) {
-      return config.get('env.dev');
-    },
-
     init: function (server, options) {
       server.ext('onPreHandler', istanbul({ root: SRC, displayRoot: SRC, filter: kibanaSrcFilter }));
       server.ext('onPreHandler', istanbul({ root: UI, displayRoot: SRC, filter: kibanaSrcFilter }));
@@ -40,6 +37,12 @@ module.exports = function devModePlugin(kibana) {
           }, reply);
         }
       });
+    },
+
+    uiExports: {
+      spyModes: [
+        'plugins/devMode/visDebugSpyPanel'
+      ]
     }
   });
 };

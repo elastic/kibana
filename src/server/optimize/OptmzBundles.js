@@ -89,7 +89,7 @@ class OptmzBundles {
     .settle()
     .spread(function (readEntry, statBundle) {
       if (readEntry.isFulfilled() && statBundle.isFulfilled()) {
-        entry.exists = (readEntry.value() !== entry.content);
+        entry.exists = (readEntry.value() === entry.content);
       } else {
         entry.exists = false;
       }

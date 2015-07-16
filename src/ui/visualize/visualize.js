@@ -3,7 +3,7 @@ define(function (require) {
   .get('kibana/directive')
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
 
-    require('ui/visualize/spy/spy');
+    require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
     var $ = require('jquery');
     var _ = require('lodash');

@@ -8,7 +8,7 @@ define(function (require) {
     return {
       name: 'debug',
       display: 'Debug',
-      template: require('plugins/vis_debug_spy/vis_debug_spy.html'),
+      template: require('plugins/devMode/visDebugSpyPanel.html'),
       order: 5,
       link: function ($scope, $el) {
         $scope.$watch('vis.getState() | json', function (json) {

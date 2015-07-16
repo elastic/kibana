@@ -20,7 +20,7 @@ module.exports = function (grunt) {
     testUtilsDir: __dirname + '/test/utils',
     bowerComponentsDir: __dirname + '/bower_components',
 
-    devPlugins: 'vis_debug_spy',
+    devPlugins: 'devMode',
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
