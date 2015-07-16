@@ -15,8 +15,8 @@ program
 );
 
 // attach commands
-require('../commands/serve/serve')(program);
-require('../commands/plugin/plugin')(program);
+require('../serve/serve')(program);
+require('../plugin/plugin')(program);
 
 program
 .command('help <command>')

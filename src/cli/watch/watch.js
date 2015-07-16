@@ -5,7 +5,7 @@ let join = require('path').join;
 let _ = require('lodash');
 let Gaze = require('gaze').Gaze;
 
-let Log = require('../../cli/Log');
+let Log = require('../Log');
 let fromRoot = require('../../utils/fromRoot');
 let Worker = require('./Worker');
 
