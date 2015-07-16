@@ -33,10 +33,11 @@ module.exports = class Worker extends EventEmitter {
       kbnWorkerArgv: JSON.stringify(argv)
     };
 
-    _.bindAll(this, ['onExit', 'onMessage', 'start']);
+    _.bindAll(this, ['onExit', 'onMessage', 'onShutdown', 'start']);
 
     this.start = _.debounce(this.start, 25);
     cluster.on('exit', this.onExit);
+    process.on('exit', this.onShutdown);
   }
 
   onExit(fork, code) {
@@ -49,6 +50,12 @@ module.exports = class Worker extends EventEmitter {
     if (!this.filter(path)) return;
     this.changes.push(path);
     this.start();
+  }
+
+  onShutdown() {
+    if (this.fork && !this.fork.isDead()) {
+      this.fork.kill();
+    }
   }
 
   onMessage(msg) {
