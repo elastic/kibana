@@ -28,7 +28,8 @@ module.exports = function (program) {
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
   .option('-c, --config <path>', 'Path to the config file')
   .option('-p, --port <port>', 'The port to bind to', parseInt)
-  .option('-q, --quiet', 'Turns off logging')
+  .option('-q, --quiet', 'Prevent all logging except errors')
+  .option('-Q, --silent', 'Prevent all logging')
   .option('--verbose', 'Turns on verbose logging')
   .option('-H, --host <host>', 'The host to bind to')
   .option('-l, --log-file <path>', 'The file to log to')
@@ -53,10 +54,9 @@ module.exports = function (program) {
   .option('--dev', 'Run the server with development mode defaults')
   .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
   .action(function (opts) {
-
     if (opts.dev && opts.watch && !isWorker) {
       // stop processing the action and handoff to watch cluster manager
-      return require('../watch/watch');
+      return require('../watch/watch')(opts);
     }
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
@@ -71,7 +71,9 @@ module.exports = function (program) {
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
     if (opts.port) set('server.port', opts.port);
     if (opts.host) set('server.host', opts.host);
-    if (opts.quiet) set('logging.quiet', opts.quiet);
+    if (opts.quiet) set('logging.quiet', true);
+    if (opts.silent) set('logging.silent', true);
+    if (opts.verbose) set('logging.verbose', true);
     if (opts.logFile) set('logging.dest', opts.logFile);
 
     set('plugins.scanDirs', _.compact([].concat(

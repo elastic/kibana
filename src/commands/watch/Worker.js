@@ -5,7 +5,6 @@ let cluster = require('cluster');
 let resolve = require('path').resolve;
 let EventEmitter = require('events').EventEmitter;
 
-let log = require('../../cli/log');
 let fromRoot = require('../../utils/fromRoot');
 
 let cliPath = fromRoot('src/cli/cli.js');
@@ -22,14 +21,16 @@ module.exports = class Worker extends EventEmitter {
     opts = opts || {};
     super();
 
+    this.log = opts.log;
     this.type = opts.type;
     this.title = opts.title || opts.type;
     this.filter = opts.filter || _.constant(true);
-    this.changeBuffer = [];
+    this.changes = [];
 
+    let argv = _.union(baseArgv, opts.argv || []);
     this.env = {
       kbnWorkerType: this.type,
-      kbnWorkerArgv: JSON.stringify(baseArgv.concat(opts.args || []))
+      kbnWorkerArgv: JSON.stringify(argv)
     };
 
     _.bindAll(this, ['onExit', 'onMessage', 'start']);
@@ -40,13 +41,13 @@ module.exports = class Worker extends EventEmitter {
 
   onExit(fork, code) {
     if (this.fork !== fork) return;
-    if (code) log.red(`${this.title} crashed`, 'with status code', code);
+    if (code) this.log.bad(`${this.title} crashed`, 'with status code', code);
     else this.start(); // graceful shutdowns happen on restart
   }
 
   onChange(path) {
     if (!this.filter(path)) return;
-    this.changeBuffer.push(path);
+    this.changes.push(path);
     this.start();
   }
 
@@ -56,7 +57,7 @@ module.exports = class Worker extends EventEmitter {
   }
 
   flushChangeBuffer() {
-    let files = _.unique(this.changeBuffer.splice(0));
+    let files = _.unique(this.changes.splice(0));
     let prefix = files.length > 1 ? '\n - ' : '';
     return files.reduce(function (list, file, i, files) {
       return `${list || ''}${prefix}"${file}"`;
@@ -64,20 +65,17 @@ module.exports = class Worker extends EventEmitter {
   }
 
   start() {
-    if (this.fork) {
-      if (!this.fork.isDead()) {
-        this.fork.kill();
-        this.fork.removeListener('message', this.onMessage);
-        // once "exit" event is received with 0 status, start() is called again
-        return;
-      }
-
-      if (this.changeBuffer.length) {
-        log.yellow(`${this.title} restarting`, `due to changes in ${this.flushChangeBuffer()}`);
-      }
+    if (this.fork && !this.fork.isDead()) {
+      this.fork.kill();
+      this.fork.removeListener('message', this.onMessage);
+      // once "exit" event is received with 0 status, start() is called again
+      return;
     }
-    else {
-      log.yellow(`${this.title} starting`);
+
+    if (this.fork && this.changes.length) {
+      this.log.warn(`${this.title} restarting`, `due to changes in ${this.flushChangeBuffer()}`);
+    } else {
+      this.log.warn(`${this.title} starting`);
     }
 
     this.fork = cluster.fork(this.env);

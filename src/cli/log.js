@@ -8,6 +8,11 @@ let log = _.restParam(function (color, label, rest1) {
 });
 
 let color = require('./color');
-exports.green = _.partial(log, color.green);
-exports.red = _.partial(log, color.red);
-exports.yellow = _.partial(log, color.yellow);
+
+module.exports = class Log {
+  constructor(quiet, silent) {
+    this.good = quiet || silent ? _.noop : _.partial(log, color.green);
+    this.warn = quiet || silent ? _.noop : _.partial(log, color.yellow);
+    this.bad = silent ? _.noop : _.partial(log, color.red);
+  }
+};
