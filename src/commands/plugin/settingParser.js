@@ -1,4 +1,4 @@
-﻿var path = require('path');
+var resolve = require('path').resolve;
 var expiry = require('expiry-js');
 
 module.exports = function (options) {
@@ -37,8 +37,6 @@ module.exports = function (options) {
       quiet: false,
       urls: []
     };
-
-    settings.workingPath = path.resolve(__dirname, '..', 'plugins', '.plugin.installing');
 
     if (options.timeout) {
       settings.timeout = options.timeout;
@@ -94,8 +92,10 @@ module.exports = function (options) {
       throw new Error('Please specify either --install or --remove.');
     }
 
+    settings.pluginDir = options.pluginDir;
     if (settings.package) {
-      settings.pluginPath = path.resolve(__dirname, '..', 'plugins', settings.package);
+      settings.pluginPath = resolve(settings.pluginDir, settings.package);
+      settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
     }
 
     return settings;

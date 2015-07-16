@@ -40,7 +40,7 @@ module.exports = function (program) {
     .option(
       '-d, --plugin-dir <path>',
       'The path to the directory where plugins are stored',
-      fromRoot('plugins')
+      fromRoot('installed_plugins')
     )
     .description(
       'Maintain Plugins',

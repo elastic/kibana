@@ -39,7 +39,7 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('plugins'),
+      fromRoot('installed_plugins'),
       fromRoot('src/plugins')
     ]
   )
