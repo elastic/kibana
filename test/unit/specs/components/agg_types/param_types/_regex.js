@@ -10,9 +10,9 @@ define(function (require) {
     beforeEach(module('kibana'));
     // fetch out deps
     beforeEach(inject(function (Private) {
-      BaseAggParam = Private(require('components/agg_types/param_types/base'));
-      RegexAggParam = Private(require('components/agg_types/param_types/regex'));
-      Vis = Private(require('components/vis/vis'));
+      BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+      RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
+      Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 

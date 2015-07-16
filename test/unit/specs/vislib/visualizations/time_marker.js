@@ -46,7 +46,7 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        TimeMarker = Private(require('components/vislib/visualizations/time_marker'));
+        TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
         minDomain = getExtent(series.series, d3.min);
         maxDomain = getExtent(series.series, d3.max);
         domain = [minDomain, maxDomain];

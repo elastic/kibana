@@ -11,46 +11,46 @@ exports.reload = function () {
   exports.directives = scan('directives');
   exports.filters = scan('filters');
 
-  var base = ['ui-styles/theme.less', 'ui-styles/base.less'];
-  var exclude = ['ui-styles/mixins.less', 'ui-styles/variables.less'];
-  var found = scan('ui-styles', true);
+  var base = ['ui/styles/theme.less', 'ui/styles/base.less'];
+  var exclude = ['ui/styles/mixins.less', 'ui/styles/variables.less'];
+  var found = scan('styles', true);
   exports.styles = _.difference(_.union(base, found), exclude);
 
   exports.uiComponents = [
-    'chrome',
-    'chrome/context',
-    'components/bind',
-    'components/bound_to_config_obj',
-    'components/config/config',
-    'components/courier/courier',
-    'components/debounce',
-    'components/doc_title/doc_title',
-    'components/elastic_textarea',
-    'components/es',
-    'components/events',
-    'components/fancy_forms/fancy_forms',
-    'components/filter_bar/filter_bar',
-    'components/filter_manager/filter_manager',
-    'components/index_patterns/index_patterns',
-    'components/listen',
-    'components/notify/notify',
-    'components/persisted_log/persisted_log',
-    'components/private',
-    'components/promises',
-    'components/state_management/app_state',
-    'components/state_management/global_state',
-    'components/storage/storage',
-    'components/stringify/register',
-    'components/style_compile/style_compile',
-    'components/timefilter/timefilter',
-    'components/timepicker/timepicker',
-    'components/tooltip/tooltip',
-    'components/typeahead/typeahead',
-    'components/ui-bootstrap/index',
-    'components/url/url',
-    'components/validateDateInterval',
-    'components/validate_query/validate_query',
-    'components/watch_multi'
+    'ui/chrome',
+    'ui/chrome/context',
+    'ui/bind',
+    'ui/bound_to_config_obj',
+    'ui/config/config',
+    'ui/courier/courier',
+    'ui/debounce',
+    'ui/doc_title/doc_title',
+    'ui/elastic_textarea',
+    'ui/es',
+    'ui/events',
+    'ui/fancy_forms/fancy_forms',
+    'ui/filter_bar/filter_bar',
+    'ui/filter_manager/filter_manager',
+    'ui/index_patterns/index_patterns',
+    'ui/listen',
+    'ui/notify/notify',
+    'ui/persisted_log/persisted_log',
+    'ui/private',
+    'ui/promises',
+    'ui/state_management/app_state',
+    'ui/state_management/global_state',
+    'ui/storage/storage',
+    'ui/stringify/register',
+    'ui/style_compile/style_compile',
+    'ui/timefilter/timefilter',
+    'ui/timepicker/timepicker',
+    'ui/tooltip/tooltip',
+    'ui/typeahead/typeahead',
+    'ui/meta-modules/ui-bootstrap',
+    'ui/url/url',
+    'ui/validateDateInterval',
+    'ui/validate_query/validate_query',
+    'ui/watch_multi'
   ];
 
   // default angular modules to depend on

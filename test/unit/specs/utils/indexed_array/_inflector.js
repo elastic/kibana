@@ -1,6 +1,6 @@
 define(function (require) {
   return function () {
-    var inflector = require('components/indexed_array/_inflector');
+    var inflector = require('ui/indexed_array/_inflector');
 
     describe('Inflector', function () {
       it('returns a function', function () {

@@ -144,10 +144,10 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          chartSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_split'));
-          chartTitleSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_title_split'));
-          xAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/x_axis_split'));
-          yAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/y_axis_split'));
+          chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
+          chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_title_split'));
+          xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));
+          yAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/y_axis_split'));
 
           el = d3.select('body').append('div')
             .attr('class', 'visualization')

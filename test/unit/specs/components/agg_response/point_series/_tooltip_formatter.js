@@ -7,7 +7,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      tooltipFormatter = Private(require('components/agg_response/point_series/_tooltip_formatter'));
+      tooltipFormatter = Private(require('ui/agg_response/point_series/_tooltip_formatter'));
     }));
 
     function agg(name) {

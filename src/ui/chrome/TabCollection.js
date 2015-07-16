@@ -1,5 +1,5 @@
 define(function (require) {
-  var Tab = require('chrome/Tab');
+  var Tab = require('ui/chrome/Tab');
 
   function TabCollection() {
     var _ = require('lodash');

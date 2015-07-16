@@ -8,7 +8,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      getPoint = Private(require('components/agg_response/point_series/_get_point'));
+      getPoint = Private(require('ui/agg_response/point_series/_get_point'));
     }));
 
     it('properly unwraps and scales values without a series', function () {

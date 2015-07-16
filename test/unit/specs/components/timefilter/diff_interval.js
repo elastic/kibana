@@ -20,7 +20,7 @@ define(function (require) {
           }
         };
 
-        fn = Private(require('components/timefilter/lib/diff_interval'))(timefilter);
+        fn = Private(require('ui/timefilter/lib/diff_interval'))(timefilter);
       }));
 
       it('not emit anything if nothing has changed', function () {

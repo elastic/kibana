@@ -1,7 +1,7 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VislibVisType = Private(require('components/vislib_vis_type/VislibVisType'));
-    var Schemas = Private(require('components/vis/Schemas'));
+    var VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
+    var Schemas = Private(require('ui/vis/Schemas'));
 
     return new VislibVisType({
       name: 'pie',

@@ -17,9 +17,9 @@ define(function (require) {
 
     beforeEach(inject(function (Private) {
       window.DISABLE_RESIZE_CHECKER = false;
-      ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
-      EventEmitter = Private(require('components/events'));
-      reflowWatcher = Private(require('components/reflow_watcher'));
+      ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
+      EventEmitter = Private(require('ui/events'));
+      reflowWatcher = Private(require('ui/reflow_watcher'));
       reflowSpies.on = sinon.spy(reflowWatcher, 'on');
       reflowSpies.off = sinon.spy(reflowWatcher, 'off');
 

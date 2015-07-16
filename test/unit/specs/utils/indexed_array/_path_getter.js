@@ -1,6 +1,6 @@
 define(function (require) {
   return function () {
-    var pathGetter = require('components/indexed_array/_path_getter');
+    var pathGetter = require('ui/indexed_array/_path_getter');
 
     describe('Path Getter', function () {
       it('returns a function', function () {

@@ -5,7 +5,7 @@ define(function (require) {
       var _ = require('lodash');
       var sinon = require('test_utils/auto_release_sinon');
 
-      var posTT = require('components/vislib/components/tooltip/_position_tooltip');
+      var posTT = require('ui/vislib/components/tooltip/_position_tooltip');
       var positions = ['north', 'south', 'east', 'west'];
       var bounds = ['top', 'left', 'bottom', 'right'];
       var $window;

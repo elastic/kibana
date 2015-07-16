@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('components/notify/notify');
+  require('ui/notify/notify');
 
   var module = require('modules').get('discover/saved_searches', [
     'kibana/notify',

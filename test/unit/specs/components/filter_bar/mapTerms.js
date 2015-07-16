@@ -13,7 +13,7 @@ define(function (require) {
 
       beforeEach(inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        mapTerms = Private(require('components/filter_bar/lib/mapTerms'));
+        mapTerms = Private(require('ui/filter_bar/lib/mapTerms'));
       }));
 
       it('should return the key and value for matching filters', function (done) {

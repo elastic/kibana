@@ -30,7 +30,7 @@ define(function (require) {
         }
       };
 
-      flattenHit = Private(require('components/index_patterns/_flatten_hit'))(indexPattern).uncached;
+      flattenHit = Private(require('ui/index_patterns/_flatten_hit'))(indexPattern).uncached;
       config = $injector.get('config');
 
       hit = {

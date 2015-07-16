@@ -1,12 +1,12 @@
 define(function (require) {
   var RouteManager = require('routes').RouteManager;
   var getRouteProvider = require('./_get_route_provider');
-  var wrapRouteWithPrep = require('components/routes/_wrap_route_with_prep');
+  var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
   var Promise = require('bluebird');
   var _ = require('lodash');
   var stub = require('test_utils/auto_release_sinon').stub;
 
-  require('components/private');
+  require('ui/private');
 
   var routes;
 
@@ -39,7 +39,7 @@ define(function (require) {
             $injector = _$injector_;
           });
 
-          var setup = Private(require('components/routes/_setup'));
+          var setup = Private(require('ui/routes/_setup'));
           stub(setup, 'routeSetupWork', function () {
             return new Promise(function (resolve, reject) {
               setTimeout(function () {

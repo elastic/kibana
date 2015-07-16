@@ -19,8 +19,8 @@ define(function (require) {
   };
 
   // Load the kibana app dependencies.
-  require('components/private');
-  require('components/doc_viewer/doc_viewer');
+  require('ui/private');
+  require('ui/doc_viewer/doc_viewer');
 
 
   var $parentScope, $scope, indexPattern, flattened;

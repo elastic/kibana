@@ -6,8 +6,8 @@ define(function (require) {
   var searchResponse = require('fixtures/search_response');
 
   // Load the kibana app dependencies.
-  require('components/private');
-  require('components/doc_table/doc_table');
+  require('ui/private');
+  require('ui/doc_table/doc_table');
 
 
   var $parentScope, $scope, $timeout, searchSource;

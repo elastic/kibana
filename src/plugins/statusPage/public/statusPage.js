@@ -1,11 +1,11 @@
 var $ = require('jquery');
 var _ = require('lodash');
-var notify = require('components/notify');
+var notify = require('ui/notify');
 
 require('plugins/statusPage/statusPageMetric');
 require('plugins/statusPage/statusPage.less');
 
-require('chrome')
+require('ui/chrome')
 .setTabs([
   {
     id: '',

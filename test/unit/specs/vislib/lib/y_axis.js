@@ -95,8 +95,8 @@ define(function (require) {
 
     beforeEach(inject(function (Private, _d3_) {
       d3Provider = _d3_;
-      Data = Private(require('components/vislib/lib/data'));
-      YAxis = Private(require('components/vislib/lib/y_axis'));
+      Data = Private(require('ui/vislib/lib/data'));
+      YAxis = Private(require('ui/vislib/lib/y_axis'));
 
       expect($('.y-axis-wrapper')).to.have.length(0);
     }));

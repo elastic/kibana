@@ -18,8 +18,8 @@ define(function (require) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
       fixtures = require('fixtures/fake_hierarchical_data');
-      TableGroup = Private(require('components/agg_response/tabify/_table_group'));
-      Vis = Private(require('components/vis/vis'));
+      TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
+      Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 

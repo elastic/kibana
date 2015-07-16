@@ -1,5 +1,5 @@
 define(function (require) {
-  var dedupFilters = require('components/filter_bar/lib/dedupFilters');
+  var dedupFilters = require('ui/filter_bar/lib/dedupFilters');
   describe('Filter Bar Directive', function () {
     describe('dedupFilters(existing, filters)', function () {
 

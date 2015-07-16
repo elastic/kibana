@@ -3,8 +3,8 @@ define(function (require) {
   var moment = require('moment');
   var errors = require('errors');
 
-  require('directives/validate_index_name');
-  require('directives/auto_select_if_only_one');
+  require('ui/directives/validate_index_name');
+  require('ui/directives/auto_select_if_only_one');
 
   require('routes')
   .when('/settings/indices/', {

@@ -13,11 +13,11 @@ define(function (require) {
     beforeEach(inject(require('specs/components/agg_types/utils/_stub_agg_params')));
     // fetch out deps
     beforeEach(inject(function (Private) {
-      AggParams = Private(require('components/agg_types/_agg_params'));
-      BaseAggParam = Private(require('components/agg_types/param_types/base'));
-      FieldAggParam = Private(require('components/agg_types/param_types/field'));
-      OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
-      RegexAggParam = Private(require('components/agg_types/param_types/regex'));
+      AggParams = Private(require('ui/agg_types/_agg_params'));
+      BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+      FieldAggParam = Private(require('ui/agg_types/param_types/field'));
+      OptionedAggParam = Private(require('ui/agg_types/param_types/optioned'));
+      RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
     }));
 
     describe('constructor args', function () {

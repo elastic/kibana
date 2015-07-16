@@ -2,7 +2,7 @@ define(function (require) {
   require('modules')
   .get('kibana')
   .directive('visEditorAggAdd', function (Private) {
-    var AggConfig = Private(require('components/vis/AggConfig'));
+    var AggConfig = Private(require('ui/vis/AggConfig'));
 
     return {
       restrict: 'E',

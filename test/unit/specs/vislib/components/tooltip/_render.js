@@ -19,7 +19,7 @@ define(function (require) {
         inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           data = require('vislib_fixtures/mock_data/date_histogram/_series');
-          require('css!components/vislib/styles/main');
+          require('ui/vislib/styles/main.less');
 
           vis.render(data);
           vis.handler.charts.forEach(function (chart) {

@@ -2,10 +2,10 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var module = require('modules').get('kibana');
-  var AggConfigResult = require('components/vis/AggConfigResult');
+  var AggConfigResult = require('ui/vis/AggConfigResult');
 
   module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
-    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
+    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
     return {
       restrict: 'A',
       link: function ($scope, $el, attr) {

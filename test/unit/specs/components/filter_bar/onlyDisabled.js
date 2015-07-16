@@ -1,5 +1,5 @@
 define(function (require) {
-  var onlyDisabled = require('components/filter_bar/lib/onlyDisabled');
+  var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
   describe('Filter Bar Directive', function () {
     describe('onlyDisabled()', function () {
 

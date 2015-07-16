@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  require('directives/validate_date_math');
+  require('ui/directives/validate_date_math');
 
   describe('Validate date math directive', function () {
     var $compile, $rootScope;

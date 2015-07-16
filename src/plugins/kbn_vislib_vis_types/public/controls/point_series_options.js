@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var module = require('modules').get('kibana');
-  require('directives/inequality');
+  require('ui/directives/inequality');
 
   module.directive('pointSeriesOptions', function ($parse, $compile) {
     return {

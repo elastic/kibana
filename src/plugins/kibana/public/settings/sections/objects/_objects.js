@@ -5,7 +5,7 @@ define(function (require) {
   var registry = require('plugins/kibana/settings/saved_object_registry');
   var objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
 
-  require('directives/file_upload');
+  require('ui/directives/file_upload');
 
   require('routes')
   .when('/settings/objects', {

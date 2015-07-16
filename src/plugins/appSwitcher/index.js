@@ -8,7 +8,7 @@ module.exports = function (kibana) {
         defaultModules: {
           angular: [],
           require: [
-            'chrome',
+            'ui/chrome',
             'angular-bootstrap'
           ]
           .concat(kibana.autoload.styles)

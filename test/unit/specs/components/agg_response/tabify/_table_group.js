@@ -4,7 +4,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      TableGroup = Private(require('components/agg_response/tabify/_table_group'));
+      TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
     }));
 
     it('exposes tables array and empty aggConfig, key and title', function () {

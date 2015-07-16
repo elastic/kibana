@@ -116,7 +116,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          getLabels = Private(require('components/vislib/components/labels/labels'));
+          getLabels = Private(require('ui/vislib/components/labels/labels'));
           seriesLabels = getLabels(seriesData);
           rowsLabels = getLabels(rowsData);
           seriesArr = _.isArray(seriesLabels);
@@ -185,7 +185,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataArray = Private(require('components/vislib/components/labels/data_array'));
+          dataArray = Private(require('ui/vislib/components/labels/data_array'));
           seriesLabels = dataArray(seriesData);
           rowsLabels = dataArray(rowsData);
           testSeries = _.isArray(seriesLabels);
@@ -302,7 +302,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          uniqLabels = Private(require('components/vislib/components/labels/uniq_labels'));
+          uniqLabels = Private(require('ui/vislib/components/labels/uniq_labels'));
           uniq = uniqLabels(arrObj, function (d) { return d; });
           testArr = _.isArray(uniq);
         });
@@ -380,7 +380,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          getSeries = Private(require('components/vislib/components/labels/flatten_series'));
+          getSeries = Private(require('ui/vislib/components/labels/flatten_series'));
           columnsLabels = getSeries(columnsData);
           rowsLabels = getSeries(rowsData);
           columnsArr = _.isArray(columnsLabels);

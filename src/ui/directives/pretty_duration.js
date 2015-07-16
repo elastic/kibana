@@ -4,8 +4,8 @@ define(function (require) {
   var datemath = require('utils/datemath');
   var moment = require('moment');
 
-  require('components/timepicker/quick_ranges');
-  require('components/timepicker/time_units');
+  require('ui/timepicker/quick_ranges');
+  require('ui/timepicker/time_units');
 
   module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
     return {

@@ -19,11 +19,11 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private, $injector) {
-        var Vis = Private(require('components/vis/vis'));
+        var Vis = Private(require('ui/vis/vis'));
         var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        var createFilter = Private(require('components/agg_types/buckets/create_filter/date_histogram'));
-        var TimeBuckets = Private(require('components/time_buckets/time_buckets'));
-        intervalOptions = Private(require('components/agg_types/buckets/_interval_options'));
+        var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
+        var TimeBuckets = Private(require('ui/time_buckets/time_buckets'));
+        intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
 
         init = function (interval, duration) {
           interval = interval || 'auto';

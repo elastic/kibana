@@ -9,11 +9,11 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      Vis = Private(require('components/vis/vis'));
-      AggConfig = Private(require('components/vis/AggConfig'));
-      AggType = Private(require('components/agg_types/_agg_type'));
-      indexPattern = Private(require('components/vis/vis'));
-      makeFakeXAspect = Private(require('components/agg_response/point_series/_fake_x_aspect'));
+      Vis = Private(require('ui/vis/vis'));
+      AggConfig = Private(require('ui/vis/AggConfig'));
+      AggType = Private(require('ui/agg_types/_agg_type'));
+      indexPattern = Private(require('ui/vis/vis'));
+      makeFakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
     }));
 
     it('creates an object that looks like an aspect', function () {

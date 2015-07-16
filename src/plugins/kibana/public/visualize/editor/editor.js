@@ -4,8 +4,8 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  require('components/visualize/visualize');
-  require('components/clipboard/clipboard');
+  require('ui/visualize/visualize');
+  require('ui/clipboard/clipboard');
 
   require('routes')
   .when('/visualize/create', {
@@ -50,11 +50,11 @@ define(function (require) {
     var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
-    var Notifier = require('components/notify/_notifier');
-    var docTitle = Private(require('components/doc_title/doc_title'));
+    var Notifier = require('ui/notify/_notifier');
+    var docTitle = Private(require('ui/doc_title/doc_title'));
     var brushEvent = Private(require('utils/brush_event'));
-    var queryFilter = Private(require('components/filter_bar/query_filter'));
-    var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
+    var queryFilter = Private(require('ui/filter_bar/query_filter'));
+    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'

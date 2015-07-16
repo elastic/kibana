@@ -20,7 +20,7 @@ function scan(type, ignoreDirs) {
     var name = basename(filename, '.js');
 
     if (!stat(path).isDirectory()) {
-      return `${type}/${name}`;
+      return `ui/${type}/${name}`;
     }
 
     if (ignoreDirs) {

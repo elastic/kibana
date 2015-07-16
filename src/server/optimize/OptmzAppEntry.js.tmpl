@@ -12,9 +12,9 @@
 %> *
  */
 
-require('chrome');
+require('ui/chrome');
 <%
 modules.require.forEach(function (id) {
-  if (id !== 'chrome') print(`require('${id}');\n`);
+  if (id !== 'ui/chrome') print(`require('${id}');\n`);
 });
-%>require('chrome').bootstrap(<%= JSON.stringify(modules.angular) %>);
+%>require('ui/chrome').bootstrap(<%= JSON.stringify(modules.angular) %>);

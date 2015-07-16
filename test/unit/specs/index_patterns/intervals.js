@@ -6,7 +6,7 @@ define(function (require) {
       var intervals;
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        intervals = Private(require('components/index_patterns/_intervals'));
+        intervals = Private(require('ui/index_patterns/_intervals'));
       }));
 
       it('should return correct indices for hourly [logstash-]YYYY.MM.DD.HH', function () {

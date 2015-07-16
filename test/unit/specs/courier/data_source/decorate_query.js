@@ -24,7 +24,7 @@ define(function (require) {
 
     beforeEach(inject(function (Private, $injector, _config_) {
       config = _config_;
-      fn = Private(require('components/courier/data_source/_decorate_query'));
+      fn = Private(require('ui/courier/data_source/_decorate_query'));
     }));
 
     it('should be a function', function () {

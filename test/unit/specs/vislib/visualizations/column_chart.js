@@ -45,7 +45,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-          require('css!components/vislib/styles/main');
+          require('components/vislib/styles/main.less');
 
           vis.on('brush', _.noop);
           vis.render(data);

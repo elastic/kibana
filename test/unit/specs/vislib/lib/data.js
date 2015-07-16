@@ -107,7 +107,7 @@ define(function (require) {
       module('DataFactory');
 
       inject(function (Private) {
-        Data = Private(require('components/vislib/lib/data'));
+        Data = Private(require('ui/vislib/lib/data'));
       });
     });
 

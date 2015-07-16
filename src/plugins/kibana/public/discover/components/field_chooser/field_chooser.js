@@ -1,16 +1,16 @@
 define(function (require) {
   var app = require('modules').get('apps/discover');
 
-  require('directives/css_truncate');
-  require('directives/field_name');
-  require('filters/unique');
+  require('ui/directives/css_truncate');
+  require('ui/directives/field_name');
+  require('ui/filters/unique');
   require('plugins/kibana/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
     var _ = require('lodash');
     var rison = require('utils/rison');
     var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
-    var FieldList = Private(require('components/index_patterns/_field_list'));
+    var FieldList = Private(require('ui/index_patterns/_field_list'));
 
     return {
       restrict: 'E',

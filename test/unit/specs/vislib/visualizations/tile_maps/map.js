@@ -40,7 +40,7 @@ define(function (require) {
         leafletStubs.tileLayer = sinon.stub(L, 'tileLayer', _.constant(leafletMocks.tileLayer));
         leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
-        Map = Private(require('components/vislib/visualizations/_map'));
+        Map = Private(require('ui/vislib/visualizations/_map'));
       });
     });
 

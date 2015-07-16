@@ -8,8 +8,8 @@ define(function (require) {
     beforeEach(module('kibana'));
     // fetch out deps
     beforeEach(inject(function (Private) {
-      BaseAggParam = Private(require('components/agg_types/param_types/base'));
-      FieldAggParam = Private(require('components/agg_types/param_types/field'));
+      BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+      FieldAggParam = Private(require('ui/agg_types/param_types/field'));
     }));
 
     describe('constructor', function () {

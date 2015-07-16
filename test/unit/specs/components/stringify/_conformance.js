@@ -21,7 +21,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
       fieldFormats = Private(require('registry/field_formats'));
-      FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
+      FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
       config = $injector.get('config');
     }));
 

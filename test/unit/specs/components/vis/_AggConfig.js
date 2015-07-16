@@ -10,9 +10,9 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      Vis = Private(require('components/vis/vis'));
-      AggType = Private(require('components/agg_types/_agg_type'));
-      AggConfig = Private(require('components/vis/AggConfig'));
+      Vis = Private(require('ui/vis/vis'));
+      AggType = Private(require('ui/agg_types/_agg_type'));
+      AggConfig = Private(require('ui/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       fieldFormat = Private(require('registry/field_formats'));
     }));

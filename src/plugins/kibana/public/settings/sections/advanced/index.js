@@ -15,7 +15,7 @@ define(function (require) {
     return {
       restrict: 'E',
       link: function ($scope) {
-        var configDefaults = Private(require('components/config/defaults'));
+        var configDefaults = Private(require('ui/config/defaults'));
         var keyCodes = {
           ESC: 27
         };

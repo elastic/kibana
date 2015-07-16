@@ -13,7 +13,7 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (Private) {
-        ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
+        ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
         errorHandler = new ErrorHandler();
       });
     });

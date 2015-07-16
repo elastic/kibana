@@ -6,7 +6,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      Table = Private(require('components/agg_response/tabify/_table'));
+      Table = Private(require('ui/agg_response/tabify/_table'));
     }));
 
     it('exposes rows array, but not the columns', function () {

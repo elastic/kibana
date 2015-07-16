@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var IndexedArray = require('components/indexed_array/index');
+  var IndexedArray = require('ui/indexed_array/index');
 
   // this is generally a data-structure that IndexedArray is good for managing
   var users = [

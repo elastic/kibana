@@ -6,7 +6,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      getComputedFields = require('components/index_patterns/_get_computed_fields');
+      getComputedFields = require('ui/index_patterns/_get_computed_fields');
       indexPattern.getComputedFields = getComputedFields.bind(indexPattern);
       fn = indexPattern.getComputedFields;
 

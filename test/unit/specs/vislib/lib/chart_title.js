@@ -76,8 +76,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        ChartTitle = Private(require('components/vislib/lib/chart_title'));
-        Data = Private(require('components/vislib/lib/data'));
+        ChartTitle = Private(require('ui/vislib/lib/chart_title'));
+        Data = Private(require('ui/vislib/lib/data'));
 
         el = d3.select('body').append('div')
           .attr('class', 'vis-wrapper')

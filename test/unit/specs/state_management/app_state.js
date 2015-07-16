@@ -1,6 +1,6 @@
 define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
-  require('components/state_management/app_state');
+  require('ui/state_management/app_state');
 
   describe('State Management', function () {
     var $rootScope, AppState;
@@ -10,7 +10,7 @@ define(function (require) {
 
       inject(function (_$rootScope_, _$location_, Private) {
         $rootScope = _$rootScope_;
-        AppState = Private(require('components/state_management/app_state'));
+        AppState = Private(require('ui/state_management/app_state'));
       });
     });
 

@@ -15,7 +15,7 @@ define(function (require) {
       });
 
       beforeEach(inject(function (Private, _$rootScope_, Promise) {
-        filterOutTimeBasedFilter = Private(require('components/filter_bar/lib/filterOutTimeBasedFilter'));
+        filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
         $rootScope = _$rootScope_;
       }));
 

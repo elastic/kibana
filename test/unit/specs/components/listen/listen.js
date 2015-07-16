@@ -5,12 +5,12 @@ define(function (require) {
     var $rootScope;
     var Events;
 
-    require('components/listen');
+    require('ui/listen');
 
     beforeEach(module('kibana'));
     beforeEach(inject(function ($injector, Private) {
       $rootScope = $injector.get('$rootScope');
-      Events = Private(require('components/events'));
+      Events = Private(require('ui/events'));
     }));
 
     it('exposes the $listen method on all scopes', function () {

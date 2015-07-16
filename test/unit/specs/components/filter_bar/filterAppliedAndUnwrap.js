@@ -1,5 +1,5 @@
 define(function (require) {
-  var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
+  var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
   describe('Filter Bar Directive', function () {
     describe('filterAppliedAndUnwrap()', function () {
 

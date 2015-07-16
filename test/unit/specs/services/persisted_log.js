@@ -13,7 +13,7 @@ define(function (require) {
     { first: 'bruce', last: 'wayne' }
   ];
 
-  require('components/persisted_log/persisted_log');
+  require('ui/persisted_log/persisted_log');
 
   function init() {
     module('kibana/persisted_log', function ($provide) {

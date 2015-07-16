@@ -17,10 +17,10 @@ define(function (require) {
 
       inject(function ($injector, Private, _vislib_) {
         vislib = _vislib_;
-        Vis = Private(require('components/vislib/vis'));
-        Renderbot = Private(require('components/vis/Renderbot'));
-        VislibRenderbot = Private(require('components/vislib_vis_type/VislibRenderbot'));
-        normalizeChartData = Private(require('components/agg_response/index'));
+        Vis = Private(require('ui/vislib/vis'));
+        Renderbot = Private(require('ui/vis/Renderbot'));
+        VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
+        normalizeChartData = Private(require('ui/agg_response/index'));
       });
     }
 

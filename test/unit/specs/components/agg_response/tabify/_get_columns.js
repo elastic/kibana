@@ -6,8 +6,8 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      getColumns = Private(require('components/agg_response/tabify/_get_columns'));
-      Vis = Private(require('components/vis/vis'));
+      getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
+      Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 

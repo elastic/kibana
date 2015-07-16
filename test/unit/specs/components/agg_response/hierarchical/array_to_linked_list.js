@@ -1,5 +1,5 @@
 define(function (require) {
-  var arrayToLinkedList = require('components/agg_response/hierarchical/_array_to_linked_list');
+  var arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
   describe('buildHierarchicalData()', function () {
     describe('arrayToLinkedList', function () {
 

@@ -1,15 +1,15 @@
 define(function (require) {
-  var IndexedArray = require('components/indexed_array/index');
+  var IndexedArray = require('ui/indexed_array/index');
 
   require('modules')
   .get('app/visualize')
   .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var aggTypes = Private(require('components/agg_types/index'));
+    var aggTypes = Private(require('ui/agg_types/index'));
     var aggSelectHtml = require('plugins/kibana/visualize/editor/agg_select.html');
     var advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
-    require('filters/match_any');
+    require('ui/filters/match_any');
     require('plugins/kibana/visualize/editor/agg_param');
 
     var notify = new Notifier({

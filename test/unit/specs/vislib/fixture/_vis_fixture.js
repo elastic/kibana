@@ -4,7 +4,7 @@ define(function (require) {
     var _ = require('lodash');
 
     return function (visLibParams) {
-      var Vis = Private(require('components/vislib/vis'));
+      var Vis = Private(require('ui/vislib/vis'));
 
       $('body').append('<div class=visualize-chart></div>');
 

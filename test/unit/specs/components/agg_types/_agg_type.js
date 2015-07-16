@@ -9,18 +9,18 @@ define(function (require) {
     var fieldFormat;
     var Vis;
 
-    require('components/private');
+    require('ui/private');
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      var AggParamsPM = require('components/agg_types/_agg_params');
+      var AggParamsPM = require('ui/agg_types/_agg_params');
       AggParams = sinon.spy(Private(AggParamsPM));
       Private.stub(AggParamsPM, AggParams);
 
-      Vis = Private(require('components/vis/vis'));
+      Vis = Private(require('ui/vis/vis'));
       fieldFormat = Private(require('registry/field_formats'));
-      AggType = Private(require('components/agg_types/_agg_type'));
-      AggConfig = Private(require('components/vis/AggConfig'));
+      AggType = Private(require('ui/agg_types/_agg_type'));
+      AggConfig = Private(require('ui/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 

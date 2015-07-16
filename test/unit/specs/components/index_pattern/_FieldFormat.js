@@ -7,7 +7,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      FieldFormat = Private(require('components/index_patterns/_field_format/FieldFormat'));
+      FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
 
       TestFormat = function (params) {
         TestFormat.Super.call(this, params);

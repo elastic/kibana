@@ -14,7 +14,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
       // replace the AggConfig module with a spy
-      var RealAggConfigPM = require('components/vis/AggConfig');
+      var RealAggConfigPM = require('ui/vis/AggConfig');
       AggConfig = Private(RealAggConfigPM);
       var spy = sinon.spy(AggConfig);
       Object.defineProperty(spy, 'aggTypes', {
@@ -25,12 +25,12 @@ define(function (require) {
       Private.stub(RealAggConfigPM, spy);
 
       // load main deps
-      Vis = Private(require('components/vis/vis'));
-      SpiedAggConfig = Private(require('components/vis/AggConfig'));
-      AggConfigs = Private(require('components/vis/AggConfigs'));
-      IndexedArray = require('components/indexed_array/index');
+      Vis = Private(require('ui/vis/vis'));
+      SpiedAggConfig = Private(require('ui/vis/AggConfig'));
+      AggConfigs = Private(require('ui/vis/AggConfigs'));
+      IndexedArray = require('ui/indexed_array/index');
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      Schemas = Private(require('components/vis/Schemas'));
+      Schemas = Private(require('ui/vis/Schemas'));
     }));
 
     it('extends IndexedArray', function () {

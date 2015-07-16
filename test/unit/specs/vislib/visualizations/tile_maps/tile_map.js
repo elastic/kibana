@@ -29,8 +29,8 @@ define(function (require) {
     beforeEach(function () {
       module('TileMapFactory');
       inject(function (Private) {
-        Private.stub(require('components/vislib/visualizations/_map'), MockMap);
-        TileMap = Private(require('components/vislib/visualizations/tile_map'));
+        Private.stub(require('ui/vislib/visualizations/_map'), MockMap);
+        TileMap = Private(require('ui/vislib/visualizations/tile_map'));
         extentsStub = sinon.stub(TileMap.prototype, '_appendGeoExtents', _.noop);
       });
     });

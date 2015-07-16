@@ -7,7 +7,7 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        histogram = Private(require('components/agg_types/index')).byName.histogram;
+        histogram = Private(require('ui/agg_types/index')).byName.histogram;
       }));
 
       it('is ordered', function () {

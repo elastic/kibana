@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
 
   require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
-  require('directives/saved_object_finder');
+  require('ui/directives/saved_object_finder');
   require('plugins/kibana/discover/saved_searches/saved_searches');
 
   var templateStep = function (num, txt) {

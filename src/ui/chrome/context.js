@@ -4,7 +4,7 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('chromeContext', function (timefilter, globalState) {
+  .directive('ui/chromeContext', function (timefilter, globalState) {
 
     var listenForUpdates = _.once(function ($scope) {
       $scope.$listen(timefilter, 'update', function (newVal, oldVal) {
@@ -21,8 +21,8 @@ define(function (require) {
         // chrome is responsible for timepicker ui and state transfer...
         $scope.timefilter = timefilter;
         $scope.pickerTemplate = new ConfigTemplate({
-          filter: require('chrome/config/filter.html'),
-          interval: require('chrome/config/interval.html')
+          filter: require('ui/chrome/config/filter.html'),
+          interval: require('ui/chrome/config/interval.html')
         });
 
         $scope.toggleRefresh = function () {

@@ -13,7 +13,7 @@ define(function (require) {
       });
 
       beforeEach(inject(function (Private, _$rootScope_) {
-        mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
+        mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
         $rootScope = _$rootScope_;
       }));
 

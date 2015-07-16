@@ -8,10 +8,10 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        Vis = Private(require('components/vis/vis'));
-        AggConfig = Private(require('components/vis/AggConfig'));
+        Vis = Private(require('ui/vis/vis'));
+        AggConfig = Private(require('ui/vis/AggConfig'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        createFilter = Private(require('components/agg_types/buckets/create_filter/terms'));
+        createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
       }));
 
       it('should return a match filter for terms', function () {

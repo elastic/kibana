@@ -5,7 +5,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      addToSiri = Private(require('components/agg_response/point_series/_add_to_siri'));
+      addToSiri = Private(require('ui/agg_response/point_series/_add_to_siri'));
     }));
 
     it('creates a new series the first time it sees an id', function () {

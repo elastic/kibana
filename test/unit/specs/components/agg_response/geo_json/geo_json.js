@@ -10,12 +10,12 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      var Vis = Private(require('components/vis/vis'));
+      var Vis = Private(require('ui/vis/vis'));
       var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
       esResponse = Private(require('fixtures/agg_resp/geohash_grid'));
-      tabify = Private(require('components/agg_response/tabify/tabify'));
-      convert = Private(require('components/agg_response/geo_json/geo_json'));
+      tabify = Private(require('ui/agg_response/tabify/tabify'));
+      convert = Private(require('ui/agg_response/geo_json/geo_json'));
 
       vis = new Vis(indexPattern, {
         type: 'tile_map',

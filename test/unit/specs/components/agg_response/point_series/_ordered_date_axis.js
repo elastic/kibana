@@ -30,7 +30,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      orderedDateAxis = Private(require('components/agg_response/point_series/_ordered_date_axis'));
+      orderedDateAxis = Private(require('ui/agg_response/point_series/_ordered_date_axis'));
     }));
 
     describe('xAxisFormatter', function () {

@@ -11,8 +11,8 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        bucketAggs = Private(require('components/agg_types/index')).byType.buckets;
-        BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
+        bucketAggs = Private(require('ui/agg_types/index')).byType.buckets;
+        BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
       }));
 
       it('all extend BucketAggType', function () {
@@ -28,8 +28,8 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        metricAggs = Private(require('components/agg_types/index')).byType.metrics;
-        MetricAggType = Private(require('components/agg_types/metrics/_metric_agg_type'));
+        metricAggs = Private(require('ui/agg_types/index')).byType.metrics;
+        MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
       }));
 
       it('all extend MetricAggType', function () {

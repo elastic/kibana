@@ -19,8 +19,8 @@ define(function (require) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
       fixtures = require('fixtures/fake_hierarchical_data');
-      TableGroup = Private(require('components/agg_response/tabify/_table_group'));
-      Vis = Private(require('components/vis/vis'));
+      TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
+      Vis = Private(require('ui/vis/vis'));
     }));
 
     function OneRangeVis(params) {
@@ -113,7 +113,7 @@ define(function (require) {
 
     it('passes partialRows:true to tabify based on the vis params', function () {
       // spy on the tabify private module
-      var tabifyPm = require('components/agg_response/tabify/tabify');
+      var tabifyPm = require('ui/agg_response/tabify/tabify');
       var spiedTabify = sinon.spy(Private(tabifyPm));
       Private.stub(tabifyPm, spiedTabify);
 
@@ -127,7 +127,7 @@ define(function (require) {
 
     it('passes partialRows:false to tabify based on the vis params', function () {
       // spy on the tabify private module
-      var tabifyPm = require('components/agg_response/tabify/tabify');
+      var tabifyPm = require('ui/agg_response/tabify/tabify');
       var spiedTabify = sinon.spy(Private(tabifyPm));
       Private.stub(tabifyPm, spiedTabify);
 
@@ -141,7 +141,7 @@ define(function (require) {
 
     it('passes partialRows:true to tabify based on the vis params', function () {
       // spy on the tabify private module
-      var tabifyPm = require('components/agg_response/tabify/tabify');
+      var tabifyPm = require('ui/agg_response/tabify/tabify');
       var spiedTabify = sinon.spy(Private(tabifyPm));
       Private.stub(tabifyPm, spiedTabify);
 
@@ -155,7 +155,7 @@ define(function (require) {
 
     it('passes partialRows:false to tabify based on the vis params', function () {
       // spy on the tabify private module
-      var tabifyPm = require('components/agg_response/tabify/tabify');
+      var tabifyPm = require('ui/agg_response/tabify/tabify');
       var spiedTabify = sinon.spy(Private(tabifyPm));
       Private.stub(tabifyPm, spiedTabify);
 

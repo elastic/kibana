@@ -11,11 +11,11 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      Table = Private(require('components/agg_response/tabify/_table'));
-      TableGroup = Private(require('components/agg_response/tabify/_table_group'));
-      aggResponse = Private(require('components/agg_response/index'));
-      VislibRenderbot = Private(require('components/vislib_vis_type/VislibRenderbot'));
-      buildChartData = Private(require('components/vislib_vis_type/buildChartData'));
+      Table = Private(require('ui/agg_response/tabify/_table'));
+      TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
+      aggResponse = Private(require('ui/agg_response/index'));
+      VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
+      buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));
     }));
 
     describe('for hierarchical vis', function () {

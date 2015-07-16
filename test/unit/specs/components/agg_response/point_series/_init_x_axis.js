@@ -6,7 +6,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      initXAxis = Private(require('components/agg_response/point_series/_init_x_axis'));
+      initXAxis = Private(require('ui/agg_response/point_series/_init_x_axis'));
     }));
 
     var baseChart = {

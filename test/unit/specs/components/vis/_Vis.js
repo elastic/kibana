@@ -21,7 +21,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      Vis = Private(require('components/vis/vis'));
+      Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       visTypes = Private(require('registry/vis_types'));
     }));

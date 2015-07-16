@@ -6,7 +6,7 @@ define(function (require) {
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        mapDefault = Private(require('components/filter_bar/lib/mapDefault'));
+        mapDefault = Private(require('ui/filter_bar/lib/mapDefault'));
       }));
 
       it('should return the key and value for matching filters', function (done) {

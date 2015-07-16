@@ -13,7 +13,7 @@ define(function (require) {
     beforeEach(inject(function (Private, $injector, $compile) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-      var Vis = Private(require('components/vis/vis'));
+      var Vis = Private(require('ui/vis/vis'));
 
       /**
        * Render the AggParams editor for the date histogram aggregation
@@ -71,7 +71,7 @@ define(function (require) {
 
       beforeEach(inject(function (Private) {
         field = _.sample(indexPattern.fields);
-        interval = _.sample(Private(require('components/agg_types/buckets/_interval_options')));
+        interval = _.sample(Private(require('ui/agg_types/buckets/_interval_options')));
         params = render({ field: field, interval: interval });
       }));
 

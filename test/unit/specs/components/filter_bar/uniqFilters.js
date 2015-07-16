@@ -1,5 +1,5 @@
 define(function (require) {
-  var uniqFilters = require('components/filter_bar/lib/uniqFilters');
+  var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
   describe('Filter Bar Directive', function () {
     describe('uniqFilter', function () {
 

@@ -4,7 +4,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var $ = require('jquery');
 
-  require('components/clipboard/clipboard');
+  require('ui/clipboard/clipboard');
 
   describe('Clipboard directive', function () {
     var $scope;

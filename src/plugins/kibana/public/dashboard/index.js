@@ -4,12 +4,12 @@ define(function (require) {
   var angular = require('angular');
   var ConfigTemplate = require('utils/config_template');
 
-  require('directives/config');
-  require('components/courier/courier');
-  require('components/config/config');
-  require('components/notify/notify');
-  require('components/typeahead/typeahead');
-  require('components/clipboard/clipboard');
+  require('ui/directives/config');
+  require('ui/courier/courier');
+  require('ui/config/config');
+  require('ui/notify/notify');
+  require('ui/typeahead/typeahead');
+  require('ui/clipboard/clipboard');
 
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
@@ -49,7 +49,7 @@ define(function (require) {
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
-        var queryFilter = Private(require('components/filter_bar/query_filter'));
+        var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -100,7 +100,7 @@ define(function (require) {
         function init() {
           updateQueryOnRootSource();
 
-          var docTitle = Private(require('components/doc_title/doc_title'));
+          var docTitle = Private(require('ui/doc_title/doc_title'));
           if (dash.id) {
             docTitle.change(dash.title);
           }

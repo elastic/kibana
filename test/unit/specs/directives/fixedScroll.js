@@ -1,5 +1,5 @@
 define(function (require) {
-  require('components/fixedScroll');
+  require('ui/fixedScroll');
 
   describe('FixedScroll directive', function () {
     var $ = require('jquery');

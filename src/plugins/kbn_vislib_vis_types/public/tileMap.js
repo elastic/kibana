@@ -1,8 +1,8 @@
 define(function (require) {
   return function TileMapVisType(Private, getAppState, courier, config) {
-    var VislibVisType = Private(require('components/vislib_vis_type/VislibVisType'));
-    var Schemas = Private(require('components/vis/Schemas'));
-    var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
+    var VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
+    var Schemas = Private(require('ui/vis/Schemas'));
+    var geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
     var _ = require('lodash');
     var supports = require('utils/supports');
 
@@ -32,7 +32,7 @@ define(function (require) {
           var agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
-          var pushFilter = Private(require('components/filter_bar/push_filter'))(getAppState());
+          var pushFilter = Private(require('ui/filter_bar/push_filter'))(getAppState());
           var indexPatternName = agg.vis.indexPattern.id;
           var field = agg.fieldName();
           var filter = {geo_bounding_box: {}};

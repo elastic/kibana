@@ -11,10 +11,10 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      Vis = Private(require('components/vis/vis'));
-      Table = Private(require('components/agg_response/point_series/_add_to_siri'));
-      AggConfig = Private(require('components/vis/AggConfig'));
-      getAspects = Private(require('components/agg_response/point_series/_get_aspects'));
+      Vis = Private(require('ui/vis/vis'));
+      Table = Private(require('ui/agg_response/point_series/_add_to_siri'));
+      AggConfig = Private(require('ui/vis/AggConfig'));
+      getAspects = Private(require('ui/agg_response/point_series/_get_aspects'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
 

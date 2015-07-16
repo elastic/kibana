@@ -9,16 +9,16 @@ define(function (require) {
   require('plugins/table_vis/table_vis_params');
 
   // require the directives that we use as well
-  require('components/agg_table/agg_table');
-  require('components/agg_table/agg_table_group');
+  require('ui/agg_table/agg_table');
+  require('ui/agg_table/agg_table_group');
 
   // register the provider with the visTypes registry
   require('registry/vis_types').register(TableVisTypeProvider);
 
   // define the TableVisType
   function TableVisTypeProvider(Private) {
-    var TemplateVisType = Private(require('components/template_vis_type/TemplateVisType'));
-    var Schemas = Private(require('components/vis/Schemas'));
+    var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    var Schemas = Private(require('ui/vis/Schemas'));
 
     // define the TableVisController which is used in the template
     // by angular's ng-controller directive

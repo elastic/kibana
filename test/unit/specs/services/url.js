@@ -12,7 +12,7 @@ define(function (require) {
   var globalStateMock;
   var appState;
 
-  require('components/url/url');
+  require('ui/url/url');
 
   function init() {
     module('kibana/url', 'kibana', function ($provide) {

@@ -1,5 +1,5 @@
 define(function (require) {
-  var mapMissing = require('components/filter_bar/lib/mapMissing');
+  var mapMissing = require('ui/filter_bar/lib/mapMissing');
   describe('Filter Bar Directive', function () {
     describe('mapMissing()', function () {
 
@@ -7,7 +7,7 @@ define(function (require) {
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        mapMissing = Private(require('components/filter_bar/lib/mapMissing'));
+        mapMissing = Private(require('ui/filter_bar/lib/mapMissing'));
       }));
 
       it('should return the key and value for matching filters', function (done) {

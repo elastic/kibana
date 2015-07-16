@@ -27,8 +27,8 @@ define(function (require) {
       aggConfig = { params: {} };
       output = { params: {} };
 
-      BaseAggParam = Private(require('components/agg_types/param_types/base'));
-      JsonAggParam = Private(require('components/agg_types/param_types/raw_json'));
+      BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+      JsonAggParam = Private(require('ui/agg_types/param_types/raw_json'));
 
       initAggParam();
     }));

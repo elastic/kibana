@@ -16,7 +16,7 @@ define(function (require) {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
         var notify = new Notifier({ location: 'SavedObject view' });
-        var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
+        var castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
 

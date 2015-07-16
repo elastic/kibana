@@ -4,8 +4,8 @@ define(function (require) {
   var html = require('plugins/kibana/discover/components/field_chooser/discover_field.html');
   var _ = require('lodash');
 
-  require('directives/css_truncate');
-  require('directives/field_name');
+  require('ui/directives/css_truncate');
+  require('ui/directives/field_name');
 
 
   app.directive('discoverField', function ($compile) {

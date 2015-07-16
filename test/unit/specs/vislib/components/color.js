@@ -28,8 +28,8 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          seedColors = Private(require('components/vislib/components/color/seed_colors'));
-          getColors = Private(require('components/vislib/components/color/color'));
+          seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+          getColors = Private(require('ui/vislib/components/color/color'));
           color = getColors(arr);
         });
       });
@@ -134,8 +134,8 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          seedColors = Private(require('components/vislib/components/color/seed_colors'));
-          createColorPalette = Private(require('components/vislib/components/color/color_palette'));
+          seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+          createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
           colorPalette = createColorPalette(num1);
         });
       });

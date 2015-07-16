@@ -7,7 +7,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      getSeries = Private(require('components/agg_response/point_series/_get_series'));
+      getSeries = Private(require('ui/agg_response/point_series/_get_series'));
     }));
 
     function wrapRows(row) {

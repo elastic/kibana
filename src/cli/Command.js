@@ -44,12 +44,12 @@ Command.prototype.getUnknownOpts = function () {
   while (unknowns.length) {
     let opt = unknowns.shift().split('=');
     if (opt[0].slice(0, 2) !== '--') {
-      this.error(`Extra option "${opt[0]}" must start with "--"`);
+      this.error(`Server config "${opt[0]}" must start with "--"`);
     }
 
     if (opt.length === 1) {
       if (!unknowns.length || unknowns[0][0] === '-') {
-        this.error(`Extra option "${opt[0]}" must have a value`);
+        this.error(`Server config "${opt[0]}" must have a value`);
       }
 
       opt.push(unknowns.shift());

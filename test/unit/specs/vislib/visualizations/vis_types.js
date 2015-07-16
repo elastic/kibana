@@ -14,7 +14,7 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        visTypes = Private(require('components/vislib/visualizations/vis_types'));
+        visTypes = Private(require('ui/vislib/visualizations/vis_types'));
         visFunc = visTypes.histogram;
       });
     });

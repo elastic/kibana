@@ -76,10 +76,10 @@ define(function (require) {
       inject(function (d3, Private) {
         chart1 = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams1);
         chart2 = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams2);
-        Vis = Private(require('components/vis/vis'));
+        Vis = Private(require('ui/vis/vis'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
-        require('css!components/vislib/styles/main');
+        buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+        require('components/vislib/styles/main.less');
 
         var id_1 = 1;
         var id_2 = 1;
@@ -175,10 +175,10 @@ define(function (require) {
       beforeEach(function () {
         inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-          Vis = Private(require('components/vis/vis'));
+          Vis = Private(require('ui/vis/vis'));
           indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-          buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
-          require('css!components/vislib/styles/main');
+          buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+          require('components/vislib/styles/main.less');
 
           var id = 1;
           var stubVis = new Vis(indexPattern, {

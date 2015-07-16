@@ -1,7 +1,7 @@
 define(function (require) {
   return ['Index pattern to wildcard', function () {
 
-    var fn = require('components/index_patterns/_pattern_to_wildcard')();
+    var fn = require('ui/index_patterns/_pattern_to_wildcard')();
 
 
     it('should be a function', function () {

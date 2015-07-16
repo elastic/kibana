@@ -6,7 +6,7 @@ define(function (require) {
   // add a controller to tha module, which will transform the esResponse into a
   // tabular format that we can pass to the table directive
   module.controller('KbnTableVisController', function ($scope, Private) {
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
+    var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
     $scope.$watch('esResponse', function (resp, oldResp) {
       var tableGroups = $scope.tableGroups = null;

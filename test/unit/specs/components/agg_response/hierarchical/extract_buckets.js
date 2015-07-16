@@ -1,5 +1,5 @@
 define(function (require) {
-  var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');
+  var extractBuckets = require('ui/agg_response/hierarchical/_extract_buckets');
 
   describe('buildHierarchicalData()', function () {
     describe('extractBuckets()', function () {

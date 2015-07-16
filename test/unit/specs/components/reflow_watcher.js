@@ -22,11 +22,11 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
       $rootScope = $injector.get('$rootScope');
-      EventEmitter = Private(require('components/events'));
+      EventEmitter = Private(require('ui/events'));
 
       // stub jQuery's $.on method while creating the reflowWatcher
       $onStub = sinon.stub($.fn, 'on');
-      reflowWatcher = Private(require('components/reflow_watcher'));
+      reflowWatcher = Private(require('ui/reflow_watcher'));
       $onStub.restore();
 
       // setup the reflowWatchers $http watcher

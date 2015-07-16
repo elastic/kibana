@@ -1,5 +1,5 @@
 define(function (require) {
-  var fn = require('components/filter_manager/lib/query');
+  var fn = require('ui/filter_manager/lib/query');
   var _ = require('lodash');
   var indexPattern, expected;
   describe('Filter Manager', function () {

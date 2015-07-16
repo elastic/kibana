@@ -10,7 +10,7 @@ define(function (require) {
     beforeEach(module('kibana'));
 
     beforeEach(inject(function (Private, $injector) {
-      createKibanaIndex = Private(require('components/setup/steps/create_kibana_index'));
+      createKibanaIndex = Private(require('ui/setup/steps/create_kibana_index'));
       es = $injector.get('es');
       Promise = $injector.get('Promise');
     }));

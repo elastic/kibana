@@ -14,7 +14,7 @@ define(function (require) {
     }));
 
     beforeEach(inject(function (Private, $injector) {
-      checkEsVersion = Private(require('components/setup/steps/check_es_version'));
+      checkEsVersion = Private(require('ui/setup/steps/check_es_version'));
       es = $injector.get('es');
       Promise = $injector.get('Promise');
     }));

@@ -7,7 +7,7 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        transform = Private(require('components/agg_response/hierarchical/_transform_aggregation'));
+        transform = Private(require('ui/agg_response/hierarchical/_transform_aggregation'));
       }));
 
       beforeEach(function () {

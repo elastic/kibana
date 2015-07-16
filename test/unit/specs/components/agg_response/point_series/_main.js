@@ -4,7 +4,7 @@ define(function (require) {
 
     var _ = require('lodash');
     var moment = require('moment');
-    var AggConfigResult = require('components/vis/AggConfigResult');
+    var AggConfigResult = require('ui/vis/AggConfigResult');
 
     var pointSeriesChartDataFromTable;
     var indexPattern;
@@ -13,10 +13,10 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      Vis = Private(require('components/vis/vis'));
-      Table = Private(require('components/agg_response/tabify/_table'));
+      Vis = Private(require('ui/vis/vis'));
+      Table = Private(require('ui/agg_response/tabify/_table'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      pointSeriesChartDataFromTable = Private(require('components/agg_response/point_series/point_series'));
+      pointSeriesChartDataFromTable = Private(require('ui/agg_response/point_series/point_series'));
     }));
 
     it('handles a table with just a count', function () {

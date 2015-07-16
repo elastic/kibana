@@ -4,7 +4,7 @@ define(function (require) {
   .directive('nestingIndicator', function ($rootScope, $parse, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var getColors = Private(require('components/vislib/components/color/color_palette'));
+    var getColors = Private(require('ui/vislib/components/color/color_palette'));
 
     return {
       restrict: 'E',

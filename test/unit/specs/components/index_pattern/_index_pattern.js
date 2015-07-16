@@ -4,7 +4,7 @@ define(function (require) {
     var sinon = require('test_utils/auto_release_sinon');
     var Promise = require('bluebird');
     var errors = require('errors');
-    var IndexedArray = require('components/indexed_array/index');
+    var IndexedArray = require('ui/indexed_array/index');
     var IndexPattern;
     var mapper;
     var mappingSetup;
@@ -21,12 +21,12 @@ define(function (require) {
       mockLogstashFields = Private(require('fixtures/logstash_fields'));
       docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
 
-      DocSource = Private(require('components/courier/data_source/doc_source'));
+      DocSource = Private(require('ui/courier/data_source/doc_source'));
       sinon.stub(DocSource.prototype, 'doIndex');
       sinon.stub(DocSource.prototype, 'fetch');
 
       // stub mapper
-      mapper = Private(require('components/index_patterns/_mapper'));
+      mapper = Private(require('ui/index_patterns/_mapper'));
       sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
         return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
       });
@@ -37,7 +37,7 @@ define(function (require) {
         return Promise.resolve(true);
       });
 
-      IndexPattern = Private(require('components/index_patterns/_index_pattern'));
+      IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
     }));
 
     // create an indexPattern instance for each test

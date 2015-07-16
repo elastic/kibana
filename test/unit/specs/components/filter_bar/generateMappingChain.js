@@ -1,5 +1,5 @@
 define(function (require) {
-  var generateMappingChain = require('components/filter_bar/lib/generateMappingChain');
+  var generateMappingChain = require('ui/filter_bar/lib/generateMappingChain');
   var sinon = require('test_utils/auto_release_sinon');
 
   describe('Filter Bar Directive', function () {
@@ -10,7 +10,7 @@ define(function (require) {
       beforeEach(inject(function (Private, _$rootScope_, _Promise_) {
         $rootScope = _$rootScope_;
         Promise    = _Promise_;
-        generateMappingChain = Private(require('components/filter_bar/lib/generateMappingChain'));
+        generateMappingChain = Private(require('ui/filter_bar/lib/generateMappingChain'));
       }));
 
 

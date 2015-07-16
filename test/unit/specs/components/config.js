@@ -8,7 +8,7 @@ define(function (require) {
     beforeEach(inject(function ($injector, Private) {
       config = $injector.get('config');
       $scope = $injector.get('$rootScope');
-      defaults = Private(require('components/config/defaults'));
+      defaults = Private(require('ui/config/defaults'));
     }));
 
     describe('#get', function () {

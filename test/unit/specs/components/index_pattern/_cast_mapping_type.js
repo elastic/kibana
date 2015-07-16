@@ -6,7 +6,7 @@ define(function (require) {
     var fields;
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      fn = Private(require('components/index_patterns/_cast_mapping_type'));
+      fn = Private(require('ui/index_patterns/_cast_mapping_type'));
     }));
 
     it('should be a function', function () {

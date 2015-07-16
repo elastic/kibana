@@ -38,7 +38,7 @@ define(function (require) {
         inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           secondVis = Private(require('vislib_fixtures/_vis_fixture'))();
-          require('css!components/vislib/styles/main');
+          require('ui/vislib/styles/main.less');
         });
       });
 

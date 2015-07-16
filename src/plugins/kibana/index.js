@@ -31,11 +31,11 @@ module.exports = function (kibana) {
       },
 
       modules: {
-        'chrome$': 'chrome/chrome',
+        'ui/chrome$': 'ui/chrome/chrome',
         'lodash': 'utils/lodash-mixins/index',
-        'errors': 'components/errors',
-        'modules': 'components/modules',
-        'routes': 'components/routes/index',
+        'errors': 'ui/errors',
+        'modules': 'ui/modules',
+        'routes': 'ui/routes/index',
 
         // bower_components
         'angular': ['bower_components/angular/angular', jq, 'window.angular'],

@@ -10,8 +10,8 @@ define(function (require) {
     redirectTo: '/discover'
   });
 
-  require('chrome')
-  .setLogo('url(/images/kibana.png) left no-repeat', true)
+  require('ui/chrome')
+  .setLogo('url(/ui/images/kibana.png) left no-repeat', true)
   .setNavBackground('#222222')
   .setTabDefaults({
     resetWhenActive: true,

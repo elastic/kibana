@@ -4,12 +4,12 @@ define(function (require) {
   var angular = require('angular');
   var modules = require('modules');
 
-  require('components/timefilter/timefilter');
-  require('components/private');
-  require('components/promises');
-  require('components/style_compile');
+  require('ui/timefilter/timefilter');
+  require('ui/private');
+  require('ui/promises');
+  require('ui/style_compile');
 
-  var TabCollection = require('chrome/TabCollection');
+  var TabCollection = require('ui/chrome/TabCollection');
 
   var payload = window.__KBN__;
   window.__KBN__ = null;
@@ -238,7 +238,7 @@ define(function (require) {
   .directive('kbnChrome', function ($rootScope) {
     return {
       compile: function ($el) {
-        var $content = $(require('chrome/chrome.html'));
+        var $content = $(require('ui/chrome/chrome.html'));
         var $app = $content.find('.application');
 
         if (rootController) {
@@ -269,7 +269,7 @@ define(function (require) {
 
         // and some local values
         $scope.httpActive = $http.pendingRequests;
-        $scope.notifList = require('components/notify/notify')._notifs;
+        $scope.notifList = require('ui/notify/notify')._notifs;
 
         return chrome;
       }

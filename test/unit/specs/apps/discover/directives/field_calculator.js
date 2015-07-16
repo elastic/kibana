@@ -3,7 +3,7 @@ define(function (require) {
   var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
 
   // Load the kibana app dependencies.
-  require('components/private');
+  require('ui/private');
 
   var indexPattern;
 

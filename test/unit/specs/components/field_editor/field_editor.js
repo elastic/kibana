@@ -13,7 +13,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function ($compile, $injector, Private) {
       $rootScope = $injector.get('$rootScope');
-      Field = Private(require('components/index_patterns/_field'));
+      Field = Private(require('ui/index_patterns/_field'));
       StringFormat = Private(require('registry/field_formats')).getType('string');
 
       $rootScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

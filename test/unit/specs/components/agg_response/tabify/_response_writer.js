@@ -19,14 +19,14 @@ define(function (require) {
 
         if (stubGetColumns) {
           getColumns = sinon.stub();
-          Private.stub(require('components/agg_response/tabify/_get_columns'), getColumns);
+          Private.stub(require('ui/agg_response/tabify/_get_columns'), getColumns);
         }
 
-        ResponseWriter = Private(require('components/agg_response/tabify/_response_writer'));
-        TableGroup = Private(require('components/agg_response/tabify/_table_group'));
-        Buckets = Private(require('components/agg_response/tabify/_buckets'));
-        Table = Private(require('components/agg_response/tabify/_table'));
-        Vis = Private(require('components/vis/vis'));
+        ResponseWriter = Private(require('ui/agg_response/tabify/_response_writer'));
+        TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
+        Buckets = Private(require('ui/agg_response/tabify/_buckets'));
+        Table = Private(require('ui/agg_response/tabify/_table'));
+        Vis = Private(require('ui/vis/vis'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       }));
     }

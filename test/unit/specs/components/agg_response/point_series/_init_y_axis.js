@@ -6,7 +6,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
-      initYAxis = Private(require('components/agg_response/point_series/_init_y_axis'));
+      initYAxis = Private(require('ui/agg_response/point_series/_init_y_axis'));
     }));
 
     function agg() {

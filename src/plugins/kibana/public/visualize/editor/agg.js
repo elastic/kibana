@@ -7,7 +7,7 @@ define(function (require) {
 
     var _ = require('lodash');
     var $ = require('jquery');
-    var aggTypes = Private(require('components/agg_types/index'));
+    var aggTypes = Private(require('ui/agg_types/index'));
     var advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
 
     var notify = new Notifier({

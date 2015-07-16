@@ -4,7 +4,7 @@ define(function (require) {
   var module = require('modules').get('kibana/metric_vis', ['kibana']);
 
   module.controller('KbnMetricVisController', function ($scope, Private) {
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
+    var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
     var metrics = $scope.metrics = [];
 

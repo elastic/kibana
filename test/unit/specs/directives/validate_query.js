@@ -3,7 +3,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
 
   // Load the kibana app dependencies.
-  require('components/validate_query/validate_query');
+  require('ui/validate_query/validate_query');
 
   var $rootScope;
   var $timeout;
@@ -19,7 +19,7 @@ define(function (require) {
   var mockValidateQuery;
   var markup = '<input ng-model="mockModel" validate-query="mockQueryInput" input-focus type="text">';
   var fromUser;
-  var toUser = require('components/validate_query/lib/to_user');
+  var toUser = require('ui/validate_query/lib/to_user');
 
 
   var validEsResponse = function () {
@@ -170,7 +170,7 @@ define(function (require) {
     describe('user input parser', function () {
 
       beforeEach(function () {
-        fromUser = Private(require('components/validate_query/lib/from_user'));
+        fromUser = Private(require('ui/validate_query/lib/from_user'));
         config.set('query:queryString:options', {});
       });
 

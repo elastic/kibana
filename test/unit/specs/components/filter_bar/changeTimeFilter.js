@@ -8,7 +8,7 @@ define(function (require) {
       beforeEach(module('kibana'));
 
       beforeEach(inject(function (Private, _timefilter_) {
-        changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
+        changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
         timefilter = _timefilter_;
       }));
 

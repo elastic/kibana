@@ -13,9 +13,9 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function ($injector, Private) {
-      tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
+      tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      Vis = Private(require('components/vis/vis'));
+      Vis = Private(require('ui/vis/vis'));
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');

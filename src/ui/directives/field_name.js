@@ -1,6 +1,6 @@
 define(function (require) {
   var module = require('modules').get('kibana');
-  require('filters/short_dots');
+  require('ui/filters/short_dots');
 
   module.directive('fieldName', function ($compile, $rootScope, $filter) {
     return {

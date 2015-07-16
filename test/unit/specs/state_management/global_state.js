@@ -1,6 +1,6 @@
 define(function (require) {
   var sinon = require('sinon/sinon');
-  require('components/state_management/global_state');
+  require('ui/state_management/global_state');
 
   describe('State Management', function () {
     var $rootScope, $location, state;

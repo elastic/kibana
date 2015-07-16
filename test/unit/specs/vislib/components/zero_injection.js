@@ -266,7 +266,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
+          injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
           sample1 = injectZeros(seriesData);
           sample2 = injectZeros(multiSeriesData);
           sample3 = injectZeros(multiSeriesNumberedData);
@@ -377,7 +377,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          orderXValues = Private(require('components/vislib/components/zero_injection/ordered_x_keys'));
+          orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
           results = orderXValues(multiSeriesData);
           numberedResults = orderXValues(multiSeriesNumberedData);
         });
@@ -441,7 +441,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          uniqueKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
+          uniqueKeys = Private(require('ui/vislib/components/zero_injection/uniq_keys'));
           results = uniqueKeys(multiSeriesData);
         });
       });
@@ -495,7 +495,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          flattenData = Private(require('components/vislib/components/zero_injection/flatten_data'));
+          flattenData = Private(require('ui/vislib/components/zero_injection/flatten_data'));
           results = flattenData(multiSeriesData);
         });
       });
@@ -528,7 +528,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          createZeroArray = Private(require('components/vislib/components/zero_injection/zero_filled_array'));
+          createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
           results1 = createZeroArray(arr1);
           results2 = createZeroArray(arr2);
         });
@@ -615,8 +615,8 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          zeroFillArray = Private(require('components/vislib/components/zero_injection/zero_fill_data_array'));
-          createZeroArray = Private(require('components/vislib/components/zero_injection/zero_filled_array'));
+          zeroFillArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
+          createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
           arr1 = createZeroArray(xValueArr);
 
           // Takes zero array as 1st arg and data array as 2nd arg
@@ -682,7 +682,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
+          injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
           results = injectZeros(dateHistogramRows);
         });
       });

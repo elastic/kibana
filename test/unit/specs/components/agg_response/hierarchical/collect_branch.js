@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var collectBranch = require('components/agg_response/hierarchical/_collect_branch');
+  var collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
   describe('collectBranch()', function () {
     var results;
     var convert = function (name) {

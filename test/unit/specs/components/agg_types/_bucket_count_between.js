@@ -17,11 +17,11 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      Vis = Private(require('components/vis/vis'));
+      Vis = Private(require('ui/vis/vis'));
       visTypes = Private(require('registry/vis_types'));
-      aggTypes = Private(require('components/agg_types/index'));
-      AggConfig = Private(require('components/vis/AggConfig'));
-      bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
+      aggTypes = Private(require('ui/agg_types/index'));
+      AggConfig = Private(require('ui/vis/AggConfig'));
+      bucketCountBetween = Private(require('ui/agg_types/buckets/_bucket_count_between'));
     }));
 
     it('returns a positive number when a is before b', function () {

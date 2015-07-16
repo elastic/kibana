@@ -63,7 +63,7 @@ define(function (require) {
       beforeEach(function () {
         module('MarkerFactory');
         inject(function (Private) {
-          MarkerClass = Private(require('components/vislib/visualizations/marker_types/base_marker'));
+          MarkerClass = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
           markerLayer = createMarker(MarkerClass);
         });
       });
@@ -199,7 +199,7 @@ define(function (require) {
       beforeEach(function () {
         module('MarkerFactory');
         inject(function (Private) {
-          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/shaded_circles'));
+          var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/shaded_circles'));
           markerLayer = createMarker(MarkerClass);
         });
       });
@@ -225,7 +225,7 @@ define(function (require) {
         sinon.stub(mockMap, 'getZoom', _.constant(zoom));
 
         inject(function (Private) {
-          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/scaled_circles'));
+          var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/scaled_circles'));
           markerLayer = createMarker(MarkerClass);
         });
       });
@@ -273,7 +273,7 @@ define(function (require) {
         module('MarkerFactory');
 
         inject(function (Private) {
-          var MarkerClass = Private(require('components/vislib/visualizations/marker_types/heatmap'));
+          var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/heatmap'));
           markerLayer = createMarker(MarkerClass);
         });
       });

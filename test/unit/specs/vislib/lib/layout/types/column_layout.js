@@ -73,7 +73,7 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        layoutType = Private(require('components/vislib/lib/layout/layout_types'));
+        layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
         el = d3.select('body').append('div').attr('class', 'visualization');
         columnLayout = layoutType.histogram(el, data);
       });

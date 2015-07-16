@@ -54,7 +54,7 @@ define(function (require) {
     beforeEach(function () {
       inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
-        queryFilter = Private(require('components/filter_bar/query_filter'));
+        queryFilter = Private(require('ui/filter_bar/query_filter'));
       });
     });
 

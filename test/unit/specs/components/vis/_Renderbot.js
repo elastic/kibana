@@ -6,7 +6,7 @@ define(function (require) {
       module('kibana');
 
       inject(function (Private) {
-        Renderbot = Private(require('components/vis/Renderbot'));
+        Renderbot = Private(require('ui/vis/Renderbot'));
       });
     }
 

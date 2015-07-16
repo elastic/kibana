@@ -38,12 +38,12 @@ define(function (require) {
     beforeEach(function () {
       inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
-        filterManager = Private(require('components/filter_manager/filter_manager'));
+        filterManager = Private(require('ui/filter_manager/filter_manager'));
         appState = new MockState();
         appState.filters = [];
 
         // mock required queryFilter methods, used in the manager
-        queryFilter = Private(require('components/filter_bar/query_filter'));
+        queryFilter = Private(require('ui/filter_bar/query_filter'));
         sinon.stub(queryFilter, 'getAppFilters', function () {
           return appState.filters;
         });

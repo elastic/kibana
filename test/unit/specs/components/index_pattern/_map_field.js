@@ -7,7 +7,7 @@ define(function (require) {
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector, config) {
       config.set('metaFields', ['_id', '_timestamp']);
-      fn = Private(require('components/index_patterns/_map_field'));
+      fn = Private(require('ui/index_patterns/_map_field'));
       fields = require('fixtures/field_mapping').test.mappings.testType;
     }));
 

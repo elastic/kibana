@@ -6,7 +6,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      pushFilterFn = Private(require('components/filter_bar/push_filter'));
+      pushFilterFn = Private(require('ui/filter_bar/push_filter'));
     }));
 
     it('is a function that returns a function', function () {

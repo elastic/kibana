@@ -5,7 +5,7 @@ define(function (require) {
   var $window;
   var payload = { first: 'john', last: 'smith' };
 
-  require('components/storage/storage');
+  require('ui/storage/storage');
 
   function init() {
     module('kibana/storage', function ($provide) {
