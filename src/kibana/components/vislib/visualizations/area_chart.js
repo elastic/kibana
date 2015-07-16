@@ -96,11 +96,7 @@ define(function (require) {
       var path = layer.append('path')
       .call(this._addIdentifier)
       .style('fill', function (d) {
-        var label = d[0].label;
-        if (!label) {
-          label = this.getAttribute('data-label');
-        }
-        return color(label);
+        return color(d[0].label);
       })
       .classed('overlap_area', function () {
         return isOverlapping;
@@ -183,11 +179,7 @@ define(function (require) {
       .append('circle')
       .call(this._addIdentifier)
       .attr('stroke', function strokeColor(d) {
-        var label = d.label;
-        if (!label) {
-          label = this.getAttribute('data-label');
-        }
-        return color(label);
+        return color(d.label);
       })
       .attr('fill', 'transparent')
       .attr('stroke-width', circleStrokeWidth);

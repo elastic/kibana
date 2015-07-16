@@ -73,11 +73,7 @@ define(function (require) {
       .append('rect')
       .call(this._addIdentifier)
       .attr('fill', function (d) {
-        var label = d.label ;
-        if (!label) {
-          label = this.getAttribute('data-label');
-        }
-        return color(label);
+        return color(d.label);
       });
 
       self.updateBars(bars);

@@ -43,6 +43,7 @@ define(function (require) {
       if (this.type === 'series') {
         if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
           this.labels = [(this.get('yAxisLabel'))];
+          this.data.series[0].label = this.get('yAxisLabel');
         } else {
           this.labels = getLabels(data);
         }
