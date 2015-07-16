@@ -37,7 +37,7 @@ define(function (require) {
         inject(function (Private) {
           Handler = Private(require('ui/vislib/lib/handler/handler'));
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
-          require('components/vislib/styles/main.less');
+          require('ui/vislib/styles/main.less');
 
           events = [
             'click',

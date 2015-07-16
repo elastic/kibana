@@ -37,21 +37,8 @@ define(function (require) {
 
       this.data = data;
       this.type = this.getDataType();
-
-      this.labels;
-
-      if (this.type === 'series') {
-        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
-          this.labels = [(this.get('yAxisLabel'))];
-        } else {
-          this.labels = getLabels(data);
-        }
-      } else if (this.type === 'slices') {
-        this.labels = this.pieNames();
-      }
-
+      this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels) : undefined;
-
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -72,6 +59,15 @@ define(function (require) {
         });
       }
     }
+
+    Data.prototype._getLabels = function (data) {
+      if (this.type === 'series') {
+        var noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
+        if (noLabel) return [(this.get('yAxisLabel'))];
+        return getLabels(data);
+      }
+      return this.pieNames();
+    };
 
     /**
      * Returns true for positive numbers
@@ -485,7 +481,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        names.push({ key: obj.name, index: index });
+        names.push({ label: obj.name, values: obj, index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;
@@ -519,8 +515,9 @@ define(function (require) {
         .sortBy(function (obj) {
           return obj.index;
         })
-        .pluck('key')
-        .unique()
+        .unique(function (d) {
+          return d.label;
+        })
         .value();
       }
     };
@@ -553,9 +550,8 @@ define(function (require) {
      * @method pieNames
      * @returns {Array} Array of unique names (strings)
      */
-    Data.prototype.pieNames = function () {
+    Data.prototype.pieNames = function (data) {
       var self = this;
-      var data = this.getVisData();
       var names = [];
 
       _.forEach(data, function (obj) {
@@ -567,7 +563,7 @@ define(function (require) {
         });
       });
 
-      return _.uniq(names);
+      return _.uniq(names, 'label');
     };
 
     /**
@@ -619,7 +615,9 @@ define(function (require) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     Data.prototype.getPieColorFunc = function () {
-      return color(this.pieNames());
+      return color(this.pieNames(this.getVisData()).map(function (d) {
+        return d.label;
+      }));
     };
 
     /**

@@ -5,6 +5,7 @@ define(function (require) {
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
+    var Legend = Private(require('ui/vislib/lib/legend'));
 
     /**
      * Handles building all the components of the visualization
@@ -93,6 +94,12 @@ define(function (require) {
 
       this._validateData();
       this.renderArray.forEach(function (property) {
+        if (property instanceof Legend) {
+          self.vis.activeEvents().forEach(function (event) {
+            self.enable(event, property);
+          });
+        }
+
         if (typeof property.render === 'function') {
           property.render();
         }

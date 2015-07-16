@@ -39,23 +39,27 @@ define(function (require) {
         type: chartTypes[i],
         addLegend: true
       };
+      var Legend;
       var vis;
+      var $el;
 
       beforeEach(function () {
         module('LegendFactory');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        inject(function (Private, d3) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
-          require('components/vislib/styles/main.less');
-
+          Legend = Private(require('ui/vislib/lib/legend'));
+          require('ui/vislib/styles/main.less');
+          $el = d3.select('body').append('div').attr('class', 'fake-legend');
           vis.render(data);
         });
       });
 
       afterEach(function () {
         $(vis.el).remove();
+        $('.fake-legend').remove();
         vis = null;
       });
 
@@ -65,9 +69,9 @@ define(function (require) {
           var paths = $(vis.el).find(chartSelectors[chartType]).toArray();
           var items = vis.handler.legend.labels;
 
-          items.forEach(function (label) {
+          items.forEach(function (d) {
             var path = _.find(paths, function (path) {
-              return path.getAttribute('data-label') === String(label);
+              return path.getAttribute('data-label') === String(d.label);
             });
 
             expect(path).to.be.ok();
@@ -89,6 +93,22 @@ define(function (require) {
         it('should contain a list of items', function () {
           expect($(vis.el).find('li').length).to.be.greaterThan(1);
         });
+        it('should not return an undefined value', function () {
+          var emptyObject = {
+            label: ''
+          };
+          var labels = [emptyObject, emptyObject, emptyObject];
+          var args = {
+            _attr: {isOpen: true},
+            color: function () { return 'blue'; }
+          };
+
+          Legend.prototype._list($el, labels, args);
+
+          $el.selectAll('li').each(function (d) {
+            expect(d.label).not.to.be(undefined);
+          });
+        });
       });
 
       describe('render method', function () {
@@ -98,6 +118,7 @@ define(function (require) {
 
         it('should have an onclick listener', function () {
           expect(!!$('.legend-toggle')[0].__onclick).to.be(true);
+          expect(!!$('li.color')[0].__onclick).to.be(true);
         });
 
         it('should attach onmouseover listener', function () {

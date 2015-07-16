@@ -80,7 +80,7 @@ define(function (require) {
         Vis = Private(require('ui/vis/vis'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
-        require('components/vislib/styles/main.less');
+        require('ui/vislib/styles/main.less');
 
         var id_1 = 1;
         var id_2 = 1;
@@ -179,7 +179,7 @@ define(function (require) {
           Vis = Private(require('ui/vis/vis'));
           indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
           buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
-          require('components/vislib/styles/main.less');
+          require('ui/vislib/styles/main.less');
 
           var id = 1;
           var stubVis = new Vis(indexPattern, {

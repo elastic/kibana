@@ -239,7 +239,7 @@ define(function (require) {
         paginatedTable = $el.isolateScope().paginatedTable;
       });
 
-      it('should should have duplicate column titles', function () {
+      it('should have duplicate column titles', function () {
         var columns = $el.find('thead th span');
         columns.each(function () {
           expect($(this).text()).to.be(colText);
