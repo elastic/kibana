@@ -3,15 +3,21 @@
  */
 
 start
- = seriesList+
+ = series_list+
 
 series
  = chain
  / request
  / reference
 
-seriesList
+series_list
  = series:series ';'? (space*)? { return series }
+
+
+chained_function
+ = '.' func:function {
+  return func
+ }
 
 chain
  = '(' space? first:series space? ')' rest:chained_function* {
@@ -19,10 +25,8 @@ chain
   return {type: "chain", chain: [first].concat(rest)};
  }
 
-chained_function
- = '.' func:function {
-  return func
- }
+function_name
+ = (first:[a-zA-Z]+ rest:[a-zA-Z0-9]* ) { return first.join('') + rest.join('') }
 
 function
  = (name:function_name '(' space? args:args? space? ')' space? ';'? space?) {
@@ -33,16 +37,13 @@ function
   }
  }
 
-function_name
- = (first:[a-zA-Z]+ rest:[a-zA-Z0-9]* ) { return first.join('') + rest.join('') }
-
 args
  = argument+
 
 argument
- = element:argType ','? (' '*)? {return element}
+ = element:arg_type ','? (' '*)? {return element}
 
-argType
+arg_type
  = series
  / function
  / number
@@ -70,38 +71,39 @@ integer
 query
  = '`' q:[^`]* '`' {return q.join('')}
 
+request_operator
+ = (space+ )? operator:function_name (space+)? arguments:request_operator_argument+ (space+)? {
+  return {
+   operator: operator,
+   arguments: arguments
+  }
+ }
+
+request_operator_argument
+ = argument:([a-zA-Z0-9\-_\*.]+ / string) ':'? {
+  return argument.join('');
+ }
+
 request
- = query:query index:index? agg:agg?
+ = query:query operators:(request_operator+)?
  {
   var obj = {query: query, type: 'query'}
-  if (agg) {
-   obj.field = agg.field;
-   obj.metric = agg.metric;
-  }
-  if (index) {
-   obj.index = index;
+  if (operators) {
+   obj.operators = operators
   }
   return obj;
  }
 
-agg
- = (space+)? 'as' (space+)? metric:metric ':' field:field
- {
-  return {
-   field: field,
-   metric: metric
-  }
- }
 
 index
- = (space+)? 'in' (space+)? indexName:indexName
+ = (space+)? 'in' (space+)? index_name:index_name
  {
-   return indexName
+   return index_name
  }
 
-indexName
+index_name
  = indexName:[A-Za-z0-9\-_.*]+ {
-   return indexName.join('')
+   return index_name.join('')
  }
 
 metric
