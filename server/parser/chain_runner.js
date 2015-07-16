@@ -9,24 +9,16 @@ var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
 
 var fetchData = require('./fetch_data.js');
-
 var unzipPairs = require('../utils/unzipPairs.js');
 
-var queryCache = {};
-
 // Load function plugins
-var functions  = _.chain(glob.sync('server/functions/*.js')).map(function (file) {
+var functions  = _.chain(glob.sync('server/series_functions/*.js')).map(function (file) {
   var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
-  return [fnName, require('../functions/' + fnName + '.js')];
+  return [fnName, require('../series_functions/' + fnName + '.js')];
 }).zipObject().value();
 
-// Contains the parsed sheet;
 var sheet;
-
-function getQueryCacheKey (query) {
-  return JSON.stringify(_.omit(query, 'label'));
-}
-
+var queryCache = {};
 var invokeChain;
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
@@ -44,7 +36,6 @@ function invoke (fnName, args) {
       } else {
         throw new Error ('Missing query cache! ' + cacheKey);
       }
-
     }
     else if (_.isObject(item) && item.type === 'function') {
       return invoke(item.function, item.arguments);
@@ -111,6 +102,10 @@ function resolveChainList (chainList) {
     return {};
   });
 
+}
+
+function getQueryCacheKey (query) {
+  return JSON.stringify(_.omit(query, 'label'));
 }
 
 function preProcessSheet (sheet) {
