@@ -23,5 +23,6 @@
   "sub": true,
   "-W084": true,
   "scripturl": true,
-  "evil": true
+  "evil": true,
+  "esnext": true
 }

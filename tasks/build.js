@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     'clean:build',
     'less:build',
     'copy:kibana_src',
-    'clean:dev_only_plugins',
+    'clean:noDistPlugins',
 
     'webpack:build',
     'clean:unneeded_source_in_build',

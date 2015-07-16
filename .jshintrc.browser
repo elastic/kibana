@@ -2,6 +2,7 @@
   "extends": "./.jshintrc",
   "node": false,
   "browser": true,
+  "esnext": false,
 
   "predef": {
     // require.js
