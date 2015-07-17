@@ -5,6 +5,8 @@ define(function (require) {
   require('angular-sanitize');
   require('angular-resource');
   require('angular-local-storage');
+  require('text');
+
 
   var angular = require('angular');
   var RouteManager = require('scripts/routeManager');

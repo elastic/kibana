@@ -19,9 +19,14 @@ require.config({
         'angular-ui-router': 'bower_components/angular-ui-router/release/angular-ui-router',
         'angular-strap': 'bower_components/angular-strap/dist/angular-strap.min',
         'angular-strap-tpl': 'bower_components/angular-strap/dist/angular-strap.tpl.min',
-        'angular-local-storage': 'bower_components/angular-local-storage/dist/angular-local-storage'
+        'angular-local-storage': 'bower_components/angular-local-storage/dist/angular-local-storage',
+        'pegjs': 'bower_components/pegjs/peg-0.8.0',
+        'text': 'bower_components/requirejs-text/text'
     },
     shim: {
+        'pegjs': {
+            exports: 'PEG'
+        },
         'angular': {
             deps: [ 'jquery' ],
             exports: 'angular'

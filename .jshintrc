@@ -72,6 +72,7 @@
     "white": false,
 
     "globals": {
+        "PEG": false,
         "process": false,
         "__dirname": false,
         "console": false,

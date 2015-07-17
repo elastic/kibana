@@ -41,6 +41,11 @@ define(function (require) {
           // data, status, headers, config
           success(function(sheet) {
             $scope.sheet = sheet;
+            _.each(sheet, function (cell) {
+              if (cell.exception) {
+                $scope.input.selected = cell.plot;
+              }
+            });
             $scope.running = false;
           })
           .error(function () {

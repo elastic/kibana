@@ -6,9 +6,11 @@ module.exports = function (app) {
     var processRequest = require('../parser/chain_runner.js');
 
     var sheet = processRequest(req.body.sheet);
+
     Promise.all(sheet).then(function (sheet) {
       res.send(sheet);
     }).catch(function (e) {
+      console.log('lol');
       res.send(e);
     });
 

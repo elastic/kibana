@@ -144,15 +144,25 @@ function preProcessSheet (sheet) {
 }
 
 function resolveSheet (sheet) {
-  return _.map(sheet, function (plot) {
-    return Parser.parse(plot);
+  return _.map(sheet, function (plot, index) {
+    try {
+      return Parser.parse(plot);
+    } catch (e) {
+      throw {plot: index, exception: e};
+    }
+
   });
 }
 
 function processRequest (request) {
   queryCache = {};
   // This is setting the "global" sheet
-  sheet = resolveSheet(request);
+  try {
+    sheet = resolveSheet(request);
+  } catch (e) {
+    return Promise.resolve([e]);
+  }
+
 
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList) {

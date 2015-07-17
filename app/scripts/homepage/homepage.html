@@ -13,6 +13,7 @@
 <form>
   <div class="form-group function-form" ng-submit="search()">
     <input type="text"
+      expression="input.expressions[input.selected]"
       class="form-control top-agg-input"
       ng-model="input.expressions[input.selected]"
       id="search"
@@ -20,6 +21,9 @@
     <button style="display:none"
       type="submit"
       ng-click="search()">Run</button>
+  </div>
+  <div ng-if="sheet[0].exception" class="alert alert-danger">
+    {{sheet[0].exception.name}}: Expected {{sheet[0].exception.expected[0].description}} in <strong>cell {{sheet[0].plot + 1}}</strong> @ character {{sheet[0].exception.column}}
   </div>
 </form>
 

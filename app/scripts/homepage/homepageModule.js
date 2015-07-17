@@ -3,6 +3,8 @@ define(function (require) {
   var RouteManager = require('scripts/homepage/routeManager');
   var HomepageController = require('scripts/homepage/homepage_controller');
   var chartDirective = require('scripts/homepage/chart_directive');
+  var expressionDirective = require('scripts/homepage/expression_directive');
+
 
   require('angular-animate');
   require('angular-ui-router');
@@ -16,6 +18,7 @@ define(function (require) {
     ])
     .controller('HomepageController', HomepageController)
     .directive('chart', chartDirective)
+    .directive('expression', expressionDirective)
     .config(RouteManager);
 
     return name;

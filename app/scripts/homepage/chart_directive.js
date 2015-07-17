@@ -45,7 +45,7 @@ define(function (require) {
             return _.defaults(series, {
               shadowSize: 0,
               lines: {
-                lineWidth: 6
+                lineWidth: 5
               }
             });
           });
