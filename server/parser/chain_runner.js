@@ -4,18 +4,21 @@ var glob = require('glob');
 var Promise = require('bluebird');
 
 var fs = require('fs');
-var grammar = fs.readFileSync('server/parser/chain.peg', 'utf8');
+var grammar = fs.readFileSync('app/scripts/chain.peg', 'utf8');
 var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
 
 var fetchData = require('./fetch_data.js');
-var unzipPairs = require('../utils/unzipPairs.js');
 
 // Load function plugins
 var functions  = _.chain(glob.sync('server/series_functions/*.js')).map(function (file) {
   var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
   return [fnName, require('../series_functions/' + fnName + '.js')];
 }).zipObject().value();
+
+function getQueryCacheKey (query) {
+  return JSON.stringify(_.omit(query, 'label'));
+}
 
 var sheet;
 var queryCache = {};
@@ -104,9 +107,7 @@ function resolveChainList (chainList) {
 
 }
 
-function getQueryCacheKey (query) {
-  return JSON.stringify(_.omit(query, 'label'));
-}
+
 
 function preProcessSheet (sheet) {
   var queries = {};
@@ -162,7 +163,6 @@ function processRequest (request) {
   } catch (e) {
     return Promise.resolve([e]);
   }
-
 
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList) {

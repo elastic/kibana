@@ -17,7 +17,7 @@ define(function (require) {
             $elem.css({color: '#555'});
             valid = true;
           } catch (e) {
-            $elem.css({color: '#c66'});
+            $elem.css({color: '#b66'});
             valid = false;
           }
         };

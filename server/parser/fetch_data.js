@@ -68,8 +68,6 @@ function buildRequest (config) {
 
 module.exports = function (config, cacheKey) {
   return client.search(buildRequest(config)).then(function (resp) {
-    var values;
-    var keys = _.pluck(resp.aggregations.series.buckets, 'key');
 
     var data = _.map(resp.aggregations.series.buckets, function (bucket) {
       var value;
