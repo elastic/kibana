@@ -4,7 +4,7 @@ define(function (require) {
 
   require('modules')
   .get('kibana')
-  .directive('ui/chromeContext', function (timefilter, globalState) {
+  .directive('chromeContext', function (timefilter, globalState) {
 
     var listenForUpdates = _.once(function ($scope) {
       $scope.$listen(timefilter, 'update', function (newVal, oldVal) {
