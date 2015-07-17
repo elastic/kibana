@@ -43,7 +43,7 @@ define(function (require) {
       if (this.type === 'series') {
         if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
           this.labels = [(this.get('yAxisLabel'))];
-          this.data.series[0].label = this.get('yAxisLabel');
+          this._updateData();
         } else {
           this.labels = getLabels(data);
         }
@@ -73,6 +73,22 @@ define(function (require) {
         });
       }
     }
+
+    Data.prototype._updateData = function () {
+      if (this.data.rows) {
+        _.map(this.data.rows, this._updateDataSeriesLabel, this);
+      } else if (this.data.columns) {
+        _.map(this.data.columns, this._updateDataSeriesLabel, this);
+      } else {
+        this._updateDataSeriesLabel(this.data);
+      }
+    };
+
+    Data.prototype._updateDataSeriesLabel = function (eachData) {
+      if (eachData.series) {
+        eachData.series[0].label = this.get('yAxisLabel');
+      }
+    };
 
     /**
      * Returns true for positive numbers
