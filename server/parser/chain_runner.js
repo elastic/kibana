@@ -26,29 +26,28 @@ var invokeChain;
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
 
+  function unsupportedArgument (item) {
+
+  }
+
   args = _.map(args, function (item) {
-
-    if (_.isNumber(item) || _.isString(item)) {
-      return item;
-    }
-    else if (_.isObject(item) && item.type === 'query') {
-      var cacheKey = getQueryCacheKey(item);
-
-      if (queryCache[cacheKey]) {
-        return Promise.resolve(_.clone(queryCache[cacheKey]));
-      } else {
-        throw new Error ('Missing query cache! ' + cacheKey);
+    if (_.isObject(item)) {
+      switch (item.type) {
+        case 'query':
+          var cacheKey = getQueryCacheKey(item);
+          if (queryCache[cacheKey]) {
+            return Promise.resolve(_.clone(queryCache[cacheKey]));
+          }
+          throw new Error ('Missing query cache! ' + cacheKey);
+        case 'function':
+          return invoke(item.function, item.arguments);
+        case 'reference':
+          var reference = sheet[item.plot - 1][item.series - 1];
+          return invokeChain(reference);
+        case 'chain':
+          return invokeChain(item);
       }
-    }
-    else if (_.isObject(item) && item.type === 'function') {
-      return invoke(item.function, item.arguments);
-    }
-    else if (_.isObject(item) && item.type === 'reference') {
-      var reference = sheet[item.plot - 1][item.series - 1];
-      return invokeChain(reference);
-    }
-    else if (_.isObject(item) && item.type === 'chain') {
-      return invokeChain(item);
+      throw new Error ('Argument type not supported: ' + JSON.stringify(item));
     }
     return item;
   });

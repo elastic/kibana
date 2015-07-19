@@ -1,5 +1,8 @@
 var Promise = require('bluebird');
 
+// TODO: Remove when shipping
+require('../parser/chain_runner.js');
+
 module.exports = function (app) {
   app.post('/series', function (req, res) {
 
