@@ -13,7 +13,6 @@ module.exports = function (app) {
     Promise.all(sheet).then(function (sheet) {
       res.send(sheet);
     }).catch(function (e) {
-      console.log('lol');
       res.send(e);
     });
 

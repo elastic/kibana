@@ -22,9 +22,9 @@ function getQueryCacheKey (query) {
 
 var sheet;
 var queryCache = {};
-var invokeChain;
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
+  console.log(fnName + '::: ' + JSON.stringify(args, null, ' '));
 
   args = _.map(args, function (item) {
     if (_.isObject(item)) {
@@ -34,7 +34,8 @@ function invoke (fnName, args) {
           if (queryCache[cacheKey]) {
             return Promise.resolve(_.clone(queryCache[cacheKey]));
           }
-          throw new Error ('Missing query cache! ' + cacheKey);
+          return fetchData(item, cacheKey);
+          //throw new Error ('Missing query cache! ' + cacheKey);
         case 'function':
           return invoke(item.function, item.arguments);
         case 'reference':
@@ -42,6 +43,8 @@ function invoke (fnName, args) {
           return invokeChain(reference);
         case 'chain':
           return invokeChain(item);
+        case 'seriesList':
+          return resolveChainList(item.list);
       }
       throw new Error ('Argument type not supported: ' + JSON.stringify(item));
     }
@@ -87,7 +90,7 @@ function invokeChain (chainObj, result) {
 
 function resolveChainList (chainList) {
   var seriesList = _.map(chainList, function (chain) {
-    var values = invokeChain(chain);
+    var values = invoke('first', [chain]);
 
     return values.then(function (args) {
       //args.data = unzipPairs(args.data);
@@ -101,8 +104,6 @@ function resolveChainList (chainList) {
   });
 
 }
-
-
 
 function preProcessSheet (sheet) {
   var queries = {};
@@ -150,6 +151,18 @@ function resolveSheet (sheet) {
   });
 }
 
+function deepFindByProp (obj, property, list) {
+  list = list || [];
+  if (_.has(obj, property)) {
+    list.push(obj);
+    return list;
+  }
+  return list.concat(_.flatten(_.map(obj, function (elem) {
+    return deepFindByProp(elem, property);
+  })));
+
+}
+
 function processRequest (request) {
   queryCache = {};
   // This is setting the "global" sheet
@@ -162,7 +175,8 @@ function processRequest (request) {
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList) {
       return resolveChainList(chainList).then(function (plots) {
-        return plots;
+        console.log(plots);
+        return deepFindByProp(plots, 'data');
       });
     });
   });
@@ -179,7 +193,7 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['(`*`)']
+  ['(`US`,`JP`)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

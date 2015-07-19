@@ -3,45 +3,13 @@
  */
 
 start
- = series_list+
-
-series
- = chain
- / request
- / reference
-
-series_list
- = series:series ';'? (space*)? { return series }
-
-
-chained_function
- = '.' func:function {
-  return func
- }
-
-chain
- = '(' space? first:series space? ')' rest:chained_function* {
-  first.label = text();
-  return {type: "chain", chain: [first].concat(rest)};
- }
-
-function_name
- = (first:[a-zA-Z]+ rest:[a-zA-Z0-9]* ) { return first.join('') + rest.join('') }
-
-function
- = (name:function_name '(' space? args:args? space? ')' space? ';'? space?) {
-  return {
-    type: 'function',
-    function: name,
-    arguments: args
-  }
- }
+ = series+
 
 args
  = argument+
 
 argument
- = element:arg_type ','? (' '*)? {return element}
+ = element:arg_type ','? space? {return element}
 
 arg_type
  = series
@@ -49,8 +17,44 @@ arg_type
  / number
  / string
 
+series
+ = series:series_type ','? space? { return series }
+
+series_type
+ = chain
+ / request
+ / reference
+
+chained_function
+ = '.' func:function {
+  return func
+ }
+
+chain
+ = '(' space? first:series+ space? ')' rest:chained_function* {
+  first = {
+    type: 'seriesList',
+    list: first
+  }
+  first.label = text();
+
+  return {type: "chain", chain: [first].concat(rest)};
+ }
+
+function_name
+ = (first:[a-zA-Z]+ rest:[a-zA-Z0-9]* ) { return first.join('') + rest.join('') }
+
+function
+ = (name:function_name '(' space? args:args? space? ')' space? ','? space?) {
+  return {
+    type: 'function',
+    function: name,
+    arguments: args
+  }
+ }
+
 reference
- = '@' plot:integer ':' series:integer {
+ = plot:integer ':' series:integer {
   return {
    type: 'reference',
    plot: plot,
@@ -63,7 +67,7 @@ column
  = column:[A-Z]
 
 number
- = number:(integer '.'? integer?) ','? (' '*)? {return parseFloat(number.join(''))}
+ = number:(integer '.'? integer?) {return parseFloat(number.join(''))}
 
 integer
  = digits:DIGIT+ {return parseInt(digits.join(''))}
@@ -72,7 +76,7 @@ query
  = '`' q:[^`]* '`' {return q.join('')}
 
 request_operator
- = (space+ )? operator:function_name (space+)? arguments:request_operator_argument+ (space+)? {
+ = space? operator:function_name space? arguments:request_operator_argument+ space? {
   return {
    operator: operator,
    arguments: arguments
@@ -92,18 +96,6 @@ request
    obj.operators = operators
   }
   return obj;
- }
-
-
-index
- = (space+)? 'in' (space+)? index_name:index_name
- {
-   return index_name
- }
-
-index_name
- = indexName:[A-Za-z0-9\-_.*]+ {
-   return index_name.join('')
  }
 
 metric
