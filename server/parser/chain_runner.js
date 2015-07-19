@@ -26,10 +26,6 @@ var invokeChain;
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
 
-  function unsupportedArgument (item) {
-
-  }
-
   args = _.map(args, function (item) {
     if (_.isObject(item)) {
       switch (item.type) {
