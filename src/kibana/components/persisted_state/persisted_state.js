@@ -27,7 +27,7 @@ define(function (require) {
       validateValue(value);
       validateParent(parent, this._path);
 
-      value = value || (this._parent ? this.get() : {});
+      value = value || this._getDefault();
       this.set(_.cloneDeep(value));
     }
 
@@ -71,6 +71,11 @@ define(function (require) {
     PersistedState.prototype._getIndex = function (key) {
       if (_.isUndefined(key)) key = [];
       return (this._path.concat(key)).join('.');
+    };
+
+    PersistedState.prototype._getDefault = function () {
+      var def = (this._hasPath()) ? undefined : {};
+      return (this._parent ? this.get() : def);
     };
 
     PersistedState.prototype._setPath = function (path) {
