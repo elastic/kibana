@@ -386,6 +386,54 @@ define(function (require) {
           expect(persistedState.get('hello.nouns')).to.eql(['world', 'aliens', 'everyone']);
         });
       });
+
+      describe('child state operations', function () {
+        it('should modify changedState and clear state', function () {
+          var persistedState = new PersistedState({
+            name: 'parent data'
+          });
+          var childState = persistedState.createChild('test-child', {
+            title: 'i am a test child',
+            id: 1234,
+            author: 'user1'
+          });
+
+          childState.set('author', {
+            name: 'user1',
+            email: 'test@email.rocks'
+          });
+
+          expect(persistedState.get()).to.eql({
+            name: 'parent data',
+            'test-child': {
+              title: 'i am a test child',
+              id: 1234,
+              author: {
+                name: 'user1',
+                email: 'test@email.rocks'
+              }
+            }
+          });
+
+          // ensure the state objects were updated correctly
+          expect(persistedState._changedState).to.eql({
+            'test-child': {
+              author: {
+                name: 'user1',
+                email: 'test@email.rocks'
+              }
+            }
+          });
+          expect(persistedState._state).to.eql({
+            name: 'parent data',
+            'test-child': {
+              title: 'i am a test child',
+              id: 1234,
+              author: undefined
+            }
+          });
+        });
+      });
     });
   });
 });
