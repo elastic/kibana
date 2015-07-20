@@ -4,6 +4,7 @@ define(function (require) {
     var errors = require('errors');
 
     var Data = Private(require('components/vislib/lib/data'));
+    var Legend = Private(require('components/vislib/lib/legend'));
     var Layout = Private(require('components/vislib/lib/layout/layout'));
 
     /**
@@ -93,6 +94,12 @@ define(function (require) {
 
       this._validateData();
       this.renderArray.forEach(function (property) {
+        if (property instanceof Legend) {
+          self.vis.activeEvents().forEach(function (event) {
+            self.enable(event, property);
+          });
+        }
+
         if (typeof property.render === 'function') {
           property.render();
         }
