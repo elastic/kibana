@@ -32,6 +32,7 @@ define(function (require) {
       // copy passed state values and create internal trackers
       this._originalState = _.cloneDeep(value); // passed in, restorable state - NEVER MODIFIED
       this.set(_.cloneDeep(value));
+      this._initialized = true; // used to track state changes
     }
 
     PersistedState.prototype.get = function (key, def) {
@@ -117,8 +118,8 @@ define(function (require) {
       return _.merge(_.cloneDeep(state), changed);
     };
 
-    PersistedState.prototype._set = function (key, value, firstCall) {
-      firstCall = firstCall || !this._changedState;
+    PersistedState.prototype._set = function (key, value, initialState) {
+      if (_.isUndefined(initialState)) initialState = !this._initialized;
 
       // key must be the value, set the entire state using it
       if (_.isUndefined(value)) {
@@ -129,7 +130,7 @@ define(function (require) {
 
       // delegate to parent instance
       if (this._parent) {
-        return this._parent._set(this._getIndex(key), value, firstCall);
+        return this._parent._set(this._getIndex(key), value, initialState);
       }
 
       // no path, no key, set the whole state
@@ -138,10 +139,10 @@ define(function (require) {
         return this._state = value;
       }
 
-      if (firstCall) {
+      if (initialState) {
         // this is the intial call to set, import the state directly
         this._state = _.set(this._state || {}, this._getIndex(key), value);
-        this._changedState = {};
+        this._changedState = this._changedState || {};
       } else {
         // subsequent calls update the changed state
         // clearing the state key ensure that calls to _.merge get the changedState value
