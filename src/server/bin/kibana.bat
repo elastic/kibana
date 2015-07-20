@@ -17,5 +17,3 @@ TITLE Kibana Server @@version
 :finally
 
 ENDLOCAL
-
-
