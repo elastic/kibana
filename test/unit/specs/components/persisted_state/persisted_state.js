@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
+  var sinon = require('test_utils/auto_release_sinon');
   var errors = require('errors');
 
   var PersistedState;
@@ -150,7 +150,7 @@ define(function (require) {
           path: 'first*child',
           value: { first: true, second: false }
         }, {
-          path: 'second[child]',
+          path: 'second child',
           value: { first: false, second: true }
         }];
         var persistedStateValue = { original: true };
@@ -282,6 +282,66 @@ define(function (require) {
 
           persistedState.fromString(stateJSON);
           expect(persistedState.get()).to.eql(persistedStateValue);
+        });
+      });
+    });
+
+    describe('set state', function () {
+      describe('simple replace operations', function () {
+        var persistedState;
+
+        afterEach(function () {
+          // verify the state was updated correctly
+          expect(persistedState._state.hello).to.be(undefined);
+        });
+
+        it('should update with string value', function () {
+          persistedState = new PersistedState({ hello: 'world' });
+          expect(persistedState.get()).to.eql({ hello: 'world' });
+
+          persistedState.set('hello', 'fare thee well');
+          expect(persistedState.get()).to.eql({ hello: 'fare thee well' });
+        });
+
+        it('should update with object value', function () {
+          persistedState = new PersistedState({ hello: 'world' });
+          expect(persistedState.get()).to.eql({ hello: 'world' });
+
+          persistedState.set('hello', { message: 'fare thee well' });
+          expect(persistedState.get()).to.eql({ hello: { message: 'fare thee well' } });
+        });
+
+        it('should update with array value', function () {
+          persistedState = new PersistedState({ hello: ['world', 'everyone'] });
+          expect(persistedState.get()).to.eql({ hello: ['world', 'everyone'] });
+
+          persistedState.set('hello', ['people']);
+          expect(persistedState.get()).to.eql({ hello: ['people'] });
+        });
+
+        it('should replace object value', function () {
+          persistedState = new PersistedState({ hello: { message: 'world' } });
+          expect(persistedState.get()).to.eql({ hello: { message: 'world' } });
+
+          persistedState.set('hello', { length: 5 });
+          expect(persistedState.get()).to.eql({ hello: { length: 5 }});
+        });
+      });
+
+      describe('deep replace operations', function () {
+        var persistedState;
+
+        afterEach(function () {
+          // verify the state was updated correctly
+          expect(persistedState._state.hello).to.not.be(undefined);
+        });
+
+        it('should append to the object', function () {
+          persistedState = new PersistedState({ hello: { message: 'world' } });
+          expect(persistedState.get()).to.eql({ hello: { message: 'world' } });
+
+          persistedState.set('hello.length', 5);
+          expect(persistedState.get()).to.eql({ hello: { message: 'world', length: 5 } });
         });
       });
     });
