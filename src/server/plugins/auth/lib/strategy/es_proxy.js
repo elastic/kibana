@@ -27,7 +27,6 @@ module.exports = function (server) {
         };
       });
     },
-    
     validate: function (request, session) {
       return Promise.try(function () {
         if (!session.username || !session.password) throw new Error('No username and/or password in session.');
@@ -35,5 +34,5 @@ module.exports = function (server) {
         return true;
       });
     }
-  }
+  };
 };

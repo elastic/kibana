@@ -58,8 +58,8 @@ module.exports = new kibana.Plugin({
         function onSuccessfulLogin(credentials) {
           request.auth.session.set(credentials);
           reply({
-            "statusCode": 200,
-            "message": "Success"
+            'statusCode': 200,
+            'message': 'Success'
           });
         }
 

@@ -40,9 +40,8 @@ module.exports = function (server) {
         };
       });
     },
-
     validate: function (request, session) {
       return isValid(session.username, session.password);
     }
-  }
+  };
 };
