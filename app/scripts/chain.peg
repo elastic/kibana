@@ -33,7 +33,7 @@ chained_function
 chain
  = '(' space? first:series+ space? ')' rest:chained_function* {
   first = {
-    type: 'seriesList',
+    type: 'chainList',
     list: first
   }
   first.label = text();

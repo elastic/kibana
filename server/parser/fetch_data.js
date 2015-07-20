@@ -12,7 +12,7 @@ var time = {
   min: parseDateMath('now-18M').valueOf(),
   max: parseDateMath('now').valueOf(),
   field: '@timestamp',
-  interval: '8w'
+  interval: '12w'
 };
 
 // Load function plugins
@@ -86,7 +86,14 @@ module.exports = function (config, cacheKey) {
       }
     });
 
-    return { data:  data, cacheKey: cacheKey};
+    return {
+      type: 'seriesList',
+      list: [{
+        data:  data,
+        type: 'series',
+        cacheKey: cacheKey
+      }]
+    };
   }).catch(function (e) {
     throw new Error(e.message.root_cause[0].reason);
   });

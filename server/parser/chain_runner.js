@@ -9,6 +9,7 @@ var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
 
 var fetchData = require('./fetch_data.js');
+//var deepFindByProp = require('../utils/deep_find_by_prop.js');
 
 // Load function plugins
 var functions  = _.chain(glob.sync('server/series_functions/*.js')).map(function (file) {
@@ -24,9 +25,8 @@ var sheet;
 var queryCache = {};
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
-  console.log(fnName + '::: ' + JSON.stringify(args, null, ' '));
-
   args = _.map(args, function (item) {
+
     if (_.isObject(item)) {
       switch (item.type) {
         case 'query':
@@ -43,8 +43,10 @@ function invoke (fnName, args) {
           return invokeChain(reference);
         case 'chain':
           return invokeChain(item);
-        case 'seriesList':
+        case 'chainList':
           return resolveChainList(item.list);
+        case 'seriesList':
+          return item;
       }
       throw new Error ('Argument type not supported: ' + JSON.stringify(item));
     }
@@ -52,13 +54,13 @@ function invoke (fnName, args) {
   });
 
 
-  return Promise.all(args).then(function (series) {
+  return Promise.all(args).then(function (args) {
     if (!functions[fnName]){
       throw new Error('Function not found');
     }
-    var output = functions[fnName](series);
+    var output = functions[fnName](args);
     return output;
-  });
+  }).catch(function (e) {throw e;});
 }
 
 function invokeChain (chainObj, result) {
@@ -73,36 +75,33 @@ function invokeChain (chainObj, result) {
   if (link.type === 'chain') {
     promise = invokeChain(link);
   } else if (!result) {
-    if (link.label) {
-      promise = invoke('label', [link, link.label, true]);
-    } else {
-      promise = invoke('first', [link]);
-    }
+    promise = invoke('first', [link]);
   } else {
     promise = invoke(link.function, result.concat(link.arguments));
   }
 
   return promise.then(function (result) {
     return invokeChain({type:'chain', chain: chain}, [result]);
-  });
+  }).catch(function (e) {throw e;});
 
 }
 
 function resolveChainList (chainList) {
   var seriesList = _.map(chainList, function (chain) {
     var values = invoke('first', [chain]);
-
     return values.then(function (args) {
-      //args.data = unzipPairs(args.data);
       return args;
     });
   });
   return Promise.all(seriesList).then(function (args) {
-    return args;
-  }).catch(function () {
-    return {};
-  });
+    var list = _.chain(args).pluck('list').flatten().value();
+    return {type: 'seriesList', list: list};
+  }).catch(function (e) {throw e;});
 
+}
+
+function logObj(obj, thing) {
+  return JSON.stringify(obj, null, thing ? ' ' : undefined);
 }
 
 function preProcessSheet (sheet) {
@@ -137,7 +136,7 @@ function preProcessSheet (sheet) {
       queryCache[result.cacheKey] = result;
     });
     return queryCache;
-  });
+  }).catch(function (e) {throw e;});
 }
 
 function resolveSheet (sheet) {
@@ -147,20 +146,7 @@ function resolveSheet (sheet) {
     } catch (e) {
       throw {plot: index, exception: e};
     }
-
   });
-}
-
-function deepFindByProp (obj, property, list) {
-  list = list || [];
-  if (_.has(obj, property)) {
-    list.push(obj);
-    return list;
-  }
-  return list.concat(_.flatten(_.map(obj, function (elem) {
-    return deepFindByProp(elem, property);
-  })));
-
 }
 
 function processRequest (request) {
@@ -174,9 +160,8 @@ function processRequest (request) {
 
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList) {
-      return resolveChainList(chainList).then(function (plots) {
-        console.log(plots);
-        return deepFindByProp(plots, 'data');
+      return resolveChainList(chainList).then(function (seriesList) {
+        return seriesList.list;
       });
     });
   });
@@ -187,13 +172,14 @@ module.exports = processRequest;
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
   Promise.all(sheet).then(function (sheet) {
-    //console.log(JSON.stringify(sheet));
+    console.log(logObj(sheet, 1));
+    console.log(logObj({done:true}));
     return sheet;
-  });
+  }).catch(function (e) {throw e;});
 }
 
 debugSheet(
-  ['(`US`,`JP`)']
+  ['(((`*`),((`US`).divide(4).divide(2)),(`JP`).sum(10))), (`*`)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );
