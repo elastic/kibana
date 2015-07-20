@@ -69,8 +69,8 @@ define(function (require) {
     };
 
     PersistedState.prototype._getIndex = function (key) {
-      if (_.isUndefined(key)) return this._path;
-      return this._path.concat(key);
+      if (_.isUndefined(key)) key = [];
+      return (this._path.concat(key)).join('.');
     };
 
     PersistedState.prototype._setPath = function (path) {
