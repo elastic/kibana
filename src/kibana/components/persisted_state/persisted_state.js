@@ -28,6 +28,9 @@ define(function (require) {
       validateParent(parent, this._path);
 
       value = value || this._getDefault();
+
+      // copy passed state values and create internal trackers
+      this._originalState = _.cloneDeep(value); // passed in, restorable state - NEVER MODIFIED
       this.set(_.cloneDeep(value));
     }
 
@@ -39,13 +42,12 @@ define(function (require) {
       return _.cloneDeep(this._set(key, value));
     };
 
-    PersistedState.prototype.reset = function () {
-      this.set({});
+    PersistedState.prototype.reset = function (key) {
+      this.set(key, undefined);
     };
 
-    PersistedState.prototype.remove = function (key) {
-      this._state = _.omit(this._state, [key]);
-      return this.get();
+    PersistedState.prototype.clear = function (key) {
+      this.set(key, null);
     };
 
     PersistedState.prototype.createChild = function (path, value) {
