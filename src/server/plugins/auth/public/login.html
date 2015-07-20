@@ -10,7 +10,7 @@
 
   <body>
     <div class="container">
-      <form action="/login" method="POST">
+      <form id="login-form">
         <div class="form-group">
           <label for="username">Username</label>
           <input type="text" class="form-control" id="username" name="username" placeholder="Username">
@@ -19,8 +19,34 @@
           <label for="password">Password</label>
           <input type="password" class="form-control" id="password" name="password" placeholder="Password">
         </div>
+        <div id="error-message" class="form-group has-error"></div>
         <button type="submit" class="btn btn-default">Submit</button>
       </form>
     </div>
+
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+      document.getElementById('login-form').addEventListener('submit', function (e) {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        $.ajax({
+          type: 'POST',
+          url: '',
+          data: {
+            username: username,
+            password: password
+          },
+          success: function (response) {
+            window.location = '/';
+          },
+          error: function (response) {
+            response = JSON.parse(response.responseText);
+            document.getElementById('error-message').innerHTML = response.message;
+          }
+        });
+
+        e.preventDefault();
+      });
+    </script>
   </body>
 </html>
