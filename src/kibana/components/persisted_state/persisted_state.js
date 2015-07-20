@@ -93,12 +93,27 @@ define(function (require) {
     };
 
     PersistedState.prototype._get = function (key, def) {
+      // delegate to parent instance
       if (this._parent) return this._parent._get(this._getIndex(key), key);
-      if (!this._hasPath() && _.isUndefined(key)) return this._state;
-      return _.get(this._state, this._getIndex(key), def);
+
+      // no path, no key, get the whole state
+      if (!this._hasPath() && _.isUndefined(key)) {
+        return _.merge(_.cloneDeep(this._state || this._getDefault()), this._changedState);
+      }
+
+      // get the merged state
+      var state = _.get(this._state, this._getIndex(key), def);
+      var changed = _.get(this._changedState, this._getIndex(key), def);
+
+      // handle case where state is not a mergeable object
+      var notMergeable = _.isUndefined(state) || !_.isPlainObject(state);
+      if (notMergeable) return !_.isUndefined(changed) ? changed : state;
+      return _.merge(_.cloneDeep(state), changed);
     };
 
-    PersistedState.prototype._set = function (key, value) {
+    PersistedState.prototype._set = function (key, value, firstCall) {
+      firstCall = firstCall || !this._changedState;
+
       // key must be the value, set the entire state using it
       if (_.isUndefined(value)) {
         // swap the key and value to write to the state
@@ -106,9 +121,29 @@ define(function (require) {
         key = undefined;
       }
 
-      if (this._parent) return this._parent._set(this._getIndex(key), value);
-      if (!this._hasPath() && _.isUndefined(key)) return this._state = value;
-      return this._state = _.set(this._state || {}, this._getIndex(key), value);
+      // delegate to parent instance
+      if (this._parent) {
+        return this._parent._set(this._getIndex(key), value, firstCall);
+      }
+
+      // no path, no key, set the whole state
+      if (!this._hasPath() && _.isUndefined(key)) {
+        this._changedState = {}; // reset the changed state
+        return this._state = value;
+      }
+
+      if (firstCall) {
+        // this is the intial call to set, import the state directly
+        this._state = _.set(this._state || {}, this._getIndex(key), value);
+        this._changedState = {};
+      } else {
+        // subsequent calls update the changed state
+        // clearing the state key ensure that calls to _.merge get the changedState value
+        this._state = _.set(this._state || {}, this._getIndex(key), undefined);
+        this._changedState = _.set(this._changedState, this._getIndex(key), value);
+      }
+
+      return this.get(key);
     };
 
     return PersistedState;
