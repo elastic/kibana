@@ -286,6 +286,39 @@ define(function (require) {
       });
     });
 
+    describe('get state', function () {
+      it('should perform deep gets', function () {
+        var obj = {
+          red: {
+            green: {
+              blue: 'yellow'
+            }
+          },
+          orange: false,
+          purple: {
+            violet: ''
+          }
+        };
+        var persistedState = new PersistedState(obj);
+        expect(persistedState.get()).to.eql(obj);
+
+        expect(persistedState.get('red')).to.eql({ green: { blue: 'yellow' } });
+        expect(persistedState.get('red.green')).to.eql({ blue: 'yellow' });
+        expect(persistedState.get('red[green]')).to.eql({ blue: 'yellow' });
+        expect(persistedState.get('red.green.blue')).to.eql('yellow');
+        expect(persistedState.get('orange')).to.equal(false);
+        expect(persistedState.get('purple')).to.eql({ violet: '' });
+      });
+
+      it('should perform deep gets with arrays', function () {
+        var persistedState = new PersistedState({ hello: { nouns: ['world', 'humans', 'everyone'] } });
+
+        expect(persistedState.get()).to.eql({ hello: { nouns: ['world', 'humans', 'everyone'] } });
+        expect(persistedState.get('hello')).to.eql({ nouns: ['world', 'humans', 'everyone'] });
+        expect(persistedState.get('hello.nouns')).to.eql(['world', 'humans', 'everyone']);
+      });
+    });
+
     describe('set state', function () {
       describe('simple replace operations', function () {
         var persistedState;
