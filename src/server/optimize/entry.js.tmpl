@@ -3,10 +3,10 @@
  *
  * This is programatically created and updated, do not modify
  *
- * built using: Kibana <%= version %>
+ * built using: <%= optimizerTagline %>
  * includes code from:
 <%
-  deps.sort().forEach(function (plugin) {
+  entry.deps.sort().forEach(function (plugin) {
     print(` *  - ${plugin}\n`);
   })
 %> *
@@ -14,7 +14,7 @@
 
 require('ui/chrome');
 <%
-modules.require.forEach(function (id) {
+entry.modules.require.forEach(function (id) {
   if (id !== 'ui/chrome') print(`require('${id}');\n`);
 });
-%>require('ui/chrome').bootstrap(<%= JSON.stringify(modules.angular) %>);
+%>require('ui/chrome').bootstrap(<%= JSON.stringify(entry.modules.angular) %>);

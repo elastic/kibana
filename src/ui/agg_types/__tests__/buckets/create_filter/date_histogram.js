@@ -3,7 +3,7 @@ define(function (require) {
     describe('date_histogram', function () {
       var _ = require('lodash');
       var moment = require('moment');
-      var sinon = require('test_utils/auto_release_sinon');
+      var sinon = require('auto-release-sinon/mocha');
       var aggResp = require('fixtures/agg_resp/date_histogram');
       var expect = require('expect.js');
 

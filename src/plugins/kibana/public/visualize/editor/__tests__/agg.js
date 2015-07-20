@@ -5,7 +5,7 @@ define(function (require) {
   var expect = require('expect.js');
 
 
-  require('plugins/visualize/editor/agg');
+  require('plugins/kibana/visualize/editor/agg');
 
 
   describe('Vis-Editor-Agg plugin directive', function () {

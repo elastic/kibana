@@ -10,7 +10,7 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     var $rootScope, $compile, $timeout, Promise;
     var appState, queryFilter, mapFilter, $el;
-    // require('test_utils/no_digest_promises').activateForSuite();
+    // require('testUtils/noDigestPromises').activateForSuite();
 
     beforeEach(function () {
       appState = new MockState({ filters: [] });

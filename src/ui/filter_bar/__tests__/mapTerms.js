@@ -1,7 +1,7 @@
 define(function (require) {
   describe('Filter Bar Directive', function () {
     describe('mapTerms()', function () {
-      var sinon = require('test_utils/auto_release_sinon');
+      var sinon = require('auto-release-sinon/mocha');
       var expect = require('expect.js');
       var mapTerms, $rootScope;
       beforeEach(module('kibana'));

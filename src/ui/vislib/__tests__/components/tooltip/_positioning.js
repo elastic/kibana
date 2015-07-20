@@ -5,7 +5,7 @@ define(function (require) {
     describe('positioning', function () {
       var $ = require('jquery');
       var _ = require('lodash');
-      var sinon = require('test_utils/auto_release_sinon');
+      var sinon = require('auto-release-sinon/mocha');
 
       var posTT = require('ui/vislib/components/tooltip/_position_tooltip');
       var positions = ['north', 'south', 'east', 'west'];

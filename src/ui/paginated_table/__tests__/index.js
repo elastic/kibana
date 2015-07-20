@@ -2,7 +2,7 @@ define(function (require) {
   require('ui/paginated_table/paginated_table');
   var _ = require('lodash');
   var $ = require('jquery');
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
   var expect = require('expect.js');
 
   describe('paginated table', function () {

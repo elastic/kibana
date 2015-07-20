@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
   var $ = require('jquery');
 

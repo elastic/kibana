@@ -6,11 +6,9 @@ module.exports = function (kibana) {
         main: 'plugins/appSwitcher/appSwitcher',
         hidden: true,
 
-        defaultModules: {
+        autoload: {
           angular: [],
-          require: [
-            'ui/chrome'
-          ]
+          require: []
           .concat(kibana.autoload.styles)
         }
       }

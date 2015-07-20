@@ -1,7 +1,7 @@
 define(function (require) {
   describe('docTitle Service', function () {
     var _ = require('lodash');
-    var sinon = require('test_utils/auto_release_sinon');
+    var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
     var initialDocTitle;
     var MAIN_TITLE = 'Kibana 4';
@@ -19,8 +19,8 @@ define(function (require) {
     });
 
     beforeEach(module('kibana', function ($provide) {
-      $provide.decorator('docTitle', sinon.decorateWithSpy('update'));
-      $provide.decorator('$rootScope', sinon.decorateWithSpy('$on'));
+      $provide.decorator('docTitle', decorateWithSpy('update'));
+      $provide.decorator('$rootScope', decorateWithSpy('$on'));
     }));
 
     beforeEach(inject(function ($injector, Private) {
@@ -79,6 +79,13 @@ define(function (require) {
         expect(document.title).to.be('entire name');
       });
     });
+
+    function decorateWithSpy(prop) {
+      return function ($delegate) {
+        sinon.spy($delegate, prop);
+        return $delegate;
+      };
+    }
 
   });
 });

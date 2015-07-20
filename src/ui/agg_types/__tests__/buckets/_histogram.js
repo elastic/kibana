@@ -26,7 +26,7 @@ define(function (require) {
 
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
-        var AggParamWriter = Private(require('test_utils/agg_param_writer'));
+        var AggParamWriter = Private(require('../aggParamWriter'));
         paramWriter = new AggParamWriter({ aggType: 'histogram' });
       }));
 

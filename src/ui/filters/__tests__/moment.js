@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
   var moment = require('moment');
 
   // Load the kibana app dependencies.

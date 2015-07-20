@@ -3,7 +3,7 @@
 let _ = require('lodash');
 let EventEmitter = require('events').EventEmitter;
 let promify = require('bluebird').promisify;
-let each = require('bluebird').each;
+let resolve = require('bluebird').resolve;
 let Hapi = require('hapi');
 
 let rootDir = require('../utils/fromRoot')('.');
@@ -22,7 +22,7 @@ module.exports = class KbnServer extends EventEmitter {
     this.server = new Hapi.Server();
 
     require('./config')(this, this.server);
-    let config = this.server.config();
+    this.config = this.server.config();
 
     this.ready = _.constant(this.mixin(
       require('./http'),
@@ -34,7 +34,7 @@ module.exports = class KbnServer extends EventEmitter {
     ));
 
     this.listen = _.once(this.listen);
-    if (config.get('server.autoListen')) {
+    if (this.config.get('server.autoListen')) {
       this.listen();
     }
   }
@@ -54,7 +54,7 @@ module.exports = class KbnServer extends EventEmitter {
     let self = this;
     let server = self.server;
 
-    return each(fns, function (fn) {
+    return resolve(fns).each(function (fn) {
       return fn.call(self, self, server, server.config());
     })
     .then(_.noop); // clear the return value

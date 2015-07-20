@@ -2,7 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
   var getFakeRow = require('fixtures/fake_row');
 
@@ -11,7 +11,7 @@ define(function (require) {
     // Load the kibana app dependencies.
     require('angular-route');
 
-    require('plugins/discover/index');
+    require('plugins/kibana/discover/index');
 
     var $parentScope, $scope, config;
 

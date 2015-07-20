@@ -3,7 +3,7 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
   var expect = require('expect.js');
-  require('plugins/doc/index');
+  require('plugins/kibana/doc/index');
 
   var $scope, createController, timefilter;
 

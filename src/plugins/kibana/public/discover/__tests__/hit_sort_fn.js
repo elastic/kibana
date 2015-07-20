@@ -9,7 +9,7 @@ define(function (require) {
 
     beforeEach(module('hitSortFunctionTests'));
     beforeEach(inject(function (Private) {
-      createHitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
+      createHitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
     }));
 
 

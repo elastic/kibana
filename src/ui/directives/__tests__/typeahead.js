@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
   var expect = require('expect.js');
 
   // Load the kibana app dependencies.
@@ -8,7 +8,7 @@ define(function (require) {
   require('ui/typeahead/typeahead');
 
   // TODO: This should not be needed, timefilter is only included here, it should move
-  require('plugins/discover/index');
+  require('plugins/kibana/discover/index');
 
   var typeaheadHistoryCount = 10;
   var typeaheadName = 'unittest';

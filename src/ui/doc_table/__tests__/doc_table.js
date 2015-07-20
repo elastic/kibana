@@ -3,7 +3,7 @@ define(function (require) {
   var expect = require('expect.js');
   var $ = require('jquery');
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var searchResponse = require('fixtures/search_response');
 
   // Load the kibana app dependencies.

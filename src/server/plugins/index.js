@@ -10,6 +10,14 @@ module.exports = function (kbnServer, server, config) {
     return (plugin && plugin.publicDir) ? plugin.publicDir : Boom.notFound();
   });
 
+  server.method('kbnPluginById', function (id, next) {
+    if (kbnServer.plugins.byId[id]) {
+      next(null, kbnServer.plugins.byId[id]);
+    } else {
+      next(Boom.notFound(`no plugin with the id "${id}"`));
+    }
+  });
+
   return kbnServer.mixin(
     require('./scan'),
     require('./load')

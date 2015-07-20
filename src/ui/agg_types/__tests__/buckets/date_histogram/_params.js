@@ -14,7 +14,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      var AggParamWriter = Private(require('test_utils/agg_param_writer'));
+      var AggParamWriter = Private(require('../../aggParamWriter'));
       var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       var timefilter = $injector.get('timefilter');
 

@@ -3,6 +3,8 @@ define(function (require) {
   var $ = require('jquery');
   var $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
+  require('ui/config');
+
   require('modules')
   .get('kibana')
   .run(function ($rootScope, $compile, config) {

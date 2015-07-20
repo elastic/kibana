@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
 
   function ParamClassStub(parent, body) {
     var stub = sinon.spy(body || function () {

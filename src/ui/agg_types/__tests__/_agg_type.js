@@ -2,7 +2,7 @@ define(function (require) {
   return ['AggType Class', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
-    var sinon = require('test_utils/auto_release_sinon');
+    var sinon = require('auto-release-sinon/mocha');
     var AggType;
     var AggParams;
     var AggConfig;

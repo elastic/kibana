@@ -4,7 +4,7 @@ define(function (require) {
   var expect = require('expect.js');
 
   require('angular-route');
-  require('plugins/discover/index');
+  require('plugins/kibana/discover/index');
 
   var $parentScope, $scope, $elem;
 

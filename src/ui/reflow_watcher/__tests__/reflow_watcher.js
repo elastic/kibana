@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var expect = require('expect.js');
-    var sinon = require('test_utils/auto_release_sinon');
+    var sinon = require('auto-release-sinon/mocha');
 
     var $body = $(document.body);
     var $window = $(window);

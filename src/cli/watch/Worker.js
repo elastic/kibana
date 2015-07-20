@@ -17,7 +17,7 @@ cluster.setupMaster({
 });
 
 module.exports = class Worker extends EventEmitter {
-  constructor(gaze, opts) {
+  constructor(opts) {
     opts = opts || {};
     super();
 

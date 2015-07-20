@@ -5,8 +5,8 @@ define(function (require) {
     var Promise = require('bluebird');
     var expect = require('expect.js');
 
-    var sinon = require('test_utils/auto_release_sinon');
-    require('test_utils/no_digest_promises').activateForSuite();
+    var sinon = require('auto-release-sinon/mocha');
+    require('testUtils/noDigestPromises').activateForSuite();
 
     var ResizeChecker;
     var EventEmitter;

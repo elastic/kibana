@@ -5,44 +5,13 @@ module.exports = function (kbnServer, server, config) {
   var resolve = require('path').resolve;
   var fromRoot = require('../../utils/fromRoot');
 
-  var Optimizer = require('./Optimizer');
+  var CachedOptimizer = require('./CachedOptimizer');
+  var WatchingOptimizer = require('./WatchingOptimizer');
+
   var bundleDir = resolve(config.get('optimize.bundleDir'));
   var status = kbnServer.status.create('optimize');
 
   server.exposeStaticDir('/bundles/{path*}', bundleDir);
-
-  function start() {
-    kbnServer.optimizer = new Optimizer({
-      watch: config.get('optimize.watch'),
-      sourceMaps: config.get('optimize.sourceMaps'),
-      bundleDir: bundleDir,
-      apps: [].concat(
-        kbnServer.uiExports.apps,
-        kbnServer.uiExports.apps.hidden
-      ),
-      plugins: kbnServer.plugins
-    });
-
-    kbnServer.optimizer
-    .on('build-start', function () {
-      status.yellow('Optimizing and caching application source files');
-    })
-    .on('watch-run', _.before(2, function () {
-      status.yellow('Optimizing and watching application source files');
-    }))
-    .on('watch-run', _.after(2, function () {
-      status.yellow('Source file change detected, reoptimizing source files');
-    }))
-    .on('done', function (stats) {
-      logStats('debug', stats);
-      status.green('Optimization complete');
-    })
-    .on('error', function (stats, err) {
-      logStats('fatal', stats);
-      status.red('Optimization failure! ' + err.message);
-    })
-    .init();
-  }
 
   function logStats(tag, stats) {
     if (config.get('logging.json')) {
@@ -50,6 +19,11 @@ module.exports = function (kbnServer, server, config) {
     } else {
       server.log(['optimize', tag], `\n${ stats.toString({ colors: true }) }`);
     }
+  }
+
+  function describeEntries(entries) {
+    let ids = _.pluck(entries, 'id').join('", "');
+    return `application${ entries.length === 1 ? '' : 's'} "${ids}"`;
   }
 
   function onMessage(handle, filter) {
@@ -80,7 +54,55 @@ module.exports = function (kbnServer, server, config) {
     send();
   }
 
-  if (!role || role === 'send') {
-    start();
-  }
+  let watching = config.get('optimize.watch');
+  let Optimizer = watching ? WatchingOptimizer : CachedOptimizer;
+  let optmzr = kbnServer.optimizer = new Optimizer({
+    sourceMaps: config.get('optimize.sourceMaps'),
+    bundleDir: bundleDir,
+    entries: _.map(
+      [].concat(
+        kbnServer.uiExports.apps,
+        kbnServer.uiExports.apps.hidden
+      ),
+      function (app) {
+        return {
+          id: app.id,
+          deps: app.getRelatedPlugins(),
+          modules: app.getModules()
+        };
+      }
+    ),
+    plugins: kbnServer.plugins
+  });
+
+  optmzr.on('rebuilding', function () {
+    status.yellow('Source file change detected, reoptimizing source files');
+  });
+
+  optmzr.on('done', function (entries, stats) {
+    logStats('debug', stats);
+    status.green(`Optimization of ${describeEntries(entries)} complete`);
+  });
+
+  optmzr.on('error', function (entries, err, stats) {
+    if (stats) logStats('fatal', stats);
+    status.red('Optimization failure! ' + err.message);
+  });
+
+  return optmzr.init(!role || role === 'send').then(function () {
+    let entries = optmzr.bundles.getMissingEntries();
+
+    if (entries.length && watching) {
+      status.yellow(`Optimizing and watching application source files`);
+    }
+    else if (entries.length) {
+      status.yellow(`Optimizing and caching ${describeEntries(entries)}`);
+    }
+    else if (watching) {
+      status.red('No optimizable applications found');
+    }
+    else {
+      status.green('Reusing previously cached application source files');
+    }
+  });
 };

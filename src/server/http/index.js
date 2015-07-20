@@ -1,8 +1,11 @@
+'use strict';
+
 module.exports = function (kbnServer, server, config) {
-  var Boom = require('boom');
-  var parse = require('url').parse;
-  var format = require('url').format;
-  var getDefaultRoute = require('./getDefaultRoute');
+  let _ = require('lodash');
+  let Boom = require('boom');
+  let parse = require('url').parse;
+  let format = require('url').format;
+  let getDefaultRoute = require('./getDefaultRoute');
 
   // Create a new connection
   server.connection({
@@ -36,9 +39,31 @@ module.exports = function (kbnServer, server, config) {
     });
   });
 
+  // helper for creating view managers for servers
+  server.decorate('server', 'setupViews', function (path, engines) {
+    this.views({
+      path: path,
+      isCached: config.get('optimize.viewCaching'),
+      engines: _.assign({ jade: require('jade') }, engines || {})
+    });
+  });
+
+  server.decorate('server', 'redirectToSlash', function (route) {
+    this.route({
+      path: route,
+      method: 'GET',
+      handler: function (req, reply) {
+        return reply.redirect(format({
+          search: req.url.search,
+          pathname: req.url.pathname + '/',
+        }));
+      }
+    });
+  });
+
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    var response = req.response;
+    let response = req.response;
 
     if (response.isBoom) {
       response.output.headers['x-app-name'] = kbnServer.name;
@@ -63,7 +88,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     path: '/{p*}',
     handler: function (req, reply) {
-      var path = req.path;
+      let path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }

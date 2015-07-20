@@ -1,7 +1,7 @@
 define(function (require) {
   return ['index pattern', function () {
     var _ = require('lodash');
-    var sinon = require('test_utils/auto_release_sinon');
+    var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
     var Promise = require('bluebird');
     var errors = require('errors');
@@ -120,7 +120,7 @@ define(function (require) {
 
     describe('refresh fields', function () {
       // override the default indexPattern, with a truncated field list
-      require('test_utils/no_digest_promises').activateForSuite();
+      require('testUtils/noDigestPromises').activateForSuite();
       var indexPatternId = 'test-pattern';
       var indexPattern;
       var fieldLength;

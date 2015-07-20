@@ -10,14 +10,13 @@ module.exports = function (grunt) {
     plugins: __dirname + '/src/plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
+    testUtilsDir: __dirname + '/src/testUtils',
     configFile: __dirname + '/src/config/kibana.yml',
 
     nodeVersion: '0.10.35',
     platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
     services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
 
-    unitTestDir: __dirname + '/test/unit',
-    testUtilsDir: __dirname + '/test/utils',
     bowerComponentsDir: __dirname + '/bower_components',
 
     devPlugins: 'devMode',
@@ -33,8 +32,7 @@ module.exports = function (grunt) {
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
       '<%= src %>/**/*.js',
-      '<%= unitTestDir %>/**/*.js',
-      '!<%= unitTestDir %>/specs/vislib/fixture/**/*'
+      '!<%= src %>/fixtures/**/*.js'
     ]
   };
 

@@ -1,6 +1,6 @@
 define(function (require) {
   var generateMappingChain = require('ui/filter_bar/lib/generateMappingChain');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
 
   describe('Filter Bar Directive', function () {

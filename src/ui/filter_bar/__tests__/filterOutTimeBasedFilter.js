@@ -3,7 +3,7 @@ define(function (require) {
     describe('filterOutTimeBasedFilter()', function () {
 
       var expect = require('expect.js');
-      var sinon = require('test_utils/auto_release_sinon');
+      var sinon = require('auto-release-sinon/mocha');
       var filterOutTimeBasedFilter,
           $rootScope;
 

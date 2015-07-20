@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
+  var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
   var expect = require('expect.js');
 
   // Load the kibana app dependencies.

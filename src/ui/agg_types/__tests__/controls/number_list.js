@@ -3,7 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var expect = require('expect.js');
-    var simulateKeys = require('test_utils/simulate_keys');
+    var simulateKeys = require('testUtils/simulateKeys');
 
     require('ui/number_list/number_list');
 

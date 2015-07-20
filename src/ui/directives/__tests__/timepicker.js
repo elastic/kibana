@@ -4,17 +4,17 @@ define(function (require) {
   var expect = require('expect.js');
   var _ = require('lodash');
   var $ = require('jquery');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
 
 
   // Load the kibana app dependencies.
   require('angular-route');
 
-  require('plugins/visualize/index');
-  require('plugins/dashboard/index');
+  require('plugins/kibana/visualize/index');
+  require('plugins/kibana/dashboard/index');
 
   // TODO: This should not be needed, timefilter is only included here, it should move
-  require('plugins/discover/index');
+  require('plugins/kibana/discover/index');
 
   var $parentScope, $scope, $elem;
   var anchor = '2014-01-01T06:06:06.666Z';

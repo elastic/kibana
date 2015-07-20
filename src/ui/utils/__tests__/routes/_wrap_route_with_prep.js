@@ -6,7 +6,7 @@ define(function (require) {
   var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
   var Promise = require('bluebird');
   var _ = require('lodash');
-  var stub = require('test_utils/auto_release_sinon').stub;
+  var stub = require('auto-release-sinon/mocha').stub;
 
   require('ui/private');
 
@@ -14,7 +14,7 @@ define(function (require) {
 
   return function () {
     describe('wrapRouteWithPrep fn', function () {
-      require('test_utils/no_digest_promises').activateForSuite();
+      require('testUtils/noDigestPromises').activateForSuite();
 
       beforeEach(function () {
         routes = new RouteManager();

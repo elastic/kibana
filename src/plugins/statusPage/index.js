@@ -6,7 +6,7 @@ module.exports = function (kibana) {
         main: 'plugins/statusPage/statusPage',
         hidden: true,
 
-        defaultModules: {
+        autoload: {
           angular: [],
           require: [
             'ui/chrome',

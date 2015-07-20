@@ -7,7 +7,6 @@ define(function (require) {
   require('ui/timefilter/timefilter');
   require('ui/private');
   require('ui/promises');
-  require('ui/style_compile');
 
   var TabCollection = require('ui/chrome/TabCollection');
 
@@ -17,7 +16,7 @@ define(function (require) {
   var tabs = new TabCollection();
   var rootController = null;
   var rootTemplate = null;
-  var showAppsLink = payload.appCount > 1;
+  var showAppsLink = null;
   var brand = null;
 
   var chrome = {
@@ -185,7 +184,7 @@ define(function (require) {
   };
 
   chrome.getShowAppsLink = function () {
-    return showAppsLink;
+    return showAppsLink == null ? payload.appCount > 1 : showAppsLink;
   };
 
   chrome.getBrand = function () {

@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
 
   /**
    * Wrap a test function with the logic required to get the routeProvider

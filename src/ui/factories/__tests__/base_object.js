@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
   var expect = require('expect.js');
   require('ui/private');
 

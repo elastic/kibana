@@ -1,5 +1,5 @@
 define(function (require) {
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
   require('ui/state_management/app_state');
 

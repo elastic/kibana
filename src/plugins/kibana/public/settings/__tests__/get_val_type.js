@@ -1,5 +1,5 @@
 define(function (require) {
-  var getValType = require('plugins/settings/sections/advanced/lib/get_val_type');
+  var getValType = require('plugins/kibana/settings/sections/advanced/lib/get_val_type');
   var expect = require('expect.js');
 
   describe('Settings', function () {

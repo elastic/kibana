@@ -4,7 +4,7 @@ define(function (require) {
 
   describe('FixedScroll directive', function () {
     var $ = require('jquery');
-    var sinon = require('test_utils/auto_release_sinon');
+    var sinon = require('auto-release-sinon/mocha');
     var Promise = require('bluebird');
 
     var compile;

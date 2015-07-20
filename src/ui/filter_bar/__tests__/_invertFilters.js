@@ -1,7 +1,7 @@
 define(function (require) {
   return ['invert filters', function () {
     var _ = require('lodash');
-    var sinon = require('test_utils/auto_release_sinon');
+    var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
     var MockState = require('fixtures/mock_state');
     var storeNames = {

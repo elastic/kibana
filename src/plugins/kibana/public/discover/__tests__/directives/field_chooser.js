@@ -2,12 +2,12 @@ define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
 
   // Load the kibana app dependencies.
   require('ui/private');
-  require('plugins/discover/components/field_chooser/field_chooser');
+  require('plugins/kibana/discover/components/field_chooser/field_chooser');
 
   var $parentScope;
   var $scope;

@@ -3,7 +3,7 @@ define(function (require) {
   var expect = require('expect.js');
   var _ = require('lodash');
   var $ = require('jquery');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
 
   var geoJsonData = require('vislib_fixtures/mock_data/geohash/_geo_json');
   var MockMap = require('fixtures/tilemap_map');

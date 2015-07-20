@@ -3,7 +3,7 @@ define(['angular', 'bluebird', 'services/promises'], function (angular, Bluebird
    * replace the Promise service with Bluebird so that tests
    * can use promises without having to call $rootScope.apply()
    *
-   * var nonDigestPromises = require('test_utils/non_digest_promises');
+   * var nonDigestPromises = require('testUtils/non_digest_promises');
    *
    * describe('some module that does complex shit with promises', function () {
    *   beforeEach(nonDigestPromises.activate);

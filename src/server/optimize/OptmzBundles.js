@@ -14,69 +14,70 @@ let unlink = promify(require('fs').unlink);
 let readdir = promify(require('fs').readdir);
 let readSync = require('fs').readFileSync;
 
-let appEntryTmpl = _.template(readSync(join(__dirname, 'OptmzAppEntry.js.tmpl')));
-let serverVersion = require('../../utils/closestPackageJson').getSync().version;
+let entryFileTemplate = _.template(readSync(join(__dirname, 'entry.js.tmpl')));
 
 class OptmzBundles {
-  constructor(opts) {
-    let dir = _.get(opts, 'bundleDir');
-    let apps = _.get(opts, 'apps');
-    let versionTag = _.get(opts, 'sourceMaps') ? ' (with source maps)' : '';
-
-    this.dir = dir;
+  constructor(opts, optimizerTagline) {
+    this.dir = _.get(opts, 'bundleDir');
     if (!_.isString(this.dir)) {
       throw new TypeError('Optimizer requires a working directory');
     }
 
-    this.entries = _.map(apps, function (app) {
+    this.sourceMaps = _.get(opts, 'sourceMaps');
+    this.entries = _.get(opts, 'entries', []).map(function (spec) {
       let entry = {
-        id: app.id,
-        app: app,
-        modules: app.getModules(),
-        deps: app.relatedPlugins(),
-        path: join(dir, app.id + '.entry.js'),
-        bundlePath: join(dir, app.id + '.js')
+        id: spec.id,
+        deps: _.get(spec, 'deps', []),
+        modules: _.get(spec, 'modules', []),
+
+        path: join(this.dir, spec.id + '.entry.js'),
+        bundlePath: join(this.dir, spec.id + '.bundle.js'),
+
+        exists: undefined,
+        content: undefined
       };
 
-      entry.content = appEntryTmpl(_.defaults({
-        version: `${serverVersion}${versionTag}`
-      }, entry));
+      entry.content = _.get(spec, 'template', entryFileTemplate)({
+        entry: entry,
+        optimizerTagline: optimizerTagline
+      });
 
       return entry;
-    });
+    }, this);
+
 
     _.bindAll(this, [
-      'init',
-      'cleanBundles',
-      'ensureBundleDir',
-      'syncBundleDir',
+      'cleanDir',
+      'ensureDir',
+      'synchronize',
+      'collectGarbage',
       'syncBundle',
       'clean',
       'dirContents',
       'getUnkownBundleFiles',
-      'getEntriesToCompile'
+      'getMissingEntries',
+      'getEntriesConfig'
     ]);
   }
 
-  init(fresh) {
-    return resolve()
-    .then(fresh ? this.cleanBundles : _.noop)
-    .then(this.ensureBundleDir)
-    .then(this.syncBundleDir);
-  }
-
-  cleanBundles() {
+  cleanDir() {
     return rimraf(this.dir);
   }
 
-  ensureBundleDir() {
+  ensureDir() {
     return mkdirp(this.dir);
   }
 
-  syncBundleDir() {
-    let ensure = this.entries.map(this.syncBundle);
-    let collectGarbage = this.getUnkownBundleFiles().then(this.clean);
-    return resolve(ensure.concat(collectGarbage)).all().then(_.noop);
+  synchronize(collectGarbage) {
+    return this.ensureDir()
+    .return(this.entries)
+    .map(this.syncBundle)
+    .then(collectGarbage ? this.collectGarbage : _.noop)
+    .return(undefined);
+  }
+
+  collectGarbage() {
+    return this.getUnkownBundleFiles().then(this.clean);
   }
 
   syncBundle(entry) {
@@ -94,8 +95,7 @@ class OptmzBundles {
       entry.exists = existingEntry && bundleExists && (existingEntry === entry.content);
       if (entry.exists) return;
 
-      return clean([entry.path, entry.bundlePath])
-      .then(function () {
+      return clean([entry.path, entry.bundlePath]).then(function () {
         return write(entry.path, entry.content, { encoding: 'utf8' });
       });
     });
@@ -109,7 +109,7 @@ class OptmzBundles {
       })
     )
     .settle()
-    .then(_.noop);
+    .return(undefined);
   }
 
   dirContents() {
@@ -135,9 +135,17 @@ class OptmzBundles {
     .then(this.clean);
   }
 
-  getEntriesToCompile() {
-    return _.transform(this.entries, function (map, entry) {
-      if (!entry.exists) map[entry.id] = entry.path;
+  hasMissingEntries() {
+    return this.getMissingEntries().length;
+  }
+
+  getMissingEntries() {
+    return _.reject(this.entries, 'exists');
+  }
+
+  getEntriesConfig() {
+    return _.transform(this.getMissingEntries(), function (map, entry) {
+      map[entry.id] = entry.path;
     }, {});
   }
 }

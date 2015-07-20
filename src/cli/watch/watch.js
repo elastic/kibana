@@ -3,7 +3,7 @@
 let cluster = require('cluster');
 let join = require('path').join;
 let _ = require('lodash');
-let Gaze = require('gaze').Gaze;
+var chokidar = require('chokidar');
 
 let Log = require('../Log');
 let fromRoot = require('../../utils/fromRoot');
@@ -11,21 +11,23 @@ let Worker = require('./Worker');
 
 module.exports = function (opts) {
 
-  let gaze = new Gaze([
-    'src/{cli,commands,server,utils}/**/*',
+  let watcher = chokidar.watch([
+    'src/cli',
+    'src/fixtures',
+    'src/server',
+    'src/utils',
     'src/plugins/*/*', // files at the root of a plugin
     'src/plugins/*/lib/**/*', // files within a lib directory for a plugin
     'config/**/*',
   ], {
-    cwd: fromRoot('.'),
-    debounceDelay: 200
+    cwd: fromRoot('.')
   });
 
   let log = new Log(opts.quiet, opts.silent);
   let customLogging = opts.quiet || opts.silent || opts.verbose;
 
   let workers = [
-    new Worker(gaze, {
+    new Worker({
       type: 'optmzr',
       title: 'optimizer',
       log: log,
@@ -40,7 +42,7 @@ module.exports = function (opts) {
       }
     }),
 
-    new Worker(gaze, {
+    new Worker({
       type: 'server',
       log: log,
       argv: [
@@ -58,18 +60,31 @@ module.exports = function (opts) {
     });
   });
 
-  gaze.on('all', function (e, path) {
-    _.invoke(workers, 'onChange', path);
-  });
 
-  gaze.on('ready', function (watcher) {
-    log.good('Watching for changes', `(${_.size(watcher.watched())} files)`);
+  var addedCount = 0;
+  function onAddBeforeReady() {
+    addedCount += 1;
+  }
+
+  function onReady() {
+    // start sending changes to workers
+    watcher.removeListener('add', onAddBeforeReady);
+    watcher.on('all', onAnyChangeAfterReady);
+
+    log.good('Watching for changes', `(${addedCount} files)`);
     _.invoke(workers, 'start');
-  });
+  }
 
-  gaze.on('error', function (err) {
+  function onAnyChangeAfterReady(e, path) {
+    _.invoke(workers, 'onChange', path);
+  }
+
+  function onError(err) {
     log.bad('Failed to watch files!\n', err.stack);
     process.exit(1);
-  });
+  }
 
+  watcher.on('add', onAddBeforeReady);
+  watcher.on('ready', onReady);
+  watcher.on('error', onError);
 };

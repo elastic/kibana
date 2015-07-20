@@ -4,7 +4,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var L = require('leaflet');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var geoJsonData = require('vislib_fixtures/mock_data/geohash/_geo_json');
   // defaults to roughly the lower 48 US states
   var defaultSWCoords = [13.496, -143.789];

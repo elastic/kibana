@@ -32,7 +32,6 @@ module.exports = function (kibana) {
       // Expose the client to the server
       exposeClient(server);
 
-
       createProxy(server, 'GET', '/elasticsearch/{paths*}');
       createProxy(server, 'POST', '/elasticsearch/_mget');
       createProxy(server, 'POST', '/elasticsearch/_msearch');

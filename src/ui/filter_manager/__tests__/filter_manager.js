@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var sinon = require('test_utils/auto_release_sinon');
+  var sinon = require('auto-release-sinon/mocha');
   var MockState = require('fixtures/mock_state');
   var expect = require('expect.js');
   var $rootScope;

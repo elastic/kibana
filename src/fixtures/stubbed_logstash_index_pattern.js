@@ -1,6 +1,6 @@
 define(function (require) {
   return function stubbedLogstashIndexPatternService(Private) {
-    var StubIndexPattern = Private(require('test_utils/stub_index_pattern'));
+    var StubIndexPattern = Private(require('testUtils/stubIndexPattern'));
     var fieldTypes = Private(require('ui/index_patterns/_field_types'));
     var mockLogstashFields = Private(require('fixtures/logstash_fields'));
 

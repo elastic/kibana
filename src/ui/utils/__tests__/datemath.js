@@ -3,7 +3,7 @@ define(function (require) {
   var expect = require('expect.js');
   var moment = require('moment');
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
 
   describe('datemath', function () {
     // Test each of these intervals when testing relative time

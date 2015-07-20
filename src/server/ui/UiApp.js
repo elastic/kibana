@@ -42,8 +42,8 @@ class UiApp {
     };
   }
 
-  relatedPlugins() {
-    var pluginsById = _.indexBy(this.uiExports.kbnServer.plugins, 'id');
+  getRelatedPlugins() {
+    var pluginsById = this.uiExports.kbnServer.plugins.byId;
     return _.transform(this.getModules().require, function (plugins, id) {
       var matches = id.match(/^plugins\/([^\/]+)(?:\/|$)/);
       if (!matches) return;

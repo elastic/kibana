@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
   var expect = require('expect.js');
 
   require('ui/directives/confirm_click');
@@ -9,7 +9,7 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
 
-  require('plugins/discover/index');
+  require('plugins/kibana/discover/index');
 
   var $parentScope, $scope, $elem;
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  var sinon = require('sinon/sinon');
+  var sinon = require('sinon');
   var expect = require('expect.js');
   require('ui/state_management/global_state');
 
