@@ -9,29 +9,32 @@ define(function (require) {
       initYAxis = Private(require('components/agg_response/point_series/_init_y_axis'));
     }));
 
-    function agg() {
+    function agg(onSecondaryYAxis) {
       return {
         fieldFormatter: _.constant({}),
         write: _.constant({ params: {} }),
-        type: {}
+        type: {},
+        onSecondaryYAxis: onSecondaryYAxis
       };
     }
 
-    var baseChart = {
-      aspects: {
-        y: [
-          { agg: agg(), col: { title: 'y1' } },
-          { agg: agg(), col: { title: 'y2' } },
-        ],
-        x: {
-          agg: agg(),
-          col: { title: 'x' }
+    var baseChart = function (forSecondaryYAxis) {
+      return {
+        aspects: {
+          y: [
+            { agg: agg(false), col: { title: 'y1' } },
+            { agg: agg(forSecondaryYAxis), col: { title: 'y2' } },
+          ],
+          x: {
+            agg: agg(false),
+            col: { title: 'x' }
+          }
         }
-      }
+      };
     };
 
     describe('with a single y aspect', function () {
-      var singleYBaseChart = _.cloneDeep(baseChart);
+      var singleYBaseChart = _.cloneDeep(baseChart(false));
       singleYBaseChart.aspects.y = singleYBaseChart.aspects.y[0];
 
       it('sets the yAxisFormatter the the field formats convert fn', function () {
@@ -49,7 +52,7 @@ define(function (require) {
 
     describe('with mutliple y aspects', function () {
       it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function () {
-        var chart = _.cloneDeep(baseChart);
+        var chart = _.cloneDeep(baseChart(false));
         initYAxis(chart);
 
         expect(chart).to.have.property('yAxisFormatter');
@@ -59,9 +62,19 @@ define(function (require) {
       });
 
       it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {
-        var chart = _.cloneDeep(baseChart);
+        var chart = _.cloneDeep(baseChart(false));
         initYAxis(chart);
         expect(chart).to.have.property('yAxisLabel', '');
+      });
+
+      it('sets the yAxislabel for secondary axis and use the right formatter', function () {
+        var chart = _.cloneDeep(baseChart(true));
+        initYAxis(chart);
+
+        expect(chart.secondYAxisLabel).to.be(chart.aspects.y[1].col.title);
+        expect(chart.secondYAxisFormatter)
+          .to.be(chart.aspects.y[1].agg.fieldFormatter())
+          .and.not.be(chart.aspects.y[0].agg.fieldFormatter());
       });
     });
   }];

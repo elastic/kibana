@@ -5,29 +5,38 @@ define(function () {
      * For example, if the data has rows, it returns the same number of
      * `.y-axis-div` elements as row objects.
      */
-
     // render and get bounding box width
-    return function (selection, parent, opts) {
-      var yAxis = opts && opts.yAxis;
-
-      selection.each(function () {
-        var div = d3.select(this);
-
-        div.call(setWidth, yAxis);
-
-        div.selectAll('.y-axis-div')
-        .append('div')
-        .data(function (d) {
-          return d.rows ? d.rows : [d];
-        })
-        .enter()
-          .append('div')
-          .attr('class', 'y-axis-div');
-      });
+    var YAxisSplit = function (divClass, isSecondary) {
+      this.yAxisDivClass = divClass;
+      this.isSecondary = isSecondary;
     };
 
-    function setWidth(el, yAxis) {
-      if (!yAxis) return;
+    YAxisSplit.prototype.build = function () {
+      var self = this;
+      return function (selection, parent, opts) {
+        var yAxis = self.isSecondary ?
+                      opts && opts.secondaryYAxis :
+                      opts && opts.yAxis;
+
+        selection.each(function () {
+          var div = d3.select(this);
+
+          div.call(self.setWidth, yAxis);
+
+          div.selectAll('.' + self.yAxisDivClass)
+          .append('div')
+          .data(function (d) {
+            return d.rows ? d.rows : [d];
+          })
+          .enter()
+            .append('div')
+            .attr('class', self.yAxisDivClass);
+        });
+      };
+    };
+
+    YAxisSplit.prototype.setWidth = function (el, yAxis) {
+      if (!(yAxis && yAxis.el)) return;
 
       var padding = 5;
       var height = parseInt(el.node().clientHeight, 10);
@@ -41,6 +50,8 @@ define(function () {
       svg.remove();
 
       el.style('width', (width + padding) + 'px');
-    }
+    };
+
+    return YAxisSplit;
   };
 });

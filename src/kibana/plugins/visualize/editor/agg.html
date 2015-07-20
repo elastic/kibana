@@ -75,6 +75,14 @@
   class="vis-editor-agg-editor">
 </vis-editor-agg-params>
 
+<div ng-show="canBeSecondaryYAxis()">
+  <label>
+    <input type="radio" ng-model="dual_y" ng-value="agg.id">
+    Secondary Y Axis
+	</input>
+  </label>
+</div>
+
 <vis-editor-agg-add
   ng-if="$index + 1 === stats.count"
   class="vis-editor-agg-add vis-editor-agg-add-subagg">

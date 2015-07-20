@@ -9,6 +9,8 @@ define(function (require) {
     var AxisTitle = Private(require('components/vislib/lib/axis_title'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
     var Alerts = Private(require('components/vislib/lib/alerts'));
+    var SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
+    var DualYAxisStrategy = Private(require('components/vislib/lib/_dual_y_axis_strategy'));
 
     /*
      * Create handlers for Area, Column, and Line charts which
@@ -20,17 +22,35 @@ define(function (require) {
       return function (vis) {
         var isUserDefinedYAxis = vis._attr.setYExtents;
         var data;
-
+        var yAxisStrategy = vis.get('hasSecondaryYAxis') ? new DualYAxisStrategy() : new SingleYAxisStrategy();
+        var secondaryYAxis;
+        var axisTitle;
         if (opts.zeroFill) {
-          data = new Data(injectZeros(vis.data), vis._attr);
+          data = new Data(injectZeros(vis.data), vis._attr, yAxisStrategy);
         } else {
-          data = new Data(vis.data, vis._attr);
+          data = new Data(vis.data, vis._attr, yAxisStrategy);
         }
 
-        return new Handler(vis, {
+        if (vis.get('hasSecondaryYAxis')) {
+          secondaryYAxis = new YAxis({
+            el    : vis.el,
+            yMin : isUserDefinedYAxis ? vis._attr.secondaryYAxis.min : data.getSecondYMin(),
+            yMax : isUserDefinedYAxis ? vis._attr.secondaryYAxis.max : data.getSecondYMax(),
+            yAxisFormatter: data.get('secondYAxisFormatter'),
+            _attr: vis._attr,
+            orientation: 'right',
+            yAxisDiv: 'secondary-y-axis-div'
+          });
+          axisTitle = new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel'), data.get('secondYAxisLabel'));
+        } else {
+          secondaryYAxis = new YAxis({});
+          axisTitle = new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel'));
+        }
+
+        var handlerOpts = {
           data: data,
           legend: new Legend(vis, vis.el, data.labels, data.color, vis._attr),
-          axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
+          axisTitle: axisTitle,
           chartTitle: new ChartTitle(vis.el),
           xAxis: new XAxis({
             el                : vis.el,
@@ -46,10 +66,13 @@ define(function (require) {
             yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
             yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
             yAxisFormatter: data.get('yAxisFormatter'),
-            _attr: vis._attr
-          })
-        });
-
+            _attr: vis._attr,
+            orientation: 'left',
+            yAxisDiv: 'y-axis-div'
+          }),
+          secondaryYAxis: secondaryYAxis
+        };
+        return new Handler(vis, handlerOpts);
       };
     }
 

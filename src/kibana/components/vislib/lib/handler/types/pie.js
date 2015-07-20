@@ -4,13 +4,13 @@ define(function (require) {
     var Data = Private(require('components/vislib/lib/data'));
     var Legend = Private(require('components/vislib/lib/legend'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
-
+    var SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
     /*
      * Handler for Pie visualizations.
      */
 
     return function (vis) {
-      var data = new Data(vis.data, vis._attr);
+      var data = new Data(vis.data, vis._attr, new SingleYAxisStrategy());
 
       return new Handler(vis, {
         legend: new Legend(vis, vis.el, data.pieNames(), data.getPieColorFunc(), vis._attr),

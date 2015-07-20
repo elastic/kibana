@@ -5,6 +5,7 @@ define(function (require) {
 
   var YAxis;
   var Data;
+  var SingleYAxisStrategy;
   var el;
   var buildYAxis;
   var yAxis;
@@ -69,13 +70,15 @@ define(function (require) {
 
     var dataObj = new Data(data, {
       defaultYMin: true
-    });
+    }, new SingleYAxisStrategy());
 
     buildYAxis = function (params) {
       return new YAxis(_.merge({}, params, {
         el: node,
         yMin: dataObj.getYMin(),
         yMax: dataObj.getYMax(),
+        yAxisDiv: 'y-axis-div',
+        orientation: 'right',
         _attr: {
           margin: { top: 0, right: 0, bottom: 0, left: 0 },
           defaultYMin: true,
@@ -95,6 +98,7 @@ define(function (require) {
 
     beforeEach(inject(function (Private, _d3_) {
       d3Provider = _d3_;
+      SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
       Data = Private(require('components/vislib/lib/data'));
       YAxis = Private(require('components/vislib/lib/y_axis'));
 
@@ -114,15 +118,19 @@ define(function (require) {
       });
 
       it('should append an svg to div', function () {
-        expect(el.selectAll('svg').length).to.be(1);
+        expect(el.selectAll('svg')[0].length).to.be(1);
       });
 
       it('should append a g element to the svg', function () {
-        expect(el.selectAll('svg').select('g').length).to.be(1);
+        expect(el.selectAll('svg').select('g')[0].length).to.be(1);
       });
 
       it('should append ticks with text', function () {
-        expect(!!el.selectAll('svg').selectAll('.tick text')).to.be(true);
+        expect(el.selectAll('svg').selectAll('.tick text').length).to.be(1);
+      });
+
+      it('should translate with a constant x component when on right orientation', function () {
+        expect(d3.transform(el.selectAll('svg').select('g').attr('transform')).translate[0]).to.be(4);
       });
     });
 

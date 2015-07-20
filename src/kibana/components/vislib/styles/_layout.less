@@ -23,7 +23,7 @@
   min-width: 0;
 }
 
-.y-axis-col {
+.y-axis-col, .secondary-y-axis-col {
   .display(flex);
   .flex-direction(row);
   .flex(1 0 36px);
@@ -35,7 +35,7 @@
   min-height: 45px;
 }
 
-.y-axis-div-wrapper {
+.y-axis-div-wrapper, .secondary-y-axis-div-wrapper {
   .display(flex);
   .flex-direction(column);
   min-height: 20px;
@@ -48,12 +48,19 @@
   min-height: 14px;
 }
 
-.y-axis-title {
+.secondary-y-axis-div {
+  .flex(1 1 25px);
+  min-width: 14px;
+  min-height: 14px;
+  margin-left: -10px;
+}
+
+.y-axis-title, .secondary-y-axis-title {
   min-height: 14px;
   min-width: 14px;
 }
 
-.y-axis-chart-title {
+.y-axis-chart-title, .secondary-y-axis-chart-title {
   .display(flex);
   .flex-direction(column);
   min-height: 14px;

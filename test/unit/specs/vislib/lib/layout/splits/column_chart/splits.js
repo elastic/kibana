@@ -12,7 +12,7 @@ define(function (require) {
       var chartSplit;
       var chartTitleSplit;
       var xAxisSplit;
-      var yAxisSplit;
+      var YAxisSplit;
       var el;
       var data = {
         rows: [
@@ -147,7 +147,7 @@ define(function (require) {
           chartSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_split'));
           chartTitleSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_title_split'));
           xAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/x_axis_split'));
-          yAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/y_axis_split'));
+          YAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/y_axis_split'));
 
           el = d3.select('body').append('div')
             .attr('class', 'visualization')
@@ -257,7 +257,7 @@ define(function (require) {
               .attr('class', 'rows')
               .datum({ rows: [{}, {}] });
 
-            d3.select('.rows').call(yAxisSplit);
+            d3.select('.rows').call(new YAxisSplit('y-axis-div', false).build());
 
             divs = d3.selectAll('.y-axis-div')[0];
           });

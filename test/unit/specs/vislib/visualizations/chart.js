@@ -8,6 +8,7 @@ define(function (require) {
     var ColumnChart;
     var Chart;
     var Data;
+    var SingleYAxisStrategy;
     var Vis;
     var chartData = {};
     var vis;
@@ -88,6 +89,7 @@ define(function (require) {
       inject(function (d3, Private) {
         Vis = Private(require('components/vislib/vis'));
         Data = Private(require('components/vislib/lib/data'));
+        SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
         ColumnChart = Private(require('components/vislib/visualizations/column_chart'));
         Chart = Private(require('components/vislib/visualizations/_chart'));
 
@@ -102,7 +104,7 @@ define(function (require) {
         };
 
         vis = new Vis(el[0][0], config);
-        vis.data = new Data(data, config);
+        vis.data = new Data(data, config, new SingleYAxisStrategy());
 
         myChart = new ColumnChart(vis, el, chartData);
       });

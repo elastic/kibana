@@ -53,13 +53,16 @@ define(function (require) {
       describe('createLayout Method', function () {
         it('should append all the divs', function () {
           expect($(vis.el).find('.vis-wrapper').length).to.be(1);
-          expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(1);
+          expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(2);
           expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
           expect($(vis.el).find('.legend-col-wrapper').length).to.be(1);
           expect($(vis.el).find('.y-axis-col').length).to.be(1);
+          expect($(vis.el).find('.secondary-y-axis-col').length).to.be(1);
           expect($(vis.el).find('.y-axis-title').length).to.be(1);
+          expect($(vis.el).find('.secondary-y-axis-title').length).to.be(1);
           expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(1);
-          expect($(vis.el).find('.y-axis-spacer-block').length).to.be(1);
+          expect($(vis.el).find('.secondary-y-axis-div-wrapper').length).to.be(1);
+          expect($(vis.el).find('.y-axis-spacer-block').length).to.be(2);
           expect($(vis.el).find('.chart-wrapper').length).to.be(numberOfCharts);
           expect($(vis.el).find('.x-axis-wrapper').length).to.be(1);
           expect($(vis.el).find('.x-axis-div-wrapper').length).to.be(1);

@@ -509,13 +509,13 @@ define(function (require) {
         var visEl = d3.select(this);
 
         if (visEl.select('.inner-spacer-block').node() === null) {
-          visEl.select('.y-axis-spacer-block')
+          visEl.selectAll('.y-axis-spacer-block')
           .append('div')
           .attr('class', 'inner-spacer-block');
         }
         var xAxisHt = visEl.select('.x-axis-wrapper').style('height');
 
-        visEl.select('.inner-spacer-block').style('height', xAxisHt);
+        visEl.selectAll('.inner-spacer-block').style('height', xAxisHt);
       });
 
     };

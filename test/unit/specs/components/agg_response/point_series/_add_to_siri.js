@@ -44,11 +44,12 @@ define(function (require) {
       var id = 'id';
       var label = 'label';
       var point = {};
-      addToSiri(series, point, id, label);
+      addToSiri(series, point, id, label, true);
 
       expect(series).to.have.own.property(id);
       expect(series[id]).to.be.an('object');
       expect(series[id].label).to.be(label);
+      expect(series[id].onSecondaryYAxis).to.be(true);
       expect(series[id].values).to.have.length(1);
       expect(series[id].values[0]).to.be(point);
     });
