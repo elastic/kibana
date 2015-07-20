@@ -376,6 +376,15 @@ define(function (require) {
           persistedState.set('hello.length', 5);
           expect(persistedState.get()).to.eql({ hello: { message: 'world', length: 5 } });
         });
+
+        it('should change the value in the array', function () {
+          persistedState = new PersistedState({ hello: { nouns: ['world', 'humans', 'everyone'] } });
+          persistedState.set('hello.nouns[1]', 'aliens');
+
+          expect(persistedState.get()).to.eql({ hello: { nouns: ['world', 'aliens', 'everyone'] } });
+          expect(persistedState.get('hello')).to.eql({ nouns: ['world', 'aliens', 'everyone'] });
+          expect(persistedState.get('hello.nouns')).to.eql(['world', 'aliens', 'everyone']);
+        });
       });
     });
   });

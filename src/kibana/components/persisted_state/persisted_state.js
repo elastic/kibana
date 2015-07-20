@@ -106,8 +106,14 @@ define(function (require) {
       var changed = _.get(this._changedState, this._getIndex(key), def);
 
       // handle case where state is not a mergeable object
-      var notMergeable = _.isUndefined(state) || !_.isPlainObject(state);
+      var notMergeable = _.isUndefined(state) || !_.isObject(state);
       if (notMergeable) return !_.isUndefined(changed) ? changed : state;
+
+      // handle arrays by using changed values as set
+      if (_.isArray(state)) return _.map(state, function (val, key) {
+        return _.get(changed, key, val);
+      });
+
       return _.merge(_.cloneDeep(state), changed);
     };
 
