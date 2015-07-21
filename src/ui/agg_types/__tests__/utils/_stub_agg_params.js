@@ -12,16 +12,16 @@ define(function (require) {
 
   /**
    * stub all of the param classes, but ensure that they still inherit properly.
-   * This method should be passed directly to inject();
+   * This method should be passed directly to ngMock.inject();
    *
    * ```js
    * var stubParamClasses = require('specs/components/agg_types/utils/_stub_agg_params');
    * describe('something', function () {
-   *   beforeEach(inject(stubParamClasses));
+   *   beforeEach(ngMock.inject(stubParamClasses));
    * })
    * ```
    *
-   * @param  {PrivateLoader} Private - The private module loader, inject by passing this function to inject()
+   * @param  {PrivateLoader} Private - The private module loader, inject by passing this function to ngMock.inject()
    * @return {undefined}
    */
   return function stubParamClasses(Private) {

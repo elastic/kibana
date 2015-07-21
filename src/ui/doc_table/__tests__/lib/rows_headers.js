@@ -4,6 +4,7 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var getFakeRow = require('fixtures/fake_row');
 
   describe('Doc Table', function () {
@@ -18,8 +19,8 @@ define(function (require) {
     // Stub out a minimal mapping of 4 fields
     var mapping;
 
-    beforeEach(module('kibana', 'apps/discover'));
-    beforeEach(inject(function (_config_, $rootScope, Private) {
+    beforeEach(ngMock.module('kibana', 'apps/discover'));
+    beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
       config = _config_;
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
@@ -28,7 +29,7 @@ define(function (require) {
 
     // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
     var init = function ($elem, props) {
-      inject(function ($compile) {
+      ngMock.inject(function ($compile) {
         _.assign($parentScope, props);
         $compile($elem)($parentScope);
         $elem.scope().$digest();
@@ -316,7 +317,7 @@ define(function (require) {
       var $root;
       var $before;
 
-      beforeEach(inject(function ($rootScope, $compile, Private) {
+      beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
         $root.columns = ['_source'];

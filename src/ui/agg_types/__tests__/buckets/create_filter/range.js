@@ -1,14 +1,16 @@
 define(function (require) {
   describe('AggConfig Filters', function () {
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
+
     describe('range', function () {
       var AggConfig;
       var indexPattern;
       var Vis;
       var createFilter;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         Vis = Private(require('ui/vis/vis'));
         AggConfig = Private(require('ui/vis/AggConfig'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

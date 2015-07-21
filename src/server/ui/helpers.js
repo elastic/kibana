@@ -1,7 +1,7 @@
 module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
 
-  server.decorate('reply', 'renderApp', function (app) {
+  server.decorate('reply', 'renderApp', function (app, view) {
 
     var optimizeStatus = kbnServer.status.get('optimize');
     switch (optimizeStatus && optimizeStatus.state) {
@@ -22,7 +22,6 @@ module.exports = function (kbnServer, server, config) {
 
     var payload = {
       app: app,
-      angularModules: app.getModules().angular,
       appCount: kbnServer.uiExports.apps.length,
       version: kbnServer.version,
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
@@ -32,7 +31,7 @@ module.exports = function (kbnServer, server, config) {
       esShardTimeout: config.get('elasticsearch.shardTimeout')
     };
 
-    return this.view('bootstrap', {
+    return this.view(view || 'uiApp', {
       app: app,
       cacheBust: payload.cacheBust,
       kibanaPayload: payload

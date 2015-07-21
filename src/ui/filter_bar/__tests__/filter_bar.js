@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   require('ui/filter_bar/filter_bar');
@@ -15,7 +16,7 @@ define(function (require) {
     beforeEach(function () {
       appState = new MockState({ filters: [] });
 
-      module('kibana/global_state', function ($provide) {
+      ngMock.module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
             return appState;
@@ -26,13 +27,13 @@ define(function (require) {
 
     beforeEach(function () {
       // load the application
-      module('kibana');
+      ngMock.module('kibana');
 
-      module('kibana/courier', function ($provide) {
+      ngMock.module('kibana/courier', function ($provide) {
         $provide.service('courier', require('fixtures/mock_courier'));
       });
 
-      inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
+      ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
         $rootScope = _$rootScope_;
         $compile = _$compile_;
         $timeout = _$timeout_;

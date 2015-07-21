@@ -4,9 +4,10 @@ define(function (require) {
     var Vis;
     var indexPattern;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
       Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

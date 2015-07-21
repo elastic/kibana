@@ -2,9 +2,10 @@ define(function (require) {
   return ['Buckets wrapper', function () {
     var Buckets;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       Buckets = Private(require('ui/agg_response/tabify/_buckets'));
     }));
 

@@ -2,11 +2,12 @@ define(function (require) {
   return ['renderbot', function () {
     var Renderbot;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     function init() {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         Renderbot = Private(require('ui/vis/Renderbot'));
       });
     }

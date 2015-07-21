@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   angular.module('LabelUtilService', ['kibana']);
   angular.module('GetArrayUtilService', ['kibana']);
@@ -112,11 +113,11 @@ define(function (require) {
 
     describe('Labels (main)', function () {
       beforeEach(function () {
-        module('LabelUtilService');
+        ngMock.module('LabelUtilService');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           getLabels = Private(require('ui/vislib/components/labels/labels'));
           seriesLabels = getLabels(seriesData);
           rowsLabels = getLabels(rowsData);
@@ -181,11 +182,11 @@ define(function (require) {
       var testRows;
 
       beforeEach(function () {
-        module('GetArrayUtilService');
+        ngMock.module('GetArrayUtilService');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           dataArray = Private(require('ui/vislib/components/labels/data_array'));
           seriesLabels = dataArray(seriesData);
           rowsLabels = dataArray(rowsData);
@@ -298,11 +299,11 @@ define(function (require) {
       var testArr;
 
       beforeEach(function () {
-        module('UniqLabelUtilService');
+        ngMock.module('UniqLabelUtilService');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           uniqLabels = Private(require('ui/vislib/components/labels/uniq_labels'));
           uniq = uniqLabels(arrObj, function (d) { return d; });
           testArr = _.isArray(uniq);
@@ -376,11 +377,11 @@ define(function (require) {
       var rowsArr;
 
       beforeEach(function () {
-        module('GetSeriesUtilService');
+        ngMock.module('GetSeriesUtilService');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           getSeries = Private(require('ui/vislib/components/labels/flatten_series'));
           columnsLabels = getSeries(columnsData);
           rowsLabels = getSeries(rowsData);

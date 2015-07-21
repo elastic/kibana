@@ -2,6 +2,7 @@ define(function (require) {
   return ['AggType Class', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var sinon = require('auto-release-sinon/mocha');
     var AggType;
     var AggParams;
@@ -12,8 +13,8 @@ define(function (require) {
 
     require('ui/private');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       var AggParamsPM = require('ui/agg_types/_agg_params');
       AggParams = sinon.spy(Private(AggParamsPM));
       Private.stub(AggParamsPM, AggParams);

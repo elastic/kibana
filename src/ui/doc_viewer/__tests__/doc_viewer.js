@@ -4,6 +4,7 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var hit = {
     '_index': 'logstash-2014.09.09',
     '_type': 'apache',
@@ -27,7 +28,7 @@ define(function (require) {
   var $parentScope, $scope, indexPattern, flattened;
 
   var init = function ($elem, props) {
-    inject(function ($rootScope, $compile) {
+    ngMock.inject(function ($rootScope, $compile) {
       $parentScope = $rootScope;
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
@@ -44,10 +45,10 @@ define(function (require) {
   describe('docViewer', function () {
     var $elem;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(function () {
       $elem = angular.element('<doc-viewer index-pattern="indexPattern" hit="hit" filter="filter"></doc-viewer>');
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         flattened = indexPattern.flattenHit(hit);
       });

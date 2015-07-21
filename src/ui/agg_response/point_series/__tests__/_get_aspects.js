@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var Vis;
     var Table;
@@ -10,8 +11,8 @@ define(function (require) {
     var indexPattern;
     var getAspects;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/vis/vis'));
       Table = Private(require('ui/agg_response/point_series/_add_to_siri'));
       AggConfig = Private(require('ui/vis/AggConfig'));

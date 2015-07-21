@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var d3 = require('d3');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   // Data
@@ -25,8 +26,8 @@ define(function (require) {
       var vis;
       var SimpleEmitter;
 
-      beforeEach(module('AreaChartFactory'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('AreaChartFactory'));
+      beforeEach(ngMock.inject(function (Private) {
         vis = Private(require('vislib_fixtures/_vis_fixture'))();
         vis.render(data);
         SimpleEmitter = require('utils/SimpleEmitter');
@@ -48,8 +49,8 @@ define(function (require) {
     describe('Stock event handlers', function () {
       var vis;
 
-      beforeEach(module('AreaChartFactory'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('AreaChartFactory'));
+      beforeEach(ngMock.inject(function (Private) {
         vis = Private(require('vislib_fixtures/_vis_fixture'))();
         require('ui/vislib/styles/main.less');
 
@@ -120,8 +121,8 @@ define(function (require) {
       it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
         var vis;
         var chart;
-        module('AreaChartFactory');
-        inject(function (Private) {
+        ngMock.module('AreaChartFactory');
+        ngMock.inject(function (Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           vis.on('someEvent', _.noop);
           vis.render(data);
@@ -138,8 +139,8 @@ define(function (require) {
       it('can be added after rendering', function () {
         var vis;
         var chart;
-        module('AreaChartFactory');
-        inject(function (Private) {
+        ngMock.module('AreaChartFactory');
+        ngMock.inject(function (Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           vis.render(data);
           vis.on('someEvent', _.noop);

@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/directives/auto_select_if_only_one');
 
   describe('Auto-select if only one directive', function () {
@@ -10,9 +11,9 @@ define(function (require) {
     var oneOption = [{label: 'foo'}];
     var multiOptions = [{label: 'foo'}, {label: 'bar'}];
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_) {
+    beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
       $compile(html)($rootScope);

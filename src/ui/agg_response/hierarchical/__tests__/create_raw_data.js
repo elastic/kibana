@@ -4,6 +4,7 @@ define(function (require) {
   var createRawData = require('ui/agg_response/hierarchical/_create_raw_data');
   var arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var AggConfigs;
   var Vis;
@@ -13,9 +14,9 @@ define(function (require) {
     describe('createRawData()', function () {
       var vis, results;
 
-      beforeEach(module('kibana'));
+      beforeEach(ngMock.module('kibana'));
 
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.inject(function (Private) {
         Vis = Private(require('ui/vis/vis'));
         AggConfigs = Private(require('ui/vis/AggConfigs'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

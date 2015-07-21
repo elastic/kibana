@@ -2,6 +2,7 @@ define(function (require) {
 
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var WorkQueue = require('ui/routes/_work_queue');
   var sinon = require('auto-release-sinon/mocha');
   require('ui/promises');
@@ -12,8 +13,8 @@ define(function (require) {
       var queue;
       var Promise;
 
-      beforeEach(module('UtilsRouteWorkQueueTests'));
-      beforeEach(inject(function (_Promise_) {
+      beforeEach(ngMock.module('UtilsRouteWorkQueueTests'));
+      beforeEach(ngMock.inject(function (_Promise_) {
         Promise = _Promise_;
       }));
       beforeEach(function () { queue = new WorkQueue(); });

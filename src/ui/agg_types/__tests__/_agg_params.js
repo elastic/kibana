@@ -1,6 +1,7 @@
 define(function (require) {
   return ['AggParams class', function () {
     var _ = require('lodash');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var AggParams;
@@ -9,11 +10,11 @@ define(function (require) {
     var OptionedAggParam;
     var RegexAggParam;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     // stub out the param classes before we get the AggParams
-    beforeEach(inject(require('specs/components/agg_types/utils/_stub_agg_params')));
+    beforeEach(ngMock.inject(require('specs/components/agg_types/utils/_stub_agg_params')));
     // fetch out deps
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private) {
       AggParams = Private(require('ui/agg_types/_agg_params'));
       BaseAggParam = Private(require('ui/agg_types/param_types/base'));
       FieldAggParam = Private(require('ui/agg_types/param_types/field'));

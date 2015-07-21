@@ -1,6 +1,7 @@
 define(function (require) {
   require('ui/fixedScroll');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('FixedScroll directive', function () {
     var $ = require('jquery');
@@ -10,8 +11,8 @@ define(function (require) {
     var compile;
     var trash = [];
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($compile, $rootScope) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($compile, $rootScope) {
 
       compile = function (ratioY, ratioX) {
         if (ratioX == null) ratioX = ratioY;

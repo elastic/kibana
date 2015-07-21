@@ -2,11 +2,12 @@ define(function (require) {
   return ['field mapping normalizer (mapField)', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var fn;
     var fields;
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector, config) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector, config) {
       config.set('metaFields', ['_id', '_timestamp']);
       fn = Private(require('ui/index_patterns/_map_field'));
       fields = require('fixtures/field_mapping').test.mappings.testType;

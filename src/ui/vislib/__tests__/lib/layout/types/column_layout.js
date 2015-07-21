@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   angular.module('ColumnLayoutFactory', ['kibana']);
@@ -69,11 +70,11 @@ define(function (require) {
     };
 
     beforeEach(function () {
-      module('ColumnLayoutFactory');
+      ngMock.module('ColumnLayoutFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
         el = d3.select('body').append('div').attr('class', 'visualization');
         columnLayout = layoutType.histogram(el, data);

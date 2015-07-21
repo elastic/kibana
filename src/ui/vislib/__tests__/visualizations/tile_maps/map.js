@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
   var L = require('leaflet');
@@ -33,8 +34,8 @@ define(function (require) {
     var leafletMocks = {};
 
     beforeEach(function () {
-      module('MapFactory');
-      inject(function (Private) {
+      ngMock.module('MapFactory');
+      ngMock.inject(function (Private) {
         // mock parts of leaflet
         leafletMocks.tileLayer = { on: sinon.stub() };
         leafletMocks.map = { on: sinon.stub() };

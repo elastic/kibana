@@ -3,10 +3,11 @@ define(function (require) {
   describe('Index Patterns', function () {
     describe('interval.toIndexList()', function () {
       var expect = require('expect.js');
+      var ngMock = require('ngMock');
 
       var intervals;
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         intervals = Private(require('ui/index_patterns/_intervals'));
       }));
 

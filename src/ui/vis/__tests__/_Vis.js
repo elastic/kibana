@@ -2,6 +2,7 @@ define(function (require) {
   return ['Vis Class', function () {
 
     var _ = require('lodash');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var indexPattern;
@@ -20,8 +21,8 @@ define(function (require) {
       listeners: { click: _.noop }
     };
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       visTypes = Private(require('registry/vis_types'));

@@ -1,6 +1,7 @@
 define(function (require) {
   return ['renderbot#buildChartData', function () {
     var _ = require('lodash');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
     var sinon = require('auto-release-sinon/mocha');
 
@@ -10,8 +11,8 @@ define(function (require) {
     var TableGroup;
     var Table;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       Table = Private(require('ui/agg_response/tabify/_table'));
       TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
       aggResponse = Private(require('ui/agg_response/index'));

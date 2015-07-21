@@ -3,19 +3,20 @@ define(function (require) {
     describe('filterOutTimeBasedFilter()', function () {
 
       var expect = require('expect.js');
+      var ngMock = require('ngMock');
       var sinon = require('auto-release-sinon/mocha');
       var filterOutTimeBasedFilter,
           $rootScope;
 
-      beforeEach(module('kibana'));
+      beforeEach(ngMock.module('kibana'));
 
       beforeEach(function () {
-        module('kibana/courier', function ($provide) {
+        ngMock.module('kibana/courier', function ($provide) {
           $provide.service('courier', require('fixtures/mock_courier'));
         });
       });
 
-      beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
         filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
         $rootScope = _$rootScope_;
       }));

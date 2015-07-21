@@ -2,13 +2,14 @@ define(function (require) {
   return ['Field', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var BaseAggParam;
     var FieldAggParam;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     // fetch out deps
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private) {
       BaseAggParam = Private(require('ui/agg_types/param_types/base'));
       FieldAggParam = Private(require('ui/agg_types/param_types/field'));
     }));

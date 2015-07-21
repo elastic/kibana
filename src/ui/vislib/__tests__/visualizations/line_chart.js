@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
 
@@ -32,7 +33,7 @@ define(function (require) {
         var vis;
 
         beforeEach(function () {
-          module('LineChartFactory');
+          ngMock.module('LineChartFactory');
         });
 
         beforeEach(function () {
@@ -43,7 +44,7 @@ define(function (require) {
             drawLinesBetweenPoints: true
           };
 
-          inject(function (Private) {
+          ngMock.inject(function (Private) {
             vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
             require('ui/vislib/styles/main.less');
 
@@ -67,7 +68,7 @@ define(function (require) {
           var onMouseOver;
 
           beforeEach(function () {
-            inject(function (d3) {
+            ngMock.inject(function (d3) {
               vis.handler.charts.forEach(function (chart) {
                 circle = $(chart.chartEl).find('.circle')[0];
                 brush = $(chart.chartEl).find('.brush');

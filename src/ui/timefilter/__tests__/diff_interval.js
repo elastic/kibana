@@ -1,13 +1,15 @@
 define(function (require) {
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
+
   describe('Timefilter service', function () {
     describe('Refresh interval diff watcher', function () {
 
       var fn, update, fetch, timefilter;
-      beforeEach(module('kibana'));
+      beforeEach(ngMock.module('kibana'));
 
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.inject(function (Private) {
         update = sinon.spy();
         fetch = sinon.spy();
         timefilter = {

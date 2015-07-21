@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
 
   return ['JSON', function () {
@@ -21,10 +22,10 @@ define(function (require) {
       aggParam = new JsonAggParam(_.defaults(config, defaults));
     }
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
     // fetch out deps
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private) {
       aggConfig = { params: {} };
       output = { params: {} };
 

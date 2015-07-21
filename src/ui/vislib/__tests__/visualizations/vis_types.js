@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
 
   angular.module('VisTypeFactory', ['kibana']);
@@ -10,11 +11,11 @@ define(function (require) {
     var visFunc;
 
     beforeEach(function () {
-      module('VisTypeFactory');
+      ngMock.module('VisTypeFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         visTypes = Private(require('ui/vislib/visualizations/vis_types'));
         visFunc = visTypes.histogram;
       });

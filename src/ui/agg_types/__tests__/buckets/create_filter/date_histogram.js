@@ -5,6 +5,7 @@ define(function (require) {
       var moment = require('moment');
       var sinon = require('auto-release-sinon/mocha');
       var aggResp = require('fixtures/agg_resp/date_histogram');
+      var ngMock = require('ngMock');
       var expect = require('expect.js');
 
       var vis;
@@ -18,8 +19,8 @@ define(function (require) {
 
       var init;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private, $injector) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private, $injector) {
         var Vis = Private(require('ui/vis/vis'));
         var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));

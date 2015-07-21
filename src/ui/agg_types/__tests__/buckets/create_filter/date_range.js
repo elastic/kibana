@@ -1,6 +1,8 @@
 define(function (require) {
   var moment = require('moment');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
+
   describe('AggConfig Filters', function () {
     describe('Date range', function () {
       var AggConfig;
@@ -8,8 +10,8 @@ define(function (require) {
       var Vis;
       var createFilter;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         Vis = Private(require('ui/vis/vis'));
         AggConfig = Private(require('ui/vis/AggConfig'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var initialDocTitle;
     var MAIN_TITLE = 'Kibana 4';
     var fakeApp = { name: 'fancy pants' };
@@ -18,12 +19,12 @@ define(function (require) {
       document.title = initialDocTitle;
     });
 
-    beforeEach(module('kibana', function ($provide) {
+    beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.decorator('docTitle', decorateWithSpy('update'));
       $provide.decorator('$rootScope', decorateWithSpy('$on'));
     }));
 
-    beforeEach(inject(function ($injector, Private) {
+    beforeEach(ngMock.inject(function ($injector, Private) {
       if (_.random(0, 1)) {
         docTitle = $injector.get('docTitle');
       } else {

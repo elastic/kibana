@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var d3 = require('d3');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   var YAxis;
@@ -92,9 +93,9 @@ define(function (require) {
   describe('Vislib yAxis Class Test Suite', function () {
     var d3Provider;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (Private, _d3_) {
+    beforeEach(ngMock.inject(function (Private, _d3_) {
       d3Provider = _d3_;
       Data = Private(require('ui/vislib/lib/data'));
       YAxis = Private(require('ui/vislib/lib/y_axis'));

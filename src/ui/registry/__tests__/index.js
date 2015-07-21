@@ -4,11 +4,12 @@ define(function (require) {
     var sinon = require('auto-release-sinon/mocha');
     var registry = require('registry/_registry');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var Private;
     var IndexedArray;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       Private = $injector.get('Private');
     }));
 

@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   angular.module('ChartSplitFactory', ['kibana']);
@@ -137,14 +138,14 @@ define(function (require) {
       };
 
       beforeEach(function () {
-        module('ChartSplitFactory');
-        module('ChartTitleSplitFactory');
-        module('XAxisSplitFactory');
-        module('YAxisSplitFactory');
+        ngMock.module('ChartSplitFactory');
+        ngMock.module('ChartTitleSplitFactory');
+        ngMock.module('XAxisSplitFactory');
+        ngMock.module('YAxisSplitFactory');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
           chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_title_split'));
           xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));
@@ -164,7 +165,7 @@ define(function (require) {
         var fixture;
 
         beforeEach(function () {
-          inject(function (d3) {
+          ngMock.inject(function (d3) {
             fixture = d3.select('.visualization').call(chartSplit);
           });
         });
@@ -187,7 +188,7 @@ define(function (require) {
         var fixture;
 
         beforeEach(function () {
-          inject(function (d3) {
+          ngMock.inject(function (d3) {
             el.append('div').attr('class', 'x-axis-chart-title');
             el.append('div').attr('class', 'y-axis-chart-title');
             d3.select('.x-axis-chart-title').call(chartTitleSplit);
@@ -229,7 +230,7 @@ define(function (require) {
         var divs;
 
         beforeEach(function () {
-          inject(function (d3) {
+          ngMock.inject(function (d3) {
             fixture = d3.select('body').append('div')
               .attr('class', 'columns')
               .datum({ columns: [{}, {}] });
@@ -253,7 +254,7 @@ define(function (require) {
         var divs;
 
         beforeEach(function () {
-          inject(function (d3) {
+          ngMock.inject(function (d3) {
             fixture = d3.select('body').append('div')
               .attr('class', 'rows')
               .datum({ rows: [{}, {}] });

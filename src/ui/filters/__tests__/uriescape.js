@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
   var _ = require('lodash');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -11,10 +12,10 @@ define(function (require) {
 
   var init = function (expandable) {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
     // Create the scope
-    inject(function ($filter) {
+    ngMock.inject(function ($filter) {
       filter = $filter('uriescape');
     });
   };

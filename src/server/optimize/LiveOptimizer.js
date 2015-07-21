@@ -28,7 +28,8 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
     let self = this;
     let fs = self.outFs;
     let filename = join(self.compiler.outputPath, `${id}.bundle.js`);
-    let mapFilename = filename + '.map';
+    let mapFilename = join(self.compiler.outputPath, `${id}.bundle.js.map`);
+    let styleFilename = join(self.compiler.outputPath, `${id}.style.css`);
 
     self.active = (self.active || self.compile().finally(function () {
       self.active = null;
@@ -43,7 +44,8 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
       try {
         return {
           bundle: fs.readFileSync(filename),
-          map: self.sourceMaps ? fs.readFileSync(mapFilename) : false
+          sourceMap: self.sourceMaps ? fs.readFileSync(mapFilename) : false,
+          style: fs.readFileSync(styleFilename)
         };
       } catch (e) {
         return null;

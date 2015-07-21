@@ -2,12 +2,13 @@ define(function (require) {
   return ['Histogram Agg', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     describe('ordered', function () {
       var histogram;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         histogram = Private(require('ui/agg_types/index')).byName.histogram;
       }));
 
@@ -24,8 +25,8 @@ define(function (require) {
     describe('params', function () {
       var paramWriter;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         var AggParamWriter = Private(require('../aggParamWriter'));
         paramWriter = new AggParamWriter({ aggType: 'histogram' });
       }));

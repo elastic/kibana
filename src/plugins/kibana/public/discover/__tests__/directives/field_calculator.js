@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
   var expect = require('expect.js');
 
@@ -9,9 +10,9 @@ define(function (require) {
   var indexPattern;
 
   describe('fieldCalculator', function () {
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(function () {
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       });
     });

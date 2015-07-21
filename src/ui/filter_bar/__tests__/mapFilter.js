@@ -2,17 +2,18 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var mapFilter, $rootScope;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
     beforeEach(function () {
-      module('kibana/courier', function ($provide) {
+      ngMock.module('kibana/courier', function ($provide) {
         $provide.service('courier', require('fixtures/mock_courier'));
       });
     });
 
-    beforeEach(inject(function (_$rootScope_, Private) {
+    beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
       $rootScope = _$rootScope_;
     }));

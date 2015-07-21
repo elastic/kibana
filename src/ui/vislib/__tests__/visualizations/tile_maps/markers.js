@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
   var L = require('leaflet');
@@ -62,8 +63,8 @@ define(function (require) {
       var MarkerClass;
 
       beforeEach(function () {
-        module('MarkerFactory');
-        inject(function (Private) {
+        ngMock.module('MarkerFactory');
+        ngMock.inject(function (Private) {
           MarkerClass = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
           markerLayer = createMarker(MarkerClass);
         });
@@ -198,8 +199,8 @@ define(function (require) {
 
     describe('Shaded Circles', function () {
       beforeEach(function () {
-        module('MarkerFactory');
-        inject(function (Private) {
+        ngMock.module('MarkerFactory');
+        ngMock.inject(function (Private) {
           var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/shaded_circles'));
           markerLayer = createMarker(MarkerClass);
         });
@@ -220,12 +221,12 @@ define(function (require) {
       var zoom;
 
       beforeEach(function () {
-        module('MarkerFactory');
+        ngMock.module('MarkerFactory');
 
         zoom = _.random(1, 18);
         sinon.stub(mockMap, 'getZoom', _.constant(zoom));
 
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/scaled_circles'));
           markerLayer = createMarker(MarkerClass);
         });
@@ -271,9 +272,9 @@ define(function (require) {
 
     describe('Heatmaps', function () {
       beforeEach(function () {
-        module('MarkerFactory');
+        ngMock.module('MarkerFactory');
 
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/heatmap'));
           markerLayer = createMarker(MarkerClass);
         });

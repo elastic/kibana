@@ -7,9 +7,10 @@ define(function (require) {
     var AggConfig;
     var indexPattern;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/vis/vis'));
       AggConfig = Private(require('ui/vis/AggConfig'));
       AggType = Private(require('ui/agg_types/_agg_type'));

@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('lodash');
     var expect = require('expect.js');
     var simulateKeys = require('testUtils/simulateKeys');
+    var ngMock = require('ngMock');
 
     require('ui/number_list/number_list');
 
@@ -18,8 +19,8 @@ define(function (require) {
       });
     }
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       var $compile = $injector.get('$compile');
       var $rootScope = $injector.get('$rootScope');
 

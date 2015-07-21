@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   angular.module('XAxisFactory', ['kibana']);
@@ -76,11 +77,11 @@ define(function (require) {
     };
 
     beforeEach(function () {
-      module('XAxisFactory');
+      ngMock.module('XAxisFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         Data = Private(require('ui/vislib/lib/data'));
         XAxis = Private(require('ui/vislib/lib/x_axis'));
 

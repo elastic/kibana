@@ -1,6 +1,7 @@
 define(function (require) {
   var expect = require('expect.js');
   var angular = require('angular');
+  var ngMock = require('ngMock');
   angular.module('ErrorHandlerFactory', ['kibana']);
 
   describe('VisLib ErrorHandler Test Suite', function () {
@@ -8,11 +9,11 @@ define(function (require) {
     var errorHandler;
 
     beforeEach(function () {
-      module('ErrorHandlerFactory');
+      ngMock.module('ErrorHandlerFactory');
     });
 
     beforeEach(function () {
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
         errorHandler = new ErrorHandler();
       });

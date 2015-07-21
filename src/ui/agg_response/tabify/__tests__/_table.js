@@ -2,11 +2,12 @@ define(function (require) {
   return ['Table class', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var Table;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       Table = Private(require('ui/agg_response/tabify/_table'));
     }));
 

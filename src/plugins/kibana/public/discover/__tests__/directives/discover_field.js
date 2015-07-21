@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var sinon = require('auto-release-sinon/mocha');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   // Load the kibana app dependencies.
@@ -12,7 +13,7 @@ define(function (require) {
   var $parentScope, $scope, indexPattern;
 
   var init = function ($elem, props) {
-    inject(function ($rootScope, $compile) {
+    ngMock.inject(function ($rootScope, $compile) {
       $parentScope = $rootScope;
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
@@ -42,10 +43,10 @@ define(function (require) {
   describe('discoverField', function () {
     var $elem;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(function () {
       $elem = angular.element('<discover-field></discover-field>');
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       });
       init($elem, {

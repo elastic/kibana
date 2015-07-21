@@ -1,15 +1,16 @@
 define(function (require) {
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var debounce;
   var $timeout;
   var $timeoutSpy;
 
   function init() {
-    module('kibana');
+    ngMock.module('kibana');
 
-    inject(function ($injector, _$timeout_) {
+    ngMock.inject(function ($injector, _$timeout_) {
       $timeout = _$timeout_;
       $timeoutSpy = sinon.spy($timeout);
 

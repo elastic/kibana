@@ -1,15 +1,17 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
+
   require('ui/directives/validate_ip');
 
   describe('Validate IP directive', function () {
     var $compile, $rootScope;
     var html = '<input type="text" ng-model="value" validate-ip />';
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_) {
+    beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
     }));

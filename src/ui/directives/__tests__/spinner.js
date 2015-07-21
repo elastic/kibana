@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -12,10 +13,10 @@ define(function (require) {
 
   var init = function () {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
     // Create the scope
-    inject(function ($rootScope, $compile) {
+    ngMock.inject(function ($rootScope, $compile) {
 
       // Give us a scope
       $parentScope = $rootScope;

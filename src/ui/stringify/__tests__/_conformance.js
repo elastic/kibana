@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var fieldFormats;
   var FieldFormat;
@@ -19,8 +20,8 @@ define(function (require) {
 
   return ['conformance', function () {
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       fieldFormats = Private(require('registry/field_formats'));
       FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
       config = $injector.get('config');

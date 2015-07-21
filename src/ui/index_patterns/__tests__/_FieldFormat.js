@@ -2,12 +2,13 @@ define(function (require) {
   return ['FieldFormat class', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var FieldFormat;
     var TestFormat;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
 
       TestFormat = function (params) {

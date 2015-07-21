@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('ui/validate_query/validate_query');
@@ -37,9 +38,9 @@ define(function (require) {
 
   var init = function () {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
-    module('kibana', function ($provide) {
+    ngMock.module('kibana', function ($provide) {
       $provide.service('es', function () {
         return { indices: { validateQuery: function () {} } };
       });
@@ -57,7 +58,7 @@ define(function (require) {
     });
 
     // Create the scope
-    inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Promise_, _Private_, _config_) {
+    ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Promise_, _Private_, _config_) {
       $timeout = _$timeout_;
       $compile = _$compile_;
       Promise = _Promise_;

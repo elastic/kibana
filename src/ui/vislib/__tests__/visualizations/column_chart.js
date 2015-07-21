@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
   var d3 = require('d3');
@@ -40,11 +41,11 @@ define(function (require) {
       };
 
       beforeEach(function () {
-        module('AreaChartFactory');
+        ngMock.module('AreaChartFactory');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('ui/vislib/styles/main.less');
 

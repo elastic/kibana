@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
   var sinon = require('auto-release-sinon/mocha');
@@ -28,8 +29,8 @@ define(function (require) {
     var tilemap;
 
     beforeEach(function () {
-      module('TileMapFactory');
-      inject(function (Private) {
+      ngMock.module('TileMapFactory');
+      ngMock.inject(function (Private) {
         Private.stub(require('ui/vislib/visualizations/_map'), MockMap);
         TileMap = Private(require('ui/vislib/visualizations/tile_map'));
         extentsStub = sinon.stub(TileMap.prototype, '_appendGeoExtents', _.noop);

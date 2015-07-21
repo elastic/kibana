@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var baseArgs = {
       vis: {
@@ -29,8 +30,8 @@ define(function (require) {
 
     var orderedDateAxis;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       orderedDateAxis = Private(require('ui/agg_response/point_series/_ordered_date_axis'));
     }));
 

@@ -3,6 +3,7 @@ define(function (require) {
   var fixtures = require('fixtures/fake_hierarchical_data');
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var Vis;
   var Notifier;
@@ -12,8 +13,8 @@ define(function (require) {
 
   describe('buildHierarchicalData()', function () {
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       // stub the error method before requiring vis causes Notifier#error to be bound
       Notifier = $injector.get('Notifier');
       sinon.stub(Notifier.prototype, 'error');

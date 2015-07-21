@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
   var fixtures = require('fixtures/fake_hierarchical_data');
@@ -42,11 +43,11 @@ define(function (require) {
     var domain;
 
     beforeEach(function () {
-      module('TimeMarkerFactory');
+      ngMock.module('TimeMarkerFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
         minDomain = getExtent(series.series, d3.min);
         maxDomain = getExtent(series.series, d3.max);

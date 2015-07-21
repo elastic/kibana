@@ -3,6 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var sinon = require('auto-release-sinon/mocha');
 
     var $rootScope;
@@ -14,8 +15,8 @@ define(function (require) {
     var indexPattern;
     var fixtures;
 
-    beforeEach(module('kibana', 'kibana/table_vis'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
       fixtures = require('fixtures/fake_hierarchical_data');

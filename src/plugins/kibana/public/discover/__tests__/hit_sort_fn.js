@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   require('angular').module('hitSortFunctionTests', ['kibana']);
@@ -7,8 +8,8 @@ define(function (require) {
   describe('hit sort function', function () {
     var createHitSortFn;
 
-    beforeEach(module('hitSortFunctionTests'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('hitSortFunctionTests'));
+    beforeEach(ngMock.inject(function (Private) {
       createHitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
     }));
 

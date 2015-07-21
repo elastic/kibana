@@ -2,15 +2,16 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/private');
 
   describe('State Management', function () {
     var $rootScope, $location, State, Events;
 
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (_$rootScope_, _$location_, Private) {
+      ngMock.inject(function (_$rootScope_, _$location_, Private) {
         $location = _$location_;
         $rootScope = _$rootScope_;
         State = Private(require('ui/state_management/state'));

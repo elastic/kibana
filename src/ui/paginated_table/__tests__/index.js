@@ -4,6 +4,7 @@ define(function (require) {
   var $ = require('jquery');
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('paginated table', function () {
     var $el;
@@ -57,9 +58,9 @@ define(function (require) {
     };
 
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (_$rootScope_, _$compile_, $filter) {
+      ngMock.inject(function (_$rootScope_, _$compile_, $filter) {
         $rootScope = _$rootScope_;
         $compile = _$compile_;
         $orderBy = $filter('orderBy');

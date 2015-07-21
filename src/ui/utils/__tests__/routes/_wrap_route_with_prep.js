@@ -1,6 +1,7 @@
 define(function (require) {
   var RouteManager = require('routes').RouteManager;
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var getRouteProvider = require('./_get_route_provider');
   var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
@@ -27,7 +28,7 @@ define(function (require) {
         var delayUserWork = opts.delayUserWork ? 50 : 0;
 
         return function () {
-          module('kibana', 'kibana/notify');
+          ngMock.module('kibana', 'kibana/notify');
           var setupComplete = false;
           var userWorkComplete = false;
           var route;
@@ -35,7 +36,7 @@ define(function (require) {
           var Promise;
           var $injector;
 
-          inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
+          ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
             Private = _Private_;
             Promise = _Promise_;
             $injector = _$injector_;

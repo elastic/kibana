@@ -1,6 +1,7 @@
 define(function (require) {
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var storage;
   var config;
@@ -17,7 +18,7 @@ define(function (require) {
   require('ui/persisted_log/persisted_log');
 
   function init() {
-    module('kibana/persisted_log', function ($provide) {
+    ngMock.module('kibana/persisted_log', function ($provide) {
       // mock storage service
       $provide.service('localStorage', function () {
         this.get = sinon.stub();
@@ -27,7 +28,7 @@ define(function (require) {
       });
     });
 
-    inject(function ($injector) {
+    ngMock.inject(function ($injector) {
       storage = $injector.get('localStorage');
       PersistedLog = $injector.get('PersistedLog');
     });

@@ -3,9 +3,10 @@ define(function (require) {
     describe('mapExists()', function () {
 
       var expect = require('expect.js');
+      var ngMock = require('ngMock');
       var mapExists, $rootScope;
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private, _$rootScope_) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
         mapExists = Private(require('ui/filter_bar/lib/mapExists'));
       }));

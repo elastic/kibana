@@ -1,5 +1,6 @@
 define(function (require) {
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   describe('fancy forms', function () {
@@ -16,8 +17,8 @@ define(function (require) {
       );
     }
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
 

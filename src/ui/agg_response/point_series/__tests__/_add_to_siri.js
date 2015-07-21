@@ -1,10 +1,11 @@
 define(function (require) {
   return ['addToSiri', function () {
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var addToSiri;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       addToSiri = Private(require('ui/agg_response/point_series/_add_to_siri'));
     }));
 

@@ -2,11 +2,12 @@ define(function (require) {
   describe('Filter Bar pushFilter()', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var pushFilterFn;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       pushFilterFn = Private(require('ui/filter_bar/push_filter'));
     }));
 
@@ -24,7 +25,7 @@ define(function (require) {
       var pushFilter;
       var filter;
 
-      beforeEach(inject(function (Private, $injector) {
+      beforeEach(ngMock.inject(function (Private, $injector) {
         $state = {filters:[]};
         pushFilter = pushFilterFn($state);
         filter = {query: {query_string: {query: ''}}};

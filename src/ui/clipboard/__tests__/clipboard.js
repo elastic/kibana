@@ -4,6 +4,7 @@ define(function (require) {
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
 
   require('ui/clipboard/clipboard');
 
@@ -17,9 +18,9 @@ define(function (require) {
 
     function init() {
       // load the application
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (_$rootScope_, _$compile_, _$interpolate_) {
+      ngMock.inject(function (_$rootScope_, _$compile_, _$interpolate_) {
         $rootScope = _$rootScope_;
         $compile = _$compile_;
         $interpolate = _$interpolate_;

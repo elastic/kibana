@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/directives/input_focus');
 
   describe('Input focus directive', function () {
@@ -9,8 +10,8 @@ define(function (require) {
     var $el, selectedEl, selectedText;
     var inputValue = 'Input Text Value';
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
       $timeout = _$timeout_;

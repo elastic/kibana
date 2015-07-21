@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var Vis;
     var Table;
@@ -14,8 +15,8 @@ define(function (require) {
     var ResponseWriter;
 
     function defineSetup(stubGetColumns) {
-      beforeEach(module('kibana'));
-      beforeEach(inject(function ($injector) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function ($injector) {
         Private = $injector.get('Private');
 
         if (stubGetColumns) {

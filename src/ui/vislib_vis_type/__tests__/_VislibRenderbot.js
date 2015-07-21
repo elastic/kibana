@@ -2,6 +2,7 @@ define(function (require) {
   return ['renderbot', function exportWrapper() {
     var _ = require('lodash');
     var $ = require('jquery');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
     var sinon = require('auto-release-sinon/mocha');
     var vislib;
@@ -14,9 +15,9 @@ define(function (require) {
     };
 
     function init() {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function ($injector, Private, _vislib_) {
+      ngMock.inject(function ($injector, Private, _vislib_) {
         vislib = _vislib_;
         Vis = Private(require('ui/vislib/vis'));
         Renderbot = Private(require('ui/vis/Renderbot'));

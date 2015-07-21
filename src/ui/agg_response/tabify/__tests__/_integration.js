@@ -3,14 +3,15 @@ define(function (require) {
     var _ = require('lodash');
     var fixtures = require('fixtures/fake_hierarchical_data');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var Vis;
     var Buckets;
     var indexPattern;
     var tabifyAggResponse;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
       Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

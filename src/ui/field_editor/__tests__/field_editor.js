@@ -1,6 +1,7 @@
 define(function (require) {
   describe('FieldEditor directive', function () {
     var $ = require('jquery');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var Field;
@@ -11,8 +12,8 @@ define(function (require) {
     var $scope;
     var $el;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($compile, $injector, Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($compile, $injector, Private) {
       $rootScope = $injector.get('$rootScope');
       Field = Private(require('ui/index_patterns/_field'));
       StringFormat = Private(require('registry/field_formats')).getType('string');

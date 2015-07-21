@@ -2,6 +2,7 @@ define(function (require) {
   return ['AggTableGroup Directive', function () {
     var _ = require('lodash');
     var $ = require('jquery');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
     var fixtures = require('fixtures/fake_hierarchical_data');
 
@@ -11,8 +12,8 @@ define(function (require) {
     var Vis;
     var indexPattern;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector, Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector, Private) {
       tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       Vis = Private(require('ui/vis/vis'));

@@ -3,6 +3,7 @@ define(function (require) {
   var expect = require('expect.js');
   var sinon = require('sinon');
   var moment = require('moment');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -14,12 +15,12 @@ define(function (require) {
 
   var init = function (expandable) {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
     clock = sinon.useFakeTimers(moment(anchor).valueOf());
 
     // Create the scope
-    inject(function ($filter, _config_) {
+    ngMock.inject(function ($filter, _config_) {
       filter = $filter('moment');
       config = _config_;
     });

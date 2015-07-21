@@ -1,12 +1,13 @@
 define(function (require) {
   var mapMissing = require('ui/filter_bar/lib/mapMissing');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
   describe('Filter Bar Directive', function () {
     describe('mapMissing()', function () {
 
       var mapMissing, $rootScope;
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private, _$rootScope_) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
         mapMissing = Private(require('ui/filter_bar/lib/mapMissing'));
       }));

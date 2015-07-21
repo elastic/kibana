@@ -3,11 +3,12 @@ define(function (require) {
     describe('transformAggregation()', function () {
       var _ = require('lodash');
       var expect = require('expect.js');
+      var ngMock = require('ngMock');
       var transform;
       var fixture;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         transform = Private(require('ui/agg_response/hierarchical/_transform_aggregation'));
       }));
 

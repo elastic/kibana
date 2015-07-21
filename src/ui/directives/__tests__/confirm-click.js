@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   require('ui/directives/confirm_click');
 
@@ -15,10 +16,10 @@ define(function (require) {
 
   var init = function (text) {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
     // Create the scope
-    inject(function ($rootScope, $compile) {
+    ngMock.inject(function ($rootScope, $compile) {
 
       // Give us a scope
       $parentScope = $rootScope;

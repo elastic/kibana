@@ -1,5 +1,6 @@
 define(function (require) {
   var angular = require('angular');
+  var ngMock = require('ngMock');
   var $ = require('jquery');
   var _ = require('lodash');
   var sinon = require('auto-release-sinon/mocha');
@@ -18,7 +19,7 @@ define(function (require) {
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   var init = function ($elem, props) {
-    inject(function ($rootScope, $compile, $timeout, _config_) {
+    ngMock.inject(function ($rootScope, $compile, $timeout, _config_) {
       config = _config_;
       $parentScope = $rootScope;
       _.assign($parentScope, props);
@@ -52,9 +53,9 @@ define(function (require) {
       '</disc-field-chooser>'
     );
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(function () {
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         hits = Private(require('fixtures/hits'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         indexPatternList = [ 'b', 'a', 'c' ];

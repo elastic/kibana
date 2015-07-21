@@ -2,12 +2,13 @@ define(function (require) {
   describe('styleCompile directive', function () {
     var $ = require('jquery');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var config;
     var $rootScope;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       config = $injector.get('config');
       $rootScope = $injector.get('$rootScope');
     }));

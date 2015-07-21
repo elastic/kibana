@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   var Data;
@@ -105,9 +106,9 @@ define(function (require) {
   describe('Vislib Data Class Test Suite', function () {
 
     beforeEach(function () {
-      module('DataFactory');
+      ngMock.module('DataFactory');
 
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         Data = Private(require('ui/vislib/lib/data'));
       });
     });

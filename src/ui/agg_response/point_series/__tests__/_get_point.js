@@ -3,14 +3,15 @@ define(function (require) {
   return ['getPoint', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var getPoint;
 
     var truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
     var identFormatted = { fieldFormatter: _.constant(_.identity) };
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       getPoint = Private(require('ui/agg_response/point_series/_get_point'));
     }));
 

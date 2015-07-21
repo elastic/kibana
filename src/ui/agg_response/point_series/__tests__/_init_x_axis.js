@@ -2,11 +2,12 @@ define(function (require) {
   return ['initXAxis', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var initXAxis;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       initXAxis = Private(require('ui/agg_response/point_series/_init_x_axis'));
     }));
 

@@ -2,12 +2,13 @@ define(function (require) {
   return ['getSeries', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var getSeries;
 
     var agg = { fieldFormatter: _.constant(_.identity) };
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       getSeries = Private(require('ui/agg_response/point_series/_get_series'));
     }));
 

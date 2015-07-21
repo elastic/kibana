@@ -1,14 +1,15 @@
 define(function (require) {
   describe('metric vis', function () {
     var $scope;
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var formatter = function (value) {
       return value.toFixed(3);
     };
 
-    beforeEach(module('kibana/metric_vis'));
-    beforeEach(inject(function ($rootScope, $controller) {
+    beforeEach(ngMock.module('kibana/metric_vis'));
+    beforeEach(ngMock.inject(function ($rootScope, $controller) {
       $scope = $rootScope.$new();
       $controller('KbnMetricVisController', {$scope: $scope});
       $scope.$digest();

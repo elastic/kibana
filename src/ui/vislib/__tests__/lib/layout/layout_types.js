@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   angular.module('LayoutTypeFactory', ['kibana']);
@@ -10,11 +11,11 @@ define(function (require) {
     var layoutFunc;
 
     beforeEach(function () {
-      module('LayoutTypeFactory');
+      ngMock.module('LayoutTypeFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
         layoutFunc = layoutType.histogram;
       });

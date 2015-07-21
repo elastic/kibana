@@ -1,15 +1,16 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/directives/inequality');
 
   describe('greater_than model validator directive', function () {
     var $compile, $rootScope;
     var html;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_) {
+    beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
     }));

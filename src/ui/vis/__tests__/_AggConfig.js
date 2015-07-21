@@ -2,6 +2,7 @@ define(function (require) {
   return ['AggConfig', function () {
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var Vis;
     var AggType;
@@ -9,8 +10,8 @@ define(function (require) {
     var indexPattern;
     var fieldFormat;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/vis/vis'));
       AggType = Private(require('ui/agg_types/_agg_type'));
       AggConfig = Private(require('ui/vis/AggConfig'));

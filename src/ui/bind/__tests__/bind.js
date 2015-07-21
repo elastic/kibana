@@ -2,12 +2,13 @@ define(function (require) {
   describe('$scope.$bind', function () {
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var $rootScope;
     var $scope;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $scope = $rootScope.$new();
     }));

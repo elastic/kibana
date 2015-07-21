@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   angular.module('ZeroInjectionUtilService', ['kibana']);
   angular.module('FlattenDataObjectUtilService', ['kibana']);
@@ -262,11 +263,11 @@ define(function (require) {
       var sample3;
 
       beforeEach(function () {
-        module('ZeroInjectionUtilService');
+        ngMock.module('ZeroInjectionUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
           sample1 = injectZeros(seriesData);
           sample2 = injectZeros(multiSeriesData);
@@ -373,11 +374,11 @@ define(function (require) {
       var numberedResults;
 
       beforeEach(function () {
-        module('OrderedXKeysUtilService');
+        ngMock.module('OrderedXKeysUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
           results = orderXValues(multiSeriesData);
           numberedResults = orderXValues(multiSeriesNumberedData);
@@ -437,11 +438,11 @@ define(function (require) {
       var results;
 
       beforeEach(function () {
-        module('UniqueXValuesUtilService');
+        ngMock.module('UniqueXValuesUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           uniqueKeys = Private(require('ui/vislib/components/zero_injection/uniq_keys'));
           results = uniqueKeys(multiSeriesData);
         });
@@ -491,11 +492,11 @@ define(function (require) {
       var results;
 
       beforeEach(function () {
-        module('ReplaceIndexUtilService');
+        ngMock.module('ReplaceIndexUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           flattenData = Private(require('ui/vislib/components/zero_injection/flatten_data'));
           results = flattenData(multiSeriesData);
         });
@@ -524,11 +525,11 @@ define(function (require) {
       var results2;
 
       beforeEach(function () {
-        module('ZeroFilledArrayUtilService');
+        ngMock.module('ZeroFilledArrayUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
           results1 = createZeroArray(arr1);
           results2 = createZeroArray(arr2);
@@ -611,11 +612,11 @@ define(function (require) {
       var results;
 
       beforeEach(function () {
-        module('ZeroFillDataArrayUtilService');
+        ngMock.module('ZeroFillDataArrayUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           zeroFillArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
           createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
           arr1 = createZeroArray(xValueArr);
@@ -678,11 +679,11 @@ define(function (require) {
       var results;
 
       beforeEach(function () {
-        module('ZeroInjectionUtilService');
+        ngMock.module('ZeroInjectionUtilService');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
           results = injectZeros(dateHistogramRows);
         });

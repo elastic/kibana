@@ -2,11 +2,12 @@ define(function (require) {
   return ['Url Format', function () {
     var $ = require('jquery');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var fieldFormats;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       fieldFormats = Private(require('registry/field_formats'));
     }));
 

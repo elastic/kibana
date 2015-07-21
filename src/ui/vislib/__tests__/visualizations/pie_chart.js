@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var _ = require('lodash');
   var $ = require('jquery');
   var fixtures = require('fixtures/fake_hierarchical_data');
@@ -70,11 +71,11 @@ define(function (require) {
     var data2;
 
     beforeEach(function () {
-      module('PieChartFactory');
+      ngMock.module('PieChartFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         chart1 = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams1);
         chart2 = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams2);
         Vis = Private(require('ui/vis/vis'));
@@ -170,11 +171,11 @@ define(function (require) {
       var data;
 
       beforeEach(function () {
-        module('PieChartFactory');
+        ngMock.module('PieChartFactory');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           Vis = Private(require('ui/vis/vis'));
           indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
@@ -208,7 +209,7 @@ define(function (require) {
         var onMouseOver;
 
         beforeEach(function () {
-          inject(function (d3) {
+          ngMock.inject(function (d3) {
             vis.handler.charts.forEach(function (chart) {
               path = $(chart.chartEl).find('path')[0];
               d3selectedPath = d3.select(path)[0][0];
@@ -240,7 +241,7 @@ define(function (require) {
         var slices;
 
         beforeEach(function () {
-          inject(function (d3) {
+          ngMock.inject(function (d3) {
             vis.handler.charts.forEach(function (chart) {
               width = $(chart.chartEl).width();
               height = $(chart.chartEl).height();

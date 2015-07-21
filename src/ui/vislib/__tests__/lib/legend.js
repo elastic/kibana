@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   var slices = require('vislib_fixtures/mock_data/histogram/_slices');
@@ -44,11 +45,11 @@ define(function (require) {
       var $el;
 
       beforeEach(function () {
-        module('LegendFactory');
+        ngMock.module('LegendFactory');
       });
 
       beforeEach(function () {
-        inject(function (Private, d3) {
+        ngMock.inject(function (Private, d3) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           Legend = Private(require('ui/vislib/lib/legend'));
           require('ui/vislib/styles/main.less');

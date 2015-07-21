@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var MockState = require('fixtures/mock_state');
     var storeNames = {
       app: 'appState',
@@ -12,7 +13,7 @@ define(function (require) {
     var queryFilter;
     var $rootScope, appState, globalState;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
     beforeEach(function () {
       appState = new MockState({ filters: [] });
@@ -55,11 +56,11 @@ define(function (require) {
     });
 
     beforeEach(function () {
-      module('kibana/courier', function ($provide) {
+      ngMock.module('kibana/courier', function ($provide) {
         $provide.service('courier', require('fixtures/mock_courier'));
       });
 
-      module('kibana/global_state', function ($provide) {
+      ngMock.module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
           return function () {
             return appState;
@@ -73,7 +74,7 @@ define(function (require) {
     });
 
     beforeEach(function () {
-      inject(function (_$rootScope_, Private) {
+      ngMock.inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
         queryFilter = Private(require('ui/filter_bar/query_filter'));
       });

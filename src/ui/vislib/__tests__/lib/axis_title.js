@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   angular.module('AxisTitleFactory', ['kibana']);
@@ -74,11 +75,11 @@ define(function (require) {
     };
 
     beforeEach(function () {
-      module('AxisTitleFactory');
+      ngMock.module('AxisTitleFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         AxisTitle = Private(require('ui/vislib/lib/axis_title'));
         Data = Private(require('ui/vislib/lib/data'));
 

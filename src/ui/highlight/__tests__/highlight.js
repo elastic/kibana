@@ -2,12 +2,13 @@ define(function (require) {
   describe('Highlight', function () {
     var angular = require('angular');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     require('ui/highlight/highlight');
 
     var filter, tags;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (highlightFilter, highlightTags) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (highlightFilter, highlightTags) {
       filter = highlightFilter;
       tags = highlightTags;
     }));

@@ -5,6 +5,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var sinon = require('auto-release-sinon/mocha');
+  var ngMock = require('ngMock');
 
 
   // Load the kibana app dependencies.
@@ -22,13 +23,13 @@ define(function (require) {
 
   var init = function () {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
     // Stub out the clock so 'now' doesn't move
     clock = sinon.useFakeTimers(moment(anchor).valueOf());
 
     // Create the scope
-    inject(function ($rootScope, $compile) {
+    ngMock.inject(function ($rootScope, $compile) {
 
       // Give us a scope
       $parentScope = $rootScope;
@@ -88,7 +89,7 @@ define(function (require) {
       var $courier;
       beforeEach(function () {
         init();
-        inject(function (courier, $rootScope) {
+        ngMock.inject(function (courier, $rootScope) {
           $courier = courier;
           $rootScope.$apply();
         });

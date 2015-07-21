@@ -3,11 +3,12 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var fieldFormats;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       fieldFormats = Private(require('registry/field_formats'));
     }));
 
@@ -17,7 +18,7 @@ define(function (require) {
       var format;
       var convertHtml;
 
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.inject(function (Private) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         hits = Private(require('fixtures/hits'));
         format = fieldFormats.getInstance('_source');

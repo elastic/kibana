@@ -2,11 +2,12 @@ define(function (require) {
   var fn = require('ui/filter_manager/lib/phrase');
   var expect = require('expect.js');
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var indexPattern, expected;
   describe('Filter Manager', function () {
     describe('Phrase filter builder', function () {
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private, _$rootScope_, Promise) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         expected = _.cloneDeep(require('fixtures/filter_skeleton'));
       }));

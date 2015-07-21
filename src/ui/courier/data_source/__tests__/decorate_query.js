@@ -1,6 +1,8 @@
 define(function (require) {
   var moment = require('moment');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
+
   describe('Query decorator', function () {
 
     var _ = require('lodash');
@@ -8,9 +10,9 @@ define(function (require) {
 
     var indexPattern, getComputedFields, fn;
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      module('kibana', function ($provide) {
+      ngMock.module('kibana', function ($provide) {
 
         // Super simple config stub
         $provide.service('config', function () {
@@ -23,7 +25,7 @@ define(function (require) {
       });
     });
 
-    beforeEach(inject(function (Private, $injector, _config_) {
+    beforeEach(ngMock.inject(function (Private, $injector, _config_) {
       config = _config_;
       fn = Private(require('ui/courier/data_source/_decorate_query'));
     }));

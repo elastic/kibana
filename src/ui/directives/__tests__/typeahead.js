@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -25,9 +26,9 @@ define(function (require) {
 
   var init = function () {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
 
-    module('kibana/typeahead', function ($provide) {
+    ngMock.module('kibana/typeahead', function ($provide) {
       $provide.factory('PersistedLog', function () {
         function PersistedLogMock(name, options) {
           this.name = name;
@@ -47,7 +48,7 @@ define(function (require) {
 
 
     // Create the scope
-    inject(function ($injector, $controller, $rootScope, $compile) {
+    ngMock.inject(function ($injector, $controller, $rootScope, $compile) {
       // Give us a scope
       $parentScope = $rootScope;
 

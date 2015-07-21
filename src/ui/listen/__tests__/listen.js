@@ -2,14 +2,15 @@ define(function (require) {
   describe('listen component', function () {
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var $rootScope;
     var Events;
 
     require('ui/listen');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector, Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector, Private) {
       $rootScope = $injector.get('$rootScope');
       Events = Private(require('ui/events'));
     }));

@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   angular.module('ChartBaseClass', ['kibana']);
   angular.module('ColumnChartFactory', ['kibana']);
@@ -81,12 +82,12 @@ define(function (require) {
     };
 
     beforeEach(function () {
-      module('ChartBaseClass');
-      module('ColumnChartFactory');
+      ngMock.module('ChartBaseClass');
+      ngMock.module('ColumnChartFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         Vis = Private(require('ui/vislib/vis'));
         Data = Private(require('ui/vislib/lib/data'));
         ColumnChart = Private(require('ui/vislib/visualizations/column_chart'));

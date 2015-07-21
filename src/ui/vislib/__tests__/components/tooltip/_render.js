@@ -1,6 +1,7 @@
 define(function (require) {
   return function TooltipRenderingTestSuite() {
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     describe('render Method', function () {
       var angular = require('angular');
@@ -14,11 +15,11 @@ define(function (require) {
       var tooltips = [];
 
       beforeEach(function () {
-        module('TooltipFactory');
+        ngMock.module('TooltipFactory');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           data = require('vislib_fixtures/mock_data/date_histogram/_series');
           require('ui/vislib/styles/main.less');

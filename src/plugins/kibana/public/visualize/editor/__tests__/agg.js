@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
 
   require('plugins/kibana/visualize/editor/agg');
@@ -42,7 +43,7 @@ define(function (require) {
       };
     }
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(function () {
 
       $parentScope.agg = {
@@ -59,7 +60,7 @@ define(function (require) {
         schema: makeConfig('radius')
       }];
     });
-    beforeEach(inject(function ($rootScope, $compile) {
+    beforeEach(ngMock.inject(function ($rootScope, $compile) {
       // share the scope
       _.defaults($parentScope, $rootScope, Object.getPrototypeOf($rootScope));
 

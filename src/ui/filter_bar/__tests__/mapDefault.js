@@ -3,9 +3,10 @@ define(function (require) {
     describe('mapDefault()', function () {
 
       var expect = require('expect.js');
+      var ngMock = require('ngMock');
       var mapDefault, $rootScope;
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private, _$rootScope_) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private, _$rootScope_) {
         $rootScope = _$rootScope_;
         mapDefault = Private(require('ui/filter_bar/lib/mapDefault'));
       }));

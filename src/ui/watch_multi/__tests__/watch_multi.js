@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   describe('$scope.$watchMulti', function () {
@@ -8,8 +9,8 @@ define(function (require) {
     var $rootScope;
     var $scope;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $scope = $rootScope.$new();
     }));

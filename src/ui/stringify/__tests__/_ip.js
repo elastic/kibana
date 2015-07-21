@@ -2,9 +2,10 @@ define(function (require) {
   return ['IP Address Format', function () {
     var fieldFormats;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       fieldFormats = Private(require('registry/field_formats'));
     }));
 

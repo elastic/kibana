@@ -2,6 +2,7 @@ define(function (require) {
   return ['bucketCountBetween util', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
     var indexPattern;
     var Vis;
     var visTypes;
@@ -15,8 +16,8 @@ define(function (require) {
       return ((n = +n) || 1 / n) < 0;
     }
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       Vis = Private(require('ui/vis/vis'));
       visTypes = Private(require('registry/vis_types'));

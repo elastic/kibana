@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/private');
 
 
@@ -10,9 +11,9 @@ define(function (require) {
     var $rootScope;
     var BaseObject;
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (_$rootScope_, Private) {
+      ngMock.inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
         BaseObject = require('utils/BaseObject');
       });

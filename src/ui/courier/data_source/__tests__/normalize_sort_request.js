@@ -2,14 +2,15 @@ define(function (require) {
   describe('SearchSource#normalizeSortRequest', function () {
     require('ui/private');
     require('angular').module('normalizeSortRequest', ['kibana']);
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var normalizeSortRequest;
     var indexPattern;
     var normalizedSort;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       normalizeSortRequest = Private(require('ui/courier/data_source/_normalize_sort_request'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 

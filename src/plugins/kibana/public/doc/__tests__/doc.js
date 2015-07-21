@@ -2,6 +2,7 @@ define(function (require) {
 
   // Load the kibana app dependencies.
   require('angular-route');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
   require('plugins/kibana/doc/index');
 
@@ -9,10 +10,10 @@ define(function (require) {
 
   var init = function (index, type, id) {
 
-    module('kibana');
+    ngMock.module('kibana');
 
     // Stub services
-    module(function ($provide) {
+    ngMock.module(function ($provide) {
       $provide.service('$route', function (Private) {
         this.current = {
           locals: {
@@ -65,7 +66,7 @@ define(function (require) {
     });
 
     // Create the scope
-    inject(function ($rootScope, $controller, _timefilter_) {
+    ngMock.inject(function ($rootScope, $controller, _timefilter_) {
       $scope = $rootScope.$new();
       timefilter = _timefilter_;
 

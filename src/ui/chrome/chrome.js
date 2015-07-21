@@ -202,14 +202,8 @@ define(function (require) {
     return tab ? tab.id : def;
   };
 
-  /**
-   * Get the id of the active tab
-   *
-   * @param {*} def - the default value if there isn't any active tab
-   * @return {*}
-   */
-  chrome.bootstrap = function (angularModules) {
-    var kibana = modules.get('kibana', angularModules);
+  chrome.setupAngular = function (moduleDeps) {
+    var kibana = modules.get('kibana', moduleDeps);
 
     kibana
     .constant('kbnVersion', payload.version)
@@ -227,6 +221,16 @@ define(function (require) {
     .constant('sessionId', Date.now());
 
     modules.link(kibana);
+  };
+
+  /**
+   * Get the id of the active tab
+   *
+   * @param {*} def - the default value if there isn't any active tab
+   * @return {*}
+   */
+  chrome.bootstrap = function (angularModules) {
+    chrome.setupAngular(angularModules);
     angular.bootstrap(document, ['kibana']);
     $(document.body).children(':not(style-compile)').show();
   };

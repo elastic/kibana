@@ -2,6 +2,7 @@ define(function (require) {
   return ['index pattern', function () {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
     var Promise = require('bluebird');
     var errors = require('errors');
@@ -16,8 +17,8 @@ define(function (require) {
     var indexPatternId = 'test-pattern';
     var indexPattern;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector, _config_) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector, _config_) {
       config = _config_;
       mockLogstashFields = Private(require('fixtures/logstash_fields'));
       docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));

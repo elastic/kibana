@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('ui/directives/validate_json');
@@ -22,12 +23,12 @@ define(function (require) {
 
   var init = function (type) {
     // Load the application
-    module('kibana');
+    ngMock.module('kibana');
     type = type || 'input';
     var elMarkup = markup[type];
 
     // Create the scope
-    inject(function ($injector, $rootScope, $compile) {
+    ngMock.inject(function ($injector, $rootScope, $compile) {
       // Give us a scope
       $parentScope = $rootScope;
       $parentScope.mockModel = mockScope;

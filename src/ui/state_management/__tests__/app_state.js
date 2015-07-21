@@ -1,15 +1,16 @@
 define(function (require) {
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/state_management/app_state');
 
   describe('State Management', function () {
     var $rootScope, AppState;
 
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (_$rootScope_, _$location_, Private) {
+      ngMock.inject(function (_$rootScope_, _$location_, Private) {
         $rootScope = _$rootScope_;
         AppState = Private(require('ui/state_management/app_state'));
       });

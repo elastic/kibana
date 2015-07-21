@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/private');
 
   describe('Events', function () {
@@ -14,9 +15,9 @@ define(function (require) {
     var Promise;
 
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function ($injector, Private) {
+      ngMock.inject(function ($injector, Private) {
         $rootScope = $injector.get('$rootScope');
         Notifier = $injector.get('Notifier');
         Promise = $injector.get('Promise');

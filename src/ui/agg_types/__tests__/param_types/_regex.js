@@ -2,15 +2,16 @@ define(function (require) {
   return ['Regex', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var BaseAggParam;
     var RegexAggParam;
     var Vis;
     var indexPattern;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     // fetch out deps
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private) {
       BaseAggParam = Private(require('ui/agg_types/param_types/base'));
       RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
       Vis = Private(require('ui/vis/vis'));

@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('ui/directives/validate_index_name');
@@ -9,9 +10,9 @@ define(function (require) {
     var $compile, $rootScope;
     var html = '<input type="text" ng-model="indexName" validate-index-name />';
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_) {
+    beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
     }));

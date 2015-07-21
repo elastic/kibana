@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var Vis;
     var IndexedArray;
@@ -12,8 +13,8 @@ define(function (require) {
     var indexPattern;
     var Schemas;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       // replace the AggConfig module with a spy
       var RealAggConfigPM = require('ui/vis/AggConfig');
       AggConfig = Private(RealAggConfigPM);

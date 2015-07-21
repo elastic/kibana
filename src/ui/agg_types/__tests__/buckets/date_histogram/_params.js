@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var paramWriter;
     var writeInterval;
@@ -12,8 +13,8 @@ define(function (require) {
     var setTimeBounds;
     var timeField;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       var AggParamWriter = Private(require('../../aggParamWriter'));
       var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       var timefilter = $injector.get('timefilter');

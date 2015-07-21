@@ -4,9 +4,10 @@ define(function (require) {
     var config;
     var defaults;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector, Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector, Private) {
       config = $injector.get('config');
       $scope = $injector.get('$rootScope');
       defaults = Private(require('ui/config/defaults'));

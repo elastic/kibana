@@ -1,13 +1,14 @@
 define(function (require) {
   require('ui/comma_list_filter');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('Comma-List filter', function () {
 
     var commaList;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       commaList = $injector.get('commaListFilter');
     }));
 

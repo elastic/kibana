@@ -1,5 +1,6 @@
 define(function (require) {
   var moment = require('moment');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   require('angular').module('DiffTimePickerValues', ['kibana']);
@@ -7,8 +8,8 @@ define(function (require) {
   describe('Diff Time Picker Values', function () {
     var diffTimePickerValues;
 
-    beforeEach(module('DiffTimePickerValues'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('DiffTimePickerValues'));
+    beforeEach(ngMock.inject(function (Private) {
       diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
     }));
 

@@ -5,6 +5,7 @@ define(function (require) {
   var _ = require('lodash');
   var sinon = require('auto-release-sinon/mocha');
   var searchResponse = require('fixtures/search_response');
+  var ngMock = require('ngMock');
 
   // Load the kibana app dependencies.
   require('ui/private');
@@ -14,7 +15,7 @@ define(function (require) {
   var $parentScope, $scope, $timeout, searchSource;
 
   var init = function ($elem, props) {
-    inject(function ($rootScope, $compile, _$timeout_) {
+    ngMock.inject(function ($rootScope, $compile, _$timeout_) {
       $timeout = _$timeout_;
       $parentScope = $rootScope;
       _.assign($parentScope, props);
@@ -39,10 +40,10 @@ define(function (require) {
   describe('docTable', function () {
     var $elem;
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(function () {
       $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
-      inject(function (Private) {
+      ngMock.inject(function (Private) {
         searchSource = Private(require('fixtures/stubbed_search_source'));
       });
       init($elem, {

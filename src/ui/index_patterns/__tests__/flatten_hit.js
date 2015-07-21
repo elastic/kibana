@@ -3,14 +3,15 @@ define(function (require) {
 
     var _ = require('lodash');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var flattenHit;
     var config;
     var hit;
     var flat;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       var indexPattern = {
         fields: {
           byName: {

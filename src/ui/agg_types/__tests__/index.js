@@ -1,5 +1,6 @@
 define(function (require) {
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('AggTypesComponent', function () {
     describe(require('specs/components/agg_types/_agg_type'));
@@ -11,8 +12,8 @@ define(function (require) {
       var bucketAggs;
       var BucketAggType;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         bucketAggs = Private(require('ui/agg_types/index')).byType.buckets;
         BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
       }));
@@ -28,8 +29,8 @@ define(function (require) {
       var metricAggs;
       var MetricAggType;
 
-      beforeEach(module('kibana'));
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.inject(function (Private) {
         metricAggs = Private(require('ui/agg_types/index')).byType.metrics;
         MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
       }));

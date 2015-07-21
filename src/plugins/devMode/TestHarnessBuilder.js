@@ -52,9 +52,7 @@ module.exports = function (kbnServer) {
       let deps = [];
       let modules = {
         angular: [],
-        require: [
-          'angular-mocks'
-        ]
+        require: []
       };
 
       if (testFiles) {

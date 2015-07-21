@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var series = require('vislib_fixtures/mock_data/date_histogram/_series');
   var columns = require('vislib_fixtures/mock_data/date_histogram/_columns');
@@ -32,11 +33,11 @@ define(function (require) {
       var numberOfCharts;
 
       beforeEach(function () {
-        module('VisFactory');
+        ngMock.module('VisFactory');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           secondVis = Private(require('vislib_fixtures/_vis_fixture'))();
           require('ui/vislib/styles/main.less');

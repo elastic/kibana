@@ -1,14 +1,15 @@
 define(function (require) {
   var moment = require('moment');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
   describe('Filter Bar Directive', function () {
     describe('changeTimeFilter()', function () {
 
       var changeTimeFilter, timefilter;
 
-      beforeEach(module('kibana'));
+      beforeEach(ngMock.module('kibana'));
 
-      beforeEach(inject(function (Private, _timefilter_) {
+      beforeEach(ngMock.inject(function (Private, _timefilter_) {
         changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
         timefilter = _timefilter_;
       }));

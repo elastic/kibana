@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   angular.module('ChartTitleFactory', ['kibana']);
@@ -72,11 +73,11 @@ define(function (require) {
     };
 
     beforeEach(function () {
-      module('ChartTitleFactory');
+      ngMock.module('ChartTitleFactory');
     });
 
     beforeEach(function () {
-      inject(function (d3, Private) {
+      ngMock.inject(function (d3, Private) {
         ChartTitle = Private(require('ui/vislib/lib/chart_title'));
         Data = Private(require('ui/vislib/lib/data'));
 

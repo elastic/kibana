@@ -5,6 +5,7 @@ define(function (require) {
     var _ = require('lodash');
     var expect = require('expect.js');
     var sinon = require('auto-release-sinon/mocha');
+    var ngMock = require('ngMock');
 
     var $body = $(document.body);
     var $window = $(window);
@@ -20,8 +21,8 @@ define(function (require) {
     var $rootScope;
     var $onStub;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector) {
       $rootScope = $injector.get('$rootScope');
       EventEmitter = Private(require('ui/events'));
 

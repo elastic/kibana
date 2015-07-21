@@ -3,9 +3,10 @@ define(function (require) {
 
     var Private;
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function ($injector) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function ($injector) {
       Private = $injector.get('Private');
     }));
 

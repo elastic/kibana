@@ -6,14 +6,15 @@ define(function (require) {
     var moment = require('moment');
     var AggConfigResult = require('ui/vis/AggConfigResult');
     var expect = require('expect.js');
+    var ngMock = require('ngMock');
 
     var pointSeriesChartDataFromTable;
     var indexPattern;
     var Table;
     var Vis;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/vis/vis'));
       Table = Private(require('ui/agg_response/tabify/_table'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   angular.module('ColorUtilService', ['kibana']);
   angular.module('SeedColorUtilService', ['kibana']);
@@ -24,11 +25,11 @@ define(function (require) {
       var color;
 
       beforeEach(function () {
-        module('ColorUtilService');
+        ngMock.module('ColorUtilService');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           seedColors = Private(require('ui/vislib/components/color/seed_colors'));
           getColors = Private(require('ui/vislib/components/color/color'));
           color = getColors(arr);
@@ -107,7 +108,7 @@ define(function (require) {
     describe('Seed Colors', function () {
 
       beforeEach(function () {
-        module('SeedColorUtilService');
+        ngMock.module('SeedColorUtilService');
       });
 
       it('should return an array', function () {
@@ -130,11 +131,11 @@ define(function (require) {
       var colorPalette;
 
       beforeEach(function () {
-        module('ColorPaletteUtilService');
+        ngMock.module('ColorPaletteUtilService');
       });
 
       beforeEach(function () {
-        inject(function (d3, Private) {
+        ngMock.inject(function (d3, Private) {
           seedColors = Private(require('ui/vislib/components/color/seed_colors'));
           createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
           colorPalette = createColorPalette(num1);

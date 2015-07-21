@@ -1,5 +1,6 @@
 define(function (require) {
   var angular = require('angular');
+  var ngMock = require('ngMock');
   var sinon = require('auto-release-sinon/mocha');
 
   /**
@@ -15,8 +16,8 @@ define(function (require) {
       $routeProvider = _r;
     }]);
 
-    module('_Temp_Module_');
-    inject(function () {});
+    ngMock.module('_Temp_Module_');
+    ngMock.inject(function () {});
 
     sinon.stub($routeProvider, 'otherwise');
     sinon.stub($routeProvider, 'when');

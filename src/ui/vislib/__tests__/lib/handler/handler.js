@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
+  var ngMock = require('ngMock');
   var expect = require('expect.js');
 
   // Data
@@ -30,11 +31,11 @@ define(function (require) {
       var events;
 
       beforeEach(function () {
-        module('HandlerBaseClass');
+        ngMock.module('HandlerBaseClass');
       });
 
       beforeEach(function () {
-        inject(function (Private) {
+        ngMock.inject(function (Private) {
           Handler = Private(require('ui/vislib/lib/handler/handler'));
           vis = Private(require('vislib_fixtures/_vis_fixture'))();
           require('ui/vislib/styles/main.less');
@@ -109,7 +110,7 @@ define(function (require) {
 
       describe('removeAll Method', function () {
         beforeEach(function () {
-          inject(function () {
+          ngMock.inject(function () {
             vis.handler.removeAll(vis.el);
           });
         });

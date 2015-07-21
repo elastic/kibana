@@ -2,6 +2,7 @@ define(function (require) {
   return ['editor', function () {
     var _ = require('lodash');
     var $ = require('jquery');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var indexPattern;
@@ -10,8 +11,8 @@ define(function (require) {
     var render;
     var $scope;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private, $injector, $compile) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private, $injector, $compile) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
       var Vis = Private(require('ui/vis/vis'));
@@ -70,7 +71,7 @@ define(function (require) {
       var field;
       var interval;
 
-      beforeEach(inject(function (Private) {
+      beforeEach(ngMock.inject(function (Private) {
         field = _.sample(indexPattern.fields);
         interval = _.sample(Private(require('ui/agg_types/buckets/_interval_options')));
         params = render({ field: field, interval: interval });

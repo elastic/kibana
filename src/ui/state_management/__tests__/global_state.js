@@ -1,15 +1,16 @@
 define(function (require) {
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   require('ui/state_management/global_state');
 
   describe('State Management', function () {
     var $rootScope, $location, state;
 
     beforeEach(function () {
-      module('kibana');
+      ngMock.module('kibana');
 
-      inject(function (_$location_, globalState) {
+      ngMock.inject(function (_$location_, globalState) {
         $location = _$location_;
         state = globalState;
       });

@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('GeoJson Agg Response Converter', function () {
     var vis;
@@ -9,8 +10,8 @@ define(function (require) {
     var esResponse;
     var aggs;
 
-    beforeEach(module('kibana'));
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (Private) {
       var Vis = Private(require('ui/vis/vis'));
       var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 

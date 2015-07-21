@@ -63,8 +63,7 @@ class BaseOptimizer extends EventEmitter {
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=2048!file?name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file?name=[path][name].[ext]' },
-          { test: /\/src\/(plugins|ui)\/.+\.js$/, loader: 'auto-preload-rjscommon-deps' },
-          { test: /\/__tests__\//, loader: 'mocha' }
+          { test: /\/src\/(plugins|ui)\/.+\.js$/, loader: 'auto-preload-rjscommon-deps' }
         ].concat(this.modules.loaders),
         noParse: this.modules.noParse,
       },

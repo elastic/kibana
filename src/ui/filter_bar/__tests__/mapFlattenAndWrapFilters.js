@@ -4,16 +4,17 @@ define(function (require) {
     describe('mapFlattenAndWrapFilters()', function () {
       var sinon = require('auto-release-sinon/mocha');
       var expect = require('expect.js');
+      var ngMock = require('ngMock');
       var mapFlattenAndWrapFilters, $rootScope;
-      beforeEach(module('kibana'));
+      beforeEach(ngMock.module('kibana'));
 
       beforeEach(function () {
-        module('kibana/courier', function ($provide) {
+        ngMock.module('kibana/courier', function ($provide) {
           $provide.service('courier', require('fixtures/mock_courier'));
         });
       });
 
-      beforeEach(inject(function (Private, _$rootScope_) {
+      beforeEach(ngMock.inject(function (Private, _$rootScope_) {
         mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
         $rootScope = _$rootScope_;
       }));

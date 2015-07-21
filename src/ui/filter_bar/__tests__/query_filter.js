@@ -1,16 +1,17 @@
 define(function (require) {
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var queryFilter;
   var EventEmitter;
   var $rootScope;
 
   describe('Query Filter', function () {
     describe('Module', function () {
-      beforeEach(module('kibana'));
+      beforeEach(ngMock.module('kibana'));
 
       beforeEach(function () {
-        inject(function (_$rootScope_, Private) {
+        ngMock.inject(function (_$rootScope_, Private) {
           $rootScope = _$rootScope_;
           queryFilter = Private(require('ui/filter_bar/query_filter'));
           EventEmitter = Private(require('ui/events'));

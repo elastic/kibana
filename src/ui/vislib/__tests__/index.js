@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var angular = require('angular');
 
@@ -10,11 +11,11 @@ define(function (require) {
     var visLib;
 
     beforeEach(function () {
-      module('kibana/vislib');
+      ngMock.module('kibana/vislib');
     });
 
     beforeEach(function () {
-      inject(function (d3, vislib) {
+      ngMock.inject(function (d3, vislib) {
         visLib = vislib;
       });
     });

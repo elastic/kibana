@@ -3,6 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var Promise = require('bluebird');
+    var ngMock = require('ngMock');
     var expect = require('expect.js');
 
     var sinon = require('auto-release-sinon/mocha');
@@ -14,9 +15,9 @@ define(function (require) {
     var reflowWatcher;
     var reflowSpies = {};
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private) {
       window.DISABLE_RESIZE_CHECKER = false;
       ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
       EventEmitter = Private(require('ui/events'));

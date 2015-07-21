@@ -1,6 +1,7 @@
 define(function (require) {
   var sinon = require('auto-release-sinon/mocha');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
   var faker = require('faker');
   var _ = require('lodash');
   var MockState = require('fixtures/mock_state');
@@ -16,7 +17,7 @@ define(function (require) {
   require('ui/url/url');
 
   function init() {
-    module('kibana/url', 'kibana', function ($provide) {
+    ngMock.module('kibana/url', 'kibana', function ($provide) {
       $provide.service('$route', function () {
         return {
           reload: _.noop
@@ -40,7 +41,7 @@ define(function (require) {
       });
     });
 
-    inject(function ($injector) {
+    ngMock.inject(function ($injector) {
       $route = $injector.get('$route');
       $location = $injector.get('$location');
       $rootScope = $injector.get('$rootScope');

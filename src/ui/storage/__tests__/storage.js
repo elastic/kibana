@@ -1,6 +1,7 @@
 define(function (require) {
   var sinon = require('sinon');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   var storage;
   var $window;
@@ -9,7 +10,7 @@ define(function (require) {
   require('ui/storage/storage');
 
   function init() {
-    module('kibana/storage', function ($provide) {
+    ngMock.module('kibana/storage', function ($provide) {
       // mock $window.localStorage for storage
       $provide.value('$window', {
         localStorage: {
@@ -21,7 +22,7 @@ define(function (require) {
       });
     });
 
-    inject(function ($injector) {
+    ngMock.inject(function ($injector) {
       storage = $injector.get('localStorage');
       $window = $injector.get('$window');
     });

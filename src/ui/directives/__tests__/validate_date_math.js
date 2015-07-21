@@ -1,15 +1,17 @@
 define(function (require) {
   var angular = require('angular');
   var expect = require('expect.js');
+  var ngMock = require('ngMock');
+
   require('ui/directives/validate_date_math');
 
   describe('Validate date math directive', function () {
     var $compile, $rootScope;
     var html = '<input type="text" ng-model="value" validate-date-math />';
 
-    beforeEach(module('kibana'));
+    beforeEach(ngMock.module('kibana'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_) {
+    beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
     }));
