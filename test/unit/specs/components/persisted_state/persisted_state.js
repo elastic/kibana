@@ -62,14 +62,23 @@ define(function (require) {
       it('should throw if given an invalid value', function () {
         var run = function () {
           var val = 'bananas';
-          var path = ['test.path'];
-          var parent = new PersistedState();
-          new PersistedState(val, path, parent);
+          new PersistedState(val);
         };
 
         expect(run).to.throwException(function (err) {
           expect(err).to.be.a(errors.PersistedStateError);
         });
+      });
+
+      it('should not throw if given primitive to child', function () {
+        var run = function () {
+          var val = 'bananas';
+          var path = ['test.path'];
+          var parent = new PersistedState();
+          new PersistedState(val, path, parent);
+        };
+
+        expect(run).not.to.throwException();
       });
 
       it('should throw if given an invalid parent object', function () {
