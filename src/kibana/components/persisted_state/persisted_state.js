@@ -24,7 +24,7 @@ define(function (require) {
       this._path = this._setPath(path);
       this._parent = parent || false;
 
-      validateValue(value);
+      if (!this._parent && !this._path.length) validateValue(value);
       validateParent(parent, this._path);
 
       value = value || this._getDefault();
