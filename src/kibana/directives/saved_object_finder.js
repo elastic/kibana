@@ -9,19 +9,22 @@ define(function (require) {
     var types = {
       searches: {
         service: savedSearches,
-        name: 'searches',
+        name: 'search',
+        names: 'searches',
         noun: 'Saved Search',
         nouns: 'searches'
       },
       visualizations: {
         service: savedVisualizations,
-        name: 'visualizations',
+        name: 'visualization',
+        names: 'visualizations',
         noun: 'Visualization',
         nouns: 'visualizations'
       },
       dashboards: {
         service: savedDashboards,
-        name: 'dashboards',
+        name: 'dashboard',
+        names: 'dashboards',
         noun: 'Dashboard',
         nouns: 'dashboards'
       }

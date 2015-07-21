@@ -13,7 +13,7 @@
       name="filter"
       type="text" />
 
-    <span class="finder-hit-count"><strong>{{hitCount}}</strong> {{finder.objectType.name}}</span>
+    <span class="finder-hit-count"><strong>{{hitCount}}</strong> <ng-pluralize count="hitCount" when="{'1':'{{finder.objectType.name}}', 'other':'{{finder.objectType.names}}'}"></ng-pluralize></span>
   </div>
 </form>
 <paginate list="finder.hits" per-page="5">
