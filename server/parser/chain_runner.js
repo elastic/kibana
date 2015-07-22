@@ -206,7 +206,7 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['(`*`).yaxis(2)']
+  ['(`*`).multiply(`*`)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

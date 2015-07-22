@@ -16,13 +16,24 @@ module.exports = function reduce (args, fn) {
   return Promise.all(args).then(function (args) {
 
     var seriesList = args.shift();
+    var argument = args.shift();
 
     if (seriesList.type !== 'seriesList') {
-      throw new Error ('args[0] must be a seriesList');
+      throw new Error ('input must be a seriesList');
+    }
+
+    console.log(argument);
+
+    if (_.isObject(argument) && argument.type === 'seriesList') {
+      if (argument.list.length !== 1) {
+        throw new Error ('argument must be a seriesList with a single series');
+      } else {
+        argument = argument.list[0];
+      }
     }
 
     var reduced = _.map(seriesList.list, function (series) {
-      return _.reduce([series].concat(args), function(destinationObject, argument) {
+      return _.reduce([series].concat(argument), function(destinationObject, argument) {
 
         var output = _.map(destinationObject.data, function (point, index) {
 
