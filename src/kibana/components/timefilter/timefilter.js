@@ -27,31 +27,33 @@
 
       self.enabled = false;
 
-      self.init = _.constant(
-        config.init()
-        .then(function () {
-          var timeDefaults = config.get('timepicker:timeDefaults');
-          var refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
+      self.init = _.once(function () {
+        return config.init()
+        .then(self.consumeDefaults);
+      });
 
-          // These can be date math strings or moments.
-          self.time = _.defaults(globalState.time || {}, timeDefaults);
-          self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
+      self.consumeDefaults = _.once(function () {
+        var timeDefaults = config.get('timepicker:timeDefaults');
+        var refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 
-          globalState.on('fetch_with_changes', function () {
-            // clone and default to {} in one
-            var newTime = _.defaults({}, globalState.time, timeDefaults);
-            var newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
+        // These can be date math strings or moments.
+        self.time = _.defaults(globalState.time || {}, timeDefaults);
+        self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
 
-            if (newTime) {
-              if (newTime.to) newTime.to = convertISO8601(newTime.to);
-              if (newTime.from) newTime.from = convertISO8601(newTime.from);
-            }
+        globalState.on('fetch_with_changes', function () {
+          // clone and default to {} in one
+          var newTime = _.defaults({}, globalState.time, timeDefaults);
+          var newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
 
-            self.time = newTime;
-            self.refreshInterval = newRefreshInterval;
-          });
-        })
-      );
+          if (newTime) {
+            if (newTime.to) newTime.to = convertISO8601(newTime.to);
+            if (newTime.from) newTime.from = convertISO8601(newTime.from);
+          }
+
+          self.time = newTime;
+          self.refreshInterval = newRefreshInterval;
+        });
+      });
 
       $rootScope.$$timefilter = self;
 
