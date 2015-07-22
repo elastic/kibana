@@ -49,6 +49,7 @@ class BaseOptimizer extends EventEmitter {
         new webpack.ResolverPlugin([
           new DirectoryNameAsMain()
         ]),
+        new webpack.NoErrorsPlugin(),
         new webpack.optimize.DedupePlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
