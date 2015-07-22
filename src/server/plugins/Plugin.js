@@ -17,7 +17,7 @@ module.exports = class Plugin {
     this.path = path;
 
     this.id = opts.id || pkg.name;
-    this.uiExportSpecs = opts.uiExports || {};
+    this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
     this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));

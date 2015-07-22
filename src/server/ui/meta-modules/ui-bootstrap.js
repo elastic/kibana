@@ -1,7 +1,7 @@
 define(function (require) {
-  require('angular-bootstrap');
+  require('angular');
 
-  return require('modules')
+  return require('ui/modules')
   .get('kibana', ['ui.bootstrap'])
   .config(function ($tooltipProvider) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
