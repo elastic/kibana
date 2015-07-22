@@ -22,9 +22,6 @@ module.exports = function reduce (args, fn) {
       throw new Error ('input must be a seriesList');
     }
 
-    console.log('arg: ' + argument);
-
-
     if (_.isObject(argument) && argument.type === 'seriesList') {
       if (argument.list.length !== 1) {
         throw new Error ('argument must be a seriesList with a single series');

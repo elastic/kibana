@@ -173,8 +173,6 @@ function preProcessSheet (sheet) {
     findQueries(chainList);
   });
 
-  console.log(queries);
-
   var promises = _.map(queries, function (item, cacheKey) {
     return fetchData(item, cacheKey);
   });
