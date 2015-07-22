@@ -17,7 +17,7 @@ define(function (require) {
       TestFormat.title = 'Test Format';
       TestFormat.prototype._convert = _.asPrettyString;
 
-      _(TestFormat).inherits(FieldFormat);
+      _.class(TestFormat).inherits(FieldFormat);
     }));
 
     describe('params', function () {

@@ -19,7 +19,7 @@ define(function (require) {
      * @param chartData {Object} Elasticsearch query results for this specific
      * chart
      */
-    _(AreaChart).inherits(PointSeriesChart);
+    _.class(AreaChart).inherits(PointSeriesChart);
     function AreaChart(handler, chartEl, chartData) {
       if (!(this instanceof AreaChart)) {
         return new AreaChart(handler, chartEl, chartData);

@@ -27,6 +27,12 @@
         </div>
       </div>
 
+      <form role="form">
+        <input aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
+      </form>
+
+      <br />
+
       <ul class="nav nav-tabs">
         <li class="kbn-settings-tab" ng-class="{ active: state.tab === fieldType.index }" ng-repeat="fieldType in fieldTypes">
           <a ng-click="changeTab(fieldType)">

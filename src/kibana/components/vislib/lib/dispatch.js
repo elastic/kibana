@@ -13,7 +13,7 @@ define(function (require) {
      * @param handler {Object} Reference to Handler Class Object
      */
 
-    _(Dispatch).inherits(SimpleEmitter);
+    _.class(Dispatch).inherits(SimpleEmitter);
     function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);
@@ -35,26 +35,27 @@ define(function (require) {
      */
     Dispatch.prototype.eventResponse = function (d, i) {
       var datum = d._input || d;
-      var data = d3.event.target.nearestViewportElement.__data__;
+      var data = d3.event.target.nearestViewportElement ?
+        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
       var label = d.label ? d.label : d.name;
-      var isSeries = !!(data.series);
-      var isSlices = !!(data.slices);
+      var isSeries = !!(data && data.series);
+      var isSlices = !!(data && data.slices);
       var series = isSeries ? data.series : undefined;
       var slices = isSlices ? data.slices : undefined;
       var handler = this.handler;
-      var color = handler.data.color;
-      var isPercentage = (handler._attr.mode === 'percentage');
+      var color = _.get(handler, 'data.color');
+      var isPercentage = (handler && handler._attr.mode === 'percentage');
 
       var eventData = {
         value: d.y,
         point: datum,
         datum: datum,
         label: label,
-        color: color(label),
+        color: color ? color(label) : undefined,
         pointIndex: i,
         series: series,
         slices: slices,
-        config: handler._attr,
+        config: handler && handler._attr,
         data: data,
         e: d3.event,
         handler: handler
@@ -231,7 +232,7 @@ define(function (require) {
         .select('.legend-ul')
         .selectAll('li.color')
         .filter(function (d, i) {
-          return this.getAttribute('data-label') !== label;
+          return String(d.label) !== label;
         })
         .classed('blur_shape', true);
     };

@@ -31,7 +31,7 @@
   <div class="hintbox" ng-if="!indexedFields.length">
     <p>
       <i class="fa fa-danger text-danger"></i>
-      <strong>No Compatible Fields:</strong> The "{{ vis.indexPattern.id }}" index pattern does not any of the following field types: {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
+      <strong>No Compatible Fields:</strong> The "{{ vis.indexPattern.id }}" index pattern does not contain any of the following field types: {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
     </p>
   </div>
 

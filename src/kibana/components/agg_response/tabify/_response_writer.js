@@ -5,9 +5,9 @@ define(function (require) {
     var TableGroup = Private(require('components/agg_response/tabify/_table_group'));
     var getColumns = Private(require('components/agg_response/tabify/_get_columns'));
 
-    var AggConfigResult = require('components/vis/_agg_config_result');
+    var AggConfigResult = require('components/vis/AggConfigResult');
 
-    _(SplitAcr).inherits(AggConfigResult);
+    _.class(SplitAcr).inherits(AggConfigResult);
     function SplitAcr(agg, parent, key) {
       SplitAcr.Super.call(this, agg, parent, key, key);
     }
@@ -72,7 +72,7 @@ define(function (require) {
       if (group) {
         table.aggConfig = agg;
         table.key = key;
-        table.title = agg.makeLabel() + ': ' + (table.fieldFormatter()(key));
+        table.title =  (table.fieldFormatter()(key)) + ': ' + agg.makeLabel() ;
       }
 
       // link the parent and child

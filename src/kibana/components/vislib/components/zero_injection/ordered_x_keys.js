@@ -17,7 +17,7 @@ define(function (require) {
       }
 
       var objKeys = getUniqKeys(obj);
-      var interval = _.deepGet(obj, 'ordered.interval');
+      var interval = _.get(obj, 'ordered.interval');
       var dateInterval = moment.isDuration(interval) ? interval : false;
 
       return _(objKeys)
@@ -34,7 +34,7 @@ define(function (require) {
         var val = +d[0];
         if (interval == null) return val;
 
-        var gapEdge = parseFloat(_.deepGet(list, [i + 1, 0]));
+        var gapEdge = parseFloat(_.get(list, [i + 1, 0]));
         if (isNaN(gapEdge)) return val;
 
         var vals = [];
@@ -55,7 +55,7 @@ define(function (require) {
 
         return vals;
       })
-      .flatten(true)
+      .flatten()
       .value();
     };
   };

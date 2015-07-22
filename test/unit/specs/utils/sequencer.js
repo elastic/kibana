@@ -16,7 +16,7 @@ define(function (require) {
     }
 
     function getSlopes(seq, count) {
-      return _.chunk(seq, count).map(function (chunk) {
+      return _.chunk(seq, Math.ceil(seq.length / count)).map(function (chunk) {
         return (_.last(chunk) - _.first(chunk)) / chunk.length;
       });
     }

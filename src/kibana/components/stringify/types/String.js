@@ -5,7 +5,7 @@ define(function (require) {
 
     require('components/field_format_editor/samples/samples');
 
-    _(_String).inherits(FieldFormat);
+    _.class(_String).inherits(FieldFormat);
     function _String(params) {
       _String.Super.call(this, params);
     }
@@ -36,20 +36,31 @@ define(function (require) {
       { id: false, name: '- none -' },
       { id: 'lower', name: 'Lower Case' },
       { id: 'upper', name: 'Upper Case' },
-      { id: 'short', name: 'Short Dots' }
+      { id: 'short', name: 'Short Dots' },
+      { id: 'base64', name: 'Base64 Decode'}
     ];
 
     _String.sampleInputs = [
       'A Quick Brown Fox.',
       'com.organizations.project.ClassName',
-      'hostname.net'
+      'hostname.net',
+      'SGVsbG8gd29ybGQ='
     ];
+
+    _String.prototype._base64Decode = function (val) {
+      try {
+        return window.atob(val);
+      } catch (e) {
+        return _.asPrettyString(val);
+      }
+    };
 
     _String.prototype._convert = function (val) {
       switch (this.param('transform')) {
       case 'lower': return String(val).toLowerCase();
       case 'upper': return String(val).toUpperCase();
       case 'short': return _.shortenDottedString(val);
+      case 'base64': return this._base64Decode(val);
       default: return _.asPrettyString(val);
       }
     };

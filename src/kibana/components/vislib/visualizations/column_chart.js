@@ -21,7 +21,7 @@ define(function (require) {
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
-    _(ColumnChart).inherits(PointSeriesChart);
+    _.class(ColumnChart).inherits(PointSeriesChart);
     function ColumnChart(handler, chartEl, chartData) {
       if (!(this instanceof ColumnChart)) {
         return new ColumnChart(handler, chartEl, chartData);

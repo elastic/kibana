@@ -35,7 +35,7 @@ define(function (require) {
     });
 
     it('should work with inherited objects', function () {
-      _(MyEventedObject).inherits(Events);
+      _.class(MyEventedObject).inherits(Events);
       function MyEventedObject() {
         MyEventedObject.Super.call(this);
       }
@@ -161,6 +161,41 @@ define(function (require) {
           expect(handler1.callCount).to.be(emits.length + emits2.length);
           expect(handler2.callCount).to.be(emits2.length);
         });
+      });
+    });
+
+    it('should pass multiple arguments from the emitter', function () {
+      var obj = new Events();
+      var handler = sinon.stub();
+      var payload = [
+        'one',
+        { hello: 'tests' },
+        null
+      ];
+
+      obj.on('test', handler);
+
+      return obj.emit('test', payload[0], payload[1], payload[2])
+      .then(function () {
+        expect(handler.callCount).to.be(1);
+        expect(handler.calledWithExactly(payload[0], payload[1], payload[2])).to.be(true);
+      });
+    });
+
+    it('should preserve the scope of the handler', function () {
+      var obj = new Events();
+      var expected = 'some value';
+      var testValue;
+
+      function handler(arg1, arg2) {
+        testValue = this.getVal();
+      }
+      handler.getVal = _.constant(expected);
+
+      obj.on('test', handler);
+      return obj.emit('test')
+      .then(function () {
+        expect(testValue).to.equal(expected);
       });
     });
 

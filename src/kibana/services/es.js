@@ -12,23 +12,22 @@ define(function (require) {
         host: configFile.elasticsearch,
         log: 'info',
         requestTimeout: 0,
+        apiVersion: '1.4',
         plugins: [function (Client, config) {
 
           // esFactory automatically injects the AngularConnector to the config
           // https://github.com/elastic/elasticsearch-js/blob/master/src/lib/connectors/angular.js
-          _(CustomAngularConnector).inherits(config.connectionClass);
+          _.class(CustomAngularConnector).inherits(config.connectionClass);
           function CustomAngularConnector(host, config) {
             CustomAngularConnector.Super.call(this, host, config);
 
-            var originalRequest = this.request;
-            this.request = function (params) {
+            this.request = _.wrap(this.request, function (request, params, cb) {
               if (String(params.method).toUpperCase() === 'GET') {
-                params.query = params.query || {};
-                params.query._ = Date.now();
+                params.query = _.defaults({ _: Date.now() }, params.query);
               }
 
-              return originalRequest.apply(this, arguments);
-            };
+              return request.call(this, params, cb);
+            });
           }
 
           config.connectionClass = CustomAngularConnector;

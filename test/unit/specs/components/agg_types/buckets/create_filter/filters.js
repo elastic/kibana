@@ -10,7 +10,7 @@ define(function (require) {
       beforeEach(module('kibana'));
       beforeEach(inject(function (Private) {
         Vis = Private(require('components/vis/vis'));
-        AggConfig = Private(require('components/vis/_agg_config'));
+        AggConfig = Private(require('components/vis/AggConfig'));
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
         createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
       }));

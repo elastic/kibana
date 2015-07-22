@@ -1,0 +1,13 @@
+{
+  "name": "test-plugin",
+  "version": "1.0.0",
+  "description": "just a test plugin",
+  "repository": {
+    "type": "git",
+    "url": "http://website.git"
+  },
+  "dependencies": {
+    "bluebird": "2.9.30"
+  },
+  "license": "Apache-2.0"
+}

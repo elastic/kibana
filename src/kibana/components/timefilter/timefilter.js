@@ -1,7 +1,7 @@
   define(function (require) {
   require('modules')
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope) {
+  .service('timefilter', function (Private, globalState, $rootScope, config) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -17,7 +17,7 @@
       return obj.isValid() ? obj : stringTime;
     }
 
-    _(Timefilter).inherits(Events);
+    _.class(Timefilter).inherits(Events);
     function Timefilter() {
       Timefilter.Super.call(this);
 
@@ -27,10 +27,7 @@
 
       self.enabled = false;
 
-      var timeDefaults = {
-        from: 'now-15m',
-        to: 'now'
-      };
+      var timeDefaults = config.get('timepicker:timeDefaults');
 
       var refreshIntervalDefaults = {
         display: 'Off',
@@ -82,7 +79,8 @@
         filter = {range : {}};
         filter.range[timefield.name] = {
           gte: bounds.min.valueOf(),
-          lte: bounds.max.valueOf()
+          lte: bounds.max.valueOf(),
+          format: 'epoch_millis'
         };
       }
 

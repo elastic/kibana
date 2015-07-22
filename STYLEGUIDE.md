@@ -650,7 +650,7 @@ While you can do it with pure JS, a utility will remove a lot of boilerplate, an
 ```js
 // uses a lodash inherits mixin
 // inheritance is defined first - it's easier to read and the function will be hoisted
-_(Square).inherits(Shape);
+_.class(Square).inherits(Shape);
 
 function Square(width, height) {
   Square.Super.call(this);

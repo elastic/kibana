@@ -38,21 +38,8 @@ define(function (require) {
       this.data = data;
       this.type = this.getDataType();
 
-      this.labels;
-
-      if (this.type === 'series') {
-        if (getLabels(data).length === 1 && getLabels(data)[0] === '') {
-          this.labels = [(this.get('yAxisLabel'))];
-          this._updateData();
-        } else {
-          this.labels = getLabels(data);
-        }
-      } else if (this.type === 'slices') {
-        this.labels = this.pieNames();
-      }
-
+      this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels) : undefined;
-
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -88,6 +75,18 @@ define(function (require) {
       if (eachData.series) {
         eachData.series[0].label = this.get('yAxisLabel');
       }
+    };
+
+    Data.prototype._getLabels = function (data) {
+      if (this.type === 'series') {
+        var noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
+        if (noLabel) {
+          this._updateData();
+          return [(this.get('yAxisLabel'))];
+        }
+        return getLabels(data);
+      }
+      return this.pieNames();
     };
 
     /**
@@ -235,7 +234,7 @@ define(function (require) {
     Data.prototype.chartData = function () {
       if (!this.data.series) {
         var arr = this.data.rows ? this.data.rows : this.data.columns;
-        return _.pluck(arr);
+        return _.toArray(arr);
       }
       return [this.data];
     };
@@ -258,6 +257,23 @@ define(function (require) {
       }
 
       return visData;
+    };
+
+    /**
+     * get min and max for all cols, rows of data
+     *
+     * @method getMaxMin
+     * @return {Object}
+     */
+    Data.prototype.getGeoExtents = function () {
+      var visData = this.getVisData();
+
+      return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
+        return {
+          min: Math.min(props.min, minMax.min),
+          max: Math.max(props.max, minMax.max)
+        };
+      }, { min: Infinity, max: -Infinity });
     };
 
     /**
@@ -299,9 +315,9 @@ define(function (require) {
     Data.prototype.flatten = function () {
       return _(this.chartData())
       .pluck('series')
-      .flatten()
+      .flattenDeep()
       .pluck('values')
-      .flatten()
+      .flattenDeep()
       .value();
     };
 
@@ -485,7 +501,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        names.push({ key: obj.name, index: index });
+        names.push({ label: obj.name, values: obj, index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;
@@ -519,8 +535,9 @@ define(function (require) {
         .sortBy(function (obj) {
           return obj.index;
         })
-        .pluck('key')
-        .unique()
+        .unique(function (d) {
+          return d.label;
+        })
         .value();
       }
     };
@@ -553,9 +570,8 @@ define(function (require) {
      * @method pieNames
      * @returns {Array} Array of unique names (strings)
      */
-    Data.prototype.pieNames = function () {
+    Data.prototype.pieNames = function (data) {
       var self = this;
-      var data = this.getVisData();
       var names = [];
 
       _.forEach(data, function (obj) {
@@ -567,7 +583,7 @@ define(function (require) {
         });
       });
 
-      return _.uniq(names);
+      return _.uniq(names, 'label');
     };
 
     /**
@@ -619,7 +635,9 @@ define(function (require) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     Data.prototype.getPieColorFunc = function () {
-      return color(this.pieNames());
+      return color(this.pieNames(this.getVisData()).map(function (d) {
+        return d.label;
+      }));
     };
 
     /**

@@ -9,7 +9,7 @@ define(function (require) {
   ]);
 
   module.factory('SavedSearch', function (courier) {
-    _(SavedSearch).inherits(courier.SavedObject);
+    _.class(SavedSearch).inherits(courier.SavedObject);
     function SavedSearch(id) {
       courier.SavedObject.call(this, {
         type: SavedSearch.type,

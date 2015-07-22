@@ -78,7 +78,7 @@ define(function (require) {
         _.forOwn(self, function (fn) {
           if (_.isFunction(fn) && fn.cache) {
             // clear all memoize caches
-            fn.cache = {};
+            fn.cache = new _.memoize.Cache();
           }
         });
       }
