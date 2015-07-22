@@ -65,7 +65,7 @@ module.exports = function (server, kbnServer) {
       }
 
       this.optimizer = new LiveOptimizer({
-        sourceMaps: false,
+        sourceMaps: true,
         bundleDir: this.bundleDir,
         entries: [
           {
