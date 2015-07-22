@@ -37,9 +37,11 @@ module.exports = function (opts) {
         '--server.autoListen=false',
         '--optimize._workerRole=send'
       ]),
-      filter: function (path) {
-        return /\/src\/server\/optimize\//.test(path);
-      }
+      filters: [
+        /src\/server\/(optimize|ui|plugins)\//,
+        /src\/plugins\/[^\/]+\/[^\/]+\.js$/,
+        /src\/cli\//
+      ]
     }),
 
     new Worker({
