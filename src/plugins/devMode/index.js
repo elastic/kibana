@@ -31,7 +31,7 @@ module.exports = function devModePlugin(kibana) {
         server.ext('onPreHandler', istanbul({ root: UI,  displayRoot: SRC, filter: kibanaSrcFilter }));
         server.setupViews(resolve(__dirname, 'views'));
 
-        server.redirectToSlash('/testUtils/plugins/{pluginId}');
+        server.redirectToSlash('/tests/plugins/{pluginId}');
 
         let currentBuilder = null;
         server.decorate('reply', 'renderTestPart', function (basePath, part, mimeType) {
