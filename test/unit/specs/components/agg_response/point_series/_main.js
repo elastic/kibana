@@ -4,7 +4,7 @@ define(function (require) {
 
     var _ = require('lodash');
     var moment = require('moment');
-    var AggConfigResult = require('components/vis/_agg_config_result');
+    var AggConfigResult = require('components/vis/AggConfigResult');
 
     var pointSeriesChartDataFromTable;
     var indexPattern;

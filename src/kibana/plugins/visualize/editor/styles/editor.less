@@ -77,6 +77,9 @@
       // margin-bottom: (@input-height-base * 2) - 3;
     }
 
+    nav {
+      border-radius: 0px;
+    }
 
     .sidebar-item {
       border-top: 0 !important;
@@ -91,8 +94,13 @@
         .flex-parent(1, 1, auto);
 
         > div.vis-editor-config {
-          .flex(1, 1, auto);
-          overflow-y: auto;
+          @media (min-width: @screen-md-min) {
+            .flex-parent(1, 1, 1px);
+            overflow: auto;
+          }
+          @media (max-width: @screen-md-min) {
+            .flex-parent(1, 1, auto);
+          }
         }
 
         > .vis-edit-sidebar-buttons {
@@ -122,6 +130,14 @@
     .hintbox {
       padding: @vis-editor-agg-editor-spacing;
       margin-bottom: @vis-editor-agg-editor-spacing;
+    }
+
+    label {
+      .flex(2 0 0);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-bottom: 0;
     }
   }
 
@@ -157,7 +173,7 @@
     }
 
     &-group {
-      .flex-parent();
+      .flex-parent(0, 1, auto);
       color: @text-color;
     }
 
@@ -298,6 +314,10 @@
     }
   }
 
+  vis-editor-agg-group {
+    .flex-parent(0, 1, auto);
+  }
+
   &-canvas {
     .flex(1, 0, @screen-md-min - @vis-editor-sidebar-basis);
     .display(flex);
@@ -337,7 +357,8 @@ vis-editor-agg-group,
 vis-editor-agg,
 vis-editor-agg-params,
 vis-editor-agg-param,
-vis-editor-vis-options {
+vis-editor-vis-options,
+vis-editor-vis-options > * {
   .flex-parent();
 }
 

@@ -13,7 +13,7 @@ define(function (require) {
      * @constructor
      * @param el {HTMLElement} Reference to DOM element
      */
-
+    _.class(ChartTitle).inherits(ErrorHandler);
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
@@ -21,11 +21,9 @@ define(function (require) {
 
       this.el = el;
       this.tooltip = new Tooltip('chart-title', el, function (d) {
-        return '<p>' + d.label + '</p>';
+        return '<p>' + _.escape(d.label) + '</p>';
       });
     }
-
-    _(ChartTitle.prototype).extend(ErrorHandler.prototype);
 
     /**
      * Renders chart titles
@@ -34,7 +32,11 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
     ChartTitle.prototype.render = function () {
-      return d3.select(this.el).selectAll('.chart-title').call(this.draw());
+      var el = d3.select(this.el).select('.chart-title').node();
+      var width = el ? el.clientWidth : 0;
+      var height = el ? el.clientHeight : 0;
+
+      return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
     };
 
     /**
@@ -91,27 +93,20 @@ define(function (require) {
      * @method draw
      * @returns {Function} Appends chart titles to a D3 selection
      */
-    ChartTitle.prototype.draw = function () {
+    ChartTitle.prototype.draw = function (width, height) {
       var self = this;
 
       return function (selection) {
         selection.each(function () {
           var div = d3.select(this);
           var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
-          var width = $(this).width();
-          var height = $(this).height();
           var size = dataType === 'rows' ? height : width;
           var txtHtOffset = 11;
 
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-          .attr('width', function () {
-            if (dataType === 'rows') {
-              return 15;
-            }
-            return width;
-          })
+          .attr('width', width)
           .attr('height', height)
           .append('text')
           .attr('transform', function () {
@@ -121,9 +116,7 @@ define(function (require) {
             return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
           })
           .attr('text-anchor', 'middle')
-          .text(function (d) {
-            return d.label;
-          });
+          .text(function (d) { return d.label; });
 
           // truncate long chart titles
           div.selectAll('text')

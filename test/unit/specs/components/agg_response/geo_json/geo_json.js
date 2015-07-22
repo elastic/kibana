@@ -52,7 +52,6 @@ define(function (require) {
       }
 
       describe('with table ' + JSON.stringify(tableOpts), function () {
-
         it('outputs a chart', function () {
           var table = makeTable();
           var chart = makeSingleChart(table);
@@ -87,7 +86,7 @@ define(function (require) {
 
           // props
           expect(props).to.be.an('object');
-          expect(props).to.only.have.keys('min', 'max');
+          expect(props).to.have.keys('min', 'max');
 
           // props.min
           expect(props.min).to.be.a('number');
@@ -99,47 +98,75 @@ define(function (require) {
         });
 
         describe('properties', function () {
-          it('includes one feature per row in the table', function () {
-            var table = makeTable();
-            var chart = makeSingleChart(table);
-            var geoColI = _.findIndex(table.columns, { aggConfig: aggs.geo });
-            var metricColI = _.findIndex(table.columns, { aggConfig: aggs.metric });
+          describe('includes one feature per row in the table', function () {
+            this.timeout(60000);
 
-            table.rows.forEach(function (row, i) {
-              var feature = chart.geoJson.features[i];
-              expect(feature).to.have.property('geometry');
-              expect(feature.geometry).to.be.an('object');
-              expect(feature).to.have.property('properties');
-              expect(feature.properties).to.be.an('object');
+            var table;
+            var chart;
+            var geoColI;
+            var metricColI;
 
-              var geometry = feature.geometry;
-              expect(geometry.type).to.be('Point');
-              expect(geometry).to.have.property('coordinates');
-              expect(geometry.coordinates).to.be.an('array');
-              expect(geometry.coordinates).to.have.length(2);
-              expect(geometry.coordinates[0]).to.be.a('number');
-              expect(geometry.coordinates[1]).to.be.a('number');
+            before(function () {
+              table = makeTable();
+              chart = makeSingleChart(table);
+              geoColI = _.findIndex(table.columns, { aggConfig: aggs.geo });
+              metricColI = _.findIndex(table.columns, { aggConfig: aggs.metric });
+            });
 
-              var props = feature.properties;
-              expect(props).to.be.an('object');
-              expect(props).to.only.have.keys(
-                'value', 'geohash', 'aggConfigResult',
-                'rectangle', 'center'
-              );
+            it('should be geoJson format', function () {
+              table.rows.forEach(function (row, i) {
+                var feature = chart.geoJson.features[i];
+                expect(feature).to.have.property('geometry');
+                expect(feature.geometry).to.be.an('object');
+                expect(feature).to.have.property('properties');
+                expect(feature.properties).to.be.an('object');
+              });
+            });
 
-              expect(props.center).to.eql(geometry.coordinates);
-              if (props.value != null) expect(props.value).to.be.a('number');
-              expect(props.geohash).to.be.a('string');
+            it('should have valid geometry data', function () {
+              table.rows.forEach(function (row, i) {
+                var geometry = chart.geoJson.features[i].geometry;
+                expect(geometry.type).to.be('Point');
+                expect(geometry).to.have.property('coordinates');
+                expect(geometry.coordinates).to.be.an('array');
+                expect(geometry.coordinates).to.have.length(2);
+                expect(geometry.coordinates[0]).to.be.a('number');
+                expect(geometry.coordinates[1]).to.be.a('number');
+              });
+            });
 
-              if (tableOpts.asAggConfigResults) {
-                expect(props.aggConfigResult).to.be(row[metricColI]);
-                expect(props.value).to.be(row[metricColI].value);
-                expect(props.geohash).to.be(row[geoColI].value);
-              } else {
-                expect(props.aggConfigResult).to.be(null);
-                expect(props.value).to.be(row[metricColI]);
-                expect(props.geohash).to.be(row[geoColI]);
-              }
+            it('should have value properties data', function () {
+              table.rows.forEach(function (row, i) {
+                var props = chart.geoJson.features[i].properties;
+                var keys = ['value', 'geohash', 'aggConfigResult', 'rectangle', 'center'];
+                expect(props).to.be.an('object');
+                expect(props).to.only.have.keys(keys);
+                expect(props.geohash).to.be.a('string');
+                if (props.value != null) expect(props.value).to.be.a('number');
+              });
+            });
+
+            it('should use latLng in properties and lngLat in geometry', function () {
+              table.rows.forEach(function (row, i) {
+                var geometry = chart.geoJson.features[i].geometry;
+                var props = chart.geoJson.features[i].properties;
+                expect(props.center).to.eql(geometry.coordinates.slice(0).reverse());
+              });
+            });
+
+            it('should handle both AggConfig and non-AggConfig results', function () {
+              table.rows.forEach(function (row, i) {
+                var props = chart.geoJson.features[i].properties;
+                if (tableOpts.asAggConfigResults) {
+                  expect(props.aggConfigResult).to.be(row[metricColI]);
+                  expect(props.value).to.be(row[metricColI].value);
+                  expect(props.geohash).to.be(row[geoColI].value);
+                } else {
+                  expect(props.aggConfigResult).to.be(null);
+                  expect(props.value).to.be(row[metricColI]);
+                  expect(props.geohash).to.be(row[geoColI]);
+                }
+              });
             });
           });
         });

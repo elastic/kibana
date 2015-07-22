@@ -1,14 +1,15 @@
 define(function (require) {
-
   return function SearchSourceFactory(Promise, Private) {
     var _ = require('lodash');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
     var SearchRequest = Private(require('components/courier/fetch/request/search'));
     var SegmentedRequest = Private(require('components/courier/fetch/request/segmented'));
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
+    var normalizeSortRequest = Private(require('components/courier/data_source/_normalize_sort_request'));
 
-    _(SearchSource).inherits(SourceAbstract);
+    _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
-      SearchSource.Super.call(this, initialState);
+      SearchSource.Super.call(this, initialState, searchStrategy);
     }
 
     // expose a ready state for the route setup to read
@@ -92,37 +93,6 @@ define(function (require) {
       this._fetchDisabled = false;
     };
 
-    /**
-     * Special reader function for sort, which will transform the sort syntax into a simple
-     * map of `field: dir`
-     */
-    SearchSource.prototype.getNormalizedSort = function () {
-      var sort = this.get('sort');
-      if (!sort) return;
-
-      var normal = {};
-
-      (function read(lvl) {
-        if (_.isString(lvl)) {
-          normal[lvl] = 'asc';
-        }
-        else if (_.isArray(lvl)) {
-          _.forEach(lvl, read);
-        }
-        else if (_.isObject(lvl)) {
-          _.forOwn(lvl, function (dir, field) {
-            if (_.isObject(dir)) {
-              normal[field] = dir.dir || 'asc';
-            } else {
-              normal[field] = String(dir);
-            }
-          });
-        }
-      }(sort));
-
-      return normal;
-    };
-
     SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
       var self = this;
       return Promise.try(function addRequest() {
@@ -184,17 +154,12 @@ define(function (require) {
       case 'filter':
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
         state.filters = _([ state.filters || [], val ])
-          .flatten(true)
-          // Yo Dawg! I heard you needed to filter out your filters
-          .filter(function (filter) {
-            if (!filter) return false;
-            // return true for anything that is either empty or false
-            // return false for anything that is explicitly set to true
-            if (filter.meta)
-              return !filter.meta.disabled;
-            return true;
-          })
-          .value();
+        .flatten()
+        // Yo Dawg! I heard you needed to filter out your filters
+        .reject(function (filter) {
+          return !filter || _.get(filter, 'meta.disabled');
+        })
+        .value();
         return;
       case 'index':
       case 'type':
@@ -205,8 +170,20 @@ define(function (require) {
         return;
       case 'source':
         key = '_source';
-        /* fall through */
+        addToBody();
+        break;
+      case 'sort':
+        val = normalizeSortRequest(val, this.get('index'));
+        addToBody();
+        break;
       default:
+        addToBody();
+      }
+
+      /**
+       * Add the key and val to the body of the resuest
+       */
+      function addToBody() {
         state.body = state.body || {};
         // ignore if we already have a value
         if (state.body[key] == null) {

@@ -35,6 +35,14 @@ define(function (require) {
           write: _.noop
         },
         {
+          name: 'mapZoom',
+          write: _.noop
+        },
+        {
+          name: 'mapCenter',
+          write: _.noop
+        },
+        {
           name: 'precision',
           default: defaultPrecision,
           editor: require('text!components/agg_types/controls/precision.html'),

@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var inherits = require('lodash').inherits;
 
   var canStack = (function () {
     var err = new Error();
@@ -24,7 +23,7 @@ define(function (require) {
     }
   }
   errors.KbnError = KbnError;
-  inherits(KbnError, Error);
+  _.class(KbnError).inherits(Error);
 
   /**
    * HastyRefresh error class
@@ -35,7 +34,7 @@ define(function (require) {
       'Courier attempted to start a query before the previous had finished.',
       errors.HastyRefresh);
   };
-  inherits(errors.HastyRefresh, KbnError);
+  _.class(errors.HastyRefresh).inherits(KbnError);
 
   /**
    * SearchTimeout error class
@@ -45,7 +44,7 @@ define(function (require) {
       'All or part of your request has timed out. The data shown may be incomplete.',
       errors.SearchTimeout);
   };
-  inherits(errors.SearchTimeout, KbnError);
+  _.class(errors.SearchTimeout).inherits(KbnError);
 
   /**
    * Request Failure - When an entire mutli request fails
@@ -62,7 +61,7 @@ define(function (require) {
     this.origError = err;
     this.resp = resp;
   };
-  inherits(errors.RequestFailure, KbnError);
+  _.class(errors.RequestFailure).inherits(KbnError);
 
   /**
    * FetchFailure Error - when there is an error getting a doc or search within
@@ -76,7 +75,7 @@ define(function (require) {
 
     this.resp = resp;
   };
-  inherits(errors.FetchFailure, KbnError);
+  _.class(errors.FetchFailure).inherits(KbnError);
 
   /**
    * ShardFailure Error - when one or more shards fail
@@ -88,7 +87,7 @@ define(function (require) {
 
     this.resp = resp;
   };
-  inherits(errors.ShardFailure, KbnError);
+  _.class(errors.ShardFailure).inherits(KbnError);
 
 
   /**
@@ -102,7 +101,7 @@ define(function (require) {
 
     this.resp = resp;
   };
-  inherits(errors.VersionConflict, KbnError);
+  _.class(errors.VersionConflict).inherits(KbnError);
 
 
   /**
@@ -114,7 +113,7 @@ define(function (require) {
       'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
       errors.MappingConflict);
   };
-  inherits(errors.MappingConflict, KbnError);
+  _.class(errors.MappingConflict).inherits(KbnError);
 
   /**
    * a field mapping was using a restricted fields name
@@ -126,7 +125,7 @@ define(function (require) {
 
     KbnError.call(this, msg, errors.RestrictedMapping);
   };
-  inherits(errors.RestrictedMapping, KbnError);
+  _.class(errors.RestrictedMapping).inherits(KbnError);
 
   /**
    * a non-critical cache write to elasticseach failed
@@ -136,7 +135,7 @@ define(function (require) {
       'A Elasticsearch cache write has failed.',
       errors.CacheWriteFailure);
   };
-  inherits(errors.CacheWriteFailure, KbnError);
+  _.class(errors.CacheWriteFailure).inherits(KbnError);
 
   /**
    * when a field mapping is requested for an unknown field
@@ -147,7 +146,7 @@ define(function (require) {
       'The ' + name + ' field was not found in the cached mappings',
       errors.FieldNotFoundInCache);
   };
-  inherits(errors.FieldNotFoundInCache, KbnError);
+  _.class(errors.FieldNotFoundInCache).inherits(KbnError);
 
   /**
    * when a mapping already exists for a field the user is attempting to add
@@ -158,7 +157,7 @@ define(function (require) {
       'The "' + name + '" field already exists in this mapping',
       errors.DuplicateField);
   };
-  inherits(errors.DuplicateField, KbnError);
+  _.class(errors.DuplicateField).inherits(KbnError);
 
   /**
    * A saved object was not found
@@ -172,7 +171,7 @@ define(function (require) {
       'Could not locate that ' + type + idMsg,
       errors.SavedObjectNotFound);
   };
-  inherits(errors.SavedObjectNotFound, KbnError);
+  _.class(errors.SavedObjectNotFound).inherits(KbnError);
 
   /**
    * Tried to call a method that relies on SearchSource having an indexPattern assigned
@@ -182,7 +181,7 @@ define(function (require) {
       'IndexPattern\'s configured pattern does not match any indices',
       errors.IndexPatternMissingIndices);
   };
-  inherits(errors.IndexPatternMissingIndices, KbnError);
+  _.class(errors.IndexPatternMissingIndices).inherits(KbnError);
 
   /**
    * Tried to call a method that relies on SearchSource having an indexPattern assigned
@@ -192,7 +191,7 @@ define(function (require) {
       'Define at least one index pattern to continue',
       errors.NoDefinedIndexPatterns);
   };
-  inherits(errors.NoDefinedIndexPatterns, KbnError);
+  _.class(errors.NoDefinedIndexPatterns).inherits(KbnError);
 
 
   /**
@@ -203,7 +202,7 @@ define(function (require) {
       'Please specify a default index pattern',
       errors.NoDefaultIndexPattern);
   };
-  inherits(errors.NoDefaultIndexPattern, KbnError);
+  _.class(errors.NoDefaultIndexPattern).inherits(KbnError);
 
 
   /**
@@ -215,7 +214,7 @@ define(function (require) {
     'This container is too small to render the visualization',
     errors.ContainerTooSmall);
   };
-  inherits(errors.ContainerTooSmall, KbnError);
+  _.class(errors.ContainerTooSmall).inherits(KbnError);
 
   /**
    * error thrown when user tries to render an chart with less
@@ -225,7 +224,7 @@ define(function (require) {
   errors.NotEnoughData = function NotEnoughData(message) {
     KbnError.call(this, message, errors.NotEnoughData);
   };
-  inherits(errors.NotEnoughData, KbnError);
+  _.class(errors.NotEnoughData).inherits(KbnError);
 
   /**
    * error thrown when no results are returned from an elasticsearch query
@@ -235,7 +234,7 @@ define(function (require) {
     'No results found',
     errors.NoResults);
   };
-  inherits(errors.NoResults, KbnError);
+  _.class(errors.NoResults).inherits(KbnError);
 
   /**
    * error thrown when no results are returned from an elasticsearch query
@@ -245,17 +244,25 @@ define(function (require) {
       'No results displayed because all values equal 0',
       errors.PieContainsAllZeros);
   };
-  inherits(errors.PieContainsAllZeros, KbnError);
+  _.class(errors.PieContainsAllZeros).inherits(KbnError);
 
   /**
    * error thrown when no results are returned from an elasticsearch query
    */
-  errors.CannotLogScaleNegVals = function CannotLogScaleNegVals() {
+  errors.InvalidLogScaleValues = function InvalidLogScaleValues() {
     KbnError.call(this,
-      'Negative values cannot be displayed on a log scale',
-      errors.CannotLogScaleNegVals);
+      'Values less than 1 cannot be displayed on a log scale',
+      errors.InvalidLogScaleValues);
   };
-  inherits(errors.CannotLogScaleNegVals, KbnError);
+  _.class(errors.InvalidLogScaleValues).inherits(KbnError);
+
+  /** error thrown when wiggle chart is selected for non linear data */
+  errors.InvalidWiggleSelection = function InvalidWiggleSelection() {
+    KbnError.call(this,
+      'In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.',
+      errors.InvalidWiggleSelection);
+  };
+  _.class(errors.InvalidWiggleSelection).inherits(KbnError);
 
   return errors;
 });

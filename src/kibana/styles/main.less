@@ -102,7 +102,8 @@ ul.navbar-inline li {
   opacity: 90%;
 
   &-inner {
-    word-break: break-word;
+    word-break: normal;
+    word-wrap: break-word;
     white-space: normal;
   }
 }
@@ -224,7 +225,15 @@ notifications {
 
 .list-group-menu {
 
+  &.select-mode a{
+     outline: none;
+     color: @link-color;
+  }
+
   .list-group-menu-item {
+    list-style: none;
+    color: @link-color;
+
     &.active {
       font-weight: bold;
       background-color: @well-bg;
@@ -271,6 +280,10 @@ notifications {
     font-size: 16px;
     vertical-align: middle;
   }
+}
+
+kbn-info i {
+  cursor: help;
 }
 
 .kbn-timepicker .btn-default {
@@ -345,6 +358,10 @@ saved-object-finder {
   .list-group-item {
     &:first-child {
       .border-top-radius(0) !important;
+    }
+
+    &.list-group-no-results p {
+      margin-bottom: 0 !important;
     }
   }
 
@@ -506,4 +523,16 @@ fieldset {
   padding: @form-group-margin-bottom;
   border: 1px solid @input-border;
   border-radius: @input-border-radius;
+}
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0px;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
 }

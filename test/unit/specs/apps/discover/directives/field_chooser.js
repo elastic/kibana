@@ -60,7 +60,7 @@ define(function (require) {
       });
 
       var fieldCounts = _.transform(hits, function (counts, hit) {
-        _(indexPattern.flattenHit(hit)).keys().each(function (key) {
+        _.keys(indexPattern.flattenHit(hit)).forEach(function (key) {
           counts[key] = (counts[key] || 0) + 1;
         });
       }, {});

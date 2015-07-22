@@ -10,7 +10,7 @@ define(function (require) {
 
   require('components/notify/notify');
   require('components/timepicker/timepicker');
-  require('directives/fixed_scroll');
+  require('components/fixedScroll');
   require('directives/validate_json');
   require('components/validate_query/validate_query');
   require('filters/moment');
@@ -332,8 +332,8 @@ define(function (require) {
       }
 
       $scope.updateTime();
-
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
+      segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
 
       // triggered when the status updated
       segmented.on('status', function (status) {

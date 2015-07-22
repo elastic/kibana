@@ -245,9 +245,16 @@ define(function (require) {
         return docSource.doCreate(source)
         .then(finish)
         .catch(function (err) {
-          var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
-          if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
-            return docSource.doIndex(source).then(finish);
+          // record exists, confirm overwriting
+          if (_.get(err, 'origError.status') === 409) {
+            var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
+
+            if (window.confirm(confirmMessage)) {
+              return docSource.doIndex(source).then(finish);
+            }
+
+            // if the user doesn't overwrite record, just swallow the error
+            return;
           }
           return Promise.reject(err);
         });

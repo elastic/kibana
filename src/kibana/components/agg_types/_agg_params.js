@@ -26,7 +26,7 @@ define(function (require) {
      * @extends IndexedArray
      * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
      */
-    _(AggParams).inherits(IndexedArray);
+    _.class(AggParams).inherits(IndexedArray);
     function AggParams(params) {
       AggParams.Super.call(this, {
         index: ['name'],

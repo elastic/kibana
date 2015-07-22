@@ -54,7 +54,7 @@ define(function (require) {
     Layout.prototype.createLayout = function (arr) {
       var self = this;
 
-      return _(arr).forEach(function (obj) {
+      return _.each(arr, function (obj) {
         self.layout(obj);
       });
     };

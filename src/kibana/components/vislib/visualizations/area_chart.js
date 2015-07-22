@@ -19,7 +19,7 @@ define(function (require) {
      * @param chartData {Object} Elasticsearch query results for this specific
      * chart
      */
-    _(AreaChart).inherits(PointSeriesChart);
+    _.class(AreaChart).inherits(PointSeriesChart);
     function AreaChart(handler, chartEl, chartData) {
       if (!(this instanceof AreaChart)) {
         return new AreaChart(handler, chartEl, chartData);
@@ -249,6 +249,13 @@ define(function (require) {
       }
     };
 
+    AreaChart.prototype.validateWiggleSelection = function () {
+      var isWiggle = this._attr.mode === 'wiggle';
+      var ordered = this.handler.data.get('ordered');
+
+      if (isWiggle && !ordered) throw new errors.InvalidWiggleSelection();
+    };
+
     /**
      * Renders d3 visualization
      *
@@ -294,6 +301,7 @@ define(function (require) {
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
+          self.validateWiggleSelection();
 
           // Select the current DOM element
           div = d3.select(this);

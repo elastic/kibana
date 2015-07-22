@@ -8,6 +8,11 @@ define(function () {
         description: 'Options for the lucene query string parser',
         type: 'json'
       },
+      'sort:options': {
+        value: '{ "unmapped_type": "boolean" }',
+        description: 'Options the Elasticsearch sort parameter',
+        type: 'json'
+      },
       'dateFormat': {
         value: 'MMMM Do YYYY, HH:mm:ss.SSS',
         description: 'When displaying a pretty formatted date, use this format',
@@ -34,12 +39,18 @@ define(function () {
         description: 'The index to access if no index is set',
       },
       'metaFields': {
-        value: ['_source', '_id', '_type', '_index'],
+        value: ['_source', '_id', '_type', '_index', '_score'],
         description: 'Fields that exist outside of _source to merge into our document when displaying it',
       },
       'discover:sampleSize': {
         value: 500,
         description: 'The number of rows to show in the table',
+      },
+      'courier:maxSegmentCount': {
+        value: 30,
+        description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
+          'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
+          'cause requests to take much longer to process.'
       },
       'fields:popularLimit': {
         value: 10,
@@ -117,6 +128,14 @@ define(function () {
       'format:currency:defaultPattern': {
         type: 'string',
         value: '($0,0.[00])'
+      },
+      'timepicker:timeDefaults': {
+        type: 'json',
+        value: JSON.stringify({
+          from: 'now-15m',
+          to: 'now',
+          mode: 'quick'
+        }, null, 2)
       }
     };
   };

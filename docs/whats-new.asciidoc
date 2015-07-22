@@ -1,58 +1,34 @@
 [[whats-new]]
-== What's New in Kibana 4
-
-Kibana 4 provides dozens of new features that enable you to compose questions, 
-get answers, and solve problems like never before. It has a brand-new look and 
-feel and improved workflows for discovering and visualizing your data and
-building and sharing dashboards. 
+== What's New in Kibana 4.1
 
 [float]
 [[key-features]]
 === Key Features
-* New data search and discovery interface 
-* Unified visualization builder for your favorite visualizations and some brand
-new ones:
-** Area Chart
-** Data Table
-** Line Chart
-** Markdown Text Widget
-** Pie Chart (including "doughnut" charts)
-** Raw Document Widget
-** Single Metric Widget
-** Tile Map 
-** Vertical Bar Chart
-* Drag and drop dashboard builder that enables you to quickly add, rearrange, 
-resize, and remove visualizations
-* Advanced aggregation-based analytics capabilities, including support for:
-** Unique counts (cardinality)
-** Non-date histograms
-** Ranges
-** Significant terms
-** Percentiles
-* Expressions-based scripted fields enable you to perform ad-hoc analysis by 
-performing computations on the fly
+
+* {k4pull}2518[Pull Request 2518]: You can pin filters to make the filter persist across Kibana functionality, from 
+the Visualize tab to Discover to a Dashboard.
+* {k4pull}2731[Pull Request 2731]: Field formatting options now supported in Settings.
+* {k4pull}3154[Pull Request 3154]: New chart: Bubble chart, derived from the basic line chart.
+* {k4pull}3212[Pull Request 3212]: You can now install Kibana on Linux with a package manager such as `apt-get`.
+* {k4pull}3271[Pull Request 3271] and {k4pull}3262[3262]: New aggregations: IPv4 and Date range aggregations enable 
+you to specify buckets for these qualities.
+* {k4pull}3290[Pull Request 3290]: You can select a time interval for the Discover display of time series data.
+* {k4pull}3470[Pull Request 3470]: New metric: Percentile ranks.
+* {k4pull}3573[Pull Request 3573]: Kibana objects (visualizations, dashboards, and searches) can be imported and 
+exported.
+* {k4pull}3830[Pull Request 3830]: New chart: Heatmap, a tile map display variant.
 
 [float]
 [[improvements]]
 === Improvements
-* Ability to save searches and visualizations enables you to link 
-searches to visualizations and add the same visualization to multiple dashboards
-* Visualizations support an unlimited number of nested aggregations so you can 
-display new types of visualizations, such as "doughnut" charts
-* New URL format eliminates the need for templated and scripted dashboards
-* Better mobile experience
-* Faster dashboard loading due to a reduction in the number HTTP calls needed to load the page
-* SSL encryption for client requests as well as requests to and from Elasticsearch
-* Search result highlighting
-* Easy to access and export the data behind any visualization: 
-** View in a table or view as JSON
-** Export in CSV format
-** See the Elasticsearch request and response
-* Share and embed individual visualizations as well as dashboards
 
-[float]
-[[nuts-bolts]]
-=== Nuts and Bolts
-* Ships with its own webserver and uses Node.js on the backend--installation 
-binaries are provided for Linux, Windows, and Mac OS
-* Uses the D3 framework to display visualizations
+* {k4pull}3164[Pull Request 3164]: You can now store a specific time range with a dashboard.
+* {k4pull}3233[Pull Request 3233]: New Y axis scale options, log scale and square root scale.
+* {k4pull}3237[Pull Request 3237]: Dat Histogram bucket aggregation now supports custom intervals, from seconds to 
+years.
+* {k4pull}3273[Pull Request 3273]: Line smoothing for for line and area charts.
+* {k4pull}3464[Pull Request 3464]: You can now specify the extent of the Y axis for charts.
+* {k4pull}3526[Pull Request 3526]: You can add columns to Discover's list of results directly from an entry's table of 
+fields.
+* {k4pull}3671[Pull Request 3671]: Tile maps now support latitude/longitude filtering.
+* {k4pull}3800[Pull Request 3800]: You can now pause auto-refresh on a dashboard.

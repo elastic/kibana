@@ -18,7 +18,7 @@ define(function (require) {
       sinon.stub(Notifier.prototype, 'error');
 
       Vis = Private(require('components/vis/vis'));
-      AggConfigs = Private(require('components/vis/_agg_configs'));
+      AggConfigs = Private(require('components/vis/AggConfigs'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
     }));

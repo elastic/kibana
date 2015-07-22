@@ -6,7 +6,8 @@ module.exports = function (grunt) {
         '<%= plugins %>/*/styles/**/*.less',
         '<%= plugins %>/*/*.less',
         '<%= app %>/**/components/**/*.less',
-        '<%= app %>/**/components/vislib/components/styles/**/*.less'
+        '<%= app %>/**/components/vislib/components/styles/**/*.less',
+        '<%= src %>/*/server/plugins/status/public/styles/*.less'
       ],
       tasks: ['less:dev']
     },

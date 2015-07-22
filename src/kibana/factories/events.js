@@ -5,7 +5,7 @@ define(function (require) {
     var SimpleEmitter = require('utils/SimpleEmitter');
     var notify = new Notifier({ location: 'EventEmitter' });
 
-    _(Events).inherits(SimpleEmitter);
+    _.class(Events).inherits(SimpleEmitter);
     function Events() {
       Events.Super.call(this);
       this._listeners = {};
@@ -30,11 +30,11 @@ define(function (require) {
 
       (function rebuildDefer() {
         listener.defer = Promise.defer();
-        listener.resolved = listener.defer.promise.then(function (value) {
+        listener.resolved = listener.defer.promise.then(function (args) {
           rebuildDefer();
 
           // we ignore the completion of handlers, just watch for unhandled errors
-          Promise.resolve(handler(value)).catch(notify.fatal);
+          Promise.resolve(handler.apply(handler, args)).catch(notify.fatal);
         });
       }());
 
@@ -74,8 +74,9 @@ define(function (require) {
      * @param {any} [value] - The value that will be passed to all event handlers.
      * @returns {Promise}
      */
-    Events.prototype.emit = function (name, value) {
+    Events.prototype.emit = function (name) {
       var self = this;
+      var args = _.rest(arguments);
 
       if (!self._listeners[name]) {
         return self._emitChain;
@@ -83,7 +84,7 @@ define(function (require) {
 
       return Promise.map(self._listeners[name], function (listener) {
         return self._emitChain = self._emitChain.then(function () {
-          listener.defer.resolve(value);
+          listener.defer.resolve(args);
           return listener.resolved;
         });
       });

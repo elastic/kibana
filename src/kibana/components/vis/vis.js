@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var aggTypes = Private(require('components/agg_types/index'));
     var visTypes = Private(require('registry/vis_types'));
-    var AggConfigs = Private(require('components/vis/_agg_configs'));
+    var AggConfigs = Private(require('components/vis/AggConfigs'));
 
     var notify = new Notifier({
       location: 'Vis'
@@ -84,6 +84,14 @@ define(function (require) {
         }).filter(Boolean),
         listeners: this.listeners
       };
+    };
+
+    Vis.prototype.createEditableVis = function () {
+      return this._editableVis || (this._editableVis = this.clone());
+    };
+
+    Vis.prototype.getEditableVis = function () {
+      return this._editableVis || undefined;
     };
 
     Vis.prototype.clone = function () {

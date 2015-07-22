@@ -1,7 +1,7 @@
 define(function (require) {
   return function GetColumnsProvider(Private) {
     var _ = require('lodash');
-    var AggConfig = Private(require('components/vis/_agg_config'));
+    var AggConfig = Private(require('components/vis/AggConfig'));
 
     return function getColumns(vis, minimal) {
       var aggs = vis.aggs.getResponseAggs();

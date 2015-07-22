@@ -1,0 +1,118 @@
+<!-- vis type specific options -->
+<div class="form-group">
+  <label>Map type</label>
+    <select name="agg"
+    class="form-control"
+    ng-model="vis.params.mapType"
+    ng-init="vis.params.mapType || vis.type.params.mapTypes[0]"
+    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes"
+    >
+  </select>
+</div>
+
+<div ng-if="vis.params.mapType === 'Heatmap'" class="form-group">
+  <div>
+    <label>
+      Radius
+      &nbsp;<kbn-info placement="right" info="Size of heatmap dots. Default: 25"></kbn-info>
+    </label>
+    <div class="vis-editor-agg-form-row">
+      <input
+        name="heatRadius"
+        ng-model="vis.params.heatRadius"
+        required
+        class="form-control"
+        type="range"
+        min="5"
+        max="50"
+        step="1"
+        >
+      <div class="form-group vis-editor-agg-form-value">
+        {{vis.params.heatRadius}}
+      </div>
+    </div>
+  </div>
+  <div>
+    <label>
+      Blur
+      &nbsp;<kbn-info placement="right" info="Amount of blur applied to dots. Default: 15"></kbn-info>
+    </label>
+    <div class="vis-editor-agg-form-row">
+      <input
+        name="heatBlur"
+        ng-model="vis.params.heatBlur"
+        required
+        class="form-control"
+        type="range"
+        min="1"
+        max="25"
+        step="1"
+        >
+      <div class="form-group vis-editor-agg-form-value">
+        {{vis.params.heatBlur}}
+      </div>
+    </div>
+  </div>
+  <div>
+    <label>
+      Maximum zoom
+      &nbsp;<kbn-info placement="right" info="Map zoom at which all dots are displayed at full intensity. Default: 16"></kbn-info>
+    </label>
+    <div class="vis-editor-agg-form-row">
+      <input
+        name="heatMaxZoom"
+        ng-model="vis.params.heatMaxZoom"
+        required
+        class="form-control"
+        type="range"
+        min="1"
+        max="18"
+        step="1"
+        >
+      <div class="vis-editor-agg-form-value">
+        {{vis.params.heatMaxZoom}}
+      </div>
+    </div>
+  </div>
+  <div>
+    <label>
+      Minimum opacity
+      &nbsp;<kbn-info placement="right" info="Minimum opacity of dots. Default: 0.1"></kbn-info>
+    </label>
+    <div class="vis-editor-agg-form-row">
+      <input
+        name="heatMinOpacity"
+        ng-model="vis.params.heatMinOpacity"
+        required
+        class="form-control"
+        type="range"
+        min="0"
+        max="1.0"
+        step="0.01"
+        >
+      <div class="vis-editor-agg-form-value">
+        {{vis.params.heatMinOpacity}}
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>
+      <input type="checkbox" ng-model="vis.params.addTooltip">
+      Show Tooltip
+    </label>
+  </div>
+</div>
+
+<div class="vis-option-item form-group">
+  <label>
+    <input type="checkbox"
+    name="isDesaturated"
+    ng-disabled="!vis.type.params.canDesaturate"
+    ng-model="vis.params.isDesaturated">
+
+    Desaturate map tiles
+
+    <kbn-info info="Reduce the vibrancy of tile colors, this does not work in any version of Internet Explorer"
+  </label>
+</div>

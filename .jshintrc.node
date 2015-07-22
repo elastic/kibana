@@ -3,6 +3,7 @@
   "node": true,
 
   "globals": {
-    "Promise": true
+    "Promise": true,
+    "status": true
   }
 }
