@@ -49,6 +49,7 @@ class UiExports {
 
     case 'modules':
     case 'loaders':
+    case 'noParse':
       return function (plugin, spec) {
         plugin.uiExportsSpecs[type] = spec;
       };

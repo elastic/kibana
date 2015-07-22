@@ -83,6 +83,12 @@ function OptmzUiExports(plugins) {
       loaders.push(loader);
     });
 
+
+    // consume the plugin's "noParse" exports
+    _.each(exports.noParse, function (regExp) {
+      noParse.push(regExp);
+    });
+
   });
 }
 
