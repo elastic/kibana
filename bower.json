@@ -12,7 +12,6 @@
   "license": "Apache 2.0",
   "homepage": "http://www.elastic.co/products/kibana",
   "dependencies": {
-    "angular": "1.2.28",
     "angular-bindonce": "0.3.3",
     "angular-bootstrap": "0.10.0",
     "angular-elastic": "2.4.2",
@@ -35,8 +34,5 @@
     "marked": "0.3.3",
     "numeral": "1.5.3",
     "leaflet-draw": "0.2.4"
-  },
-  "resolutions": {
-    "d3": "3.5.5"
   }
 }

@@ -1,116 +1,24 @@
 'use strict';
 
 module.exports = function devModePlugin(kibana) {
+  if (!kibana.config.get('env.dev')) return;
+
   let _ = require('lodash');
   let webpack = require('webpack');
-
-  // let bundle = require('../../server/optimize/testBundler');
-  let istanbul = require('./istanbul');
-  let kibanaSrcFilter = require('./kibanaSrcFilter');
-  let resolve = require('path').resolve;
-  let extname = require('path').extname;
-  let relative = require('path').relative;
-  let Boom = require('boom');
-
   let fromRoot = require('../../utils/fromRoot');
-  let pathContains = require('../../utils/pathContains');
-  let UiApp = require('../../server/ui/UiApp');
-
-  const SRC = fromRoot('src');
-  const UI = fromRoot('src/ui');
-
-  // if (!kibana.config.get('env.dev')) return;
 
   return new kibana.Plugin({
     init: function (server, options) {
-      return kibana.mixin(function (kbnServer) {
+      let istanbul = require('./istanbul');
+      let kibanaSrcFilter = require('./kibanaSrcFilter');
+      let fromRoot = require('../../utils/fromRoot');
+      const SRC = fromRoot('src');
+      const UI = fromRoot('src/ui');
 
-        let TestHarnessBuilder = require('./TestHarnessBuilder')(kbnServer);
+      server.ext('onPreHandler', istanbul({ root: SRC, displayRoot: SRC, filter: kibanaSrcFilter }));
+      server.ext('onPreHandler', istanbul({ root: UI,  displayRoot: SRC, filter: kibanaSrcFilter }));
 
-        server.ext('onPreHandler', istanbul({ root: SRC, displayRoot: SRC, filter: kibanaSrcFilter }));
-        server.ext('onPreHandler', istanbul({ root: UI,  displayRoot: SRC, filter: kibanaSrcFilter }));
-        server.setupViews(resolve(__dirname, 'views'));
-
-        server.redirectToSlash('/tests/plugins/{pluginId}');
-
-        let currentBuilder = null;
-        server.decorate('reply', 'renderTestPart', function (basePath, part, mimeType) {
-          let reply = this;
-
-          if (!currentBuilder || currentBuilder.path !== basePath) {
-            currentBuilder = new TestHarnessBuilder(basePath);
-          }
-
-          currentBuilder.render().then(function (output) {
-            if (!output || !output.bundle) {
-              return reply(Boom.create(500, 'failed to build test bundle'));
-            }
-
-            return reply(output[part]).type(mimeType);
-          });
-        });
-
-        server.route({
-          path: '/tests/plugins/{pluginId}/',
-          method: 'GET',
-          config: {
-            pre: [
-              'kbnPluginById(params.pluginId)'
-            ],
-            handler: function (req, reply) {
-              let pluginId = req.params.pluginId;
-
-              let app = new UiApp(kbnServer.uiExports, {
-                id: `tests/plugins/${pluginId}`,
-                main: `/testBundle/plugins/${pluginId}/`,
-                autoload: []
-              });
-
-              return reply.renderApp(app, 'testHarness');
-            }
-          }
-        });
-
-        server.route({
-          path: '/testBundle/plugins/{pluginId}/',
-          method: 'GET',
-          config: {
-            pre: [
-              'kbnPluginById(params.pluginId)'
-            ],
-            handler: function (req, reply) {
-              return reply.renderTestPart(req.pre.kbnPluginById.publicDir, 'bundle', 'application/javascript');
-            }
-          }
-        });
-
-        server.route({
-          path: '/testBundle/plugins/{pluginId}/*.map',
-          method: 'GET',
-          config: {
-            pre: [
-              'kbnPluginById(params.pluginId)'
-            ],
-            handler: function (req, reply) {
-              return reply.renderTestPart(req.pre.kbnPluginById.publicDir, 'sourceMap', 'text/plain');
-            }
-          }
-        });
-
-        server.route({
-          path: '/testBundle/plugins/{pluginId}/css',
-          method: 'GET',
-          config: {
-            pre: [
-              'kbnPluginById(params.pluginId)'
-            ],
-            handler: function (req, reply) {
-              return reply.renderTestPart(req.pre.kbnPluginById.publicDir, 'style', 'text/css');
-            }
-          }
-        });
-
-      });
+      return kibana.mixin(require('./testHarness')(server));
     },
 
     uiExports: {

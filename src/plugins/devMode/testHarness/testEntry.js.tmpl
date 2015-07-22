@@ -14,7 +14,7 @@
 
 require('plugins/devMode/bootstrap');
 <%
-entry.modules.require.forEach(function (id) {
+entry.modules.slice(0).reverse().forEach(function (id) {
   print(`require('${id}');\n`);
 });
 %>require('plugins/devMode/bootstrap').bootstrap();

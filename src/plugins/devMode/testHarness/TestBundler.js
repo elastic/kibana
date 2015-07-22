@@ -1,28 +1,28 @@
 'use strict';
 
-module.exports = function (kbnServer) {
+module.exports = function (server, kbnServer) {
 
   let _ = require('lodash');
   let resolve = require('path').resolve;
   let promify = require('bluebird').promisify;
   let glob = promify(require('glob'));
   let createHash = require('crypto').createHash;
-  let pathContains = require('../../utils/pathContains');
-  let LiveOptimizer = require('../../server/optimize/LiveOptimizer');
+  let pathContains = require('../../../utils/pathContains');
+  let LiveOptimizer = require('../../../server/optimize/LiveOptimizer');
   let readFileSync = require('fs').readFileSync;
   let testEntryFileTemplate = _.template(readFileSync(resolve(__dirname, './testEntry.js.tmpl')));
 
-  let hash = function (prefix) {
-    return createHash('sha1').update(prefix).digest('hex');
+  let hash = function (path) {
+    return createHash('sha1').update(path).digest('hex');
   };
 
   class TestHarnessBuilder {
-    constructor(prefix) {
-      this.id = hash(prefix).slice(0, 8);
-      this.prefix = prefix;
+    constructor(path) {
+      this.id = hash(path).slice(0, 8);
+      this.path = path;
       this.bundleDir = kbnServer.config.get('optimize.bundleDir');
       this.plugin = _.find(kbnServer.plugins, function (plugin) {
-        return pathContains(plugin.publicDir, prefix);
+        return pathContains(plugin.publicDir, path);
       });
 
       this.init = _.once(this.init);
@@ -34,29 +34,26 @@ module.exports = function (kbnServer) {
     }
 
     findTestFiles() {
-      let prefix = this.prefix;
+      let path = this.path;
 
       return glob(
         '**/__tests__/**/*.js',
         {
-          cwd: prefix,
+          cwd: path,
           ignore: ['**/_*.js']
         }
       )
       .map(function (testFile) {
-        return resolve(prefix, testFile);
+        return resolve(path, testFile);
       });
     }
 
     setupOptimizer(testFiles) {
       let deps = [];
-      let modules = {
-        angular: [],
-        require: []
-      };
+      let modules = [];
 
       if (testFiles) {
-        modules.require = modules.require.concat(testFiles);
+        modules = modules.concat(testFiles);
       }
 
       let app = this.plugin && this.plugin.app;
@@ -64,11 +61,11 @@ module.exports = function (kbnServer) {
         deps = deps.concat(app.getRelatedPlugins());
 
         let appModules = app.getModules();
-        modules.require = appModules.require.concat(modules.require);
+        modules = appModules.concat(modules);
       }
 
       this.optimizer = new LiveOptimizer({
-        sourceMaps: true,
+        sourceMaps: false,
         bundleDir: this.bundleDir,
         entries: [
           {
@@ -86,6 +83,12 @@ module.exports = function (kbnServer) {
 
     render() {
       let self = this;
+
+      if (this.optimizer) {
+        server.log(['optimize', 'testHarness', 'info'], 'Reusing test harness');
+      } else {
+        server.log(['optimize', 'testHarness', 'info'], 'Building test harness');
+      }
 
       return self.init()
       .then(function () {

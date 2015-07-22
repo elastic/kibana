@@ -25,9 +25,12 @@ module.exports = function (kibana) {
     uiExports: {
       modules: modules,
       noParse: [
+        /node_modules\/angular\//,
         {
           test: function (request) {
-            return _.endsWith(request, '.js') && _.includes(request, bowerComponentsDir);
+            return _.endsWith(request, '.js')
+            && _.includes(request, bowerComponentsDir)
+            && !_.includes(request, 'bower_components/gridster');
           }
         }
       ]
