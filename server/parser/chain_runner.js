@@ -23,6 +23,17 @@ function getQueryCacheKey (query) {
 
 var sheet;
 var queryCache = {};
+
+function argType (arg) {
+  if (_.isObject(arg) && arg) {
+    return arg.type;
+  }
+  if (arg == null) {
+    return 'null';
+  }
+  return typeof arg;
+}
+
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
   args = _.map(args, function (item) {
@@ -58,9 +69,24 @@ function invoke (fnName, args) {
     if (!functions[fnName]){
       throw new Error('Function not found');
     }
-    var output = functions[fnName](args);
-    return output;
-  }).catch(function (e) {throw e;});
+    var functionDef = functions[fnName];
+
+    if (args.length > functionDef.args.length) {
+      throw new Error ('Too many arguments passed to: ' + fnName);
+    }
+
+    _.each(args, function (arg, i) {
+      var type = argType(arg);
+      var required = functionDef.args[i].types;
+      var name = functionDef.args[i].name;
+
+      if (!(_.contains(required, type))) {
+        throw new Error (name + ' must be one of ' + JSON.stringify(required) + '. Got: ' + type);
+      }
+    });
+
+    return functions[fnName].fn.apply(this, args);
+  });
 }
 
 function invokeChain (chainObj, result) {
@@ -77,12 +103,13 @@ function invokeChain (chainObj, result) {
   } else if (!result) {
     promise = invoke('first', [link]);
   } else {
-    promise = invoke(link.function, result.concat(link.arguments));
+    var args = link.arguments ? result.concat(link.arguments) : result;
+    promise = invoke(link.function, args);
   }
 
   return promise.then(function (result) {
     return invokeChain({type:'chain', chain: chain}, [result]);
-  }).catch(function (e) {throw e;});
+  });
 
 }
 
@@ -97,7 +124,6 @@ function resolveChainList (chainList) {
     var list = _.chain(args).pluck('list').flatten().value();
     return {type: 'seriesList', list: list};
   }).catch(function (e) {throw e;});
-
 }
 
 function logObj(obj, thing) {
@@ -155,6 +181,7 @@ function processRequest (request) {
   try {
     sheet = resolveSheet(request);
   } catch (e) {
+    console.log(e);
     return Promise.resolve([e]);
   }
 
@@ -175,11 +202,11 @@ function debugSheet (sheet) {
     console.log(logObj(sheet, 1));
     console.log(logObj({done:true}));
     return sheet;
-  }).catch(function (e) {throw e;});
+  });
 }
 
 debugSheet(
-  ['(((`*`),((`US`).divide(4).divide(2)),(`JP`).sum(10))), (`*`)']
+  ['(`*`).yaxis(2)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

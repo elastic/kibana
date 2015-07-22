@@ -10,7 +10,7 @@ module.exports = function (app) {
 
     var sheet = processRequest(req.body.sheet);
 
-    Promise.all(sheet).then(function (sheet) {
+    return Promise.all(sheet).then(function (sheet) {
       res.send(sheet);
     }).catch(function (e) {
       res.send(e);

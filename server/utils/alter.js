@@ -12,6 +12,11 @@ module.exports = function alter (args, fn) {
   return Promise.all(args).then(function (args) {
 
     var seriesList = args.shift();
+
+    if (seriesList.type !== 'seriesList') {
+      throw new Error ('args[0] must be a seriesList');
+    }
+
     var list = _.chain(seriesList.list).map(function (series) {
       return fn([series].concat(args));
     }).flatten().value();

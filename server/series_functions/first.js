@@ -1,11 +1,16 @@
 var alter = require('../utils/alter.js');
-var _ = require('lodash');
 
-module.exports = function first (args) {
-  return alter(args, function (args) {
-    if (_.isObject(args[0]) && args[0].type === 'seriesList') {
-      return args[0].list;
+module.exports = {
+  args: [
+    {
+      name: 'inputSeries',
+      types: ['seriesList']
     }
-    return args[0];
-  });
+  ],
+  help: 'This is an internal function that simply returns the input series. Don\'t use this',
+  fn: function first (inputSeries) {
+    return alter([inputSeries], function (args) {
+      return args[0];
+    });
+  }
 };

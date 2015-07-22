@@ -46,11 +46,12 @@ function_name
 
 function
  = (name:function_name '(' space? args:args? space? ')' space? ','? space?) {
-  return {
+  var result = {
     type: 'function',
-    function: name,
-    arguments: args
+    function: name
   }
+  if (args) {result.arguments = args;}
+  return result;
  }
 
 reference

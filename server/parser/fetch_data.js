@@ -12,7 +12,7 @@ var time = {
   min: parseDateMath('now-18M').valueOf(),
   max: parseDateMath('now').valueOf(),
   field: '@timestamp',
-  interval: '12w'
+  interval: '2w'
 };
 
 // Load function plugins

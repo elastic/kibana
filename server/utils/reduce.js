@@ -18,7 +18,7 @@ module.exports = function reduce (args, fn) {
     var seriesList = args.shift();
 
     if (seriesList.type !== 'seriesList') {
-      throw new Error ('reduce requires a seriesList as argument 1');
+      throw new Error ('args[0] must be a seriesList');
     }
 
     var reduced = _.map(seriesList.list, function (series) {
@@ -28,7 +28,6 @@ module.exports = function reduce (args, fn) {
 
 
           var value = point[1];
-
 
           if (value == null) {
             return [point[0], null];
