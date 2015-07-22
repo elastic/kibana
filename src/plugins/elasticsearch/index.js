@@ -4,6 +4,7 @@ module.exports = function (kibana) {
   var createProxy = require('./lib/create_proxy');
 
   return new kibana.Plugin({
+    require: ['kibana'],
 
     config: function (Joi) {
       return Joi.object({
