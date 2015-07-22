@@ -1,13 +1,17 @@
-module.exports = function (kbnServer, server, config) {
-  var _ = require('lodash');
-  var Promise = require('bluebird');
-  var readdir = Promise.promisify(require('fs').readdir);
-  var stat = Promise.promisify(require('fs').stat);
-  var join = require('path').join;
+'use strict';
 
-  var scanDirs = [].concat(config.get('plugins.scanDirs') || []);
-  var absolutePaths = [].concat(config.get('plugins.paths') || []);
-  var debug = _.bindKey(server, 'log', ['plugins', 'debug']);
+module.exports = function (kbnServer, server, config) {
+  let _ = require('lodash');
+  let Promise = require('bluebird');
+  let readdir = Promise.promisify(require('fs').readdir);
+  let stat = Promise.promisify(require('fs').stat);
+  let resolve = require('path').resolve;
+
+  let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
+  let absolutePaths = [].concat(config.get('plugins.paths') || []);
+  let bundled = [resolve(__dirname, '../ui/plugin')];
+  let debug = _.bindKey(server, 'log', ['plugins', 'debug']);
+  let warning = _.bindKey(server, 'log', ['plugins', 'warning']);
 
   return Promise.map(scanDirs, function (dir) {
     debug({ tmpl: 'Scanning `<%= dir %>` for plugins', dir: dir });
@@ -18,7 +22,7 @@ module.exports = function (kbnServer, server, config) {
         throw err;
       }
 
-      server.log('warning', {
+      warning({
         tmpl: '<%= err.code %>: Unable to scan non-existent directory for plugins "<%= dir %>"',
         err: err,
         dir: dir
@@ -28,7 +32,7 @@ module.exports = function (kbnServer, server, config) {
     })
     .map(function (file) {
       if (file === '.' || file === '..') return false;
-      var path = join(dir, file);
+      let path = resolve(dir, file);
 
       return stat(path)
       .then(function (stat) {
@@ -37,20 +41,23 @@ module.exports = function (kbnServer, server, config) {
     });
   })
   .then(function (dirs) {
-    return _(dirs)
-    .flatten()
+    return _([dirs, absolutePaths, bundled])
+    .flattenDeep()
     .compact()
-    .union(absolutePaths)
+    .uniq()
     .value();
   })
   .filter(function (dir) {
-    try {
-      require(dir);
+    let path;
+    try { path = require.resolve(dir); } catch (e) {}
+
+    if (!path) {
+      warning({ tmpl: 'Skipping non-plugin directory at <%= dir %>', dir: dir });
+      return false;
+    } else {
+      require(path);
       debug({ tmpl: 'Found plugin at <%= dir %>', dir: dir });
       return true;
-    } catch (e) {
-      debug({ tmpl: 'Skipping non-plugin directory at <%= dir %>', dir: dir });
-      return false;
     }
   })
   .then(function (pluginPaths) {
