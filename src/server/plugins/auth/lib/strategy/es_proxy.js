@@ -2,37 +2,38 @@ var _ = require('lodash');
 var btoa = require('btoa');
 var Promise = require('bluebird');
 
-module.exports = function (server) {
-  var client = server.plugins.elasticsearch.client;
+var client;
+var status = 'red';
 
-  var status = 'red';
-  server.plugins.elasticsearch.status.on('change', function (current) {
-    status = current.state;
-  });
+module.exports = {
+  init: function (server) {
+    client = server.plugins.elasticsearch.client;
+    status = 'red';
+    server.plugins.elasticsearch.status.on('change', function (current) {
+      status = current.state;
+    });
+  },
+  authenticate: function (request, username, password) {
+    if (status !== 'green') return Promise.reject();
 
-  function getAuthHeader(username, password) {
-    return {'Authorization': 'Basic ' + btoa(username + ':' + password)};
+    return client.info({
+      headers: getAuthHeader(username, password)
+    }).then(function () {
+      return {
+        username: username,
+        password: password
+      };
+    });
+  },
+  validate: function (request, session) {
+    return Promise.try(function () {
+      if (!session.username || !session.password) throw new Error('No username and/or password in session.');
+      _.assign(request.headers, getAuthHeader(session.username, session.password));
+      return true;
+    });
   }
-
-  return {
-    authenticate: function (request, username, password) {
-      if (status !== 'green') return Promise.reject();
-
-      return client.info({
-        headers: getAuthHeader(username, password)
-      }).then(function () {
-        return {
-          username: username,
-          password: password
-        };
-      });
-    },
-    validate: function (request, session) {
-      return Promise.try(function () {
-        if (!session.username || !session.password) throw new Error('No username and/or password in session.');
-        _.assign(request.headers, getAuthHeader(session.username, session.password));
-        return true;
-      });
-    }
-  };
 };
+
+function getAuthHeader(username, password) {
+  return {'Authorization': 'Basic ' + btoa(username + ':' + password)};
+}

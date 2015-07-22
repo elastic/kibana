@@ -12,7 +12,8 @@ module.exports = new kibana.Plugin({
     var config = server.config();
     if (!config.get('kibana.server.auth.enabled')) return;
 
-    var strategy = require('./lib/strategy/htpasswd')(server); // TODO: Clean up how this is imported
+    var strategy = require('./lib/strategy/htpasswd'); // TODO: Clean up how this is imported
+    strategy.init(server);
 
     server.register(hapiAuthCookie, function (error) {
       if (error != null) return; // TODO: Handle this error
