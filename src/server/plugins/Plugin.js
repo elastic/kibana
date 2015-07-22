@@ -41,7 +41,6 @@ module.exports = class Plugin {
     let id = self.id;
     let version = self.version;
     let server = self.kbnServer.server;
-    let status = self.kbnServer.status;
 
     let config = server.config();
     server.log(['plugins', 'debug'], {
@@ -49,15 +48,13 @@ module.exports = class Plugin {
       plugin: self
     });
 
+    self.status = self.kbnServer.status.create(`plugin:${self.id}`);
     return Promise.try(function () {
       return self.getConfigSchema(Joi);
     })
     .then(function (schema) {
       if (schema) config.extendSchema(id, schema);
       else config.extendSchema(id, defaultConfigSchema);
-    })
-    .then(function () {
-      return status.decoratePlugin(self);
     })
     .then(function () {
       if (config.get([id, 'enabled'])) {

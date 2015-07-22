@@ -24,10 +24,6 @@ module.exports = class ServerStatus {
     });
   }
 
-  decoratePlugin(plugin) {
-    plugin.status = this.create(`plugin:${plugin.id}`);
-  }
-
   get(name) {
     return this._created[name];
   }
