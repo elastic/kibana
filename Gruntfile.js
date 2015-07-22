@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
-  // and once durring so that we have access to it via
+  // and once during so that we have access to it via
   // grunt.config.get() within the config files
   var config = {
     pkg: grunt.file.readJSON('package.json'),

@@ -1,4 +1,4 @@
-﻿var _ = require('lodash');
+var _ = require('lodash');
 var zlib = require('zlib');
 var Promise = require('bluebird');
 var request = require('request');
@@ -55,7 +55,6 @@ module.exports = function (settings, logger) {
 
     return wrappedRequest(requestOptions)
     .then(function (req) {
-      //debugger;
       var reporter = progressReporter(logger, req);
 
       req
@@ -73,9 +72,7 @@ module.exports = function (settings, logger) {
   }
 
   function wrappedRequest(requestOptions) {
-    //debugger;
     return Promise.try(function () {
-      //debugger;
       return request.get(requestOptions);
     })
     .catch(function (err) {
