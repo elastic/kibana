@@ -137,6 +137,19 @@ define(function (require) {
   });
 
   /**
+  * Remove items from this based on a predicate
+  * @param {function|object|string} predicate - the predicate used to decide what is removed
+  * @param {object} context - this binding for predicate
+  * @return {array} - the removed data
+  */
+  IndexedArray.prototype.remove = function (predicate, context) {
+    var out = _.remove(this, predicate, context);
+    _.remove(this.raw, predicate, context);
+    this._clearIndices();
+    return out;
+  };
+
+  /**
    * provide a hook for the JSON serializer
    * @return {array} - a plain, vanilla array with our same data
    */

@@ -26,7 +26,7 @@
 # kibana_elasticsearch_client_crt: /path/to/your/client.crt
 # kibana_elasticsearch_client_key: /path/to/your/client.key
 
-# If you need to provide a CA certificate for your Elasticsarech instance, put
+# If you need to provide a CA certificate for your Elasticsearch instance, put
 # the path of the pem file here.
 # ca: /path/to/your/CA.pem
 

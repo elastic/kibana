@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SearchLooperService(Private, Promise, Notifier) {
+  return function SearchLooperService(Private, Promise, Notifier, $rootScope) {
     var fetch = Private(require('components/courier/fetch/fetch'));
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var requestQueue = Private(require('components/courier/_request_queue'));
@@ -12,6 +12,7 @@ define(function (require) {
      * @type {Looper}
      */
     var searchLooper = new Looper(null, function () {
+      $rootScope.$broadcast('courier:searchRefresh');
       return fetch.these(
         requestQueue.getInactive(searchStrategy)
       );
