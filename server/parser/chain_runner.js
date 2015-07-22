@@ -9,7 +9,6 @@ var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
 
 var fetchData = require('./fetch_data.js');
-//var deepFindByProp = require('../utils/deep_find_by_prop.js');
 
 // Load function plugins
 var functions  = _.chain(glob.sync('server/series_functions/*.js')).map(function (file) {
@@ -45,8 +44,8 @@ function invoke (fnName, args) {
           if (queryCache[cacheKey]) {
             return Promise.resolve(_.clone(queryCache[cacheKey]));
           }
-          return fetchData(item, cacheKey);
-          //throw new Error ('Missing query cache! ' + cacheKey);
+          //return fetchData(item, cacheKey);
+          throw new Error ('Missing query cache! ' + cacheKey);
         case 'function':
           return invoke(item.function, item.arguments);
         case 'reference':
@@ -133,20 +132,39 @@ function logObj(obj, thing) {
 function preProcessSheet (sheet) {
   var queries = {};
 
-  console.log(logObj(sheet,1));
+  function storeQueryObj(query) {
+    var cacheKey = getQueryCacheKey(query);
+    queries[cacheKey] = query;
+  }
 
   function findQueries(chain) {
+
+    if (_.isObject(chain) && chain.type === 'query') {
+      storeQueryObj(chain);
+      return;
+    }
+
+    if (!_.isArray(chain)) {
+      return;
+    }
+
     _.each(chain, function (operator) {
       if (!_.isObject(operator)) {
         return;
       }
-      if (operator.type === 'chain') {
+      switch (operator.type) {
+      case 'chain':
         findQueries(operator.chain);
-      } else if (operator.type === 'function') {
+        break;
+      case 'chainList':
+        findQueries(operator.list);
+        break;
+      case 'function':
         findQueries(operator.arguments);
-      } else if (operator.type === 'query') {
-        var cacheKey = getQueryCacheKey(operator);
-        queries[cacheKey] = operator;
+        break;
+      case 'query':
+        storeQueryObj(operator);
+        break;
       }
     });
   }
@@ -203,14 +221,14 @@ module.exports = processRequest;
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
   Promise.all(sheet).then(function (sheet) {
-    //console.log(logObj(sheet, 1));
+    console.log(logObj(sheet, 1));
     console.log(logObj({done:true}));
     return sheet;
   });
 }
 
 debugSheet(
-  ['(`*`).sum(10)']
+  ['(`*`)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );
