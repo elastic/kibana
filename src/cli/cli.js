@@ -4,7 +4,7 @@ let _ = require('lodash');
 let pkg = require('../utils/closestPackageJson').getSync();
 let Command = require('./Command');
 
-let argv = require('cluster').isWorker ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
+let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 let program = new Command('bin/kibana');
 
 program

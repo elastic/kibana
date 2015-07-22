@@ -84,25 +84,31 @@ module.exports = function (kbnServer, server, config) {
     status.green(`Optimization of ${describeEntries(entries)} complete`);
   });
 
-  optmzr.on('error', function (entries, err, stats) {
+  optmzr.on('error', function (entries, stats, err) {
     if (stats) logStats('fatal', stats);
     status.red('Optimization failure! ' + err.message);
   });
 
-  return optmzr.init(!role || role === 'send').then(function () {
+  return optmzr.init().then(function () {
     let entries = optmzr.bundles.getMissingEntries();
 
-    if (entries.length && watching) {
-      status.yellow(`Optimizing and watching application source files`);
+    if (!entries.length) {
+      if (watching) {
+        status.red('No optimizable applications found');
+      } else {
+        status.green('Reusing previously cached application source files');
+      }
+      return;
     }
-    else if (entries.length) {
+
+    if (watching) {
+      status.yellow(`Optimizing and watching all application source files`);
+    } else {
       status.yellow(`Optimizing and caching ${describeEntries(entries)}`);
     }
-    else if (watching) {
-      status.red('No optimizable applications found');
-    }
-    else {
-      status.green('Reusing previously cached application source files');
+
+    if (!role || role === 'send') {
+      optmzr.run();
     }
   });
 };

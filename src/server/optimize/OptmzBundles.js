@@ -50,11 +50,8 @@ class OptmzBundles {
       'cleanDir',
       'ensureDir',
       'synchronize',
-      'collectGarbage',
       'syncBundle',
       'clean',
-      'dirContents',
-      'getUnkownBundleFiles',
       'getMissingEntries',
       'getEntriesConfig'
     ]);
@@ -64,20 +61,15 @@ class OptmzBundles {
     return rimraf(this.dir);
   }
 
-  ensureDir() {
-    return mkdirp(this.dir);
-  }
-
-  synchronize(collectGarbage) {
+  synchronize() {
     return this.ensureDir()
     .return(this.entries)
     .map(this.syncBundle)
-    .then(collectGarbage ? this.collectGarbage : _.noop)
     .return(undefined);
   }
 
-  collectGarbage() {
-    return this.getUnkownBundleFiles().then(this.clean);
+  ensureDir() {
+    return mkdirp(this.dir);
   }
 
   syncBundle(entry) {
@@ -110,33 +102,6 @@ class OptmzBundles {
     )
     .settle()
     .return(undefined);
-  }
-
-  dirContents() {
-    let dir = this.dir;
-
-    return readdir(dir).map(function (name) {
-      // skip '.', '..', and dot-prefixed files
-      if (name.charAt(0) === '.' || name === 'sourcemaps') return false;
-      return join(dir, name);
-    })
-    .then(_.compact);
-  }
-
-  getUnkownBundleFiles() {
-    let entriesByPath = _.indexBy(this.entries, 'path');
-    let entriesByBundlePath = _.indexBy(this.entries, 'bundlePath');
-
-    return this.dirContents()
-    .map(function (path) {
-      return entriesByPath[path] || entriesByBundlePath[path];
-    })
-    .then(_.compact)
-    .then(this.clean);
-  }
-
-  hasMissingEntries() {
-    return this.getMissingEntries().length;
   }
 
   getMissingEntries() {

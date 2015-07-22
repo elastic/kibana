@@ -5,40 +5,64 @@ let webpack = require('webpack');
 
 let BaseOptimizer = require('./BaseOptimizer');
 
-module.exports = class CachedOptimizer extends BaseOptimizer {
+const STATUS_BUNDLE_INVALID = 'bundle invalid';
+const STATUS_BUNDLING = 'optimizing';
+const STATUS_REBUNDLING = 'bundle invalid during optimizing';
+const STATUS_ERROR = 'error';
+const STATUS_DONE = 'done';
+
+class WatchingOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
 
-    this.bundleStatus = null; // options: null, 'built', 'needs rebuild'
+    this.bundleStatus = null;
+    _.bindAll(this, 'init', 'setupCompiler', 'onBundlesInvalid', 'setStatus', 'enable', 'disable');
 
-    _.bindAll(this, 'init', 'setupCompiler', 'enable', 'disable');
+    this.run = this.enable; // enable makes a bit more sense here, but alias for consistency with CachedOptimizer
   }
 
-  init(autoRun) {
-    return this.bundles.cleanDir().then(autoRun ? this.enable : this.setupCompiler);
+  init(autoEnable) {
+    return this.bundles.cleanDir()
+    .then(this.bundles.synchronize)
+    .then(autoEnable ? this.enable : this.setupCompiler);
   }
 
-  setupCompiler(autoRun) {
+  setupCompiler(autoEnable) {
     if (!_.size(this.bundles.entries)) return;
 
     this.compilerConfig = this.getConfig();
     this.compiler = webpack(this.compilerConfig);
-    this.compiler.plugin('done', _.bindKey(this, 'setStatus', 'done'));
-    this.compiler.plugin('failed', _.bindKey(this, 'setStatus', 'error'));
-    this.compiler.plugin('invalid', _.bindKey(this, 'setStatus', 'needs rebuild'));
-    this.compiler.plugin('watch-run', _.bindKey(this, 'setStatus', 'rebuilding'));
+    this.compiler.plugin('watch-run', _.partial(this.setStatus, STATUS_BUNDLING));
+    this.compiler.plugin('invalid', this.onBundlesInvalid);
+    this.compiler.plugin('failed', _.partial(this.setStatus, STATUS_ERROR));
+    this.compiler.plugin('done', _.partial(this.setStatus, STATUS_DONE, true));
 
-    if (autoRun) this.enable();
+    if (autoEnable) this.enable();
   }
 
-  setStatus(status) {
-    let entries = this.bundles.entries;
+  onBundlesInvalid() {
+    switch (this.bundleStatus || null) {
+      case STATUS_BUNDLING:
+      case STATUS_REBUNDLING:
+        // if the source changed during building, we immediately rebuild
+        return this.setStatus(STATUS_REBUNDLING);
+      case null:
+        // the bundle has to be something before that something can be invalid
+        return;
+      default:
+        return this.setStatus(STATUS_BUNDLE_INVALID);
+    }
+  }
+
+  setStatus(status, shouldBeFinal) {
+    let self = this;
+    let entries = self.bundles.entries;
     let stats;
     let error;
 
     switch (status) {
       case 'done':
-        stats = this.watcher.stats;
+        stats = self.watcher.stats;
         error = null;
 
         if (stats.hasErrors()) {
@@ -48,11 +72,26 @@ module.exports = class CachedOptimizer extends BaseOptimizer {
         break;
 
       case 'error':
-        stats = this.watcher.stats;
-        error = this.watcher.error;
+        stats = self.watcher.stats;
+        error = self.watcher.error;
     }
 
-    this.emit(this.bundleStatus = status, entries, stats, error);
+    let apply = function () {
+      self.tentativeStatusChange = clearTimeout(self.tentativeStatusChange);
+      self.emit(self.bundleStatus = status, entries, stats, error);
+    };
+
+    if (shouldBeFinal) {
+      // this looks race-y, but it's how webpack does it: https://goo.gl/ShVo2o
+      self.tentativeStatusChange = setTimeout(apply, 0);
+    } else {
+      apply();
+    }
+
+    // webpack allows some plugins to be async, we don't want to hold up webpack,
+    // so just always callback if we get a cb();
+    let cb = _.last(arguments);
+    if (typeof cb === 'function') cb();
   }
 
   enable() {
@@ -64,7 +103,7 @@ module.exports = class CachedOptimizer extends BaseOptimizer {
       throw new Error('WatchingOptimizer already watching!');
     }
 
-    this.watcher = this.compiler.watch(_.noop);
+    this.watcher = this.compiler.watch({}, _.noop);
   }
 
   disable() {
@@ -75,4 +114,6 @@ module.exports = class CachedOptimizer extends BaseOptimizer {
     this.watcher = null;
     this.compiler = null;
   }
-};
+}
+
+module.exports = WatchingOptimizer;

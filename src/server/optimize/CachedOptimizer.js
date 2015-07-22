@@ -12,7 +12,7 @@ module.exports = class CachedOptimizer extends BaseOptimizer {
   }
 
   init(autoRun) {
-    return this.bundles.synchronize(true).then(autoRun ? this.run : this.setupCompiler);
+    return this.bundles.synchronize().then(autoRun ? this.run : this.setupCompiler);
   }
 
   setupCompiler(autoRun) {
@@ -36,10 +36,10 @@ module.exports = class CachedOptimizer extends BaseOptimizer {
     self.emit('build-start', entries);
     self.compiler.run(function (err, stats) {
       if (err) {
-        self.emit('error', entries, err);
+        self.emit('error', entries, stats, err);
       }
       else if (stats.hasErrors() || stats.hasWarnings()) {
-        self.emit('error', entries, new Error('Optimization must not produce errors or warnings'), stats);
+        self.emit('error', entries, stats, new Error('Optimization must not produce errors or warnings'));
       }
       else {
         self.emit('done', entries, stats);
