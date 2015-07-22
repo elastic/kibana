@@ -31,9 +31,11 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
     let mapFilename = join(self.compiler.outputPath, `${id}.bundle.js.map`);
     let styleFilename = join(self.compiler.outputPath, `${id}.style.css`);
 
-    self.active = (self.active || self.compile().finally(function () {
-      self.active = null;
-    }));
+    if (!self.active) {
+      self.active = self.compile().finally(function () {
+        self.active = null;
+      });
+    }
 
     return self.active.then(function (stats) {
       if (stats.hasErrors() || stats.hasWarnings()) {
