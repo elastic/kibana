@@ -9,7 +9,6 @@ module.exports = function (kbnServer, server, config) {
 
   let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
   let absolutePaths = [].concat(config.get('plugins.paths') || []);
-  let bundled = [resolve(__dirname, '../ui/plugin')];
   let debug = _.bindKey(server, 'log', ['plugins', 'debug']);
   let warning = _.bindKey(server, 'log', ['plugins', 'warning']);
 
@@ -41,7 +40,7 @@ module.exports = function (kbnServer, server, config) {
     });
   })
   .then(function (dirs) {
-    return _([dirs, absolutePaths, bundled])
+    return _([dirs, absolutePaths])
     .flattenDeep()
     .compact()
     .uniq()

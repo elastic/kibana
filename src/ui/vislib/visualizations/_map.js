@@ -3,7 +3,6 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
-    require('leaflet-draw');
 
     var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];

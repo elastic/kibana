@@ -14,7 +14,7 @@
 
 require('ui/chrome');
 <%
-entry.modules.require.forEach(function (id) {
+entry.modules.forEach(function (id) {
   if (id !== 'ui/chrome') print(`require('${id}');\n`);
 });
-%>require('ui/chrome').bootstrap(<%= JSON.stringify(entry.modules.angular) %>);
+%>require('ui/chrome').bootstrap(/* xoxo */);

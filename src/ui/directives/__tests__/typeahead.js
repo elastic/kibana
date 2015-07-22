@@ -3,9 +3,6 @@ define(function (require) {
   var sinon = require('sinon');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-
-  // Load the kibana app dependencies.
-  require('angular-route');
   require('ui/typeahead/typeahead');
 
   // TODO: This should not be needed, timefilter is only included here, it should move

@@ -23,23 +23,15 @@ class UiApp {
     this.getModules = _.once(this.getModules);
   }
 
-  autoload(type) {
-    return _.get(this.autoloadOverrides, type, defAutoload[type]) || [];
-  }
-
   getModules() {
-    return {
-      // there current isn't any way to extend the default angular modules
-      angular: this.autoload('angular'),
-      require: _([
-        this.autoload('require'),
-        this.uiExports.find(_.get(this, 'spec.uses', [])),
-      ])
-      .flatten()
-      .uniq()
-      .push(this.main)
-      .value()
-    };
+    return _([
+      this.autoloadOverrides || defAutoload.require,
+      this.uiExports.find(_.get(this, 'spec.uses', [])),
+    ])
+    .flatten()
+    .uniq()
+    .push(this.main)
+    .value();
   }
 
   getRelatedPlugins() {

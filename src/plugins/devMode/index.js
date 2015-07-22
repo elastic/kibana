@@ -63,10 +63,7 @@ module.exports = function devModePlugin(kibana) {
               let app = new UiApp(kbnServer.uiExports, {
                 id: `tests/plugins/${pluginId}`,
                 main: `/testBundle/plugins/${pluginId}/`,
-                autoload: {
-                  angular: [],
-                  require: []
-                }
+                autoload: []
               });
 
               return reply.renderApp(app, 'testHarness');

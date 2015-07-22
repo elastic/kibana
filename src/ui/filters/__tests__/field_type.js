@@ -3,9 +3,6 @@ define(function (require) {
   var expect = require('expect.js');
   var _ = require('lodash');
   var ngMock = require('ngMock');
-
-  // Load the kibana app dependencies.
-  require('angular-route');
   require('plugins/kibana/discover/index');
   require('ui/filters/field_type');
 

@@ -8,10 +8,6 @@ define(function (require) {
   var getFakeRow = require('fixtures/fake_row');
 
   describe('Doc Table', function () {
-
-    // Load the kibana app dependencies.
-    require('angular-route');
-
     require('plugins/kibana/discover/index');
 
     var $parentScope, $scope, config;

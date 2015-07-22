@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  require('angular-route');
 
   var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
   var kibana = require('ui/modules').get('kibana', ['ngRoute']);

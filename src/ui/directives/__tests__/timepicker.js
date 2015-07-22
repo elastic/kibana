@@ -7,10 +7,6 @@ define(function (require) {
   var sinon = require('auto-release-sinon/mocha');
   var ngMock = require('ngMock');
 
-
-  // Load the kibana app dependencies.
-  require('angular-route');
-
   require('plugins/kibana/visualize/index');
   require('plugins/kibana/dashboard/index');
 

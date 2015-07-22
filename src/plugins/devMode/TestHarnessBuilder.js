@@ -64,7 +64,6 @@ module.exports = function (kbnServer) {
         deps = deps.concat(app.getRelatedPlugins());
 
         let appModules = app.getModules();
-        modules.angular = appModules.angular.concat(modules.angular);
         modules.require = appModules.require.concat(modules.require);
       }
 

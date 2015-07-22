@@ -6,10 +6,6 @@ define(function (require) {
   var ngMock = require('ngMock');
 
   require('ui/directives/confirm_click');
-
-  // Load the kibana app dependencies.
-  require('angular-route');
-
   require('plugins/kibana/discover/index');
 
   var $parentScope, $scope, $elem;

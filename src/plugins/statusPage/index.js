@@ -6,14 +6,11 @@ module.exports = function (kibana) {
         main: 'plugins/statusPage/statusPage',
         hidden: true,
 
-        autoload: {
-          angular: [],
-          require: [
-            'ui/chrome',
-            'angular-bootstrap'
-          ]
-          .concat(kibana.autoload.styles)
-        }
+        autoload: [].concat(
+          kibana.autoload.styles,
+          'ui/chrome',
+          'angular'
+        )
       },
 
       modules: {

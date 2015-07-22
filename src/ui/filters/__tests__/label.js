@@ -5,9 +5,6 @@ define(function (require) {
   var faker = require('faker');
   var ngMock = require('ngMock');
 
-  // Load the kibana app dependencies.
-  require('angular-route');
-
   // Load kibana and its applications
   require('plugins/kibana/discover/index');
 

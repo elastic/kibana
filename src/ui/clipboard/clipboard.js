@@ -1,16 +1,10 @@
 define(function (require) {
-  // ng-clip expects ZeroClipboard to be global, but it's AMD, so it never is
-  var ZeroClipboard = window.ZeroClipboard = require('zeroclipboard');
-  require('ng-clip');
-
+  var ZeroClipboard = require('ng-clip');
   var $ = require('jquery');
   var html = require('ui/clipboard/clipboard.html');
-  var module = require('ui/modules').get('kibana', ['ngClipboard']);
 
-  module
-  .config(function (ngClipProvider) {
-    ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
-  })
+  require('ui/modules')
+  .get('kibana')
   .directive('kbnClipboard', function ($compile, $timeout) {
     return {
       restrict: 'E',

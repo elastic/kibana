@@ -1,7 +1,4 @@
 module.exports = function (kibana) {
-  var meta = require('path').resolve.bind(null, __dirname, 'meta-modules');
-  var noParse = function (path) { return { path: path, parse: false }; };
-
   return new kibana.Plugin({
 
     config: function (Joi) {

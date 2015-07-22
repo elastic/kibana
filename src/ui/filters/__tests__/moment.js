@@ -5,8 +5,6 @@ define(function (require) {
   var moment = require('moment');
   var ngMock = require('ngMock');
 
-  // Load the kibana app dependencies.
-  require('angular-route');
   require('ui/filters/moment');
 
   var filter, config;

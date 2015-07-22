@@ -1,7 +1,7 @@
 define(function (require) {
   var html = require('ui/tooltip/tooltip.html');
 
-  require('ui/meta-modules/ui-bootstrap')
+  require('ui-bootstrap')
   .config(function ($tooltipProvider) {
     $tooltipProvider.options({
       placement: 'bottom',

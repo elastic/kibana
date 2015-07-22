@@ -3,8 +3,6 @@ define(function (require) {
   var $ = require('jquery');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-
-  require('angular-route');
   require('plugins/kibana/discover/index');
 
   var $parentScope, $scope, $elem;

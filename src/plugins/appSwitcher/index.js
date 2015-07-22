@@ -5,12 +5,7 @@ module.exports = function (kibana) {
         id: 'switcher',
         main: 'plugins/appSwitcher/appSwitcher',
         hidden: true,
-
-        autoload: {
-          angular: [],
-          require: []
-          .concat(kibana.autoload.styles)
-        }
+        autoload: kibana.autoload.styles
       }
     }
   });

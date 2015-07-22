@@ -2,7 +2,6 @@ define(function (require) {
   return function HeatmapMarkerFactory(Private, d3) {
     var _ = require('lodash');
     var L = require('leaflet');
-    require('leaflet-heat');
 
     var BaseMarker = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
 
