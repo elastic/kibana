@@ -19,7 +19,7 @@ module.exports = function (kibana) {
           exports: 'window.nv',
           imports: 'd3,nvd3Styles'
         },
-        nvd3Styles: {
+        nvd3Styles$: {
           path: 'nvd3/build/nv.d3.css'
         }
       },

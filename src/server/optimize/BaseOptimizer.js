@@ -9,7 +9,6 @@ let webpack = require('webpack');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-let assets = require('../ui/assets');
 let fromRoot = require('../../utils/fromRoot');
 let OptmzBundles = require('./OptmzBundles');
 let OptmzUiModules = require('./OptmzUiModules');
@@ -72,9 +71,11 @@ class BaseOptimizer extends EventEmitter {
       },
 
       resolve: {
-        extensions: ['', '.js', '.less'],
-        modulesDirectories: [ fromRoot('node_modules'), assets.root ],
-        root: fromRoot(),
+        extensions: ['.js', '.less', ''],
+        postfixes: [''],
+        modulesDirectories: ['node_modules'],
+        loaderPostfixes: ['-loader', ''],
+        root: fromRoot('.'),
         alias: this.modules.aliases
       }
     };

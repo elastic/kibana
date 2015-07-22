@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
-  var datemath = require('utils/datemath');
+  var datemath = require('ui/utils/datemath');
 
   // Assume interval is in the form (value)(unit), such as "1h"
   var INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + datemath.units.join('|') + ')$');

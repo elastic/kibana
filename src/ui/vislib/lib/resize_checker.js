@@ -5,7 +5,7 @@ define(function (require) {
 
     var EventEmitter = Private(require('ui/events'));
     var reflowWatcher = Private(require('ui/reflow_watcher'));
-    var sequencer = require('utils/sequencer');
+    var sequencer = require('ui/utils/sequencer');
 
     var SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
       100,      // shortest delay

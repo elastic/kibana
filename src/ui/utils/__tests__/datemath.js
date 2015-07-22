@@ -1,5 +1,5 @@
 define(function (require) {
-  var datemath = require('utils/datemath');
+  var datemath = require('ui/utils/datemath');
   var expect = require('expect.js');
   var moment = require('moment');
   var _ = require('lodash');

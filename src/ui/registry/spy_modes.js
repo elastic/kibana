@@ -1,5 +1,5 @@
 define(function (require) {
-  return require('registry/_registry')({
+  return require('ui/registry/_registry')({
     name: 'visTypes',
     index: ['name'],
     order: ['order']

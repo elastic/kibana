@@ -1,9 +1,9 @@
 define(function (require) {
-  var diff = require('utils/diff_object');
+  var diff = require('ui/utils/diff_object');
   var expect = require('expect.js');
   var _ = require('lodash');
 
-  describe('utils/diff_object', function () {
+  describe('ui/utils/diff_object', function () {
 
     it('should list the removed keys', function () {
       var target = { test: 'foo' };

@@ -12,7 +12,7 @@ define(function (require) {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route, Private) {
-        var visTypes = Private(require('registry/vis_types'));
+        var visTypes = Private(require('ui/registry/vis_types'));
         var visType = _.find(visTypes, {name: $route.current.params.type});
         if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
           throw new Error('You must provide either an indexPattern or a savedSearchId');
@@ -49,10 +49,10 @@ define(function (require) {
 
     var _ = require('lodash');
     var angular = require('angular');
-    var ConfigTemplate = require('utils/config_template');
+    var ConfigTemplate = require('ui/utils/config_template');
     var Notifier = require('ui/notify/_notifier');
     var docTitle = Private(require('ui/doc_title/doc_title'));
-    var brushEvent = Private(require('utils/brush_event'));
+    var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
 

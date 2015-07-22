@@ -6,7 +6,7 @@ define(function (require) {
   require('plugins/markdown_vis/markdown_vis_controller');
 
   // register the provider with the visTypes registry so that other know it exists
-  require('registry/vis_types').register(MarkdownVisProvider);
+  require('ui/registry/vis_types').register(MarkdownVisProvider);
 
   function MarkdownVisProvider(Private) {
     var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));

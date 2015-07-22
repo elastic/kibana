@@ -20,7 +20,7 @@ define(function (require) {
     require('ui/visualize/visualize');
     require('ui/doc_table/doc_table');
 
-    var brushEvent = Private(require('utils/brush_event'));
+    var brushEvent = Private(require('ui/utils/brush_event'));
 
     return {
       restrict: 'E',

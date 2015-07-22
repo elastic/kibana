@@ -4,7 +4,7 @@ define(function (require) {
     var sinon = require('sinon');
     var IndexedArray = require('ui/indexed_array/index');
     var IndexPattern = require('ui/index_patterns/_index_pattern');
-    var fieldFormats = Private(require('registry/field_formats'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
     var getComputedFields = require('ui/index_patterns/_get_computed_fields');

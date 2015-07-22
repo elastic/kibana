@@ -16,7 +16,7 @@ define(function (require) {
     beforeEach(ngMock.inject(function ($compile, $injector, Private) {
       $rootScope = $injector.get('$rootScope');
       Field = Private(require('ui/index_patterns/_field'));
-      StringFormat = Private(require('registry/field_formats')).getType('string');
+      StringFormat = Private(require('ui/registry/field_formats')).getType('string');
 
       $rootScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       // set the field format for this field

@@ -4,7 +4,7 @@ define(function (require) {
 
     var MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
     var getResponseAggConfig = Private(require('ui/agg_types/metrics/_get_response_agg_config'));
-    var fieldFormats = Private(require('registry/field_formats'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
     var valuesEditor = require('ui/agg_types/controls/percentile_ranks.html');
     // required by the values editor

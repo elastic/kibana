@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var rison = require('utils/rison');
+  var rison = require('ui/utils/rison');
   var registry = require('plugins/kibana/settings/saved_object_registry');
   var objectViewHTML = require('plugins/kibana/settings/sections/objects/_view.html');
 

@@ -1,7 +1,7 @@
 define(function (require) {
   return function () {
     var moment = require('moment');
-    var datemath = require('utils/datemath');
+    var datemath = require('ui/utils/datemath');
 
     var unitsDesc = datemath.unitsDesc;
     var largeMax = unitsDesc.indexOf('M');

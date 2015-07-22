@@ -1,5 +1,5 @@
 define(function (require) {
-  var Ipv4Address = require('utils/ipv4_address');
+  var Ipv4Address = require('ui/utils/ipv4_address');
   var expect = require('expect.js');
 
   describe('Ipv4Address', function () {

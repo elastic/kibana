@@ -13,7 +13,7 @@ define(function (require) {
   require('ui/agg_table/agg_table_group');
 
   // register the provider with the visTypes registry
-  require('registry/vis_types').register(TableVisTypeProvider);
+  require('ui/registry/vis_types').register(TableVisTypeProvider);
 
   // define the TableVisType
   function TableVisTypeProvider(Private) {

@@ -1,7 +1,7 @@
 define(function (require) {
   describe('sequencer util', function () {
     var _ = require('lodash');
-    var sequencer = require('utils/sequencer');
+    var sequencer = require('ui/utils/sequencer');
     var expect = require('expect.js');
 
     var args = [

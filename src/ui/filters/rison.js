@@ -1,5 +1,5 @@
 define(function (require) {
-  var rison = require('utils/rison');
+  var rison = require('ui/utils/rison');
   var module = require('ui/modules').get('kibana');
 
   module.filter('rison', function () {

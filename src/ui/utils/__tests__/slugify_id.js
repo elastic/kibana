@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var slugifyId = require('utils/slugify_id');
+  var slugifyId = require('ui/utils/slugify_id');
   var expect = require('expect.js');
 
   describe('slugifyId()', function () {

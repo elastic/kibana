@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return require('registry/_registry')({
+  return require('ui/registry/_registry')({
     name: 'fieldFormats',
     index: ['id'],
     group: ['fieldType'],

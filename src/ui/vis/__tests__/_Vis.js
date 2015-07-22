@@ -25,7 +25,7 @@ define(function (require) {
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      visTypes = Private(require('registry/vis_types'));
+      visTypes = Private(require('ui/registry/vis_types'));
     }));
 
     beforeEach(function () {

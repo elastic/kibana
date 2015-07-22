@@ -12,7 +12,7 @@ define(function (require) {
   });
 
   app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
-    var visTypes = Private(require('registry/vis_types'));
+    var visTypes = Private(require('ui/registry/vis_types'));
     var notify = new Notifier({
       location: 'Saved Visualization Service'
     });

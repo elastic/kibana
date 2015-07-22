@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var expect = require('expect.js');
-  var addWordBreaks = require('utils/add_word_breaks');
+  var addWordBreaks = require('ui/utils/add_word_breaks');
 
   describe('addWordBreaks', function () {
 

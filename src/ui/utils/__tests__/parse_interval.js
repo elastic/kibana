@@ -1,5 +1,5 @@
 define(function (require) {
-  var parseInterval = require('utils/parse_interval');
+  var parseInterval = require('ui/utils/parse_interval');
   var expect = require('expect.js');
 
   describe('parseInterval', function () {

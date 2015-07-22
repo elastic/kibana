@@ -6,12 +6,15 @@ let promify = require('bluebird').promisify;
 let webpack = require('webpack');
 let MemoryFileSystem = require('memory-fs');
 let BaseOptimizer = require('./BaseOptimizer');
+let writeFileSync = require('fs').writeFileSync;
 
 module.exports = class LiveOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
 
     this.compilerConfig = this.getConfig();
+    // this.compilerConfig.profile = true;
+
     this.compiler = webpack(this.compilerConfig);
     this.outFs = this.compiler.outputFileSystem = new MemoryFileSystem();
 
@@ -43,15 +46,13 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
         return null;
       }
 
-      try {
-        return {
-          bundle: fs.readFileSync(filename),
-          sourceMap: self.sourceMaps ? fs.readFileSync(mapFilename) : false,
-          style: fs.readFileSync(styleFilename)
-        };
-      } catch (e) {
-        return null;
-      }
+      // writeFileSync('liveBuildStats.json', JSON.stringify(stats.toJson()));
+
+      return {
+        bundle: fs.readFileSync(filename),
+        sourceMap: self.sourceMaps ? fs.readFileSync(mapFilename) : false,
+        style: fs.readFileSync(styleFilename)
+      };
     });
   }
 };

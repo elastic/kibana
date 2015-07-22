@@ -7,7 +7,7 @@ define(function (require) {
     require('ui/visualize/visualize.less');
     var $ = require('jquery');
     var _ = require('lodash');
-    var visTypes = Private(require('registry/vis_types'));
+    var visTypes = Private(require('ui/registry/vis_types'));
 
     var notify = new Notifier({
       location: 'Visualize'

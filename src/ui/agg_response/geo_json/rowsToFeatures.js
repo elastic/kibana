@@ -1,5 +1,5 @@
 define(function (require) {
-  var decodeGeoHash = require('utils/decode_geo_hash');
+  var decodeGeoHash = require('ui/utils/decode_geo_hash');
   var AggConfigResult = require('ui/vis/AggConfigResult');
   var _ = require('lodash');
 

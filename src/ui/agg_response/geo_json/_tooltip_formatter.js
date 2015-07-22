@@ -3,7 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var fieldFormats = Private(require('registry/field_formats'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
     var $tooltipScope = $rootScope.$new();
     var $el = $('<div>').html(require('ui/agg_response/geo_json/_tooltip.html'));
     $compile($el)($tooltipScope);

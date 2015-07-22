@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var addOrdinalSuffix = require('utils/ordinal_suffix');
+  var addOrdinalSuffix = require('ui/utils/ordinal_suffix');
   var expect = require('expect.js');
 
   describe('ordinal suffix util', function () {

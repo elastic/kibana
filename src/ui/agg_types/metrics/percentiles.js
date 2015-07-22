@@ -4,8 +4,8 @@ define(function (require) {
 
     var MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
     var getResponseAggConfig = Private(require('ui/agg_types/metrics/_get_response_agg_config'));
-    var ordinalSuffix = require('utils/ordinal_suffix');
-    var fieldFormats = Private(require('registry/field_formats'));
+    var ordinalSuffix = require('ui/utils/ordinal_suffix');
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
     var percentsEditor = require('ui/agg_types/controls/percentiles.html');
     // required by the percentiles editor

@@ -190,7 +190,7 @@ define(function (require) {
     // this directive is automatically added by paginate if not found within it's $el
     return {
       restrict: 'E',
-      template: require('partials/paginate_controls.html')
+      template: require('ui/partials/paginate_controls.html')
     };
   });
 

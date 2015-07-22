@@ -1,7 +1,7 @@
 define(function (require) {
   var module = require('ui/modules').get('kibana');
   var _ = require('lodash');
-  var datemath = require('utils/datemath');
+  var datemath = require('ui/utils/datemath');
   var moment = require('moment');
 
   require('ui/timepicker/quick_ranges');

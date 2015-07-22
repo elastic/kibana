@@ -20,7 +20,7 @@ define(function (require) {
       Private.stub(AggParamsPM, AggParams);
 
       Vis = Private(require('ui/vis/vis'));
-      fieldFormat = Private(require('registry/field_formats'));
+      fieldFormat = Private(require('ui/registry/field_formats'));
       AggType = Private(require('ui/agg_types/_agg_type'));
       AggConfig = Private(require('ui/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

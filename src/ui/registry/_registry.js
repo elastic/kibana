@@ -16,7 +16,7 @@ define(function (require) {
    *
    * + register a module
    * ```js
-   * var registry = require('registry/vis_types');
+   * var registry = require('ui/registry/vis_types');
    * registry.add(function InjectablePrivateModule($http, Promise) {
    *   ...
    * })
@@ -24,7 +24,7 @@ define(function (require) {
    *
    * + get all registered modules
    * ```js
-   * var visTypes = Private(require('registry/vis_types'));
+   * var visTypes = Private(require('ui/registry/vis_types'));
    * ```
    *
    *

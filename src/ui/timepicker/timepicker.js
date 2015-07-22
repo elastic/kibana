@@ -2,7 +2,7 @@ define(function (require) {
   var html = require('ui/timepicker/timepicker.html');
   var module = require('ui/modules').get('ui/timepicker');
   var _ = require('lodash');
-  var datemath = require('utils/datemath');
+  var datemath = require('ui/utils/datemath');
   var moment = require('moment');
 
   require('ui/directives/input_datetime');

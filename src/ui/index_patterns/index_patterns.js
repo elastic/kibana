@@ -42,7 +42,7 @@ define(function (require) {
     self.intervals = Private(require('ui/index_patterns/_intervals'));
     self.mapper = Private(require('ui/index_patterns/_mapper'));
     self.patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
-    self.fieldFormats = Private(require('registry/field_formats'));
+    self.fieldFormats = Private(require('ui/registry/field_formats'));
     self.IndexPattern = IndexPattern;
   });
 });

@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var versionmath = require('utils/versionmath');
+  var versionmath = require('ui/utils/versionmath');
   var expect = require('expect.js');
   var versions = [
     '1.1.12',

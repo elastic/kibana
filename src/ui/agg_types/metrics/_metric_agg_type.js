@@ -2,7 +2,7 @@ define(function (require) {
   return function MetricAggTypeProvider(Private) {
     var _ = require('lodash');
     var AggType = Private(require('ui/agg_types/_agg_type'));
-    var fieldFormats = Private(require('registry/field_formats'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
     _.class(MetricAggType).inherits(AggType);
     function MetricAggType(config) {

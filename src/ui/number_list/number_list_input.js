@@ -1,7 +1,7 @@
 define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
-  var keyMap = require('utils/key_map');
+  var keyMap = require('ui/utils/key_map');
 
   var INVALID = {}; // invalid flag
   var FLOATABLE = /^[\d\.e\-\+]+$/i;

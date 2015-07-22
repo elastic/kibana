@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var Tooltip = Private(require('ui/vislib/components/tooltip/tooltip'));
-    var SimpleEmitter = require('utils/SimpleEmitter');
+    var SimpleEmitter = require('ui/utils/SimpleEmitter');
 
     /**
      * Handles event responses

@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var Ipv4Address = require('utils/ipv4_address');
+  var Ipv4Address = require('ui/utils/ipv4_address');
 
   require('ui/modules')
     .get('kibana')

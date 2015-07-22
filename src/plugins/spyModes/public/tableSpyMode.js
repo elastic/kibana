@@ -36,5 +36,5 @@ define(function (require) {
     };
   }
 
-  require('registry/spy_modes').register(VisSpyTableProvider);
+  require('ui/registry/spy_modes').register(VisSpyTableProvider);
 });

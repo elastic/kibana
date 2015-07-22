@@ -30,7 +30,7 @@ define(function (require) {
       beforeEach(ngMock.inject(function (Private) {
         vis = Private(require('vislib_fixtures/_vis_fixture'))();
         vis.render(data);
-        SimpleEmitter = require('utils/SimpleEmitter');
+        SimpleEmitter = require('ui/utils/SimpleEmitter');
       }));
 
       afterEach(function () {

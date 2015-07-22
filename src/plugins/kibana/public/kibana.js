@@ -5,15 +5,6 @@ define(function (require) {
   require('plugins/kibana/settings/index');
   require('plugins/kibana/doc/index');
 
-  // enable prefetching for faster webpack builds
-  require('ui/vislib/index');
-  require('ui/vislib/vis');
-  require('ui/vislib/lib/handler/handler');
-  require('ui/vislib/lib/layout/layout');
-  require('ui/vislib/visualizations/tile_map');
-  require('ui/vislib/lib/handler/types/point_series');
-  // end prefetching
-
   require('ui/routes')
   .otherwise({
     redirectTo: '/discover'

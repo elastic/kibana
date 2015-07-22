@@ -2,7 +2,7 @@ define(function (require) {
   describe('Range parsing utility', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
-    var parse = require('utils/range');
+    var parse = require('ui/utils/range');
 
     it('throws an error for inputs that are not formatted properly', function () {
       expect(function () {

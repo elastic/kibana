@@ -2,7 +2,7 @@ define(function (require) {
   describe('Registry', function () {
     var _ = require('lodash');
     var sinon = require('auto-release-sinon/mocha');
-    var registry = require('registry/_registry');
+    var registry = require('ui/registry/_registry');
     var expect = require('expect.js');
     var ngMock = require('ngMock');
     var Private;

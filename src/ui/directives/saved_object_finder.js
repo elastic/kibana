@@ -1,8 +1,8 @@
 define(function (require) {
   var module = require('ui/modules').get('kibana');
   var _ = require('lodash');
-  var rison = require('utils/rison');
-  var keymap = require('utils/key_map');
+  var rison = require('ui/utils/rison');
+  var keymap = require('ui/utils/key_map');
 
   module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, kbnUrl) {
 
@@ -37,7 +37,7 @@ define(function (require) {
         // optional on-choose attr, sets the userOnChoose in our scope
         userOnChoose: '=?onChoose'
       },
-      template: require('partials/saved_object_finder.html'),
+      template: require('ui/partials/saved_object_finder.html'),
       controllerAs: 'finder',
       controller: function ($scope, $element, $timeout) {
         var self = this;

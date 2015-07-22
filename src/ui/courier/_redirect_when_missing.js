@@ -1,6 +1,6 @@
 define(function (require) {
   var errors = require('ui/errors');
-  var qs = require('utils/query_string');
+  var qs = require('ui/utils/query_string');
 
   return function RedirectWhenMissingFn($location, kbnUrl, Notifier, Promise) {
     var SavedObjectNotFound = errors.SavedObjectNotFound;

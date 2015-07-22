@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var ConfigTemplate = require('utils/config_template');
+  var ConfigTemplate = require('ui/utils/config_template');
 
   require('ui/modules')
   .get('kibana')

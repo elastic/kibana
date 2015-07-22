@@ -6,9 +6,9 @@
     var _ = require('lodash');
     var angular = require('angular');
     var moment = require('moment');
-    var datemath = require('utils/datemath');
+    var datemath = require('ui/utils/datemath');
     var Events = Private(require('ui/events'));
-    var diff = Private(require('utils/diff_time_picker_vals'));
+    var diff = Private(require('ui/utils/diff_time_picker_vals'));
 
     require('ui/state_management/global_state');
 

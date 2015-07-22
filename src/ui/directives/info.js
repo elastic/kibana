@@ -1,5 +1,5 @@
 define(function (require) {
-  var html = require('partials/info.html');
+  var html = require('ui/partials/info.html');
 
   require('ui/modules')
     .get('kibana')

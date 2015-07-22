@@ -9,7 +9,7 @@ define(function (require) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      fieldFormats = Private(require('registry/field_formats'));
+      fieldFormats = Private(require('ui/registry/field_formats'));
     }));
 
     describe('Source format', function () {

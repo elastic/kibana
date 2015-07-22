@@ -1,9 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
-  var rison = require('utils/rison');
+  var rison = require('ui/utils/rison');
 
-  var applyDiff = require('utils/diff_object');
-  var qs = require('utils/query_string');
+  var applyDiff = require('ui/utils/diff_object');
+  var qs = require('ui/utils/query_string');
 
   return function StateProvider(Notifier, Private, $rootScope, $location) {
     var Events = Private(require('ui/events'));

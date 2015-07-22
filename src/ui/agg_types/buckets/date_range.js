@@ -1,12 +1,12 @@
 define(function (require) {
   var moment = require('moment');
-  var dateRange = require('utils/date_range');
+  var dateRange = require('ui/utils/date_range');
   require('ui/directives/validate_date_math');
 
   return function DateRangeAggDefinition(Private, config) {
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
-    var fieldFormats = Private(require('registry/field_formats'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
 
     return new BucketAggType({

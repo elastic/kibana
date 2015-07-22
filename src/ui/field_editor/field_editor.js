@@ -6,7 +6,7 @@ define(function (require) {
   .get('kibana')
   .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');
-    var fieldFormats = Private(require('registry/field_formats'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
     var Field = Private(require('ui/index_patterns/_field'));
     var scriptingInfo = $sce.trustAsHtml(require('ui/field_editor/scripting_info.html'));
     var scriptingWarning = $sce.trustAsHtml(require('ui/field_editor/scripting_warning.html'));

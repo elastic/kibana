@@ -15,7 +15,7 @@ define(function (require) {
 
       ngMock.inject(function (_$rootScope_, Private) {
         $rootScope = _$rootScope_;
-        BaseObject = require('utils/BaseObject');
+        BaseObject = require('ui/utils/BaseObject');
       });
     });
 

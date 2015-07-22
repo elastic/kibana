@@ -2,7 +2,7 @@ define(function (require) {
 
   var angular = require('angular');
   var _ = require('lodash');
-  var rison = require('utils/rison');
+  var rison = require('ui/utils/rison');
 
   // invokable/private angular dep
   return function ($location) {

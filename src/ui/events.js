@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
 
   return function EventsProvider(Private, Promise, Notifier) {
-    var SimpleEmitter = require('utils/SimpleEmitter');
+    var SimpleEmitter = require('ui/utils/SimpleEmitter');
     var notify = new Notifier({ location: 'EventEmitter' });
 
     _.class(Events).inherits(SimpleEmitter);

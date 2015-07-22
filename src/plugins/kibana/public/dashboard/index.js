@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var angular = require('angular');
-  var ConfigTemplate = require('utils/config_template');
+  var ConfigTemplate = require('ui/utils/config_template');
 
   require('ui/directives/config');
   require('ui/courier/courier');

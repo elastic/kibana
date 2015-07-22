@@ -3,11 +3,11 @@ define(function (require) {
     var angular = require('angular');
     var errors = require('ui/errors');
     var _ = require('lodash');
-    var slugifyId = require('utils/slugify_id');
+    var slugifyId = require('ui/utils/slugify_id');
 
     var DocSource = Private(require('ui/courier/data_source/doc_source'));
     var SearchSource = Private(require('ui/courier/data_source/search_source'));
-    var mappingSetup = Private(require('utils/mapping_setup'));
+    var mappingSetup = Private(require('ui/utils/mapping_setup'));
 
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};

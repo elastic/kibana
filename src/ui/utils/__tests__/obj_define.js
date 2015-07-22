@@ -2,7 +2,7 @@ define(function (require) {
   var expect = require('expect.js');
 
   describe('ObjDefine Utility', function () {
-    var ObjDefine = require('utils/obj_define');
+    var ObjDefine = require('ui/utils/obj_define');
 
     function flatten(obj) {
       return JSON.parse(JSON.stringify(obj));

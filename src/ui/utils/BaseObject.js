@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var rison = require('utils/rison');
+  var rison = require('ui/utils/rison');
   var angular = require('angular');
 
   function BaseObject(attributes) {

@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   return function diffTimeProvider(Private) {
-    var diff = Private(require('utils/diff_time_picker_vals'));
+    var diff = Private(require('ui/utils/diff_time_picker_vals'));
 
     return function (self) {
         var oldTime = _.clone(self.time);

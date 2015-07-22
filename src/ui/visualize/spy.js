@@ -5,7 +5,7 @@ define(function (require) {
       var $ = require('jquery');
       var _ = require('lodash');
 
-      var modes = Private(require('registry/spy_modes'));
+      var modes = Private(require('ui/registry/spy_modes'));
       var defaultMode = modes.inOrder[0];
 
       return {

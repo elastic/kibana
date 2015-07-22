@@ -20,7 +20,7 @@ define(function (require) {
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       Vis = Private(require('ui/vis/vis'));
-      visTypes = Private(require('registry/vis_types'));
+      visTypes = Private(require('ui/registry/vis_types'));
       aggTypes = Private(require('ui/agg_types/index'));
       AggConfig = Private(require('ui/vis/AggConfig'));
       bucketCountBetween = Private(require('ui/agg_types/buckets/_bucket_count_between'));

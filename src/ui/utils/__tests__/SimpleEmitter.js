@@ -1,6 +1,6 @@
 define(function (require) {
   describe('SimpleEmitter class', function () {
-    var SimpleEmitter = require('utils/SimpleEmitter');
+    var SimpleEmitter = require('ui/utils/SimpleEmitter');
     var expect = require('expect.js');
     var sinon = require('auto-release-sinon/mocha');
     var emitter;

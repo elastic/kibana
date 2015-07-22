@@ -1,6 +1,6 @@
 define(function (require) {
   return function visualizationLoader(savedVisualizations, Private) { // Inject services here
-    var brushEvent = Private(require('utils/brush_event'));
+    var brushEvent = Private(require('ui/utils/brush_event'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
 
     return function (panel, $scope) { // Function parameters here

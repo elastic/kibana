@@ -4,7 +4,7 @@ define(function (require) {
     var Schemas = Private(require('ui/vis/Schemas'));
     var geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
     var _ = require('lodash');
-    var supports = require('utils/supports');
+    var supports = require('ui/utils/supports');
 
     return new VislibVisType({
       name: 'tile_map',

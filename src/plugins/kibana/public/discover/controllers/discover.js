@@ -2,11 +2,11 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var moment = require('moment');
-  var ConfigTemplate = require('utils/config_template');
+  var ConfigTemplate = require('ui/utils/config_template');
   var getSort = require('ui/doc_table/lib/get_sort');
-  var rison = require('utils/rison');
+  var rison = require('ui/utils/rison');
 
-  var datemath = require('utils/datemath');
+  var datemath = require('ui/utils/datemath');
 
   require('ui/doc_table/doc_table');
   require('ui/visualize/visualize');
@@ -68,7 +68,7 @@ define(function (require) {
 
     var Vis = Private(require('ui/vis/vis'));
     var docTitle = Private(require('ui/doc_title/doc_title'));
-    var brushEvent = Private(require('utils/brush_event'));
+    var brushEvent = Private(require('ui/utils/brush_event'));
     var HitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterManager = Private(require('ui/filter_manager/filter_manager'));

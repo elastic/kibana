@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var qs = require('utils/query_string');
-  var rison = require('utils/rison');
+  var qs = require('ui/utils/query_string');
+  var rison = require('ui/utils/rison');
 
   var module = require('ui/modules').get('kibana/global_state');
 

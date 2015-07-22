@@ -34,7 +34,7 @@ define(function (require) {
       });
 
       // stub mappingSetup
-      mappingSetup = Private(require('utils/mapping_setup'));
+      mappingSetup = Private(require('ui/utils/mapping_setup'));
       sinon.stub(mappingSetup, 'isDefined', function () {
         return Promise.resolve(true);
       });

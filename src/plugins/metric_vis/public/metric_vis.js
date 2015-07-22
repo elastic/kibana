@@ -6,7 +6,7 @@ define(function (require) {
   require('plugins/metric_vis/metric_vis_controller');
 
   // register the provider with the visTypes registry
-  require('registry/vis_types').register(MetricVisProvider);
+  require('ui/registry/vis_types').register(MetricVisProvider);
 
   function MetricVisProvider(Private) {
     var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));

@@ -16,7 +16,7 @@ define(function (require) {
       AggType = Private(require('ui/agg_types/_agg_type'));
       AggConfig = Private(require('ui/vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      fieldFormat = Private(require('registry/field_formats'));
+      fieldFormat = Private(require('ui/registry/field_formats'));
     }));
 
     describe('#toDsl', function () {

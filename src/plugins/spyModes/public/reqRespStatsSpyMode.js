@@ -26,7 +26,7 @@ define(function (require) {
     });
   };
 
-  require('registry/spy_modes')
+  require('ui/registry/spy_modes')
   .register(function () {
     return {
       name: 'request',

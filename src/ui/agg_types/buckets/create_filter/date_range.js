@@ -1,5 +1,5 @@
 define(function (require) {
-  var dateRange = require('utils/date_range');
+  var dateRange = require('ui/utils/date_range');
 
   return function createDateRangeFilterProvider(config) {
     var buildRangeFilter = require('ui/filter_manager/lib/range');

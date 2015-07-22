@@ -10,7 +10,7 @@ define(function (require) {
 
     beforeEach(ngMock.module('DiffTimePickerValues'));
     beforeEach(ngMock.inject(function (Private) {
-      diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
+      diffTimePickerValues = Private(require('ui/utils/diff_time_picker_vals'));
     }));
 
     it('accepts two undefined values', function () {

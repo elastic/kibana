@@ -4,13 +4,13 @@ define(function (require) {
     var errors = require('ui/errors');
     var angular = require('angular');
 
-    var fieldformats = Private(require('registry/field_formats'));
+    var fieldformats = Private(require('ui/registry/field_formats'));
     var getIds = Private(require('ui/index_patterns/_get_ids'));
     var mapper = Private(require('ui/index_patterns/_mapper'));
     var intervals = Private(require('ui/index_patterns/_intervals'));
     var getComputedFields = require('ui/index_patterns/_get_computed_fields');
     var DocSource = Private(require('ui/courier/data_source/doc_source'));
-    var mappingSetup = Private(require('utils/mapping_setup'));
+    var mappingSetup = Private(require('ui/utils/mapping_setup'));
     var FieldList = Private(require('ui/index_patterns/_field_list'));
 
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));

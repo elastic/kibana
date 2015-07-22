@@ -1,5 +1,5 @@
 define(function (require) {
-  var datemath = require('utils/datemath');
+  var datemath = require('ui/utils/datemath');
 
   return function TimeMarkerFactory(d3) {
     function TimeMarker(times, xScale, height) {
