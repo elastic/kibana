@@ -4,7 +4,8 @@
     "value": 140,
     "allowComments": true
   },
-	"requireCurlyBraces": [
+  "requireSemicolons": true,
+  "requireCurlyBraces": [
     "for",
     "do",
     "try",
