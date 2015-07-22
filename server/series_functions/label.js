@@ -1,4 +1,5 @@
 var alter = require('../utils/alter.js');
+var util = require('util');
 
 module.exports = {
   args: [
@@ -7,17 +8,14 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'seriesLabel',
+      name: 'formatString',
       types: ['string']
     }
   ],
   help: 'Change the color of the series',
-  fn:  function label (inputSeries, seriesLabel) {
-    return alter([inputSeries, seriesLabel], function (args) {
-      if (args[2] && args[0].label) {
-        return args[0];
-      }
-      args[0].label = args[1];
+  fn:  function label (inputSeries, formatString) {
+    return alter([inputSeries, formatString], function (args) {
+      args[0].label = util.format(args[1], args[0].label);
       return args[0];
     });
   }

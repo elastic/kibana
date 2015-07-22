@@ -22,7 +22,8 @@ module.exports = function reduce (args, fn) {
       throw new Error ('input must be a seriesList');
     }
 
-    console.log(argument);
+    console.log('arg: ' + argument);
+
 
     if (_.isObject(argument) && argument.type === 'seriesList') {
       if (argument.list.length !== 1) {
@@ -32,8 +33,9 @@ module.exports = function reduce (args, fn) {
       }
     }
 
-    var reduced = _.map(seriesList.list, function (series) {
-      return _.reduce([series].concat(argument), function(destinationObject, argument) {
+
+    function reduceSeries (series) {
+      return _.reduce(series, function(destinationObject, argument) {
 
         var output = _.map(destinationObject.data, function (point, index) {
 
@@ -63,7 +65,18 @@ module.exports = function reduce (args, fn) {
         return output;
 
       });
-    });
+
+    }
+
+    var reduced;
+
+    if (argument != null) {
+      reduced = _.map(seriesList.list, function (series) {
+        return reduceSeries([series].concat(argument));
+      });
+    } else {
+      reduced = [reduceSeries(seriesList.list)];
+    }
 
     return {type: 'seriesList', list: reduced};
 

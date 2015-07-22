@@ -133,6 +133,8 @@ function logObj(obj, thing) {
 function preProcessSheet (sheet) {
   var queries = {};
 
+  console.log(logObj(sheet,1));
+
   function findQueries(chain) {
     _.each(chain, function (operator) {
       if (!_.isObject(operator)) {
@@ -153,13 +155,15 @@ function preProcessSheet (sheet) {
     findQueries(chainList);
   });
 
+  console.log(queries);
+
   var promises = _.map(queries, function (item, cacheKey) {
     return fetchData(item, cacheKey);
   });
 
   return Promise.all(promises).then(function (results) {
     _.each(results, function (result) {
-      queryCache[result.cacheKey] = result;
+      queryCache[result.list[0].cacheKey] = result;
     });
     return queryCache;
   }).catch(function (e) {throw e;});
@@ -199,14 +203,14 @@ module.exports = processRequest;
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
   Promise.all(sheet).then(function (sheet) {
-    console.log(logObj(sheet, 1));
+    //console.log(logObj(sheet, 1));
     console.log(logObj({done:true}));
     return sheet;
   });
 }
 
 debugSheet(
-  ['(`*`).multiply(`*`)']
+  ['(`*`).sum(10)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

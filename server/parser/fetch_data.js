@@ -91,7 +91,8 @@ module.exports = function (config, cacheKey) {
       list: [{
         data:  data,
         type: 'series',
-        cacheKey: cacheKey
+        cacheKey: cacheKey,
+        label: config.query
       }]
     };
   }).catch(function (e) {

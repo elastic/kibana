@@ -36,9 +36,7 @@ define(function (require) {
             return;
           }
 
-          var series = _.map($scope.chart, function (series, i) {
-            series.label = series.label || '';
-            series.label = (i + 1) + (series.label ? ': ' + series.label : '');
+          var series = _.map($scope.chart, function (series) {
             if (series.yaxis === 2) {
               series.label = series.label + ' (y2)';
             }
