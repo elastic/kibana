@@ -36,10 +36,13 @@ class UiApp {
 
   getRelatedPlugins() {
     var pluginsById = this.uiExports.kbnServer.plugins.byId;
-    return _.transform(this.getModules().require, function (plugins, id) {
+    return _.transform(this.getModules(), function (plugins, id) {
       var matches = id.match(/^plugins\/([^\/]+)(?:\/|$)/);
       if (!matches) return;
-      plugins.push(pluginsById[matches[1]]);
+
+      var plugin = pluginsById[matches[1]];
+      if (_.includes(plugins, plugin)) return;
+      plugins.push(plugin);
     }, []);
   }
 

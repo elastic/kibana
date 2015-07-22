@@ -31,6 +31,8 @@ class BaseOptimizer extends EventEmitter {
   }
 
   getConfig() {
+    let mapQ = this.sourceMaps ? '?sourceMap' : '';
+
     return {
       context: fromRoot('.'),
       entry: this.bundles.getEntriesConfig(),
@@ -58,8 +60,8 @@ class BaseOptimizer extends EventEmitter {
 
       module: {
         loaders: [
-          { test: /\.less$/, loader: ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap') },
-          { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?sourceMap') },
+          { test: /\.less$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}!autoprefixer!less${mapQ}`) },
+          { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
           { test: /\.jade$/, loader: 'jade' },
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=2048!file?name=[path][name].[ext]' },

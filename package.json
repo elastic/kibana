@@ -45,6 +45,7 @@
     "angular-nvd3": "panda01/angular-nvd3#kibana",
     "ansicolors": "^0.3.2",
     "auto-preload-rjscommon-deps-loader": "^1.0.1",
+    "autoprefixer": "^5.2.0",
     "autoprefixer-loader": "^2.0.0",
     "babel-jscs": "^1.0.3",
     "base64-js": "0.0.8",
