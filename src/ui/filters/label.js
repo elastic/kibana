@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .filter('label', function () {
       return function (str) {

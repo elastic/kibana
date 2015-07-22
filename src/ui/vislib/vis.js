@@ -6,7 +6,7 @@ define(function (require) {
     var Events = Private(require('ui/events'));
     var handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
-    var errors = require('errors');
+    var errors = require('ui/errors');
     require('ui/vislib/styles/main.less');
 
     /**

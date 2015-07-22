@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
 
-    var IndexPatternMissingIndices = require('errors').IndexPatternMissingIndices;
+    var IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
     var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
     var intervals = Private(require('ui/index_patterns/_intervals'));
     var patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));

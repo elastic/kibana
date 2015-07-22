@@ -6,7 +6,7 @@ define(function (require) {
   var html = require('ui/doc_viewer/doc_viewer.html');
   require('ui/doc_viewer/doc_viewer.less');
 
-  require('modules').get('kibana')
+  require('ui/modules').get('kibana')
   .directive('docViewer', function (config, Private) {
     return {
       restrict: 'E',

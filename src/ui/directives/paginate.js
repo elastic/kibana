@@ -3,7 +3,7 @@ define(function (require) {
 
   var PER_PAGE_DEFAULT = 10;
 
-  require('modules').get('kibana')
+  require('ui/modules').get('kibana')
   .directive('paginate', function ($parse, $compile) {
     return {
       restrict: 'E',

@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var CidrMask = require('utils/cidr_mask');
 
-  require('modules').get('kibana').directive('validateCidrMask', function () {
+  require('ui/modules').get('kibana').directive('validateCidrMask', function () {
     return {
       restrict: 'A',
       require: 'ngModel',

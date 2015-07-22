@@ -1,6 +1,6 @@
 define(function (require) {
   var rison = require('utils/rison');
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
 
   module.filter('rison', function () {
     return function (str) {

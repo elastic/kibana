@@ -3,7 +3,7 @@
 
 define(function (require) {
   var _ = require('lodash');
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
 
   module.service('debounce', ['$timeout', function ($timeout) {
     return function (func, wait, options) {

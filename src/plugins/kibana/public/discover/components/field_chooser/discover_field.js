@@ -1,6 +1,6 @@
 define(function (require) {
   var $ = require('jquery');
-  var app = require('modules').get('apps/discover');
+  var app = require('ui/modules').get('apps/discover');
   var html = require('plugins/kibana/discover/components/field_chooser/discover_field.html');
   var _ = require('lodash');
 

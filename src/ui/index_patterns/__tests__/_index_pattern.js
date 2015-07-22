@@ -5,7 +5,7 @@ define(function (require) {
     var ngMock = require('ngMock');
     var expect = require('expect.js');
     var Promise = require('bluebird');
-    var errors = require('errors');
+    var errors = require('ui/errors');
     var IndexedArray = require('ui/indexed_array/index');
     var IndexPattern;
     var mapper;

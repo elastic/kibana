@@ -7,7 +7,7 @@ define(function (require) {
   require('ui/visualize/visualize');
   require('ui/clipboard/clipboard');
 
-  require('routes')
+  require('ui/routes')
   .when('/visualize/create', {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
@@ -40,7 +40,7 @@ define(function (require) {
     }
   });
 
-  require('modules')
+  require('ui/modules')
   .get('app/visualize', [
     'kibana/notify',
     'kibana/courier'

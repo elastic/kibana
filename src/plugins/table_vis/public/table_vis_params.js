@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('modules').get('kibana/table_vis')
+  require('ui/modules').get('kibana/table_vis')
   .directive('tableVisParams', function () {
     return {
       restrict: 'E',

@@ -5,7 +5,7 @@ define(function (require) {
 
   var $ = require('jquery');
   var html = require('ui/clipboard/clipboard.html');
-  var module = require('modules').get('kibana', ['ngClipboard']);
+  var module = require('ui/modules').get('kibana', ['ngClipboard']);
 
   module
   .config(function (ngClipProvider) {

@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var join = require('path').join;
 
-var uiRoot = require('../ui/assets').root;
 var asRegExp = _.flow(
   _.escapeRegExp,
   function (path) {
@@ -15,16 +14,14 @@ function OptmzUiExports(plugins) {
   var noParse = this.noParse = [];
 
   // webpack aliases, like require paths, mapping a prefix to a directory
-  var aliases = this.aliases = {
-    ui: uiRoot
-  };
+  var aliases = this.aliases = {};
 
   // webpack loaders map loader configuration to regexps
   var loaders = this.loaders = [];
 
   var claimedModuleIds = {};
   _.each(plugins, function (plugin) {
-    var exports = plugin.uiExportSpecs;
+    var exports = plugin.uiExportsSpecs;
 
     // add an alias for this plugins public directory
     if (plugin.publicDir) {

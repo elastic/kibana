@@ -3,7 +3,7 @@ define(function (require) {
 
   require('ui/notify/notify');
 
-  var module = require('modules').get('discover/saved_searches', [
+  var module = require('ui/modules').get('discover/saved_searches', [
     'kibana/notify',
     'kibana/courier'
   ]);

@@ -29,7 +29,7 @@ define(function (require) {
     };
   }
 
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .directive('greaterThan', makeDirectiveDef('greaterThan', function (a, b) {
       return a > b;

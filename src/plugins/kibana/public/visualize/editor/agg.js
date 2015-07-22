@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
     require('plugins/kibana/visualize/editor/agg_params');

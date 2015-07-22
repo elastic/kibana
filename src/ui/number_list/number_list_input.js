@@ -9,7 +9,7 @@ define(function (require) {
   var VALIDATION_ERROR = 'numberListRangeAndOrder';
   var DIRECTIVE_ATTR = 'kbn-number-list-input';
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('kbnNumberListInput', function ($parse) {
     return {

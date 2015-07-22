@@ -1,7 +1,7 @@
 define(function (require) {
   return function HandlerBaseClass(d3, Private) {
     var _ = require('lodash');
-    var errors = require('errors');
+    var errors = require('ui/errors');
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));

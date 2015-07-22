@@ -1,5 +1,5 @@
 define(function (require) {
-  var app = require('modules').get('app/visualize');
+  var app = require('ui/modules').get('app/visualize');
   var _ = require('lodash');
 
   require('plugins/kibana/visualize/saved_visualizations/_saved_vis');

@@ -1,5 +1,5 @@
 define(function (require) {
-  var app = require('modules').get('apps/discover');
+  var app = require('ui/modules').get('apps/discover');
 
   require('ui/directives/css_truncate');
   require('ui/directives/field_name');

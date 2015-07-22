@@ -4,7 +4,7 @@ define(function (require) {
 
   require('ui/debounce');
 
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .directive('validateQuery', function (es, $compile, timefilter, kbnIndex, debounce, Private) {
       var fromUser = Private(require('ui/validate_query/lib/from_user'));

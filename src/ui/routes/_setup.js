@@ -1,7 +1,7 @@
 define(function (require) {
   return function routeSetup(Promise, config, $route, kbnUrl, courier, Notifier, Private, $rootScope) {
     var _ = require('lodash');
-    var errors = require('errors');
+    var errors = require('ui/errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
     var NoDefinedIndexPatterns = errors.NoDefinedIndexPatterns;
     var firstNoDefaultError = true;

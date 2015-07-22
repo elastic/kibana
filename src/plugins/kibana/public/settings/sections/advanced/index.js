@@ -5,12 +5,12 @@ define(function (require) {
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings/advanced', {
     template: require('plugins/kibana/settings/sections/advanced/index.html')
   });
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('kbnSettingsAdvanced', function (config, Notifier, Private, $rootScope) {
     return {
       restrict: 'E',

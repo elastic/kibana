@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var modules = require('modules');
+  var modules = require('ui/modules');
   var module = modules.get('kibana/notify');
   var errors = require('ui/notify/_errors');
   var Notifier = require('ui/notify/_notifier');

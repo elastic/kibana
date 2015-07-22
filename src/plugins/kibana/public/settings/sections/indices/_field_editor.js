@@ -2,7 +2,7 @@ define(function (require) {
   require('ui/field_editor/field_editor');
   require('plugins/kibana/settings/sections/indices/_index_header');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings/indices/:indexPatternId/field/:fieldName', { mode: 'edit' })
   .when('/settings/indices/:indexPatternId/create-field/', { mode: 'create' })
   .defaults(/settings\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {

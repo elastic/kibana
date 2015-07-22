@@ -93,7 +93,7 @@ define(function (require) {
     return fn.name || fn.toString().split('\n').shift();
   }
 
-  require('modules').get('kibana')
+  require('ui/modules').get('kibana')
   .provider('Private', function () {
     var provider = this;
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('paginatedTable', function ($filter) {
     var _ = require('lodash');

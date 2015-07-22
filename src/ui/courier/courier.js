@@ -1,12 +1,12 @@
 define(function (require) {
-  var errors = require('errors');
+  var errors = require('ui/errors');
   var _ = require('lodash');
 
   require('ui/es');
   require('ui/promises');
   require('ui/index_patterns/index_patterns');
 
-  require('modules').get('kibana/courier')
+  require('ui/modules').get('kibana/courier')
   .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {
     function Courier() {
       var self = this;

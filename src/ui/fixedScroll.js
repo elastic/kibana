@@ -4,7 +4,7 @@ define(function (require) {
 
   var SCROLLER_HEIGHT = 20;
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('fixedScroll', function ($timeout) {
     return {

@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .filter('uriescape', function () {
       return function (str) {

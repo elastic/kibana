@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('modules')
+  require('ui/modules')
   .get('app/visualize')
   .directive('visAggParamEditor', function (config, $parse, Private) {
     return {

@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana/vislib', ['kibana']);
+  var module = require('ui/modules').get('kibana/vislib', ['kibana']);
 
   require('ui/private');
 

@@ -4,7 +4,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('collapsibleSidebar', function () {
     // simply a list of all of all of angulars .col-md-* classes except 12

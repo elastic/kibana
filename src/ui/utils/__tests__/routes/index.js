@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var RouteManager = require('routes').RouteManager;
+  var RouteManager = require('ui/routes').RouteManager;
   var expect = require('expect.js');
 
   var routes; // will contain an new instance of RouteManager for each test

@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/indices/_scripted_fields');
   require('plugins/kibana/settings/sections/indices/_index_header');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings/indices/:indexPatternId', {
     template: require('plugins/kibana/settings/sections/indices/_edit.html'),
     resolve: {
@@ -15,7 +15,7 @@ define(function (require) {
     }
   });
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
 
     var notify = new Notifier();

@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
   var _ = require('lodash');
   var rison = require('utils/rison');
   var keymap = require('utils/key_map');

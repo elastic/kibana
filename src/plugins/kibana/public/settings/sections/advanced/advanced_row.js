@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   require('ui/elastic_textarea');
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('advancedRow', function (config, Notifier, Private) {
     return {
       restrict: 'A',

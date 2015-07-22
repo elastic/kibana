@@ -2,7 +2,7 @@ define(function (require) {
   require('ui/compile_recursive_directive');
   require('ui/agg_table/agg_table');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('kbnAggTableGroup', function (compileRecursiveDirective) {
     return {

@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
   var $ = require('jquery');
   var _ = require('lodash');
   var moment = require('moment');

@@ -1,11 +1,11 @@
 define(function (require) {
-  var module = require('modules').get('kibana/index_patterns');
+  var module = require('ui/modules').get('kibana/index_patterns');
   require('ui/filters/short_dots');
 
   module.service('indexPatterns', function (es, Notifier, Private, Promise, kbnIndex) {
     var self = this;
     var _ = require('lodash');
-    var errors = require('errors');
+    var errors = require('ui/errors');
 
     var IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
     var patternCache = Private(require('ui/index_patterns/_pattern_cache'));

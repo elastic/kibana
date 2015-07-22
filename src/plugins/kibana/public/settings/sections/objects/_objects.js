@@ -7,12 +7,12 @@ define(function (require) {
 
   require('ui/directives/file_upload');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings/objects', {
     template: objectIndexHTML
   });
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('kbnSettingsObjects', function (kbnIndex, Notifier, Private, kbnUrl) {
     return {
       restrict: 'E',

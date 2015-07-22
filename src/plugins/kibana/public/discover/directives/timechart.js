@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var vislib = require('ui/vislib/index');
 
-  var app = require('modules').get('apps/discover');
+  var app = require('ui/modules').get('apps/discover');
 
   app.directive('discoverTimechart', function ($compile) {
     return {

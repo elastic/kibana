@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana/config', [
+  var module = require('ui/modules').get('kibana/config', [
     'kibana/notify'
   ]);
 

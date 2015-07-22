@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .filter('commaList', function () {
     /**

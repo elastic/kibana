@@ -6,7 +6,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/indices/_field_editor');
 
   // add a dependency to all of the subsection routes
-  require('routes')
+  require('ui/routes')
   .defaults(/settings\/indices/, {
     resolve: {
       indexPatternIds: function (courier) {
@@ -16,7 +16,7 @@ define(function (require) {
   });
 
   // wrapper directive, which sets some global stuff up like the left nav
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('kbnSettingsIndices', function ($route, config, kbnUrl) {
     return {
       restrict: 'E',

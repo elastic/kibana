@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
-    var errors = require('errors');
+    var errors = require('ui/errors');
     require('ui/vislib/styles/main.less');
 
     /**

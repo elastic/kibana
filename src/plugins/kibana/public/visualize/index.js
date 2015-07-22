@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/editor');
   require('plugins/kibana/visualize/wizard/wizard');
 
-  require('routes')
+  require('ui/routes')
   .when('/visualize', {
     redirectTo: '/visualize/step/1'
   });

@@ -17,7 +17,7 @@ class UiExports {
 
   consumePlugin(plugin) {
     var self = this;
-    var types = _.keys(plugin.uiExportSpecs);
+    var types = _.keys(plugin.uiExportsSpecs);
 
     if (!types) return false;
 
@@ -27,7 +27,7 @@ class UiExports {
     }
 
     types.forEach(function (type) {
-      self.exportConsumer(type)(plugin, plugin.uiExportSpecs[type]);
+      self.exportConsumer(type)(plugin, plugin.uiExportsSpecs[type]);
     });
   }
 
@@ -50,7 +50,7 @@ class UiExports {
     case 'modules':
     case 'loaders':
       return function (plugin, spec) {
-        plugin.uiExportSpecs[type] = spec;
+        plugin.uiExportsSpecs[type] = spec;
       };
 
     case 'aliases':

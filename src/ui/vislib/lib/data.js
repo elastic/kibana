@@ -6,7 +6,7 @@ define(function (require) {
     var orderKeys = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
     var getLabels = Private(require('ui/vislib/components/labels/labels'));
     var color = Private(require('ui/vislib/components/color/color'));
-    var errors = require('errors');
+    var errors = require('ui/errors');
 
     /**
      * Provides an API for pulling values off the data

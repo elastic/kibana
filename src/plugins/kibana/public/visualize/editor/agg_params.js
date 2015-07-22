@@ -1,7 +1,7 @@
 define(function (require) {
   var IndexedArray = require('ui/indexed_array/index');
 
-  require('modules')
+  require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
     var _ = require('lodash');

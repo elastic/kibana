@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var errors = require('errors');
+  var errors = require('ui/errors');
 
   return function (Promise, Private, es) {
     var requestQueue = Private(require('ui/courier/_request_queue'));

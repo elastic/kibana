@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
     var _ = require('lodash');

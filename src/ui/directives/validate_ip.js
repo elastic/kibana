@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var Ipv4Address = require('utils/ipv4_address');
 
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .directive('validateIp', function () {
       return {

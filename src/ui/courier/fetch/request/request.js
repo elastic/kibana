@@ -2,7 +2,7 @@ define(function (require) {
   return function AbstractReqProvider(Private, Promise) {
     var _ = require('lodash');
     var moment = require('moment');
-    var errors = require('errors');
+    var errors = require('ui/errors');
     var requestQueue = Private(require('ui/courier/_request_queue'));
     var requestErrorHandler = Private(require('ui/courier/fetch/request/_error_handler'));
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
 
   module.directive('inputFocus', function ($timeout) {
     return {

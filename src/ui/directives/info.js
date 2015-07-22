@@ -1,7 +1,7 @@
 define(function (require) {
   var html = require('partials/info.html');
 
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .directive('kbnInfo', function () {
       return {

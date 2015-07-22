@@ -1,5 +1,5 @@
 define(function (require) {
-  var RouteManager = require('routes').RouteManager;
+  var RouteManager = require('ui/routes').RouteManager;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

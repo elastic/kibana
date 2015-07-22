@@ -1,7 +1,7 @@
 define(function (require) {
   var parseInterval = require('utils/parse_interval');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('validateDateInterval', function () {
     return {

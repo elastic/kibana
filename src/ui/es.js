@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var es; // share the client amoungst all apps
-  require('modules')
+  require('ui/modules')
     .get('kibana', ['elasticsearch', 'kibana/config'])
     .service('es', function (esFactory, esUrl, $q) {
       if (es) return es;

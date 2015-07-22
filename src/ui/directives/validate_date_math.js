@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var DateMath = require('utils/datemath');
 
-  require('modules').get('kibana').directive('validateDateMath', function () {
+  require('ui/modules').get('kibana').directive('validateDateMath', function () {
     return {
       restrict: 'A',
       require: 'ngModel',

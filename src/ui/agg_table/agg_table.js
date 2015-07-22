@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/compile_recursive_directive');
   require('ui/agg_table/agg_table.less');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
     var _ = require('lodash');

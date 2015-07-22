@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   require('ui/paginated_table/paginated_table');
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var popularityHtml = require('plugins/kibana/settings/sections/indices/_field_popularity.html');

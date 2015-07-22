@@ -2,7 +2,7 @@ define(function (require) {
   return function YAxisFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var errors = require('errors');
+    var errors = require('ui/errors');
 
     var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
 

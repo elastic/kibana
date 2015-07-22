@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
 
-  require('modules').get('kibana')
+  require('ui/modules').get('kibana')
   .config(function ($provide) {
 
     function strictEquality(a, b) {

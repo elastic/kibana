@@ -5,7 +5,7 @@ define(function (require) {
 
   require('ui/config');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .run(function ($rootScope, $compile, config) {
     var truncateGradientHeight = 15;

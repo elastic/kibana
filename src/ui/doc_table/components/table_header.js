@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var module = require('modules').get('app/discover');
+  var module = require('ui/modules').get('app/discover');
 
   require('ui/filters/short_dots');
 

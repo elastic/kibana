@@ -1,17 +1,17 @@
 define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
-  var errors = require('errors');
+  var errors = require('ui/errors');
 
   require('ui/directives/validate_index_name');
   require('ui/directives/auto_select_if_only_one');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings/indices/', {
     template: require('plugins/kibana/settings/sections/indices/_create.html')
   });
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
     var notify = new Notifier();
     var MissingIndices = errors.IndexPatternMissingIndices;

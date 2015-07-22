@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
 
-  require('modules')
+  require('ui/modules')
   .get('app/visualize')
   .directive('visEditorVisOptions', function (Private, $timeout, $compile) {
     return {

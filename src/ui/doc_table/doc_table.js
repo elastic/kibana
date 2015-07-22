@@ -10,7 +10,7 @@ define(function (require) {
   require('ui/doc_table/components/table_header');
   require('ui/doc_table/components/table_row');
 
-  require('modules').get('kibana')
+  require('ui/modules').get('kibana')
   .directive('docTable', function (config, Notifier, getAppState) {
     return {
       restrict: 'E',

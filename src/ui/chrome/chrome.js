@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var angular = require('angular');
-  var modules = require('modules');
+  var modules = require('ui/modules');
 
   require('ui/timefilter/timefilter');
   require('ui/private');
@@ -236,7 +236,7 @@ define(function (require) {
   };
 
   // build a kbn-chrome directive that will bind our service to the dom
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('kbnChrome', function ($rootScope) {
     return {

@@ -2,7 +2,7 @@ define(function (require) {
 
   require('ui/field_format_editor/field_format_editor');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');

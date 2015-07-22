@@ -17,7 +17,7 @@ function calcAvg(metricList, metricNumberType) {
   });
 }
 
-require('modules')
+require('ui/modules')
 .get('kibana', ['nvd3'])
 .directive('statusPageMetric', function () {
   return {

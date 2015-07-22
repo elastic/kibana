@@ -5,12 +5,12 @@ define(function (require) {
   var registry = require('plugins/kibana/settings/saved_object_registry');
   var objectViewHTML = require('plugins/kibana/settings/sections/objects/_view.html');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings/objects/:service/:id', {
     template: objectViewHTML
   });
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('kbnSettingsObjectsView', function (kbnIndex, Notifier) {
     return {
       restrict: 'E',

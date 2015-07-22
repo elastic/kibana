@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/discover/saved_searches/_saved_search');
   require('ui/notify/notify');
 
-  var module = require('modules').get('discover/saved_searches', [
+  var module = require('ui/modules').get('discover/saved_searches', [
     'kibana/notify'
   ]);
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  var modules = require('modules');
+  var modules = require('ui/modules');
   var _ = require('lodash');
 
   modules.get('kibana/persisted_log')

@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('modules').get('kibana')
+  require('ui/modules').get('kibana')
   .run(function ($rootScope) {
 
     /**

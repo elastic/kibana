@@ -3,7 +3,7 @@ define(function (require) {
   require('angular-route');
 
   var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
-  var kibana = require('modules').get('kibana', ['ngRoute']);
+  var kibana = require('ui/modules').get('kibana', ['ngRoute']);
 
   function RouteManager() {
     var when = [];

@@ -22,13 +22,13 @@ define(function (require) {
   require('ui/timefilter/timefilter');
   require('ui/highlight/highlight_tags');
 
-  var app = require('modules').get('apps/discover', [
+  var app = require('ui/modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',
     'kibana/index_patterns'
   ]);
 
-  require('routes')
+  require('ui/routes')
   .when('/discover/:id?', {
     template: require('plugins/kibana/discover/index.html'),
     reloadOnSearch: false,

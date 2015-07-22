@@ -8,7 +8,7 @@ define(function (require) {
 
     var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
-    var errors = require('errors');
+    var errors = require('ui/errors');
     require('ui/vislib/styles/main.less');
 
     /**

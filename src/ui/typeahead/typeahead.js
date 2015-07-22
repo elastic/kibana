@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var typeahead = require('modules').get('kibana/typeahead');
+  var typeahead = require('ui/modules').get('kibana/typeahead');
 
   require('ui/typeahead/typeahead.less');
   require('ui/typeahead/_input');

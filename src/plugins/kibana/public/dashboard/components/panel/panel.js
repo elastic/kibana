@@ -1,7 +1,7 @@
 define(function (require) {
   var moment = require('moment');
   var $ = require('jquery');
-  require('modules')
+  require('ui/modules')
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
     var _ = require('lodash');

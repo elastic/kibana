@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var WorkQueue = require('ui/routes/_work_queue');
-  var errors = require('errors');
+  var errors = require('ui/errors');
 
   function wrapRouteWithPrep(route) {
     if (!route.resolve && route.redirectTo) return;

@@ -4,7 +4,7 @@ define(function (require) {
 
     var editorHtml = require('ui/agg_types/controls/field.html');
     var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    var SavedObjectNotFound = require('errors').SavedObjectNotFound;
+    var SavedObjectNotFound = require('ui/errors').SavedObjectNotFound;
 
     _.class(FieldAggParam).inherits(BaseAggParam);
     function FieldAggParam(config) {

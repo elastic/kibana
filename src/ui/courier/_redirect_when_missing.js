@@ -1,5 +1,5 @@
 define(function (require) {
-  var errors = require('errors');
+  var errors = require('ui/errors');
   var qs = require('utils/query_string');
 
   return function RedirectWhenMissingFn($location, kbnUrl, Notifier, Promise) {

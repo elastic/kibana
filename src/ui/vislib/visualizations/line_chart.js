@@ -2,7 +2,7 @@ define(function (require) {
   return function LineChartFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var errors = require('errors');
+    var errors = require('ui/errors');
 
     var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));

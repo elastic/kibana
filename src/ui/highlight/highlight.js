@@ -3,7 +3,7 @@ define(function (require) {
 
   var _ = require('lodash');
   var angular = require('angular');
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
 
   module.filter('highlight', function (highlightTags) {
     return function (formatted, highlight) {

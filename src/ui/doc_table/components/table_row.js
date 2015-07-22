@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var addWordBreaks = require('utils/add_word_breaks');
-  var module = require('modules').get('app/discover');
+  var module = require('ui/modules').get('app/discover');
 
   require('ui/highlight/highlight');
   require('ui/highlight/highlight_tags');

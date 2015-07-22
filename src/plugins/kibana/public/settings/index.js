@@ -4,14 +4,14 @@ define(function (require, module, exports) {
   require('plugins/kibana/settings/styles/main.less');
   require('ui/filters/start_from');
 
-  require('routes')
+  require('ui/routes')
   .when('/settings', {
     redirectTo: '/settings/indices'
   });
 
   var sections = require('plugins/kibana/settings/sections/index');
 
-  require('modules')
+  require('ui/modules')
   .get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
     return {

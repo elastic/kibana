@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var ConfigTemplate = require('utils/config_template');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('chromeContext', function (timefilter, globalState) {
 

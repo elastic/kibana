@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
   .get('kibana/directive')
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
 

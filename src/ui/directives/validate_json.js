@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
 
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
 
   module.directive('validateJson', function ($compile) {
     return {

@@ -5,7 +5,7 @@ define(function (require) {
   var _ = require('lodash');
   var propFilter = require('ui/filters/_prop_filter');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .filter('fieldType', function () {
     return propFilter('type');

@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var errors = require('errors');
+  var errors = require('ui/errors');
 
   return function ErrorHandlerFactory() {
 

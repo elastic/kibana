@@ -1,5 +1,5 @@
 define(function (require) {
-  require('modules')
+  require('ui/modules')
     .get('app/visualize')
     .directive('visualizeSpy', function (Private, $compile) {
       var $ = require('jquery');

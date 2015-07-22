@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
   var template = require('ui/filter_bar/filter_bar.html');
   var moment = require('moment');
 

@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   require('ui/paginated_table/paginated_table');
 
-  require('modules').get('apps/settings')
+  require('ui/modules').get('apps/settings')
   .directive('indexedFields', function ($filter) {
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';

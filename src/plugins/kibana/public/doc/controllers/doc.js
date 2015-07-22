@@ -7,7 +7,7 @@ define(function (require) {
   require('ui/doc_viewer/doc_viewer');
   require('ui/index_patterns/index_patterns');
 
-  var app = require('modules').get('apps/doc', [
+  var app = require('ui/modules').get('apps/doc', [
     'kibana/notify',
     'kibana/courier',
     'kibana/index_patterns'
@@ -21,7 +21,7 @@ define(function (require) {
     }
   };
 
-  require('routes')
+  require('ui/routes')
   .when('/doc/:indexPattern/:index/:type/:id', {
     template: html,
     resolve: resolveIndexPattern

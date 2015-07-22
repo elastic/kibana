@@ -4,7 +4,7 @@ define(function (require) {
   var qs = require('utils/query_string');
   var rison = require('utils/rison');
 
-  var module = require('modules').get('kibana/global_state');
+  var module = require('ui/modules').get('kibana/global_state');
 
   module.service('globalState', function (Private, $rootScope, $location) {
     var State = Private(require('ui/state_management/state'));

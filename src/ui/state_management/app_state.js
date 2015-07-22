@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var modules = require('modules');
+  var modules = require('ui/modules');
   var urlParam = '_a';
 
 

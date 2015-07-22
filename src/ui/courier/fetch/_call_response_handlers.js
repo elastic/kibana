@@ -4,9 +4,9 @@ define(function (require) {
     var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
     var notify = Private(require('ui/courier/fetch/_notifier'));
 
-    var SearchTimeout = require('errors').SearchTimeout;
-    var RequestFailure = require('errors').RequestFailure;
-    var ShardFailure = require('errors').ShardFailure;
+    var SearchTimeout = require('ui/errors').SearchTimeout;
+    var RequestFailure = require('ui/errors').RequestFailure;
+    var ShardFailure = require('ui/errors').ShardFailure;
 
     function callResponseHandlers(requests, responses) {
       return Promise.map(requests, function (req, i) {

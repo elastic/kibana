@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('app/dashboard');
+  var module = require('ui/modules').get('app/dashboard');
   var _ = require('lodash');
   var moment = require('moment');
 

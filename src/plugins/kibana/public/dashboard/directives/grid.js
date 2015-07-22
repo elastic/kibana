@@ -4,7 +4,7 @@ define(function (require) {
 
   require('gridster');
 
-  var app = require('modules').get('app/dashboard');
+  var app = require('ui/modules').get('app/dashboard');
 
   app.directive('dashboardGrid', function ($compile, Notifier) {
     return {

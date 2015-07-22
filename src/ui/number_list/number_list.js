@@ -3,7 +3,7 @@ define(function (require) {
   var parseRange = require('utils/range');
 
   require('ui/number_list/number_list_input');
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('kbnNumberList', function () {
     return {

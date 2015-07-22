@@ -16,7 +16,7 @@ define(function (require) {
   require('plugins/kibana/dashboard/services/saved_dashboards');
   require('plugins/kibana/dashboard/styles/main.less');
 
-  var app = require('modules').get('app/dashboard', [
+  var app = require('ui/modules').get('app/dashboard', [
     'elasticsearch',
     'ngRoute',
     'kibana/courier',
@@ -25,7 +25,7 @@ define(function (require) {
     'kibana/typeahead'
   ]);
 
-  require('routes')
+  require('ui/routes')
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {

@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/field_format_editor/samples/samples');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .directive('fieldFormatEditorPattern', function () {
     return {

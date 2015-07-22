@@ -7,7 +7,7 @@ define(function (require) {
   require('ui/directives/confirm_click');
 
   // add the module deps to this module
-  require('modules').get('apps/settings', ['ui.ace', 'monospaced.elastic']);
+  require('ui/modules').get('apps/settings', ['ui.ace', 'monospaced.elastic']);
 
   return {
     name: 'objects',

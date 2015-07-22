@@ -1,7 +1,7 @@
 define(function (require) {
   return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope) {
     var _ = require('lodash');
-    var errors = require('errors');
+    var errors = require('ui/errors');
     var angular = require('angular');
 
     var fieldformats = Private(require('registry/field_formats'));

@@ -6,7 +6,7 @@ define(function (require) {
    * http://stackoverflow.com/a/18609594/296172
    */
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .service('compileRecursiveDirective', function ($compile) {
     return {

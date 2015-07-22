@@ -5,7 +5,7 @@ define(function (require) {
   var KbnFormController = require('ui/fancy_forms/kbn_form');
   var KbnModelController = require('ui/fancy_forms/kbn_model');
 
-  require('modules')
+  require('ui/modules')
   .get('kibana')
   .config(function ($provide) {
     function decorateDirectiveController(DecorativeController) {

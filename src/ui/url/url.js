@@ -4,7 +4,7 @@ define(function (require) {
   require('ui/filters/uriescape');
   require('ui/filters/rison');
 
-  require('modules').get('kibana/url')
+  require('ui/modules').get('kibana/url')
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
   function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {

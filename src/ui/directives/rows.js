@@ -1,7 +1,7 @@
 define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
-  var module = require('modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
   var AggConfigResult = require('ui/vis/AggConfigResult');
 
   module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {

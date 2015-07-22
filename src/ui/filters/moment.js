@@ -2,7 +2,7 @@ define(function (require) {
   var moment = require('moment');
   var _ = require('lodash');
 
-  require('modules')
+  require('ui/modules')
     .get('kibana')
     .filter('moment', function (config) {
     return function (datetime) {
