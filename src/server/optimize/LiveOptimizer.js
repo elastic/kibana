@@ -21,7 +21,7 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
   }
 
   init() {
-    this.bundles.synchronize();
+    return this.bundles.synchronize();
   }
 
   get(id) {
