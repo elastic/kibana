@@ -332,6 +332,7 @@ define(function (require) {
       }
 
       $scope.updateTime();
+      if (sort[0] === '_score') segmented.setMaxSegments(1);
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
       segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
 

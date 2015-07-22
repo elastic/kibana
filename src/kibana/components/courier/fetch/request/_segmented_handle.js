@@ -21,6 +21,7 @@ define(function (require) {
       // export a couple methods from the request
       this.setDirection = _.bindKey(req, 'setDirection');
       this.setSize = _.bindKey(req, 'setSize');
+      this.setMaxSegments = _.bindKey(req, 'setMaxSegments');
     }
 
     return SegmentedHandle;

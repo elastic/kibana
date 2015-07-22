@@ -119,6 +119,15 @@ define(function (require) {
      *********/
 
     /**
+     * Set the sort total number of segments to emit
+     *
+     * @param {number}
+     */
+    SegmentedReq.prototype.setMaxSegments = function (maxSegments) {
+      this._maxSegments = _.parseInt(maxSegments);
+    };
+
+    /**
      * Set the sort direction for the request.
      *
      * @param {string} dir - one of 'asc' or 'desc'
