@@ -43,7 +43,7 @@ class BaseOptimizer extends EventEmitter {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: '/bundles/',
-        devtoolModuleFilenameTemplate: '[resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
       plugins: [
