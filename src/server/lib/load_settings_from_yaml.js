@@ -25,6 +25,7 @@ module.exports = function (path) {
   if (config.log_file) settings['logging.file'] = config.log_file;
   if (config.bundled_plugin_ids) settings['kibana.bundledPluginIds'] = config.bundled_plugin_ids;
   if (config.enable_authentication) settings['kibana.server.auth.enabled'] = config.enable_authentication;
+  if (config.authentication_strategy) settings['kibana.server.auth.strategy'] = config.authentication_strategy;
   if (config.encryption_key) settings['kibana.server.auth.encryption_key'] = config.encryption_key;
   if (config.session_timeout) settings['kibana.server.auth.session_timeout'] = config.session_timeout;
   if (config.htpasswd) settings['kibana.server.auth.htpasswd'] = config.htpasswd;

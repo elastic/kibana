@@ -32,8 +32,9 @@ module.exports = Joi.object({
       }).default(),
       auth: Joi.object({
         enabled: Joi.boolean().default(false),
+        strategy: Joi.string().default('es_proxy'),
         encryptionKey: Joi.string().default('secret'),
-        sessionTimeout: Joi.number().default(24 * 60 * 60 * 1000),
+        sessionTimeout: Joi.number().default(30 * 60 * 1000),
         htpasswd: Joi.string()
       }).default()
     }).default(),
