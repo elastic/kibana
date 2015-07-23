@@ -28,8 +28,7 @@ module.exports = function (kbnServer, server, config) {
     else {
       _.defaults(events, {
         log: ['info', 'warning', 'error', 'fatal'],
-        request: '*',
-        response: '*',
+        response: config.get('logging.json') ? '*' : '!',
         error: '*'
       });
     }
