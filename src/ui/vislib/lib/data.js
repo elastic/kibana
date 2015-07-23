@@ -37,6 +37,7 @@ define(function (require) {
 
       this.data = data;
       this.type = this.getDataType();
+
       this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels) : undefined;
       this._normalizeOrdered();
@@ -60,10 +61,29 @@ define(function (require) {
       }
     }
 
+    Data.prototype._updateData = function () {
+      if (this.data.rows) {
+        _.map(this.data.rows, this._updateDataSeriesLabel, this);
+      } else if (this.data.columns) {
+        _.map(this.data.columns, this._updateDataSeriesLabel, this);
+      } else {
+        this._updateDataSeriesLabel(this.data);
+      }
+    };
+
+    Data.prototype._updateDataSeriesLabel = function (eachData) {
+      if (eachData.series) {
+        eachData.series[0].label = this.get('yAxisLabel');
+      }
+    };
+
     Data.prototype._getLabels = function (data) {
       if (this.type === 'series') {
         var noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
-        if (noLabel) return [(this.get('yAxisLabel'))];
+        if (noLabel) {
+          this._updateData();
+          return [(this.get('yAxisLabel'))];
+        }
         return getLabels(data);
       }
       return this.pieNames();

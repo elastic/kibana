@@ -150,9 +150,9 @@ define(function (require) {
         .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
         .attr('cx', cx)
         .attr('cy', cy)
-        .attr('fill', colorCircle)
         .attr('class', 'circle-decoration')
-        .call(this._addIdentifier);
+        .call(this._addIdentifier)
+        .attr('fill', colorCircle);
 
       circles
       .enter()

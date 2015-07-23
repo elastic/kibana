@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
 
     var createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
+    var MappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
+    var mappedColors = new MappedColors();
 
     /*
      * Accepts an array of strings or numbers that are used to create a
@@ -23,10 +25,15 @@ define(function (require) {
       });
 
       var arrayLength = arrayOfStringsOrNumbers.length;
-      var colorObj = _.zipObject(arrayOfStringsOrNumbers, createColorPalette(arrayLength));
+      var colors = createColorPalette(arrayLength + mappedColors.count());
+      var uniqueColors = _.difference(colors, mappedColors.all()).slice(0, arrayLength + 1);
+      var colorObj = _.zipObject(arrayOfStringsOrNumbers, uniqueColors);
 
       return function (value) {
-        return colorObj[value];
+        if (!mappedColors.get(value)) {
+          mappedColors.add(value, colorObj[value]);
+        }
+        return mappedColors.get(value);
       };
     };
   };

@@ -29,7 +29,7 @@
 # elasticsearch.ssl.cert: /path/to/your/client.crt
 # elasticsearch.ssl.key: /path/to/your/client.key
 
-# If you need to provide a CA certificate for your Elasticsarech instance, put
+# If you need to provide a CA certificate for your Elasticsearch instance, put
 # the path of the pem file here.
 # elasticsearch.ssl.ca: /path/to/your/CA.pem
 
