@@ -120,16 +120,27 @@ define(function (require) {
 
         //key handler for the filter text box
         self.filterKeyDown = function ($event) {
-          if (keymap[$event.keyCode] !== 'tab') return;
+          switch (keymap[$event.keyCode]) {
+            case 'tab':
+              if (self.hitCount === 0) return;
 
-          if (self.hits.length === 0) return;
+              self.selector.index = 0;
+              self.selector.enabled = true;
 
-          self.selector.index = 0;
-          self.selector.enabled = true;
+              selectTopHit();
 
-          selectTopHit();
+              $event.preventDefault();
+              break;
+            case 'enter':
+              if (self.hitCount === 1) {
+                var hit = self.hits[0];
+                if (!hit) return;
 
-          $event.preventDefault();
+                self.onChoose(hit, $event);
+                $event.preventDefault();
+              }
+              break;
+          }
         };
 
         //key handler for the list items
