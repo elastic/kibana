@@ -11,7 +11,7 @@ define(function (require) {
         service: savedSearches,
         name: 'searches',
         noun: 'Saved Search',
-        nouns: 'searches'
+        nouns: 'saved searches'
       },
       visualizations: {
         service: savedVisualizations,
@@ -220,6 +220,10 @@ define(function (require) {
           $location.url('/settings/objects?_a=' + rison.encode({tab: type}));
         };
 
+        self.hitCountNoun = function () {
+          return ((self.hitCount === 1) ? self.objectType.noun : self.objectType.nouns).toLowerCase();
+        };
+
         function selectTopHit() {
           setTimeout(function () {
             //triggering a focus event kicks off a new angular digest cycle.
@@ -244,7 +248,7 @@ define(function (require) {
             // ensure that we don't display old results
             // as we can't really cancel requests
             if (currentFilter === filter) {
-              $scope.hitCount = hits.total;
+              self.hitCount = hits.total;
               self.hits = _.sortBy(hits.hits, 'title');
             }
           });
