@@ -1,5 +1,5 @@
 define(function (require) {
-  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope) {
+  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope, timefilter) {
     var _ = require('lodash');
     var errors = require('errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
@@ -15,6 +15,7 @@ define(function (require) {
         return Promise.all([
           kbnSetup(),
           config.init(),
+          timefilter.init(),
           courier.SearchSource.ready,
           $rootScope.kibana && $rootScope.kibana.ready
         ])
