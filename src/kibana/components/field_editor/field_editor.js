@@ -42,7 +42,7 @@ define(function (require) {
           var fields = indexPattern.fields;
           var field = self.field.toActualField();
 
-          _.remove(fields, { name: field.name });
+          fields.remove({ name: field.name });
           fields.push(field);
 
           if (!self.selectedFormatId) {
@@ -62,7 +62,7 @@ define(function (require) {
           var indexPattern = self.indexPattern;
           var field = self.field;
 
-          _.remove(indexPattern.fields, { name: field.name });
+          indexPattern.fields.remove({ name: field.name });
           return indexPattern.save()
           .then(function () {
             notify.info('Deleted Field "' + field.name + '"');

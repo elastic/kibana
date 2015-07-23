@@ -225,7 +225,15 @@ notifications {
 
 .list-group-menu {
 
+  &.select-mode a{
+     outline: none;
+     color: @link-color;
+  }
+
   .list-group-menu-item {
+    list-style: none;
+    color: @link-color;
+
     &.active {
       font-weight: bold;
       background-color: @well-bg;
@@ -350,6 +358,10 @@ saved-object-finder {
   .list-group-item {
     &:first-child {
       .border-top-radius(0) !important;
+    }
+
+    &.list-group-no-results p {
+      margin-bottom: 0 !important;
     }
   }
 

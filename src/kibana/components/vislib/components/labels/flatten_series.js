@@ -6,7 +6,6 @@ define(function (require) {
      * Accepts a Kibana data object with a rows or columns key
      * and returns an array of flattened series values.
      */
-
     return function (obj) {
       if (!_.isObject(obj) || !obj.rows && !obj.columns) {
         throw new TypeError('GetSeriesUtilService expects an object with either a rows or columns key');
