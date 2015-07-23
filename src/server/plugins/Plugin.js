@@ -4,7 +4,7 @@ let _ = require('lodash');
 let inherits = require('util').inherits;
 let Joi = require('joi');
 let Promise = require('bluebird');
-let join = require('path').join;
+let resolve = require('path').resolve;
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)
@@ -20,7 +20,7 @@ module.exports = class Plugin {
     this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
-    this.publicDir = _.get(opts, 'publicDir', join(path, 'public'));
+    this.publicDir = opts.publicDir !== false ? resolve(path, 'public') : null;
     this.externalCondition = opts.initCondition || _.constant(true);
     this.externalInit = opts.init || _.noop;
     this.getConfigSchema = opts.config || _.noop;
