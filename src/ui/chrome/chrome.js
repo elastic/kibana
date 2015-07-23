@@ -266,8 +266,13 @@ define(function (require) {
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
         function onRouteChange() {
-          var id = $location.path().split('/')[1] || '';
-          tabs.trackPathUpdate(id, $location.url(), chrome.embedded);
+          // remove _g from url before tracking
+          var path = $location.path();
+          var qs = $.param(_.omit($location.search(), '_g'), false);
+          var hash = $location.hash();
+          var url = path + (qs ? '?' + qs : '') + (hash ? '#' + hash : '');
+
+          tabs.trackUrlUpdate(url, !chrome.embedded);
         }
 
         // and some local values

@@ -27,7 +27,7 @@ define(function (require) {
       id: 'visualize',
       title: 'Visualize',
       activeIndicatorColor: function () {
-        return (String(this.lastPath).indexOf('/visualize/step/') === 0) ? 'white' : '#656a76';
+        return (String(this.lastUrl).indexOf('/visualize/step/') === 0) ? 'white' : '#656a76';
       }
     },
     {

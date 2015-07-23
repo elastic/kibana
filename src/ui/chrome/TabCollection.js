@@ -34,11 +34,15 @@ define(function (require) {
       return activeTab;
     };
 
-    this.trackPathUpdate = function (id, path, temp) {
-      this.get().forEach(function (tab) {
-        var active = tab.active = (tab.id === id);
-        if (active) activeTab = tab;
-        if (active && !temp) tab.pathUpdate(path);
+    this.trackUrlUpdate = function (url, persist) {
+      var id = url.split('/')[1] || '';
+
+      tabs.forEach(function (tab) {
+        tab.active = (tab.id === id);
+        if (!tab.active) return;
+
+        activeTab = tab;
+        if (persist) tab.persistLastUrl(url);
       });
     };
   }
