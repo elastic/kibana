@@ -26,8 +26,9 @@ module.exports = function (server) {
 
     // if we already have a the current version in the index then we need to stop
     if (_.find(response.hits.hits, function currentVersion(hit) {
-      return hit._id !== '@@version' &&
-       hit._id === config.get('kibana.package.version');
+      var versionSpecified = hit._id !== '@@version';
+      var indexVersionMatchesConfig = hit._id === config.get('kibana.package.version');
+      return versionSpecified && indexVersionMatchesConfig;
     })) {
       return Promise.resolve();
     }
