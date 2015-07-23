@@ -33,17 +33,25 @@ module.exports = class Worker extends EventEmitter {
       kbnWorkerArgv: JSON.stringify(argv)
     };
 
-    _.bindAll(this, ['onExit', 'onMessage', 'onShutdown', 'start']);
+    _.bindAll(this, ['onExit', 'onMessage', 'shutdown', 'start']);
 
     this.start = _.debounce(this.start, 25);
     cluster.on('exit', this.onExit);
-    process.on('exit', this.onShutdown);
+    process.on('exit', this.shutdown);
   }
 
   onExit(fork, code) {
     if (this.fork !== fork) return;
-    if (code) this.log.bad(`${this.title} crashed`, 'with status code', code);
-    else this.start(); // graceful shutdowns happen on restart
+
+    // our fork is gone, clear our ref so we don't try to talk to it anymore
+    this.fork = null;
+
+    if (code) {
+      this.log.bad(`${this.title} crashed`, 'with status code', code);
+    } else {
+      // restart after graceful shutdowns
+      this.start();
+    }
   }
 
   onChange(path) {
@@ -60,9 +68,10 @@ module.exports = class Worker extends EventEmitter {
     this.start();
   }
 
-  onShutdown() {
+  shutdown() {
     if (this.fork && !this.fork.isDead()) {
       this.fork.kill();
+      this.fork.removeListener('message', this.onMessage);
     }
   }
 
@@ -81,10 +90,8 @@ module.exports = class Worker extends EventEmitter {
 
   start() {
     if (this.fork && !this.fork.isDead()) {
-      this.fork.kill();
-      this.fork.removeListener('message', this.onMessage);
       // once "exit" event is received with 0 status, start() is called again
-      return;
+      return this.shutdown();
     }
 
     if (this.fork && this.changes.length) {

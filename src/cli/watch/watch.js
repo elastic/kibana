@@ -55,9 +55,8 @@ module.exports = function (opts) {
 
   workers.forEach(function (worker) {
     worker.on('broadcast', function (msg) {
-      workers.forEach(function (broadcastTo) {
-        if (broadcastTo === worker) return;
-        broadcastTo.fork.send(msg);
+      workers.forEach(function (to) {
+        if (to !== worker && to.fork) to.fork.send(msg);
       });
     });
   });
