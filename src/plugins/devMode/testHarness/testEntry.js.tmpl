@@ -12,9 +12,9 @@
 %> *
  */
 
-require('plugins/devMode/bootstrap');
+require('plugins/devMode/bootstrapTests');
 <%
 entry.modules.slice(0).reverse().forEach(function (id) {
   print(`require('${id}');\n`);
 });
-%>require('plugins/devMode/bootstrap').bootstrap();
+%>require('plugins/devMode/bootstrapTests').bootstrap();
