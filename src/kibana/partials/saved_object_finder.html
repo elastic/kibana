@@ -13,7 +13,7 @@
       name="filter"
       type="text" />
 
-    <span class="finder-hit-count"><strong>{{hitCount}}</strong> {{finder.objectType.name}}</span>
+    <span class="finder-hit-count"><strong>{{finder.hitCount}}</strong> {{finder.hitCountNoun()}}</span>
   </div>
 </form>
 <paginate list="finder.hits" per-page="5">
@@ -40,7 +40,6 @@
     <li
       class="list-group-item list-group-no-results"
       ng-if="finder.hits.length === 0">
-
       <p ng-bind="'No matching ' + finder.objectType.nouns + ' found.'"></p>
     </li>
   </ul>
