@@ -75,7 +75,7 @@ module.exports = function (kbnServer, server, config) {
     plugins: kbnServer.plugins
   });
 
-  optmzr.on('rebuilding', function () {
+  optmzr.on('bundle invalid', function () {
     status.yellow('Source file change detected, reoptimizing source files');
   });
 
