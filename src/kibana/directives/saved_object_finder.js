@@ -94,8 +94,6 @@ define(function (require) {
             $scope.userOnChoose(hit, $event);
           }
 
-          if ($event.isDefaultPrevented()) return;
-
           var url = self.makeUrl(hit);
           if (!url || url === '#' || url.charAt(0) !== '#') return;
 
