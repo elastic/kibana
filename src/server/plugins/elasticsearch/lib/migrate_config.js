@@ -9,16 +9,7 @@ module.exports = function (server) {
       type: 'config',
       body: {
         size: 1000,
-        sort: [ { buildNum: { order: 'desc' } } ],
-        query: {
-          filtered: {
-            filter: {
-              bool: {
-                must_not: [ { query: { match: { _id: '@@version' } } } ]
-              }
-            }
-          }
-        }
+        sort: [ { buildNum: { order: 'desc' } } ]
       }
     };
 

@@ -120,7 +120,86 @@ define(function (require) {
         var rowIn = new Data(rowsData, {});
         expect(_.isObject(rowIn)).to.be(true);
       });
+
+      it('should update label in series data', function () {
+        var seriesDataWithoutLabelInSeries = {
+          'label': '',
+          'series': [
+            {
+              'label': '',
+              'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+            }
+          ],
+          'yAxisLabel': 'customLabel'
+        };
+        var modifiedData = new Data(seriesDataWithoutLabelInSeries, {});
+        expect(modifiedData.data.series[0].label).to.be('customLabel');
+      });
+
+      it('should update label in row data', function () {
+        var seriesDataWithoutLabelInRow = {
+          'rows': [
+            {
+              'label': '',
+              'series': [
+                {
+                  'label': '',
+                  'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+                }
+              ],
+              'yAxisLabel': 'customLabel'
+            },
+            {
+              'label': '',
+              'series': [
+                {
+                  'label': '',
+                  'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+                }
+              ],
+              'yAxisLabel': 'customLabel'
+            }
+          ],
+        };
+
+        var modifiedData = new Data(seriesDataWithoutLabelInRow, {});
+        expect(modifiedData.data.rows[0].series[0].label).to.be('customLabel');
+        expect(modifiedData.data.rows[1].series[0].label).to.be('customLabel');
+      });
+
+      it('should update label in column data', function () {
+        var seriesDataWithoutLabelInRow = {
+          'columns': [
+            {
+              'label': '',
+              'series': [
+                {
+                  'label': '',
+                  'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+                }
+              ],
+              'yAxisLabel': 'customLabel'
+            },
+            {
+              'label': '',
+              'series': [
+                {
+                  'label': '',
+                  'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+                }
+              ],
+              'yAxisLabel': 'customLabel'
+            }
+          ],
+          'yAxisLabel': 'customLabel'
+        };
+
+        var modifiedData = new Data(seriesDataWithoutLabelInRow, {});
+        expect(modifiedData.data.columns[0].series[0].label).to.be('customLabel');
+        expect(modifiedData.data.columns[1].series[0].label).to.be('customLabel');
+      });
     });
+
 
     describe('_removeZeroSlices', function () {
       var data;
