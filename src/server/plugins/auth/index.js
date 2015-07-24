@@ -25,8 +25,7 @@ module.exports = new kibana.Plugin({
         ttl: config.get('kibana.server.auth.sessionTimeout'),
         clearInvalid: true,
         keepAlive: true,
-        isSecure: false, // TODO: Switch to true
-        isHttpOnly: false,
+        isSecure: true,
         redirectTo: '/login'
       };
 
