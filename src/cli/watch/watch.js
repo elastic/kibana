@@ -16,11 +16,11 @@ module.exports = function (opts) {
     'src/fixtures',
     'src/server',
     'src/utils',
-    'src/plugins/*/*', // files at the root of a plugin
-    'src/plugins/*/lib/**/*', // files within a lib directory for a plugin
+    'src/plugins/**/*', // files at the root of a plugin
     'config/**/*',
   ], {
-    cwd: fromRoot('.')
+    cwd: fromRoot('.'),
+    ignore: 'src/plugins/*/public/**/*'
   });
 
   let log = new Log(opts.quiet, opts.silent);
