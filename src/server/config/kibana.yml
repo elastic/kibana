@@ -64,7 +64,8 @@
 # log_file: ./kibana.log
 
 # Authentication settings for Kibana
-# enable_authentication: false
-# encryption_key:
-# session_timeout: 300000
-# htpasswd: /path/to/.htpasswd
+# kibana.server.auth.enabled: false
+# kibana.server.auth.strategy: es_proxy # or htpasswd
+# kibana.server.auth.encryptionKey: secret
+# kibana.server.auth.sessionTimeout: 1800000
+# kibana.server.auth.htpasswd: /path/to/.htpasswd
