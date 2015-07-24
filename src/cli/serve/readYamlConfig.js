@@ -1,9 +1,11 @@
-var _ = require('lodash');
-var fs = require('fs');
-var yaml = require('js-yaml');
-var fromRoot = require('../../utils/fromRoot');
+'use strict';
 
-var legacySettingMap = {
+let _ = require('lodash');
+let fs = require('fs');
+let yaml = require('js-yaml');
+let fromRoot = require('../../utils/fromRoot');
+
+let legacySettingMap = {
   // server
   port: 'server.port',
   host: 'server.host',
@@ -36,7 +38,17 @@ var legacySettingMap = {
 module.exports = function (path) {
   if (!path) return {};
 
-  var file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
+  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
+
+  function apply(config, val, key) {
+    if (_.isPlainObject(val)) {
+      _.forOwn(val, function (subVal, subKey) {
+        apply(config, subVal, key + '.' + subKey);
+      });
+    } else {
+      _.set(config, key, val);
+    }
+  }
 
   // transform legeacy options into new namespaced versions
   return _.transform(file, function (config, val, key) {
@@ -44,7 +56,7 @@ module.exports = function (path) {
       key = legacySettingMap[key];
     }
 
-    _.set(config, key, val);
+    apply(config, val, key);
   }, {});
 };
 
