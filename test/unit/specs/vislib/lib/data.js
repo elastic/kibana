@@ -355,7 +355,7 @@ define(function (require) {
                 -112.06054687499999
               ]
             }
-          },
+          }
         }, {
           title: 'Top 5 _type: nginx',
           label: 'Top 5 _type: nginx',
@@ -371,7 +371,7 @@ define(function (require) {
                 -112.06054687499999
               ]
             }
-          },
+          }
         }]
       };
 
@@ -392,6 +392,29 @@ define(function (require) {
           expect(minMax.min).to.be(1);
           expect(minMax.max).to.be(331);
         });
+      });
+    });
+
+    describe('null value check', function () {
+      it('should return false', function () {
+        var data = new Data(rowsData, {});
+        expect(data.hasNullValues()).to.be(false);
+      });
+
+      it('should return true', function () {
+        var nullRowData = { rows: rowsData.rows.slice(0) };
+        nullRowData.rows.push({
+          'label': 'e',
+          'series': [
+            {
+              'label': '200',
+              'values': [{x: 0, y: 1}, {x: 1, y: null}, {x: 2, y: 3}]
+            }
+          ]
+        });
+
+        var data = new Data(nullRowData, {});
+        expect(data.hasNullValues()).to.be(true);
       });
     });
   });

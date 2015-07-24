@@ -305,6 +305,22 @@ define(function (require) {
     };
 
     /**
+     * Returns true if null values are present
+     * @returns {*}
+     */
+    Data.prototype.hasNullValues = function () {
+      var chartData = this.chartData();
+
+      return chartData.some(function (chart) {
+        return chart.series.some(function (obj) {
+          return obj.values.some(function (d) {
+            return d.y === null;
+          });
+        });
+      });
+    };
+
+    /**
      * Return an array of all value objects
      * Pluck the data.series array from each data object
      * Create an array of all the value objects from the series array
