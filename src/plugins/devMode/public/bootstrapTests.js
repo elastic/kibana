@@ -5,7 +5,7 @@ var SEED = parseFloat((window.location.search.match(/[&?]SEED=([^&]+)(?:&|$)/) |
 if (isNaN(SEED)) SEED = Date.now();
 console.log('Random-ness seed: ' + SEED);
 
-var Nonsense = require('nonsense');
+var Nonsense = require('Nonsense');
 Math.nonsense = new Nonsense(SEED);
 Math.random = function () {
   return Math.nonsense.frac();
