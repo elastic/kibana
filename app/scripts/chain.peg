@@ -5,11 +5,12 @@
 start
  = series+
 
-args
- = argument+
+arg_list
+ = argument*
 
 argument
- = element:arg_type ','? space? {return element}
+ = arg_name:function_name '=' element:arg_type ','? space? {return {type: 'namedArg', name:arg_name, value:element}}
+ / element:arg_type ','? space? {return element}
 
 arg_type
  = series
@@ -45,12 +46,12 @@ function_name
  = (first:[a-zA-Z]+ rest:[a-zA-Z0-9]* ) { return first.join('') + rest.join('') }
 
 function
- = (name:function_name '(' space? args:args? space? ')' space? ','? space?) {
+ = (name:function_name '(' space? arguments:arg_list space? ')' space? ','? space?) {
   var result = {
     type: 'function',
     function: name
   }
-  if (args) {result.arguments = args;}
+  if (arguments) {result.arguments = arguments;}
   return result;
  }
 
@@ -98,12 +99,6 @@ request
   }
   return obj;
  }
-
-metric
- = metric:[a-z]+ { return metric.join('')}
-
-field
- = field:[a-zA-Z0-9\-\_\.]+ {return field.join('')}
 
 space
  = [\ \t]+

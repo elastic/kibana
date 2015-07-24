@@ -8,13 +8,13 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'formatString',
+      name: 'label',
       types: ['string']
     }
   ],
   help: 'Change the color of the series',
-  fn:  function label (inputSeries, formatString) {
-    return alter([inputSeries, formatString], function (args) {
+  fn:  function labelFn (inputSeries, label) {
+    return alter([inputSeries, label], function (args) {
       if (args[1].indexOf('%s') !== -1) {
         args[0].label =  util.format(args[1], args[0].label);
       } else {

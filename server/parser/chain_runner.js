@@ -33,8 +33,25 @@ function argType (arg) {
   return typeof arg;
 }
 
+function repositionArguments (functionDef, unorderedArgs) {
+  var args = [];
+  _.each(unorderedArgs, function (unorderedArg, i) {
+    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
+      var argIndex = _.findIndex(functionDef.args, function(orderedArg) {
+        return unorderedArg.name === orderedArg.name;
+      });
+      args[argIndex] = unorderedArg.value;
+    } else {
+      args[i] = unorderedArg;
+    }
+  });
+  return args;
+}
+
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke (fnName, args) {
+  var functionDef = functions[fnName];
+  args = repositionArguments(functionDef, args);
   args = _.map(args, function (item) {
 
     if (_.isObject(item)) {
@@ -68,11 +85,11 @@ function invoke (fnName, args) {
     if (!functions[fnName]){
       throw new Error('Function not found');
     }
-    var functionDef = functions[fnName];
 
     if (args.length > functionDef.args.length) {
       throw new Error ('Too many arguments passed to: ' + fnName);
     }
+
 
     _.each(args, function (arg, i) {
       var type = argType(arg);
@@ -83,8 +100,7 @@ function invoke (fnName, args) {
         throw new Error (name + ' must be one of ' + JSON.stringify(required) + '. Got: ' + type);
       }
     });
-
-    return functions[fnName].fn.apply(this, args);
+    return functionDef.fn.apply(this, args);
   });
 }
 
@@ -226,7 +242,7 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['(`*`)']
+  ['(`*`).label(label="All")']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

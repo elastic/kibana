@@ -7,17 +7,27 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'lineWidth',
+      name: 'width',
+      types: ['number', 'null']
+    },
+    {
+      name: 'fill',
+      types: ['number', 'null']
+    },
+    {
+      name: 'show',
       types: ['number', 'null']
     }
   ],
   help: 'Show the seriesList as lines',
-  fn: function lines (inputSeries, lineWidth) {
-    return alter([inputSeries, lineWidth], function (args) {
+  fn: function lines (inputSeries, width, fill, show) {
+    return alter([inputSeries, width, fill, show], function (args) {
       args[0].lines = args[0].lines || {};
-      args[0].lines.show = args[1] == null ? 1 : args[1];
       args[0].lines.lineWidth = args[1] == null ? 5 : args[1];
-      args[0].lines.shadowSize = 0;
+      args[0].lines.fill = args[2]/10;
+
+      args[0].lines.show = args[3];
+
       return args[0];
     });
   }
