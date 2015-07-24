@@ -33,8 +33,7 @@ module.exports = function (kbnServer, server, config) {
       if (file === '.' || file === '..') return false;
       let path = resolve(dir, file);
 
-      return stat(path)
-      .then(function (stat) {
+      return stat(path).then(function (stat) {
         return stat.isDirectory() ? path : false;
       });
     });

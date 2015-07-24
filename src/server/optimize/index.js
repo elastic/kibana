@@ -40,7 +40,7 @@ module.exports = function (kbnServer, server, config) {
     // query for initial status
     process.send(['WORKER_BROADCAST', { optimizeMsg: '?' }]);
     onMessage(function (wrkrStatus) {
-      status[wrkrStatus.state](wrkrStatus.message);
+      status[wrkrStatus.state](`Worker ${wrkrStatus.message}`);
     });
   }
 
@@ -75,6 +75,8 @@ module.exports = function (kbnServer, server, config) {
     plugins: kbnServer.plugins
   });
 
+  if (role === 'receive') return;
+
   optmzr.on('bundle invalid', function () {
     status.yellow('Source file change detected, reoptimizing source files');
   });
@@ -91,7 +93,6 @@ module.exports = function (kbnServer, server, config) {
 
   return optmzr.init().then(function () {
     let entries = optmzr.bundles.getMissingEntries();
-
     if (!entries.length) {
       if (watching) {
         status.red('No optimizable applications found');
@@ -107,8 +108,6 @@ module.exports = function (kbnServer, server, config) {
       status.yellow(`Optimizing and caching ${describeEntries(entries)}`);
     }
 
-    if (!role || role === 'send') {
-      optmzr.run();
-    }
+    optmzr.run();
   });
 };

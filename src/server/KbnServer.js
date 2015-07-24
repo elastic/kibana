@@ -20,7 +20,6 @@ module.exports = class KbnServer extends EventEmitter {
     this.settings = settings || {};
 
     this.server = new Hapi.Server();
-
     require('./config')(this, this.server);
     this.config = this.server.config();
 

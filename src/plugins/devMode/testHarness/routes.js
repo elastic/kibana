@@ -3,68 +3,45 @@
 module.exports = function (server, kbnServer) {
   let resolve = require('path').resolve;
 
+  let fromRoot = require('../../../utils/fromRoot');
   let UiApp = require('../../../server/ui/UiApp');
+
+  let srcPath = fromRoot('src');
 
   server.setupViews(resolve(__dirname, 'views'));
   server.redirectToSlash('/tests/plugins/{pluginId}');
 
   server.route({
-    path: '/tests/plugins/{pluginId}/',
+    path: '/tests',
     method: 'GET',
-    config: {
-      pre: [
-        'kbnPluginById(params.pluginId)'
-      ],
-      handler: function (req, reply) {
-        let pluginId = req.params.pluginId;
-
-        let app = new UiApp(kbnServer.uiExports, {
-          id: `tests/plugins/${pluginId}`,
-          main: `/testBundle/plugins/${pluginId}/`,
-          autoload: []
-        });
-
-        return reply.renderApp(app, 'testHarness');
-      }
+    handler: function (req, reply) {
+      return reply.renderApp(new UiApp(kbnServer.uiExports, {
+        id: 'tests'
+      }), 'testHarness');
     }
   });
 
   server.route({
-    path: '/testBundle/plugins/{pluginId}/',
+    path: '/tests/bundle.js',
     method: 'GET',
-    config: {
-      pre: [
-        'kbnPluginById(params.pluginId)'
-      ],
-      handler: function (req, reply) {
-        return reply.renderTestPart(req.pre.kbnPluginById.publicDir, 'bundle', 'application/javascript');
-      }
+    handler: function (req, reply) {
+      return reply.renderTestPart(srcPath, 'bundle', 'application/javascript');
     }
   });
 
   server.route({
-    path: '/testBundle/plugins/{pluginId}/*.map',
+    path: '/tests/a6b5151f.bundle.js.map',
     method: 'GET',
-    config: {
-      pre: [
-        'kbnPluginById(params.pluginId)'
-      ],
-      handler: function (req, reply) {
-        return reply.renderTestPart(req.pre.kbnPluginById.publicDir, 'sourceMap', 'text/plain');
-      }
+    handler: function (req, reply) {
+      return reply.renderTestPart(srcPath, 'sourceMap', 'text/plain');
     }
   });
 
   server.route({
-    path: '/testBundle/plugins/{pluginId}/css',
+    path: '/tests/style.css',
     method: 'GET',
-    config: {
-      pre: [
-        'kbnPluginById(params.pluginId)'
-      ],
-      handler: function (req, reply) {
-        return reply.renderTestPart(req.pre.kbnPluginById.publicDir, 'style', 'text/css');
-      }
+    handler: function (req, reply) {
+      return reply.renderTestPart(srcPath, 'style', 'text/css');
     }
   });
 };
