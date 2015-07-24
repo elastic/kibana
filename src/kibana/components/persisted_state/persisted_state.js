@@ -4,8 +4,6 @@ define(function (require) {
 
   return function () {
     function validateParent(parent, path) {
-      if (_.isUndefined(parent)) return;
-
       if (path.length <= 0) {
         throw new errors.PersistedStateError('PersistedState child objects must contain a path');
       }
@@ -24,14 +22,16 @@ define(function (require) {
       this._path = this._setPath(path);
       this._parent = parent || false;
 
-      if (!this._parent && !this._path.length) validateValue(value);
-      validateParent(parent, this._path);
+      if (this._parent) {
+        validateParent(this._parent, this._path);
+      } else if (!this._path.length) {
+        validateValue(value);
+      }
 
       value = value || this._getDefault();
 
       // copy passed state values and create internal trackers
-      this._originalState = _.cloneDeep(value); // passed in, restorable state - NEVER MODIFIED
-      this.set(_.cloneDeep(value));
+      this.set(value);
       this._initialized = true; // used to track state changes
     }
 
@@ -40,7 +40,17 @@ define(function (require) {
     };
 
     PersistedState.prototype.set = function (key, value) {
-      return _.cloneDeep(this._set(key, value));
+      // key must be the value, set the entire state using it
+      if (_.isUndefined(value) && _.isPlainObject(key)) {
+        // swap the key and value to write to the state
+        value = key;
+        key = undefined;
+      }
+
+      // ensure the value being passed in is never mutated
+      value = _.cloneDeep(value);
+
+      return this._set(key, value);
     };
 
     PersistedState.prototype.reset = function (key) {
@@ -97,7 +107,7 @@ define(function (require) {
       // delegate to parent instance
       if (this._parent) return this._parent._get(this._getIndex(key), key);
 
-      // no path, no key, get the whole state
+      // no path and no key, get the whole state
       if (!this._hasPath() && _.isUndefined(key)) {
         return _.merge(_.cloneDeep(this._state || this._getDefault()), this._changedState);
       }
@@ -121,11 +131,6 @@ define(function (require) {
     PersistedState.prototype._set = function (key, value, initialState) {
       if (_.isUndefined(initialState)) initialState = !this._initialized;
 
-      // key must be the value, set the entire state using it
-      if (_.isUndefined(value)) {
-        // swap the key and value to write to the state
-        value = key;
-        key = undefined;
       }
 
       // delegate to parent instance
@@ -150,7 +155,6 @@ define(function (require) {
         this._changedState = _.set(this._changedState, this._getIndex(key), value);
       }
 
-      return this.get(key);
     };
 
     return PersistedState;
