@@ -42,7 +42,7 @@ function invoke (fnName, args) {
         case 'query':
           var cacheKey = getQueryCacheKey(item);
           if (queryCache[cacheKey]) {
-            return Promise.resolve(_.clone(queryCache[cacheKey]));
+            return Promise.resolve(_.cloneDeep(queryCache[cacheKey]));
           }
           //return fetchData(item, cacheKey);
           throw new Error ('Missing query cache! ' + cacheKey);
