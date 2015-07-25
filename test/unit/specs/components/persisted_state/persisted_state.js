@@ -19,10 +19,6 @@ define(function (require) {
     describe('state creation', function () {
       var persistedState;
 
-      afterEach(function () {
-        expect(persistedState._state).to.be.an(Object);
-      });
-
       it('should create an empty state instance', function () {
         persistedState = new PersistedState();
         expect(persistedState.get()).to.eql({});
@@ -208,27 +204,26 @@ define(function (require) {
         expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
       });
 
-      it('should clobber data if the child path already', function () {
+      it('should merge default child state', function () {
         var childIndex = 'childTest';
-        var childStateValue = { clobbered_index: true };
+        var childStateValue = { child_index: false };
         var persistedStateValue = {};
-        persistedStateValue[childIndex] = { overlapping_index: true };
+        persistedStateValue[childIndex] = { parent_index: true };
 
         var persistedState = new PersistedState(persistedStateValue);
         var state = persistedState.get();
         expect(state).to.have.property(childIndex);
         expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
 
-        // pass in chidl state value
+        // pass in child state value
         var childState = persistedState.createChild(childIndex, childStateValue);
-        expect(childState.get()).to.eql(childStateValue);
-        // ensure original object is not mutated
-        expect(persistedStateValue[childIndex]).to.not.eql(childStateValue);
 
-        // make sure the parent state matches the passed child state
+        // parent's default state overrides child state
+        var compare = _.merge({}, childStateValue, persistedStateValue[childIndex]);
+        expect(childState.get()).to.eql(compare);
         state = persistedState.get();
         expect(state).to.have.property(childIndex);
-        expect(state[childIndex]).to.eql(childStateValue);
+        expect(state[childIndex]).to.eql(compare);
       });
     });
 
@@ -242,7 +237,7 @@ define(function (require) {
         _.assign(obj, insertedObj);
 
         expect(obj).to.have.property('farewell');
-        expect(persistedState._state).to.not.have.property('farewell');
+        expect(persistedState.get()).to.not.have.property('farewell');
       });
     });
 
@@ -296,14 +291,14 @@ define(function (require) {
     });
 
     describe('get state', function () {
-      it('should perform deep gets', function () {
+      it('should perform deep gets with vairous formats', function () {
         var obj = {
           red: {
             green: {
               blue: 'yellow'
             }
           },
-          orange: false,
+          orange: [1, 2, false, 4],
           purple: {
             violet: ''
           }
@@ -314,8 +309,15 @@ define(function (require) {
         expect(persistedState.get('red')).to.eql({ green: { blue: 'yellow' } });
         expect(persistedState.get('red.green')).to.eql({ blue: 'yellow' });
         expect(persistedState.get('red[green]')).to.eql({ blue: 'yellow' });
+        expect(persistedState.get(['red', 'green'])).to.eql({ blue: 'yellow' });
         expect(persistedState.get('red.green.blue')).to.eql('yellow');
-        expect(persistedState.get('orange')).to.equal(false);
+        expect(persistedState.get('red[green].blue')).to.eql('yellow');
+        expect(persistedState.get('red.green[blue]')).to.eql('yellow');
+        expect(persistedState.get('red[green][blue]')).to.eql('yellow');
+        expect(persistedState.get('red.green.blue')).to.eql('yellow');
+        expect(persistedState.get('orange')).to.eql([1, 2, false, 4]);
+        expect(persistedState.get('orange[0]')).to.equal(1);
+        expect(persistedState.get('orange[2]')).to.equal(false);
         expect(persistedState.get('purple')).to.eql({ violet: '' });
       });
 
@@ -329,15 +331,36 @@ define(function (require) {
     });
 
     describe('set state', function () {
+      describe('path format support', function () {
+        it('should create deep objects from dot notation', function () {
+          var persistedState = new PersistedState();
+          persistedState.set('one.two.three', 4);
+          expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
+        });
+
+        it('should create deep objects from array notation', function () {
+          var persistedState = new PersistedState();
+          persistedState.set('one[two][three]', 4);
+          expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
+        });
+
+        it('should create deep objects from arrays', function () {
+          var persistedState = new PersistedState();
+          persistedState.set(['one', 'two', 'three'], 4);
+          expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
+        });
+
+        it('should create deep objects with an existing path', function () {
+          var persistedState = new PersistedState({}, 'deep.path');
+          persistedState.set('green[red].blue', 4);
+          expect(persistedState.get()).to.eql({ green: { red: { blue: 4 } }});
+        });
+      });
+
       describe('simple replace operations', function () {
         var persistedState;
 
-        afterEach(function () {
-          // verify the state was updated correctly
-          expect(persistedState._state.hello).to.be(undefined);
-        });
-
-        it('should update with string value', function () {
+        it('should replace value with string', function () {
           persistedState = new PersistedState({ hello: 'world' });
           expect(persistedState.get()).to.eql({ hello: 'world' });
 
@@ -345,15 +368,7 @@ define(function (require) {
           expect(persistedState.get()).to.eql({ hello: 'fare thee well' });
         });
 
-        it('should update with object value', function () {
-          persistedState = new PersistedState({ hello: 'world' });
-          expect(persistedState.get()).to.eql({ hello: 'world' });
-
-          persistedState.set('hello', { message: 'fare thee well' });
-          expect(persistedState.get()).to.eql({ hello: { message: 'fare thee well' } });
-        });
-
-        it('should update with array value', function () {
+        it('should replace value with array', function () {
           persistedState = new PersistedState({ hello: ['world', 'everyone'] });
           expect(persistedState.get()).to.eql({ hello: ['world', 'everyone'] });
 
@@ -361,7 +376,15 @@ define(function (require) {
           expect(persistedState.get()).to.eql({ hello: ['people'] });
         });
 
-        it('should replace object value', function () {
+        it('should replace value with object', function () {
+          persistedState = new PersistedState({ hello: 'world' });
+          expect(persistedState.get()).to.eql({ hello: 'world' });
+
+          persistedState.set('hello', { message: 'fare thee well' });
+          expect(persistedState.get()).to.eql({ hello: { message: 'fare thee well' } });
+        });
+
+        it('should replace value with object, removing old properties', function () {
           persistedState = new PersistedState({ hello: { message: 'world' } });
           expect(persistedState.get()).to.eql({ hello: { message: 'world' } });
 
@@ -372,11 +395,6 @@ define(function (require) {
 
       describe('deep replace operations', function () {
         var persistedState;
-
-        afterEach(function () {
-          // verify the state was updated correctly
-          expect(persistedState._state.hello).to.not.be(undefined);
-        });
 
         it('should append to the object', function () {
           persistedState = new PersistedState({ hello: { message: 'world' } });
@@ -396,52 +414,27 @@ define(function (require) {
         });
       });
 
-      describe('child state operations', function () {
-        it('should modify changedState and clear state', function () {
-          var persistedState = new PersistedState({
-            name: 'parent data'
-          });
-          var childState = persistedState.createChild('test-child', {
-            title: 'i am a test child',
-            id: 1234,
-            author: 'user1'
-          });
+    });
 
-          childState.set('author', {
-            name: 'user1',
-            email: 'test@email.rocks'
-          });
+    describe('internal state tracking', function () {
+      it('should be an empty object', function () {
+        var persistedState = new PersistedState();
+        expect(persistedState._defaultState).to.eql({});
+      });
 
-          expect(persistedState.get()).to.eql({
-            name: 'parent data',
-            'test-child': {
-              title: 'i am a test child',
-              id: 1234,
-              author: {
-                name: 'user1',
-                email: 'test@email.rocks'
-              }
-            }
-          });
+      it('should store the default state value', function () {
+        var val = { one: 1, two: 2 };
+        var persistedState = new PersistedState(val);
+        expect(persistedState._defaultState).to.eql(val);
+      });
 
-          // ensure the state objects were updated correctly
-          expect(persistedState._changedState).to.eql({
-            'test-child': {
-              author: {
-                name: 'user1',
-                email: 'test@email.rocks'
-              }
-            }
-          });
-          expect(persistedState._state).to.eql({
-            name: 'parent data',
-            'test-child': {
-              title: 'i am a test child',
-              id: 1234,
-              author: undefined
-            }
-          });
-        });
+      it('should keep track of changes', function () {
+        var val = { one: 1, two: 2 };
+        var persistedState = new PersistedState(val);
+
+        persistedState.set('two', 22);
+        expect(persistedState._defaultState).to.eql(val);
+        expect(persistedState._changedState).to.eql({ two: 22 });
       });
     });
   });
