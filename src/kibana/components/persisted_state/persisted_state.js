@@ -82,8 +82,8 @@ define(function (require) {
     };
 
     PersistedState.prototype._getIndex = function (key) {
-      if (_.isUndefined(key)) key = [];
-      return (this._path.concat(key)).join('.');
+      if (_.isUndefined(key)) return this._path;
+      return (this._path || []).concat(_.toPath(key));
     };
 
     PersistedState.prototype._getDefault = function () {
@@ -96,7 +96,7 @@ define(function (require) {
       var isArray = _.isArray(path);
 
       if (!isString && !isArray) return [];
-      return (isString) ? [path] : path;
+      return (isString) ? [this._getIndex(path)] : path;
     };
 
     PersistedState.prototype._hasPath = function () {
@@ -109,52 +109,56 @@ define(function (require) {
 
       // no path and no key, get the whole state
       if (!this._hasPath() && _.isUndefined(key)) {
-        return _.merge(_.cloneDeep(this._state || this._getDefault()), this._changedState);
+        return this._mergedState;
       }
 
-      // get the merged state
-      var state = _.get(this._state, this._getIndex(key), def);
-      var changed = _.get(this._changedState, this._getIndex(key), def);
-
-      // handle case where state is not a mergeable object
-      var notMergeable = _.isUndefined(state) || !_.isObject(state);
-      if (notMergeable) return !_.isUndefined(changed) ? changed : state;
-
-      // handle arrays by using changed values as set
-      if (_.isArray(state)) return _.map(state, function (val, key) {
-        return _.get(changed, key, val);
-      });
-
-      return _.merge(_.cloneDeep(state), changed);
+      return _.get(this._mergedState, this._getIndex(key), def);
     };
 
-    PersistedState.prototype._set = function (key, value, initialState) {
-      if (_.isUndefined(initialState)) initialState = !this._initialized;
+    PersistedState.prototype._set = function (key, value, initialChildState, defaultChildState) {
+      // initialState = (!_.isUndefined(initialState)) ? initialState : !this._initialized;
+      var self = this;
+      var initialState = !this._initialized;
+      var keyPath = this._getIndex(key);
 
-      }
-
-      // delegate to parent instance
-      if (this._parent) {
-        return this._parent._set(this._getIndex(key), value, initialState);
-      }
-
-      // no path, no key, set the whole state
-      if (!this._hasPath() && _.isUndefined(key)) {
-        this._changedState = {}; // reset the changed state
-        return this._state = value;
-      }
-
+      // if this is the initial state value, save value as the default
       if (initialState) {
-        // this is the intial call to set, import the state directly
-        this._state = _.set(this._state || {}, this._getIndex(key), value);
-        this._changedState = this._changedState || {};
-      } else {
-        // subsequent calls update the changed state
-        // clearing the state key ensure that calls to _.merge get the changedState value
-        this._state = _.set(this._state || {}, this._getIndex(key), undefined);
-        this._changedState = _.set(this._changedState, this._getIndex(key), value);
+        if (!this._hasPath() && _.isUndefined(key)) this._defaultState = value;
+        else this._defaultState = _.set({}, keyPath, value);
       }
 
+      // delegate to parent instance, passing child's default value
+      if (this._parent) {
+        return this._parent._set(keyPath, value, initialState, this._defaultState);
+      }
+
+      // everything in here affects only the parent state
+      if (!initialState && !initialChildState) {
+        // no path and no key, set the whole state
+        if (!this._hasPath() && _.isUndefined(key)) {
+          this._changedState = value;
+        } else {
+          // arrays merge by index, not the desired behavior - ensure they are replaced
+          if (_.isArray(_.get(this._mergedState, keyPath))) {
+            _.set(this._mergedState, keyPath, undefined);
+          }
+          this._changedState = _.set(this._changedState || {}, keyPath, value);
+        }
+      }
+
+      var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
+      var sourceObj = _.merge({}, defaultChildState, this._changedState);
+      var mergeMethod = function (targetValue, sourceValue, mergeKey) {
+        // If `mergeMethod` is provided it is invoked to produce the merged values of the destination and
+        // source properties. If `mergeMethod` returns `undefined` merging is handled by the method instead
+        // handler arguments are (targetValue, sourceValue, key, target, source)
+        if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
+          return !_.isUndefined(sourceValue) ? sourceValue : targetValue;
+        }
+      };
+      this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
+
+      return this;
     };
 
     return PersistedState;
