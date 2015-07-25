@@ -7,15 +7,15 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'axisNumber',
+      name: 'yaxis',
       types: ['number']
     }
   ],
   help: 'This is an internal function that simply returns the input series. Don\'t use this',
-  fn: function yaxis (inputSeries, axisNumber) {
-  return alter([inputSeries, axisNumber], function (args) {
-    args[0].yaxis = args[1];
-    return args[0];
-  });
-}
+  fn: function yaxisFn (args) {
+    return alter(args, function (inputSeries, yaxis) {
+      inputSeries.yaxis = yaxis;
+      return inputSeries;
+    });
+  }
 };

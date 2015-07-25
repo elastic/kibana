@@ -35,16 +35,20 @@ function argType (arg) {
 
 function repositionArguments (functionDef, unorderedArgs) {
   var args = [];
+
   _.each(unorderedArgs, function (unorderedArg, i) {
     if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
+
       var argIndex = _.findIndex(functionDef.args, function(orderedArg) {
         return unorderedArg.name === orderedArg.name;
       });
+
       args[argIndex] = unorderedArg.value;
     } else {
       args[i] = unorderedArg;
     }
   });
+
   return args;
 }
 
@@ -100,7 +104,7 @@ function invoke (fnName, args) {
         throw new Error (name + ' must be one of ' + JSON.stringify(required) + '. Got: ' + type);
       }
     });
-    return functionDef.fn.apply(this, args);
+    return functionDef.fn(args);
   });
 }
 
@@ -242,7 +246,7 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['(`*`).label(label="All")']
+  ['(`*`).lines(steps=1)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

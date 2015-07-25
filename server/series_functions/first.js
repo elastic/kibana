@@ -8,9 +8,9 @@ module.exports = {
     }
   ],
   help: 'This is an internal function that simply returns the input series. Don\'t use this',
-  fn: function first (inputSeries) {
-    return alter([inputSeries], function (args) {
-      return args[0];
+  fn: function firstFn (args) {
+    return alter(args, function (inputSeries) {
+      return inputSeries;
     });
   }
 };

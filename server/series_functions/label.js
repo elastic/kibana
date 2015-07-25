@@ -13,15 +13,15 @@ module.exports = {
     }
   ],
   help: 'Change the color of the series',
-  fn:  function labelFn (inputSeries, label) {
-    return alter([inputSeries, label], function (args) {
-      if (args[1].indexOf('%s') !== -1) {
-        args[0].label =  util.format(args[1], args[0].label);
+  fn:  function labelFn (args) {
+    return alter(args, function (inputSeries, label) {
+      if (label.indexOf('%s') !== -1) {
+        inputSeries.label =  util.format(label, inputSeries.label);
       } else {
-        args[0].label =  args[1];
+        inputSeries.label =  label;
       }
 
-      return args[0];
+      return inputSeries;
     });
   }
 };

@@ -8,35 +8,29 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'averageWindow',
+      name: 'window',
       types: ['number']
     }
   ],
   help: 'Show the seriesList as bars',
-  fn: function movingaverage (inputSeries, averageWindow) {
-    return alter([inputSeries, averageWindow], function (args) {
+  fn: function movingaverageFn (args) {
+    return alter(args, function (inputSeries, _window) {
 
-      var pairs = args[0].data;
-      var windowSize = args[1];
+      var pairs = inputSeries.data;
 
+      inputSeries.data = _.map(pairs, function(point, i) {
+        if (i < _window) { return [point[0], null]; }
 
-
-      args[0].data = _.map(pairs, function(point, i) {
-
-
-        if (i < windowSize) { return [point[0], null]; }
-
-
-        var average = _.chain(pairs.slice(i - windowSize, i))
+        var average = _.chain(pairs.slice(i - _window, i))
         .map(function (point) {
           return point[1];
         }).reduce(function (memo, num) {
           return (memo + num);
-        }).value() / windowSize;
+        }).value() / _window;
 
         return [point[0], average];
       });
-      return args[0];
+      return inputSeries;
     });
   }
 };

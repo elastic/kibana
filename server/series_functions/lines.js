@@ -17,18 +17,26 @@ module.exports = {
     {
       name: 'show',
       types: ['number', 'null']
+    },
+    {
+      name: 'steps',
+      types: ['number', 'null']
     }
   ],
   help: 'Show the seriesList as lines',
-  fn: function lines (inputSeries, width, fill, show) {
-    return alter([inputSeries, width, fill, show], function (args) {
-      args[0].lines = args[0].lines || {};
-      args[0].lines.lineWidth = args[1] == null ? 5 : args[1];
-      args[0].lines.fill = args[2]/10;
+  fn: function linesFn (args) {
+    return alter(args, function (inputSeries, width, fill, show, steps) {
+      inputSeries.lines = inputSeries.lines || {};
 
-      args[0].lines.show = args[3];
+      // Defaults
+      if (inputSeries.lines.lineWidth == null) inputSeries.lines.lineWidth = 5;
 
-      return args[0];
+      if (width != null) inputSeries.lines.lineWidth = width;
+      if (fill != null)  inputSeries.lines.fill = fill/10;
+      if (show != null)  inputSeries.lines.show = show;
+      if (steps != null) inputSeries.lines.steps = steps;
+
+      return inputSeries;
     });
   }
 };

@@ -18,7 +18,7 @@ module.exports = function alter (args, fn) {
     }
 
     var list = _.chain(seriesList.list).map(function (series) {
-      return fn([series].concat(args));
+      return fn.apply(this, [series].concat(args));
     }).flatten().value();
 
     return {type: 'seriesList', list: list};

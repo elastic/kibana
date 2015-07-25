@@ -7,19 +7,49 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'pointSize',
+      name: 'radius',
+      types: ['number', 'null']
+    },
+    {
+      name: 'weight',
+      types: ['number', 'null']
+    },
+    {
+      name: 'fill',
+      types: ['number', 'null']
+    },
+    {
+      name: 'fillColor',
+      types: ['string', 'null']
+    },
+    {
+      name: 'show',
       types: ['number', 'null']
     }
   ],
   help: 'Show the series as points',
-  fn: function linewidth (inputSeries, pointSize) {
-    return alter([inputSeries, pointSize], function (args) {
-      args[0].points = args[0].points || {};
-      args[0].points.show = args[1] == null ? 1 : args[1];
-      args[0].points.radius = args[1] == null ? undefined : args[1];
-      args[0].points.lineWidth = args[1] == null ? undefined : args[1];
+  fn: function pointsFn (args) {
+    return alter(args, function (inputSeries, radius, weight, fill, fillColor, show) {
+      inputSeries.points = inputSeries.points || {};
+      inputSeries.points.radius = radius == null ? undefined : radius;
 
-      return args[0];
+      if (fill) {
+        inputSeries.points.fillColor = fillColor == null ? false : fillColor;
+      }
+
+      if (fill != null) {
+        inputSeries.points.fill =  fill/10;
+      }
+
+      if (weight != null) {
+        inputSeries.points.lineWidth = weight;
+      }
+
+      inputSeries.points.show = show == null ? true : show;
+
+
+
+      return inputSeries;
     });
   }
 };

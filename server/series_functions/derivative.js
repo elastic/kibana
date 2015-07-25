@@ -9,15 +9,15 @@ module.exports = {
     }
   ],
   help: 'Show the seriesList as bars',
-  fn: function derivative (inputSeries) {
-  return alter([inputSeries], function (args) {
-      var pairs = args[0].data;
-      args[0].data = _.map(pairs, function(point, i) {
+  fn: function derivativeFn (args) {
+  return alter(args, function (inputSeries) {
+      var pairs = inputSeries.data;
+      inputSeries.data = _.map(pairs, function(point, i) {
         if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
         return [point[0], point[1] - pairs[i - 1][1]];
       });
 
-      return args[0];
+      return inputSeries;
     });
   }
 };

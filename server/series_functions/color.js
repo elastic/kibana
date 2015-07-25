@@ -7,15 +7,15 @@ module.exports = {
       types: ['seriesList']
     },
     {
-      name: 'rgbColor',
+      name: 'color',
       types: ['string']
     }
   ],
   help: 'Change the color of the series',
-  fn: function color (inputSeries, rgbColor) {
-    return alter([inputSeries, rgbColor], function (args) {
-      args[0].color = args[1];
-      return args[0];
+  fn: function colorFn (args) {
+    return alter(args, function (inputSeries, color) {
+      inputSeries.color = color;
+      return inputSeries;
     });
   }
 };
