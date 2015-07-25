@@ -69,6 +69,10 @@ define(function (require) {
       this.remove(path);
     };
 
+    PersistedState.prototype.save = function () {
+      this._saveState(this._changedState);
+    };
+
     PersistedState.prototype.toJSON = function () {
       return this.get();
     };
@@ -123,6 +127,7 @@ define(function (require) {
 
       // if this is the initial state value, save value as the default
       if (initialState) {
+        this._changedState = {};
         if (!this._hasPath() && _.isUndefined(key)) this._defaultState = value;
         else this._defaultState = _.set({}, keyPath, value);
       }
@@ -142,7 +147,7 @@ define(function (require) {
           if (_.isArray(_.get(this._mergedState, keyPath))) {
             _.set(this._mergedState, keyPath, undefined);
           }
-          this._changedState = _.set(this._changedState || {}, keyPath, value);
+          _.set(this._changedState, keyPath, value);
         }
       }
 
@@ -159,6 +164,10 @@ define(function (require) {
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
 
       return this;
+    };
+
+    PersistedState.prototype._saveState = function (state) {
+      // TODO: persist the state
     };
 
     return PersistedState;

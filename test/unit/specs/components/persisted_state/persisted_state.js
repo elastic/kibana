@@ -416,6 +416,58 @@ define(function (require) {
 
     });
 
+    describe('save state', function () {
+      var saveStub;
+
+      function makeState(val, path) {
+        var state;
+        if (path) state = new PersistedState(val, path);
+        else state = new PersistedState(val);
+
+        saveStub = sinon.stub(state, '_saveState');
+        return state;
+      }
+
+      it('should not save default parent state', function () {
+        var persistedState = makeState({ one: 1, two: 2});
+
+        persistedState.save();
+        expect(saveStub.callCount).to.equal(1);
+        expect(saveStub.firstCall.args[0]).to.eql({});
+      });
+
+      it('should only save changed values', function () {
+        var persistedState = makeState({ one: 1, two: 2});
+
+        persistedState.set('one.two', 'three');
+        persistedState.save();
+        expect(saveStub.callCount).to.equal(1);
+        expect(saveStub.firstCall.args[0]).to.eql({ one: { two: 'three' }});
+      });
+
+      it('should not save default child state', function () {
+        var persistedState = makeState({ one: 1, two: 2});
+        persistedState.createChild('child_path', 'child_value');
+
+        persistedState.save();
+        expect(saveStub.callCount).to.equal(1);
+        expect(saveStub.firstCall.args[0]).to.eql({});
+      });
+
+      it('should only save changed child values', function () {
+        var persistedState = makeState({ one: 1, two: 2});
+        var child = persistedState.createChild('child_path', 'child_value');
+        child.set('me[gusta]', 'cosas deliciosas');
+        persistedState.save();
+        expect(saveStub.callCount).to.equal(1);
+        expect(saveStub.firstCall.args[0]).to.eql({
+          child_path: {
+            me: { gusta: 'cosas deliciosas' }
+          }
+        });
+      });
+    });
+
     describe('internal state tracking', function () {
       it('should be an empty object', function () {
         var persistedState = new PersistedState();
