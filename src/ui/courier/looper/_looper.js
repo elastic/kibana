@@ -9,7 +9,7 @@ define(function (require) {
       this._timer;
       this._started = false;
 
-      this._looperOver = _.bind(this._looperOver, this);
+      this._loopTheLoop = _.bind(this._loopTheLoop, this);
     }
 
     /**
@@ -59,7 +59,7 @@ define(function (require) {
       }
 
       if (loopOver) {
-        this._looperOver();
+        this._loopTheLoop();
       } else {
         this._scheduleLoop();
       }
@@ -126,7 +126,7 @@ define(function (require) {
      * @private
      * @return {undefined}
      */
-    Looper.prototype._looperOver = function () {
+    Looper.prototype._loopTheLoop = function () {
       var self = this;
 
       if (self.active) {
@@ -156,7 +156,7 @@ define(function (require) {
      */
     Looper.prototype._scheduleLoop = function () {
       this._unScheduleLoop();
-      this._timer = this._ms ? $timeout(this._looperOver, this._ms) : null;
+      this._timer = this._ms ? $timeout(this._loopTheLoop, this._ms) : null;
       return this._timer;
     };
 

@@ -19,7 +19,15 @@ define(function (require) {
     });
 
     searchLooper.onHastyLoop = function () {
-      notif.warning('Skipping search attempt because previous search request has not completed');
+      if (searchLooper.afterHastyQueued) return;
+
+      searchLooper.afterHastyQueued = Promise.resolve(searchLooper.active)
+      .then(function () {
+        return searchLooper._loopTheLoop();
+      })
+      .finally(function () {
+        searchLooper.afterHastyQueued = null;
+      });
     };
 
     return searchLooper;
