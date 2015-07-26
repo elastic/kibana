@@ -1,10 +1,10 @@
-var root = require('requirefrom')('');
 var _ = require('lodash');
 var sinon = require('sinon');
 var expect = require('expect.js');
-var createKibanaIndex = root('src/server/plugins/elasticsearch/lib/create_kibana_index');
-var SetupError = root('src/server/plugins/elasticsearch/lib/setup_error');
 var Promise = require('bluebird');
+
+var createKibanaIndex = require('../create_kibana_index');
+var SetupError = require('../setup_error');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {

@@ -1,10 +1,10 @@
-var root = require('requirefrom')('');
-var plugin = root('src/server/bin/plugin/plugin');
 var expect = require('expect.js');
 var sinon = require('sinon');
-var installer = root('src/server/bin/plugin/pluginInstaller');
-var remover = root('src/server/bin/plugin/pluginRemover');
-var settingParser = root('src/server/bin/plugin/settingParser');
+
+var plugin = require('../plugin');
+var installer = require('../pluginInstaller');
+var remover = require('../pluginRemover');
+var settingParser = require('../settingParser');
 
 describe('kibana cli', function () {
 

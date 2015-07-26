@@ -20,6 +20,8 @@ class UiApp {
     this.icon = this.spec.icon;
     this.hidden = this.spec.hidden;
     this.autoloadOverrides = this.spec.autoload;
+    this.templateName = this.spec.templateName || 'uiApp';
+    this.requireOptimizeGreen = this.spec.requireOptimizeGreen !== false;
     this.getModules = _.once(this.getModules);
   }
 

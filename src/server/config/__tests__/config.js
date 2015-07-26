@@ -1,5 +1,4 @@
-var root = require('requirefrom')('');
-var Config = root('src/server/lib/config/config');
+var Config = require('../Config');
 var expect = require('expect.js');
 var _ = require('lodash');
 var Joi = require('joi');
@@ -201,9 +200,8 @@ describe('lib/config/config', function () {
 
       it('should NOT allow you to extend the schema if somethign else is there', function () {
         var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
-        config.extendSchema('test', newSchema);
         var run = function () {
-          config.get('test.test');
+          config.extendSchema('test', newSchema);
         };
         expect(run).to.throwException();
       });

@@ -36,7 +36,7 @@ module.exports = function (server) {
         server.log(['error', 'elasticsearch'], err);
       };
       this.warning = function (message) {
-        server.log(['warning', 'elasticsearch'], '[ elasticsearch ] ' + message);
+        server.log(['warning', 'elasticsearch'], message);
       };
       this.info = _.noop;
       this.debug = _.noop;

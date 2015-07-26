@@ -1,28 +1,36 @@
-var root = require('requirefrom')('');
-var upgradeConfig = root('src/server/plugins/elasticsearch/lib/upgrade_config');
+var _ = require('lodash');
 var Promise = require('bluebird');
 var sinon = require('sinon');
 var expect = require('expect.js');
 
+var upgradeConfig = require('../upgrade_config');
+
 describe('pluigns/elasticsearch', function () {
   describe('lib/upgrade_config', function () {
+    var get;
+    var server;
+    var client;
+    var config;
+    var upgrade;
 
-    var get, server, client, config, upgrade;
     beforeEach(function () {
       get = sinon.stub();
-      get.withArgs('kibana.package.version').returns('4.0.1');
       get.withArgs('kibana.index').returns('.my-kibana');
+      get.withArgs('pkg.version').returns('4.0.1');
       client = { create: sinon.stub() };
       server = {
         log: sinon.stub(),
-        config: function () { return { get: get }; },
+        config: function () {
+          return {
+            get: get
+          };
+        },
         plugins: { elasticsearch: { client: client } }
       };
       upgrade = upgradeConfig(server);
     });
 
     describe('nothing is found', function () {
-      var env = process.env.NODE_ENV;
       var response = { hits: { hits:[] } };
 
       beforeEach(function () {
@@ -31,11 +39,14 @@ describe('pluigns/elasticsearch', function () {
 
       describe('production', function () {
         beforeEach(function () {
-          process.env.NODE_ENV = 'production';
+          get.withArgs('env.name').returns('production');
+          get.withArgs('env.prod').returns(true);
+          get.withArgs('env.dev').returns(false);
         });
 
-        it('should resolve buildNum to kibana.buildNum', function () {
-          get.withArgs('kibana.buildNum').returns(5801);
+        it('should resolve buildNum to pkg.buildNum', function () {
+          get.withArgs('pkg.buildNum').returns(5801);
+
           return upgrade(response).then(function (resp) {
             sinon.assert.calledOnce(client.create);
             var params = client.create.args[0][0];
@@ -53,7 +64,9 @@ describe('pluigns/elasticsearch', function () {
 
       describe('development', function () {
         beforeEach(function () {
-          process.env.NODE_ENV = 'development';
+          get.withArgs('env.name').returns('development');
+          get.withArgs('env.prod').returns(false);
+          get.withArgs('env.dev').returns(true);
         });
 
         it('should resolve buildNum to the max integer', function () {
@@ -69,12 +82,6 @@ describe('pluigns/elasticsearch', function () {
             expect(params).to.have.property('id', '@@version');
           });
         });
-
-
-      });
-
-      afterEach(function () {
-        process.env.NODE_ENV = env;
       });
     });
 
@@ -93,7 +100,7 @@ describe('pluigns/elasticsearch', function () {
     });
 
     it('should update the build number on the new config', function () {
-      get.withArgs('kibana.buildNum').returns(5801);
+      get.withArgs('pkg.buildNum').returns(5801);
       client.create.returns(Promise.resolve());
       var response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
       return upgrade(response).then(function (resp) {
@@ -108,7 +115,7 @@ describe('pluigns/elasticsearch', function () {
     });
 
     it('should update the build number to max integer if buildNum is template string', function () {
-      get.withArgs('kibana.buildNum').returns('@@buildNum');
+      get.withArgs('pkg.buildNum').returns('@@buildNum');
       client.create.returns(Promise.resolve());
       var response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
       return upgrade(response).then(function (resp) {
@@ -120,18 +127,21 @@ describe('pluigns/elasticsearch', function () {
     });
 
     it('should log a message for upgrades', function () {
-      get.withArgs('kibana.buildNum').returns(5801);
+      get.withArgs('pkg.buildNum').returns(5801);
       client.create.returns(Promise.resolve());
       var response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
       return upgrade(response).then(function (resp) {
         sinon.assert.calledOnce(server.log);
-        expect(server.log.args[0][0]).to.be('plugin');
-        expect(server.log.args[0][1]).to.be('[ elasticsearch ] Upgrade config from 4.0.0 to 4.0.1');
+        expect(server.log.args[0][0]).to.eql(['plugin', 'elasticsearch']);
+        var msg = server.log.args[0][1];
+        expect(msg).to.have.property('prevVersion', '4.0.0');
+        expect(msg).to.have.property('newVersion', '4.0.1');
+        expect(msg.tmpl).to.contain('Upgrade');
       });
     });
 
     it('should copy attributes from old config', function () {
-      get.withArgs('kibana.buildNum').returns(5801);
+      get.withArgs('pkg.buildNum').returns(5801);
       client.create.returns(Promise.resolve());
       var response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1, defaultIndex: 'logstash-*' } } ] } };
       return upgrade(response).then(function (resp) {

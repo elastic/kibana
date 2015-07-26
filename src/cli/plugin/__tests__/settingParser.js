@@ -1,7 +1,9 @@
-var root = require('requirefrom')('');
-var settingParser = root('src/server/bin/plugin/settingParser');
 var path = require('path');
 var expect = require('expect.js');
+
+var utils = require('requirefrom')('src/utils');
+var fromRoot = utils('fromRoot');
+var settingParser = require('../settingParser');
 
 describe('kibana cli', function () {
 
@@ -71,7 +73,7 @@ describe('kibana cli', function () {
         var options;
         var parser;
         beforeEach(function () {
-          options = { install: 'dummy/dummy' };
+          options = { install: 'dummy/dummy', pluginDir: fromRoot('installedPlugins') };
         });
 
         it('should require the user to specify either install and remove', function () {
@@ -224,7 +226,7 @@ describe('kibana cli', function () {
             parser = settingParser(options);
 
             var settings = parser.parse();
-            var expected = path.resolve(__dirname, '..', '..', '..', '..', '..', 'src', 'server', 'bin', 'plugins', 'test-plugin');
+            var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
           });
@@ -307,7 +309,7 @@ describe('kibana cli', function () {
             parser = settingParser(options);
 
             var settings = parser.parse();
-            var expected = path.resolve(__dirname, '..', '..', '..', '..', '..', 'src', 'server', 'bin', 'plugins', 'test-plugin');
+            var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
           });

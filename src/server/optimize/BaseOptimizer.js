@@ -9,11 +9,12 @@ let webpack = require('webpack');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-let fromRoot = require('../../utils/fromRoot');
+let utils = require('requirefrom')('src/utils');
+let fromRoot = utils('fromRoot');
 let OptmzBundles = require('./OptmzBundles');
 let OptmzUiModules = require('./OptmzUiModules');
 
-let kbnTag = `Kibana ${ require('../../utils/closestPackageJson').getSync().version }`;
+let kbnTag = `Kibana ${ utils('packageJson').version }`;
 
 class BaseOptimizer extends EventEmitter {
   constructor(opts) {

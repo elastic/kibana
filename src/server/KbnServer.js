@@ -4,10 +4,12 @@ let _ = require('lodash');
 let EventEmitter = require('events').EventEmitter;
 let promify = require('bluebird').promisify;
 let resolve = require('bluebird').resolve;
+let fromNode = require('bluebird').fromNode;
 let Hapi = require('hapi');
 
-let rootDir = require('../utils/fromRoot')('.');
-let pkg = require('../utils/closestPackageJson').getSync();
+let utils = require('requirefrom')('src/utils');
+let rootDir = utils('fromRoot')('.');
+let pkg = utils('packageJson');
 
 module.exports = class KbnServer extends EventEmitter {
   constructor(settings) {
@@ -18,7 +20,7 @@ module.exports = class KbnServer extends EventEmitter {
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.server = new Hapi.Server();
-    this.settings = settings;
+    this.settings = settings || {};
 
     this.ready = _.constant(this.mixin(
       require('./config/setup'),
@@ -73,12 +75,13 @@ module.exports = class KbnServer extends EventEmitter {
     let server = self.server;
     let start = _.ary(promify(server.start, server), 0);
 
-    self.ready().then(function () {
+    return self.ready()
+    .then(function () {
       return self.mixin(start, require('./pid'));
     })
     .then(
       function () {
-        server.log('info', 'Server running at ' + server.info.uri);
+        server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
         self.emit('listening');
         return server;
       },
@@ -87,7 +90,18 @@ module.exports = class KbnServer extends EventEmitter {
         self.emit('error', err);
       }
     );
+  }
 
-    return this;
+  close() {
+    let self = this;
+
+    return fromNode(function (cb) {
+      self.server.stop(cb);
+    })
+    .then(function () {
+      if (self.optimizer && self.optimizer.disable) {
+        return self.optimizer.disable();
+      }
+    });
   }
 };

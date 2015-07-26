@@ -21,6 +21,7 @@ let typeColors = {
   server: 'brightBlack',
   optmzr: 'white',
   optimize: 'magenta',
+  listening: 'magenta'
 };
 
 let color = _.memoize(function (name) {

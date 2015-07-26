@@ -1,7 +1,7 @@
-var root = require('requirefrom')('');
-var pluginLogger = root('src/server/bin/plugin/pluginLogger');
 var expect = require('expect.js');
 var sinon = require('sinon');
+
+var pluginLogger = require('../pluginLogger');
 
 describe('kibana cli', function () {
 

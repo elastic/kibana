@@ -1,7 +1,9 @@
 'use strict';
 
 let _ = require('lodash');
-let pkg = require('../utils/closestPackageJson').getSync();
+
+let utils = require('requirefrom')('src/utils');
+let pkg = utils('packageJson');
 let Command = require('./Command');
 
 let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();

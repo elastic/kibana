@@ -64,10 +64,14 @@ module.exports = class Config {
       env: env,
       prod: env === 'production',
       dev: env === 'development',
+      notProd: env !== 'production',
+      notDev: env !== 'development'
     };
 
-    if (!context.dev && !context.prod) {
-      throw new TypeError(`Unexpected environment "${env}", expected one of "development" or "production"`);
+    if (!context.dev && !context.prod && !context.test) {
+      throw new TypeError(
+        `Unexpected environment "${env}", expected one of "development" or "production"`
+      );
     }
 
     let results = Joi.validate(newConfig, this.schema, {

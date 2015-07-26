@@ -1,6 +1,8 @@
 'use strict';
 
 module.exports = function (kbnServer, server, config) {
+  if (!config.get('optimize.enabled')) return;
+
   var _ = require('lodash');
   var resolve = require('path').resolve;
   var fromRoot = require('../../utils/fromRoot');

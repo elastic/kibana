@@ -1,5 +1,4 @@
-var root = require('requirefrom')('');
-var override = root('src/server/lib/config/override');
+var override = require('../override');
 var expect = require('expect.js');
 
 describe('override(target, source)', function () {

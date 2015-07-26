@@ -1,4 +1,3 @@
-﻿var root = require('requirefrom')('');
 var expect = require('expect.js');
 var sinon = require('sinon');
 var nock = require('nock');
@@ -6,9 +5,10 @@ var glob = require('glob');
 var rimraf = require('rimraf');
 var fs = require('fs');
 var join = require('path').join;
-var pluginLogger = root('src/server/bin/plugin/pluginLogger');
-var pluginInstaller = root('src/server/bin/plugin/pluginInstaller');
 var Promise = require('bluebird');
+
+var pluginLogger = require('../pluginLogger');
+var pluginInstaller = require('../pluginInstaller');
 
 describe('kibana cli', function () {
 

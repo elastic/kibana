@@ -12,7 +12,7 @@ module.exports = function (kbnServer, server, config) {
     }
     else if (config.get('logging.quiet')) {
       _.defaults(events, {
-        log: ['error', 'fatal'],
+        log: ['listening', 'error', 'fatal'],
         error: '*'
       });
     }

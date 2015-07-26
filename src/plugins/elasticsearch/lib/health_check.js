@@ -53,7 +53,7 @@ module.exports = function (plugin, server) {
 
   function check() {
     return waitForPong()
-    .then(_.partial(checkEsVersion, server))
+    .then(_.partial(checkEsVersion, server, plugin))
     .then(waitForShards)
     .then(_.partial(migrateConfig, server))
     .catch(_.bindKey(server, 'log', 'error'));

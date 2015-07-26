@@ -1,10 +1,9 @@
-var root = require('requirefrom')('');
-var healthCheck = root('src/server/plugins/elasticsearch/lib/health_check');
 var Promise = require('bluebird');
 var sinon = require('sinon');
 var expect = require('expect.js');
 var NoConnections = require('elasticsearch').errors.NoConnections;
 
+var healthCheck = require('../health_check');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {

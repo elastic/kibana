@@ -1,11 +1,36 @@
 var _ = require('lodash');
-var root = require('requirefrom')('');
-var validateRequest = root('src/server/plugins/elasticsearch/lib/validate');
 var expect = require('expect.js');
-var server =  { config: root('src/server/lib/config') };
-var config = server.config();
+var src = require('requirefrom')('src');
+
+var fromRoot = src('utils/fromRoot');
+var KbnServer = src('server/KbnServer');
+var validateRequest = require('../validate');
+
 
 describe('plugins/elasticsearch', function () {
+  var kbnServer;
+  var server;
+  var config;
+
+  before(function () {
+    kbnServer = new KbnServer({
+      server: { autoListen: false },
+      plugins: { scanDirs: [ fromRoot('src/plugins') ] },
+      logging: { quiet: true },
+      optimize: { enabled: false }
+    });
+
+    return kbnServer.ready()
+    .then(function () {
+      server = kbnServer.server;
+      config = kbnServer.config;
+    });
+  });
+
+  after(function () {
+    kbnServer.close();
+  });
+
   describe('lib/validate', function () {
 
     function del(path, body, valid) {

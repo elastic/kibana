@@ -5,8 +5,9 @@ let join = require('path').join;
 let _ = require('lodash');
 var chokidar = require('chokidar');
 
+let utils = require('requirefrom')('src/utils');
+let fromRoot = utils('fromRoot');
 let Log = require('../Log');
-let fromRoot = require('../../utils/fromRoot');
 let Worker = require('./Worker');
 
 module.exports = function (opts) {

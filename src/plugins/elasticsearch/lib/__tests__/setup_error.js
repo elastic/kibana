@@ -1,5 +1,4 @@
-var root = require('requirefrom')('');
-var SetupError = root('src/server/plugins/elasticsearch/lib/setup_error');
+var SetupError = require('../setup_error');
 var expect = require('expect.js');
 
 describe('plugins/elasticsearch', function () {

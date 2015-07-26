@@ -15,8 +15,10 @@ module.exports = function (server, kbnServer) {
     method: 'GET',
     handler: function (req, reply) {
       return reply.renderApp(new UiApp(kbnServer.uiExports, {
-        id: 'tests'
-      }), 'testHarness');
+        id: 'tests',
+        templateName: 'testHarness',
+        requireOptimizeGreen: false
+      }));
     }
   });
 

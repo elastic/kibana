@@ -3,7 +3,9 @@
 let _ = require('lodash');
 let fs = require('fs');
 let yaml = require('js-yaml');
-let fromRoot = require('../../utils/fromRoot');
+
+let utils = require('requirefrom')('src/utils');
+let fromRoot = utils('fromRoot');
 
 let legacySettingMap = {
   // server

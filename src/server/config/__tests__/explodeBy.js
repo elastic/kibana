@@ -1,5 +1,4 @@
-var root = require('requirefrom')('');
-var explodeBy = root('src/server/lib/config/explode_by');
+var explodeBy = require('../explodeBy');
 var expect = require('expect.js');
 
 describe('explode_by(dot, flatObject)', function () {

@@ -1,8 +1,10 @@
+var utils = require('requirefrom')('src/utils');
+var fromRoot = utils('fromRoot');
+
 var settingParser = require('./settingParser');
 var installer = require('./pluginInstaller');
 var remover = require('./pluginRemover');
 var pluginLogger = require('./pluginLogger');
-var fromRoot = require('../../utils/fromRoot');
 
 module.exports = function (program) {
   function processCommand(command, options) {
@@ -40,7 +42,7 @@ module.exports = function (program) {
     .option(
       '-d, --plugin-dir <path>',
       'The path to the directory where plugins are stored',
-      fromRoot('installed_plugins')
+      fromRoot('installedPlugins')
     )
     .description(
       'Maintain Plugins',

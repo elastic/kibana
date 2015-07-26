@@ -11,8 +11,6 @@ module.exports = function (grunt) {
       'jshint:source',
       'jscs:source',
       'maybeStartKibana',
-      'jade',
-      'less:build',
       'simplemocha:all',
       'mocha:unit'
     ];

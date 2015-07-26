@@ -1,60 +1,96 @@
 var expect = require('expect.js');
 var sinon = require('sinon');
-var Status = require('../../../../../src/server/lib/status/status');
+var Status = require('../Status');
+var ServerStatus = require('../ServerStatus');
 
-describe('lib/status/status.js', function () {
+describe('Status class', function () {
 
-  it('should have a undefined state when initialized', function () {
-    var obj = new Status('test');
-    expect(obj).to.have.property('state');
-    expect(obj.statue).to.be(undefined);
+  var server;
+  var serverStatus;
+
+  beforeEach(function () {
+    server = { expose: sinon.stub(), log: sinon.stub() };
+    serverStatus = new ServerStatus(server);
   });
 
-  it('should only trigger the change listner when something changes', function () {
-    var obj = new Status('test');
+  it('should have an "uninitialized" state initially', function () {
+    expect(serverStatus.create('test')).to.have.property('state', 'uninitialized');
+  });
+
+  it('emits change when the status is set', function (done) {
+    var status = serverStatus.create('test');
+
+    status.once('change', function (prev, prevMsg) {
+      expect(status.state).to.be('green');
+      expect(status.message).to.be('GREEN');
+      expect(prev).to.be('uninitialized');
+
+      status.once('change', function (prev, prevMsg) {
+        expect(status.state).to.be('red');
+        expect(status.message).to.be('RED');
+        expect(prev).to.be('green');
+        expect(prevMsg).to.be('GREEN');
+
+        done();
+      });
+
+      status.red('RED');
+    });
+
+    status.green('GREEN');
+  });
+
+  it('should only trigger the change listener when something changes', function () {
+    var status = serverStatus.create('test');
     var stub = sinon.stub();
-    obj.on('change', stub);
-    obj.green('Ready');
-    obj.green('Ready');
-    obj.red('Not Ready');
+    status.on('change', stub);
+    status.green('Ready');
+    status.green('Ready');
+    status.red('Not Ready');
     sinon.assert.calledTwice(stub);
   });
 
   it('should create a JSON representation of the status', function () {
-    var obj = new Status('test');
-    obj.green('Ready');
-    expect(obj.toJSON()).to.eql({ state: 'green', message: 'Ready' });
+    var status = serverStatus.create('test');
+    status.green('Ready');
+
+    var json = status.toJSON();
+    expect(json.state).to.eql('green');
+    expect(json.message).to.eql('Ready');
   });
 
   function testState(color) {
-    it('should change the state to ' + color + ' when #' + color + '() is called', function () {
-      var obj = new Status('test');
+    it(`should change the state to ${color} when #${color}() is called`, function () {
+      var status = serverStatus.create('test');
       var message = 'testing ' + color;
-      obj[color](message);
-      expect(obj).to.have.property('state', color);
-      expect(obj).to.have.property('message', message);
+      status[color](message);
+      expect(status).to.have.property('state', color);
+      expect(status).to.have.property('message', message);
     });
 
-    it('should trigger the "change" listner when #' + color + '() is called', function (done) {
-      var obj = new Status('test');
+    it(`should trigger the "change" listner when #${color}() is called`, function (done) {
+      var status = serverStatus.create('test');
       var message = 'testing ' + color;
-      obj.on('change', function (current, previous) {
-        expect(current).to.eql({ state: color, message: message });
-        expect(previous).to.eql({ state: undefined, message: 'uninitialized' });
+      status.on('change', function (prev, prevMsg) {
+        expect(status.state).to.be(color);
+        expect(status.message).to.be(message);
+
+        expect(prev).to.be('uninitialized');
+        expect(prevMsg).to.be('uninitialized');
         done();
       });
-      obj[color](message);
+      status[color](message);
     });
 
-    it('should trigger the "' + color + '" listner when #' + color + '() is called', function (done) {
-      var obj = new Status('test');
+    it(`should trigger the "${color}" listner when #${color}() is called`, function (done) {
+      var status = serverStatus.create('test');
       var message = 'testing ' + color;
-      obj.on(color, function (msg, prev) {
-        expect(msg).to.be(message);
-        expect(prev).to.eql({ state: undefined, message: 'uninitialized' });
+      status.on(color, function (prev, prevMsg) {
+        expect(status.state).to.be(color);
+        expect(status.message).to.be(message);
         done();
       });
-      obj[color](message);
+      status[color](message);
     });
   }
 

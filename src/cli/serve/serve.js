@@ -6,8 +6,9 @@ let resolve = require('path').resolve;
 
 let cwd = process.cwd();
 let readYamlConfig = require('./readYamlConfig');
-let fromRoot = require('../../utils/fromRoot');
-let KbnServer = require('../../server/KbnServer');
+let src = require('requirefrom')('src');
+let fromRoot = src('utils/fromRoot');
+let KbnServer = src('server/KbnServer');
 
 let pathCollector = function () {
   let paths = [];
@@ -39,7 +40,7 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('installed_plugins'),
+      fromRoot('installedPlugins'),
       fromRoot('src/plugins')
     ]
   )

@@ -72,6 +72,7 @@ module.exports = class Plugin {
       }
 
       let register = function (server, options, next) {
+        server.expose('status', self.status);
         Promise.try(self.externalInit, [server, options], self).nodeify(next);
       };
 

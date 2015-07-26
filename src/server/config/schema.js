@@ -1,15 +1,27 @@
-var Joi = require('joi');
-var fs = require('fs');
-var path = require('path');
-var package = require('../../utils/closestPackageJson').getSync();
-var fromRoot = require('../../utils/fromRoot');
+'use strict';
+
+let get = require('lodash').get;
+let Joi = require('joi');
+let fs = require('fs');
+let path = require('path');
+
+let utils = require('requirefrom')('src/utils');
+let fromRoot = utils('fromRoot');
+let pkg = utils('packageJson');
+let buildNum = get(pkg, 'build.num', '@@buildNum');
 
 module.exports = Joi.object({
+
+  pkg: Joi.object({
+    version: Joi.string().valid(pkg.version).default(pkg.version),
+    buildNum: Joi.string().valid(buildNum).default(buildNum)
+  }).default(),
 
   env: Joi.object({
     name: Joi.string().default(Joi.ref('$env')),
     dev: Joi.boolean().default(Joi.ref('$dev')),
-    prod: Joi.boolean().default(Joi.ref('$prod'))
+    prod: Joi.boolean().default(Joi.ref('$prod')),
+    test: Joi.boolean().default(Joi.ref('$test')),
   }).default(),
 
   pid: Joi.object({
@@ -64,6 +76,7 @@ module.exports = Joi.object({
   }).default(),
 
   optimize: Joi.object({
+    enabled: Joi.boolean().default(true),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(Joi.ref('$dev')),

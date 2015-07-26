@@ -34,8 +34,7 @@ function maybeStartES() {
   });
 }
 
-before(function () {
+module.exports = function () {
   this.timeout(120000);
   return maybeStartES();
-});
-
+};

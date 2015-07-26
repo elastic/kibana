@@ -1,23 +1,24 @@
 module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
 
-  server.decorate('reply', 'renderApp', function (app, view) {
+  server.decorate('reply', 'renderApp', function (app) {
 
-    var optimizeStatus = kbnServer.status.get('optimize');
-    switch (optimizeStatus && optimizeStatus.state) {
-    case 'yellow':
-      return this(`
-        <html>
-          <head><meta http-equiv="refresh" content="1"></head>
-          <body>${optimizeStatus.message}</body>
-        </html>
-      `).code(503);
+    if (app.requireOptimizeGreen) {
+      var optimizeStatus = kbnServer.status.get('optimize');
+      switch (optimizeStatus && optimizeStatus.state) {
+      case 'yellow':
+        return this(`
+          <html>
+            <head><meta http-equiv="refresh" content="1"></head>
+            <body>${optimizeStatus.message}</body>
+          </html>
+        `).code(503);
 
-    case 'red':
-      return this(`
-        <html><body>${optimizeStatus.message}</body></html>
-      `).code(500);
-
+      case 'red':
+        return this(`
+          <html><body>${optimizeStatus.message}</body></html>
+        `).code(500);
+      }
     }
 
     var payload = {
@@ -31,7 +32,7 @@ module.exports = function (kbnServer, server, config) {
       esShardTimeout: config.get('elasticsearch.shardTimeout')
     };
 
-    return this.view(view || 'uiApp', {
+    return this.view(app.templateName, {
       app: app,
       cacheBust: payload.cacheBust,
       kibanaPayload: payload

@@ -1,12 +1,12 @@
-﻿var root = require('requirefrom')('');
 var expect = require('expect.js');
 var sinon = require('sinon');
 var nock = require('nock');
 var glob = require('glob');
 var rimraf = require('rimraf');
 var join = require('path').join;
-var pluginLogger = root('src/server/bin/plugin/pluginLogger');
-var pluginDownloader = root('src/server/bin/plugin/pluginDownloader');
+
+var pluginLogger = require('../pluginLogger');
+var pluginDownloader = require('../pluginDownloader');
 
 describe('kibana cli', function () {
 

@@ -1,10 +1,10 @@
-﻿var root = require('requirefrom')('');
 var expect = require('expect.js');
 var sinon = require('sinon');
 var fs = require('fs');
 var rimraf = require('rimraf');
-var pluginCleaner = root('src/server/bin/plugin/pluginCleaner');
-var pluginLogger = root('src/server/bin/plugin/pluginLogger');
+
+var pluginCleaner = require('../pluginCleaner');
+var pluginLogger = require('../pluginLogger');
 
 describe('kibana cli', function () {
 

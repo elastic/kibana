@@ -1,37 +1,53 @@
-var root = require('requirefrom')('');
+var src = require('requirefrom')('src');
 var expect = require('expect.js');
-var Kibana = root('src/server');
-var findPort = require('./findPort');
-require('./_ensure_elasticsearch');
 var util = require('util');
 var format = util.format;
 
+var KbnServer = src('server/KbnServer');
+var fromRoot = src('utils/fromRoot');
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
-    var server, config;
+    before(require('./_ensure_elasticsearch'));
 
-    beforeEach(function () {
-      return findPort(7000, 8000).then(function (port) {
-        config = { 'kibana.server.port': port, 'logging.quiet': true};
-        var kibana = new Kibana(config);
-        return kibana.listen().then(function (_server) {
-          server = _server;
-        });
+    var kbnServer;
+
+    before(function () {
+      kbnServer = new KbnServer({
+        server: { autoListen: false },
+        logging: { quiet: true },
+        plugins: {
+          scanDirs: [
+            fromRoot('src/plugins')
+          ]
+        },
+        optimize: {
+          enabled: false
+        }
       });
+
+      return kbnServer.ready();
     });
 
-    afterEach(function (done) {
-      server.stop(done);
+
+    after(function () {
+      return kbnServer.close();
     });
+
 
     function testRoute(options) {
       var statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
-          server.inject(options, function (res) {
-            expect(res.statusCode).to.be(statusCode);
-            done();
+          kbnServer.server.inject(options, function (res) {
+            try {
+              expect(res.statusCode).to.be(statusCode);
+            } catch (e) {
+              done(e);
+              done = null;
+            } finally {
+              done && done();
+            }
           });
         });
       });
