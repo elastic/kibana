@@ -82,6 +82,7 @@ define(function (require) {
 
         return yScale(d.y0 + d.y);
       })
+      .defined(function (d) { return !_.isNull(d.y); })
       .interpolate(interpolate);
 
       // Data layers
@@ -162,12 +163,12 @@ define(function (require) {
         .append('g')
         .attr('class', 'points area');
 
-      // append the bars
+      // append the circles
       circles = layer
-      .selectAll('rect')
+      .selectAll('circles')
       .data(function appendData(data) {
-        return data.filter(function isNotZero(d) {
-          return d.y !== 0;
+        return data.filter(function isZeroOrNull(d) {
+          return d.y !== 0 && !_.isNull(d.y);
         });
       });
 

@@ -165,6 +165,9 @@
   &-agg {
     .flex-parent();
 
+    //IE10/11 - prevent flex item from overflowing
+    flex-basis: 100%;
+
     padding: @vis-editor-agg-editor-spacing;
 
     // wraps the .vis-editor-agg and nesting-indicator ^^

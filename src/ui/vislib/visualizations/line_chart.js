@@ -100,8 +100,10 @@ define(function (require) {
 
       var circles = layer
       .selectAll('circle')
-      .data(function appendData(d) {
-        return d;
+      .data(function appendData(data) {
+        return data.filter(function (d) {
+          return !_.isNull(d.y);
+        });
       });
 
       circles
@@ -191,6 +193,7 @@ define(function (require) {
       var ordered = this.handler.data.get('ordered');
       var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       var line = d3.svg.line()
+      .defined(function (d) { return !_.isNull(d.y); })
       .interpolate(interpolate)
       .x(function x(d) {
         if (ordered && ordered.date) {
