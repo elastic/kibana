@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var Promise = require('bluebird');
 var elasticsearch = require('elasticsearch');
 var exposeClient = require('./expose_client');
@@ -7,6 +8,7 @@ var checkEsVersion = require('./check_es_version');
 var NoConnections = elasticsearch.errors.NoConnections;
 var util = require('util');
 var format = util.format;
+
 module.exports = function (plugin, server) {
   var config = server.config();
   var client = server.plugins.elasticsearch.client;
@@ -49,42 +51,45 @@ module.exports = function (plugin, server) {
     });
   }
 
-  var running = false;
-
-  function runHealthCheck() {
-    if (running) {
-      setTimeout(function () {
-        healthCheck()
-        .then(runHealthCheck)
-        .catch(function (err) {
-          server.log('error', err);
-          runHealthCheck();
-        });
-      }, 2500);
-    }
+  function check() {
+    return waitForPong()
+    .then(_.partial(checkEsVersion, server))
+    .then(waitForShards)
+    .then(_.partial(migrateConfig, server))
+    .catch(_.bindKey(server, 'log', 'error'));
   }
 
-  function healthCheck() {
-    return waitForPong()
-    .then(checkEsVersion(server))
-    .then(waitForShards)
-    .then(migrateConfig(server));
+
+  var timeoutId = null;
+
+  function scheduleCheck(ms) {
+    if (timeoutId) return;
+
+    var myId = setTimeout(function () {
+      check().finally(function () {
+        if (timeoutId === myId) startorRestartChecking();
+      });
+    }, ms);
+
+    timeoutId = myId;
+  }
+
+  function startorRestartChecking() {
+    scheduleCheck(stopChecking() ? 2500 : 1);
+  }
+
+  function stopChecking() {
+    if (!timeoutId) return false;
+    clearTimeout(timeoutId);
+    timeoutId = null;
+    return true;
   }
 
   return {
-    isRunning: function () {
-      return running;
-    },
-    run: function () {
-      return healthCheck();
-    },
-    start: function () {
-      running = true;
-      return healthCheck().then(runHealthCheck, runHealthCheck);
-    },
-    stop: function () {
-      running = false;
-    }
+    run: check,
+    start: startorRestartChecking,
+    stop: stopChecking,
+    isRunning: function () { return !!timeoutId; },
   };
 
 };

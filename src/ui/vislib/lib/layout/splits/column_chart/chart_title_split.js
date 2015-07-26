@@ -1,5 +1,7 @@
 define(function () {
-  return function ChartTitleSplitFactory(d3) {
+  return function ChartTitleSplitFactory() {
+    var d3 = require('d3');
+
     /*
      * Adds div DOM elements to either the `.y-axis-chart-title` element or the
      * `.x-axis-chart-title` element based on the data layout.

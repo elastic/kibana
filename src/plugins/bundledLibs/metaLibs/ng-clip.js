@@ -6,3 +6,5 @@ window.ZeroClipboard.SWF_URL = require('file!bower_components/zeroclipboard/dist
 
 require('bower_components/ng-clip/src/ngClip');
 require('ui/modules').get('kibana', ['ngClipboard']);
+
+module.exports = window.ZeroClipboard;

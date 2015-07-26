@@ -61,7 +61,7 @@ describe('lib/config/config', function () {
 
     });
 
-    describe('#reset(object)', function () {
+    describe('#resetTo(object)', function () {
 
       var config;
       beforeEach(function () {
@@ -72,7 +72,7 @@ describe('lib/config/config', function () {
         config.set(data);
         var newData = config.get();
         newData.test.enable = false;
-        config.reset(newData);
+        config.resetTo(newData);
         expect(config.get()).to.eql(newData);
       });
 

@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var sinon = require('auto-release-sinon/mocha');
+  var sinon = require('auto-release-sinon');
 
   function MockState(defaults) {
     this.on = _.noop;

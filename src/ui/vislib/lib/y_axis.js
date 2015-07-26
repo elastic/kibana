@@ -1,5 +1,6 @@
 define(function (require) {
-  return function YAxisFactory(d3, Private) {
+  return function YAxisFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
     var errors = require('ui/errors');

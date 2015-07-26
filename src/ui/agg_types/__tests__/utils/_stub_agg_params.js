@@ -1,45 +1,43 @@
-define(function (require) {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon/mocha');
+var _ = require('lodash');
+var sinon = require('auto-release-sinon');
 
-  function ParamClassStub(parent, body) {
-    var stub = sinon.spy(body || function () {
-      stub.Super && stub.Super.call(this);
-    });
-    if (parent) _.class(stub).inherits(parent);
-    return stub;
-  }
+function ParamClassStub(parent, body) {
+  var stub = sinon.spy(body || function () {
+    stub.Super && stub.Super.call(this);
+  });
+  if (parent) _.class(stub).inherits(parent);
+  return stub;
+}
 
-  /**
-   * stub all of the param classes, but ensure that they still inherit properly.
-   * This method should be passed directly to ngMock.inject();
-   *
-   * ```js
-   * var stubParamClasses = require('specs/components/agg_types/utils/_stub_agg_params');
-   * describe('something', function () {
-   *   beforeEach(ngMock.inject(stubParamClasses));
-   * })
-   * ```
-   *
-   * @param  {PrivateLoader} Private - The private module loader, inject by passing this function to ngMock.inject()
-   * @return {undefined}
-   */
-  return function stubParamClasses(Private) {
-    var BaseAggParam = Private.stub(
-      require('ui/agg_types/param_types/base'),
-      ParamClassStub(null, function (config) {
-        _.assign(this, config);
-      })
-    );
+/**
+ * stub all of the param classes, but ensure that they still inherit properly.
+ * This method should be passed directly to ngMock.inject();
+ *
+ * ```js
+ * var stubParamClasses = require('./utils/_stub_agg_params');
+ * describe('something', function () {
+ *   beforeEach(ngMock.inject(stubParamClasses));
+ * })
+ * ```
+ *
+ * @param  {PrivateLoader} Private - The private module loader, inject by passing this function to ngMock.inject()
+ * @return {undefined}
+ */
+module.exports = function stubParamClasses(Private) {
+  var BaseAggParam = Private.stub(
+    require('ui/agg_types/param_types/base'),
+    ParamClassStub(null, function (config) {
+      _.assign(this, config);
+    })
+  );
 
-    Private.stub(
-      require('ui/agg_types/param_types/field'),
-      ParamClassStub(BaseAggParam)
-    );
+  Private.stub(
+    require('ui/agg_types/param_types/field'),
+    ParamClassStub(BaseAggParam)
+  );
 
-    Private.stub(
-      require('ui/agg_types/param_types/optioned'),
-      ParamClassStub(BaseAggParam)
-    );
-  };
-});
+  Private.stub(
+    require('ui/agg_types/param_types/optioned'),
+    ParamClassStub(BaseAggParam)
+  );
+};

@@ -1,5 +1,6 @@
 define(function (require) {
-  return function AlertsFactory(d3, Private) {
+  return function AlertsFactory(Private) {
+    var d3 = require('d3');
     var $ = require('jquery');
     var _ = require('lodash');
 

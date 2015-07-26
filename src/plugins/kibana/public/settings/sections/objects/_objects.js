@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var saveAs = require('file-saver');
+  var saveAs = require('@spalger/filesaver').saveAs;
   var registry = require('plugins/kibana/settings/saved_object_registry');
   var objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
 

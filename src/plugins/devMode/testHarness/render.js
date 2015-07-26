@@ -8,6 +8,8 @@ module.exports = function (server, kbnServer) {
 
   let TestBundler = require('./TestBundler')(server, kbnServer);
 
+  server.setupViews(resolve(__dirname, '../public'));
+
   let state = null;
   server.decorate('reply', 'renderTestPart', function (path, part, mimeType) {
     let reply = this;

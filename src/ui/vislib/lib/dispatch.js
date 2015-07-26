@@ -1,5 +1,6 @@
 define(function (require) {
-  return function DispatchClass(d3, Private) {
+  return function DispatchClass(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
     var Tooltip = Private(require('ui/vislib/components/tooltip/tooltip'));

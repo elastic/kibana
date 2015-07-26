@@ -1,77 +1,76 @@
-define(function (require) {
-  describe('listen component', function () {
-    var sinon = require('auto-release-sinon/mocha');
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
 
-    var $rootScope;
-    var Events;
+describe('listen component', function () {
+  var sinon = require('auto-release-sinon');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
-    require('ui/listen');
+  var $rootScope;
+  var Events;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function ($injector, Private) {
-      $rootScope = $injector.get('$rootScope');
-      Events = Private(require('ui/events'));
-    }));
+  require('ui/listen');
 
-    it('exposes the $listen method on all scopes', function () {
-      expect($rootScope.$listen).to.be.a('function');
-      expect($rootScope.$new().$listen).to.be.a('function');
-    });
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function ($injector, Private) {
+    $rootScope = $injector.get('$rootScope');
+    Events = Private(require('ui/events'));
+  }));
 
-    it('binds to an event emitter', function () {
-      var emitter = new Events();
-      var $scope = $rootScope.$new();
+  it('exposes the $listen method on all scopes', function () {
+    expect($rootScope.$listen).to.be.a('function');
+    expect($rootScope.$new().$listen).to.be.a('function');
+  });
 
-      function handler() {}
-      $scope.$listen(emitter, 'hello', handler);
+  it('binds to an event emitter', function () {
+    var emitter = new Events();
+    var $scope = $rootScope.$new();
 
-      expect(emitter._listeners.hello).to.have.length(1);
-      expect(emitter._listeners.hello[0].handler).to.be(handler);
-    });
+    function handler() {}
+    $scope.$listen(emitter, 'hello', handler);
 
-    it('binds to $scope, waiting for the destroy event', function () {
-      var emitter = new Events();
-      var $scope = $rootScope.$new();
+    expect(emitter._listeners.hello).to.have.length(1);
+    expect(emitter._listeners.hello[0].handler).to.be(handler);
+  });
 
-      sinon.stub($scope, '$on');
-      sinon.stub($rootScope, '$on');
+  it('binds to $scope, waiting for the destroy event', function () {
+    var emitter = new Events();
+    var $scope = $rootScope.$new();
 
-      function handler() {}
-      $scope.$listen(emitter, 'hello', handler);
+    sinon.stub($scope, '$on');
+    sinon.stub($rootScope, '$on');
 
-      expect($rootScope.$on).to.have.property('callCount', 0);
-      expect($scope.$on).to.have.property('callCount', 1);
+    function handler() {}
+    $scope.$listen(emitter, 'hello', handler);
 
-      var call = $scope.$on.firstCall;
-      expect(call.args[0]).to.be('$destroy');
-      expect(call.args[1]).to.be.a('function');
-    });
+    expect($rootScope.$on).to.have.property('callCount', 0);
+    expect($scope.$on).to.have.property('callCount', 1);
 
-    it('unbinds the event handler when $destroy is triggered', function () {
-      var emitter = new Events();
-      var $scope = $rootScope.$new();
+    var call = $scope.$on.firstCall;
+    expect(call.args[0]).to.be('$destroy');
+    expect(call.args[1]).to.be.a('function');
+  });
 
-      sinon.stub($scope, '$on');
-      sinon.stub(emitter, 'off');
+  it('unbinds the event handler when $destroy is triggered', function () {
+    var emitter = new Events();
+    var $scope = $rootScope.$new();
 
-      // set the listener
-      function handler() {}
-      $scope.$listen(emitter, 'hello', handler);
+    sinon.stub($scope, '$on');
+    sinon.stub(emitter, 'off');
 
-      // get the unbinder that was registered to $scope
-      var unbinder = $scope.$on.firstCall.args[1];
+    // set the listener
+    function handler() {}
+    $scope.$listen(emitter, 'hello', handler);
 
-      // call the unbinder
-      expect(emitter.off).to.have.property('callCount', 0);
-      unbinder();
-      expect(emitter.off).to.have.property('callCount', 1);
+    // get the unbinder that was registered to $scope
+    var unbinder = $scope.$on.firstCall.args[1];
 
-      // check that the off args were as expected
-      var call = emitter.off.firstCall;
-      expect(call.args[0]).to.be('hello');
-      expect(call.args[1]).to.be(handler);
-    });
+    // call the unbinder
+    expect(emitter.off).to.have.property('callCount', 0);
+    unbinder();
+    expect(emitter.off).to.have.property('callCount', 1);
+
+    // check that the off args were as expected
+    var call = emitter.off.firstCall;
+    expect(call.args[0]).to.be('hello');
+    expect(call.args[1]).to.be(handler);
   });
 });

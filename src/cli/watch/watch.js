@@ -16,8 +16,8 @@ module.exports = function (opts) {
     'src/fixtures',
     'src/server',
     'src/utils',
-    'src/plugins/**/*', // files at the root of a plugin
-    'config/**/*',
+    'src/plugins',
+    'config',
   ], {
     cwd: fromRoot('.'),
     ignore: 'src/plugins/*/public/**/*'

@@ -1,5 +1,6 @@
 define(function (require) {
-  return function PieChartFactory(d3, Private) {
+  return function PieChartFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
 

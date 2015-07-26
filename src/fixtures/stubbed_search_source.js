@@ -1,5 +1,5 @@
 define(function (require) {
-  var sinon = require('auto-release-sinon/mocha');
+  var sinon = require('auto-release-sinon');
   var searchResponse = require('fixtures/search_response');
 
   return function stubSearchSource(Private, $q) {

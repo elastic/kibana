@@ -1,5 +1,6 @@
 define(function (require) {
-  return function LayoutFactory(d3, Private) {
+  return function LayoutFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
 
     var layoutType = Private(require('ui/vislib/lib/layout/layout_types'));

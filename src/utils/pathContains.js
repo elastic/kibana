@@ -3,5 +3,5 @@
 let relative = require('path').relative;
 
 module.exports = function pathContains(root, child) {
-  return relative(root, child).slice(0, 2) !== '..';
+  return relative(child, root).slice(0, 2) !== '..';
 };

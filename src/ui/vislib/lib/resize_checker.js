@@ -128,8 +128,6 @@ define(function (require) {
      * @return {void}
      */
     ResizeChecker.prototype.check = function () {
-      if (window.DISABLE_RESIZE_CHECKER) return;
-
       var newSize = this.read();
       var dirty = this.saveSize(newSize);
       var dirtyChanged = this.saveDirty(dirty);
@@ -157,8 +155,6 @@ define(function (require) {
      * @return {integer} - the id of the next timer
      */
     ResizeChecker.prototype.startSchedule = function (schedule) {
-      if (window.DISABLE_RESIZE_CHECKER) return;
-
       this._tick = -1;
       this._currentSchedule = schedule;
       return this.continueSchedule();
@@ -171,8 +167,6 @@ define(function (require) {
      * @return {integer} - the id of the next timer
      */
     ResizeChecker.prototype.continueSchedule = function () {
-      if (window.DISABLE_RESIZE_CHECKER) return;
-
       clearTimeout(this._timerId);
 
       if (this._tick < this._currentSchedule.length - 1) {

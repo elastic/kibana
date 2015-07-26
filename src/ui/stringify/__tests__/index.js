@@ -1,9 +1,7 @@
-define(function (require) {
-  describe('Stringify Component', function () {
-    describe(require('specs/components/stringify/_conformance'));
-    describe(require('specs/components/stringify/_ip'));
-    describe(require('specs/components/stringify/_source'));
-    describe(require('specs/components/stringify/_string'));
-    describe(require('specs/components/stringify/_url'));
-  });
+describe('Stringify Component', function () {
+  require('./_conformance');
+  require('./_ip');
+  require('./_source');
+  require('./_string');
+  require('./_url');
 });

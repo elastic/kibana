@@ -1,5 +1,6 @@
 define(function () {
-  return function XAxisSplitFactory(d3) {
+  return function XAxisSplitFactory() {
+    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to the `.x-axis-div-wrapper` element based on the data layout.

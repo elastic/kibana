@@ -1,5 +1,6 @@
 define(function (require) {
-  return function HeatmapMarkerFactory(Private, d3) {
+  return function HeatmapMarkerFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var L = require('leaflet');
 

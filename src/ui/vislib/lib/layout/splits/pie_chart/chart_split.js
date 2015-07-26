@@ -1,5 +1,6 @@
 define(function () {
-  return function ChartSplitFactory(d3) {
+  return function ChartSplitFactory() {
+    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to the `.chart-wrapper` element based on the data layout.

@@ -1,87 +1,57 @@
-var COVERAGE = window.COVERAGE = !!(/coverage/i.test(window.location.search));
-var DISABLE_RESIZE_CHECKER = window.DISABLE_RESIZE_CHECKER = true;
-var SEED = parseFloat((window.location.search.match(/[&?]SEED=([^&]+)(?:&|$)/) || [])[1]);
-
-if (isNaN(SEED)) SEED = Date.now();
-console.log('Random-ness seed: ' + SEED);
 
 var Nonsense = require('Nonsense');
-Math.nonsense = new Nonsense(SEED);
-Math.random = function () {
-  return Math.nonsense.frac();
-};
-
+var sinon = require('sinon');
 var mocha = require('mocha');
+var chrome = require('ui/chrome');
+var $ = require('jquery');
+var _ = require('lodash');
+var parse = require('url').parse;
+
+var getFailedSpecsFromMochaRunner = require('./getFailedSpecsFromMochaRunner');
+require('./testHarness.less');
+
+var url = parse(window.location.href, true);
+var query = url.query;
+var seed = _.add(query.seed, 0) || Date.now();
+var coverage = _.has(query, 'coverage');
+
+
+/*** Setup seeded random ***/
+Math.random = _.bindKey(new Nonsense(seed), 'frac');
+Math.random.nonsense = new Nonsense(seed);
+console.log('Random-ness seed: ' + seed);
+
+
+/*** Setup mocha ***/
 mocha.setup({
   ui: 'bdd',
-  timeout: 5000,
-  reporter: 'html'
+  timeout: 5000
 });
 
-var angular = require('angular-mocks');
 
-function setupCoverage(done) {
+/*** Switch to coverage mode if needed ***/
+if (coverage) {
   document.title = document.title.replace('Tests', 'Coverage');
   mocha.reporter(require('testUtils/istanbul_reporter/reporter'));
 }
 
+
+/*** Setup auto releasing stubs and spys ***/
+require('auto-release-sinon').setupAutoRelease(sinon, window.afterEach);
+
+/*** Make sure that angular-mocks gets setup in the global suite **/
+require('ngMock');
+
+/*** Kick off mocha, called at the end of test entry files ***/
 exports.bootstrap = function () {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var sinon = require('sinon');
-
-  var _desc = window.describe;
-  window.describe = _.wrap(_desc, unwindDescribeArrays);
-  window.describe.only = _.wrap(_desc.only, unwindDescribeArrays);
-
   $('#mocha').html('');
 
-  if (COVERAGE) {
-    setupCoverage();
-  }
-
-  require('ui/chrome').setupAngular();
+  chrome.setupAngular();
 
   var xhr = sinon.useFakeXMLHttpRequest();
   window.mochaRunner = mocha.run().on('end', function () {
     window.mochaResults = this.stats;
-    window.mochaResults.details = getFailedTests(this);
+    window.mochaResults.details = getFailedSpecsFromMochaRunner(this);
     xhr.restore();
   });
-
-
-  function getFailedTests(runner) {
-    var fails = [];
-    var suiteStack = [];
-    (function recurse(suite) {
-      suiteStack.push(suite);
-      (suite.tests || [])
-      .filter(function (test) {
-          return test.state && test.state !== 'passed' && test.state !== 'pending';
-        })
-        .forEach(function (test) {
-          fails.push({
-            title: suiteStack.concat(test).reduce(function (title, suite) {
-              if (suite.title) {
-                return (title ? title + ' ' : '') + suite.title;
-              } else {
-                return title;
-              }
-            }, ''),
-            err: test.err ? (test.err.stack || test.err.message) : 'unknown error'
-          });
-        });
-      (suite.suites || []).forEach(recurse);
-      suiteStack.pop();
-    }(runner.suite));
-    return fails;
-  }
-
-  function unwindDescribeArrays(fn, name, body) {
-    if (!body && _.isArray(name)) {
-      body = name[1];
-      name = name[0];
-    }
-    return fn.call(this, name, body);
-  }
 };

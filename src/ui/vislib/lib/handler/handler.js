@@ -1,5 +1,6 @@
 define(function (require) {
-  return function HandlerBaseClass(d3, Private) {
+  return function HandlerBaseClass(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var errors = require('ui/errors');
 

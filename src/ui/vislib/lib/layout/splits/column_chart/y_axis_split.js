@@ -1,5 +1,7 @@
 define(function () {
-  return function YAxisSplitFactory(d3) {
+  return function YAxisSplitFactory() {
+    var d3 = require('d3');
+
     /*
      * Adds div DOM elements to the `.y-axis-div-wrapper` element based on the data layout.
      * For example, if the data has rows, it returns the same number of

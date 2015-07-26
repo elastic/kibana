@@ -12,10 +12,6 @@ define(function (require) {
     var template = _.template(require('ui/style_compile/style_compile.css.tmpl'));
     var locals = {};
 
-    $rootScope.$on('$destroy', function () {
-      $style.remove();
-    });
-
     // watch the value of the truncate:maxHeight config param
     $rootScope.$watch(function () {
       return config.get('truncate:maxHeight');

@@ -8,7 +8,6 @@ module.exports = function (server, kbnServer) {
 
   let srcPath = fromRoot('src');
 
-  server.setupViews(resolve(__dirname, 'views'));
   server.redirectToSlash('/tests/plugins/{pluginId}');
 
   server.route({

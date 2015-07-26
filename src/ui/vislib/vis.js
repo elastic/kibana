@@ -1,6 +1,7 @@
 define(function (require) {
-  return function VisFactory(d3, Private) {
+  return function VisFactory(Private) {
     var _ = require('lodash');
+    var d3 = require('d3');
 
     var ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     var Events = Private(require('ui/events'));

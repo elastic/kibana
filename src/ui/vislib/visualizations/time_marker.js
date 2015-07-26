@@ -1,7 +1,8 @@
 define(function (require) {
-  var datemath = require('ui/utils/datemath');
+  return function TimeMarkerFactory() {
+    var d3 = require('d3');
+    var datemath = require('ui/utils/datemath');
 
-  return function TimeMarkerFactory(d3) {
     function TimeMarker(times, xScale, height) {
       if (!(this instanceof TimeMarker)) {
         return new TimeMarker(times, xScale, height);

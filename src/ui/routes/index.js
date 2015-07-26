@@ -1,58 +1,59 @@
-define(function (require) {
-  var _ = require('lodash');
+var _ = require('lodash');
 
-  var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
-  var kibana = require('ui/modules').get('kibana', ['ngRoute']);
+var wrapRouteWithPrep = require('ui/routes/_wrap_route_with_prep');
 
-  function RouteManager() {
-    var when = [];
-    var defaults = [];
-    var otherwise;
+function RouteManager() {
+  var self = this;
+  var when = [];
+  var defaults = [];
+  var otherwise;
 
-    kibana.config(function ($routeProvider) {
-      when.forEach(function (args) {
-        var path = args[0];
-        var route = args[1] || {};
+  self.config = function ($routeProvider) {
+    when.forEach(function (args) {
+      var path = args[0];
+      var route = args[1] || {};
 
-        // merge in any defaults
-        defaults.forEach(function (args) {
-          if (args[0].test(path)) {
-            _.merge(route, args[1]);
-          }
-        });
-
-        if (route.reloadOnSearch === void 0) {
-          route.reloadOnSearch = false;
+      // merge in any defaults
+      defaults.forEach(function (args) {
+        if (args[0].test(path)) {
+          _.merge(route, args[1]);
         }
-
-        wrapRouteWithPrep(route);
-        $routeProvider.when(path, route);
       });
 
-      if (otherwise) {
-        wrapRouteWithPrep(otherwise);
-        $routeProvider.otherwise(otherwise);
+      if (route.reloadOnSearch === void 0) {
+        route.reloadOnSearch = false;
       }
+
+      wrapRouteWithPrep(route);
+      $routeProvider.when(path, route);
     });
 
-    return {
-      when: function (path, route) {
-        when.push([path, route]);
-        return this;
-      },
-      // before attaching the routes to the routeProvider, test the RE
-      // against the .when() path and add/override the resolves if there is a match
-      defaults: function (RE, def) {
-        defaults.push([RE, def]);
-        return this;
-      },
-      otherwise: function (route) {
-        otherwise = route;
-        return this;
-      },
-      RouteManager: RouteManager
-    };
-  }
+    if (otherwise) {
+      wrapRouteWithPrep(otherwise);
+      $routeProvider.otherwise(otherwise);
+    }
+  };
 
-  return new RouteManager();
-});
+  self.when = function (path, route) {
+    when.push([path, route]);
+    return self;
+  };
+
+  // before attaching the routes to the routeProvider, test the RE
+  // against the .when() path and add/override the resolves if there is a match
+  self.defaults = function (RE, def) {
+    defaults.push([RE, def]);
+    return self;
+  };
+
+  self.otherwise = function (route) {
+    otherwise = route;
+    return self;
+  };
+
+  self.RouteManager = RouteManager;
+}
+
+var defaultRouteManager = new RouteManager();
+require('ui/modules').get('kibana', ['ngRoute']).config(defaultRouteManager.config);
+module.exports = defaultRouteManager;

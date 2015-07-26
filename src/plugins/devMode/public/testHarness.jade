@@ -1,0 +1,8 @@
+extends ../../../server/ui/views/chrome.jade
+
+block head
+  link(rel='stylesheet', href='/tests/style.css')
+
+block content
+  #mocha Bundling tests, brb!
+  script(defer src='/tests/bundle.js')

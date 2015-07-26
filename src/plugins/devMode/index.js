@@ -28,10 +28,6 @@ module.exports = function devModePlugin(kibana) {
 
       modules: {
         ngMock$: 'plugins/devMode/ngMock',
-        sinon$: {
-          path: fromRoot('node_modules/sinon/pkg/sinon.js'),
-          parse: false
-        },
         fixtures: fromRoot('src/fixtures'),
         testUtils: fromRoot('src/testUtils'),
         mocha$: {

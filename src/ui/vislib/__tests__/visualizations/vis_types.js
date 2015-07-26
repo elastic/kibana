@@ -1,33 +1,23 @@
-define(function (require) {
-  var angular = require('angular');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var _ = require('lodash');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var _ = require('lodash');
 
-  angular.module('VisTypeFactory', ['kibana']);
+describe('Vislib Vis Types Test Suite', function () {
+  var visTypes;
+  var visFunc;
 
-  describe('Vislib Vis Types Test Suite', function () {
-    var visTypes;
-    var visFunc;
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private) {
+    visTypes = Private(require('ui/vislib/visualizations/vis_types'));
+    visFunc = visTypes.histogram;
+  }));
 
-    beforeEach(function () {
-      ngMock.module('VisTypeFactory');
-    });
-
-    beforeEach(function () {
-      ngMock.inject(function (d3, Private) {
-        visTypes = Private(require('ui/vislib/visualizations/vis_types'));
-        visFunc = visTypes.histogram;
-      });
-    });
-
-    it('should be an object', function () {
-      expect(_.isObject(visTypes)).to.be(true);
-    });
-
-    it('should return a function', function () {
-      expect(typeof visFunc).to.be('function');
-    });
+  it('should be an object', function () {
+    expect(_.isObject(visTypes)).to.be(true);
   });
 
+  it('should return a function', function () {
+    expect(typeof visFunc).to.be('function');
+  });
 });

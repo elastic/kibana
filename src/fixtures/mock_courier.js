@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var sinon = require('auto-release-sinon/mocha');
+  var sinon = require('auto-release-sinon');
 
   return function (Private, Promise) {
     var indexPatterns = Private(require('fixtures/stubbed_logstash_index_pattern'));

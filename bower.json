@@ -21,8 +21,6 @@
     "bluebird": "~2.9.27",
     "d3": "3.5.5",
     "elasticsearch": "~5.0.0",
-    "Faker": "1.1.0",
-    "FileSaver": "babc6d9d8f",
     "gridster": "0.5.6",
     "jquery": "2.1.4",
     "leaflet": "0.7.3",

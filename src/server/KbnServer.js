@@ -17,25 +17,26 @@ module.exports = class KbnServer extends EventEmitter {
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
-    this.settings = settings || {};
-
     this.server = new Hapi.Server();
-    require('./config')(this, this.server);
-    this.config = this.server.config();
+    this.settings = settings;
 
     this.ready = _.constant(this.mixin(
+      require('./config/setup'),
       require('./http'),
       require('./logging'),
       require('./status'), // sets this.status
       require('./plugins'), // sets this.plugins
+      require('./config/complete'),
       require('./ui'), // sets this.uiExports
-      require('./optimize')
+      require('./optimize'),
+      function () {
+        if (this.config.get('server.autoListen')) {
+          this.listen();
+        }
+      }
     ));
 
     this.listen = _.once(this.listen);
-    if (this.config.get('server.autoListen')) {
-      this.listen();
-    }
   }
 
   /**
@@ -49,14 +50,13 @@ module.exports = class KbnServer extends EventEmitter {
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */
   mixin(/* ...fns */) {
-    let fns = _.compact(_.toArray(arguments));
     let self = this;
-    let server = self.server;
-
-    return resolve(fns).each(function (fn) {
-      return fn.call(self, self, server, server.config());
+    return resolve(_.toArray(arguments))
+    .then(_.compact)
+    .each(function (fn) {
+      return fn.call(self, self, self.server, self.config);
     })
-    .then(_.noop); // clear the return value
+    .return(undefined);
   }
 
   /**

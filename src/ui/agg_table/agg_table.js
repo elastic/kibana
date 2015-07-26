@@ -25,7 +25,7 @@ define(function (require) {
         var self = this;
 
         self.sort = null;
-        self._saveAs = require('file-saver');
+        self._saveAs = require('@spalger/filesaver').saveAs;
         self.csv = {
           separator: config.get('csv:separator'),
           quoteValues: config.get('csv:quoteValues')

@@ -1,70 +1,69 @@
-define(function (require) {
-  describe('Filter Bar pushFilter()', function () {
-    var _ = require('lodash');
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
 
-    var pushFilterFn;
+describe('Filter Bar pushFilter()', function () {
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
-    beforeEach(ngMock.module('kibana'));
+  var pushFilterFn;
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    pushFilterFn = Private(require('ui/filter_bar/push_filter'));
+  }));
+
+  it('is a function that returns a function', function () {
+    expect(pushFilterFn).to.be.a(Function);
+    expect(pushFilterFn({})).to.be.a(Function);
+  });
+
+  it('throws an error if passed something besides an object', function () {
+    expect(pushFilterFn).withArgs(true).to.throwError();
+  });
+
+  describe('pushFilter($state)()', function () {
+    var $state;
+    var pushFilter;
+    var filter;
+
     beforeEach(ngMock.inject(function (Private, $injector) {
-      pushFilterFn = Private(require('ui/filter_bar/push_filter'));
+      $state = {filters:[]};
+      pushFilter = pushFilterFn($state);
+      filter = {query: {query_string: {query: ''}}};
     }));
 
-    it('is a function that returns a function', function () {
-      expect(pushFilterFn).to.be.a(Function);
-      expect(pushFilterFn({})).to.be.a(Function);
+    it('should create the filters property it needed', function () {
+      var altState = {};
+      pushFilterFn(altState)(filter);
+      expect(altState.filters).to.be.an(Array);
     });
 
-    it('throws an error if passed something besides an object', function () {
-      expect(pushFilterFn).withArgs(true).to.throwError();
+    it('should replace the filters property instead of modifying it', function () {
+      // If we push directly instead of using pushFilter a $watch('filters') does not trigger
+
+      var oldFilters;
+
+      oldFilters = $state.filters;
+      $state.filters.push(filter);
+      expect($state.filters).to.equal(oldFilters); // Same object
+
+      oldFilters = $state.filters;
+      pushFilter(filter);
+      expect($state.filters).to.not.equal(oldFilters); // New object!
     });
 
-    describe('pushFilter($state)()', function () {
-      var $state;
-      var pushFilter;
-      var filter;
+    it('should add meta data to the filter', function () {
+      pushFilter(filter, true, 'myIndex');
+      expect($state.filters[0].meta).to.be.an(Object);
 
-      beforeEach(ngMock.inject(function (Private, $injector) {
-        $state = {filters:[]};
-        pushFilter = pushFilterFn($state);
-        filter = {query: {query_string: {query: ''}}};
-      }));
+      expect($state.filters[0].meta.negate).to.be(true);
+      expect($state.filters[0].meta.index).to.be('myIndex');
 
-      it('should create the filters property it needed', function () {
-        var altState = {};
-        pushFilterFn(altState)(filter);
-        expect(altState.filters).to.be.an(Array);
-      });
-
-      it('should replace the filters property instead of modifying it', function () {
-        // If we push directly instead of using pushFilter a $watch('filters') does not trigger
-
-        var oldFilters;
-
-        oldFilters = $state.filters;
-        $state.filters.push(filter);
-        expect($state.filters).to.equal(oldFilters); // Same object
-
-        oldFilters = $state.filters;
-        pushFilter(filter);
-        expect($state.filters).to.not.equal(oldFilters); // New object!
-      });
-
-      it('should add meta data to the filter', function () {
-        pushFilter(filter, true, 'myIndex');
-        expect($state.filters[0].meta).to.be.an(Object);
-
-        expect($state.filters[0].meta.negate).to.be(true);
-        expect($state.filters[0].meta.index).to.be('myIndex');
-
-        pushFilter(filter, false, 'myIndex');
-        expect($state.filters[1].meta.negate).to.be(false);
-      });
-
-
-
+      pushFilter(filter, false, 'myIndex');
+      expect($state.filters[1].meta.negate).to.be(false);
     });
+
+
 
   });
+
 });

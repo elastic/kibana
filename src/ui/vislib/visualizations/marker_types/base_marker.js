@@ -1,5 +1,6 @@
 define(function (require) {
-  return function MarkerFactory(d3) {
+  return function MarkerFactory() {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');

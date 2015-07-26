@@ -1,5 +1,6 @@
 define(function (require) {
-  return function PointSeriesChartProvider(d3, Private) {
+  return function PointSeriesChartProvider(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));

@@ -7,23 +7,35 @@ let override = require('./override');
 
 module.exports = class Config {
   constructor(schema, defaults) {
-    this.schema = schema || Joi.object({}).default();
+    this.schema = Joi.object({}).default();
     this.config = {};
-    this.set(defaults);
+    this.unappliedDefaults = _.cloneDeep(defaults || {});
+    if (schema) this.extendSchema(schema);
   }
 
   extendSchema(key, schema) {
-    let additionalSchema = {};
-    if (!this.has(key)) {
-      additionalSchema[key] = schema;
-      this.schema = this.schema.keys(additionalSchema);
-      this.reset(this.config);
-    } else {
+    if (key && key.isJoi) {
+      return _.each(key._inner.children, function (child) {
+        this.extendSchema(child.key, child.schema);
+      }, this);
+    }
+
+    if (this.has(key)) {
       throw new Error(`Config schema already has key ${key}`);
     }
+
+    this.schema = this.schema.keys(_.set({}, key, schema));
+
+    if (this.unappliedDefaults[key]) {
+      this.set(key, this.unappliedDefaults[key]);
+      this.unappliedDefaults[key] = null;
+    } else {
+      this._commit(this.config);
+    }
+
   }
 
-  reset(obj) {
+  resetTo(obj) {
     this._commit(obj);
   }
 

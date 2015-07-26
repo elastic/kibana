@@ -1,5 +1,6 @@
 define(function (require) {
-  return function ColorPaletteUtilService(d3, Private) {
+  return function ColorPaletteUtilService(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
 
     var seedColors = Private(require('ui/vislib/components/color/seed_colors'));

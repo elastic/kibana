@@ -2,6 +2,7 @@ define(function (require) {
   return function VislibVisTypeFactory(Private) {
     var _ = require('lodash');
 
+    require('ui/vislib');
     var VisTypeSchemas = Private(require('ui/vis/Schemas'));
     var VisType = Private(require('ui/vis/VisType'));
     var pointSeries = Private(require('ui/agg_response/point_series/point_series'));

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function MapHandler(d3, Private) {
+  return function MapHandler(Private) {
     var _ = require('lodash');
 
     var Handler = Private(require('ui/vislib/lib/handler/handler'));

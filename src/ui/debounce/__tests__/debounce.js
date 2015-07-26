@@ -1,86 +1,85 @@
-define(function (require) {
-  var sinon = require('auto-release-sinon/mocha');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
-  var debounce;
-  var $timeout;
-  var $timeoutSpy;
+var sinon = require('auto-release-sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
-  function init() {
-    ngMock.module('kibana');
+var debounce;
+var $timeout;
+var $timeoutSpy;
 
-    ngMock.inject(function ($injector, _$timeout_) {
-      $timeout = _$timeout_;
-      $timeoutSpy = sinon.spy($timeout);
+function init() {
+  ngMock.module('kibana');
 
-      debounce = $injector.get('debounce');
+  ngMock.inject(function ($injector, _$timeout_) {
+    $timeout = _$timeout_;
+    $timeoutSpy = sinon.spy($timeout);
+
+    debounce = $injector.get('debounce');
+  });
+}
+
+describe('debounce service', function () {
+  var spy;
+  beforeEach(function () {
+    spy = sinon.spy(function () {});
+    init();
+  });
+
+  describe('API', function () {
+    it('should have a cancel method', function () {
+      var bouncer = debounce(function () {}, 100);
+      expect(bouncer).to.have.property('cancel');
     });
-  }
+  });
 
-  describe('debounce service', function () {
-    var spy;
-    beforeEach(function () {
-      spy = sinon.spy(function () {});
-      init();
+  describe('delayed execution', function () {
+    it('should delay execution', function () {
+      var bouncer = debounce(spy, 100);
+      bouncer();
+      expect(spy.callCount).to.be(0);
+      $timeout.flush();
+      expect(spy.callCount).to.be(1);
     });
 
-    describe('API', function () {
-      it('should have a cancel method', function () {
-        var bouncer = debounce(function () {}, 100);
-        expect(bouncer).to.have.property('cancel');
-      });
+    it('should fire on leading edge', function () {
+      var bouncer = debounce(spy, 100, { leading: true });
+      bouncer();
+      expect(spy.callCount).to.be(1);
+      $timeout.flush();
+      expect(spy.callCount).to.be(2);
     });
 
-    describe('delayed execution', function () {
-      it('should delay execution', function () {
-        var bouncer = debounce(spy, 100);
+    it('should only fire on leading edge', function () {
+      var bouncer = debounce(spy, 100, { leading: true, trailing: false });
+      bouncer();
+      expect(spy.callCount).to.be(1);
+      $timeout.flush();
+      expect(spy.callCount).to.be(1);
+    });
+
+    it('should reset delayed execution', function (done) {
+      var cancelSpy = sinon.spy($timeout, 'cancel');
+      var bouncer = debounce(spy, 100);
+      bouncer();
+      setTimeout(function () {
         bouncer();
         expect(spy.callCount).to.be(0);
         $timeout.flush();
         expect(spy.callCount).to.be(1);
-      });
-
-      it('should fire on leading edge', function () {
-        var bouncer = debounce(spy, 100, { leading: true });
-        bouncer();
-        expect(spy.callCount).to.be(1);
-        $timeout.flush();
-        expect(spy.callCount).to.be(2);
-      });
-
-      it('should only fire on leading edge', function () {
-        var bouncer = debounce(spy, 100, { leading: true, trailing: false });
-        bouncer();
-        expect(spy.callCount).to.be(1);
-        $timeout.flush();
-        expect(spy.callCount).to.be(1);
-      });
-
-      it('should reset delayed execution', function (done) {
-        var cancelSpy = sinon.spy($timeout, 'cancel');
-        var bouncer = debounce(spy, 100);
-        bouncer();
-        setTimeout(function () {
-          bouncer();
-          expect(spy.callCount).to.be(0);
-          $timeout.flush();
-          expect(spy.callCount).to.be(1);
-          expect(cancelSpy.callCount).to.be(1);
-          done();
-        }, 1);
-      });
-    });
-
-    describe('cancel', function () {
-      it('should cancel the $timeout', function () {
-        var cancelSpy = sinon.spy($timeout, 'cancel');
-        var bouncer = debounce(spy, 100);
-        bouncer();
-        bouncer.cancel();
         expect(cancelSpy.callCount).to.be(1);
-        $timeout.verifyNoPendingTasks(); // throws if pending timeouts
-      });
+        done();
+      }, 1);
+    });
+  });
+
+  describe('cancel', function () {
+    it('should cancel the $timeout', function () {
+      var cancelSpy = sinon.spy($timeout, 'cancel');
+      var bouncer = debounce(spy, 100);
+      bouncer();
+      bouncer.cancel();
+      expect(cancelSpy.callCount).to.be(1);
+      $timeout.verifyNoPendingTasks(); // throws if pending timeouts
     });
   });
 });

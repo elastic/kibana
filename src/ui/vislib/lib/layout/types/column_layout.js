@@ -1,5 +1,7 @@
 define(function (require) {
-  return function ColumnLayoutFactory(d3, Private) {
+  return function ColumnLayoutFactory(Private) {
+    var d3 = require('d3');
+
     var chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
     var yAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/y_axis_split'));
     var xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));

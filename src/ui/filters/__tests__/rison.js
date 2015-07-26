@@ -1,56 +1,55 @@
-define(function (require) {
-  var angular = require('angular');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
-  // Load kibana and its applications
-  require('plugins/kibana/discover/index');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
-  var rison;
-  var risonDecode;
+// Load kibana and its applications
+require('plugins/kibana/discover/index');
 
-  var init = function (expandable) {
-    // Load the application
-    ngMock.module('kibana');
+var rison;
+var risonDecode;
 
-    // Create the scope
-    ngMock.inject(function ($filter) {
-      rison = $filter('rison');
-      risonDecode = $filter('risonDecode');
-    });
+var init = function (expandable) {
+  // Load the application
+  ngMock.module('kibana');
+
+  // Create the scope
+  ngMock.inject(function ($filter) {
+    rison = $filter('rison');
+    risonDecode = $filter('risonDecode');
+  });
+};
+
+describe('rison filters', function () {
+  var testObj = {
+    time: {
+      from: 'now-15m',
+      to: 'now'
+    }
   };
+  var testRison = '(time:(from:now-15m,to:now))';
 
-  describe('rison filters', function () {
-    var testObj = {
-      time: {
-        from: 'now-15m',
-        to: 'now'
-      }
-    };
-    var testRison = '(time:(from:now-15m,to:now))';
+  beforeEach(function () {
+    init();
+  });
 
-    beforeEach(function () {
-      init();
+  describe('rison', function () {
+    it('should have the filter', function () {
+      expect(rison).to.not.be(null);
     });
 
-    describe('rison', function () {
-      it('should have the filter', function () {
-        expect(rison).to.not.be(null);
-      });
+    it('should rison encode data', function () {
+      expect(rison(testObj)).to.be(testRison);
+    });
+  });
 
-      it('should rison encode data', function () {
-        expect(rison(testObj)).to.be(testRison);
-      });
+  describe('risonDecode', function () {
+    it('should have the filter', function () {
+      expect(risonDecode).to.not.be(null);
     });
 
-    describe('risonDecode', function () {
-      it('should have the filter', function () {
-        expect(risonDecode).to.not.be(null);
-      });
-
-      it('should decode rison data', function () {
-        expect(risonDecode(testRison)).to.eql(testObj);
-      });
+    it('should decode rison data', function () {
+      expect(risonDecode(testRison)).to.eql(testObj);
     });
   });
 });

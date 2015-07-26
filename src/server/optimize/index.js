@@ -40,7 +40,7 @@ module.exports = function (kbnServer, server, config) {
     // query for initial status
     process.send(['WORKER_BROADCAST', { optimizeMsg: '?' }]);
     onMessage(function (wrkrStatus) {
-      status[wrkrStatus.state](`Worker ${wrkrStatus.message}`);
+      status[wrkrStatus.state](wrkrStatus.message);
     });
   }
 

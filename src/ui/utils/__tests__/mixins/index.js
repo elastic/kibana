@@ -1,7 +1,6 @@
-define(function (require) {
-  describe('lodash mixins', function () {
-    describe(require('specs/utils/mixins/_move'));
-    describe(require('specs/utils/mixins/_organize_by'));
-    describe(require('specs/utils/mixins/_push_all'));
-  });
+
+describe('lodash mixins', function () {
+  require('./_move');
+  require('./_organize_by');
+  require('./_push_all');
 });

@@ -1,72 +1,71 @@
-define(function (require) {
-  describe('$scope.$bind', function () {
-    var sinon = require('auto-release-sinon/mocha');
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
 
-    var $rootScope;
-    var $scope;
+describe('$scope.$bind', function () {
+  var sinon = require('auto-release-sinon');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function ($injector) {
-      $rootScope = $injector.get('$rootScope');
-      $scope = $rootScope.$new();
-    }));
+  var $rootScope;
+  var $scope;
 
-    it('exposes $bind on all scopes', function () {
-      expect($rootScope.$bind).to.be.a('function');
-      expect($scope).to.have.property('$bind', $rootScope.$bind);
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function ($injector) {
+    $rootScope = $injector.get('$rootScope');
+    $scope = $rootScope.$new();
+  }));
 
-      var $isoScope = $scope.$new(true);
-      expect($isoScope).to.have.property('$bind', $rootScope.$bind);
-    });
+  it('exposes $bind on all scopes', function () {
+    expect($rootScope.$bind).to.be.a('function');
+    expect($scope).to.have.property('$bind', $rootScope.$bind);
 
-    it('sets up binding from a parent scope to it\'s child', function () {
-      $rootScope.val = 'foo';
-      $scope.$bind('localVal', 'val');
-      expect($scope.localVal).to.be('foo');
+    var $isoScope = $scope.$new(true);
+    expect($isoScope).to.have.property('$bind', $rootScope.$bind);
+  });
 
-      $rootScope.val = 'bar';
-      expect($scope.localVal).to.be('foo'); // shouldn't have changed yet
+  it('sets up binding from a parent scope to it\'s child', function () {
+    $rootScope.val = 'foo';
+    $scope.$bind('localVal', 'val');
+    expect($scope.localVal).to.be('foo');
 
-      $rootScope.$apply();
-      expect($scope.localVal).to.be('bar');
-    });
+    $rootScope.val = 'bar';
+    expect($scope.localVal).to.be('foo'); // shouldn't have changed yet
 
-    it('sets up a binding from the child to the parent scope', function () {
-      var stub = sinon.stub();
+    $rootScope.$apply();
+    expect($scope.localVal).to.be('bar');
+  });
 
-      $rootScope.val = 'foo';
-      $scope.$bind('localVal', 'val');
-      expect($scope.localVal).to.be('foo');
+  it('sets up a binding from the child to the parent scope', function () {
+    var stub = sinon.stub();
 
-      $scope.localVal = 'bar';
-      expect($rootScope.val).to.be('foo'); // shouldn't have changed yet
+    $rootScope.val = 'foo';
+    $scope.$bind('localVal', 'val');
+    expect($scope.localVal).to.be('foo');
 
-      $scope.$apply();
-      expect($rootScope.val).to.be('bar');
-    });
+    $scope.localVal = 'bar';
+    expect($rootScope.val).to.be('foo'); // shouldn't have changed yet
 
-    it('pulls from the scopes $parent by default', function () {
-      var $parent = $rootScope.$new();
-      var $self = $parent.$new();
+    $scope.$apply();
+    expect($rootScope.val).to.be('bar');
+  });
 
-      $parent.val = 'foo';
-      $self.val = 'bar';
+  it('pulls from the scopes $parent by default', function () {
+    var $parent = $rootScope.$new();
+    var $self = $parent.$new();
 
-      $self.$bind('localVal', 'val');
-      expect($self.localVal).to.be('foo');
-    });
+    $parent.val = 'foo';
+    $self.val = 'bar';
 
-    it('accepts an alternate scope to read from', function () {
-      var $parent = $rootScope.$new();
-      var $self = $parent.$new();
+    $self.$bind('localVal', 'val');
+    expect($self.localVal).to.be('foo');
+  });
 
-      $parent.val = 'foo';
-      $self.val = 'bar';
+  it('accepts an alternate scope to read from', function () {
+    var $parent = $rootScope.$new();
+    var $self = $parent.$new();
 
-      $self.$bind('localVal', 'val', $self);
-      expect($self.localVal).to.be('bar');
-    });
+    $parent.val = 'foo';
+    $self.val = 'bar';
+
+    $self.$bind('localVal', 'val', $self);
+    expect($self.localVal).to.be('bar');
   });
 });

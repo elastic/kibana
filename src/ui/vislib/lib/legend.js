@@ -1,5 +1,6 @@
 define(function (require) {
-  return function LegendFactory(d3, Private) {
+  return function LegendFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var Dispatch = Private(require('ui/vislib/lib/dispatch'));
     var Data = Private(require('ui/vislib/lib/data'));

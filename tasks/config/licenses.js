@@ -39,7 +39,7 @@ module.exports = function (grunt) {
         'css-stringify@1.0.5': ['MIT'],
         'css@1.0.8': ['MIT'],
         'cycle@1.0.3': ['Public-Domain'],
-        'FileSaver@undefined': ['MIT'],
+        'FileSaver@1.1.0': ['MIT'],
         'flatten@0.0.1': ['MIT'],
         'indexof@0.0.1': ['MIT'],
         'inherits@1.0.0': ['ISC'],

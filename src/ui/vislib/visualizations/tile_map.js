@@ -1,5 +1,6 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private) {
+  return function TileMapFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
     require('ui/vislib/styles/main.less');

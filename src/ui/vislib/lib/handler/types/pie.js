@@ -1,5 +1,5 @@
 define(function (require) {
-  return function PieHandler(d3, Private) {
+  return function PieHandler(Private) {
     var Handler = Private(require('ui/vislib/lib/handler/handler'));
     var Data = Private(require('ui/vislib/lib/data'));
     var Legend = Private(require('ui/vislib/lib/legend'));

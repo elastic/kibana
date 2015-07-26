@@ -1,5 +1,6 @@
 define(function (require) {
-  return function DataFactory(d3, Private) {
+  return function DataFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
 
     var injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));

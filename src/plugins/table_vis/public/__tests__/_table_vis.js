@@ -3,7 +3,7 @@ describe('Integration', function () {
   var _ = require('lodash');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var sinon = require('auto-release-sinon/mocha');
+  var sinon = require('auto-release-sinon');
 
   var $rootScope;
   var TableGroup;

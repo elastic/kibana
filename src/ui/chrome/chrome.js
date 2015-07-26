@@ -31,8 +31,8 @@ require('./api/tabs')(chrome, internals);
 require('./api/template')(chrome, internals);
 require('./api/theme')(chrome, internals);
 
-chrome.bootstrap = function (angularModules) {
-  chrome.setupAngular(angularModules);
+chrome.bootstrap = function () {
+  chrome.setupAngular();
   angular.bootstrap(document, ['kibana']);
   $(document.body).children(':not(style-compile)').show();
 };

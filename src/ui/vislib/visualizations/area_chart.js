@@ -1,5 +1,6 @@
 define(function (require) {
-  return function AreaChartFactory(d3, Private) {
+  return function AreaChartFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
 

@@ -1,5 +1,6 @@
 define(function (require) {
-  return function TooltipFactory(d3, Private) {
+  return function TooltipFactory(Private) {
+    var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
     var positionTooltip = require('ui/vislib/components/tooltip/_position_tooltip');

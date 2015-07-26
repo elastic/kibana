@@ -40,15 +40,16 @@ module.exports = class Plugin {
 
     let id = self.id;
     let version = self.version;
+    let kbnStatus = self.kbnServer.status;
     let server = self.kbnServer.server;
+    let config = self.kbnServer.config;
 
-    let config = server.config();
     server.log(['plugins', 'debug'], {
       tmpl: 'Initializing plugin <%= plugin.id %>',
       plugin: self
     });
 
-    self.status = self.kbnServer.status.create(`plugin:${self.id}`);
+    self.status = kbnStatus.create(`plugin:${self.id}`);
     return Promise.try(function () {
       return self.getConfigSchema(Joi);
     })
