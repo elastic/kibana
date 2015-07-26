@@ -59,7 +59,13 @@ class BaseOptimizer extends EventEmitter {
 
       module: {
         loaders: [
-          { test: /\.less$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}!autoprefixer!less${mapQ}`) },
+          {
+            test: /\.less$/,
+            loader: ExtractTextPlugin.extract(
+              'style',
+              `css${mapQ}!autoprefixer?{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+            )
+          },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
           { test: /\.jade$/, loader: 'jade' },
           { test: /\.(html|tmpl)$/, loader: 'raw' },
