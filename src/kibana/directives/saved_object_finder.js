@@ -132,13 +132,13 @@ define(function (require) {
               $event.preventDefault();
               break;
             case 'enter':
-              if (self.hitCount === 1) {
-                var hit = self.hits[0];
-                if (!hit) return;
+              if (self.hitCount !== 1) return;
 
-                self.onChoose(hit, $event);
-                $event.preventDefault();
-              }
+              var hit = self.hits[0];
+              if (!hit) return;
+
+              self.onChoose(hit, $event);
+              $event.preventDefault();
               break;
           }
         };
