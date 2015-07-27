@@ -13,7 +13,7 @@ describe('Regex', function () {
   beforeEach(ngMock.inject(function (Private) {
     BaseAggParam = Private(require('ui/agg_types/param_types/base'));
     RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));
 

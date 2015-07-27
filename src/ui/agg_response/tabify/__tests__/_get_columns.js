@@ -8,7 +8,7 @@ describe('get columns', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));
 

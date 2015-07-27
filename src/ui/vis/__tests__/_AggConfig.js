@@ -11,9 +11,9 @@ describe('AggConfig', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vis/vis'));
-    AggType = Private(require('ui/agg_types/_agg_type'));
-    AggConfig = Private(require('ui/vis/AggConfig'));
+    Vis = Private(require('ui/Vis'));
+    AggType = Private(require('ui/agg_types/AggType'));
+    AggConfig = Private(require('ui/Vis/AggConfig'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     fieldFormat = Private(require('ui/registry/field_formats'));
   }));

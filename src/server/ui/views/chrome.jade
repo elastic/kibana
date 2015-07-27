@@ -1,4 +1,7 @@
 - var j = function (o) { return JSON.stringify(o); }
+- var appName = 'kibana';
+
+block vars
 
 doctype html
 html(lang='en')
@@ -9,6 +12,6 @@ html(lang='en')
     link(rel='shortcut icon', href='/ui/images/elk.ico')
     title Kibana
     block head
-  body(kbn-chrome)
+  body(kbn-chrome, id='#{appName}-body')
     script window.__KBN__ = !{j(kibanaPayload)};
     block content

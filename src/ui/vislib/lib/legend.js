@@ -8,8 +8,6 @@ define(function (require) {
     var dataLabel = require('ui/vislib/lib/_data_label');
     var color = Private(require('ui/vislib/components/color/color'));
 
-    require('ui/vislib/styles/main.less');
-
     /**
      * Appends legend to the visualization
      *

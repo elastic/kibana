@@ -19,8 +19,8 @@ describe('buildHierarchicalData()', function () {
     Notifier = $injector.get('Notifier');
     sinon.stub(Notifier.prototype, 'error');
 
-    Vis = Private(require('ui/vis/vis'));
-    AggConfigs = Private(require('ui/vis/AggConfigs'));
+    Vis = Private(require('ui/Vis'));
+    AggConfigs = Private(require('ui/Vis/AggConfigs'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
   }));

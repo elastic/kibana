@@ -40,10 +40,7 @@ describe('Vislib Line Chart', function () {
         };
 
         vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-        require('ui/vislib/styles/main.less');
-
         vis.on('brush', _.noop);
-
         vis.render(data);
       }));
 

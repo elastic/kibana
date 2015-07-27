@@ -15,7 +15,7 @@ describe('AggTableGroup Directive', function () {
   beforeEach(ngMock.inject(function ($injector, Private) {
     tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');

@@ -1,6 +1,6 @@
 define(function (require) {
   require('ui/compile_recursive_directive');
-  require('ui/agg_table/agg_table');
+  require('ui/agg_table');
 
   require('ui/modules')
   .get('kibana')

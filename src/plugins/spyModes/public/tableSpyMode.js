@@ -6,7 +6,7 @@ define(function (require) {
 
     var PER_PAGE_DEFAULT = 10;
 
-    require('ui/agg_table/agg_table');
+    require('ui/agg_table');
 
     return {
       name: 'table',

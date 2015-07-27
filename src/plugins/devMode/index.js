@@ -30,21 +30,11 @@ module.exports = function devModePlugin(kibana) {
         ngMock$: 'plugins/devMode/ngMock',
         fixtures: fromRoot('src/fixtures'),
         testUtils: fromRoot('src/testUtils'),
-        mocha$: {
-          path: fromRoot('node_modules/mocha/mocha.js'),
-          exports: 'window.mocha',
-          imports: 'mochaStyles'
-        },
-        mochaStyles$: fromRoot('node_modules/mocha/mocha.css'),
         'angular-mocks': {
           path: require.resolve('angular-mocks'),
-          imports: 'angular,mocha'
+          imports: 'angular'
         },
-      },
-
-      loaders: [
-        { test: /\/__tests__\//, loader: 'imports?mocha' }
-      ]
+      }
     }
   });
 };

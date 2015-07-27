@@ -27,7 +27,7 @@ describe('ResponseWriter class', function () {
       TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
       Buckets = Private(require('ui/agg_response/tabify/_buckets'));
       Table = Private(require('ui/agg_response/tabify/_table'));
-      Vis = Private(require('ui/vis/vis'));
+      Vis = Private(require('ui/Vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));
   }

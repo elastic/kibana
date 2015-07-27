@@ -5,7 +5,7 @@ define(function (require) {
     var TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
     var getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
 
-    var AggConfigResult = require('ui/vis/AggConfigResult');
+    var AggConfigResult = require('ui/Vis/AggConfigResult');
 
     _.class(SplitAcr).inherits(AggConfigResult);
     function SplitAcr(agg, parent, key) {

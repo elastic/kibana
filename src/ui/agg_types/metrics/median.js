@@ -1,8 +1,8 @@
 define(function (require) {
   return function AggTypeMetricMaxProvider(Private) {
     var _ = require('lodash');
-    var MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
-    var getResponseAggConfig = Private(require('ui/agg_types/metrics/_get_response_agg_config'));
+    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
     var percentiles = Private(require('ui/agg_types/metrics/percentiles'));
 
     return new MetricAggType({

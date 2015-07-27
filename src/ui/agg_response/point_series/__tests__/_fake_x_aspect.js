@@ -10,10 +10,10 @@ describe('makeFakeXAspect', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vis/vis'));
-    AggConfig = Private(require('ui/vis/AggConfig'));
-    AggType = Private(require('ui/agg_types/_agg_type'));
-    indexPattern = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
+    AggConfig = Private(require('ui/Vis/AggConfig'));
+    AggType = Private(require('ui/agg_types/AggType'));
+    indexPattern = Private(require('ui/Vis'));
     makeFakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
   }));
 

@@ -5,7 +5,7 @@ define(function (require) {
     var errors = require('ui/errors');
 
     var Dispatch = Private(require('ui/vislib/lib/dispatch'));
-    var Tooltip = Private(require('ui/vislib/components/tooltip/tooltip'));
+    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
     var dataLabel = require('ui/vislib/lib/_data_label');
 
     /**

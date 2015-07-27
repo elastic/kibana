@@ -7,7 +7,7 @@ define(function (require) {
     var arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
     var tooltipFormatter = Private(require('ui/agg_response/hierarchical/_hierarchical_tooltip_formatter'));
 
-    var AggConfigResult = require('ui/vis/AggConfigResult');
+    var AggConfigResult = require('ui/Vis/AggConfigResult');
 
     var notify = new Notifier({
       location: 'Pie chart response converter'

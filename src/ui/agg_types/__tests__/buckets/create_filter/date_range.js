@@ -12,8 +12,8 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/vis/vis'));
-      AggConfig = Private(require('ui/vis/AggConfig'));
+      Vis = Private(require('ui/Vis'));
+      AggConfig = Private(require('ui/Vis/AggConfig'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
     }));

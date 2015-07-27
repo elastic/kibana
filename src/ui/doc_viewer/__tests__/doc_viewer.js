@@ -22,7 +22,7 @@ var hit = {
 
 // Load the kibana app dependencies.
 require('ui/private');
-require('ui/doc_viewer/doc_viewer');
+require('ui/doc_viewer');
 
 
 var $parentScope, $scope, indexPattern, flattened;

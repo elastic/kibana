@@ -21,7 +21,7 @@ describe('Controller', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
   }));
 
   function OneRangeVis(params) {

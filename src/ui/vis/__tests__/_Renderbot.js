@@ -7,7 +7,7 @@ describe('renderbot', function () {
     ngMock.module('kibana');
 
     ngMock.inject(function (Private) {
-      Renderbot = Private(require('ui/vis/Renderbot'));
+      Renderbot = Private(require('ui/Vis/Renderbot'));
     });
   }
 

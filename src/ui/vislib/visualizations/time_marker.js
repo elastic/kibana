@@ -1,7 +1,7 @@
 define(function (require) {
   return function TimeMarkerFactory() {
     var d3 = require('d3');
-    var datemath = require('ui/utils/datemath');
+    var dateMath = require('ui/utils/dateMath');
 
     function TimeMarker(times, xScale, height) {
       if (!(this instanceof TimeMarker)) {
@@ -20,7 +20,7 @@ define(function (require) {
       this.height = height;
       this.times = (times.length) ? times.map(function (d) {
         return {
-          'time': datemath.parse(d.time),
+          'time': dateMath.parse(d.time),
           'class': d.class || 'time-marker',
           'color': d.color || '#c80000',
           'opacity': d.opacity || 0.3,

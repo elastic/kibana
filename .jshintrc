@@ -13,7 +13,8 @@
     "-name": true,
     "-Promise": true,
     "-Worker": true,
-    "-status": true
+    "-status": true,
+    "-fetch": true
   },
 
   // shared with .jshintrc files for browser and node

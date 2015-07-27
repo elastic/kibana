@@ -7,7 +7,7 @@ var storage;
 var $window;
 var payload = { first: 'john', last: 'smith' };
 
-require('ui/storage/storage');
+require('ui/storage');
 
 function init() {
   ngMock.module('kibana/storage', function ($provide) {

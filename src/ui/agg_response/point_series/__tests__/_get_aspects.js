@@ -12,9 +12,9 @@ describe('getAspects', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     Table = Private(require('ui/agg_response/point_series/_add_to_siri'));
-    AggConfig = Private(require('ui/vis/AggConfig'));
+    AggConfig = Private(require('ui/Vis/AggConfig'));
     getAspects = Private(require('ui/agg_response/point_series/_get_aspects'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));

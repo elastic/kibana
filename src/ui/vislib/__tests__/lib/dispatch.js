@@ -49,10 +49,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      require('ui/vislib/styles/main.less');
-
       vis.on('brush', _.noop);
-
       vis.render(data);
     }));
 

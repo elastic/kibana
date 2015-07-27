@@ -4,8 +4,8 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  require('ui/visualize/visualize');
-  require('ui/clipboard/clipboard');
+  require('ui/visualize');
+  require('ui/clipboard');
 
   require('ui/routes')
   .when('/visualize/create', {
@@ -49,9 +49,9 @@ define(function (require) {
 
     var _ = require('lodash');
     var angular = require('angular');
-    var ConfigTemplate = require('ui/utils/config_template');
-    var Notifier = require('ui/notify/_notifier');
-    var docTitle = Private(require('ui/doc_title/doc_title'));
+    var ConfigTemplate = require('ui/ConfigTemplate');
+    var Notifier = require('ui/notify/Notifier');
+    var docTitle = Private(require('ui/doc_title'));
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));

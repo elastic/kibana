@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeMetricMinProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
+    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
 
     return new MetricAggType({
       name: 'min',

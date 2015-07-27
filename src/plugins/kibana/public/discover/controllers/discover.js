@@ -2,24 +2,24 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var moment = require('moment');
-  var ConfigTemplate = require('ui/utils/config_template');
+  var ConfigTemplate = require('ui/ConfigTemplate');
   var getSort = require('ui/doc_table/lib/get_sort');
   var rison = require('ui/utils/rison');
 
-  var datemath = require('ui/utils/datemath');
+  var dateMath = require('ui/utils/dateMath');
 
-  require('ui/doc_table/doc_table');
-  require('ui/visualize/visualize');
-  require('ui/notify/notify');
-  require('ui/timepicker/timepicker');
+  require('ui/doc_table');
+  require('ui/visualize');
+  require('ui/notify');
+  require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
-  require('ui/validate_query/validate_query');
+  require('ui/validate_query');
   require('ui/filters/moment');
-  require('ui/courier/courier');
-  require('ui/index_patterns/index_patterns');
+  require('ui/courier');
+  require('ui/index_patterns');
   require('ui/state_management/app_state');
-  require('ui/timefilter/timefilter');
+  require('ui/timefilter');
   require('ui/highlight/highlight_tags');
 
   var app = require('ui/modules').get('apps/discover', [
@@ -66,12 +66,12 @@ define(function (require) {
   app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
     AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
-    var Vis = Private(require('ui/vis/vis'));
-    var docTitle = Private(require('ui/doc_title/doc_title'));
+    var Vis = Private(require('ui/Vis'));
+    var docTitle = Private(require('ui/doc_title'));
     var brushEvent = Private(require('ui/utils/brush_event'));
     var HitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var filterManager = Private(require('ui/filter_manager/filter_manager'));
+    var filterManager = Private(require('ui/filter_manager'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -406,8 +406,8 @@ define(function (require) {
 
     $scope.updateTime = function () {
       $scope.timeRange = {
-        from: datemath.parse(timefilter.time.from),
-        to: datemath.parse(timefilter.time.to, true)
+        from: dateMath.parse(timefilter.time.from),
+        to: dateMath.parse(timefilter.time.to, true)
       };
     };
 

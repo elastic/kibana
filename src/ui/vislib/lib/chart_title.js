@@ -5,7 +5,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
-    var Tooltip = Private(require('ui/vislib/components/tooltip/tooltip'));
+    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
 
     /**
      * Appends chart titles to the visualization

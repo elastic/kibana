@@ -26,7 +26,7 @@ describe('Histogram Agg', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      var AggParamWriter = Private(require('../aggParamWriter'));
+      var AggParamWriter = Private(require('../AggParamWriter'));
       paramWriter = new AggParamWriter({ aggType: 'histogram' });
     }));
 

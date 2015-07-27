@@ -2,7 +2,7 @@ define(function (require) {
   return function IndexNameIntervalsService(timefilter) {
     var _ = require('lodash');
     var moment = require('moment');
-    var IndexedArray = require('ui/indexed_array/index');
+    var IndexedArray = require('ui/IndexedArray');
 
     var intervals = new IndexedArray({
       index: ['name'],

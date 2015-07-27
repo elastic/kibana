@@ -3,8 +3,8 @@ define(function (require) {
     var _ = require('lodash');
 
     require('ui/vislib');
-    var VisTypeSchemas = Private(require('ui/vis/Schemas'));
-    var VisType = Private(require('ui/vis/VisType'));
+    var VisTypeSchemas = Private(require('ui/Vis/Schemas'));
+    var VisType = Private(require('ui/Vis/VisType'));
     var pointSeries = Private(require('ui/agg_response/point_series/point_series'));
     var VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
 

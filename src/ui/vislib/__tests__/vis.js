@@ -34,7 +34,6 @@ dataArray.forEach(function (data, i) {
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
       secondVis = Private(require('fixtures/vislib/_vis_fixture'))();
-      require('ui/vislib/styles/main.less');
     }));
 
     afterEach(function () {

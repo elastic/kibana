@@ -19,7 +19,7 @@ describe('renderbot', function exportWrapper() {
     ngMock.inject(function ($injector, Private) {
       vislib = Private(require('ui/vislib'));
       Vis = Private(require('ui/vislib/vis'));
-      Renderbot = Private(require('ui/vis/Renderbot'));
+      Renderbot = Private(require('ui/Vis/Renderbot'));
       VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
       normalizeChartData = Private(require('ui/agg_response/index'));
     });

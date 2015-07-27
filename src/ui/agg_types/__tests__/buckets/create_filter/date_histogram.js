@@ -21,10 +21,10 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      var Vis = Private(require('ui/vis/vis'));
+      var Vis = Private(require('ui/Vis'));
       var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-      var TimeBuckets = Private(require('ui/time_buckets/time_buckets'));
+      var TimeBuckets = Private(require('ui/time_buckets'));
       intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
 
       init = function (interval, duration) {

@@ -5,7 +5,7 @@ var $ = require('jquery');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 
-require('ui/filter_bar/filter_bar');
+require('ui/filter_bar');
 var MockState = require('fixtures/mock_state');
 
 describe('Filter Bar Directive', function () {

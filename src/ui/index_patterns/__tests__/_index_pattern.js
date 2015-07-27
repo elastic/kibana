@@ -5,7 +5,7 @@ describe('index pattern', function () {
   var expect = require('expect.js');
   var Promise = require('bluebird');
   var errors = require('ui/errors');
-  var IndexedArray = require('ui/indexed_array/index');
+  var IndexedArray = require('ui/IndexedArray');
   var IndexPattern;
   var mapper;
   var mappingSetup;

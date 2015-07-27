@@ -1,7 +1,7 @@
 define(function (require) {
   return function TileMapVisType(Private, getAppState, courier, config) {
     var VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
-    var Schemas = Private(require('ui/vis/Schemas'));
+    var Schemas = Private(require('ui/Vis/Schemas'));
     var geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
     var _ = require('lodash');
     var supports = require('ui/utils/supports');

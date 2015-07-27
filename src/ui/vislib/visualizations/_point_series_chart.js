@@ -4,7 +4,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
-    var Tooltip = Private(require('ui/vislib/components/tooltip/tooltip'));
+    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
     var touchdownTmpl = _.template(require('ui/vislib/partials/touchdown.tmpl.html'));
 
     _.class(PointSeriesChart).inherits(Chart);

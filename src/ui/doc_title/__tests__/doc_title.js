@@ -28,7 +28,7 @@ describe('docTitle Service', function () {
     if (_.random(0, 1)) {
       docTitle = $injector.get('docTitle');
     } else {
-      docTitle = Private(require('ui/doc_title/doc_title'));
+      docTitle = Private(require('ui/doc_title'));
     }
 
     $rootScope = $injector.get('$rootScope');

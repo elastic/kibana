@@ -3,7 +3,6 @@ define(function (require) {
     var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
-    require('ui/vislib/styles/main.less');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
     var Map = Private(require('ui/vislib/visualizations/_map'));

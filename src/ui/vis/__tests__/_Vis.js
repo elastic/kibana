@@ -22,7 +22,7 @@ describe('Vis Class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     visTypes = Private(require('ui/registry/vis_types'));
   }));

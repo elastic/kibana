@@ -5,7 +5,7 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 
 // Load the kibana app dependencies.
-require('ui/validate_query/validate_query');
+require('ui/validate_query');
 
 var $rootScope;
 var $timeout;

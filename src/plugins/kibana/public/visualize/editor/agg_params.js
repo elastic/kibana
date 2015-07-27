@@ -1,5 +1,5 @@
 define(function (require) {
-  var IndexedArray = require('ui/indexed_array/index');
+  var IndexedArray = require('ui/IndexedArray');
 
   require('ui/modules')
   .get('app/visualize')

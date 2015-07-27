@@ -1,5 +1,5 @@
 define(function (require) {
-  require('ui/field_editor/field_editor');
+  require('ui/field_editor');
   require('plugins/kibana/settings/sections/indices/_index_header');
 
   require('ui/routes')
@@ -17,7 +17,7 @@ define(function (require) {
     controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
       var Field = Private(require('ui/index_patterns/_field'));
       var notify = new Notifier({ location: 'Field Editor' });
-      var kbnUrl = Private(require('ui/url/url'));
+      var kbnUrl = Private(require('ui/url'));
 
 
       this.mode = $route.current.mode;

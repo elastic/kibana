@@ -2,7 +2,7 @@ define(function (require) {
   var html = require('ui/timepicker/timepicker.html');
   var module = require('ui/modules').get('ui/timepicker');
   var _ = require('lodash');
-  var datemath = require('ui/utils/datemath');
+  var dateMath = require('ui/utils/dateMath');
   var moment = require('moment');
 
   require('ui/directives/input_datetime');
@@ -84,7 +84,7 @@ define(function (require) {
               $scope.relative.count = parseInt(relativeParts[1], 10);
               $scope.relative.unit = relativeParts[2];
             } else {
-              var duration = moment.duration(moment().diff(datemath.parse($scope.from)));
+              var duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
               var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
               if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
               for (var i = 0; i < units.length; i++) {
@@ -102,8 +102,8 @@ define(function (require) {
 
             break;
           case 'absolute':
-            $scope.absolute.from = datemath.parse($scope.from || moment().subtract('minutes', 15));
-            $scope.absolute.to = datemath.parse($scope.to || moment(), true);
+            $scope.absolute.from = dateMath.parse($scope.from || moment().subtract('minutes', 15));
+            $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
             break;
           }
 
@@ -120,7 +120,7 @@ define(function (require) {
         };
 
         $scope.formatRelative = function () {
-          var parsed = datemath.parse(getRelativeString());
+          var parsed = dateMath.parse(getRelativeString());
           $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
           return parsed;
         };

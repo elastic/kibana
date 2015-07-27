@@ -1,5 +1,5 @@
 define(function (require) {
-  return function BucketCountBetweenUtil() {
+  return function BucketCountBetweenProvider() {
 
     /**
      * Count the number of bucket aggs between two agg config objects owned

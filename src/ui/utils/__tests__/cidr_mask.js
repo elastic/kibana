@@ -1,5 +1,5 @@
 
-var CidrMask = require('ui/utils/cidr_mask');
+var CidrMask = require('ui/utils/CidrMask');
 var expect = require('expect.js');
 
 describe('CidrMask', function () {

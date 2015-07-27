@@ -3,12 +3,15 @@
 module.exports = function (server, kbnServer) {
   let resolve = require('path').resolve;
 
-  let fromRoot = require('../../../utils/fromRoot');
-  let UiApp = require('../../../server/ui/UiApp');
+  let src = require('requirefrom')('src');
+  let fromRoot = src('utils/fromRoot');
+  let UiApp = src('server/ui/UiApp');
 
   let srcPath = fromRoot('src');
 
   server.redirectToSlash('/tests/plugins/{pluginId}');
+  server.exposeStaticFile('/tests/mocha.js', fromRoot('node_modules/mocha/mocha.js'));
+  server.exposeStaticFile('/tests/mocha.css', fromRoot('node_modules/mocha/mocha.css'));
 
   server.route({
     path: '/tests',

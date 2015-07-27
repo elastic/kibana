@@ -3,7 +3,7 @@ describe('pointSeriesChartDataFromTable', function () {
 
   var _ = require('lodash');
   var moment = require('moment');
-  var AggConfigResult = require('ui/vis/AggConfigResult');
+  var AggConfigResult = require('ui/Vis/AggConfigResult');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
@@ -14,7 +14,7 @@ describe('pointSeriesChartDataFromTable', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     Table = Private(require('ui/agg_response/tabify/_table'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     pointSeriesChartDataFromTable = Private(require('ui/agg_response/point_series/point_series'));

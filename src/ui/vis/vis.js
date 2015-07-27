@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var aggTypes = Private(require('ui/agg_types/index'));
     var visTypes = Private(require('ui/registry/vis_types'));
-    var AggConfigs = Private(require('ui/vis/AggConfigs'));
+    var AggConfigs = Private(require('ui/Vis/AggConfigs'));
 
     var notify = new Notifier({
       location: 'Vis'

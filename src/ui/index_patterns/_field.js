@@ -4,7 +4,7 @@ define(function (require) {
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
     var fieldTypes = Private(require('ui/index_patterns/_field_types'));
     var fieldFormats = Private(require('ui/registry/field_formats'));
-    var ObjDefine = require('ui/utils/obj_define');
+    var ObjDefine = require('ui/utils/ObjDefine');
 
     function Field(indexPattern, spec) {
       // unwrap old instances of Field

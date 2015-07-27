@@ -2,9 +2,9 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 
 describe('AggTypesComponent', function () {
-  require('./_agg_type');
-  require('./_agg_params');
-  require('./_bucket_count_between');
+  require('./AggType');
+  require('./AggParams');
+  require('./bucketCountBetween');
   require('./buckets/_histogram');
 
   describe('bucket aggs', function () {
@@ -31,7 +31,7 @@ describe('AggTypesComponent', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       metricAggs = Private(require('ui/agg_types/index')).byType.metrics;
-      MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
+      MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
     }));
 
     it('all extend MetricAggType', function () {

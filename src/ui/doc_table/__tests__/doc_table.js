@@ -9,7 +9,7 @@ var ngMock = require('ngMock');
 
 // Load the kibana app dependencies.
 require('ui/private');
-require('ui/doc_table/doc_table');
+require('ui/doc_table');
 
 
 var $parentScope, $scope, $timeout, searchSource;

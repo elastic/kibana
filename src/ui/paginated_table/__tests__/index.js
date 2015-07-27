@@ -1,5 +1,5 @@
 
-require('ui/paginated_table/paginated_table');
+require('ui/paginated_table');
 var _ = require('lodash');
 var $ = require('jquery');
 var sinon = require('sinon');

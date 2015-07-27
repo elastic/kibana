@@ -6,7 +6,7 @@ describe('NumberList directive', function () {
   var simulateKeys = require('testUtils/simulateKeys');
   var ngMock = require('ngMock');
 
-  require('ui/number_list/number_list');
+  require('ui/number_list');
 
   var $el;
   var $scope;

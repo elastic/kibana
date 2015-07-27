@@ -4,7 +4,7 @@ module.exports = function (grunt) {
       var http = require('http');
       var opts = {
         method: 'HEAD',
-        path: '/status/health',
+        path: '/api/status',
         host: 'localhost',
         port: options.port
       };

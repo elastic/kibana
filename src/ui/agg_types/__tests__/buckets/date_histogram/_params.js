@@ -14,13 +14,13 @@ describe('params', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    var AggParamWriter = Private(require('../../aggParamWriter'));
+    var AggParamWriter = Private(require('../../AggParamWriter'));
     var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     var timefilter = $injector.get('timefilter');
 
     timeField = indexPattern.timeFieldName;
     aggTypes = Private(require('ui/agg_types/index'));
-    AggConfig = Private(require('ui/vis/AggConfig'));
+    AggConfig = Private(require('ui/Vis/AggConfig'));
 
     paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
     writeInterval = function (interval) {

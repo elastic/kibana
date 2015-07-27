@@ -5,31 +5,16 @@ var ngMock = require('ngMock');
 var _ = require('lodash');
 var $ = require('jquery');
 
-// Data
-var seriesPos = require('fixtures/vislib/mock_data/date_histogram/_series');
-var seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-var seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-var termColumns = require('fixtures/vislib/mock_data/terms/_columns');
-var rangeRows = require('fixtures/vislib/mock_data/range/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
-
-var dataArray = [
-  seriesPos,
-  seriesPosNeg,
-  seriesNeg,
-  termColumns,
-  rangeRows,
-  stackedSeries,
-];
-
-var names = [
-  'series pos',
-  'series pos neg',
-  'series neg',
-  'term columns',
-  'range rows',
-  'stackedSeries',
-];
+var woahLotsOfVariables = require('fixtures/vislib/mock_data/date_histogram/_series');
+var notQuiteEnoughVariables = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
+var someOtherVariables = {
+  'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
+  'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
+  'series neg': require('fixtures/vislib/mock_data/date_histogram/_series_neg'),
+  'term columns': require('fixtures/vislib/mock_data/terms/_columns'),
+  'range rows': require('fixtures/vislib/mock_data/range/_rows'),
+  'stackedSeries': require('fixtures/vislib/mock_data/date_histogram/_stacked_series')
+};
 
 var visLibParams = {
   type: 'area',
@@ -37,18 +22,16 @@ var visLibParams = {
   addTooltip: true
 };
 
-dataArray.forEach(function (data, i) {
-  describe('Vislib Area Chart Test Suite for ' + names[i] + ' Data', function () {
+
+_.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
+  describe('Vislib Area Chart Test Suite for ' + imaVariable + ' Data', function () {
     var vis;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      require('ui/vislib/styles/main.less');
-
       vis.on('brush', _.noop);
-
-      vis.render(data);
+      vis.render(variablesAreCool);
     }));
 
     afterEach(function () {
@@ -57,37 +40,25 @@ dataArray.forEach(function (data, i) {
     });
 
     describe('checkIfEnoughData method throws an error when not enough data', function () {
-      var notEnoughData;
-
       beforeEach(function () {
         ngMock.inject(function () {
-          notEnoughData = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
-          require('ui/vislib/styles/main.less');
-
-          vis.render(notEnoughData);
+          vis.render(notQuiteEnoughVariables);
         });
       });
 
       it('should throw a Not Enough Data Error', function () {
-        var chart = {
-          chartData: notEnoughData
-        };
-
-        expect(function () {
-          vis.handler.ChartClass.prototype.checkIfEnoughData.apply(chart);
-        }).to.throwError();
+        vis.handler.charts.forEach(function (chart) {
+          expect(function () {
+            chart.checkIfEnoughData();
+          }).to.throwError();
+        });
       });
     });
 
     describe('checkIfEnoughData method should not throw an error when enough data', function () {
-      var enoughData;
-
       beforeEach(function () {
         ngMock.inject(function () {
-          enoughData = require('fixtures/vislib/mock_data/date_histogram/_series');
-          require('ui/vislib/styles/main.less');
-
-          vis.render(enoughData);
+          vis.render(woahLotsOfVariables);
         });
       });
 
@@ -199,16 +170,6 @@ dataArray.forEach(function (data, i) {
       });
     });
 
-    // Cannot seem to get these tests to work on the box
-    // They however pass in the browsers
-    //describe('addClipPath method', function () {
-    //  it('should append a clipPath', function () {
-    //    vis.handler.charts.forEach(function (chart) {
-    //      expect($(chart.chartEl).find('clipPath').length).to.be(1);
-    //    });
-    //  });
-    //});
-
     describe('draw method', function () {
       it('should return a function', function () {
         vis.handler.charts.forEach(function (chart) {
@@ -254,7 +215,7 @@ dataArray.forEach(function (data, i) {
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
         vis._attr.defaultYExtents = true;
-        vis.render(data);
+        vis.render(variablesAreCool);
       });
 
       it('should return yAxis extents equal to data extents', function () {

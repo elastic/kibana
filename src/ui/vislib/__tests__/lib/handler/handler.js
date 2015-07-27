@@ -26,19 +26,15 @@ dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
     var Handler;
     var vis;
-    var events;
+    var events = [
+      'click',
+      'brush'
+    ];
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Handler = Private(require('ui/vislib/lib/handler/handler'));
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      require('ui/vislib/styles/main.less');
-
-      events = [
-        'click',
-        'brush'
-      ];
-
       vis.render(data);
     }));
 

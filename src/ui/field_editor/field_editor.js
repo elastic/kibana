@@ -1,6 +1,6 @@
 define(function (require) {
 
-  require('ui/field_format_editor/field_format_editor');
+  require('ui/field_format_editor');
 
   require('ui/modules')
   .get('kibana')

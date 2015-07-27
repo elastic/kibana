@@ -6,7 +6,7 @@ define(function (require) {
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
     var _ = require('lodash');
     var loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
-    var filterManager = Private(require('ui/filter_manager/filter_manager'));
+    var filterManager = Private(require('ui/filter_manager'));
     var notify = new Notifier();
 
     var services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
@@ -17,8 +17,8 @@ define(function (require) {
       };
     });
 
-    require('ui/visualize/visualize');
-    require('ui/doc_table/doc_table');
+    require('ui/visualize');
+    require('ui/doc_table');
 
     var brushEvent = Private(require('ui/utils/brush_event'));
 

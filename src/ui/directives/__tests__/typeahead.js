@@ -3,7 +3,7 @@ var angular = require('angular');
 var sinon = require('sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
-require('ui/typeahead/typeahead');
+require('ui/typeahead');
 
 // TODO: This should not be needed, timefilter is only included here, it should move
 require('plugins/kibana/discover/index');

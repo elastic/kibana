@@ -1,5 +1,5 @@
 define(function (require) {
-  require('ui/paginated_table/paginated_table');
+  require('ui/paginated_table');
   require('ui/compile_recursive_directive');
   require('ui/agg_table/agg_table.less');
 

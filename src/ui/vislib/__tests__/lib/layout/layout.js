@@ -35,8 +35,6 @@ dateHistogramArray.forEach(function (data, i) {
       ngMock.inject(function (Private) {
         Layout = Private(require('ui/vislib/lib/layout/layout'));
         vis = Private(require('fixtures/vislib/_vis_fixture'))();
-        require('ui/vislib/styles/main.less');
-
         vis.render(data);
         numberOfCharts = vis.handler.charts.length;
       });

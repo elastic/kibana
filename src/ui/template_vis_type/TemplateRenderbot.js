@@ -1,7 +1,7 @@
 define(function (require) {
   return function TemplateRenderbotFactory(Private, $compile, $rootScope) {
     var _ = require('lodash');
-    var Renderbot = Private(require('ui/vis/Renderbot'));
+    var Renderbot = Private(require('ui/Vis/Renderbot'));
 
     _.class(TemplateRenderbot).inherits(Renderbot);
     function TemplateRenderbot(vis, $el) {

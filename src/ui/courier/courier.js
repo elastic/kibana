@@ -4,7 +4,7 @@ define(function (require) {
 
   require('ui/es');
   require('ui/promises');
-  require('ui/index_patterns/index_patterns');
+  require('ui/index_patterns');
 
   require('ui/modules').get('kibana/courier')
   .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {

@@ -16,7 +16,7 @@ describe('Diff Time Picker Values', function () {
     expect(diff).to.be(false);
   });
 
-  describe('datemath ranges', function () {
+  describe('dateMath ranges', function () {
     it('knows a match', function () {
       var diff = diffTimePickerValues(
         {
@@ -47,7 +47,7 @@ describe('Diff Time Picker Values', function () {
     });
   });
 
-  describe('a datemath range, and a moment range', function () {
+  describe('a dateMath range, and a moment range', function () {
     it('is always different', function () {
       var diff = diffTimePickerValues(
         {

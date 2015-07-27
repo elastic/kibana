@@ -3,8 +3,8 @@ define(function (require) {
   var $ = require('jquery');
   var modules = require('ui/modules');
   var module = modules.get('kibana/notify');
-  var errors = require('ui/notify/_errors');
-  var Notifier = require('ui/notify/_notifier');
+  var errors = require('ui/notify/errors');
+  var Notifier = require('ui/notify/Notifier');
   var rootNotifier = new Notifier();
 
   require('ui/notify/directives');

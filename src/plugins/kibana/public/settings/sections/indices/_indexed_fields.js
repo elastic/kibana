@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  require('ui/paginated_table/paginated_table');
+  require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
   .directive('indexedFields', function ($filter) {

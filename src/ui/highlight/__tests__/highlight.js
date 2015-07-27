@@ -3,7 +3,7 @@ describe('Highlight', function () {
   var angular = require('angular');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  require('ui/highlight/highlight');
+  require('ui/highlight');
 
   var filter, tags;
 

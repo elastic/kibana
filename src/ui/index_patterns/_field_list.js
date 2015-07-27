@@ -1,7 +1,7 @@
 define(function (require) {
   return function FieldListProvider(Private) {
     var Field = Private(require('ui/index_patterns/_field'));
-    var IndexedArray = require('ui/indexed_array/index');
+    var IndexedArray = require('ui/IndexedArray');
     var _ = require('lodash');
 
     _.class(FieldList).inherits(IndexedArray);

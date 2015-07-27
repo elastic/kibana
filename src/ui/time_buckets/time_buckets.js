@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
 
-    var datemath = require('ui/utils/datemath');
+    var dateMath = require('ui/utils/dateMath');
     var parseInterval = require('ui/utils/parse_interval');
     var calcAuto = Private(require('ui/time_buckets/calc_auto_interval'));
     var calcEsInterval = Private(require('ui/time_buckets/calc_es_interval'));

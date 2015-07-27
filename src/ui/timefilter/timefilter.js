@@ -6,7 +6,7 @@
     var _ = require('lodash');
     var angular = require('angular');
     var moment = require('moment');
-    var datemath = require('ui/utils/datemath');
+    var dateMath = require('ui/utils/dateMath');
     var Events = Private(require('ui/events'));
     var diff = Private(require('ui/utils/diff_time_picker_vals'));
 
@@ -89,8 +89,8 @@
 
     Timefilter.prototype.getBounds = function (timefield) {
       return {
-        min: datemath.parse(this.time.from),
-        max: datemath.parse(this.time.to, true)
+        min: dateMath.parse(this.time.from),
+        max: dateMath.parse(this.time.to, true)
       };
     };
 

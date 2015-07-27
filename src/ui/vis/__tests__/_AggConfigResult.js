@@ -1,6 +1,6 @@
 describe('AggConfigResult', function () {
   var _ = require('lodash');
-  var AggConfigResult = require('ui/vis/AggConfigResult');
+  var AggConfigResult = require('ui/Vis/AggConfigResult');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
@@ -10,8 +10,8 @@ describe('AggConfigResult', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vis/vis'));
-    AggConfig = Private(require('ui/vis/AggConfig'));
+    Vis = Private(require('ui/Vis'));
+    AggConfig = Private(require('ui/Vis/AggConfig'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));
 

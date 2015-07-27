@@ -1,7 +1,7 @@
 define(function (require) {
   var module = require('ui/modules').get('kibana');
   var _ = require('lodash');
-  var datemath = require('ui/utils/datemath');
+  var dateMath = require('ui/utils/dateMath');
   var moment = require('moment');
 
   require('ui/timepicker/quick_ranges');
@@ -57,7 +57,7 @@ define(function (require) {
               if ($scope[time] === 'now') {
                 display[time] = 'now';
               } else {
-                var tryParse = datemath.parse($scope[time], time === 'to' ? true : false);
+                var tryParse = dateMath.parse($scope[time], time === 'to' ? true : false);
                 display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
               }
             }

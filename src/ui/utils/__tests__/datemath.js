@@ -1,10 +1,10 @@
-var datemath = require('ui/utils/datemath');
+var dateMath = require('ui/utils/dateMath');
 var expect = require('expect.js');
 var moment = require('moment');
 var _ = require('lodash');
 var sinon = require('auto-release-sinon');
 
-describe('datemath', function () {
+describe('dateMath', function () {
   // Test each of these intervals when testing relative time
   var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
   var anchor =  '2014-01-01T06:06:06.666Z';
@@ -14,26 +14,26 @@ describe('datemath', function () {
 
   describe('errors', function () {
     it('should return undefined if passed something falsy', function () {
-      expect(datemath.parse()).to.be(undefined);
+      expect(dateMath.parse()).to.be(undefined);
     });
 
     it('should return undefined if I pass an operator besides [+-/]', function () {
-      expect(datemath.parse('now&1d')).to.be(undefined);
+      expect(dateMath.parse('now&1d')).to.be(undefined);
     });
 
     it('should return undefined if I pass a unit besides' + spans.toString(), function () {
-      expect(datemath.parse('now+5f')).to.be(undefined);
+      expect(dateMath.parse('now+5f')).to.be(undefined);
     });
 
     it('should return undefined if rounding unit is not 1', function () {
-      expect(datemath.parse('now/2y')).to.be(undefined);
-      expect(datemath.parse('now/0.5y')).to.be(undefined);
+      expect(dateMath.parse('now/2y')).to.be(undefined);
+      expect(dateMath.parse('now/0.5y')).to.be(undefined);
     });
 
     it('should not go into an infinite loop when missing a unit', function () {
-      expect(datemath.parse('now-0')).to.be(undefined);
-      expect(datemath.parse('now-00')).to.be(undefined);
-      expect(datemath.parse('now-000')).to.be(undefined);
+      expect(dateMath.parse('now-0')).to.be(undefined);
+      expect(dateMath.parse('now-00')).to.be(undefined);
+      expect(dateMath.parse('now-000')).to.be(undefined);
     });
 
   });
@@ -50,19 +50,19 @@ describe('datemath', function () {
     });
 
     it('should return the same moment if passed a moment', function () {
-      expect(datemath.parse(mmnt)).to.eql(mmnt);
+      expect(dateMath.parse(mmnt)).to.eql(mmnt);
     });
 
     it('should return a moment if passed a date', function () {
-      expect(datemath.parse(date).format(format)).to.eql(mmnt.format(format));
+      expect(dateMath.parse(date).format(format)).to.eql(mmnt.format(format));
     });
 
     it('should return a moment if passed an ISO8601 string', function () {
-      expect(datemath.parse(string).format(format)).to.eql(mmnt.format(format));
+      expect(dateMath.parse(string).format(format)).to.eql(mmnt.format(format));
     });
 
     it('should return the current time if passed now', function () {
-      expect(datemath.parse('now').format(format)).to.eql(now.format(format));
+      expect(dateMath.parse('now').format(format)).to.eql(now.format(format));
     });
   });
 
@@ -80,11 +80,11 @@ describe('datemath', function () {
       var thenEx =  anchor + '||-5' + span;
 
       it('should return 5' + span + ' ago', function () {
-        expect(datemath.parse(nowEx).format(format)).to.eql(now.subtract(5, span).format(format));
+        expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(5, span).format(format));
       });
 
       it('should return 5' + span + ' before ' + anchor, function () {
-        expect(datemath.parse(thenEx).format(format)).to.eql(anchored.subtract(5, span).format(format));
+        expect(dateMath.parse(thenEx).format(format)).to.eql(anchored.subtract(5, span).format(format));
       });
     });
   });
@@ -103,11 +103,11 @@ describe('datemath', function () {
       var thenEx =  anchor + '||+5' + span;
 
       it('should return 5' + span + ' from now', function () {
-        expect(datemath.parse(nowEx).format()).to.eql(now.add(5, span).format());
+        expect(dateMath.parse(nowEx).format()).to.eql(now.add(5, span).format());
       });
 
       it('should return 5' + span + ' after ' + anchor, function () {
-        expect(datemath.parse(thenEx).format()).to.eql(anchored.add(5, span).format());
+        expect(dateMath.parse(thenEx).format()).to.eql(anchored.add(5, span).format());
       });
     });
 
@@ -124,11 +124,11 @@ describe('datemath', function () {
 
     _.each(spans, function (span) {
       it('should round now to the beginning of the ' + span, function () {
-        expect(datemath.parse('now/' + span).format(format)).to.eql(now.startOf(span).format(format));
+        expect(dateMath.parse('now/' + span).format(format)).to.eql(now.startOf(span).format(format));
       });
 
       it('should round now to the end of the ' + span, function () {
-        expect(datemath.parse('now/' + span, true).format(format)).to.eql(now.endOf(span).format(format));
+        expect(dateMath.parse('now/' + span, true).format(format)).to.eql(now.endOf(span).format(format));
       });
     });
 

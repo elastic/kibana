@@ -12,7 +12,7 @@ describe('GeoJson Agg Response Converter', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    var Vis = Private(require('ui/vis/vis'));
+    var Vis = Private(require('ui/Vis'));
     var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
     esResponse = Private(require('fixtures/agg_resp/geohash_grid'));

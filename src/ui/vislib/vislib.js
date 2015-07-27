@@ -17,6 +17,8 @@ require('ui/vislib/visualizations/vis_types');
  * @return {Object} Contains the version number and the Vis Class for creating visualizations
  */
 module.exports = function VislibProvider(Private) {
+  require('ui/vislib/styles/main.less');
+
   return {
     version: '0.0.0',
     Vis: Private(require('ui/vislib/vis'))

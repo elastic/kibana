@@ -4,7 +4,7 @@ module.exports = function (grunt) {
       options: {
         log: true,
         logErrors: true,
-        run: false,
+        run: true,
         timeout: 120000,
         page: {
           settings: {

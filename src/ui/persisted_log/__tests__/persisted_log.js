@@ -15,7 +15,7 @@ var payload = [
   { first: 'bruce', last: 'wayne' }
 ];
 
-require('ui/persisted_log/persisted_log');
+require('ui/persisted_log');
 
 function init() {
   ngMock.module('kibana/persisted_log', function ($provide) {

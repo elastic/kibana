@@ -4,9 +4,9 @@ define(function (require) {
   var addWordBreaks = require('ui/utils/add_word_breaks');
   var module = require('ui/modules').get('app/discover');
 
-  require('ui/highlight/highlight');
+  require('ui/highlight');
   require('ui/highlight/highlight_tags');
-  require('ui/doc_viewer/doc_viewer');
+  require('ui/doc_viewer');
   require('ui/filters/trust_as_html');
   require('ui/filters/short_dots');
 

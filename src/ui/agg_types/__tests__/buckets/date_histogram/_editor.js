@@ -14,7 +14,7 @@ describe('editor', function () {
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-    var Vis = Private(require('ui/vis/vis'));
+    var Vis = Private(require('ui/Vis'));
 
     /**
      * Render the AggParams editor for the date histogram aggregation

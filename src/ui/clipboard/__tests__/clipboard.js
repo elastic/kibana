@@ -6,7 +6,7 @@ var expect = require('expect.js');
 var $ = require('jquery');
 var ngMock = require('ngMock');
 
-require('ui/clipboard/clipboard');
+require('ui/clipboard');
 
 describe('Clipboard directive', function () {
   var $scope;

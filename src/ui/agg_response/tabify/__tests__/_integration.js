@@ -12,7 +12,7 @@ describe('tabifyAggResponse Integration', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));
 

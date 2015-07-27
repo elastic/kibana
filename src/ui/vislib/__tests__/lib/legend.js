@@ -46,7 +46,6 @@ dataArray.forEach(function (data, i) {
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
       Legend = Private(require('ui/vislib/lib/legend'));
-      require('ui/vislib/styles/main.less');
       $el = d3.select('body').append('div').attr('class', 'fake-legend');
       vis.render(data);
     }));

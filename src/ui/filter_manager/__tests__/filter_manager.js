@@ -36,7 +36,7 @@ describe('Filter Manager', function () {
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    filterManager = Private(require('ui/filter_manager/filter_manager'));
+    filterManager = Private(require('ui/filter_manager'));
 
     // mock required queryFilter methods, used in the manager
     queryFilter = Private(require('ui/filter_bar/query_filter'));

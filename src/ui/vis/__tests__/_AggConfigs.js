@@ -15,7 +15,7 @@ describe('AggConfigs', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy
-    var RealAggConfigPM = require('ui/vis/AggConfig');
+    var RealAggConfigPM = require('ui/Vis/AggConfig');
     AggConfig = Private(RealAggConfigPM);
     var spy = sinon.spy(AggConfig);
     Object.defineProperty(spy, 'aggTypes', {
@@ -26,12 +26,12 @@ describe('AggConfigs', function () {
     Private.stub(RealAggConfigPM, spy);
 
     // load main deps
-    Vis = Private(require('ui/vis/vis'));
-    SpiedAggConfig = Private(require('ui/vis/AggConfig'));
-    AggConfigs = Private(require('ui/vis/AggConfigs'));
-    IndexedArray = require('ui/indexed_array/index');
+    Vis = Private(require('ui/Vis'));
+    SpiedAggConfig = Private(require('ui/Vis/AggConfig'));
+    AggConfigs = Private(require('ui/Vis/AggConfigs'));
+    IndexedArray = require('ui/IndexedArray');
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Schemas = Private(require('ui/vis/Schemas'));
+    Schemas = Private(require('ui/Vis/Schemas'));
   }));
 
   it('extends IndexedArray', function () {

@@ -2,10 +2,10 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
 
-  require('ui/notify/notify');
-  require('ui/courier/courier');
-  require('ui/doc_viewer/doc_viewer');
-  require('ui/index_patterns/index_patterns');
+  require('ui/notify');
+  require('ui/courier');
+  require('ui/doc_viewer');
+  require('ui/index_patterns');
 
   var app = require('ui/modules').get('apps/doc', [
     'kibana/notify',

@@ -2,7 +2,7 @@ var _ = require('lodash');
 var $ = require('jquery');
 var angular = require('angular');
 
-require('ui/timefilter/timefilter');
+require('ui/timefilter');
 require('ui/private');
 require('ui/promises');
 
@@ -15,7 +15,7 @@ var chrome = {
 };
 
 var internals = _.assign(
-  _.cloneDeep(window.__KBN__),
+  _.cloneDeep(window.__KBN__ || {}),
   {
     tabs: new TabCollection(),
     rootController: null,

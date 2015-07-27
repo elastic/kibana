@@ -22,7 +22,7 @@ define(function (require) {
     var $state = $scope.state = new AppState();
     var refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
 
-    $scope.kbnUrl = Private(require('ui/url/url'));
+    $scope.kbnUrl = Private(require('ui/url'));
     $scope.indexPattern = $route.current.locals.indexPattern;
     docTitle.change($scope.indexPattern.id);
     var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);

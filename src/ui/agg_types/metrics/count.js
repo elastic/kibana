@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeMetricCountProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/_metric_agg_type'));
+    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
     var fieldFormats = Private(require('ui/registry/field_formats'));
 
     return new MetricAggType({

@@ -72,10 +72,9 @@ describe('No global chart settings', function () {
   beforeEach(ngMock.inject(function (Private) {
     chart1 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams1);
     chart2 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams2);
-    Vis = Private(require('ui/vis/vis'));
+    Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
-    require('ui/vislib/styles/main.less');
 
     var id_1 = 1;
     var id_2 = 1;
@@ -104,7 +103,6 @@ describe('No global chart settings', function () {
   }));
 
   afterEach(function () {
-    $('.visualize-chart').remove();
     chart1 = null;
     chart2 = null;
   });
@@ -166,10 +164,9 @@ aggArray.forEach(function (dataAgg, i) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      Vis = Private(require('ui/vis/vis'));
+      Vis = Private(require('ui/Vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
-      require('ui/vislib/styles/main.less');
 
       var id = 1;
       var stubVis = new Vis(indexPattern, {
@@ -196,7 +193,7 @@ aggArray.forEach(function (dataAgg, i) {
       var onClick;
       var onMouseOver;
 
-      beforeEach(ngMock.inject(function () {
+      beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
           path = $(chart.chartEl).find('path')[0];
           d3selectedPath = d3.select(path)[0][0];
@@ -205,7 +202,7 @@ aggArray.forEach(function (dataAgg, i) {
           onClick = (!!d3selectedPath.__onclick);
           onMouseOver = (!!d3selectedPath.__onmouseover);
         });
-      }));
+      });
 
       it('should attach a click event', function () {
         vis.handler.charts.forEach(function () {

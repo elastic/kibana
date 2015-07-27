@@ -96,7 +96,7 @@ module.exports = function (server, kbnServer) {
 
       return self.init()
       .then(function () {
-        server.log(['optimize', 'testHarness', first ? 'info' : 'debug'], 'Test harness build complete');
+        server.log(['optimize', 'testHarness', first ? 'info' : 'debug'], 'Test harness built, compiling test bundle');
         return self.optimizer.get(self.id);
       });
     }

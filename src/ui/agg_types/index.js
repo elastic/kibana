@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeService(Private) {
-    var IndexedArray = require('ui/indexed_array/index');
+    var IndexedArray = require('ui/IndexedArray');
 
     var aggs = {
       metrics: [
@@ -10,7 +10,7 @@ define(function (require) {
         Private(require('ui/agg_types/metrics/median')),
         Private(require('ui/agg_types/metrics/min')),
         Private(require('ui/agg_types/metrics/max')),
-        Private(require('ui/agg_types/metrics/std_deviation')),
+        Private(require('ui/agg_types/metrics/stdDeviation')),
         Private(require('ui/agg_types/metrics/cardinality')),
         Private(require('ui/agg_types/metrics/percentiles')),
         Private(require('ui/agg_types/metrics/percentile_ranks'))

@@ -3,7 +3,7 @@ define(function (require) {
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
     var _ = require('lodash');
-    var Vis = Private(require('ui/vis/vis'));
+    var Vis = Private(require('ui/Vis'));
 
     var notify = new Notifier({
       location: 'SavedVis'

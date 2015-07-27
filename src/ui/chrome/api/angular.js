@@ -53,7 +53,7 @@ module.exports = function (chrome, internals) {
 
           // and some local values
           $scope.httpActive = $http.pendingRequests;
-          $scope.notifList = require('ui/notify/notify')._notifs;
+          $scope.notifList = require('ui/notify')._notifs;
 
           return chrome;
         }

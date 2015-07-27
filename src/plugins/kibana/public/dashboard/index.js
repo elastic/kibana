@@ -2,14 +2,14 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var angular = require('angular');
-  var ConfigTemplate = require('ui/utils/config_template');
+  var ConfigTemplate = require('ui/ConfigTemplate');
 
   require('ui/directives/config');
-  require('ui/courier/courier');
-  require('ui/config/config');
-  require('ui/notify/notify');
-  require('ui/typeahead/typeahead');
-  require('ui/clipboard/clipboard');
+  require('ui/courier');
+  require('ui/config');
+  require('ui/notify');
+  require('ui/typeahead');
+  require('ui/clipboard');
 
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
@@ -100,7 +100,7 @@ define(function (require) {
         function init() {
           updateQueryOnRootSource();
 
-          var docTitle = Private(require('ui/doc_title/doc_title'));
+          var docTitle = Private(require('ui/doc_title'));
           if (dash.id) {
             docTitle.change(dash.title);
           }

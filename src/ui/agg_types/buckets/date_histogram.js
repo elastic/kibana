@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var TimeBuckets = Private(require('ui/time_buckets/time_buckets'));
+    var TimeBuckets = Private(require('ui/time_buckets'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
     var intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
 

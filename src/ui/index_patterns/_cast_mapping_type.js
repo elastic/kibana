@@ -1,6 +1,6 @@
 define(function (require) {
   return function CastMappingTypeFn() {
-    var IndexedArray = require('ui/indexed_array/index');
+    var IndexedArray = require('ui/IndexedArray');
 
     castMappingType.types = new IndexedArray({
       index: ['name'],

@@ -14,7 +14,7 @@ var $rootScope;
 var globalStateMock;
 var appState;
 
-require('ui/url/url');
+require('ui/url');
 
 function init() {
   ngMock.module('kibana/url', 'kibana', function ($provide) {
