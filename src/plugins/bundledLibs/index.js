@@ -7,10 +7,7 @@ module.exports = function (kibana) {
   let readdir = require('fs').readdirSync;
   let fromRoot = require('../../utils/fromRoot');
 
-  let modules = {
-    ui: fromRoot('src/ui')
-  };
-
+  let modules = {};
   let metaLibs = resolve(__dirname, 'metaLibs');
   readdir(metaLibs).forEach(function (file) {
     if (file[0] === '.') return;

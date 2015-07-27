@@ -10,7 +10,7 @@ module.exports = class PluginApi {
     this.config = kibana.server.config();
     this.rootDir = kibana.rootDir;
     this.package = require(join(pluginPath, 'package.json'));
-    this.autoload = require('../ui/autoload');
+    this.autoload = require('../../ui/autoload');
     this.Plugin = Plugin.scoped(kibana, pluginPath, this.package);
     this.mixin = _.bindKey(kibana, 'mixin');
   }

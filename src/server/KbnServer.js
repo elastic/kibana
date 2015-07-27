@@ -29,8 +29,10 @@ module.exports = class KbnServer extends EventEmitter {
       require('./status'), // sets this.status
       require('./plugins'), // sets this.plugins
       require('./config/complete'),
-      require('./ui'), // sets this.uiExports
-      require('./optimize'),
+
+      require('../ui'), // sets this.uiExports
+      require('../optimize'),
+
       function () {
         if (this.config.get('server.autoListen')) {
           this.listen();
