@@ -27,12 +27,11 @@ module.exports = function (server) {
     }
 
     // if we already have a the current version in the index then we need to stop
-    if (_.find(response.hits.hits, function currentVersion(hit) {
-      return hit._id !== '@@version' &&
-       hit._id === config.get('pkg.version');
-    })) {
-      return Promise.resolve();
-    }
+    var devConfig = _.find(response.hits.hits, function currentVersion(hit) {
+      return hit._id !== '@@version' && hit._id === config.get('pkg.version');
+    });
+
+    if (devConfig) return Promise.resolve();
 
     // Look for upgradeable configs. If none of them are upgradeable
     // then resolve with null.

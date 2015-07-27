@@ -242,7 +242,7 @@ Don't do this. Everything should be wrapped in a module that can be depended on 
 
 Prefer the use of function declarations over function expressions. Function expressions are allowed, but should usually be avoided.
 
-Also, keep function definitions above other code instead of relying on function hoising.
+Also, keep function definitions above other code instead of relying on function hoisting.
 
 *Preferred:*
 
