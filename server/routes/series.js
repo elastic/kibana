@@ -6,12 +6,16 @@ require('../parser/chain_runner.js');
 module.exports = function (app) {
   app.post('/series', function (req, res) {
 
-    var processRequest = require('../parser/chain_runner.js');
+    var chainRunner = require('../parser/chain_runner.js');
 
-    var sheet = processRequest(req.body.sheet);
+    var sheet = chainRunner.processRequest(req.body.sheet);
 
     return Promise.all(sheet).then(function (sheet) {
-      res.send(sheet);
+      var response = {
+        sheet: sheet,
+        stats: chainRunner.getStats()
+      };
+      res.send(response);
     }).catch(function (e) {
       res.send(e);
     });

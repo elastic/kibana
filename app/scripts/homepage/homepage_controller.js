@@ -39,9 +39,10 @@ define(function (require) {
 
         $http.post('/series', {sheet:$scope.input.expressions}).
           // data, status, headers, config
-          success(function(sheet) {
-            $scope.sheet = sheet;
-            _.each(sheet, function (cell) {
+          success(function(resp) {
+            $scope.stats = resp.stats;
+            $scope.sheet = resp.sheet;
+            _.each(resp.sheet, function (cell) {
               if (cell.exception) {
                 $scope.input.selected = cell.plot;
               }

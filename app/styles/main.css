@@ -51,6 +51,11 @@ body {
   font: normal normal normal normal '.HelveticaNeueDeskInterface-Regular';
 }
 
+.footer {
+  background-color: whitesmoke;
+  padding: 5px;
+  font-size: 0.9em;
+}
 
 .new-sheet {
   cursor: pointer;

@@ -10,6 +10,8 @@ var Parser = PEG.buildParser(grammar);
 
 var fetchData = require('./fetch_data.js');
 
+var stats = {};
+
 // Load function plugins
 var functions  = _.chain(glob.sync('server/series_functions/*.js')).map(function (file) {
   var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
@@ -63,6 +65,7 @@ function invoke (fnName, args) {
         case 'query':
           var cacheKey = getQueryCacheKey(item);
           if (queryCache[cacheKey]) {
+            stats.queryCount++;
             return Promise.resolve(_.cloneDeep(queryCache[cacheKey]));
           }
           //return fetchData(item, cacheKey);
@@ -193,6 +196,7 @@ function preProcessSheet (sheet) {
     findQueries(chainList);
   });
 
+
   var promises = _.map(queries, function (item, cacheKey) {
     return fetchData(item, cacheKey);
   });
@@ -201,9 +205,13 @@ function preProcessSheet (sheet) {
     _.each(results, function (result) {
       queryCache[result.list[0].cacheKey] = result;
     });
+    stats.cacheCount = _.keys(queryCache).length;
+    stats.queryTime = (new Date()).getTime();
     return queryCache;
   }).catch(function (e) {throw e;});
 }
+
+
 
 function resolveSheet (sheet) {
   return _.map(sheet, function (plot, index) {
@@ -216,6 +224,8 @@ function resolveSheet (sheet) {
 }
 
 function processRequest (request) {
+  stats.invokeTime = (new Date()).getTime();
+  stats.queryCount = 0;
   queryCache = {};
   // This is setting the "global" sheet
   try {
@@ -228,13 +238,17 @@ function processRequest (request) {
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList) {
       return resolveChainList(chainList).then(function (seriesList) {
+        stats.sheetTime = (new Date()).getTime();
         return seriesList.list;
       });
     });
   });
 }
 
-module.exports = processRequest;
+module.exports = {
+  processRequest: processRequest,
+  getStats: function () { return stats; }
+};
 
 function debugSheet (sheet) {
   sheet = processRequest(sheet);

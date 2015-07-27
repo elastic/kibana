@@ -9,7 +9,6 @@
       </small>
   </h1>
 </div>
-
 <form>
   <div class="form-group function-form" ng-submit="search()">
     <input type="text"
@@ -27,7 +26,7 @@
   </div>
 </form>
 
-
+<div>
   <div class="chart-container col-md-4"
     ng-repeat="cell in input.expressions track by $index"
     ng-click="setActiveCell($index)"
@@ -36,7 +35,16 @@
     <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
     <div chart="sheet[$index]" cell="$index"></div>
   </div>
-  <div class="chart-container add-chart col-md-4">
+  <div class="add-chart col-md-4">
     <i class="fa fa-plus" ng-click="newCell()"></i>
   </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="footer" ng-if="stats">
+  <center>
+    <strong>Cache Efficiency</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
+    <strong>Query Time:</strong> {{stats.queryTime - stats.invokeTime}}ms /
+    <strong>Processing Time:</strong> {{stats.sheetTime - stats.queryTime}}ms
+  </center>
 </div>
