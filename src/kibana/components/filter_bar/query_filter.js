@@ -99,12 +99,20 @@ define(function (require) {
     };
 
     /**
-    * Merge an edited filter
+
     * @param currentFilter The filter to merge changes in to
     * @param newFilter The filter changes to merge
     */
-    queryFilter.mergeEditedFilter = function (currentFilter, newFilter) {
-      _.merge(currentFilter, newFilter);
+    queryFilter.mergeEditedFilter = function (currentFilter, newQuery) {
+      var parsedQuery;
+      try {
+        parsedQuery = JSON.parse(newQuery);
+      } catch (e) {
+        //The editor is already showing an error,
+        //staying in edit mode is sufficient
+        return;
+      }
+      currentFilter.query = parsedQuery;
       this.stopEditingFilter(currentFilter);
     };
 
@@ -113,8 +121,8 @@ define(function (require) {
     * @param {object} filter The filter to clone
     * @return {object} the cloned filter
     */
-    queryFilter.cloneFilter = function (filter) {
-      return _.cloneDeep(filter);
+    queryFilter.stringifyQuery = function (filter) {
+      return JSON.stringify(filter.query, null, '\t');
     };
 
     /**

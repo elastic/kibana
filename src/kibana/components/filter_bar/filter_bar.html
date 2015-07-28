@@ -36,11 +36,8 @@
         <i class="fa fa-fw fa-edit"></i>
       </a>
     </div>
-    <div class="filter-edit" ng-if="filter.meta.editing" ng-init="clonedFilter = cloneFilter(filter)">
-      <div class="form-group" ng-repeat="(key, value) in clonedFilter.query.match">
-        <label>{{key}}</label>
-        <input class="form-control" ng-model="value.query" />
-      </div>
+    <div class="filter-edit" ng-if="filter.meta.editing" ng-init="clonedFilter = stringifyQuery(filter)">
+      <div ui-ace="{ onLoad: aceLoaded, mode: 'json' }" ng-model="clonedFilter"></div>
       <button class="btn btn-default" ng-click="mergeEditedFilter(filter, clonedFilter)">Done</button>
       <button class="btn btn-default" ng-click="stopEditingFilter(filter)">Cancel</button>
     </div>

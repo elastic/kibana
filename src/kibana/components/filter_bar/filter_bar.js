@@ -28,7 +28,7 @@ define(function (require) {
           'startEditingFilter',
           'stopEditingFilter',
           'mergeEditedFilter',
-          'cloneFilter',
+          'stringifyQuery',
           'invertFilter',
           'invertAll',
           'removeFilter',
@@ -48,6 +48,12 @@ define(function (require) {
           if ($scope.changeTimeFilter && $scope.changeTimeFilter.meta && $scope.changeTimeFilter.meta.apply) {
             changeTimeFilter($scope.changeTimeFilter);
           }
+        };
+
+        $scope.aceLoaded = function (editor) {
+          var session = editor.getSession();
+          session.setTabSize(2);
+          session.setUseSoftTabs(true);
         };
 
         $scope.clearFilterBar = function () {
