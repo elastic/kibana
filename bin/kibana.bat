@@ -6,7 +6,7 @@ set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\node.exe
-for /f %%i in ('WHERE node') do (set SYS_NODE=%%i)
+for /f "delims=" %%i in ('WHERE node') do set SYS_NODE=%%i
 
 If Not Exist "%NODE%" (
   IF Exist "%SYS_NODE%" (
