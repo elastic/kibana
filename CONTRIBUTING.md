@@ -10,18 +10,17 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 ### Development Environment Setup
 
-- Install node.js (we recommend using [nvm](https://github.com/creationix/nvm))
-
-  ```sh
-  ## follow directions at https://github.com/creationix/nvm, then
-  nvm install 0.10
-  ```
-
 - Clone the kibana repo and move into it
 
   ```sh
   git clone https://github.com/elastic/kibana.git kibana
   cd kibana
+  ```
+
+- Install the version of node.js listed in the `.node-version` file (this is made easy with tools like [nvm](https://github.com/creationix/nvm) and [avn](https://github.com/wbyoung/avn))
+
+  ```sh
+  nvm install "$(cat .node-version)"
   ```
 
 - Install dependencies
@@ -30,10 +29,16 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   npm install
   ```
 
+- Start elasticsearch, you can use [esvm](https://github.com/simianhacker/esvm) to make that easier.
+
+  ```sh
+  grunt esvm:dev:keepalive
+  ```
+
 - Start the development server.
 
   ```sh
-  ./node_modules/.bin/grunt dev # use the "--with-es" flag to install & start elasticsearch too
+  ./bin/kibana --dev
   ```
 
 #### Linting
