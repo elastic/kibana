@@ -16,7 +16,7 @@
       </button>
       <span class="visible-xs">
         <span ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</span>
-        <span ng-if="chrome.getActiveTab()" class="navbar-brand">{{ chrome.getActiveTab().title }}</span>
+        <span ng-if="chrome.getActiveTabTitle()" class="navbar-brand">{{ chrome.getActiveTabTitle() }}</span>
         <span ng-show="chrome.httpActive.length" class="spinner"></span>
       </span>
     </div>

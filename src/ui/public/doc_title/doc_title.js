@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var chrome = require('ui/chrome');
 
   require('ui/modules').get('kibana')
   .run(function ($rootScope, docTitle) {
@@ -7,7 +8,7 @@ define(function (require) {
     $rootScope.$on('$routeChangeStart', docTitle.reset);
     $rootScope.$on('$routeChangeError', docTitle.update);
     $rootScope.$on('$routeChangeSuccess', docTitle.update);
-    $rootScope.$watch('activeApp', docTitle.update);
+    $rootScope.$watch(_.bindKey(chrome, 'getActiveTabTitle'), docTitle.update);
   })
   .service('docTitle', function ($rootScope) {
     var baseTitle = document.title;
@@ -19,14 +20,11 @@ define(function (require) {
       lastChange = lastChange || [];
 
       var parts = [lastChange[0]];
+      var activeTabTitle = chrome.getActiveTabTitle();
 
-      if ($rootScope.activeApp) {
-        parts.push($rootScope.activeApp.name);
-      }
+      if (activeTabTitle) parts.push(activeTabTitle);
 
-      if (!lastChange[1]) {
-        parts.push(baseTitle);
-      }
+      if (!lastChange[1]) parts.push(baseTitle);
 
       return _(parts).flattenDeep().compact().join(' - ');
     }

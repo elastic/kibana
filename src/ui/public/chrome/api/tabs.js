@@ -73,10 +73,20 @@ module.exports = function (chrome, internals) {
    * @param {any} def - the default value if there isn't any active tab
    * @return {any}
    */
-  chrome.getActiveTabId = function (def) {
-    var tab = chrome.getActiveTab();
-    return tab ? tab.id : def;
-  };
+  chrome.getActiveTabId = activeGetter('id');
 
+  /**
+   * @param {any} def - the default value if there isn't any active tab
+   * @return {any}
+   */
+  chrome.getActiveTabTitle = activeGetter('title');
+
+  // create a getter for properties of the active tab
+  function activeGetter(prop) {
+    return function (def) {
+      var active = chrome.getActiveTab();
+      return !active ? def : active[prop];
+    };
+  }
 
 };
