@@ -32,6 +32,17 @@
       <a class="action filter-remove" ng-click="removeFilter(filter)">
         <i class="fa fa-fw fa-trash"></i>
       </a>
+      <a class="action filter-edit" ng-click="startEditingFilter(filter)">
+        <i class="fa fa-fw fa-edit"></i>
+      </a>
+    </div>
+    <div class="filter-edit" ng-if="filter.meta.editing" ng-init="clonedFilter = cloneFilter(filter)">
+      <div class="form-group" ng-repeat="(key, value) in clonedFilter.query.match">
+        <label>{{key}}</label>
+        <input class="form-control" ng-model="value.query" />
+      </div>
+      <button class="btn btn-default" ng-click="mergeEditedFilter(filter, clonedFilter)">Done</button>
+      <button class="btn btn-default" ng-click="stopEditingFilter(filter)">Cancel</button>
     </div>
   </div>
   <div class="filter-link">
@@ -43,6 +54,8 @@
       </a>
     </div>
   </div>
+
+
 </div>
 
 <div class="bar bar-condensed" ng-show="filters.length && showFilterActions">

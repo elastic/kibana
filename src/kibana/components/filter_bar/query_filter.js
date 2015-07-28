@@ -83,6 +83,41 @@ define(function (require) {
     };
 
     /**
+    * Start editing a filter
+    * @param {object} filter The filter to start editing
+    */
+    queryFilter.startEditingFilter = function (filter) {
+      filter.meta.editing = true;
+    };
+
+    /**
+    * Stop editing a filter
+    * @param {object} filter The filter to stop editing
+    */
+    queryFilter.stopEditingFilter = function (filter) {
+      delete filter.meta.editing;
+    };
+
+    /**
+    * Merge an edited filter
+    * @param currentFilter The filter to merge changes in to
+    * @param newFilter The filter changes to merge
+    */
+    queryFilter.mergeEditedFilter = function (currentFilter, newFilter) {
+      _.merge(currentFilter, newFilter);
+      this.stopEditingFilter(currentFilter);
+    };
+
+    /**
+    * Clone a filter
+    * @param {object} filter The filter to clone
+    * @return {object} the cloned filter
+    */
+    queryFilter.cloneFilter = function (filter) {
+      return _.cloneDeep(filter);
+    };
+
+    /**
      * Removes all filters
      */
     queryFilter.removeAll = function () {
