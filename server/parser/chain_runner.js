@@ -72,9 +72,7 @@ function invoke (fnName, args) {
     if (_.isObject(item)) {
       switch (item.type) {
         case 'function':
-          console.log(queryCache[getQueryCacheKey(item)]);
           if (queryCache[getQueryCacheKey(item)]) {
-            console.log('Cache hit');
             stats.queryCount++;
             return Promise.resolve(_.cloneDeep(queryCache[getQueryCacheKey(item)]));
           }
@@ -103,8 +101,6 @@ function invoke (fnName, args) {
     if (args.length > functionDef.args.length) {
       throw new Error ('Too many arguments passed to: ' + fnName);
     }
-
-    console.log(fnName);
 
     _.each(args, function (arg, i) {
       var type = argType(arg);
@@ -168,11 +164,15 @@ function preProcessSheet (sheet) {
     queries[cacheKey] = query;
   }
 
-  function findQueries(chain) {
+  function validateAndCache(chain) {
 
     function checkFunc (func) {
       if (_.isObject(func) && func.type === 'function') {
-        if ( functions[func.function].dataSource) {
+        if (!functions[func.function]) {
+          throw new Error('Unknown function: ' + func.function);
+        }
+
+        if (functions[func.function].dataSource) {
           storeQueryObj(func);
           return true;
         } else {
@@ -181,11 +181,7 @@ function preProcessSheet (sheet) {
       }
     }
 
-    if (checkFunc(chain)) {
-      return;
-    }
-
-    if (!_.isArray(chain)) {
+    if (checkFunc(chain) || !_.isArray(chain)) {
       return;
     }
 
@@ -195,24 +191,28 @@ function preProcessSheet (sheet) {
       }
       switch (operator.type) {
       case 'chain':
-        findQueries(operator.chain);
+        validateAndCache(operator.chain);
         break;
       case 'chainList':
-        findQueries(operator.list);
+        validateAndCache(operator.list);
         break;
       case 'function':
         if (checkFunc(operator)) {
           break;
         } else {
-          findQueries(operator.arguments);
+          validateAndCache(operator.arguments);
         }
         break;
       }
     });
   }
 
-  _.each(sheet, function (chainList) {
-    findQueries(chainList);
+  _.each(sheet, function (chainList, index) {
+    try {
+      validateAndCache(chainList);
+    } catch (e) {
+      throw {plot: index, name: 'InvalidFunction', exception: e.toString()};
+    }
   });
 
   queries = _.values(queries);
@@ -223,12 +223,10 @@ function preProcessSheet (sheet) {
 
   return Promise.all(promises).then(function (results) {
     _.each(queries, function (item, i) {
-      console.log(i);
       queryCache[getQueryCacheKey(item)] = results[i];
     });
 
 
-    console.log(queryCache);
     stats.cacheCount = _.keys(queryCache).length;
     stats.queryTime = (new Date()).getTime();
     return queryCache;
@@ -242,7 +240,7 @@ function resolveSheet (sheet) {
     try {
       return Parser.parse(plot);
     } catch (e) {
-      throw {plot: index, exception: e};
+      throw {plot: index, name: e.name, exception: 'Expected: ' + e.expected[0].description + ' @ character ' + e.column};
     }
   });
 }
@@ -255,7 +253,6 @@ function processRequest (request) {
   try {
     sheet = resolveSheet(request);
   } catch (e) {
-    console.log(e);
     return Promise.resolve([e]);
   }
 

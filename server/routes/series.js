@@ -8,7 +8,14 @@ module.exports = function (app) {
 
     var chainRunner = require('../parser/chain_runner.js');
 
-    var sheet = chainRunner.processRequest(req.body.sheet);
+    var sheet;
+    try {
+      sheet = chainRunner.processRequest(req.body.sheet);
+    } catch (e) {
+      res.send({sheet: [e]});
+      return;
+    }
+
 
     return Promise.all(sheet).then(function (sheet) {
       var response = {

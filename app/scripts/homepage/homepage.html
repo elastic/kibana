@@ -22,7 +22,7 @@
       ng-click="search()">Run</button>
   </div>
   <div ng-if="sheet[0].exception" class="alert alert-danger">
-    {{sheet[0].exception.name}}: Expected {{sheet[0].exception.expected[0].description}} in <strong>cell {{sheet[0].plot + 1}}</strong> @ character {{sheet[0].exception.column}}
+    {{sheet[0].exception.name}} {{sheet[0].exception}} in <strong>cell {{sheet[0].plot + 1}}</strong>
   </div>
 </form>
 
