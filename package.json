@@ -110,7 +110,7 @@
     "zeroclipboard": "^2.2.0"
   },
   "devDependencies": {
-    "auto-release-sinon": "^1.0.2",
+    "auto-release-sinon": "^1.0.3",
     "expect.js": "^0.3.1",
     "faker": "^1.1.0",
     "grunt": "^0.4.5",

@@ -8,7 +8,7 @@ module.exports = function (grunt) {
         failOnError: false
       },
       cmd: './bin/kibana',
-      args: ['--dev', '--no-watch', '--quiet', '--logging.json=false']
+      args: ['--dev', '--no-watch', '--logging.json=false']
     }
   };
 };
