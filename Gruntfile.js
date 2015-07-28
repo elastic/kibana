@@ -17,8 +17,6 @@ module.exports = function (grunt) {
     platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
     services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
 
-    bowerComponentsDir: __dirname + '/bower_components',
-
     devPlugins: 'devMode',
 
     meta: {

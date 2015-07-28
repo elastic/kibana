@@ -73,7 +73,7 @@ module.exports = function (kbnServer, server, config) {
 
     let payload = {
       app: app,
-      appCount: kbnServer.uiExports.apps.length,
+      appCount: apps.length,
       version: kbnServer.version,
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),

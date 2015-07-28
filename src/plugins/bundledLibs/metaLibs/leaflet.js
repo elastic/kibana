@@ -1,6 +1,7 @@
-require('bower_components/leaflet-draw/dist/leaflet.draw.css');
-require('bower_components/leaflet/dist/leaflet.css');
+require('node_modules/leaflet/dist/leaflet.css');
+window.L = module.exports = require('node_modules/leaflet/dist/leaflet');
 
-window.L = module.exports = require('bower_components/leaflet/dist/leaflet');
-require('bower_components/Leaflet.heat/dist/leaflet-heat');
-require('bower_components/leaflet-draw/dist/leaflet.draw');
+require('node_modules/@spalger/leaflet-heat/dist/leaflet-heat.js');
+
+require('node_modules/@spalger/leaflet-draw/dist/leaflet.draw.css');
+require('node_modules/@spalger/leaflet-draw/dist/leaflet.draw.js');

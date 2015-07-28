@@ -17,12 +17,6 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install 0.10
   ```
 
-- Install grunt and bower globally (as root if not using nvm)
-
-  ```sh
-  npm install -g grunt-cli bower
-  ```
-
 - Clone the kibana repo and move into it
 
   ```sh
@@ -30,16 +24,16 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   cd kibana
   ```
 
-- Install node and bower dependencies
+- Install dependencies
 
   ```sh
-  npm install && bower install
+  npm install
   ```
 
 - Start the development server.
 
   ```sh
-  grunt dev # use the "--with-es" flag to install & start elasticsearch too
+  ./node_modules/.bin/grunt dev # use the "--with-es" flag to install & start elasticsearch too
   ```
 
 #### Linting
@@ -65,7 +59,7 @@ Before running the tests you will need to install the projects dependencies as d
 Once that is complete just run:
 
 ```sh
-grunt test build
+./node_modules/.bin/grunt test build
 ```
 
 Distributable, built packages can be found in `target/` after the build completes.

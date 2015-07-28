@@ -1,6 +1,6 @@
 require('brace');
 require('brace/mode/json');
-require('bower_components/angular-ui-ace/ui-ace');
+require('node_modules/@spalger/ui-ace/ui-ace');
 
 require('ui/modules').get('kibana', ['ui.ace']);
 

@@ -2,7 +2,6 @@
 .DS_Store
 .node_binaries
 node_modules
-bower_components
 trash
 bundles
 target

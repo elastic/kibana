@@ -6,18 +6,15 @@ module.exports = function (grunt) {
       return;
     }
 
-    var tasks = [
+    grunt.task.run(_.compact([
+      process.env.TRAVIS && 'esvm:dev',
       'licenses',
       'jshint:source',
       'jscs:source',
       'maybeStartKibana',
       'simplemocha:all',
       'mocha:unit'
-    ];
-
-    if (process.env.TRAVIS) tasks.unshift('esvm:dev');
-
-    grunt.task.run(tasks);
+    ]));
   });
 
   grunt.registerTask('quick-test', function () {

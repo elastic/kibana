@@ -15,21 +15,12 @@ module.exports = function (kibana) {
     modules[name] = resolve(metaLibs, file);
   });
 
-  var bowerComponentsDir = fromRoot('bower_components');
-
   return new kibana.Plugin({
     init: false,
     uiExports: {
       modules: modules,
       noParse: [
-        /node_modules\/angular\//,
-        {
-          test: function (request) {
-            return _.endsWith(request, '.js')
-            && _.includes(request, bowerComponentsDir)
-            && !_.includes(request, 'bower_components/gridster');
-          }
-        }
+        /node_modules\/(angular|elasticsearch-browser|mocha)\//
       ]
     }
   });

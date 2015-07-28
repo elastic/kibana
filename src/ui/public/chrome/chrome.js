@@ -25,6 +25,11 @@ var internals = _.assign(
   }
 );
 
+$('<link>').attr({
+  href: require('ui/images/elk.ico'),
+  rel: 'shortcut icon'
+}).appendTo('head');
+
 require('./api/apps')(chrome, internals);
 require('./api/angular')(chrome, internals);
 require('./api/tabs')(chrome, internals);

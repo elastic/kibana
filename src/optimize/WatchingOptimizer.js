@@ -22,7 +22,7 @@ class WatchingOptimizer extends BaseOptimizer {
   }
 
   init(autoEnable) {
-    return this.bundles.synchronize().then(autoEnable ? this.enable : this.setupCompiler);
+    return this.bundles.ensureDir().then(autoEnable ? this.enable : this.setupCompiler);
   }
 
   setupCompiler(autoEnable) {
