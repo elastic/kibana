@@ -124,7 +124,7 @@ define(function (require) {
      * @param {number}
      */
     SegmentedReq.prototype.setMaxSegments = function (maxSegments) {
-      this._maxSegments = _.parseInt(maxSegments);
+      this._maxSegments = Math.max(_.parseInt(maxSegments), 1);
     };
 
     /**
