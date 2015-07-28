@@ -3,6 +3,7 @@ module.exports = function (grunt) {
     unit: {
       configFile: 'karma.conf.js',
       singleRun: true,
+      reporters: 'dots',
       browsers: [
         '<%= karmaBrowser %>'
       ]
