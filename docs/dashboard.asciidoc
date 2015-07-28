@@ -102,8 +102,6 @@ Move the cursor to the bottom right corner of the container until the cursor cha
 cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to 
 confirm the new container size.
 
-// enhancement request: a way to specify specific dimensions for a container in pixels, or at least display that info?
-
 [float]
 [[removing-containers]]
 ==== Removing Containers
