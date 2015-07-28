@@ -13,7 +13,7 @@ module.exports = function (grunt) {
       'jscs:source',
       'maybeStartKibana',
       'simplemocha:all',
-      'mocha:unit'
+      'karma:unit'
     ]));
   });
 
@@ -21,15 +21,9 @@ module.exports = function (grunt) {
     grunt.task.run([
       'maybeStartKibana',
       'simplemocha:all',
-      'mocha:unit'
+      'karma:unit'
     ]);
   });
-
-  grunt.registerTask('coverage', [
-    'blanket',
-    'maybeStartKibana',
-    'mocha:coverage'
-  ]);
 
   grunt.registerTask('test:watch', [
     'maybeStartKibana',
