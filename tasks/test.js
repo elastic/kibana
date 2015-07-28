@@ -7,7 +7,6 @@ module.exports = function (grunt) {
     }
 
     grunt.task.run(_.compact([
-      process.env.TRAVIS && 'esvm:dev',
       'jshint:source',
       'jscs:source',
       'maybeStartKibana',

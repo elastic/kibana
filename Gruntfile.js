@@ -13,7 +13,17 @@ module.exports = function (grunt) {
     testUtilsDir: __dirname + '/src/testUtils',
     configFile: __dirname + '/src/config/kibana.yml',
 
-    karmaBrowser: process.env.TRAVIS ? 'Firefox' : 'Chrome',
+    karmaBrowser: (function () {
+      switch (require('os').platform()) {
+        case 'win32':
+          return 'IE';
+        case 'darwin':
+          return 'Chrome';
+        default:
+          return 'Firefox';
+      }
+    }()),
+
     nodeVersion: '0.10.35',
     platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
     services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
