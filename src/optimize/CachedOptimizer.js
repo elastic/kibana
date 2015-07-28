@@ -12,7 +12,7 @@ module.exports = class CachedOptimizer extends BaseOptimizer {
   }
 
   init(autoRun) {
-    return this.bundles.synchronize().then(autoRun ? this.run : this.setupCompiler);
+    return this.bundles.ensureAllEntriesExist().then(autoRun ? this.run : this.setupCompiler);
   }
 
   setupCompiler(autoRun) {

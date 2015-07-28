@@ -101,9 +101,7 @@ module.exports = class KbnServer extends EventEmitter {
       self.server.stop(cb);
     })
     .then(function () {
-      if (self.optimizer && self.optimizer.disable) {
-        return self.optimizer.disable();
-      }
+      return _.get(self, 'optimizer.disable', _.noop)();
     });
   }
 };

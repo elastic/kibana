@@ -48,28 +48,29 @@ class OptmzBundles {
 
     _.bindAll(this, [
       'ensureDir',
-      'synchronize',
-      'syncBundle',
+      'ensureAllEntriesExist',
+      'checkIfEntryExists',
+      'writeEntryFile',
       'clean',
       'getMissingEntries',
       'getEntriesConfig'
     ]);
   }
 
-  synchronize() {
-    return this.ensureDir()
-    .return(this.entries)
-    .map(this.syncBundle)
-    .return(undefined);
-  }
-
   ensureDir() {
     return mkdirp(this.dir);
   }
 
-  syncBundle(entry) {
-    let clean = this.clean;
+  ensureAllEntriesExist(overwrite) {
+    return this.ensureDir()
+    .return(this.entries)
+    .map(overwrite ? this.checkIfEntryExists : _.noop)
+    .return(this.entries)
+    .map(this.writeEntryFile)
+    .return(undefined);
+  }
 
+  checkIfEntryExists(entry) {
     return resolve([
       read(entry.path),
       stat(entry.bundlePath)
@@ -78,13 +79,14 @@ class OptmzBundles {
     .spread(function (readEntry, statBundle) {
       let existingEntry = readEntry.isFulfilled() && readEntry.value().toString('utf8');
       let bundleExists = statBundle.isFulfilled() && !statBundle.value().isDirectory();
-
       entry.exists = existingEntry && bundleExists && (existingEntry === entry.content);
-      if (entry.exists) return;
+    });
+  }
 
-      return clean([entry.path, entry.bundlePath]).then(function () {
-        return write(entry.path, entry.content, { encoding: 'utf8' });
-      });
+  writeEntryFile(entry) {
+    return this.clean([entry.path, entry.bundlePath]).then(function () {
+      entry.exists = false;
+      return write(entry.path, entry.content, { encoding: 'utf8' });
     });
   }
 

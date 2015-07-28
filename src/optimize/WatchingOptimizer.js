@@ -22,7 +22,7 @@ class WatchingOptimizer extends BaseOptimizer {
   }
 
   init(autoEnable) {
-    return this.bundles.ensureDir().then(autoEnable ? this.enable : this.setupCompiler);
+    return this.bundles.ensureAllEntriesExist(true).then(autoEnable ? this.enable : this.setupCompiler);
   }
 
   setupCompiler(autoEnable) {
@@ -33,7 +33,7 @@ class WatchingOptimizer extends BaseOptimizer {
     this.compiler.plugin('watch-run', _.partial(this.setStatus, STATUS_BUNDLING));
     this.compiler.plugin('invalid', this.onBundlesInvalid);
     this.compiler.plugin('failed', _.partial(this.setStatus, STATUS_ERROR));
-    this.compiler.plugin('done', _.partial(this.setStatus, STATUS_DONE, true));
+    this.compiler.plugin('done', _.partial(this.setStatus, STATUS_DONE));
 
     if (autoEnable) this.enable();
   }
@@ -52,16 +52,18 @@ class WatchingOptimizer extends BaseOptimizer {
     }
   }
 
-  setStatus(status, shouldBeFinal) {
+  setStatus(status) {
     let self = this;
     let entries = self.bundles.entries;
     let stats;
     let error;
+    let shouldBeFinal = false;
 
     switch (status) {
       case 'done':
         stats = self.watcher.stats;
         error = null;
+        shouldBeFinal = true;
 
         if (stats.hasErrors()) {
           error = new Error('Optimization must not produce errors or warnings');
@@ -75,7 +77,8 @@ class WatchingOptimizer extends BaseOptimizer {
     }
 
     let apply = function () {
-      self.tentativeStatusChange = clearTimeout(self.tentativeStatusChange);
+      clearTimeout(self.tentativeStatusChange);
+      self.tentativeStatusChange = null;
       self.emit(self.bundleStatus = status, entries, stats, error);
     };
 
