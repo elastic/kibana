@@ -107,10 +107,14 @@ Use the following command to establish `geo_point` mapping for the logs:
 curl -XPUT http://localhost:9200/logstash-2015.05.18 -d '
 {
  "mappings" : {
-  "pin" : {
+  "log" : {
    "properties" : {
-    "location" : {
-     "type" : "geo_point"
+    "geo" : {
+     "properties" : {
+      "coordinates" : {
+       "type" : "geo_point"
+      }
+     }
     }
    }
   }
