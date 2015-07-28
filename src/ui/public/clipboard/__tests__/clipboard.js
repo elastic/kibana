@@ -33,8 +33,9 @@ describe('Clipboard directive', function () {
     });
   }
 
-  describe('With flash disabled', function () {
+  describe.skip('With flash disabled', function () {
     beforeEach(function () {
+      this.timeout(5000);
       sinon.stub(window.ZeroClipboard, 'isFlashUnusable', _.constant(true));
       init();
     });
@@ -54,8 +55,9 @@ describe('Clipboard directive', function () {
     });
   });
 
-  describe('With flash enabled', function () {
+  describe.skip('With flash enabled', function () {
     beforeEach(function () {
+      this.timeout(5000);
       sinon.stub(window.ZeroClipboard, 'isFlashUnusable', _.constant(false));
       init();
     });
