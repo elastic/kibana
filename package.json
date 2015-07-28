@@ -7,6 +7,7 @@
     "express": "^4.11.2",
     "glob": "^5.0.13",
     "moment": "^2.10.3",
+    "node-fetch": "^1.3.2",
     "pegjs": "^0.8.0"
   },
   "devDependencies": {

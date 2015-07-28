@@ -47,7 +47,7 @@ module.exports = function reduce (args, fn) {
             return [point[0], fn(value, argument)];
           }
 
-          if (argument.data[index][1] == null) {
+          if (argument.data[index] == null || argument.data[index][1] == null) {
             return [point[0], null];
           }
           return [point[0], fn(value, argument.data[index][1])];

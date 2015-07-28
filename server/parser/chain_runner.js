@@ -7,8 +7,17 @@ var fs = require('fs');
 var grammar = fs.readFileSync('app/scripts/chain.peg', 'utf8');
 var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
+var parseDateMath = require('../utils/date_math.js');
 
-var fetchData = require('./fetch_data.js');
+
+var tlConfig = {
+  time: {
+    min: parseDateMath('now-18M').valueOf(),
+    max: parseDateMath('now').valueOf(),
+    field: '@timestamp',
+    interval: '1w'
+  }
+};
 
 var stats = {};
 
@@ -62,15 +71,13 @@ function invoke (fnName, args) {
 
     if (_.isObject(item)) {
       switch (item.type) {
-        case 'query':
-          var cacheKey = getQueryCacheKey(item);
-          if (queryCache[cacheKey]) {
-            stats.queryCount++;
-            return Promise.resolve(_.cloneDeep(queryCache[cacheKey]));
-          }
-          //return fetchData(item, cacheKey);
-          throw new Error ('Missing query cache! ' + cacheKey);
         case 'function':
+          console.log(queryCache[getQueryCacheKey(item)]);
+          if (queryCache[getQueryCacheKey(item)]) {
+            console.log('Cache hit');
+            stats.queryCount++;
+            return Promise.resolve(_.cloneDeep(queryCache[getQueryCacheKey(item)]));
+          }
           return invoke(item.function, item.arguments);
         case 'reference':
           var reference = sheet[item.plot - 1][item.series - 1];
@@ -97,6 +104,7 @@ function invoke (fnName, args) {
       throw new Error ('Too many arguments passed to: ' + fnName);
     }
 
+    console.log(fnName);
 
     _.each(args, function (arg, i) {
       var type = argType(arg);
@@ -107,7 +115,7 @@ function invoke (fnName, args) {
         throw new Error (name + ' must be one of ' + JSON.stringify(required) + '. Got: ' + type);
       }
     });
-    return functionDef.fn(args);
+    return functionDef.fn(args, tlConfig);
   });
 }
 
@@ -153,7 +161,7 @@ function logObj(obj, thing) {
 }
 
 function preProcessSheet (sheet) {
-  var queries = {};
+  var queries = [];
 
   function storeQueryObj(query) {
     var cacheKey = getQueryCacheKey(query);
@@ -162,8 +170,18 @@ function preProcessSheet (sheet) {
 
   function findQueries(chain) {
 
-    if (_.isObject(chain) && chain.type === 'query') {
-      storeQueryObj(chain);
+    function checkFunc (func) {
+      if (_.isObject(func) && func.type === 'function') {
+        if ( functions[func.function].dataSource) {
+          storeQueryObj(func);
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    if (checkFunc(chain)) {
       return;
     }
 
@@ -183,10 +201,11 @@ function preProcessSheet (sheet) {
         findQueries(operator.list);
         break;
       case 'function':
-        findQueries(operator.arguments);
-        break;
-      case 'query':
-        storeQueryObj(operator);
+        if (checkFunc(operator)) {
+          break;
+        } else {
+          findQueries(operator.arguments);
+        }
         break;
       }
     });
@@ -196,15 +215,20 @@ function preProcessSheet (sheet) {
     findQueries(chainList);
   });
 
+  queries = _.values(queries);
 
-  var promises = _.map(queries, function (item, cacheKey) {
-    return fetchData(item, cacheKey);
+  var promises = _.map(queries, function (item) {
+    return invoke(item.function, item.arguments);
   });
 
   return Promise.all(promises).then(function (results) {
-    _.each(results, function (result) {
-      queryCache[result.list[0].cacheKey] = result;
+    _.each(queries, function (item, i) {
+      console.log(i);
+      queryCache[getQueryCacheKey(item)] = results[i];
     });
+
+
+    console.log(queryCache);
     stats.cacheCount = _.keys(queryCache).length;
     stats.queryTime = (new Date()).getTime();
     return queryCache;
@@ -253,14 +277,14 @@ module.exports = {
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
   Promise.all(sheet).then(function (sheet) {
-    console.log(logObj(sheet, 1));
+    //console.log(logObj(sheet, 1));
     console.log(logObj({done:true}));
     return sheet;
   });
 }
 
 debugSheet(
-  ['(`*`).lines(steps=1)']
+  ['`*` offset="-1M"']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

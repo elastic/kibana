@@ -22,7 +22,9 @@ series
  = series:series_type ','? space? { return series }
 
 series_type
- = chain
+ = grouped_chain
+ / chain
+ / function
  / request
  / reference
 
@@ -31,7 +33,15 @@ chained_function
   return func
  }
 
+group
+ = '(' grouped:series+ ')'
+
 chain
+ = func:function rest:chained_function* {
+  return {type: 'chain', chain: [func].concat(rest)}
+}
+
+grouped_chain
  = '(' space? first:series+ space? ')' rest:chained_function* {
   first = {
     type: 'chainList',
@@ -78,24 +88,29 @@ query
  = '`' q:[^`]* '`' {return q.join('')}
 
 request_operator
- = space? operator:function_name space? arguments:request_operator_argument+ space? {
+ = space? operator:function_name '=' arguments:string space? {
   return {
-   operator: operator,
-   arguments: arguments
+   type: 'namedArg',
+   name: operator,
+   value: arguments
   }
  }
 
 request_operator_argument
- = argument:([a-zA-Z0-9\-_\*.+]+ / string) ':'? {
+ = argument:([a-zA-Z0-9\-_\*.+:]+ / string) {
   return argument.join('');
  }
 
 request
- = query:query operators:(request_operator+)?
+ = query:query arguments:(request_operator+)?
  {
-  var obj = {query: query, type: 'query'}
-  if (operators) {
-   obj.operators = operators
+  var obj = {
+    type: 'function',
+    function: 'es',
+    arguments: [query]
+  }
+  if (arguments) {
+   obj.arguments = obj.arguments.concat(arguments)
   }
   return obj;
  }
