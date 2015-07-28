@@ -123,7 +123,7 @@ define(function (require) {
             notify.error('The file could not be processed.');
           }
 
-          return Promise.all(docs.map(function (doc) {
+          return Promise.map(docs, function (doc) {
             var service = _.find($scope.services, {type: doc._type}).service;
             return service.get().then(function (obj) {
               obj.id = doc._id;
@@ -131,7 +131,7 @@ define(function (require) {
                 return obj.save();
               });
             });
-          }))
+          })
           .then(refreshIndex)
           .then(refreshData, notify.error);
         };
