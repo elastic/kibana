@@ -40,6 +40,7 @@ define(function (require) {
         $http.post('/series', {sheet:$scope.input.expressions}).
           // data, status, headers, config
           success(function(resp) {
+            $scope.error = null;
             $scope.stats = resp.stats;
             $scope.sheet = resp.sheet;
             _.each(resp.sheet, function (cell) {
@@ -49,7 +50,8 @@ define(function (require) {
             });
             $scope.running = false;
           })
-          .error(function () {
+          .error(function (resp) {
+            $scope.error = resp.error;
             $scope.sheet = [];
             $scope.running = false;
           });

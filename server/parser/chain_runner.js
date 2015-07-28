@@ -108,7 +108,7 @@ function invoke (fnName, args) {
       var name = functionDef.args[i].name;
 
       if (!(_.contains(required, type))) {
-        throw new Error (name + ' must be one of ' + JSON.stringify(required) + '. Got: ' + type);
+        throw new Error (fnName + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
       }
     });
     return functionDef.fn(args, tlConfig);
@@ -149,7 +149,7 @@ function resolveChainList (chainList) {
   return Promise.all(seriesList).then(function (args) {
     var list = _.chain(args).pluck('list').flatten().value();
     return {type: 'seriesList', list: list};
-  }).catch(function (e) {throw e;});
+  });
 }
 
 function logObj(obj, thing) {
@@ -207,12 +207,8 @@ function preProcessSheet (sheet) {
     });
   }
 
-  _.each(sheet, function (chainList, index) {
-    try {
-      validateAndCache(chainList);
-    } catch (e) {
-      throw {plot: index, name: 'InvalidFunction', exception: e.toString()};
-    }
+  _.each(sheet, function (chainList) {
+    validateAndCache(chainList);
   });
 
   queries = _.values(queries);
@@ -226,21 +222,20 @@ function preProcessSheet (sheet) {
       queryCache[getQueryCacheKey(item)] = results[i];
     });
 
-
     stats.cacheCount = _.keys(queryCache).length;
     stats.queryTime = (new Date()).getTime();
     return queryCache;
-  }).catch(function (e) {throw e;});
+  });
 }
 
 
 
 function resolveSheet (sheet) {
-  return _.map(sheet, function (plot, index) {
+  return _.map(sheet, function (plot) {
     try {
       return Parser.parse(plot);
     } catch (e) {
-      throw {plot: index, name: e.name, exception: 'Expected: ' + e.expected[0].description + ' @ character ' + e.column};
+      throw new Error('Expected: ' + e.expected[0].description + ' @ character ' + e.column);
     }
   });
 }
@@ -250,11 +245,8 @@ function processRequest (request) {
   stats.queryCount = 0;
   queryCache = {};
   // This is setting the "global" sheet
-  try {
-    sheet = resolveSheet(request);
-  } catch (e) {
-    return Promise.resolve([e]);
-  }
+  sheet = resolveSheet(request);
+
 
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList) {
@@ -281,7 +273,7 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['`*` offset="-1M"']
+  //['es(1)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );

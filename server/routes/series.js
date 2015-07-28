@@ -12,7 +12,7 @@ module.exports = function (app) {
     try {
       sheet = chainRunner.processRequest(req.body.sheet);
     } catch (e) {
-      res.send({sheet: [e]});
+      res.status(400).send({error: e.toString()});
       return;
     }
 
@@ -24,7 +24,7 @@ module.exports = function (app) {
       };
       res.send(response);
     }).catch(function (e) {
-      res.send(e);
+      res.status(400).send({error: e.toString()});
     });
 
   });
