@@ -27,7 +27,9 @@
                   {{bucket.display}} <i ng-show="bucket.display === ''">Empty string</i>
                 </div>
               </div>
-              <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+              <kbn-tooltip text="{{bucket.count}}" placement="right" append-to-body="1">
+                <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+              </kbn-tooltip>
             </div>
           </div>
         </div>
