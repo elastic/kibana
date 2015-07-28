@@ -24,6 +24,7 @@ define(function (require) {
         });
 
         $elem.on('click', function (e) {
+          $fileInput.val(null);
           $fileInput.trigger('click');
         });
       }
