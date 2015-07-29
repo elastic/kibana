@@ -17,9 +17,10 @@ define(function (require) {
       restrict: 'E',
       scope : {
         vis: '=',
+        uiState: '=?',
+        searchSource: '=?',
         editableVis: '=?',
         esResp: '=?',
-        searchSource: '=?'
       },
       template: require('ui/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
@@ -36,7 +37,7 @@ define(function (require) {
         var getVisEl = getter('.visualize-chart');
         var getSpyEl = getter('visualize-spy');
 
-        $scope.spy = {};
+        $scope.spy = $scope.uiState ? $scope.uiState.get('spy', {}) : {};
         $scope.fullScreenSpy = false;
 
         var applyClassNames = function () {
@@ -76,7 +77,9 @@ define(function (require) {
           };
         }());
 
+        // spy watchers
         $scope.$watch('fullScreenSpy', applyClassNames);
+
         $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
           var $visEl = getVisEl();
           if (!$visEl) return;
@@ -85,6 +88,7 @@ define(function (require) {
           if (spyMode && !oldSpyMode) {
             $scope.fullScreenSpy = $visEl.height() < minVisChartHeight;
           }
+
           applyClassNames();
         });
 
