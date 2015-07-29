@@ -29,6 +29,13 @@ module.exports = Joi.object({
       ssl: Joi.object({
         cert: Joi.string(),
         key: Joi.string()
+      }).default(),
+      auth: Joi.object({
+        enabled: Joi.boolean().default(false),
+        strategy: Joi.string().default('es_proxy'),
+        encryptionKey: Joi.string().default('secret'),
+        sessionTimeout: Joi.number().default(30 * 60 * 1000),
+        htpasswd: Joi.string()
       }).default()
     }).default(),
     index: Joi.string().default('.kibana'),
@@ -65,8 +72,8 @@ module.exports = Joi.object({
       log: Joi.any().default('*'),
       response: Joi.any().default('*'),
       error: Joi.any().default('*'),
-      json: Joi.boolean().default(false),
+      json: Joi.boolean().default(false)
     }).default()
-  }).default(),
+  }).default()
 }).default();
 

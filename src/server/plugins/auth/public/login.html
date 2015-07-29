@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Kibana 4</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+        </div>
+        <div id="error-message" class="form-group has-error"></div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+      document.getElementById('login-form').addEventListener('submit', function (e) {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        $.ajax({
+          type: 'POST',
+          url: '',
+          data: {
+            username: username,
+            password: password
+          },
+          success: function (response) {
+            window.location = '/';
+          },
+          error: function (response) {
+            response = JSON.parse(response.responseText);
+            document.getElementById('error-message').innerHTML = response.message;
+          }
+        });
+
+        e.preventDefault();
+      });
+    </script>
+  </body>
+</html>
