@@ -38,7 +38,7 @@ describe('kibana cli', function () {
       afterEach(function () {
       });
 
-      it('should throw an ENOTFOUND error for a 404 error', function () {
+      it.skip('should throw an ENOTFOUND error for a 404 error', function () {
         var couchdb = nock('http://www.files.com')
                 .get('/plugin.tar.gz')
                 .reply(404);
@@ -57,7 +57,7 @@ describe('kibana cli', function () {
         });
       });
 
-      it('should download and extract a valid plugin', function () {
+      it.skip('should download and extract a valid plugin', function () {
         var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
@@ -109,7 +109,7 @@ describe('kibana cli', function () {
 
       afterEach(function () {});
 
-      it('should loop through bad urls until it finds a good one.', function () {
+      it.skip('should loop through bad urls until it finds a good one.', function () {
         var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
         var settings = {
           urls: [
@@ -158,7 +158,7 @@ describe('kibana cli', function () {
         });
       });
 
-      it('should stop looping through urls when it finds a good one.', function () {
+      it.skip('should stop looping through urls when it finds a good one.', function () {
         var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
         var settings = {
           urls: [
@@ -207,7 +207,7 @@ describe('kibana cli', function () {
         });
       });
 
-      it('should throw an error when it doesn\'t find a good url.', function () {
+      it.skip('should throw an error when it doesn\'t find a good url.', function () {
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
