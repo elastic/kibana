@@ -73,6 +73,10 @@ define(function (require) {
       this._saveState(this._changedState);
     };
 
+    PersistedState.prototype.getChanges = function () {
+      return _.cloneDeep(this._changedState);
+    };
+
     PersistedState.prototype.toJSON = function () {
       return this.get();
     };
