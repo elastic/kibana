@@ -114,18 +114,6 @@ describe('pluigns/elasticsearch', function () {
       });
     });
 
-    it('should update the build number to max integer if buildNum is template string', function () {
-      get.withArgs('pkg.buildNum').returns('@@buildNum');
-      client.create.returns(Promise.resolve());
-      var response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
-      return upgrade(response).then(function (resp) {
-        sinon.assert.calledOnce(client.create);
-        var params = client.create.args[0][0];
-        expect(params).to.have.property('body');
-        expect(params.body).to.have.property('buildNum', Math.pow(2, 53) - 1);
-      });
-    });
-
     it('should log a message for upgrades', function () {
       get.withArgs('pkg.buildNum').returns(5801);
       client.create.returns(Promise.resolve());

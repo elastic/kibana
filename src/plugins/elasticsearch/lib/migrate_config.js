@@ -8,7 +8,7 @@ module.exports = function (server) {
     type: 'config',
     body: {
       size: 1000,
-      sort: [ { buildNum: { order: 'desc' } } ]
+      sort: [ { buildNum: { order: 'desc', ignore_unmapped: true } } ]
     }
   };
 

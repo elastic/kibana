@@ -19,10 +19,8 @@ module.exports = function (server) {
       return client.create({
         index: config.get('kibana.index'),
         type: 'config',
-        body: {
-          buildNum: config.get('env.prod') ? config.get('pkg.buildNum') : MAX_INTEGER
-        },
-        id: config.get('env.prod') ? config.get('pkg.version') : '@@version'
+        body: { buildNum: config.get('pkg.buildNum') },
+        id: config.get('pkg.version')
       });
     }
 
@@ -40,10 +38,7 @@ module.exports = function (server) {
 
     // if the build number is still the template string (which it wil be in development)
     // then we need to set it to the max interger. Otherwise we will set it to the build num
-    body._source.buildNum = MAX_INTEGER;
-    if (!/^@@/.test(config.get('pkg.buildNum'))) {
-      body._source.buildNum = parseInt(config.get('pkg.buildNum'), 10);
-    }
+    body._source.buildNum = config.get('pkg.buildNum');
 
     server.log(['plugin', 'elasticsearch'], {
       tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
