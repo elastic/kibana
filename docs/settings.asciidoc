@@ -155,6 +155,44 @@ the field's format from the *Format* drop-down. Format options vary based on the
 You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the 
 *Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
 
+Kibana has field formatters for the following field types:
+
+==== String Field Formatters
+
+String fields support the `String` and `Url` formatters.
+
+include::string-formatter.asciidoc[]
+
+include::url-formatter.asciidoc[]
+
+==== Date Field Formatters
+
+Date fields support the `Date`, `Url`, and `String` formatters.
+
+The `Date` formatter enables you to choose the display format of date stamps using the http://moment.js[moment.js]
+standard format definitions.
+
+include::string-formatter.asciidoc[]
+
+include::url-formatter.asciidoc[]
+
+==== Geographic Point Field Formatters
+
+Geographic point fields support the `String` formatter.
+
+include::string-formatter.asciidoc[]
+
+==== Numeric Field Formatters
+
+Numeric fields support the `Url`, `String`, `Bytes`, `Number`, and `Percentage` formatters.
+
+include::string-formatter.asciidoc[]
+
+include::url-formatter.asciidoc[]
+
+The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using 
+the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
+
 [float]
 [[create-scripted-field]]
 === Creating a Scripted Field
