@@ -426,6 +426,7 @@ define(function (require) {
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
         fields: {'*': {}},
+        require_field_match: false,
         fragment_size: 2147483647 // Limit of an integer.
       })
       .set('filter', queryFilter.getFilters());
