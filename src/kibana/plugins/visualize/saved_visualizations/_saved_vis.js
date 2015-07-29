@@ -30,6 +30,7 @@ define(function (require) {
             def.type = opts.type;
             return def;
           }()),
+          uiStateJSON: '{}',
           description: '',
           savedSearchId: opts.savedSearchId,
           version: 1
@@ -44,6 +45,7 @@ define(function (require) {
     SavedVis.mapping = {
       title: 'string',
       visState: 'json',
+      uiStateJSON: 'string',
       description: 'string',
       savedSearchId: 'string',
       version: 'integer'

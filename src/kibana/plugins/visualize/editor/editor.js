@@ -4,7 +4,6 @@ define(function (require) {
   require('plugins/visualize/editor/sidebar');
   require('plugins/visualize/editor/agg_filter');
 
-
   require('directives/saved_object_finder');
   require('components/visualize/visualize');
   require('components/clipboard/clipboard');
@@ -60,6 +59,7 @@ define(function (require) {
     var brushEvent = Private(require('utils/brush_event'));
     var queryFilter = Private(require('components/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
+    var PersistedState = Private(require('components/persisted_state/persisted_state'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -68,6 +68,8 @@ define(function (require) {
     var savedVis = $route.current.locals.savedVis;
 
     var vis = savedVis.vis;
+    var uiState = new PersistedState();
+    if (savedVis.uiStateJSON) uiState.set(JSON.parse(savedVis.uiStateJSON));
     var editableVis = vis.createEditableVis();
     vis.requesting = function () {
       var requesting = editableVis.requesting;
@@ -117,6 +119,7 @@ define(function (require) {
       $scope.savedVis = savedVis;
       $scope.searchSource = searchSource;
       $scope.vis = vis;
+      $scope.uiState = uiState;
       $scope.indexPattern = vis.indexPattern;
       $scope.editableVis = editableVis;
       $scope.state = $state;
@@ -216,7 +219,6 @@ define(function (require) {
       }
     };
 
-
     $scope.startOver = function () {
       kbnUrl.change('/visualize', {});
     };
@@ -224,6 +226,7 @@ define(function (require) {
     $scope.doSave = function () {
       savedVis.id = savedVis.title;
       savedVis.visState = $state.vis;
+      savedVis.uiStateJSON = JSON.stringify($scope.uiState.getChanges());
 
       savedVis.save()
       .then(function (id) {
