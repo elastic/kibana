@@ -38,8 +38,8 @@
     </div>
     <div class="filter-edit" ng-if="filter.meta.editing" ng-init="clonedFilter = stringifyQuery(filter)">
       <div ui-ace="{ onLoad: aceLoaded, mode: 'json' }" ng-model="clonedFilter"></div>
-      <button class="btn btn-default" ng-click="mergeEditedFilter(filter, clonedFilter)">Done</button>
-      <button class="btn btn-default" ng-click="stopEditingFilter(filter)">Cancel</button>
+      <button class="btn btn-primary" ng-click="stopEditingFilter(filter)">Cancel</button>
+      <button class="btn btn-success" ng-click="mergeEditedFilter(filter, clonedFilter)">Done</button>
     </div>
   </div>
   <div class="filter-link">

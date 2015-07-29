@@ -112,7 +112,7 @@ define(function (require) {
         //staying in edit mode is sufficient
         return;
       }
-      currentFilter.query = parsedQuery;
+      currentFilter.query.match = parsedQuery;
       this.stopEditingFilter(currentFilter);
     };
 
@@ -122,7 +122,7 @@ define(function (require) {
     * @return {object} the cloned filter
     */
     queryFilter.stringifyQuery = function (filter) {
-      return JSON.stringify(filter.query, null, '\t');
+      return JSON.stringify(filter.query.match, null, '\t');
     };
 
     /**
