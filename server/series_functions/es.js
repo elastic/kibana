@@ -29,6 +29,8 @@ module.exports = {
   help: 'Pull data from an elasticsearch instance',
   aliases: ['elasticsearch'],
   fn: function esFn (args, tlConfig) {
+
+    console.log(tlConfig);
     var config = {
       query: args[0],
       metric: args[1],
@@ -69,7 +71,7 @@ module.exports = {
 
 function buildRequest (config, tlConfig) {
   var filter = {range:{}};
-  filter.range[tlConfig.time.field] = {gte: tlConfig.time.min, lte: tlConfig.time.max, format: 'epoch_millis'};
+  filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.min, lte: tlConfig.time.max, format: 'epoch_millis'};
 
   var searchRequest = {
     index: config.index,
@@ -89,7 +91,7 @@ function buildRequest (config, tlConfig) {
       aggs: {
         series: {
           date_histogram: {
-            field: tlConfig.time.field,
+            field: tlConfig.file.es.timefield,
             interval: tlConfig.time.interval,
             extended_bounds: {
               min: tlConfig.time.min,

@@ -9,15 +9,15 @@ var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
 var parseDateMath = require('../utils/date_math.js');
 
+var config = require('../../timelion.json');
 
 var tlConfig = {
   time: {
     min: parseDateMath('now-18M').valueOf(),
     max: parseDateMath('now').valueOf(),
-    field: '@timestamp',
-    interval: '1w'
+    interval: config.default_interval
   },
-  file: require('../../timelion.json')
+  file: config
 };
 
 var stats = {};

@@ -1,6 +1,9 @@
 {
- "quandl": {
-  "key": ""
-
- }
+  "quandl": {
+    "key": ""
+  },
+  "es": {
+    "timefield": "@timestamp"
+  },
+  "default_interval": "1w"
 }
