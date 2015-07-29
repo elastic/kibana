@@ -2,7 +2,7 @@ define(function (require) {
   require('flot.time');
   var _ = require('lodash');
   var $ = require('jquery');
-  return function () {
+  return function ($compile) {
     return {
       restrict: 'A',
       scope: {
@@ -23,33 +23,55 @@ define(function (require) {
             margin: 10,
           },
           legend: {
-            position: 'nw'
+            position: 'nw',
+            labelBoxBorderColor: 'rgb(255,255,255,0)',
+            labelFormatter: function (label, series) {
+              return '<span class="ngLegendValue" ng-click="toggleSeries(' + series._id + ')">' + label + '</span>';
+            }
           },
           yaxes: [ { }, { position: "right" } ],
           colors: ['#01A4A4', '#c66', '#D0D102', '#616161', '#00A1CB','#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
         };
 
-        $scope.$watch('chart', function (val) {
+        $scope.toggleSeries = function(id) {
+          var series = $scope.chart[id];
+          series._hide = !series._hide;
+          drawPlot($scope.chart);
+        };
 
-          if (!val || !val.length) {
+        function drawPlot (plotConfig) {
+          if (!plotConfig || !plotConfig.length) {
             $elem.empty();
             return;
           }
 
-          var series = _.map($scope.chart, function (series) {
-            if (series.yaxis === 2) {
-              series.label = series.label + ' (y2)';
-            }
-            return _.defaults(series, {
+          var series = _.map(_.cloneDeep($scope.chart), function (series, index) {
+            _.defaults(series, {
               shadowSize: 0,
               lines: {
                 lineWidth: 5
               }
             });
+            series._id = index;
+            if (series.yaxis === 2) {
+              series.label = series.label + ' (y2)';
+            }
+            if (series._hide) {
+              series.data = [];
+              //series.color = "#ddd";
+              series.label = '(hidden) ' + series.label;
+            }
+            return series;
           });
 
-          $.plot($elem, series, options);
-        });
+          $scope.plot = $.plot($elem, _.compact(series), options);
+
+          _.each($elem.find('.ngLegendValue'), function (elem) {
+            $compile(elem)($scope);
+          });
+        }
+
+        $scope.$watch('chart', drawPlot);
       }
     };
   };

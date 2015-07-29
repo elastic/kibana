@@ -171,3 +171,7 @@ body {
   text-overflow: ellipsis;
   overflow-x: hidden;
 }
+
+.ngLegendValue:hover {
+  text-decoration: underline;
+}
