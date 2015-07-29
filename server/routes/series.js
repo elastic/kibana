@@ -10,7 +10,7 @@ module.exports = function (app) {
 
     var sheet;
     try {
-      sheet = chainRunner.processRequest(req.body.sheet);
+      sheet = chainRunner.processRequest(req.body);
     } catch (e) {
       res.status(400).send({error: e.toString()});
       return;

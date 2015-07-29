@@ -2,6 +2,12 @@ define(function (require) {
     var _ = require('lodash');
     return function ($scope, $http, localStorageService) {
 
+      $scope.input = {
+        expressions: localStorageService.get('expressions') || blankSheet,
+        selected: 0,
+        interval: '1w'
+      };
+
       var init = function () {
         $scope.running = false;
         $scope.search();
@@ -24,11 +30,6 @@ define(function (require) {
         $scope.search();
       };
 
-      $scope.input = {
-        expressions: localStorageService.get('expressions') || blankSheet,
-        selected: 0
-      };
-
       $scope.setActiveCell = function (cell) {
         $scope.input.selected = cell;
       };
@@ -37,7 +38,7 @@ define(function (require) {
         localStorageService.set('expressions', $scope.input.expressions);
         $scope.running = true;
 
-        $http.post('/series', {sheet:$scope.input.expressions}).
+        $http.post('/series', {sheet:$scope.input.expressions, interval: $scope.input.interval}).
           // data, status, headers, config
           success(function(resp) {
             $scope.error = null;

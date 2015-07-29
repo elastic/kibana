@@ -9,7 +9,39 @@
       </small>
   </h1>
 </div>
+
+<form class="input-form">
+  <div class="form-group input-form-expression">
+    <label>&nbsp</label>
+    <input type="text"
+      expression="input.expressions[input.selected]"
+      class="form-control top-agg-input"
+      ng-model="input.expressions[input.selected]"
+      id="search"
+      placeholder="Enter Expression" />
+  </div>
+  <div class="form-group input-form-interval">
+    <label>Interval</label>
+    <select class="form-control"
+      ng-change="search()"
+      ng-options="interval for interval in ['1m','1h','1d', '1w', '1M', '1y']"
+      ng-model="input.interval">
+
+    </select>
+  </div>
+  <button style="display:none"
+      type="submit"
+      ng-click="search()">Run</button>
+</form>
+
+<div ng-if="error" class="alert alert-danger">
+  {{error}}
+</div>
+
+
+<!--
 <form>
+  <select ng-options="interval for interval in ['1m','1h','1d', '1w', '1M', '1y']" ng-model="input.interval">
   <div class="form-group function-form" ng-submit="search()">
     <input type="text"
       expression="input.expressions[input.selected]"
@@ -21,11 +53,8 @@
       type="submit"
       ng-click="search()">Run</button>
   </div>
-  <div ng-if="error" class="alert alert-danger">
-    {{error}}
-  </div>
 </form>
-
+-->
 <div>
   <div class="chart-container col-md-4"
     ng-repeat="cell in input.expressions track by $index"

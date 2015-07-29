@@ -137,61 +137,30 @@ body {
     box-shadow: inherit;
 }
 
-/* Preloader */
-
-.preloader {
-  left:0;
-  top: 6px;
-  display: none;
+.input-form {
+  display: flex;
 }
 
-.preloader {
-  position: absolute;
-  width: 3rem;
-  height: 3rem;
-  border: .4rem solid #999;
-  border-radius: 100%;
-  -webkit-animation-play-state: paused;
+.input-form label {
+  font-weight: normal;
+  font-size: 0.8em;
+  margin-bottom: 0px;
 }
 
-.preloader.running {
-  -webkit-animation-play-state: running;
+.input-form input {
+  padding: 0px 0px;
 }
 
-.preloader:before,
-.preloader:after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: -.2rem 0 0 -.2rem;
-  border-bottom: .4rem solid #999;
-  border-radius: .6rem;
-  -webkit-transform-origin: .2rem center;
+.input-form-expression {
+  flex-grow: 1;
 }
 
-.preloader:before { /* hour hand */
-  width: 30%;
-  -webkit-transform: rotate(270deg);
-
-  -webkit-animation: hour 10s linear infinite;
-  -webkit-animation-play-state: inherit;
-}
-.preloader:after { /* minute hand */
-  width: 40%;
-  background-color: #999;
-  -webkit-animation: minute 1s linear infinite;
-  -webkit-animation-play-state: inherit;
+.input-form-interval {
+  margin-left: 5px;
+  margin-right: 20px;
 }
 
-@-webkit-keyframes hour {
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-
-@-webkit-keyframes minute {
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
+.input-form-interval > select {
+  box-shadow: inherit;
+  width: 60px;
 }

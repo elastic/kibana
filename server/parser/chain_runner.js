@@ -16,7 +16,8 @@ var tlConfig = {
     max: parseDateMath('now').valueOf(),
     field: '@timestamp',
     interval: '1w'
-  }
+  },
+  file: require('../../timelion.json')
 };
 
 var stats = {};
@@ -152,10 +153,6 @@ function resolveChainList (chainList) {
   });
 }
 
-function logObj(obj, thing) {
-  return JSON.stringify(obj, null, thing ? ' ' : undefined);
-}
-
 function preProcessSheet (sheet) {
   var queries = [];
 
@@ -241,11 +238,16 @@ function resolveSheet (sheet) {
 }
 
 function processRequest (request) {
+  if (!request) {
+    return;
+  }
+  tlConfig.time.interval = request.interval;
+
   stats.invokeTime = (new Date()).getTime();
   stats.queryCount = 0;
   queryCache = {};
   // This is setting the "global" sheet
-  sheet = resolveSheet(request);
+  sheet = resolveSheet(request.sheet);
 
 
   return preProcessSheet(sheet).then(function () {
@@ -263,6 +265,11 @@ module.exports = {
   getStats: function () { return stats; }
 };
 
+/*
+function logObj(obj, thing) {
+  return JSON.stringify(obj, null, thing ? ' ' : undefined);
+}
+
 function debugSheet (sheet) {
   sheet = processRequest(sheet);
   Promise.all(sheet).then(function (sheet) {
@@ -273,8 +280,8 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  //['es(1)']
+  ['es(1)']
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );
-
+*/

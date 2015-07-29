@@ -4,7 +4,6 @@ var moment = require('moment');
 fetch.Promise = require('bluebird');
 //var parseDateMath = require('../utils/date_math.js');
 
-var APIKEY = 'kBtiRZbjgezSQ5sy11Ns';
 
 module.exports = {
   dataSource: true,
@@ -19,12 +18,24 @@ module.exports = {
     }
   ],
   help: 'Pull data from quandl.com using the quandl code',
-  aliases: ['elasticsearch'],
   fn: function quandlFn (args, tlConfig) {
+    var intervalMap = {
+      '1d': 'daily',
+      '1w': 'weekly',
+      '1M': 'monthly',
+      '1y': 'annual',
+    };
+
     var config = {
       code: args[0] || 'WIKI/AAPL',
-      position: args[1] || 1
+      position: args[1] || 1,
+      interval: intervalMap[tlConfig.time.interval],
+      apikey: tlConfig.file.quandl.key
     };
+
+    if (!config.interval) {
+      throw 'quandl() unsupported interval: ' + tlConfig.time.interval + '. quandl() supports: ' + _.keys(intervalMap).join(', ');
+    }
 
     var time = {
       min: moment(tlConfig.time.min).format('YYYY-MM-DD'),
@@ -42,8 +53,8 @@ module.exports = {
       '?sort_order=asc' +
       '&trim_start=' + time.min +
       '&trim_end=' + time.max +
-      '&collapse=weekly' +
-      '&auth_token=' + APIKEY;
+      '&collapse=' + config.interval +
+      '&auth_token=' + config.apikey;
 
     return fetch(URL).then(function (resp) {return resp.json();}).then(function (resp) {
       var data = _.map(resp.data, function (bucket) {
