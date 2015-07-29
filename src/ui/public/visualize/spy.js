@@ -13,7 +13,7 @@ define(function (require) {
         template: require('ui/visualize/spy.html'),
         link: function ($scope, $el) {
           var $container = $el.find('.visualize-spy-container');
-          var fullPageSpy = false;
+          var fullPageSpy = $scope.uiState ? $scope.uiState.get('spy.fullScreen') : false;
           $scope.modes = modes;
 
           var renderSpy = function (spyName) {
@@ -59,7 +59,20 @@ define(function (require) {
             $scope.spy.name = modeName;
           };
 
-          $scope.$watch('spy.name', renderSpy);
+          $scope.$watchMulti([
+            'spy.name',
+            function () { return fullPageSpy; }
+          ], function (vals, oldValds) {
+            renderSpy(vals[0]);
+
+            // update the ui state
+            if ($scope.uiState) {
+              $scope.uiState.set('spy', {
+                name: _.get($scope.spy.mode, 'name', null),
+                fullScreen: _.get($scope.spy.mode, 'fill', false),
+              });
+            }
+          });
         }
       };
     });
