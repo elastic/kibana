@@ -39,6 +39,10 @@ define(function (require) {
           expect(queryFilter.invertAll).to.be.a('function');
           expect(queryFilter.pinFilter).to.be.a('function');
           expect(queryFilter.pinAll).to.be.a('function');
+          expect(queryFilter.startEditingFilter).to.be.a('function');
+          expect(queryFilter.stopEditingFilter).to.be.a('function');
+          expect(queryFilter.mergeEditedFilter).to.be.a('function');
+          expect(queryFilter.stringifyQuery).to.be.a('function');
         });
       });
     });
@@ -50,6 +54,7 @@ define(function (require) {
       describe(require('specs/components/filter_bar/_toggleFilters'));
       describe(require('specs/components/filter_bar/_invertFilters'));
       describe(require('specs/components/filter_bar/_pinFilters'));
+      describe(require('specs/components/filter_bar/_startEditingFilter'));
     });
   });
 });
