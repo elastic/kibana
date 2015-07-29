@@ -77,6 +77,8 @@ module.exports = function (kbnServer, server, config) {
     plugins: kbnServer.plugins
   });
 
+  server.on('close', _.bindKey(optmzr.disable || _.noop, optmzr));
+
   kbnServer.mixin(require('./browserTests'))
   .then(function () {
 

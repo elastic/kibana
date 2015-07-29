@@ -84,6 +84,13 @@ module.exports = function (program) {
 
     set('plugins.paths', [].concat(opts.pluginPath || []));
 
-    return new KbnServer(_.merge(settings, this.getUnknownOptions()));
+    let server = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+
+    server.ready().catch(function (err) {
+      console.error(err.stack);
+      process.exit(1);
+    });
+
+    return server;
   });
 };

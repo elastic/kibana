@@ -60,6 +60,16 @@ module.exports = class KbnServer extends EventEmitter {
     .each(function (fn) {
       return fn.call(self, self, self.server, self.config);
     })
+    .catch(function (err) {
+      self.server.log('fatal', err);
+      self.emit('error', err);
+
+      return self.close()
+      .then(function () {
+        // retrow once server is closed
+        throw err;
+      });
+    })
     .return(undefined);
   }
 
@@ -74,34 +84,24 @@ module.exports = class KbnServer extends EventEmitter {
    */
   listen() {
     let self = this;
-    let server = self.server;
-    let start = _.ary(promify(server.start, server), 0);
 
     return self.ready()
     .then(function () {
-      return self.mixin(start, require('./pid'));
+      return self.mixin(
+        function () {
+          return fromNode(_.bindKey(self.server, 'start'));
+        },
+        require('./pid')
+      );
     })
-    .then(
-      function () {
-        server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
-        self.emit('listening');
-        return server;
-      },
-      function (err) {
-        server.log('fatal', err);
-        self.emit('error', err);
-      }
-    );
+    .then(function () {
+      self.server.log(['listening', 'info'], 'Server running at ' + self.server.info.uri);
+      self.emit('listening');
+      return self.server;
+    });
   }
 
   close() {
-    let self = this;
-
-    return fromNode(function (cb) {
-      self.server.stop(cb);
-    })
-    .then(function () {
-      return _.get(self, 'optimizer.disable', _.noop)();
-    });
+    return fromNode(_.bindKey(this.server, 'stop'));
   }
 };
