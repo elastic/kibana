@@ -30,7 +30,6 @@ module.exports = {
   aliases: ['elasticsearch'],
   fn: function esFn (args, tlConfig) {
 
-    console.log(tlConfig);
     var config = {
       query: args[0],
       metric: args[1],

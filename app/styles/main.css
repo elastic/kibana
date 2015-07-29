@@ -164,3 +164,10 @@ body {
   box-shadow: inherit;
   width: 60px;
 }
+
+.legendLabel {
+  max-width: 210px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
