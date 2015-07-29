@@ -111,17 +111,28 @@
       }
 
       function loadSpecs(specListJson) {
-        var deps = JSON.parse(specListJson);
-        deps.unshift('sinon/sinon');
-        deps.unshift('kibana');
-
+        var specs = JSON.parse(specListJson);
         sessionStorage.clear();
         localStorage.clear();
 
-        require(deps, bootstrap);
+        require(
+          [
+            'kibana',
+            'sinon/sinon',
+            'modules'
+          ].concat(specs),
+          bootstrap
+        );
       }
 
-      function bootstrap(kibana, sinon) {
+      function bootstrap(kibana, sinon, modules) {
+        modules.get('kibana').config(function ($provide) {
+          $provide.decorator('timefilter', function ($delegate) {
+            $delegate.consumeDefaults();
+            return $delegate;
+          });
+        });
+
         kibana.load(function () {
           var xhr = sinon.useFakeXMLHttpRequest();
 
