@@ -264,5 +264,13 @@ define(function (require) {
   };
   _.class(errors.InvalidWiggleSelection).inherits(KbnError);
 
+  errors.PersistedStateError = function PersistedStateError(msg) {
+    KbnError.call(this,
+      msg || 'PersistedState Error',
+      errors.PersistedStateError);
+  };
+  _.class(errors.PersistedStateError).inherits(KbnError);
+
+
   return errors;
 });
