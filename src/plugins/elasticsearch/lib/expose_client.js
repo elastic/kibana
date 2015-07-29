@@ -45,7 +45,9 @@ module.exports = function (server) {
     }
   });
 
+  server.on('close', _.bindKey(client, 'close'));
   server.expose('client', client);
+
   return client;
 
 };
