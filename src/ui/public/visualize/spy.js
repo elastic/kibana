@@ -6,7 +6,7 @@ define(function (require) {
       var _ = require('lodash');
 
       var modes = Private(require('ui/registry/spy_modes'));
-      var defaultMode = modes.inOrder[0];
+      var defaultMode = modes.inOrder[0].name;
 
       return {
         restrict: 'E',
@@ -16,34 +16,21 @@ define(function (require) {
           var fullPageSpy = false;
           $scope.modes = modes;
 
-          $scope.toggleDisplay = function () {
-            $scope.setSpyMode($scope.spy.mode ? null : defaultMode);
-          };
-
-          $scope.toggleFullPage = function () {
-            fullPageSpy = $scope.spy.mode.fill = !fullPageSpy;
-          };
-
-          $scope.setSpyMode = function (newMode) {
-            // allow passing in a mode name
-            if (_.isString(newMode)) newMode = modes.byName[newMode];
-
+          var renderSpy = function (spyName) {
+            var newMode = modes.byName[spyName];
             var current = $scope.spy.mode;
-            var change = false;
-
-            // no change
-            if (current && newMode && newMode.name === current.name) return;
 
             // clear the current value
             if (current) {
-              current.$container.remove();
-              current.$scope.$destroy();
-              delete $scope.spy.mode;
+              current.$container && current.$container.remove();
+              current.$scope && current.$scope.$destroy();
+              $scope.spy.mode = false;
             }
 
             // no further changes
             if (!newMode) return;
 
+            // update the spy mode and append to the container
             current = $scope.spy.mode = {
               // copy a couple values over
               name: newMode.name,
@@ -56,6 +43,23 @@ define(function (require) {
             current.$container.append($compile(newMode.template)(current.$scope));
             newMode.link && newMode.link(current.$scope, current.$container);
           };
+
+          $scope.toggleDisplay = function () {
+            var modeName = _.get($scope.spy, 'mode.name');
+            $scope.setSpyMode(modeName ? null : defaultMode);
+          };
+
+          $scope.toggleFullPage = function () {
+            fullPageSpy = $scope.spy.mode.fill = !fullPageSpy;
+          };
+
+          $scope.setSpyMode = function (modeName) {
+            // save the spy mode to the UI state
+            if (!_.isString(modeName)) return $scope.spy.name = null;
+            $scope.spy.name = modeName;
+          };
+
+          $scope.$watch('spy.name', renderSpy);
         }
       };
     });

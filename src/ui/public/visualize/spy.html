@@ -10,7 +10,7 @@
         class="btn btn-default"
         ng-repeat="mode in modes.inOrder"
         ng-class="{ active: spy.mode.name === mode.name }"
-        ng-click="setSpyMode(mode)">
+        ng-click="setSpyMode(mode.name)">
         {{mode.display}}
       </a>
     </div>

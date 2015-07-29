@@ -36,7 +36,7 @@ define(function (require) {
         var getVisEl = getter('.visualize-chart');
         var getSpyEl = getter('visualize-spy');
 
-        $scope.spy = {mode: false};
+        $scope.spy = {};
         $scope.fullScreenSpy = false;
 
         var applyClassNames = function () {
