@@ -45,7 +45,8 @@ define(function (require) {
           };
 
           $scope.toggleDisplay = function () {
-            $scope.setSpyMode($scope.spy.mode.name ? null : defaultMode);
+            var modeName = _.get($scope.spy, 'mode.name');
+            $scope.setSpyMode(modeName ? null : defaultMode);
           };
 
           $scope.toggleFullPage = function () {

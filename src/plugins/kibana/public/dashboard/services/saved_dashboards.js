@@ -19,7 +19,6 @@ define(function (require) {
 
     // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
-
       // Returns a promise that contains a dashboard which is a subclass of docSource
       return (new SavedDashboard(id)).init();
     };
@@ -34,7 +33,6 @@ define(function (require) {
         return (new SavedDashboard(id)).delete();
       });
     };
-
 
     this.find = function (searchString) {
       var self = this;
