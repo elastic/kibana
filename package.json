@@ -12,6 +12,9 @@
   ],
   "private": false,
   "version": "4.2.0-snapshot",
+  "build": {
+    "num": 8095
+  },
   "main": "src/server/KbnServer.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {

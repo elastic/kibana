@@ -5,7 +5,7 @@ var expect = require('expect.js');
 
 var upgradeConfig = require('../upgrade_config');
 
-describe('pluigns/elasticsearch', function () {
+describe('plugins/elasticsearch', function () {
   describe('lib/upgrade_config', function () {
     var get;
     var server;
@@ -17,6 +17,7 @@ describe('pluigns/elasticsearch', function () {
       get = sinon.stub();
       get.withArgs('kibana.index').returns('.my-kibana');
       get.withArgs('pkg.version').returns('4.0.1');
+      get.withArgs('pkg.buildNum').returns(Math.random());
       client = { create: sinon.stub() };
       server = {
         log: sinon.stub(),
@@ -44,20 +45,18 @@ describe('pluigns/elasticsearch', function () {
           get.withArgs('env.dev').returns(false);
         });
 
-        it('should resolve buildNum to pkg.buildNum', function () {
-          get.withArgs('pkg.buildNum').returns(5801);
-
+        it('should resolve buildNum to pkg.buildNum config', function () {
           return upgrade(response).then(function (resp) {
             sinon.assert.calledOnce(client.create);
             var params = client.create.args[0][0];
-            expect(params.body).to.have.property('buildNum', 5801);
+            expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
-        it('should resolve version to kibana.package.version', function () {
+        it('should resolve version to pkg.version config', function () {
           return upgrade(response).then(function (resp) {
             var params = client.create.args[0][0];
-            expect(params).to.have.property('id', '4.0.1');
+            expect(params).to.have.property('id', get('pkg.version'));
           });
         });
       });
@@ -69,17 +68,17 @@ describe('pluigns/elasticsearch', function () {
           get.withArgs('env.dev').returns(true);
         });
 
-        it('should resolve buildNum to the max integer', function () {
+        it('should resolve buildNum to pkg.buildNum config', function () {
           return upgrade(response).then(function (resp) {
             var params = client.create.args[0][0];
-            expect(params.body).to.have.property('buildNum', (Math.pow(2, 53) - 1));
+            expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
-        it('should resolve version to @@version', function () {
+        it('should resolve version to pkg.version config', function () {
           return upgrade(response).then(function (resp) {
             var params = client.create.args[0][0];
-            expect(params).to.have.property('id', '@@version');
+            expect(params).to.have.property('id', get('pkg.version'));
           });
         });
       });

@@ -7,14 +7,11 @@ let path = require('path');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
-let pkg = utils('packageJson');
-let buildNum = get(pkg, 'build.num', Math.pow(2, 53) - 1);
 
 module.exports = Joi.object({
-
   pkg: Joi.object({
-    version: Joi.string().valid(pkg.version).default(pkg.version),
-    buildNum: Joi.number().valid(buildNum).default(buildNum)
+    version: Joi.string().default(Joi.ref('$version')),
+    buildNum: Joi.number().default(Joi.ref('$buildNum'))
   }).default(),
 
   env: Joi.object({

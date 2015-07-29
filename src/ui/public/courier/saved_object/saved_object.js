@@ -92,45 +92,7 @@ define(function (require) {
 
           // fetch the object from ES
           return docSource.fetch()
-          .then(function applyESResp(resp) {
-
-            self._source = _.cloneDeep(resp._source);
-
-            if (!resp.found) throw new errors.SavedObjectNotFound(type, self.id);
-
-            var meta = resp._source.kibanaSavedObjectMeta || {};
-            delete resp._source.kibanaSavedObjectMeta;
-
-            if (!config.indexPattern && self._source.indexPattern) {
-              config.indexPattern = self._source.indexPattern;
-              delete self._source.indexPattern;
-            }
-
-            // assign the defaults to the response
-            _.defaults(self._source, defaults);
-
-            // transform the source using _deserializers
-            _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
-              if (fieldMapping._deserialize) {
-                self._source[fieldName] = fieldMapping._deserialize(self._source[fieldName], resp, fieldName, fieldMapping);
-              }
-            });
-
-            // Give obj all of the values in _source.fields
-            _.assign(self, self._source);
-
-            return Promise.try(function () {
-              parseSearchSource(meta.searchSourceJSON);
-            })
-            .then(hydrateIndexPattern)
-            .then(function () {
-              return Promise.cast(afterESResp.call(self, resp));
-            })
-            .then(function () {
-              // Any time obj is updated, re-call applyESResp
-              docSource.onUpdate().then(applyESResp, notify.fatal);
-            });
-          });
+          .then(self.applyESResp);
         })
         .then(function () {
           return customInit.call(self);
@@ -140,6 +102,45 @@ define(function (require) {
           return self;
         });
       });
+
+      self.applyESResp = function (resp) {
+        self._source = _.cloneDeep(resp._source);
+
+        if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, self.id);
+
+        var meta = resp._source.kibanaSavedObjectMeta || {};
+        delete resp._source.kibanaSavedObjectMeta;
+
+        if (!config.indexPattern && self._source.indexPattern) {
+          config.indexPattern = self._source.indexPattern;
+          delete self._source.indexPattern;
+        }
+
+        // assign the defaults to the response
+        _.defaults(self._source, defaults);
+
+        // transform the source using _deserializers
+        _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
+          if (fieldMapping._deserialize) {
+            self._source[fieldName] = fieldMapping._deserialize(self._source[fieldName], resp, fieldName, fieldMapping);
+          }
+        });
+
+        // Give obj all of the values in _source.fields
+        _.assign(self, self._source);
+
+        return Promise.try(function () {
+          parseSearchSource(meta.searchSourceJSON);
+        })
+        .then(hydrateIndexPattern)
+        .then(function () {
+          return Promise.cast(afterESResp.call(self, resp));
+        })
+        .then(function () {
+          // Any time obj is updated, re-call applyESResp
+          docSource.onUpdate().then(self.applyESResp, notify.fatal);
+        });
+      };
 
       function parseSearchSource(searchSourceJson) {
         if (!self.searchSource) return;

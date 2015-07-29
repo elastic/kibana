@@ -4,6 +4,7 @@ let Promise = require('bluebird');
 let Joi = require('joi');
 let _ = require('lodash');
 let override = require('./override');
+let pkg = require('requirefrom')('src/utils')('packageJson');
 
 module.exports = class Config {
   constructor(schema, defaults) {
@@ -65,7 +66,9 @@ module.exports = class Config {
       prod: env === 'production',
       dev: env === 'development',
       notProd: env !== 'production',
-      notDev: env !== 'development'
+      notDev: env !== 'development',
+      version: _.get(pkg, 'version'),
+      buildNum: env === 'development' ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.num', NaN)
     };
 
     if (!context.dev && !context.prod && !context.test) {
