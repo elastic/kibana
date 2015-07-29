@@ -122,3 +122,9 @@ across the map to zoom in on the selection.
 geohash buckets that have at least one result.
 * Click the *Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[] button, then drag a bounding box across the 
 map, to create a filter for the box coordinates.
+
+[float]
+[[tilemap-viewing-detailed-information]]
+==== Viewing Detailed Information
+
+include::visualization-raw-data.asciidoc[]
