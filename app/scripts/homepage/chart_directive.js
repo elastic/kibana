@@ -10,7 +10,7 @@ define(function (require) {
         cell: '='
       },
       link: function ($scope, $elem) {
-        var options = {
+        var defaultOptions = {
           xaxis: {
             mode: 'time',
             tickLength: 0,
@@ -29,7 +29,7 @@ define(function (require) {
               return '<span class="ngLegendValue" ng-click="toggleSeries(' + series._id + ')">' + label + '</span>';
             }
           },
-          yaxes: [ { }, { position: "right" } ],
+          yaxes: [ {}, { position: "right" } ],
           colors: ['#01A4A4', '#c66', '#D0D102', '#616161', '#00A1CB','#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
         };
 
@@ -45,13 +45,14 @@ define(function (require) {
             return;
           }
 
-          var series = _.map(_.cloneDeep($scope.chart), function (series, index) {
-            _.defaults(series, {
+          var options = _.cloneDeep(defaultOptions);
+          var series = _.map($scope.chart, function (series, index) {
+            series = _.cloneDeep(_.defaults(series, {
               shadowSize: 0,
               lines: {
                 lineWidth: 5
               }
-            });
+            }));
             series._id = index;
             if (series.yaxis === 2) {
               series.label = series.label + ' (y2)';
@@ -61,6 +62,10 @@ define(function (require) {
               //series.color = "#ddd";
               series.label = '(hidden) ' + series.label;
             }
+            if (series._global) {
+              _.merge(options, series._global);
+            }
+
             return series;
           });
 
