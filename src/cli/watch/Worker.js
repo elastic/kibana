@@ -5,7 +5,7 @@ let EventEmitter = require('events').EventEmitter;
 
 let fromRoot = require('../../utils/fromRoot');
 
-let cliPath = fromRoot('src/cli/cli.js');
+let cliPath = fromRoot('src/cli');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 let baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
