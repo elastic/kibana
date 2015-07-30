@@ -1,0 +1,16 @@
+<div ng-if="switcher.loading">
+  <div class="spinner large"></div>
+</div>
+
+<div ng-if="!switcher.loading" class="app-links">
+  <a
+    ng-repeat="app in switcher.apps"
+    ng-href="/app/{{app.id}}"
+    class="app-link">
+    <span ng-style="{ 'background-image': 'url(' + app.icon + ')' }" class="app-icon"></span>
+    <span class="app-info">
+      <h2 class="app-title">{{ app.title }}</h2>
+      <h3 class="app-description">{{ app.description }}</h3>
+    </span>
+  </a>
+</li>

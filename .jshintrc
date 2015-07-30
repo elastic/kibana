@@ -1,6 +1,21 @@
 {
   // for files at project root
   "node": true,
+  "browser": true,
+  "mocha": true,
+
+  "predef": {
+    "inject": true,
+    "module": true,
+    "define": true,
+    "console": false,
+    "-event": true,
+    "-name": true,
+    "-Promise": true,
+    "-Worker": true,
+    "-status": true,
+    "-fetch": true
+  },
 
   // shared with .jshintrc files for browser and node
   "unused": false,
@@ -23,5 +38,6 @@
   "sub": true,
   "-W084": true,
   "scripturl": true,
-  "evil": true
+  "evil": true,
+  "esnext": true
 }

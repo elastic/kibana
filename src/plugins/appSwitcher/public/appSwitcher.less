@@ -1,0 +1,43 @@
+@import (reference) "~ui/styles/variables";
+
+.application {
+  background-color: @gray-lighter;
+}
+
+.app-links {
+  width: 700px;
+  margin: 25px auto;
+  text-align: justify;
+
+  .app-link {
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+    background: white;
+    width: 200px;
+    margin: 0 30px 30px 0;
+
+    .app-icon {
+      display: block;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .app-info {
+      display: block;
+      padding: 15px;
+    }
+
+    .app-title {
+      margin: 0 0 10px;
+      color: @text-color;
+    }
+
+    .app-description {
+      font-size: 1em;
+      color: @gray;
+      margin: 0;
+    }
+  }
+}

@@ -28,14 +28,6 @@ module.exports = function (grunt) {
           dest: join(build, 'dist', 'kibana', 'src', 'config', 'index.js')
         }
       ]
-    },
-    build_props: {
-      files: [
-        {
-          src: [join(app, 'index.html')],
-          dest: join(build, 'src', 'index.html')
-        }
-      ]
     }
   };
 
