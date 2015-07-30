@@ -1,0 +1,22 @@
+@import (reference) "~ui/styles/theme";
+
+.config {
+  .navbar;
+  .navbar-default();
+  .navbar-static-top;
+  border-bottom: 1px solid darken(@body-bg, 10%);
+
+  .config-close {
+    width: 100%;
+    background-color: @well-bg;
+    border-radius: 0;
+    @shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 5px rgba(0,0,0,.075);
+    .box-shadow(@shadow);
+    text-align: center;
+  }
+
+  .container-fluid {
+    padding: 10px 10px;
+    background-color: @body-bg;
+  }
+}

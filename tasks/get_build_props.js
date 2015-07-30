@@ -1,16 +1,7 @@
 module.exports = function (grunt) {
-  var Promise = require('bluebird');
-  var spawn = require('./utils/spawn');
-
+  var exec = require('child_process').execSync;
   grunt.registerTask('get_build_props', function () {
-    Promise.props({
-      sha: spawn.silent('git', ['rev-parse', 'HEAD'])(),
-      num: spawn.silent('sh', ['-c', 'git log --format="%h" | wc -l'])()
-    })
-    .then(function (props) {
-      grunt.config.set('commitSha', props.sha.trim());
-      grunt.config.set('buildNum', props.num.trim());
-    })
-    .nodeify(this.async());
+    grunt.config.set('commitSha', String(exec('git rev-parse HEAD')).trim());
+    grunt.config.set('buildNum', parseFloat(exec('git log --format="%h" | wc -l')).trim());
   });
 };
