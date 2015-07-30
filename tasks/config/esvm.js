@@ -1,14 +1,13 @@
 module.exports = function (grunt) {
-  var join = require('path').join;
-  var rel = require('path').join.bind(null, grunt.config.get('root'));
-  var directory = join(grunt.config.get('root'), 'esvm');
-  var dataDir = join(directory, 'data_dir');
+  var resolve = require('path').resolve;
+  var directory = resolve(__dirname, '../../esvm');
+  var dataDir = resolve(directory, 'data_dir');
 
   return {
     options: {
       directory: directory,
       branch: 'master',
-      fresh: true,
+      fresh: !grunt.option('esvm-no-fresh'),
       config: {
         path: {
           data: dataDir

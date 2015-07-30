@@ -1,0 +1,18 @@
+@import "~ui/styles/variables";
+@import (reference) "~bootstrap/less/mixins";
+
+.flex-parent(@grow: 1, @shrink: 1, @basis: auto) {
+  flex: @grow @shrink @basis;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.ellipsis() {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

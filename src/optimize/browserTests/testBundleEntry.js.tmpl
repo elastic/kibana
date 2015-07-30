@@ -1,0 +1,20 @@
+/**
+ * Optimized application entry file
+ *
+ * This is programatically created and updated, do not modify
+ *
+ * built using: <%= optimizerTagline %>
+ * includes code from:
+<%
+  entry.deps.sort().forEach(function (plugin) {
+    print(` *  - ${plugin}\n`);
+  })
+%> *
+ */
+
+require('ui/testHarness');
+<%
+entry.modules.slice(0).reverse().forEach(function (id) {
+  print(`require('${id}');\n`);
+});
+%>require('ui/testHarness').bootstrap();
