@@ -1,0 +1,42 @@
+@import (reference) "~ui/styles/variables";
+
+kbn-agg-table,
+kbn-agg-table-group {
+  display: block;
+}
+
+.agg-table {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+
+  &-paginated {
+    flex: 1 1 auto;
+    overflow: auto;
+
+    tr:hover td {
+      background-color: lighten(@gray-lighter, 4%);
+    }
+
+    .cell-hover:hover {
+      background-color: @gray-lighter;
+    }
+
+    th i.fa-sort {
+      color: @gray-light;
+    }
+  }
+
+  &-controls {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin: 10px 5px;
+
+    > paginate-controls {
+      flex: 1 0 auto;
+      margin: 0;
+      padding: 0;
+    }
+  }
+}

@@ -2,10 +2,8 @@
 .DS_Store
 .node_binaries
 node_modules
-bower_components
-**/*.css
 trash
-build
+bundles
 target
 .jruby
 .idea
@@ -13,4 +11,4 @@ target
 *.log
 esvm
 .htpasswd
-src/server/bin/plugins
+installed_plugins
