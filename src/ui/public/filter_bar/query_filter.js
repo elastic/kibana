@@ -8,6 +8,7 @@ define(function (require) {
     var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
     var compareFilters = require('ui/filter_bar/lib/compareFilters');
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+    var validateFilter = Private(require('ui/filter_bar/lib/validateFilter'));
 
     var queryFilter = new EventEmitter();
 
@@ -104,6 +105,7 @@ define(function (require) {
     * @param newFilter The filter changes to merge
     */
     queryFilter.mergeEditedFilter = function (currentFilter, newQuery) {
+      var self = this;
       var parsedQuery;
       try {
         parsedQuery = JSON.parse(newQuery);
@@ -112,8 +114,16 @@ define(function (require) {
         //staying in edit mode is sufficient
         return;
       }
-      currentFilter.query.match = parsedQuery;
-      this.stopEditingFilter(currentFilter);
+
+
+      var clonedFilter = _.cloneDeep(currentFilter);
+      clonedFilter.query.match = parsedQuery;
+      validateFilter(clonedFilter).then(function (valid) {
+        if (!valid) return;
+        self.stopEditingFilter(currentFilter);
+        currentFilter.query.match = parsedQuery;
+      });
+
     };
 
     /**
