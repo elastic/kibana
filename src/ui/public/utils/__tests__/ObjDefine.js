@@ -89,9 +89,11 @@ describe('ObjDefine Utility', function () {
       def.comp('name', val);
       var obj = def.create();
 
+      expect(function () {
+        'use strict';
 
-      obj.name = notval; // UPDATE SHOULD BE IGNORED
-      expect(obj).to.have.property('name', val);
+        obj.name = notval;
+      }).to.throwException();
     });
 
     it('does not export the computed value to JSON', function () {
