@@ -1,0 +1,5 @@
+<div class="status_chart_wrapper col-md-4">
+  <h3 class="title">{{metric.title}}</h3>
+  <h4 class="average">{{ metric.averages.join(', ') }}</h4>
+  <nvd3 options="metric.chartOptions" data="metric.chartData"></nvd3>
+</div>

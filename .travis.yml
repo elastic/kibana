@@ -1,15 +1,17 @@
 language: node_js
-node_js: '0.12'
+node_js: 'iojs-v2.4'
 install: npm install
-script: npm test
+script: ./node_modules/.bin/grunt travis
 sudo: false
 cache:
   directories:
   - esvm
   - node_modules
-  - src/kibana/bower_components
 before_cache:
-  - rm -rf esvm/*/logs esvm/data_dir
+- rm -rf esvm/*/logs esvm/data_dir
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
 notifications:
   email:
   - rashid.khan@elastic.co

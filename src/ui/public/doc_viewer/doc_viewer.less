@@ -1,0 +1,23 @@
+@import (reference) "~ui/styles/variables";
+
+doc-viewer .doc-viewer {
+
+  &-buttons, &-field {
+    white-space: nowrap;
+  }
+
+  &-value, pre {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  td, pre {
+    font-family: "Lucida Console", Monaco, monospace;
+  }
+
+  &-content {
+    margin-top: @padding-base-vertical;
+  }
+}

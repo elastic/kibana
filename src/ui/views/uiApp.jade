@@ -1,0 +1,7 @@
+extends ./chrome.jade
+
+block head
+  link(rel='stylesheet', href='/bundles/#{app.id}.style.css')
+
+block content
+  script(src='/bundles/#{app.id}.bundle.js' src-map='/bundles/#{app.id}.bundle.js.map')

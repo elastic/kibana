@@ -6,7 +6,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 ## Requirements
 
-- Elasticsearch version 1.4.4 or later
+- Elasticsearch version 2.0.0 or later
 - Kibana binary package
 
 ## Installation
