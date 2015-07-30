@@ -41,7 +41,6 @@ describe('Query Filter', function () {
         expect(queryFilter.stopEditingFilter).to.be.a('function');
         expect(queryFilter.mergeEditedFilter).to.be.a('function');
         expect(queryFilter.stringifyQuery).to.be.a('function');
-
       });
     });
   });
@@ -53,6 +52,5 @@ describe('Query Filter', function () {
     require('./_toggleFilters');
     require('./_invertFilters');
     require('./_pinFilters');
-    require('./_editFilter');
   });
 });
