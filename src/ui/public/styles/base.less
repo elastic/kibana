@@ -1,0 +1,455 @@
+// generic mixins
+@import (reference) "./mixins";
+@import (reference) "./variables";
+@import (reference) "~bootstrap/less/bootstrap";
+
+html,
+body {
+  .flex-parent();
+  height: 100%;
+  margin: 0px;
+}
+
+label > small {
+  font-weight: normal;
+}
+
+button {
+  // buttons have a stupid 1990's default look which should be disabled
+  .btn();
+}
+
+.small {
+  font-size: 0.9em !important;
+}
+.smaller {
+  font-size: 0.8em !important;
+}
+.smallest {
+  font-size: 0.7em !important;
+}
+
+// Colors available for font awesome icons, these might not look good with normal text
+.text-color-primary {
+  color: @brand-primary;
+}
+
+.text-color-info {
+  color: @brand-info;
+}
+
+.text-color-success {
+  color: @brand-success;
+}
+
+.text-color-warning {
+  color: @brand-warning;
+}
+
+.text-color-danger {
+  color: @brand-danger;
+}
+
+.text-monospace {
+  font-family: @font-family-monospace;
+}
+
+code {
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+ul.navbar-inline li {
+  display: inline;
+}
+
+.tooltip {
+  font-size: 8pt;
+  font-weight: normal;
+  opacity: 90%;
+
+  &-inner {
+    word-break: normal;
+    word-wrap: break-word;
+    white-space: normal;
+  }
+}
+
+.content {
+  .flex-parent();
+  position: relative;
+  z-index: 0;
+
+  > nav {
+    position: relative;
+    z-index: 1;
+
+    .navbar-right {
+      margin-right: 0;
+    }
+  }
+}
+
+.application {
+  .flex-parent();
+  position: relative;
+  z-index: 0;
+}
+
+.top-fixed {
+  position: fixed;
+  bottom: 0px;
+}
+
+.checkbox label {
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+
+  input[type="checkbox"] {
+    float: none;
+    margin: 0 4px;
+    position: static;
+  }
+}
+
+notifications {
+  z-index: 1;
+}
+
+//== Subnav
+//
+// Use for adding a subnav to your app
+.navbar {
+  margin-bottom: 0px!important;
+}
+
+a {
+  // overriden by next rule for a tags that actually have an href
+  cursor: default;
+}
+
+[ng-click], [clip-copy], [href], [confirm-click] {
+  cursor: pointer;
+}
+
+.app-container {
+  > * {
+    position: relative;
+    z-index: 0;
+  }
+
+  > config {
+    z-index: 1;
+  }
+
+  > nav,
+  > navbar {
+    z-index: 2 !important;
+  }
+}
+
+//== Nav tweaks
+.nav-condensed > li > a {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.navbar > .container-fluid {
+  > .navbar-nav,
+  > .navbar-form {
+    &:not(.pull-right):first-child {
+      // This is how .navbar-brand accomplishes it's solid placement
+      margin-left: -15px;
+    }
+  }
+}
+
+.navbtn {
+  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
+}
+
+.navbtn-inverse {
+  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
+}
+
+// right section of the main nav base
+.navbar-static-top .navbar-right {
+  font-size: @font-size-small;
+
+  .loading-spinner {
+    color: @navbar-inverse-brand-hover-color;
+    vertical-align: middle;
+  }
+}
+
+.navbar-timepicker {
+  > li > a {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  &-time-desc > .fa-clock-o {
+    padding-right: 5px;
+  }
+
+  .fa {
+    font-size: 16px;
+    vertical-align: middle;
+  }
+}
+
+kbn-info i {
+  cursor: help;
+}
+
+.kbn-timepicker .btn-default {
+  background: transparent;
+  color: @text-color;
+  border: 0px;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.kbn-timepicker .btn-info {
+  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
+  text-shadow: none;
+}
+
+.kbn-timepicker .refresh-interval {
+  padding: 0.2em 0.4em;
+  border-radius: @border-radius-small;
+}
+
+.kbn-timepicker .refresh-interval-active {
+  background-color: @btn-info-bg;
+  color: @btn-info-color;
+}
+
+//== Table
+
+kbn-table, .kbn-table {
+  font-size: @font-size-small;
+
+  th {
+    white-space: nowrap;
+    padding-right: 10px;
+
+    .table-header-move, .table-header-sortchange {
+      visibility: hidden;
+    }
+
+    .fa {
+      font-size: 1.1em;
+    }
+
+  }
+
+  th:hover {
+    .table-header-move, .table-header-sortchange {
+      visibility: visible;
+    }
+  }
+
+}
+
+//== Generic Table
+table {
+  td .fa {
+    // font-awesome's override of the line-height usually doesn't
+    // cauase problems, but in the table it pushes the icon to the
+    // top of the row
+    line-height: @line-height-base;
+  }
+}
+
+//== SavedObjectFinder
+saved-object-finder {
+  .form-group {
+    margin-bottom: 0;
+    input {
+      .border-bottom-radius(0);
+    }
+  }
+
+  .list-group-item {
+    &:first-child {
+      .border-top-radius(0) !important;
+    }
+
+    &.list-group-no-results p {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  div.finder-form {
+    position: relative;
+
+    &-options {
+      .flex-parent();
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+
+  span.finder-hit-count {
+    position: absolute;
+    right: 10px;
+    top: 25px;
+    font-size: 0.85em;
+  }
+
+  .finder-options {
+    max-height: 300px;
+    overflow: auto;
+    padding: 0;
+    .border-top-radius(0);
+
+    // replace the padding that was originally on the outer well
+    > * {
+      padding: @padding-base-vertical @padding-base-horizontal;
+      margin: 0;
+    }
+
+    // enable bigger backgrounds for "active" elements
+    > li {
+      margin-top: -ceil(@padding-base-vertical / 2);
+
+      &:first-child {
+        margin: 0;
+      }
+      &.active {
+        background-color: @component-active-bg;
+        color: @component-active-color;
+        a {
+          color: @component-active-color;
+        }
+      }
+    }
+  }
+}
+
+// when rendered within a config dropdown, don't use a bottom margin
+.config saved-object-finder .finder-options {
+  margin-bottom: 0;
+  background: @body-bg;
+}
+
+//== Generic Media List
+.media-object {
+  // image in result list
+  width: 65px;
+  height: 65px;
+}
+
+
+//== inputDatetime
+.input-datetime-format {
+  font-size: @font-size-small;
+  color: @text-muted;
+  padding: @padding-base-vertical @padding-base-horizontal;
+}
+
+//== clicking disabled buttons should not cause the whole page to get selected
+button[disabled] {
+  user-select: none;
+}
+
+//== override the disabled cursor that doesn't work everywhere
+.form-control{
+  &[disabled],
+  &[readonly],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
+
+.fatal-body {
+  white-space: pre-wrap;
+}
+
+.ng-dirty, .ng-touched {
+  input.ng-invalid&,
+  textarea.ng-invalid&,
+  select.ng-invalid& {
+    border-color: @state-danger-bg !important;
+  }
+}
+
+
+input[type="radio"],
+input[type="checkbox"],
+.radio,
+.radio-inline,
+.checkbox,
+.checkbox-inline {
+  &[disabled],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
+
+textarea {
+  resize: vertical;
+}
+
+.initial-load {
+  margin-top: 60px;
+}
+
+.field-collapse-toggle {
+  color: #999;
+  margin-left: 10px !important;
+}
+
+style-compile {
+  display: none;
+}
+
+.tooltip-inner {
+  white-space: pre-wrap !important;
+}
+
+@import '../filter_bar/filter_bar.less';
+
+
+.cell-hover {
+  background-color: white;
+  &-show {
+    // so that the cell doesn't change size on hover
+    visibility: hidden;
+  }
+}
+.cell-hover:hover {
+  background-color: @gray-lighter;
+  cursor: cell;
+
+  .cell-hover-show {
+    visibility: visible;
+  }
+}
+
+mark, .mark {
+  background-color: rgba(252, 229, 113, 1);
+}
+
+fieldset {
+  margin: @form-group-margin-bottom;
+  padding: @form-group-margin-bottom;
+  border: 1px solid @input-border;
+  border-radius: @input-border-radius;
+}
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0px;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
