@@ -1,0 +1,16 @@
+- var j = function (o) { return JSON.stringify(o); }
+- var appName = 'kibana';
+
+block vars
+
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    meta(name='viewport', content='width=device-width')
+    title Kibana
+    block head
+  body(kbn-chrome, id='#{appName}-body')
+    script window.__KBN__ = !{j(kibanaPayload)};
+    block content

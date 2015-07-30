@@ -1,0 +1,106 @@
+<kbn-notifications list="notifList"></kbn-notifications>
+<div class="content" style="display: none;" chrome-context >
+  <nav
+    ng-style="{ background: chrome.navBackground }"
+    ng-class="{ show: !chrome.embedded }"
+    bindonce
+    class="hide navbar navbar-inverse navbar-static-top">
+
+    <!-- Mobile navbar -->
+    <div class="navbar-header">
+      <button ng-click="showCollapsed = !showCollapsed" type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <span class="visible-xs">
+        <span ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</span>
+        <span ng-if="chrome.getActiveTabTitle()" class="navbar-brand">{{ chrome.getActiveTabTitle() }}</span>
+        <span ng-show="chrome.httpActive.length" class="spinner"></span>
+      </span>
+    </div>
+    <!-- /Mobile navbar -->
+
+    <!-- Full navbar -->
+    <div collapse="!showCollapsed" class="navbar-collapse">
+      <ul class="nav navbar-nav" role="navigation">
+        <li
+          ng-if="chrome.logo"
+          ng-style="{ 'background': chrome.logo }"
+          aria-label="{{ chrome.getAppTitle() }} Logo"
+          class="logo hidden-sm"
+          ></li>
+
+        <li
+          ng-if="chrome.smallLogo"
+          ng-style="{ 'background': chrome.smallLogo }"
+          aria-label="{{ chrome.getAppTitle() }} Logo"
+          class="logo-small visible-sm hidden-xs"
+          ></li>
+
+        <li ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</li>
+
+        <li ng-if="chrome.getShowAppsLink()">
+          <a href="/apps"><i class="fa fa-th" alt="Go to app switcher"></i></a>
+        </li>
+
+        <li ng-repeat="tab in chrome.getTabs()" ng-class="{ active: tab.active }">
+          <a ng-href="{{ tab.href() }}" ng-style="{ 'border-bottom-color': tab.activeIndicatorColor }">
+            {{ tab.title }}
+          </a>
+        </li>
+      </ul>
+
+      <ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
+        <li>
+          <a
+            ng-click="toggleRefresh()"
+            ng-show="timefilter.refreshInterval.value > 0">
+
+            <i class="fa" ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"></i>
+          </a>
+        </li>
+
+        <li
+          ng-class="{active: pickerTemplate.is('interval') }"
+          ng-show="timefilter.refreshInterval.value > 0 || !!pickerTemplate.current"
+          class="to-body">
+
+          <a ng-click="pickerTemplate.toggle('interval')" class="navbar-timepicker-auto-refresh-desc">
+            <span ng-show="timefilter.refreshInterval.value === 0"><i class="fa fa-repeat"></i> Auto-refresh</span>
+            <span ng-show="timefilter.refreshInterval.value > 0">{{timefilter.refreshInterval.display}}</span>
+          </a>
+
+        </li>
+
+        <li class="to-body" ng-class="{active: pickerTemplate.is('filter')}">
+          <a
+            ng-click="pickerTemplate.toggle('filter')"
+            aria-haspopup="true"
+            aria-expanded="false"
+            class="navbar-timepicker-time-desc">
+            <i aria-hidden="true" class="fa fa-clock-o"></i>
+            <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
+          </a>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right navbar-timepicker" >
+        <li ng-show="httpActive.length" class="navbar-text hidden-xs">
+          <div class="spinner"></div>
+        </li>
+      </ul>
+    </div>
+    <!-- /Full navbar -->
+  </nav>
+
+  <config
+    ng-show="timefilter.enabled"
+    config-template="pickerTemplate"
+    config-object="timefilter"
+    config-close="pickerTemplate.close">
+  </config>
+
+  <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-')" ng-view></div>
+</div>
