@@ -84,23 +84,6 @@ define(function (require) {
     };
 
     /**
-    * Start editing a filter
-    * @param {object} filter The filter to start editing
-    */
-    queryFilter.startEditingFilter = function (filter) {
-      filter.meta.editing = true;
-    };
-
-    /**
-    * Stop editing a filter
-    * @param {object} filter The filter to stop editing
-    */
-    queryFilter.stopEditingFilter = function (filter) {
-      delete filter.meta.editing;
-    };
-
-    /**
-
     * @param currentFilter The filter to merge changes in to
     * @param newFilter The filter changes to merge
     */

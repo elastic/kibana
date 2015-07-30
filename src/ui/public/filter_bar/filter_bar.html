@@ -36,11 +36,11 @@
         <i class="fa fa-fw fa-edit"></i>
       </a>
     </div>
-    <div class="filter-edit" ng-if="filter.meta.editing" ng-init="clonedFilter = stringifyQuery(filter)">
-      <div ui-ace="{ onLoad: aceLoaded, mode: 'json' }" ng-model="clonedFilter"></div>
-      <button class="btn btn-primary" ng-click="stopEditingFilter(filter)">Cancel</button>
-      <button class="btn btn-success" ng-click="mergeEditedFilter(filter, clonedFilter)">Done</button>
-    </div>
+  </div>
+  <div class="filter-edit" ng-if="editingFilter" ng-init="clonedFilter = stringifyQuery(editingFilter)">
+    <div ui-ace="{ onLoad: aceLoaded, mode: 'json' }" ng-model="clonedFilter"></div>
+    <button class="btn btn-primary" ng-click="stopEditingFilter(editingFilter)">Cancel</button>
+    <button class="btn btn-success" ng-click="mergeEditedFilter(editingFilter, clonedFilter)">Done</button>
   </div>
   <div class="filter-link">
     <div class="filter-description small">
@@ -51,8 +51,6 @@
       </a>
     </div>
   </div>
-
-
 </div>
 
 <div class="bar bar-condensed" ng-show="filters.length && showFilterActions">

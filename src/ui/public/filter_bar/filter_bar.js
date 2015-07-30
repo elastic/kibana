@@ -56,6 +56,15 @@ define(function (require) {
           session.setUseSoftTabs(true);
         };
 
+        $scope.startEditingFilter = function (filter) {
+          $scope.editingFilter = filter;
+          $scope.clonedFilter = $scope.stringifyQuery(filter);
+        };
+
+        $scope.stopEditingFilter = function () {
+          $scope.editingFilter = null;
+        };
+
         $scope.clearFilterBar = function () {
           $scope.newFilters = [];
           $scope.changeTimeFilter = null;

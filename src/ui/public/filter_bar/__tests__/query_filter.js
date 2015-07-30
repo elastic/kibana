@@ -37,8 +37,6 @@ describe('Query Filter', function () {
         expect(queryFilter.invertAll).to.be.a('function');
         expect(queryFilter.pinFilter).to.be.a('function');
         expect(queryFilter.pinAll).to.be.a('function');
-        expect(queryFilter.startEditingFilter).to.be.a('function');
-        expect(queryFilter.stopEditingFilter).to.be.a('function');
         expect(queryFilter.mergeEditedFilter).to.be.a('function');
         expect(queryFilter.stringifyQuery).to.be.a('function');
       });
@@ -52,5 +50,6 @@ describe('Query Filter', function () {
     require('./_toggleFilters');
     require('./_invertFilters');
     require('./_pinFilters');
+    require('./_editFilters');
   });
 });
