@@ -1,5 +1,3 @@
-'use strict';
-
 let EventEmitter = require('events').EventEmitter;
 let inherits = require('util').inherits;
 let _ = require('lodash');

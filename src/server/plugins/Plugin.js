@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let inherits = require('util').inherits;
 let Joi = require('joi');

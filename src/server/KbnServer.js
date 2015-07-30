@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let EventEmitter = require('events').EventEmitter;
 let promify = require('bluebird').promisify;

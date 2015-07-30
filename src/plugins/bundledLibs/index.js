@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = function (kibana) {
   let _ = require('lodash');
   let resolve = require('path').resolve;

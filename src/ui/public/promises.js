@@ -6,8 +6,6 @@ define(function (require) {
   // Provides a tiny subset of the excelent API from
   // bluebird, reimplemented using the $q service
   module.service('Promise', function ($q, $timeout) {
-    'use strict';
-
     function Promise(fn) {
       if (typeof this === 'undefined') throw new Error('Promise constructor must be called with "new"');
 

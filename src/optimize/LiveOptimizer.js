@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let join = require('path').join;
 let promify = require('bluebird').promisify;

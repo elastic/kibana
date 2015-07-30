@@ -1,5 +1,3 @@
-'use strict';
-
 let Promise = require('bluebird');
 let Joi = require('joi');
 let _ = require('lodash');

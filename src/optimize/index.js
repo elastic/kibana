@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = function (kbnServer, server, config) {
   if (!config.get('optimize.enabled')) return;
 

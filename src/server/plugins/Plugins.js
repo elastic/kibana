@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let inspect = require('util').inspect;
 let PluginApi = require('./PluginApi');

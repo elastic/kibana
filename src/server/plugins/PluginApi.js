@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let Plugin = require('./Plugin');
 let basename = require('path').basename;

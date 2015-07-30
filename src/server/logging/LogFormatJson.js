@@ -1,5 +1,3 @@
-'use strict';
-
 let LogFormat = require('./LogFormat');
 let stringify = require('json-stringify-safe');
 

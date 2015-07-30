@@ -1,5 +1,3 @@
-'use strict';
-
 let relative = require('path').relative;
 
 module.exports = function pathContains(root, child) {

@@ -1,5 +1,3 @@
-'use strict';
-
 let get = require('lodash').get;
 let Joi = require('joi');
 let fs = require('fs');

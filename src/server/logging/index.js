@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let fromNode = require('bluebird').fromNode;
 

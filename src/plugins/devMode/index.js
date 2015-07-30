@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = function (kibana) {
   if (!kibana.config.get('env.dev')) return;
 

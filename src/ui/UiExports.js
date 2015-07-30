@@ -1,5 +1,3 @@
-'use strict';
-
 var _ = require('lodash');
 var minimatch = require('minimatch');
 

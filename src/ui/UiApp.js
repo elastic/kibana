@@ -1,5 +1,3 @@
-'use strict';
-
 var _ = require('lodash');
 var join = require('path').join;
 var autoload = require('./autoload');

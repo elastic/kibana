@@ -1,5 +1,3 @@
-'use strict';
-
 let cluster = require('cluster');
 let join = require('path').join;
 let _ = require('lodash');
