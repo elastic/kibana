@@ -72,7 +72,28 @@ class BaseOptimizer extends EventEmitter {
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
-          { test: /\/src\/(plugins|ui)\/.+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` }
+          { test: /\/src\/(plugins|ui)\/.+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` },
+          {
+            test: /\.js$/,
+            exclude: /(node_modules|bower_components)/,
+            loader: 'babel',
+            query: {
+              optional: ['runtime'],
+              stage: 1,
+              nonStandard: false
+            }
+          },
+          {
+            // explicitly require .jsx extension to support jsx
+            test: /\.jsx$/,
+            exclude: /(node_modules|bower_components)/,
+            loader: 'babel',
+            query: {
+              optional: ['runtime'],
+              stage: 1,
+              nonStandard: true
+            }
+          }
         ].concat(this.modules.loaders),
         noParse: this.modules.noParse,
       },
