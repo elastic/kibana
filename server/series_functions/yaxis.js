@@ -8,7 +8,7 @@ module.exports = {
     },
     {
       name: 'yaxis',
-      types: ['number']
+      types: ['number', 'null']
     },
     {
       name: 'min',
@@ -26,12 +26,14 @@ module.exports = {
   help: 'This is an internal function that simply returns the input series. Don\'t use this',
   fn: function yaxisFn (args) {
     return alter(args, function (inputSeries, yaxis, min, max, position) {
+      yaxis = yaxis || 1;
+
       inputSeries.yaxis = yaxis;
       inputSeries._global = inputSeries._global || {};
 
       var yaxes = inputSeries._global.yaxes = inputSeries._global.yaxes || [];
       var myAxis = yaxes[yaxis - 1] = yaxes[yaxis - 1] || {};
-      myAxis.position = position || 'right';
+      myAxis.position = position;
       myAxis.min = min == null ? 0 : min;
       myAxis.max = max;
 
