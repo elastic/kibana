@@ -130,9 +130,9 @@ define(function (require) {
           $scope.to = 'now';
         };
 
-        var getRelativeString = function () {
+        function getRelativeString() {
           return 'now-' + $scope.relative.count + $scope.relative.unit + ($scope.relative.round ? '/' + $scope.relative.unit : '');
-        };
+        }
 
         $scope.applyAbsolute = function () {
           $scope.from = moment($scope.absolute.from);

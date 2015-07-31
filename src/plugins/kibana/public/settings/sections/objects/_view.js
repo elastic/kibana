@@ -143,7 +143,8 @@ define(function (require) {
             } else {
               $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
             }
-            $rootScope.$$phase || $scope.$apply();
+
+            if ($rootScope.$$phase) $scope.$apply();
           });
         };
 

@@ -1,7 +1,7 @@
 let _ = require('lodash');
 let Joi = require('joi');
 let Promise = require('bluebird');
-let { resolve } = require('path');
+let { resolve } = require('path');
 let { inherits } = require('util');
 
 const defaultConfigSchema = Joi.object({

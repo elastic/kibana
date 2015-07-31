@@ -90,7 +90,7 @@ describe('Integration', function () {
   }
 
   it('passes the table groups to the kbnAggTableGroup directive', function () {
-    init(OneRangeVis(), fixtures.oneRangeBucket);
+    init(new OneRangeVis(), fixtures.oneRangeBucket);
 
     var $atg = $el.find('kbn-agg-table-group').first();
     expect($atg.size()).to.be(1);
@@ -99,7 +99,7 @@ describe('Integration', function () {
   });
 
   it('displays an error if the search had no hits', function () {
-    init(OneRangeVis(), { hits: { total: 0, hits: [] }});
+    init(new OneRangeVis(), { hits: { total: 0, hits: [] }});
 
     expect($el.find('kbn-agg-table-group').size()).to.be(0);
 
@@ -122,7 +122,7 @@ describe('Integration', function () {
       });
     });
 
-    init(ThreeTermVis(visParams), resp);
+    init(new ThreeTermVis(visParams), resp);
 
     expect($el.find('kbn-agg-table-group').size()).to.be(0);
 

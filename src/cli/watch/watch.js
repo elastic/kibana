@@ -81,7 +81,7 @@ module.exports = function (opts) {
 
   function onError(err) {
     log.bad('Failed to watch files!\n', err.stack);
-    process.exit(1);
+    process.exit(1); // eslint-disable-line no-process-exit
   }
 
   watcher.on('add', onAddBeforeReady);

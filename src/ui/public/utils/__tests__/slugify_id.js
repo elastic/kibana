@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var slugifyId = require('ui/utils/slugify_id');
 var expect = require('expect.js');

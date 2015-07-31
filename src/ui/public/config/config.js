@@ -137,14 +137,14 @@ define(function (require) {
     /*****
      * PRIVATE API
      *****/
-    var change = function (key, val, silentAndLocal) {
+    function change(key, val, silentAndLocal) {
       // if the previous updater has already fired, then start over with null
       if (updater && updater.fired) updater = null;
       // create a new updater
       if (!updater) updater = new DelayedUpdater(doc);
       // return a promise that will be resolved once the action is eventually done
       return updater.update(key, val, silentAndLocal);
-    };
+    }
 
     config._vals = function () {
       return _.cloneDeep(vals);

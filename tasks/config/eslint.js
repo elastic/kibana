@@ -6,8 +6,7 @@ module.exports = function (grunt) {
         src: '<%= lintThese %>'
       }
     },
-    options: {
-      jshintrc: true
-    }
+
+    staged: {}
   };
 };

@@ -146,10 +146,12 @@ define(function (require) {
         if (!self.searchSource) return;
 
         // if we have a searchSource, set its state based on the searchSourceJSON field
-        var state = {};
+        var state;
         try {
           state = JSON.parse(searchSourceJson);
-        } catch (e) {}
+        } catch (e) {
+          state = {};
+        }
 
         var oldState = self.searchSource.toJSON();
         var fnProps = _.transform(oldState, function (dynamic, val, name) {
@@ -250,7 +252,7 @@ define(function (require) {
           if (_.get(err, 'origError.status') === 409) {
             var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
-            if (window.confirm(confirmMessage)) {
+            if (window.confirm(confirmMessage)) { // eslint-disable-line no-alert
               return docSource.doIndex(source).then(finish);
             }
 

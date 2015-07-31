@@ -1,4 +1,3 @@
-
 var Ipv4Address = require('ui/utils/Ipv4Address');
 var expect = require('expect.js');
 

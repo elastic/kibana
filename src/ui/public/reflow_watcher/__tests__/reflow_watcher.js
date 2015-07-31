@@ -1,4 +1,3 @@
-
 describe('Reflow watcher', function () {
   require('angular');
   var $ = require('jquery');

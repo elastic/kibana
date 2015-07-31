@@ -1,5 +1,5 @@
+/* eslint-disable */
 define(function (require) {
-
   /*
    * Decodes geohash to object containing
    * top-left and bottom-right corners of

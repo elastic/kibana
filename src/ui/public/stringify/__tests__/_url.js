@@ -97,22 +97,9 @@ describe('Url Format', function () {
       });
 
       describe('', function () {
-        before(function () {
-          Object.prototype.cantStopMeNow = {
-            toString: function () {
-              return 'fail';
-            },
-            cantStopMeNow: null
-          };
-        });
-
         it('does not get values from the prototype chain', function () {
-          var url = new Url({ urlTemplate: '{{ cantStopMeNow }}' });
+          var url = new Url({ urlTemplate: '{{ toString }}' });
           expect(url.convert('url', 'text')).to.be('');
-        });
-
-        after(function () {
-          delete Object.prototype.cantStopMeNow;
         });
       });
     });

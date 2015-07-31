@@ -16,7 +16,7 @@ ${help(this, '  ')}
 `
   );
 
-  process.exit(64);
+  process.exit(64); // eslint-disable-line no-process-exit
 };
 
 Command.prototype.defaultHelp = function () {
@@ -27,7 +27,7 @@ ${help(this, '  ')}
 `
   );
 
-  process.exit(64);
+  process.exit(64); // eslint-disable-line no-process-exit
 };
 
 Command.prototype.unknownArgv = function (argv) {

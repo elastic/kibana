@@ -1,4 +1,3 @@
-
 var angular = require('angular');
 var $ = require('jquery');
 var expect = require('expect.js');

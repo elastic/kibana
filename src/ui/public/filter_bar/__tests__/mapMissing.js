@@ -1,5 +1,3 @@
-
-var mapMissing = require('ui/filter_bar/lib/mapMissing');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 describe('Filter Bar Directive', function () {

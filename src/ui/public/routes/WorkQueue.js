@@ -15,8 +15,8 @@ define(function (require) {
     });
 
     var checkIfFull = function () {
-      if (work.length >= q.limit) {
-        fullDefers.length && resolve(fullDefers);
+      if (work.length >= q.limit && fullDefers.length) {
+        resolve(fullDefers);
       }
     };
 

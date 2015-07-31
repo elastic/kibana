@@ -99,7 +99,8 @@ define(function (require) {
       if (type === 'keyup') setModifier(key, false);
 
       var $target = _.isFunction($el) ? $el() : $el;
-      $target.trigger($.Event(type, _.defaults({ keyCode: keyCode }, modifierState)));
+      var $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
+      $target.trigger($event);
     }
   };
 });

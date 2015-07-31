@@ -86,7 +86,7 @@ module.exports = function (program) {
 
     server.ready().catch(function (err) {
       console.error(err.stack);
-      process.exit(1);
+      process.exit(1); // eslint-disable-line no-process-exit
     });
 
     return server;

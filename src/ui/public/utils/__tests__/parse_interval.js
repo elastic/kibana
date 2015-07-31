@@ -1,4 +1,3 @@
-
 var parseInterval = require('ui/utils/parse_interval');
 var expect = require('expect.js');
 

@@ -18,7 +18,7 @@ module.exports = function (grunt) {
         {
           src: [join(src, 'server', 'bin', 'kibana.sh')],
           dest: join(build, 'dist', 'kibana', 'bin', 'kibana'),
-          mode: 0755
+          mode: parseInt('0755', 8)
         },
         {
           src: [join(src, 'server', 'bin', 'kibana.bat')],

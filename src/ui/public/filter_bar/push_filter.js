@@ -3,7 +3,7 @@ define(function (require) {
 
   return function () {
     return function ($state) {
-      if (!_.isObject($state)) throw new Error ('pushFilters requires a state object');
+      if (!_.isObject($state)) throw new Error('pushFilters requires a state object');
       return function (filter, negate, index) {
         // Hierarchical and tabular data set their aggConfigResult parameter
         // differently because of how the point is rewritten between the two. So

@@ -26,18 +26,18 @@ function ParamClassStub(parent, body) {
 module.exports = function stubParamClasses(Private) {
   var BaseAggParam = Private.stub(
     require('ui/agg_types/param_types/base'),
-    ParamClassStub(null, function (config) {
+    new ParamClassStub(null, function (config) {
       _.assign(this, config);
     })
   );
 
   Private.stub(
     require('ui/agg_types/param_types/field'),
-    ParamClassStub(BaseAggParam)
+    new ParamClassStub(BaseAggParam)
   );
 
   Private.stub(
     require('ui/agg_types/param_types/optioned'),
-    ParamClassStub(BaseAggParam)
+    new ParamClassStub(BaseAggParam)
   );
 };

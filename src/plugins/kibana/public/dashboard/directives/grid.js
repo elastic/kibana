@@ -30,7 +30,10 @@ define(function (require) {
         // pixels used by all of the spacers (gridster puts have a spacer on the ends)
         var spacerSize = SPACER * COLS;
 
-        var init = function () {
+        // debounced layout function is safe to call as much as possible
+        var safeLayout = _.debounce(layout, 200);
+
+        function init() {
           $el.addClass('gridster');
 
           gridster = $el.gridster({
@@ -90,36 +93,37 @@ define(function (require) {
               makePanelSerializeable(panel);
             });
           });
+
           safeLayout();
           $window.on('resize', safeLayout);
           $scope.$on('ready:vis', safeLayout);
-        };
+        }
 
         // return the panel object for an element.
         //
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // ALWAYS CALL makePanelSerializeable AFTER YOU ARE DONE WITH IT
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        var getPanelFor = function (el) {
-          var $el = el.jquery ? el : $(el);
-          var panel = $el.data('panel');
+        function getPanelFor(el) {
+          var $panel = el.jquery ? el : $(el);
+          var panel = $panel.data('panel');
 
-          panel.$el = $el;
-          panel.$scope = $el.data('$scope');
+          panel.$el = $panel;
+          panel.$scope = $panel.data('$scope');
 
           return panel;
-        };
+        }
 
         // since the $el and $scope are circular structures, they need to be
         // removed from panel before it can be serialized (we also wouldn't
         // want them to show up in the url)
-        var makePanelSerializeable = function (panel) {
+        function makePanelSerializeable(panel) {
           delete panel.$el;
           delete panel.$scope;
-        };
+        }
 
         // tell gridster to remove the panel, and cleanup our metadata
-        var removePanel = function (panel) {
+        function removePanel(panel) {
           // remove from grister 'silently' (don't reorganize after)
           gridster.remove_widget(panel.$el);
 
@@ -128,10 +132,10 @@ define(function (require) {
 
           panel.$el.removeData('panel');
           panel.$el.removeData('$scope');
-        };
+        }
 
         // tell gridster to add the panel, and create additional meatadata like $scope
-        var addPanel = function (panel) {
+        function addPanel(panel) {
           _.defaults(panel, {
             size_x: 3,
             size_y: 2
@@ -163,19 +167,19 @@ define(function (require) {
           // stash the panel and it's scope in the element's data
           panel.$el.data('panel', panel);
           panel.$el.data('$scope', panel.$scope);
-        };
+        }
 
         // ensure that the panel object has the latest size/pos info
-        var refreshPanelStats = function (panel) {
+        function refreshPanelStats(panel) {
           var data = panel.$el.coords().grid;
           panel.size_x = data.size_x;
           panel.size_y = data.size_y;
           panel.col = data.col;
           panel.row = data.row;
-        };
+        }
 
         // when gridster tell us it made a change, update each of the panel objects
-        var readGridsterChangeHandler = function (e, ui, $widget) {
+        function readGridsterChangeHandler(e, ui, $widget) {
           // ensure that our panel objects keep their size in sync
           gridster.$widgets.each(function (i, el) {
             var panel = getPanelFor(el);
@@ -184,12 +188,12 @@ define(function (require) {
             makePanelSerializeable(panel);
             $scope.$root.$broadcast('change:vis');
           });
-        };
+        }
 
         // calculate the position and sizing of the gridster el, and the columns within it
         // then tell gridster to "reflow" -- which is definitely not supported.
         // we may need to consider using a different library
-        var reflowGridster = function () {
+        function reflowGridster() {
           // https://github.com/gcphost/gridster-responsive/blob/97fe43d4b312b409696b1d702e1afb6fbd3bba71/jquery.gridster.js#L1208-L1235
           var g = gridster;
 
@@ -212,16 +216,14 @@ define(function (require) {
           // https://github.com/elastic/kibana4/issues/390
           if (gridster.gridmap.length > 0) g.set_dom_grid_height();
           g.drag_api.set_limits(COLS * g.min_widget_width);
-        };
+        }
 
-        var layout = function () {
+        function layout() {
           var complete = notify.event('reflow dashboard');
           reflowGridster();
           readGridsterChangeHandler();
           complete();
-        };
-
-        var safeLayout = _.debounce(layout, 200);
+        }
 
         init();
       }

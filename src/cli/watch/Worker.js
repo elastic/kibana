@@ -81,7 +81,7 @@ module.exports = class Worker extends EventEmitter {
   flushChangeBuffer() {
     let files = _.unique(this.changes.splice(0));
     let prefix = files.length > 1 ? '\n - ' : '';
-    return files.reduce(function (list, file, i, files) {
+    return files.reduce(function (list, file) {
       return `${list || ''}${prefix}"${file}"`;
     }, '');
   }

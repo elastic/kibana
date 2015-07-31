@@ -21,7 +21,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
 
     if (config.get('pid.exclusive')) {
       server.log(['pid', 'fatal'], log);
-      process.exit(1);
+      process.exit(1); // eslint-disable-line  no-process-exit
     } else {
       server.log(['pid', 'warning'], log);
     }

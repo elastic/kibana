@@ -1,3 +1,5 @@
+/* eslint camelcase:0 */
+
 var child_process = require('child_process');
 var Promise = require('bluebird');
 var { join } = require('path');

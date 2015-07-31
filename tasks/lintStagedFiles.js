@@ -21,10 +21,8 @@ module.exports = function (grunt) {
         files = grunt.file.match(patterns, files);
         grunt.log.debug(files);
 
-        grunt.config.set('jshint.staged.files.src', files);
-        grunt.config.set('jscs.staged.files.src', files);
-
-        grunt.task.run(['jshint:staged', 'jscs:staged']);
+        grunt.config.set('eslint.staged.files.src', files);
+        grunt.task.run(['eslint:staged']);
       })
       .nodeify(this.async());
 

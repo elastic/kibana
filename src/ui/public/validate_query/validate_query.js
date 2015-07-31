@@ -31,7 +31,7 @@ define(function (require) {
             validator($scope.ngModel);
           };
 
-          var validator = function (query) {
+          function validator(query) {
             var index, type;
             if (request.abort) request.abort();
 
@@ -100,7 +100,7 @@ define(function (require) {
                 return error(resp);
               }
             }
-          };
+          }
 
           var debouncedValidator = debounce(validator, 300, {
             leading: true,

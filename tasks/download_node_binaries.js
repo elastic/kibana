@@ -49,7 +49,7 @@ module.exports = function (grunt) {
           mkdirp(dest, function (err) {
             if (err) return reject(err);
             var unzip = zlib.createGunzip();
-            var out = tar.Extract({ path: dest, strip: 1 });
+            var out = new tar.Extract({ path: dest, strip: 1 });
             out.on('close', resolve).on('error', reject);
             var req = request.get(url);
             req.on('response', handle404);

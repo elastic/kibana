@@ -13,8 +13,8 @@ define(function (require) {
     var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
 
     function fetchThese(requests) {
-      return forEachStrategy(requests, function (strategy, requests) {
-        return fetchWithStrategy(strategy, requests.map(function (req) {
+      return forEachStrategy(requests, function (strategy, reqsForStrategy) {
+        return fetchWithStrategy(strategy, reqsForStrategy.map(function (req) {
           if (!req.started) return req;
           return req.retry();
         }));

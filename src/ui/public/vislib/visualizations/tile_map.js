@@ -5,7 +5,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
-    var Map = Private(require('ui/vislib/visualizations/_map'));
+    var TileMapMap = Private(require('ui/vislib/visualizations/_map'));
 
     /**
      * Tile Map Visualization: renders maps
@@ -99,7 +99,7 @@ define(function (require) {
     TileMap.prototype._appendMap = function (selection) {
       var container = $(selection).addClass('tilemap');
 
-      var map = new Map(container, this._chartData, {
+      var map = new TileMapMap(container, this._chartData, {
         // center: this._attr.mapCenter,
         // zoom: this._attr.mapZoom,
         events: this.events,
