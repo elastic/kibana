@@ -54,7 +54,7 @@
               ng-cloak ng-hide="panel.hide"
               kibana-panel type='panel.type' resizable
               class="panel nospace" ng-class="{'dragInProgress':dashboard.panelDragging}"
-              style="position:relative"  ng-style="{'width':!panel.span?'100%':((panel.span/1.2)*10)+'%'}"
+              style="position:relative; float: left"  ng-style="{'width':!panel.span?'100%':((panel.span/1.2)*10)+'%'}"
               data-drop="true" ng-model="row.panels" data-jqyoui-options
               jqyoui-droppable="{index:$index,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver(true)',onOut:'panelMoveOut'}">
             </div>
