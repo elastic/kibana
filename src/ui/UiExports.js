@@ -80,6 +80,10 @@ class UiExports {
     }, [])
     .value();
   }
+
+  allApps() {
+    return _.union(this.apps, this.apps.hidden);
+  }
 }
 
 module.exports = UiExports;

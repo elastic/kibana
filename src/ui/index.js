@@ -1,10 +1,8 @@
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
-  let join = require('path').join;
   let Boom = require('boom');
   let formatUrl = require('url').format;
-  let resolve = require('path').resolve;
-
+  let { join, resolve } = require('path');
   let UiExports = require('./UiExports');
 
   let uiExports = kbnServer.uiExports = new UiExports(kbnServer);

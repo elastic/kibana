@@ -1,6 +1,6 @@
 let _ = require('lodash');
-let isWorker = require('cluster').isWorker;
-let resolve = require('path').resolve;
+let { isWorker } = require('cluster');
+let { resolve } = require('path');
 
 let cwd = process.cwd();
 let readYamlConfig = require('./readYamlConfig');

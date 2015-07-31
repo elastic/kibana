@@ -1,6 +1,7 @@
-var child_process = require('child_process');
-var join = require('path').join;
 module.exports = function (grunt) {
+  var child_process = require('child_process');
+  var { join } = require('path');
+
   grunt.registerTask('npm_install_kibana', 'NPM install kibana server into dist', function () {
     var done = this.async();
     var cwd = join(grunt.config.get('build'), 'dist', 'kibana', 'src');

@@ -1,7 +1,7 @@
 let _ = require('lodash');
 let cluster = require('cluster');
-let resolve = require('path').resolve;
-let EventEmitter = require('events').EventEmitter;
+let { resolve } = require('path');
+let { EventEmitter } = require('events');
 
 let fromRoot = require('../../utils/fromRoot');
 

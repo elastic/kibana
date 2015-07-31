@@ -1,6 +1,6 @@
 var marked = require('marked');
 var Promise = require('bluebird');
-var join = require('path').join;
+var { join } = require('path');
 var TextRenderer = require('marked-text-renderer');
 var _ = require('lodash');
 var fs = require('fs');

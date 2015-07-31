@@ -1,5 +1,5 @@
 let cluster = require('cluster');
-let join = require('path').join;
+let { join } = require('path');
 let _ = require('lodash');
 var chokidar = require('chokidar');
 

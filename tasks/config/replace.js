@@ -1,5 +1,6 @@
-var join = require('path').join;
 module.exports = function (grunt) {
+  var { join } = require('path');
+
   var build = grunt.config.get('build');
   var src = grunt.config.get('src');
   var app = grunt.config.get('app');

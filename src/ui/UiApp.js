@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var join = require('path').join;
+var { join } = require('path');
 var autoload = require('./autoload');
 
 class UiApp {

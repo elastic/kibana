@@ -3,7 +3,7 @@ var sinon = require('sinon');
 var nock = require('nock');
 var glob = require('glob');
 var rimraf = require('rimraf');
-var join = require('path').join;
+var { join } = require('path');
 
 var pluginLogger = require('../pluginLogger');
 var pluginDownloader = require('../pluginDownloader');
