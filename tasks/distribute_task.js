@@ -6,7 +6,6 @@ module.exports = function(grunt) {
     'build',
     'compress:zip',
     'compress:tgz',
-    's3:dist',
     'clean:temp'
   ]);
 
