@@ -12,10 +12,10 @@ define(function (require) {
       destroy: sinon.spy(),
       get: function (param) {
         switch (param) {
-        case 'index':
-          return Private(require('fixtures/stubbed_logstash_index_pattern'));
-        default:
-          throw new Error('Param "' + param + '" is not implemented in the stubbed search source');
+          case 'index':
+            return Private(require('fixtures/stubbed_logstash_index_pattern'));
+          default:
+            throw new Error('Param "' + param + '" is not implemented in the stubbed search source');
         }
       },
       crankResults: function () {

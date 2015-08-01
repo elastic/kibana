@@ -254,18 +254,18 @@ define(function (require) {
 
     function getPatternDefault(interval) {
       switch (interval) {
-      case 'hours':
-        return '[logstash-]YYYY.MM.DD.HH';
-      case 'days':
-        return '[logstash-]YYYY.MM.DD';
-      case 'weeks':
-        return '[logstash-]GGGG.WW';
-      case 'months':
-        return '[logstash-]YYYY.MM';
-      case 'years':
-        return '[logstash-]YYYY';
-      default:
-        return 'logstash-*';
+        case 'hours':
+          return '[logstash-]YYYY.MM.DD.HH';
+        case 'days':
+          return '[logstash-]YYYY.MM.DD';
+        case 'weeks':
+          return '[logstash-]GGGG.WW';
+        case 'months':
+          return '[logstash-]YYYY.MM';
+        case 'years':
+          return '[logstash-]YYYY';
+        default:
+          return 'logstash-*';
       }
     }
 

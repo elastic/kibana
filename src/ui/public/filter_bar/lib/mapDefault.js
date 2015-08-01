@@ -3,7 +3,8 @@ define(function (require) {
     var angular = require('angular');
 
     return function (filter) {
-      var key, value;
+      var key;
+      var value;
       if (filter.query) {
         key = 'query';
         value = angular.toJson(filter.query);

@@ -12,7 +12,8 @@ var indexPattern;
 
 describe('buildHierarchicalData()', function () {
   describe('createRawData()', function () {
-    var vis, results;
+    var vis;
+    var results;
 
     beforeEach(ngMock.module('kibana'));
 
