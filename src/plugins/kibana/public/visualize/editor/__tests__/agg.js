@@ -9,8 +9,7 @@ require('plugins/kibana/visualize/editor/agg');
 
 describe('Vis-Editor-Agg plugin directive', function () {
   var $parentScope = {};
-  var $scope;
-  var $elem;
+  var $scope, $elem;
 
   function makeConfig(which) {
     var schemaMap = {

@@ -1,8 +1,7 @@
 define(function (require) {
   return function mapMissingProvider(Promise) {
     return function (filter) {
-      var key;
-      var value;
+      var key, value;
       if (filter.missing) {
         key = 'missing';
         value = filter.missing.field;

@@ -8,15 +8,7 @@ var healthCheck = require('../health_check');
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {
 
-    var health;
-
-    var plugin;
-
-    var server;
-
-    var get;
-
-    var client;
+    var health, plugin, server, get, client;
     beforeEach(function () {
       // setup the plugin stub
       plugin = {
@@ -87,9 +79,9 @@ describe('plugins/elasticsearch', function () {
           sinon.assert.calledOnce(plugin.status.yellow);
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
-          expect(plugin.status.red.args[0][0]).to.be(
-            'Unable to connect to Elasticsearch at http://localhost:9200. Retrying in 2.5 seconds.'
-          );
+          /* jscs:disable maximumLineLength */
+          expect(plugin.status.red.args[0][0]).to.be('Unable to connect to Elasticsearch at http://localhost:9200. Retrying in 2.5 seconds.');
+          /* jscs:enable maximumLineLength */
           sinon.assert.calledTwice(client.ping);
           sinon.assert.calledOnce(client.nodes.info);
           sinon.assert.calledOnce(client.cluster.health);
@@ -112,9 +104,9 @@ describe('plugins/elasticsearch', function () {
           sinon.assert.calledOnce(plugin.status.yellow);
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
-          expect(plugin.status.red.args[0][0]).to.be(
-            'Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.'
-          );
+          /* jscs:disable maximumLineLength */
+          expect(plugin.status.red.args[0][0]).to.be('Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.');
+          /* jscs:enable maximumLineLength */
           sinon.assert.calledOnce(client.ping);
           sinon.assert.calledOnce(client.nodes.info);
           sinon.assert.calledTwice(client.cluster.health);

@@ -11,16 +11,7 @@ require('ui/private');
 require('ui/doc_table');
 
 
-var $parentScope;
-
-
-var $scope;
-
-
-var $timeout;
-
-
-var searchSource;
+var $parentScope, $scope, $timeout, searchSource;
 
 var init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {

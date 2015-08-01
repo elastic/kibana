@@ -39,10 +39,7 @@ describe('dateMath', function () {
   });
 
   describe('objects and strings', function () {
-    var mmnt;
-    var date;
-    var string;
-    var now;
+    var mmnt, date, string, now;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -70,8 +67,7 @@ describe('dateMath', function () {
   });
 
   describe('subtraction', function () {
-    var now;
-    var anchored;
+    var now, anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -94,8 +90,7 @@ describe('dateMath', function () {
   });
 
   describe('addition', function () {
-    var now;
-    var anchored;
+    var now, anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -119,8 +114,7 @@ describe('dateMath', function () {
   });
 
   describe('rounding', function () {
-    var now;
-    var anchored;
+    var now, anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);

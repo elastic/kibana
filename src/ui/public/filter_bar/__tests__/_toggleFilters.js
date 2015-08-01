@@ -10,9 +10,7 @@ describe('toggle filters', function () {
   };
   var filters;
   var queryFilter;
-  var $rootScope;
-  var appState;
-  var globalState;
+  var $rootScope, appState, globalState;
 
   beforeEach(ngMock.module(
     'kibana',

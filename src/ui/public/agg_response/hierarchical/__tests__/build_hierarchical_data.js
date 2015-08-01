@@ -27,8 +27,7 @@ describe('buildHierarchicalData()', function () {
 
 
   describe('metric only', function () {
-    var vis;
-    var results;
+    var vis, results;
 
     beforeEach(function () {
       var id = 1;
@@ -98,8 +97,7 @@ describe('buildHierarchicalData()', function () {
   });
 
   describe('threeTermBuckets', function () {
-    var vis;
-    var results;
+    var vis, results;
 
     beforeEach(function () {
       var id = 1;
@@ -140,8 +138,7 @@ describe('buildHierarchicalData()', function () {
   });
 
   describe('oneHistogramBucket', function () {
-    var vis;
-    var results;
+    var vis, results;
 
     beforeEach(function () {
       var id = 1;
@@ -172,8 +169,7 @@ describe('buildHierarchicalData()', function () {
   });
 
   describe('oneRangeBucket', function () {
-    var vis;
-    var results;
+    var vis, results;
 
     beforeEach(function () {
       var id = 1;
@@ -213,8 +209,7 @@ describe('buildHierarchicalData()', function () {
   });
 
   describe('oneFilterBucket', function () {
-    var vis;
-    var results;
+    var vis, results;
 
     beforeEach(function () {
       var id = 1;
@@ -246,8 +241,7 @@ describe('buildHierarchicalData()', function () {
   });
 
   describe('oneFilterBucket that is a split', function () {
-    var vis;
-    var results;
+    var vis, results;
 
     beforeEach(function () {
       var id = 1;

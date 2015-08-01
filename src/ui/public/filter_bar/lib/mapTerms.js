@@ -2,9 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   return function mapTermsProvider(Promise, courier) {
     return function (filter) {
-      var key;
-      var value;
-      var field;
+      var key, value, field;
       if (filter.query && filter.query.match) {
         return courier
         .indexPatterns

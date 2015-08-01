@@ -4,11 +4,7 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 require('plugins/kibana/discover/index');
 
-var $parentScope;
-
-var $scope;
-
-var $elem;
+var $parentScope, $scope, $elem;
 
 var init = function (expandable) {
   // Load the application

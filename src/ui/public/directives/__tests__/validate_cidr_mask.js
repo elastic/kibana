@@ -5,8 +5,7 @@ var ngMock = require('ngMock');
 require('ui/directives/validate_cidr_mask');
 
 describe('Validate CIDR mask directive', function () {
-  var $compile;
-  var $rootScope;
+  var $compile, $rootScope;
   var html = '<input type="text" ng-model="value" validate-cidr-mask />';
 
   beforeEach(ngMock.module('kibana'));

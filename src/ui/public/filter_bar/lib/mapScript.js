@@ -1,9 +1,7 @@
 define(function () {
   return function mapScriptProvider(Promise, courier) {
     return function (filter) {
-      var key;
-      var value;
-      var field;
+      var key, value, field;
       if (filter.script) {
         return courier
         .indexPatterns

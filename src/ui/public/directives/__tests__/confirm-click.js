@@ -7,11 +7,7 @@ var ngMock = require('ngMock');
 require('ui/directives/confirm_click');
 require('plugins/kibana/discover/index');
 
-var $parentScope;
-
-var $scope;
-
-var $elem;
+var $parentScope, $scope, $elem;
 
 var init = function (text) {
   // Load the application

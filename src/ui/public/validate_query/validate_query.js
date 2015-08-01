@@ -32,8 +32,7 @@ define(function (require) {
           };
 
           function validator(query) {
-            var index;
-            var type;
+            var index, type;
             if (request.abort) request.abort();
 
             if ($scope.queryInput) {

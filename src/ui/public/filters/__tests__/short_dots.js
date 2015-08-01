@@ -6,9 +6,7 @@ var ngMock = require('ngMock');
 require('plugins/kibana/discover/index');
 require('ui/filters/short_dots');
 
-var filter;
-
-var config;
+var filter, config;
 
 var init = function (expandable) {
   // Load the application

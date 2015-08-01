@@ -3,8 +3,7 @@ describe('Filter Bar Directive', function () {
 
     var expect = require('expect.js');
     var ngMock = require('ngMock');
-    var mapExists;
-    var $rootScope;
+    var mapExists, $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;

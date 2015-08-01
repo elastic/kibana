@@ -44,10 +44,8 @@ define(function (require) {
 
   function parseDateMath(mathString, time, roundUp) {
     var dateTime = time;
-    var i = 0;
-    var len = mathString.length;
 
-    while (i < len) {
+    for (var i = 0; i < mathString.length; ) {
       var c = mathString.charAt(i++);
       var type;
       var num;

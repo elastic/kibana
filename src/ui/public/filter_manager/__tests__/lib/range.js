@@ -3,8 +3,7 @@ var fn = require('ui/filter_manager/lib/range');
 var expect = require('expect.js');
 var _ = require('lodash');
 var ngMock = require('ngMock');
-var indexPattern;
-var expected;
+var indexPattern, expected;
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana'));

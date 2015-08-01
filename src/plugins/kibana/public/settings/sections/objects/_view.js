@@ -80,10 +80,10 @@ define(function (require) {
               name: name,
               type: (function () {
                 switch (castMappingType(esType)) {
-                  case 'string': return 'text';
-                  case 'number': return 'number';
-                  case 'boolean': return 'boolean';
-                  default: return 'json';
+                case 'string': return 'text';
+                case 'number': return 'number';
+                case 'boolean': return 'boolean';
+                default: return 'json';
                 }
               }())
             });

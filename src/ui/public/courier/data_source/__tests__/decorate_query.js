@@ -7,11 +7,7 @@ describe('Query decorator', function () {
   var _ = require('lodash');
   var config;
 
-  var indexPattern;
-
-  var getComputedFields;
-
-  var fn;
+  var indexPattern, getComputedFields, fn;
   beforeEach(ngMock.module(
     'kibana',
     function ($provide) {

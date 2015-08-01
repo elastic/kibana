@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var resolve = require('path').resolve;
 var root = resolve(__dirname, '..');
 var simpleGit = require('simple-git')(root);
@@ -22,9 +21,8 @@ module.exports = function (grunt) {
         files = grunt.file.match(patterns, files);
         grunt.log.debug(files);
 
-        if (!_.size(files)) return;
-        grunt.config.set('run.eslintStaged.args', _.union(grunt.config.get('run.eslintStaged.args'), files));
-        grunt.task.run(['run:eslintStaged']);
+        grunt.config.set('eslint.staged.files.src', files);
+        grunt.task.run(['eslint:staged']);
       })
       .nodeify(this.async());
 

@@ -22,9 +22,7 @@ describe('fieldCalculator', function () {
   });
 
   describe('_groupValues', function () {
-    var groups;
-    var params;
-    var values;
+    var groups, params, values;
     beforeEach(function () {
       values = [['foo', 'bar'], 'foo', 'foo', undefined, ['foo', 'bar'], 'bar', 'baz', null, null, null, 'foo', undefined];
       params = {};

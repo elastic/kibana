@@ -1,7 +1,6 @@
 
 describe('markdown vis controller', function () {
-  var $scope;
-  var $el;
+  var $scope, $el;
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 

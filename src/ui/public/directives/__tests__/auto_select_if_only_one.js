@@ -5,8 +5,7 @@ var ngMock = require('ngMock');
 require('ui/directives/auto_select_if_only_one');
 
 describe('Auto-select if only one directive', function () {
-  var $compile;
-  var $rootScope;
+  var $compile, $rootScope;
   var zeroOptions = [];
   var oneOption = [{label: 'foo'}];
   var multiOptions = [{label: 'foo'}, {label: 'bar'}];

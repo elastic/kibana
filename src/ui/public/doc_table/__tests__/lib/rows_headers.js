@@ -9,11 +9,7 @@ var getFakeRow = require('fixtures/fake_row');
 describe('Doc Table', function () {
   require('plugins/kibana/discover/index');
 
-  var $parentScope;
-
-  var $scope;
-
-  var config;
+  var $parentScope, $scope, config;
 
   // Stub out a minimal mapping of 4 fields
   var mapping;

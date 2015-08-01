@@ -4,8 +4,7 @@ describe('Filter Bar Directive', function () {
     var sinon = require('auto-release-sinon');
     var expect = require('expect.js');
     var ngMock = require('ngMock');
-    var mapGeoBoundingBox;
-    var $rootScope;
+    var mapGeoBoundingBox, $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

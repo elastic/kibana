@@ -25,12 +25,12 @@ define(function (require) {
         responses = responses || [];
         return Promise.map(requests, function (req, i) {
           switch (statuses[i]) {
-            case ABORTED:
-              return ABORTED;
-            case DUPLICATE:
-              return req._uniq.resp;
-            default:
-              return responses[_.findIndex(executable, req)];
+          case ABORTED:
+            return ABORTED;
+          case DUPLICATE:
+            return req._uniq.resp;
+          default:
+            return responses[_.findIndex(executable, req)];
           }
         })
         .then(defer.resolve, defer.reject);

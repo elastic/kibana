@@ -1,4 +1,4 @@
-define(function (require) {
+  define(function (require) {
   require('ui/modules')
   .get('kibana')
   .service('timefilter', function (Private, globalState, $rootScope, config) {

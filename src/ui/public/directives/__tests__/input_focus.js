@@ -5,13 +5,8 @@ var ngMock = require('ngMock');
 require('ui/directives/input_focus');
 
 describe('Input focus directive', function () {
-  var $compile;
-  var $rootScope;
-  var $timeout;
-  var element;
-  var $el;
-  var selectedEl;
-  var selectedText;
+  var $compile, $rootScope, $timeout, element;
+  var $el, selectedEl, selectedText;
   var inputValue = 'Input Text Value';
 
   beforeEach(ngMock.module('kibana'));
