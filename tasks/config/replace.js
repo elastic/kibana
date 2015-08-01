@@ -1,5 +1,6 @@
-var join = require('path').join;
 module.exports = function (grunt) {
+  var { join } = require('path');
+
   var build = grunt.config.get('build');
   var src = grunt.config.get('src');
   var app = grunt.config.get('app');
@@ -17,7 +18,7 @@ module.exports = function (grunt) {
         {
           src: [join(src, 'server', 'bin', 'kibana.sh')],
           dest: join(build, 'dist', 'kibana', 'bin', 'kibana'),
-          mode: 0755
+          mode: parseInt('0755', 8)
         },
         {
           src: [join(src, 'server', 'bin', 'kibana.bat')],

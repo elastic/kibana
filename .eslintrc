@@ -1,0 +1,82 @@
+---
+env:
+  es6: true
+  amd: true
+  node: true
+  mocha: true
+  browser: true
+
+rules:
+  block-scoped-var: 2
+  camelcase:
+    - 2
+    - { "properties": "never" }
+  comma-style:
+    - 2
+    - "last"
+  comma-dangle: 0
+  consistent-return: 0
+  curly:
+    - 2
+    - "multi-line"
+  dot-notation:
+    - 2
+    - { "allowKeywords": true }
+  eqeqeq:
+    - 2
+    - "allow-null"
+  global-strict:
+    - 2
+    - "never"
+  guard-for-in: 2
+  no-multi-spaces: 0
+  key-spacing:
+    - 0
+    - { align: "value" }
+  new-cap:
+    - 2
+    - { "capIsNewExceptions": ["Private"] }
+  no-underscore-dangle: 0
+  no-bitwise: 0
+  no-caller: 2
+  no-cond-assign: 0
+  no-debugger: 2
+  no-empty: 2
+  no-eval: 2
+  no-extend-native: 2
+  no-extra-parens: 0
+  no-irregular-whitespace: 2
+  no-iterator: 2
+  no-loop-func: 2
+  no-multi-str: 2
+  no-new: 0
+  no-proto: 2
+  no-return-assign: 0
+  no-script-url: 2
+  no-sequences: 2
+  no-shadow: 0
+  no-undef: 2
+  no-unused-vars: 0
+  no-unused-expressions: 0
+  no-path-concat: 0
+  no-use-before-define:
+    - 2
+    - "nofunc"
+  no-with: 2
+  quotes:
+    - 2
+    - "single"
+  semi:
+    - 2
+    - "always"
+  semi-spacing:
+    - 2
+    - { before: false, after: true }
+  strict:
+    - 2
+    - "never"
+  valid-typeof: 2
+  wrap-iife:
+    - 2
+    - "outside"
+  yoda: 0

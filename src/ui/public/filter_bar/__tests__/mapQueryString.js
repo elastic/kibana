@@ -1,4 +1,3 @@
-
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {
     var expect = require('expect.js');

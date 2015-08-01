@@ -1,4 +1,3 @@
-
 describe('Registry', function () {
   var _ = require('lodash');
   var sinon = require('auto-release-sinon');

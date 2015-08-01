@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var expect = require('expect.js');
 var addWordBreaks = require('ui/utils/add_word_breaks');

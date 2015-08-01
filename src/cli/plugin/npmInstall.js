@@ -1,4 +1,4 @@
-﻿var Promise = require('bluebird');
+var Promise = require('bluebird');
 var fs = require('fs');
 var path = require('path');
 var exec = require('child_process').exec;
@@ -10,8 +10,7 @@ module.exports = function (dest, logger) {
       var packageFile = path.join(dest, 'package.json');
       fs.statSync(packageFile);
     } catch (e) {
-      if (e.code !== 'ENOENT')
-        throw e;
+      if (e.code !== 'ENOENT') throw e;
 
       return reject(new Error('Plugin does not contain package.json file'));
     }

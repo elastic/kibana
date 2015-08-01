@@ -13,6 +13,13 @@ define(function (require) {
         var $window = $(window);
         var $scroller = $('<div class="fixed-scroll-scroller">').height(SCROLLER_HEIGHT);
 
+
+        /**
+         * Remove the listeners bound in listen()
+         * @type {function}
+         */
+        var unlisten = _.noop;
+
         /**
          * Listen for scroll events on the $scroller and the $el, sets unlisten()
          *
@@ -48,12 +55,6 @@ define(function (require) {
             function () { unlisten = _.noop; }
           );
         }
-
-        /**
-         * Remove the listeners bound in listen()
-         * @type {function}
-         */
-        var unlisten = _.noop;
 
         /**
          * Revert DOM changes and event listeners

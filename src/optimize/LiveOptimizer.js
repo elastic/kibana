@@ -1,12 +1,9 @@
-'use strict';
-
 let _ = require('lodash');
-let join = require('path').join;
-let promify = require('bluebird').promisify;
+let { join } = require('path');
+let { promisify } = require('bluebird');
 let webpack = require('webpack');
 let MemoryFileSystem = require('memory-fs');
 let BaseOptimizer = require('./BaseOptimizer');
-let writeFileSync = require('fs').writeFileSync;
 
 module.exports = class LiveOptimizer extends BaseOptimizer {
   constructor(opts) {
@@ -20,7 +17,7 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
 
     _.bindAll(this, 'get', 'init');
 
-    this.compile = promify(this.compiler.run, this.compiler);
+    this.compile = promisify(this.compiler.run, this.compiler);
   }
 
   init() {
@@ -45,8 +42,6 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
         console.log(stats.toString({ colors: true }));
         return null;
       }
-
-      // writeFileSync('liveBuildStats.json', JSON.stringify(stats.toJson()));
 
       return {
         bundle: fs.readFileSync(filename),

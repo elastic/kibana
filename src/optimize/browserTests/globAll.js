@@ -1,10 +1,8 @@
-'use strict';
-
 let _ = require('lodash');
-let resolve = require('path').resolve;
-let promify = require('bluebird').promisify;
-let all = require('bluebird').all;
-let glob = promify(require('glob'));
+let { resolve } = require('path');
+let { promisify } = require('bluebird');
+let { all } = require('bluebird');
+let glob = promisify(require('glob'));
 
 module.exports = function (path, patterns) {
   return all([].concat(patterns || []))

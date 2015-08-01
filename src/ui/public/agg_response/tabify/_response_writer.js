@@ -72,7 +72,7 @@ define(function (require) {
       if (group) {
         table.aggConfig = agg;
         table.key = key;
-        table.title =  (table.fieldFormatter()(key)) + ': ' + agg.makeLabel() ;
+        table.title =  (table.fieldFormatter()(key)) + ': ' + agg.makeLabel();
       }
 
       // link the parent and child

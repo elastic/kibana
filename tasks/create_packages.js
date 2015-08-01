@@ -1,6 +1,8 @@
+/* eslint camelcase:0 */
+
 var child_process = require('child_process');
 var Promise = require('bluebird');
-var join = require('path').join;
+var { join } = require('path');
 var mkdirp = Promise.promisifyAll(require('mkdirp'));
 
 var execFile = Promise.promisify(child_process.execFile);

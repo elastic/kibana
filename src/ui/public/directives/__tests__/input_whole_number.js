@@ -1,4 +1,3 @@
-
 var angular = require('angular');
 var expect = require('expect.js');
 var ngMock = require('ngMock');

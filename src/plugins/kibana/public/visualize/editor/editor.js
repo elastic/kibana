@@ -47,7 +47,6 @@ define(function (require) {
   ])
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
-    var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('ui/ConfigTemplate');
     var Notifier = require('ui/notify/Notifier');
@@ -92,7 +91,7 @@ define(function (require) {
         vis: savedVisState
       };
 
-      var $state = new AppState(stateDefaults);
+      $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
         Promise.try(function () {

@@ -43,16 +43,16 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 #### Linting
 
-A note about linting: We use both [jshint](http://jshint.com/) and [jscs](http://jscs.info/) to check that the [styleguide](STYLEGUIDE.md) is being followed. They run in a pre-commit hook and as a part of the tests, but most contributors integrate these linters with their code editors for real-time feedback.
+A note about linting: We use [eslint](http://eslint.org) to check that the [styleguide](STYLEGUIDE.md) is being followed. It runs in a pre-commit hook and as a part of the tests, but most contributors integrate it with their code editors for real-time feedback.
 
-Here are some hints for setting up the linters in your favorite editor:
+Here are some hints for getting eslint setup in your favorite editor:
 
-| Editor | JSHint | JSCS |
+| Editor | Plugin |
 | --- | --- | --- |
-| Sublime | [SublimeLinter-jshint](https://github.com/SublimeLinter/SublimeLinter-jshint#installation) | [SublimeLinter-jscs](https://github.com/SublimeLinter/SublimeLinter-jscs#installation) |
-| Atom | [linter-jshint](https://github.com/AtomLinter/linter-jshint#installation) | [linter-jscs](https://github.com/AtomLinter/linter-jscs#installation) |
-| IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » JSHint (be sure to check "Use config files") | « |
-| vi | ask @simianhacker | « |
+| Sublime | [SublimeLinter-eslint](https://github.com/SublimeLinter/SublimeLinter-eslint#installation) |
+| Atom | [linter-eslint](https://github.com/AtomLinter/linter-eslint#installation) |
+| IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint |
+| vi | [scrooloose/syntastic](https://github.com/scrooloose/syntastic) |
 
 
 ### Testing and building

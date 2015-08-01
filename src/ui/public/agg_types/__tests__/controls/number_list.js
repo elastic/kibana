@@ -1,4 +1,3 @@
-
 describe('NumberList directive', function () {
   var $ = require('jquery');
   var _ = require('lodash');

@@ -1,4 +1,3 @@
-
 var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
 var expect = require('expect.js');
 describe('Filter Bar Directive', function () {

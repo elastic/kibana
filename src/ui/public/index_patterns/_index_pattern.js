@@ -214,7 +214,7 @@ define(function (require) {
         .then(setId)
         .catch(function (err) {
           var confirmMessage = 'Are you sure you want to overwrite this?';
-          if (_.get(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
+          if (_.get(err, 'origError.status') === 409 && window.confirm(confirmMessage)) { // eslint-disable-line no-alert
             return docSource.doIndex(body).then(setId);
           }
           return Promise.resolve(false);

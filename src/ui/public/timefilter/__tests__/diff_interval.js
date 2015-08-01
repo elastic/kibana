@@ -1,4 +1,3 @@
-
 var sinon = require('auto-release-sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');

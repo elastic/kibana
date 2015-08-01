@@ -1,5 +1,3 @@
-'use strict';
-
 var _ = require('lodash');
 var minimatch = require('minimatch');
 
@@ -81,6 +79,10 @@ class UiExports {
       return found.concat(aliases[name]);
     }, [])
     .value();
+  }
+
+  allApps() {
+    return _.union(this.apps, this.apps.hidden);
   }
 }
 

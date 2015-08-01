@@ -26,7 +26,7 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 describe('TileMap Map Tests', function () {
   this.timeout(0);
   var $mockMapEl = $('<div>');
-  var Map;
+  var TileMapMap;
   var leafletStubs = {};
   var leafletMocks = {};
 
@@ -38,7 +38,7 @@ describe('TileMap Map Tests', function () {
     leafletStubs.tileLayer = sinon.stub(L, 'tileLayer', _.constant(leafletMocks.tileLayer));
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
-    Map = Private(require('ui/vislib/visualizations/_map'));
+    TileMapMap = Private(require('ui/vislib/visualizations/_map'));
   }));
 
   describe('instantiation', function () {
@@ -46,8 +46,8 @@ describe('TileMap Map Tests', function () {
     var createStub;
 
     beforeEach(function () {
-      createStub = sinon.stub(Map.prototype, '_createMap', _.noop);
-      map = new Map($mockMapEl, geoJsonData, {});
+      createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
+      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should create the map', function () {

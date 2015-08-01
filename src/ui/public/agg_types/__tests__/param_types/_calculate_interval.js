@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var expect = require('expect.js');
 var ngMock = require('ngMock');

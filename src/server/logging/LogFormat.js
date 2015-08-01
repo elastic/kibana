@@ -1,5 +1,3 @@
-'use strict';
-
 let Stream = require('stream');
 let moment = require('moment');
 let _ = require('lodash');

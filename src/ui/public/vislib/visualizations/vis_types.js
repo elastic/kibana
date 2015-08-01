@@ -17,5 +17,4 @@ define(function (require) {
       tile_map: Private(require('ui/vislib/visualizations/tile_map'))
     };
   };
-
 });

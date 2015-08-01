@@ -14,7 +14,7 @@ module.exports = function (program) {
     } catch (ex) {
       //The logger has not yet been initialized.
       console.error(ex.message);
-      process.exit(64);
+      process.exit(64); // eslint-disable-line no-process-exit
     }
 
     var logger = pluginLogger(settings);

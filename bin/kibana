@@ -21,5 +21,5 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-exec "${NODE}" "${DIR}/src/cli/cli" ${@}
+exec "${NODE}" "${DIR}/src/cli" ${@}
 

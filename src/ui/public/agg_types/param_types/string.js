@@ -23,8 +23,9 @@ define(function (require) {
      * @return {undefined}
      */
     ScriptAggParam.prototype.write = function (aggConfig, output) {
-      if (aggConfig.params[this.name] && aggConfig.params[this.name].length)
+      if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
         output.params[this.name] = aggConfig.params[this.name];
+      }
     };
 
     return ScriptAggParam;

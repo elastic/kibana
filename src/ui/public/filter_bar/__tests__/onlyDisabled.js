@@ -1,4 +1,3 @@
-
 var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
 var expect = require('expect.js');
 describe('Filter Bar Directive', function () {

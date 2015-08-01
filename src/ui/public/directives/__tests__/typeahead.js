@@ -1,4 +1,3 @@
-
 var angular = require('angular');
 var sinon = require('sinon');
 var expect = require('expect.js');

@@ -18,7 +18,7 @@ If Not Exist "%NODE%" (
 )
 
 TITLE Kibana Server
-"%NODE%" "%DIR%\src\cli\cli" %*
+"%NODE%" "%DIR%\src\cli" %*
 
 :finally
 

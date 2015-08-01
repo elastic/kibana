@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
-  var errors = require('ui/errors');
+  var { IndexPatternMissingIndices } = require('ui/errors');
 
   require('ui/directives/validate_index_name');
   require('ui/directives/auto_select_if_only_one');
@@ -14,7 +14,6 @@ define(function (require) {
   require('ui/modules').get('apps/settings')
   .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
     var notify = new Notifier();
-    var MissingIndices = errors.IndexPatternMissingIndices;
     var refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
     var intervals = indexPatterns.intervals;
     var samplePromise;
@@ -69,7 +68,7 @@ define(function (require) {
         // .then(function () { indexPattern.save(); })
       })
       .catch(function (err) {
-        if (err instanceof MissingIndices) {
+        if (err instanceof IndexPatternMissingIndices) {
           notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
         }
         else notify.fatal(err);
@@ -209,7 +208,7 @@ define(function (require) {
         return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
         .catch(function (err) {
           // TODO: we should probably display a message of some kind
-          if (err instanceof MissingIndices) {
+          if (err instanceof IndexPatternMissingIndices) {
             fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
             return [];
           }

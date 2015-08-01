@@ -10,12 +10,7 @@ define(function (require) {
 
   var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
 
-  var log = _.noop;
-  if (typeof KIBANA_DIST === 'undefined') {
-    log = function () {
-      console.log.apply(console, arguments);
-    };
-  }
+  var log = _.bindKey(console, 'log');
 
   // used to identify the first call to fatal, set to false there
   var firstFatal = true;

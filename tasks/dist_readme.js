@@ -1,10 +1,11 @@
 var marked = require('marked');
 var Promise = require('bluebird');
-var join = require('path').join;
+var { join } = require('path');
 var TextRenderer = require('marked-text-renderer');
 var _ = require('lodash');
 var fs = require('fs');
-var entities = new (require('html-entities').AllHtmlEntities)();
+var { AllHtmlEntities } = require('html-entities');
+var entities = new AllHtmlEntities();
 
 var readFile = Promise.promisify(fs.readFile);
 var writeFile = Promise.promisify(fs.writeFile);
@@ -26,10 +27,10 @@ module.exports = function (grunt) {
     var root = grunt.config.get('root');
     var build = grunt.config.get('build');
 
-    var srcReadme =  join(root, 'README.md');
+    var srcReadme = join(root, 'README.md');
     var distReadme = join(build, 'dist', 'kibana', 'README.txt');
 
-    var srcLicense =  join(root, 'LICENSE.md');
+    var srcLicense = join(root, 'LICENSE.md');
     var distLicense = join(build, 'dist', 'kibana', 'LICENSE.txt');
 
     marked.setOptions({
