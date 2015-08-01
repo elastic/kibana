@@ -4,7 +4,8 @@ var ngMock = require('ngMock');
 require('ui/directives/input_whole_number');
 
 describe('Whole number input directive', function () {
-  var $compile, $rootScope;
+  var $compile;
+  var $rootScope;
   var html = '<input type="text" ng-model="value" input-whole-number />';
 
   beforeEach(ngMock.module('kibana'));

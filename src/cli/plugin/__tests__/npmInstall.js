@@ -15,8 +15,8 @@ describe('kibana cli', function () {
 
     describe('npmInstall', function () {
 
-      var logger;
       var testWorkingPath = join(__dirname, '.test.data');
+      var logger;
       var statSyncStub;
 
       beforeEach(function () {

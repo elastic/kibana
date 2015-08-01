@@ -87,14 +87,14 @@ define(function (require) {
         var label = _.escape(this._formatLabel(rawValue, url));
 
         switch (this.param('type')) {
-        case 'img':
-          return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
-        default:
-          if (hit && hit.highlight && hit.highlight[field.name]) {
-            label = highlightFilter(label, hit.highlight[field.name]);
-          }
+          case 'img':
+            return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
+          default:
+            if (hit && hit.highlight && hit.highlight[field.name]) {
+              label = highlightFilter(label, hit.highlight[field.name]);
+            }
 
-          return '<a href="' + url + '" target="_blank">' + label + '</a>';
+            return '<a href="' + url + '" target="_blank">' + label + '</a>';
         }
       }
     };

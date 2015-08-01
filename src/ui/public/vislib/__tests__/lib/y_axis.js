@@ -320,7 +320,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getYAxis method', function () {
-    var mode, yMax, yScale;
+    var mode;
+    var yMax;
+    var yScale;
     beforeEach(function () {
       createData(defaultGraphData);
       mode = yAxis._attr.mode;

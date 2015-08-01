@@ -3,7 +3,9 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 require('plugins/kibana/doc/index');
 
-var $scope, createController, timefilter;
+var $scope;
+var createController;
+var timefilter;
 
 var init = function (index, type, id) {
 
