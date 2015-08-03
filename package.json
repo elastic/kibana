@@ -34,7 +34,8 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/cli/index.js --dev",
-    "precommit": "grunt lintStagedFiles"
+    "precommit": "grunt lintStagedFiles",
+    "karma": "karma start"
   },
   "repository": {
     "type": "git",
