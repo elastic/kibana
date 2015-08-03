@@ -45,10 +45,9 @@ define(function (require) {
           if (!color.range) return;
 
           const rangeValues = color.range.split(':');
-          if (rangeValues.length !== 2) return;
-
           const start = Number(rangeValues[0]);
           const end = Number(rangeValues[1]);
+
           return val >= start && val <= end;
         });
 
