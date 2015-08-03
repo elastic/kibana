@@ -39,4 +39,8 @@ module.exports = class UiApps extends Array {
     return this._byId || (this._byId = _.indexBy(this, 'id'));
   }
 
+  toJSON() {
+    return this.slice(0);
+  }
+
 };
