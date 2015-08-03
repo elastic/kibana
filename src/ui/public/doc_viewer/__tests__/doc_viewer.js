@@ -24,7 +24,16 @@ require('ui/private');
 require('ui/doc_viewer');
 
 
-var $parentScope, $scope, indexPattern, flattened;
+var $parentScope;
+
+
+var $scope;
+
+
+var indexPattern;
+
+
+var flattened;
 
 var init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile) {

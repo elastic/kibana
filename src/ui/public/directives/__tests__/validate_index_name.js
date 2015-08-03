@@ -6,7 +6,8 @@ var ngMock = require('ngMock');
 require('ui/directives/validate_index_name');
 
 describe('Validate index name directive', function () {
-  var $compile, $rootScope;
+  var $compile;
+  var $rootScope;
   var html = '<input type="text" ng-model="indexName" validate-index-name />';
 
   beforeEach(ngMock.module('kibana'));

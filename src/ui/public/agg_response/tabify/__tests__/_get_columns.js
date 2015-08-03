@@ -77,15 +77,15 @@ describe('get columns', function () {
     function checkColumns(column, i) {
       expect(column).to.have.property('aggConfig');
       switch (i) {
-      case 0:
-        expect(column.aggConfig.type).to.have.property('name', 'date_histogram');
-        break;
-      case 1:
-        expect(column.aggConfig.type).to.have.property('name', 'avg');
-        break;
-      case 2:
-        expect(column.aggConfig.type).to.have.property('name', 'sum');
-        break;
+        case 0:
+          expect(column.aggConfig.type).to.have.property('name', 'date_histogram');
+          break;
+        case 1:
+          expect(column.aggConfig.type).to.have.property('name', 'avg');
+          break;
+        case 2:
+          expect(column.aggConfig.type).to.have.property('name', 'sum');
+          break;
       }
     }
 

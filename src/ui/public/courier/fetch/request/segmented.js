@@ -125,11 +125,11 @@ define(function (require) {
      */
     SegmentedReq.prototype.setDirection = function (dir) {
       switch (dir) {
-      case 'asc':
-      case 'desc':
-        return (this._direction = dir);
-      default:
-        throw new TypeError('unkown sort direction "' + dir + '"');
+        case 'asc':
+        case 'desc':
+          return (this._direction = dir);
+        default:
+          throw new TypeError('unkown sort direction "' + dir + '"');
       }
     };
 

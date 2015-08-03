@@ -37,35 +37,35 @@ define(function (require) {
         }
 
         switch (fieldName) {
-        case '_exists_':
-          filter = {
-            meta: {
-              negate: negate,
-              index: index
-            },
-            exists: {
-              field: value
-            }
-          };
-          break;
-        default:
-          if (field.scripted) {
+          case '_exists_':
             filter = {
-              meta: { negate: negate, index: index, field: fieldName },
-              script: {
-                script: '(' + field.script + ') == value',
-                lang: field.lang,
-                params: {
-                  value: value
-                }
+              meta: {
+                negate: negate,
+                index: index
+              },
+              exists: {
+                field: value
               }
             };
-          } else {
-            filter = { meta: { negate: negate, index: index }, query: { match: {} } };
-            filter.query.match[fieldName] = { query: value, type: 'phrase' };
-          }
+            break;
+          default:
+            if (field.scripted) {
+              filter = {
+                meta: { negate: negate, index: index, field: fieldName },
+                script: {
+                  script: '(' + field.script + ') == value',
+                  lang: field.lang,
+                  params: {
+                    value: value
+                  }
+                }
+              };
+            } else {
+              filter = { meta: { negate: negate, index: index }, query: { match: {} } };
+              filter.query.match[fieldName] = { query: value, type: 'phrase' };
+            }
 
-          break;
+            break;
         }
 
         newFilters.push(filter);

@@ -172,18 +172,18 @@ describe('Tooltip Positioning', function () {
 
       directions.forEach(function (dir) {
         switch (dir) {
-        case 'top':
-          expect(placement.top).to.be.lessThan(event.clientY);
-          return;
-        case 'bottom':
-          expect(placement.top).to.be.greaterThan(event.clientY);
-          return;
-        case 'right':
-          expect(placement.left).to.be.greaterThan(event.clientX);
-          return;
-        case 'left':
-          expect(placement.left).to.be.lessThan(event.clientX);
-          return;
+          case 'top':
+            expect(placement.top).to.be.lessThan(event.clientY);
+            return;
+          case 'bottom':
+            expect(placement.top).to.be.greaterThan(event.clientY);
+            return;
+          case 'right':
+            expect(placement.left).to.be.greaterThan(event.clientX);
+            return;
+          case 'left':
+            expect(placement.left).to.be.lessThan(event.clientX);
+            return;
         }
       });
 

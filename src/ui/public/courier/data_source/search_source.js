@@ -145,33 +145,33 @@ define(function (require) {
       if (val == null || !key || !_.isString(key)) return;
 
       switch (key) {
-      case 'filter':
-        // user a shallow flatten to detect if val is an array, and pull the values out if it is
-        state.filters = _([ state.filters || [], val ])
-        .flatten()
-        // Yo Dawg! I heard you needed to filter out your filters
-        .reject(function (filter) {
-          return !filter || _.get(filter, 'meta.disabled');
-        })
-        .value();
-        return;
-      case 'index':
-      case 'type':
-      case 'id':
-        if (key && state[key] == null) {
-          state[key] = val;
-        }
-        return;
-      case 'source':
-        key = '_source';
-        addToBody();
-        break;
-      case 'sort':
-        val = normalizeSortRequest(val, this.get('index'));
-        addToBody();
-        break;
-      default:
-        addToBody();
+        case 'filter':
+          // user a shallow flatten to detect if val is an array, and pull the values out if it is
+          state.filters = _([ state.filters || [], val ])
+          .flatten()
+          // Yo Dawg! I heard you needed to filter out your filters
+          .reject(function (filter) {
+            return !filter || _.get(filter, 'meta.disabled');
+          })
+          .value();
+          return;
+        case 'index':
+        case 'type':
+        case 'id':
+          if (key && state[key] == null) {
+            state[key] = val;
+          }
+          return;
+        case 'source':
+          key = '_source';
+          addToBody();
+          break;
+        case 'sort':
+          val = normalizeSortRequest(val, this.get('index'));
+          addToBody();
+          break;
+        default:
+          addToBody();
       }
 
       /**
