@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     devServer: {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /\[optimize\]\[status\] Status changed from [a-zA-Z]+ to green/,
         quiet: false,
         failOnError: false
       },
