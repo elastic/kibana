@@ -28,5 +28,7 @@ module.exports = function (grunt) {
 
     }
   );
+
+  grunt.loadNpmTasks('gruntify-eslint');
 };
 
