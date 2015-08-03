@@ -1,5 +1,8 @@
 <div class="form-group">
   <div ng-repeat="range in editor.formatParams.colors">
+    <button ng-if="$index > 0" aria-label="Remove Range" ng-click="removeColor($index)" tooltip="Remove Range" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger pull-right">
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
     <div class="form-group">
       <label>Range
         <small>
@@ -22,10 +25,13 @@
         ng-model="range.backgroundColor"
         class="form-control">
     </div>
+    <hr>
   </div>
 
-  <i class="fa fa-plus" ng-click="addColor()"></i>
-
+  <button aria-label="Remove Range" ng-click="addColor()" tooltip="Remove Range" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-primary">
+    <span class="sr-only">Add Color</span>
+    <i class="fa fa-plus"> Add Color</i>
+  </button>
 
   <field-format-editor-samples
     inputs="editor.field.format.type.sampleInputs">

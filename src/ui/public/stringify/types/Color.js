@@ -22,6 +22,10 @@ define(function (require) {
         $scope.addColor = function () {
           $scope.editor.formatParams.colors.push({});
         };
+
+        $scope.removeColor = function (index) {
+          $scope.editor.formatParams.colors.splice(index, 1);
+        };
       }
     };
 
@@ -38,6 +42,8 @@ define(function (require) {
     _Color.prototype._convert = {
       html(val) {
         var range = _.findLast(this.param('colors'), function (color) {
+          if (!color.range) return;
+
           const rangeValues = color.range.split(':');
           if (rangeValues.length !== 2) return;
 
