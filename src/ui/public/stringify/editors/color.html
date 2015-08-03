@@ -1,0 +1,34 @@
+<div class="form-group">
+  <div ng-repeat="range in editor.formatParams.colors">
+    <div class="form-group">
+      <label>Range
+        <small>
+          (min:max)
+        </small>
+    </label>
+      <input
+        ng-model="range.range"
+        class="form-control">
+    </div>
+    <div class="form-group">
+      <label>Font Color</label>
+      <input
+        ng-model="range.color"
+        class="form-control">
+    </div>
+    <div class="form-group">
+      <label>Background Color</label>
+      <input
+        ng-model="range.backgroundColor"
+        class="form-control">
+    </div>
+  </div>
+
+  <i class="fa fa-plus" ng-click="addColor()"></i>
+
+
+  <field-format-editor-samples
+    inputs="editor.field.format.type.sampleInputs">
+  </field-format-editor-samples>
+
+</div>
