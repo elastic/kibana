@@ -70,41 +70,41 @@ define(function (require) {
 
         $scope.setMode = function (thisMode) {
           switch (thisMode) {
-          case 'quick':
-            break;
-          case 'relative':
-            var fromParts = $scope.from.toString().split('-');
-            var relativeParts = [];
+            case 'quick':
+              break;
+            case 'relative':
+              var fromParts = $scope.from.toString().split('-');
+              var relativeParts = [];
 
-            // Try to parse the relative time, if we can't use moment duration to guestimate
-            if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
-              relativeParts = fromParts[1].match(/([0-9]+)([smhdwMy]).*/);
-            }
-            if (relativeParts[1] && relativeParts[2]) {
-              $scope.relative.count = parseInt(relativeParts[1], 10);
-              $scope.relative.unit = relativeParts[2];
-            } else {
-              var duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
-              var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
-              if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
-              for (var i = 0; i < units.length; i++) {
-                var as = duration.as(units[i]);
-                if (as > 1) {
-                  $scope.relative.count = Math.round(as);
-                  $scope.relative.unit = units[i];
-                  break;
+              // Try to parse the relative time, if we can't use moment duration to guestimate
+              if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
+                relativeParts = fromParts[1].match(/([0-9]+)([smhdwMy]).*/);
+              }
+              if (relativeParts[1] && relativeParts[2]) {
+                $scope.relative.count = parseInt(relativeParts[1], 10);
+                $scope.relative.unit = relativeParts[2];
+              } else {
+                var duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
+                var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
+                if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+                for (var i = 0; i < units.length; i++) {
+                  var as = duration.as(units[i]);
+                  if (as > 1) {
+                    $scope.relative.count = Math.round(as);
+                    $scope.relative.unit = units[i];
+                    break;
+                  }
                 }
               }
-            }
 
-            if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
-            $scope.formatRelative();
+              if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+              $scope.formatRelative();
 
-            break;
-          case 'absolute':
-            $scope.absolute.from = dateMath.parse($scope.from || moment().subtract('minutes', 15));
-            $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
-            break;
+              break;
+            case 'absolute':
+              $scope.absolute.from = dateMath.parse($scope.from || moment().subtract('minutes', 15));
+              $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
+              break;
           }
 
           $scope.mode = thisMode;
@@ -130,9 +130,9 @@ define(function (require) {
           $scope.to = 'now';
         };
 
-        var getRelativeString = function () {
+        function getRelativeString() {
           return 'now-' + $scope.relative.count + $scope.relative.unit + ($scope.relative.round ? '/' + $scope.relative.unit : '');
-        };
+        }
 
         $scope.applyAbsolute = function () {
           $scope.from = moment($scope.absolute.from);

@@ -1,4 +1,3 @@
-
 describe('FieldEditor directive', function () {
   var $ = require('jquery');
   var ngMock = require('ngMock');

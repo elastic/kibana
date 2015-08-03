@@ -9,19 +9,19 @@ module.exports = function (server) {
   var uri = url.parse(config.get('elasticsearch.url'));
   var username = config.get('elasticsearch.username');
   var password = config.get('elasticsearch.password');
-  var verify_ssl = config.get('elasticsearch.ssl.verify');
-  var client_crt = config.get('elasticsearch.ssl.cert');
-  var client_key = config.get('elasticsearch.ssl.key');
+  var verifySsl = config.get('elasticsearch.ssl.verify');
+  var clientCrt = config.get('elasticsearch.ssl.cert');
+  var clientKey = config.get('elasticsearch.ssl.key');
   var ca = config.get('elasticsearch.ssl.ca');
 
   if (username && password) {
     uri.auth = util.format('%s:%s', username, password);
   }
 
-  var ssl = { rejectUnauthorized: verify_ssl };
-  if (client_crt && client_key) {
-    ssl.cert = fs.readFileSync(client_crt, 'utf8');
-    ssl.key = fs.readFileSync(client_key, 'utf8');
+  var ssl = { rejectUnauthorized: verifySsl };
+  if (clientCrt && clientKey) {
+    ssl.cert = fs.readFileSync(clientCrt, 'utf8');
+    ssl.key = fs.readFileSync(clientKey, 'utf8');
   }
   if (ca) {
     ssl.ca = fs.readFileSync(ca, 'utf8');
@@ -31,7 +31,7 @@ module.exports = function (server) {
     host: url.format(uri),
     ssl: ssl,
     apiVersion: '1.4',
-    log: function (config) {
+    log: function () {
       this.error = function (err) {
         server.log(['error', 'elasticsearch'], err);
       };

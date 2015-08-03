@@ -24,7 +24,7 @@ define(function () {
       path.unshift(result);
       if (result.$parent) return walk(result.$parent, path);
       return path;
-    })(this, []);
+    }(this, []));
   };
 
   /**

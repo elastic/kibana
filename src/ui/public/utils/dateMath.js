@@ -44,8 +44,10 @@ define(function (require) {
 
   function parseDateMath(mathString, time, roundUp) {
     var dateTime = time;
+    var i = 0;
+    var len = mathString.length;
 
-    for (var i = 0; i < mathString.length;) {
+    while (i < len) {
       var c = mathString.charAt(i++);
       var type;
       var num;
@@ -86,7 +88,8 @@ define(function (require) {
         return undefined;
       } else {
         if (type === 0) {
-          roundUp ? dateTime.endOf(unit) : dateTime.startOf(unit);
+          if (roundUp) dateTime.endOf(unit);
+          else dateTime.startOf(unit);
         } else if (type === 1) {
           dateTime.add(num, unit);
         } else if (type === 2) {

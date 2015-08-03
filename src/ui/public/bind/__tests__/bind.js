@@ -1,4 +1,3 @@
-
 describe('$scope.$bind', function () {
   var sinon = require('auto-release-sinon');
   var expect = require('expect.js');

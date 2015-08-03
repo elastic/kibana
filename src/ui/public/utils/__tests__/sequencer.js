@@ -1,17 +1,16 @@
-
 describe('sequencer util', function () {
   var _ = require('lodash');
   var sequencer = require('ui/utils/sequencer');
   var expect = require('expect.js');
 
-  var args = [
+  var opts = [
     { min: 500, max: 7500, length: 1500 },
     { min: 50, max: 500, length: 1000 },
     { min: 5, max: 50, length: 100 }
   ];
 
   function eachSeqFor(method, fn) {
-    args.forEach(function (args) {
+    opts.forEach(function (args) {
       fn(method(args.min, args.max, args.length), args);
     });
   }

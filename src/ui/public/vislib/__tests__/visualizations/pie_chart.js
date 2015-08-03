@@ -76,8 +76,8 @@ describe('No global chart settings', function () {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
 
-    var id_1 = 1;
-    var id_2 = 1;
+    var id1 = 1;
+    var id2 = 1;
     var stubVis1 = new Vis(indexPattern, {
       type: 'pie',
       aggs: rowAgg
@@ -89,10 +89,10 @@ describe('No global chart settings', function () {
 
     // We need to set the aggs to a known value.
     _.each(stubVis1.aggs, function (agg) {
-      agg.id = 'agg_' + id_1++;
+      agg.id = 'agg_' + id1++;
     });
     _.each(stubVis2.aggs, function (agg) {
-      agg.id = 'agg_' + id_2++;
+      agg.id = 'agg_' + id2++;
     });
 
     data1 = buildHierarchicalData(stubVis1, fixtures.threeTermBuckets);

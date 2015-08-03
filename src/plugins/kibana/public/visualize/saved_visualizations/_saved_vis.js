@@ -101,10 +101,12 @@ define(function (require) {
         self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
       }
 
-      return self.vis = new Vis(
+      self.vis = new Vis(
         self.searchSource.get('index'),
         self.visState
       );
+
+      return self.vis;
     };
 
     SavedVis.prototype._updateVis = function () {

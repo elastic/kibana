@@ -7,30 +7,30 @@ define(function (require) {
   }
 
   // Get the max version in this cluster
-  var max = function (versions) {
+  function max(versions) {
     return sortVersions(versions).pop();
-  };
+  }
 
   // Return the lowest version in the cluster
-  var min = function (versions) {
+  function min(versions) {
     return sortVersions(versions).shift();
-  };
+  }
 
   // Sort versions from lowest to highest
-  var sortVersions = function (versions) {
+  function sortVersions(versions) {
     if (!_.isArray(versions)) versions = [versions];
 
     return _.uniq(versions).sort(function (a, b) {
       return compare(a, b) ? -1 : 1;
     });
-  };
+  }
 
   /*
     Takes a version string with one of the following optional comparison prefixes: >,>=,<.<=
     and evaluates if the cluster meets the requirement. If the prefix is omitted exact match
     is assumed
   */
-  var is = function (equation, versions) {
+  function is(equation, versions) {
     var _versions = sortVersions(versions);
     var _v = equation;
     var _cf;
@@ -44,40 +44,40 @@ define(function (require) {
     }
 
     return _cf;
-  };
+  }
 
   // check if lowest version in cluster = `version`
-  var eq = function (version, versions) {
+  function eq(version, versions) {
     var _versions = sortVersions(versions);
     return version === min(_versions) ? true : false;
-  };
+  }
 
   // version > lowest version in cluster?
-  var gt = function (version, versions) {
+  function gt(version, versions) {
     var _versions = sortVersions(versions);
     return version === min(_versions) ? false : gte(version, _versions);
-  };
+  }
 
   // version < highest version in cluster?
-  var lt = function (version, versions) {
+  function lt(version, versions) {
     var _versions = sortVersions(versions);
     return version === max(_versions) ? false : lte(version, _versions);
-  };
+  }
 
   // Check if the lowest version in the cluster is >= to `version`
-  var gte = function (version, versions) {
+  function gte(version, versions) {
     var _versions = sortVersions(versions);
     return compare(version, min(_versions));
-  };
+  }
 
   // Check if the highest version in the cluster is <= to `version`
-  var lte = function (version, versions) {
+  function lte(version, versions) {
     var _versions = sortVersions(versions);
     return compare(max(_versions), version);
-  };
+  }
 
   // Determine if a specific version meets the minimum requirement
-  var compare = function (required, installed) {
+  function compare(required, installed) {
     if (_.isUndefined(installed)) {
       return;
     }
@@ -123,7 +123,7 @@ define(function (require) {
     }
 
     return true;
-  };
+  }
 
 
   return {

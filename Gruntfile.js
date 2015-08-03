@@ -1,3 +1,5 @@
+require('babel/register');
+
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
   // and once during so that we have access to it via
@@ -26,7 +28,12 @@ module.exports = function (grunt) {
 
     nodeVersion: '0.10.35',
     platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
-    services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
+    services: [
+      ['launchd', '10.9'],
+      ['upstart', '1.5'],
+      ['systemd', 'default'],
+      ['sysv', 'lsb-3.1']
+    ],
 
     devPlugins: 'devMode',
 
@@ -51,7 +58,10 @@ module.exports = function (grunt) {
   require('load-grunt-config')(grunt, {
     configPath: __dirname + '/tasks/config',
     init: true,
-    config: config
+    config: config,
+    loadGruntTasks: {
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*']
+    }
   });
 
   // load task definitions

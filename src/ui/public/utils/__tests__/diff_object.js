@@ -1,4 +1,3 @@
-
 var diff = require('ui/utils/diff_object');
 var expect = require('expect.js');
 var _ = require('lodash');

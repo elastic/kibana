@@ -49,11 +49,11 @@ define(function (require) {
     AggConfigs.prototype.toDsl = function () {
       var dslTopLvl = {};
       var dslLvlCursor;
-      var nestedMetric;
+      var nestedMetrics;
 
       if (this.vis.isHierarchical()) {
         // collect all metrics, and filter out the ones that we won't be copying
-        var nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
+        nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
         .filter(function (agg) {
           return agg.type.name !== 'count';
         })

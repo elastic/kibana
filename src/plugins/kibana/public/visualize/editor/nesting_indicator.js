@@ -21,7 +21,7 @@ define(function (require) {
           var bars = $scope.list.slice(0, index + 1);
           var colors = getColors(bars.length);
 
-          $el.html(bars.map(function (item, i) {
+          $el.html(bars.map(function (bar, i) {
             return $(document.createElement('span'))
             .css('background-color', colors[i]);
           }));

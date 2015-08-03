@@ -1,5 +1,3 @@
-
-var generateMappingChain = require('ui/filter_bar/lib/generateMappingChain');
 var sinon = require('auto-release-sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
@@ -7,7 +5,10 @@ var ngMock = require('ngMock');
 describe('Filter Bar Directive', function () {
   describe('generateMappingChain()', function () {
 
-    var generateMappingChain, $rootScope, Promise;
+    var generateMappingChain;
+
+    var $rootScope;
+    var Promise;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_, _Promise_) {
       $rootScope = _$rootScope_;

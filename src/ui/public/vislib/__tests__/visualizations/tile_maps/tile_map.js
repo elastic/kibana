@@ -86,7 +86,7 @@ describe('TileMap Tests', function () {
           hits: 20
         }
       };
-      var tilemap = createTileMap(null, null, noData);
+      tilemap = createTileMap(null, null, noData);
 
       tilemap._appendMap($selection);
       expect(tilemap.maps).to.have.length(1);
@@ -99,7 +99,7 @@ describe('TileMap Tests', function () {
 
     it('should append title if set in the data object', function () {
       var mapTitle = 'Test Title';
-      var tilemap = createTileMap(null, null, _.assign({ title: mapTitle }, geoJsonData));
+      tilemap = createTileMap(null, null, _.assign({ title: mapTitle }, geoJsonData));
       tilemap._appendMap($selection);
       var map = tilemap.maps[0];
 

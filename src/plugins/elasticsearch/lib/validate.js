@@ -90,17 +90,17 @@ function validate(server, req) {
     throw new validate.Fail(config.get('kibana.index'));
   }
 
-  function validateBulkBody(body) {
-    while (body.length) {
-      var header = body.shift();
-      var req = body.shift();
+  function validateBulkBody(toValidate) {
+    while (toValidate.length) {
+      let header = toValidate.shift();
+      let body = toValidate.shift();
 
-      var op = _.keys(header).join('');
-      var meta = header[op];
+      let op = _.keys(header).join('');
+      let meta = header[op];
 
       if (!meta) throw new validate.Fail(config.get('kibana.index'));
 
-      var index = meta._index || maybeIndex;
+      let index = meta._index || maybeIndex;
       if (index !== config.get('kibana.index')) {
         throw new validate.BadIndex(index);
       }

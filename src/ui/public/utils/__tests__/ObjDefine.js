@@ -90,8 +90,6 @@ describe('ObjDefine Utility', function () {
       var obj = def.create();
 
       expect(function () {
-        'use strict';
-
         obj.name = notval;
       }).to.throwException();
     });

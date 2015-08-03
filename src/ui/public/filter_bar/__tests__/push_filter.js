@@ -1,4 +1,3 @@
-
 describe('Filter Bar pushFilter()', function () {
   var _ = require('lodash');
   var expect = require('expect.js');

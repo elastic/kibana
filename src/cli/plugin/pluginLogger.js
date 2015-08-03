@@ -1,4 +1,4 @@
-﻿module.exports = function (settings) {
+module.exports = function (settings) {
   var previousLineEnded = true;
   var silent = !!settings.silent;
   var quiet = !!settings.quiet;

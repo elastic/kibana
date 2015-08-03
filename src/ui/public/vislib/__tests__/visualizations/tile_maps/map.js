@@ -26,7 +26,7 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 describe('TileMap Map Tests', function () {
   this.timeout(0);
   var $mockMapEl = $('<div>');
-  var Map;
+  var TileMapMap;
   var leafletStubs = {};
   var leafletMocks = {};
 
@@ -38,7 +38,7 @@ describe('TileMap Map Tests', function () {
     leafletStubs.tileLayer = sinon.stub(L, 'tileLayer', _.constant(leafletMocks.tileLayer));
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
-    Map = Private(require('ui/vislib/visualizations/_map'));
+    TileMapMap = Private(require('ui/vislib/visualizations/_map'));
   }));
 
   describe('instantiation', function () {
@@ -46,8 +46,8 @@ describe('TileMap Map Tests', function () {
     var createStub;
 
     beforeEach(function () {
-      createStub = sinon.stub(Map.prototype, '_createMap', _.noop);
-      map = new Map($mockMapEl, geoJsonData, {});
+      createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
+      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should create the map', function () {
@@ -69,12 +69,11 @@ describe('TileMap Map Tests', function () {
 
     beforeEach(function () {
       mapStubs = {
-        destroy: sinon.stub(Map.prototype, 'destroy'),
-        attachEvents: sinon.stub(Map.prototype, '_attachEvents'),
-        addMarkers: sinon.stub(Map.prototype, '_addMarkers'),
+        destroy: sinon.stub(TileMapMap.prototype, 'destroy'),
+        attachEvents: sinon.stub(TileMapMap.prototype, '_attachEvents'),
+        addMarkers: sinon.stub(TileMapMap.prototype, '_addMarkers'),
       };
-
-      map = new Map($mockMapEl, geoJsonData, {});
+      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should create the create leaflet objects', function () {
@@ -104,12 +103,12 @@ describe('TileMap Map Tests', function () {
     var map;
 
     beforeEach(function () {
-      sinon.stub(Map.prototype, '_createMap', function () {
+      sinon.stub(TileMapMap.prototype, '_createMap', function () {
         this._tileLayer = leafletMocks.tileLayer;
         this.map = leafletMocks.map;
         this._attachEvents();
       });
-      map = new Map($mockMapEl, geoJsonData, {});
+      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should attach interaction events', function () {
@@ -140,9 +139,9 @@ describe('TileMap Map Tests', function () {
     var createStub;
 
     beforeEach(function () {
-      sinon.stub(Map.prototype, '_createMap');
-      createStub = sinon.stub(Map.prototype, '_createMarkers', _.constant({ addLegend: _.noop }));
-      map = new Map($mockMapEl, geoJsonData, {});
+      sinon.stub(TileMapMap.prototype, '_createMap');
+      createStub = sinon.stub(TileMapMap.prototype, '_createMarkers', _.constant({ addLegend: _.noop }));
+      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should pass the map options to the marker', function () {
@@ -167,12 +166,12 @@ describe('TileMap Map Tests', function () {
     var map;
 
     beforeEach(function () {
-      sinon.stub(Map.prototype, '_createMap');
-      map = new Map($mockMapEl, geoJsonData, {});
+      sinon.stub(TileMapMap.prototype, '_createMap');
+      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should return an empty array if no data', function () {
-      map = new Map($mockMapEl, {}, {});
+      map = new TileMapMap($mockMapEl, {}, {});
       var rects = map._getDataRectangles();
       expect(rects).to.have.length(0);
     });

@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let Squeeze = require('good-squeeze').Squeeze;
 let writeStr = require('fs').createWriteStream;

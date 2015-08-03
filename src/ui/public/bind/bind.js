@@ -34,11 +34,6 @@ define(function (require) {
         var $to = $parse(to);
         if (!$to.assign) errorNotAssignable(to, from);
         var $from = $parse(from);
-        $from.assignOrFail = $from.assign || function () {
-          // revert the change and throw an error, child writes aren't supported
-          $to($target, lastSourceVal = $from($source));
-          errorNotAssignable(from, to);
-        };
 
         // bind scopes to expressions
         var getTarget = function () { return $to($target); };
@@ -46,16 +41,23 @@ define(function (require) {
         var getSource = function () { return $from($source); };
         var setSource = function (v) { return $from.assignOrFail($source, v); };
 
-        // if we are syncing down a literal, then we use loose equality check
-        var strict = !$from.literal;
-        var compare = strict ? strictEquality : angular.equals;
-
         // to support writing from the child to the parent we need to know
         // which source has changed. Track the source value and anytime it
         // changes (even if the target value changed too) push from source
         // to target. If the source hasn't changed then the change is from
         // the target and push accordingly
         var lastSourceVal = getSource();
+
+        $from.assignOrFail = $from.assign || function () {
+          // revert the change and throw an error, child writes aren't supported
+          $to($target, lastSourceVal = $from($source));
+          errorNotAssignable(from, to);
+        };
+
+        // if we are syncing down a literal, then we use loose equality check
+        var strict = !$from.literal;
+        var compare = strict ? strictEquality : angular.equals;
+
 
         // push the initial value down, start off in sync
         setTarget(lastSourceVal);

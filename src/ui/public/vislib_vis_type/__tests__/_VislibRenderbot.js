@@ -113,7 +113,6 @@ describe('renderbot', function exportWrapper() {
   describe('render', function () {
     var vis = { type: mockVisType, isHierarchical: _.constant(false) };
     var $el = $('<div>testing</div>');
-    var renderbot;
     var stubs = {};
 
     beforeEach(function () {

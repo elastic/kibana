@@ -1,4 +1,4 @@
-﻿var rimraf = require('rimraf');
+var rimraf = require('rimraf');
 var fs = require('fs');
 var Promise = require('bluebird');
 
@@ -17,8 +17,7 @@ module.exports = function (settings, logger) {
         }
         return resolve();
       } catch (e) {
-        if (e.code !== 'ENOENT')
-          return reject(e);
+        if (e.code !== 'ENOENT') return reject(e);
 
         return resolve();
       }
@@ -26,11 +25,11 @@ module.exports = function (settings, logger) {
   }
 
   function cleanError() {
-    //delete the working directory.
-    //At this point we're bailing, so swallow any errors on delete.
-    try {
-      rimraf.sync(settings.workingPath);
-    } catch (e) { }
+    // delete the working directory.
+    // At this point we're bailing, so swallow any errors on delete.
+
+    try { rimraf.sync(settings.workingPath); }
+    catch (e) {} // eslint-disable-line no-empty
   }
 
   return {

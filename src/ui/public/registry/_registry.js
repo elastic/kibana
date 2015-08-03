@@ -52,6 +52,7 @@ define(function (require) {
     var constructor = _.has(spec, 'constructor') && spec.constructor;
     var iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
     var props = _.omit(spec, notPropsOptNames);
+    var providers = [];
 
     /**
      * This is the Private module that will be instanciated by
@@ -79,7 +80,6 @@ define(function (require) {
 
     registry.displayName = '[registry ' + props.name + ']';
 
-    var providers = [];
     registry.register = function (privateModule) {
       providers.push(privateModule);
       return registry;

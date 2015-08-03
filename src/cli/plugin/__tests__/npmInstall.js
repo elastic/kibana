@@ -3,7 +3,7 @@ var nock = require('nock');
 var glob = require('glob');
 var rimraf = require('rimraf');
 var fs = require('fs');
-var join = require('path').join;
+var { join } = require('path');
 var sinon = require('sinon');
 
 var pluginLogger = require('../pluginLogger');
@@ -15,8 +15,8 @@ describe('kibana cli', function () {
 
     describe('npmInstall', function () {
 
-      var logger;
       var testWorkingPath = join(__dirname, '.test.data');
+      var logger;
       var statSyncStub;
 
       beforeEach(function () {

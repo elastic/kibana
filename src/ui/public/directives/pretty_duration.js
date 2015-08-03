@@ -22,7 +22,7 @@ define(function (require) {
           lookupByRange[frame.from + ' to ' + frame.to] = frame;
         });
 
-        var stringify = function () {
+        function stringify() {
           var text;
           // If both parts are date math, try to look up a reasonable string
           if ($scope.from && $scope.to && !moment.isMoment($scope.from) && !moment.isMoment($scope.to)) {
@@ -48,7 +48,7 @@ define(function (require) {
           }
         };
 
-        var cantLookup = function () {
+        function cantLookup() {
           var display = {};
           _.each(['from', 'to'], function (time) {
             if (moment.isMoment($scope[time])) {

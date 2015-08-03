@@ -1,10 +1,8 @@
-'use strict';
-
 let _ = require('lodash');
-let inherits = require('util').inherits;
 let Joi = require('joi');
 let Promise = require('bluebird');
-let resolve = require('path').resolve;
+let { resolve } = require('path');
+let { inherits } = require('util');
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)

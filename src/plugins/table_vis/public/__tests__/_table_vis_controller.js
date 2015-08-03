@@ -75,7 +75,7 @@ describe('Controller', function () {
   }
 
   it('exposes #tableGroups and #hasSomeRows when a response is attached to scope', function () {
-    initController(OneRangeVis());
+    initController(new OneRangeVis());
 
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
@@ -90,7 +90,7 @@ describe('Controller', function () {
   });
 
   it('clears #tableGroups and #hasSomeRows when the response is removed', function () {
-    initController(OneRangeVis());
+    initController(new OneRangeVis());
 
     attachEsResponseToScope(fixtures.oneRangeBucket);
     removeEsResponseFromScope();
@@ -100,7 +100,7 @@ describe('Controller', function () {
   });
 
   it('sets #hasSomeRows properly if the table group is empty', function () {
-    initController(OneRangeVis());
+    initController(new OneRangeVis());
 
     // modify the data to not have any buckets
     var resp = _.cloneDeep(fixtures.oneRangeBucket);
@@ -118,7 +118,7 @@ describe('Controller', function () {
     var spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = OneRangeVis({ showPartialRows: true });
+    var vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 
@@ -132,7 +132,7 @@ describe('Controller', function () {
     var spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = OneRangeVis({ showPartialRows: false });
+    var vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 
@@ -146,7 +146,7 @@ describe('Controller', function () {
     var spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = OneRangeVis({ showPartialRows: true });
+    var vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 
@@ -160,7 +160,7 @@ describe('Controller', function () {
     var spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = OneRangeVis({ showPartialRows: false });
+    var vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 

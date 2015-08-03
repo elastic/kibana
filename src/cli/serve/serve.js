@@ -1,8 +1,6 @@
-'use strict';
-
 let _ = require('lodash');
-let isWorker = require('cluster').isWorker;
-let resolve = require('path').resolve;
+let { isWorker } = require('cluster');
+let { resolve } = require('path');
 
 let cwd = process.cwd();
 let readYamlConfig = require('./readYamlConfig');
@@ -88,7 +86,7 @@ module.exports = function (program) {
 
     server.ready().catch(function (err) {
       console.error(err.stack);
-      process.exit(1);
+      process.exit(1); // eslint-disable-line no-process-exit
     });
 
     return server;

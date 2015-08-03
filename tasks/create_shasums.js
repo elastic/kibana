@@ -1,8 +1,8 @@
-var child_process = require('child_process');
+var childProcess = require('child_process');
 var Promise = require('bluebird');
 var fs = require('fs');
 var readdir = Promise.promisify(fs.readdir);
-var exec = Promise.promisify(child_process.exec);
+var exec = Promise.promisify(childProcess.exec);
 var _ = require('lodash');
 module.exports = function (grunt) {
 

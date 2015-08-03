@@ -14,16 +14,16 @@ define(function (require) {
       }
     });
 
-    var checkIfFull = function () {
-      if (work.length >= q.limit) {
-        fullDefers.length && resolve(fullDefers);
-      }
-    };
-
     var resolve = function (defers) {
       return defers.splice(0).map(function (defer) {
         return defer.resolve();
       });
+    };
+
+    var checkIfFull = function () {
+      if (work.length >= q.limit && fullDefers.length) {
+        resolve(fullDefers);
+      }
     };
 
     q.resolveWhenFull = function (defer) {

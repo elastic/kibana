@@ -4,7 +4,8 @@ var ngMock = require('ngMock');
 
 describe('Vislib Color Module Test Suite', function () {
   var seedColors;
-  var MappedColors, mappedColors;
+  var MappedColors;
+  var mappedColors;
 
   describe('Color (main)', function () {
     var getColors;

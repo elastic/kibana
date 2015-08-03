@@ -80,10 +80,10 @@ define(function (require) {
               name: name,
               type: (function () {
                 switch (castMappingType(esType)) {
-                case 'string': return 'text';
-                case 'number': return 'number';
-                case 'boolean': return 'boolean';
-                default: return 'json';
+                  case 'string': return 'text';
+                  case 'number': return 'number';
+                  case 'boolean': return 'boolean';
+                  default: return 'json';
                 }
               }())
             });
@@ -143,7 +143,8 @@ define(function (require) {
             } else {
               $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
             }
-            $rootScope.$$phase || $scope.$apply();
+
+            if ($rootScope.$$phase) $scope.$apply();
           });
         };
 

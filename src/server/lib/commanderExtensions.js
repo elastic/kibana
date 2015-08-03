@@ -1,4 +1,4 @@
-﻿module.exports = function (program) {
+module.exports = function (program) {
   function isCommand(val) {
     return typeof val === 'object' && val._name;
   }

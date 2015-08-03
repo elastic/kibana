@@ -1,17 +1,13 @@
-'use strict';
-
 let _ = require('lodash');
-let join = require('path').join;
-let resolve = require('bluebird').resolve;
-let promify = require('bluebird').promisify;
-let rimraf = promify(require('rimraf'));
-let mkdirp = promify(require('mkdirp'));
-
-let stat = promify(require('fs').stat);
-let read = promify(require('fs').readFile);
-let write = promify(require('fs').writeFile);
-let unlink = promify(require('fs').unlink);
-let readdir = promify(require('fs').readdir);
+let { join } = require('path');
+let { resolve, promisify } = require('bluebird');
+let rimraf = promisify(require('rimraf'));
+let mkdirp = promisify(require('mkdirp'));
+let stat = promisify(require('fs').stat);
+let read = promisify(require('fs').readFile);
+let write = promisify(require('fs').writeFile);
+let unlink = promisify(require('fs').unlink);
+let readdir = promisify(require('fs').readdir);
 let readSync = require('fs').readFileSync;
 
 let entryFileTemplate = _.template(readSync(join(__dirname, 'entry.js.tmpl')));

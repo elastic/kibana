@@ -1,4 +1,3 @@
-
 describe('config component', function () {
   var $scope;
   var config;

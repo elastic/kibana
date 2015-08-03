@@ -1,13 +1,11 @@
-'use strict';
-
 let _ = require('lodash');
 let cluster = require('cluster');
-let resolve = require('path').resolve;
-let EventEmitter = require('events').EventEmitter;
+let { resolve } = require('path');
+let { EventEmitter } = require('events');
 
 let fromRoot = require('../../utils/fromRoot');
 
-let cliPath = fromRoot('src/cli/cli.js');
+let cliPath = fromRoot('src/cli');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 let baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
@@ -83,7 +81,7 @@ module.exports = class Worker extends EventEmitter {
   flushChangeBuffer() {
     let files = _.unique(this.changes.splice(0));
     let prefix = files.length > 1 ? '\n - ' : '';
-    return files.reduce(function (list, file, i, files) {
+    return files.reduce(function (list, file) {
       return `${list || ''}${prefix}"${file}"`;
     }, '');
   }

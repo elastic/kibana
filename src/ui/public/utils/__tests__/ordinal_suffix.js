@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var addOrdinalSuffix = require('ui/utils/ordinal_suffix');
 var expect = require('expect.js');

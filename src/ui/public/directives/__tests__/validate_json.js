@@ -1,4 +1,3 @@
-
 var angular = require('angular');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
@@ -40,8 +39,8 @@ var init = function (type) {
 };
 
 describe('validate-json directive', function () {
-  var checkValid = function (input, className) {
-    $parentScope.mockModel = input;
+  var checkValid = function (inputVal, className) {
+    $parentScope.mockModel = inputVal;
     $elem.scope().$digest();
     expect($elem.hasClass(className)).to.be(true);
   };

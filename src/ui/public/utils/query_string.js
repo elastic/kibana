@@ -39,15 +39,15 @@ define(function (require) {
    */
   qs.decode = function (keyValue) {
     var obj = {};
-    var key_value;
+    var keyValueParts;
     var key;
 
     (keyValue || '').split('&').forEach(function (keyValue) {
       if (keyValue) {
-        key_value = keyValue.split('=');
-        key = tryDecodeURIComponent(key_value[0]);
+        keyValueParts = keyValue.split('=');
+        key = tryDecodeURIComponent(keyValueParts[0]);
         if (key !== void 0) {
-          var val = key_value[1] !== void 0 ? tryDecodeURIComponent(key_value[1]) : true;
+          var val = keyValueParts[1] !== void 0 ? tryDecodeURIComponent(keyValueParts[1]) : true;
           if (!obj[key]) {
             obj[key] = val;
           } else if (Array.isArray(obj[key])) {

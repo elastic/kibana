@@ -9,7 +9,8 @@ var SetupError = require('../setup_error');
 describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {
 
-    var server, client, config;
+    var server;
+    var client;
     beforeEach(function () {
       server = {};
       client = {};

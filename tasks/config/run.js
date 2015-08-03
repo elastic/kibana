@@ -1,9 +1,12 @@
 module.exports = function (grunt) {
+  let {resolve} = require('path');
+  let root = p => resolve(__dirname, '../../', p);
+
   return {
     devServer: {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /\[optimize\]\[status\] Status changed from [a-zA-Z]+ to green/,
         quiet: false,
         failOnError: false
       },
@@ -11,4 +14,5 @@ module.exports = function (grunt) {
       args: ['--dev', '--no-watch', '--logging.json=false']
     }
   };
+
 };

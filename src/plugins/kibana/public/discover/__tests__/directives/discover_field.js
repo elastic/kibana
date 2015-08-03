@@ -24,7 +24,7 @@ describe('discoverField', function () {
       field: indexPattern.fields.byName.extension,
       increaseFieldCounter: sinon.spy(),
       toggle: function (field) {
-        indexPattern.fields.byName[field].display = !!!indexPattern.fields.byName[field].display;
+        indexPattern.fields.byName[field].display = !indexPattern.fields.byName[field].display;
       }
     });
 

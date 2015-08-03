@@ -1,4 +1,3 @@
-
 describe('AggConfig Filters', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');

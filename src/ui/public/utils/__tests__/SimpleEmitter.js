@@ -1,4 +1,3 @@
-
 describe('SimpleEmitter class', function () {
   var SimpleEmitter = require('ui/utils/SimpleEmitter');
   var expect = require('expect.js');

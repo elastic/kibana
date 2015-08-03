@@ -86,6 +86,16 @@ describe('FixedScroll directive', function () {
       var on = sinon.spy($.fn, 'on');
       var off = sinon.spy($.fn, 'off');
 
+      var els = compile(1.5);
+      expect(on.callCount).to.be(2);
+      checkThisVals('$.fn.on', on);
+
+      expect(off.callCount).to.be(0);
+      els.$container.width(els.$container.prop('scrollWidth'));
+      els.$container.scope().$digest();
+      expect(off.callCount).to.be(2);
+      checkThisVals('$.fn.off', off);
+
       function checkThisVals(name, spy) {
         // the this values should be different
         expect(spy.thisValues[0].is(spy.thisValues[1])).to.be(false);
@@ -95,17 +105,6 @@ describe('FixedScroll directive', function () {
           expect.fail('expected ' + name + ' to be called with $scroller or $container');
         });
       }
-
-      var els = compile(1.5);
-      expect(on.callCount).to.be(2);
-      checkThisVals('$.fn.on', on);
-
-      expect(off.callCount).to.be(0);
-      els.$container.width(els.$container.prop('scrollWidth'));
-      els.$container.scope().$digest();
-      expect(off.callCount).to.be(2);
-
-      checkThisVals('$.fn.off', off);
     });
 
     [

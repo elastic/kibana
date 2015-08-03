@@ -1,4 +1,3 @@
-
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
     var _ = require('lodash');

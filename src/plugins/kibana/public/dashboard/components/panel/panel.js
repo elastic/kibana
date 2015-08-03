@@ -31,10 +31,11 @@ define(function (require) {
         var $state = $scope.state;
 
         // receives $scope.panel from the dashboard grid directive, seems like should be isolate?
-        $scope.$watch('id', function (id) {
+        $scope.$watch('id', function () {
           if (!$scope.panel.id || !$scope.panel.type) return;
 
-          loadPanel($scope.panel, $scope).then(function (panelConfig) {
+          loadPanel($scope.panel, $scope)
+          .then(function (panelConfig) {
             // These could be done in loadPanel, putting them here to make them more explicit
             $scope.savedObj = panelConfig.savedObj;
             $scope.editUrl = panelConfig.editUrl;
@@ -44,7 +45,8 @@ define(function (require) {
               var index = $scope.savedObj.searchSource.get('index').id;
               filterManager.add(field, value, operator, index);
             };
-          }).catch(function (e) {
+          })
+          .catch(function (e) {
             $scope.error = e.message;
 
             // If the savedObjectType matches the panel type, this means the object itself has been deleted,
