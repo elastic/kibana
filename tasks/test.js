@@ -7,7 +7,7 @@ module.exports = function (grunt) {
     }
 
     grunt.task.run(_.compact([
-      'run:eslint',
+      'eslint:source',
       'maybeStartKibana',
       'simplemocha:all',
       'karma:unit'
