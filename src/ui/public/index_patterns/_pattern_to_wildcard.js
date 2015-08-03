@@ -8,28 +8,28 @@ define(function (require) {
       for (var i = 0; i < format.length; i++) {
         var ch = format.charAt(i);
         switch (ch) {
-        case '[':
-          inPattern = false;
-          if (!inEscape) {
-            inEscape = true;
-          } else {
-            wildcard += ch;
-          }
-          break;
-        case ']':
-          if (inEscape) {
-            inEscape = false;
-          } else if (!inPattern) {
-            wildcard += ch;
-          }
-          break;
-        default:
-          if (inEscape) {
-            wildcard += ch;
-          } else if (!inPattern) {
-            wildcard += '*';
-            inPattern = true;
-          }
+          case '[':
+            inPattern = false;
+            if (!inEscape) {
+              inEscape = true;
+            } else {
+              wildcard += ch;
+            }
+            break;
+          case ']':
+            if (inEscape) {
+              inEscape = false;
+            } else if (!inPattern) {
+              wildcard += ch;
+            }
+            break;
+          default:
+            if (inEscape) {
+              wildcard += ch;
+            } else if (!inPattern) {
+              wildcard += '*';
+              inPattern = true;
+            }
         }
       }
 

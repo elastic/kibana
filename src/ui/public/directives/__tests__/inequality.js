@@ -4,7 +4,8 @@ var ngMock = require('ngMock');
 require('ui/directives/inequality');
 
 describe('greater_than model validator directive', function () {
-  var $compile, $rootScope;
+  var $compile;
+  var $rootScope;
   var html;
 
   beforeEach(ngMock.module('kibana'));

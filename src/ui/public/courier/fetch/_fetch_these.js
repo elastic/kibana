@@ -51,13 +51,13 @@ define(function (require) {
       .then(function (responses) {
         return responses.map(function (resp) {
           switch (resp) {
-          case ABORTED:
-            return null;
-          case DUPLICATE:
-          case INCOMPLETE:
-            throw new Error('Failed to clear incomplete or duplicate request from responses.');
-          default:
-            return resp;
+            case ABORTED:
+              return null;
+            case DUPLICATE:
+            case INCOMPLETE:
+              throw new Error('Failed to clear incomplete or duplicate request from responses.');
+            default:
+              return resp;
           }
         });
       });

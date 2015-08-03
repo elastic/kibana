@@ -9,7 +9,8 @@ define(function (require) {
    */
   function getSort(sort, indexPattern) {
     var sortObj = {};
-    var field, direction;
+    var field;
+    var direction;
 
     function isSortable(field) {
       return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);

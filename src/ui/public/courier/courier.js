@@ -96,10 +96,10 @@ define(function (require) {
        */
       self.createSource = function (type) {
         switch (type) {
-        case 'doc':
-          return new DocSource();
-        case 'search':
-          return new SearchSource();
+          case 'doc':
+            return new DocSource();
+          case 'search':
+            return new SearchSource();
         }
       };
 
