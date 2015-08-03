@@ -100,8 +100,9 @@ define(function (require) {
 
       return el.append('ul')
       .attr('class', function () {
-        if (self.vis.get('legendOpen')) { return 'legend-ul'; }
-        return 'legend-ul hidden';
+        var className = 'legend-ul';
+        if (self.vis && !self.vis.get('legendOpen')) className += ' hidden';
+        return className;
       })
       .selectAll('li')
       .data(data)
