@@ -23,7 +23,7 @@ StackTraceMapper.prototype.mapError = function (err) {
   if (!stackLineFormat || !err.stack) return err;
 
   var stack = err.stack.replace(stackLineFormat, this.mapLine);
-  return setErrorStack(err, this.mapLine);
+  return setErrorStack(err, stack);
 };
 
 StackTraceMapper.prototype.mapLine = function (match, filename, line, col) {

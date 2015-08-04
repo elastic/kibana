@@ -297,6 +297,6 @@ define(function (require) {
       return _.pluck(this._geoJson.features, 'properties.rectangle');
     };
 
-    return Map;
+    return TileMapMap;
   };
 });
