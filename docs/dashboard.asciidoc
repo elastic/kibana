@@ -133,6 +133,10 @@ grid includes the query duration, the request duration, the total number of reco
 index pattern used to make the query.
 image:images/NYCTA-Statistics.jpg[]
 
+To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
+*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it 
+is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
+
 [float]
 [[changing-the-visualization]]
 === Changing the Visualization
