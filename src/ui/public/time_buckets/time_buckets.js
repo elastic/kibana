@@ -278,6 +278,39 @@ define(function (require) {
 
     TimeBuckets.__cached__ = function (self) {
       var cache = {};
+      var sameMoment = same(moment.isMoment);
+      var sameDuration = same(moment.isDuration);
+
+      var desc = {
+        __cached__: {
+          value: self
+        },
+      };
+
+      var breakers = {
+        setBounds: 'bounds',
+        clearBounds: 'bounds',
+        setInterval: 'interval'
+      };
+
+      var resources = {
+        bounds: {
+          setup: function () {
+            return [self._lb, self._ub];
+          },
+          changes: function (prev) {
+            return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
+          }
+        },
+        interval: {
+          setup: function () {
+            return self._i;
+          },
+          changes: function (prev) {
+            return !sameDuration(prev, this._i);
+          }
+        }
+      };
 
       function cachedGetter(prop) {
         return {
@@ -320,39 +353,6 @@ define(function (require) {
         };
       }
 
-      var sameMoment = same(moment.isMoment);
-      var sameDuration = same(moment.isDuration);
-
-      var desc = {
-        __cached__: {
-          value: self
-        },
-      };
-
-      var breakers = {
-        setBounds: 'bounds',
-        clearBounds: 'bounds',
-        setInterval: 'interval'
-      };
-
-      var resources = {
-        bounds: {
-          setup: function () {
-            return [self._lb, self._ub];
-          },
-          changes: function (prev) {
-            return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
-          }
-        },
-        interval: {
-          setup: function () {
-            return self._i;
-          },
-          changes: function (prev) {
-            return !sameDuration(prev, this._i);
-          }
-        }
-      };
 
       _.forOwn(TimeBuckets.prototype, function (fn, prop) {
         if (prop[0] === '_') return;

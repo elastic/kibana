@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
@@ -33,15 +35,7 @@ define(function (require) {
           });
 
           $scope.availableSchema = $scope.schemas.filter(function (schema) {
-            var count = 0;
-
-            if ($scope.group) {
-              count = $scope.group.reduce(function (count, aggConfig) {
-                if (aggConfig.schema === schema) count += 1;
-                return count;
-              }, 0);
-            }
-
+            var count = _.where($scope.group, { schema }).length;
             if (count < schema.max) return true;
           });
         });

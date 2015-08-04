@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
   let Promise = require('bluebird');
@@ -47,7 +45,8 @@ module.exports = function (kbnServer, server, config) {
   })
   .filter(function (dir) {
     let path;
-    try { path = require.resolve(dir); } catch (e) {}
+    try { path = require.resolve(dir); }
+    catch (e) { path = false; }
 
     if (!path) {
       warning({ tmpl: 'Skipping non-plugin directory at <%= dir %>', dir: dir });

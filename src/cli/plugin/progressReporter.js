@@ -1,4 +1,4 @@
-﻿var Promise = require('bluebird');
+var Promise = require('bluebird');
 
 /*
 Responsible for reporting the progress of the file request stream
@@ -47,7 +47,7 @@ module.exports = function (logger, request) {
     runningTotal += buffer.length;
     var dotCount = Math.round(runningTotal / totalSize * 100 / 5);
     if (dotCount > 20) dotCount = 20;
-    for (var i = 0; i < (dotCount - oldDotCount) ; i++) {
+    for (var i = 0; i < (dotCount - oldDotCount); i++) {
       logger.log('.', true);
     }
     oldDotCount = dotCount;

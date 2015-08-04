@@ -62,28 +62,28 @@ define(function (require) {
         }
 
         switch (event.type) {
-        case 'press':
-          return Promise.resolve()
-          .then(_.partial(fire, 'keydown', event.key))
-          .then(_.partial(fire, 'keypress', event.key))
-          .then(_.partial(doList, event.events))
-          .then(_.partial(fire, 'keyup', event.key));
-
-        case 'wait':
-          return Promise.delay(event.ms);
-
-        case 'repeat':
-          return (function again(remaining) {
-            if (!remaining) return Promise.resolve();
-            remaining = remaining - 1;
+          case 'press':
             return Promise.resolve()
-            .then(_.partial(fire, 'keydown', event.key, true))
-            .then(_.partial(fire, 'keypress', event.key, true))
-            .then(_.partial(again, remaining));
-          }(event.count));
+            .then(_.partial(fire, 'keydown', event.key))
+            .then(_.partial(fire, 'keypress', event.key))
+            .then(_.partial(doList, event.events))
+            .then(_.partial(fire, 'keyup', event.key));
 
-        default:
-          throw new TypeError('invalid event type "' + event.type + '"');
+          case 'wait':
+            return Promise.delay(event.ms);
+
+          case 'repeat':
+            return (function again(remaining) {
+              if (!remaining) return Promise.resolve();
+              remaining = remaining - 1;
+              return Promise.resolve()
+              .then(_.partial(fire, 'keydown', event.key, true))
+              .then(_.partial(fire, 'keypress', event.key, true))
+              .then(_.partial(again, remaining));
+            }(event.count));
+
+          default:
+            throw new TypeError('invalid event type "' + event.type + '"');
         }
       })
       .then(function () {
@@ -99,7 +99,8 @@ define(function (require) {
       if (type === 'keyup') setModifier(key, false);
 
       var $target = _.isFunction($el) ? $el() : $el;
-      $target.trigger($.Event(type, _.defaults({ keyCode: keyCode }, modifierState)));
+      var $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
+      $target.trigger($event);
     }
   };
 });

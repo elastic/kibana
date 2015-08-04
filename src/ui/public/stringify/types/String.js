@@ -57,11 +57,11 @@ define(function (require) {
 
     _String.prototype._convert = function (val) {
       switch (this.param('transform')) {
-      case 'lower': return String(val).toLowerCase();
-      case 'upper': return String(val).toUpperCase();
-      case 'short': return _.shortenDottedString(val);
-      case 'base64': return this._base64Decode(val);
-      default: return _.asPrettyString(val);
+        case 'lower': return String(val).toLowerCase();
+        case 'upper': return String(val).toUpperCase();
+        case 'short': return _.shortenDottedString(val);
+        case 'base64': return this._base64Decode(val);
+        default: return _.asPrettyString(val);
       }
     };
 

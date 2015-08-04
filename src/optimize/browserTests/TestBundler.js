@@ -1,8 +1,6 @@
-'use strict';
-
 let _ = require('lodash');
-let resolve = require('path').resolve;
-let readFileSync = require('fs').readFileSync;
+let { resolve } = require('path');
+let { readFileSync } = require('fs');
 
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');

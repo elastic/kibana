@@ -13,13 +13,14 @@ define(function (require) {
         throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
       }
 
-      var max = arr2.length;
-      var getX = function (d) {
-        return d.x === val.x;
-      };
       var i;
       var val;
       var index;
+      var max = arr2.length;
+
+      var getX = function (d) {
+        return d.x === val.x;
+      };
 
       for (i = 0; i < max; i++) {
         val = arr2[i];

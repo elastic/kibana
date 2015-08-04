@@ -31,8 +31,9 @@ define(function (require) {
             validator($scope.ngModel);
           };
 
-          var validator = function (query) {
-            var index, type;
+          function validator(query) {
+            var index;
+            var type;
             if (request.abort) request.abort();
 
             if ($scope.queryInput) {
@@ -100,7 +101,7 @@ define(function (require) {
                 return error(resp);
               }
             }
-          };
+          }
 
           var debouncedValidator = debounce(validator, 300, {
             leading: true,

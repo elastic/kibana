@@ -6,7 +6,7 @@ define(function (require) {
     function Looper(ms, fn) {
       this._fn = fn;
       this._ms = ms === void 0 ? 1500 : ms;
-      this._timer;
+      this._timer = null;
       this._started = false;
 
       this._loopTheLoop = _.bind(this._loopTheLoop, this);

@@ -65,7 +65,7 @@ describe('kibana cli', function () {
             throw error;
           });
 
-          var errorStub = sinon.stub();
+          errorStub = sinon.stub();
           return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function () {
@@ -90,7 +90,7 @@ describe('kibana cli', function () {
             throw new Error('I am an error thrown by rimraf');
           });
 
-          var errorStub = sinon.stub();
+          errorStub = sinon.stub();
           return cleaner.cleanPrevious(logger)
           .catch(errorStub)
           .then(function () {

@@ -1,4 +1,3 @@
-
 var angular = require('angular');
 var expect = require('expect.js');
 var $ = require('jquery');
@@ -12,7 +11,16 @@ require('ui/private');
 require('ui/doc_table');
 
 
-var $parentScope, $scope, $timeout, searchSource;
+var $parentScope;
+
+
+var $scope;
+
+
+var $timeout;
+
+
+var searchSource;
 
 var init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {

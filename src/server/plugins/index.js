@@ -2,7 +2,7 @@ module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var Promise = require('bluebird');
   var Boom = require('boom');
-  var join = require('path').join;
+  var { join } = require('path');
 
   server.exposeStaticDir('/plugins/{id}/{path*}', function (req) {
     var id = req.params.id;

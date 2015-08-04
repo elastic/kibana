@@ -2,7 +2,7 @@ module.exports = function (kbnServer) {
   var _ = require('lodash');
   var Samples = require('./Samples');
   var ServerStatus = require('./ServerStatus');
-  var join = require('path').join;
+  var { join } = require('path');
 
   var server = kbnServer.server;
   var config = server.config();

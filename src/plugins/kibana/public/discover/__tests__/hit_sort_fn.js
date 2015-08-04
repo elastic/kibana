@@ -23,7 +23,7 @@ describe('hit sort function', function () {
     });
     var sortOptLength = sortOpts.length;
 
-    for (var i = 0; i < hits.length; i++) {
+    for (let i = 0; i < hits.length; i++) {
       hits[i] = {
         _source: {},
         sort: sortOpts[i % sortOptLength]
@@ -31,7 +31,7 @@ describe('hit sort function', function () {
     }
 
     hits.sort(createHitSortFn(dir))
-    .forEach(function (hit, i, hits) {
+    .forEach(function (hit, i) {
       var group = Math.floor(i / groupSize);
       expect(hit.sort).to.eql(sortOpts[group]);
     });

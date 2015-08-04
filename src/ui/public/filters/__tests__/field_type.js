@@ -5,7 +5,9 @@ var ngMock = require('ngMock');
 require('plugins/kibana/discover/index');
 require('ui/filters/field_type');
 
-var filter, types;
+var filter;
+
+var types;
 
 var init = function (expandable) {
   // Load the application

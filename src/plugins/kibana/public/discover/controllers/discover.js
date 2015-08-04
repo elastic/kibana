@@ -37,9 +37,10 @@ define(function (require) {
         return courier.indexPatterns.getIds()
         .then(function (list) {
           var stateRison = $location.search()._a;
+
           var state;
-          try { state = rison.decode(stateRison); } catch (e) {}
-          state = state || {};
+          try { state = rison.decode(stateRison); }
+          catch (e) { state = {}; }
 
           var specified = !!state.index;
           var exists = _.contains(list, state.index);
@@ -428,6 +429,7 @@ define(function (require) {
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
         fields: {'*': {}},
+        require_field_match: false,
         fragment_size: 2147483647 // Limit of an integer.
       })
       .set('filter', queryFilter.getFilters());
@@ -444,7 +446,7 @@ define(function (require) {
     };
 
     var loadingVis;
-    var setupVisualization = function () {
+    function setupVisualization() {
       // If we're not setting anything up we need to return an empty promise
       if (!$scope.opts.timefield) return Promise.resolve();
       if (loadingVis) return loadingVis;
@@ -509,7 +511,7 @@ define(function (require) {
       });
 
       return loadingVis;
-    };
+    }
 
     function resolveIndexPatternLoading() {
       var props = $route.current.locals.ip;

@@ -34,7 +34,7 @@ define(function (require) {
      * @param chartData {Object} Elasticsearch query results for this map
      * @param params {Object} Parameters used to build a map
      */
-    function Map(container, chartData, params) {
+    function TileMapMap(container, chartData, params) {
       this._container = $(container).get(0);
       this._chartData = chartData;
 
@@ -58,7 +58,7 @@ define(function (require) {
       this._createMap(mapOptions);
     }
 
-    Map.prototype.addBoundingControl = function () {
+    TileMapMap.prototype.addBoundingControl = function () {
       if (this._boundingControl) return;
 
       var self = this;
@@ -81,7 +81,7 @@ define(function (require) {
       this.map.addControl(this._boundingControl);
     };
 
-    Map.prototype.addFitControl = function () {
+    TileMapMap.prototype.addFitControl = function () {
       if (this._fitControl) return;
 
       var self = this;
@@ -117,7 +117,7 @@ define(function (require) {
      * @param mapLabel {String}
      * @return {undefined}
      */
-    Map.prototype.addTitle = function (mapLabel) {
+    TileMapMap.prototype.addTitle = function (mapLabel) {
       if (this._label) return;
 
       var label = this._label = L.control();
@@ -141,19 +141,19 @@ define(function (require) {
      * @method saturateTiles
      * @return undefined
      */
-    Map.prototype.saturateTiles = function () {
+    TileMapMap.prototype.saturateTiles = function () {
       if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
     };
 
-    Map.prototype.updateSize = function () {
+    TileMapMap.prototype.updateSize = function () {
       this.map.invalidateSize({
         debounceMoveend: true
       });
     };
 
-    Map.prototype.destroy = function () {
+    TileMapMap.prototype.destroy = function () {
       if (this._label) this._label.removeFrom(this.map);
       if (this._fitControl) this._fitControl.removeFrom(this.map);
       if (this._boundingControl) this._boundingControl.removeFrom(this.map);
@@ -168,7 +168,7 @@ define(function (require) {
      *
      * @method _addMarkers
      */
-    Map.prototype._addMarkers = function () {
+    TileMapMap.prototype._addMarkers = function () {
       if (!this._geoJson) return;
       if (this._markers) this._markers.destroy();
 
@@ -190,12 +190,12 @@ define(function (require) {
      * @param options {Object} options to give to marker class
      * @return {Object} marker layer
      */
-    Map.prototype._createMarkers = function (options) {
+    TileMapMap.prototype._createMarkers = function (options) {
       var MarkerType = markerTypes[this._markerType];
       return new MarkerType(this.map, this._geoJson, options);
     };
 
-    Map.prototype._attachEvents = function () {
+    TileMapMap.prototype._attachEvents = function () {
       var self = this;
       var saturateTiles = self.saturateTiles.bind(self);
 
@@ -256,7 +256,7 @@ define(function (require) {
       });
     };
 
-    Map.prototype._createMap = function (mapOptions) {
+    TileMapMap.prototype._createMap = function (mapOptions) {
       if (this.map) this.destroy();
 
       // get center and zoom from mapdata, or use defaults
@@ -283,7 +283,7 @@ define(function (require) {
      * @param map {Leaflet Object}
      * @return {boolean}
      */
-    Map.prototype._fitBounds = function () {
+    TileMapMap.prototype._fitBounds = function () {
       this.map.fitBounds(this._getDataRectangles());
     };
 
@@ -292,11 +292,11 @@ define(function (require) {
      *
      * @return {LatLngRectangles[]}
      */
-    Map.prototype._getDataRectangles = function () {
+    TileMapMap.prototype._getDataRectangles = function () {
       if (!this._geoJson) return [];
       return _.pluck(this._geoJson.features, 'properties.rectangle');
     };
 
-    return Map;
+    return TileMapMap;
   };
 });

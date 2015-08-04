@@ -1,9 +1,7 @@
-'use strict';
-
-let EventEmitter = require('events').EventEmitter;
-let inherits = require('util').inherits;
+let { EventEmitter } = require('events');
+let { inherits } = require('util');
 let _ = require('lodash');
-let join = require('path').join;
+let { join } = require('path');
 let write = require('fs').writeFileSync;
 let webpack = require('webpack');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
@@ -72,7 +70,28 @@ class BaseOptimizer extends EventEmitter {
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
-          { test: /\/src\/(plugins|ui)\/.+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` }
+          { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` },
+          {
+            test: /\.js$/,
+            exclude: /(node_modules|bower_components)/,
+            loader: 'babel',
+            query: {
+              optional: ['runtime'],
+              stage: 1,
+              nonStandard: false
+            }
+          },
+          {
+            // explicitly require .jsx extension to support jsx
+            test: /\.jsx$/,
+            exclude: /(node_modules|bower_components)/,
+            loader: 'babel',
+            query: {
+              optional: ['runtime'],
+              stage: 1,
+              nonStandard: true
+            }
+          }
         ].concat(this.modules.loaders),
         noParse: this.modules.noParse,
       },

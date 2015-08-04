@@ -20,13 +20,22 @@ define(function (require) {
       var esPromise;
       var defer = Promise.defer();
 
-      // attach abort handlers, close over request index
-      statuses.forEach(function (req, i) {
-        if (!isRequest(req)) return;
-        req.whenAborted(function () {
-          requestWasAborted(req, i).catch(defer.reject);
-        });
-      });
+      // for each respond with either the response or ABORTED
+      var respond = function (responses) {
+        responses = responses || [];
+        return Promise.map(requests, function (req, i) {
+          switch (statuses[i]) {
+            case ABORTED:
+              return ABORTED;
+            case DUPLICATE:
+              return req._uniq.resp;
+            default:
+              return responses[_.findIndex(executable, req)];
+          }
+        })
+        .then(defer.resolve, defer.reject);
+      };
+
 
       // handle a request being aborted while being fetched
       var requestWasAborted = Promise.method(function (req, i) {
@@ -49,21 +58,15 @@ define(function (require) {
         return respond();
       });
 
-      // for each respond with either the response or ABORTED
-      var respond = function (responses) {
-        responses = responses || [];
-        return Promise.map(requests, function (req, i) {
-          switch (statuses[i]) {
-          case ABORTED:
-            return ABORTED;
-          case DUPLICATE:
-            return req._uniq.resp;
-          default:
-            return responses[_.findIndex(executable, req)];
-          }
-        })
-        .then(defer.resolve, defer.reject);
-      };
+
+      // attach abort handlers, close over request index
+      statuses.forEach(function (req, i) {
+        if (!isRequest(req)) return;
+        req.whenAborted(function () {
+          requestWasAborted(req, i).catch(defer.reject);
+        });
+      });
+
 
       // Now that all of THAT^^^ is out of the way, lets actually
       // call out to elasticsearch
@@ -108,6 +111,7 @@ define(function (require) {
           }
         });
       });
+
     }
 
     return callClient;

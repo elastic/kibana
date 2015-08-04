@@ -1,15 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var getFieldValues = function (hits, field) {
+  function getFieldValues(hits, field) {
     var name = field.name;
     var flattenHit = field.indexPattern.flattenHit;
     return _.map(hits, function (hit) {
       return flattenHit(hit)[name];
     });
-  };
+  }
 
-  var getFieldValueCounts = function (params) {
+  function getFieldValueCounts(params) {
     params = _.defaults(params, {
       count: 5,
       grouped: false
@@ -57,15 +57,15 @@ define(function (require) {
       return { error: e.message };
     }
 
-  };
+  }
 
   // returns a count of fields in the array that are undefined or null
-  var _countMissing = function (array) {
+  function _countMissing(array) {
     return array.length - _.without(array, undefined, null).length;
-  };
+  }
 
 
-  var _groupValues = function (allValues, params) {
+  function _groupValues(allValues, params) {
     var groups = {};
     var k;
 
@@ -93,7 +93,7 @@ define(function (require) {
     });
 
     return groups;
-  };
+  }
 
   return {
     _groupValues: _groupValues,

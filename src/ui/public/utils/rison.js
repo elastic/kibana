@@ -1,7 +1,6 @@
+/* eslint-disable */
 define(function () {
   var rison = {};
-  /* jshint ignore:start */
-  /* jscs: disable */
   //////////////////////////////////////////////////
   //
   //  the stringifier is based on
@@ -494,7 +493,5 @@ define(function () {
       this.index = i;
       return c;
   };
-  /* jscs: enable */
-  /* jshint ignore:end */
   return rison;
 });

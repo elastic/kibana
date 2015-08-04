@@ -1,10 +1,6 @@
-'use strict';
-
 let _ = require('lodash');
-let EventEmitter = require('events').EventEmitter;
-let promify = require('bluebird').promisify;
-let resolve = require('bluebird').resolve;
-let fromNode = require('bluebird').fromNode;
+let { EventEmitter } = require('events');
+let { promisify, resolve, fromNode } = require('bluebird');
 let Hapi = require('hapi');
 
 let utils = require('requirefrom')('src/utils');

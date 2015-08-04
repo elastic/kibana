@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 
 let states = require('./states');
@@ -62,7 +60,7 @@ module.exports = class ServerStatus {
 
   toString() {
     var overall = this.overall();
-    return `${overall.title} – ${overall.nickname}`;
+    return `${overall.title} – ${overall.nickname}`;
   }
 
   toJSON() {

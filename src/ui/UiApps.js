@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let UiApp = require('./UiApp');
 
@@ -39,6 +37,10 @@ module.exports = class UiApps extends Array {
 
   get byId() {
     return this._byId || (this._byId = _.indexBy(this, 'id'));
+  }
+
+  toJSON() {
+    return this.slice(0);
   }
 
 };

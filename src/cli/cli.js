@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 
 let utils = require('requirefrom')('src/utils');

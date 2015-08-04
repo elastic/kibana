@@ -62,7 +62,7 @@ describe('plugins/elasticsearch', function () {
           payload: body
         });
         pass = true;
-      } catch (e) {}
+      } catch (e) {} // eslint-disable-line no-empty
 
       if (pass !== Boolean(valid)) {
         var msg = 'Expected ' + method + ' ' +

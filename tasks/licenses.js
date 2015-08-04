@@ -23,7 +23,7 @@ module.exports = function (grunt) {
           return true;
         }
         return false;
-      })();
+      }());
       return pkgInfo;
     }
 
@@ -50,7 +50,7 @@ module.exports = function (grunt) {
           });
 
           var licenseStats = _.map(productionDependencies, processPackage);
-          var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
+          var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid; });
 
           if (!grunt.option('only-invalid')) {
             grunt.log.debug(JSON.stringify(licenseStats, null, 2));

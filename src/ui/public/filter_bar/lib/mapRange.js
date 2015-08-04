@@ -2,7 +2,11 @@ define(function (require) {
   var _ = require('lodash');
   return function mapRangeProvider(Promise, courier) {
     return function (filter) {
-      var key, value, from, to, field;
+      var key;
+      var value;
+      var from;
+      var to;
+      var field;
       if (filter.range) {
         return courier
         .indexPatterns

@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 let expect = require('expect.js');
 let sinon = require('sinon');

@@ -44,9 +44,6 @@ describe('Courier DocFetchRequest class', function () {
      *                        received from elasticsearfch.
      */
     setVersion = function (mine, theirs) {
-      // mine – the version the source think is accurate
-      // theirs - the version other sources think is accurate
-
       source._version = mine;
       storage.getItem.withArgs(source._versionKey()).returns(theirs);
     };

@@ -46,7 +46,7 @@ module.exports = function (settings, logger) {
   //Attempts to download a single url
   function downloadSingle(source, dest, timeout) {
     var gunzip = zlib.createGunzip();
-    var tarExtract = tar.Extract({ path: dest, strip: 1 });
+    var tarExtract = new tar.Extract({ path: dest, strip: 1 });
 
     var requestOptions = { url: source };
     if (timeout !== 0) {

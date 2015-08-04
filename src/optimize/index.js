@@ -1,10 +1,8 @@
-'use strict';
-
 module.exports = function (kbnServer, server, config) {
   if (!config.get('optimize.enabled')) return;
 
   var _ = require('lodash');
-  var resolve = require('path').resolve;
+  var { resolve } = require('path');
   var fromRoot = require('../utils/fromRoot');
 
   var CachedOptimizer = require('./CachedOptimizer');
@@ -61,19 +59,13 @@ module.exports = function (kbnServer, server, config) {
   let optmzr = kbnServer.optimizer = new Optimizer({
     sourceMaps: config.get('optimize.sourceMaps'),
     bundleDir: bundleDir,
-    entries: _.map(
-      [].concat(
-        kbnServer.uiExports.apps,
-        kbnServer.uiExports.apps.hidden
-      ),
-      function (app) {
-        return {
-          id: app.id,
-          deps: app.getRelatedPlugins(),
-          modules: app.getModules()
-        };
-      }
-    ),
+    entries: _.map(kbnServer.uiExports.allApps(), function (app) {
+      return {
+        id: app.id,
+        deps: app.getRelatedPlugins(),
+        modules: app.getModules()
+      };
+    }),
     plugins: kbnServer.plugins
   });
 

@@ -1,4 +1,3 @@
-
 var sinon = require('auto-release-sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
@@ -6,7 +5,13 @@ var ngMock = require('ngMock');
 describe('Timefilter service', function () {
   describe('Refresh interval diff watcher', function () {
 
-    var fn, update, fetch, timefilter;
+    var fn;
+
+    var update;
+
+    var fetch;
+
+    var timefilter;
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(ngMock.inject(function (Private) {

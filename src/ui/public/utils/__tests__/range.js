@@ -1,4 +1,3 @@
-
 describe('Range parsing utility', function () {
   var _ = require('lodash');
   var expect = require('expect.js');

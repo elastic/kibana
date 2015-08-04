@@ -1,4 +1,4 @@
-var resolve = require('path').resolve;
+var { resolve } = require('path');
 var expiry = require('expiry-js');
 
 module.exports = function (options) {

@@ -1,5 +1,3 @@
-'use strict';
-
 var _ = require('lodash');
 var minimatch = require('minimatch');
 
@@ -34,32 +32,32 @@ class UiExports {
   exportConsumer(type) {
     var self = this;
     switch (type) {
-    case 'app':
-      return function (plugin, spec) {
-        spec = _.defaults({}, spec, { id: plugin.id });
-        plugin.app = self.apps.new(spec);
-      };
+      case 'app':
+        return function (plugin, spec) {
+          spec = _.defaults({}, spec, { id: plugin.id });
+          plugin.app = self.apps.new(spec);
+        };
 
-    case 'visTypes':
-    case 'fieldFormats':
-    case 'spyModes':
-      return function (plugin, spec) {
-        self.aliases[type] = _.union(self.aliases[type] || [], spec);
-      };
+      case 'visTypes':
+      case 'fieldFormats':
+      case 'spyModes':
+        return function (plugin, spec) {
+          self.aliases[type] = _.union(self.aliases[type] || [], spec);
+        };
 
-    case 'modules':
-    case 'loaders':
-    case 'noParse':
-      return function (plugin, spec) {
-        plugin.uiExportsSpecs[type] = spec;
-      };
+      case 'modules':
+      case 'loaders':
+      case 'noParse':
+        return function (plugin, spec) {
+          plugin.uiExportsSpecs[type] = spec;
+        };
 
-    case 'aliases':
-      return function (plugin, specs) {
-        _.forOwn(specs, function (spec, adhocType) {
-          self.aliases[adhocType] = _.union(self.aliases[adhocType] || [], spec);
-        });
-      };
+      case 'aliases':
+        return function (plugin, specs) {
+          _.forOwn(specs, function (spec, adhocType) {
+            self.aliases[adhocType] = _.union(self.aliases[adhocType] || [], spec);
+          });
+        };
     }
   }
 
@@ -81,6 +79,10 @@ class UiExports {
       return found.concat(aliases[name]);
     }, [])
     .value();
+  }
+
+  allApps() {
+    return _.union(this.apps, this.apps.hidden);
   }
 }
 

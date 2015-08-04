@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 var err = new Error();
-setByAssignment(err, 'john');
+try { setByAssignment(err, 'john'); } catch (e) {} // eslint-disable-line
 
 // err.stack is not always writeable, so we
 // do some detection for support and fallback to a

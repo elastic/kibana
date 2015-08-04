@@ -1,4 +1,3 @@
-
 var sinon = require('sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');

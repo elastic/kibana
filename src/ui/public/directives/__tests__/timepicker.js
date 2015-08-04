@@ -12,7 +12,11 @@ require('plugins/kibana/dashboard/index');
 // TODO: This should not be needed, timefilter is only included here, it should move
 require('plugins/kibana/discover/index');
 
-var $parentScope, $scope, $elem;
+var $parentScope;
+
+var $scope;
+
+var $elem;
 var anchor = '2014-01-01T06:06:06.666Z';
 var clock;
 

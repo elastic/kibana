@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require('lodash');
 
 module.exports = _.once(function (kbnServer) {

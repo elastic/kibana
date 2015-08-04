@@ -1,4 +1,3 @@
-
 var dedupFilters = require('ui/filter_bar/lib/dedupFilters');
 var expect = require('expect.js');
 describe('Filter Bar Directive', function () {
