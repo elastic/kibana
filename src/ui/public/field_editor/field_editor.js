@@ -1,9 +1,11 @@
 define(function (require) {
 
   require('ui/field_format_editor');
+  require('angular-bootstrap-colorpicker');
+  require('angular-bootstrap-colorpicker/css/colorpicker.css');
 
   require('ui/modules')
-  .get('kibana')
+  .get('kibana', ['colorpicker.module'])
   .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');
     var fieldFormats = Private(require('ui/registry/field_formats'));

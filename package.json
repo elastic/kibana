@@ -49,6 +49,7 @@
     "Nonsense": "^0.1.2",
     "angular": "1.2.28",
     "angular-bindonce": "0.3.1",
+    "angular-bootstrap-colorpicker": "^3.0.18",
     "angular-elastic": "2.5.0",
     "angular-mocks": "1.2.28",
     "angular-nvd3": "panda01/angular-nvd3#kibana",
