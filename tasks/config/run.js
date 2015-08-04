@@ -6,22 +6,12 @@ module.exports = function (grunt) {
     devServer: {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /\[optimize\]\[status\] Status changed from [a-zA-Z]+ to green/,
         quiet: false,
         failOnError: false
       },
       cmd: './bin/kibana',
       args: ['--dev', '--no-watch', '--logging.json=false']
-    },
-
-    eslint: {
-      cmd: root('node_modules/.bin/eslint'),
-      args: ['Gruntfile.js', 'src/', 'tasks/', '--ignore-path', root('.eslintignore'), '--color']
-    },
-
-    eslintStaged: {
-      cmd: root('node_modules/.bin/eslint'),
-      args: ['--ignore-path', root('.eslintignore'), '--color']
     }
   };
 

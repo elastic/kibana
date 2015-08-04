@@ -34,7 +34,8 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/cli/index.js --dev",
-    "precommit": "grunt lintStagedFiles"
+    "precommit": "grunt lintStagedFiles",
+    "karma": "karma start"
   },
   "repository": {
     "type": "git",
@@ -134,6 +135,7 @@
     "grunt-run": "spalger/grunt-run#master",
     "grunt-s3": "^0.2.0-alpha.3",
     "grunt-simple-mocha": "^0.4.0",
+    "gruntify-eslint": "^1.0.0",
     "html-entities": "^1.1.1",
     "husky": "^0.8.1",
     "karma": "^0.13.3",

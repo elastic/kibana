@@ -58,7 +58,10 @@ module.exports = function (grunt) {
   require('load-grunt-config')(grunt, {
     configPath: __dirname + '/tasks/config',
     init: true,
-    config: config
+    config: config,
+    loadGruntTasks: {
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*']
+    }
   });
 
   // load task definitions

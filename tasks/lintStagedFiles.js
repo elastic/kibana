@@ -23,8 +23,8 @@ module.exports = function (grunt) {
         grunt.log.debug(files);
 
         if (!_.size(files)) return;
-        grunt.config.set('run.eslintStaged.args', _.union(grunt.config.get('run.eslintStaged.args'), files));
-        grunt.task.run(['run:eslintStaged']);
+        grunt.config.set('eslint.staged.files.src', files);
+        grunt.task.run(['eslint:staged']);
       })
       .nodeify(this.async());
 
