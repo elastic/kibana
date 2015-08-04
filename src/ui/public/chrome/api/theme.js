@@ -36,6 +36,7 @@ module.exports = function (chrome, internals) {
 
   /**
    * @param {string|object} item - brand key to set, or object to apply
+   * @param {mixed} val - value to put on the brand item
    * @return {chrome}
    */
   chrome.setBrand = function (item, val) {

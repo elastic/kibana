@@ -2,7 +2,7 @@
 <div class="content" style="display: none;" chrome-context >
   <nav
     ng-style="{ background: chrome.getNavBackground() }"
-    ng-class="{ show: !chrome.embedded }"
+    ng-class="{ show: chrome.getVisible() }"
     bindonce
     class="hide navbar navbar-inverse navbar-static-top">
 
