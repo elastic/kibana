@@ -69,7 +69,7 @@ define(function (require) {
             var typeName = source.typeName;
             if (source.visState) {
               try { typeName = JSON.parse(source.visState).type; }
-              catch (e) { /* missing typename handled below */ }
+              catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
             }
 
             if (!typeName || !visTypes.byName[typeName]) {
