@@ -34,27 +34,23 @@ define(function (require) {
     _Color.paramDefaults = {
       colors: [{
         range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-        color: '#000',
-        backgroundColor: '#FFF'
+        text: '#000000',
+        background: '#ffffff'
       }]
     };
 
     _Color.prototype._convert = {
       html(val) {
-        var range = _.findLast(this.param('colors'), function (color) {
-          if (!color.range) return;
-
-          const rangeValues = color.range.split(':');
-          const start = Number(rangeValues[0]);
-          const end = Number(rangeValues[1]);
-
-          return val >= start && val <= end;
+        const color = _.findLast(this.param('colors'), ({ range }) => {
+          if (!range) return;
+          const [start, end] = range.split(':');
+          return val >= Number(start) && val <= Number(end);
         });
 
-        if (!range) return _.asPrettyString(val);
+        if (!color) return _.asPrettyString(val);
 
-        const styleColor = range.color ? `color: ${range.color};` : '';
-        const styleBackgroundColor = range.backgroundColor ? `background-color: ${range.backgroundColor};` : '';
+        const styleColor = color.text ? `color: ${color.text};` : '';
+        const styleBackgroundColor = color.background ? `background-color: ${color.background};` : '';
         return `<span style="${styleColor}${styleBackgroundColor}">${_.escape(val)}</span>`;
       }
     };

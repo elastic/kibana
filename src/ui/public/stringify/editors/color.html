@@ -1,6 +1,6 @@
 <div class="form-group">
-  <div ng-repeat="range in editor.formatParams.colors">
-    <button ng-if="$index > 0" aria-label="Remove Range" ng-click="removeColor($index)" tooltip="Remove Range" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger pull-right">
+  <div ng-repeat="color in editor.formatParams.colors">
+    <button ng-if="$index > 0" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger pull-right">
       <i aria-hidden="true" class="fa fa-times"></i>
     </button>
     <div class="form-group">
@@ -10,25 +10,29 @@
         </small>
     </label>
       <input
-        ng-model="range.range"
+        ng-model="color.range"
         class="form-control">
     </div>
     <div class="form-group">
       <label>Font Color</label>
       <input
-        ng-model="range.color"
+        ng-model="color.text"
+        colorpicker
+        type="text"
         class="form-control">
     </div>
     <div class="form-group">
       <label>Background Color</label>
       <input
-        ng-model="range.backgroundColor"
+        ng-model="color.background"
+        colorpicker
+        type="text"
         class="form-control">
     </div>
     <hr>
   </div>
 
-  <button aria-label="Remove Range" ng-click="addColor()" tooltip="Remove Range" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-primary">
+  <button aria-label="Add Color" ng-click="addColor()" tooltip="Add Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-primary">
     <span class="sr-only">Add Color</span>
     <i class="fa fa-plus"> Add Color</i>
   </button>

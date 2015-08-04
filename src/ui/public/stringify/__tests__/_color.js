@@ -15,8 +15,8 @@ describe('Color Format', function () {
     var colorer = new ColorFormat({
       colors: [{
         range: '100:150',
-        color: 'blue',
-        backgroundColor: 'yellow'
+        text: 'blue',
+        background: 'yellow'
       }]
     });
     expect(colorer.convert(99, 'html')).to.eql('99');
@@ -29,8 +29,8 @@ describe('Color Format', function () {
     var colorer = new ColorFormat({
       colors: [{
         range: '100150',
-        color: 'blue',
-        backgroundColor: 'yellow'
+        text: 'blue',
+        background: 'yellow'
       }]
     });
     expect(colorer.convert(99, 'html')).to.eql('99');
