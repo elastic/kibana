@@ -11,6 +11,7 @@ let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 let OptmzBundles = require('./OptmzBundles');
 let OptmzUiModules = require('./OptmzUiModules');
+let babelOptions = require('./babelOptions');
 
 let kbnTag = `Kibana ${ utils('packageJson').version }`;
 
@@ -75,22 +76,16 @@ class BaseOptimizer extends EventEmitter {
             test: /\.js$/,
             exclude: /(node_modules|bower_components)/,
             loader: 'babel',
-            query: {
-              optional: ['runtime'],
-              stage: 1,
-              nonStandard: false
-            }
+            query: babelOptions
           },
           {
             // explicitly require .jsx extension to support jsx
             test: /\.jsx$/,
             exclude: /(node_modules|bower_components)/,
             loader: 'babel',
-            query: {
-              optional: ['runtime'],
-              stage: 1,
+            query: _.defaults({
               nonStandard: true
-            }
+            }, babelOptions)
           }
         ].concat(this.modules.loaders),
         noParse: this.modules.noParse,
