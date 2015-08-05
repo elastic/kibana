@@ -11,4 +11,4 @@ target
 *.log
 esvm
 .htpasswd
-installed_plugins
+installedPlugins
