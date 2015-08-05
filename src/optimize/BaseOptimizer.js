@@ -83,7 +83,9 @@ class BaseOptimizer extends EventEmitter {
             test: /\.jsx$/,
             exclude: /(node_modules|bower_components)/,
             loader: 'babel',
-            query: babelOptions
+            query: _.defaults({
+              nonStandard: true
+            }, babelOptions)
           }
         ].concat(this.modules.loaders),
         noParse: this.modules.noParse,
