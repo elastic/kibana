@@ -1,6 +1,6 @@
 <div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
 
-  <navbar ng-if="!chrome.embedded">
+  <navbar ng-if="chrome.getVisible()">
     <div class="fill bitty-modal-container">
       <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
         ng-dblclick="unlink()"
@@ -116,9 +116,8 @@
     </div>
   </navbar>
 
-
   <config
-    ng-if="!chrome.embedded"
+    ng-if="chrome.getVisible()"
     config-template="configTemplate"
     config-object="conf">
   </config>
@@ -127,9 +126,9 @@
 
   <div class="vis-editor-content">
 
-    <vis-editor-sidebar class="vis-editor-sidebar" ng-if="!chrome.embedded"></vis-editor-sidebar>
+    <vis-editor-sidebar class="vis-editor-sidebar" ng-if="chrome.getVisible()"></vis-editor-sidebar>
 
-    <div class="vis-editor-canvas" ng-class="{ embedded: chrome.embedded }">
+    <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
       <div class="visualize-info" ng-if="savedVis.id">
         <div class="visualize-info-tab">
           <span bindonce bo-bind="savedVis.title"></span>

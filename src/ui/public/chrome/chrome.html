@@ -1,8 +1,8 @@
 <kbn-notifications list="notifList"></kbn-notifications>
 <div class="content" style="display: none;" chrome-context >
   <nav
-    ng-style="{ background: chrome.navBackground }"
-    ng-class="{ show: !chrome.embedded }"
+    ng-style="{ background: chrome.getNavBackground() }"
+    ng-class="{ show: chrome.getVisible() }"
     bindonce
     class="hide navbar navbar-inverse navbar-static-top">
 
@@ -15,7 +15,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="visible-xs">
-        <span ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</span>
+        <span ng-if="chrome.getBrand('title')" class="navbar-brand">{{ chrome.getBrand('title') }}</span>
         <span ng-if="chrome.getActiveTabTitle()" class="navbar-brand">{{ chrome.getActiveTabTitle() }}</span>
         <span ng-show="chrome.httpActive.length" class="spinner"></span>
       </span>
@@ -26,20 +26,20 @@
     <div collapse="!showCollapsed" class="navbar-collapse">
       <ul class="nav navbar-nav" role="navigation">
         <li
-          ng-if="chrome.logo"
-          ng-style="{ 'background': chrome.logo }"
+          ng-if="chrome.getBrand('logo')"
+          ng-style="{ 'background': chrome.getBrand('logo') }"
           aria-label="{{ chrome.getAppTitle() }} Logo"
           class="logo hidden-sm"
           ></li>
 
         <li
-          ng-if="chrome.smallLogo"
-          ng-style="{ 'background': chrome.smallLogo }"
+          ng-if="chrome.getBrand('smallLogo')"
+          ng-style="{ 'background': chrome.getBrand('smallLogo') }"
           aria-label="{{ chrome.getAppTitle() }} Logo"
           class="logo-small visible-sm hidden-xs"
           ></li>
 
-        <li ng-if="chrome.getBrand()" class="navbar-brand">{{ chrome.getBrand() }}</li>
+        <li ng-if="chrome.getBrand('title')" class="navbar-brand">{{ chrome.getBrand('title') }}</li>
 
         <li ng-if="chrome.getShowAppsLink()">
           <a href="/apps"><i class="fa fa-th" alt="Go to app switcher"></i></a>
