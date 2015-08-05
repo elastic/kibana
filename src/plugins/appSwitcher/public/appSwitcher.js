@@ -3,7 +3,10 @@ require('plugins/appSwitcher/appSwitcher.less');
 var kibanaLogoUrl = require('ui/images/kibana.png');
 
 require('ui/chrome')
-.setLogo('url(' + kibanaLogoUrl + ') left no-repeat', true)
+.setBrand({
+  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
+  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
+})
 .setShowAppsLink(false)
 .setTabs([
   {
