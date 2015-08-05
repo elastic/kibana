@@ -16,7 +16,9 @@ uiModules
       table: '=',
       perPage: '=?',
       sort: '=?',
-      exportTitle: '=?'
+      exportTitle: '=?',
+      showTotal: '=',
+      totalFunc: '='
     },
     controllerAs: 'aggTable',
     compile: function ($el) {
@@ -91,6 +93,26 @@ uiModules
 
           if (last || (agg.schema.group === 'metrics')) {
             formattedColumn.class = 'visualize-table-right';
+          }
+
+          let isFirstValueNumeric =
+            (table.rows && table.rows[0] && table.rows[0][i] && _.isNumber(table.rows[0][i].value)) === true;
+
+          if ((!!field && field.type === 'number') || isFirstValueNumeric) {
+            function sum() {
+              return _.reduce(table.rows, function (prev, curr, n, all) {return prev + curr[i].value; }, 0);
+            }
+
+            switch ($scope.totalFunc) {
+              case 'sum':
+                formattedColumn.total = sum();
+                break;
+              case 'avg':
+                formattedColumn.total = sum() / table.rows.length;
+                break;
+              default:
+                break;
+            }
           }
 
           return formattedColumn;
