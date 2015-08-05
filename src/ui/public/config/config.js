@@ -3,6 +3,10 @@ define(function (require) {
     'kibana/notify'
   ]);
 
+  require('ui/routes').addSetupWork(function (config) {
+    return config.init();
+  });
+
   // service for delivering config variables to everywhere else
   module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
     var config = this;

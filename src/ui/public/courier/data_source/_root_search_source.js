@@ -1,5 +1,5 @@
 define(function (require) {
-  return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter, Notifier) {
+  return function RootSearchSource(Private, $rootScope, timefilter, Notifier) {
     var SearchSource = Private(require('ui/courier/data_source/search_source'));
 
     var notify = new Notifier({ location: 'Root Search Source' });
@@ -13,24 +13,6 @@ define(function (require) {
 
     var appSource; // set in setAppSource()
     resetAppSource();
-
-    /**
-     * Get the default index from the config, and hook it up to the globalSource.
-     *
-     * @return {Promise}
-     */
-    function loadDefaultPattern() {
-      return notify.event('loading default index pattern', function () {
-        var defId = config.get('defaultIndex');
-
-        return Promise.cast(defId && indexPatterns.get(defId))
-        .then(function (pattern) {
-          pattern = pattern || undefined;
-          globalSource.set('index', pattern);
-          notify.log('index pattern set to', defId);
-        });
-      });
-    }
 
     // when the route changes, clear the appSource
     $rootScope.$on('$routeChangeStart', resetAppSource);
@@ -73,7 +55,10 @@ define(function (require) {
     return {
       get: getAppSource,
       set: setAppSource,
-      loadDefault: loadDefaultPattern
+
+      getGlobalSource: function () {
+        return globalSource;
+      }
     };
   };
 });

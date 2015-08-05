@@ -1,6 +1,7 @@
 define(function (require, module, exports) {
   var _ = require('lodash');
 
+  var sections = require('plugins/kibana/settings/sections/index');
   require('plugins/kibana/settings/styles/main.less');
   require('ui/filters/start_from');
 
@@ -9,7 +10,10 @@ define(function (require, module, exports) {
     redirectTo: '/settings/indices'
   });
 
-  var sections = require('plugins/kibana/settings/sections/index');
+  require('ui/index_patterns/routeSetup/loadDefault')({
+    notRequiredRe: /^\/settings\//,
+    whenMissingRedirectTo: '/settings/indices'
+  });
 
   require('ui/modules')
   .get('apps/settings')
