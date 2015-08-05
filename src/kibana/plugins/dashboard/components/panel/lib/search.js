@@ -17,6 +17,7 @@ define(function (require) {
           return {
             savedObj: savedSearch,
             panel: panel,
+            uiState: savedSearch.uiStateJSON ? JSON.parse(savedSearch.uiStateJSON) : {},
             editUrl: savedSearches.urlFor(panel.id)
           };
         });

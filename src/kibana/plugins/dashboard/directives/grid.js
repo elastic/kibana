@@ -151,6 +151,7 @@ define(function (require) {
 
           panel.$scope = $scope.$new();
           panel.$scope.panel = panel;
+          panel.$scope.parentUiState = $scope.uiState;
 
           panel.$el = $compile('<li><dashboard-panel></li>')(panel.$scope);
 
