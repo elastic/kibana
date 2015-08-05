@@ -1,0 +1,75 @@
+@import "~ui/styles/mixins";
+
+.toaster-container {
+  visibility: visible;
+  width: 100%;
+
+  .toaster {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .alert {
+    padding: 0 15px;
+    margin: 0;
+    border-radius: 0;
+    border: 0px;
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+
+    > * {
+      flex: 0 0 auto;
+      &:not(:last-child) {
+        margin-right: 4px;
+      }
+    }
+
+    &-message {
+      flex: 1 1 auto;
+      .ellipsis();
+      line-height: normal;
+    }
+
+    &-stack {
+      padding-bottom: 10px;
+
+      pre {
+        display: inline-block;
+        width: 100%;
+        margin: 10px 0;
+        word-break: normal;
+        word-wrap: normal;
+        white-space: pre-wrap;
+      }
+    }
+
+    &-controls {
+      display: flex;
+
+      button {
+        flex: 0 0 auto;
+        border: 0;
+        border-radius: 0;
+        padding: 10px 15px;
+      }
+    }
+  }
+
+  // add darkened background to the different badges
+  .alert-success .badge {
+    background: darken(@alert-success-bg, 25%);
+  }
+  .alert-info .badge {
+    background: darken(@alert-info-bg, 25%);
+  }
+  .alert-warning .badge {
+    background: darken(@alert-warning-bg, 25%);
+  }
+  .alert-danger .badge {
+    background: darken(@alert-danger-bg, 25%);
+  }
+}

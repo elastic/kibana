@@ -1,0 +1,126 @@
+.section {
+  margin-bottom:15px;
+}
+
+.status_breakdown {
+  margin:0 15px 15px 15px;
+
+  .status_row {
+    height:30px;
+    line-height:30px;
+    + .status_row {
+      border-top:1px solid #ebebeb;
+    }
+  }
+
+  th {
+    font-size:10px;
+    color:#a9a9a9;
+    height:25px;
+    line-height:25px;
+  }
+
+  .status_name {
+    font-weight:bold;
+    padding:0px 5px;
+  }
+
+  .status_message {
+    border-left:1px solid #ebebeb;
+    padding:0;
+    padding-left:15px;
+  }
+}
+
+.system_status_wrapper {
+  .missing_statuses,
+  .loading_statuses {
+    padding: 20px;
+    text-align: center;
+  }
+}
+
+.status_chart_wrapper {
+  border-top:1px solid #ebebeb;
+  border-left:1px solid #ebebeb;
+  .average {
+    font-size: 42px;
+    line-height:45px;
+    margin-top:0;
+    font-weight:bold;
+  }
+  .title {
+    margin:0 0 5px 0;
+    text-transform:capitalize;
+  }
+}
+
+#chart_cont {
+  margin-top:35px;
+}
+
+.status_chart_wrapper:nth-child(2), .status_chart_wrapper:nth-child(3) {
+  border-top:0 none transparent;
+}
+
+.status_chart_wrapper:first-child {
+  border-top:0 none transparent;
+  border-left:0 none transparent;
+}
+
+.status_chart_wrapper:nth-child(3n + 1) {
+  border-left:0 none transparent;
+}
+
+.status_chart_wrapper:nth-child(n + 4) {
+  padding-top:20px;
+}
+
+.nv-axis.nv-x .tick line {
+  display:none;
+}
+
+.state(@primary, @secondary) {
+  &.system_status_wrapper {
+    border:1px solid @primary;
+    border-radius:5px;
+    overflow: hidden;
+
+    .title {
+      color:#ffffff;
+      height:50px;
+      line-height:50px;
+      margin:0 0 10px 0;
+      padding:0 15px;
+      border-color:@primary;
+      background:@primary;
+      background:-moz-linear-gradient(left,@primary 0%,@secondary 100%);
+      background:-webkit-gradient(linear,left top,right top,color-stop(0%,@primary),color-stop(100%,@secondary));
+      background:-webkit-linear-gradient(left,@primary 0%,@secondary 100%);
+      background:-o-linear-gradient(left,@primary 0%,@secondary 100%);
+      background:-ms-linear-gradient(left,@primary 0%,@secondary 100%);
+      background:linear-gradient(to right,@primary 0%,@secondary 100%);
+      filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=@primary,endColorstr=@secondary,GradientType=1);
+    }
+  }
+
+  &.status_row {
+    color: @primary;
+  }
+}
+
+.state_default {
+  .state(#7C7C7C, #CFCFCF);
+}
+
+.state_green {
+  .state(#0a8e03, #96f501);
+}
+
+.state_yellow {
+  .state(#fdee00, #c16f00);
+}
+
+.state_red {
+  .state(#da1e04, #ff730f);
+}

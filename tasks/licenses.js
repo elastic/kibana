@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var npm = require('npm');
-var bowerLicense = require('bower-license');
 var npmLicense = require('license-checker');
 
 module.exports = function (grunt) {
@@ -24,33 +23,10 @@ module.exports = function (grunt) {
           return true;
         }
         return false;
-      })();
+      }());
       return pkgInfo;
     }
 
-    function dequeue(output) {
-      checkQueueLength--;
-      _.extend(result, output);
-
-      if (!checkQueueLength) {
-        var licenseStats = _.map(result, processPackage);
-        var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
-
-        if (grunt.option('only-invalid')) {
-          console.log(invalidLicenses);
-        } else {
-          console.log(licenseStats);
-        }
-
-        if (invalidLicenses.length) {
-          grunt.fail.warn('Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', ') +
-            '. Use --only-invalid for details.', invalidLicenses.length);
-        }
-        done();
-      }
-    }
-
-    bowerLicense.init(options, dequeue);
     npmLicense.init(options, function (allDependencies) {
       // Only check production NPM dependencies, not dev
       npm.load({production: true}, function () {
@@ -72,8 +48,24 @@ module.exports = function (grunt) {
           _.each(getDependencies(npmList.dependencies), function (packageAndVersion) {
             productionDependencies[packageAndVersion] = allDependencies[packageAndVersion];
           });
-          dequeue(productionDependencies);
 
+          var licenseStats = _.map(productionDependencies, processPackage);
+          var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid; });
+
+          if (!grunt.option('only-invalid')) {
+            grunt.log.debug(JSON.stringify(licenseStats, null, 2));
+          }
+
+
+          if (invalidLicenses.length) {
+            grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
+            grunt.fail.warn(
+              'Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', '),
+              invalidLicenses.length
+            );
+          }
+
+          done();
         });
       });
     });

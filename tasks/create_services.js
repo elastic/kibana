@@ -1,8 +1,10 @@
-var child_process = require('child_process');
+/* eslint camelcase:0 */
+
+var childProcess = require('child_process');
 var Promise = require('bluebird');
-var join = require('path').join;
+var { join } = require('path');
 var mkdirp = Promise.promisifyAll(require('mkdirp'));
-var execFile = Promise.promisify(child_process.execFile);
+var execFile = Promise.promisify(childProcess.execFile);
 
 function createServices(grunt) {
   grunt.registerTask('create_services', function () {
