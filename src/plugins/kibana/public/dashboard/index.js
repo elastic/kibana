@@ -47,7 +47,7 @@ define(function (require) {
   });
 
   app.directive('dashboardApp', function (Private, Notifier, courier, AppState, timefilter, kbnUrl) {
-    var PersistedState = Private(require('components/persisted_state/persisted_state'));
+    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
 
     return {
       controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
