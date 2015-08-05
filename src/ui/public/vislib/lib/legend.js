@@ -34,8 +34,7 @@ define(function (require) {
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
-        'legendDefaultOpacity': 1,
-        'isOpen' : true
+        'legendDefaultOpacity': 1
       });
     }
 
@@ -77,12 +76,13 @@ define(function (require) {
      * @returns {*} HTML element
      */
     Legend.prototype._header = function (el, args) {
+      var self = this;
       return el.append('div')
       .attr('class', 'header')
       .append('div')
       .attr('class', 'column-labels')
       .html(function () {
-        return legendHeaderTemplate(args._attr);
+        return legendHeaderTemplate({ isOpen: self.vis.get('legendOpen') });
       });
     };
 
@@ -100,8 +100,9 @@ define(function (require) {
 
       return el.append('ul')
       .attr('class', function () {
-        if (args._attr.isOpen) { return 'legend-ul'; }
-        return 'legend-ul hidden';
+        var className = 'legend-ul';
+        if (self.vis && !self.vis.get('legendOpen')) className += ' hidden';
+        return className;
       })
       .selectAll('li')
       .data(data)
@@ -146,24 +147,14 @@ define(function (require) {
 
       var headerIcon = visEl.select('.legend-toggle');
 
-      // toggle
+      // toggle legend open and closed
       headerIcon
       .on('click', function legendClick() {
-        if (self._attr.isOpen) {
-          // close legend
-          visEl.select('ul.legend-ul').classed('hidden', true);
-          self._attr.isOpen = false;
+        var legendOpen = !self.vis.get('legendOpen');
+        self.vis.set('legendOpen', legendOpen);
 
-          // need to add reference to resize function on toggle
-          self.vis.resize();
-        } else {
-          // open legend
-          visEl.select('ul.legend-ul').classed('hidden', false);
-          self._attr.isOpen = true;
-
-          // need to add reference to resize function on toggle
-          self.vis.resize();
-        }
+        visEl.select('ul.legend-ul').classed('hidden', legendOpen);
+        self.vis.resize();
       });
 
       legendDiv.select('.legend-ul').selectAll('li')
