@@ -36,9 +36,14 @@ function RouteManager() {
     }
   };
 
-  this.addSetupWork = _.bindKey(setup, 'addSetupWork');
-  this.afterSetupWork = _.bindKey(setup, 'afterSetupWork');
-  this.afterWork = _.bindKey(setup, 'afterWork');
+  let wrapSetupAndChain = (fn, ...args) => {
+    fn.apply(setup, args);
+    return this;
+  };
+
+  this.addSetupWork = _.wrap(setup.addSetupWork, wrapSetupAndChain);
+  this.afterSetupWork = _.wrap(setup.afterSetupWork, wrapSetupAndChain);
+  this.afterWork = _.wrap(setup.afterWork, wrapSetupAndChain);
 
   self.when = function (path, route) {
     when.push([path, route]);
