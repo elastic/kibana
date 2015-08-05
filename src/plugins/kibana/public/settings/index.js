@@ -8,12 +8,12 @@ define(function (require, module, exports) {
   require('ui/routes')
   .when('/settings', {
     redirectTo: '/settings/indices'
-  })
-  .addSetupWork(
-    require('ui/index_patterns/routeSetup/loadDefault')({
-      notRequiredRe: /^\/settings\//
-    })
-  );
+  });
+
+  require('ui/index_patterns/routeSetup/loadDefault')({
+    notRequiredRe: /^\/settings\//,
+    whenMissingRedirectTo: '/settings/indices'
+  });
 
   require('ui/modules')
   .get('apps/settings')
