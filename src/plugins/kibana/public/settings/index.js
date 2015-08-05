@@ -1,15 +1,19 @@
 define(function (require, module, exports) {
   var _ = require('lodash');
 
+  var sections = require('plugins/kibana/settings/sections/index');
   require('plugins/kibana/settings/styles/main.less');
   require('ui/filters/start_from');
 
   require('ui/routes')
   .when('/settings', {
     redirectTo: '/settings/indices'
-  });
-
-  var sections = require('plugins/kibana/settings/sections/index');
+  })
+  .addSetupWork(
+    require('ui/index_patterns/routeSetup/loadDefault')({
+      notRequiredRe: /^\/settings\//
+    })
+  );
 
   require('ui/modules')
   .get('apps/settings')

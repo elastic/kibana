@@ -1,9 +1,11 @@
 var _ = require('lodash');
 
 var wrapRouteWithPrep = require('./wrapRouteWithPrep');
+var RouteSetupManager = require('./RouteSetupManager');
 
 function RouteManager() {
   var self = this;
+  var setup = new RouteSetupManager();
   var when = [];
   var defaults = [];
   var otherwise;
@@ -24,15 +26,19 @@ function RouteManager() {
         route.reloadOnSearch = false;
       }
 
-      wrapRouteWithPrep(route);
+      wrapRouteWithPrep(route, setup);
       $routeProvider.when(path, route);
     });
 
     if (otherwise) {
-      wrapRouteWithPrep(otherwise);
+      wrapRouteWithPrep(otherwise, setup);
       $routeProvider.otherwise(otherwise);
     }
   };
+
+  this.addSetupWork = _.bindKey(setup, 'addSetupWork');
+  this.afterSetupWork = _.bindKey(setup, 'afterSetupWork');
+  this.afterWork = _.bindKey(setup, 'afterWork');
 
   self.when = function (path, route) {
     when.push([path, route]);
