@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
 
   return function (Private, $rootScope, getAppState, globalState) {
     var EventEmitter = Private(require('ui/events'));
@@ -8,7 +9,6 @@ define(function (require) {
     var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
     var compareFilters = require('ui/filter_bar/lib/compareFilters');
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
-    var validateFilter = Private(require('ui/filter_bar/lib/validateFilter'));
 
     var queryFilter = new EventEmitter();
 
@@ -84,47 +84,29 @@ define(function (require) {
     };
 
     /**
-    * @param currentFilter The filter to merge changes in to
-    * @param newFilter The filter changes to merge
-    */
-    queryFilter.mergeEditedFilter = function (currentFilter, newQuery) {
-      var self = this;
-      var parsedQuery;
-      try {
-        parsedQuery = JSON.parse(newQuery);
-      } catch (e) {
-        //The editor is already showing an error,
-        //staying in edit mode is sufficient
-        return;
-      }
-
-
-      var clonedFilter = _.cloneDeep(currentFilter);
-      clonedFilter.query.match = parsedQuery;
-      validateFilter(clonedFilter).then(function (valid) {
-        if (!valid) return;
-        self.stopEditingFilter(currentFilter);
-        currentFilter.query.match = parsedQuery;
-      });
-
-    };
-
-    /**
-    * Clone a filter
-    * @param {object} filter The filter to clone
-    * @return {object} the cloned filter
-    */
-    queryFilter.stringifyQuery = function (filter) {
-      return JSON.stringify(filter.query.match, null, '\t');
-    };
-
-    /**
      * Removes all filters
      */
     queryFilter.removeAll = function () {
       var appState = getAppState();
       appState.filters = [];
       globalState.filters = [];
+    };
+
+    /**
+    * Updates an existing filter
+    * @param {object} Contains a reference to a filter and its new model
+    */
+    queryFilter.updateFilter = function ({ source, model }) {
+      var parsedFilter;
+      try {
+        parsedFilter = JSON.parse(model);
+      } catch (e) {
+        //The editor is already showing an error,
+        //staying in edit mode is sufficient
+        return;
+      }
+
+      angular.copy(parsedFilter, source);
     };
 
     /**

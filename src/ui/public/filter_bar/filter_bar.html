@@ -37,10 +37,14 @@
       </a>
     </div>
   </div>
-  <div class="filter-edit" ng-if="editingFilter" ng-init="clonedFilter = stringifyQuery(editingFilter)">
-    <div ui-ace="{ onLoad: aceLoaded, mode: 'json' }" ng-model="clonedFilter"></div>
-    <button class="btn btn-primary" ng-click="stopEditingFilter(editingFilter)">Cancel</button>
-    <button class="btn btn-success" ng-click="mergeEditedFilter(editingFilter, clonedFilter)">Done</button>
+  <div class="filter-edit-container" ng-if="editingFilter">
+  <div class="bs-callout bs-callout-warning">
+      <h4>Proceed with caution</h4>
+      <p>Modifying filters is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse.</p>
+    </div>
+    <div ui-ace="{ mode: 'json' }" ng-model="editingFilter.model"></div>
+    <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
+    <button class="btn btn-success" ng-click="updateFilter(editingFilter)">Save filter</button>
   </div>
   <div class="filter-link">
     <div class="filter-description small">

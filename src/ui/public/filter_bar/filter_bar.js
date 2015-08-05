@@ -25,14 +25,11 @@ define(function (require) {
           'toggleAll',
           'pinFilter',
           'pinAll',
-          'startEditingFilter',
-          'stopEditingFilter',
-          'mergeEditedFilter',
-          'stringifyQuery',
           'invertFilter',
           'invertAll',
           'removeFilter',
-          'removeAll'
+          'removeAll',
+          'updateFilter'
         ].forEach(function (method) {
           $scope[method] = queryFilter[method];
         });
@@ -50,15 +47,11 @@ define(function (require) {
           }
         };
 
-        $scope.aceLoaded = function (editor) {
-          var session = editor.getSession();
-          session.setTabSize(2);
-          session.setUseSoftTabs(true);
-        };
-
         $scope.startEditingFilter = function (filter) {
-          $scope.editingFilter = filter;
-          $scope.clonedFilter = $scope.stringifyQuery(filter);
+          $scope.editingFilter = {
+            source: filter,
+            model: JSON.stringify(filter, null, '  ')
+          };
         };
 
         $scope.stopEditingFilter = function () {
@@ -72,6 +65,7 @@ define(function (require) {
 
         // update the scope filter list on filter changes
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.stopEditingFilter();
           updateFilters();
         });
 
