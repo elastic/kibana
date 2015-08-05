@@ -13,6 +13,8 @@ describe('plugins/elasticsearch', function () {
     var kbnServer;
 
     before(function () {
+      this.timeout(10000);
+
       kbnServer = new KbnServer({
         server: { autoListen: false },
         logging: { quiet: true },
