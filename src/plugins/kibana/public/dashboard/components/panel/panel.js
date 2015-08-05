@@ -41,6 +41,11 @@ define(function (require) {
             $scope.editUrl = panelConfig.editUrl;
             $scope.$on('$destroy', panelConfig.savedObj.destroy);
 
+            // create child ui state from the savedObj
+            var uiState = panelConfig.uiState || {};
+            var path = ['panels', panelConfig.savedObj.id, panelConfig.panel.panelIndex];
+            $scope.uiState = $scope.parentUiState.createChild(path.join('-'), uiState);
+
             $scope.filter = function (field, value, operator) {
               var index = $scope.savedObj.searchSource.get('index').id;
               filterManager.add(field, value, operator, index);

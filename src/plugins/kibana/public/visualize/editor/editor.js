@@ -221,7 +221,7 @@ define(function (require) {
     $scope.doSave = function () {
       savedVis.id = savedVis.title;
       savedVis.visState = $state.vis;
-      savedVis.uiStateJSON = JSON.stringify($scope.uiState.getChanges());
+      savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
       savedVis.save()
       .then(function (id) {
