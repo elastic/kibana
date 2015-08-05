@@ -133,11 +133,11 @@ define(function (require) {
           $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
             return _.get(agg, 'schema.group') === 'metrics';
           });
-        } catch (e) {
-          // this can fail when the agg.type is changed but the
-          // params have not been set yet. watcher will trigger again
-          // when the params update
         }
+        // this can fail when the agg.type is changed but the
+        // params have not been set yet. watcher will trigger again
+        // when the params update
+        catch (e) {} // eslint-disable-line no-empty
       }, true);
 
       $state.replace();

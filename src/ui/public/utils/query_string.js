@@ -8,9 +8,9 @@ define(function (require) {
   function tryDecodeURIComponent(value) {
     try {
       return decodeURIComponent(value);
-    } catch (e) {
-      // Ignore any invalid uri component
     }
+    // Ignore any invalid uri component
+    catch (e) {} // eslint-disable-line no-empty
   }
 
   /**
