@@ -12,7 +12,10 @@ require('ui/routes')
 });
 
 require('ui/chrome')
-.setLogo('url(' + kibanaLogoUrl + ') left no-repeat', true)
+.setBrand({
+  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
+  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
+})
 .setNavBackground('#222222')
 .setTabDefaults({
   resetWhenActive: true,

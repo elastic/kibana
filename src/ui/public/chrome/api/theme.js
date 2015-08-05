@@ -1,7 +1,6 @@
 var _ = require('lodash');
 
 module.exports = function (chrome, internals) {
-
   /**
    * ui/chrome Theme API
    *
@@ -36,35 +35,29 @@ module.exports = function (chrome, internals) {
   };
 
   /**
-   * @param {string} logo - css background value
-   * @param {string|bool} [smallLogo] - css background value, true to reuse the regular logo
+   * @param {string|object} item - brand key to set, or object to apply
+   * @param {mixed} val - value to put on the brand item
    * @return {chrome}
    */
-  chrome.setLogo = function (logo, smallLogo) {
-    if (smallLogo === true) {
-      smallLogo = logo;
+  chrome.setBrand = function (item, val) {
+    internals.brand = internals.brand || {};
+
+    // allow objects to be passed in
+    if (_.isPlainObject(item)) {
+      internals.brand = _.clone(item);
+    } else {
+      internals.brand[item] = val;
     }
 
-    chrome.logo = logo;
-    chrome.smallLogo = smallLogo;
-
-    return chrome;
-  };
-
-  /**
-   * @param {string} val - the text to display
-   * @return {chrome}
-   */
-  chrome.setBrand = function (val) {
-    internals.brand = val;
     return chrome;
   };
 
   /**
    * @return {string} - the brand text
    */
-  chrome.getBrand = function () {
-    return internals.brand;
+  chrome.getBrand = function (item) {
+    if (!internals.brand) return;
+    return internals.brand[item];
   };
 
 };
