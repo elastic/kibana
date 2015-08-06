@@ -2,7 +2,9 @@ define(function (require) {
   var _ = require('lodash');
   var errors = require('ui/errors');
 
-  return function () {
+  return function (Private) {
+    var Events = Private(require('ui/events'));
+
     function validateParent(parent, path) {
       if (path.length <= 0) {
         throw new errors.PersistedStateError('PersistedState child objects must contain a path');
@@ -18,7 +20,10 @@ define(function (require) {
       if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
     }
 
+    _.class(PersistedState).inherits(Events);
     function PersistedState(value, path, parent) {
+      PersistedState.Super.call(this);
+
       this._path = this._setPath(path);
       this._parent = parent || false;
 
