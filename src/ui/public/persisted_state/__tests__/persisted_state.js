@@ -5,6 +5,7 @@ var expect = require('expect.js');
 var errors = require('ui/errors');
 
 var PersistedState;
+var Events;
 
 describe('Persisted State', function () {
   beforeEach(function () {
@@ -12,6 +13,7 @@ describe('Persisted State', function () {
 
     ngMock.inject(function (Private) {
       PersistedState = Private(require('ui/persisted_state/persisted_state'));
+      Events = Private(require('ui/events'));
     });
   });
 
@@ -21,6 +23,11 @@ describe('Persisted State', function () {
     it('should create an empty state instance', function () {
       persistedState = new PersistedState();
       expect(persistedState.get()).to.eql({});
+    });
+
+    it('should be an event emitter', function () {
+      persistedState = new PersistedState();
+      expect(persistedState).to.be.an(Events);
     });
 
     it('should create a state instance with data', function () {
