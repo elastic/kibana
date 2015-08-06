@@ -29,7 +29,7 @@ define(function (require) {
             case 'geo_point':
               return '<i class="fa fa-globe"></i>';
             case 'boolean':
-              return '<i><strong>b</strong></i>';
+              return '<i class="fa fa-adjust"></i>';
             case 'conflict':
               return '<i class="fa fa-warning"></i>';
             default:
