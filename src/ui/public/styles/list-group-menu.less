@@ -1,0 +1,26 @@
+@import (reference) "~ui/styles/theme";
+
+.list-group-menu {
+
+  &.select-mode a{
+     outline: none;
+     color: @link-color;
+  }
+
+  .list-group-menu-item {
+    list-style: none;
+    color: @link-color;
+
+    &.active {
+      font-weight: bold;
+      background-color: @well-bg;
+    }
+    &:hover {
+      background-color: @well-bg;
+    }
+    li {
+      list-style: none;
+      color: @link-color;
+    }
+  }
+}

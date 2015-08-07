@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var resolve = require('path').resolve;
 var root = resolve(__dirname, '..');
 var simpleGit = require('simple-git')(root);
@@ -10,7 +11,7 @@ module.exports = function (grunt) {
     'Run staged files through JSHint/JSCS',
     function () {
 
-      diff('--name-only --cached')
+      diff(['--name-only', '--cached'])
       .then(function (files) {
         // match these patterns
         var patterns = grunt.config.get('lintThese');
@@ -21,10 +22,9 @@ module.exports = function (grunt) {
         files = grunt.file.match(patterns, files);
         grunt.log.debug(files);
 
-        grunt.config.set('jshint.staged.files.src', files);
-        grunt.config.set('jscs.staged.files.src', files);
-
-        grunt.task.run(['jshint:staged', 'jscs:staged']);
+        if (!_.size(files)) return;
+        grunt.config.set('eslint.staged.files.src', files);
+        grunt.task.run(['eslint:staged']);
       })
       .nodeify(this.async());
 

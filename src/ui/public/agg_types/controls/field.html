@@ -1,0 +1,38 @@
+<div class="form-group">
+  <label for="field">
+    Field
+  </label>
+
+  <span class="pull-right text-warning hintbox-label" ng-show="agg.params.field.analyzed"
+      ng-click="showAnalyzedFieldWarning = !showAnalyzedFieldWarning">
+    <i class="fa fa-warning"></i> Analyzed Field
+  </span>
+  <div class="hintbox" ng-show="showAnalyzedFieldWarning">
+    <p>
+    <strong>Careful!</strong> The field selected contains analyzed strings. Analyzed strings are highly unique and can use a lot of memory to visualize. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
+    </p>
+
+    <p ng-show="indexedFields.byName[agg.params.field.name + '.raw'].analyzed == false">
+      <strong>Tip:</strong> <i>{{agg.params.field.name + '.raw'}}</i> may be a <i>not_analyzed</i> version of this field.
+    </p>
+  </div>
+
+  <select
+    class="form-control"
+    name="field"
+    required
+    ng-model="agg.params.field"
+    ng-show="indexedFields.length"
+    auto-select-if-only-one="indexedFields"
+    ng-options="field as field.displayName group by field.type for field in indexedFields"
+    ng-change="aggParam.onChange(agg)">
+  </select>
+
+  <div class="hintbox" ng-if="!indexedFields.length">
+    <p>
+      <i class="fa fa-danger text-danger"></i>
+      <strong>No Compatible Fields:</strong> The "{{ vis.indexPattern.id }}" index pattern does not contain any of the following field types: {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
+    </p>
+  </div>
+
+</div>

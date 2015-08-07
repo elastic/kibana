@@ -1,4 +1,4 @@
-# Kibana 4.1.0-snapshot
+# Kibana 4.2.0-snapshot
 
 [![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
 
@@ -6,7 +6,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 ## Requirements
 
-- Elasticsearch version 1.4.4 or later
+- Elasticsearch version 2.0.0 or later
 - Kibana binary package
 
 ## Installation
@@ -39,7 +39,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |  |
 | --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.0-snapshot-windows.zip) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-darwin-x64.zip) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-linux-x64.zip) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-linux-x86.zip) |
+| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.2.0-snapshot-windows.zip) |
