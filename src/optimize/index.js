@@ -45,7 +45,7 @@ module.exports = async (kbnServer, server, config) => {
   try {
     server.log(
       ['info', 'optimize'],
-      `Optimizing bundles for ${bundleIds.join(', ')}. This may take a few minutes.`
+      `Optimizing and caching bundles for ${bundleIds.join(', ')}. This may take a few minutes.`
     );
 
     let start = Date.now();
