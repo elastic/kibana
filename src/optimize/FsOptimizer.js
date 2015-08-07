@@ -1,11 +1,14 @@
 let { fromNode } = require('bluebird');
+let { writeFile } = require('fs');
+
 let BaseOptimizer = require('./BaseOptimizer');
+let fromRoot = require('../utils/fromRoot');
 
 module.exports = class FsOptimizer extends BaseOptimizer {
   async run() {
     await this.initCompiler();
 
-    await fromNode(cb => {
+    let stats = await fromNode(cb => {
       this.compiler.run((err, stats) => {
         if (err || !stats) return cb(err);
 
@@ -19,6 +22,17 @@ module.exports = class FsOptimizer extends BaseOptimizer {
         }
       });
     });
+
+    if (this.profile) {
+      await fromNode(cb => {
+        writeFile(
+          fromRoot('webpackstats.json'),
+          JSON.stringify(stats.toJson()),
+          { encoding: 'utf8' },
+          cb
+        );
+      });
+    }
 
     this.compiler = null;
   }

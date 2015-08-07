@@ -36,7 +36,8 @@ module.exports = async (kbnServer, server, config) => {
   let optimizer = new FsOptimizer({
     env: bundles.env,
     bundles: bundles,
-    sourceMaps: config.get('optimize.sourceMaps')
+    sourceMaps: config.get('optimize.sourceMaps'),
+    profile: config.get('optimize.profile')
   });
 
   server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);

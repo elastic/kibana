@@ -5,6 +5,7 @@ let write = require('fs').writeFileSync;
 let webpack = require('webpack');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
+var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
@@ -15,6 +16,7 @@ class BaseOptimizer {
     this.env = opts.env;
     this.bundles = opts.bundles;
     this.sourceMaps = opts.sourceMaps || false;
+    this.profile = opts.profile || false;
   }
 
   async initCompiler() {
@@ -29,6 +31,7 @@ class BaseOptimizer {
       entry: this.bundles.toWebpackEntries(),
 
       devtool: this.sourceMaps ? '#source-map' : false,
+      profile: this.profile || false,
 
       output: {
         path: this.env.workingDir,
@@ -46,7 +49,8 @@ class BaseOptimizer {
         new webpack.optimize.DedupePlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
-        })
+        }),
+        new CommonsChunkPlugin('commons.bundle.js'),
       ],
 
       module: {
