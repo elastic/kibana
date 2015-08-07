@@ -1,10 +1,11 @@
-module.exports = function (kbnServer, server, config) {
+module.exports = async (kbnServer, server, config) => {
   let _ = require('lodash');
   let Boom = require('boom');
   let formatUrl = require('url').format;
   let { join, resolve } = require('path');
 
   let UiExports = require('./UiExports');
+  let UiBundle = require('./UiBundle');
   let UiBundleCollection = require('./UiBundleCollection');
   let UiBundlerEnv = require('./UiBundlerEnv');
 
@@ -21,10 +22,15 @@ module.exports = function (kbnServer, server, config) {
     uiExports.consumePlugin(plugin);
   }
 
-  let bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv);
+  let bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
 
   for (let app of uiExports.getAllApps()) {
     bundles.addApp(app);
+  }
+
+  for (let gen of uiExports.getBundleProviders()) {
+    let bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps());
+    if (bundle) bundles.add(bundle);
   }
 
   // render all views from the ui/views directory

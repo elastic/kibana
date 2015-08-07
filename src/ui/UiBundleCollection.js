@@ -1,6 +1,7 @@
 let { pull, transform, pluck } = require('lodash');
 let { join } = require('path');
 let { resolve, promisify } = require('bluebird');
+let { makeRe } = require('minimatch');
 let rimraf = promisify(require('rimraf'));
 let mkdirp = promisify(require('mkdirp'));
 let unlink = promisify(require('fs').unlink);
@@ -11,13 +12,28 @@ let UiBundle = require('./UiBundle');
 let appEntryTemplate = require('./appEntryTemplate');
 
 class UiBundleCollection {
-  constructor(bundlerEnv) {
+  constructor(bundlerEnv, filter) {
     this.each = [];
     this.env = bundlerEnv;
+    this.filter = makeRe(filter || '*', {
+      noglobstar: true,
+      noext: true,
+      matchBase: true
+    });
+  }
+
+  add(bundle) {
+    if (!(bundle instanceof UiBundle)) {
+      throw new TypeError('expected bundle to be an instance of UiBundle');
+    }
+
+    if (this.filter.test(bundle.id)) {
+      this.each.push(bundle);
+    }
   }
 
   addApp(app) {
-    this.each.push(new UiBundle({
+    this.add(new UiBundle({
       id: app.id,
       modules: app.getModules(),
       template: appEntryTemplate,
@@ -43,11 +59,17 @@ class UiBundleCollection {
     }
   }
 
-  async filterCachedBundles() {
-    for (let bundle of this.each.slice()) {
+  async getInvalidBundles() {
+    let invalids = new UiBundleCollection(this.env);
+
+    for (let bundle of this.each) {
       let exists = await bundle.checkForExistingOutput();
-      if (exists) pull(this.each, bundle);
+      if (!exists) {
+        invalids.add(bundle);
+      }
     }
+
+    return invalids;
   }
 
   toWebpackEntries() {

@@ -9,6 +9,7 @@ class UiExports {
     this.aliases = {};
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
+    this.bundleProviders = [];
   }
 
   consumePlugin(plugin) {
@@ -54,6 +55,11 @@ class UiExports {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };
 
+      case 'bundle':
+        return (plugin, spec) => {
+          this.bundleProviders.push(spec);
+        };
+
       case 'aliases':
         return (plugin, specs) => {
           _.forOwn(specs, (spec, adhocType) => {
@@ -93,6 +99,10 @@ class UiExports {
 
   getHiddenApp(id) {
     return this.apps.hidden.byId[id];
+  }
+
+  getBundleProviders() {
+    return this.bundleProviders;
   }
 }
 

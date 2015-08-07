@@ -15,8 +15,7 @@ module.exports = Joi.object({
   env: Joi.object({
     name: Joi.string().default(Joi.ref('$env')),
     dev: Joi.boolean().default(Joi.ref('$dev')),
-    prod: Joi.boolean().default(Joi.ref('$prod')),
-    test: Joi.boolean().default(Joi.ref('$test')),
+    prod: Joi.boolean().default(Joi.ref('$prod'))
   }).default(),
 
   pid: Joi.object({
@@ -72,9 +71,10 @@ module.exports = Joi.object({
 
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
+    bundleFilter: Joi.string().default('*'),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-    watch: Joi.boolean().default(Joi.ref('$dev')),
+    watch: Joi.boolean().default(false),
     lazy: Joi.boolean().when('watch', {
       is: true,
       then: Joi.default(true),

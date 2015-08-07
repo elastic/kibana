@@ -73,11 +73,13 @@ module.exports = class LiveOptimizer extends BaseOptimizer {
       return content || '';
     }
     catch (error) {
-      if (error && error.message.match(/Path doesn't exist/)) {
-        error = Boom.notFound();
+
+      if (error && error.message.match(/path doesn't exist/i)) {
+        error = Boom.notFound(error.message);
+      } else {
+        console.log(error.stack);
       }
 
-      console.log(error.stack);
       throw error;
     }
   }

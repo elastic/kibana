@@ -3,9 +3,7 @@ module.exports = async (kbnServer, server, config) => {
   let { fromNode } = require('bluebird');
   let { readdir, stat } = require('fs');
   let { resolve } = require('path');
-
-  let src = require('requirefrom')('src');
-  let { each } = src('utils/async');
+  let { each } = require('bluebird');
 
   var Plugins = require('./Plugins');
   var plugins = kbnServer.plugins = new Plugins(kbnServer);

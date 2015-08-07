@@ -8,17 +8,17 @@ let stat = promisify(require('fs').stat);
 
 module.exports = class UiBundle {
   constructor(opts) {
-    opts = opts || {};
 
-    this.env = opts.env;
+    opts = opts || {};
     this.id = opts.id;
-    this.plugins = opts.plugins;
     this.modules = opts.modules;
     this.template = opts.template;
+    this.env = opts.env;
 
     let pathBase = join(this.env.workingDir, this.id);
     this.entryPath = `${pathBase}.entry.js`;
     this.outputPath = `${pathBase}.bundle.js`;
+
   }
 
   renderContent() {
@@ -60,7 +60,6 @@ module.exports = class UiBundle {
   toJSON() {
     return {
       id: this.id,
-      plugins: this.plugins,
       modules: this.modules,
       entryPath: this.entryPath,
       outputPath: this.outputPath

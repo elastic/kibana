@@ -49,10 +49,8 @@ module.exports = function (program) {
   )
   .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
-  .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
-  .option('--no-lazy', 'Prevent lazy optimization of applications, only works with --dev')
   .action(function (opts) {
-    if (opts.dev && !isWorker) {
+    if (opts.dev && opts.lazy && !isWorker) {
       // stop processing the action and handoff to cluster manager
       let ClusterManager = require('../cluster/ClusterManager');
       new ClusterManager(opts);
@@ -68,7 +66,7 @@ module.exports = function (program) {
 
     if (opts.dev) {
       set('env', 'development');
-      set('optimize.lazy', opts.lazy);
+      set('optimize.watch', true);
     }
 
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);

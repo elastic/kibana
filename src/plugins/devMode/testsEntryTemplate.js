@@ -10,28 +10,25 @@ module.exports = require('lodash').template(
  * includes code from:
 <%
 
-  env.pluginInfo.sort().forEach(function (plugin) {
-    print(\` *  - \${plugin}\n\`);
-  });
-
-%> *
- */
-
-require('ui/chrome');
-<%
-
-bundle.modules
-.filter(function (id) {
-  return id !== 'ui/chrome';
-})
-.forEach(function (id, i) {
-
+env.pluginInfo.sort().forEach(function (plugin, i) {
   if (i > 0) print('\\n');
-  print(\`require('\${id}');\`);
-
+  print(' *  - ' + plugin);
 });
 
 %>
-require('ui/chrome').bootstrap(/* xoxo */);
+ *
+ */
+
+require('ui/testHarness');
+<%
+
+bundle.modules.forEach(function (id, i) {
+  if (i > 0) print('\\n');
+  print(\`require('\${id}');\`);
+});
+
+%>
+require('ui/testHarness').bootstrap(/* go! */);
+
 `
 );

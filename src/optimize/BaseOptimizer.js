@@ -89,7 +89,8 @@ class BaseOptimizer {
         modulesDirectories: ['node_modules'],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
-        alias: this.env.aliases
+        alias: this.env.aliases,
+        unsafeCache: [/\/node_modules\//]
       }
     };
   }
