@@ -54,7 +54,6 @@ define(function (require) {
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
-    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -63,8 +62,6 @@ define(function (require) {
     var savedVis = $route.current.locals.savedVis;
 
     var vis = savedVis.vis;
-    var uiState = new PersistedState();
-    if (savedVis.uiStateJSON) uiState.set(JSON.parse(savedVis.uiStateJSON));
     var editableVis = vis.createEditableVis();
     vis.requesting = function () {
       var requesting = editableVis.requesting;
@@ -88,6 +85,7 @@ define(function (require) {
     var $state = $scope.$state = (function initState() {
       var savedVisState = vis.getState();
       var stateDefaults = {
+        uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
         linked: !!savedVis.savedSearchId,
         query: searchSource.getOwn('query') || {query_string: {query: '*'}},
         filters: searchSource.getOwn('filter') || [],
@@ -114,10 +112,11 @@ define(function (require) {
       $scope.savedVis = savedVis;
       $scope.searchSource = searchSource;
       $scope.vis = vis;
-      $scope.uiState = uiState;
       $scope.indexPattern = vis.indexPattern;
       $scope.editableVis = editableVis;
       $scope.state = $state;
+      $scope.uiState = $state.makeStateful('uiState');
+
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
 
