@@ -31,7 +31,7 @@ module.exports = class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
-    if (opts.watch) this.setupWatching();
+    if (opts.devWatch) this.setupWatching();
     else this.startCluster();
   }
 

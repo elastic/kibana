@@ -49,6 +49,7 @@ module.exports = function (program) {
   )
   .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
+  .option('--no-dev-watch', 'Prevents automatic restarts of the server in --dev mode')
   .action(function (opts) {
     if (opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
