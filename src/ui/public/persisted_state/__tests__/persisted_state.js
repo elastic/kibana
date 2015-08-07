@@ -496,8 +496,7 @@ describe('Persisted State', function () {
     });
   });
 
-  describe.only('events', function () {
-    this.timeout(0);
+  describe('events', function () {
     var persistedState;
     var emitter;
 
@@ -521,6 +520,35 @@ describe('Persisted State', function () {
     it('should emit change when changing values', function () {
       expect(getByType('change')).to.have.length(0);
       persistedState.set('hello.time', 'now');
+      expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit change when values are identical', function () {
+      expect(getByType('change')).to.have.length(0);
+      // check both forms of setting the same value
+      persistedState.set('hello', { message: 'world' });
+      expect(getByType('change')).to.have.length(0);
+      persistedState.set('hello.message', 'world');
+      expect(getByType('change')).to.have.length(0);
+    });
+
+    it('should emit change when values change', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.set('hello.message', 'worlds');
+      expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit change when createChild is same value', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('hello', { message: 'world' });
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('hello.message', 'world');
+      expect(getByType('change')).to.have.length(0);
+    });
+
+    it('should emit change when createChild changes value', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('hello', { message: 'everyone' });
       expect(getByType('change')).to.have.length(1);
     });
   });
