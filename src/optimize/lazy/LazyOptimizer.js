@@ -36,12 +36,13 @@ module.exports = class LazyOptimizer extends FsOptimizer {
         if (e.stats && this.current === prom) {
           this.log(['warning', 'optimize'], e.stats.toString({ colors: true }));
         }
+        // TODO: rebuild on errors
         throw e;
       }
     }())
     .then(() => {
       let seconds = ((Date.now() - start) / 1000).toFixed(2);
-      this.log(['info', 'optimize'], `live optimization complete in ${seconds} seconds.`);
+      this.log(['info', 'optimize'], `lazy optimization complete in ${seconds} seconds.`);
     });
 
     return prom;

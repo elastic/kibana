@@ -1,6 +1,6 @@
 let { inherits } = require('util');
 let _ = require('lodash');
-let { join } = require('path');
+let { resolve } = require('path');
 let write = require('fs').writeFileSync;
 let webpack = require('webpack');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
@@ -40,6 +40,8 @@ class BaseOptimizer {
         publicPath: '/bundles/',
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
+
+      recordsPath: resolve(this.env.workingDir, 'webpack.records'),
 
       plugins: [
         new webpack.ResolverPlugin([

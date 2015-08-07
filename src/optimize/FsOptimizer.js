@@ -38,10 +38,4 @@ module.exports = class FsOptimizer extends BaseOptimizer {
       });
     }
   }
-
-  getConfig() {
-    let config = BaseOptimizer.prototype.getConfig.call(this);
-    config.cache = true;
-    return config;
-  }
 };

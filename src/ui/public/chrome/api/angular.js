@@ -37,7 +37,7 @@ module.exports = function (chrome, internals) {
             $app.html(internals.rootTemplate);
           }
 
-          $el.append($content);
+          $el.html($content);
         },
         controllerAs: 'chrome',
         controller: function ($scope, $rootScope, $location, $http) {

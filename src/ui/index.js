@@ -2,12 +2,15 @@ module.exports = async (kbnServer, server, config) => {
   let _ = require('lodash');
   let Boom = require('boom');
   let formatUrl = require('url').format;
-  let { join, resolve } = require('path');
+  let { resolve } = require('path');
+  let readFile = require('fs').readFileSync;
 
+  let fromRoot = require('../utils/fromRoot');
   let UiExports = require('./UiExports');
   let UiBundle = require('./UiBundle');
   let UiBundleCollection = require('./UiBundleCollection');
   let UiBundlerEnv = require('./UiBundlerEnv');
+  let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
   let uiExports = kbnServer.uiExports = new UiExports(kbnServer);
 
@@ -35,6 +38,7 @@ module.exports = async (kbnServer, server, config) => {
 
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
+  server.exposeStaticFile('/loading.gif', resolve(__dirname, 'public/loading.gif'));
 
   // serve the app switcher
   server.route({
@@ -81,13 +85,14 @@ module.exports = async (kbnServer, server, config) => {
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),
       cacheBust: _.get(kbnServer, 'build.number', ''),
       kbnIndex: config.get('kibana.index'),
-      esShardTimeout: config.get('elasticsearch.shardTimeout')
+      esShardTimeout: config.get('elasticsearch.shardTimeout'),
     };
 
     return this.view(app.templateName, {
       app: app,
       cacheBust: payload.cacheBust,
-      kibanaPayload: payload
+      kibanaPayload: payload,
+      loadingGif: loadingGif,
     });
   });
 };
