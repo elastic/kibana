@@ -6,21 +6,12 @@ define(function (require) {
   function AppStateProvider(Private, $rootScope, getAppState) {
     var State = Private(require('ui/state_management/state'));
     var PersistedState = Private(require('ui/persisted_state/persisted_state'));
-    var uiState;
+    var persistedStates = {};
 
     _.class(AppState).inherits(State);
     function AppState(defaults) {
       AppState.Super.call(this, urlParam, defaults);
       getAppState._set(this);
-
-      // set up the ui state
-      uiState = new PersistedState({});
-      var saveUIState = function () {
-        this.uiState = uiState.getChanges();
-        this.save();
-      };
-      uiState.on('change', _.bind(saveUIState, this));
-      if (this.uiState) uiState.set(this.uiState);
     }
 
     // if the url param is missing, write it back
@@ -29,11 +20,22 @@ define(function (require) {
     AppState.prototype.destroy = function () {
       AppState.Super.prototype.destroy.call(this);
       getAppState._set(null);
-      uiState.off('change');
+      _.each(persistedStates, function (state) {
+        state.off('change');
+      });
     };
 
-    AppState.prototype.getUIState = function () {
-      return uiState;
+    AppState.prototype.makeStateful = function (prop) {
+      if (persistedStates[prop]) return persistedStates[prop];
+
+      // set up the ui state
+      persistedStates[prop] = new PersistedState();
+      var saveState = function () {
+        this[prop] = persistedStates[prop].getChanges();
+        this.save();
+      };
+      persistedStates[prop].on('change', _.bind(saveState, this));
+      if (this[prop]) persistedStates[prop].set(this[prop]);
     };
 
     return AppState;
