@@ -50,6 +50,14 @@ define(function (require) {
         return Promise.try(fn, [i, el, list]);
       }));
     };
+    Promise.each = function (arr, fn) {
+      let queue = arr.slice(0);
+      let i = 0;
+      return (function next() {
+        if (!queue.length) return arr;
+        return Promise.try(fn, [arr.shift(), i++]).then(next);
+      }());
+    };
     Promise.is = function (obj) {
       // $q doesn't create instances of any constructor, promises are just objects with a then function
       // https://github.com/angular/angular.js/blob/58f5da86645990ef984353418cd1ed83213b111e/src/ng/q.js#L335
