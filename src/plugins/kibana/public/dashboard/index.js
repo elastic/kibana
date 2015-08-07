@@ -82,11 +82,17 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
           filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
+
+        // create ui state and load existing state data
+        $scope.uiState = new PersistedState();
+        // setting state here so full dashboard state is in getChanges
+        $scope.uiState.set($state.uiState);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
@@ -156,6 +162,12 @@ define(function (require) {
         // update data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
+        // update the app state when the ui state changes
+        $scope.$listen($scope.uiState, 'change', function () {
+          $state.uiState = $scope.uiState.get();
+          $state.save();
+        });
+
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});
         };
@@ -165,10 +177,6 @@ define(function (require) {
           $state.save();
           $scope.refresh();
         };
-
-        // create ui state and load existing state data
-        $scope.uiState = new PersistedState();
-        if (dash.uiStateJSON) $scope.uiState.set(JSON.parse(dash.uiStateJSON));
 
         $scope.save = function () {
           $state.title = dash.id = dash.title;
