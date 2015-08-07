@@ -73,8 +73,6 @@ define(function (require) {
           if (filter) return filter.query;
         };
 
-
-        // debugger
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
