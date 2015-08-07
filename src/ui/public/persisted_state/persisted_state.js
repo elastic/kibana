@@ -133,7 +133,7 @@ define(function (require) {
       var self = this;
       var initialState = !this._initialized;
       var keyPath = this._getIndex(key);
-      this.emit('set', key, value);
+      this.emit('set');
 
       // if this is the initial state value, save value as the default
       if (initialState) {
@@ -148,18 +148,25 @@ define(function (require) {
       }
 
       // everything in here affects only the parent state
-      if (!initialState && !initialChildState) {
+      if (!initialState) {
         // no path and no key, set the whole state
         if (!this._hasPath() && _.isUndefined(key)) {
-          this._changedState = value;
+          // check for changes and emit an event when found
+          if (!_.isEqual(this._changedState, value)) this.emit('change');
+          if (!initialChildState) this._changedState = value;
         } else {
+          // check for changes and emit an event when found
+          if (!_.isEqual(this.get(keyPath), value)) this.emit('change');
+
           // arrays merge by index, not the desired behavior - ensure they are replaced
-          if (_.isArray(_.get(this._mergedState, keyPath))) {
-            _.set(this._mergedState, keyPath, undefined);
+          if (!initialChildState) {
+            if (_.isArray(_.get(this._mergedState, keyPath))) {
+              _.set(this._mergedState, keyPath, undefined);
+            }
+            _.set(this._changedState, keyPath, value);
           }
-          _.set(this._changedState, keyPath, value);
         }
-        this.emit('change', key, value);
+
       }
 
       var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
