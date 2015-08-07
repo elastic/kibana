@@ -44,15 +44,17 @@ module.exports = async (kbnServer, server, config) => {
 
   try {
     server.log(
-      ['warning', 'optimize'],
+      ['info', 'optimize'],
       `Optimizing bundles for ${bundleIds.join(', ')}. This may take a few minutes.`
     );
 
+    let start = Date.now();
     await optimizer.run();
+    let seconds = ((Date.now() - start) / 1000).toFixed(2);
 
     server.log(
       ['info', 'optimize'],
-      `Optimization of ${bundleIds.join(', ')} complete.`
+      `Optimization of ${bundleIds.join(', ')} complete in ${seconds} seconds.`
     );
   } catch (e) {
     if (e.stats) {

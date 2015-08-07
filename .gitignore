@@ -12,3 +12,4 @@ target
 esvm
 .htpasswd
 installedPlugins
+webpackstats.json
