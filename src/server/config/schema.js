@@ -75,8 +75,14 @@ module.exports = Joi.object({
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(Joi.ref('$dev')),
+    lazy: Joi.boolean().when('watch', {
+      is: true,
+      then: Joi.default(true),
+      otherwise: Joi.default(false)
+    }),
+    lazyPort: Joi.number().default(5602),
+    lazyHost: Joi.string().hostname().default('0.0.0.0'),
     sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
-    _workerRole: Joi.valid('send', 'receive', null).default(null)
   }).default()
 
 }).default();

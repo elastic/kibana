@@ -17,7 +17,7 @@ module.exports = function (config) {
     // list of files / patterns to load in the browser
     files: [
       'http://localhost:5601/bundles/tests.bundle.js',
-      'http://localhost:5601/bundles/tests.bundle.style.css'
+      'http://localhost:5601/bundles/tests.style.css'
     ],
 
     proxies: {

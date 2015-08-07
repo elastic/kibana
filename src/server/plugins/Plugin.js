@@ -1,6 +1,6 @@
 let _ = require('lodash');
 let Joi = require('joi');
-let Promise = require('bluebird');
+let { attempt, fromNode } = require('bluebird');
 let { resolve } = require('path');
 let { inherits } = require('util');
 
@@ -33,63 +33,59 @@ module.exports = class Plugin {
     };
   }
 
-  init() {
-    let self = this;
-
-    let id = self.id;
-    let version = self.version;
-    let kbnStatus = self.kbnServer.status;
-    let server = self.kbnServer.server;
-    let config = self.kbnServer.config;
+  async init() {
+    let id = this.id;
+    let version = this.version;
+    let kbnStatus = this.kbnServer.status;
+    let server = this.kbnServer.server;
+    let config = this.kbnServer.config;
 
     server.log(['plugins', 'debug'], {
       tmpl: 'Initializing plugin <%= plugin.id %>',
-      plugin: self
+      plugin: this
     });
 
-    self.status = kbnStatus.create(`plugin:${self.id}`);
-    return Promise.try(function () {
-      return self.getConfigSchema(Joi);
-    })
-    .then(function (schema) {
-      if (schema) config.extendSchema(id, schema);
-      else config.extendSchema(id, defaultConfigSchema);
-    })
-    .then(function () {
-      if (config.get([id, 'enabled'])) {
-        return self.externalCondition(config);
-      }
-    })
-    .then(function (enabled) {
-      if (!enabled) {
-        // Only change the plugin status if it wasn't set by the externalCondition
-        if (self.status.state === 'uninitialized') {
-          self.status.disabled();
-        }
-        return;
+    if (this.publicDir) {
+      server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
+    }
+
+    this.status = kbnStatus.create(`plugin:${this.id}`);
+
+    // setup plugin config
+    let schema = await this.getConfigSchema(Joi);
+    config.extendSchema(id, schema || defaultConfigSchema);
+
+    // ensure that the plugin is enabled
+    let enabled = config.get([id, 'enabled']) && this.externalCondition(config);
+    if (!enabled) {
+      // Only change the plugin status if it wasn't set by the externalCondition
+      if (this.status.state === 'uninitialized') {
+        this.status.disabled();
       }
 
-      let register = function (server, options, next) {
-        server.expose('status', self.status);
-        Promise.try(self.externalInit, [server, options], self).nodeify(next);
-      };
+      return;
+    }
 
-      register.attributes = { name: id, version: version };
+    // setup the hapi register function and get on with it
+    let register = (server, options, next) => {
+      server.expose('status', this.status);
+      attempt(this.externalInit, [server, options], this).nodeify(next);
+    };
 
-      return Promise.fromNode(function (cb) {
-        server.register({
-          register: register,
-          options: config.has(id) ? config.get(id) : null
-        }, cb);
-      })
-      .then(function () {
-        // Only change the plugin status to green if the
-        // intial status has not been updated
-        if (self.status.state === 'uninitialized') {
-          self.status.green('Ready');
-        }
-      });
+    register.attributes = { name: id, version: version };
+
+    await fromNode(cb => {
+      server.register({
+        register: register,
+        options: config.has(id) ? config.get(id) : null
+      }, cb);
     });
+
+    // Only change the plugin status to green if the
+    // intial status has not been changed
+    if (this.status.state === 'uninitialized') {
+      this.status.green('Ready');
+    }
   }
 
   toJSON() {

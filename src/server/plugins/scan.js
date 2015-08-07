@@ -1,63 +1,62 @@
-module.exports = function (kbnServer, server, config) {
+module.exports = async (kbnServer, server, config) => {
   let _ = require('lodash');
-  let Promise = require('bluebird');
-  let readdir = Promise.promisify(require('fs').readdir);
-  let stat = Promise.promisify(require('fs').stat);
-  let resolve = require('path').resolve;
+  let { fromNode } = require('bluebird');
+  let { readdir, stat } = require('fs');
+  let { resolve } = require('path');
+
+  let src = require('requirefrom')('src');
+  let { each } = src('utils/async');
+
+  var Plugins = require('./Plugins');
+  var plugins = kbnServer.plugins = new Plugins(kbnServer);
 
   let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
-  let absolutePaths = [].concat(config.get('plugins.paths') || []);
+  let pluginPaths = [].concat(config.get('plugins.paths') || []);
+
   let debug = _.bindKey(server, 'log', ['plugins', 'debug']);
   let warning = _.bindKey(server, 'log', ['plugins', 'warning']);
 
-  return Promise.map(scanDirs, function (dir) {
+  // scan all scanDirs to find pluginPaths
+  await each(scanDirs, async dir => {
     debug({ tmpl: 'Scanning `<%= dir %>` for plugins', dir: dir });
 
-    return readdir(dir)
-    .catch(function (err) {
-      if (err.code !== 'ENOENT') {
-        throw err;
-      }
+    let filenames = null;
 
+    try {
+      filenames = await fromNode(cb => readdir(dir, cb));
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+
+      filenames = [];
       warning({
         tmpl: '<%= err.code %>: Unable to scan non-existent directory for plugins "<%= dir %>"',
         err: err,
         dir: dir
       });
-
-      return [];
-    })
-    .map(function (file) {
-      if (file === '.' || file === '..') return false;
-      let path = resolve(dir, file);
-
-      return stat(path).then(function (stat) {
-        return stat.isDirectory() ? path : false;
-      });
-    });
-  })
-  .then(function (dirs) {
-    return _([dirs, absolutePaths])
-    .flattenDeep()
-    .compact()
-    .uniq()
-    .value();
-  })
-  .filter(function (dir) {
-    let path;
-    try { path = require.resolve(dir); }
-    catch (e) { path = false; }
-
-    if (!path) {
-      warning({ tmpl: 'Skipping non-plugin directory at <%= dir %>', dir: dir });
-      return false;
-    } else {
-      require(path);
-      debug({ tmpl: 'Found plugin at <%= dir %>', dir: dir });
-      return true;
     }
-  })
-  .then(function (pluginPaths) {
-    kbnServer.pluginPaths = pluginPaths;
+
+    await each(filenames, async name => {
+      if (name[0] === '.') return;
+
+      let path = resolve(dir, name);
+      let stats = await fromNode(cb => stat(path, cb));
+      if (stats.isDirectory()) {
+        pluginPaths.push(path);
+      }
+    });
   });
+
+  for (let path of pluginPaths) {
+    let modulePath;
+    try {
+      modulePath = require.resolve(path);
+    } catch (e) {
+      warning({ tmpl: 'Skipping non-plugin directory at <%= path %>', path: path });
+      continue;
+    }
+
+    require(modulePath);
+    plugins.new(path);
+    debug({ tmpl: 'Found plugin at <%= modulePath %>', path: modulePath });
+  }
 };

@@ -1,37 +1,36 @@
-let _ = require('lodash');
+let { once, template } = require('lodash');
 let { resolve } = require('path');
 let { readFileSync } = require('fs');
 
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');
-let pathContains = src('utils/pathContains');
 let LiveOptimizer = src('optimize/LiveOptimizer');
 
 let id = 'tests';
 let globAll = require('./globAll');
-let testEntryFileTemplate = _.template(readFileSync(resolve(__dirname, './testBundleEntry.js.tmpl')));
+let testEntryFileTemplate = template(readFileSync(resolve(__dirname, './testBundleEntry.js.tmpl')));
 
 class TestBundler {
   constructor(kbnServer) {
-    this.kbnServer = kbnServer;
-    this.init = _.once(this.init);
-    _.bindAll(this, ['init', 'findTestFiles', 'setupOptimizer', 'render']);
+    this.hapi = kbnServer.server;
+    this.plugins = kbnServer.plugins;
+    this.bundleDir = kbnServer.config.get('optimize.bundleDir');
+    this.init = once(this.init);
   }
 
-  init() {
-    return this.findTestFiles().then(this.setupOptimizer);
+  async init() {
+    await this.findTestFiles();
+    await this.setupOptimizer();
   }
 
-  findTestFiles() {
-    return globAll(fromRoot('src'), [
-      '**/public/**/__tests__/**/*.js'
+  async findTestFiles() {
+    await globAll(fromRoot('.'), [
+      'src/**/public/**/__tests__/**/*.js',
+      'installedPlugins/**/public/**/__tests__/**/*.js'
     ]);
   }
 
-  setupOptimizer(testFiles) {
-    let plugins = this.kbnServer.plugins;
-    let bundleDir = this.kbnServer.config.get('optimize.bundleDir');
-
+  async setupOptimizer(testFiles) {
     let deps = [];
     let modules = [];
 
@@ -39,7 +38,7 @@ class TestBundler {
       modules = modules.concat(testFiles);
     }
 
-    plugins.forEach(function (plugin) {
+    this.plugins.forEach(function (plugin) {
       if (!plugin.app) return;
       modules = modules.concat(plugin.app.getModules());
       deps = deps.concat(plugin.app.getRelatedPlugins());
@@ -47,7 +46,7 @@ class TestBundler {
 
     this.optimizer = new LiveOptimizer({
       sourceMaps: true,
-      bundleDir: bundleDir,
+      bundleDir: this.bundleDir,
       entries: [
         {
           id: id,
@@ -56,22 +55,12 @@ class TestBundler {
           template: testEntryFileTemplate
         }
       ],
-      plugins: plugins
+      plugins: this.plugins
     });
 
-    return this.optimizer.init();
-  }
+    await this.optimizer.init();
 
-  render() {
-    let self = this;
-    let first = !this.optimizer;
-    let server = this.kbnServer.server;
-
-    return self.init()
-    .then(function () {
-      server.log(['optimize', 'testHarness', first ? 'info' : 'debug'], 'Test harness built, compiling test bundle');
-      return self.optimizer.get(id);
-    });
+    this.optimizer.bindToServer(this.hapi);
   }
 }
 

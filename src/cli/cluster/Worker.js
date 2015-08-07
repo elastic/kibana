@@ -22,7 +22,7 @@ module.exports = class Worker extends EventEmitter {
     this.log = opts.log;
     this.type = opts.type;
     this.title = opts.title || opts.type;
-    this.filters = opts.filters;
+    this.watch = (opts.watch !== false);
     this.changes = [];
 
     let argv = _.union(baseArgv, opts.argv || []);
@@ -53,15 +53,7 @@ module.exports = class Worker extends EventEmitter {
   }
 
   onChange(path) {
-    var valid = true;
-
-    if (this.filters) {
-      valid = _.any(this.filters, function (filter) {
-        return filter.test(path);
-      });
-    }
-
-    if (!valid) return;
+    if (!this.watch) return;
     this.changes.push(path);
     this.start();
   }

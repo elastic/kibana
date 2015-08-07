@@ -22,14 +22,25 @@ module.exports = class KbnServer extends EventEmitter {
       require('./config/setup'),
       require('./http'),
       require('./logging'),
-      require('./status'), // sets this.status
-      require('./plugins'), // sets this.plugins
+      require('./status'),
+
+      // find plugins and set this.plugins
+      require('./plugins/scan'),
+
+      // tell the config we are done loading plugins
       require('./config/complete'),
 
-      require('../ui'), // sets this.uiExports
+      // setup this.uiExports and this.bundles
+      require('../ui'),
+
+      // ensure that all bundles are built, or that the
+      // lazy bundle server is running
       require('../optimize'),
 
-      function () {
+      // finally, initialize the plugins
+      require('./plugins/initialize'),
+
+      () => {
         if (this.config.get('server.autoListen')) {
           this.listen();
         }

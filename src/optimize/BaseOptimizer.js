@@ -1,4 +1,3 @@
-let { EventEmitter } = require('events');
 let { inherits } = require('util');
 let _ = require('lodash');
 let { join } = require('path');
@@ -9,24 +8,17 @@ let ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
-let OptmzBundles = require('./OptmzBundles');
-let OptmzUiModules = require('./OptmzUiModules');
 let babelOptions = require('./babelOptions');
 
-let kbnTag = `Kibana ${ utils('packageJson').version }`;
-
-class BaseOptimizer extends EventEmitter {
+class BaseOptimizer {
   constructor(opts) {
-    super();
-
+    this.env = opts.env;
+    this.bundles = opts.bundles;
     this.sourceMaps = opts.sourceMaps || false;
-    this.modules = new OptmzUiModules(opts.plugins);
-    this.bundles = new OptmzBundles(
-      opts,
-      `${kbnTag} ${this.constructor.name} ${ this.sourceMaps ? ' (with source maps)' : ''}`
-    );
+  }
 
-    _.bindAll(this, 'getConfig');
+  async initCompiler() {
+    return this.compiler || (this.compiler = webpack(this.getConfig()));
   }
 
   getConfig() {
@@ -34,12 +26,12 @@ class BaseOptimizer extends EventEmitter {
 
     return {
       context: fromRoot('.'),
-      entry: this.bundles.getEntriesConfig(),
+      entry: this.bundles.toWebpackEntries(),
 
       devtool: this.sourceMaps ? '#source-map' : false,
 
       output: {
-        path: this.bundles.dir,
+        path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: '/bundles/',
@@ -87,8 +79,8 @@ class BaseOptimizer extends EventEmitter {
               nonStandard: true
             }, babelOptions)
           }
-        ].concat(this.modules.loaders),
-        noParse: this.modules.noParse,
+        ].concat(this.env.loaders),
+        noParse: this.env.noParse,
       },
 
       resolve: {
@@ -97,7 +89,7 @@ class BaseOptimizer extends EventEmitter {
         modulesDirectories: ['node_modules'],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
-        alias: this.modules.aliases
+        alias: this.env.aliases
       }
     };
   }

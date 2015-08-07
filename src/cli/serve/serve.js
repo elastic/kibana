@@ -3,10 +3,8 @@ let { isWorker } = require('cluster');
 let { resolve } = require('path');
 
 let cwd = process.cwd();
-let readYamlConfig = require('./readYamlConfig');
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');
-let KbnServer = src('server/KbnServer');
 
 let pathCollector = function () {
   let paths = [];
@@ -52,11 +50,17 @@ module.exports = function (program) {
   .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
   .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
+  .option('--no-lazy', 'Prevent lazy optimization of applications, only works with --dev')
   .action(function (opts) {
-    if (opts.dev && opts.watch && !isWorker) {
-      // stop processing the action and handoff to watch cluster manager
-      return require('../watch/watch')(opts);
+    if (opts.dev && !isWorker) {
+      // stop processing the action and handoff to cluster manager
+      let ClusterManager = require('../cluster/ClusterManager');
+      new ClusterManager(opts);
+      return;
     }
+
+    let readYamlConfig = require('./readYamlConfig');
+    let KbnServer = src('server/KbnServer');
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
     let set = _.partial(_.set, settings);
@@ -64,7 +68,7 @@ module.exports = function (program) {
 
     if (opts.dev) {
       set('env', 'development');
-      set('optimize.watch', opts.watch);
+      set('optimize.lazy', opts.lazy);
     }
 
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);

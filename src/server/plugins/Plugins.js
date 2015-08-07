@@ -10,18 +10,17 @@ module.exports = class Plugins extends Array {
   }
 
   new(path) {
-    var self = this;
     var api = new PluginApi(this.kbnServer, path);
+    let output = [].concat(require(path)(api) || []);
 
-    [].concat(require(path)(api) || [])
-    .forEach(function (out) {
-      if (out instanceof api.Plugin) {
-        self._byId = null;
-        self.push(out);
+    for (let product of output) {
+      if (product instanceof api.Plugin) {
+        this._byId = null;
+        this.push(product);
       } else {
-        throw new TypeError('unexpected plugin export ' + inspect(out));
+        throw new TypeError('unexpected plugin export ' + inspect(product));
       }
-    });
+    }
   }
 
   get byId() {

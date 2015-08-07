@@ -16,7 +16,7 @@ require('ui/chrome')
   'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
   'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
 })
-.setNavBackground('#222222')
+.setNavBackground('black')
 .setTabDefaults({
   resetWhenActive: true,
   trackLastPath: true,

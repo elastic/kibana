@@ -3,11 +3,29 @@ module.exports = function (kbnServer, server, config) {
   let Boom = require('boom');
   let formatUrl = require('url').format;
   let { join, resolve } = require('path');
+
   let UiExports = require('./UiExports');
+  let UiBundleCollection = require('./UiBundleCollection');
+  let UiBundlerEnv = require('./UiBundlerEnv');
 
   let uiExports = kbnServer.uiExports = new UiExports(kbnServer);
-  let apps = uiExports.apps;
-  let hiddenApps = uiExports.apps.hidden;
+
+  let bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
+  bundlerEnv.addContext('env', config.get('env.name'));
+  bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
+  bundlerEnv.addContext('kbnVersion', config.get('pkg.version'));
+  bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
+  uiExports.addConsumer(bundlerEnv);
+
+  for (let plugin of kbnServer.plugins) {
+    uiExports.consumePlugin(plugin);
+  }
+
+  let bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv);
+
+  for (let app of uiExports.getAllApps()) {
+    bundles.addApp(app);
+  }
 
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
@@ -17,7 +35,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/apps',
     method: 'GET',
     handler: function (req, reply) {
-      let switcher = hiddenApps.byId.switcher;
+      let switcher = uiExports.getHiddenApp('switcher');
       if (!switcher) return reply(Boom.notFound('app switcher not installed'));
       return reply.renderApp(switcher);
     }
@@ -28,7 +46,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/api/apps',
     method: 'GET',
     handler: function (req, reply) {
-      return reply(apps);
+      return reply(uiExports.apps);
     }
   });
 
@@ -37,7 +55,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     handler: function (req, reply) {
       let id = req.params.id;
-      let app = apps.byId[id];
+      let app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
       if (kbnServer.status.isGreen()) {
@@ -49,27 +67,9 @@ module.exports = function (kbnServer, server, config) {
   });
 
   server.decorate('reply', 'renderApp', function (app) {
-    if (app.requireOptimizeGreen) {
-      let optimizeStatus = kbnServer.status.get('optimize');
-      switch (optimizeStatus && optimizeStatus.state) {
-        case 'yellow':
-          return this(`
-            <html>
-              <head><meta http-equiv="refresh" content="1"></head>
-              <body>${optimizeStatus.message}</body>
-            </html>
-          `).code(503);
-
-        case 'red':
-          return this(`
-            <html><body>${optimizeStatus.message}</body></html>
-          `).code(500);
-      }
-    }
-
     let payload = {
       app: app,
-      appCount: apps.length,
+      appCount: uiExports.apps.length,
       version: kbnServer.version,
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),
