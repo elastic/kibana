@@ -5,8 +5,12 @@ let BaseOptimizer = require('./BaseOptimizer');
 let fromRoot = require('../utils/fromRoot');
 
 module.exports = class FsOptimizer extends BaseOptimizer {
-  async run() {
+  async init() {
     await this.initCompiler();
+  }
+
+  async run() {
+    if (!this.compiler) await this.init();
 
     let stats = await fromNode(cb => {
       this.compiler.run((err, stats) => {
@@ -33,13 +37,11 @@ module.exports = class FsOptimizer extends BaseOptimizer {
         );
       });
     }
-
-    this.compiler = null;
   }
 
   getConfig() {
     let config = BaseOptimizer.prototype.getConfig.call(this);
-    config.cache = false;
+    config.cache = true;
     return config;
   }
 };

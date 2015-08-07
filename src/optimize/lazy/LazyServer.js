@@ -7,7 +7,7 @@ let Boom = require('boom');
 module.exports = class LazyServer {
   constructor(host, port, optimizer) {
     this.optimizer = optimizer;
-    this.server = new Server({ minimal: true });
+    this.server = new Server();
     this.server.connection({
       host: host,
       port: port

@@ -84,6 +84,7 @@ module.exports = Joi.object({
     lazyHost: Joi.string().hostname().default('0.0.0.0'),
     sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false),
+    tests: Joi.boolean().default(false),
   }).default()
 
 }).default();

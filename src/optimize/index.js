@@ -15,6 +15,7 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   let bundles = kbnServer.bundles;
+  server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);
   await bundles.writeEntryFiles();
 
   // in prod, only bundle what looks invalid or missing
@@ -39,8 +40,6 @@ module.exports = async (kbnServer, server, config) => {
     sourceMaps: config.get('optimize.sourceMaps'),
     profile: config.get('optimize.profile')
   });
-
-  server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);
 
   try {
     server.log(

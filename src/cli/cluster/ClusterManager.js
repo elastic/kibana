@@ -16,7 +16,6 @@ module.exports = class ClusterManager {
         title: 'optimizer',
         log: this.log,
         argv: compact([
-          (opts.quiet || opts.silent || opts.verbose) ? null : '--quiet',
           '--plugins.initialize=false',
           '--server.autoListen=false'
         ]),
@@ -45,8 +44,6 @@ module.exports = class ClusterManager {
     let fromRoot = utils('fromRoot');
 
     this.watcher = chokidar.watch([
-      'src/cli',
-      'src/optimize',
       'src/plugins',
       'src/server',
       'src/ui',

@@ -3,12 +3,13 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
   let src = require('requirefrom')('src');
   let fromRoot = src('utils/fromRoot');
   let LazyServer = require('./LazyServer');
-  let LiveOptimizer = require('../LiveOptimizer');
+  let LiveOptimizer = require('./LazyOptimizer');
 
   let server = new LazyServer(
     config.get('optimize.lazyHost'),
     config.get('optimize.lazyPort'),
     new LiveOptimizer({
+      log: (tags, data) => kibanaHapiServer.log(tags, data),
       env: kbnServer.bundles.env,
       bundles: kbnServer.bundles,
       sourceMaps: config.get('optimize.sourceMaps')
