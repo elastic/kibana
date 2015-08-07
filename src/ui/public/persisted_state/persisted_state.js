@@ -133,6 +133,7 @@ define(function (require) {
       var self = this;
       var initialState = !this._initialized;
       var keyPath = this._getIndex(key);
+      this.emit('set', key, value);
 
       // if this is the initial state value, save value as the default
       if (initialState) {
@@ -158,6 +159,7 @@ define(function (require) {
           }
           _.set(this._changedState, keyPath, value);
         }
+        this.emit('change', key, value);
       }
 
       var targetObj = this._mergedState || _.cloneDeep(this._defaultState);

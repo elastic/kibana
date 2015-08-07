@@ -495,4 +495,33 @@ describe('Persisted State', function () {
       expect(persistedState._changedState).to.eql({ two: 22 });
     });
   });
+
+  describe.only('events', function () {
+    this.timeout(0);
+    var persistedState;
+    var emitter;
+
+    var getByType = function (type) {
+      return emitter.getCalls().filter(function (call) {
+        return call.args[0] === type;
+      });
+    };
+
+    beforeEach(function () {
+      persistedState = new PersistedState({ hello: { message: 'world' } });
+      emitter = sinon.stub(persistedState, 'emit');
+    });
+
+    it('should emit set when setting values', function () {
+      expect(getByType('set')).to.have.length(0);
+      persistedState.set('hello.time', 'now');
+      expect(getByType('set')).to.have.length(1);
+    });
+
+    it('should emit change when changing values', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.set('hello.time', 'now');
+      expect(getByType('change')).to.have.length(1);
+    });
+  });
 });
