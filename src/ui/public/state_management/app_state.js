@@ -3,24 +3,37 @@ define(function (require) {
   var modules = require('ui/modules');
   var urlParam = '_a';
 
-
   function AppStateProvider(Private, $rootScope, getAppState) {
     var State = Private(require('ui/state_management/state'));
-
+    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
+    var uiState;
 
     _.class(AppState).inherits(State);
     function AppState(defaults) {
       AppState.Super.call(this, urlParam, defaults);
       getAppState._set(this);
+
+      // set up the ui state
+      uiState = new PersistedState({});
+      var saveUIState = function () {
+        this.uiState = uiState.getChanges();
+        this.save();
+      };
+      uiState.on('change', _.bind(saveUIState, this));
+      if (this.uiState) uiState.set(this.uiState);
     }
 
     // if the url param is missing, write it back
     AppState.prototype._persistAcrossApps = false;
 
-
     AppState.prototype.destroy = function () {
       AppState.Super.prototype.destroy.call(this);
       getAppState._set(null);
+      uiState.off('change');
+    };
+
+    AppState.prototype.getUIState = function () {
+      return uiState;
     };
 
     return AppState;
