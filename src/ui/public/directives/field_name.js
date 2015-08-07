@@ -28,6 +28,8 @@ define(function (require) {
               return '<i class="fa fa-laptop"></i>';
             case 'geo_point':
               return '<i class="fa fa-globe"></i>';
+            case 'boolean':
+              return '<i class="fa fa-adjust"></i>';
             case 'conflict':
               return '<i class="fa fa-warning"></i>';
             default:
