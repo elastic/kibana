@@ -46,9 +46,7 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Private, Notifier, courier, AppState, timefilter, kbnUrl) {
-    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
-
+  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -86,11 +84,7 @@ define(function (require) {
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
-
-        // create ui state and load existing state data
-        $scope.uiState = new PersistedState();
-        // setting state here so full dashboard state is in getChanges
-        $scope.uiState.set($state.uiState);
+        var $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
@@ -160,12 +154,6 @@ define(function (require) {
         // update data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
-        // update the app state when the ui state changes
-        $scope.$listen($scope.uiState, 'change', function () {
-          $state.uiState = $scope.uiState.get();
-          $state.save();
-        });
-
         $scope.newDashboard = function () {
           kbnUrl.change('/dashboard', {});
         };
@@ -181,7 +169,7 @@ define(function (require) {
           $state.save();
 
           dash.panelsJSON = angular.toJson($state.panels);
-          dash.uiStateJSON = angular.toJson($scope.uiState.getChanges());
+          dash.uiStateJSON = angular.toJson($uiState.getChanges());
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
 

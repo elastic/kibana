@@ -36,6 +36,8 @@ define(function (require) {
       };
       persistedStates[prop].on('change', _.bind(saveState, this));
       if (this[prop]) persistedStates[prop].set(this[prop]);
+
+      return persistedStates[prop];
     };
 
     return AppState;
