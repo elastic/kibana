@@ -65,10 +65,10 @@ uiModules
           return escape(col.title);
         }));
 
-        return csvRows.map(function (row) {
-          return row.join(self.csv.separator) + '\r\n';
-        }).join('');
-      };
+          return csvRows.map(function (row) {
+            return row.join(self.csv.separator) + '\r\n';
+          }).join('');
+        };
 
       $scope.$watch('table', function () {
         let table = $scope.table;
@@ -96,9 +96,9 @@ uiModules
           }
 
           let isFirstValueNumeric =
-            (table.rows && table.rows[0] && table.rows[0][i] && _.isNumber(table.rows[0][i].value)) === true;
+            table.rows && table.rows[0] && table.rows[0][i] && _.isNumber(table.rows[0][i].value);
 
-          if ((!!field && field.type === 'number') || isFirstValueNumeric) {
+          if ((field && field.type === 'number') || isFirstValueNumeric) {
             function sum() {
               return _.reduce(table.rows, function (prev, curr, n, all) {return prev + curr[i].value; }, 0);
             }
