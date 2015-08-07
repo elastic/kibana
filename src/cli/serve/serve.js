@@ -50,7 +50,7 @@ module.exports = function (program) {
   .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
   .action(function (opts) {
-    if (opts.dev && opts.lazy && !isWorker) {
+    if (opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
       let ClusterManager = require('../cluster/ClusterManager');
       new ClusterManager(opts);
