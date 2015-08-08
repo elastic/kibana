@@ -20,7 +20,11 @@ class BaseOptimizer {
   }
 
   async initCompiler() {
-    return this.compiler || (this.compiler = webpack(this.getConfig()));
+    if (this.compiler) return this.compiler;
+
+    let compilerConfig = this.getConfig();
+    this.compiler = webpack(compilerConfig);
+    return this.compiler;
   }
 
   getConfig() {
@@ -71,26 +75,17 @@ class BaseOptimizer {
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
           { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` },
           {
-            test: /\.js$/,
+            test: /\.babel\.js$/,
             exclude: /(node_modules|bower_components)/,
             loader: 'babel',
             query: babelOptions
-          },
-          {
-            // explicitly require .jsx extension to support jsx
-            test: /\.jsx$/,
-            exclude: /(node_modules|bower_components)/,
-            loader: 'babel',
-            query: _.defaults({
-              nonStandard: true
-            }, babelOptions)
           }
         ].concat(this.env.loaders),
         noParse: this.env.noParse,
       },
 
       resolve: {
-        extensions: ['.js', '.less', ''],
+        extensions: ['.babel.js', '.js', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['node_modules'],
         loaderPostfixes: ['-loader', ''],
