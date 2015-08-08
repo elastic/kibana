@@ -71,7 +71,11 @@ module.exports = Joi.object({
 
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
-    bundleFilter: Joi.string().default('*'),
+    bundleFilter: Joi.string().when('tests', {
+      is: true,
+      then: Joi.default('tests'),
+      otherwise: Joi.default('*')
+    }),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(false),
