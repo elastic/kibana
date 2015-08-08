@@ -17,7 +17,7 @@ module.exports = class LazyOptimizer extends FsOptimizer {
   }
 
   start() {
-    this.log(['info', 'optimize'], 'starting live optimization');
+    this.log(['info', 'optimize'], 'lazy optimization starting');
 
     let start = Date.now();
     let prom = this.current = (async () => {

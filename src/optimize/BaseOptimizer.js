@@ -1,7 +1,6 @@
 let { inherits } = require('util');
 let _ = require('lodash');
 let { resolve } = require('path');
-let write = require('fs').writeFileSync;
 let webpack = require('webpack');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
