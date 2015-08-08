@@ -1,5 +1,13 @@
 var _ = require('lodash');
 
+// Downsampling of cummulative metrics
+// Good: count, sum
+// Bad: avg, min, max
+
+
+// For upsampling cummulative metrics (eg sum from 1M to 1d), could rename this scale.
+// Really only the 0s that screws this up, need to distribute contents of spikes to empty buckets
+// Empty is currently 0, which is not right
 module.exports = function (dataTuples, targetTuples) {
   return _.map(targetTuples, function (bucket) {
     var time = bucket[0];

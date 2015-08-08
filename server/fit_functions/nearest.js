@@ -1,5 +1,8 @@
 var _ = require('lodash');
 
+// Upsampling and downsampling of non-cummulative sets
+// Good: average, min, max
+// Bad: sum, count
 module.exports = function (dataTuples, targetTuples) {
   return _.map(targetTuples, function (bucket) {
     var time = bucket[0];
