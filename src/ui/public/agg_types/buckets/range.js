@@ -3,7 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/range'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+
 
     return new BucketAggType({
       name: 'range',
@@ -13,12 +14,22 @@ define(function (require) {
         return aggConfig.params.field.displayName + ' ranges';
       },
       getKey: function (bucket, key, agg) {
-        let stringFormat = fieldFormats.getDefaultInstance('string');
-        let format = _.get(agg.field(), 'format', stringFormat).getConverterFor('text');
-        return `${format(bucket.from)} to ${format(bucket.to)}`;
+        let range = { gte: bucket.from, lt: bucket.to };
+
+        if (range.gte == null) range.gte = -Infinity;
+        if (range.lt == null) range.lt = +Infinity;
+
+        return range;
       },
-      getFormat: function () {
-        return fieldFormats.getDefaultInstance('string');
+      getFormat: function (agg) {
+        if (agg.$$rangeAggTypeFormat) return agg.$$rangeAggTypeFormat;
+
+        var RangeFormat = FieldFormat.from(function (range) {
+          var format = agg.fieldOwnFormatter();
+          return `[${format(range.gte)}, ${format(range.lt)})`;
+        });
+
+        return (this.$$rangeAggTypeFormat = new RangeFormat());
       },
       params: [
         {
