@@ -122,7 +122,7 @@
   "devDependencies": {
     "auto-release-sinon": "^1.0.3",
     "babel-eslint": "^4.0.5",
-    "eslint": "^1.0.0",
+    "eslint": "1.0.x",
     "expect.js": "^0.3.1",
     "faker": "^1.1.0",
     "grunt": "^0.4.5",
