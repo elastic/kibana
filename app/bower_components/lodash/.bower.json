@@ -1,6 +1,5 @@
 {
   "name": "lodash",
-  "version": "3.9.3",
   "main": "lodash.js",
   "ignore": [
     ".*",
@@ -18,14 +17,15 @@
     "vendor"
   ],
   "homepage": "https://github.com/lodash/lodash",
-  "_release": "3.9.3",
+  "version": "3.10.1",
+  "_release": "3.10.1",
   "_resolution": {
     "type": "version",
-    "tag": "3.9.3",
-    "commit": "6a07c79011bb161ada455cca36e102b2f7991aee"
+    "tag": "3.10.1",
+    "commit": "ef20b4290cc4fe7551c82a552ea7ffa76548eec8"
   },
   "_source": "git://github.com/lodash/lodash.git",
-  "_target": "~3.9.3",
+  "_target": "~3.10.1",
   "_originalSource": "lodash",
   "_direct": true
 }

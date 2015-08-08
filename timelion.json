@@ -3,7 +3,8 @@
     "key": ""
   },
   "es": {
-    "timefield": "@timestamp"
+    "timefield": "@timestamp",
+    "defaultIndex": "usagov"
   },
   "default_interval": "1w"
 }

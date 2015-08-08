@@ -15,6 +15,9 @@ var Promise = require('bluebird');
 module.exports = function reduce (args, fn) {
   return Promise.all(args).then(function (args) {
 
+    console.log(JSON.stringify(args.length, null, ' '));
+
+
     var seriesList = args.shift();
     var argument = args.shift();
 
@@ -35,7 +38,6 @@ module.exports = function reduce (args, fn) {
       return _.reduce(series, function(destinationObject, argument) {
 
         var output = _.map(destinationObject.data, function (point, index) {
-
 
           var value = point[1];
 

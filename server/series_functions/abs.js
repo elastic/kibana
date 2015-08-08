@@ -1,4 +1,4 @@
-var alter = require('../utils/alter.js');
+var alter = require('../lib/alter.js');
 var _ = require('lodash');
 module.exports = {
   args: [

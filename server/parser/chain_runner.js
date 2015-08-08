@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var glob = require('glob');
 var Promise = require('bluebird');
@@ -7,25 +6,38 @@ var fs = require('fs');
 var grammar = fs.readFileSync('app/scripts/chain.peg', 'utf8');
 var PEG = require("pegjs");
 var Parser = PEG.buildParser(grammar);
-var parseDateMath = require('../utils/date_math.js');
+var parseDateMath = require('../lib/date_math.js');
 
 var config = require('../../timelion.json');
 
+var buildTarget = require('../lib/build_target.js');
 var tlConfig = {
   time: {
-    min: parseDateMath('now-18M').valueOf(),
+    min: parseDateMath('now-12M').valueOf(),
     max: parseDateMath('now').valueOf(),
     interval: config.default_interval
   },
-  file: config
+  file: config,
+  getTargetSeries: function () {
+    return _.map(targetSeries, function (bucket) {
+      return [bucket, null];
+    });
+  }
 };
-
+var targetSeries = buildTarget(tlConfig);
 var stats = {};
+
 
 // Load function plugins
 var functions  = _.chain(glob.sync('server/series_functions/*.js')).map(function (file) {
   var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
   return [fnName, require('../series_functions/' + fnName + '.js')];
+}).zipObject().value();
+
+// Load fit plugins
+var fitFunctions  = _.chain(glob.sync('server/fit_functions/*.js')).map(function (file) {
+  var fnName = file.substring(file.lastIndexOf('/')+1, file.lastIndexOf('.'));
+  return [fnName, require('../fit_functions/' + fnName + '.js')];
 }).zipObject().value();
 
 function getQueryCacheKey (query) {
@@ -215,12 +227,20 @@ function preProcessSheet (sheet) {
   });
 
   return Promise.all(promises).then(function (results) {
+    stats.queryTime = (new Date()).getTime();
     _.each(queries, function (item, i) {
+      // TODO: This ASSumes the result of any dataSource is a seriesList
+
+      results[i].list = _.map(results[i].list, function (series) {
+        series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
+        return series;
+      });
+
       queryCache[getQueryCacheKey(item)] = results[i];
     });
+    stats.fitTime = (new Date()).getTime();
 
     stats.cacheCount = _.keys(queryCache).length;
-    stats.queryTime = (new Date()).getTime();
     return queryCache;
   });
 }
@@ -242,6 +262,8 @@ function processRequest (request) {
     return;
   }
   tlConfig.time.interval = request.interval;
+
+  targetSeries = buildTarget(tlConfig);
 
   stats.invokeTime = (new Date()).getTime();
   stats.queryCount = 0;
@@ -265,7 +287,7 @@ module.exports = {
   getStats: function () { return stats; }
 };
 
-/*
+
 function logObj(obj, thing) {
   return JSON.stringify(obj, null, thing ? ' ' : undefined);
 }
@@ -280,8 +302,8 @@ function debugSheet (sheet) {
 }
 
 debugSheet(
-  ['es(1)']
+  {sheet:['es("-*")'], interval: '1w'}
   //['(`US`).divide((`*`).sum(1000))']
   //['(`*`).divide(100)']
 );
-*/
+

@@ -1,4 +1,4 @@
-var reduce = require('../utils/reduce.js');
+var reduce = require('../lib/reduce.js');
 
 module.exports = {
   args: [

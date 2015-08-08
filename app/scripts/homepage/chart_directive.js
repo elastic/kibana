@@ -1,5 +1,6 @@
 define(function (require) {
   require('flot.time');
+  require('flot.curvedlines');
   var _ = require('lodash');
   var $ = require('jquery');
   return function ($compile) {
@@ -49,6 +50,7 @@ define(function (require) {
           var series = _.map($scope.chart, function (series, index) {
             series = _.cloneDeep(_.defaults(series, {
               shadowSize: 0,
+              curvedLines: {apply: true, tension: 1},
               lines: {
                 lineWidth: 5
               }

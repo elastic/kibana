@@ -1,4 +1,4 @@
-var alter = require('../utils/alter.js');
+var alter = require('../lib/alter.js');
 
 module.exports = function attr (args) {
   return alter(args, function (args) {

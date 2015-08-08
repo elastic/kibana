@@ -8,6 +8,7 @@ require.config({
         'angular-animate': 'bower_components/angular-animate/angular-animate',
         'flot': 'bower_components/flot/jquery.flot',
         'flot.time': 'bower_components/flot/jquery.flot.time',
+        'flot.curvedlines': 'bower_components/flot.curvedlines/curvedLines',
         'flot.resize': 'bower_components/flot/jquery.flot.resize',
         'jquery': 'bower_components/jquery/dist/jquery',
         'lodash': 'bower_components/lodash/lodash',
@@ -73,12 +74,16 @@ require.config({
         'flot': {
             deps: [
                 'jquery',
-            ]
+            ],
+            exports: '$.plot'
         },
         'flot.time': {
             deps: [ 'flot', 'flot.resize']
         },
         'flot.resize' : {
+            deps: ['flot']
+        },
+        'flot.curvedLines' : {
             deps: ['flot']
         }
     },

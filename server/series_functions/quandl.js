@@ -2,7 +2,7 @@ var _ = require('lodash');
 var fetch = require('node-fetch');
 var moment = require('moment');
 fetch.Promise = require('bluebird');
-//var parseDateMath = require('../utils/date_math.js');
+//var parseDateMath = require('../lib/date_math.js');
 
 
 module.exports = {
@@ -29,7 +29,7 @@ module.exports = {
     var config = {
       code: args[0] || 'WIKI/AAPL',
       position: args[1] || 1,
-      interval: intervalMap[tlConfig.time.interval],
+      interval: intervalMap[tlConfig.time.interval] || '1d',
       apikey: tlConfig.file.quandl.key
     };
 

@@ -24,6 +24,14 @@ module.exports = {
     {
       name: 'offset',
       types: ['string', 'null']
+    },
+    {
+      name: 'interval', // You really shouldn't use this, use the interval picker instead
+      types: ['string', 'null']
+    },
+    {
+      name: 'fit', // If you went around fiddling with interval you probably need a better fit function
+      types: ['string', 'null']
     }
   ],
   help: 'Pull data from an elasticsearch instance',
@@ -33,15 +41,17 @@ module.exports = {
     var config = {
       query: args[0],
       metric: args[1],
-      index: args[2],
-      offset: args[3]
+      index: args[2] || tlConfig.file.es.defaultIndex,
+      offset: args[3],
+      interval: args[4],
+      fit: args[5] || 'nearest'
     };
 
     return client.search(buildRequest(config, tlConfig)).then(function (resp) {
 
       var data = _.map(resp.aggregations.series.buckets, function (bucket) {
         var value;
-        if (resp.aggregations.series.buckets[0].metric) {
+        if (resp.aggregations.series.buckets[0].metric != null) {
           value = bucket.metric.value;
         } else {
           value = bucket.doc_count;
@@ -58,6 +68,7 @@ module.exports = {
         list: [{
           data:  data,
           type: 'series',
+          fit: config.fit,
           //cacheKey: cacheKey,
           label: config.query
         }]
@@ -72,10 +83,12 @@ function buildRequest (config, tlConfig) {
   var filter = {range:{}};
   filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.min, lte: tlConfig.time.max, format: 'epoch_millis'};
 
+
+
   var searchRequest = {
     index: config.index,
-    filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
-    searchType: 'count',
+    //filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
+    //searchType: 'count',
     body: {
       query: {
         filtered: {
@@ -91,7 +104,7 @@ function buildRequest (config, tlConfig) {
         series: {
           date_histogram: {
             field: tlConfig.file.es.timefield,
-            interval: tlConfig.time.interval,
+            interval: config.interval || tlConfig.time.interval,
             extended_bounds: {
               min: tlConfig.time.min,
               max: tlConfig.time.max
@@ -99,7 +112,8 @@ function buildRequest (config, tlConfig) {
             min_doc_count: 0
           }
         }
-      }
+      },
+      size: 0
     }
   };
 
@@ -121,10 +135,10 @@ function buildRequest (config, tlConfig) {
 }
 
 function offsetTime (milliseconds, offset, reverse) {
-  if (!offset.match(/[-+][0-9]+[msdwMy]/g)) {
+  if (!offset.match(/[-+][0-9]+[mshdwMy]/g)) {
     throw new Error ('Malformed `offset` at ' + offset);
   }
-  var parts = offset.match(/[-+]|[0-9]+|[msdwMy]/g);
+  var parts = offset.match(/[-+]|[0-9]+|[mshdwMy]/g);
 
   var add = parts[0] === '+';
   add = reverse ? !add : add;
