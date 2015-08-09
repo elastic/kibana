@@ -15,12 +15,11 @@ module.exports = class KbnServer extends EventEmitter {
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
-    this.server = new Hapi.Server();
     this.settings = settings || {};
 
     this.ready = _.constant(this.mixin(
-      require('./config/setup'),
-      require('./http'),
+      require('./config/setup'), // sets this.config, reads this.settings
+      require('./http'), // sets this.server
       require('./logging'),
       require('./status'),
 
@@ -60,24 +59,22 @@ module.exports = class KbnServer extends EventEmitter {
    *                         and can return a promise to delay execution of the next mixin
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */
-  mixin(/* ...fns */) {
-    let self = this;
-    return resolve(_.toArray(arguments))
-    .then(_.compact)
-    .each(function (fn) {
-      return fn.call(self, self, self.server, self.config);
-    })
-    .catch(function (err) {
-      self.server.log('fatal', err);
-      self.emit('error', err);
+  async mixin(...fns) {
+    fns = _.compact(_.flatten(fns));
 
-      return self.close()
-      .then(function () {
-        // retrow once server is closed
-        throw err;
-      });
-    })
-    .return(undefined);
+    try {
+      for (let fn of fns) {
+        await fn.call(this, this, this.server, this.config);
+      }
+    } catch (err) {
+      if (this.server) this.server.log('fatal', err);
+      else console.error('FATAL', err);
+
+      this.emit('error', err);
+      await this.close();
+      throw err;
+    }
+
   }
 
   /**

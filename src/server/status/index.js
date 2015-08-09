@@ -1,11 +1,8 @@
-module.exports = function (kbnServer) {
+module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var Samples = require('./Samples');
   var ServerStatus = require('./ServerStatus');
   var { join } = require('path');
-
-  var server = kbnServer.server;
-  var config = server.config();
 
   kbnServer.status = new ServerStatus(kbnServer.server);
   kbnServer.metrics = new Samples(60);

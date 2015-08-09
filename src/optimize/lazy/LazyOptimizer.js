@@ -9,15 +9,17 @@ module.exports = class LazyOptimizer extends FsOptimizer {
     super(opts);
     this.sent = [];
     this.log = opts.log || (() => null);
+    this.prebuild = opts.prebuild || false;
   }
 
   async init() {
     await this.bundles.writeEntryFiles();
     await this.initCompiler();
+    if (this.prebuild) await this.start();
   }
 
   start() {
-    this.log(['info', 'optimize'], 'lazy optimization starting');
+    this.log(['info', 'optimize'], `Lazy Optimization for ${this.bundles.desc()} starting`);
 
     let start = Date.now();
     let prom = this.current = (async () => {
@@ -42,7 +44,7 @@ module.exports = class LazyOptimizer extends FsOptimizer {
     }())
     .then(() => {
       let seconds = ((Date.now() - start) / 1000).toFixed(2);
-      this.log(['info', 'optimize'], `lazy optimization complete in ${seconds} seconds.`);
+      this.log(['info', 'optimize'], `Lazy optimization of ${this.bundles.desc()} complete in ${seconds} seconds.`);
     });
 
     return prom;

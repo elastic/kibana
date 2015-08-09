@@ -11,7 +11,11 @@ module.exports = function (grunt) {
         failOnError: false
       },
       cmd: './bin/kibana',
-      args: ['--env.name=development', '--logging.json=false', '--optimize.bundleFilter=tests']
+      args: [
+        '--env.name=development',
+        '--logging.json=false',
+        '--optimize.tests=true',
+      ]
     }
   };
 

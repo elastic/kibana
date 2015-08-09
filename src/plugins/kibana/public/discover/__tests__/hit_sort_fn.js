@@ -16,19 +16,18 @@ describe('hit sort function', function () {
     var groupSize = _.random(10, 30);
     var total = sortOpts.length * groupSize;
 
-    var hits = new Array(total);
     sortOpts = sortOpts.map(function (opt) {
       if (_.isArray(opt)) return opt;
       else return [opt];
     });
     var sortOptLength = sortOpts.length;
 
-    for (let i = 0; i < hits.length; i++) {
-      hits[i] = {
+    var hits = _.times(total, function (i) {
+      return {
         _source: {},
         sort: sortOpts[i % sortOptLength]
       };
-    }
+    });
 
     hits.sort(createHitSortFn(dir))
     .forEach(function (hit, i) {

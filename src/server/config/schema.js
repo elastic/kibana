@@ -31,7 +31,14 @@ module.exports = Joi.object({
     ssl: Joi.object({
       cert: Joi.string(),
       key: Joi.string()
-    }).default()
+    }).default(),
+    cors: Joi.when('$dev', {
+      is: true,
+      then: Joi.object().default({
+        origin: ['localhost:9876'] // karma test server
+      }),
+      otherwise: Joi.boolean().default(false)
+    })
   }).default(),
 
   logging: Joi.object().keys({
@@ -86,6 +93,7 @@ module.exports = Joi.object({
     }),
     lazyPort: Joi.number().default(5602),
     lazyHost: Joi.string().hostname().default('0.0.0.0'),
+    lazyPrebuild: Joi.boolean().default(false),
     sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false),
     tests: Joi.boolean().default(false),

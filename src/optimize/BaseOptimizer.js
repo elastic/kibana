@@ -55,7 +55,10 @@ class BaseOptimizer {
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
         }),
-        new CommonsChunkPlugin('commons.bundle.js'),
+        new CommonsChunkPlugin({
+          name: 'commons',
+          filename: 'commons.bundle.js'
+        }),
       ],
 
       module: {

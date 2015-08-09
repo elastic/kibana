@@ -12,9 +12,11 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
       log: (tags, data) => kibanaHapiServer.log(tags, data),
       env: kbnServer.bundles.env,
       bundles: kbnServer.bundles,
-      sourceMaps: config.get('optimize.sourceMaps')
+      sourceMaps: config.get('optimize.sourceMaps'),
+      prebuild: config.get('optimize.lazyPrebuild')
     })
   );
 
   await server.init();
+  kibanaHapiServer.log(['info', 'optimize'], 'Lazy Optimizer ready');
 };

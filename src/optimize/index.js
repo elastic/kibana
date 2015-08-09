@@ -21,10 +21,8 @@ module.exports = async (kbnServer, server, config) => {
   // in prod, only bundle what looks invalid or missing
   if (config.get('env.prod')) bundles = await kbnServer.bundles.getInvalidBundles();
 
-  let bundleIds = bundles.getIds();
-
   // we might not have any work to do
-  if (!bundleIds.length) {
+  if (!bundles.getIds().length) {
     server.log(
       ['debug', 'optimize'],
       `All bundles are cached and ready to go!`
@@ -44,17 +42,14 @@ module.exports = async (kbnServer, server, config) => {
   try {
     server.log(
       ['info', 'optimize'],
-      `Optimizing and caching bundles for ${bundleIds.join(', ')}. This may take a few minutes.`
+      `Optimizing and caching ${bundles.desc()}. This may take a few minutes.`
     );
 
     let start = Date.now();
     await optimizer.run();
     let seconds = ((Date.now() - start) / 1000).toFixed(2);
 
-    server.log(
-      ['info', 'optimize'],
-      `Optimization of ${bundleIds.join(', ')} complete in ${seconds} seconds.`
-    );
+    server.log(['info', 'optimize'], `Optimization of ${bundle.desc()} complete in ${seconds} seconds.`);
   } catch (e) {
     if (e.stats) {
       server.log(['error'], e.stats.toString({ colors: true }));

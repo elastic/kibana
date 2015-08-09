@@ -21,7 +21,9 @@ module.exports = function (kbnServer, server, config) {
   return resolve(kbnServer.plugins)
   .then(function () {
     if (!config.get('plugins.initialize')) {
-      server.log(['info'], 'Plugin initialization disabled.');
+      if (!require('cluster').isWorker) {
+        server.log(['info'], 'Plugin initialization disabled.');
+      }
       return [];
     }
 

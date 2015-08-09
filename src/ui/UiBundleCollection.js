@@ -41,6 +41,20 @@ class UiBundleCollection {
     }));
   }
 
+  desc() {
+    switch (this.each.length) {
+      case 0:
+        return '0 bundles';
+      case 1:
+        return `bundle for ${this.each[0].id}`;
+      default:
+        var ids = this.getIds();
+        var last = ids.pop();
+        var commas = ids.join(', ');
+        return `bundles for ${commas} and ${last}`;
+    }
+  }
+
   async ensureDir() {
     await mkdirp(this.env.workingDir);
   }
