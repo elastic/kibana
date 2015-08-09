@@ -35,7 +35,7 @@ module.exports = Joi.object({
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({
-        origin: ['localhost:9876'] // karma test server
+        origin: ['*://localhost:9876'] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
     })
