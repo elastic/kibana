@@ -49,7 +49,7 @@ module.exports = async (kbnServer, server, config) => {
     await optimizer.run();
     let seconds = ((Date.now() - start) / 1000).toFixed(2);
 
-    server.log(['info', 'optimize'], `Optimization of ${bundle.desc()} complete in ${seconds} seconds.`);
+    server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds.`);
   } catch (e) {
     if (e.stats) {
       server.log(['error'], e.stats.toString({ colors: true }));

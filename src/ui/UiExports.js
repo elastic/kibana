@@ -43,9 +43,11 @@ class UiExports {
 
     switch (type) {
       case 'app':
-        return (plugin, spec) => {
-          spec = _.defaults({}, spec, { id: plugin.id });
-          plugin.app = this.apps.new(spec);
+      case 'apps':
+        return (plugin, specs) => {
+          for (let spec of [].concat(specs || [])) {
+            this.apps.new(_.defaults({}, spec, { id: plugin.id }));
+          }
         };
 
       case 'visTypes':
