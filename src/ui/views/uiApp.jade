@@ -3,13 +3,14 @@ extends ./chrome.jade
 block content
   style.
     .ui-app-loading {
-      width: 33%;
+      width: 33.3%;
       margin: 60px auto;
+      padding: 0 15px;
       text-align: center;
       font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
       color: #444444;
       padding-top: 45px;
-      background-size: 145px;
+      background-size: 128px;
       background-position: top center;
       background-repeat: no-repeat;
       background-image: url('data:image/gif;base64,#{loadingGif}');
@@ -18,20 +19,24 @@ block content
     .ui-app-loading small {
       font-size: 65%;
       font-weight: 400;
-      color: #777;
+      color: #b4bcc2;
     }
 
 
   div.ui-app-loading
-    h1 Kibana
-      small(id="cache-message" style="display:none").
-        Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!
+    h1
+      strong Kibana
+      small.
+        &nbsp;is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!
 
   script.
     window.onload = function () {
 
-      var showCacheMessage = !/#.*[?&]embed(&|$)/.test(window.location.href);
-      if (showCacheMessage) document.getElementById('cache-message').style.display = 'block';
+      var hideLoadingMessage = /#.*[?&]embed(&|$)/.test(window.location.href);
+      if (hideLoadingMessage) {
+        var loading = document.querySelector('.ui-app-loading h1');
+        loading.removeChild(loading.lastChild);
+      }
 
       var files = [
         '/bundles/commons.style.css',
