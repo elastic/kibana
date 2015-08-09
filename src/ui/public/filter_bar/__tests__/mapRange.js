@@ -24,7 +24,7 @@ describe('Filter Bar Directive', function () {
       var filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
       mapRange(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
-        expect(result).to.have.property('value', '1,024 to 2,048');
+        expect(result).to.have.property('value', '[1,024, 2,048)');
         done();
       });
       $rootScope.$apply();
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
       var filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
       mapRange(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
-        expect(result).to.have.property('value', '1,024 to 2,048');
+        expect(result).to.have.property('value', '[1,024, 2,048)');
         done();
       });
       $rootScope.$apply();

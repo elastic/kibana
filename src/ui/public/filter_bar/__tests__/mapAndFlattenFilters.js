@@ -46,7 +46,7 @@ describe('Filter Bar Directive', function () {
         expect(results[2].meta).to.have.property('key', 'query');
         expect(results[2].meta).to.have.property('value', 'foo:bar');
         expect(results[3].meta).to.have.property('key', 'bytes');
-        expect(results[3].meta).to.have.property('value', '1,024 to 2,048');
+        expect(results[3].meta).to.have.property('value', '[1,024, 2,048)');
         expect(results[4].meta).to.have.property('key', '_type');
         expect(results[4].meta).to.have.property('value', 'apache');
         done();
