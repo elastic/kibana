@@ -49,3 +49,14 @@ require('ui/chrome')
     courier.start();
   });
 });
+
+var vars = require('ui/chrome').getInjectedVars();
+require('ui/modules').get('kibana')
+.constant('kbnIndex', vars.kbnIndex)
+.constant('esShardTimeout', vars.esShardTimeout)
+.constant('esUrl', (function () {
+  var a = document.createElement('a');
+  a.href = '/elasticsearch';
+  return a.href;
+}()));
+

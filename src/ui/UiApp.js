@@ -19,7 +19,12 @@ class UiApp {
     this.hidden = this.spec.hidden;
     this.autoloadOverrides = this.spec.autoload;
     this.templateName = this.spec.templateName || 'uiApp';
+
+    // once this resolves, no reason to run it again
     this.getModules = _.once(this.getModules);
+
+    // variables that are injected into the browser, must serialize to JSON
+    this.getInjectedVars = this.spec.injectVars || _.noop;
   }
 
   getModules() {

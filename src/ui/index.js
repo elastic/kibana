@@ -84,8 +84,7 @@ module.exports = async (kbnServer, server, config) => {
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),
       cacheBust: _.get(kbnServer, 'build.number', ''),
-      kbnIndex: config.get('kibana.index'),
-      esShardTimeout: config.get('elasticsearch.shardTimeout'),
+      vars: app.getInjectedVars()
     };
 
     return this.view(app.templateName, {

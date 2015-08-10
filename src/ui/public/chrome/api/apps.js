@@ -31,4 +31,8 @@ module.exports = function (chrome, internals) {
     return internals.app.id;
   };
 
+  chrome.getInjectedVars = function () {
+    return internals.vars;
+  };
+
 };
