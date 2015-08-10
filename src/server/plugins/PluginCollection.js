@@ -1,8 +1,12 @@
 let _ = require('lodash');
 let inspect = require('util').inspect;
-let PluginApi = require('./PluginApi');
 
-module.exports = class Plugins extends Array {
+let PluginApi = require('./PluginApi');
+let Collection = require('requirefrom')('src')('utils/Collection');
+
+let byIdCache = Symbol('byIdCache');
+
+module.exports = class Plugins extends Collection {
 
   constructor(kbnServer) {
     super();
@@ -15,8 +19,8 @@ module.exports = class Plugins extends Array {
 
     for (let product of output) {
       if (product instanceof api.Plugin) {
-        this._byId = null;
-        this.push(product);
+        this[byIdCache] = null;
+        this.add(product);
       } else {
         throw new TypeError('unexpected plugin export ' + inspect(product));
       }
@@ -24,7 +28,7 @@ module.exports = class Plugins extends Array {
   }
 
   get byId() {
-    return this._byId || (this._byId = _.indexBy(this, 'id'));
+    return this[byIdCache] || (this[byIdCache] = _.indexBy([...this], 'id'));
   }
 
 };

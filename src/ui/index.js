@@ -79,7 +79,7 @@ module.exports = async (kbnServer, server, config) => {
   server.decorate('reply', 'renderApp', function (app) {
     let payload = {
       app: app,
-      appCount: uiExports.apps.length,
+      appCount: uiExports.apps.size,
       version: kbnServer.version,
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),

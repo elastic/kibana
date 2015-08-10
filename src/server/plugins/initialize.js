@@ -1,46 +1,49 @@
-module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let resolve = require('bluebird').resolve;
+module.exports = async function (kbnServer, server, config) {
+  let { includes, keys } = require('lodash');
+
+  if (!config.get('plugins.initialize')) {
+    server.log(['info'], 'Plugin initialization disabled.');
+    return [];
+  }
+
+  let { plugins } = kbnServer;
+  let enabledPlugins = {};
+
+  // setup config and filter out disabled plugins
+  for (let plugin of plugins) {
+    await plugin.setupConfig();
+    if (config.get([plugin.id, 'enabled'])) {
+      enabledPlugins[plugin.id] = plugin;
+    }
+  }
+
 
   let path = [];
-  let step = function (id, block) {
-    return resolve(id)
-    .then(function (id) {
-      if (_.includes(path, id)) {
-        throw new Error(`circular dependencies found: "${path.concat(id).join(' -> ')}"`);
-      }
+  let initialize = async id => {
+    let plugin = enabledPlugins[id];
 
-      path.push(id);
-      return block();
-    })
-    .then(function () {
-      path.pop(id);
-    });
-  };
-
-  return resolve(kbnServer.plugins)
-  .then(function () {
-    if (!config.get('plugins.initialize')) {
-      if (!require('cluster').isWorker) {
-        server.log(['info'], 'Plugin initialization disabled.');
-      }
-      return [];
+    if (includes(path, id)) {
+      throw new Error(`circular dependencies found: "${path.concat(id).join(' -> ')}"`);
     }
 
-    return _.toArray(kbnServer.plugins);
-  })
-  .each(function loadReqsAndInit(plugin) {
-    return step(plugin.id, function () {
-      return resolve(plugin.requiredIds).map(function (reqId) {
-        if (!kbnServer.plugins.byId[reqId]) {
+    path.push(id);
+
+
+    for (let reqId of plugin.requiredIds) {
+      if (!enabledPlugins[reqId]) {
+        if (plugins.byId[reqId]) {
+          throw new Error(`Requirement "${reqId}" for plugin "${plugin.id}" is disabled.`);
+        } else {
           throw new Error(`Unmet requirement "${reqId}" for plugin "${plugin.id}"`);
         }
+      }
+      await initialize(reqId);
+    }
 
-        return loadReqsAndInit(kbnServer.plugins.byId[reqId]);
-      })
-      .then(function () {
-        return plugin.init();
-      });
-    });
-  });
+    await plugin.init();
+
+    path.pop();
+  };
+
+  for (let id of keys(enabledPlugins)) await initialize(id);
 };

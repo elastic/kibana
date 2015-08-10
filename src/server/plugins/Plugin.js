@@ -33,49 +33,39 @@ module.exports = class Plugin {
     };
   }
 
-  async init() {
-    let id = this.id;
-    let version = this.version;
-    let kbnStatus = this.kbnServer.status;
-    let server = this.kbnServer.server;
-    let config = this.kbnServer.config;
-
-    server.log(['plugins', 'debug'], {
-      tmpl: 'Initializing plugin <%= plugin.id %>',
-      plugin: this
-    });
-
-    if (this.publicDir) {
-      server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
-    }
-
-    this.status = kbnStatus.create(`plugin:${this.id}`);
-
-    // setup plugin config
+  async setupConfig() {
+    let { config } = this.kbnServer;
     let schema = await this.getConfigSchema(Joi);
-    config.extendSchema(id, schema || defaultConfigSchema);
+    this.kbnServer.config.extendSchema(this.id, schema || defaultConfigSchema);
+  }
 
-    // ensure that the plugin is enabled
-    let enabled = config.get([id, 'enabled']) && this.externalCondition(config);
-    if (!enabled) {
-      // Only change the plugin status if it wasn't set by the externalCondition
-      if (this.status.state === 'uninitialized') {
-        this.status.disabled();
-      }
-
-      return;
-    }
+  async init() {
+    let { id, version, kbnServer } = this;
+    let { config } = kbnServer;
 
     // setup the hapi register function and get on with it
     let register = (server, options, next) => {
+      this.server = server;
+
+      server.log(['plugins', 'debug'], {
+        tmpl: 'Initializing plugin <%= plugin.id %>',
+        plugin: this
+      });
+
+      if (this.publicDir) {
+        server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
+      }
+
+      this.status = kbnServer.status.create(`plugin:${this.id}`);
       server.expose('status', this.status);
+
       attempt(this.externalInit, [server, options], this).nodeify(next);
     };
 
     register.attributes = { name: id, version: version };
 
     await fromNode(cb => {
-      server.register({
+      kbnServer.server.register({
         register: register,
         options: config.has(id) ? config.get(id) : null
       }, cb);

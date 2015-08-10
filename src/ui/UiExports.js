@@ -1,11 +1,11 @@
 var _ = require('lodash');
 var minimatch = require('minimatch');
 
-var UiApps = require('./UiApps');
+var UiAppCollection = require('./UiAppCollection');
 
 class UiExports {
   constructor(kbnServer) {
-    this.apps = new UiApps(this);
+    this.apps = new UiAppCollection(this);
     this.aliases = {};
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
@@ -92,7 +92,8 @@ class UiExports {
   }
 
   getAllApps() {
-    return _.union(this.apps, this.apps.hidden);
+    let { apps } = this;
+    return [...apps].concat(...apps.hidden);
   }
 
   getApp(id) {
