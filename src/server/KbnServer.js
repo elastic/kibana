@@ -81,6 +81,6 @@ module.exports = class KbnServer {
   }
 
   async close() {
-    await fromNode(cb => this.server.stop());
+    await fromNode(cb => this.server.stop(cb));
   }
 };
