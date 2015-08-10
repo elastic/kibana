@@ -58,18 +58,22 @@ module.exports = class Config {
     if (_.isObject(env)) env = env.name;
     if (!env) env = process.env.NODE_ENV || 'production';
 
+    let dev = env === 'development';
+    let prod = env === 'production';
+
     // pass the environment as context so that it can be refed in config
     let context = {
       env: env,
-      prod: env === 'production',
-      dev: env === 'development',
-      notProd: env !== 'production',
-      notDev: env !== 'development',
+      prod: prod,
+      dev: dev,
+      notProd: !prod,
+      notDev: !dev,
       version: _.get(pkg, 'version'),
-      buildNum: env === 'development' ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.num', NaN)
+      buildNum: dev ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.number', NaN),
+      buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _.get(pkg, 'build.sha', '')
     };
 
-    if (!context.dev && !context.prod && !context.test) {
+    if (!context.dev && !context.prod) {
       throw new TypeError(
         `Unexpected environment "${env}", expected one of "development" or "production"`
       );

@@ -8,9 +8,8 @@ module.exports = function (chrome, internals) {
 
     kibana
     .constant('kbnVersion', internals.version)
-    .constant('buildNum', internals.buildNumber)
-    .constant('commitSha', internals.buildSha)
-    .constant('cacheBust', internals.cacheBust)
+    .constant('buildNum', internals.buildNum)
+    .constant('buildSha', internals.buildSha)
     .constant('sessionId', Date.now())
     .directive('kbnChrome', function ($rootScope) {
       return {

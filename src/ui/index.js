@@ -81,17 +81,15 @@ module.exports = async (kbnServer, server, config) => {
       app: app,
       appCount: uiExports.apps.size,
       version: kbnServer.version,
-      buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
-      buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),
-      cacheBust: _.get(kbnServer, 'build.number', ''),
+      buildNum: config.get('pkg.buildNum'),
+      buildSha: config.get('pkg.buildSha'),
       vars: app.getInjectedVars()
     };
 
     return this.view(app.templateName, {
       app: app,
-      cacheBust: payload.cacheBust,
-      kibanaPayload: payload,
       loadingGif: loadingGif,
+      kibanaPayload: payload
     });
   });
 };

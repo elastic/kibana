@@ -9,7 +9,8 @@ let fromRoot = utils('fromRoot');
 module.exports = Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
-    buildNum: Joi.number().default(Joi.ref('$buildNum'))
+    buildNum: Joi.number().default(Joi.ref('$buildNum')),
+    buildSha: Joi.string().default(Joi.ref('$buildSha')),
   }).default(),
 
   env: Joi.object({
