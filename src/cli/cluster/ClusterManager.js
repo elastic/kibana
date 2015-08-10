@@ -1,6 +1,6 @@
 let cluster = require('cluster');
 let { join } = require('path');
-let { compact, invoke, bindAll, once } = require('lodash');
+let { compact, invoke, bindAll, once, get } = require('lodash');
 
 let Log = require('../Log');
 let Worker = require('./Worker');
@@ -27,6 +27,17 @@ module.exports = class ClusterManager {
         log: this.log
       })
     ];
+
+    // broker messages between workers
+    this.workers.forEach((worker) => {
+      worker.on('broadcast', (msg) => {
+        this.workers.forEach((to) => {
+          if (to !== worker && to.online) {
+            to.fork.send(msg);
+          }
+        });
+      });
+    });
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 

@@ -26,9 +26,7 @@ module.exports = class LazyOptimizer extends FsOptimizer {
     await this.bundles.writeEntryFiles();
     await this.initCompiler();
 
-    let watching;
-
-    this.compiler.plugin('watch-run', (watching, webpackCb) => {
+    this.compiler.plugin('watch-run', (w, webpackCb) => {
       this.build.work(once(() => {
         this.timer.start();
         this.logRunStart();
@@ -46,10 +44,10 @@ module.exports = class LazyOptimizer extends FsOptimizer {
       let err = this.failedStatsToError(stats);
       this.logRunFailure(err);
       this.build.failure(err);
-      watching.invalidate();
+      this.watching.invalidate();
     });
 
-    watching = this.compiler.watch({ aggregateTimeout: 200 }, err => {
+    this.watching = this.compiler.watch({ aggregateTimeout: 200 }, err => {
       if (err) {
         this.log('fatal', err);
         process.exit(1);
@@ -88,14 +86,14 @@ module.exports = class LazyOptimizer extends FsOptimizer {
 
   logRunStart() {
     this.log(['info', 'optimize'], {
-      tmpl: `Lazy optimization running.`,
+      tmpl: `Lazy optimization started`,
       bundles: this.bundles.getIds()
     });
   }
 
   logRunSuccess() {
     this.log(['info', 'optimize'], {
-      tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds.',
+      tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds',
       bundles: this.bundles.getIds(),
       status: 'success',
       seconds: this.timer.end()
@@ -108,7 +106,7 @@ module.exports = class LazyOptimizer extends FsOptimizer {
     if (this.initializing) return;
 
     this.log(['fatal', 'optimize'], {
-      tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds.<%= err %>',
+      tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds<%= err %>',
       bundles: this.bundles.getIds(),
       status: 'failed',
       seconds: this.timer.end(),
