@@ -2,6 +2,7 @@ let { inherits } = require('util');
 let _ = require('lodash');
 let { resolve } = require('path');
 let webpack = require('webpack');
+var Boom = require('boom');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
@@ -96,6 +97,35 @@ class BaseOptimizer {
         unsafeCache: [/\/node_modules\//]
       }
     };
+  }
+
+  failedStatsToError(stats) {
+    let statFormatOpts = {
+      hash: false,  // add the hash of the compilation
+      version: false,  // add webpack version information
+      timings: false,  // add timing information
+      assets: false,  // add assets information
+      chunks: false,  // add chunk information
+      chunkModules: false,  // add built modules information to chunk information
+      modules: false,  // add built modules information
+      cached: false,  // add also information about cached (not built) modules
+      reasons: false,  // add information about the reasons why modules are included
+      source: false,  // add the source code of modules
+      errorDetails: false,  // add details to errors (like resolving log)
+      chunkOrigins: false,  // add the origins of chunks and chunk merging info
+      modulesSort: false,  // (string) sort the modules by that field
+      chunksSort: false,  // (string) sort the chunks by that field
+      assetsSort: false,  // (string) sort the assets by that field
+      children: false,
+    };
+
+    let details = stats.toString(_.defaults({ colors: true }, statFormatOpts));
+
+    return Boom.create(
+      500,
+      `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
+      stats.toJson(statFormatOpts)
+    );
   }
 }
 

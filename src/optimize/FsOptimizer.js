@@ -17,9 +17,7 @@ module.exports = class FsOptimizer extends BaseOptimizer {
         if (err || !stats) return cb(err);
 
         if (stats.hasErrors() || stats.hasWarnings()) {
-          let err = new Error('Optimization must not produce errors or warnings');
-          err.stats = stats;
-          return cb(err);
+          return cb(this.failedStatsToError(stats));
         }
         else {
           cb(null, stats);

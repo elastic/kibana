@@ -39,22 +39,14 @@ module.exports = async (kbnServer, server, config) => {
     profile: config.get('optimize.profile')
   });
 
-  try {
-    server.log(
-      ['info', 'optimize'],
-      `Optimizing and caching ${bundles.desc()}. This may take a few minutes.`
-    );
+  server.log(
+    ['info', 'optimize'],
+    `Optimizing and caching ${bundles.desc()}. This may take a few minutes.`
+  );
 
-    let start = Date.now();
-    await optimizer.run();
-    let seconds = ((Date.now() - start) / 1000).toFixed(2);
+  let start = Date.now();
+  await optimizer.run();
+  let seconds = ((Date.now() - start) / 1000).toFixed(2);
 
-    server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds.`);
-  } catch (e) {
-    if (e.stats) {
-      server.log(['error'], e.stats.toString({ colors: true }));
-    }
-    server.log(['fatal'], e);
-    process.exit(1); // eslint-disable-line  no-process-exit
-  }
+  server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds.`);
 };

@@ -18,5 +18,4 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
   );
 
   await server.init();
-  kibanaHapiServer.log(['info', 'optimize'], 'Lazy Optimizer ready');
 };

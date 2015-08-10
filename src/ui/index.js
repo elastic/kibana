@@ -45,7 +45,7 @@ module.exports = async (kbnServer, server, config) => {
     path: '/apps',
     method: 'GET',
     handler: function (req, reply) {
-      let switcher = uiExports.getHiddenApp('switcher');
+      let switcher = uiExports.getHiddenApp('appSwitcher');
       if (!switcher) return reply(Boom.notFound('app switcher not installed'));
       return reply.renderApp(switcher);
     }

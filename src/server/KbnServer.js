@@ -1,5 +1,4 @@
-let _ = require('lodash');
-let { EventEmitter } = require('events');
+let { constant, once, compact, flatten } = require('lodash');
 let { promisify, resolve, fromNode } = require('bluebird');
 let Hapi = require('hapi');
 
@@ -7,17 +6,15 @@ let utils = require('requirefrom')('src/utils');
 let rootDir = utils('fromRoot')('.');
 let pkg = utils('packageJson');
 
-module.exports = class KbnServer extends EventEmitter {
+module.exports = class KbnServer {
   constructor(settings) {
-    super();
-
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    this.ready = _.constant(this.mixin(
+    this.ready = constant(this.mixin(
       require('./config/setup'), // sets this.config, reads this.settings
       require('./http'), // sets this.server
       require('./logging'),
@@ -41,12 +38,13 @@ module.exports = class KbnServer extends EventEmitter {
 
       () => {
         if (this.config.get('server.autoListen')) {
-          this.listen();
+          this.ready = constant(resolve());
+          return this.listen();
         }
       }
     ));
 
-    this.listen = _.once(this.listen);
+    this.listen = once(this.listen);
   }
 
   /**
@@ -60,52 +58,29 @@ module.exports = class KbnServer extends EventEmitter {
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */
   async mixin(...fns) {
-    fns = _.compact(_.flatten(fns));
-
-    try {
-      for (let fn of fns) {
-        await fn.call(this, this, this.server, this.config);
-      }
-    } catch (err) {
-      if (this.server) this.server.log('fatal', err);
-      else console.error('FATAL', err);
-
-      this.emit('error', err);
-      await this.close();
-      throw err;
+    for (let fn of compact(flatten(fns))) {
+      await fn.call(this, this, this.server, this.config);
     }
-
   }
 
   /**
    * Tell the server to listen for incoming requests, or get
    * a promise that will be resolved once the server is listening.
    *
-   * Calling this function has no effect, unless the "server.autoListen"
-   * is set to false.
-   *
    * @return undefined
    */
-  listen() {
-    let self = this;
+  async listen() {
+    let { server, config } = this;
 
-    return self.ready()
-    .then(function () {
-      return self.mixin(
-        function () {
-          return fromNode(_.bindKey(self.server, 'start'));
-        },
-        require('./pid')
-      );
-    })
-    .then(function () {
-      self.server.log(['listening', 'info'], 'Server running at ' + self.server.info.uri);
-      self.emit('listening');
-      return self.server;
-    });
+    await this.ready();
+    await fromNode(cb => server.start(cb));
+    await require('./pid')(this, server, config);
+
+    server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
+    return server;
   }
 
-  close() {
-    return fromNode(_.bindKey(this.server, 'stop'));
+  async close() {
+    await fromNode(cb => this.server.stop());
   }
 };

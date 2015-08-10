@@ -50,7 +50,7 @@ module.exports = function (program) {
   .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
   .option('--no-dev-watch', 'Prevents automatic restarts of the server in --dev mode')
-  .action(function (opts) {
+  .action(async function (opts) {
     if (opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
       let ClusterManager = require('../cluster/ClusterManager');
@@ -85,13 +85,22 @@ module.exports = function (program) {
 
     set('plugins.paths', [].concat(opts.pluginPath || []));
 
-    let server = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+    let kbnServer = {};
 
-    server.ready().catch(function (err) {
-      console.error(err.stack);
+    try {
+      kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+      await kbnServer.ready();
+    }
+    catch (err) {
+      let { server } = kbnServer;
+
+      if (server) server.log(['fatal'], err);
+      else console.error('FATAL', err);
+
+      kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
-    });
+    }
 
-    return server;
+    return kbnServer;
   });
 };
