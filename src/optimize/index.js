@@ -41,12 +41,12 @@ module.exports = async (kbnServer, server, config) => {
 
   server.log(
     ['info', 'optimize'],
-    `Optimizing and caching ${bundles.desc()}. This may take a few minutes.`
+    `Optimizing and caching ${bundles.desc()}. This may take a few minutes`
   );
 
   let start = Date.now();
   await optimizer.run();
   let seconds = ((Date.now() - start) / 1000).toFixed(2);
 
-  server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds.`);
+  server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds`);
 };
