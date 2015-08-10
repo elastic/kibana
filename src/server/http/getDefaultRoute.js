@@ -6,9 +6,6 @@ module.exports = _.once(function (kbnServer) {
   if (defaultConfig) return defaultConfig;
 
   // redirect to the single app
-  if (kbnServer.uiExports.apps.size === 1) {
-    return `/app/${kbnServer.uiExports.apps[0].id}`;
-  }
-
-  return '/apps';
+  let apps = kbnServer.uiExports.apps.toArray();
+  return apps.length === 1 ? `/app/${apps[0].id}` : '/apps';
 });
