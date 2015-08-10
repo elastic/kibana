@@ -60,7 +60,7 @@ module.exports = class LazyOptimizer extends FsOptimizer {
 
     this.initializing = false;
     this.log(['info', 'optimize'], {
-      tmpl: `Lazy optimization ${this.bundles.desc()} ready.`,
+      tmpl: `Lazy optimization of ${this.bundles.desc()} ready.`,
       bundles: this.bundles.getIds()
     });
   }
