@@ -131,6 +131,9 @@ NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
 To render the visualization on the _preview canvas_, click the green *Apply Changes* button at the top right of the
 Aggregation Builder.
 
+You can learn more about aggregation and how altering the order of aggregations affects your visualizations 
+https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[here]. 
+
 [float]
 [[visualize-filters]]
 include::filter-pinning.asciidoc[]
