@@ -1,80 +1,73 @@
-let { contains } = require('lodash');
+let { once, pick, size } = require('lodash');
 let { join } = require('path');
-let { fromNode } = require('bluebird');
 let Boom = require('boom');
+
 let FsOptimizer = require('../FsOptimizer');
+let WeirdControlFlow = require('./WeirdControlFlow');
 
 module.exports = class LazyOptimizer extends FsOptimizer {
   constructor(opts) {
     super(opts);
-    this.sent = [];
     this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
+
+    this.timer = {
+      ms: null,
+      start: () => this.timer.ms = Date.now(),
+      end: () => this.timer.ms = ((Date.now() - this.timer.ms) / 1000).toFixed(2)
+    };
+
+    this.build = new WeirdControlFlow();
   }
 
   async init() {
+    this.initializing = true;
+
     await this.bundles.writeEntryFiles();
     await this.initCompiler();
-    if (this.prebuild) await this.start();
-  }
 
-  start() {
-    this.log(['info', 'optimize'], `Lazy Optimization for ${this.bundles.desc()} starting`);
+    let watching;
 
-    let start = Date.now();
-    let prom = this.current = (async () => {
-      try {
-
-        let stats = await fromNode(cb => this.compiler.run(cb));
-        if (stats.hasErrors() || stats.hasWarnings()) {
-          let err = new Error('optimization failure');
-          err.stats = stats;
-          throw err;
-        }
-
-        return stats;
-
-      } catch (e) {
-        if (e.stats && this.current === prom) {
-          this.log(['warning', 'optimize'], e.stats.toString({ colors: true }));
-        }
-        // TODO: rebuild on errors
-        throw e;
-      }
-    }())
-    .then(() => {
-      let seconds = ((Date.now() - start) / 1000).toFixed(2);
-      this.log(['info', 'optimize'], `Lazy optimization of ${this.bundles.desc()} complete in ${seconds} seconds.`);
+    this.compiler.plugin('watch-run', (watching, webpackCb) => {
+      this.build.work(once(() => {
+        this.timer.start();
+        this.logRunStart();
+        webpackCb();
+      }));
     });
 
-    return prom;
+    this.compiler.plugin('done', stats => {
+      if (!stats.hasErrors() && !stats.hasWarnings()) {
+        this.logRunSuccess();
+        this.build.success();
+        return;
+      }
+
+      let err = this.failedStatsToError(stats);
+      this.logRunFailure(err);
+      this.build.failure(err);
+      watching.invalidate();
+    });
+
+    watching = this.compiler.watch({ aggregateTimeout: 200 }, err => {
+      if (err) {
+        this.log('fatal', err);
+        process.exit(1);
+      }
+    });
+
+    if (this.prebuild) await this.build.get();
+
+    this.initializing = false;
+    this.log(['info', 'optimize'], {
+      tmpl: `Lazy optimization ${this.bundles.desc()} ready.`,
+      bundles: this.bundles.getIds()
+    });
   }
 
-  /**
-   * Read a file from the in-memory bundles, paths just like those
-   * produces by the FsOptimizer are used to access files. The first time
-   * a file is requested it is marked as "sent". If that same file is requested
-   * a second time then we will rerun the compiler.
-   *
-   * !!!ONLY ONE BROWSER TAB SHOULD ACCESS THE IN-MEMORY OPTIMIZERS FILES AT A TIME!!!
-   *
-   * @param  {[type]} relativePath [description]
-   * @return {[type]}              [description]
-   */
   async getPath(relativePath) {
-    let path = join(this.compiler.outputPath, relativePath);
-    let resend = contains(this.sent, path);
-
-    if (resend) {
-      this.sent = [];
-      this.current = null;
-    }
-
-    if (!this.current) this.start();
-    await this.current;
-
-    this.sent.push(path);
-    return path;
+    await this.build.get();
+    return join(this.compiler.outputPath, relativePath);
   }
 
   bindToServer(server) {
@@ -90,6 +83,36 @@ module.exports = class LazyOptimizer extends FsOptimizer {
           return reply(error);
         }
       }
+    });
+  }
+
+  logRunStart() {
+    this.log(['info', 'optimize'], {
+      tmpl: `Lazy optimization running.`,
+      bundles: this.bundles.getIds()
+    });
+  }
+
+  logRunSuccess() {
+    this.log(['info', 'optimize'], {
+      tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds.',
+      bundles: this.bundles.getIds(),
+      status: 'success',
+      seconds: this.timer.end()
+    });
+  }
+
+  logRunFailure(err) {
+    // errors during initialization to the server, unlike the rest of the
+    // errors produced here. Lets not muddy the console with extra errors
+    if (this.initializing) return;
+
+    this.log(['fatal', 'optimize'], {
+      tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds.<%= err %>',
+      bundles: this.bundles.getIds(),
+      status: 'failed',
+      seconds: this.timer.end(),
+      err: err
     });
   }
 };
