@@ -95,12 +95,20 @@ module.exports = Joi.object({
     lazyHost: Joi.string().hostname().default('0.0.0.0'),
     lazyPrebuild: Joi.boolean().default(true),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
-    unsafeCache: Joi.boolean().when('lazy', {
-      is: true,
-      then: Joi.default(false),
-      otherwise: Joi.default(true)
-    }),
-    sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
+    unsafeCache: Joi
+      .alternatives()
+      .try(
+        Joi.boolean(),
+        Joi.string().regex(/^\/.+\/$/)
+      )
+      .default('/[\\/\\\\](node_modules|bower_components)[\\/\\\\]/'),
+    sourceMaps: Joi
+      .alternatives()
+      .try(
+        Joi.string().required(),
+        Joi.boolean()
+      )
+      .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false),
     tests: Joi.boolean().default(false),
   }).default()

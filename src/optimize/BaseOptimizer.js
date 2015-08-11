@@ -11,15 +11,33 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 let babelOptions = require('./babelOptions');
-let vendorRE = /[\/\\](node_modules|bower_components)[\/\\]/;
 
 class BaseOptimizer {
   constructor(opts) {
     this.env = opts.env;
     this.bundles = opts.bundles;
     this.profile = opts.profile || false;
-    this.sourceMaps = opts.sourceMaps || false;
+
+    switch (opts.sourceMaps) {
+      case true:
+        this.sourceMaps = 'source-map';
+        break;
+
+      case 'fast':
+        this.sourceMaps = 'cheap-module-eval-source-map';
+        break;
+
+      default:
+        this.sourceMaps = opts.sourceMaps || false;
+        break;
+    }
+
     this.unsafeCache = opts.unsafeCache || false;
+    if (typeof this.unsafeCache === 'string') {
+      this.unsafeCache = [
+        new RegExp(this.unsafeCache.slice(1, -1))
+      ];
+    }
   }
 
   async initCompiler() {
@@ -48,7 +66,7 @@ class BaseOptimizer {
       context: fromRoot('.'),
       entry: this.bundles.toWebpackEntries(),
 
-      devtool: this.sourceMaps ? '#source-map' : false,
+      devtool: this.sourceMaps,
       profile: this.profile || false,
 
       output: {
@@ -93,7 +111,7 @@ class BaseOptimizer {
           { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` },
           {
             test: /\.babel\.js$/,
-            exclude: vendorRE,
+            exclude: /[\/\\](node_modules|bower_components)[\/\\]/,
             loader: 'babel',
             query: babelOptions
           }
@@ -108,7 +126,7 @@ class BaseOptimizer {
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,
-        unsafeCache: this.unsafeCache || [vendorRE],
+        unsafeCache: this.unsafeCache,
       },
     };
   }
