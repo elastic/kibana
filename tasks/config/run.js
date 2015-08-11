@@ -15,6 +15,7 @@ module.exports = function (grunt) {
         '--env.name=development',
         '--logging.json=false',
         '--optimize.tests=true',
+        '--optimize.lazy=false'
       ]
     }
   };
