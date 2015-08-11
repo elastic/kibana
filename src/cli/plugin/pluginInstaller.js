@@ -13,7 +13,7 @@ function install(settings, logger) {
   try {
     fs.statSync(settings.pluginPath);
 
-    logger.error(`Plugin ${settings.package} already exists. Please remove before installing a new version`);
+    logger.error(`Plugin ${settings.package} already exists, please remove before installing a new version`);
     process.exit(70); // eslint-disable-line no-process-exit
   } catch (e) {
     if (e.code !== 'ENOENT') throw e;
