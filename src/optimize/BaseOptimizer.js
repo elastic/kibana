@@ -1,5 +1,5 @@
 let { inherits } = require('util');
-let _ = require('lodash');
+let { defaults } = require('lodash');
 let { resolve } = require('path');
 let { writeFile } = require('fs');
 let webpack = require('webpack');
@@ -110,10 +110,18 @@ class BaseOptimizer {
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
           { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` },
           {
-            test: /\.babel\.js$/,
+            test: /\.js$/,
             exclude: /[\/\\](node_modules|bower_components)[\/\\]/,
             loader: 'babel',
             query: babelOptions
+          },
+          {
+            test: /\.jsx$/,
+            exclude: /[\/\\](node_modules|bower_components)[\/\\]/,
+            loader: 'babel',
+            query: defaults({
+              nonStandard: true
+            }, babelOptions)
           }
         ].concat(this.env.loaders),
         noParse: this.env.noParse,
@@ -151,7 +159,7 @@ class BaseOptimizer {
       children: false,
     };
 
-    let details = stats.toString(_.defaults({ colors: true }, statFormatOpts));
+    let details = stats.toString(defaults({ colors: true }, statFormatOpts));
 
     return Boom.create(
       500,
