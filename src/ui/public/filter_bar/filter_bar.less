@@ -2,8 +2,9 @@
 
 filter-bar .confirm {
   padding: 8px 10px 4px;
-  background: @gray-lighter;
-  border-bottom: 1px solid #ccc;
+  background: @filter-bar-confirm-bg; //@gray-lighter;
+  border-bottom: 1px solid;
+  border-bottom-color: @filter-bar-confirm-border;
 
   ul {
     margin-bottom: 0px;
@@ -30,7 +31,7 @@ filter-bar .confirm {
     min-width: 110px;
 
     font-size: @font-size-small;
-    background-color: @gray-light;
+    background-color: @filter-bar-confirm-filter-bg; //@gray-light;
     color: #333;
     margin-right: 4px;
     margin-bottom: 4px;
@@ -42,15 +43,23 @@ filter-bar .confirm {
   }
 }
 
+@filter-bar-confirm-bg: @gray-lighter;
+@filter-bar-confirm-border: @gray12;
+@filter-bar-confirm-filter-bg: @gray-light;
+@filter-bar-bar-bg: @gray-lighter;
+@filter-bar-bar-border: @gray12;
+@filter-bar-bar-condensed-bg: darken(@filter-bar-bar-bg, 5%);
+
 filter-bar .bar {
   padding: 6px 6px 4px 6px;
-  background: @gray-lighter;
-  border-bottom: 1px solid #ccc;
+  background: @filter-bar-bar-bg; //@gray-lighter;
+  border-bottom: 1px solid;
+  border-bottom-color: @filter-bar-bar-border;
 
   &-condensed {
     padding: 2px 6px 0px 6px !important;
     font-size: 0.9em;
-    background: darken(@gray-lighter, 5%);
+    background: @filter-bar-bar-condensed-bg; //darken(@gray-lighter, 5%);
   }
 
   .filter-link {
