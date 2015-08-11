@@ -1,0 +1,100 @@
+<div ng-controller="timelion">
+  <navbar class="timelion-navbar">
+    <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
+      <div class="typeahead">
+        <div class="input-group"
+          ng-class="discoverSearch.$invalid ? 'has-error' : ''">
+          <input input-focus
+            ng-model="state.expressions[state.selected]"
+            placeholder="Expression ..."
+            aria-label="Expression input"
+            type="text"
+            class="form-control">
+
+          <select class="form-control timelion-interval"
+            ng-change="search()"
+            ng-options="interval for interval in ['1m','1h','1d', '1w', '1M', '1y']"
+            ng-model="state.interval">
+          </select>
+
+          <button type="submit"
+            ng-disabled="discoverSearch.$invalid"
+            aria-label="Search">
+            <span aria-hidden="true" class="fa fa-play"></span></button>
+        </div>
+      </div>
+    </form>
+
+
+    <div class="button-group" role="toolbar">
+      <div ng-if="showButtons">
+        <kbn-tooltip text="New Sheet" placement="bottom" append-to-body="1">
+          <button
+            ng-click="newSheet()"
+            aria-label="New Sheet">
+            <i aria-hidden="true" class="fa fa-file-new-o"></i>
+          </button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Save Sheet" placement="bottom" append-to-body="1">
+          <button
+            ng-click="configTemplate.toggle('save');"
+            ng-class="{active: configTemplate.is('save')}"
+            aria-haspopup="true"
+            aria-expanded="{{ configTemplate.is('save') }}"
+            aria-label="Save Search">
+            <i aria-hidden="true" class="fa fa-save"></i>
+          </button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Load Sheet" placement="bottom" append-to-body="1">
+          <button
+            aria-haspopup="true"
+            aria-expanded="{{ configTemplate.is('load') }}"
+            ng-click="configTemplate.toggle('load');"
+            ng-class="{active: configTemplate.is('load')}"
+            aria-label="Load Saved Search">
+            <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+          </button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Add Chart" placement="bottom" append-to-body="1">
+          <button
+            aria-label="Add Chart"
+            ng-click="newCell()">
+            <i aria-hidden="true" class="fa fa-area-chart"></i>
+          </button>
+        </kbn-tooltip>
+      </div>
+      <kbn-tooltip text="Toggle Menu" placement="bottom" append-to-body="1">
+        <button
+          ng-click="toggleButtons()"
+          aria-label="Toggle Menu">
+          <i aria-hidden="true" class="fa fa-bars"></i>
+        </button>
+      </kbn-tooltip>
+    </div>
+  </navbar>
+
+
+
+  <div class="timelion-container">
+    <div>
+      <div class="chart-container col-md-4"
+        ng-repeat="cell in state.expressions track by $index"
+        ng-click="setActiveCell($index)"
+        ng-class="{active: $index === state.selected, running: running}"
+        >
+        <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
+        <div chart="sheet[$index]" cell="$index"></div>
+      </div>
+    </div>
+
+    <div class="clearfix"></div>
+    <div class="footer" ng-if="stats">
+      <center>
+        <strong>Cache Efficiency</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
+        <strong>Query Time:</strong> {{stats.queryTime - stats.invokeTime}}ms /
+        <strong>Resampling Time:</strong> {{stats.fitTime - stats.queryTime}}ms /
+        <strong>Processing Time:</strong> {{stats.sheetTime - stats.fitTime}}ms
+      </center>
+    </div>
+  </div>
+</div>
