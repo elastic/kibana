@@ -35,8 +35,9 @@ module.exports = async (kbnServer, server, config) => {
   let optimizer = new FsOptimizer({
     env: bundles.env,
     bundles: bundles,
+    profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
-    profile: config.get('optimize.profile')
+    unsafeCache: config.get('optimize.unsafeCache'),
   });
 
   server.log(

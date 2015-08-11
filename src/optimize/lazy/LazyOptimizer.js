@@ -2,10 +2,10 @@ let { once, pick, size } = require('lodash');
 let { join } = require('path');
 let Boom = require('boom');
 
-let FsOptimizer = require('../FsOptimizer');
+let BaseOptimizer = require('../BaseOptimizer');
 let WeirdControlFlow = require('./WeirdControlFlow');
 
-module.exports = class LazyOptimizer extends FsOptimizer {
+module.exports = class LazyOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
     this.log = opts.log || (() => null);

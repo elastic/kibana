@@ -17,8 +17,9 @@ class BaseOptimizer {
   constructor(opts) {
     this.env = opts.env;
     this.bundles = opts.bundles;
-    this.sourceMaps = opts.sourceMaps || false;
     this.profile = opts.profile || false;
+    this.sourceMaps = opts.sourceMaps || false;
+    this.unsafeCache = opts.unsafeCache || false;
   }
 
   async initCompiler() {
@@ -107,8 +108,8 @@ class BaseOptimizer {
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,
-        unsafeCache: [vendorRE]
-      }
+        unsafeCache: this.unsafeCache || [vendorRE],
+      },
     };
   }
 
