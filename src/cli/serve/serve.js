@@ -62,6 +62,10 @@ module.exports = function (program) {
     let KbnServer = src('server/KbnServer');
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
+
+    try { _.merge(settings, readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
+    catch (e) { null; }
+
     let set = _.partial(_.set, settings);
     let get = _.partial(_.get, settings);
 

@@ -13,3 +13,4 @@ esvm
 .htpasswd
 installedPlugins
 webpackstats.json
+config/kibana.dev.yml
