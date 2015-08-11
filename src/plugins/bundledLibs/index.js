@@ -17,7 +17,7 @@ module.exports = function (kibana) {
     uiExports: {
       modules: modules,
       noParse: [
-        /node_modules\/(angular|elasticsearch-browser|mocha)\//
+        /node_modules[\/\\](angular|elasticsearch-browser|mocha)[\/\\]/
       ]
     }
   });
