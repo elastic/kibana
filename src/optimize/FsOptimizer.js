@@ -24,16 +24,5 @@ module.exports = class FsOptimizer extends BaseOptimizer {
         }
       });
     });
-
-    if (this.profile) {
-      await fromNode(cb => {
-        writeFile(
-          fromRoot('webpackstats.json'),
-          JSON.stringify(stats.toJson()),
-          { encoding: 'utf8' },
-          cb
-        );
-      });
-    }
   }
 };

@@ -12,6 +12,7 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
       log: (tags, data) => kibanaHapiServer.log(tags, data),
       env: kbnServer.bundles.env,
       bundles: kbnServer.bundles,
+      profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.lazyPrebuild')
     })

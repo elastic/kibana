@@ -1,6 +1,7 @@
 let { inherits } = require('util');
 let _ = require('lodash');
 let { resolve } = require('path');
+let { writeFile } = require('fs');
 let webpack = require('webpack');
 var Boom = require('boom');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
@@ -25,6 +26,17 @@ class BaseOptimizer {
 
     let compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
+
+    this.compiler.plugin('done', stats => {
+      if (!this.profile) return;
+
+      let path = resolve(this.env.workingDir, 'stats.json');
+      let content = JSON.stringify(stats.toJson());
+      writeFile(path, content, function (err) {
+        if (err) throw err;
+      });
+    });
+
     return this.compiler;
   }
 
