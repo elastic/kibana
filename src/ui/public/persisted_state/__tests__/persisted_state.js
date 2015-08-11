@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var sinon = require('auto-release-sinon');
+var noDigestPromises = require('testUtils/noDigestPromises');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 var errors = require('ui/errors');
@@ -8,6 +9,8 @@ var PersistedState;
 var Events;
 
 describe('Persisted State', function () {
+  noDigestPromises.activateForSuite();
+
   beforeEach(function () {
     ngMock.module('kibana');
 
@@ -496,60 +499,91 @@ describe('Persisted State', function () {
     });
   });
 
-  describe('events', function () {
+  describe.only('events', function () {
     var persistedState;
     var emitter;
 
-    var getByType = function (type) {
-      return emitter.getCalls().filter(function (call) {
+    var getByType = function (type, spy) {
+      spy = spy || emitter;
+      return spy.getCalls().filter(function (call) {
         return call.args[0] === type;
       });
     };
 
+    var watchEmitter = function (state) {
+      return sinon.spy(state, 'emit');
+    };
+
     beforeEach(function () {
-      persistedState = new PersistedState({ hello: { message: 'world' } });
-      emitter = sinon.stub(persistedState, 'emit');
+      persistedState = new PersistedState({ checker: { events: 'event tests' } });
+      emitter = watchEmitter(persistedState);
     });
 
     it('should emit set when setting values', function () {
       expect(getByType('set')).to.have.length(0);
-      persistedState.set('hello.time', 'now');
+      persistedState.set('checker.time', 'now');
       expect(getByType('set')).to.have.length(1);
     });
 
     it('should emit change when changing values', function () {
       expect(getByType('change')).to.have.length(0);
-      persistedState.set('hello.time', 'now');
+      persistedState.set('checker.time', 'now');
       expect(getByType('change')).to.have.length(1);
     });
 
     it('should not emit change when values are identical', function () {
       expect(getByType('change')).to.have.length(0);
       // check both forms of setting the same value
-      persistedState.set('hello', { message: 'world' });
+      persistedState.set('checker', { events: 'event tests' });
       expect(getByType('change')).to.have.length(0);
-      persistedState.set('hello.message', 'world');
+      persistedState.set('checker.events', 'event tests');
       expect(getByType('change')).to.have.length(0);
     });
 
     it('should emit change when values change', function () {
       expect(getByType('change')).to.have.length(0);
-      persistedState.set('hello.message', 'worlds');
+      persistedState.set('checker.events', 'i changed');
       expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit change when createChild has no value', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('checker');
+      expect(getByType('change')).to.have.length(0);
     });
 
     it('should not emit change when createChild is same value', function () {
       expect(getByType('change')).to.have.length(0);
-      persistedState.createChild('hello', { message: 'world' });
+      persistedState.createChild('checker', { events: 'event tests' });
       expect(getByType('change')).to.have.length(0);
-      persistedState.createChild('hello.message', 'world');
+      persistedState.createChild('checker.events', 'event tests');
       expect(getByType('change')).to.have.length(0);
     });
 
-    it('should emit change when createChild changes value', function () {
+    it('should emit change when createChild changes existing value', function () {
       expect(getByType('change')).to.have.length(0);
-      persistedState.createChild('hello', { message: 'everyone' });
+      persistedState.createChild('checker', { events: 'changed via child' });
       expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should emit change when createChild adds new value', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('new.path', { another: 'thing' });
+      expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should emit on parent and child instances', function (done) {
+      var child = persistedState.createChild('checker');
+      expect(getByType('change')).to.have.length(0);
+
+      // parent and child should emit, set up listener to test
+      child.on('change', function () {
+        // child fired, make sure parent fires as well
+        expect(getByType('change')).to.have.length(1);
+        done();
+      });
+
+      child.set('events', 'changed via child set');
     });
   });
 });
