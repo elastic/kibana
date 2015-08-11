@@ -1,6 +1,6 @@
 let cluster = require('cluster');
 let { join } = require('path');
-let { compact, invoke, bindAll, once, get } = require('lodash');
+let { startsWith, debounce, compact, invoke, bindAll, once } = require('lodash');
 
 let Log = require('../Log');
 let Worker = require('./Worker');
@@ -11,7 +11,7 @@ module.exports = class ClusterManager {
     this.addedCount = 0;
 
     this.workers = [
-      new Worker({
+      this.optimizer = new Worker({
         type: 'optmzr',
         title: 'optimizer',
         log: this.log,
@@ -22,7 +22,7 @@ module.exports = class ClusterManager {
         watch: false
       }),
 
-      new Worker({
+      this.server = new Worker({
         type: 'server',
         log: this.log
       })
@@ -46,6 +46,7 @@ module.exports = class ClusterManager {
   }
 
   startCluster() {
+    this.setupManualRestart();
     invoke(this.workers, 'start');
   }
 
@@ -74,9 +75,32 @@ module.exports = class ClusterManager {
       this.watcher.removeListener('add', this.onWatcherAdd);
       this.watcher.on('all', this.onWatcherChange);
 
-      this.log.good('Watching for changes', `(${this.addedCount} files)`);
+      this.log.good('watching for changes', `(${this.addedCount} files)`);
       this.startCluster();
     }));
+  }
+
+  setupManualRestart() {
+    let input = '';
+    let clear = () => input = '';
+    let clearSoon = debounce(clear, 1250);
+
+    process.stdin.on('data', chunk => {
+      input += chunk.toString('utf8');
+
+      if (input === '\n') {
+        // wait for final \n
+        clearSoon();
+      }
+      else if (startsWith(input, '\n\n')) {
+        clearSoon.cancel();
+        this.server.start();
+        clear();
+      }
+      else {
+        clear();
+      }
+    });
   }
 
   onWatcherAdd() {
