@@ -54,7 +54,8 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
       }
     });
 
-    if (this.prebuild) await this.build.get();
+    let buildPromise = this.build.get();
+    if (this.prebuild) await buildPromise;
 
     this.initializing = false;
     this.log(['info', 'optimize'], {
