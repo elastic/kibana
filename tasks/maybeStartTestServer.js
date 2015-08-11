@@ -50,9 +50,9 @@ module.exports = function (grunt) {
     };
   };
 
-  grunt.registerTask('maybeStartKibana', maybeStartServer({
+  grunt.registerTask('maybeStartTestServer', maybeStartServer({
     name: 'kibana-server',
     port: grunt.option('port') || 5601,
-    tasks: ['run:devServer']
+    tasks: ['run:testServer']
   }));
 };

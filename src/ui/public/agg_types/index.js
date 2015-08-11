@@ -58,4 +58,7 @@ define(function (require) {
       initialSet: aggs.metrics.concat(aggs.buckets)
     });
   };
+
+  // preload
+  require('ui/agg_types/AggParams');
 });

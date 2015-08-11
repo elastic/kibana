@@ -1,23 +1,51 @@
-module.exports = function (kbnServer, server, config) {
+module.exports = async (kbnServer, server, config) => {
   let _ = require('lodash');
   let Boom = require('boom');
   let formatUrl = require('url').format;
-  let { join, resolve } = require('path');
+  let { resolve } = require('path');
+  let readFile = require('fs').readFileSync;
+
+  let fromRoot = require('../utils/fromRoot');
   let UiExports = require('./UiExports');
+  let UiBundle = require('./UiBundle');
+  let UiBundleCollection = require('./UiBundleCollection');
+  let UiBundlerEnv = require('./UiBundlerEnv');
+  let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
   let uiExports = kbnServer.uiExports = new UiExports(kbnServer);
-  let apps = uiExports.apps;
-  let hiddenApps = uiExports.apps.hidden;
+
+  let bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
+  bundlerEnv.addContext('env', config.get('env.name'));
+  bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
+  bundlerEnv.addContext('kbnVersion', config.get('pkg.version'));
+  bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
+  uiExports.addConsumer(bundlerEnv);
+
+  for (let plugin of kbnServer.plugins) {
+    uiExports.consumePlugin(plugin);
+  }
+
+  let bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
+
+  for (let app of uiExports.getAllApps()) {
+    bundles.addApp(app);
+  }
+
+  for (let gen of uiExports.getBundleProviders()) {
+    let bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps());
+    if (bundle) bundles.add(bundle);
+  }
 
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
+  server.exposeStaticFile('/loading.gif', resolve(__dirname, 'public/loading.gif'));
 
   // serve the app switcher
   server.route({
     path: '/apps',
     method: 'GET',
     handler: function (req, reply) {
-      let switcher = hiddenApps.byId.switcher;
+      let switcher = uiExports.getHiddenApp('appSwitcher');
       if (!switcher) return reply(Boom.notFound('app switcher not installed'));
       return reply.renderApp(switcher);
     }
@@ -28,7 +56,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/api/apps',
     method: 'GET',
     handler: function (req, reply) {
-      return reply(apps);
+      return reply(uiExports.apps);
     }
   });
 
@@ -37,7 +65,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     handler: function (req, reply) {
       let id = req.params.id;
-      let app = apps.byId[id];
+      let app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unkown app ' + id));
 
       if (kbnServer.status.isGreen()) {
@@ -49,39 +77,22 @@ module.exports = function (kbnServer, server, config) {
   });
 
   server.decorate('reply', 'renderApp', function (app) {
-    if (app.requireOptimizeGreen) {
-      let optimizeStatus = kbnServer.status.get('optimize');
-      switch (optimizeStatus && optimizeStatus.state) {
-        case 'yellow':
-          return this(`
-            <html>
-              <head><meta http-equiv="refresh" content="1"></head>
-              <body>${optimizeStatus.message}</body>
-            </html>
-          `).code(503);
-
-        case 'red':
-          return this(`
-            <html><body>${optimizeStatus.message}</body></html>
-          `).code(500);
-      }
-    }
-
     let payload = {
       app: app,
-      appCount: apps.length,
+      appCount: uiExports.apps.size,
       version: kbnServer.version,
       buildSha: _.get(kbnServer, 'build.sha', '@@buildSha'),
       buildNumber: _.get(kbnServer, 'build.number', '@@buildNum'),
       cacheBust: _.get(kbnServer, 'build.number', ''),
       kbnIndex: config.get('kibana.index'),
-      esShardTimeout: config.get('elasticsearch.shardTimeout')
+      esShardTimeout: config.get('elasticsearch.shardTimeout'),
     };
 
     return this.view(app.templateName, {
       app: app,
       cacheBust: payload.cacheBust,
-      kibanaPayload: payload
+      kibanaPayload: payload,
+      loadingGif: loadingGif,
     });
   });
 };

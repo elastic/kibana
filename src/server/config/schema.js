@@ -15,8 +15,7 @@ module.exports = Joi.object({
   env: Joi.object({
     name: Joi.string().default(Joi.ref('$env')),
     dev: Joi.boolean().default(Joi.ref('$dev')),
-    prod: Joi.boolean().default(Joi.ref('$prod')),
-    test: Joi.boolean().default(Joi.ref('$test')),
+    prod: Joi.boolean().default(Joi.ref('$prod'))
   }).default(),
 
   pid: Joi.object({
@@ -32,7 +31,14 @@ module.exports = Joi.object({
     ssl: Joi.object({
       cert: Joi.string(),
       key: Joi.string()
-    }).default()
+    }).default(),
+    cors: Joi.when('$dev', {
+      is: true,
+      then: Joi.object().default({
+        origin: ['*://localhost:9876'] // karma test server
+      }),
+      otherwise: Joi.boolean().default(false)
+    })
   }).default(),
 
   logging: Joi.object().keys({
@@ -72,11 +78,38 @@ module.exports = Joi.object({
 
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
+    bundleFilter: Joi.string().when('tests', {
+      is: true,
+      then: Joi.default('tests'),
+      otherwise: Joi.default('*')
+    }),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-    watch: Joi.boolean().default(Joi.ref('$dev')),
-    sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
-    _workerRole: Joi.valid('send', 'receive', null).default(null)
+    lazy: Joi.boolean().when('$dev', {
+      is: true,
+      then: Joi.default(true),
+      otherwise: Joi.default(false)
+    }),
+    lazyPort: Joi.number().default(5602),
+    lazyHost: Joi.string().hostname().default('0.0.0.0'),
+    lazyPrebuild: Joi.boolean().default(false),
+    lazyProxyTimeout: Joi.number().default(5 * 60000),
+    unsafeCache: Joi
+      .alternatives()
+      .try(
+        Joi.boolean(),
+        Joi.string().regex(/^\/.+\/$/)
+      )
+      .default('/[\\/\\\\](node_modules|bower_components)[\\/\\\\]/'),
+    sourceMaps: Joi
+      .alternatives()
+      .try(
+        Joi.string().required(),
+        Joi.boolean()
+      )
+      .default(Joi.ref('$dev')),
+    profile: Joi.boolean().default(false),
+    tests: Joi.boolean().default(false),
   }).default()
 
 }).default();

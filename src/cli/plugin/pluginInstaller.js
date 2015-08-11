@@ -13,7 +13,7 @@ function install(settings, logger) {
   try {
     fs.statSync(settings.pluginPath);
 
-    logger.error(`Plugin ${settings.package} already exists. Please remove before installing a new version.`);
+    logger.error(`Plugin ${settings.package} already exists, please remove before installing a new version`);
     process.exit(70); // eslint-disable-line no-process-exit
   } catch (e) {
     if (e.code !== 'ENOENT') throw e;
@@ -31,7 +31,7 @@ function install(settings, logger) {
   })
   .then(function (curious) {
     fs.renameSync(settings.workingPath, settings.pluginPath);
-    logger.log('Plugin installation complete!');
+    logger.log('Plugin installation complete');
   })
   .catch(function (e) {
     logger.error(`Plugin installation was unsuccessful due to error "${e.message}"`);

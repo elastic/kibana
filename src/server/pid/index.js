@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var Boom = require('boom');
 var Promise = require('bluebird');
 var writeFile = Promise.promisify(require('fs').writeFile);
 var unlink = require('fs').unlinkSync;
@@ -20,8 +21,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
     };
 
     if (config.get('pid.exclusive')) {
-      server.log(['pid', 'fatal'], log);
-      process.exit(1); // eslint-disable-line  no-process-exit
+      throw Boom.create(500, _.template(log.tmpl)(log), log);
     } else {
       server.log(['pid', 'warning'], log);
     }
