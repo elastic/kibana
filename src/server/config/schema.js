@@ -85,8 +85,7 @@ module.exports = Joi.object({
     }),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-    watch: Joi.boolean().default(false),
-    lazy: Joi.boolean().when('watch', {
+    lazy: Joi.boolean().when('$dev', {
       is: true,
       then: Joi.default(true),
       otherwise: Joi.default(false)
