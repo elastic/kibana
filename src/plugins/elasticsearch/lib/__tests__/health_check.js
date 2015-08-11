@@ -9,14 +9,11 @@ describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {
 
     var health;
-
     var plugin;
-
     var server;
-
     var get;
-
     var client;
+
     beforeEach(function () {
       // setup the plugin stub
       plugin = {
@@ -75,7 +72,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster red if the ping fails, then to green', function () {
-      this.timeout(3000);
+
       get.withArgs('elasticsearch.url').returns('http://localhost:9200');
       get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
@@ -100,7 +97,6 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster red if the health check status is red, then to green', function () {
-      this.timeout(3000);
       get.withArgs('elasticsearch.url').returns('http://localhost:9200');
       get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
@@ -124,7 +120,6 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster yellow if the health check timed_out and create index', function () {
-      this.timeout(3000);
       get.withArgs('elasticsearch.url').returns('http://localhost:9200');
       get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');

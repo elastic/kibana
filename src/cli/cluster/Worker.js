@@ -22,7 +22,8 @@ module.exports = class Worker extends EventEmitter {
     this.log = opts.log;
     this.type = opts.type;
     this.title = opts.title || opts.type;
-    this.filters = opts.filters;
+    this.watch = (opts.watch !== false);
+    this.online = false;
     this.changes = [];
 
     let argv = _.union(baseArgv, opts.argv || []);
@@ -31,7 +32,7 @@ module.exports = class Worker extends EventEmitter {
       kbnWorkerArgv: JSON.stringify(argv)
     };
 
-    _.bindAll(this, ['onExit', 'onMessage', 'shutdown', 'start']);
+    _.bindAll(this, ['onExit', 'onMessage', 'onOnline', 'onDisconnect', 'shutdown', 'start']);
 
     this.start = _.debounce(this.start, 25);
     cluster.on('exit', this.onExit);
@@ -53,15 +54,7 @@ module.exports = class Worker extends EventEmitter {
   }
 
   onChange(path) {
-    var valid = true;
-
-    if (this.filters) {
-      valid = _.any(this.filters, function (filter) {
-        return filter.test(path);
-      });
-    }
-
-    if (!valid) return;
+    if (!this.watch) return;
     this.changes.push(path);
     this.start();
   }
@@ -70,12 +63,22 @@ module.exports = class Worker extends EventEmitter {
     if (this.fork && !this.fork.isDead()) {
       this.fork.kill();
       this.fork.removeListener('message', this.onMessage);
+      this.fork.removeListener('online', this.onOnline);
+      this.fork.removeListener('disconnect', this.onDisconnect);
     }
   }
 
   onMessage(msg) {
     if (!_.isArray(msg) || msg[0] !== 'WORKER_BROADCAST') return;
     this.emit('broadcast', msg[1]);
+  }
+
+  onOnline() {
+    this.online = true;
+  }
+
+  onDisconnect() {
+    this.online = false;
   }
 
   flushChangeBuffer() {
@@ -100,5 +103,7 @@ module.exports = class Worker extends EventEmitter {
 
     this.fork = cluster.fork(this.env);
     this.fork.on('message', this.onMessage);
+    this.fork.on('online', this.onOnline);
+    this.fork.on('disconnect', this.onDisconnect);
   }
 };

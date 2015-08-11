@@ -1,6 +1,6 @@
 let _ = require('lodash');
 let Joi = require('joi');
-let Promise = require('bluebird');
+let { attempt, fromNode } = require('bluebird');
 let { resolve } = require('path');
 let { inherits } = require('util');
 
@@ -33,63 +33,49 @@ module.exports = class Plugin {
     };
   }
 
-  init() {
-    let self = this;
+  async setupConfig() {
+    let { config } = this.kbnServer;
+    let schema = await this.getConfigSchema(Joi);
+    this.kbnServer.config.extendSchema(this.id, schema || defaultConfigSchema);
+  }
 
-    let id = self.id;
-    let version = self.version;
-    let kbnStatus = self.kbnServer.status;
-    let server = self.kbnServer.server;
-    let config = self.kbnServer.config;
+  async init() {
+    let { id, version, kbnServer } = this;
+    let { config } = kbnServer;
 
-    server.log(['plugins', 'debug'], {
-      tmpl: 'Initializing plugin <%= plugin.id %>',
-      plugin: self
-    });
+    // setup the hapi register function and get on with it
+    let register = (server, options, next) => {
+      this.server = server;
 
-    self.status = kbnStatus.create(`plugin:${self.id}`);
-    return Promise.try(function () {
-      return self.getConfigSchema(Joi);
-    })
-    .then(function (schema) {
-      if (schema) config.extendSchema(id, schema);
-      else config.extendSchema(id, defaultConfigSchema);
-    })
-    .then(function () {
-      if (config.get([id, 'enabled'])) {
-        return self.externalCondition(config);
-      }
-    })
-    .then(function (enabled) {
-      if (!enabled) {
-        // Only change the plugin status if it wasn't set by the externalCondition
-        if (self.status.state === 'uninitialized') {
-          self.status.disabled();
-        }
-        return;
-      }
-
-      let register = function (server, options, next) {
-        server.expose('status', self.status);
-        Promise.try(self.externalInit, [server, options], self).nodeify(next);
-      };
-
-      register.attributes = { name: id, version: version };
-
-      return Promise.fromNode(function (cb) {
-        server.register({
-          register: register,
-          options: config.has(id) ? config.get(id) : null
-        }, cb);
-      })
-      .then(function () {
-        // Only change the plugin status to green if the
-        // intial status has not been updated
-        if (self.status.state === 'uninitialized') {
-          self.status.green('Ready');
-        }
+      server.log(['plugins', 'debug'], {
+        tmpl: 'Initializing plugin <%= plugin.id %>',
+        plugin: this
       });
+
+      if (this.publicDir) {
+        server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
+      }
+
+      this.status = kbnServer.status.create(`plugin:${this.id}`);
+      server.expose('status', this.status);
+
+      attempt(this.externalInit, [server, options], this).nodeify(next);
+    };
+
+    register.attributes = { name: id, version: version };
+
+    await fromNode(cb => {
+      kbnServer.server.register({
+        register: register,
+        options: config.has(id) ? config.get(id) : null
+      }, cb);
     });
+
+    // Only change the plugin status to green if the
+    // intial status has not been changed
+    if (this.status.state === 'uninitialized') {
+      this.status.green('Ready');
+    }
   }
 
   toJSON() {

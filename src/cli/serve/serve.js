@@ -3,10 +3,8 @@ let { isWorker } = require('cluster');
 let { resolve } = require('path');
 
 let cwd = process.cwd();
-let readYamlConfig = require('./readYamlConfig');
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');
-let KbnServer = src('server/KbnServer');
 
 let pathCollector = function () {
   let paths = [];
@@ -51,12 +49,17 @@ module.exports = function (program) {
   )
   .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
   .option('--dev', 'Run the server with development mode defaults')
-  .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
-  .action(function (opts) {
-    if (opts.dev && opts.watch && !isWorker) {
-      // stop processing the action and handoff to watch cluster manager
-      return require('../watch/watch')(opts);
+  .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+  .action(async function (opts) {
+    if (opts.dev && !isWorker) {
+      // stop processing the action and handoff to cluster manager
+      let ClusterManager = require('../cluster/ClusterManager');
+      new ClusterManager(opts);
+      return;
     }
+
+    let readYamlConfig = require('./readYamlConfig');
+    let KbnServer = src('server/KbnServer');
 
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
     let set = _.partial(_.set, settings);
@@ -64,7 +67,7 @@ module.exports = function (program) {
 
     if (opts.dev) {
       set('env', 'development');
-      set('optimize.watch', opts.watch);
+      set('optimize.watch', true);
     }
 
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
@@ -82,13 +85,22 @@ module.exports = function (program) {
 
     set('plugins.paths', [].concat(opts.pluginPath || []));
 
-    let server = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+    let kbnServer = {};
 
-    server.ready().catch(function (err) {
-      console.error(err.stack);
+    try {
+      kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+      await kbnServer.ready();
+    }
+    catch (err) {
+      let { server } = kbnServer;
+
+      if (server) server.log(['fatal'], err);
+      else console.error('FATAL', err);
+
+      kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
-    });
+    }
 
-    return server;
+    return kbnServer;
   });
 };
