@@ -377,7 +377,6 @@ button[disabled] {
   }
 }
 
-
 input[type="radio"],
 input[type="checkbox"],
 .radio,
@@ -416,14 +415,14 @@ style-compile {
 
 
 .cell-hover {
-  background-color: white;
+  background-color: @table-cell-hover-bg; //white;
   &-show {
     // so that the cell doesn't change size on hover
     visibility: hidden;
   }
 }
 .cell-hover:hover {
-  background-color: @gray-lighter;
+  background-color: @table-cell-hover-hover-bg; //@gray-lighter;
   cursor: cell;
 
   .cell-hover-show {

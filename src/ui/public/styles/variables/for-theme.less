@@ -15,6 +15,158 @@
 @sidebar-active-hover-bg: @component-active-bg;
 @sidebar-active-hover-color: @component-active-color;
 
+@sidebar-index-pattern-selection-bg: @brand-primary;
+@sidebar-index-pattern-selection-color: @gray8;
+
 @action-add: desaturate(@btn-success-bg, 30%);
 @action-remove: desaturate(@btn-danger-bg, 30%);
 
+//== Discover
+//
+// ##
+@discover-info-bg: @well-bg;
+
+@discover-link-color: @link-color;
+@discover-link-btn-color: @text-color;
+
+@discover-table-footer-bg: @well-bg;
+@discover-field-filter-bg: @well-bg;
+
+@discover-shard-failures-color: @brand-danger;
+@discover-shard-failures-bg: lighten(@discover-shard-failures-color, 40%);
+@discover-shard-failures-border: @brand-danger;
+
+@discover-field-toggle-color: @btn-success-color;
+@discover-field-details-border: @well-border;
+@discover-field-details-color: @text-color;
+@discover-field-details-bg: @body-bg;
+@discover-field-details-close-border: @well-border;
+@discover-field-details-close-bg: @well-bg;
+@discover-field-details-close-hover-bg: @sidebar-hover-bg;
+@discover-field-details-close-hover-color: @sidebar-hover-color;
+@discover-field-details-progress-bar-bg: @gray;
+
+//== Field name
+//
+// ##
+@field-name-color: @text-muted;
+@field-name-no-results-color: @text-muted;
+
+//== Collapser
+//
+// ##
+@collapser-bg: @gray3; //@gray-lighter;
+@collapser-border: @gray-lighter; //#fff; //@gray-lighter;
+@collapser-color: @gray-lighter; //#fff; //@gray3;
+
+@collapser-hover-bg: @gray-lighter; //Added
+@collapser-hover-color: @gray3; //Added
+
+//== Dashboard
+//
+// ##
+@dashboard-bg: @gray3; //@gray-lighter;
+@dashboard-panel-bg: @panel-bg;
+@dashboard-panel-color: @text-color;
+@dashboard-panel-heading-link-color: @text-color;
+@dashboard-panel-heading-link-hover-color: @link-hover-color;
+@dashboard-panel-load-error-color: @btn-danger-bg;
+
+//== table
+//
+// ##
+@table-dt-bg: @gray4;
+@table-dt-color: @brand-primary;
+@table-cell-hover-bg: @gray5;
+@table-cell-hover-hover-bg: @gray6;
+
+//== NavBar
+//
+// ##
+@navbar-button-border: @input-border;
+@navbar-button-color: @gray2;
+@navbar-button-bg: @input-group-addon-bg;
+
+//== AppSwitcher
+//
+// ##
+@app-switcher-application-bg: @gray-lighter;
+@app-switcher-app-link-color: @white;
+@app-switcher-app-title-color: @text-color;
+@app-switcher-app-description-color: @gray;
+
+//== Settings
+//
+// ##
+@settings-objects-list-border: @gray-lighter;
+@settings-objects-empty-color: @gray-light;
+@settings-objects-action-bar-bg: @gray-lighter;
+
+@settings-advanced-table-default-color: @input-color-placeholder;
+
+@settings-indices-active-color: @btn-success-bg;
+
+//== Visualize
+//
+// ##
+@visualize-show-spy-border: @collapser-border;
+@visualize-show-spy-bg: @collapser-bg;
+
+@visualize-show-spy-hover-bg: @collapser-hover-bg;
+@visualize-show-spy-hover-color: @collapser-hover-color;
+
+@visualize-info-bg: @well-bg;
+
+//== Vis Editor
+//
+// ##
+
+@wizard-vis-type-description-color: @brand-primary;
+
+@vis-editor-navbar-current-tab-color: @gray-lighter;
+@vis-editor-navbar-error-state-bg: @btn-danger-bg;
+@vis-editor-navbar-error-state-color: @btn-danger-color;
+
+@vis-editor-navbar-modal-bg: @navbar-default-bg;
+@vis-editor-navbar-modal-color: @gray9; //@white;
+@vis-editor-navbar-modal-link-color: @white; //JEU: Could not see where this was used.
+
+@vis-editor-sidebar-bg: @body-bg;
+@vis-editor-sidebar-border: @sidebar-bg;
+@vis-editor-sidebar-title-bg: @gray6; //@gray-lighter;
+@vis-editor-sidebar-title-hover-bg: @vis-editor-sidebar-title-bg; //@gray-lighter;
+@vis-editor-sidebar-title-hover-color: @text-color;
+
+@vis-editor-agg-group-color: @text-color;
+
+@vis-editor-agg-error-color: @btn-danger-color;
+@vis-editor-agg-error-bg: @btn-danger-bg;
+
+@vis-editor-agg-editor-flags-color: @link-color;
+
+@vis-editor-agg-wide-btn-border: @gray-lighter;
+@vis-editor-agg-wide-btn-bg: @body-bg;
+
+@vis-editor-agg-wide-btn-hover-bg: @collapser-hover-bg;
+@vis-editor-agg-wide-btn-hover-color: @collapser-hover-color;
+
+@vis-editor-agg-editor-order-bg: transparent;
+@vis-editor-agg-editor-order-border: @gray7;
+
+@vis-editor-nesting-indicator-bg: @brand-success;
+
+//== List Group Menu
+//
+// ##
+@list-group-menu-item-color: @text-color; //@link-color;
+@list-group-menu-item-select-color: @link-color;
+@list-group-menu-item-active-bg: @well-bg;
+@list-group-menu-item-hover-bg: @well-bg;
+
+//== Hint Box
+//
+// ##
+@hintbox-background-color: @gray5; //@gray-lighter;
+@hintbox-spacing-vertical: 10px;
+@hintbox-spacing-horizontal: 12px;
+@hintbox-table-border-color: @gray4; //#BFC9CA;

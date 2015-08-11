@@ -1,7 +1,7 @@
 @import (reference) "~ui/styles/variables";
 
 .application {
-  background-color: @gray-lighter;
+  background-color: @app-switcher-application-bg; //@gray-lighter;
 }
 
 .app-links {
@@ -13,7 +13,7 @@
     display: inline-block;
     vertical-align: top;
     text-align: left;
-    background: white;
+    background: @app-switcher-app-link-color; //white;
     width: 200px;
     margin: 0 30px 30px 0;
 
@@ -31,12 +31,12 @@
 
     .app-title {
       margin: 0 0 10px;
-      color: @text-color;
+      color: @app-switcher-app-title-color; //@text-color;
     }
 
     .app-description {
       font-size: 1em;
-      color: @gray;
+      color: @app-switcher-app-description-color; //@gray;
       margin: 0;
     }
   }

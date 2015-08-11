@@ -1,9 +1,8 @@
 @import (reference) "~ui/styles/variables";
 @import (reference) "~ui/styles/mixins";
-@dashboard-background: @gray-lighter;
 
 .tab-dashboard {
-  background-color: @dashboard-background;
+  background-color: @dashboard-bg;
 }
 
 dashboard-grid {
@@ -14,14 +13,14 @@ dashboard-grid {
 
 .start-screen {
   margin: 20px;
-  background-color: @gray-lighter;
+  background-color: @dashboard-bg;
   padding: 20px;
 }
 
 .gridster {
   list-style-type: none;
   display: block;
-  background-color: @dashboard-background;
+  background-color: @dashboard-bg;
   margin: 0;
   padding: 0;
 
@@ -41,8 +40,8 @@ dashboard-grid {
   dashboard-panel {
     display: block;
     height: 100%;
-    background: @panel-bg;
-    color: @text-color;
+    background: @dashboard-panel-bg; //@panel-bg;
+    color: @dashboard-panel-color; //@text-color;
     padding: 0;
     overflow: hidden;
     position: relative;
@@ -61,6 +60,8 @@ dashboard-grid {
         flex: 0 0 auto;
         white-space: nowrap;
         display: flex;
+        border-top-right-radius: 0;
+        border-top-left-radius: 0;
 
         div.btn-group {
           white-space: nowrap;
@@ -79,12 +80,12 @@ dashboard-grid {
         }
 
         a {
-          color: @text-color;
+          color: @dashboard-panel-heading-link-color; //@text-color;
           border: none;
           background: none;
           padding: 0px 3px;
           &:hover {
-            color: @link-hover-color;
+            color: @dashboard-panel-heading-link-hover-color; //@link-hover-color;
           }
         }
       }
@@ -99,7 +100,7 @@ dashboard-grid {
 
         .fa-exclamation-triangle {
           font-size: 2em;
-          color: @btn-danger-bg;
+          color: @dashboard-panel-load-error-color; //@btn-danger-bg;
         }
       }
 

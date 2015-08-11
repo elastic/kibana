@@ -1,3 +1,5 @@
+@import (reference) "~ui/styles/variables";
+
 /* _tilemap */
 
 .tilemap {
@@ -65,7 +67,7 @@
 /* over-rides leaflet popup styles to look like kibana tooltip */
 
 .leaflet-container {
-  background: #fff !important;
+  background: @body-bg !important; //#fff !important;
   outline: 0 !important;
 }
 

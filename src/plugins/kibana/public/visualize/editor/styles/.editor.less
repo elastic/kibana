@@ -10,12 +10,12 @@
   .navbar-default .navbar-nav {
     &> .active > a:before {
       border: 7px solid transparent;
-      border-bottom-color: @gray-lighter;
+      border-bottom-color: @vis-editor-navbar-current-tab-color; //@gray-lighter;
     }
 
     .danger {
-      color: @btn-danger-color;
-      background-color: @btn-danger-bg;
+      color: @vis-editor-navbar-error-state-color; //@btn-danger-bg;
+      background-color: @vis-editor-navbar-error-state-bg; //@btn-danger-color;
     }
   }
 
@@ -35,8 +35,8 @@
         right: 0px;
         bottom: 0px;
         z-index: 10;
-        background: fadeout(@navbar-default-bg, 10%);
-        color: white;
+        background: fadeout(@vis-editor-navbar-modal-bg, 10%); //fadeout(@navbar-default-bg, 10%);
+        color: @vis-editor-navbar-modal-color; //white;
         text-align: center;
         padding-top: 6px;
 
@@ -50,7 +50,7 @@
       }
 
       a {
-        color: white;
+        color: @vis-editor-navbar-modal-link-color; //white;
       }
     }
   }
@@ -87,8 +87,8 @@
 
     .sidebar-container {
       .flex-parent(1, 1, auto);
-      background-color: @body-bg;
-      border-right-color: @sidebar-bg;
+      background-color: @vis-editor-sidebar-bg; //@body-bg;
+      border-right-color: @vis-editor-sidebar-border; //@sidebar-bg;
 
       form {
         .flex-parent(1, 1, auto);
@@ -117,14 +117,14 @@
       font-size: 20px;
       font-weight: bold;
       border: inherit !important;
-      background-color: @gray-lighter;
+      background-color: @vis-editor-sidebar-title-bg;
       margin-bottom: @vis-editor-agg-editor-spacing;
       padding: 2px 5px !important;
     }
 
     .sidebar-item-title:hover {
-      color: @text-color !important;
-      background-color: @gray-lighter !important;
+      color: @vis-editor-sidebar-title-hover-color !important; //@text-color !important;
+      background-color: @vis-editor-sidebar-title-hover-bg !important; //@gray-lighter !important;
     }
 
     .hintbox {
@@ -158,7 +158,7 @@
 
     > span {
       width: @vis-editor-nesting-width;
-      background-color: @brand-success;
+      background-color: @vis-editor-nesting-indicator-bg; //@brand-success;
     }
   }
 
@@ -177,7 +177,7 @@
 
     &-group {
       .flex-parent(0, 1, auto);
-      color: @text-color;
+      color: @vis-editor-agg-group-color; //@text-color;
     }
 
     &-header {
@@ -221,8 +221,8 @@
       margin: @vis-editor-agg-editor-spacing 0;
       padding: @vis-editor-agg-editor-spacing;
       text-align: center;
-      background: @btn-danger-bg;
-      color: @btn-danger-color;
+      background: @vis-editor-agg-error-bg; //@btn-danger-bg;
+      color: @vis-editor-agg-error-color; //@btn-danger-color;
     }
 
     &-editor {
@@ -241,7 +241,7 @@
         }
 
         a {
-          color: @link-color;
+          color: @vis-editor-agg-editor-flags-color; //@link-color;
         }
       }
 
@@ -275,23 +275,26 @@
 
     &-wide-btn {
       border-radius: 0;
-      border-top: 2px solid @gray-lighter;
+      border-top: 2px solid;
+      border-top-color: @vis-editor-agg-wide-btn-border; //@gray-lighter;
 
       &-add {
         width: 140px;
         margin: -2px auto 5px auto;
         text-align: center;
-        border: 2px solid @gray-lighter;
+        border: 2px solid;
+        border-color: @vis-editor-agg-wide-btn-border; //@gray-lighter;
         border-top: 0px;
         padding: 3px;
         border-bottom-right-radius: @border-radius-base;
         border-bottom-left-radius: @border-radius-base;
-        background-color: @body-bg;
+        background-color: @vis-editor-agg-wide-btn-bg; //@body-bg;
         font-weight: bold;
       }
 
       &-add:hover {
-        background-color: @gray-lighter;
+        color: @vis-editor-agg-wide-btn-hover-color; //Added
+        background-color: @vis-editor-agg-wide-btn-hover-bg; //@gray-lighter;
       }
     }
 
@@ -310,8 +313,10 @@
     }
 
     &-order-agg {
-      border: 2px solid @gray-lighter;
+      border: 2px solid;
+      border-color: @vis-editor-agg-editor-order-border; //@gray-lighter;
       border-radius: @border-radius-base;
+      background-color: @vis-editor-agg-editor-order-bg; //Added
       margin: @vis-editor-agg-editor-spacing;
       padding: @vis-editor-agg-editor-spacing;
     }
