@@ -1,5 +1,5 @@
 let { fromNode } = require('bluebird');
-let { get } = require('lodash');
+let { get, once } = require('lodash');
 
 module.exports = (kbnServer, server, config) => {
 
@@ -21,11 +21,22 @@ module.exports = (kbnServer, server, config) => {
       cb(new Error('Server timedout waiting for the optimizer to become ready'));
     }, config.get('optimize.lazyProxyTimeout'));
 
+    let waiting = once(() => {
+      server.log(['info', 'optimize'], 'Waiting for optimizer completion');
+    });
+
+    if (!process.connected) return;
+
     process.send(['WORKER_BROADCAST', { optimizeReady: '?' }]);
     process.on('message', (msg) => {
-      if (get(msg, 'optimizeReady')) {
-        clearTimeout(timeout);
-        cb();
+      switch (get(msg, 'optimizeReady')) {
+        case true:
+          clearTimeout(timeout);
+          cb();
+          break;
+        case false:
+          waiting();
+          break;
       }
     });
   });

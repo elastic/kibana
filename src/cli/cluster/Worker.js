@@ -14,6 +14,15 @@ cluster.setupMaster({
   silent: false
 });
 
+let dead = fork => {
+  return fork.isDead() || fork.killed;
+};
+
+let kill = fork => {
+  fork.kill('SIGINT'); // make it snappy
+  fork.killed = true;
+};
+
 module.exports = class Worker extends EventEmitter {
   constructor(opts) {
     opts = opts || {};
@@ -23,6 +32,7 @@ module.exports = class Worker extends EventEmitter {
     this.type = opts.type;
     this.title = opts.title || opts.type;
     this.watch = (opts.watch !== false);
+    this.startCount = 0;
     this.online = false;
     this.changes = [];
 
@@ -47,6 +57,7 @@ module.exports = class Worker extends EventEmitter {
 
     if (code) {
       this.log.bad(`${this.title} crashed`, 'with status code', code);
+      if (!this.watch) process.exit(code);
     } else {
       // restart after graceful shutdowns
       this.start();
@@ -60,8 +71,8 @@ module.exports = class Worker extends EventEmitter {
   }
 
   shutdown() {
-    if (this.fork && !this.fork.isDead()) {
-      this.fork.kill();
+    if (this.fork && !dead(this.fork)) {
+      kill(this.fork);
       this.fork.removeListener('message', this.onMessage);
       this.fork.removeListener('online', this.onOnline);
       this.fork.removeListener('disconnect', this.onDisconnect);
@@ -90,15 +101,14 @@ module.exports = class Worker extends EventEmitter {
   }
 
   start() {
-    if (this.fork && !this.fork.isDead()) {
-      // once "exit" event is received with 0 status, start() is called again
-      return this.shutdown();
-    }
+    // once "exit" event is received with 0 status, start() is called again
+    if (this.fork) return this.shutdown();
 
-    if (this.fork && this.changes.length) {
-      this.log.warn(`${this.title} restarting`, `due to changes in ${this.flushChangeBuffer()}`);
-    } else {
-      this.log.warn(`${this.title} starting`);
+    if (this.changes.length) {
+      this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
+    }
+    else if (this.startCount++) {
+      this.log.warn(`restarting ${this.title}...`);
     }
 
     this.fork = cluster.fork(this.env);
