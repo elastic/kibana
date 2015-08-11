@@ -24,7 +24,7 @@ require('ui/testHarness');
 
 bundle.modules.forEach(function (id, i) {
   if (i > 0) print('\\n');
-  print(\`require('\${id}');\`);
+  print(\`require('\${id.replace(/\\\\/g, '\\\\\\\\')}');\`);
 });
 
 %>

@@ -20,8 +20,8 @@ module.exports = function (kibana) {
     uiExports: {
       modules: modules,
       noParse: [
-        /node_modules\/(angular|elasticsearch-browser)\//,
-        /node_modules\/(angular-nvd3|mocha|moment)\//
+        /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
+        /node_modules[\/\\](angular-nvd3|mocha|moment)[\/\\]/
       ]
     }
   });
