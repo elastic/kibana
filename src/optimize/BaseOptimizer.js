@@ -10,6 +10,7 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 let babelOptions = require('./babelOptions');
+let vendorRE = /[\/\\](node_modules|bower_components)[\/\\]/;
 
 class BaseOptimizer {
   constructor(opts) {
@@ -79,7 +80,7 @@ class BaseOptimizer {
           { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `auto-preload-rjscommon-deps${mapQ}` },
           {
             test: /\.babel\.js$/,
-            exclude: /(node_modules|bower_components)/,
+            exclude: vendorRE,
             loader: 'babel',
             query: babelOptions
           }
@@ -94,7 +95,7 @@ class BaseOptimizer {
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,
-        unsafeCache: [/\/node_modules\//]
+        unsafeCache: [vendorRE]
       }
     };
   }
