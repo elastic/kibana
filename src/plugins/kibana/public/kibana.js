@@ -54,13 +54,3 @@ chrome
   });
 });
 
-modules
-.get('kibana')
-.constant('kbnIndex', chrome.getInjected('kbnIndex'))
-.constant('esShardTimeout', chrome.getInjected('esShardTimeout'))
-.constant('esUrl', (function () {
-  var a = document.createElement('a');
-  a.href = '/elasticsearch';
-  return a.href;
-}()));
-

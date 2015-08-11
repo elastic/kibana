@@ -6,11 +6,20 @@ module.exports = function (chrome, internals) {
   chrome.setupAngular = function () {
     var kibana = modules.get('kibana');
 
+    _.forOwn(chrome.getInjected(), function (val, name) {
+      kibana.value(name, val);
+    });
+
     kibana
-    .constant('kbnVersion', internals.version)
-    .constant('buildNum', internals.buildNum)
-    .constant('buildSha', internals.buildSha)
-    .constant('sessionId', Date.now())
+    .value('kbnVersion', internals.version)
+    .value('buildNum', internals.buildNum)
+    .value('buildSha', internals.buildSha)
+    .value('sessionId', Date.now())
+    .value('esUrl', (function () {
+      var a = document.createElement('a');
+      a.href = '/elasticsearch';
+      return a.href;
+    }()))
     .directive('kbnChrome', function ($rootScope) {
       return {
         compile: function ($el) {
