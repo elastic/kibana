@@ -4,6 +4,7 @@ define(function (require) {
 
   return function (Private) {
     var Events = Private(require('ui/events'));
+    var SimpleEmitter = require('ui/utils/SimpleEmitter');
 
     function validateParent(parent, path) {
       if (path.length <= 0) {
@@ -20,7 +21,18 @@ define(function (require) {
       if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
     }
 
+    function parentDelegationMixin(from, to) {
+      _.forOwn(from.prototype, function (method, methodName) {
+        to.prototype[methodName] = function () {
+          return from.prototype[methodName].apply(this._parent || this, arguments);
+        };
+      });
+    }
+
     _.class(PersistedState).inherits(Events);
+    parentDelegationMixin(SimpleEmitter, PersistedState);
+    parentDelegationMixin(Events, PersistedState);
+
     function PersistedState(value, path, parent) {
       PersistedState.Super.call(this);
 
@@ -54,6 +66,8 @@ define(function (require) {
 
       // ensure the value being passed in is never mutated
       value = _.cloneDeep(value);
+
+      this.emit('set');
 
       return this._set(key, value);
     };
@@ -129,11 +143,9 @@ define(function (require) {
     };
 
     PersistedState.prototype._set = function (key, value, initialChildState, defaultChildState) {
-      // initialState = (!_.isUndefined(initialState)) ? initialState : !this._initialized;
       var self = this;
       var initialState = !this._initialized;
       var keyPath = this._getIndex(key);
-      this.emit('set');
 
       // if this is the initial state value, save value as the default
       if (initialState) {
