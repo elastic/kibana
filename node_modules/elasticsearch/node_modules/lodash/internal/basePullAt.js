@@ -1,6 +1,4 @@
-var baseAt = require('./baseAt'),
-    baseCompareAscending = require('./baseCompareAscending'),
-    isIndex = require('./isIndex');
+var isIndex = require('./isIndex');
 
 /** Used for native method references. */
 var arrayProto = Array.prototype;
@@ -10,26 +8,23 @@ var splice = arrayProto.splice;
 
 /**
  * The base implementation of `_.pullAt` without support for individual
- * index arguments.
+ * index arguments and capturing the removed elements.
  *
  * @private
  * @param {Array} array The array to modify.
  * @param {number[]} indexes The indexes of elements to remove.
- * @returns {Array} Returns the new array of removed elements.
+ * @returns {Array} Returns `array`.
  */
 function basePullAt(array, indexes) {
-  var length = indexes.length,
-      result = baseAt(array, indexes);
-
-  indexes.sort(baseCompareAscending);
+  var length = array ? indexes.length : 0;
   while (length--) {
-    var index = parseFloat(indexes[length]);
+    var index = indexes[length];
     if (index != previous && isIndex(index)) {
       var previous = index;
       splice.call(array, index, 1);
     }
   }
-  return result;
+  return array;
 }
 
 module.exports = basePullAt;

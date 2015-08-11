@@ -43,6 +43,11 @@ $ npm install body-parser
 var bodyParser = require('body-parser')
 ```
 
+The `bodyParser` object exposes various factories to create middlewares. All
+middlewares will populate the `req.body` property with the parsed body or
+provide an error to the callback. The various errors are described in the
+[errors section](#errors).
+
 ### bodyParser.json(options)
 
 Returns middleware that only parses `json`. This parser accepts any Unicode
@@ -86,9 +91,9 @@ The `type` option is used to determine what media type the middleware will
 parse. This option can be a function or a string. If a string, `type` option
 is passed directly to the [type-is](https://www.npmjs.org/package/type-is#readme)
 library and this can be an extension name (like `json`), a mime type (like
-`application/json`), or a mime time with a wildcard (like `*/*` or `*/json`).
+`application/json`), or a mime type with a wildcard (like `*/*` or `*/json`).
 If a function, the `type` option is called as `fn(req)` and the request is
-parsed if it returns a truthy value. Defaults to `json`.
+parsed if it returns a truthy value. Defaults to `application/json`.
 
 ##### verify
 
@@ -128,7 +133,7 @@ The `type` option is used to determine what media type the middleware will
 parse. This option can be a function or a string. If a string, `type` option
 is passed directly to the [type-is](https://www.npmjs.org/package/type-is#readme)
 library and this can be an extension name (like `bin`), a mime type (like
-`application/octet-stream`), or a mime time with a wildcard (like `*/*` or
+`application/octet-stream`), or a mime type with a wildcard (like `*/*` or
 `application/*`). If a function, the `type` option is called as `fn(req)`
 and the request is parsed if it returns a truthy value. Defaults to
 `application/octet-stream`.
@@ -176,7 +181,7 @@ The `type` option is used to determine what media type the middleware will
 parse. This option can be a function or a string. If a string, `type` option
 is passed directly to the [type-is](https://www.npmjs.org/package/type-is#readme)
 library and this can be an extension name (like `txt`), a mime type (like
-`text/plain`), or a mime time with a wildcard (like `*/*` or `text/*`).
+`text/plain`), or a mime type with a wildcard (like `*/*` or `text/*`).
 If a function, the `type` option is called as `fn(req)` and the request is
 parsed if it returns a truthy value. Defaults to `text/plain`.
 
@@ -239,16 +244,72 @@ The `type` option is used to determine what media type the middleware will
 parse. This option can be a function or a string. If a string, `type` option
 is passed directly to the [type-is](https://www.npmjs.org/package/type-is#readme)
 library and this can be an extension name (like `urlencoded`), a mime type (like
-`application/x-www-form-urlencoded`), or a mime time with a wildcard (like
+`application/x-www-form-urlencoded`), or a mime type with a wildcard (like
 `*/x-www-form-urlencoded`). If a function, the `type` option is called as
 `fn(req)` and the request is parsed if it returns a truthy value. Defaults
-to `urlencoded`.
+to `application/x-www-form-urlencoded`.
 
 ##### verify
 
 The `verify` option, if supplied, is called as `verify(req, res, buf, encoding)`,
 where `buf` is a `Buffer` of the raw request body and `encoding` is the
 encoding of the request. The parsing can be aborted by throwing an error.
+
+## Errors
+
+The middlewares provided by this module create errors depending on the error
+condition during parsing. The errors will typically have a `status` property
+that contains the suggested HTTP response code.
+
+The following are the common errors emitted, though any error can come through
+for various reasons.
+
+### content encoding unsupported
+
+This error will occur when the request had a `Content-Encoding` header that
+contained an encoding but the "inflation" option was set to `false`. The
+`status` property is set to `415`.
+
+### request aborted
+
+This error will occur when the request is aborted by the client before reading
+the body has finished. The `received` property will be set to the number of
+bytes received before the request was aborted and the `expected` property is
+set to the number of expected bytes. The `status` property is set to `400`.
+
+### request entity too large
+
+This error will occur when the request body's size is larger than the "limit"
+option. The `limit` property will be set to the byte limit and the `length`
+property will be set to the request body's length. The `status` property is
+set to `413`.
+
+### request size did not match content length
+
+This error will occur when the request's length did not match the length from
+the `Content-Length` header. This typically occurs when the requst is malformed,
+typically when the `Content-Length` header was calculated based on characters
+instead of bytes. The `status` property is set to `400`.
+
+### stream encoding should not be set
+
+This error will occur when something called the `req.setEncoding` method prior
+to this middleware. This module operates directly on bytes only and you cannot
+call `req.setEncoding` when using this module. The `status` property is set to
+`500`.
+
+### unsupported charset "BOGUS"
+
+This error will occur when the request had a charset parameter in the
+`Content-Type` header, but the `iconv-lite` module does not support it OR the
+parser does not support it. The charset is contained in the message as well
+as in the `charset` property. The `status` property is set to `415`.
+
+### unsupported content encoding "bogus"
+
+This error will occur when the request had a `Content-Encoding` header that
+contained an unsupported encoding. The encoding is contained in the message
+as well as in the `encoding` property. The `status` property is set to `415`.
 
 ## Examples
 

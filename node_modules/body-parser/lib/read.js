@@ -4,10 +4,14 @@
  * MIT Licensed
  */
 
+'use strict'
+
 /**
  * Module dependencies.
+ * @private
  */
 
+var createError = require('http-errors')
 var getBody = require('raw-body')
 var iconv = require('iconv-lite')
 var onFinished = require('on-finished')
@@ -43,7 +47,7 @@ function read(req, res, next, parse, debug, options) {
   try {
     stream = contentstream(req, debug, opts.inflate)
     length = stream.length
-    delete stream.length
+    stream.length = undefined
   } catch (err) {
     return next(err)
   }
@@ -63,15 +67,14 @@ function read(req, res, next, parse, debug, options) {
   debug('read body')
   getBody(stream, opts, function (err, body) {
     if (err) {
-      if (!err.status) {
-        err.status = 400
-      }
+      // default to 400
+      setErrorStatus(err, 400)
 
       // echo back charset
       if (err.type === 'encoding.unsupported') {
-        err = new Error('unsupported charset "' + encoding.toUpperCase() + '"')
-        err.charset = encoding.toLowerCase()
-        err.status = 415
+        err = createError(415, 'unsupported charset "' + encoding.toUpperCase() + '"', {
+          charset: encoding.toLowerCase()
+        })
       }
 
       // read off entire request
@@ -88,24 +91,31 @@ function read(req, res, next, parse, debug, options) {
         debug('verify body')
         verify(req, res, body, encoding)
       } catch (err) {
-        if (!err.status) err.status = 403
-        return next(err)
+        // default to 403
+        setErrorStatus(err, 403)
+        next(err)
+        return
       }
     }
 
     // parse
+    var str
     try {
       debug('parse body')
-      body = typeof body !== 'string' && encoding !== null
+      str = typeof body !== 'string' && encoding !== null
         ? iconv.decode(body, encoding)
         : body
-      req.body = parse(body)
+      req.body = parse(str)
     } catch (err) {
-      if (!err.status) {
-        err.body = body
-        err.status = 400
-      }
-      return next(err)
+      err.body = str === undefined
+        ? body
+        : str
+
+      // default to 400
+      setErrorStatus(err, 400)
+
+      next(err)
+      return
     }
 
     next()
@@ -124,16 +134,13 @@ function read(req, res, next, parse, debug, options) {
 
 function contentstream(req, debug, inflate) {
   var encoding = (req.headers['content-encoding'] || 'identity').toLowerCase()
-  var err
   var length = req.headers['content-length']
   var stream
 
   debug('content-encoding "%s"', encoding)
 
   if (inflate === false && encoding !== 'identity') {
-    err = new Error('content encoding unsupported')
-    err.status = 415
-    throw err
+    throw createError(415, 'content encoding unsupported')
   }
 
   switch (encoding) {
@@ -152,11 +159,22 @@ function contentstream(req, debug, inflate) {
       stream.length = length
       break
     default:
-      err = new Error('unsupported content encoding "' + encoding + '"')
-      err.encoding = encoding
-      err.status = 415
-      throw err
+      throw createError(415, 'unsupported content encoding "' + encoding + '"', {
+        encoding: encoding
+      })
   }
 
   return stream
+}
+
+/**
+ * Set a status on an error object, if ones does not exist
+ * @private
+ */
+
+function setErrorStatus(error, status) {
+  if (!error.status && !error.statusCode) {
+    error.status = status
+    error.statusCode = status
+  }
 }

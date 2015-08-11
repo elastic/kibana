@@ -1,16 +1,24 @@
 /*!
  * body-parser
- * Copyright(c) 2014 Douglas Christopher Wilson
+ * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
 
+'use strict'
+
 /**
  * Module dependencies.
+ * @private
  */
 
 var deprecate = require('depd')('body-parser')
-var fs = require('fs')
-var path = require('path')
+
+/**
+ * Cache of loaded parsers.
+ * @private
+ */
+
+var parsers = Object.create(null)
 
 /**
  * @typedef Parsers
@@ -30,35 +38,47 @@ exports = module.exports = deprecate.function(bodyParser,
   'bodyParser: use individual json/urlencoded middlewares')
 
 /**
- * Path to the parser modules.
+ * JSON parser.
+ * @public
  */
 
-var parsersDir = path.join(__dirname, 'lib', 'types')
+Object.defineProperty(exports, 'json', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('json')
+})
 
 /**
- * Auto-load bundled parsers with getters.
+ * Raw parser.
+ * @public
  */
 
-fs.readdirSync(parsersDir).forEach(function onfilename(filename) {
-  if (!/\.js$/.test(filename)) return
+Object.defineProperty(exports, 'raw', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('raw')
+})
 
-  var loc = path.resolve(parsersDir, filename)
-  var mod
-  var name = path.basename(filename, '.js')
+/**
+ * Text parser.
+ * @public
+ */
 
-  function load() {
-    if (mod) {
-      return mod
-    }
+Object.defineProperty(exports, 'text', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('text')
+})
 
-    return mod = require(loc)
-  }
+/**
+ * URL-encoded parser.
+ * @public
+ */
 
-  Object.defineProperty(exports, name, {
-    configurable: true,
-    enumerable: true,
-    get: load
-  })
+Object.defineProperty(exports, 'urlencoded', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('urlencoded')
 })
 
 /**
@@ -67,18 +87,18 @@ fs.readdirSync(parsersDir).forEach(function onfilename(filename) {
  * @param {object} [options]
  * @return {function}
  * @deprecated
- * @api public
+ * @public
  */
 
 function bodyParser(options){
   var opts = {}
 
-  options = options || {}
-
   // exclude type option
-  for (var prop in options) {
-    if ('type' !== prop) {
-      opts[prop] = options[prop]
+  if (options) {
+    for (var prop in options) {
+      if ('type' !== prop) {
+        opts[prop] = options[prop]
+      }
     }
   }
 
@@ -91,4 +111,47 @@ function bodyParser(options){
       _urlencoded(req, res, next);
     });
   }
+}
+
+/**
+ * Create a getter for loading a parser.
+ * @private
+ */
+
+function createParserGetter(name) {
+  return function get() {
+    return loadParser(name)
+  }
+}
+
+/**
+ * Load a parser module.
+ * @private
+ */
+
+function loadParser(parserName) {
+  var parser = parsers[parserName]
+
+  if (parser !== undefined) {
+    return parser
+  }
+
+  // this uses a switch for static require analysis
+  switch (parserName) {
+    case 'json':
+      parser = require('./lib/types/json')
+      break
+    case 'raw':
+      parser = require('./lib/types/raw')
+      break
+    case 'text':
+      parser = require('./lib/types/text')
+      break
+    case 'urlencoded':
+      parser = require('./lib/types/urlencoded')
+      break
+  }
+
+  // store to prevent invoking require()
+  return parsers[parserName] = parser
 }

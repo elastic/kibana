@@ -1,14 +1,11 @@
 var baseDifference = require('../internal/baseDifference'),
-    baseSlice = require('../internal/baseSlice');
+    isArrayLike = require('../internal/isArrayLike'),
+    restParam = require('../function/restParam');
 
 /**
- * Creates an array excluding all provided values using `SameValueZero` for
- * equality comparisons.
- *
- * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
- * e.g. `===`, except that `NaN` matches `NaN`. See the
- * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
- * for more details.
+ * Creates an array excluding all provided values using
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+ * for equality comparisons.
  *
  * @static
  * @memberOf _
@@ -21,8 +18,10 @@ var baseDifference = require('../internal/baseDifference'),
  * _.without([1, 2, 1, 3], 1, 2);
  * // => [3]
  */
-function without(array) {
-  return baseDifference(array, baseSlice(arguments, 1));
-}
+var without = restParam(function(array, values) {
+  return isArrayLike(array)
+    ? baseDifference(array, values)
+    : [];
+});
 
 module.exports = without;

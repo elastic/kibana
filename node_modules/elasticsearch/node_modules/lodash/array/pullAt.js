@@ -1,5 +1,8 @@
-var baseFlatten = require('../internal/baseFlatten'),
-    basePullAt = require('../internal/basePullAt');
+var baseAt = require('../internal/baseAt'),
+    baseCompareAscending = require('../internal/baseCompareAscending'),
+    baseFlatten = require('../internal/baseFlatten'),
+    basePullAt = require('../internal/basePullAt'),
+    restParam = require('../function/restParam');
 
 /**
  * Removes elements from `array` corresponding to the given indexes and returns
@@ -26,8 +29,12 @@ var baseFlatten = require('../internal/baseFlatten'),
  * console.log(evens);
  * // => [10, 20]
  */
-function pullAt(array) {
-  return basePullAt(array || [], baseFlatten(arguments, false, false, 1));
-}
+var pullAt = restParam(function(array, indexes) {
+  indexes = baseFlatten(indexes);
+
+  var result = baseAt(array, indexes);
+  basePullAt(array, indexes.sort(baseCompareAscending));
+  return result;
+});
 
 module.exports = pullAt;

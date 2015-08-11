@@ -1,12 +1,10 @@
-/** Native method references. */
-var floor = Math.floor;
-
 /* Native method references for those with the same name as other `lodash` methods. */
-var nativeMin = Math.min;
+var nativeFloor = Math.floor,
+    nativeMin = Math.min;
 
 /** Used as references for the maximum length and index of an array. */
-var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1,
-    MAX_ARRAY_INDEX =  MAX_ARRAY_LENGTH - 1;
+var MAX_ARRAY_LENGTH = 4294967295,
+    MAX_ARRAY_INDEX = MAX_ARRAY_LENGTH - 1;
 
 /**
  * This function is like `binaryIndex` except that it invokes `iteratee` for
@@ -17,8 +15,7 @@ var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1,
  * @param {Array} array The sorted array to inspect.
  * @param {*} value The value to evaluate.
  * @param {Function} iteratee The function invoked per iteration.
- * @param {boolean} [retHighest] Specify returning the highest, instead
- *  of the lowest, index at which a value should be inserted into `array`.
+ * @param {boolean} [retHighest] Specify returning the highest qualified index.
  * @returns {number} Returns the index at which `value` should be inserted
  *  into `array`.
  */
@@ -28,17 +25,23 @@ function binaryIndexBy(array, value, iteratee, retHighest) {
   var low = 0,
       high = array ? array.length : 0,
       valIsNaN = value !== value,
-      valIsUndef = typeof value == 'undefined';
+      valIsNull = value === null,
+      valIsUndef = value === undefined;
 
   while (low < high) {
-    var mid = floor((low + high) / 2),
+    var mid = nativeFloor((low + high) / 2),
         computed = iteratee(array[mid]),
+        isDef = computed !== undefined,
         isReflexive = computed === computed;
 
     if (valIsNaN) {
       var setLow = isReflexive || retHighest;
+    } else if (valIsNull) {
+      setLow = isReflexive && isDef && (retHighest || computed != null);
     } else if (valIsUndef) {
-      setLow = isReflexive && (retHighest || typeof computed != 'undefined');
+      setLow = isReflexive && (retHighest || isDef);
+    } else if (computed == null) {
+      setLow = false;
     } else {
       setLow = retHighest ? (computed <= value) : (computed < value);
     }

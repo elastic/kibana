@@ -1,3 +1,4 @@
+"use strict"
 
 // Manually added data to be used by sbcs codec in addition to generated one.
 

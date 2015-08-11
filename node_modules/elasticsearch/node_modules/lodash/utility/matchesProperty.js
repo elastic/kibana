@@ -2,7 +2,7 @@ var baseClone = require('../internal/baseClone'),
     baseMatchesProperty = require('../internal/baseMatchesProperty');
 
 /**
- * Creates a function which compares the property value of `key` on a given
+ * Creates a function that compares the property value of `path` on a given
  * object to `value`.
  *
  * **Note:** This method supports comparing arrays, booleans, `Date` objects,
@@ -12,22 +12,21 @@ var baseClone = require('../internal/baseClone'),
  * @static
  * @memberOf _
  * @category Utility
- * @param {string} key The key of the property to get.
- * @param {*} value The value to compare.
+ * @param {Array|string} path The path of the property to get.
+ * @param {*} srcValue The value to match.
  * @returns {Function} Returns the new function.
  * @example
  *
  * var users = [
  *   { 'user': 'barney' },
- *   { 'user': 'fred' },
- *   { 'user': 'pebbles' }
+ *   { 'user': 'fred' }
  * ];
  *
  * _.find(users, _.matchesProperty('user', 'fred'));
- * // => { 'user': 'fred', 'age': 40 }
+ * // => { 'user': 'fred' }
  */
-function matchesProperty(key, value) {
-  return baseMatchesProperty(key + '', baseClone(value, true));
+function matchesProperty(path, srcValue) {
+  return baseMatchesProperty(path, baseClone(srcValue, true));
 }
 
 module.exports = matchesProperty;

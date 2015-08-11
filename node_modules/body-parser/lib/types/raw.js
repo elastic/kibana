@@ -4,6 +4,8 @@
  * MIT Licensed
  */
 
+'use strict'
+
 /**
  * Module dependencies.
  */
@@ -28,14 +30,14 @@ module.exports = raw
  */
 
 function raw(options) {
-  options = options || {};
+  var opts = options || {};
 
-  var inflate = options.inflate !== false
-  var limit = typeof options.limit !== 'number'
-    ? bytes(options.limit || '100kb')
-    : options.limit
-  var type = options.type || 'application/octet-stream'
-  var verify = options.verify || false
+  var inflate = opts.inflate !== false
+  var limit = typeof opts.limit !== 'number'
+    ? bytes.parse(opts.limit || '100kb')
+    : opts.limit
+  var type = opts.type || 'application/octet-stream'
+  var verify = opts.verify || false
 
   if (verify !== false && typeof verify !== 'function') {
     throw new TypeError('option verify must be function')
@@ -62,7 +64,7 @@ function raw(options) {
       return debug('skip empty body'), next()
     }
 
-    debug('content-type %s', JSON.stringify(req.headers['content-type']))
+    debug('content-type %j', req.headers['content-type'])
 
     // determine if request should be parsed
     if (!shouldParse(req)) {

@@ -15,11 +15,13 @@ module.exports = {
   'flow': require('./function/flow'),
   'flowRight': require('./function/flowRight'),
   'memoize': require('./function/memoize'),
+  'modArgs': require('./function/modArgs'),
   'negate': require('./function/negate'),
   'once': require('./function/once'),
   'partial': require('./function/partial'),
   'partialRight': require('./function/partialRight'),
   'rearg': require('./function/rearg'),
+  'restParam': require('./function/restParam'),
   'spread': require('./function/spread'),
   'throttle': require('./function/throttle'),
   'wrap': require('./function/wrap')

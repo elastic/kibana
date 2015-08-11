@@ -4,7 +4,10 @@
   },
   "es": {
     "timefield": "@timestamp",
-    "defaultIndex": "usagov"
+    "default_index": "usagov",
+    "url": "http://localhost:9200/",
+    "allow_url_parameter": false
   },
-  "default_interval": "1w"
+  "default_interval": "1w",
+  "max_buckets": 732
 }

@@ -1,11 +1,12 @@
 var arrayEvery = require('../internal/arrayEvery'),
     baseCallback = require('../internal/baseCallback'),
     baseEvery = require('../internal/baseEvery'),
-    isArray = require('../lang/isArray');
+    isArray = require('../lang/isArray'),
+    isIterateeCall = require('../internal/isIterateeCall');
 
 /**
  * Checks if `predicate` returns truthy for **all** elements of `collection`.
- * The predicate is bound to `thisArg` and invoked with three arguments;
+ * The predicate is bound to `thisArg` and invoked with three arguments:
  * (value, index|key, collection).
  *
  * If a property name is provided for `predicate` the created `_.property`
@@ -53,7 +54,10 @@ var arrayEvery = require('../internal/arrayEvery'),
  */
 function every(collection, predicate, thisArg) {
   var func = isArray(collection) ? arrayEvery : baseEvery;
-  if (typeof predicate != 'function' || typeof thisArg != 'undefined') {
+  if (thisArg && isIterateeCall(collection, predicate, thisArg)) {
+    predicate = undefined;
+  }
+  if (typeof predicate != 'function' || thisArg !== undefined) {
     predicate = baseCallback(predicate, thisArg, 3);
   }
   return func(collection, predicate);

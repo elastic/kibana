@@ -1,15 +1,14 @@
 var arrayEach = require('../internal/arrayEach'),
     baseEach = require('../internal/baseEach'),
-    bindCallback = require('../internal/bindCallback'),
-    isArray = require('../lang/isArray');
+    createForEach = require('../internal/createForEach');
 
 /**
  * Iterates over elements of `collection` invoking `iteratee` for each element.
- * The `iteratee` is bound to `thisArg` and invoked with three arguments;
- * (value, index|key, collection). Iterator functions may exit iteration early
+ * The `iteratee` is bound to `thisArg` and invoked with three arguments:
+ * (value, index|key, collection). Iteratee functions may exit iteration early
  * by explicitly returning `false`.
  *
- * **Note:** As with other "Collections" methods, objects with a `length` property
+ * **Note:** As with other "Collections" methods, objects with a "length" property
  * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
  * may be used for object iteration.
  *
@@ -33,10 +32,6 @@ var arrayEach = require('../internal/arrayEach'),
  * });
  * // => logs each value-key pair and returns the object (iteration order is not guaranteed)
  */
-function forEach(collection, iteratee, thisArg) {
-  return (typeof iteratee == 'function' && typeof thisArg == 'undefined' && isArray(collection))
-    ? arrayEach(collection, iteratee)
-    : baseEach(collection, bindCallback(iteratee, thisArg, 3));
-}
+var forEach = createForEach(arrayEach, baseEach);
 
 module.exports = forEach;

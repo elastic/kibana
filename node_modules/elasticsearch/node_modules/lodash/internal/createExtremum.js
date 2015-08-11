@@ -1,37 +1,32 @@
-var baseCallback = require('./baseCallback'),
-    charAtCallback = require('./charAtCallback'),
-    extremumBy = require('./extremumBy'),
+var arrayExtremum = require('./arrayExtremum'),
+    baseCallback = require('./baseCallback'),
+    baseExtremum = require('./baseExtremum'),
     isArray = require('../lang/isArray'),
     isIterateeCall = require('./isIterateeCall'),
-    isString = require('../lang/isString'),
     toIterable = require('./toIterable');
 
 /**
- * Creates a function that gets the extremum value of a collection.
+ * Creates a `_.max` or `_.min` function.
  *
  * @private
- * @param {Function} arrayFunc The function to get the extremum value from an array.
- * @param {boolean} [isMin] Specify returning the minimum, instead of the maximum,
- *  extremum value.
+ * @param {Function} comparator The function used to compare values.
+ * @param {*} exValue The initial extremum value.
  * @returns {Function} Returns the new extremum function.
  */
-function createExtremum(arrayFunc, isMin) {
+function createExtremum(comparator, exValue) {
   return function(collection, iteratee, thisArg) {
     if (thisArg && isIterateeCall(collection, iteratee, thisArg)) {
-      iteratee = null;
+      iteratee = undefined;
     }
-    var noIteratee = iteratee == null;
-
-    iteratee = noIteratee ? iteratee : baseCallback(iteratee, thisArg, 3);
-    if (noIteratee) {
-      var isArr = isArray(collection);
-      if (!isArr && isString(collection)) {
-        iteratee = charAtCallback;
-      } else {
-        return arrayFunc(isArr ? collection : toIterable(collection));
+    iteratee = baseCallback(iteratee, thisArg, 3);
+    if (iteratee.length == 1) {
+      collection = isArray(collection) ? collection : toIterable(collection);
+      var result = arrayExtremum(collection, iteratee, comparator, exValue);
+      if (!(collection.length && result === exValue)) {
+        return result;
       }
     }
-    return extremumBy(collection, iteratee, isMin);
+    return baseExtremum(collection, iteratee, comparator, exValue);
   };
 }
 

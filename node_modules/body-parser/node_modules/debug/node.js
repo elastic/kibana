@@ -87,7 +87,7 @@ function formatArgs() {
   if (useColors) {
     var c = this.color;
 
-    args[0] = '  \u001b[9' + c + 'm' + name + ' '
+    args[0] = '  \u001b[3' + c + ';1m' + name + ' '
       + '\u001b[0m'
       + args[0] + '\u001b[3' + c + 'm'
       + ' +' + exports.humanize(this.diff) + '\u001b[0m';

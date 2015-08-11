@@ -1,5 +1,4 @@
-var createWrapper = require('../internal/createWrapper'),
-    isIterateeCall = require('../internal/isIterateeCall');
+var createCurry = require('../internal/createCurry');
 
 /** Used to compose bitmasks for wrapper metadata. */
 var CURRY_RIGHT_FLAG = 16;
@@ -11,7 +10,7 @@ var CURRY_RIGHT_FLAG = 16;
  * The `_.curryRight.placeholder` value, which defaults to `_` in monolithic
  * builds, may be used as a placeholder for provided arguments.
  *
- * **Note:** This method does not set the `length` property of curried functions.
+ * **Note:** This method does not set the "length" property of curried functions.
  *
  * @static
  * @memberOf _
@@ -41,14 +40,7 @@ var CURRY_RIGHT_FLAG = 16;
  * curried(3)(1, _)(2);
  * // => [1, 2, 3]
  */
-function curryRight(func, arity, guard) {
-  if (guard && isIterateeCall(func, arity, guard)) {
-    arity = null;
-  }
-  var result = createWrapper(func, CURRY_RIGHT_FLAG, null, null, null, null, null, arity);
-  result.placeholder = curryRight.placeholder;
-  return result;
-}
+var curryRight = createCurry(CURRY_RIGHT_FLAG);
 
 // Assign default placeholders.
 curryRight.placeholder = {};

@@ -1,9 +1,0 @@
-Hello World. 
-
-Foooooooooo. 
-
-<p>Version:</p>
-
-<a href="localhost">Link</a>
-
-01/12/2012

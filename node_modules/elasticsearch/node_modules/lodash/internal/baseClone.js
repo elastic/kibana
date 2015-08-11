@@ -1,13 +1,12 @@
 var arrayCopy = require('./arrayCopy'),
     arrayEach = require('./arrayEach'),
-    baseCopy = require('./baseCopy'),
+    baseAssign = require('./baseAssign'),
     baseForOwn = require('./baseForOwn'),
     initCloneArray = require('./initCloneArray'),
     initCloneByTag = require('./initCloneByTag'),
     initCloneObject = require('./initCloneObject'),
     isArray = require('../lang/isArray'),
-    isObject = require('../lang/isObject'),
-    keys = require('../object/keys');
+    isObject = require('../lang/isObject');
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]',
@@ -54,9 +53,8 @@ cloneableTags[weakMapTag] = false;
 var objectProto = Object.prototype;
 
 /**
- * Used to resolve the `toStringTag` of values.
- * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
- * for more details.
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
  */
 var objToString = objectProto.toString;
 
@@ -79,7 +77,7 @@ function baseClone(value, isDeep, customizer, key, object, stackA, stackB) {
   if (customizer) {
     result = object ? customizer(value, key, object) : customizer(value);
   }
-  if (typeof result != 'undefined') {
+  if (result !== undefined) {
     return result;
   }
   if (!isObject(value)) {
@@ -98,7 +96,7 @@ function baseClone(value, isDeep, customizer, key, object, stackA, stackB) {
     if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
       result = initCloneObject(isFunc ? {} : value);
       if (!isDeep) {
-        return baseCopy(value, result, keys(value));
+        return baseAssign(result, value);
       }
     } else {
       return cloneableTags[tag]
@@ -106,7 +104,7 @@ function baseClone(value, isDeep, customizer, key, object, stackA, stackB) {
         : (object ? value : {});
     }
   }
-  // Check for circular references and return corresponding clone.
+  // Check for circular references and return its corresponding clone.
   stackA || (stackA = []);
   stackB || (stackB = []);
 

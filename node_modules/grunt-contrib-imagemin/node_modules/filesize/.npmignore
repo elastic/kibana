@@ -1,9 +1,0 @@
-/node_modules/
-lib/filesize.min.js
-lib/filesize.map
-src
-test
-.jamignore
-.jshintrc
-.travis.yml
-Gruntfile.js

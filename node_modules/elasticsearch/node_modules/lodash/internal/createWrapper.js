@@ -51,19 +51,19 @@ function createWrapper(func, bitmask, thisArg, partials, holders, argPos, ary, a
   var length = partials ? partials.length : 0;
   if (!length) {
     bitmask &= ~(PARTIAL_FLAG | PARTIAL_RIGHT_FLAG);
-    partials = holders = null;
+    partials = holders = undefined;
   }
   length -= (holders ? holders.length : 0);
   if (bitmask & PARTIAL_RIGHT_FLAG) {
     var partialsRight = partials,
         holdersRight = holders;
 
-    partials = holders = null;
+    partials = holders = undefined;
   }
-  var data = !isBindKey && getData(func),
+  var data = isBindKey ? undefined : getData(func),
       newData = [func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity];
 
-  if (data && data !== true) {
+  if (data) {
     mergeData(newData, data);
     bitmask = newData[1];
     arity = newData[9];

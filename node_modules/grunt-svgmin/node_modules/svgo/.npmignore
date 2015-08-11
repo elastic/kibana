@@ -1,9 +1,0 @@
-docs
-examples
-test
-.editorconfig
-.jshintignore
-.jshintrc
-.travis.yml
-logo.svg
-CHANGELOG.MD

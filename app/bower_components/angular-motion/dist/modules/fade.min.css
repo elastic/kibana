@@ -1,8 +1,0 @@
-/**
- * angular-motion
- * @version v0.3.4 - 2014-10-14
- * @link https://github.com/mgcrea/angular-motion
- * @author Olivier Louvignes <olivier@mg-crea.com>
- * @license MIT License, http://www.opensource.org/licenses/MIT
- */
-.am-fade{-webkit-animation-duration:.3s;animation-duration:.3s;-webkit-animation-timing-function:linear;animation-timing-function:linear;-webkit-animation-fill-mode:backwards;animation-fill-mode:backwards;opacity:1}.am-fade.am-fade-add,.am-fade.ng-hide-remove,.am-fade.ng-move{-webkit-animation-name:fadeIn;animation-name:fadeIn}.am-fade.am-fade-remove,.am-fade.ng-hide{-webkit-animation-name:fadeOut;animation-name:fadeOut}.am-fade.ng-enter{visibility:hidden;-webkit-animation-name:fadeIn;animation-name:fadeIn;-webkit-animation-play-state:paused;animation-play-state:paused}.am-fade.ng-enter.ng-enter-active{visibility:visible;-webkit-animation-play-state:running;animation-play-state:running}.am-fade.ng-leave{-webkit-animation-name:fadeOut;animation-name:fadeOut;-webkit-animation-play-state:paused;animation-play-state:paused}.am-fade.ng-leave.ng-leave-active{-webkit-animation-play-state:running;animation-play-state:running}@-webkit-keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@-webkit-keyframes fadeOut{from{opacity:1}to{opacity:0}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.tab-pane.am-fade.active-remove{display:none!important}.tab-pane.am-fade.active-add{-webkit-animation-name:fadeIn;animation-name:fadeIn}.modal-backdrop.am-fade,.aside-backdrop.am-fade{background:rgba(0,0,0,.5);-webkit-animation-duration:.15s;animation-duration:.15s}.modal-backdrop.am-fade.ng-leave,.aside-backdrop.am-fade.ng-leave{-webkit-animation-delay:.3s;animation-delay:.3s}

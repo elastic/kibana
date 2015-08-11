@@ -6,27 +6,28 @@ var arrayMap = require('../internal/arrayMap'),
 /**
  * Creates an array of values by running each element in `collection` through
  * `iteratee`. The `iteratee` is bound to `thisArg` and invoked with three
- * arguments; (value, index|key, collection).
+ * arguments: (value, index|key, collection).
  *
- * If a property name is provided for `predicate` the created `_.property`
+ * If a property name is provided for `iteratee` the created `_.property`
  * style callback returns the property value of the given element.
  *
  * If a value is also provided for `thisArg` the created `_.matchesProperty`
  * style callback returns `true` for elements that have a matching property
  * value, else `false`.
  *
- * If an object is provided for `predicate` the created `_.matches` style
+ * If an object is provided for `iteratee` the created `_.matches` style
  * callback returns `true` for elements that have the properties of the given
  * object, else `false`.
  *
- * Many lodash methods are guarded to work as interatees for methods like
+ * Many lodash methods are guarded to work as iteratees for methods like
  * `_.every`, `_.filter`, `_.map`, `_.mapValues`, `_.reject`, and `_.some`.
  *
  * The guarded methods are:
- * `ary`, `callback`, `chunk`, `clone`, `create`, `curry`, `curryRight`, `drop`,
- * `dropRight`, `fill`, `flatten`, `invert`, `max`, `min`, `parseInt`, `slice`,
- * `sortBy`, `take`, `takeRight`, `template`, `trim`, `trimLeft`, `trimRight`,
- * `trunc`, `random`, `range`, `sample`, `uniq`, and `words`
+ * `ary`, `callback`, `chunk`, `clone`, `create`, `curry`, `curryRight`,
+ * `drop`, `dropRight`, `every`, `fill`, `flatten`, `invert`, `max`, `min`,
+ * `parseInt`, `slice`, `sortBy`, `take`, `takeRight`, `template`, `trim`,
+ * `trimLeft`, `trimRight`, `trunc`, `random`, `range`, `sample`, `some`,
+ * `sum`, `uniq`, and `words`
  *
  * @static
  * @memberOf _
@@ -35,7 +36,6 @@ var arrayMap = require('../internal/arrayMap'),
  * @param {Array|Object|string} collection The collection to iterate over.
  * @param {Function|Object|string} [iteratee=_.identity] The function invoked
  *  per iteration.
- *  create a `_.property` or `_.matches` style callback respectively.
  * @param {*} [thisArg] The `this` binding of `iteratee`.
  * @returns {Array} Returns the new mapped array.
  * @example

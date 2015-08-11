@@ -1,22 +1,21 @@
 var arrayReduce = require('../internal/arrayReduce'),
-    baseCallback = require('../internal/baseCallback'),
     baseEach = require('../internal/baseEach'),
-    baseReduce = require('../internal/baseReduce'),
-    isArray = require('../lang/isArray');
+    createReduce = require('../internal/createReduce');
 
 /**
  * Reduces `collection` to a value which is the accumulated result of running
  * each element in `collection` through `iteratee`, where each successive
  * invocation is supplied the return value of the previous. If `accumulator`
  * is not provided the first element of `collection` is used as the initial
- * value. The `iteratee` is bound to `thisArg`and invoked with four arguments;
+ * value. The `iteratee` is bound to `thisArg` and invoked with four arguments:
  * (accumulator, value, index|key, collection).
  *
- * Many lodash methods are guarded to work as interatees for methods like
+ * Many lodash methods are guarded to work as iteratees for methods like
  * `_.reduce`, `_.reduceRight`, and `_.transform`.
  *
  * The guarded methods are:
- * `assign`, `defaults`, `merge`, and `sortAllBy`
+ * `assign`, `defaults`, `defaultsDeep`, `includes`, `merge`, `sortByAll`,
+ * and `sortByOrder`
  *
  * @static
  * @memberOf _
@@ -29,8 +28,8 @@ var arrayReduce = require('../internal/arrayReduce'),
  * @returns {*} Returns the accumulated value.
  * @example
  *
- * _.reduce([1, 2], function(sum, n) {
- *   return sum + n;
+ * _.reduce([1, 2], function(total, n) {
+ *   return total + n;
  * });
  * // => 3
  *
@@ -40,9 +39,6 @@ var arrayReduce = require('../internal/arrayReduce'),
  * }, {});
  * // => { 'a': 3, 'b': 6 } (iteration order is not guaranteed)
  */
-function reduce(collection, iteratee, accumulator, thisArg) {
-  var func = isArray(collection) ? arrayReduce : baseReduce;
-  return func(collection, baseCallback(iteratee, thisArg, 4), accumulator, arguments.length < 3, baseEach);
-}
+var reduce = createReduce(arrayReduce, baseEach);
 
 module.exports = reduce;

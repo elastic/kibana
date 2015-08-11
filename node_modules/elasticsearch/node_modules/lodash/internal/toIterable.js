@@ -1,9 +1,9 @@
-var isLength = require('./isLength'),
+var isArrayLike = require('./isArrayLike'),
     isObject = require('../lang/isObject'),
     values = require('../object/values');
 
 /**
- * Converts `value` to an array-like object if it is not one.
+ * Converts `value` to an array-like object if it's not one.
  *
  * @private
  * @param {*} value The value to process.
@@ -13,7 +13,7 @@ function toIterable(value) {
   if (value == null) {
     return [];
   }
-  if (!isLength(value.length)) {
+  if (!isArrayLike(value)) {
     return values(value);
   }
   return isObject(value) ? value : Object(value);

@@ -1,3 +1,4 @@
+"use strict"
 
 // Update this array if you add/rename/remove files in this directory.
 // We support Browserify by skipping automatic module discovery and requiring modules directly.

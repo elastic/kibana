@@ -5,12 +5,16 @@
  * MIT Licensed
  */
 
+'use strict'
+
 /**
  * Module dependencies.
+ * @private
  */
 
 var bytes = require('bytes')
 var contentType = require('content-type')
+var createError = require('http-errors')
 var debug = require('debug')('body-parser:urlencoded')
 var deprecate = require('depd')('body-parser')
 var read = require('../read')
@@ -33,24 +37,24 @@ var parsers = Object.create(null)
  *
  * @param {object} [options]
  * @return {function}
- * @api public
+ * @public
  */
 
-function urlencoded(options){
-  options = options || {};
+function urlencoded(options) {
+  var opts = options || {}
 
   // notice because option default will flip in next major
-  if (options.extended === undefined) {
+  if (opts.extended === undefined) {
     deprecate('undefined extended: provide extended option')
   }
 
-  var extended = options.extended !== false
-  var inflate = options.inflate !== false
-  var limit = typeof options.limit !== 'number'
-    ? bytes(options.limit || '100kb')
-    : options.limit
-  var type = options.type || 'urlencoded'
-  var verify = options.verify || false
+  var extended = opts.extended !== false
+  var inflate = opts.inflate !== false
+  var limit = typeof opts.limit !== 'number'
+    ? bytes.parse(opts.limit || '100kb')
+    : opts.limit
+  var type = opts.type || 'application/x-www-form-urlencoded'
+  var verify = opts.verify || false
 
   if (verify !== false && typeof verify !== 'function') {
     throw new TypeError('option verify must be function')
@@ -58,8 +62,8 @@ function urlencoded(options){
 
   // create the appropriate query parser
   var queryparse = extended
-    ? extendedparser(options)
-    : simpleparser(options)
+    ? extendedparser(opts)
+    : simpleparser(opts)
 
   // create the appropriate type checking function
   var shouldParse = typeof type !== 'function'
@@ -84,7 +88,7 @@ function urlencoded(options){
       return debug('skip empty body'), next()
     }
 
-    debug('content-type %s', JSON.stringify(req.headers['content-type']))
+    debug('content-type %j', req.headers['content-type'])
 
     // determine if request should be parsed
     if (!shouldParse(req)) {
@@ -94,10 +98,11 @@ function urlencoded(options){
     // assert charset
     var charset = getCharset(req) || 'utf-8'
     if (charset !== 'utf-8') {
-      var err = new Error('unsupported charset "' + charset.toUpperCase() + '"')
-      err.charset = charset
-      err.status = 415
-      return debug('invalid charset'), next(err)
+      debug('invalid charset')
+      next(createError(415, 'unsupported charset "' + charset.toUpperCase() + '"', {
+        charset: charset
+      }))
+      return
     }
 
     // read
@@ -135,16 +140,16 @@ function extendedparser(options) {
     var paramCount = parameterCount(body, parameterLimit)
 
     if (paramCount === undefined) {
-      var err = new Error('too many parameters')
-      err.status = 413
       debug('too many parameters')
-      throw err
+      throw createError(413, 'too many parameters')
     }
 
     var arrayLimit = Math.max(100, paramCount)
 
     debug('parse extended urlencoding')
     return parse(body, {
+      allowDots: false,
+      allowPrototypes: true,
       arrayLimit: arrayLimit,
       depth: Infinity,
       parameterLimit: parameterLimit
@@ -236,10 +241,8 @@ function simpleparser(options) {
     var paramCount = parameterCount(body, parameterLimit)
 
     if (paramCount === undefined) {
-      var err = new Error('too many parameters')
-      err.status = 413
       debug('too many parameters')
-      throw err
+      throw createError(413, 'too many parameters')
     }
 
     debug('parse urlencoding')

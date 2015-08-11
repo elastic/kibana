@@ -1,12 +1,11 @@
 var SetCache = require('./SetCache'),
-    constant = require('../utility/constant'),
-    isNative = require('../lang/isNative');
+    getNative = require('./getNative');
 
 /** Native method references. */
-var Set = isNative(Set = global.Set) && Set;
+var Set = getNative(global, 'Set');
 
 /* Native method references for those with the same name as other `lodash` methods. */
-var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
+var nativeCreate = getNative(Object, 'create');
 
 /**
  * Creates a `Set` cache object to optimize linear searches of large arrays.
@@ -15,8 +14,8 @@ var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
  * @param {Array} [values] The values to cache.
  * @returns {null|Object} Returns the new cache object if `Set` is supported, else `null`.
  */
-var createCache = !(nativeCreate && Set) ? constant(null) : function(values) {
-  return new SetCache(values);
-};
+function createCache(values) {
+  return (nativeCreate && Set) ? new SetCache(values) : null;
+}
 
 module.exports = createCache;

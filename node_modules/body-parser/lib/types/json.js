@@ -5,12 +5,16 @@
  * MIT Licensed
  */
 
+'use strict'
+
 /**
  * Module dependencies.
+ * @private
  */
 
 var bytes = require('bytes')
 var contentType = require('content-type')
+var createError = require('http-errors')
 var debug = require('debug')('body-parser:json')
 var read = require('../read')
 var typeis = require('type-is')
@@ -40,20 +44,20 @@ var firstcharRegExp = /^[\x20\x09\x0a\x0d]*(.)/
  *
  * @param {object} [options]
  * @return {function}
- * @api public
+ * @public
  */
 
 function json(options) {
-  options = options || {}
+  var opts = options || {}
 
-  var limit = typeof options.limit !== 'number'
-    ? bytes(options.limit || '100kb')
-    : options.limit
-  var inflate = options.inflate !== false
-  var reviver = options.reviver
-  var strict = options.strict !== false
-  var type = options.type || 'json'
-  var verify = options.verify || false
+  var limit = typeof opts.limit !== 'number'
+    ? bytes.parse(opts.limit || '100kb')
+    : opts.limit
+  var inflate = opts.inflate !== false
+  var reviver = opts.reviver
+  var strict = opts.strict !== false
+  var type = opts.type || 'application/json'
+  var verify = opts.verify || false
 
   if (verify !== false && typeof verify !== 'function') {
     throw new TypeError('option verify must be function')
@@ -96,7 +100,7 @@ function json(options) {
       return debug('skip empty body'), next()
     }
 
-    debug('content-type %s', JSON.stringify(req.headers['content-type']))
+    debug('content-type %j', req.headers['content-type'])
 
     // determine if request should be parsed
     if (!shouldParse(req)) {
@@ -106,10 +110,11 @@ function json(options) {
     // assert charset per RFC 7159 sec 8.1
     var charset = getCharset(req) || 'utf-8'
     if (charset.substr(0, 4) !== 'utf-') {
-      var err = new Error('unsupported charset "' + charset.toUpperCase() + '"')
-      err.charset = charset
-      err.status = 415
-      return debug('invalid charset'), next(err)
+      debug('invalid charset')
+      next(createError(415, 'unsupported charset "' + charset.toUpperCase() + '"', {
+        charset: charset
+      }))
+      return
     }
 
     // read

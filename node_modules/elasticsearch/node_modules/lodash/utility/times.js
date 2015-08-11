@@ -1,11 +1,12 @@
 var bindCallback = require('../internal/bindCallback');
 
 /* Native method references for those with the same name as other `lodash` methods. */
-var nativeIsFinite = global.isFinite,
+var nativeFloor = Math.floor,
+    nativeIsFinite = global.isFinite,
     nativeMin = Math.min;
 
 /** Used as references for the maximum length and index of an array. */
-var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1;
+var MAX_ARRAY_LENGTH = 4294967295;
 
 /**
  * Invokes the iteratee function `n` times, returning an array of the results
@@ -27,7 +28,7 @@ var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1;
  * _.times(3, function(n) {
  *   mage.castSpell(n);
  * });
- * // => invokes `mage.castSpell(n)` three times with `n` of `0`, `1`, and `2` respectively
+ * // => invokes `mage.castSpell(n)` three times with `n` of `0`, `1`, and `2`
  *
  * _.times(3, function(n) {
  *   this.cast(n);
@@ -35,7 +36,7 @@ var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1;
  * // => also invokes `mage.castSpell(n)` three times
  */
 function times(n, iteratee, thisArg) {
-  n = +n;
+  n = nativeFloor(n);
 
   // Exit early to avoid a JSC JIT bug in Safari 8
   // where `Array(0)` is treated as `Array(1)`.
