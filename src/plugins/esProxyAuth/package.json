@@ -1,0 +1,7 @@
+{
+  "name": "esProxyAuth",
+  "version": "1.0.0",
+  "dependencies": {
+    "btoa": "^1.1.2"
+  }
+}

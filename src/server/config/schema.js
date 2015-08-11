@@ -77,6 +77,13 @@ module.exports = Joi.object({
     watch: Joi.boolean().default(Joi.ref('$dev')),
     sourceMaps: Joi.boolean().default(Joi.ref('$dev')),
     _workerRole: Joi.valid('send', 'receive', null).default(null)
+  }).default(),
+
+  auth: Joi.object({
+    enabled: Joi.boolean().default(false),
+    strategy: Joi.string().default('esProxy'),
+    encryptionKey: Joi.string().default('secret'),
+    sessionTimeout: Joi.number().default(30 * 60 * 1000)
   }).default()
 
 }).default();

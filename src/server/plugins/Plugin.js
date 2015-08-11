@@ -84,7 +84,7 @@ module.exports = class Plugin {
       })
       .then(function () {
         // Only change the plugin status to green if the
-        // intial status has not been updated
+        // initial status has not been updated
         if (self.status.state === 'uninitialized') {
           self.status.green('Ready');
         }

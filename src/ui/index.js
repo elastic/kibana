@@ -12,6 +12,21 @@ module.exports = function (kbnServer, server, config) {
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
 
+  if (config.get('auth.enabled')) {
+    server.route({
+      path: '/login',
+      method: 'GET',
+      handler: function (req, reply) {
+        let login = hiddenApps.byId.login;
+        if (!login) return reply(Boom.notFound('login page not installed'));
+        return reply.renderApp(login);
+      },
+      config: {
+        auth: false
+      }
+    });
+  }
+
   // serve the app switcher
   server.route({
     path: '/apps',
@@ -38,7 +53,7 @@ module.exports = function (kbnServer, server, config) {
     handler: function (req, reply) {
       let id = req.params.id;
       let app = apps.byId[id];
-      if (!app) return reply(Boom.notFound('Unkown app ' + id));
+      if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
         return reply.renderApp(app);

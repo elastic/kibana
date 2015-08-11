@@ -19,9 +19,9 @@ class UiExports {
 
     if (!types) return false;
 
-    var unkown = _.reject(types, self.exportConsumer, self);
-    if (unkown.length) {
-      throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
+    var unknown = _.reject(types, self.exportConsumer, self);
+    if (unknown.length) {
+      throw new Error('unknown export types ' + unknown.join(', ') + ' in plugin ' + plugin.id);
     }
 
     types.forEach(function (type) {

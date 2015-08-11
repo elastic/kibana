@@ -24,6 +24,7 @@ module.exports = class KbnServer extends EventEmitter {
       require('./logging'),
       require('./status'), // sets this.status
       require('./plugins'), // sets this.plugins
+      require('./auth'),
       require('./config/complete'),
 
       require('../ui'), // sets this.uiExports
@@ -40,7 +41,7 @@ module.exports = class KbnServer extends EventEmitter {
   }
 
   /**
-   * Extend the KbnServer outside of the constraits of a plugin. This allows access
+   * Extend the KbnServer outside of the constraints of a plugin. This allows access
    * to APIs that are not exposed (intentionally) to the plugins and should only
    * be used when the code will be kept up to date with Kibana.
    *
@@ -62,7 +63,7 @@ module.exports = class KbnServer extends EventEmitter {
 
       return self.close()
       .then(function () {
-        // retrow once server is closed
+        // rethrow once server is closed
         throw err;
       });
     })

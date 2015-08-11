@@ -1,0 +1,9 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "dependencies": {
+    "boom": "^2.8.0",
+    "hapi": "^8.8.1",
+    "hapi-auth-cookie": "^3.0.1"
+  }
+}

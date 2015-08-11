@@ -1,0 +1,16 @@
+<h1></h1>
+<div class="container">
+  <form id="login-form" ng-submit="login.submit(username, password)">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" ng-model="username" class="form-control" id="username" name="username" placeholder="Username" />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" ng-model="password" class="form-control" id="password" name="password" placeholder="Password" />
+    </div>
+    <div ng-show="login.error" class="form-group has-error">Oops! That is an invalid username/password combination.</div>
+    <button type="submit" class="btn btn-default">Submit</button>
+    <span ng-show="login.loading" class="fa fa-spinner fa-spin"></span>
+  </form>
+</div>
