@@ -14,7 +14,7 @@ module.exports = (kibana) => new kibana.Plugin({
 
   init(server, options) {
     let config = server.config();
-    if (!config.get('auth.enabled') || config.get('auth.strategy') !== '') return;
+    if (!config.get('auth.enabled') || config.get('auth.strategy') !== name) return;
     let path = config.get('htpasswdAuth.path');
     let users = new Map();
 
