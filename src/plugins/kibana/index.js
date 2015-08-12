@@ -34,9 +34,12 @@ module.exports = function (kibana) {
           'leaflet'
         ),
 
-        constants: function (server, options) {
+        injectVars: function (server, options) {
+          let config = server.config();
+
           return {
-            defaultAppId: options.defaultAppId
+            kbnIndex: config.get('kibana.index'),
+            esShardTimeout: config.get('elasticsearch.shardTimeout')
           };
         }
       }

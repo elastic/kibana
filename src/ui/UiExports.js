@@ -13,6 +13,8 @@ class UiExports {
   }
 
   consumePlugin(plugin) {
+    plugin.apps = new UiAppCollection(this);
+
     var types = _.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
@@ -46,7 +48,8 @@ class UiExports {
       case 'apps':
         return (plugin, specs) => {
           for (let spec of [].concat(specs || [])) {
-            this.apps.new(_.defaults({}, spec, { id: plugin.id }));
+            let app = this.apps.new(_.defaults({}, spec, { id: plugin.id }));
+            plugin.apps.add(app);
           }
         };
 
