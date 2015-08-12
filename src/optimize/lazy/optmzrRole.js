@@ -19,14 +19,23 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
     })
   );
 
-  await server.init();
+
+  let ready = false;
 
   let sendReady = () => {
-    process.send(['WORKER_BROADCAST', { optimizeReady: true }]);
+    if (!process.connected) return;
+    process.send(['WORKER_BROADCAST', { optimizeReady: ready }]);
   };
 
-  sendReady();
   process.on('message', (msg) => {
     if (msg && msg.optimizeReady === '?') sendReady();
   });
+
+
+  sendReady();
+
+  await server.init();
+
+  ready = true;
+  sendReady();
 };

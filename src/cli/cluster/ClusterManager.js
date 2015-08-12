@@ -112,7 +112,7 @@ module.exports = class ClusterManager {
   }
 
   onWatcherError(err) {
-    this.log.bad('Failed to watch files!\n', err.stack);
+    this.log.bad('failed to watch files!\n', err.stack);
     process.exit(1); // eslint-disable-line no-process-exit
   }
 };
