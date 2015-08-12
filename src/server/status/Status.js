@@ -13,7 +13,10 @@ class Status extends EventEmitter {
 
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
-      server.log(['status', name, 'info'], {
+      var tags = ['status', name];
+      tags.push(this.state === 'red' ? 'error' : 'info');
+
+      server.log(tags, {
         tmpl: 'Status changed from <%= prevState %> to <%= state %><% message && print(` - ${message}`) %>',
         name: name,
         state: this.state,
