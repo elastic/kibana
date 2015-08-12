@@ -8,7 +8,7 @@ module.exports = function (grunt) {
 
     grunt.task.run(_.compact([
       'eslint:source',
-      'maybeStartKibana',
+      'maybeStartTestServer',
       'simplemocha:all',
       'karma:unit'
     ]));
@@ -16,14 +16,14 @@ module.exports = function (grunt) {
 
   grunt.registerTask('quick-test', function () {
     grunt.task.run([
-      'maybeStartKibana',
+      'maybeStartTestServer',
       'simplemocha:all',
       'karma:unit'
     ]);
   });
 
   grunt.registerTask('test:watch', [
-    'maybeStartKibana',
+    'maybeStartTestServer',
     'watch:test'
   ]);
 };

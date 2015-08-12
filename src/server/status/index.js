@@ -1,11 +1,8 @@
-module.exports = function (kbnServer) {
+module.exports = function (kbnServer, server, config) {
   var _ = require('lodash');
   var Samples = require('./Samples');
   var ServerStatus = require('./ServerStatus');
   var { join } = require('path');
-
-  var server = kbnServer.server;
-  var config = server.config();
 
   kbnServer.status = new ServerStatus(kbnServer.server);
   kbnServer.metrics = new Samples(60);
@@ -39,7 +36,7 @@ module.exports = function (kbnServer) {
   });
 
   server.decorate('reply', 'renderStatusPage', function () {
-    var app = _.get(kbnServer, 'uiExports.apps.hidden.byId.statusPage');
+    var app = kbnServer.uiExports.getHiddenApp('statusPage');
     var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
     resp.code(kbnServer.status.isGreen() ? 200 : 503);
     return resp;

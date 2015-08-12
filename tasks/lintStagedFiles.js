@@ -14,7 +14,7 @@ module.exports = function (grunt) {
       diff(['--name-only', '--cached'])
       .then(function (files) {
         // match these patterns
-        var patterns = grunt.config.get('lintThese');
+        var patterns = grunt.config.get('eslint.files.src');
         files = files.split('\n').filter(Boolean).map(function (file) {
           return resolve(root, file);
         });

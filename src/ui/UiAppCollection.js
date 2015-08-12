@@ -1,7 +1,10 @@
 let _ = require('lodash');
 let UiApp = require('./UiApp');
+let Collection = require('requirefrom')('src')('utils/Collection');
 
-module.exports = class UiApps extends Array {
+let byIdCache = Symbol('byId');
+
+module.exports = class UiAppCollection extends Collection {
 
   constructor(uiExports, parent) {
     super();
@@ -10,7 +13,7 @@ module.exports = class UiApps extends Array {
 
     if (!parent) {
       this.claimedIds = [];
-      this.hidden = new UiApps(uiExports, this);
+      this.hidden = new UiAppCollection(uiExports, this);
     } else {
       this.claimedIds = parent.claimedIds;
     }
@@ -30,17 +33,13 @@ module.exports = class UiApps extends Array {
       this.claimedIds.push(app.id);
     }
 
-    this._byId = null;
-    this.push(app);
+    this[byIdCache] = null;
+    this.add(app);
     return app;
   }
 
   get byId() {
-    return this._byId || (this._byId = _.indexBy(this, 'id'));
-  }
-
-  toJSON() {
-    return this.slice(0);
+    return this[byIdCache] || (this[byIdCache] = _.indexBy([...this], 'id'));
   }
 
 };

@@ -19,8 +19,12 @@ class UiApp {
     this.hidden = this.spec.hidden;
     this.autoloadOverrides = this.spec.autoload;
     this.templateName = this.spec.templateName || 'uiApp';
-    this.requireOptimizeGreen = this.spec.requireOptimizeGreen !== false;
+
+    // once this resolves, no reason to run it again
     this.getModules = _.once(this.getModules);
+
+    // variables that are injected into the browser, must serialize to JSON
+    this.getInjectedVars = this.spec.injectVars || _.noop;
   }
 
   getModules() {
@@ -32,18 +36,6 @@ class UiApp {
     .uniq()
     .push(this.main)
     .value();
-  }
-
-  getRelatedPlugins() {
-    var pluginsById = this.uiExports.kbnServer.plugins.byId;
-    return _.transform(this.getModules(), function (plugins, id) {
-      var matches = id.match(/^plugins\/([^\/]+)(?:\/|$)/);
-      if (!matches) return;
-
-      var plugin = pluginsById[matches[1]];
-      if (_.includes(plugins, plugin)) return;
-      plugins.push(plugin);
-    }, []);
   }
 
   toJSON() {
