@@ -24,7 +24,6 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 // ];
 
 describe('TileMap Map Tests', function () {
-  this.timeout(0);
   var $mockMapEl = $('<div>');
   var TileMapMap;
   var leafletStubs = {};

@@ -6,22 +6,20 @@ module.exports = function (chrome, internals) {
   chrome.setupAngular = function () {
     var kibana = modules.get('kibana');
 
-    var esUrl = (function () {
+    _.forOwn(chrome.getInjected(), function (val, name) {
+      kibana.value(name, val);
+    });
+
+    kibana
+    .value('kbnVersion', internals.version)
+    .value('buildNum', internals.buildNum)
+    .value('buildSha', internals.buildSha)
+    .value('sessionId', Date.now())
+    .value('esUrl', (function () {
       var a = document.createElement('a');
       a.href = '/elasticsearch';
       return a.href;
-    }());
-
-    kibana
-    .constant('kbnVersion', internals.version)
-    .constant('buildNum', internals.buildNumber)
-    .constant('kbnIndex', internals.kbnIndex)
-    .constant('esShardTimeout', internals.esShardTimeout)
-    .constant('esUrl', esUrl)
-    .constant('commitSha', internals.buildSha)
-    .constant('cacheBust', internals.cacheBust)
-    .constant('minimumElasticsearchVersion', '2.0.0')
-    .constant('sessionId', Date.now())
+    }()))
     .directive('kbnChrome', function ($rootScope) {
       return {
         compile: function ($el) {
@@ -37,7 +35,7 @@ module.exports = function (chrome, internals) {
             $app.html(internals.rootTemplate);
           }
 
-          $el.append($content);
+          $el.html($content);
         },
         controllerAs: 'chrome',
         controller: function ($scope, $rootScope, $location, $http) {

@@ -28,7 +28,7 @@ describe('plugins/elasticsearch', function () {
   });
 
   after(function () {
-    kbnServer.close();
+    return kbnServer.close();
   });
 
   describe('lib/validate', function () {

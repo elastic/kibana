@@ -1,6 +1,7 @@
 module.exports = {
   options: {
-    timeout: 2000,
+    timeout: 10000,
+    slow: 5000,
     ignoreLeaks: false,
     reporter: 'dot'
   },

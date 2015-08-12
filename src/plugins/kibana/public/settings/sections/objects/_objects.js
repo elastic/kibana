@@ -81,7 +81,9 @@ define(function (require) {
         };
 
         $scope.bulkDelete = function () {
-          $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(refreshData);
+          $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(refreshData).then(function () {
+            $scope.selectedItems.length = 0;
+          });
         };
 
         $scope.bulkExport = function () {

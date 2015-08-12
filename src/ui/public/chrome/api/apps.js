@@ -31,4 +31,9 @@ module.exports = function (chrome, internals) {
     return internals.app.id;
   };
 
+  chrome.getInjected = function (name, def) {
+    if (name == null) return _.clone(internals.vars) || {};
+    return _.get(internals.vars, name, def);
+  };
+
 };

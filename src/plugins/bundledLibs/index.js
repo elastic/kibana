@@ -4,7 +4,10 @@ module.exports = function (kibana) {
   let { readdirSync } = require('fs');
   let { resolve, basename } = require('path');
 
-  let modules = {};
+  let modules = {
+    moment$: fromRoot('node_modules/moment/min/moment.min.js')
+  };
+
   let metaLibs = resolve(__dirname, 'metaLibs');
   readdirSync(metaLibs).forEach(function (file) {
     if (file[0] === '.') return;
@@ -17,7 +20,8 @@ module.exports = function (kibana) {
     uiExports: {
       modules: modules,
       noParse: [
-        /node_modules\/(angular|elasticsearch-browser|mocha)\//
+        /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
+        /node_modules[\/\\](angular-nvd3|mocha|moment)[\/\\]/
       ]
     }
   });

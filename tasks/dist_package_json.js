@@ -10,7 +10,7 @@ module.exports = function (grunt) {
       version: pkg.version,
       build: {
         number: grunt.config.get('buildNum'),
-        sha: grunt.config.get('commitSha')
+        sha: grunt.config.get('buildSha')
       },
       repository: pkg.repository,
       dependencies: pkg.dependencies

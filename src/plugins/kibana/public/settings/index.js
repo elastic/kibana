@@ -36,4 +36,9 @@ define(function (require, module, exports) {
       }
     };
   });
+
+  // preload
+  require('ui/field_editor');
+  require('plugins/kibana/settings/sections/indices/_indexed_fields');
+  require('plugins/kibana/settings/sections/indices/_scripted_fields');
 });

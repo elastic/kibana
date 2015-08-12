@@ -3,15 +3,20 @@ module.exports = function (grunt) {
   let root = p => resolve(__dirname, '../../', p);
 
   return {
-    devServer: {
+    testServer: {
       options: {
         wait: false,
-        ready: /\[optimize\]\[status\] Status changed from [a-zA-Z]+ to green/,
+        ready: /Server running/,
         quiet: false,
         failOnError: false
       },
       cmd: './bin/kibana',
-      args: ['--dev', '--no-watch', '--logging.json=false']
+      args: [
+        '--env.name=development',
+        '--logging.json=false',
+        '--optimize.tests=true',
+        '--optimize.lazy=false'
+      ]
     }
   };
 
