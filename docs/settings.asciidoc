@@ -165,7 +165,7 @@ the field's format from the *Format* drop-down. Format options vary based on the
 You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the 
 *Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
 
-Kibana has field formatters for the following field types:
+Kibana has https://www.elastic.co/blog/kibana-4-1-field-formatters[field formatters] for the following field types:
 
 ==== String Field Formatters
 

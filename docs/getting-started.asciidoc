@@ -12,6 +12,13 @@ key Kibana functionality. By the end of this tutorial, you will have:
 
 The material in this section assumes you have a working Kibana install connected to a working Elasticsearch install.
 
+Video tutorials are also available:
+
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-1[High-level Kibana 4 introduction, pie charts]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-2[Data discovery, bar charts, and line charts]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-3[Tile maps]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-4[Embedding Kibana 4 visualizations] 
+
 [float]
 [[tutorial-load-dataset]]
 === Before You Start: Loading Sample Data
