@@ -11,7 +11,6 @@ module.exports = async function (kbnServer, server, config) {
 
   // setup config and filter out disabled plugins
   for (let plugin of plugins) {
-    await plugin.setupConfig();
     if (config.get([plugin.id, 'enabled'])) {
       enabledPlugins[plugin.id] = plugin;
     }
