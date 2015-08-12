@@ -2,7 +2,7 @@
 module.exports = require('lodash').template(
 `
 /**
- * Optimized application entry file
+ * Test entry file
  *
  * This is programatically created and updated, do not modify
  *
@@ -18,6 +18,13 @@ env.pluginInfo.sort().forEach(function (plugin, i) {
 %>
  *
  */
+
+window.__KBN__ = {
+  vars: {
+    kbnIndex: '.kibana',
+    esShardTimeout: 1500
+  }
+};
 
 require('ui/testHarness');
 <%
