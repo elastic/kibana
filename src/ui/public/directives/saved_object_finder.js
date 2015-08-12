@@ -4,28 +4,12 @@ define(function (require) {
   var rison = require('ui/utils/rison');
   var keymap = require('ui/utils/key_map');
 
-  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, kbnUrl) {
 
-    var types = {
-      searches: {
-        service: savedSearches,
-        name: 'searches',
-        noun: 'Saved Search',
-        nouns: 'saved searches'
-      },
-      visualizations: {
-        service: savedVisualizations,
-        name: 'visualizations',
-        noun: 'Visualization',
-        nouns: 'visualizations'
-      },
-      dashboards: {
-        service: savedDashboards,
-        name: 'dashboards',
-        noun: 'Dashboard',
-        nouns: 'dashboards'
-      }
-    };
+
+
+  module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
+
+    var types = Private(require('ui/saved_objects/saved_object_registry')).byName;
 
     return {
       restrict: 'E',
