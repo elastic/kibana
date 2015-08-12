@@ -9,7 +9,8 @@ module.exports = function createProxy(server, method, route, opts) {
       proxy: {
         mapUri: mapUri(server, opts.prefix),
         passThrough: true,
-        agent: createAgent(server)
+        agent: createAgent(server),
+        xforward: true
       }
     }
   };
