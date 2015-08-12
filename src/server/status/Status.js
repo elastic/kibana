@@ -42,8 +42,14 @@ states.all.forEach(function (state) {
     let previous = this.state;
     let previousMsg = this.message;
 
-    this.state = state.id;
+    this.error = null;
     this.message = message || state.title;
+    this.state = state.id;
+
+    if (message instanceof Error) {
+      this.error = message
+      this.message = message.message
+    }
 
     if (previous === this.state && previousMsg === this.message) {
       // noop
