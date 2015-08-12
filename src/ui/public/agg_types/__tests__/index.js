@@ -6,6 +6,7 @@ describe('AggTypesComponent', function () {
   require('./AggParams');
   require('./bucketCountBetween');
   require('./buckets/_histogram');
+  require('./buckets/_range');
 
   describe('bucket aggs', function () {
     var bucketAggs;
