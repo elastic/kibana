@@ -23,7 +23,7 @@ module.exports = function (kibana) {
           cert: Joi.string(),
           key: Joi.string()
         }).default(),
-        minimumVerison: Joi.string().default('1.4.4')
+        minimumVerison: Joi.string().default('2.0.0')
       }).default();
     },
 
