@@ -13,7 +13,7 @@ module.exports = class Plugins extends Collection {
     this.kbnServer = kbnServer;
   }
 
-  new(path) {
+  async new(path) {
     var api = new PluginApi(this.kbnServer, path);
     let output = [].concat(require(path)(api) || []);
 
@@ -21,6 +21,7 @@ module.exports = class Plugins extends Collection {
       if (product instanceof api.Plugin) {
         this[byIdCache] = null;
         this.add(product);
+        await product.setupConfig();
       } else {
         throw new TypeError('unexpected plugin export ' + inspect(product));
       }
