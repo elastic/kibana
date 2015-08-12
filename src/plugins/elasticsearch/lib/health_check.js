@@ -31,21 +31,22 @@ module.exports = function (plugin, server) {
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index')
     })
-    .then(function (resp) {
+    .catch(function (resp) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
-      if (resp.timed_out) {
+      if (resp.body.timed_out) {
         plugin.status.yellow('No existing Kibana index found');
         return createKibanaIndex(server);
       }
 
       // If status === "red" that means that index(es) were found
       // but the shards are not ready for queries
-      if (resp.status === 'red') {
+      if (resp.body.status === 'red') {
         plugin.status.red('Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.');
         return Promise.delay(2500).then(waitForShards);
       }
-
+    })
+    .then(function () {
       // otherwise we are g2g
       plugin.status.green('Kibana index ready');
     });
