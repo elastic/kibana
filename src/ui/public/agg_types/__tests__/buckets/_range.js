@@ -49,9 +49,9 @@ describe('Range Agg', function () {
       var format = function (val) {
         return agg.fieldFormatter()(agg.getKey(val));
       };
-      expect(format(buckets[0])).to.be('[-∞, 1 KB)');
-      expect(format(buckets[1])).to.be('[1 KB, 2.5 KB)');
-      expect(format(buckets[2])).to.be('[2.5 KB, +∞)');
+      expect(format(buckets[0])).to.be('-∞ to 1 KB');
+      expect(format(buckets[1])).to.be('1 KB to 2.5 KB');
+      expect(format(buckets[2])).to.be('2.5 KB to +∞');
 
     });
   });

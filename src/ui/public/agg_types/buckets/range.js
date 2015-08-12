@@ -26,7 +26,7 @@ define(function (require) {
 
         var RangeFormat = FieldFormat.from(function (range) {
           var format = agg.fieldOwnFormatter();
-          return `[${format(range.gte)}, ${format(range.lt)})`;
+          return `${format(range.gte)} to ${format(range.lt)}`;
         });
 
         return (this.$$rangeAggTypeFormat = new RangeFormat());

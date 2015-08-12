@@ -20,7 +20,7 @@ define(function (require) {
 
         return {
           key: key,
-          value: `[${convert(left)}, ${convert(right)})`
+          value: `${convert(left)} to ${convert(right)}`
         };
       });
 
