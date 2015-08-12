@@ -7,6 +7,7 @@ function startEs() {
   var options = {
     version: '1.4.4',
     directory: path.join(__dirname, '..', '..', 'esvm'),
+    purge: true,
     config: {
       'cluster.name': 'test',
       'network.host': '127.0.0.1'

@@ -124,7 +124,7 @@ describe('plugins/elasticsearch', function () {
       get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.returns(Promise.resolve());
-      client.cluster.health.onCall(0).returns(Promise.resolve({ timed_out: true, status: 'red' }));
+      client.cluster.health.onCall(0).returns(Promise.reject({ body: { timed_out: true, status: 'red' } }));
       client.cluster.health.onCall(1).returns(Promise.resolve({ timed_out: false, status: 'green' }));
       client.indices.create.returns(Promise.resolve());
       return health.run()
