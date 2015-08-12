@@ -30,7 +30,7 @@ module.exports = function (server) {
   var client = new elasticsearch.Client({
     host: url.format(uri),
     ssl: ssl,
-    apiVersion: '1.4',
+    apiVersion: '2.0',
     log: function () {
       this.error = function (err) {
         server.log(['error', 'elasticsearch'], err);
