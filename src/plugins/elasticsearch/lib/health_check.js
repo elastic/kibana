@@ -38,15 +38,14 @@ module.exports = function (plugin, server) {
         plugin.status.yellow('No existing Kibana index found');
         return createKibanaIndex(server);
       }
-
+    })
+    .then(function (resp) {
       // If status === "red" that means that index(es) were found
       // but the shards are not ready for queries
-      if (resp.body.status === 'red') {
+      if (resp.status === 'red') {
         plugin.status.red('Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.');
         return Promise.delay(2500).then(waitForShards);
       }
-    })
-    .then(function () {
       // otherwise we are g2g
       plugin.status.green('Kibana index ready');
     });
