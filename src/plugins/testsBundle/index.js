@@ -5,7 +5,7 @@ module.exports = (kibana) => {
 
   let utils = require('requirefrom')('src/utils');
   let fromRoot = utils('fromRoot');
-  let findSourceFiles = utils('findSourceFiles');
+  let findSourceFiles = require('./findSourceFiles');
 
   return new kibana.Plugin({
     uiExports: {
