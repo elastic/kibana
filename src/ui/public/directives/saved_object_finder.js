@@ -6,7 +6,7 @@ define(function (require) {
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
 
-    var types = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
+    var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
 
     return {
       restrict: 'E',
@@ -38,7 +38,7 @@ define(function (require) {
         // the list of hits, used to render display
         self.hits = [];
 
-        self.objectType = types[$scope.type];
+        self.service = services[$scope.type];
 
         filterResults();
 
@@ -208,7 +208,7 @@ define(function (require) {
         };
 
         self.hitCountNoun = function () {
-          return ((self.hitCount === 1) ? self.objectType.loaderProperties.noun : self.objectType.loaderProperties.nouns).toLowerCase();
+          return ((self.hitCount === 1) ? self.service.loaderProperties.noun : self.service.loaderProperties.nouns).toLowerCase();
         };
 
         function selectTopHit() {
@@ -219,8 +219,8 @@ define(function (require) {
         }
 
         function filterResults() {
-          if (!self.objectType) return;
-          if (!self.objectType.loaderProperties) return;
+          if (!self.service) return;
+          if (!self.service.loaderProperties) return;
 
           // track the filter that we use for this search,
           // but ensure that we don't search for the same
@@ -230,7 +230,7 @@ define(function (require) {
           if (prevSearch === filter) return;
 
           prevSearch = filter;
-          self.objectType.find(filter)
+          self.service.find(filter)
           .then(function (hits) {
             // ensure that we don't display old results
             // as we can't really cancel requests
