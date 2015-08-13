@@ -206,11 +206,11 @@ selector. Select the *balance* field from the *Field* drop-down, then click on *
 total number of ranges to six. Enter the following ranges:
 
 [source,text]
-0            1000
-1000         3000
-3000         7000
-7000        15000
-15000       31000
+0             999
+1000         2999
+3000         6999
+7000        14999
+15000       30999
 31000       50000
 
 Click the green *Apply changes* to display the chart:
