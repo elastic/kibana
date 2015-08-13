@@ -2,11 +2,13 @@ var portscanner = require('portscanner');
 var path = require('path');
 var Promise = require('bluebird');
 var libesvm = require('libesvm');
+var fromRoot = require('requirefrom')('src/utils')('fromRoot');
 
 function startEs() {
   var options = {
-    version: '1.4.4',
-    directory: path.join(__dirname, '..', '..', 'esvm'),
+    branch: 'master',
+    directory: fromRoot('esvm/test-es'),
+    purge: true,
     config: {
       'cluster.name': 'test',
       'network.host': '127.0.0.1'
@@ -28,7 +30,7 @@ function maybeStartES() {
   return new Promise(function (resolve, reject) {
     portscanner.checkPortStatus(9200, '127.0.0.1', function (err, status) {
       if (err) return reject(err);
-      if (status === 'closed') return startEs().then(resolve);
+      if (status === 'closed') return startEs().then(resolve, reject);
       resolve();
     });
   });
