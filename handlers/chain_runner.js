@@ -85,7 +85,7 @@ function invoke(fnName, args) {
           return invoke(item.function, item.arguments);
         case 'reference':
           var reference = sheet[item.plot - 1][item.series - 1];
-          return invokeChain(reference);
+          return invoke('first', [reference]);
         case 'chain':
           return invokeChain(item);
         case 'chainList':
@@ -101,7 +101,7 @@ function invoke(fnName, args) {
 
   return Promise.all(args).then(function (args) {
     if (!functions[fnName]) {
-      throw new Error('Function not found');
+      throw new Error('Function not found: ' + fnName);
     }
 
     if (args.length > functionDef.args.length) {
@@ -177,9 +177,10 @@ function preProcessSheet(sheet) {
         if (functions[func.function].dataSource) {
           storeQueryObj(func);
           return true;
-        } else {
-          return false;
         }
+
+        return false;
+
       }
     }
 
