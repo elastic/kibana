@@ -31,6 +31,7 @@ define(function (require) {
 
       // If buckets is falsy then we should just return the aggs
       if (!buckets) {
+        var label = 'Count';
         var value = resp.aggregations
           && resp.aggregations[metric.id]
           && resp.aggregations[metric.id].value
@@ -38,11 +39,11 @@ define(function (require) {
         return {
           hits: resp.hits.total,
           raw: raw,
-          names: ['_all'],
+          names: [label],
           tooltipFormatter: tooltipFormatter(raw.columns),
           slices: {
             children: [
-              { name: '_all', size: value }
+              { name: label, size: value }
             ]
           }
         };
