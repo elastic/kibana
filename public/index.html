@@ -5,7 +5,7 @@
         <div class="input-group"
           ng-class="discoverSearch.$invalid ? 'has-error' : ''">
           <input input-focus
-            ng-model="state.expressions[state.selected]"
+            ng-model="state.sheet[state.selected]"
             placeholder="Expression ..."
             aria-label="Expression input"
             type="text"
@@ -73,12 +73,13 @@
     </div>
   </navbar>
 
+  <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
 
 
   <div class="timelion-container">
     <div>
       <div class="chart-container col-md-4"
-        ng-repeat="cell in state.expressions track by $index"
+        ng-repeat="cell in state.sheet track by $index"
         ng-click="setActiveCell($index)"
         ng-class="{active: $index === state.selected, running: running}"
         >

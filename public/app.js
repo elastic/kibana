@@ -18,41 +18,54 @@ require('ui/chrome')
 
 var app = require('ui/modules').get('apps/timelion', []);
 
+require('plugins/timelion/services/saved_sheets');
+require('plugins/timelion/services/_saved_sheet');
+
+require('ui/saved_objects/saved_object_registry').register(require('plugins/timelion/services/saved_sheet_register'));
+
 // TODO: Expose an api for dismissing notifications
 var unsafeNotifications = require('ui/notify')._notifs;
+var ConfigTemplate = require('ui/ConfigTemplate');
 
 require('ui/routes')
-  .when('/', {
+  .when('/:id?', {
     template: require('plugins/timelion/index.html'),
     reloadOnSearch: false,
+    resolve: {
+      savedSheet: function (courier, savedSheets, $route) {
+        return savedSheets.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing({
+          'search': '/'
+        }));
+      }
+    }
   });
 
-app.controller('timelion', function ($scope, $http, timefilter, AppState, courier, $rootScope, Notifier) {
-
-  $scope.toggleButtons = function () {
-    $scope.showButtons = !$scope.showButtons;
-  };
-
+app.controller('timelion', function ($scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier) {
   timefilter.enabled = true;
-
-  var blankSheet = ['es()'];
-
   var notify = new Notifier({
     location: 'Timelion'
   });
 
-  $rootScope.$on('courier:searchRefresh', function () {
-    console.log('search');
+  var savedSheet = $route.current.locals.savedSheet;
+  var blankSheet = ['`*`'];
+
+    // config panel templates
+  $scope.configTemplate = new ConfigTemplate({
+    load: require('plugins/timelion/partials/load_sheet.html'),
+    save: require('plugins/timelion/partials/save_sheet.html')
   });
 
   $scope.state = new AppState(getStateDefaults());
   function getStateDefaults() {
     return {
-      expressions: blankSheet,
+      sheet: savedSheet.timelion_sheet || blankSheet,
       selected: 0,
-      interval: '1d'
+      interval: savedSheet.timelion_interval || '1d'
     };
   }
+
+
 
   var init = function () {
     $scope.running = false;
@@ -60,23 +73,31 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
     $scope.$listen(timefilter, 'fetch', $scope.search);
+
+    $scope.opts = {
+      save: save,
+      savedSheet: savedSheet
+    };
   };
 
+  $scope.toggleButtons = function () {
+    $scope.showButtons = !$scope.showButtons;
+  };
 
   $scope.newSheet = function () {
-    $scope.state.expressions = [];
+    $scope.state.sheet = [];
     $scope.newCell();
     $scope.search();
   };
 
   $scope.newCell = function () {
-    $scope.state.expressions.push('es()');
-    $scope.state.selected = $scope.state.expressions.length - 1;
+    $scope.state.sheet.push('`*`');
+    $scope.state.selected = $scope.state.sheet.length - 1;
     $scope.search();
   };
 
   $scope.removeCell = function (index) {
-    _.pullAt($scope.state.expressions, index);
+    _.pullAt($scope.state.sheet, index);
     $scope.search();
   };
 
@@ -89,7 +110,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
     $scope.running = true;
 
     $http.post('/timelion/sheet', {
-      sheet:$scope.state.expressions,
+      sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
         interval: $scope.state.interval
       }),
@@ -110,6 +131,22 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
       notify.error(resp.error);
       $scope.sheet = [];
       $scope.running = false;
+    });
+  };
+
+  function save() {
+    savedSheet.id = savedSheet.title;
+    savedSheet.timelion_sheet = $scope.state.sheet;
+    savedSheet.timelion_interval = $scope.state.interval;
+
+    savedSheet.save().then(function (id) {
+      $scope.configTemplate.close('save');
+      if (id) {
+        notify.info('Saved sheet as "' + savedSheet.title + '"');
+        if (savedSheet.id !== $routeParams.id) {
+          kbnUrl.change('/{{id}}', {id: savedSheet.id});
+        }
+      }
     });
   };
 

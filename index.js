@@ -8,7 +8,14 @@ module.exports = function (kibana) {
         title: 'Timelion',
         description: 'Rawr',
         icon: 'http://placekitten.com/g/400/302',
-        main: 'plugins/timelion/app'
+        main: 'plugins/timelion/app',
+        injectVars: function (server, options) {
+          let config = server.config();
+          return {
+            kbnIndex: config.get('kibana.index'),
+            esShardTimeout: config.get('elasticsearch.shardTimeout')
+          };
+        }
       },
       modules: {
         flot$: {
@@ -21,7 +28,7 @@ module.exports = function (kibana) {
         }
       }
     },
-    init: require('./init.js')
+    init: require('./init.js'),
   });
 
 };
