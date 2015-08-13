@@ -17,6 +17,13 @@ define(function (require) {
     this.type = SavedDashboard.type;
     this.Class = SavedDashboard;
 
+
+    this.loaderProperties = {
+      name: 'dashboards',
+      noun: 'Dashboard',
+      nouns: 'dashboards'
+    };
+
     // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
 
