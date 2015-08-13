@@ -17,7 +17,7 @@ define(function (require) {
      * Listens for events
      * @param {string} name - The name of the event
      * @param {function} handler - The function to call when the event is triggered
-     * @returns {undefined}
+     * @return {Events} - this, for chaining
      */
     Events.prototype.on = function (name, handler) {
       if (!_.isArray(this._listeners[name])) {
@@ -46,15 +46,15 @@ define(function (require) {
      * Removes an event listener
      * @param {string} [name] - The name of the event
      * @param {function} [handler] - The handler to remove
-     * @return {undefined}
+     * @return {Events} - this, for chaining
      */
     Events.prototype.off = function (name, handler) {
       if (!name && !handler) {
-        return this._listeners = {};
+        return this.removeAllListeners();
       }
 
       // exit early if there is not an event that matches
-      if (!this._listeners[name]) return;
+      if (!this._listeners[name]) return this;
 
       // If no hander remove all the events
       if (!handler) {
