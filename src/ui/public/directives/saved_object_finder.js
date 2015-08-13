@@ -39,6 +39,7 @@ define(function (require) {
         self.hits = [];
 
         self.service = services[$scope.type];
+        self.properties = self.service.loaderProperties;
 
         filterResults();
 
@@ -208,7 +209,7 @@ define(function (require) {
         };
 
         self.hitCountNoun = function () {
-          return ((self.hitCount === 1) ? self.service.loaderProperties.noun : self.service.loaderProperties.nouns).toLowerCase();
+          return ((self.hitCount === 1) ? self.properties.noun : self.properties.nouns).toLowerCase();
         };
 
         function selectTopHit() {
@@ -220,7 +221,7 @@ define(function (require) {
 
         function filterResults() {
           if (!self.service) return;
-          if (!self.service.loaderProperties) return;
+          if (!self.properties) return;
 
           // track the filter that we use for this search,
           // but ensure that we don't search for the same
