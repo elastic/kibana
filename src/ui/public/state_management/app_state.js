@@ -6,10 +6,14 @@ define(function (require) {
   function AppStateProvider(Private, $rootScope, getAppState) {
     var State = Private(require('ui/state_management/state'));
     var PersistedState = Private(require('ui/persisted_state/persisted_state'));
-    var persistedStates = {};
+    var persistedStates;
+    var eventUnsubscribers;
 
     _.class(AppState).inherits(State);
     function AppState(defaults) {
+      persistedStates = {};
+      eventUnsubscribers = [];
+
       AppState.Super.call(this, urlParam, defaults);
       getAppState._set(this);
     }
@@ -20,22 +24,41 @@ define(function (require) {
     AppState.prototype.destroy = function () {
       AppState.Super.prototype.destroy.call(this);
       getAppState._set(null);
-      _.each(persistedStates, function (state) {
-        state.off('change');
-      });
+      _.callEach(eventUnsubscribers);
     };
 
     AppState.prototype.makeStateful = function (prop) {
       if (persistedStates[prop]) return persistedStates[prop];
+      var self = this;
 
       // set up the ui state
       persistedStates[prop] = new PersistedState();
-      var saveState = function () {
-        this[prop] = persistedStates[prop].getChanges();
-        this.save();
+
+      // update the app state when the stateful instance changes
+      var updateOnChange = function () {
+        var replaceState = false; // TODO: debouncing logic
+
+        self[prop] = persistedStates[prop].getChanges();
+        self.save(replaceState);
       };
-      persistedStates[prop].on('change', _.bind(saveState, this));
-      if (this[prop]) persistedStates[prop].set(this[prop]);
+      var handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
+      handlerOnChange('on');
+      eventUnsubscribers.push(() => handlerOnChange('off'));
+
+      // update the stateful object when the app state changes
+      var persistOnChange = function (changes) {
+        if (!changes) return;
+
+        if (changes.indexOf(prop) !== -1) {
+          persistedStates[prop].set(self[prop]);
+        }
+      };
+      var handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
+      handlePersist('on');
+      eventUnsubscribers.push(() => handlePersist('off'));
+
+      // if the thing we're making stateful has a value, keep it around
+      if (self[prop]) persistedStates[prop].set(self[prop]);
 
       return persistedStates[prop];
     };
