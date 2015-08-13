@@ -46,11 +46,9 @@ describe('plugins/elasticsearch', function () {
           kbnServer.server.inject(options, function (res) {
             try {
               expect(res.statusCode).to.be(statusCode);
+              done();
             } catch (e) {
               done(e);
-              done = null;
-            } finally {
-              done && done();
             }
           });
         });
@@ -72,7 +70,7 @@ describe('plugins/elasticsearch', function () {
       method: 'POST',
       url: '/elasticsearch/.kibana',
       payload: {settings: { number_of_shards: 1, number_of_replicas: 1 }},
-      statusCode: 201
+      statusCode: 200
     });
 
     testRoute({
@@ -85,17 +83,6 @@ describe('plugins/elasticsearch', function () {
       url: '/elasticsearch/.kibana/_bulk',
       payload: '{}',
       statusCode: 400
-    });
-
-    testRoute({
-      method: 'GET',
-      url: '/elasticsearch/.kibana/_mapping/*/field/_source'
-    });
-
-    testRoute({
-      method: 'POST',
-      url: '/elasticsearch/.kibana/index-pattern/_search?fields=',
-      payload: {query: {match_all: {}}, size: 2147483647}
     });
 
     testRoute({
