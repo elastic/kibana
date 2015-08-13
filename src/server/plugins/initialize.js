@@ -16,7 +16,6 @@ module.exports = async function (kbnServer, server, config) {
     }
   }
 
-
   let path = [];
   let initialize = async id => {
     let plugin = enabledPlugins[id];
@@ -26,7 +25,6 @@ module.exports = async function (kbnServer, server, config) {
     }
 
     path.push(id);
-
 
     for (let reqId of plugin.requiredIds) {
       if (!enabledPlugins[reqId]) {
