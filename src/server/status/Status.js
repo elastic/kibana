@@ -50,8 +50,8 @@ states.all.forEach(function (state) {
     this.state = state.id;
 
     if (message instanceof Error) {
-      this.error = message
-      this.message = message.message
+      this.error = message;
+      this.message = message.message;
     }
 
     if (previous === this.state && previousMsg === this.message) {
