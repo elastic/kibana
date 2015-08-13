@@ -2,7 +2,7 @@
   <navbar ng-show="chrome.getVisible()">
     <span class="name" ng-if="dash.id" bindonce bo-bind="dash.title" tooltip="{{dash.title}}"></span>
 
-    <from name="queryInput"
+    <form name="queryInput"
       class="fill inline-form"
       ng-submit="filterResults()"
       role="form">
