@@ -8,4 +8,7 @@ define(function (require, module, exports) {
 
   // preload
   require('ui/doc_table/components/table_row');
+
+  require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/discover/saved_searches/saved_search_register'));
+
 });
