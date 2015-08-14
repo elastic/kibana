@@ -3,7 +3,7 @@ module.exports = function (grunt) {
   let { resolve } = require('path');
   let userScriptsDir = grunt.config.get('userScriptsDir');
 
-  grunt.registerTask('build-pleaseManageUser', function () {
+  grunt.registerTask('build:pleaseManageUser', function () {
     grunt.file.mkdir(userScriptsDir);
     execFileSync('please-manage-user', ['--output', userScriptsDir, 'kibana']);
   });

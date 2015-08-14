@@ -76,8 +76,8 @@ module.exports = function (grunt) {
   let current = null;
   let start = () => current || (current = run());
 
-  grunt.registerTask('downloadNodes:start', start);
-  grunt.registerTask('downloadNodes:finish', function () {
+  grunt.registerTask('build:downloadNodes:start', start);
+  grunt.registerTask('build:downloadNodes:finish', function () {
     start().then(() => {
       grunt.log.ok(`node binaries for ${platforms.join(', ')} downloaded`);
     })

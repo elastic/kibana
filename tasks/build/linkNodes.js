@@ -3,7 +3,7 @@ module.exports = function (grunt) {
   let { basename, resolve } = require('path');
   let { forOwn } = require('lodash');
 
-  grunt.registerTask('build-versionedLinks', function () {
+  grunt.registerTask('build:versionedLinks', function () {
     let buildFiles = grunt.file.expand('build/kibana/{*,.*}');
     let rootDir = grunt.config.get('root');
 

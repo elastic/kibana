@@ -9,7 +9,7 @@ module.exports = function (grunt) {
   let userScriptsDir = config.get('userScriptsDir');
   let servicesByName = indexBy(config.get('services'), 'id');
 
-  grunt.registerTask('build-osPackages', function () {
+  grunt.registerTask('build:osPackages', function () {
     grunt.config.get('platforms').forEach(({ name, buildDir }) => {
 
       let arch = /x64$/.test(name) ? 'x86_64' : 'i686';

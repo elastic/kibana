@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  grunt.registerTask('build-packageJson', function () {
+  grunt.registerTask('build:packageJson', function () {
     var pkg = grunt.config.get('pkg');
 
     grunt.file.write(

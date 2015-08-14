@@ -3,7 +3,7 @@ var readdir = promisify(require('fs').readdir);
 var exec = promisify(require('child_process').exec);
 
 module.exports = function (grunt) {
-  grunt.registerTask('build-shasums', function () {
+  grunt.registerTask('build:shasums', function () {
     var targetDir = grunt.config.get('target');
 
     readdir(targetDir)

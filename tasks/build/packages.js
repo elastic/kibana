@@ -26,7 +26,7 @@ module.exports = function createPackages(grunt) {
     }
   };
 
-  grunt.registerTask('build-archives', function () {
+  grunt.registerTask('build:archives', function () {
 
     all(
       grunt.config.get('platforms')
