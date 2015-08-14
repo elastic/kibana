@@ -12,8 +12,6 @@ module.exports = function (grunt) {
       return resolve(rootPath, file);
     });
 
-    console.log(buildFiles);
-
     let ln = (source, link) => exec('ln', ['-s', source, link]);
 
     grunt.config.get('platforms').forEach(function (platform) {

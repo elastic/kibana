@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     release: {
       bucket: 'download.elasticsearch.org',
       access: 'private',
-      debug: !grunt.option('upload-to-s3'),
+      debug: false,
       upload: config.get('platforms')
       .reduce(function (files, platform) {
         return files.concat(
