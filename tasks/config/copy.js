@@ -6,7 +6,6 @@ module.exports = function (grunt) {
         'src/**',
         'bin/**',
         'config/kibana.yml',
-        '.node-version',
         '!src/**/__tests__/**',
         '!src/testUtils/**',
         '!src/fixtures/**',
