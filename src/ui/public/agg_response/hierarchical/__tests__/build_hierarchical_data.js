@@ -11,7 +11,7 @@ var AggConfigs;
 var indexPattern;
 var buildHierarchicalData;
 
-describe('buildHierarchicalData()', function () {
+describe('buildHierarchicalData', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -43,14 +43,15 @@ describe('buildHierarchicalData()', function () {
 
     });
 
-    it('should set the slices with one children with the name _all', function () {
+    it('should set the slices with one child to a consistent label', function () {
+      var checkLabel = 'Count';
       expect(results).to.have.property('slices');
       expect(results.slices).to.have.property('children');
       expect(results.slices.children).to.have.length(1);
-      expect(results.slices.children[0]).to.have.property('name', '_all');
+      expect(results.slices.children[0]).to.have.property('name', checkLabel);
       expect(results.slices.children[0]).to.have.property('size', 412032);
       expect(results).to.have.property('names');
-      expect(results.names).to.eql(['_all']);
+      expect(results.names).to.eql([checkLabel]);
       expect(results).to.have.property('raw');
       expect(results.raw).to.have.property('rows');
       expect(results.raw.rows).to.have.length(1);
