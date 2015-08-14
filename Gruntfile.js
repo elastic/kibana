@@ -27,20 +27,6 @@ module.exports = function (grunt) {
     }()),
 
     nodeVersion: '2.5.0',
-    platforms: [
-      'darwin-x64',
-      'linux-x64',
-      'linux-x86',
-      'windows'
-    ],
-    services: [
-      ['launchd', '10.9'],
-      ['upstart', '1.5'],
-      ['systemd', 'default'],
-      ['sysv', 'lsb-3.1']
-    ],
-
-    devPlugins: 'devMode',
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
@@ -49,6 +35,7 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
+
     lintThese: [
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
@@ -56,6 +43,12 @@ module.exports = function (grunt) {
       '!<%= src %>/fixtures/**/*.js'
     ]
   };
+
+  grunt.config.merge(config);
+
+  config.userScriptsDir = __dirname + '/build/userScripts';
+  config.services = require('./tasks/config/services')(grunt);
+  config.platforms = require('./tasks/config/packages')(grunt);
 
   grunt.config.merge(config);
 
@@ -69,6 +62,9 @@ module.exports = function (grunt) {
     }
   });
 
+
+
   // load task definitions
   grunt.task.loadTasks('tasks');
+  grunt.task.loadTasks('tasks/build');
 };
