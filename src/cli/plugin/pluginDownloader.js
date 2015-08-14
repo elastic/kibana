@@ -70,7 +70,15 @@ module.exports = function (settings, logger) {
     if (timeout) timeout = false;
 
     return Promise.fromNode(cb => {
-      return wreck.defaults({ timeout }).request('GET', url, null, cb);
+      let request = wreck
+      .defaults({ timeout })
+      .request('GET', url, null, (err, response) => {
+        if (err || !response) cb(err);
+
+        response.request = request;
+        response.abort = () => request.abort();
+        cb(null, response);
+      });
     })
     .catch(function (err) {
       if (err.message.match(/invalid uri/i)) {
