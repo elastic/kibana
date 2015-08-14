@@ -2,29 +2,28 @@ module.exports = function (grunt) {
   let { flatten } = require('lodash');
 
   grunt.registerTask('build', flatten([
-    'build:getProps',
+    '_build:getProps',
     'clean:build',
     'clean:target',
-    'build:downloadNodes:start',
+    '_build:downloadNodes:start',
     'copy:devSource',
     'babel:build',
-    'build:cliIndex',
-    'build:installedPlugins',
-    'build:packageJson',
-    'build:readme',
-    'build:installNpmDeps',
+    '_build:cliIndex',
+    '_build:installedPlugins',
+    '_build:packageJson',
+    '_build:readme',
+    '_build:installNpmDeps',
     'clean:testsFromModules',
     'clean:deepModules',
     'run:optimizeBuild',
     'stop:optimizeBuild',
-    'build:downloadNodes:finish',
-    'build:versionedLinks',
-    'build:archives',
+    '_build:downloadNodes:finish',
+    '_build:versionedLinks',
+    '_build:archives',
     !grunt.option('os-packages') ? [] : [
-      'build:pleaseRun',
-      'build:pleaseManageUser',
-      'build:osPackages',
+      '_build:pleaseRun',
+      '_build:osPackages',
     ],
-    'build:shasums'
+    '_build:shasums'
   ]));
 };

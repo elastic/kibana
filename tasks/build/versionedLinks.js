@@ -1,30 +1,30 @@
 module.exports = function (grunt) {
-  let { execFileSync } = require('child_process');
   let { basename, resolve } = require('path');
   let { forOwn } = require('lodash');
 
-  grunt.registerTask('build:versionedLinks', function () {
-    let buildFiles = grunt.file.expand('build/kibana/{*,.*}');
-    let rootDir = grunt.config.get('root');
+  let exec = require('../utils/exec').silent;
 
-    let buildMap = buildFiles.reduce(function (map, file) {
-      map[file] = basename(file);
-      return map;
-    }, {});
+  grunt.registerTask('_build:versionedLinks', function () {
+    let rootPath = grunt.config.get('root');
 
-    let ln = (source, link) => {
-      execFileSync('ln', [
-        '-s',
-        resolve(rootDir, source),
-        resolve(rootDir, link)
-      ]);
-    };
+    let buildFiles = grunt.file.expand('build/kibana/{*,.*}')
+    .map(function (file) {
+      return resolve(rootPath, file);
+    });
+
+    console.log(buildFiles);
+
+    let ln = (source, link) => exec('ln', ['-s', source, link]);
 
     grunt.config.get('platforms').forEach(function (platform) {
       grunt.file.mkdir(platform.buildDir);
-      forOwn(buildMap, function (link, source) {
-        ln(source, resolve(platform.buildDir, link));
+
+      // link all files at the root of the build
+      buildFiles.forEach(function (source) {
+        ln(source, resolve(platform.buildDir, basename(source)));
       });
+
+      // link the node modules
       ln(platform.nodeDir, resolve(platform.buildDir, 'node'));
     });
   });

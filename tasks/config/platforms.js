@@ -1,6 +1,9 @@
 module.exports = function (grunt) {
+  let { resolve } = require('path');
+
   let version = grunt.config.get('pkg.version');
   let nodeVersion = grunt.config.get('nodeVersion');
+  let rootPath = grunt.config.get('root');
   let baseUri = `https://iojs.org/dist/v${nodeVersion}`;
 
   return [
@@ -12,15 +15,23 @@ module.exports = function (grunt) {
     let win = name === 'windows';
 
     let nodeUrl = win ? `${baseUri}/win-x64/iojs.exe` : `${baseUri}/iojs-v${nodeVersion}-${name}.tar.gz`;
-    let nodeDir = `.node_binaries/${nodeVersion}/${name}`;
+    let nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${name}`);
 
     let buildName = `kibana-${version}-${name}`;
-    let buildDir = `build/${buildName}`;
-    let tarName = `${buildName}.tar.gz`;
-    let tarPath = `target/${tarName}`;
-    let zipName = `${buildName}.zip`;
-    let zipPath = `target/${zipName}`;
+    let buildDir = resolve(rootPath, `build/${buildName}`);
 
-    return { name, buildName, nodeUrl, tarName, tarPath, zipName, zipPath, buildDir, nodeDir };
+    let tarName = `${buildName}.tar.gz`;
+    let tarPath = resolve(rootPath, `target/${tarName}`);
+
+    let zipName = `${buildName}.zip`;
+    let zipPath = resolve(rootPath, `target/${zipName}`);
+
+    return {
+      name, win,
+      nodeUrl, nodeDir,
+      buildName, buildDir,
+      tarName, tarPath,
+      zipName, zipPath,
+    };
   });
 };

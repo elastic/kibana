@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   let pkg = grunt.config.get('pkg');
   let deepModules = grunt.config.get('deepModules');
 
-  grunt.registerTask('build:packageJson', function () {
+  grunt.registerTask('_build:packageJson', function () {
 
     grunt.file.write(
       'build/kibana/package.json',

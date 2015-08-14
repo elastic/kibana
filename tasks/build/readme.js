@@ -13,7 +13,7 @@ TextRenderer.prototype.heading = function (text, level, raw) {
 
 module.exports = function (grunt) {
 
-  grunt.registerTask('build:readme', function () {
+  grunt.registerTask('_build:readme', function () {
     let transform = function (input) {
       let output = input.replace(/<\!\-\- [^\-]+ \-\->/g, '\n');
       output = marked(output);

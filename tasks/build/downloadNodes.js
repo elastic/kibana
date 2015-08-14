@@ -13,11 +13,6 @@ module.exports = function (grunt) {
 
   let start = async (platform) => {
     let finalDir = platform.nodeDir;
-    if (!grunt.file.isPathAbsolute(finalDir)) {
-      // since we are using fs module function we need absolute paths
-      finalDir = resolve(grunt.config.get('root'), finalDir);
-    }
-
     let downloadDir = `${finalDir}.temp`;
 
     if (grunt.file.isDir(platform.nodeDir)) {
@@ -75,11 +70,11 @@ module.exports = function (grunt) {
     grunt.log.ok(`downloading ${platform.name} - ${mb} mb`);
   };
 
-  grunt.registerTask('build:downloadNodes:start', function () {
+  grunt.registerTask('_build:downloadNodes:start', function () {
     map(platforms, start).nodeify(this.async());
   });
 
-  grunt.registerTask('build:downloadNodes:finish', function () {
+  grunt.registerTask('_build:downloadNodes:finish', function () {
     map(activeDownloads, async (platform) => {
       await platform.downloadPromise;
       grunt.log.ok(`${platform.name} download complete`);

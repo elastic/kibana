@@ -1,17 +1,19 @@
-var { resolve } = require('path');
-var { execFileSync } = require('child_process');
-
 module.exports = function createServices(grunt) {
-  grunt.registerTask('build:pleaserun', function () {
+  var { resolve } = require('path');
+
+  let exec = require('../utils/exec');
+  let userScriptsPath = grunt.config.get('userScriptsPath');
+
+  grunt.registerTask('_build:pleaseRun', function () {
     // TODO(sissel): Detect if 'pleaserun' is found, and provide a useful error
     // to the user if it is missing.
 
     grunt.config.get('services').forEach(function (service) {
-      grunt.file.mkdir(service.outDir);
-      execFileSync('pleaserun', [
+      grunt.file.mkdir(service.outputDir);
+      exec('pleaserun', [
         '--install',
         '--no-install-actions',
-        '--install-prefix', service.outDir,
+        '--install-prefix', service.outputDir,
         '--overwrite',
         '--user', 'kibana',
         '--sysv-log-path', '/var/log/kibana/',
@@ -20,6 +22,9 @@ module.exports = function createServices(grunt) {
         '/opt/kibana/bin/kibana'
       ]);
     });
+
+    grunt.file.mkdir(userScriptsPath);
+    exec('please-manage-user', ['--output', userScriptsPath, 'kibana']);
 
   });
 };

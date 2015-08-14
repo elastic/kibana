@@ -4,31 +4,26 @@ module.exports = function createPackages(grunt) {
   let { execFile } = require('child_process');
   let { all, fromNode } = require('bluebird');
 
-  let rootDir = config.get('root');
-  let buildDir = resolve(rootDir, 'build');
-
+  let buildPath = resolve(config.get('root'), 'build');
   let exec = async (cmd, args) => {
     grunt.log.writeln(` > ${cmd} ${args.join(' ')}`);
-    await fromNode(cb => execFile(cmd, args, { cwd: buildDir }, cb));
+    await fromNode(cb => execFile(cmd, args, { cwd: buildPath }, cb));
   };
 
 
   let archives = async (platform) => {
-    let tarPath = resolve(rootDir, platform.tarPath);
-    let zipPath = resolve(rootDir, platform.zipPath);
-
     // kibana.tar.gz
-    await exec('tar', ['-zchf', tarPath, platform.buildName]);
+    await exec('tar', ['-zchf', platform.tarPath, platform.buildName]);
 
     // kibana.zip
     if (/windows/.test(platform.name)) {
-      await exec('zip', ['-rq', '-ll', zipPath, platform.buildName]);
+      await exec('zip', ['-rq', '-ll', platform.zipPath, platform.buildName]);
     } else {
-      await exec('zip', ['-rq', zipPath, platform.buildName]);
+      await exec('zip', ['-rq', platform.zipPath, platform.buildName]);
     }
   };
 
-  grunt.registerTask('build:archives', function () {
+  grunt.registerTask('_build:archives', function () {
 
     all(
       grunt.config.get('platforms')
