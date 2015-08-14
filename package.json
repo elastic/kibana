@@ -96,7 +96,7 @@
     "less": "^2.5.1",
     "less-loader": "^2.2.0",
     "lodash": "^3.10.0",
-    "marked": "^0.3.3",
+    "marked": "0.3.3",
     "memory-fs": "^0.2.0",
     "minimatch": "^2.0.8",
     "mkdirp": "^0.5.1",
