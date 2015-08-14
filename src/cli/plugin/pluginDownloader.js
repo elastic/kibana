@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var zlib = require('zlib');
 var Promise = require('bluebird');
-var wreck = require('wreck');
+var request = require('request');
 var tar = require('tar');
 var progressReporter = require('./progressReporter');
 
@@ -48,7 +48,12 @@ module.exports = function (settings, logger) {
     var gunzip = zlib.createGunzip();
     var tarExtract = new tar.Extract({ path: dest, strip: 1 });
 
-    return wrappedRequest(source, timeout)
+    var requestOptions = { url: source };
+    if (timeout !== 0) {
+      requestOptions.timeout = timeout;
+    }
+
+    return wrappedRequest(requestOptions)
     .then(function (req) {
       var reporter = progressReporter(logger, req);
 
@@ -66,19 +71,9 @@ module.exports = function (settings, logger) {
     });
   }
 
-  function wrappedRequest(url, timeout) {
-    if (timeout) timeout = false;
-
-    return Promise.fromNode(cb => {
-      let request = wreck
-      .defaults({ timeout })
-      .request('GET', url, null, (err, response) => {
-        if (err || !response) cb(err);
-
-        response.request = request;
-        response.abort = () => request.abort();
-        cb(null, response);
-      });
+  function wrappedRequest(requestOptions) {
+    return Promise.try(function () {
+      return request.get(requestOptions);
     })
     .catch(function (err) {
       if (err.message.match(/invalid uri/i)) {
