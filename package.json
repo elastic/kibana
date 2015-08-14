@@ -107,7 +107,6 @@
     "numeral": "^1.5.3",
     "nvd3": "panda01/nvd3#kibana",
     "raw-loader": "^0.5.1",
-    "request": "^2.40.0",
     "requirefrom": "^0.2.0",
     "rimraf": "^2.4.1",
     "script-loader": "^0.6.1",
