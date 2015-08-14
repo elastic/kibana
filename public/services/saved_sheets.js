@@ -17,6 +17,12 @@ define(function (require) {
     this.type = SavedSheet.type;
     this.Class = SavedSheet;
 
+    this.loaderProperties = {
+      name: 'timelion-sheet',
+      noun: 'Saved Sheets',
+      nouns: 'saved sheets'
+    };
+
     // Returns a single sheet by ID, should be the name of the sheet
     this.get = function (id) {
       // Returns a promise that contains a sheet which is a subclass of docSource

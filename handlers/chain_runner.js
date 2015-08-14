@@ -2,22 +2,19 @@
 var _ = require('lodash');
 var glob = require('glob');
 var Promise = require('bluebird');
-var path = require('path');
 
-var fs = require('fs');
-var grammar = fs.readFileSync(path.resolve(__dirname, 'chain.peg'), 'utf8');
-var PEG = require('pegjs');
-var Parser = PEG.buildParser(grammar);
+var parseSheet = require('./lib/parse_sheet.js');
 var parseDateMath = require('../lib/date_math.js');
+var toMS = require('../lib/to_milliseconds.js');
+
 var loadFunctions = require('../lib/load_functions.js');
-
-var config = require('../timelion.json');
-
+var repositionArguments = require('./lib/reposition_arguments.js');
+var buildTarget = require('../lib/build_target.js');
 // Load function plugins
 var functions  = loadFunctions('series_functions/');
 var fitFunctions  = loadFunctions('fit_functions');
+var config = require('../timelion.json');
 
-var buildTarget = require('../lib/build_target.js');
 var tlConfig = {
   time: {
     from: 'now-12M',
@@ -50,31 +47,13 @@ function argType(arg) {
   return typeof arg;
 }
 
-function repositionArguments(functionDef, unorderedArgs) {
-  var args = [];
-
-  _.each(unorderedArgs, function (unorderedArg, i) {
-    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
-
-      var argIndex = _.findIndex(functionDef.args, function (orderedArg) {
-        return unorderedArg.name === orderedArg.name;
-      });
-
-      args[argIndex] = unorderedArg.value;
-    } else {
-      args[i] = unorderedArg;
-    }
-  });
-
-  return args;
-}
-
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke(fnName, args) {
+  if (!functions[fnName]) throw new Error('Function not found: ' + fnName);
+
   var functionDef = functions[fnName];
   args = repositionArguments(functionDef, args);
   args = _.map(args, function (item) {
-
     if (_.isObject(item)) {
       switch (item.type) {
         case 'function':
@@ -94,19 +73,14 @@ function invoke(fnName, args) {
           return item;
       }
       throw new Error ('Argument type not supported: ' + JSON.stringify(item));
+    } else {
+      return item;
     }
-    return item;
   });
 
 
   return Promise.all(args).then(function (args) {
-    if (!functions[fnName]) {
-      throw new Error('Function not found: ' + fnName);
-    }
-
-    if (args.length > functionDef.args.length) {
-      throw new Error ('Too many arguments passed to: ' + fnName);
-    }
+    if (args.length > functionDef.args.length) throw new Error ('Too many arguments passed to: ' + fnName);
 
     _.each(args, function (arg, i) {
       var type = argType(arg);
@@ -122,9 +96,7 @@ function invoke(fnName, args) {
 }
 
 function invokeChain(chainObj, result) {
-  if (chainObj.chain.length === 0) {
-    return result[0];
-  }
+  if (chainObj.chain.length === 0) return result[0];
 
   var chain = _.clone(chainObj.chain);
   var link = chain.shift();
@@ -158,67 +130,63 @@ function resolveChainList(chainList) {
   });
 }
 
-function preProcessSheet(sheet) {
-  var queries = [];
 
-  function storeQueryObj(query) {
-    var cacheKey = getQueryCacheKey(query);
-    queries[cacheKey] = query;
+function preProcessChain(chain, queries) {
+  function validateAndStore(func) {
+    if (_.isObject(func) && func.type === 'function') {
+      if (!functions[func.function]) throw new Error('Unknown function: ' + func.function);
+
+      if (functions[func.function].dataSource) {
+        var cacheKey = getQueryCacheKey(func);
+        queries[cacheKey] = func;
+        return true;
+      }
+      return false;
+    }
   }
 
-  function validateAndCache(chain) {
+  // Is this thing a function?
+  if (validateAndStore(chain)) {
+    return;
+  }
 
-    function checkFunc(func) {
-      if (_.isObject(func) && func.type === 'function') {
-        if (!functions[func.function]) {
-          throw new Error('Unknown function: ' + func.function);
-        }
+  if (!_.isArray(chain)) return;
 
-        if (functions[func.function].dataSource) {
-          storeQueryObj(func);
-          return true;
-        }
-
-        return false;
-
-      }
-    }
-
-    if (checkFunc(chain) || !_.isArray(chain)) {
+  _.each(chain, function (operator) {
+    if (!_.isObject(operator)) {
       return;
     }
-
-    _.each(chain, function (operator) {
-      if (!_.isObject(operator)) {
-        return;
-      }
-      switch (operator.type) {
-        case 'chain':
-          validateAndCache(operator.chain);
+    switch (operator.type) {
+      case 'chain':
+        preProcessChain(operator.chain, queries);
+        break;
+      case 'chainList':
+        preProcessChain(operator.list, queries);
+        break;
+      case 'function':
+        if (validateAndStore(operator)) {
           break;
-        case 'chainList':
-          validateAndCache(operator.list);
-          break;
-        case 'function':
-          if (checkFunc(operator)) {
-            break;
-          } else {
-            validateAndCache(operator.arguments);
-          }
-          break;
-      }
-    });
-  }
-
-  _.each(sheet, function (chainList) {
-    validateAndCache(chainList);
+        } else {
+          preProcessChain(operator.arguments, queries);
+        }
+        break;
+    }
   });
 
+  return queries;
+}
+
+function preProcessSheet(sheet) {
+
+  var queries = {};
+  _.each(sheet, function (chainList) {
+    preProcessChain(chainList, queries);
+  });
   queries = _.values(queries);
 
-  var promises = _.map(queries, function (item) {
+  var promises = _.chain(queries).values().map(function (item) {
     return invoke(item.function, item.arguments);
-  });
+  }).value();
 
   return Promise.all(promises).then(function (results) {
     stats.queryTime = (new Date()).getTime();
@@ -242,24 +210,24 @@ function preProcessSheet(sheet) {
   });
 }
 
-
-
-function resolveSheet(sheet) {
-  return _.map(sheet, function (plot) {
-    try {
-      return Parser.parse(plot);
-    } catch (e) {
-      throw new Error('Expected: ' + e.expected[0].description + ' @ character ' + e.column);
-    }
-  });
+function validateTime(time) {
+  var span = parseDateMath(time.to) - parseDateMath(time.from);
+  var interval = toMS(time.interval);
+  var bucketCount = span / interval;
+  if (bucketCount > tlConfig.file.max_buckets) {
+    throw new Error('Max buckets exceeded: ' +
+      Math.round(bucketCount) + ' of ' + tlConfig.file.max_buckets + ' allowed. ' +
+      'Choose a larger interval or a shorter time span');
+  }
+  return true;
 }
 
 function processRequest(request) {
-  if (!request) {
-    throw new Error('Empty request body');
-  }
-  tlConfig.time = request.time;
+  if (!request) throw new Error('Empty request body');
 
+  validateTime(request.time);
+
+  tlConfig.time = request.time;
   tlConfig.time.to = parseDateMath(request.time.to).valueOf();
   tlConfig.time.from = parseDateMath(request.time.from).valueOf();
 
@@ -267,8 +235,8 @@ function processRequest(request) {
   stats.invokeTime = (new Date()).getTime();
   stats.queryCount = 0;
   queryCache = {};
-  // This is setting the "global" sheet
-  sheet = resolveSheet(request.sheet);
+  // This is setting the "global" sheet, required for resolving references
+  sheet = parseSheet(request.sheet);
 
   targetSeries = buildTarget(tlConfig);
 

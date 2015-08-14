@@ -1,3 +1,4 @@
+
 var path = require('path');
 
 module.exports = function (kibana) {
@@ -10,7 +11,7 @@ module.exports = function (kibana) {
         icon: 'http://placekitten.com/g/400/302',
         main: 'plugins/timelion/app',
         injectVars: function (server, options) {
-          let config = server.config();
+          var config = server.config();
           return {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout')

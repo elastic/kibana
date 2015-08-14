@@ -1,10 +1,5 @@
 define(function (require) {
-  return function savedSearchObjectFn(Private, savedSheets) {
-    return {
-      service: savedSheets,
-      name: 'timelion-sheet',
-      noun: 'Saved Sheets',
-      nouns: 'saved sheets'
-    };
+  return function savedSearchObjectFn(savedSheets) {
+    return savedSheets;
   };
 });

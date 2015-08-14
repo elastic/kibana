@@ -85,9 +85,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   };
 
   $scope.newSheet = function () {
-    $scope.state.sheet = [];
-    $scope.newCell();
-    $scope.search();
+    kbnUrl.change('/', {});
   };
 
   $scope.newCell = function () {
