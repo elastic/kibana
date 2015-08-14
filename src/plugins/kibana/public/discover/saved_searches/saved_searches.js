@@ -25,6 +25,12 @@ define(function (require) {
     this.type = SavedSearch.type;
     this.Class = SavedSearch;
 
+    this.loaderProperties = {
+      name: 'searches',
+      noun: 'Saved Search',
+      nouns: 'saved searches'
+    };
+
     this.get = function (id) {
       return (new SavedSearch(id)).init();
     };
