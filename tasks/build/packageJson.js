@@ -1,6 +1,10 @@
 module.exports = function (grunt) {
+  let { defaults } = require('lodash');
+
+  let pkg = grunt.config.get('pkg');
+  let deepModules = grunt.config.get('deepModules');
+
   grunt.registerTask('build:packageJson', function () {
-    var pkg = grunt.config.get('pkg');
 
     grunt.file.write(
       'build/kibana/package.json',
@@ -14,7 +18,7 @@ module.exports = function (grunt) {
           sha: grunt.config.get('buildSha')
         },
         repository: pkg.repository,
-        dependencies: pkg.dependencies
+        dependencies: defaults({}, pkg.dependencies, deepModules)
       }, null, '  ')
     );
   });
