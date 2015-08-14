@@ -1,86 +1,88 @@
 module.exports = function (grunt) {
-  let { map, fromNode, promisify } = require('bluebird');
+  let { map, fromNode } = require('bluebird');
   let { resolve } = require('path');
   let { pluck } = require('lodash');
   let { createWriteStream } = require('fs');
   let { createGunzip } = require('zlib');
   let { Extract } = require('tar');
-
-  let mkdirp = promisify(require('mkdirp'));
-  let rename = promisify(require('fs').rename);
-  let get = (uri) => fromNode(cb => require('wreck').request('GET', uri, null, cb));
-
-  let exists = (path) => fromNode(cb => {
-    require('fs').stat(path, err => cb(null, !err));
-  });
+  let { rename } = require('fs');
+  let wreck = require('wreck');
 
   let platforms = grunt.config.get('platforms');
-  let nodeVersion = grunt.config.get('nodeVersion');
-  let baseUri = `https://iojs.org/dist/v${nodeVersion}`;
+  let activeDownloads = [];
 
-  let writeTar = async (to, from) => {
-    await fromNode(cb => {
-      from
-      .pipe(createGunzip())
-      .on('error', cb)
-      .pipe(new Extract({ path: to, strip: 1 }))
-      .on('error', cb)
-      .on('end', cb);
+  let start = async (platform) => {
+    let finalDir = platform.nodeDir;
+    if (!grunt.file.isPathAbsolute(finalDir)) {
+      // since we are using fs module function we need absolute paths
+      finalDir = resolve(grunt.config.get('root'), finalDir);
+    }
+
+    let downloadDir = `${finalDir}.temp`;
+
+    if (grunt.file.isDir(platform.nodeDir)) {
+      grunt.log.ok(`${platform.name} exists`);
+      return;
+    }
+
+    let resp = await fromNode(cb => {
+      let req = wreck.request('GET', platform.nodeUrl, null, function (err, resp) {
+        if (err) {
+          return cb(err);
+        }
+
+        if (resp.statusCode !== 200) {
+          return cb(new Error(`${platform.nodeUrl} failed with a ${resp.statusCode} response`));
+        }
+
+        return cb(null, resp);
+      });
     });
-  };
 
-  let writeExe = async (to, from) => {
-    let winBinDir = resolve(to, 'bin');
-    await mkdirp(winBinDir);
-    await fromNode(cb => {
-      from
-      .pipe(createWriteStream(resolve(winBinDir, 'node.exe')))
-      .on('error', cb)
-      .on('finish', cb);
-    });
-  };
+    // use an async iife to store promise for download
+    // then store platform in active downloads list
+    // which we will read from in the finish task
+    platform.downloadPromise = (async () => {
+      grunt.file.mkdir(downloadDir);
 
-  let run = () => {
-    grunt.log.ok(`downloading node binaries`);
-
-    return map(platforms, async function (platform) {
-      grunt.file.mkdir(platform.nodeDir);
-
-      let finalDir = resolve(grunt.config.get('root'), platform.nodeDir);
-      let downloadDir = `${finalDir}.temp`;
-
-      if (await exists(finalDir)) {
-        grunt.log.debug(`${platform} download exists`);
-        return;
-      }
-
-      let uri;
-      if (platform === 'windows') {
-        uri = `${baseUri}/win-x64/iojs.exe`;
+      if (platform.name === 'windows') {
+        await fromNode(cb => {
+          resp
+          .pipe(createWriteStream(resolve(downloadDir, 'node.exe')))
+          .on('error', cb)
+          .on('finish', cb);
+        });
       } else {
-        uri = `${baseUri}/iojs-v${nodeVersion}-${platform}.tar.gz`;
+        await fromNode(cb => {
+          resp
+          .pipe(createGunzip())
+          .on('error', cb)
+          .pipe(new Extract({ path: downloadDir, strip: 1 }))
+          .on('error', cb)
+          .on('end', cb);
+        });
       }
 
-      let resp = await get('GET', uri);
-      if (resp.statusCode !== 200) {
-        throw new Error(uri + ' failed with a ' + resp.statusCode);
-      }
+      await fromNode(cb => {
+        rename(downloadDir, finalDir, cb);
+      });
+    }());
 
-      let write = platform === 'windows' ? writeExe : writeTar;
-      await write(downloadDir, resp);
-      await rename(downloadDir, finalDir);
+    activeDownloads.push(platform);
 
-      grunt.log.debug(`${platform} download complete`);
-    });
+    var bytes = parseInt(resp.headers['content-length'], 10) || 'unknown number of';
+    var mb = ((bytes / 1024) / 1024).toFixed(2);
+    grunt.log.ok(`downloading ${platform.name} - ${mb} mb`);
   };
 
-  let current = null;
-  let start = () => current || (current = run());
+  grunt.registerTask('build:downloadNodes:start', function () {
+    map(platforms, start).nodeify(this.async());
+  });
 
-  grunt.registerTask('build:downloadNodes:start', start);
   grunt.registerTask('build:downloadNodes:finish', function () {
-    start().then(() => {
-      grunt.log.ok(`node binaries for ${pluck(platforms, 'name').join(', ')} downloaded`);
+    map(activeDownloads, async (platform) => {
+      await platform.downloadPromise;
+      grunt.log.ok(`${platform.name} download complete`);
     })
     .nodeify(this.async());
   });

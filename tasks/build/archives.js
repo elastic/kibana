@@ -4,25 +4,27 @@ module.exports = function createPackages(grunt) {
   let { execFile } = require('child_process');
   let { all, fromNode } = require('bluebird');
 
-  let version = config.get('pkg.version');
   let rootDir = config.get('root');
-  let targetDir = resolve(rootDir, 'target');
-  let buildDir = resolve(rootDir, 'build/kibana');
+  let buildDir = resolve(rootDir, 'build');
 
   let exec = async (cmd, args) => {
     grunt.log.writeln(` > ${cmd} ${args.join(' ')}`);
-    await fromNode(cb => execFile(cmd, args, { cwd: rootDir }, cb));
+    await fromNode(cb => execFile(cmd, args, { cwd: buildDir }, cb));
   };
 
+
   let archives = async (platform) => {
+    let tarPath = resolve(rootDir, platform.tarPath);
+    let zipPath = resolve(rootDir, platform.zipPath);
+
     // kibana.tar.gz
-    await exec('tar', ['-zchf', platform.tarPath, platform.buildDir]);
+    await exec('tar', ['-zchf', tarPath, platform.buildName]);
 
     // kibana.zip
     if (/windows/.test(platform.name)) {
-      await exec('zip', ['-rq', '-ll', platform.zipPath, platform.buildDir]);
+      await exec('zip', ['-rq', '-ll', zipPath, platform.buildName]);
     } else {
-      await exec('zip', ['-rq', platform.zipPath, platform.buildDir]);
+      await exec('zip', ['-rq', zipPath, platform.buildName]);
     }
   };
 

@@ -13,10 +13,11 @@ module.exports = function (grunt) {
     'build:packageJson',
     'build:readme',
     'build:installNpmDeps',
+    'clean:testsFromModules',
+    'clean:deepModules',
     'run:optimizeBuild',
     'stop:optimizeBuild',
     'build:downloadNodes:finish',
-    'clean:testsFromModules',
     'build:versionedLinks',
     'build:archives',
     !grunt.option('os-packages') ? [] : [

@@ -6,14 +6,14 @@ module.exports = function (grunt) {
     release: {
       bucket: 'download.elasticsearch.org',
       access: 'private',
-      // debug: true, // uncommment to prevent actual upload
+      debug: !grunt.option('upload-to-s3'),
       upload: config.get('platforms')
       .reduce(function (files, platform) {
         return files.concat(
-          platform.tarPath,
-          platform.tarPath + '.sha1.txt',
-          platform.zipPath,
-          platform.zipPath + '.sha1.txt'
+          platform.tarName,
+          platform.tarName + '.sha1.txt',
+          platform.zipName,
+          platform.zipName + '.sha1.txt'
         );
       }, [])
       .map(function (filename) {
