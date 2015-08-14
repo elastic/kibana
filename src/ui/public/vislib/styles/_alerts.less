@@ -1,3 +1,4 @@
+@import "~ui/styles/variables";
 
 .vis-alerts {
   position: relative;
@@ -17,10 +18,11 @@
 
   .vis-alert {
     margin: 0 10px 10px;
-    padding: 5px 10px 5px 5px; // @alert-padding
-    color: white;
+    padding: 5px 10px 5px 5px;
+    color: @alert-vis-alert-color; //white;
     border-radius: @alert-border-radius;
-    border: 1px solid white;
+    border: 1px solid;
+    border-color: @alert-vis-alert-border; //white;
     display: flex;
 
     &-success {

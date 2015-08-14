@@ -273,6 +273,14 @@ saved-object-finder {
   }
 
   .list-group-item {
+    a {
+      i {
+        color: @saved-object-finder-icon-color !important;
+      }
+
+      color: @saved-object-finder-link-color !important;
+    }
+
     &:first-child {
       .border-top-radius(0) !important;
     }
@@ -332,7 +340,7 @@ saved-object-finder {
 // when rendered within a config dropdown, don't use a bottom margin
 .config saved-object-finder .finder-options {
   margin-bottom: 0;
-  background: @body-bg;
+  background: @config-saved-object-finder-options-bg; //@body-bg;
 }
 
 //== Generic Media List
@@ -399,7 +407,7 @@ textarea {
 }
 
 .field-collapse-toggle {
-  color: #999;
+  color: @field-collapse-toggle-color; //#999;
   margin-left: 10px !important;
 }
 
@@ -431,7 +439,7 @@ style-compile {
 }
 
 mark, .mark {
-  background-color: rgba(252, 229, 113, 1);
+  background-color: @mark-bg; //rgba(252, 229, 113, 1);
 }
 
 fieldset {

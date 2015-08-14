@@ -32,7 +32,7 @@ filter-bar .confirm {
 
     font-size: @font-size-small;
     background-color: @filter-bar-confirm-filter-bg; //@gray-light;
-    color: #333;
+    color: @filter-bar-confirm-filter-color; //#333;
     margin-right: 4px;
     margin-bottom: 4px;
     max-width: 100%;
@@ -42,13 +42,6 @@ filter-bar .confirm {
     border-radius: 12px;
   }
 }
-
-@filter-bar-confirm-bg: @gray-lighter;
-@filter-bar-confirm-border: @gray12;
-@filter-bar-confirm-filter-bg: @gray-light;
-@filter-bar-bar-bg: @gray-lighter;
-@filter-bar-bar-border: @gray12;
-@filter-bar-bar-condensed-bg: darken(@filter-bar-bar-bg, 5%);
 
 filter-bar .bar {
   padding: 6px 6px 4px 6px;
@@ -82,8 +75,8 @@ filter-bar .bar {
     min-width: 110px;
 
     font-size: @font-size-small;
-    background-color: @action-add;
-    color: #fff;
+    background-color: @filter-bar-bar-filter-bg; //@action-add;
+    color: @filter-bar-bar-filter-color; //#fff;
     margin-right: 4px;
     margin-bottom: 4px;
     max-width: 100%;
@@ -135,11 +128,11 @@ filter-bar .bar {
     }
 
     &.negate {
-      background-color: @action-remove;
+      background-color: @filter-bar-bar-filter-negate-bg; //@action-remove;
     }
 
     a {
-      color: #FFF;
+      color: @filter-bar-bar-filter-color; //#FFF;
     }
 
     &.disabled {

@@ -7,15 +7,15 @@
   background-color: @hintbox-background-color;
 
   a {
-    color: @link-color !important;
+    color: @hintbox-link-color !important; //@link-color !important;
 
     &:hover {
-      color: @text-color !important;
+      color: @hintbox-link-hover-color !important; //@text-color !important;
     }
   }
 
   pre {
-    background-color: white;
+    background-color: @hintbox-pre-bg; //white;
   }
 
   &-label,

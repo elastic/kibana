@@ -5,11 +5,13 @@
   padding-left: 0px !important;
   padding-right: 0px !important;
   background-color: @sidebar-bg;
-  border-right: 1px solid @sidebar-border;
-  border-bottom: 1px solid @sidebar-border;
+  border-right: 1px solid;
+  border-right-color: @sidebar-border;
+  border-bottom: 1px solid;
+  border-bottom-color: @sidebar-border;
 
   .sidebar-well {
-    background-color: darken(@sidebar-bg, 5%);
+    background-color: @sidebar-well-bg; //darken(@sidebar-bg, 5%);
   }
 
   .sidebar-list {
@@ -22,18 +24,20 @@
       padding-left: 10px;
       padding-right: 10px;
       color: @sidebar-header-color;
-      border: 1px solid rgba(0, 0, 0, 0);
+      border: 1px solid;
+      border-color: @sidebar-header-border; //rgba(0, 0, 0, 0);
     }
 
     .sidebar-item {
-      border-top: 1px solid @sidebar-border;
+      border-top: 1px solid;
+      border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
 
       a {
-        color: @text-color;
+        color: @sidebar-item-color; //@text-color;
 
         &:hover {
-          color: @text-color;
+          color: @sidebar-item-color; //@text-color;
           text-decoration: none;
         }
       }
@@ -66,7 +70,7 @@
       }
 
       &-text {
-        background: white;
+        background: @sidebar-item-text-bg; //white;
       }
 
       &-button {
