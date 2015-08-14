@@ -1,6 +1,7 @@
 module.exports = function (grunt) {
   let { map, fromNode, promisify } = require('bluebird');
   let { resolve } = require('path');
+  let { pluck } = require('lodash');
   let { createWriteStream } = require('fs');
   let { createGunzip } = require('zlib');
   let { Extract } = require('tar');
@@ -79,7 +80,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build:downloadNodes:start', start);
   grunt.registerTask('build:downloadNodes:finish', function () {
     start().then(() => {
-      grunt.log.ok(`node binaries for ${platforms.join(', ')} downloaded`);
+      grunt.log.ok(`node binaries for ${pluck(platforms, 'name').join(', ')} downloaded`);
     })
     .nodeify(this.async());
   });

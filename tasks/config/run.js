@@ -22,7 +22,7 @@ module.exports = function (grunt) {
     optimizeBuild: {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /Optimization .+ complete/,
         quiet: false
       },
       cmd: './build/kibana/bin/kibana',
