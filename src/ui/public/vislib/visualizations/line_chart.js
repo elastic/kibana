@@ -41,11 +41,11 @@ define(function (require) {
      * @param element{D3.UpdateSelection} Reference to SVG circle
      * @returns {D3.Selection} SVG circles with event listeners attached
      */
-    LineChart.prototype.addCircleEvents = function (element, svg, timeMarker) {
+    LineChart.prototype.addCircleEvents = function (element, svg) {
       var events = this.events;
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      var hover = events.addHoverEvent(svg, timeMarker);
+      var hover = events.addHoverEvent();
       var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
       var attachedEvents = element.call(hover).call(mouseout).call(click);
@@ -305,6 +305,10 @@ define(function (require) {
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);
+            self.events.on('hover', function (e) {
+              timeMarker.setTime(e.point.x);
+              timeMarker.render(svg);
+            });
           }
 
           if (self._attr.scale === 'log' && self._invalidLogScaleValues(data)) {

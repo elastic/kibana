@@ -101,7 +101,7 @@ define(function (require) {
      * @method addHoverEvent
      * @returns {Function}
      */
-    Dispatch.prototype.addHoverEvent = function (svg, timeMarker) {
+    Dispatch.prototype.addHoverEvent = function () {
       var self = this;
       var isClickable = this.listenerCount('click') > 0;
       var addEvent = this.addEvent;
@@ -114,10 +114,6 @@ define(function (require) {
         }
 
         self.highlightLegend.call(this, $el);
-
-        timeMarker.setTime(d.x);
-        timeMarker.render(svg);
-
         self.emit('hover', self.eventResponse(d, i));
       }
 
