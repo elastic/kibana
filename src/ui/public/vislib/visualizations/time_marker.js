@@ -43,21 +43,23 @@ define(function (require) {
       if (!self._isTimeBasedChart(selection)) return;
 
       selection.each(function () {
-        d3.select(this).selectAll('time-marker')
-          .data(self.times)
+        var markers = d3.select(this).selectAll('.time-marker')
+          .data(self.times);
+        markers
           .enter().append('line')
           .attr('class', function (d) {
             return d.class;
           })
-          .attr('pointer-events', 'none')
-          .attr('stroke', function (d) {
-            return d.color;
-          })
+          .attr('pointer-events', 'none');
+        markers
           .attr('stroke-width', function (d) {
             return d.width;
           })
           .attr('stroke-opacity', function (d) {
             return d.opacity;
+          })
+          .attr('stroke', function (d) {
+            return d.color;
           })
           .attr('x1', function (d) {
             return self.xScale(d.time);
@@ -68,6 +70,16 @@ define(function (require) {
           .attr('y1', self.height)
           .attr('y2', self.xScale.range()[0]);
       });
+    };
+
+    TimeMarker.prototype.setTime = function (time) {
+      this.times = [{
+        'time': time,
+        'class': 'time-marker',
+        'color': '#aaa',
+        'opacity': 0.8,
+        'width': 1
+      }];
     };
 
     return TimeMarker;

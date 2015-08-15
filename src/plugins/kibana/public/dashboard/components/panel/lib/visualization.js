@@ -9,6 +9,7 @@ define(function (require) {
           // $scope.state comes via $scope inheritence from the dashboard app. Don't love this.
           savedVis.vis.listeners.click = filterBarClickHandler($scope.state);
           savedVis.vis.listeners.brush = brushEvent;
+          savedVis.vis.listeners.hover = function () { console.log(arguments); }
 
           return {
             savedObj: savedVis,
