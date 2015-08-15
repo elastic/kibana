@@ -26,8 +26,8 @@ define(function (require) {
         var key = keys.get(id);
         if (!key) {
           keys.set(id, key = {
-            lt: bucket.to == null ? -Infinity : bucket.to,
-            gte: bucket.from == null ? +Infinity : bucket.from,
+            gte: bucket.from == null ? -Infinity : bucket.from,
+            lt: bucket.to == null ? +Infinity : bucket.to,
             toString: () => id
           });
         }
