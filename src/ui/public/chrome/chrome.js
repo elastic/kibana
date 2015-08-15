@@ -1,3 +1,5 @@
+require('babel/polyfill');
+
 var _ = require('lodash');
 var $ = require('jquery');
 var angular = require('angular');
