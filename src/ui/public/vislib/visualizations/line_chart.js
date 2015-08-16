@@ -1,5 +1,5 @@
 define(function (require) {
-  return function LineChartFactory(Private) {
+  return function LineChartFactory(Private, markerSync) {
     var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
@@ -305,7 +305,8 @@ define(function (require) {
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);
-            self.events.on('hover', function (e) {
+
+            markerSync.on('sync', function (e) {
               timeMarker.setTime(e.point.x);
               timeMarker.render(svg);
             });
