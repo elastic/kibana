@@ -1,5 +1,4 @@
 let _ = require('lodash');
-let btoa = require('btoa');
 let Promise = require('bluebird');
 let strategyMap = require('../../server/auth/lib/authStrategyMap');
 let name = 'esProxy';
@@ -39,7 +38,7 @@ module.exports = (kibana) => new kibana.Plugin({
     }
 
     function getAuthHeader(username, password) {
-      let auth = btoa(`${username}:${password}`);
+      let auth = new Buffer(`${username}:${password}`, 'utf8').toString('base64');
       return {'Authorization': `Basic ${auth}`};
     }
   }

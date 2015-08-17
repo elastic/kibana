@@ -67,7 +67,6 @@
     "boom": "^2.8.0",
     "bootstrap": "^3.3.5",
     "brace": "^0.5.1",
-    "btoa": "^1.1.2",
     "bunyan": "^1.2.3",
     "chokidar": "^1.0.4",
     "commander": "^2.8.1",
