@@ -17,6 +17,21 @@ module.exports = function (grunt) {
         '--optimize.tests=true',
         '--optimize.lazy=false'
       ]
+    },
+
+    optimizeBuild: {
+      options: {
+        wait: false,
+        ready: /Optimization .+ complete/,
+        quiet: true
+      },
+      cmd: './build/kibana/bin/kibana',
+      args: [
+        '--env.name=production',
+        '--logging.json=false',
+        '--plugins.initialize=false',
+        '--server.autoListen=false'
+      ]
     }
   };
 

@@ -5,6 +5,7 @@ node_modules
 trash
 bundles
 target
+/build
 .jruby
 .idea
 *.iml
