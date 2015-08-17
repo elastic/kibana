@@ -19,7 +19,6 @@ module.exports = class KbnServer {
       require('./http'), // sets this.server
       require('./logging'),
       require('./status'),
-      require('./auth'),
 
       // find plugins and set this.plugins
       require('./plugins/scan'),
@@ -36,6 +35,7 @@ module.exports = class KbnServer {
 
       // finally, initialize the plugins
       require('./plugins/initialize'),
+      require('./auth'),
 
       () => {
         if (this.config.get('server.autoListen')) {

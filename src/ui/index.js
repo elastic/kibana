@@ -45,7 +45,7 @@ module.exports = async (kbnServer, server, config) => {
       path: '/login',
       method: 'GET',
       handler: function (req, reply) {
-        let login = hiddenApps.byId.login;
+        let login = uiExports.getHiddenApp('login');
         if (!login) return reply(Boom.notFound('login page not installed'));
         return reply.renderApp(login);
       },
