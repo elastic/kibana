@@ -49,13 +49,14 @@
       <div class="doc-container-content">
         <h2>Good news <small>Elasticsearch is configured correctly!</small></h2>
         <p>
-          Or at least, things look ok. I validated your elasticsearch url, default index and time field and everything looks ok. Given your settings I found data between <strong>{{es.stats.min}}</strong> and <strong>{{es.stats.max}}</strong>. You're probably all set. If this doesn't look right, <a ng-click="es.valid = false">Click here for instructions on configuring the elasticsearch data source</a>.
+          Or at least, things look ok. I validated the elasticsearch url, default index and time field in your <code>timelion.json</code> and everything looks ok. Given your settings I found data between <strong>{{es.stats.min}}</strong> and <strong>{{es.stats.max}}</strong>. You're probably all set. If this doesn't look right, <a ng-click="es.valid = false">Click here for instructions on configuring the elasticsearch data source</a>.
         </p>
         <p>
           <h4>Intervals</h4>
           You might already have one nice chart, but I'm going to operate on the assumption you don't for educational purposes. The input bar at the top as two inputs. On the left, is your expression, leave that alone for now, we'll get to it. On the right is the <strong>interval selector</strong>, which is currently set to <code>{{state.interval}}</code>. 
           <span ng-show="state.interval == '1d'"><strong>Looks good!</strong></span>
           <span ng-show="state.interval != '1d'">Set it to <code>1d</code>. That's pretty safe</span>
+          If timelion thinks your combination of time range and interval will produce too many data points it will throw an error. You can configure that limit in <code>timelion.json</code>
         </p>
         <p>
           <h4>Time range</h4>
@@ -91,7 +92,7 @@
 
   <div ng-show="page === 4">
     <div class="doc-container-content">
-      <h4>Expressions and expressing yourself</h4>
+      <h3>Expressions and expressing yourself</h3>
       <p>
         On the previous page we learned the "shortcut" for elasticsearch querying, we made a short form of the elasticsearch function because its so commonly used. In fact <code>(`*`)</code> actually translates to <code>es(query="*")</code>. Go ahead, try it. Same results right? Every timelion expression starts with a datasource function. From there, the sky is the limit and new functions can be appended, or "chained", to the data source to transform and augment it. From here we're going to assume you know something about your data. Feel free to replace the elasticsearch query with something more meaningful to you.
       </p>

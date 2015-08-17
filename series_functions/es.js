@@ -84,7 +84,8 @@ module.exports = {
       host: config.url,
     });
 
-    return client.search(buildRequest(config, tlConfig)).then(function (resp) {
+    var body = buildRequest(config, tlConfig);
+    return client.search(body).then(function (resp) {
 
       var data = _.map(resp.aggregations.series.buckets, function (bucket) {
         var value;
@@ -106,6 +107,9 @@ module.exports = {
           data:  data,
           type: 'series',
           fit: config.fit,
+          _meta: {
+            es_request: body
+          },
           //cacheKey: cacheKey,
           label: config.query
         }]

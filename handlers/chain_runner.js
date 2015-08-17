@@ -211,7 +211,7 @@ function preProcessSheet(sheet) {
 }
 
 function validateTime(time) {
-  var span = parseDateMath(time.to) - parseDateMath(time.from);
+  var span = parseDateMath(time.to, true) - parseDateMath(time.from);
   var interval = toMS(time.interval);
   var bucketCount = span / interval;
   if (bucketCount > tlConfig.file.max_buckets) {
@@ -228,7 +228,7 @@ function processRequest(request) {
   validateTime(request.time);
 
   tlConfig.time = request.time;
-  tlConfig.time.to = parseDateMath(request.time.to).valueOf();
+  tlConfig.time.to = parseDateMath(request.time.to, true).valueOf();
   tlConfig.time.from = parseDateMath(request.time.from).valueOf();
 
 
