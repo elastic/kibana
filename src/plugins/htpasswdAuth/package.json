@@ -1,7 +1,4 @@
 {
   "name": "htpasswdAuth",
-  "version": "1.0.0",
-  "dependencies": {
-    "htpasswd": "^2.2.1"
-  }
+  "version": "1.0.0"
 }
