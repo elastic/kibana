@@ -14,7 +14,7 @@ module.exports = function (grunt) {
   ].map(function (name) {
     let win = name === 'windows';
 
-    let nodeUrl = win ? `${baseUri}/win-x64/iojs.exe` : `${baseUri}/iojs-v${nodeVersion}-${name}.tar.gz`;
+    let nodeUrl = win ? `${baseUri}/win-x86/iojs.exe` : `${baseUri}/iojs-v${nodeVersion}-${name}.tar.gz`;
     let nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${name}`);
 
     let buildName = `kibana-${version}-${name}`;
