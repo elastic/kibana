@@ -5,8 +5,7 @@
 @white:                  #fff; //#fff;
 @black:                  #000; //#000;
 
-@gray-base:              #000;
-@gray-darker:            lighten(@gray-base, 13.5%);
+
 @gray2:                  #222222;
 @gray3:                  #333333;
 @gray4:                  #444444;
@@ -15,27 +14,29 @@
 @gray7:                  #777777;
 @gray8:                  #888888;
 @gray9:                  #999999;
-@gray10:                 #aaa;
-@gray11:                 #bbb;
-@gray12:                 #ccc;
+@gray10:                 #aaaaaa;
+@gray11:                 #bbbbbb;
+@gray12:                 #cccccc;
+
+@gray-base:              #000000;
+@gray-darker:            #222222;
 @gray-dark:              #7b8a8b;
 @gray:                   #95a5a6;
 @gray-light:             #b4bcc2;
-@gray-lighter:           #eee; //#ecf0f1;
+@gray-lighter:           #ecf0f1;
 
-@brand-primary:         @gray-lighter; //#444444;
-@brand-success:         #31C471; // #18BC9C
-@brand-info:            #6482e5; //#1F6B7A;
+@brand-primary:         #444444;
+@brand-success:         #31C471;
+@brand-info:            #1F6B7A;
 @brand-warning:         #F39C12;
 @brand-danger:          #E74C3C;
-
 
 //== Scaffolding
 //
 // ## Settings for some of the most global styles.
 
 //** Background color for `<body>`.
-@body-bg:               @gray3;//@white;
+@body-bg:               @white;
 //** Global text color on `<body>`.
 @text-color:            @brand-primary;
 
@@ -116,9 +117,9 @@
 @border-radius-small:       3px;
 
 //** Global color for active items (e.g., navs or dropdowns).
-@component-active-color:    #4d4d4d; //@white;
+@component-active-color:    @white;
 //** Global background color for active items (e.g., navs or dropdowns).
-@component-active-bg:       @gray9; //@brand-primary;
+@component-active-bg:       @brand-primary;
 
 //** Width of the `border` for generating carets that indicator dropdowns.
 @caret-width-base:          4px;
@@ -138,9 +139,9 @@
 //** Default background color used for all tables.
 @table-bg:                      transparent;
 //** Background color used for `.table-striped`.
-@table-bg-accent:               @gray4; //#f9f9f9;
+@table-bg-accent:               #f9f9f9;
 //** Background color used for `.table-hover`.
-@table-bg-hover:                lighten(@table-bg-accent, 10%); //@gray-lighter;
+@table-bg-hover:                @gray-lighter;
 @table-bg-active:               @table-bg-hover;
 
 //** Border color for table and cell borders.
@@ -154,14 +155,14 @@
 @btn-font-weight:                normal;
 
 @btn-default-color:              @white;
-@btn-default-bg:                 @gray7;
+@btn-default-bg:                 @gray;
 @btn-default-border:             @btn-default-bg;
 
-@btn-primary-color:              @white; //@btn-default-color;
-@btn-primary-bg:                 @gray7; //@brand-primary;
+@btn-primary-color:              @btn-default-color;
+@btn-primary-bg:                 @brand-primary;
 @btn-primary-border:             @btn-primary-bg;
 
-@btn-success-color:              @gray3; //@btn-default-color;
+@btn-success-color:              @btn-default-color;
 @btn-success-bg:                 @brand-success;
 @btn-success-border:             @btn-success-bg;
 
@@ -185,14 +186,14 @@
 //##
 
 //** `<input>` background color
-@input-bg:                       @gray4; //@white;
+@input-bg:                       @white;
 //** `<input disabled>` background color
-@input-bg-disabled:              @gray3; //@gray-lighter;
+@input-bg-disabled:              @gray-lighter;
 
 //** Text color for `<input>`s
 @input-color:                    @text-color;
 //** `<input>` border color
-@input-border:                   @gray6; //@gray-lighter;
+@input-border:                   @gray-lighter;
 
 // TODO: Rename `@input-border-radius` to `@input-border-radius-base` in v4
 //** Default `.form-control` border radius
@@ -377,7 +378,7 @@
 
 // Default theme
 @navbar-default-color:               @white;
-@navbar-default-bg:                  #3c3c3c; //#656A76;
+@navbar-default-bg:                  #656A76;
 @navbar-default-border:              darken(@navbar-default-bg, 10%);
 @navbar-default-link-color:          @gray-lighter;
 @navbar-default-link-hover-color:    @white;
@@ -386,6 +387,7 @@
 @navbar-default-link-active-bg:      darken(@navbar-default-bg, 10%);
 @navbar-default-link-disabled-color: #ccc;
 @navbar-default-link-disabled-bg:    transparent;
+
 
 // Navbar brand label
 @navbar-default-brand-color:               @navbar-default-link-color;
@@ -682,9 +684,9 @@
 //##
 
 //** Background color on `.list-group-item`
-@list-group-bg:                 @gray5; //@white;
+@list-group-bg:                 @white;
 //** `.list-group-item` border color
-@list-group-border:             @gray7; //#ddd;
+@list-group-border:             #ddd;
 //** List group border radius
 @list-group-border-radius:      @border-radius-base;
 
@@ -715,7 +717,7 @@
 //
 //##
 
-@panel-bg:                    @gray-darker; //@white;
+@panel-bg:                    @white;
 @panel-body-padding:          15px;
 @panel-heading-padding:       10px 15px;
 @panel-footer-padding:        @panel-heading-padding;
@@ -725,9 +727,9 @@
 @panel-inner-border:          #ddd;
 @panel-footer-bg:             #f5f5f5;
 
-@panel-default-text:          @brand-primary; //@gray-dark;
-@panel-default-border:        @gray4; //#ddd;
-@panel-default-heading-bg:    @gray-darker;  //#f5f5f5;
+@panel-default-text:          @gray-dark;
+@panel-default-border:        #ddd;
+@panel-default-heading-bg:    #f5f5f5;
 
 @panel-primary-text:          @white;
 @panel-primary-border:        @brand-primary;
@@ -773,7 +775,7 @@
 //
 //##
 
-@well-bg:                     @gray4; //@gray-lighter;
+@well-bg:                     @gray-lighter;
 @well-border:                 transparent;
 
 
@@ -859,7 +861,7 @@
 //##
 
 //** Text muted color
-@text-muted:                  @gray7;
+@text-muted:                  @gray-light;
 //** Abbreviations and acronyms border color
 @abbr-border-color:           @gray-light;
 //** Headings small color

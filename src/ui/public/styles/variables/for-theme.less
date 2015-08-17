@@ -6,7 +6,7 @@
 
 @field-collapse-toggle-color: #999;
 
-@mark-bg: #fce571; //rgba(252, 229, 113, 1);
+@mark-bg: #fce571;
 
 
 // Sidebar =====================================================================
@@ -16,7 +16,7 @@
 
 @sidebar-well-bg: darken(@sidebar-bg, 5%);
 
-@sidebar-header-border: rgb(0, 0, 0, 0);
+@sidebar-header-border: transparent; //rgb(0, 0, 0, 0);
 @sidebar-header-color: @brand-primary;
 @sidebar-item-font-size: @font-size-small;
 @sidebar-item-color: @text-color;
@@ -64,16 +64,16 @@
 
 
 // Collapser ===================================================================
-@collapser-bg: @gray3; //@gray-lighter;
-@collapser-border: @gray-lighter; //#fff; //@gray-lighter;
-@collapser-color: @gray-lighter; //#fff; //@gray3;
+@collapser-bg: @white;
+@collapser-border: @gray-lighter;
+@collapser-color: @gray3;
 
-@collapser-hover-bg: @gray-lighter; //Added
-@collapser-hover-color: @gray3; //Added
+@collapser-hover-bg: @gray-lighter;
+@collapser-hover-color: @gray3;
 
 
 // Dashboard ===================================================================
-@dashboard-bg: @gray3; //@gray-lighter;
+@dashboard-bg: @gray-lighter;
 @dashboard-panel-bg: @panel-bg;
 @dashboard-panel-color: @text-color;
 @dashboard-panel-heading-link-color: @text-color;
@@ -82,13 +82,13 @@
 
 
 // table =======================================================================
-@table-dt-bg: @gray4;
+@table-dt-bg: @gray-lighter;
 @table-dt-color: @brand-primary;
-@table-cell-hover-bg: @gray5; //white;
-@table-cell-hover-hover-bg: @gray6; //@gray-lighter;
-@table-row-hover-bg: lighten(@gray6, 4%); //lighten(@gray-lighter, 4%);
+@table-cell-hover-bg: white;
+@table-cell-hover-hover-bg: @gray-lighter;
+@table-row-hover-bg: lighten(@gray-lighter, 4%);
 
-@table-sort-color: @gray6;
+@table-sort-color: @gray-light;
 @table-sort-asc-color: @gray-light;
 @table-sort-desc-color: @gray-light;
 
@@ -97,7 +97,7 @@
 
 // NavBar ======================================================================
 @navbar-button-border: @input-border;
-@navbar-button-color: @gray2;
+@navbar-button-color: @brand-primary;
 @navbar-button-bg: @input-group-addon-bg;
 
 
@@ -111,7 +111,7 @@
 // Settings ====================================================================
 @settings-objects-list-border: @gray-lighter;
 @settings-objects-empty-color: @gray-light;
-@settings-objects-action-bar-bg: @gray6; //@gray-lighter;
+@settings-objects-action-bar-bg: @gray-lighter;
 
 @settings-advanced-table-default-color: @input-color-placeholder;
 
@@ -137,13 +137,13 @@
 @vis-editor-navbar-error-state-color: @btn-danger-color;
 
 @vis-editor-navbar-modal-bg: @navbar-default-bg;
-@vis-editor-navbar-modal-color: @gray9; //@white;
-@vis-editor-navbar-modal-link-color: @white; //JEU: Could not see where this was used.
+@vis-editor-navbar-modal-color: @white;
+@vis-editor-navbar-modal-link-color: @white;
 
 @vis-editor-sidebar-bg: @body-bg;
 @vis-editor-sidebar-border: @sidebar-bg;
-@vis-editor-sidebar-title-bg: @gray6; //@gray-lighter;
-@vis-editor-sidebar-title-hover-bg: @vis-editor-sidebar-title-bg; //@gray-lighter;
+@vis-editor-sidebar-title-bg: @gray-lighter;
+@vis-editor-sidebar-title-hover-bg: @vis-editor-sidebar-title-bg;
 @vis-editor-sidebar-title-hover-color: @text-color;
 
 @vis-editor-agg-group-color: @text-color;
@@ -160,33 +160,33 @@
 @vis-editor-agg-wide-btn-hover-color: @collapser-hover-color;
 
 @vis-editor-agg-editor-order-bg: transparent;
-@vis-editor-agg-editor-order-border: @gray7;
+@vis-editor-agg-editor-order-border: @gray-lighter;
 
 @vis-editor-nesting-indicator-bg: @brand-success;
 
 
 // List Group Menu =============================================================
-@list-group-menu-item-color: @text-color; //@link-color;
+@list-group-menu-item-color: @link-color;
 @list-group-menu-item-select-color: @link-color;
 @list-group-menu-item-active-bg: @well-bg;
 @list-group-menu-item-hover-bg: @well-bg;
 
 
 // Hint Box ====================================================================
-@hintbox-background-color: @gray5; //@gray-lighter;
+@hintbox-background-color: @gray-lighter;
 @hintbox-spacing-vertical: 10px;
 @hintbox-spacing-horizontal: 12px;
-@hintbox-table-border-color: @gray4; //#BFC9CA;
+@hintbox-table-border-color: #BFC9CA;
 
 
 // Filter Bar ==================================================================
-@filter-bar-confirm-bg: @gray3; //@gray-lighter;
+@filter-bar-confirm-bg: @gray-lighter;
 @filter-bar-confirm-filter-color: #333;
-@filter-bar-confirm-border: @gray12;
-@filter-bar-confirm-filter-bg: @gray12; //@gray-light;
+@filter-bar-confirm-border: #ccc;
+@filter-bar-confirm-filter-bg: @gray-light;
 
-@filter-bar-bar-bg: @gray3; //@gray-lighter;
-@filter-bar-bar-border: @gray12;
+@filter-bar-bar-bg: @gray-lighter;
+@filter-bar-bar-border: #ccc;
 @filter-bar-bar-condensed-bg: darken(@filter-bar-bar-bg, 5%);
 
 @filter-bar-bar-filter-bg: @action-add;
@@ -195,12 +195,12 @@
 
 
 // Config ======================================================================
-@config-border: @gray4; //darken(@body-bg, 10%);
+@config-border: darken(@body-bg, 10%);
 @config-bg: @body-bg;
 
 @config-close-bg: @well-bg;
 
-@config-saved-object-finder-options-bg: @body-bg; //JEU: couldn't see where this was used in code.
+@config-saved-object-finder-options-bg: @body-bg;
 
 
 // Hintbox =====================================================================
@@ -271,14 +271,14 @@
 @tilemap-info-bg: @white;
 @tilemap-info-header-color: #444;
 
-@tilemap-leaflet-control-bg: #fff;
+@tilemap-leaflet-control-bg: @white;
 @tilemap-leaflet-control-outline: @black;
 
-@tilemap-leaflet-container-bg: @body-bg; //#fff;
+@tilemap-leaflet-container-bg: @white;
 
 @tilemap-leaflet-popup-border: @gray;
 
-@tilemap-filter:  invert(1) brightness(1.75) grayscale(1) contrast(1); //brightness(1.03) grayscale(0.83) contrast(1.07);
+@tilemap-filter: brightness(1.03) grayscale(0.83) contrast(1.07);
 
 
 // Tooltip =====================================================================
@@ -293,14 +293,14 @@
 
 // Svg =========================================================================
 @svg-axis-color: #ddd;
-@svg-tick-color: @gray8; //#848e96;
-@svg-brush-color: @white; //#fff;
-@svg-endzone-bg: @black; //#000;
+@svg-tick-color: #848e96;
+@svg-brush-color: @white;
+@svg-endzone-bg: @black;
 
-@vis-axis-title-color: @gray8; //#848e96;
-@vis-chart-title-color: @gray8; //#848e96;
+@vis-axis-title-color: #848e96;
+@vis-chart-title-color: #848e96;
 
 
 // Saved Object Finder =========================================================
-@saved-object-finder-link-color: @text-color; //@link-color;
-@saved-object-finder-icon-color: darken(@saved-object-finder-link-color, 10%); //@link-color;
+@saved-object-finder-link-color: @link-color;
+@saved-object-finder-icon-color: darken(@saved-object-finder-link-color, 10%);
