@@ -65,7 +65,7 @@
       </div>
       <kbn-tooltip text="Toggle Menu" placement="bottom" append-to-body="1">
         <button
-          ng-click="toggleButtons()"
+          ng-click="toggle('showButtons')"
           aria-label="Toggle Menu">
           <i aria-hidden="true" class="fa fa-bars"></i>
         </button>
@@ -75,6 +75,14 @@
 
   <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
 
+  <div class="stats" ng-if="stats && showButtons">
+    <center>
+      <strong>Cache Efficiency</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
+      <strong>Query Time:</strong> {{stats.queryTime - stats.invokeTime}}ms /
+      <strong>Resampling Time:</strong> {{stats.fitTime - stats.queryTime}}ms /
+      <strong>Processing Time:</strong> {{stats.sheetTime - stats.fitTime}}ms
+    </center>
+  </div>
 
   <div class="timelion-container">
     <div>
@@ -87,15 +95,12 @@
         <div chart="sheet[$index]" cell="$index"></div>
       </div>
     </div>
+  </div>
 
-    <div class="clearfix"></div>
-    <div class="footer" ng-if="stats">
-      <center>
-        <strong>Cache Efficiency</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
-        <strong>Query Time:</strong> {{stats.queryTime - stats.invokeTime}}ms /
-        <strong>Resampling Time:</strong> {{stats.fitTime - stats.queryTime}}ms /
-        <strong>Processing Time:</strong> {{stats.sheetTime - stats.fitTime}}ms
-      </center>
+  <div class="spy-footer">
+    <div class="spy-footer-tab" ng-click="toggle('showHelp')">
+      <i class="fa" ng-class="showHelp ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
     </div>
+    <timelion-docs ng-show="showHelp"></timelion-docs>
   </div>
 </div>

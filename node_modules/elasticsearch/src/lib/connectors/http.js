@@ -106,7 +106,6 @@ HttpConnector.prototype.makeReqParams = function (params) {
   var reqParams = {
     method: params.method || 'GET',
     protocol: host.protocol + ':',
-    auth: host.auth,
     hostname: host.host,
     port: host.port,
     path: (host.path || '') + (params.path || ''),

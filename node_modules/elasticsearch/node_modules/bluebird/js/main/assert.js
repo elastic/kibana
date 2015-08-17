@@ -50,10 +50,6 @@ return function assert(boolExpr, message) {
     if (Error.captureStackTrace) {
         Error.captureStackTrace(ret, assert);
     }
-    if (console && console.error) {
-        console.error(ret.stack + "");
-    }
     throw ret;
-
 };
 })();

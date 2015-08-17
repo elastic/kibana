@@ -23,8 +23,8 @@ define(function (require) {
           title: 'New TimeLion Sheet',
           hits: 0,
           description: '',
-          timelion_sheet: ['es()'],
-          timelion_interval: '1h',
+          timelion_sheet: ['(`*`)'],
+          timelion_interval: '1d',
           timelion_chart_height: 275,
 
           version: 1,

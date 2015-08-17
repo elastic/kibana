@@ -3,6 +3,7 @@ var _ = require('lodash');
 var logoUrl = require('./logo.png');
 
 require('./chart_directive');
+require('./docs');
 require('./main.less');
 
 require('ui/chrome')
@@ -41,14 +42,14 @@ require('ui/routes')
     }
   });
 
-app.controller('timelion', function ($scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier) {
+app.controller('timelion', function ($scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config) {
   timefilter.enabled = true;
   var notify = new Notifier({
     location: 'Timelion'
   });
 
   var savedSheet = $route.current.locals.savedSheet;
-  var blankSheet = ['`*`'];
+  var blankSheet = ['(`*`)'];
 
     // config panel templates
   $scope.configTemplate = new ConfigTemplate({
@@ -59,17 +60,17 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   $scope.state = new AppState(getStateDefaults());
   function getStateDefaults() {
     return {
-      sheet: savedSheet.timelion_sheet || blankSheet,
+      sheet: savedSheet.timelion_sheet,
       selected: 0,
-      interval: savedSheet.timelion_interval || '1d'
+      interval: savedSheet.timelion_interval
     };
   }
-
-
 
   var init = function () {
     $scope.running = false;
     $scope.search();
+
+    $scope.showHelp = config.get('timelion:showHelpByDefault', true);
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
     $scope.$listen(timefilter, 'fetch', $scope.search);
@@ -80,8 +81,9 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
     };
   };
 
-  $scope.toggleButtons = function () {
-    $scope.showButtons = !$scope.showButtons;
+  $scope.toggle = function (property) {
+    console.log(property);
+    $scope[property] = !$scope[property];
   };
 
   $scope.newSheet = function () {
@@ -89,7 +91,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   };
 
   $scope.newCell = function () {
-    $scope.state.sheet.push('`*`');
+    $scope.state.sheet.push('(`*`)');
     $scope.state.selected = $scope.state.sheet.length - 1;
     $scope.search();
   };

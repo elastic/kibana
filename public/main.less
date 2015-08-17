@@ -40,10 +40,56 @@ select.timelion-interval {
  -webkit-appearance: none;
 }
 
-.footer {
+.stats {
   background-color: whitesmoke;
   padding: 5px;
   font-size: 0.9em;
+}
+
+.spy-footer {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  z-index: 100;
+
+  &-tab {
+    font-size: 1.3em;
+    text-align: center;
+    width: 50px;
+    background-color: whitesmoke;  
+    margin: 0 auto;
+    border-top-right-radius: @border-radius-base;
+    border-top-left-radius: @border-radius-base;
+  }
+}
+
+div.doc-container {
+  &-content {
+    padding: 0 20px 20px 20px;
+    height: 330px;
+    overflow-y: scroll;
+    border-top: 10px solid whitesmoke;
+    background-color: @body-bg;
+    position: relative;
+  }
+
+  &-buttons {
+    text-align: center;
+    background-color: @body-bg;
+    height: 40px;
+
+    .btn-doc {
+      &-prev {
+        position: absolute;
+        left: 20px;
+      }
+
+      &-next {
+        position: absolute;
+        right: 20px;
+      }
+    }
+  }
 }
 
 .cell-id {
@@ -61,7 +107,7 @@ select.timelion-interval {
   font-weight: bold;
   background-color: #ccc;
   opacity: 0.50;
-  z-index: 999;
+  z-index: 10;
 }
 
 .chart-container:hover .cell-id {

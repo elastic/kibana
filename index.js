@@ -31,5 +31,4 @@ module.exports = function (kibana) {
     },
     init: require('./init.js'),
   });
-
 };

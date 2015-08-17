@@ -10,12 +10,18 @@ var _ = require('./utils');
 
 var startsWithProtocolRE = /^([a-z]+:)?\/\//;
 var defaultProto = 'http:';
+var btoa;
 
 /* jshint ignore:start */
 if (typeof window !== 'undefined') {
   defaultProto = window.location.protocol;
+  btoa = window.btoa;
 }
 /* jshint ignore:end */
+
+btoa = btoa || function (data) {
+  return (new Buffer(data, 'utf8')).toString('base64');
+};
 
 var urlParseFields = [
   'protocol', 'hostname', 'pathname', 'port', 'auth', 'query'
@@ -42,7 +48,7 @@ Host.defaultPorts = {
 };
 
 function Host(config, globalConfig) {
-  config = config || {};
+  config = _.clone(config || {});
   globalConfig = globalConfig || {};
 
   // defaults
@@ -50,7 +56,6 @@ function Host(config, globalConfig) {
   this.host = 'localhost';
   this.path = '';
   this.port = 9200;
-  this.auth = null;
   this.query = null;
   this.headers = null;
   this.suggestCompression = !!globalConfig.suggestCompression;
@@ -97,8 +102,14 @@ function Host(config, globalConfig) {
     config = {};
   }
 
+  if (config.auth) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = 'Basic ' + btoa(config.auth);
+    delete config.auth;
+  }
+
   _.forOwn(config, function (val, prop) {
-    if (val != null) this[prop] = val;
+    if (val != null) this[prop] = _.clone(val);
   }, this);
 
   // make sure the query string is parsed
@@ -149,15 +160,8 @@ Host.prototype.makeUrl = function (params) {
   // build the query string
   var query = qs.stringify(this.getQuery(params.query));
 
-  var auth = '';
-  if (params.auth) {
-    auth = params.auth + '@';
-  } else if (this.auth && params.auth !== false) {
-    auth = this.auth + '@';
-  }
-
   if (this.host) {
-    return this.protocol + '://' + auth + this.host + port + path + (query ? '?' + query : '');
+    return this.protocol + '://' + this.host + port + path + (query ? '?' + query : '');
   } else {
     return path + (query ? '?' + query : '');
   }

@@ -16,6 +16,7 @@ function ConnectionAbstract(host, config) {
   EventEmitter.call(this);
 
   this.log = config.log || new Log();
+  this.pingTimeout = config.pingTimeout || 3000;
 
   if (!host) {
     throw new TypeError('Missing host');
@@ -51,7 +52,7 @@ ConnectionAbstract.prototype.ping = function (params, cb) {
     cb = typeof cb === 'function' ? cb : null;
   }
 
-  var requestTimeout = 100;
+  var requestTimeout = this.pingTimeout;
   var requestTimeoutId;
   var aborted;
   var abort;

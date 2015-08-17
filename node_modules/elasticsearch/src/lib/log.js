@@ -251,7 +251,7 @@ Log.prototype.info = function (/* ...msg */) {
  */
 Log.prototype.debug = function (/* ...msg */) {
   if (this.listenerCount('debug')) {
-    return this.emit('debug', Log.join(arguments) /*+ _.getStackTrace(Log.prototype.debug)*/);
+    return this.emit('debug', Log.join(arguments));
   }
 };
 

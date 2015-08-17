@@ -26,12 +26,6 @@ JqueryConnector.prototype.request = function (params, cb) {
     done: cb
   };
 
-  if (params.auth) {
-    var auths = params.auth.split(':');
-    ajax.username = auths[0];
-    ajax.password = auths[1];
-  }
-
   var jqXHR = jQuery.ajax(ajax)
     .done(function (data, textStatus, jqXHR) {
       cb(null, data, jqXHR.statusCode(), {

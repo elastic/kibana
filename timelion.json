@@ -4,10 +4,10 @@
   },
   "es": {
     "timefield": "@timestamp",
-    "default_index": "usagov",
+    "default_index": "logstash-*",
     "url": "http://localhost:9200/",
     "allow_url_parameter": false
   },
   "default_interval": "1w",
-  "max_buckets": 732
+  "max_buckets": 2000
 }
