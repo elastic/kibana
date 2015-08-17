@@ -167,7 +167,7 @@ define(function (require) {
           return pointLabel !== label.toString();
         }
 
-        if (label && label !== '_all') {
+        if (label && label !== 'Count') {
           d3.select(this).style('cursor', 'pointer');
         }
 
@@ -208,7 +208,7 @@ define(function (require) {
 
       legendDiv.selectAll('li.color').each(function (d) {
         var label = d.label;
-        if (label !== undefined && label !== '_all') {
+        if (label !== undefined && label !== 'Count') {
           d3.select(this).call(self.events.addClickEvent());
         }
       });
