@@ -88,7 +88,10 @@ module.exports = function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler: function (req, reply) {
-      reply.redirect(getDefaultRoute(kbnServer));
+      return reply.view('rootRedirect', {
+        hashRoute: '/app/kibana',
+        defaultRoute: getDefaultRoute(kbnServer),
+      });
     }
   });
 

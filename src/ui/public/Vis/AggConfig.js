@@ -267,16 +267,18 @@ define(function (require) {
       return this.params.field;
     };
 
-    AggConfig.prototype.fieldFormatter = function (contentType) {
+    AggConfig.prototype.fieldFormatter = function (contentType, defaultFormat) {
+      var format = this.type && this.type.getFormat(this);
+      if (format) return format.getConverterFor(contentType);
+      return this.fieldOwnFormatter(contentType, defaultFormat);
+    };
+
+    AggConfig.prototype.fieldOwnFormatter = function (contentType, defaultFormat) {
       var field = this.field();
       var format = field && field.format;
-      var strFormat = fieldFormats.getDefaultInstance('string');
-
-      if (this.type) {
-        format = this.type.getFormat(this) || format;
-      }
-
-      return (format || strFormat).getConverterFor(contentType);
+      if (!format) format = defaultFormat;
+      if (!format) format = fieldFormats.getDefaultInstance('string');
+      return format.getConverterFor(contentType);
     };
 
     AggConfig.prototype.fieldName = function () {

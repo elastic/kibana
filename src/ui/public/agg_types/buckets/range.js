@@ -1,10 +1,10 @@
 define(function (require) {
   return function RangeAggDefinition(Private) {
     var _ = require('lodash');
-    var moment = require('moment');
-    var angular = require('angular');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/range'));
+    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+
 
     return new BucketAggType({
       name: 'range',
@@ -12,6 +12,24 @@ define(function (require) {
       createFilter: createFilter,
       makeLabel: function (aggConfig) {
         return aggConfig.params.field.displayName + ' ranges';
+      },
+      getKey: function (bucket, key, agg) {
+        let range = { gte: bucket.from, lt: bucket.to };
+
+        if (range.gte == null) range.gte = -Infinity;
+        if (range.lt == null) range.lt = +Infinity;
+
+        return range;
+      },
+      getFormat: function (agg) {
+        if (agg.$$rangeAggTypeFormat) return agg.$$rangeAggTypeFormat;
+
+        var RangeFormat = FieldFormat.from(function (range) {
+          var format = agg.fieldOwnFormatter();
+          return `${format(range.gte)} to ${format(range.lt)}`;
+        });
+
+        return (this.$$rangeAggTypeFormat = new RangeFormat());
       },
       params: [
         {
