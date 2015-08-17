@@ -36,11 +36,14 @@ define(function (require) {
       });
     };
 
-    TimeMarker.prototype.render = function (selection) {
+    TimeMarker.prototype.render = function (selection, xScale, height) {
       var self = this;
 
       // return if not time based chart
-      if (!self._isTimeBasedChart(selection)) return;
+      // if (!self._isTimeBasedChart(selection)) return;
+
+      xScale = xScale || this.xScale;
+      height = height || this.height;
 
       selection.each(function () {
         var markers = d3.select(this).selectAll('.time-marker')
@@ -62,13 +65,13 @@ define(function (require) {
             return d.color;
           })
           .attr('x1', function (d) {
-            return self.xScale(d.time);
+            return xScale(d.time);
           })
           .attr('x2', function (d) {
-            return self.xScale(d.time);
+            return xScale(d.time);
           })
-          .attr('y1', self.height)
-          .attr('y2', self.xScale.range()[0]);
+          .attr('y1', height)
+          .attr('y2', xScale.range()[0]);
       });
     };
 

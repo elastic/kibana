@@ -1,5 +1,7 @@
 define(function (require) {
-  return function HandlerBaseClass(Private) {
+  require('ui/vislib/lib/marker_synchronizer');
+
+  return function HandlerBaseClass(Private, markerSync) {
     var d3 = require('d3');
     var _ = require('lodash');
     var errors = require('ui/errors');
@@ -7,6 +9,7 @@ define(function (require) {
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
     var Legend = Private(require('ui/vislib/lib/legend'));
+    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
 
     /**
      * Handles building all the components of the visualization
@@ -21,6 +24,8 @@ define(function (require) {
       if (!(this instanceof Handler)) {
         return new Handler(vis, opts);
       }
+
+      var self = this;
 
       this.data = opts.data || new Data(vis.data, vis._attr);
       this.vis = vis;
@@ -42,6 +47,19 @@ define(function (require) {
         this.legend = opts.legend;
       }
 
+      this.timeMarker = new TimeMarker([]);
+      this.markerSyncHandler = function (e) {
+        var margin = self._attr.margin;
+        self.timeMarker.setTime(e.point.x);
+        self.charts.forEach(function (chart) {
+          var height = $(chart.chartEl).height() - margin.top - margin.bottom;
+          var svg = d3.select(chart.chartEl).selectAll('svg > g');
+          self.timeMarker.render(svg, self.xAxis.xScale, height);
+        });
+      };
+
+      markerSync.on('sync', this.markerSyncHandler);
+
       this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
 
       this.renderArray = _.filter([
@@ -51,7 +69,7 @@ define(function (require) {
         this.chartTitle,
         this.alerts,
         this.xAxis,
-        this.yAxis,
+        this.yAxis
       ], Boolean);
 
       // memoize so that the same function is returned every time,
@@ -210,6 +228,8 @@ define(function (require) {
       });
 
       this.charts.length = 0;
+
+      markerSync.off('sync', this.markerSyncHandler);
     };
 
     return Handler;

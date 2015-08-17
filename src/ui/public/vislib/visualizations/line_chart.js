@@ -1,5 +1,5 @@
 define(function (require) {
-  return function LineChartFactory(Private, markerSync) {
+  return function LineChartFactory(Private) {
     var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
@@ -305,11 +305,6 @@ define(function (require) {
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);
-
-            markerSync.on('sync', function (e) {
-              timeMarker.setTime(e.point.x);
-              timeMarker.render(svg);
-            });
           }
 
           if (self._attr.scale === 'log' && self._invalidLogScaleValues(data)) {
@@ -333,7 +328,7 @@ define(function (require) {
             lines = self.addLines(svg, data.series);
           }
           circles = self.addCircles(svg, layers);
-          self.addCircleEvents(circles, svg, timeMarker);
+          self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
 
           var scale = (scaleType === 'log') ? yScale(1) : yScale(0);

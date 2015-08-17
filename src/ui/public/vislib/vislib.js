@@ -5,7 +5,6 @@ require('ui/vislib/lib/handler/types/tile_map');
 require('ui/vislib/lib/handler/handler_types');
 require('ui/vislib/lib/layout/layout_types');
 require('ui/vislib/lib/data');
-require('ui/vislib/lib/marker_synchronizer');
 require('ui/vislib/visualizations/_map.js');
 require('ui/vislib/visualizations/vis_types');
 // end prefetching

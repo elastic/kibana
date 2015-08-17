@@ -1,5 +1,5 @@
 define(function (require) {
-  return function ColumnChartFactory(Private, markerSync) {
+  return function ColumnChartFactory(Private) {
     var d3 = require('d3');
     var _ = require('lodash');
     var $ = require('jquery');
@@ -285,11 +285,6 @@ define(function (require) {
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);
-
-            markerSync.on('sync', function (e) {
-              timeMarker.setTime(e.point.x);
-              timeMarker.render(svg);
-            });
           }
 
           if (width < minWidth || height < minHeight) {
