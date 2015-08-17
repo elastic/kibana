@@ -1,0 +1,75 @@
+.resizable {
+  position: relative;
+}
+.resizable.no-transition {
+  transition: none !important;
+}
+
+.rg-right, .rg-left, .rg-top, .rg-bottom {
+  display: block;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  position: absolute;
+  z-index: 1;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  background: transparent;
+}
+.rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
+  position: absolute;
+  box-sizing: border-box;
+  display: block;
+  border: 1px solid #ccc;
+}
+
+.rg-right span, .rg-left span {
+  border-width: 0 1px;
+  top: 50%;
+  margin-top: -10px;
+  margin: -10px 0 0 3.5px;
+  height: 20px;
+  width: 7px;
+}
+
+.rg-top span, .rg-bottom span {
+  border-width: 1px 0;
+  left: 50%;
+  margin: 3.5px 0 0 -10px;
+  width: 20px;
+  height: 7px;
+}
+
+.rg-top {
+  cursor: row-resize;
+  width: 100%;
+  top: 0;
+  left: 0;
+  margin-top: -14px;
+}
+
+.rg-right {
+  cursor: col-resize;
+  height: 100%;
+  right: 0;
+  top: 0;
+  margin-right: -14px;
+}
+
+.rg-bottom {
+  cursor: row-resize;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  margin-bottom: -14px;
+}
+
+.rg-left {
+  cursor: col-resize;
+  height: 100%;
+  left: 0;
+  top: 0;
+  margin-left: -14px;
+}

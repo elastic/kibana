@@ -1,4 +1,4 @@
-<div ng-controller="timelion">
+<div class="timelion" ng-controller="timelion">
   <navbar class="timelion-navbar">
     <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
       <div class="typeahead">
@@ -85,7 +85,7 @@
   </div>
 
   <div class="timelion-container">
-    <div>
+    <div class="timelion-container-sheet">
       <div class="chart-container col-md-4"
         ng-repeat="cell in state.sheet track by $index"
         ng-click="setActiveCell($index)"
@@ -95,12 +95,12 @@
         <div chart="sheet[$index]" cell="$index"></div>
       </div>
     </div>
-  </div>
-
-  <div class="spy-footer">
-    <div class="spy-footer-tab" ng-click="toggle('showHelp')">
+    <div class="timelion-container-drawer-tab" ng-click="toggle('showHelp')">
       <i class="fa" ng-class="showHelp ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
     </div>
-    <timelion-docs ng-show="showHelp"></timelion-docs>
+    
+    <div class="timelion-container-drawer" ng-show="showHelp">
+      <timelion-docs></timelion-docs>
+    </div>
   </div>
 </div>

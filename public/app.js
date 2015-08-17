@@ -2,6 +2,7 @@ var _ = require('lodash');
 
 var logoUrl = require('./logo.png');
 
+require('angular-resizable');
 require('./chart_directive');
 require('./docs');
 require('./main.less');
@@ -17,7 +18,7 @@ require('ui/chrome')
   }
 ]);
 
-var app = require('ui/modules').get('apps/timelion', []);
+var app = require('ui/modules').get('apps/timelion', ['angularResizable']);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');

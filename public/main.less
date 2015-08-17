@@ -1,8 +1,42 @@
 @import "~ui/styles/variables.less";
+@import (reference) "~ui/styles/mixins";
 
 
-.timelion-container {
-  margin: 10px 35px;
+body > .content,  body > .content > .application {
+  overflow: hidden
+}
+
+.timelion {
+  overflow: hidden;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+
+  &-container {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow-y:auto;
+    
+    &-sheet {
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    &-drawer {
+      min-height: 350px;    
+      overflow-y: auto;
+      z-index: 100;
+
+
+      &-tab {
+        text-align: center;
+        width: 100%;
+        background-color: whitesmoke;  
+        margin: 0 auto;
+      }
+    }
+  }
 }
 
 [chart] {
@@ -46,29 +80,11 @@ select.timelion-interval {
   font-size: 0.9em;
 }
 
-.spy-footer {
-  position: fixed;
-  width: 100%;
-  bottom: 0;
-  z-index: 100;
-
-  &-tab {
-    font-size: 1.3em;
-    text-align: center;
-    width: 50px;
-    background-color: whitesmoke;  
-    margin: 0 auto;
-    border-top-right-radius: @border-radius-base;
-    border-top-left-radius: @border-radius-base;
-  }
-}
-
 div.doc-container {
   &-content {
     padding: 0 20px 20px 20px;
-    height: 330px;
-    overflow-y: scroll;
-    border-top: 10px solid whitesmoke;
+    height: 310px;
+    overflow-y: auto;
     background-color: @body-bg;
     position: relative;
   }
