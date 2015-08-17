@@ -30,6 +30,11 @@ define(function (require) {
      */
     function collectBucket(write, bucket, key) {
       var agg = write.aggStack.shift();
+      if (bucket[agg.id] && !bucket[agg.id]['buckets'] ){
+        bucket = bucket[agg.id];
+        write.columns.shift();
+        agg = write.aggStack.shift();
+      }
 
       switch (agg.schema.group) {
         case 'buckets':
