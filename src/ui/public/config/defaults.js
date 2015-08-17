@@ -136,6 +136,10 @@ define(function () {
           to: 'now',
           mode: 'quick'
         }, null, 2)
+      },
+      'theme' : {
+        value: 'bright',
+        description: 'Application theme. Valid values are "dark" and "bright"'
       }
     };
   };

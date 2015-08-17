@@ -11,7 +11,7 @@ require('ui/routes')
   redirectTo: '/discover'
 });
 
-require('ui/chrome')
+var chrome = require('ui/chrome')
 .setBrand({
   'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
   'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
@@ -43,9 +43,18 @@ require('ui/chrome')
     title: 'Settings'
   }
 ])
-.setRootController('kibana', function ($scope, courier) {
+.setRootController('kibana', function ($scope, $rootScope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
     courier.start();
   });
+
+  function updateTheme() {
+    var theme = config.get('theme');
+    console.log(theme);
+    chrome.setTheme(theme);
+  }
+
+  $rootScope.$on('init:config', updateTheme);
+  $rootScope.$on('change:config.theme', updateTheme);
 });

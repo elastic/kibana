@@ -60,4 +60,20 @@ module.exports = function (chrome, internals) {
     return internals.brand[item];
   };
 
+  /**
+   * @param {string} val - the name of the theme
+   * @return {chrome}
+   */
+  chrome.setTheme = function (val) {
+    internals.theme = val;
+    return chrome;
+  };
+
+  /**
+   * @return {string} - the name of the theme
+   */
+  chrome.getTheme = function () {
+    return internals.theme;
+  };
+
 };
