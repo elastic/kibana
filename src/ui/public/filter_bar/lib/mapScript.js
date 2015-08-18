@@ -10,8 +10,14 @@ define(function () {
         .get(filter.meta.index).then(function (indexPattern) {
           key = filter.meta.field;
           field = indexPattern.fields.byName[key];
-          value = filter.script.params.value;
-          value = field.format.convert(value);
+
+          if (filter.meta.formattedValue) {
+            value = filter.meta.formattedValue;
+          } else {
+            value = filter.script.params.value;
+            value = field.format.convert(value);
+          }
+
           return { key: key, value: value };
         });
       }
