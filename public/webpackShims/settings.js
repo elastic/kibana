@@ -109,7 +109,7 @@ define([
 
   function applyThemeToBody() {
     var theme = getTheme();
-    $("#bootstrapThemeCss").attr("href", "/plugins/sense/module_shims/bootstrap/css/bootstrap." + theme + ".min.css");
+    $("#bootstrapThemeCss").attr("href", "/plugins/sense/webpackShims/bootstrap/css/bootstrap." + theme + ".min.css");
     $("#senseThemeCss").attr("href", "/plugins/sense/css/sense." + theme + ".css");
   }
 

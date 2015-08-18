@@ -1,9 +1,8 @@
 module.exports = function (kibana) {
-  let { escapeRegExp } = require('lodash');
   let { resolve } = require('path');
   let Joi = require('joi');
   let Boom = require('boom');
-  let modules = resolve(__dirname, 'public/module_shims/');
+  let modules = resolve(__dirname, 'public/webpackShims/');
 
   return new kibana.Plugin({
     id: 'sense',
@@ -45,7 +44,7 @@ module.exports = function (kibana) {
       },
 
       noParse: [
-        new RegExp(escapeRegExp(resolve(modules, 'ace/') + '.+')),
+        resolve(modules, 'ace') + '/',
         resolve(modules, 'moment'),
         resolve(modules, 'sense_editor/mode/worker.js'),
       ]
