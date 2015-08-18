@@ -92,6 +92,7 @@
     "jquery": "^2.1.4",
     "js-yaml": "^3.2.5",
     "json-stringify-safe": "^5.0.1",
+    "jstimezonedetect": "^1.0.5",
     "leaflet": "^0.7.3",
     "less": "^2.5.1",
     "less-loader": "^2.2.0",

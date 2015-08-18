@@ -2,11 +2,12 @@ define(function (require) {
   return function DateHistogramAggType(timefilter, config, Private) {
     var _ = require('lodash');
     var moment = require('moment');
+    var tzDetect = require('jstimezonedetect').jstz;
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var TimeBuckets = Private(require('ui/time_buckets'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
     var intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
-
+    var timeZone = tzDetect.determine().name();
     var tzOffset = moment().format('Z');
 
     function getInterval(agg) {
@@ -93,7 +94,7 @@ define(function (require) {
             var interval = agg.buckets.getInterval();
             output.bucketInterval = interval;
             output.params.interval = interval.expression;
-            output.params.time_zone = tzOffset;
+            output.params.time_zone = timeZone || tzOffset;
 
             var scaleMetrics = interval.scaled && interval.scale < 1;
             if (scaleMetrics) {
