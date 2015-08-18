@@ -3,6 +3,8 @@ var _ = require('lodash');
 var logoUrl = require('./logo.png');
 
 require('angular-resizable');
+require('angular-resizable/angular-resizable.min.css');
+
 require('./chart_directive');
 require('./docs');
 require('./main.less');
@@ -70,8 +72,6 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   var init = function () {
     $scope.running = false;
     $scope.search();
-
-    $scope.showHelp = config.get('timelion:showHelpByDefault', true);
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
     $scope.$listen(timefilter, 'fetch', $scope.search);
