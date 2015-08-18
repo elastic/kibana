@@ -17,7 +17,7 @@ define(function (require) {
       }
 
       var flattenedData = flattenDataArray(obj);
-      var uniqueXValues = {};
+      var uniqueXValues = new Map();
 
       var charts;
       if (!obj.series) {
@@ -36,7 +36,7 @@ define(function (require) {
 
       flattenedData.forEach(function (d, i) {
         var key = d.x;
-        var prev = uniqueXValues[key];
+        var prev = uniqueXValues.get(key);
 
         if (d.xi != null) {
           i = d.xi;
@@ -46,12 +46,12 @@ define(function (require) {
           i = Math.min(i, prev.index);
         }
 
-        uniqueXValues[key] = {
+        uniqueXValues.set(key, {
           index: i,
           isDate: isDate,
           isOrdered: isOrdered,
           isNumber: _.isNumber(key)
-        };
+        });
       });
 
       return uniqueXValues;
