@@ -59,15 +59,35 @@ Here are some hints for getting eslint setup in your favorite editor:
 
 To ensure that your changes will not break other functionality, please run the test suite and build process before submitting your pull request.
 
-Before running the tests you will need to install the projects dependencies as described below.
+Before running the tests you will need to install the projects dependencies as described above.
 
 Once that is complete just run:
 
 ```sh
-./node_modules/.bin/grunt test build
+npm run test && npm run build
 ```
 
-Distributable, built packages can be found in `target/` after the build completes.
+Distributable packages can be found in `target/` after the build completes.
+
+#### Debugging test failures
+
+The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specifialized tasks provide alternate methods for running the tests.
+
+<dl>
+  <dt><code>npm run test:quick</code></dt>
+  <dd>Runs both server and browser tests, but skips linting</dd>
+
+  <dt><code>npm run test:server</code> or <code>npm run test:browser</code></dt>
+  <dd>Runs the tests for just the server or browser</dd>
+
+  <dt><code>npm run test:dev</code></dt>
+  <dd>
+    Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+    <br>
+    <img src="http://i.imgur.com/DwHxgfq.png">
+  </dd>
+</dl>
+
 
 ### Submit a pull request
 
