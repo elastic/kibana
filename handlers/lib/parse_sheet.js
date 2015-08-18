@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('lodash');
-var grammar = fs.readFileSync(path.resolve(__dirname, 'chain.peg'), 'utf8');
+var grammar = fs.readFileSync(path.resolve(__dirname, '../../public/chain.peg'), 'utf8');
 var PEG = require('pegjs');
 var Parser = PEG.buildParser(grammar);
 

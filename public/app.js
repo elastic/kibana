@@ -6,6 +6,7 @@ require('angular-resizable');
 require('angular-resizable/angular-resizable.min.css');
 
 require('./chart_directive');
+require('./expression_directive');
 require('./docs');
 require('./main.less');
 
