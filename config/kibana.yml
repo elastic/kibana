@@ -18,6 +18,21 @@
 # The default application to load.
 # kibana.defaultAppId: "discover"
 
+# Time in milliseconds to wait for elasticsearch to respond to pings, defaults to
+# request_timeout setting
+# elasticsearch.pingTimeout: 1500
+
+# Time in milliseconds to wait for responses from the back end or elasticsearch.
+# This must be > 0
+# elasticsearch.requestTimeout: 300000
+
+# Time in milliseconds for Elasticsearch to wait for responses from shards.
+# Set to 0 to disable.
+# elasticsearch.shardTimeout: 0
+
+# Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying
+# elasticsearch.startupTimeout: 5000
+
 # If your Elasticsearch is protected with basic auth, this is the user credentials
 # used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
 # users will still need to authenticate with Elasticsearch (which is proxied thorugh
@@ -36,21 +51,6 @@
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
 # elasticsearch.ssl.verify: true
-
-# Time in milliseconds to wait for elasticsearch to respond to pings, defaults to
-# request_timeout setting
-# elasticsearch.pingTimeout: 1500
-
-# Time in milliseconds to wait for responses from the back end or elasticsearch.
-# This must be > 0
-# elasticsearch.requestTimeout: 300000
-
-# Time in milliseconds for Elasticsearch to wait for responses from shards.
-# Set to 0 to disable.
-# elasticsearch.shardTimeout: 0
-
-# Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying
-# elasticsearch.startupTimeout: 5000
 
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
 # server.ssl.cert: /path/to/your/server.key
