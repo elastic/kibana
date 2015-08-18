@@ -40,7 +40,6 @@ require('./api/theme')(chrome, internals);
 chrome.bootstrap = function () {
   chrome.setupAngular();
   angular.bootstrap(document, ['kibana']);
-  $(document.body).children(':not(style-compile)').show();
 };
 
 module.exports = chrome;
