@@ -5,43 +5,46 @@ define(function (require) {
       var $ = require('jquery');
       var _ = require('lodash');
 
-      var modes = Private(require('ui/registry/spy_modes'));
-      var defaultMode = modes.inOrder[0].name;
+      var spyModes = Private(require('ui/registry/spy_modes'));
+      var defaultMode = spyModes.inOrder[0].name;
 
       return {
         restrict: 'E',
         template: require('ui/visualize/spy.html'),
         link: function ($scope, $el) {
+          var currentSpy;
           var $container = $el.find('.visualize-spy-container');
-          var fullPageSpy = $scope.uiState ? $scope.uiState.get('spy.fullScreen') : false;
-          $scope.modes = modes;
+          var fullPageSpy = _.get($scope.spy, 'mode.fill', false);
+          $scope.modes = spyModes;
 
           var renderSpy = function (spyName) {
-            var newMode = modes.byName[spyName];
-            var current = $scope.spy.mode;
+            var newMode = $scope.modes.byName[spyName];
 
             // clear the current value
-            if (current) {
-              current.$container && current.$container.remove();
-              current.$scope && current.$scope.$destroy();
-              $scope.spy.mode = false;
+            if (currentSpy) {
+              currentSpy.$container && currentSpy.$container.remove();
+              currentSpy.$scope && currentSpy.$scope.$destroy();
+              $scope.spy.mode = {};
+              currentSpy = null;
             }
 
             // no further changes
             if (!newMode) return;
 
             // update the spy mode and append to the container
-            current = $scope.spy.mode = {
-              // copy a couple values over
+            $scope.spy.mode = {
               name: newMode.name,
-              display: newMode.display,
               fill: fullPageSpy,
-              $scope: $scope.$new(),
-              $container: $('<div class="visualize-spy-content">').appendTo($container)
+              // display: newMode.display,
             };
 
-            current.$container.append($compile(newMode.template)(current.$scope));
-            newMode.link && newMode.link(current.$scope, current.$container);
+            currentSpy = _.assign({
+              $scope: $scope.$new(),
+              $container: $('<div class="visualize-spy-content">').appendTo($container)
+            }, $scope.spy.mode);
+
+            currentSpy.$container.append($compile(newMode.template)(currentSpy.$scope));
+            newMode.link && newMode.link(currentSpy.$scope, currentSpy.$container);
           };
 
           $scope.toggleDisplay = function () {
@@ -55,23 +58,25 @@ define(function (require) {
 
           $scope.setSpyMode = function (modeName) {
             // save the spy mode to the UI state
-            if (!_.isString(modeName)) return $scope.spy.name = null;
-            $scope.spy.name = modeName;
+            if (!_.isString(modeName)) modeName = null;
+            $scope.spy.mode.name = modeName;
           };
 
-          $scope.$watchMulti([
-            'spy.name',
-            function () { return fullPageSpy; }
-          ], function (vals, oldValds) {
-            renderSpy(vals[0]);
+          if ($scope.uiState) {
+            // sync external uiState changes
+            var syncUIState = () => $scope.spy.mode = $scope.uiState.get('spy.mode');
+            $scope.uiState.on('change', syncUIState);
+            $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
+          }
 
-            // update the ui state
-            if ($scope.uiState) {
-              $scope.uiState.set('spy', {
-                name: _.get($scope.spy.mode, 'name', null),
-                fullScreen: _.get($scope.spy.mode, 'fill', false),
-              });
-            }
+          // re-render the spy when the name of fill modes change
+          $scope.$watchMulti([
+            'spy.mode.name',
+            'spy.mode.fill'
+          ], function () {
+            // update the ui state, if passed in
+            if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
+            renderSpy(_.get($scope.spy, 'mode.name', null));
           });
         }
       };

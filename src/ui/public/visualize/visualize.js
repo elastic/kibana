@@ -37,8 +37,9 @@ define(function (require) {
         var getVisEl = getter('.visualize-chart');
         var getSpyEl = getter('visualize-spy');
 
-        $scope.spy = $scope.uiState ? $scope.uiState.get('spy', {}) : {};
         $scope.fullScreenSpy = false;
+        $scope.spy = {};
+        $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
         var applyClassNames = function () {
           var $spyEl = getSpyEl();
