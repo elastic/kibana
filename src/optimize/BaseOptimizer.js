@@ -11,7 +11,7 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 let babelOptions = require('./babelOptions');
-let babelExclude = [/[\/\\](node_modules|bower_components)[\/\\]/];
+let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
 class BaseOptimizer {
   constructor(opts) {
