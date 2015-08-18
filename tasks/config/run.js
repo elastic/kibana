@@ -16,13 +16,14 @@ module.exports = function (grunt) {
         '--env.name=development',
         '--logging.json=false',
         '--optimize.bundleFilter=tests',
-        '--optimize.lazy=false'
+        '--plugins.initialize=false'
       ]
     },
 
     devTestServer: {
       options: {
         wait: false,
+        ready: /Server running/,
         quiet: false,
         failOnError: false
       },
@@ -32,6 +33,7 @@ module.exports = function (grunt) {
         '--no-watch',
         '--server.port=5610',
         '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
         '--logging.json=false',
         '--optimize.bundleFilter=tests',
         '--plugins.initialize=false'

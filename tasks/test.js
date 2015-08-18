@@ -10,7 +10,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:dev', [
     'run:devTestServer',
-    'run:karmaDev'
+    'karma:dev'
   ]);
 
   grunt.registerTask('test', function (subTask) {
