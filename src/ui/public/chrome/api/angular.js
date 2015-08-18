@@ -22,7 +22,7 @@ module.exports = function (chrome, internals) {
     }()))
     .directive('kbnChrome', function ($rootScope) {
       return {
-        compile: function ($el) {
+        template: function ($el) {
           var $content = $(require('ui/chrome/chrome.html'));
           var $app = $content.find('.application');
 
@@ -35,7 +35,7 @@ module.exports = function (chrome, internals) {
             $app.html(internals.rootTemplate);
           }
 
-          $el.html($content);
+          return $content;
         },
         controllerAs: 'chrome',
         controller: function ($scope, $rootScope, $location, $http) {
