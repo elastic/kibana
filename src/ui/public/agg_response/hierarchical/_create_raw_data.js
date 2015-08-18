@@ -58,6 +58,12 @@ define(function (require) {
         record = [];
       }
 
+      if (!data[agg.id].buckets){
+        results.columns.shift()
+        results.columns.shift()
+        data = data[agg.id]
+        agg = agg._next
+      }
       // iterate through all the buckets
       _.each(extractBuckets(data[agg.id]), function (bucket) {
 
