@@ -19,7 +19,7 @@
         <i aria-hidden="true" class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form" name="queryInput">
+      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form fill" name="queryInput">
         <div class="typeahead">
           <div class="input-group">
             <input
@@ -39,7 +39,7 @@
       <form
         ng-if="vis.type.requiresSearch && !$state.linked"
         ng-submit="fetch()"
-        class="inline-form"
+        class="inline-form fill"
         name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"

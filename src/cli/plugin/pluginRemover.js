@@ -10,7 +10,7 @@ function remove(settings, logger) {
     try {
       fs.statSync(settings.pluginPath);
     } catch (e) {
-      logger.log(`Plugin ${settings.package} does not exist.`);
+      logger.log(`Plugin ${settings.package} does not exist`);
       return;
     }
 

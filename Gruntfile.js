@@ -1,4 +1,4 @@
-require('babel/register');
+require('babel/register')(require('./src/optimize/babelOptions'));
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
@@ -26,16 +26,7 @@ module.exports = function (grunt) {
       }
     }()),
 
-    nodeVersion: '0.10.35',
-    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
-    services: [
-      ['launchd', '10.9'],
-      ['upstart', '1.5'],
-      ['systemd', 'default'],
-      ['sysv', 'lsb-3.1']
-    ],
-
-    devPlugins: 'devMode',
+    nodeVersion: '2.5.0',
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
@@ -44,13 +35,37 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
+
     lintThese: [
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
       '<%= src %>/**/*.js',
       '!<%= src %>/fixtures/**/*.js'
-    ]
+    ],
+
+    deepModules: {
+      'caniuse-db': '1.0.30000265',
+      'chalk': '1.1.0',
+      'glob': '4.5.3',
+      'har-validator': '1.8.0',
+      'json5': '0.4.0',
+      'loader-utils': '0.2.11',
+      'micromatch': '2.2.0',
+      'postcss-normalize-url': '2.1.1',
+      'postcss-reduce-idents': '1.0.2',
+      'postcss-unique-selectors': '1.0.0',
+      'postcss-minify-selectors': '1.4.6',
+      'postcss-single-charset': '0.3.0',
+      'regenerator': '0.8.36'
+    }
   };
+
+  grunt.config.merge(config);
+
+  config.userScriptsDir = __dirname + '/build/userScripts';
+  // ensure that these run first, other configs need them
+  config.services = require('./tasks/config/services')(grunt);
+  config.platforms = require('./tasks/config/platforms')(grunt);
 
   grunt.config.merge(config);
 
@@ -66,4 +81,5 @@ module.exports = function (grunt) {
 
   // load task definitions
   grunt.task.loadTasks('tasks');
+  grunt.task.loadTasks('tasks/build');
 };

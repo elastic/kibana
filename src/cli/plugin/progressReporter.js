@@ -56,7 +56,7 @@ module.exports = function (logger, request) {
   function handleEnd() {
     if (hasError) return;
 
-    logger.log('Download Complete.');
+    logger.log('Download Complete');
     _resolve();
   }
 

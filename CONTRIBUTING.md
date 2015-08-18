@@ -49,7 +49,7 @@ Here are some hints for getting eslint setup in your favorite editor:
 
 | Editor | Plugin |
 | --- | --- | --- |
-| Sublime | [SublimeLinter-eslint](https://github.com/SublimeLinter/SublimeLinter-eslint#installation) |
+| Sublime | [SublimeLinter-eslint](https://github.com/roadhump/SublimeLinter-eslint#installation) |
 | Atom | [linter-eslint](https://github.com/AtomLinter/linter-eslint#installation) |
 | IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint |
 | vi | [scrooloose/syntastic](https://github.com/scrooloose/syntastic) |

@@ -3,10 +3,16 @@ let { isWorker } = require('cluster');
 let { resolve } = require('path');
 
 let cwd = process.cwd();
-let readYamlConfig = require('./readYamlConfig');
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');
-let KbnServer = src('server/KbnServer');
+
+let canCluster;
+try {
+  require.resolve('../cluster/ClusterManager');
+  canCluster = true;
+} catch (e) {
+  canCluster = false;
+}
 
 let pathCollector = function () {
   let paths = [];
@@ -20,8 +26,9 @@ let pluginDirCollector = pathCollector();
 let pluginPathCollector = pathCollector();
 
 module.exports = function (program) {
-  program
-  .command('serve')
+  let command = program.command('serve');
+
+  command
   .description('Run the kibana server')
   .collectUnknownOptions()
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
@@ -49,24 +56,37 @@ module.exports = function (program) {
     pluginPathCollector,
     []
   )
-  .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-  .option('--dev', 'Run the server with development mode defaults')
-  .option('--no-watch', 'Prevent watching, use with --dev to prevent server restarts')
-  .action(function (opts) {
-    if (opts.dev && opts.watch && !isWorker) {
-      // stop processing the action and handoff to watch cluster manager
-      return require('../watch/watch')(opts);
+  .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+
+  if (canCluster) {
+    command
+    .option('--dev', 'Run the server with development mode defaults')
+    .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+  }
+
+  command
+  .action(async function (opts) {
+    if (canCluster && opts.dev && !isWorker) {
+      // stop processing the action and handoff to cluster manager
+      let ClusterManager = require('../cluster/ClusterManager');
+      new ClusterManager(opts);
+      return;
     }
 
+    let readYamlConfig = require('./readYamlConfig');
+    let KbnServer = src('server/KbnServer');
+
     let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
+
+    if (opts.dev) {
+      try { _.merge(settings, readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
+      catch (e) { null; }
+    }
+
     let set = _.partial(_.set, settings);
     let get = _.partial(_.get, settings);
 
-    if (opts.dev) {
-      set('env', 'development');
-      set('optimize.watch', opts.watch);
-    }
-
+    if (opts.dev) set('env', 'development');
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
     if (opts.port) set('server.port', opts.port);
     if (opts.host) set('server.host', opts.host);
@@ -82,13 +102,22 @@ module.exports = function (program) {
 
     set('plugins.paths', [].concat(opts.pluginPath || []));
 
-    let server = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+    let kbnServer = {};
 
-    server.ready().catch(function (err) {
-      console.error(err.stack);
+    try {
+      kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+      await kbnServer.ready();
+    }
+    catch (err) {
+      let { server } = kbnServer;
+
+      if (server) server.log(['fatal'], err);
+      else console.error('FATAL', err);
+
+      kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
-    });
+    }
 
-    return server;
+    return kbnServer;
   });
 };

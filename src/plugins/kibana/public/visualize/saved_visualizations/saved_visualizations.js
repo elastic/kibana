@@ -20,6 +20,12 @@ define(function (require) {
     this.type = SavedVis.type;
     this.Class = SavedVis;
 
+    this.loaderProperties = {
+      name: 'visualizations',
+      noun: 'Visualization',
+      nouns: 'visualizations'
+    };
+
     this.get = function (id) {
       return (new SavedVis(id)).init();
     };

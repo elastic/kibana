@@ -46,12 +46,7 @@ module.exports = function (opts) {
   })
   .afterWork(
     // success
-    function () {
-      if (defaultRequiredToasts) {
-        _.invoke(defaultRequiredToasts, 'clear');
-        defaultRequiredToasts = null;
-      }
-    },
+    null,
 
     // failure
     function (err, kbnUrl) {

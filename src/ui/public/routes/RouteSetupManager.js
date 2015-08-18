@@ -32,6 +32,7 @@ module.exports = class RouteSetupManager {
 
     let invokeEach = (arr, locals) => {
       return Promise.map(arr, fn => {
+        if (!fn) return;
         return $injector.invoke(fn, null, locals);
       });
     };
@@ -45,9 +46,14 @@ module.exports = class RouteSetupManager {
       handlers = handlers.slice(0);
 
       let next = (err) => {
+        if (!handlers.length) throw err;
+
         let handler = handlers.shift();
-        if (!handler) throw err;
-        return $injector.invoke(handler, null, { err }).catch(next);
+        if (!handler) return next(err);
+
+        return Promise.try(function () {
+          return $injector.invoke(handler, null, { err });
+        }).catch(next);
       };
 
       return next(origError);
@@ -56,7 +62,7 @@ module.exports = class RouteSetupManager {
     return invokeEach(this.setupWork)
     .then(
       () => invokeEach(this.onSetupComplete),
-      err => callErrorHandlers(this.onSetupError)
+      err => callErrorHandlers(this.onSetupError, err)
     )
     .then(() => {
       // wait for the queue to fill up, then do all the work
@@ -67,7 +73,7 @@ module.exports = class RouteSetupManager {
     })
     .then(
       () => invokeEach(this.onWorkComplete),
-      err => callErrorHandlers(this.onWorkError)
+      err => callErrorHandlers(this.onWorkError, err)
     );
   }
 };

@@ -80,4 +80,16 @@ Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function
   return opts;
 });
 
+Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn) {
+  return action.call(this, function (...args) {
+    var ret = fn.apply(this, args);
+    if (ret && typeof ret.then === 'function') {
+      ret.then(null, function (e) {
+        console.log('FATAL CLI ERROR', e.stack);
+        process.exit(1);
+      });
+    }
+  });
+});
+
 module.exports = Command;
