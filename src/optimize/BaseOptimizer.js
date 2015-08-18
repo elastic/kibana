@@ -131,7 +131,7 @@ class BaseOptimizer {
       resolve: {
         extensions: ['.babel.js', '.js', '.less', ''],
         postfixes: [''],
-        modulesDirectories: ['node_modules'],
+        modulesDirectories: ['webpackShims', 'node_modules'],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,
