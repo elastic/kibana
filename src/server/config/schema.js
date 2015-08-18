@@ -82,11 +82,7 @@ module.exports = Joi.object({
     bundleFilter: Joi.string().default('!tests'),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-    lazy: Joi.boolean().when('$dev', {
-      is: true,
-      then: Joi.default(true),
-      otherwise: Joi.default(false)
-    }),
+    lazy: Joi.boolean().default(false),
     lazyPort: Joi.number().default(5602),
     lazyHost: Joi.string().hostname().default('0.0.0.0'),
     lazyPrebuild: Joi.boolean().default(false),
