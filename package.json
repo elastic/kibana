@@ -34,11 +34,12 @@
   ],
   "scripts": {
     "test": "grunt test",
-    "start": "node ./src/server/cli/index.js --dev",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
     "test:server": "grunt test:server",
+    "build": "grunt build",
+    "start": "./bin/kibana --dev",
     "precommit": "grunt lintStagedFiles",
     "karma": "karma start"
   },
