@@ -57,10 +57,12 @@ module.exports = {
       name: 'url', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null']
     },
+    /*
     {
       name: 'fit', // If you went around fiddling with interval you probably need a better fit function
       types: ['string', 'null']
     }
+    */
   ],
   help: 'Pull data from an elasticsearch instance',
   aliases: ['elasticsearch'],
@@ -129,8 +131,6 @@ function buildRequest(config, tlConfig) {
   //console.log(tlConfig);
   var filter = {range:{}};
   filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
-
-
 
   var searchRequest = {
     index: 'usagov',

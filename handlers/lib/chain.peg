@@ -13,9 +13,9 @@ argument
  / element:arg_type ','? space? {return element}
 
 arg_type
- = series
+ = number
  / function
- / number
+ / series
  / string
 
 series
@@ -74,12 +74,8 @@ reference
   }
  }
 
-// Only 26 columns supported for now
-column
- = column:[A-Z]
-
 number
- = number:(integer '.'? integer?) {return parseFloat(number.join(''))}
+ = number:([-+]? integer '.'? integer?) {return parseFloat(number.join(''))}
 
 integer
  = digits:DIGIT+ {return parseInt(digits.join(''))}
@@ -121,7 +117,11 @@ space
  /* ----- Strings, borrowed from the PEGJS JSON parser ----- */
 
 string "string"
-  = quotation_mark chars:char* quotation_mark { return chars.join(''); }
+ = quotation_mark chars:char* quotation_mark { return chars.join(''); }
+ / chars:unquoted_char+ { return chars.join(''); }
+
+unquoted_char 
+ = [-_*.+a-zA-Z0-9#\u00A0-\u10FFFF]
 
 char
   = unescaped
