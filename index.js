@@ -45,7 +45,7 @@ module.exports = function (kibana) {
 
       noParse: [
         join(modules, 'ace' + sep),
-        resolve(modules, 'moment'),
+        join(modules, 'moment_src' + sep),
         resolve(modules, 'sense_editor/mode/worker.js'),
       ]
     }
