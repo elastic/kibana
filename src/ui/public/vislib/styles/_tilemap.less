@@ -5,7 +5,7 @@
 .tilemap {
   margin-bottom: 6px;
   border: 1px solid;
-  border-color: @tilemap-border; //#DDD;
+  border-color: @tilemap-border;
   position: relative;
 }
 
@@ -15,13 +15,13 @@
   padding: 5px 7px 5px 7px;
   margin: 0;
   font: 11px/13px Arial, Helvetica, sans-serif;
-  background: @tilemap-legend-bg; //white;
-  background: fade(@tilemap-legend-bg, 8%); //rgba(255,255,255,0.92);
+  background: @tilemap-legend-base-bg;
+  background: @tilemap-legend-bg;
   box-shadow: 0 0 12px rgba(0,0,0,0.3);
   border-radius: 5px;
   text-align: left;
   line-height: 15px;
-  color: @tilemap-color; //#666;
+  color: @tilemap-color;
 }
 
 
@@ -34,8 +34,8 @@
   border-radius: 50%;
   border-width: 1px;
   border-style: solid;
-  border-color: @tilemap-legend-i-border; //#999;
-  background: @tilemap-legend-i-bg; //#aaa;
+  border-color: @tilemap-legend-i-border;
+  background: @tilemap-legend-i-bg;
 }
 
 
@@ -45,8 +45,8 @@
   padding: 3px 7px 3px 7px;
   margin: 0;
   font-size: 12px;
-  background: @tilemap-info-bg; //white;
-  background: fade(@tilemap-info-bg, 92%); //rgba(255,255,255,0.92);
+  background: @tilemap-info-base-bg;
+  background: fade(@tilemap-info-bg, 92%);
   box-shadow: 0 0 12px rgba(0,0,0,0.3);
   border-radius: 5px;
 }
@@ -55,12 +55,12 @@
   font-size: 12px !important;
   margin: 0 !important;
   padding: 0;
-  color: @tilemap-info-header-color; //#444;
+  color: @tilemap-info-header-color;
 }
 
 .leaflet-control-fit {
   text-align: center;
-  background: @tilemap-leaflet-control-bg; //#fff;
+  background: @tilemap-leaflet-control-bg;
   width: 26px;
   height: 26px;
   outline: 1px @tilemap-leaflet-control-outline;
@@ -69,7 +69,7 @@
 /* over-rides leaflet popup styles to look like kibana tooltip */
 
 .leaflet-container {
-  background: @tilemap-leaflet-container-bg !important; //#fff !important;
+  background: @tilemap-leaflet-container-bg !important;
   outline: 0 !important;
 }
 
@@ -120,13 +120,13 @@
     // those in the body
     thead tr {
       border-bottom: 1px solid;
-      border-bottom-color: @tilemap-leaflet-popup-border; //@gray;
+      border-bottom-color: @tilemap-leaflet-popup-border;
     }
 
     // only apply to tr in the body, not the header
     tbody tr {
       border-top: 1px solid;
-      border-top-color: @tilemap-leaflet-popup-border; //@gray;
+      border-top-color: @tilemap-leaflet-popup-border;
       &:first-child {
         border-top: none;
       }
@@ -153,6 +153,24 @@
 
 .leaflet-draw-tooltip {
   display: none;
+}
+
+.leaflet-control-attribution {
+  background-color: @tilemap-leaflet-footer-bg !important;
+  color: @tilemap-leaflet-footer-color !important;
+}
+
+.leaflet-left {
+  .leaflet-control {
+    a,
+    a:hover {
+      color: @tilemap-leaflet-control-color;
+    }
+  }
+
+  .leaflet-draw-actions a {
+    background-color: @tilemap-leaflet-control-draw-action-bg;
+  }
 }
 
 /* filter to desaturate mapquest tiles */

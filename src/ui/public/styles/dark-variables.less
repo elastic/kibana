@@ -1,41 +1,173 @@
+@white:                                       #ffffff;
+@black:                                       #000000;
 
-@white:                  #ffffff;
-@black:                  #000000;
+@gray2:                                       #222222;
+@gray3:                                       #333333;
+@gray4:                                       #444444;
+@gray5:                                       #555555;
+@gray6:                                       #666666;
+@gray7:                                       #777777;
+@gray8:                                       #888888;
+@gray9:                                       #999999;
+@gray10:                                      #aaaaaa;
+@gray11:                                      #bbbbbb;
+@gray12:                                      #cccccc;
+@gray13:                                      #dddddd;
+@gray14:                                      #eeeeee;
 
-@gray2:                  #222222;
-@gray3:                  #333333;
-@gray4:                  #444444;
-@gray5:                  #555555;
-@gray6:                  #666666;
-@gray7:                  #777777;
-@gray8:                  #888888;
-@gray9:                  #999999;
-@gray10:                 #aaaaaa;
-@gray11:                 #bbbbbb;
-@gray12:                 #cccccc;
-@gray13:                 #dddddd;
-@gray14:                 #eeeeee;
+@brand-primary:                               @gray14;
+@brand-success:                               #31C471;
+@brand-info:                                  #6482e5;
+@brand-warning:                               #F39C12;
+@brand-danger:                                #E74C3C;
 
-@brand-primary:         @gray14;
-@brand-success:         #31C471;
-@brand-info:            #6482e5;
-@brand-warning:         #F39C12;
-@brand-danger:          #E74C3C;
+@body-bg:                                     @gray3;
+@text-color:                                  @brand-primary;
+@link-color:                                  @brand-info; //lighten(#358782, 10%);
+@link-hover-color:                            lighten(@link-color, 10%);
 
-@body-bg:                                   @gray3;
-@text-color:                                @brand-primary;
-@link-color:                                @brand-info;
-@link-hover-color:                          lighten(@link-color, 10%);
+@btn-default-color:                           @white;
+@btn-default-bg:                              @gray7;
+@btn-default-border:                          @btn-default-bg;
 
-@btn-danger-bg:                             @brand-danger;
+@btn-primary-color:                           @white;
+@btn-primary-bg:                              @gray7;
+@btn-primary-border:                          @btn-primary-bg;
 
-@table-border-color:                        @gray14;
+@btn-success-bg:                              @brand-success;
+@btn-danger-bg:                               @brand-danger;
 
-@dashboard-bg:                              @gray3;
-@panel-bg:                                  @gray2;
-@panel-inner-border:                        @gray13;
-@dashboard-panel-bg:                        @panel-bg;
-@dashboard-panel-color:                     @text-color;
-@dashboard-panel-heading-link-color:        @text-color;
-@dashboard-panel-heading-link-hover-color:  @link-hover-color;
-@dashboard-panel-load-error-color:          @btn-danger-bg;
+@input-bg:                                    @gray4;
+@input-bg-disabled:                           @gray3;
+
+@input-color:                                 @text-color;
+@input-border:                                @gray6;
+
+@well-bg:                                     @gray4;
+
+@action-add:                                  desaturate(@btn-success-bg, 30%);
+@action-remove:                               desaturate(@btn-danger-bg, 30%);
+
+@table-border-color:                          @gray14;
+@table-cell-hover-bg:                         @gray3;
+@table-cell-hover-hover-bg:                   @gray6;
+@table-row-hover-bg:                          lighten(@gray6, 4%);
+
+@table-sort-color:                            @gray6;
+@table-sort-asc-color:                        @gray11;
+@table-sort-desc-color:                       @gray11;
+
+
+
+@nav-link-hover-bg:                           @gray6; //@gray14;
+@nav-tabs-active-link-hover-bg:               @gray3; //@body-bg;
+
+@nav-tabs-border-color:                       @gray6;//@gray14;
+@nav-tabs-link-hover-border-color:            @gray7; //@gray14;
+@nav-tabs-active-link-hover-border-color:     @gray14;
+
+@nav-tabs-active-link-hover-color:            @brand-primary;
+
+
+
+@dashboard-bg:                                @gray3;
+@panel-bg:                                    @gray2;
+@panel-inner-border:                          @gray13;
+
+@panel-default-text:                          @brand-primary;
+@panel-default-border:                        @gray4;
+@panel-default-heading-bg:                    @gray2;
+
+@dashboard-panel-bg:                          @panel-bg;
+@dashboard-panel-color:                       @text-color;
+@dashboard-panel-heading-link-color:          @text-color;
+@dashboard-panel-heading-link-hover-color:    @link-hover-color;
+@dashboard-panel-load-error-color:            @btn-danger-bg;
+
+@collapser-bg:                                @gray3;
+@collapser-border:                            @gray14;
+@collapser-color:                             @gray14;
+@collapser-hover-bg:                          @gray14;
+@collapser-hover-color:                       @gray3;
+
+@visualize-show-spy-border:                   @collapser-border;
+@visualize-show-spy-bg:                       @collapser-bg;
+@visualize-show-spy-hover-bg:                 @collapser-hover-bg;
+@visualize-show-spy-hover-color:              @collapser-hover-color;
+
+@svg-axis-color:                              @gray13;
+@svg-tick-color:                              @gray8;
+@svg-brush-color:                             @white;
+@svg-endzone-bg:                              @black;
+@vis-axis-title-color:                        @gray8;
+@vis-chart-title-color:                       @gray8;
+
+@tilemap-border:                              @gray13;
+@tilemap-legend-base-bg:                      @gray3;
+@tilemap-legend-bg:                           fade(@tilemap-legend-base-bg, 100%);
+@tilemap-color:                               @gray12;
+@tilemap-legend-i-border:                     @gray9;
+@tilemap-legend-i-bg:                         @gray10;
+@tilemap-info-base-bg:                        @white;
+@tilemap-info-bg:                             fade(@tilemap-info-base-bg, 92%);
+@tilemap-info-header-color:                   @gray4;
+@tilemap-leaflet-control-bg:                  @white;
+@tilemap-leaflet-control-outline:             @black;
+@tilemap-leaflet-control-color:               @black;
+@tilemap-leaflet-control-draw-action-bg:      @gray11;
+@tilemap-leaflet-container-bg:                @body-bg;
+@tilemap-leaflet-popup-border:                @gray9;
+@tilemap-leaflet-footer-bg:                   fade(@gray3, 80%);
+@tilemap-leaflet-footer-color:                @gray12;
+@tilemap-filter:                              invert(1) brightness(1.75) grayscale(1) contrast(1);
+
+@tooltip-bg:                                  fadeout(@gray4, 7%);
+@tooltip-color:                               @gray14;
+
+
+@filter-bar-confirm-bg:                       @gray3;
+@filter-bar-confirm-filter-color:             @gray3;
+@filter-bar-confirm-border:                   @gray12;
+@filter-bar-confirm-filter-bg:                @gray12;
+@filter-bar-bar-bg:                           @gray3;
+@filter-bar-bar-border:                       @gray12;
+@filter-bar-bar-condensed-bg:                 darken(@filter-bar-bar-bg, 5%);
+@filter-bar-bar-filter-bg:                    @action-add;
+@filter-bar-bar-filter-color:                 @white;
+@filter-bar-bar-filter-negate-bg:             @action-remove;
+
+// Legend ======================================================================
+@legend-item-color:                           @gray10;
+
+// Config ======================================================================
+@config-border: @gray4;
+@config-bg: @body-bg;
+@config-close-bg: @well-bg;
+@config-saved-object-finder-options-bg:       @body-bg;
+
+// Saved Object Finder =========================================================
+@saved-object-finder-link-color:              @text-color;
+@saved-object-finder-icon-color:              darken(@saved-object-finder-link-color, 10%);
+
+// List Group Menu =============================================================
+@list-group-bg:                               @gray5;
+@list-group-border:                           @gray7;
+
+@list-group-hover-bg:                         @gray14;
+
+@list-group-link-color:                       @gray5;
+@list-group-link-hover-color:                 @list-group-link-color;
+@list-group-link-heading-color:               @gray3;
+
+@list-group-menu-item-color:                  @text-color;
+@list-group-menu-item-select-color:           @link-color;
+@list-group-menu-item-active-bg:              @well-bg;
+@list-group-menu-item-hover-bg:               @well-bg;
+
+
+@component-active-color:                      @gray5;
+@component-active-bg:                         @gray9;
+
+@navbar-default-color:                        @white;
+@navbar-default-bg:                           @gray3;
+@navbar-default-border:                       darken(@navbar-default-bg, 10%);
