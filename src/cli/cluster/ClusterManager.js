@@ -64,7 +64,7 @@ module.exports = class ClusterManager {
       'installedPlugins'
     ], {
       cwd: fromRoot('.'),
-      ignored: /[\\\/](node_modules|bower_components|public)[\\\/]/,
+      ignored: /[\\\/](node_modules|bower_components|public|__tests__)[\\\/]/,
     });
 
     this.watcher.on('add', this.onWatcherAdd);
