@@ -22,6 +22,17 @@ define(function (require) {
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
+          wms: {
+            url: 'http://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+            options: {
+              version: '1.3.0',
+              layers: '0,1,2',
+              format: 'image/png',
+              transparent: true,
+              attribution: 'Maps provided by USGS',
+              styles: '',
+            }
+          }
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
