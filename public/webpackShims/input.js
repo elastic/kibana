@@ -16,7 +16,6 @@
  */
 
 
-
 define([
   'ace',
   'autocomplete',
