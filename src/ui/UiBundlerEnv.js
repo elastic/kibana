@@ -6,7 +6,14 @@ let fromRoot = require('../utils/fromRoot');
 let asRegExp = flow(
   escapeRegExp,
   function (path) {
-    return path + '(?:\\.js)?$';
+    let last = path.slice(-1);
+    if (last === '/' || last === '\\') {
+      // match a directory explicitly
+      return path + '.*';
+    } else {
+      // match a directory or files or just the absolute path
+      return path + '(?:\\.js$|$|\\\\|\\/)?';
+    }
   },
   RegExp
 );
@@ -85,6 +92,7 @@ module.exports = class UiBundlerEnv {
   }
 
   addNoParse(regExp) {
+    if (typeof regExp === 'string') regExp = asRegExp(regExp);
     this.noParse.push(regExp);
   }
 
@@ -129,7 +137,7 @@ module.exports = class UiBundlerEnv {
     if (exports) loader.push(`exports?${exports}`);
     if (expose) loader.push(`expose?${expose}`);
     if (loader.length) this.loaders.push({ test: asRegExp(path), loader: loader.join('!') });
-    if (!parse) this.noParse.push(asRegExp(path));
+    if (!parse) this.addNoParse(path);
   }
 
   claim(id, pluginId) {
