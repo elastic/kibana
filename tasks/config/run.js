@@ -14,7 +14,7 @@ module.exports = function (grunt) {
       args: [
         '--env.name=development',
         '--logging.json=false',
-        '--optimize.tests=true',
+        '--optimize.bundleFilter=tests',
         '--optimize.lazy=false'
       ]
     },
