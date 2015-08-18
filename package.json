@@ -35,6 +35,10 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/cli/index.js --dev",
+    "test:dev": "grunt test:dev",
+    "test:quick": "grunt test:quick",
+    "test:browser": "grunt test:browser",
+    "test:server": "grunt test:server",
     "precommit": "grunt lintStagedFiles",
     "karma": "karma start"
   },

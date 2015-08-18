@@ -1,32 +1,32 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-  grunt.registerTask('test', function () {
+  grunt.registerTask('test:server', [ 'simplemocha:all' ]);
+  grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
+
+  grunt.registerTask('test:quick', [
+    'test:server',
+    'test:browser'
+  ]);
+
+  grunt.registerTask('test:dev', [
+    'run:devTestServer',
+    'run:karmaDev'
+  ]);
+
+  grunt.registerTask('test', function (subTask) {
+    if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
+
     if (grunt.option('quick')) {
-      grunt.task.run('quick-test');
+      grunt.task.run('test:quick');
       return;
     }
 
     grunt.task.run(_.compact([
       'eslint:source',
-      'simplemocha:all',
-      'run:testServer',
-      'karma:ci'
+      'test:server',
+      'test:browser'
     ]));
   });
 
-  grunt.registerTask('quick-test', [
-    'simplemocha:all',
-    'run:testServer',
-    'karma:ci'
-  ]);
-
-  grunt.registerTask('test:dev', [
-    'run:devTestServer',
-    'karma:dev'
-  ]);
-
-  grunt.registerTask('test:watch', [
-    'run:testServer',
-    'watch:test'
-  ]);
+  grunt.registerTask('quick-test', ['test:quick']); // historical alias
 };
