@@ -9,21 +9,24 @@ module.exports = function (grunt) {
     grunt.task.run(_.compact([
       'eslint:source',
       'simplemocha:all',
-      'maybeStartTestServer',
-      'karma:unit'
+      'run:testServer',
+      'karma:ci'
     ]));
   });
 
-  grunt.registerTask('quick-test', function () {
-    grunt.task.run([
-      'simplemocha:all',
-      'maybeStartTestServer',
-      'karma:unit'
-    ]);
-  });
+  grunt.registerTask('quick-test', [
+    'simplemocha:all',
+    'run:testServer',
+    'karma:ci'
+  ]);
+
+  grunt.registerTask('test:dev', [
+    'run:devTestServer',
+    'karma:dev'
+  ]);
 
   grunt.registerTask('test:watch', [
-    'maybeStartTestServer',
+    'run:testServer',
     'watch:test'
   ]);
 };

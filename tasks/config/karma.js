@@ -1,12 +1,19 @@
 module.exports = function (grunt) {
   return {
-    unit: {
+    dev: {
       configFile: 'karma.conf.js',
-      singleRun: true,
       reporters: 'dots',
       browsers: [
         '<%= karmaBrowser %>'
       ]
-    }
+    },
+    ci: {
+      singleRun: true,
+      configFile: 'karma.conf.js',
+      reporters: 'dots',
+      browsers: [
+        '<%= karmaBrowser %>'
+      ]
+    },
   };
 };

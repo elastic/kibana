@@ -16,15 +16,15 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'http://localhost:5601/bundles/commons.bundle.js',
-      'http://localhost:5601/bundles/tests.bundle.js',
-      'http://localhost:5601/bundles/commons.style.css',
-      'http://localhost:5601/bundles/tests.style.css'
+      'http://localhost:5610/bundles/commons.bundle.js',
+      'http://localhost:5610/bundles/tests.bundle.js',
+      'http://localhost:5610/bundles/commons.style.css',
+      'http://localhost:5610/bundles/tests.style.css'
     ],
 
     proxies: {
-      '/tests/': 'http://localhost:5601/tests/',
-      '/bundles/': 'http://localhost:5601/bundles/'
+      '/tests/': 'http://localhost:5610/tests/',
+      '/bundles/': 'http://localhost:5610/bundles/'
     },
 
     // test results reporter to use
