@@ -92,7 +92,6 @@ module.exports = class UiBundlerEnv {
   }
 
   addNoParse(regExp) {
-    if (typeof regExp === 'string') regExp = asRegExp(regExp);
     this.noParse.push(regExp);
   }
 
