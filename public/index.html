@@ -86,13 +86,15 @@
 
   <div class="timelion-container">
     <div class="timelion-container-sheet">
-      <div class="chart-container col-md-4"
-        ng-repeat="cell in state.sheet track by $index"
-        ng-click="setActiveCell($index)"
-        ng-class="{active: $index === state.selected, running: running}"
-        >
-        <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
-        <div chart="sheet[$index]" cell="$index"></div>
+      <div class="timelion-container-sheet-margin">
+        <div class="chart-container col-md-4"
+          ng-repeat="cell in state.sheet track by $index"
+          ng-click="setActiveCell($index)"
+          ng-class="{active: $index === state.selected, running: running}"
+          >
+          <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
+          <div chart="sheet[$index]" cell="$index"></div>
+        </div>
       </div>
     </div>
     <div class="timelion-container-drawer-tab" ng-click="toggle('showHelp')">
