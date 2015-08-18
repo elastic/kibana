@@ -1,5 +1,5 @@
 module.exports = function (kibana) {
-  let { resolve } = require('path');
+  let { resolve, join, sep } = require('path');
   let Joi = require('joi');
   let Boom = require('boom');
   let modules = resolve(__dirname, 'public/webpackShims/');
@@ -44,7 +44,7 @@ module.exports = function (kibana) {
       },
 
       noParse: [
-        resolve(modules, 'ace') + '/',
+        join(modules, 'ace' + sep),
         resolve(modules, 'moment'),
         resolve(modules, 'sense_editor/mode/worker.js'),
       ]
