@@ -23,11 +23,6 @@
     }
   }
 
-  // the element should take up an even share of available space
-  > .fill {
-    flex: 1 1 1%;
-  }
-
   button {
     padding: @padding-base-vertical @padding-base-horizontal;
     font-size: @font-size-base;
@@ -79,7 +74,7 @@
   }
 
   .inline-form {
-    .flex-parent();
+    .flex-parent(0, 0, auto);
     display: flex;
 
     > .typeahead {
@@ -101,6 +96,11 @@
         }
       }
     }
+  }
+
+  // the element should take up an even share of available space
+  > .fill {
+    flex: 1 1 1%;
   }
 }
 
