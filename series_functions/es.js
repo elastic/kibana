@@ -133,7 +133,7 @@ function buildRequest(config, tlConfig) {
   filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
 
   var searchRequest = {
-    index: 'usagov',
+    index: config.index,
     //filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
     //searchType: 'count',
     body: {
