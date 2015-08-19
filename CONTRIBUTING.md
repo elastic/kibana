@@ -71,7 +71,7 @@ Distributable packages can be found in `target/` after the build completes.
 
 #### Debugging test failures
 
-The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specifialized tasks provide alternate methods for running the tests.
+The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
 <dl>
   <dt><code>npm run test:quick</code></dt>
