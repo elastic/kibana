@@ -4,6 +4,8 @@ var versionMath = require('./version_math');
 var SetupError = require('./setup_error');
 
 module.exports = function (server) {
+  server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
+
   var client = server.plugins.elasticsearch.client;
   var minimumElasticsearchVersion = server.config().get('elasticsearch.minimumVerison');
 
@@ -31,7 +33,6 @@ module.exports = function (server) {
     `${minimumElasticsearchVersion} or higher on all nodes. I found ` +
     `the following incompatible nodes in your cluster: ${badNodeNames.join(',')}`;
 
-    server.plugins.elasticsearch.status.red(message);
     throw new SetupError(server, message);
   });
 };
