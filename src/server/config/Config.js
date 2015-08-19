@@ -4,12 +4,20 @@ let _ = require('lodash');
 let override = require('./override');
 let pkg = require('requirefrom')('src/utils')('packageJson');
 
+const pendingSets = Symbol('Pending Settings');
+
 module.exports = class Config {
-  constructor(schema, defaults) {
+  constructor(schema, initialSettings) {
     this.schema = Joi.object({}).default();
     this.config = {};
-    this.unappliedDefaults = _.cloneDeep(defaults || {});
+
+    this[pendingSets] = new Map(_.pairs(_.cloneDeep(initialSettings || {})));
+
     if (schema) this.extendSchema(schema);
+  }
+
+  getPendingSets() {
+    return this[pendingSets];
   }
 
   extendSchema(key, schema) {
@@ -25,13 +33,13 @@ module.exports = class Config {
 
     this.schema = this.schema.keys(_.set({}, key, schema));
 
-    if (this.unappliedDefaults[key]) {
-      this.set(key, this.unappliedDefaults[key]);
-      this.unappliedDefaults[key] = null;
+    var initialVals = this[pendingSets].get(key);
+    if (initialVals) {
+      this.set(key, initialVals);
+      this[pendingSets].delete(key);
     } else {
       this._commit(this.config);
     }
-
   }
 
   resetTo(obj) {
