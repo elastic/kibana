@@ -50,6 +50,10 @@
             {{ tab.title }}
           </a>
         </li>
+
+        <li ng-if="!!sid">
+          <a href="/logout">Log Out</a>
+        </li>
       </ul>
 
       <ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">

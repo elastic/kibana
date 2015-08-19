@@ -111,7 +111,13 @@ module.exports = Joi.object({
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false),
     tests: Joi.boolean().default(false),
-  }).default()
+  }).default(),
 
+  auth: Joi.object({
+    enabled: Joi.boolean().default(false),
+    strategy: Joi.string().default('esProxy'),
+    encryptionKey: Joi.string().default('secret'),
+    sessionTimeout: Joi.number().default(30 * 60 * 1000)
+  }).default()
 }).default();
 

@@ -29,6 +29,9 @@ module.exports = function (kbnServer, server, config) {
           listing: true,
           lookupCompressed: true
         }
+      },
+      config: {
+        auth: false
       }
     });
   });

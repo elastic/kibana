@@ -18,9 +18,9 @@ class UiExports {
     var types = _.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
-    var unkown = _.reject(types, this.exportConsumer, this);
-    if (unkown.length) {
-      throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
+    var unknown = _.reject(types, this.exportConsumer, this);
+    if (unknown.length) {
+      throw new Error('unknown export types ' + unknown.join(', ') + ' in plugin ' + plugin.id);
     }
 
     for (let consumer of this.consumers) {

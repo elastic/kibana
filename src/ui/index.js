@@ -40,6 +40,21 @@ module.exports = async (kbnServer, server, config) => {
   server.setupViews(resolve(__dirname, 'views'));
   server.exposeStaticFile('/loading.gif', resolve(__dirname, 'public/loading.gif'));
 
+  if (config.get('auth.enabled')) {
+    server.route({
+      path: '/login',
+      method: 'GET',
+      handler: function (req, reply) {
+        let login = uiExports.getHiddenApp('login');
+        if (!login) return reply(Boom.notFound('login page not installed'));
+        return reply.renderApp(login);
+      },
+      config: {
+        auth: false
+      }
+    });
+  }
+
   // serve the app switcher
   server.route({
     path: '/apps',
@@ -66,7 +81,7 @@ module.exports = async (kbnServer, server, config) => {
     handler: function (req, reply) {
       let id = req.params.id;
       let app = uiExports.apps.byId[id];
-      if (!app) return reply(Boom.notFound('Unkown app ' + id));
+      if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
         return reply.renderApp(app);

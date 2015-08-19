@@ -35,7 +35,7 @@ define(function (require) {
    *
    * # init
    * @param {Function} [spec.constructor] - an injectable function that is called when
-   *                                      the registry is first instanciated by the app.
+   *                                      the registry is first instantiated by the app.
    *
    * # IndexedArray params
    * @param {array[String]} [spec.index] - passed to the IndexedArray constructor
@@ -55,7 +55,7 @@ define(function (require) {
     var providers = [];
 
     /**
-     * This is the Private module that will be instanciated by
+     * This is the Private module that will be instantiated by
      *
      * @tag:PrivateModule
      * @return {IndexedArray} - an indexed array containing the values

@@ -56,6 +56,13 @@ module.exports = function (chrome, internals) {
           return chrome;
         }
       };
+    })
+    .run(function ($rootScope, $cookies) {
+      $rootScope.$watch(function () {
+        return $cookies.sid;
+      }, function (value) {
+        $rootScope.sid = value;
+      });
     });
 
     modules.link(kibana);
