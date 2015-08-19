@@ -264,7 +264,7 @@ define(function (require) {
       this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
 
       // add map tiles layer, using the mapTiles object settings
-      if (this._attr.wms.enabled) {
+      if (this._attr.wms && this._attr.wms.enabled) {
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
       } else {
         this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
