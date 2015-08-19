@@ -28,7 +28,7 @@ module.exports = function (settings, logger) {
             return tryNext();
           }
           if (err.message === 'EEXTRACT') {
-            throw (new Error('Error extracting the plugin archive'));
+            throw (new Error('Error extracting the plugin archive... is this a valid tar.gz file?'));
           }
           throw (err);
         });
