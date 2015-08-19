@@ -9,7 +9,6 @@ define(function (require) {
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
     var Legend = Private(require('ui/vislib/lib/legend'));
-    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
 
     /**
      * Handles building all the components of the visualization
@@ -42,23 +41,25 @@ define(function (require) {
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
+      this.timeMarker = opts.timeMarker;
+
+      if (this.timeMarker) {
+        this.markerSyncHandler = function (e) {
+          var margin = self._attr.margin;
+          self.timeMarker.setTime(e.point.x);
+          self.charts.forEach(function (chart) {
+            var height = $(chart.chartEl).height() - margin.top - margin.bottom;
+            var svg = d3.select(chart.chartEl).selectAll('svg > g');
+            self.timeMarker.render(svg, self.xAxis.xScale, height);
+          });
+        };
+
+        markerSync.on('sync', this.markerSyncHandler);
+      }
 
       if (this._attr.addLegend) {
         this.legend = opts.legend;
       }
-
-      this.timeMarker = new TimeMarker([]);
-      this.markerSyncHandler = function (e) {
-        var margin = self._attr.margin;
-        self.timeMarker.setTime(e.point.x);
-        self.charts.forEach(function (chart) {
-          var height = $(chart.chartEl).height() - margin.top - margin.bottom;
-          var svg = d3.select(chart.chartEl).selectAll('svg > g');
-          self.timeMarker.render(svg, self.xAxis.xScale, height);
-        });
-      };
-
-      markerSync.on('sync', this.markerSyncHandler);
 
       this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
 
@@ -229,7 +230,10 @@ define(function (require) {
 
       this.charts.length = 0;
 
-      markerSync.off('sync', this.markerSyncHandler);
+      if (this.markerSyncHandler) {
+        markerSync.off('sync', this.markerSyncHandler);
+        this.markerSyncHandler = null;
+      }
     };
 
     return Handler;

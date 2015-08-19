@@ -9,6 +9,7 @@ define(function (require) {
     var AxisTitle = Private(require('ui/vislib/lib/axis_title'));
     var ChartTitle = Private(require('ui/vislib/lib/chart_title'));
     var Alerts = Private(require('ui/vislib/lib/alerts'));
+    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
 
     /*
      * Create handlers for Area, Column, and Line charts which
@@ -47,7 +48,8 @@ define(function (require) {
             yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
             yAxisFormatter: data.get('yAxisFormatter'),
             _attr: vis._attr
-          })
+          }),
+          timeMarker: new TimeMarker([])
         });
 
       };
