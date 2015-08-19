@@ -1,12 +1,9 @@
-var childProcess = require('child_process');
-var Promise = require('bluebird');
-var fs = require('fs');
-var readdir = Promise.promisify(fs.readdir);
-var exec = Promise.promisify(childProcess.exec);
-var _ = require('lodash');
-module.exports = function (grunt) {
+var { promisify } = require('bluebird');
+var readdir = promisify(require('fs').readdir);
+var exec = promisify(require('child_process').exec);
 
-  grunt.registerTask('create_shasums', function () {
+module.exports = function (grunt) {
+  grunt.registerTask('_build:shasums', function () {
     var targetDir = grunt.config.get('target');
 
     readdir(targetDir)

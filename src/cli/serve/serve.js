@@ -6,6 +6,14 @@ let cwd = process.cwd();
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');
 
+let canCluster;
+try {
+  require.resolve('../cluster/ClusterManager');
+  canCluster = true;
+} catch (e) {
+  canCluster = false;
+}
+
 let pathCollector = function () {
   let paths = [];
   return function (path) {
@@ -18,8 +26,9 @@ let pluginDirCollector = pathCollector();
 let pluginPathCollector = pathCollector();
 
 module.exports = function (program) {
-  program
-  .command('serve')
+  let command = program.command('serve');
+
+  command
   .description('Run the kibana server')
   .collectUnknownOptions()
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
@@ -47,11 +56,17 @@ module.exports = function (program) {
     pluginPathCollector,
     []
   )
-  .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-  .option('--dev', 'Run the server with development mode defaults')
-  .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+  .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+
+  if (canCluster) {
+    command
+    .option('--dev', 'Run the server with development mode defaults')
+    .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+  }
+
+  command
   .action(async function (opts) {
-    if (opts.dev && !isWorker) {
+    if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
       let ClusterManager = require('../cluster/ClusterManager');
       new ClusterManager(opts);

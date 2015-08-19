@@ -1,6 +1,5 @@
 var pluginDownloader = require('./pluginDownloader');
 var pluginCleaner = require('./pluginCleaner');
-var npmInstall = require('./npmInstall');
 var fs = require('fs');
 
 module.exports = {
@@ -25,9 +24,6 @@ function install(settings, logger) {
   return cleaner.cleanPrevious()
   .then(function () {
     return downloader.download();
-  })
-  .then(function () {
-    return npmInstall(settings.workingPath, logger);
   })
   .then(function (curious) {
     fs.renameSync(settings.workingPath, settings.pluginPath);
