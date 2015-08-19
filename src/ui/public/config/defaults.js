@@ -74,6 +74,22 @@ define(function () {
         '12 is the max. Explanation of cell dimensions: http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator',
       },
+      'visualization:tileMap:WMSdefaults': {
+        value: JSON.stringify({
+          enabled: false,
+          url: 'http://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+          options: {
+            version: '1.3.0',
+            layers: '0',
+            format: 'image/png',
+            transparent: true,
+            attribution: 'Maps provided by USGS',
+            styles: '',
+          }
+        }, null, '  '),
+        type: 'json',
+        description: 'Default properties for the WMS map server support in the tile map'
+      },
       'csv:separator': {
         value: ',',
         description: 'Separate exported values with this string',
