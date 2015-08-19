@@ -23,7 +23,7 @@
 
 @body-bg:                                     @gray3;
 @text-color:                                  @brand-primary;
-@link-color:                                  @brand-info; //lighten(#358782, 10%);
+@link-color:                                  #ea458b;
 @link-hover-color:                            lighten(@link-color, 10%);
 
 @btn-default-color:                           @white;
@@ -48,7 +48,7 @@
 @action-add:                                  desaturate(@btn-success-bg, 30%);
 @action-remove:                               desaturate(@btn-danger-bg, 30%);
 
-@table-border-color:                          @gray14;
+@table-border-color:                          @gray6;
 @table-cell-hover-bg:                         @gray3;
 @table-cell-hover-hover-bg:                   @gray6;
 @table-row-hover-bg:                          lighten(@gray6, 4%);
@@ -59,11 +59,11 @@
 
 
 
-@nav-link-hover-bg:                           @gray6; //@gray14;
-@nav-tabs-active-link-hover-bg:               @gray3; //@body-bg;
+@nav-link-hover-bg:                           @gray6;
+@nav-tabs-active-link-hover-bg:               @gray3;
 
-@nav-tabs-border-color:                       @gray6;//@gray14;
-@nav-tabs-link-hover-border-color:            @gray7; //@gray14;
+@nav-tabs-border-color:                       @gray6;
+@nav-tabs-link-hover-border-color:            @gray7;
 @nav-tabs-active-link-hover-border-color:     @gray14;
 
 @nav-tabs-active-link-hover-color:            @brand-primary;
@@ -85,13 +85,14 @@
 @dashboard-panel-load-error-color:            @btn-danger-bg;
 
 @collapser-bg:                                @gray3;
-@collapser-border:                            @gray14;
-@collapser-color:                             @gray14;
-@collapser-hover-bg:                          @gray14;
+@collapser-border:                            @gray6;
+@collapser-color:                             @gray8;
+@collapser-hover-bg:                          @gray6;
 @collapser-hover-color:                       @gray3;
 
 @visualize-show-spy-border:                   @collapser-border;
 @visualize-show-spy-bg:                       @collapser-bg;
+@visualize-show-spy-color:                    @collapser-color;
 @visualize-show-spy-hover-bg:                 @collapser-hover-bg;
 @visualize-show-spy-hover-color:              @collapser-hover-color;
 
@@ -136,34 +137,26 @@
 @filter-bar-bar-filter-color:                 @white;
 @filter-bar-bar-filter-negate-bg:             @action-remove;
 
-// Legend ======================================================================
 @legend-item-color:                           @gray10;
 
-// Config ======================================================================
 @config-border: @gray4;
 @config-bg: @body-bg;
 @config-close-bg: @well-bg;
 @config-saved-object-finder-options-bg:       @body-bg;
 
-// Saved Object Finder =========================================================
 @saved-object-finder-link-color:              @text-color;
 @saved-object-finder-icon-color:              darken(@saved-object-finder-link-color, 10%);
 
-// List Group Menu =============================================================
 @list-group-bg:                               @gray5;
 @list-group-border:                           @gray7;
-
 @list-group-hover-bg:                         @gray14;
-
 @list-group-link-color:                       @gray5;
 @list-group-link-hover-color:                 @list-group-link-color;
 @list-group-link-heading-color:               @gray3;
-
 @list-group-menu-item-color:                  @text-color;
 @list-group-menu-item-select-color:           @link-color;
 @list-group-menu-item-active-bg:              @well-bg;
 @list-group-menu-item-hover-bg:               @well-bg;
-
 
 @component-active-color:                      @gray5;
 @component-active-bg:                         @gray9;
