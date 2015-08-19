@@ -92,7 +92,7 @@ module.exports = Joi.object({
       otherwise: Joi.default(false)
     }),
     lazyPort: Joi.number().default(5602),
-    lazyHost: Joi.string().hostname().default('0.0.0.0'),
+    lazyHost: Joi.string().hostname().default('localhost'),
     lazyPrebuild: Joi.boolean().default(false),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
     unsafeCache: Joi
