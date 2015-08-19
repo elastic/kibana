@@ -1,6 +1,6 @@
 let cluster = require('cluster');
 let { join } = require('path');
-let { startsWith, debounce, compact, invoke, bindAll, once } = require('lodash');
+let { debounce, compact, invoke, bindAll, once } = require('lodash');
 
 let Log = require('../Log');
 let Worker = require('./Worker');
@@ -81,25 +81,32 @@ module.exports = class ClusterManager {
   }
 
   setupManualRestart() {
-    let input = '';
-    let clear = () => input = '';
-    let clearSoon = debounce(clear, 1250);
+    let readline = require('readline');
+    let rl = readline.createInterface(process.stdin, process.stdout);
 
-    process.stdin.on('data', chunk => {
-      input += chunk.toString('utf8');
+    let nls = 0;
+    let clear = () => nls = 0;
+    let clearSoon = debounce(clear, 2000);
 
-      if (input === '\n') {
-        // wait for final \n
+    rl.setPrompt('');
+    rl.prompt();
+
+    rl.on('line', line => {
+      nls = line.trim() ? 0 : nls + 1;
+      if (nls >= 2) {
+        clearSoon.cancel();
+        clear();
+        this.server.start();
+      } else {
         clearSoon();
       }
-      else if (startsWith(input, '\n\n')) {
-        clearSoon.cancel();
-        this.server.start();
-        clear();
-      }
-      else {
-        clear();
-      }
+
+      rl.prompt();
+    });
+
+    rl.on('SIGINT', () => {
+      rl.pause();
+      process.kill(process.pid, 'SIGINT');
     });
   }
 
