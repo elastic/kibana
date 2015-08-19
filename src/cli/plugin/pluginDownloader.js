@@ -56,10 +56,10 @@ module.exports = function (settings, logger) {
     }
 
     return wrappedRequest(requestOptions)
-    .then(function (req) {
-      var reporter = progressReporter(logger, req);
+    .then(function (fileStream) {
+      var reporter = progressReporter(logger, fileStream);
 
-      req
+      fileStream
       .on('response', reporter.handleResponse)
       .on('data', reporter.handleData)
       .on('error', _.partial(reporter.handleError, 'ENOTFOUND'))
@@ -76,7 +76,7 @@ module.exports = function (settings, logger) {
   function wrappedRequest(requestOptions) {
     return Promise.try(function () {
       let urlInfo = url.parse(requestOptions.url);
-      if (urlInfo.protocol === 'file:') {
+      if (/^file/.test(urlInfo.protocol)) {
         return fs.createReadStream(urlInfo.path);
       } else {
         return request.get(requestOptions);
