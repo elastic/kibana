@@ -10,7 +10,7 @@ target
 .idea
 *.iml
 *.log
-esvm
+/esvm
 .htpasswd
 installedPlugins
 webpackstats.json

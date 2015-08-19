@@ -86,7 +86,11 @@ module.exports = function (program) {
     let set = _.partial(_.set, settings);
     let get = _.partial(_.get, settings);
 
-    if (opts.dev) set('env', 'development');
+    if (opts.dev) {
+      set('env', 'development');
+      set('optimize.lazy', true);
+    }
+
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
     if (opts.port) set('server.port', opts.port);
     if (opts.host) set('server.host', opts.host);
