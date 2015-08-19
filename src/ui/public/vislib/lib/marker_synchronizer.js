@@ -10,11 +10,14 @@ define(function (require) {
       this._listeners = {};
     }
 
-    MarkerSynchronizer.prototype.handler = function () {
+    MarkerSynchronizer.prototype.hoverHandler = function () {
       var self = this;
       return function (e) {
-        console.log('emit sync');
-        self.emit('sync', e);
+        // ignore if not time based chart
+        if (_.get(e, 'data.ordered.date')) {
+          console.log('emit sync');
+          self.emit('sync', e);
+        }
       };
     };
 
