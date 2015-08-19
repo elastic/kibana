@@ -5,7 +5,7 @@ define(function (require) {
   var WorkQueue = require('ui/routes/WorkQueue');
   var errors = require('ui/errors');
 
-  function wrapRouteWithPrep(route) {
+  function wrapRouteWithPrep(route, setup) {
     if (!route.resolve && route.redirectTo) return;
 
     var userWork = new WorkQueue();
@@ -13,24 +13,8 @@ define(function (require) {
     userWork.limit = _.keys(route.resolve).length;
 
     var resolve = {
-      __prep__: function (Private, Promise, $route, $injector, Notifier) {
-        var setup = Private(require('ui/routes/setup'));
-
-        return setup.routeSetupWork()
-        .then(function () {
-          // wait for the queue to fill up, then do all the work
-          var defer = Promise.defer();
-          userWork.resolveWhenFull(defer);
-
-          return defer.promise.then(function () {
-            return Promise.all(userWork.doWork());
-          });
-        })
-        .catch(function (err) {
-          // discard any remaining user work
-          userWork.empty();
-          return setup.handleKnownError(err);
-        });
+      __prep__: function ($injector) {
+        return $injector.invoke(setup.doWork, setup, { userWork });
       }
     };
 

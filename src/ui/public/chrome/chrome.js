@@ -1,3 +1,5 @@
+require('babel/polyfill');
+
 var _ = require('lodash');
 var $ = require('jquery');
 var angular = require('angular');
@@ -32,6 +34,7 @@ $('<link>').attr({
 
 require('./api/apps')(chrome, internals);
 require('./api/angular')(chrome, internals);
+require('./api/controls')(chrome, internals);
 require('./api/tabs')(chrome, internals);
 require('./api/template')(chrome, internals);
 require('./api/theme')(chrome, internals);
@@ -39,7 +42,6 @@ require('./api/theme')(chrome, internals);
 chrome.bootstrap = function () {
   chrome.setupAngular();
   angular.bootstrap(document, ['kibana']);
-  $(document.body).children(':not(style-compile)').show();
 };
 
 module.exports = chrome;

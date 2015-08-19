@@ -29,12 +29,13 @@ module.exports = function (plugin, server) {
   function waitForShards() {
     return client.cluster.health({
       timeout: '5s', // tells es to not sit around and wait forever
-      index: config.get('kibana.index')
+      index: config.get('kibana.index'),
+      ignore: [408]
     })
     .then(function (resp) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
-      if (resp.timed_out) {
+      if (!resp || resp.timed_out) {
         plugin.status.yellow('No existing Kibana index found');
         return createKibanaIndex(server);
       }

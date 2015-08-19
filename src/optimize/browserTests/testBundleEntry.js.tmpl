@@ -15,6 +15,6 @@
 require('ui/testHarness');
 <%
 entry.modules.slice(0).reverse().forEach(function (id) {
-  print(`require('${id}');\n`);
+  print(`require('${id.replace(/\\/g, '\\\\')}');\n`);
 });
 %>require('ui/testHarness').bootstrap();

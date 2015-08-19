@@ -517,8 +517,12 @@ define(function (require) {
       var names = [];
       var self = this;
 
-      _.forEach(array, function (obj) {
-        names.push({ label: obj.name, values: obj, index: index });
+      _.forEach(array, function (obj, i) {
+        names.push({
+          label: obj.name,
+          values: obj,
+          index: index
+        });
 
         if (obj.children) {
           var plusIndex = index + 1;

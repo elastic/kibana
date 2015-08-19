@@ -1,14 +1,21 @@
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
   let Boom = require('boom');
+  let Hapi = require('hapi');
   let parse = require('url').parse;
   let format = require('url').format;
+
   let getDefaultRoute = require('./getDefaultRoute');
+
+  server = kbnServer.server = new Hapi.Server();
 
   // Create a new connection
   server.connection({
     host: config.get('server.host'),
-    port: config.get('server.port')
+    port: config.get('server.port'),
+    routes: {
+      cors: config.get('server.cors')
+    }
   });
 
   // provide a simple way to expose static directories
@@ -78,7 +85,10 @@ module.exports = function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler: function (req, reply) {
-      reply.redirect(getDefaultRoute(kbnServer));
+      return reply.view('rootRedirect', {
+        hashRoute: '/app/kibana',
+        defaultRoute: getDefaultRoute(kbnServer),
+      });
     }
   });
 

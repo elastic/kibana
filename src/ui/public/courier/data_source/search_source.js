@@ -13,8 +13,6 @@ define(function (require) {
       SearchSource.Super.call(this, initialState, searchStrategy);
     }
 
-    // expose a ready state for the route setup to read
-
     /*****
      * PUBLIC API
      *****/

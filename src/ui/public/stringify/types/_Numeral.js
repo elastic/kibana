@@ -12,6 +12,8 @@ define(function (require) {
     }
 
     Numeral.prototype._convert = function (val) {
+      if (val === -Infinity) return '-∞';
+      if (val === +Infinity) return '+∞';
       if (typeof val !== 'number') {
         val = parseFloat(val);
       }

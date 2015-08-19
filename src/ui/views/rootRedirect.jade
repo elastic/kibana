@@ -1,0 +1,10 @@
+script.
+  var hashRoute = '#{hashRoute}';
+  var defaultRoute = '#{defaultRoute}';
+
+  var hash = window.location.hash;
+  if (hash.length) {
+    window.location = hashRoute + hash;
+  } else {
+    window.location = defaultRoute;
+  }

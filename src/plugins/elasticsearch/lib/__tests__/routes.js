@@ -36,17 +36,19 @@ describe('plugins/elasticsearch', function () {
 
 
     function testRoute(options) {
+      if (typeof options.payload === 'object') {
+        options.payload = JSON.stringify(options.payload);
+      }
+
       var statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
           kbnServer.server.inject(options, function (res) {
             try {
               expect(res.statusCode).to.be(statusCode);
+              done();
             } catch (e) {
               done(e);
-              done = null;
-            } finally {
-              done && done();
             }
           });
         });
@@ -67,8 +69,8 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana',
-      payload: '{settings: {number_of_shards: 1, number_of_replicas: 1}}',
-      statusCode: 201
+      payload: {settings: { number_of_shards: 1, number_of_replicas: 1 }},
+      statusCode: 200
     });
 
     testRoute({
@@ -84,26 +86,15 @@ describe('plugins/elasticsearch', function () {
     });
 
     testRoute({
-      method: 'GET',
-      url: '/elasticsearch/.kibana/_mapping/*/field/_source'
-    });
-
-    testRoute({
-      method: 'POST',
-      url: '/elasticsearch/.kibana/index-pattern/_search?fields=',
-      payload: '{query: {match_all: {}}, size: 2147483647}'
-    });
-
-    testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana/__kibanaQueryValidator/_validate/query?explain=true&ignore_unavailable=true',
-      payload: '{query: {query_string: {analyze_wildcard: true, query: "*"}}}'
+      payload: {query: {query_string: {analyze_wildcard: true, query: '*'}}}
     });
 
     testRoute({
       method: 'POST',
       url: '/elasticsearch/_mget?timeout=0&ignore_unavailable=true&preference=1429574531063',
-      payload: '{docs: [{_index: ".kibana", _type: "index-pattern", _id: "[logstash-]YYYY.MM.DD"}]}'
+      payload: {docs: [{_index: '.kibana', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD'}]}
     });
 
     testRoute({

@@ -131,11 +131,23 @@ define(function () {
       },
       'timepicker:timeDefaults': {
         type: 'json',
-        value: JSON.stringify({
-          from: 'now-15m',
-          to: 'now',
-          mode: 'quick'
-        }, null, 2)
+        value: [
+          '{',
+          '  "from": "now-15m",',
+          '  "to": "now",',
+          '  "mode": "quick"',
+          '}'
+        ].join('\n')
+      },
+      'timepicker:refreshIntervalDefaults': {
+        type: 'json',
+        value: [
+          '{',
+          '  "display": "Off",',
+          '  "pause": false,',
+          '  "value": 0',
+          '}'
+        ].join('\n')
       }
     };
   };

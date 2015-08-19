@@ -1,115 +1,53 @@
-module.exports = function (kbnServer, server, config) {
+module.exports = async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
-  var _ = require('lodash');
-  var { resolve } = require('path');
-  var fromRoot = require('../utils/fromRoot');
-
-  var CachedOptimizer = require('./CachedOptimizer');
-  var WatchingOptimizer = require('./WatchingOptimizer');
-
-  var bundleDir = resolve(config.get('optimize.bundleDir'));
-  var status = kbnServer.status.create('optimize');
-
-  server.exposeStaticDir('/bundles/{path*}', bundleDir);
-
-  function logStats(tag, stats) {
-    if (config.get('logging.json')) {
-      server.log(['optimize', tag], _.pick(stats.toJson(), 'errors', 'warnings'));
-    } else {
-      server.log(['optimize', tag], `\n${ stats.toString({ colors: true }) }`);
-    }
+  // the lazy optimizer sets up two threads, one is the server listening
+  // on 5601 and the other is a server listening on 5602 that builds the
+  // bundles in a "middleware" style.
+  //
+  // the server listening on 5601 may be restarted a number of times, depending
+  // on the watch setup managed by the cli. It proxies all bundles/* requests to
+  // the other server. The server on 5602 is long running, in order to prevent
+  // complete rebuilds of the optimize content.
+  let lazy = config.get('optimize.lazy');
+  if (lazy) {
+    return await kbnServer.mixin(require('./lazy/lazy'));
   }
 
-  function describeEntries(entries) {
-    let ids = _.pluck(entries, 'id').join('", "');
-    return `application${ entries.length === 1 ? '' : 's'} "${ids}"`;
+  let bundles = kbnServer.bundles;
+  server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);
+  await bundles.writeEntryFiles();
+
+  // in prod, only bundle what looks invalid or missing
+  if (config.get('env.prod')) bundles = await kbnServer.bundles.getInvalidBundles();
+
+  // we might not have any work to do
+  if (!bundles.getIds().length) {
+    server.log(
+      ['debug', 'optimize'],
+      `All bundles are cached and ready to go!`
+    );
+    return;
   }
 
-  function onMessage(handle, filter) {
-    filter = filter || _.constant(true);
-    process.on('message', function (msg) {
-      var optimizeMsg = msg && msg.optimizeMsg;
-      if (!optimizeMsg || !filter(optimizeMsg)) return;
-      handle(optimizeMsg);
-    });
-  }
-
-  var role = config.get('optimize._workerRole');
-  if (role === 'receive') {
-    // query for initial status
-    process.send(['WORKER_BROADCAST', { optimizeMsg: '?' }]);
-    onMessage(function (wrkrStatus) {
-      status[wrkrStatus.state](wrkrStatus.message);
-    });
-  }
-
-  if (role === 'send') {
-    let send = function () {
-      process.send(['WORKER_BROADCAST', { optimizeMsg: status }]);
-    };
-
-    status.on('change', send);
-    onMessage(send, _.partial(_.eq, '?'));
-    send();
-  }
-
-  let watching = config.get('optimize.watch');
-  let Optimizer = watching ? WatchingOptimizer : CachedOptimizer;
-  let optmzr = kbnServer.optimizer = new Optimizer({
+  // only require the FsOptimizer when we need to
+  let FsOptimizer = require('./FsOptimizer');
+  let optimizer = new FsOptimizer({
+    env: bundles.env,
+    bundles: bundles,
+    profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
-    bundleDir: bundleDir,
-    entries: _.map(kbnServer.uiExports.allApps(), function (app) {
-      return {
-        id: app.id,
-        deps: app.getRelatedPlugins(),
-        modules: app.getModules()
-      };
-    }),
-    plugins: kbnServer.plugins
+    unsafeCache: config.get('optimize.unsafeCache'),
   });
 
-  server.on('close', _.bindKey(optmzr.disable || _.noop, optmzr));
+  server.log(
+    ['info', 'optimize'],
+    `Optimizing and caching ${bundles.desc()}. This may take a few minutes`
+  );
 
-  kbnServer.mixin(require('./browserTests'))
-  .then(function () {
+  let start = Date.now();
+  await optimizer.run();
+  let seconds = ((Date.now() - start) / 1000).toFixed(2);
 
-    if (role === 'receive') return;
-
-    optmzr.on('bundle invalid', function () {
-      status.yellow('Source file change detected, reoptimizing source files');
-    });
-
-    optmzr.on('done', function (entries, stats) {
-      logStats('debug', stats);
-      status.green(`Optimization of ${describeEntries(entries)} complete`);
-    });
-
-    optmzr.on('error', function (entries, stats, err) {
-      if (stats) logStats('fatal', stats);
-      status.red('Optimization failure! ' + err.message);
-    });
-
-    return optmzr.init()
-    .then(function () {
-      let entries = optmzr.bundles.getMissingEntries();
-      if (!entries.length) {
-        if (watching) {
-          status.red('No optimizable applications found');
-        } else {
-          status.green('Reusing previously cached application source files');
-        }
-        return;
-      }
-
-      if (watching) {
-        status.yellow(`Optimizing and watching all application source files`);
-      } else {
-        status.yellow(`Optimizing and caching ${describeEntries(entries)}`);
-      }
-
-      optmzr.run();
-      return null;
-    });
-  });
+  server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds`);
 };
