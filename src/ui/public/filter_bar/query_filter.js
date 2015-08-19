@@ -97,16 +97,7 @@ define(function (require) {
     * @param {object} Contains a reference to a filter and its new model
     */
     queryFilter.updateFilter = function ({ source, model }) {
-      var parsedFilter;
-      try {
-        parsedFilter = JSON.parse(model);
-      } catch (e) {
-        //The editor is already showing an error,
-        //staying in edit mode is sufficient
-        return;
-      }
-
-      angular.copy(parsedFilter, source);
+      angular.copy(JSON.parse(model), source);
     };
 
     /**

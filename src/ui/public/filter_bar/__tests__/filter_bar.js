@@ -4,6 +4,7 @@ var _ = require('lodash');
 var $ = require('jquery');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
+var sinon = require('sinon');
 
 require('ui/filter_bar');
 var MockState = require('fixtures/mock_state');
@@ -88,17 +89,28 @@ describe('Filter Bar Directive', function () {
 
 
     describe('editing filters', function () {
-      it('should be able to edit a filter', function () {
+      beforeEach(function () {
         $scope.startEditingFilter(appState.filters[3]);
         $scope.$digest();
+      });
+
+      it('should be able to edit a filter', function () {
         expect($el.find('.filter-edit-container').length).to.be(1);
       });
 
       it('should be able to stop editing a filter', function () {
-        $scope.startEditingFilter(appState.filters[3]);
         $scope.stopEditingFilter();
         $scope.$digest();
         expect($el.find('.filter-edit-container').length).to.be(0);
+      });
+
+      it('should stop editing and merge changes after clicking done', function () {
+        sinon.spy($scope, 'stopEditingFilter');
+        sinon.spy($scope, 'updateFilter');
+
+        $scope.editDone();
+        expect($scope.stopEditingFilter.called).to.be(true);
+        expect($scope.updateFilter.called).to.be(true);
       });
     });
   });

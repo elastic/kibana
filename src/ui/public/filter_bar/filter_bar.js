@@ -58,6 +58,15 @@ define(function (require) {
           $scope.editingFilter = null;
         };
 
+        $scope.editDone = function () {
+          try {
+            $scope.updateFilter($scope.editingFilter);
+          } catch(e) {
+            return;
+          }
+          $scope.stopEditingFilter();
+        };
+
         $scope.clearFilterBar = function () {
           $scope.newFilters = [];
           $scope.changeTimeFilter = null;
