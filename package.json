@@ -34,7 +34,12 @@
   ],
   "scripts": {
     "test": "grunt test",
-    "start": "node ./src/server/cli/index.js --dev",
+    "test:dev": "grunt test:dev",
+    "test:quick": "grunt test:quick",
+    "test:browser": "grunt test:browser",
+    "test:server": "grunt test:server",
+    "build": "grunt build",
+    "start": "./bin/kibana --dev",
     "precommit": "grunt lintStagedFiles",
     "karma": "karma start"
   },
@@ -145,6 +150,7 @@
     "karma-growl-reporter": "^0.1.1",
     "karma-ie-launcher": "^0.2.0",
     "karma-mocha": "^0.2.0",
+    "karma-safari-launcher": "^0.1.1",
     "libesvm": "^1.0.1",
     "license-checker": "^3.1.0",
     "load-grunt-config": "^0.7.0",

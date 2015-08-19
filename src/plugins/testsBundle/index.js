@@ -1,6 +1,4 @@
 module.exports = (kibana) => {
-  if (!kibana.config.get('optimize.tests')) return;
-
   let { union } = require('lodash');
 
   let utils = require('requirefrom')('src/utils');

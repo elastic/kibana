@@ -79,18 +79,10 @@ module.exports = Joi.object({
 
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
-    bundleFilter: Joi.string().when('tests', {
-      is: true,
-      then: Joi.default('tests'),
-      otherwise: Joi.default('*')
-    }),
+    bundleFilter: Joi.string().default('!tests'),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-    lazy: Joi.boolean().when('$dev', {
-      is: true,
-      then: Joi.default(true),
-      otherwise: Joi.default(false)
-    }),
+    lazy: Joi.boolean().default(false),
     lazyPort: Joi.number().default(5602),
     lazyHost: Joi.string().hostname().default('localhost'),
     lazyPrebuild: Joi.boolean().default(false),
@@ -109,8 +101,7 @@ module.exports = Joi.object({
         Joi.boolean()
       )
       .default(Joi.ref('$dev')),
-    profile: Joi.boolean().default(false),
-    tests: Joi.boolean().default(false),
+    profile: Joi.boolean().default(false)
   }).default()
 
 }).default();
