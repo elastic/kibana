@@ -12,6 +12,7 @@ module.exports = {
       types: ['number']
     }
   ],
+  aliases: ['mvavg'],
   help: 'Show the seriesList as bars',
   fn: function movingaverageFn(args) {
     return alter(args, function (inputSeries, _window) {

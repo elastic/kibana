@@ -10,7 +10,14 @@ require('./expression_directive');
 require('./docs');
 require('./main.less');
 
+var timelionLogo = require('plugins/timelion/header.png');
+
+
 require('ui/chrome')
+.setBrand({
+  'logo': 'url(' + timelionLogo + ') left no-repeat',
+  'smallLogo': 'url(' + timelionLogo + ') left no-repeat'
+})
 .setTabDefaults({
   activeIndicatorColor: '#656a76'
 })
@@ -58,7 +65,8 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
     // config panel templates
   $scope.configTemplate = new ConfigTemplate({
     load: require('plugins/timelion/partials/load_sheet.html'),
-    save: require('plugins/timelion/partials/save_sheet.html')
+    save: require('plugins/timelion/partials/save_sheet.html'),
+    options: require('plugins/timelion/partials/sheet_options.html')
   });
 
   $scope.state = new AppState(getStateDefaults());
@@ -66,6 +74,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
     return {
       sheet: savedSheet.timelion_sheet,
       selected: 0,
+      columns: savedSheet.timelion_columns,
       interval: savedSheet.timelion_interval
     };
   }
@@ -79,7 +88,9 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
 
     $scope.opts = {
       save: save,
-      savedSheet: savedSheet
+      savedSheet: savedSheet,
+      state: $scope.state,
+      search: $scope.search
     };
   };
 
@@ -140,7 +151,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
     savedSheet.id = savedSheet.title;
     savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
-
+    savedSheet.timelion_columns = $scope.state.columns;
     savedSheet.save().then(function (id) {
       $scope.configTemplate.close('save');
       if (id) {

@@ -1,6 +1,7 @@
 @import "~ui/styles/variables.less";
 @import (reference) "~ui/styles/mixins";
 
+@chart-height: 330px;
 
 body > .content,  body > .content > .application {
   overflow: hidden
@@ -44,7 +45,7 @@ body > .content,  body > .content > .application {
 }
 
 [chart] {
-  height: 270px;
+  height: @chart-height;
 }
 
 [ng-click] {
@@ -52,7 +53,6 @@ body > .content,  body > .content > .application {
 }
 
 .chart-container {
-  height: 270px;
   cursor: pointer;
   position: relative;
   box-sizing: border-box;
@@ -149,7 +149,7 @@ div.doc-container {
 }
 
 .legendLabel {
-  max-width: 210px;
+  //max-width: 210px;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow-x: hidden;

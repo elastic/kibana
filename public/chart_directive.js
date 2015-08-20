@@ -11,6 +11,7 @@ app.directive('chart', function ($compile) {
     restrict: 'A',
     scope: {
       chart: '=',
+      rows: '=',
       cell: '='
     },
     link: function ($scope, $elem) {
@@ -45,6 +46,9 @@ app.directive('chart', function ($compile) {
       };
 
       function drawPlot(plotConfig) {
+        var controllerHeight = $('.timelion-container').height() - 80;
+        $elem.height(controllerHeight / 2);
+
         if (!plotConfig || !plotConfig.length) {
           $elem.empty();
           return;

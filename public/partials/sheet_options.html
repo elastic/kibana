@@ -1,0 +1,10 @@
+<form role="form" class="container-fluid">
+  <div class="form-group">
+    <label>Charts per row</label>
+    <select class="form-control"
+      ng-change="opts.search()"
+      ng-options="column for column in [1, 2, 3, 4, 6, 12]"
+      ng-model="opts.state.columns">
+    </select>
+  </div>
+</form>

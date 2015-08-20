@@ -26,7 +26,7 @@ define(function (require) {
           timelion_sheet: ['(`*`)'],
           timelion_interval: '1d',
           timelion_chart_height: 275,
-
+          timelion_columns: 3,
           version: 1,
         }
       });
@@ -43,6 +43,7 @@ define(function (require) {
       timelion_sheet: 'string',
       timelion_interval: 'string',
       timelion_chart_height: 'integer',
+      timelion_columns: 'integer',
       version: 'integer'
     };
 

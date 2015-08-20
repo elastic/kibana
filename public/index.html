@@ -36,6 +36,18 @@
             <i aria-hidden="true" class="fa fa-file-new-o"></i>
           </button>
         </kbn-tooltip>
+
+        <kbn-tooltip text="Sheet Options" placement="bottom" append-to-body="1">
+          <button
+            ng-click="configTemplate.toggle('options');"
+            ng-class="{active: configTemplate.is('options')}"
+            aria-haspopup="true"
+            aria-expanded="{{ configTemplate.is('options') }}"
+            aria-label="Sheet Options">
+            <i aria-hidden="true" class="fa fa-cog"></i>
+          </button>
+        </kbn-tooltip>
+
         <kbn-tooltip text="Save Sheet" placement="bottom" append-to-body="1">
           <button
             ng-click="configTemplate.toggle('save');"
@@ -88,7 +100,7 @@
   <div class="timelion-container">
     <div class="timelion-container-sheet">
       <div class="timelion-container-sheet-margin">
-        <div class="chart-container col-md-4"
+        <div class="chart-container col-md-{{(12 / state.columns)}}"
           ng-repeat="cell in state.sheet track by $index"
           ng-click="setActiveCell($index)"
           ng-class="{active: $index === state.selected, running: running}"

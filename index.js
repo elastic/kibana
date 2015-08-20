@@ -7,8 +7,8 @@ module.exports = function (kibana) {
     uiExports: {
       app: {
         title: 'Timelion',
-        description: 'Rawr',
-        icon: 'http://placekitten.com/g/400/302',
+        description: 'Time series expressions for everything',
+        icon: 'plugins/timelion/icon.svg',
         main: 'plugins/timelion/app',
         injectVars: function (server, options) {
           var config = server.config();
