@@ -39,7 +39,6 @@
   </div>
 
   <h2>Server Metrics</h2>
-  <p>Interval of 5 seconds, with a max history of 5 minutes.</p>
   <div id="chart_cont" class="row">
     <div ng-repeat="(name, data) in ui.metrics">
       <status-page-metric name="{{name}}" data="data"></status-page-metric>

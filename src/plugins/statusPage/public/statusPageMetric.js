@@ -5,7 +5,6 @@ require('angular-nvd3');
 
 var toTitleCase = require('./lib/toTitleCase');
 var formatNumber = require('./lib/formatNumber');
-var getChartOptions = _.memoize(require('./lib/makeChartOptions'));
 var readStatData = require('./lib/readStatData');
 
 function calcAvg(metricList, metricNumberType) {
@@ -53,8 +52,6 @@ require('ui/modules')
           self.seriesNames = ['1min', '5min', '15min'];
           break;
       }
-
-      self.chartOptions = getChartOptions(self.numberType);
 
       $scope.$watch('data', function (data) {
         self.rawData = data;

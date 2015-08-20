@@ -11,11 +11,9 @@ module.exports = function (kbnServer, server, config) {
     server.plugins.good.monitor.on('ops', function (event) {
       var port = config.get('server.port');
       kbnServer.metrics.add({
-        rss: event.psmem.rss,
         heapTotal: event.psmem.heapTotal,
         heapUsed: event.psmem.heapUsed,
         load: event.osload,
-        delay: event.psdelay,
         concurrency: _.get(event, ['concurrents', port]),
         responseTimeAvg: _.get(event, ['responseTimes', port, 'avg']),
         responseTimeMax: _.get(event, ['responseTimes', port, 'max']),

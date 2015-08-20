@@ -50,9 +50,4 @@ require('ui/chrome')
   };
 
   ui.refresh();
-
-  // let the browser decide when to slow down requests
-  setInterval(function () {
-    $scope.$eval(ui.refresh);
-  }, 5000);
 });

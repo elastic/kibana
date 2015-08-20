@@ -87,20 +87,13 @@
     overflow: hidden;
 
     .title {
-      color:#ffffff;
+      color:@secondary;
       height:50px;
       line-height:50px;
       margin:0 0 10px 0;
       padding:0 15px;
       border-color:@primary;
       background:@primary;
-      background:-moz-linear-gradient(left,@primary 0%,@secondary 100%);
-      background:-webkit-gradient(linear,left top,right top,color-stop(0%,@primary),color-stop(100%,@secondary));
-      background:-webkit-linear-gradient(left,@primary 0%,@secondary 100%);
-      background:-o-linear-gradient(left,@primary 0%,@secondary 100%);
-      background:-ms-linear-gradient(left,@primary 0%,@secondary 100%);
-      background:linear-gradient(to right,@primary 0%,@secondary 100%);
-      filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=@primary,endColorstr=@secondary,GradientType=1);
     }
   }
 
@@ -110,17 +103,17 @@
 }
 
 .state_default {
-  .state(#7C7C7C, #CFCFCF);
+  .state(#7C7C7C, #fff);
 }
 
 .state_green {
-  .state(#0a8e03, #96f501);
+  .state(#0a8e03, #fff);
 }
 
 .state_yellow {
-  .state(#fdee00, #c16f00);
+  .state(#fdee00, #885306);
 }
 
 .state_red {
-  .state(#da1e04, #ff730f);
+  .state(#da1e04, #fff);
 }
