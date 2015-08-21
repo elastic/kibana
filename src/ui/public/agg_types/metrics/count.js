@@ -7,8 +7,7 @@ define(function (require) {
       name: 'count',
       title: 'Count',
       hasNoDsl: true,
-      makeLabel: function (agg) {
-        if (agg.vis.params.mode === 'percentage') return 'Percentage of Count';
+      makeLabel: function () {
         return 'Count';
       },
       getFormat: function () {
