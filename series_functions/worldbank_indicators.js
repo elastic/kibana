@@ -9,18 +9,18 @@ module.exports = {
   args: [
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
-      types: ['string']
+      types: ['string', 'null']
     },
     {
       name: 'indicator',
-      types: ['string']
+      types: ['string', 'null']
     }
   ],
   aliases: ['wbi'],
-  help: 'Pull data from http://data.worldbank.org/ using path to series.',
+  help: 'Pull data from http://data.worldbank.org/ using the country name and indicator.',
   fn: function worldbankIndicators(args, tlConfig) {
     var config = {
-      country: args[0] || 'usa',
+      country: args[0] || 'wld',
       indicator: args[1] || 'SP.POP.TOTL'
     };
 

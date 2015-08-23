@@ -74,9 +74,9 @@ space
  = [\ \t]+
 
 string "string"
-  = '"' chars:dq_char* '"' { return chars.join(''); }
-  / "'" chars:sq_char* "'" { return chars.join(''); }
-  / string:[^()"'=\ \t]+ { return string.join(''); }
+  = '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
+  / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
+  / string:[^()"',=\ \t]+ { return string.join(''); } // unquoted string
 
 dq_char
   = [\x20-\x21\x23-\x5B\x5D-\u10FFFF] // everything except "

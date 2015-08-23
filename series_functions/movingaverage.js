@@ -13,7 +13,7 @@ module.exports = {
     }
   ],
   aliases: ['mvavg'],
-  help: 'Show the seriesList as bars',
+  help: 'Calculate the moving average over a given window. Nice for smoothing noisey series',
   fn: function movingaverageFn(args) {
     return alter(args, function (inputSeries, _window) {
 
