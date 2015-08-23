@@ -12,7 +12,7 @@ module.exports = {
       types: ['string']
     }
   ],
-  help: 'Change the color of the series',
+  help: 'Change the label of the series. Use %s reference the existing label',
   fn:  function labelFn(args) {
     return alter(args, function (inputSeries, label) {
       if (label.indexOf('%s') !== -1) {
