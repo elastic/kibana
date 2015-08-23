@@ -34,8 +34,8 @@ module.exports = {
   dataSource: true,
   args: [
     {
-      name: 'query',
-      types: ['string']
+      name: 'q',
+      types: ['string', 'null']
     },
     {
       name: 'metric',
@@ -181,6 +181,7 @@ function buildRequest(config, tlConfig) {
   return searchRequest;
 }
 
+// usually reverse = false on the request, true on the response
 function offsetTime(milliseconds, offset, reverse) {
   if (!offset.match(/[-+][0-9]+[mshdwMy]/g)) {
     throw new Error ('Malformed `offset` at ' + offset);

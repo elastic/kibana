@@ -69,6 +69,7 @@ function invoke(fnName, args) {
           return invokeChain(item);
         case 'chainList':
           return resolveChainList(item.list);
+        case 'requestList':
         case 'seriesList':
           return item;
       }
@@ -271,8 +272,6 @@ function debugSheet(sheet) {
 }
 
 debugSheet(
-  {sheet:['es("-*")'], time: tlConfig.time}
-  //['(`US`).divide((`*`).sum(1000))']
-  //['(`*`).divide(100)']
+  {sheet:['es(q=-*)'], time: tlConfig.time}
 );
 */

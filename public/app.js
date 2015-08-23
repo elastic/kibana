@@ -60,7 +60,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   });
 
   var savedSheet = $route.current.locals.savedSheet;
-  var blankSheet = ['(`*`)'];
+  var blankSheet = ['es(q=*)'];
 
     // config panel templates
   $scope.configTemplate = new ConfigTemplate({
@@ -104,7 +104,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   };
 
   $scope.newCell = function () {
-    $scope.state.sheet.push('(`*`)');
+    $scope.state.sheet.push('es(q=*)');
     $scope.state.selected = $scope.state.sheet.length - 1;
     $scope.search();
   };
