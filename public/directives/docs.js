@@ -1,5 +1,5 @@
 define(function (require) {
-  var html = require('./partials/docs/tutorial.html');
+  var html = require('../partials/docs/tutorial.html');
   var app = require('ui/modules').get('apps/timelion', []);
   var _ = require('lodash');
   var moment = require('moment');

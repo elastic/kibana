@@ -6,7 +6,7 @@
           ng-class="discoverSearch.$invalid ? 'has-error' : ''">
           <input input-focus
             ng-model="state.sheet[state.selected]"
-            timelion-expression="state.sheet[state.selected]"
+            timelion-expression="{{state.sheet[state.selected]}}"
             placeholder="Expression ..."
             aria-label="Expression input"
             type="text"
@@ -97,6 +97,17 @@
     </center>
   </div>
 
+
+  <div class="suggestion" ng-if="suggestion">
+    <h4>Function: {{suggestion.name}}() <small>{{suggestion.help}}</small></h4>
+
+    <p>
+      <strong>Arguments:</strong> <span ng-repeat="arg in suggestion.args"><strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>) <em ng-show="!$last">,</em> </span>
+    </p>
+  </div>
+
+
+
   <div class="timelion-container">
     <div class="timelion-container-sheet">
       <div class="timelion-container-sheet-margin">
@@ -113,7 +124,7 @@
     <div class="timelion-container-drawer-tab" ng-click="toggle('showHelp')">
       <i class="fa" ng-class="showHelp ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
     </div>
-    
+
     <div class="timelion-container-drawer" ng-show="showHelp">
       <timelion-docs></timelion-docs>
     </div>

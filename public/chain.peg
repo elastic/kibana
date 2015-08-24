@@ -2,8 +2,17 @@
  * Timelion syntax parser
  */
 
+{
+  var functions = [];
+}
+
 start
- = series+
+ = tree:series+ {
+  return {
+    tree: tree,
+    functions: functions
+  }
+ }
 
 arg_list
  = argument*
@@ -33,8 +42,16 @@ function "function"
   var result = {
     type: 'function',
     function: name,
-    arguments: arguments
+    arguments: arguments,
+    position: {
+      min: offset(),
+      max: offset() + text().length,
+      text: text()
+    }
+
   }
+
+  functions.push(result)
   return result;
  }
 
@@ -47,14 +64,15 @@ reference
   }
  }
 
-chain 
+chain
  = func:function rest:chained_function* {
   return {type: 'chain', chain: [func].concat(rest)}
 }
 
 chained_function
- = '.' func:function {
-  return func
+ = '.' func:function {return func}
+ / '.' func:function_name '('? {
+  error('Incomplete function: ' + func)
  }
 
 group

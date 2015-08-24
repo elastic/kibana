@@ -8,7 +8,7 @@ var Parser = PEG.buildParser(grammar);
 module.exports = function parseSheet(sheet) {
   return _.map(sheet, function (plot) {
     try {
-      return Parser.parse(plot);
+      return Parser.parse(plot).tree;
     } catch (e) {
       throw new Error('Expected: ' + e.expected[0].description + ' @ character ' + e.column);
     }

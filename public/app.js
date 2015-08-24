@@ -5,9 +5,9 @@ var logoUrl = require('./logo.png');
 require('angular-resizable');
 require('angular-resizable/angular-resizable.min.css');
 
-require('./chart_directive');
-require('./expression_directive');
-require('./docs');
+require('./directives/chart_directive');
+require('./directives/expression_directive');
+require('./directives/docs');
 require('./main.less');
 
 var timelionLogo = require('plugins/timelion/header.png');
