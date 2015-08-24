@@ -137,7 +137,7 @@
     "grunt-cli": "0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-copy": "^0.8.0",
-    "grunt-esvm": "^1.1.3",
+    "grunt-esvm": "^1.1.5",
     "grunt-karma": "^0.12.0",
     "grunt-run": "spalger/grunt-run#master",
     "grunt-s3": "^0.2.0-alpha.3",
