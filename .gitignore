@@ -13,5 +13,6 @@ target
 /esvm
 .htpasswd
 installedPlugins
+disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
