@@ -125,6 +125,7 @@ class BaseOptimizer {
             }, babelOptions)
           }
         ].concat(this.env.loaders),
+        postLoaders: this.env.postLoaders || [],
         noParse: this.env.noParse,
       },
 
