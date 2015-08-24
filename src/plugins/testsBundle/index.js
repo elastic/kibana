@@ -23,6 +23,12 @@ module.exports = (kibana) => {
 
         for (let f of testFiles) modules.push(f);
 
+        env.addPostLoader({
+          test: /\.jsx?$/,
+          exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
+          loader: 'istanbul-instrumenter'
+        });
+
         return new UiBundle({
           id: 'tests',
           modules: modules,
