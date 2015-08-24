@@ -16,6 +16,10 @@ module.exports = function (grunt) {
     configFile: __dirname + '/src/config/kibana.yml',
 
     karmaBrowser: (function () {
+      if (grunt.option('browser')) {
+        return grunt.option('browser');
+      }
+
       switch (require('os').platform()) {
         case 'win32':
           return 'IE';

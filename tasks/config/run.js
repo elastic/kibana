@@ -12,10 +12,31 @@ module.exports = function (grunt) {
       },
       cmd: './bin/kibana',
       args: [
+        '--server.port=5610',
         '--env.name=development',
         '--logging.json=false',
-        '--optimize.tests=true',
-        '--optimize.lazy=false'
+        '--optimize.bundleFilter=tests',
+        '--plugins.initialize=false'
+      ]
+    },
+
+    devTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: './bin/kibana',
+      args: [
+        '--dev',
+        '--no-watch',
+        '--server.port=5610',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--logging.json=false',
+        '--optimize.bundleFilter=tests',
+        '--plugins.initialize=false'
       ]
     },
 
