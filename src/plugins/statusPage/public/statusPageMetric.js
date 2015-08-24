@@ -32,17 +32,16 @@ require('ui/modules')
 
       self.name = $scope.name;
       self.title = toTitleCase(self.name);
+      self.extendedTitle = self.title;
       self.numberType = 'precise';
       self.seriesNames = [];
 
       switch (self.name) {
         case 'heapTotal':
         case 'heapUsed':
-        case 'rss':
           self.numberType = 'byte';
           break;
 
-        case 'delay':
         case 'responseTimeAvg':
         case 'responseTimeMax':
           self.numberType = 'ms';
@@ -57,6 +56,14 @@ require('ui/modules')
         self.rawData = data;
         self.chartData = readStatData(self.rawData, self.seriesNames);
         self.averages = calcAvg(self.chartData, self.numberType);
+
+        var unit = '';
+        self.averages = self.averages.map(function (average) {
+          var parts = average.split(' ');
+          unit = parts[1] ? ' (' + parts[1] + ')' : '';
+          return parts[0];
+        });
+        self.extendedTitle = self.title + unit;
       });
     }
   };

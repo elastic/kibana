@@ -14,7 +14,6 @@ module.exports = function (kbnServer, server, config) {
         heapTotal: event.psmem.heapTotal,
         heapUsed: event.psmem.heapUsed,
         load: event.osload,
-        concurrency: _.get(event, ['concurrents', port]),
         responseTimeAvg: _.get(event, ['responseTimes', port, 'avg']),
         responseTimeMax: _.get(event, ['responseTimes', port, 'max']),
         requests: _.get(event, ['requests', port, 'total'], 0)

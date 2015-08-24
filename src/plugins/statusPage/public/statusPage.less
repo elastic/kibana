@@ -1,119 +1,170 @@
+@import "~font-awesome/less/font-awesome";
+
+@status-bg: #eff0f2;
+@status-metric-bg: #fff;
+@status-metric-border: #a4a7ae;
+@status-metric-title-color: #666978;
+
+.application {
+  background-color: @status-bg;
+}
+
 .section {
-  margin-bottom:15px;
+  margin-top: 35px;
 }
 
-.status_breakdown {
-  margin:0 15px 15px 15px;
-
-  .status_row {
-    height:30px;
-    line-height:30px;
-    + .status_row {
-      border-top:1px solid #ebebeb;
-    }
-  }
-
-  th {
-    font-size:10px;
-    color:#a9a9a9;
-    height:25px;
-    line-height:25px;
-  }
-
-  .status_name {
-    font-weight:bold;
-    padding:0px 5px;
-  }
-
-  .status_message {
-    border-left:1px solid #ebebeb;
-    padding:0;
-    padding-left:15px;
-  }
+header {
+  margin-left: 15px;
 }
 
-.system_status_wrapper {
-  .missing_statuses,
-  .loading_statuses {
-    padding: 20px;
-    text-align: center;
-  }
+// .status_breakdown {
+//   margin:0 15px 15px 15px;
+
+//   .status_row {
+//     height:30px;
+//     line-height:30px;
+//     + .status_row {
+//       border-top:1px solid #ebebeb;
+//     }
+//   }
+
+//   th {
+//     font-size:10px;
+//     color:#a9a9a9;
+//     height:25px;
+//     line-height:25px;
+//   }
+
+//   .status_name {
+//     font-weight:bold;
+//     padding:0px 5px;
+//   }
+
+//   .status_message {
+//     border-left:1px solid #ebebeb;
+//     padding:0;
+//     padding-left:15px;
+//   }
+// }
+
+// .system_status_wrapper {
+//   .missing_statuses,
+//   .loading_statuses {
+//     padding: 20px;
+//     text-align: center;
+//   }
+// }
+
+#plugin_cont {
+  background-color: #fff;
 }
 
 .status_chart_wrapper {
-  border-top:1px solid #ebebeb;
-  border-left:1px solid #ebebeb;
+  text-align: right;
+  margin-bottom: 30px;
+  background-color: @status-metric-bg;
+  border-top: 2px solid;
+  border-top-color: @status-metric-border;
+  padding: 10px;
+  padding-right: 20px;
+
   .average {
     font-size: 42px;
     line-height:45px;
     margin-top:0;
-    font-weight:bold;
   }
   .title {
+    color: @status-metric-title-color;
     margin:0 0 5px 0;
-    text-transform:capitalize;
   }
 }
 
-#chart_cont {
-  margin-top:35px;
+.plugin_list {
+  padding: 0;
+  margin-left: 0;
+  list-style-type: none;
+
+  li {
+    margin-right: 10px;
+    display: inline-block;
+    float: left;
+  }
 }
 
-.status_chart_wrapper:nth-child(2), .status_chart_wrapper:nth-child(3) {
-  border-top:0 none transparent;
-}
-
-.status_chart_wrapper:first-child {
-  border-top:0 none transparent;
-  border-left:0 none transparent;
-}
-
-.status_chart_wrapper:nth-child(3n + 1) {
-  border-left:0 none transparent;
-}
-
-.status_chart_wrapper:nth-child(n + 4) {
-  padding-top:20px;
-}
-
-.nv-axis.nv-x .tick line {
-  display:none;
-}
-
-.state(@primary, @secondary) {
-  &.system_status_wrapper {
-    border:1px solid @primary;
-    border-radius:5px;
-    overflow: hidden;
-
-    .title {
-      color:@secondary;
-      height:50px;
-      line-height:50px;
-      margin:0 0 10px 0;
-      padding:0 15px;
-      border-color:@primary;
-      background:@primary;
-    }
+.state(@color, @icon){
+  .state_color {
+    color: @color;
   }
 
-  &.status_row {
-    color: @primary;
+  i:before {
+    content: @icon;
   }
 }
 
 .state_default {
-  .state(#7C7C7C, #fff);
+  .state(#7C7C7C, @fa-var-clock-o);
 }
 
 .state_green {
-  .state(#0a8e03, #fff);
+  .state(#0a8e03, @fa-var-check);
 }
 
 .state_yellow {
-  .state(#fdee00, #885306);
+  .state(#fdee00, @fa-var-exclamation-triangle);
 }
 
 .state_red {
-  .state(#da1e04, #fff);
+  .state(#da1e04, @fa-var-exclamation-circle);
 }
+
+/*
+.state(@color, @icon){
+  color: @color;
+
+  &:before {
+    content: @icon;
+    cursor: help;
+  }
+}
+
+.state_icon {
+  &.state_default {
+    .state(#7C7C7C, @fa-var-clock-o);
+  }
+
+  &.state_green {
+    .state(#0a8e03, @fa-var-check);
+  }
+
+  &.state_yellow {
+    .state(#fdee00, @fa-var-exclamation-triangle);
+  }
+
+  &.state_red {
+    .state(#da1e04, @fa-var-exclamation-circle);
+  }
+}
+
+
+.server_state(@color) {
+  span {
+    color: @color;
+  }
+}
+
+.server_state_default {
+    .server_state(#7C7C7C);
+}
+
+.server_state_green {
+  .server_state(#0a8e03);
+}
+
+.server_state_yellow {
+  .server_state(#fdee00);
+}
+
+.server_state_red {
+  .server_state(#da1e04);
+}
+*/

@@ -1,47 +1,70 @@
-<div class="container">
-  <header>
+<div class="container-fluid">
+  <header class="state_default state_{{ui.serverState}}">
     <h1>
-      <strong>Kibana</strong>&nbsp;Status Page
+      Status: <span class="state_color">{{ ui.serverStateMessage }}</span>
+      <i class="fa state_color state_icon state_{{status.serverState}}" />
     </h1>
   </header>
 
-  <section class="section">
-    <h4>What is this page?</h4>
-    <p>This page is your sanity check, and your savior. You can check for potential problems</p>
-    <p>Here is the status of your kibana instance and the plugins you have installed along with some, statistics to asses potential problems.</p>
-  </section>
 
-  <div class="system_status_wrapper state_default state_{{ui.serverState}}">
-
-    <h3 class="title">
-      <b>System Status</b> {{ ui.serverStateMessage }}
-    </h3>
-
-    <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
-      <span class="spinner"></span>
-    </div>
-
-    <h4 ng-if="!ui.statuses && !ui.loading" class="missing_statuses">
-      No status information available
-    </h4>
-
-    <table class="status_breakdown" ng-if="ui.statuses">
-      <tr>
-        <th class="col-xs-1">Name</th>
-        <th class="col-xs-11">Description</th>
-      </tr>
-      <tr ng-repeat="status in ui.statuses" class="status_row state_default state_{{status.state}}">
-        <td class="col-xs-1 status_name">{{status.name}}</td>
-        <td class="col-xs-11 status_message">{{status.message}}</td>
-      </tr>
-    </table>
-
-  </div>
-
-  <h2>Server Metrics</h2>
-  <div id="chart_cont" class="row">
+  <div id="metric_cont" class="row">
     <div ng-repeat="(name, data) in ui.metrics">
       <status-page-metric name="{{name}}" data="data"></status-page-metric>
     </div>
   </div>
+
+<!--   <div id="plugin_issue_cont" class="section row" ng-if="ui.issues">
+    <h2>Plugin Issues</h2>
+
+    <table class="status_breakdown">
+      <tr>
+        <th class="col-xs-1">Name</th>
+        <th class="col-xs-11">Description</th>
+      </tr>
+      <tr ng-repeat="status in ui.issues" class="status_row">
+        <td class="col-xs-1 status_name">{{status.name}}</td>
+        <td class="col-xs-11 status_message">{{status.message}}</td>
+      </tr>
+    </table>
+  </div> -->
+
+<!--
+  <div id="plugin_cont" class="section row">
+    <h2>Installed Plugins</h2>
+    <ul class="plugin_list">
+        <li ng-repeat="status in ui.statuses">
+          <span class="status_name">{{status.name}}</span>
+          <i class="fa state_icon state_{{status.state}}" title="{{status.message}}" />
+        </li>
+    </ul>
+
+
+    <div class="system_status_wrapper state_default state_{{ui.serverState}}">
+
+      <h3 class="title">
+        <b>System Status</b> {{ ui.serverStateMessage }}
+      </h3>
+
+      <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
+        <span class="spinner"></span>
+      </div>
+
+      <h4 ng-if="!ui.statuses && !ui.loading" class="missing_statuses">
+        No status information available
+      </h4>
+
+      <table class="status_breakdown" ng-if="ui.statuses">
+        <tr>
+          <th class="col-xs-1">Name</th>
+          <th class="col-xs-11">Description</th>
+        </tr>
+        <tr ng-repeat="status in ui.statuses" class="status_row state_default state_{{status.state}}">
+          <td class="col-xs-1 status_name">{{status.name}}</td>
+          <td class="col-xs-11 status_message">{{status.message}}</td>
+        </tr>
+      </table>
+
+    </div>
+  </div> -->
+
 </div>
