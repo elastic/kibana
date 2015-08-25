@@ -1,70 +1,39 @@
-<div class="container-fluid">
-  <header class="state_default state_{{ui.serverState}}">
+<div class="container state_default state_{{ui.serverState}}">
+  <header>
     <h1>
       Status: <span class="state_color">{{ ui.serverStateMessage }}</span>
-      <i class="fa state_color state_icon state_{{status.serverState}}" />
+      <i class="fa state_color state_icon" />
     </h1>
   </header>
 
-
-  <div id="metric_cont" class="row">
+  <div class="row metrics_wrapper">
     <div ng-repeat="(name, data) in ui.metrics">
       <status-page-metric name="{{name}}" data="data"></status-page-metric>
     </div>
   </div>
 
-<!--   <div id="plugin_issue_cont" class="section row" ng-if="ui.issues">
-    <h2>Plugin Issues</h2>
+  <div class="row plugin_status_wrapper">
+    <h3>Installed Plugins</h3>
+    <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
+      <span class="spinner"></span>
+    </div>
 
-    <table class="status_breakdown">
+    <h4 ng-if="!ui.statuses && !ui.loading" class="missing_statuses">
+      No plugin status information available
+    </h4>
+
+    <table class="plugin_status_breakdown row" ng-if="ui.statuses">
       <tr>
         <th class="col-xs-1">Name</th>
-        <th class="col-xs-11">Description</th>
+        <th class="col-xs-11">Status</th>
       </tr>
-      <tr ng-repeat="status in ui.issues" class="status_row">
+      <tr ng-repeat="status in ui.statuses" class="status_row plugin_state_default plugin_state_{{status.state}}">
         <td class="col-xs-1 status_name">{{status.name}}</td>
-        <td class="col-xs-11 status_message">{{status.message}}</td>
+        <td class="col-xs-11 status_message">
+          <i class="fa plugin_state_color plugin_state_icon" />
+          {{status.message}}
+        </td>
       </tr>
     </table>
-  </div> -->
-
-<!--
-  <div id="plugin_cont" class="section row">
-    <h2>Installed Plugins</h2>
-    <ul class="plugin_list">
-        <li ng-repeat="status in ui.statuses">
-          <span class="status_name">{{status.name}}</span>
-          <i class="fa state_icon state_{{status.state}}" title="{{status.message}}" />
-        </li>
-    </ul>
-
-
-    <div class="system_status_wrapper state_default state_{{ui.serverState}}">
-
-      <h3 class="title">
-        <b>System Status</b> {{ ui.serverStateMessage }}
-      </h3>
-
-      <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
-        <span class="spinner"></span>
-      </div>
-
-      <h4 ng-if="!ui.statuses && !ui.loading" class="missing_statuses">
-        No status information available
-      </h4>
-
-      <table class="status_breakdown" ng-if="ui.statuses">
-        <tr>
-          <th class="col-xs-1">Name</th>
-          <th class="col-xs-11">Description</th>
-        </tr>
-        <tr ng-repeat="status in ui.statuses" class="status_row state_default state_{{status.state}}">
-          <td class="col-xs-1 status_name">{{status.name}}</td>
-          <td class="col-xs-11 status_message">{{status.message}}</td>
-        </tr>
-      </table>
-
-    </div>
-  </div> -->
-
+  </div>
 </div>

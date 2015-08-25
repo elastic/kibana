@@ -34,16 +34,10 @@ require('ui/chrome')
       ui.metrics = data.metrics;
       ui.statuses = data.status.statuses;
 
-      ui.issues = _.filter(ui.statuses, function (n) {
-        return n.state !== 'green';
-      });
-
-      console.log(ui);
-
       var overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {
         ui.serverState = overall.state;
-        ui.serverStateMessage = /* overall.nickname || */ overall.title;
+        ui.serverStateMessage = overall.title;
       }
     })
     .catch(function () {

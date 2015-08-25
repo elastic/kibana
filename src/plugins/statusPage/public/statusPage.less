@@ -2,169 +2,177 @@
 
 @status-bg: #eff0f2;
 @status-metric-bg: #fff;
-@status-metric-border: #a4a7ae;
-@status-metric-title-color: #666978;
+@status-metric-border: #aaa;
+@status-metric-title-color: #666;
 
-.application {
+@status-plugins-bg: #fff;
+@status-plugins-border: #bbb;
+@status-plugins-headings-color: #666;
+
+@status-default: #7c7c7c;
+@status-green: #94c63d;
+@status-yellow: #edb800;
+@status-red: #da1e04;
+
+@icon-default: @fa-var-clock-o;
+@icon-green: @fa-var-check;
+@icon-yellow: @fa-var-exclamation-circle;
+@icon-red: @fa-var-exclamation-triangle;
+
+// background of main page
+.content {
   background-color: @status-bg;
 }
 
 .section {
-  margin-top: 35px;
+  margin-bottom:15px;
 }
 
-header {
-  margin-left: 15px;
+// metrics section
+.metrics_wrapper {
+  margin-top: 25px;
+  .status_metric_wrapper {
+    padding: 10px;
+    border: 0;
+
+    .content {
+      text-align: right;
+      padding: 15px;
+      padding-right: 20px;
+      background-color: @status-metric-bg;
+      border-top: 2px solid;
+      border-top-color: @status-metric-border;
+
+      .title {
+        color: @status-metric-title-color;
+        margin: 0 0 5px 0;
+      }
+
+      .average {
+        font-size: 42px;
+        line-height:45px;
+        font-weight: normal;
+        margin:0;
+      }
+    }
+  }
 }
 
-// .status_breakdown {
-//   margin:0 15px 15px 15px;
-
-//   .status_row {
-//     height:30px;
-//     line-height:30px;
-//     + .status_row {
-//       border-top:1px solid #ebebeb;
-//     }
-//   }
-
-//   th {
-//     font-size:10px;
-//     color:#a9a9a9;
-//     height:25px;
-//     line-height:25px;
-//   }
-
-//   .status_name {
-//     font-weight:bold;
-//     padding:0px 5px;
-//   }
-
-//   .status_message {
-//     border-left:1px solid #ebebeb;
-//     padding:0;
-//     padding-left:15px;
-//   }
-// }
-
-// .system_status_wrapper {
-//   .missing_statuses,
-//   .loading_statuses {
-//     padding: 20px;
-//     text-align: center;
-//   }
-// }
-
-#plugin_cont {
-  background-color: #fff;
-}
-
-.status_chart_wrapper {
-  text-align: right;
-  margin-bottom: 30px;
-  background-color: @status-metric-bg;
-  border-top: 2px solid;
-  border-top-color: @status-metric-border;
+// plugin status table section
+.plugin_status_wrapper {
+  margin-top: 25px;
+  margin-left: -5px;
+  margin-right: -5px;
+  border-top:2px solid;
+  background-color: @status-plugins-bg;
   padding: 10px;
-  padding-right: 20px;
 
-  .average {
-    font-size: 42px;
-    line-height:45px;
-    margin-top:0;
+  h3 {
+    margin-top: 3px;
+    margin-bottom: 3px;
   }
-  .title {
-    color: @status-metric-title-color;
-    margin:0 0 5px 0;
+
+  .missing_statuses,
+  .loading_statuses {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .plugin_status_breakdown {
+    margin-left: 0;
+    margin-right: 0;
+
+    .status_row {
+      height:30px;
+      line-height:30px;
+      border-bottom:1px solid;
+      border-bottom-color: @status-plugins-border;
+    }
+
+    th {
+      color:@status-plugins-headings-color;
+      font-weight: normal;
+      height:25px;
+      line-height:25px;
+      border-bottom:1px solid;
+      border-bottom-color: @status-plugins-border;
+    }
+
+    .status_name {
+      padding:0px 5px;
+      border-left: 2px solid;
+    }
+
+    .status_message {
+      padding:0;
+      padding-left:15px;
+      border-right: 2px solid;
+    }
   }
 }
 
-.plugin_list {
-  padding: 0;
-  margin-left: 0;
-  list-style-type: none;
+//plugin state
+.plugin_state(@color, @icon) {
+  .plugin_state_color {
+    color: @color;
+  }
 
-  li {
-    margin-right: 10px;
-    display: inline-block;
-    float: left;
+  .plugin_state_icon:before {
+    content: @icon;
+  }
+
+  .status_name {
+    border-left-color: @color !important;
+  }
+
+  .status_message {
+    border-right-color: @color !important;
   }
 }
 
-.state(@color, @icon){
+.plugin_state_default {
+  .plugin_state(@status-default, @icon-default);
+}
+
+.plugin_state_green {
+  .plugin_state(@status-green, @icon-green);
+}
+
+.plugin_state_yellow {
+  .plugin_state(@status-yellow, @icon-yellow);
+}
+
+.plugin_state_red {
+  .plugin_state(@status-red, @icon-red);
+}
+
+//server state
+.state(@color, @icon) {
   .state_color {
     color: @color;
   }
 
-  i:before {
+  .state_icon:before {
     content: @icon;
+  }
+
+  .plugin_status_wrapper {
+    border-top-color: @color;
   }
 }
 
 .state_default {
-  .state(#7C7C7C, @fa-var-clock-o);
+  .state(@status-default, @icon-default);
 }
 
 .state_green {
-  .state(#0a8e03, @fa-var-check);
+  .state(@status-green, @icon-green);
 }
 
 .state_yellow {
-  .state(#fdee00, @fa-var-exclamation-triangle);
+  .state(@status-yellow, @icon-yellow);
 }
 
 .state_red {
-  .state(#da1e04, @fa-var-exclamation-circle);
+  .state(@status-red, @icon-red);
 }
-
-/*
-.state(@color, @icon){
-  color: @color;
-
-  &:before {
-    content: @icon;
-    cursor: help;
-  }
-}
-
-.state_icon {
-  &.state_default {
-    .state(#7C7C7C, @fa-var-clock-o);
-  }
-
-  &.state_green {
-    .state(#0a8e03, @fa-var-check);
-  }
-
-  &.state_yellow {
-    .state(#fdee00, @fa-var-exclamation-triangle);
-  }
-
-  &.state_red {
-    .state(#da1e04, @fa-var-exclamation-circle);
-  }
-}
-
-
-.server_state(@color) {
-  span {
-    color: @color;
-  }
-}
-
-.server_state_default {
-    .server_state(#7C7C7C);
-}
-
-.server_state_green {
-  .server_state(#0a8e03);
-}
-
-.server_state_yellow {
-  .server_state(#fdee00);
-}
-
-.server_state_red {
-  .server_state(#da1e04);
-}
-*/
