@@ -110,6 +110,15 @@ uiModules
               case 'avg':
                 formattedColumn.total = sum() / table.rows.length;
                 break;
+              case 'min':
+                formattedColumn.total = _.chain(table.rows).map(i).map('value').min().value();
+                break;
+              case 'max':
+                formattedColumn.total = _.chain(table.rows).map(i).map('value').max().value();
+                break;
+              case 'count':
+                formattedColumn.total = table.rows.length;
+                break;
               default:
                 break;
             }
