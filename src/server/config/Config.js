@@ -1,47 +1,56 @@
 let Promise = require('bluebird');
 let Joi = require('joi');
 let _ = require('lodash');
+let { zipObject } = require('lodash');
 let override = require('./override');
 let pkg = require('requirefrom')('src/utils')('packageJson');
 
+const schema = Symbol('Joi Schema');
+const schemaKeys = Symbol('Schema Extensions');
+const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
 
 module.exports = class Config {
-  constructor(schema, initialSettings) {
-    this.schema = Joi.object({}).default();
-    this.config = {};
+  constructor(initialSchema, initialSettings) {
+    this[schemaKeys] = new Map();
 
+    this[vals] = Object.create(null);
     this[pendingSets] = new Map(_.pairs(_.cloneDeep(initialSettings || {})));
 
-    if (schema) this.extendSchema(schema);
+    if (initialSchema) this.extendSchema(initialSchema);
   }
 
   getPendingSets() {
     return this[pendingSets];
   }
 
-  extendSchema(key, schema) {
+  extendSchema(key, extension) {
     if (key && key.isJoi) {
-      return _.each(key._inner.children, function (child) {
+      return _.each(key._inner.children, (child) => {
         this.extendSchema(child.key, child.schema);
-      }, this);
+      });
     }
 
-    if (schema == null) {
-      schema = Joi.any().forbidden();
-    } else if (this.has(key)) {
+    if (this.has(key)) {
       throw new Error(`Config schema already has key ${key}`);
     }
 
-    this.schema = this.schema.keys(_.set({}, key, schema));
+    this[schemaKeys].set(key, extension);
+    this[schema] = null;
 
-    var initialVals = this[pendingSets].get(key);
+    let initialVals = this[pendingSets].get(key);
     if (initialVals) {
       this.set(key, initialVals);
       this[pendingSets].delete(key);
     } else {
-      this._commit(this.config);
+      this._commit(this[vals]);
     }
+  }
+
+  removeSchema(key) {
+    this[schemaKeys].delete(key);
+    this[pendingSets].delete(key);
+    delete this[vals][key];
   }
 
   resetTo(obj) {
@@ -50,7 +59,7 @@ module.exports = class Config {
 
   set(key, value) {
     // clone and modify the config
-    let config = _.cloneDeep(this.config);
+    let config = _.cloneDeep(this[vals]);
     if (_.isPlainObject(key)) {
       config = override(config, key);
     } else {
@@ -61,10 +70,10 @@ module.exports = class Config {
     this._commit(config);
   }
 
-  _commit(newConfig) {
+  _commit(newVals) {
     // resolve the current environment
-    let env = newConfig.env;
-    delete newConfig.env;
+    let env = newVals.env;
+    delete newVals.env;
     if (_.isObject(env)) env = env.name;
     if (!env) env = process.env.NODE_ENV || 'production';
 
@@ -89,23 +98,21 @@ module.exports = class Config {
       );
     }
 
-    let results = Joi.validate(newConfig, this.schema, {
-      context: context
-    });
+    let results = Joi.validate(newVals, this.getSchema(), { context });
 
     if (results.error) {
       throw results.error;
     }
 
-    this.config = results.value;
+    this[vals] = results.value;
   }
 
   get(key) {
     if (!key) {
-      return _.cloneDeep(this.config);
+      return _.cloneDeep(this[vals]);
     }
 
-    let value = _.get(this.config, key);
+    let value = _.get(this[vals], key);
     if (value === undefined) {
       if (!this.has(key)) {
         throw new Error('Unknown config key: ' + key);
@@ -140,6 +147,15 @@ module.exports = class Config {
       key = key.join('.');
     }
 
-    return !!has(key, this.schema);
+    return !!has(key, this.getSchema());
+  }
+
+  getSchema() {
+    if (!this[schema]) {
+      let objKeys = zipObject([...this[schemaKeys]]);
+      this[schema] = Joi.object().keys(objKeys).default();
+    }
+
+    return this[schema];
   }
 };

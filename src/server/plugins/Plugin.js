@@ -38,10 +38,12 @@ module.exports = class Plugin {
     let { config } = this.kbnServer;
     config.extendSchema(this.id, schema || defaultConfigSchema);
 
-    if (config.get([this.id, 'enabled'])) return true;
-
-    config.extendSchema(this.id, null);
-    return false;
+    if (config.get([this.id, 'enabled'])) {
+      return true;
+    } else {
+      config.removeSchema(this.id);
+      return false;
+    }
   }
 
   async init() {
