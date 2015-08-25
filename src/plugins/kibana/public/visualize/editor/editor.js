@@ -85,6 +85,7 @@ define(function (require) {
     var $state = $scope.$state = (function initState() {
       var savedVisState = vis.getState();
       var stateDefaults = {
+        uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
         linked: !!savedVis.savedSearchId,
         query: searchSource.getOwn('query') || {query_string: {query: '*'}},
         filters: searchSource.getOwn('filter') || [],
@@ -114,6 +115,8 @@ define(function (require) {
       $scope.indexPattern = vis.indexPattern;
       $scope.editableVis = editableVis;
       $scope.state = $state;
+      $scope.uiState = $state.makeStateful('uiState');
+
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
 
@@ -210,7 +213,6 @@ define(function (require) {
       }
     };
 
-
     $scope.startOver = function () {
       kbnUrl.change('/visualize', {});
     };
@@ -218,6 +220,7 @@ define(function (require) {
     $scope.doSave = function () {
       savedVis.id = savedVis.title;
       savedVis.visState = $state.vis;
+      savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
       savedVis.save()
       .then(function (id) {

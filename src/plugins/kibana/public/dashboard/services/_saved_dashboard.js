@@ -11,7 +11,7 @@ define(function (require) {
     _.class(SavedDashboard).inherits(courier.SavedObject);
     function SavedDashboard(id) {
       // Gives our SavedDashboard the properties of a SavedObject
-      courier.SavedObject.call(this, {
+      SavedDashboard.Super.call(this, {
         type: SavedDashboard.type,
         mapping: SavedDashboard.mapping,
         searchSource: SavedDashboard.searchsource,
@@ -25,6 +25,7 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]',
+          uiStateJSON: '{}',
           version: 1,
           timeRestore: false,
           timeTo: undefined,
@@ -46,6 +47,7 @@ define(function (require) {
       hits: 'integer',
       description: 'string',
       panelsJSON: 'string',
+      uiStateJSON: 'string',
       version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',

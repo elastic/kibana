@@ -22,6 +22,10 @@ define(function (require) {
 
     var brushEvent = Private(require('ui/utils/brush_event'));
 
+    var getPanelId = function (panel) {
+      return ['P', panel.id, panel.panelIndex].join('-');
+    };
+
     return {
       restrict: 'E',
       template: require('plugins/kibana/dashboard/components/panel/panel.html'),
@@ -40,6 +44,10 @@ define(function (require) {
             $scope.savedObj = panelConfig.savedObj;
             $scope.editUrl = panelConfig.editUrl;
             $scope.$on('$destroy', panelConfig.savedObj.destroy);
+
+            // create child ui state from the savedObj
+            var uiState = panelConfig.uiState || {};
+            $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState);
 
             $scope.filter = function (field, value, operator) {
               var index = $scope.savedObj.searchSource.get('index').id;
