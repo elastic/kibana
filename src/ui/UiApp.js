@@ -28,13 +28,13 @@ class UiApp {
   }
 
   getModules() {
-    return _([
+    return _.chain([
       this.autoloadOverrides || autoload.require,
       this.uiExports.find(_.get(this, 'spec.uses', [])),
     ])
     .flatten()
     .uniq()
-    .push(this.main)
+    .unshift(this.main)
     .value();
   }
 

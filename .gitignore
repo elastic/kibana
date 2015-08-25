@@ -10,8 +10,9 @@ target
 .idea
 *.iml
 *.log
-esvm
+/esvm
 .htpasswd
 installedPlugins
+disabledPlugins
 webpackstats.json
 config/kibana.dev.yml

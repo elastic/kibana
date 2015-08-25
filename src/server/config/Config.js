@@ -32,7 +32,7 @@ module.exports = class Config {
     }
 
     if (this.has(key)) {
-      throw new Error(`Config schema already has key ${key}`);
+      throw new Error(`Config schema already has key: ${key}`);
     }
 
     this[schemaKeys].set(key, extension);
@@ -48,6 +48,11 @@ module.exports = class Config {
   }
 
   removeSchema(key) {
+    if (!this[schemaKeys].has(key)) {
+      throw new TypeError(`Unknown schema key: ${key}`);
+    }
+
+    this[schema] = null;
     this[schemaKeys].delete(key);
     this[pendingSets].delete(key);
     delete this[vals][key];
