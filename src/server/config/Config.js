@@ -27,7 +27,9 @@ module.exports = class Config {
       }, this);
     }
 
-    if (this.has(key)) {
+    if (schema == null) {
+      schema = Joi.any().forbidden();
+    } else if (this.has(key)) {
       throw new Error(`Config schema already has key ${key}`);
     }
 
