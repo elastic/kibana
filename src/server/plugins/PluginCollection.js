@@ -18,26 +18,23 @@ module.exports = class Plugins extends Collection {
     let output = [].concat(require(path)(api) || []);
     let config = this.kbnServer.config;
 
+    if (!output.length) return;
+
+    // clear the byIdCache
+    this[byIdCache] = null;
+
     for (let product of output) {
+
       if (product instanceof api.Plugin) {
         let plugin = product;
-
-        // the config does not know about
-        let pendingConfig = config.getPendingSets();
-        let enabled = get(pendingConfig.get(plugin.id), 'enabled', true);
-        if (!enabled) {
-          pendingConfig.delete(plugin.id);
-          continue;
-        }
-
-        this[byIdCache] = null;
         this.add(plugin);
-        await plugin.setupConfig();
 
+        let enabled = await plugin.readConfig();
+        if (!enabled) this.delete(plugin);
+        continue;
       }
-      else {
-        throw new TypeError('unexpected plugin export ' + inspect(product));
-      }
+
+      throw new TypeError('unexpected plugin export ' + inspect(product));
     }
   }
 
