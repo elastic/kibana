@@ -49,5 +49,14 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
+    it('should return a value for a scripted range', (done) => {
+      let filter = {meta: {index: 'logstash-*'}, field: 'script number', script: {params: {gte: 0, lt: 500}}};
+      mapRange(filter).then((result) => {
+        expect(result).to.have.property('value', '0 to 500');
+        done();
+      });
+      $rootScope.$apply();
+    });
+
   });
 });
