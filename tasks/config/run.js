@@ -20,6 +20,24 @@ module.exports = function (grunt) {
       ]
     },
 
+    testCoverageServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: './bin/kibana',
+      args: [
+        '--server.port=5610',
+        '--env.name=development',
+        '--logging.json=false',
+        '--optimize.bundleFilter=tests',
+        '--plugins.initialize=false',
+        '--testsBundle.instrument=true'
+      ]
+    },
+
     devTestServer: {
       options: {
         wait: false,

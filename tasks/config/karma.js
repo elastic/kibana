@@ -40,5 +40,15 @@ module.exports = function (grunt) {
 
     dev: { singleRun: false },
     unit: { singleRun: true },
+    coverage: {
+      singleRun: true,
+      reporters: ['coverage'],
+      coverageReporter: {
+        reporters: [
+          { type: 'html', dir: 'coverage' },
+          { type: 'text-summary' },
+        ]
+      }
+    }
   };
 };
