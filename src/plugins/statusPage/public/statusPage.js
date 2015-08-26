@@ -9,7 +9,8 @@ require('ui/chrome')
 .setTabs([
   {
     id: '',
-    title: 'Server Status'
+    title: 'Server Status',
+    activeIndicatorColor: '#EFF0F2'
   }
 ])
 .setRootTemplate(require('plugins/statusPage/statusPage.html'))
