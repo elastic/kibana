@@ -1,4 +1,5 @@
 module.exports = function (grunt) {
+  let platform = require('os').platform();
   let {resolve} = require('path');
   let root = p => resolve(__dirname, '../../', p);
 
@@ -10,7 +11,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: './bin/kibana',
+      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
       args: [
         '--server.port=5610',
         '--env.name=development',
@@ -27,7 +28,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: './bin/kibana',
+      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
       args: [
         '--server.port=5610',
         '--env.name=development',
