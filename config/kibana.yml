@@ -53,8 +53,8 @@
 # elasticsearch.startupTimeout: 5000
 
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
-# server.ssl.cert: /path/to/your/server.key
-# server.ssl.key: /path/to/your/server.crt
+# server.ssl.cert: /path/to/your/server.crt
+# server.ssl.key: /path/to/your/server.key
 
 # Set the path to where you would like the process id file to be created.
 # pid.file: /var/run/kibana.pid
