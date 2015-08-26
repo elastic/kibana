@@ -48,32 +48,6 @@ define(function (require) {
         }
 
         return list;
-      },
-
-      /**
-       * Converts `value` to property path array if it's not one.
-       * This is a stop-gap until we have access to the npm version of lodash
-       * and gain access to `lodash/internal/toPath`
-       *
-       * @param {*} value The value to process.
-       * @returns {Array} Returns the property path array.
-       */
-      toPath: function (value) {
-        var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
-        var reEscapeChar = /\\(\\)?/g;
-
-        function baseToString(value) {
-          return value == null ? '' : (value + '');
-        }
-
-        if (_.isArray(value)) {
-          return value;
-        }
-        var result = [];
-        baseToString(value).replace(rePropName, function (match, number, quote, string) {
-          result.push(quote ? string.replace(reEscapeChar, '$1') : (number || match));
-        });
-        return result;
       }
 
     });

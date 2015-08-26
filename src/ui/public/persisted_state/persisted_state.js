@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var toPath = require('lodash/internal/toPath');
   var errors = require('ui/errors');
 
   return function (Private) {
@@ -110,7 +111,7 @@ define(function (require) {
 
     PersistedState.prototype._getIndex = function (key) {
       if (_.isUndefined(key)) return this._path;
-      return (this._path || []).concat(_.toPath(key));
+      return (this._path || []).concat(toPath(key));
     };
 
     PersistedState.prototype._getDefault = function () {
