@@ -60,10 +60,14 @@ require('ui/modules')
         var unit = '';
         self.averages = self.averages.map(function (average) {
           var parts = average.split(' ');
-          unit = parts[1] ? ' (' + parts[1] + ')' : '';
-          return parts[0];
+          var value = parts.shift();
+          unit = parts.join(' ');
+          return value;
         });
-        self.extendedTitle = self.title + unit;
+        self.extendedTitle = self.title;
+        if (unit) {
+          self.extendedTitle = `${self.extendedTitle} (${unit})`;
+        }
       });
     }
   };
