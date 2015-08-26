@@ -33,10 +33,17 @@ module.exports = class Plugin {
     };
   }
 
-  async setupConfig() {
-    let { config } = this.kbnServer;
+  async readConfig() {
     let schema = await this.getConfigSchema(Joi);
-    this.kbnServer.config.extendSchema(this.id, schema || defaultConfigSchema);
+    let { config } = this.kbnServer;
+    config.extendSchema(this.id, schema || defaultConfigSchema);
+
+    if (config.get([this.id, 'enabled'])) {
+      return true;
+    } else {
+      config.removeSchema(this.id);
+      return false;
+    }
   }
 
   async init() {
