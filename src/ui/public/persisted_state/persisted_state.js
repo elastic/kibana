@@ -85,14 +85,6 @@ define(function (require) {
       return new PersistedState(value, this._getIndex(path), this._parent || this);
     };
 
-    PersistedState.prototype.destroyChild = function (path) {
-      this.remove(path);
-    };
-
-    PersistedState.prototype.save = function () {
-      this._saveState(this._changedState);
-    };
-
     PersistedState.prototype.getChanges = function () {
       return _.cloneDeep(this._changedState);
     };
@@ -195,10 +187,6 @@ define(function (require) {
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
 
       return this;
-    };
-
-    PersistedState.prototype._saveState = function (state) {
-      // TODO: persist the state
     };
 
     return PersistedState;
