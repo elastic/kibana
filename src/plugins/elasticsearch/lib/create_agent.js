@@ -26,3 +26,6 @@ module.exports = _.memoize(function (server) {
 
   return new https.Agent(agentOptions);
 });
+
+// See https://lodash.com/docs#memoize: We use a Map() instead of the default, because
+module.exports.cache = new Map();
