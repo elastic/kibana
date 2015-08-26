@@ -5,7 +5,7 @@ module.exports = function (kbnServer, server, config) {
   var { join } = require('path');
 
   kbnServer.status = new ServerStatus(kbnServer.server);
-  kbnServer.metrics = new Samples(60);
+  kbnServer.metrics = new Samples(1);
 
   if (server.plugins.good) {
     server.plugins.good.monitor.on('ops', function (event) {
