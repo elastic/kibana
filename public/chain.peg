@@ -15,11 +15,16 @@ start
  }
 
 arg_list
- = argument*
+ = first:argument* rest:more_args* {
+  return first.concat(rest);
+ }
+
+more_args
+ = ',' space? arg:argument {return arg;}
 
 argument
- = arg_name:function_name '=' element:arg_type ','? space? {return {type: 'namedArg', name:arg_name, value:element}}
- / element:arg_type ','? space? {return element}
+ = arg_name:function_name '=' element:arg_type {return {type: 'namedArg', name:arg_name, value:element}}
+ / element:arg_type {return element}
 
 arg_type
  = series_type
@@ -38,7 +43,7 @@ function_name // check
  = (first:[a-zA-Z]+ rest:[a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
 
 function "function"
- = name:function_name '(' space? arguments:arg_list space? ')' {
+ = '.' name:function_name '(' space? arguments:arg_list space? ')' {
   var result = {
     type: 'function',
     function: name,
@@ -65,18 +70,22 @@ reference
  }
 
 chain
- = func:function rest:chained_function* {
-  return {type: 'chain', chain: [func].concat(rest)}
-}
-
-chained_function
- = '.' func:function {return func}
- / '.' func:function_name '('? {
-  error('Incomplete function: ' + func)
+ = func:function rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
+ / '.' func:function_name? {
+  var exception = {
+    type: 'incompleteFunction',
+    function: func,
+    position: {
+      min: offset(),
+      max: offset() + text().length,
+      text: text()
+    }
+  }
+  error(JSON.stringify(exception));
  }
 
 group
- = '(' space? grouped:series+ space? ')' functions:chained_function* {
+ = '(' space? grouped:series+ space? ')' functions:function* {
   first = {
     type: 'chainList',
     list: grouped
@@ -88,13 +97,16 @@ group
 
  /* ----- Core types ----- */
 
-space
- = [\ \t]+
+number
+ = number:([-+]? integer '.'? integer?) {return parseFloat(number.join(''))}
 
 string "string"
   = '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
   / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
   / string:[^()"',=\ \t]+ { return string.join(''); } // unquoted string
+
+space
+ = [\ \t]+
 
 dq_char
   = [\x20-\x21\x23-\x5B\x5D-\u10FFFF] // everything except "
@@ -105,9 +117,6 @@ sq_char
   / "\\" sequence:("'" / "\\") { return sequence; }
 
 digit  = [0-9]
-
-number
- = number:([-+]? integer '.'? integer?) {return parseFloat(number.join(''))}
 
 integer
  = digits:digit+ {return parseInt(digits.join(''))}

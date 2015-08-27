@@ -42,6 +42,10 @@ body > .content,  body > .content > .application {
       }
     }
   }
+
+  &-expression {
+    position: relative !important;
+  }
 }
 
 [chart] {
@@ -84,9 +88,30 @@ select.timelion-interval {
   font-size: 0.9em;
 }
 
-.suggestion {
-  border-bottom: 1px solid #ccc;
-  padding: 5px 20px;
+
+
+.suggestions {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  width: 100% !important;
+  background-color: @body-bg;
+  color: @text-color;
+  border: 1px solid @input-border;
+  border-top: 2px solid @input-border;
+  border-radius: 0px 0px @border-radius-base @border-radius-base !important;
+  z-index: 20;
+  max-height: 378px; // 5 suggestions
+  overflow-y: auto;
+
+  .suggestion {
+    border-bottom: 1px solid @gray-lighter;
+    padding: 5px 20px;
+
+    &.active {
+      background-color: @gray-lighter;
+    }
+  }
 }
 
 div.doc-container {

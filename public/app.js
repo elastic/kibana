@@ -59,8 +59,10 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
     location: 'Timelion'
   });
 
+
+  var defaultExpression = '.es(*)';
   var savedSheet = $route.current.locals.savedSheet;
-  var blankSheet = ['es(q=*)'];
+  var blankSheet = [defaultExpression];
 
     // config panel templates
   $scope.configTemplate = new ConfigTemplate({
@@ -104,7 +106,7 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   };
 
   $scope.newCell = function () {
-    $scope.state.sheet.push('es(q=*)');
+    $scope.state.sheet.push(defaultExpression);
     $scope.state.selected = $scope.state.sheet.length - 1;
     $scope.search();
   };

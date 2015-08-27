@@ -10,7 +10,7 @@
             placeholder="Expression ..."
             aria-label="Expression input"
             type="text"
-            class="form-control">
+            class="form-control timelion-expression">
 
           <select class="form-control timelion-interval"
             ng-change="search()"
@@ -96,17 +96,6 @@
       <strong>Processing Time:</strong> {{stats.sheetTime - stats.fitTime}}ms
     </center>
   </div>
-
-
-  <div class="suggestion" ng-if="suggestion">
-    <h4>Function: {{suggestion.name}}() <small>{{suggestion.help}}</small></h4>
-
-    <p>
-      <strong>Arguments:</strong> <span ng-repeat="arg in suggestion.args"><strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>) <em ng-show="!$last">,</em> </span>
-    </p>
-  </div>
-
-
 
   <div class="timelion-container">
     <div class="timelion-container-sheet">

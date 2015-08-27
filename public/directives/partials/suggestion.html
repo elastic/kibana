@@ -1,0 +1,12 @@
+<div class="suggestions" ng-if="suggestions.list">
+  <div class="suggestion"
+    ng-click="suggestions.selected = $index"
+    ng-class="{active: $index === suggestions.selected}"
+    ng-repeat="suggestion in suggestions.list track by suggestion.name">
+    <h4><strong>{{suggestion.name}}()</strong> <small>{{suggestion.help}}</small></h4>
+
+    <p>
+      <strong>Arguments:</strong> <span ng-repeat="arg in suggestion.args"><strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>) <em ng-show="!$last">,</em> </span>
+    </p>
+  </div>
+</div>

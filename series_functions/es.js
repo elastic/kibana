@@ -54,7 +54,7 @@ module.exports = {
       types: ['string', 'null']
     },
     {
-      name: 'url', // You really shouldn't use this, use the interval picker instead
+      name: 'url',
       types: ['string', 'null']
     },
     /*
