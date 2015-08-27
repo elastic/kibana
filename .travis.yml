@@ -1,5 +1,5 @@
 language: node_js
-node_js: 'iojs-v2.4'
+node_js: 'iojs-v2.5'
 install:
   - npm install -g npm@3.2
   - npm install
