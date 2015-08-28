@@ -1,5 +1,7 @@
 define(function (require) {
   var {has} = require('lodash');
+  var {FieldNotFound} = require('ui/errors');
+
   return function mapRangeProvider(Promise, courier) {
     return function (filter) {
       if (!filter.range) return Promise.reject(filter);
@@ -9,7 +11,10 @@ define(function (require) {
       .get(filter.meta.index)
       .then(function (indexPattern) {
         var key = Object.keys(filter.range)[0];
-        var convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+        var field = indexPattern.fields.byName[key];
+        if (!field) return Promise.reject(new FieldNotFound());
+
+        var convert = field.format.getConverterFor('text');
         var range = filter.range[key];
 
         var left = has(range, 'gte') ? range.gte : range.gt;

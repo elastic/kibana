@@ -3,6 +3,7 @@ define(function (require) {
   var module = require('ui/modules').get('kibana');
   var template = require('ui/filter_bar/filter_bar.html');
   var moment = require('moment');
+  var angular = require('angular');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
@@ -36,6 +37,13 @@ define(function (require) {
 
         $scope.state = getAppState();
 
+        $scope.aceLoaded = function (editor) {
+          editor.$blockScrolling = Infinity;
+          var session = editor.getSession();
+          session.setTabSize(2);
+          session.setUseSoftTabs(true);
+        };
+
         $scope.applyFilters = function (filters) {
           // add new filters
           $scope.addFilters(filterAppliedAndUnwrap(filters));
@@ -47,10 +55,24 @@ define(function (require) {
           }
         };
 
-        $scope.startEditingFilter = function (filter) {
+        var privateFieldRegexp = /(^\$|meta)/;
+        $scope.startEditingFilter = function (source) {
+          var model = _.cloneDeep(source);
+          var filterType;
+
+          //Hide private properties and figure out what type of filter this is
+          _.each(model, function (value, key) {
+            if (key.match(privateFieldRegexp)) {
+              delete model[key];
+            } else {
+              filterType = key;
+            }
+          });
+
           $scope.editingFilter = {
-            source: filter,
-            model: JSON.stringify(filter, null, '  ')
+            source,
+            type: filterType,
+            model: angular.toJson(model, true)
           };
         };
 
@@ -59,12 +81,11 @@ define(function (require) {
         };
 
         $scope.editDone = function () {
-          try {
-            $scope.updateFilter($scope.editingFilter);
-          } catch(e) {
-            return;
-          }
-          $scope.stopEditingFilter();
+          $scope.updateFilter($scope.editingFilter).then(function () {
+            $scope.stopEditingFilter();
+          }, function (e) {
+            $scope.editingFilter.error = e;
+          });
         };
 
         $scope.clearFilterBar = function () {

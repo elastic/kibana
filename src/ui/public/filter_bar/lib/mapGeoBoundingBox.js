@@ -1,5 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
+  var {FieldNotFound} = require('ui/errors');
+
   return function mapGeoBoundBoxProvider(Promise, courier) {
     return function (filter) {
       var key;
@@ -13,6 +15,7 @@ define(function (require) {
         .get(filter.meta.index).then(function (indexPattern) {
           key = _.keys(filter.geo_bounding_box)[0];
           field = indexPattern.fields.byName[key];
+          if (!field) return Promise.reject(new FieldNotFound());
           topLeft = field.format.convert(filter.geo_bounding_box[field.name].top_left);
           bottomRight = field.format.convert(filter.geo_bounding_box[field.name].bottom_right);
           value = topLeft + ' to ' + bottomRight;

@@ -104,12 +104,10 @@ describe('Filter Bar Directive', function () {
         expect($el.find('.filter-edit-container').length).to.be(0);
       });
 
-      it('should stop editing and merge changes after clicking done', function () {
-        sinon.spy($scope, 'stopEditingFilter');
+      it('should merge changes after clicking done', function () {
         sinon.spy($scope, 'updateFilter');
 
         $scope.editDone();
-        expect($scope.stopEditingFilter.called).to.be(true);
         expect($scope.updateFilter.called).to.be(true);
       });
     });

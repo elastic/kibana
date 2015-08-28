@@ -12,6 +12,7 @@ describe('update filters', function () {
   var queryFilter;
   var appState;
   var globalState;
+  var $rootScope;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -32,7 +33,8 @@ describe('update filters', function () {
     }
   ));
 
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, _$rootScope_) {
+    $rootScope = _$rootScope_;
     queryFilter = Private(require('ui/filter_bar/query_filter'));
     filters = [
       {
@@ -43,17 +45,36 @@ describe('update filters', function () {
   }));
 
   describe('updating', function () {
-    it('should be able to update a filter', function () {
-      var currentFilter = filters[0];
-      var newFilter = _.cloneDeep(currentFilter);
-      newFilter.meta.disabled = true;
+    var currentFilter;
+    var newFilter;
 
-      expect(filters[0].meta.disabled).to.be(false);
+    beforeEach(function () {
+      currentFilter = filters[0];
+      newFilter = _.cloneDeep(currentFilter);
+      delete newFilter.meta;
+    });
+
+    it('should be able to update a filter', function () {
+      newFilter.query.match.extension.query = 'png';
+
+      expect(currentFilter.query.match.extension.query).to.be('jpg');
       queryFilter.updateFilter({
         source: currentFilter,
         model: JSON.stringify(newFilter)
       });
-      expect(filters[0].meta.disabled).to.be(true);
+      $rootScope.$digest();
+      expect(currentFilter.query.match.extension.query).to.be('png');
+    });
+
+    it('should not update if the field doesn\'t exist', function () {
+      delete newFilter.query.match.extension;
+      newFilter.query.match.fakeField = 'foo';
+      queryFilter.updateFilter({
+        source: currentFilter,
+        model: JSON.stringify(newFilter)
+      });
+      $rootScope.$digest();
+      expect(_.eq(currentFilter, newFilter)).to.be(false);
     });
   });
 });
