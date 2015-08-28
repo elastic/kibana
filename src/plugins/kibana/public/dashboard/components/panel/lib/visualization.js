@@ -13,6 +13,7 @@ define(function (require) {
         return {
           savedObj: savedVis,
           panel: panel,
+          uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
           editUrl: savedVisualizations.urlFor(panel.id)
         };
       });

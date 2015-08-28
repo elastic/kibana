@@ -54,7 +54,7 @@ define(function (require) {
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
-    var PersistedState = Private(require('components/persisted_state/persisted_state'));
+    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -221,7 +221,7 @@ define(function (require) {
     $scope.doSave = function () {
       savedVis.id = savedVis.title;
       savedVis.visState = $state.vis;
-      savedVis.uiStateJSON = JSON.stringify($scope.uiState.getChanges());
+      savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
       savedVis.save()
       .then(function (id) {
