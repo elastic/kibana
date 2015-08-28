@@ -61,3 +61,8 @@
 
 # If you would like to send the log output to a file you can set the path below.
 # logging.dest: stdout
+#
+ optimize:
+   sourceMaps: '#cheap-source-map'
+   unsafeCache: true
+   lazyPrebuild: false
