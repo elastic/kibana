@@ -12,21 +12,11 @@ require('./main.less');
 
 var timelionLogo = require('plugins/timelion/header.png');
 
-
 require('ui/chrome')
 .setBrand({
   'logo': 'url(' + timelionLogo + ') left no-repeat',
   'smallLogo': 'url(' + timelionLogo + ') left no-repeat'
-})
-.setTabDefaults({
-  activeIndicatorColor: '#656a76'
-})
-.setTabs([
-  {
-    id: '',
-    title: 'TimeLion'
-  }
-]);
+}).setTabs([]);
 
 var app = require('ui/modules').get('apps/timelion', ['angularResizable']);
 
