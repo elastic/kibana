@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.2.0-snapshot",
+  "version": "4.2.0-beta1",
   "build": {
     "number": 8173,
     "sha": "0102888deb393e4141369fbd1644a5d77f8732da"

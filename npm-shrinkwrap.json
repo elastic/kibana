@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "version": "4.2.0-snapshot",
+  "version": "4.2.0-beta1",
   "dependencies": {
     "@spalger/angular-bootstrap": {
       "version": "0.10.0",
