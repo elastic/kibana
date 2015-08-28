@@ -39,8 +39,9 @@ describe('wrapRouteWithPrep fn', function () {
         $injector = _$injector_;
       });
 
-      var setup = Private(require('ui/routes/setup'));
-      stub(setup, 'routeSetupWork', function () {
+
+      routes
+      .addSetupWork(function () {
         return new Promise(function (resolve, reject) {
           setTimeout(function () {
             setupComplete = true;
@@ -50,17 +51,17 @@ describe('wrapRouteWithPrep fn', function () {
       });
 
       routes
-        .when('/', {
-          resolve: {
-            test: function () {
-              expect(setupComplete).to.be(true);
-              userWorkComplete = true;
-            }
+      .when('/', {
+        resolve: {
+          test: function () {
+            expect(setupComplete).to.be(true);
+            userWorkComplete = true;
           }
-        })
-        .config({
-          when: function (p, _r) { route = _r; }
-        });
+        }
+      })
+      .config({
+        when: function (p, _r) { route = _r; }
+      });
 
       return new Promise(function (resolve, reject) {
         setTimeout(function () {

@@ -15,7 +15,6 @@ module.exports = function (plugin, server) {
 
   plugin.status.yellow('Waiting for Elasticsearch');
 
-
   function waitForPong() {
     return client.ping({ requestTimeout: 1500 }).catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
@@ -29,12 +28,13 @@ module.exports = function (plugin, server) {
   function waitForShards() {
     return client.cluster.health({
       timeout: '5s', // tells es to not sit around and wait forever
-      index: config.get('kibana.index')
+      index: config.get('kibana.index'),
+      ignore: [408]
     })
     .then(function (resp) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
-      if (resp.timed_out) {
+      if (!resp || resp.timed_out) {
         plugin.status.yellow('No existing Kibana index found');
         return createKibanaIndex(server);
       }
@@ -53,12 +53,11 @@ module.exports = function (plugin, server) {
 
   function check() {
     return waitForPong()
-    .then(_.partial(checkEsVersion, server, plugin))
+    .then(_.partial(checkEsVersion, server))
     .then(waitForShards)
     .then(_.partial(migrateConfig, server))
-    .catch(_.bindKey(server, 'log', 'error'));
+    .catch(err => plugin.status.red(err));
   }
-
 
   var timeoutId = null;
 

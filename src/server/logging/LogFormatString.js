@@ -4,6 +4,16 @@ let moment = require('moment');
 
 let LogFormat = require('./LogFormat');
 
+let statuses = [
+  'err',
+  'info',
+  'error',
+  'warning',
+  'fatal',
+  'status',
+  'debug'
+];
+
 let typeColors = {
   log: 'blue',
   req: 'green',
@@ -39,7 +49,9 @@ module.exports = class KbnLoggerJsonFormat extends LogFormat {
 
     let tags = _(data.tags)
     .sortBy(function (tag) {
-      return color(tag) === _.identity ? `1${tag}` : `0${tag}`;
+      if (color(tag) === _.identity) return `2${tag}`;
+      if (_.includes(statuses, tag)) return `0${tag}`;
+      return `1${tag}`;
     })
     .reduce(function (s, t) {
       return s + `[${ color(t)(t) }]`;

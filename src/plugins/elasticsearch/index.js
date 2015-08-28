@@ -23,7 +23,8 @@ module.exports = function (kibana) {
           cert: Joi.string(),
           key: Joi.string()
         }).default(),
-        minimumVerison: Joi.string().default('1.4.4')
+        apiVersion: Joi.string().default('master'),
+        minimumVerison: Joi.string().default('2.0.0')
       }).default();
     },
 
@@ -32,9 +33,10 @@ module.exports = function (kibana) {
 
       // Expose the client to the server
       exposeClient(server);
-      createProxy(server, 'GET', '/elasticsearch/{paths*}');
-      createProxy(server, 'POST', '/elasticsearch/_mget');
-      createProxy(server, 'POST', '/elasticsearch/_msearch');
+      createProxy(server, 'GET', '/{paths*}');
+      createProxy(server, 'POST', '/_mget');
+      createProxy(server, 'POST', '/{index}/_search');
+      createProxy(server, 'POST', '/_msearch');
 
       function noBulkCheck(request, reply) {
         if (/\/_bulk/.test(request.path)) {
@@ -48,10 +50,9 @@ module.exports = function (kibana) {
       createProxy(
         server,
         ['PUT', 'POST', 'DELETE'],
-        '/elasticsearch/' + config.get('kibana.index') + '/{paths*}',
+        '/' + config.get('kibana.index') + '/{paths*}',
         {
-          prefix: '/' + config.get('kibana.index'),
-          config: { pre: [ noBulkCheck ] }
+          pre: [ noBulkCheck ]
         }
       );
 

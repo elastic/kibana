@@ -6,25 +6,23 @@ module.exports = function (chrome, internals) {
   chrome.setupAngular = function () {
     var kibana = modules.get('kibana');
 
-    var esUrl = (function () {
+    _.forOwn(chrome.getInjected(), function (val, name) {
+      kibana.value(name, val);
+    });
+
+    kibana
+    .value('kbnVersion', internals.version)
+    .value('buildNum', internals.buildNum)
+    .value('buildSha', internals.buildSha)
+    .value('sessionId', Date.now())
+    .value('esUrl', (function () {
       var a = document.createElement('a');
       a.href = '/elasticsearch';
       return a.href;
-    }());
-
-    kibana
-    .constant('kbnVersion', internals.version)
-    .constant('buildNum', internals.buildNumber)
-    .constant('kbnIndex', internals.kbnIndex)
-    .constant('esShardTimeout', internals.esShardTimeout)
-    .constant('esUrl', esUrl)
-    .constant('commitSha', internals.buildSha)
-    .constant('cacheBust', internals.cacheBust)
-    .constant('minimumElasticsearchVersion', '2.0.0')
-    .constant('sessionId', Date.now())
+    }()))
     .directive('kbnChrome', function ($rootScope) {
       return {
-        compile: function ($el) {
+        template: function ($el) {
           var $content = $(require('ui/chrome/chrome.html'));
           var $app = $content.find('.application');
 
@@ -37,16 +35,16 @@ module.exports = function (chrome, internals) {
             $app.html(internals.rootTemplate);
           }
 
-          $el.append($content);
+          return $content;
         },
         controllerAs: 'chrome',
         controller: function ($scope, $rootScope, $location, $http) {
 
           // are we showing the embedded version of the chrome?
-          chrome.embedded = Boolean($location.search().embed);
+          chrome.setVisible(!Boolean($location.search().embed));
 
           // listen for route changes, propogate to tabs
-          var onRouteChange = _.bindKey(internals.tabs, 'consumeRouteUpdate', $location, !chrome.embedded);
+          var onRouteChange = _.bindKey(internals.tabs, 'consumeRouteUpdate', $location, chrome.getVisible());
           $rootScope.$on('$routeChangeSuccess', onRouteChange);
           $rootScope.$on('$routeUpdate', onRouteChange);
           onRouteChange();

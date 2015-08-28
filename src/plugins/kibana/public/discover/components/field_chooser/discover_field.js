@@ -29,7 +29,7 @@ define(function (require) {
           var warnings = [];
 
           if (!field.scripted) {
-            if (!field.doc_values && !(field.analyzed && field.type === 'string')) {
+            if (!field.doc_values && field.type !== 'boolean' && !(field.analyzed && field.type === 'string')) {
               warnings.push('Doc values are not enabled on this field. This may lead to excess heap consumption when visualizing.');
             }
 

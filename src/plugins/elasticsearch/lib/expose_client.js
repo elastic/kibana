@@ -13,6 +13,7 @@ module.exports = function (server) {
   var clientCrt = config.get('elasticsearch.ssl.cert');
   var clientKey = config.get('elasticsearch.ssl.key');
   var ca = config.get('elasticsearch.ssl.ca');
+  var apiVersion = config.get('elasticsearch.apiVersion');
 
   if (username && password) {
     uri.auth = util.format('%s:%s', username, password);
@@ -30,7 +31,7 @@ module.exports = function (server) {
   var client = new elasticsearch.Client({
     host: url.format(uri),
     ssl: ssl,
-    apiVersion: '1.4',
+    apiVersion: apiVersion,
     log: function () {
       this.error = function (err) {
         server.log(['error', 'elasticsearch'], err);

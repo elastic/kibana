@@ -1,13 +1,13 @@
 <form role="form">
   <div class="form-group finder-form">
     <div class="finder-form-options">
-      <a class="small" ng-click="finder.manageObjects(finder.objectType.name)">manage {{finder.objectType.name}}</a>
+      <a class="small" ng-click="finder.manageObjects(finder.properties.name)">manage {{finder.properties.nouns}}</a>
     </div>
     <div class="clearfix visible-xs-block"></div>
     <input
       input-focus
       ng-model="filter"
-      ng-attr-placeholder="{{finder.objectType.noun}} Filter"
+      ng-attr-placeholder="{{finder.properties.noun}} Filter"
       ng-keydown="finder.filterKeyDown($event)"
       class="form-control"
       name="filter"
@@ -40,7 +40,7 @@
     <li
       class="list-group-item list-group-no-results"
       ng-if="finder.hits.length === 0">
-      <p ng-bind="'No matching ' + finder.objectType.nouns + ' found.'"></p>
+      <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
     </li>
   </ul>
 </paginate>

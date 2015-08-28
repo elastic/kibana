@@ -20,6 +20,12 @@ define(function (require) {
     this.type = SavedVis.type;
     this.Class = SavedVis;
 
+    this.loaderProperties = {
+      name: 'visualizations',
+      noun: 'Visualization',
+      nouns: 'visualizations'
+    };
+
     this.get = function (id) {
       return (new SavedVis(id)).init();
     };
@@ -69,7 +75,7 @@ define(function (require) {
             var typeName = source.typeName;
             if (source.visState) {
               try { typeName = JSON.parse(source.visState).type; }
-              catch (e) { /* missing typename handled below */ }
+              catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
             }
 
             if (!typeName || !visTypes.byName[typeName]) {

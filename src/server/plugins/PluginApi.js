@@ -4,7 +4,7 @@ let { basename, join } = require('path');
 
 module.exports = class PluginApi {
   constructor(kibana, pluginPath) {
-    this.config = kibana.server.config();
+    this.config = kibana.config;
     this.rootDir = kibana.rootDir;
     this.package = require(join(pluginPath, 'package.json'));
     this.autoload = require('../../ui/autoload');

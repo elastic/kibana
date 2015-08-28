@@ -7,10 +7,10 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .controller('settingsAbout', function ($scope, kbnVersion, buildNum, commitSha) {
+  .controller('settingsAbout', function ($scope, kbnVersion, buildNum, buildSha) {
     $scope.kbnVersion = kbnVersion;
     $scope.buildNum = buildNum;
-    $scope.commitSha = commitSha;
+    $scope.buildSha = buildSha;
   });
 
   return {

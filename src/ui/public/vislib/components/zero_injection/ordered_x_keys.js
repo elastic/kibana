@@ -16,12 +16,13 @@ define(function (require) {
         throw new Error('OrderedXKeysUtilService expects an object');
       }
 
-      var objKeys = getUniqKeys(obj);
+      var uniqKeys = getUniqKeys(obj);
+      var uniqKeysPairs = [...uniqKeys.entries()];
+
       var interval = _.get(obj, 'ordered.interval');
       var dateInterval = moment.isDuration(interval) ? interval : false;
 
-      return _(objKeys)
-      .pairs()
+      return _(uniqKeysPairs)
       .sortBy(function (d) {
         if (d[1].isDate || d[1].isOrdered) {
           return +d[0];
