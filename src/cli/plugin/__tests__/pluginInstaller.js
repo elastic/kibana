@@ -1,7 +1,6 @@
 var expect = require('expect.js');
 var sinon = require('sinon');
 var nock = require('nock');
-var glob = require('glob');
 var rimraf = require('rimraf');
 var fs = require('fs');
 var { join } = require('path');

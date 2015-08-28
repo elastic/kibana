@@ -7,7 +7,7 @@ module.exports = {
 };
 
 function install(settings, logger) {
-  logger.log(`installing ${settings.package}`);
+  logger.log(`Installing ${settings.package}`);
 
   try {
     fs.statSync(settings.pluginPath);

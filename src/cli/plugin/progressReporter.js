@@ -1,9 +1,9 @@
 var Promise = require('bluebird');
 
 /*
-Responsible for reporting the progress of the file request stream
+Responsible for reporting the progress of the file stream
 */
-module.exports = function (logger, request) {
+module.exports = function (logger, stream) {
   var oldDotCount = 0;
   var runningTotal = 0;
   var totalSize = 0;
@@ -22,7 +22,7 @@ module.exports = function (logger, request) {
 
     if (err) logger.error(err);
     hasError = true;
-    request.abort();
+    if (stream.abort) stream.abort();
     _reject(new Error(errorMessage));
   }
 
@@ -56,7 +56,7 @@ module.exports = function (logger, request) {
   function handleEnd() {
     if (hasError) return;
 
-    logger.log('Download Complete');
+    logger.log('Extraction complete');
     _resolve();
   }
 
