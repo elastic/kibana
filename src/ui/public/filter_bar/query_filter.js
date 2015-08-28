@@ -104,7 +104,7 @@ define(function (require) {
       } catch(e) {
         return Promise.reject(e);
       }
-      if (_.keys(editedFilter).length > 1) return Promise.reject(new Error('Too many filters.'));
+      if (_.keys(editedFilter).length > 1) return Promise.reject(new Error('Too many filters'));
 
       var mergedFilter = _.assign({}, source, editedFilter);
       var filterTypeReplaced = !editedFilter[type] && mergedFilter[type];

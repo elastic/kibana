@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var {FieldNotFound} = require('ui/errors');
+  var {FieldNotFoundInCache} = require('ui/errors');
 
   return function mapTermsProvider(Promise, courier) {
     return function (filter) {
@@ -13,7 +13,7 @@ define(function (require) {
         .get(filter.meta.index).then(function (indexPattern) {
           key = _.keys(filter.query.match)[0];
           field = indexPattern.fields.byName[key];
-          if (!field) return Promise.reject(new FieldNotFound());
+          if (!field) return Promise.reject(new FieldNotFoundInCache(key));
           value = filter.query.match[key].query;
           value = field.format.convert(value);
           return { key: key, value: value };

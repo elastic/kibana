@@ -264,14 +264,5 @@ define(function (require) {
   };
   _.class(errors.InvalidWiggleSelection).inherits(KbnError);
 
-  /** error thrown when a requested field is not found */
-  errors.FieldNotFound = function FieldNotFound() {
-    KbnError.call(this,
-      'Field not found.',
-      errors.FieldNotFound);
-  };
-  _.class(errors.FieldNotFound).inherits(KbnError);
-
-
   return errors;
 });
