@@ -45,6 +45,14 @@ app.directive('chart', function ($compile) {
         drawPlot($scope.chart);
       };
 
+      $(window).resize(function () {
+        drawPlot($scope.chart);
+      });
+
+      $scope.$on('$destroy', function () {
+        $(window).off('resize'); //remove the handler added earlier
+      });
+
       function drawPlot(plotConfig) {
         var controllerHeight = $('.timelion-container').height() - 80;
         $elem.height(controllerHeight / 2);
