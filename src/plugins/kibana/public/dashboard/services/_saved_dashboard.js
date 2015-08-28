@@ -28,6 +28,7 @@ define(function (require) {
           optionsJSON: angular.toJson({
             darkTheme: config.get('dashboard:defaultDarkTheme')
           }),
+          uiStateJSON: '{}',
           version: 1,
           timeRestore: false,
           timeTo: undefined,
@@ -50,6 +51,7 @@ define(function (require) {
       description: 'string',
       panelsJSON: 'string',
       optionsJSON: 'string',
+      uiStateJSON: 'string',
       version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',
