@@ -67,7 +67,7 @@ define(function (require) {
         .catch(function (err) {
           if (err.status >= 400) {
             // transform specific error type
-            throw new IndexPatternMissingIndices();
+            return Promise.reject(new IndexPatternMissingIndices());
           } else {
             // rethrow all others
             throw err;
