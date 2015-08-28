@@ -1,4 +1,4 @@
-require('babel/register')(require('./src/optimize/babelOptions'));
+require('babel/register')(require('./src/optimize/babelOptions').node);
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
