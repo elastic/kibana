@@ -6,7 +6,14 @@ let fromRoot = require('../utils/fromRoot');
 let asRegExp = flow(
   escapeRegExp,
   function (path) {
-    return path + '(?:\\.js)?$';
+    let last = path.slice(-1);
+    if (last === '/' || last === '\\') {
+      // match a directory explicitly
+      return path + '.*';
+    } else {
+      // match a directory or files or just the absolute path
+      return path + '(?:\\.js$|$|\\\\|\\/)?';
+    }
   },
   RegExp
 );
@@ -31,7 +38,10 @@ module.exports = class UiBundlerEnv {
     this.pluginInfo = [];
 
     // regular expressions which will prevent webpack from parsing the file
-    this.noParse = [];
+    this.noParse = [
+      /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
+      /node_modules[\/\\](angular-nvd3|mocha|moment)[\/\\]/
+    ];
 
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
@@ -44,6 +54,7 @@ module.exports = class UiBundlerEnv {
 
     // webpack loaders map loader configuration to regexps
     this.loaders = [];
+    this.postLoaders = [];
   }
 
   consumePlugin(plugin) {
@@ -64,6 +75,11 @@ module.exports = class UiBundlerEnv {
           for (let loader of arr(spec)) this.addLoader(loader);
         };
 
+      case 'postLoaders':
+        return (plugin, spec) => {
+          for (let loader of arr(spec)) this.addPostLoader(loader);
+        };
+
       case 'noParse':
         return (plugin, spec) => {
           for (let re of arr(spec)) this.addNoParse(re);
@@ -82,6 +98,10 @@ module.exports = class UiBundlerEnv {
 
   addLoader(loader) {
     this.loaders.push(loader);
+  }
+
+  addPostLoader(loader) {
+    this.postLoaders.push(loader);
   }
 
   addNoParse(regExp) {
@@ -129,7 +149,7 @@ module.exports = class UiBundlerEnv {
     if (exports) loader.push(`exports?${exports}`);
     if (expose) loader.push(`expose?${expose}`);
     if (loader.length) this.loaders.push({ test: asRegExp(path), loader: loader.join('!') });
-    if (!parse) this.noParse.push(asRegExp(path));
+    if (!parse) this.addNoParse(path);
   }
 
   claim(id, pluginId) {

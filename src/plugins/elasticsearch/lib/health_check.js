@@ -15,7 +15,6 @@ module.exports = function (plugin, server) {
 
   plugin.status.yellow('Waiting for Elasticsearch');
 
-
   function waitForPong() {
     return client.ping({ requestTimeout: 1500 }).catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
@@ -54,12 +53,11 @@ module.exports = function (plugin, server) {
 
   function check() {
     return waitForPong()
-    .then(_.partial(checkEsVersion, server, plugin))
+    .then(_.partial(checkEsVersion, server))
     .then(waitForShards)
     .then(_.partial(migrateConfig, server))
-    .catch(_.bindKey(server, 'log', 'error'));
+    .catch(err => plugin.status.red(err));
   }
-
 
   var timeoutId = null;
 

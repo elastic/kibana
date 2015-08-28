@@ -20,7 +20,7 @@
 
 # If your Elasticsearch is protected with basic auth, this is the user credentials
 # used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
-# users will still need to authenticate with Elasticsearch (which is proxied thorugh
+# users will still need to authenticate with Elasticsearch (which is proxied through
 # the Kibana server)
 # elasticsearch.username: user
 # elasticsearch.password: pass
@@ -53,8 +53,8 @@
 # elasticsearch.startupTimeout: 5000
 
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
-# server.ssl.cert: /path/to/your/server.key
-# server.ssl.key: /path/to/your/server.crt
+# server.ssl.cert: /path/to/your/server.crt
+# server.ssl.key: /path/to/your/server.key
 
 # Set the path to where you would like the process id file to be created.
 # pid.file: /var/run/kibana.pid
