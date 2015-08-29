@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .aws-config.json
 .DS_Store
 .node_binaries
@@ -17,3 +18,9 @@ disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
 coverage
+=======
+node_modules
+.aws-config.json
+dist
+.DS_Store
+>>>>>>> FETCH_HEAD

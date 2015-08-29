@@ -1,0 +1,22 @@
+
+== Hits
+Status: *Stable*
+
+The hits panel displays the number of hits for each of the queries on the dashboard in a
+configurable format specified by the `chart' property.
+
+
+=== Parameters
+
+arrangement:: The arrangement of the legend. horizontal or vertical
+chart:: bar, pie or none
+counter_pos:: The position of the legend, above or below
+donut:: If the chart is set to pie, setting donut to true will draw a hole in the midle of it
+tilt:: If the chart is set to pie, setting tilt to true will tilt it back into an oval
+labels:: If the chart is set to pie, setting labels to true will draw labels in the slices
+spyable:: Setting spyable to false disables the inspect icon.
+
+==== Queries
+queries object:: This object describes the queries to use on this panel.
+queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+queries.ids::: In +selected+ mode, which query ids are selected.

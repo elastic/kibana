@@ -1,0 +1,49 @@
+.short-query {
+  display:inline-block;
+  margin-right: 10px;
+}
+.short-query input.search-query {
+    width: 280px;
+}
+.begin-query {
+  position:absolute;
+  left:10px;
+  top:5px;
+}
+.end-query {
+  position:absolute;
+  right:10px;
+  top:5px;
+}
+
+.end-query i, .begin-query i {
+  margin: 0px;
+}
+
+.panel-query {
+  padding-left: 25px !important;
+  height: 31px !important;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+  box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+.query-disabled {
+  opacity: 0.3;
+}
+
+.form-search:hover .has-remove {
+  padding-left: 40px !important;
+}
+.remove-query {
+  opacity: 0;
+}
+.last-query {
+  padding-right: 45px !important;
+}
+.form-search:hover .remove-query {
+  opacity: 1;
+}
+.query-panel .pinned {
+  margin-right: 5px;
+}
