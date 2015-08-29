@@ -35,10 +35,10 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   npm install
   ```
 
-- Start elasticsearch, you can use [esvm](https://github.com/simianhacker/esvm) to make that easier.
+- Start elasticsearch
 
   ```sh
-  grunt esvm:dev:keepalive
+  npm run es
   ```
 
 - Start the development server.
