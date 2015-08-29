@@ -14,7 +14,7 @@ module.exports = class KbnLogger {
       this.dest = process.stdout;
     } else {
       this.dest = writeStr(config.dest, {
-        mode: 'a',
+        flags: 'a',
         encoding: 'utf8'
       });
     }
