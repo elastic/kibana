@@ -37,6 +37,11 @@ function getQueryCacheKey(query) {
   return JSON.stringify(_.omit(query, 'label'));
 }
 
+function getFunctionByName(name) {
+  if (!functions[name]) throw new Error ('No such function: ' + name);
+  return functions[name];
+}
+
 function argType(arg) {
   if (_.isObject(arg) && arg) {
     return arg.type;
@@ -49,17 +54,17 @@ function argType(arg) {
 
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke(fnName, args) {
-  if (!functions[fnName]) throw new Error('Function not found: ' + fnName);
+  var functionDef = getFunctionByName(fnName);
 
-  var functionDef = functions[fnName];
   args = repositionArguments(functionDef, args);
   args = _.map(args, function (item) {
     if (_.isObject(item)) {
       switch (item.type) {
         case 'function':
-          if (queryCache[getQueryCacheKey(item)]) {
+          var itemFunctionDef = getFunctionByName(item.function);
+          if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
             stats.queryCount++;
-            return Promise.resolve(_.cloneDeep(queryCache[getQueryCacheKey(item)]));
+            return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
           }
           return invoke(item.function, item.arguments);
         case 'reference':
@@ -133,13 +138,12 @@ function resolveChainList(chainList) {
 
 
 function preProcessChain(chain, queries) {
-  function validateAndStore(func) {
-    if (_.isObject(func) && func.type === 'function') {
-      if (!functions[func.function]) throw new Error('Unknown function: ' + func.function);
+  function validateAndStore(item) {
+    if (_.isObject(item) && item.type === 'function') {
+      var functionDef = getFunctionByName(item.function);
 
-      if (functions[func.function].dataSource) {
-        var cacheKey = getQueryCacheKey(func);
-        queries[cacheKey] = func;
+      if (functionDef.cacheKey) {
+        queries[functionDef.cacheKey(item)] = item;
         return true;
       }
       return false;
@@ -194,6 +198,8 @@ function preProcessSheet(sheet) {
 
     _.each(queries, function (item, i) {
 
+      var functionDef = getFunctionByName(item.function);
+
       // Fit each series
       results[i].list = _.map(results[i].list, function (series) {
         series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
@@ -201,7 +207,7 @@ function preProcessSheet(sheet) {
       });
 
       // And cache the fit series.
-      queryCache[getQueryCacheKey(item)] = results[i];
+      queryCache[functionDef.cacheKey(item)] = results[i];
     });
 
     stats.fitTime = (new Date()).getTime();

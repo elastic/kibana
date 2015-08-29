@@ -1,10 +1,10 @@
 var _ = require('lodash');
 var fetch = require('node-fetch');
 var moment = require('moment');
+var Datasource = require('../lib/classes/datasource');
 
 
-module.exports = {
-  dataSource: true,
+module.exports = new Datasource ('graphite', {
   args: [
     {
       name: 'metric', // _test-data.users.*.data
@@ -50,4 +50,4 @@ module.exports = {
       throw e;
     });
   }
-};
+});

@@ -1,7 +1,8 @@
 var alter = require('../lib/alter.js');
 var util = require('util');
 
-module.exports = {
+var Chainable = require('../lib/classes/chainable');
+module.exports = new Chainable('label', {
   args: [
     {
       name: 'inputSeries',
@@ -24,4 +25,4 @@ module.exports = {
       return inputSeries;
     });
   }
-};
+});

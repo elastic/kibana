@@ -1,6 +1,7 @@
 var reduce = require('../lib/reduce.js');
 
-module.exports = {
+var Chainable = require('../lib/classes/chainable');
+module.exports = new Chainable('divide', {
   args: [
     {
       name: 'inputSeries',
@@ -17,4 +18,4 @@ module.exports = {
       return a / b;
     });
   }
-};
+});

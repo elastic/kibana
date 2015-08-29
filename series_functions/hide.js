@@ -1,6 +1,6 @@
 var alter = require('../lib/alter.js');
-
-module.exports = {
+var Chainable = require('../lib/classes/chainable');
+module.exports = new Chainable('hide', {
   args: [
     {
       name: 'inputSeries',
@@ -11,11 +11,11 @@ module.exports = {
       types: ['number', 'null']
     }
   ],
-  help: 'Show the seriesList as bars',
-  fn: function barsFn (args) {
+  help: 'Hide the series by default',
+  fn: function hideFn(args) {
     return alter(args, function (inputSeries, hide) {
       inputSeries._hide = hide == null ? true : hide;
       return inputSeries;
     });
   }
-};
+});

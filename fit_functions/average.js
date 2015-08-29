@@ -22,7 +22,7 @@ module.exports = function (dataTuples, targetTuples) {
 
     dataTuples.splice(0, i);
 
-    var sum = _.reduce(avgSet, function(sum, num) { return sum + num; }, 0);
+    var sum = _.reduce(avgSet, function (sum, num) { return sum + num; }, 0);
 
     return avgSet.length ? (sum / avgSet.length) : NaN;
   });
@@ -36,8 +36,11 @@ module.exports = function (dataTuples, targetTuples) {
   });
 
   if (naNIndex > -1) {
-    var i = 0, naNCount = 0, filledValues = [];
-    var previousRealNumber, stepSize;
+    var i = 0;
+    var naNCount = 0;
+    var filledValues = [];
+    var previousRealNumber;
+    var stepSize;
     while (i < resultValues.length) {
       if (isNaN(resultValues[i])) {
         if (i === 0) {
@@ -48,7 +51,7 @@ module.exports = function (dataTuples, targetTuples) {
       } else {
         // Otherwise, backfill the NaNs with averaged out data
         if (naNCount > 0) {
-          stepSize = (resultValues[i] - previousRealNumber) / (naNCount+1);
+          stepSize = (resultValues[i] - previousRealNumber) / (naNCount + 1);
           while (naNCount > 0) {
             resultValues[i - naNCount] = previousRealNumber + stepSize;
             previousRealNumber = resultValues[i - naNCount];

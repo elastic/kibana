@@ -3,9 +3,10 @@ var fetch = require('node-fetch');
 var moment = require('moment');
 var worldbank = require('./worldbank.js');
 var Promise = require('bluebird');
+var Datasource = require('../lib/classes/datasource');
 
-module.exports = {
-  dataSource: true,
+
+module.exports = new Datasource ('worldbank_indicators', {
   args: [
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
@@ -39,4 +40,4 @@ module.exports = {
     });
 
   }
-};
+});

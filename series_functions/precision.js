@@ -1,6 +1,7 @@
 var reduce = require('../lib/reduce.js');
 
-module.exports = {
+var Chainable = require('../lib/classes/chainable');
+module.exports = new Chainable('precision', {
   args: [
     {
       name: 'inputSeries',
@@ -17,4 +18,4 @@ module.exports = {
       return parseInt(a * Math.pow(10, b), 10) / Math.pow(10, b);
     });
   }
-};
+});

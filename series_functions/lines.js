@@ -1,6 +1,7 @@
 var alter = require('../lib/alter.js');
 
-module.exports = {
+var Chainable = require('../lib/classes/chainable');
+module.exports = new Chainable('lines', {
   args: [
     {
       name: 'inputSeries',
@@ -39,4 +40,4 @@ module.exports = {
       return inputSeries;
     });
   }
-};
+});

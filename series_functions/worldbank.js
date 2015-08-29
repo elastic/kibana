@@ -1,10 +1,9 @@
 var _ = require('lodash');
 var fetch = require('node-fetch');
 var moment = require('moment');
+var Datasource = require('../lib/classes/datasource');
 
-
-module.exports = {
-  dataSource: true,
+module.exports = new Datasource ('worldbank', {
   args: [
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
@@ -24,6 +23,8 @@ module.exports = {
       min: moment(tlConfig.time.from).format('YYYY[M]MM'),
       max:  moment(tlConfig.time.to).format('YYYY[M]MM')
     };
+
+    console.log(time);
 
     var URL = 'http://api.worldbank.org/' + config.code +
       '?date=' + time.min + ':' + time.max +
@@ -57,4 +58,4 @@ module.exports = {
       throw e;
     });
   }
-};
+});

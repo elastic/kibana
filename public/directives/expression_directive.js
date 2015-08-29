@@ -23,7 +23,7 @@ Reference suggestor
 
 */
 
-app.directive('timelionExpression', function ($compile, $http, $timeout) {
+app.directive('timelionExpression', function ($compile, $http, $timeout, $rootScope) {
   return {
     restrict: 'A',
     require: 'ngModel',
@@ -42,8 +42,8 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
       function init() {
         resetSuggestions();
         $elem.on('mouseup', function () {
-          doSuggest();
-          $scope.$apply();
+          suggest($attrs.timelionExpression);
+          digest();
         });
         $elem.on('keydown',  keyDownHandler);
         $elem.on('keyup',  keyUpHandler);
@@ -53,19 +53,12 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
           functionReference.byName = _.indexBy(resp.data, 'name');
           functionReference.list = resp.data;
         });
-
-        /*
-        $scope.$watchCollection('suggestions', function (val) {
-          if (val.position.min == null) return;
-        });
-        */
       }
 
       function suggest(val) {
         try {
           // Inside an existing function providing suggestion only as a reference. Maybe suggest an argument?
           var possible = findFunction(getCaretPos(), Parser.parse(val).functions);
-
           // TODO: Reference suggestors. Only supporting completion right now;
           resetSuggestions();
           return;
@@ -75,7 +68,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
             if (functionReference.byName[possible.function]) {
               $scope.suggestions.list = [functionReference.byName[possible.function]];
             } else {
-              throw new Error('Unknown function: ' + possible.function);
+              resetSuggestions();
             }
           }
         } catch (e) {
@@ -98,11 +91,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
             resetSuggestions();
           }
         }
-        $scope.$apply();
-      }
-
-      function doSuggest() {
-        suggest($attrs.timelionExpression);
+        digest();
       }
 
       function validateSelection() {
@@ -112,25 +101,18 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
       }
 
       function keyDownHandler(e) {
-        doSuggest();
-
+        if (e.keyCode === keys.ENTER) return;
+        if (_.contains(_.values(keys), e.keyCode)) e.preventDefault();
         switch (e.keyCode) {
           case keys.UP:
             if ($scope.suggestions.selected > 0) $scope.suggestions.selected--;
-            e.preventDefault();
             break;
           case keys.DOWN:
             $scope.suggestions.selected++;
-            e.preventDefault();
-            break;
-          case keys.ESC:
-            resetSuggestions();
-            e.preventDefault();
-            $scope.$apply();
             break;
           case keys.TAB:
             if (!$scope.suggestions.list.length) break;
-            var expression = $elem.val();
+            var expression = $attrs.timelionExpression;
             var startOf = expression.slice(0, $scope.suggestions.position.min + 1);
             var endOf =  expression.slice($scope.suggestions.position.max, expression.length);
             var newVal = startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()' + endOf;
@@ -141,14 +123,22 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
             ngModelCtrl.$setViewValue(newVal);
 
             resetSuggestions();
-            e.preventDefault();
+            break;
+          case keys.ESC:
+            resetSuggestions();
             break;
         }
-        validateSelection();
         scrollTo($scope.suggestions);
-        $scope.$apply();
+        digest();
       }
 
+      function keyUpHandler(e) {
+        if (_.contains(_.values(keys), e.keyCode)) return;
+
+        suggest($attrs.timelionExpression);
+        validateSelection();
+        digest();
+      }
 
       function resetSuggestions() {
         $scope.suggestions = {
@@ -159,56 +149,36 @@ app.directive('timelionExpression', function ($compile, $http, $timeout) {
         return $scope.suggestions;
       }
 
-      function keyUpHandler(e) {
-        switch (e.keyCode) {
-          case keys.UP:
-          case keys.DOWN:
-          case keys.ESC:
-          case keys.TAB:
-            return;
-        }
-
-        doSuggest();
-        validateSelection();
-        $scope.$apply();
-      }
-
-
       function scrollTo(suggestions) {
+        validateSelection();
         var suggestionsListElem = $('.suggestions');
-        var suggestionElems = $('.suggestion');
-        var suggestedElem = $(suggestionElems[suggestions.selected]);
+        var suggestedElem = $($('.suggestion')[suggestions.selected]);
 
-        if (suggestions.selected < 0
-          || suggestions.list.length - 1 < suggestions.selected
-          || !suggestedElem.position().top) return;
+        if (!suggestedElem.position() || !suggestedElem.position().top) return;
 
-        $timeout(function () {
-          suggestionsListElem.scrollTop(suggestionsListElem.scrollTop() + suggestedElem.position().top);
-        }, 0);
+        suggestionsListElem.scrollTop(suggestionsListElem.scrollTop() + suggestedElem.position().top);
       }
 
       function findFunction(position, functionList) {
-        var currentFunction;
+        var bestFunction;
 
         _.each(functionList, function (func) {
           if ((func.position.min) < position && position < (func.position.max)) {
-            if (!currentFunction || func.position.text.length < currentFunction.position.text.length) {
-              currentFunction = func;
+            if (!bestFunction || func.position.text.length < bestFunction.position.text.length) {
+              bestFunction = func;
             }
           }
         });
 
-        return currentFunction;
+        return bestFunction;
       };
 
       function getCaretPos() {
         return $elem[0].selectionStart;
       };
 
-      function setSelection(start, end) {
-        $elem[0].selectionStart = start;
-        $elem[0].selectionEnd = end;
+      function digest() {
+        $rootScope.$$phase || $scope.$digest();
       }
 
       init();

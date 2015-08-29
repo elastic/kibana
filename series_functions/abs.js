@@ -1,6 +1,7 @@
 var alter = require('../lib/alter.js');
 var _ = require('lodash');
-module.exports = {
+var Chainable = require('../lib/classes/chainable');
+module.exports = new Chainable('abs', {
   args: [
     {
       name: 'inputSeries',
@@ -17,4 +18,4 @@ module.exports = {
       return inputSeries;
     });
   }
-};
+});

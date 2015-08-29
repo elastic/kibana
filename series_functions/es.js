@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var moment = require('moment');
-
+var Datasource = require('../lib/classes/datasource');
 var elasticsearch = require('elasticsearch');
 
 var offset = {
@@ -30,8 +30,78 @@ var offset = {
   }
 };
 
-module.exports = {
-  dataSource: true,
+// usually reverse = false on the request, true on the response
+function offsetTime(milliseconds, offset, reverse) {
+  if (!offset.match(/[-+][0-9]+[mshdwMy]/g)) {
+    throw new Error ('Malformed `offset` at ' + offset);
+  }
+  var parts = offset.match(/[-+]|[0-9]+|[mshdwMy]/g);
+
+  var add = parts[0] === '+';
+  add = reverse ? !add : add;
+
+  var mode = add ? 'add' : 'subtract';
+
+  var momentObj = moment(milliseconds)[mode](parts[1], parts[2]);
+  return momentObj.valueOf();
+}
+
+function buildRequest(config, tlConfig) {
+
+  //console.log(tlConfig);
+  var filter = {range:{}};
+  filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
+
+  var searchRequest = {
+    index: config.index,
+    //filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
+    //searchType: 'count',
+    body: {
+      query: {
+        filtered: {
+          query: {
+            query_string: {
+              query: config.query
+            }
+          },
+          filter: filter
+        }
+      },
+      aggs: {
+        series: {
+          date_histogram: {
+            field: tlConfig.file.es.timefield,
+            interval: config.interval || tlConfig.time.interval,
+            extended_bounds: {
+              min: tlConfig.time.from,
+              max: tlConfig.time.to
+            },
+            min_doc_count: 0
+          }
+        }
+      },
+      size: 0
+    }
+  };
+
+  if (config.metric) {
+    var metric = config.metric.split(':');
+    if (metric[0] && metric[1]) {
+      searchRequest.body.aggs.series.aggs = {metric: {}};
+      searchRequest.body.aggs.series.aggs.metric[metric[0]] = {field: metric[1]};
+    } else {
+      throw new Error ('`metric` requires metric:field');
+    }
+  }
+
+  if (config.offset) {
+    searchRequest = offset.request(searchRequest, config.offset);
+  }
+
+  return searchRequest;
+}
+
+module.exports = new Datasource('es', {
   args: [
     {
       name: 'q',
@@ -124,75 +194,5 @@ module.exports = {
       }
     });
   }
-};
+});
 
-function buildRequest(config, tlConfig) {
-
-  //console.log(tlConfig);
-  var filter = {range:{}};
-  filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
-
-  var searchRequest = {
-    index: config.index,
-    //filterPath: 'aggregations.series.buckets.key,aggregations.series.buckets.doc_count,aggregations.series.buckets.metric.value',
-    //searchType: 'count',
-    body: {
-      query: {
-        filtered: {
-          query: {
-            query_string: {
-              query: config.query
-            }
-          },
-          filter: filter
-        }
-      },
-      aggs: {
-        series: {
-          date_histogram: {
-            field: tlConfig.file.es.timefield,
-            interval: config.interval || tlConfig.time.interval,
-            extended_bounds: {
-              min: tlConfig.time.from,
-              max: tlConfig.time.to
-            },
-            min_doc_count: 0
-          }
-        }
-      },
-      size: 0
-    }
-  };
-
-  if (config.metric) {
-    var metric = config.metric.split(':');
-    if (metric[0] && metric[1]) {
-      searchRequest.body.aggs.series.aggs = {metric: {}};
-      searchRequest.body.aggs.series.aggs.metric[metric[0]] = {field: metric[1]};
-    } else {
-      throw new Error ('`metric` requires metric:field');
-    }
-  }
-
-  if (config.offset) {
-    searchRequest = offset.request(searchRequest, config.offset);
-  }
-
-  return searchRequest;
-}
-
-// usually reverse = false on the request, true on the response
-function offsetTime(milliseconds, offset, reverse) {
-  if (!offset.match(/[-+][0-9]+[mshdwMy]/g)) {
-    throw new Error ('Malformed `offset` at ' + offset);
-  }
-  var parts = offset.match(/[-+]|[0-9]+|[mshdwMy]/g);
-
-  var add = parts[0] === '+';
-  add = reverse ? !add : add;
-
-  var mode = add ? 'add' : 'subtract';
-
-  var momentObj = moment(milliseconds)[mode](parts[1], parts[2]);
-  return momentObj.valueOf();
-}

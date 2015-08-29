@@ -5,7 +5,10 @@ fetch.Promise = require('bluebird');
 //var parseDateMath = require('../utils/date_math.js');
 
 
-module.exports = {
+var Datasource = require('../lib/classes/datasource');
+
+
+module.exports = new Datasource ('quandl', {
   dataSource: true,
   args: [
     {
@@ -74,4 +77,4 @@ module.exports = {
       throw e;
     });
   }
-};
+});

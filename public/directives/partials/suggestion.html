@@ -2,7 +2,7 @@
   <div class="suggestion"
     ng-click="suggestions.selected = $index"
     ng-class="{active: $index === suggestions.selected}"
-    ng-repeat="suggestion in suggestions.list track by suggestion.name">
+    ng-repeat="suggestion in suggestions.list track by $index | filter:!suggestiom.isAlias">
     <h4><strong>{{suggestion.name}}()</strong> <small>{{suggestion.help}}</small></h4>
 
     <p>
