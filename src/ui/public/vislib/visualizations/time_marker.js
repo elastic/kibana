@@ -2,6 +2,7 @@ define(function (require) {
   return function TimeMarkerFactory() {
     var d3 = require('d3');
     var dateMath = require('ui/utils/dateMath');
+    var markerRenderer = require('./marker_renderer');
 
     function TimeMarker(times, xScale, height) {
       if (!(this instanceof TimeMarker)) {
@@ -36,14 +37,11 @@ define(function (require) {
       });
     };
 
-    TimeMarker.prototype.render = function (selection, xScale, height) {
+    TimeMarker.prototype.render = function (selection) {
       var self = this;
 
       // return if not time based chart
-      // if (!self._isTimeBasedChart(selection)) return;
-
-      xScale = xScale || this.xScale;
-      height = height || this.height;
+      if (!self._isTimeBasedChart(selection)) return;
 
       selection.each(function () {
         var markers = d3.select(this).selectAll('.time-marker')
@@ -65,24 +63,14 @@ define(function (require) {
             return d.color;
           })
           .attr('x1', function (d) {
-            return xScale(d.time);
+            return self.xScale(d.time);
           })
           .attr('x2', function (d) {
-            return xScale(d.time);
+            return self.xScale(d.time);
           })
-          .attr('y1', height)
-          .attr('y2', xScale.range()[0]);
+          .attr('y1', self.height)
+          .attr('y2', self.xScale.range()[0]);
       });
-    };
-
-    TimeMarker.prototype.setTime = function (time) {
-      this.times = [{
-        'time': time,
-        'class': 'time-marker',
-        'color': '#aaa',
-        'opacity': 0.8,
-        'width': 1
-      }];
     };
 
     return TimeMarker;

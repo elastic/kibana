@@ -5,6 +5,7 @@ define(function (require) {
     var d3 = require('d3');
     var _ = require('lodash');
     var errors = require('ui/errors');
+    var markerRenderer = require('ui/vislib/visualizations/marker_renderer');
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
@@ -41,16 +42,15 @@ define(function (require) {
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
-      this.timeMarker = opts.timeMarker;
 
-      if (this.timeMarker) {
+      // ignore if not time based chart
+      if (_.get(this.xAxis, 'ordered.date')) {
         this.markerSyncHandler = function (e) {
           var margin = self._attr.margin;
-          self.timeMarker.setTime(e.point.x);
           self.charts.forEach(function (chart) {
             var height = $(chart.chartEl).height() - margin.top - margin.bottom;
             var svg = d3.select(chart.chartEl).selectAll('svg > g');
-            self.timeMarker.render(svg, self.xAxis.xScale, height);
+            markerRenderer.render(svg, self.xAxis.xScale, height, [e.point.x]);
           });
         };
 
