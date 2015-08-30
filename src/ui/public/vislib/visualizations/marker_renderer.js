@@ -1,20 +1,16 @@
 define(function (require) {
   var d3 = require('d3');
+  var _ = require('lodash');
 
-  function render(selection, xScale, height, times) {
+  // XXX: times param should accept array of d3 objects
+  function _render(obj, selection, xScale, height, times) {
     times = (times && times.length) ? times : [new Date().getTime()];
     times = times.map(function (time) {
-      return {
-        'time': time,
-        'class': 'time-marker',
-        'color': '#aaa',
-        'opacity': 0.8,
-        'width': 1
-      };
+      return _.assign({}, obj, { 'time': time });
     });
 
     selection.each(function () {
-      var markers = d3.select(this).selectAll('.time-marker')
+      var markers = d3.select(this).selectAll('.' + obj.class)
         .data(times);
       markers
         .enter().append('line')
@@ -43,7 +39,23 @@ define(function (require) {
     });
   }
 
+  function configure(obj) {
+    obj = _.assign({
+      'class': 'default-time-marker',
+      'color': '#aaa',
+      'opacity': 0.8,
+      'width': 1
+    }, obj || {});
+
+    return {
+      render: function render(selection, xScale, height, times) {
+        return _render(obj, selection, xScale, height, times);
+      }
+    };
+  }
+
   return {
-    render: render
+    render: configure().render,
+    configure: configure
   };
 });

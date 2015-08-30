@@ -3,6 +3,7 @@ define(function (require) {
 
   return function HandlerBaseClass(Private, markerSync) {
     var d3 = require('d3');
+    var $ = require('jquery');
     var _ = require('lodash');
     var errors = require('ui/errors');
     var markerRenderer = require('ui/vislib/visualizations/marker_renderer');
