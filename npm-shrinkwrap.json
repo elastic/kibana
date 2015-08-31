@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "version": "4.2.0-beta1",
+  "version": "4.2.0-snapshot",
   "dependencies": {
     "@spalger/angular-bootstrap": {
       "version": "0.10.0",
@@ -2395,7 +2395,8 @@
         },
         "glob": {
           "version": "5.0.14",
-          "from": "glob@>=5.0.10 <6.0.0"
+          "from": "glob@5.0.14",
+          "resolved": "http://registry.npmjs.org/glob/-/glob-5.0.14.tgz"
         },
         "graceful-fs": {
           "version": "4.1.2",

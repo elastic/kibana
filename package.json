@@ -11,10 +11,10 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.2.0-beta1",
+  "version": "4.2.0-snapshot",
   "build": {
-    "number": 8173,
-    "sha": "0102888deb393e4141369fbd1644a5d77f8732da"
+    "number": 8467,
+    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
   "main": "src/server/KbnServer.js",
   "homepage": "https://www.elastic.co/products/kibana",
