@@ -33,7 +33,10 @@ define(function (require) {
 
       switch (agg.schema.group) {
       case 'buckets':
-        var buckets = new Buckets(bucket[agg.id] || bucket['nested_' + agg.id][agg.id]);
+        var buckets = new Buckets(bucket[agg.id]);
+        if (bucket['nested_' + agg.id] !== undefined) {
+          buckets = new Buckets(bucket['nested_' + agg.id][agg.id]);
+        }
         if (buckets.length) {
           var splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
