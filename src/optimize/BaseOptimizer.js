@@ -130,7 +130,7 @@ class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.babel.js', '.js', '.less', ''],
+        extensions: ['.js', '.jsx', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
         loaderPostfixes: ['-loader', ''],
