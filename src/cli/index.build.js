@@ -6,7 +6,7 @@ var babelOpts = _.defaults({
     fromRoot('src'),
     /[\\\/](node_modules|bower_components)[\\\/]/
   ]
-}, require('../optimize/babelOptions'));
+}, require('../optimize/babelOptions').node);
 
 require('babel/register')(babelOpts);
 require('./cli');
