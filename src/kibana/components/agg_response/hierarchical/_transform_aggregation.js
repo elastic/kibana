@@ -28,7 +28,7 @@ define(function (require) {
         // If the next bucket exists and it has children the we need to
         // transform it as well. This is where the recursion happens.
         if (agg._next) {
-          var nextBucket = bucket[agg._next.id];
+          var nextBucket = bucket[agg._next.id] || bucket['nested_' + agg._next.id][agg._next.id];
           if (nextBucket && nextBucket.buckets) {
             branch.children = transformAggregation(agg._next, metric, nextBucket, branch);
           }

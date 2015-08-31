@@ -47,20 +47,14 @@ define(function (require) {
 
     AggConfigs.prototype.toDsl = function () {
       var dslTopLvl = {};
-      var dslLvlCursor;
-      var nestedMetric;
+      var dslLvlCursor = dslTopLvl; // start at the top level
+      var nestedMetrics;
 
       if (this.vis.isHierarchical()) {
         // collect all metrics, and filter out the ones that we won't be copying
-        var nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
+        nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
         .filter(function (agg) {
           return agg.type.name !== 'count';
-        })
-        .map(function (agg) {
-          return {
-            config: agg,
-            dsl: agg.toDsl()
-          };
         });
       }
 
@@ -69,20 +63,7 @@ define(function (require) {
         return !config.type.hasNoDsl;
       })
       .forEach(function nestEachConfig(config, i, list) {
-        if (!dslLvlCursor) {
-          // start at the top level
-          dslLvlCursor = dslTopLvl;
-        } else {
-          var prevConfig = list[i - 1];
-          var prevDsl = dslLvlCursor[prevConfig.id];
-
-          // advance the cursor and nest under the previous agg, or
-          // put it on the same level if the previous agg doesn't accept
-          // sub aggs
-          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
-        }
-
-        var dsl = dslLvlCursor[config.id] = config.toDsl();
+        var dsl = config.toDslNested(dslLvlCursor);
         var subAggs;
 
         if (config.schema.group === 'buckets' && i < list.length - 1) {
@@ -92,9 +73,14 @@ define(function (require) {
 
         if (subAggs && nestedMetrics) {
           nestedMetrics.forEach(function (agg) {
-            subAggs[agg.config.id] = agg.dsl;
+            agg.toDslNested(subAggs);
           });
         }
+
+        // advance the cursor and nest under the previous agg, or
+        // put it on the same level if the previous agg doesn't accept
+        // sub aggs
+        dslLvlCursor = dsl.aggs || dslLvlCursor;
       });
 
       return dslTopLvl;
