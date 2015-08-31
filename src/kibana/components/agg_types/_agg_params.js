@@ -10,6 +10,7 @@ define(function (require) {
       regex: Private(require('components/agg_types/param_types/regex')),
       string: Private(require('components/agg_types/param_types/string')),
       json: Private(require('components/agg_types/param_types/raw_json')),
+      nested: Private(require('components/agg_types/param_types/nested')),
       _default: Private(require('components/agg_types/param_types/base'))
     };
 

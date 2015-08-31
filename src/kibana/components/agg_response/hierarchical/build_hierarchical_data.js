@@ -14,9 +14,8 @@ define(function (require) {
     });
 
     return function (vis, resp) {
-      // Create a refrenece to the buckets
+      // Create a reference to the buckets
       var buckets = vis.aggs.bySchemaGroup.buckets;
-
 
       // Find the metric so it's easier to reference.
       // TODO: Change this to support multiple metrics.
@@ -49,7 +48,7 @@ define(function (require) {
       }
 
       var firstAgg = buckets[0];
-      var aggData = resp.aggregations[firstAgg.id];
+      var aggData = resp.aggregations[firstAgg.id] || resp.aggregations['nested_' + firstAgg.id][firstAgg.id];
 
       if (!firstAgg._next && firstAgg.schema.name === 'split') {
         notify.error('Splitting charts without splitting slices is not supported. Pretending that we are just splitting slices.');
@@ -67,7 +66,7 @@ define(function (require) {
       // map the split aggregations into rows.
       var rows = _.map(extractBuckets(aggData), function (bucket) {
         var agg = firstAgg._next;
-        var split = buildSplit(agg, metric, bucket[agg.id]);
+        var split = buildSplit(agg, metric, bucket[agg.id] || bucket['nested_' + agg.id][agg.id]);
         // Since splits display labels we need to set it.
         split.label = firstAgg.fieldFormatter()(bucket.key);
 
