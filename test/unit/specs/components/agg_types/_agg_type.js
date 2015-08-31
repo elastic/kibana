@@ -138,7 +138,7 @@ define(function (require) {
               {name: 'two'},
               {name: 'nested'}
             ];
-            var paramLength = params.length + 1; // json is always appended
+            var paramLength = params.length + 2; // json is always appended
 
             var aggType = new AggType({
               name: 'bucketeer',
