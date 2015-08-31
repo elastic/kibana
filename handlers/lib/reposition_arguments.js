@@ -17,4 +17,22 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
   });
 
   return args;
+
+
+  /*
+  var indexedArgs = {};
+  _.each(unorderedArgs, function (unorderedArg, i) {
+    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
+      indexedArgs[unorderedArg.name] = unorderedArg.value;
+    } else {
+      if (functionDef.args[i]) {
+        indexedArgs[functionDef.args[i].name] = unorderedArg;
+      } else {
+        throw new Error ('Too many unnamed arguments supplied to: ' + functionDef.name);
+      }
+    }
+  });
+
+  return indexedArgs;
+  */
 };
