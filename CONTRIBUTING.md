@@ -23,6 +23,12 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install "$(cat .node-version)"
   ```
 
+- Install npm 3.2
+
+  ```sh
+  npm install -g npm@3.2
+  ```
+
 - Install dependencies
 
   ```sh

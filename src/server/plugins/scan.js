@@ -53,7 +53,6 @@ module.exports = async (kbnServer, server, config) => {
       continue;
     }
 
-    require(modulePath);
     await plugins.new(path);
     debug({ tmpl: 'Found plugin at <%= path %>', path: modulePath });
   }
