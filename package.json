@@ -43,7 +43,7 @@
     "start": "./bin/kibana --dev",
     "precommit": "grunt lintStagedFiles",
     "karma": "karma start",
-    "es": "grunt esvm:dev:keepalive"
+    "elasticsearch": "grunt esvm:dev:keepalive"
   },
   "repository": {
     "type": "git",

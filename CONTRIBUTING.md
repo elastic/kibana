@@ -38,7 +38,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 - Start elasticsearch
 
   ```sh
-  npm run es
+  npm run elasticsearch
   ```
 
 - Start the development server.
