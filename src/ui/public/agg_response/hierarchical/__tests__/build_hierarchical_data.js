@@ -223,7 +223,10 @@ describe('buildHierarchicalData', function () {
         type: 'pie',
         aggs: [
           { type: 'count', schema: 'metric' },
-          { type: 'filters', schema: 'segment', params: {
+          {
+            type: 'filters',
+            schema: 'segment',
+            params: {
               filters: [
                 { input: { query: { query_string: { query: '_type:apache' } } } },
                 { input: { query: { query_string: { query: '_type:nginx' } } } }
@@ -256,7 +259,10 @@ describe('buildHierarchicalData', function () {
         type: 'pie',
         aggs: [
           { type: 'count', schema: 'metric' },
-          { type: 'filters', schema: 'split', params: {
+          {
+            type: 'filters',
+            schema: 'split',
+            params: {
               filters: [
                 { input: { query: { query_string: { query: '_type:apache' } } } },
                 { input: { query: { query_string: { query: '_type:nginx' } } } }

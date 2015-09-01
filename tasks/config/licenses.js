@@ -45,7 +45,6 @@ module.exports = function (grunt) {
         'inherits@1.0.0': ['ISC'],
         'jsonpointer@1.1.0': ['MIT'],
         'leaflet@0.7.2': ['BSD-2-Clause'],
-        'moment-timezone@0.0.6': ['MIT'],
         'Nonsense@0.1.2': ['Public-Domain'],
         'pkginfo@0.2.3': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],

@@ -1,48 +1,39 @@
-<div class="container">
+<div class="container state_default state_{{ui.serverState}}">
   <header>
     <h1>
-      <strong>Kibana</strong>&nbsp;Status Page
+      Status: <span class="state_color">{{ ui.serverStateMessage }}</span>
+      <i class="fa state_color state_icon" />
     </h1>
   </header>
 
-  <section class="section">
-    <h4>What is this page?</h4>
-    <p>This page is your sanity check, and your savior. You can check for potential problems</p>
-    <p>Here is the status of your kibana instance and the plugins you have installed along with some, statistics to asses potential problems.</p>
-  </section>
+  <div class="row metrics_wrapper">
+    <div ng-repeat="(name, data) in ui.metrics">
+      <status-page-metric name="{{name}}" data="data"></status-page-metric>
+    </div>
+  </div>
 
-  <div class="system_status_wrapper state_default state_{{ui.serverState}}">
-
-    <h3 class="title">
-      <b>System Status</b> {{ ui.serverStateMessage }}
-    </h3>
-
+  <div class="row plugin_status_wrapper">
+    <h3>Installed Plugins</h3>
     <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
       <span class="spinner"></span>
     </div>
 
     <h4 ng-if="!ui.statuses && !ui.loading" class="missing_statuses">
-      No status information available
+      No plugin status information available
     </h4>
 
-    <table class="status_breakdown" ng-if="ui.statuses">
+    <table class="plugin_status_breakdown row" ng-if="ui.statuses">
       <tr>
         <th class="col-xs-1">Name</th>
-        <th class="col-xs-11">Description</th>
+        <th class="col-xs-11">Status</th>
       </tr>
-      <tr ng-repeat="status in ui.statuses" class="status_row state_default state_{{status.state}}">
+      <tr ng-repeat="status in ui.statuses" class="status_row plugin_state_default plugin_state_{{status.state}}">
         <td class="col-xs-1 status_name">{{status.name}}</td>
-        <td class="col-xs-11 status_message">{{status.message}}</td>
+        <td class="col-xs-11 status_message">
+          <i class="fa plugin_state_color plugin_state_icon" />
+          {{status.message}}
+        </td>
       </tr>
     </table>
-
-  </div>
-
-  <h2>Server Metrics</h2>
-  <p>Interval of 5 seconds, with a max history of 5 minutes.</p>
-  <div id="chart_cont" class="row">
-    <div ng-repeat="(name, data) in ui.metrics">
-      <status-page-metric name="{{name}}" data="data"></status-page-metric>
-    </div>
   </div>
 </div>

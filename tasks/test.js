@@ -2,6 +2,7 @@ var _ = require('lodash');
 module.exports = function (grunt) {
   grunt.registerTask('test:server', [ 'simplemocha:all' ]);
   grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
+  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
   grunt.registerTask('test:quick', [
     'test:server',

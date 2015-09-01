@@ -1,5 +1,6 @@
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
+  let fs = require('fs');
   let Boom = require('boom');
   let Hapi = require('hapi');
   let parse = require('url').parse;
@@ -10,13 +11,23 @@ module.exports = function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   // Create a new connection
-  server.connection({
+  var connectionOptions = {
     host: config.get('server.host'),
     port: config.get('server.port'),
     routes: {
       cors: config.get('server.cors')
     }
-  });
+  };
+
+  // enable tls if ssl key and cert are defined
+  if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
+    connectionOptions.tls = {
+      key: fs.readFileSync(config.get('server.ssl.key')),
+      cert: fs.readFileSync(config.get('server.ssl.cert'))
+    };
+  }
+
+  server.connection(connectionOptions);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {

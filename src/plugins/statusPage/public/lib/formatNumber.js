@@ -9,10 +9,10 @@ module.exports = function formatNumber(num, which) {
     case 'time':
       return moment(num).format('HH:mm:ss');
     case 'byte':
-      format += 'b';
+      format += ' b';
       break;
     case 'ms':
-      postfix = 'ms';
+      postfix = ' ms';
       break;
   }
   return numeral(num).format(format) + postfix;
