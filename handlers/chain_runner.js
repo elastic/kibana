@@ -142,7 +142,7 @@ function preProcessChain(chain, queries) {
     if (_.isObject(item) && item.type === 'function') {
       var functionDef = getFunctionByName(item.function);
 
-      if (functionDef.cacheKey) {
+      if (functionDef.datasource) {
         queries[functionDef.cacheKey(item)] = item;
         return true;
       }

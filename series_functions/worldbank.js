@@ -20,8 +20,8 @@ module.exports = new Datasource ('worldbank', {
     };
 
     var time = {
-      min: moment(tlConfig.time.from).format('YYYY[M]MM'),
-      max:  moment(tlConfig.time.to).format('YYYY[M]MM')
+      min: moment(tlConfig.time.from).format('YYYY'),
+      max:  moment(tlConfig.time.to).format('YYYY')
     };
 
     console.log(time);
