@@ -17,7 +17,7 @@ class Status extends EventEmitter {
       tags.push(this.state === 'red' ? 'error' : 'info');
 
       server.log(tags, {
-        tmpl: 'Status changed from <%= prevState %> to <%= state %><% message ? " - " + message : "" %>',
+        tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
         name: name,
         state: this.state,
         message: this.message,
