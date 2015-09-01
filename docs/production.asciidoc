@@ -81,7 +81,7 @@ If you are using a self-signed certificate for Elasticsearch, set the `ca` prope
 
 [source,text]
 ----
-# If you need to provide a CA certificate for your Elasticsarech instance, put
+# If you need to provide a CA certificate for your Elasticsearch instance, put
 # the path of the pem file here.
 ca: /path/to/your/ca/cacert.pem
 ----

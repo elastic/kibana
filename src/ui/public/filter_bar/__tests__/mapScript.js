@@ -42,5 +42,26 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
+    it('should return a value for a range/histogram filter from a scripted field', (done) => {
+      let filter = {
+        meta: {
+          index: 'logstash-*',
+          formattedValue: '1,000.00 to 2,000.00',
+          field: 'script number'
+        },
+        script: {
+          params: {
+            gte: 1000,
+            lt: 2000,
+            value: '>=1,000.00 <2,000.00'
+          }
+        }
+      };
+      mapScript(filter).then((result) => {
+        expect(result).to.have.property('value', filter.meta.formattedValue);
+        done();
+      });
+      $rootScope.$apply();
+    });
   });
 });
