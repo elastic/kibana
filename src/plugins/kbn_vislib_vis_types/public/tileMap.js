@@ -22,6 +22,7 @@ define(function (require) {
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
+          wms: config.get('visualization:tileMap:WMSdefaults')
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
