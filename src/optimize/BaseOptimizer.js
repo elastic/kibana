@@ -78,8 +78,6 @@ class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
-      recordsPath: resolve(this.env.workingDir, 'webpack.records'),
-
       plugins: [
         new webpack.ResolverPlugin([
           new DirectoryNameAsMain()
