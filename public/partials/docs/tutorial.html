@@ -74,18 +74,18 @@
     <div class="doc-container-content">
       <h2>Elasticsearch querying in short</h2>
       <p>
-        We're going to start off talking about the Elasticsearch datasource, because we've already validated that one works for you. Enter <code>es(*)</code> in the expression input, if its not there already. Hit enter.
+        We're going to start off talking about the Elasticsearch datasource, because we've already validated that one works for you. Enter <code>.es(*)</code> in the expression input, if its not there already. Hit enter.
       </p>
       <p>
-        This said <em>"hey elasticsearch, find everything in my default index"</em>. If you wanted to find a subset you might do something like <code>es(html)</code> to count events matching html, or <code>es('user:bob AND bytes:>100')</code> to find events with <em>bob</em> in the <em>user</em> field, and a bytes field that is greater than 100. Note that we surrounded our query in single quotes this time, because it has spaces. You can enter any lucene query string as the first argument to the <code>es()</code> function.
+        This said <em>"hey elasticsearch, find everything in my default index"</em>. If you wanted to find a subset you might do something like <code>.es(html)</code> to count events matching html, or <code>.es('user:bob AND bytes:>100')</code> to find events with <em>bob</em> in the <em>user</em> field, and a bytes field that is greater than 100. Note that we surrounded our query in single quotes this time, because it has spaces. You can enter any lucene query string as the first argument to the <code>.es()</code> function.
 
       <p>
         <h4>Passing arguments</h4>
-        Timelion has a number of shortcuts for doing common things, one of which is that for simple arguments, ones that don't contain spaces or special characters, you don't need quotes. Many functions also have defaults, for example <code>es()</code> and <code>es(*)</code> do the same thing. Arguments also have names, so you don't have to remember their position, you can pass <code>es(index='logstash-*', q='*'')</code> to tell the elasticsearch data source <em>"use * as the q (query) for the logstash-* index"</em>
+        Timelion has a number of shortcuts for doing common things, one of which is that for simple arguments, ones that don't contain spaces or special characters, you don't need quotes. Many functions also have defaults, for example <code>.es()</code> and <code>.es(*)</code> do the same thing. Arguments also have names, so you don't have to remember their position, you can pass <code>.es(index='logstash-*', q='*'')</code> to tell the elasticsearch data source <em>"use * as the q (query) for the logstash-* index"</em>
       </p>
       <h4>Beyond count</h4>
       <p>
-        Counting events is all well and good, but the elasticsearch data source also supports any Elasticsearch metric that returns a single value. Min, max, avg, sum and cardinality are some of the most useful. Lets say you want a unique count of the <code>src_ip</code> field. You could do say, <code>es(*, metric='cardinality:src_ip')</code>. To get the average of the bytes field you would run: <code>es(metric='avg:bytes')</code>.
+        Counting events is all well and good, but the elasticsearch data source also supports any Elasticsearch metric that returns a single value. Min, max, avg, sum and cardinality are some of the most useful. Lets say you want a unique count of the <code>src_ip</code> field. You could do say, <code>.es(*, metric='cardinality:src_ip')</code>. To get the average of the bytes field you would run: <code>.es(metric='avg:bytes')</code>.
       </p>
     </div>
     <div class="doc-container-buttons">
@@ -105,23 +105,23 @@
         Up until now we've dealt with just the one chart. We're going to experiment, so add a few more. Click the <i class="fa fa-bars"></i> <strong>Menu</strong> icon in the top right to expand the menu. Then click the <i class="fa fa-area-chart"></i> <strong>Add Chart</strong> button.
         <table class="table table-condensed table-striped">
           <tr>
-            <td><code>es(*)</code></td>
+            <td><code>.es(*)</code></td>
             <td><strong>One expression</strong></td>
           </tr>
           <tr>
-            <td><code>es(*), es(US)</code></td>
+            <td><code>.es(*), .es(US)</code></td>
             <td><strong>Two expressions.</strong> Two expressions on the same chart!</td>
           </tr>
           <tr>
-            <td><code>es(*).color(#f66), es(US).bars(1)</code></td>
+            <td><code>.es(*).color(#f66), .es(US).bars(1)</code></td>
             <td><strong>Red expression.</strong> Let's colorize the first series red instead. Also, instead of lines for 2nd series, we'll have some bars, with a 1 pixel width.</td>
           </tr>
           <tr>
-            <td><code>es(*).color(#f66).lines(fill=3), es(US).bars(1).points(radius=3, weight=1)</code></td>
+            <td><code>.es(*).color(#f66).lines(fill=3), .es(US).bars(1).points(radius=3, weight=1)</code></td>
             <td><strong>Wooo expressions.</strong> In the last example we used un-named arguments to <code>color()</code> and <code>bars</code>, which rely on the arguments position in a comma seperated list. We can use named arugments to make expressions easier to read and arguments easier to remember.</td>
           </tr>
             <tr>
-            <td><code>(es(*), es(GB)).points()</code></td>
+            <td><code>(.es(*), .es(GB)).points()</code></td>
             <td><strong>Also grouped expressions.</strong> Groups of expressions can be chained to functions as well. Both series will be shown as points instead of lines.</td>
           </tr>
         </table>
