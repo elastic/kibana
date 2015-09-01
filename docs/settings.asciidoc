@@ -293,82 +293,131 @@ The Kibana server reads properties from the `kibana.yml` file on startup. The de
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine, 
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
-NOTE: Kibana server properties changed in the 4.2 release of Kibana.
+NOTE: The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana.
 
+[horizontal]
 .Kibana Server Properties
-|===
-|Property Name |Legacy Property Name |Description 
+`server.port` added[4.2]:: The port that the Kibana server runs on.
++
+*alias*: `port` deprecated[4.2]
++ 
+*default*: `5601`
 
-|`server.port` added[4.2] |`port`
-|The port that the Kibana server runs on. Default value is `5601`. 
+`server.host` added[4.2]:: The host to bind the Kibana server to.
++
+*alias*: `host` deprecated[4.2]
++
+*default*: `"0.0.0.0"`
 
-|`server.host` added[4.2] |`host`
-|The host to bind the Kibana server to. Default value is `"0.0.0.0"`.
+`elasticsearch.url` added[4.2]:: The Elasticsearch instance where the indices you want to query reside.
++
+*alias*: `elasticsearch_url` deprecated[4.2]
++
+*default*: `"http://localhost:9200"`
 
-|`elasticsearch.url` added[4.2] |`elasticsearch_url`
-|The Elasticsearch instance where the indices you want to query reside. Default value is `"http://localhost:9200"`.
+`elasticsearch.preserveHost` added[4.2]:: By default, the host specified in the incoming request from the browser is specified as the host in the corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host specified in `elasticsearch_url`.
++
+*alias*: `elasticsearch_preserve_host` deprecated[4.2]
++ 
+*default*: `true`
 
-|`elasticsearch.preserveHost` added[4.2] |`elasticsearch_preserve_host`
-|By default, the host specified in the incoming request from the browser is specified as the host in the 
-corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host
-specified in `elasticsearch_url`. Default value is `true`.
+`elasticsearch.ssl.cert` added[4.2]:: This parameter specifies the path to the SSL certificate for Elasticsearch instances that require a client certificate.
++
+*alias*: `kibana_elasticsearch_client_crt` deprecated[4.2]
 
-|`elasticsearch.ssl.cert` added[4.2] |`kibana_elasticsearch_client_crt'
-| This parameter specifies the path to the SSL certificate for Elasticsearch instances that require a client certificate.
+`elasticsearch.ssl.key` added[4.2]:: This parameter specifies the path to the SSL key for Elasticsearch instances that require a client key.
++
+*alias*: `kibana_elasticsearch_client_key` deprecated[4.2]
 
-|`elasticsearch.ssl.key` added[4.2] |`kibana_elasticsearch_client_key'
-| This parameter specifies the path to the SSL key for Elasticsearch instances that require a client key.
+`elasticsearch.password` added[4.2]:: This parameter specifies the password for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
++
+*alias*: `kibana_elasticsearch_password` deprecated [4.2]
 
-|`elasticsearch.password` added[4.2] |`kibana_elasticsearch_password'
-| This parameter specifies the password for Elasticsearch instances that use HTTP basic authentication. Kibana users
-still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
+`elasticsearch.username` added[4.2]:: This parameter specifies the username for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
++
+*alias*: `kibana_elasticsearch_username` deprecated[4.2]
 
-|`elasticsearch.username` added[4.2] |`kibana_elasticsearch_username'
-| This parameter specifies the username for Elasticsearch instances that use HTTP basic authentication. Kibana users
-still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
+`elasticsearch.pingTimeout` added[4.2]:: This parameter specifies the maximum wait time in milliseconds for ping responses by Elasticsearch.
++
+*alias*: `ping_timeout` deprecated[4.2]
++ 
+*default*: `1500`
 
-|`elasticsearch.pingTimeout` added[4.2] |`ping_timeout'
-| This parameter specifies the maximum wait time in milliseconds for ping responses by Elasticsearch. The default value 
-is `1500`.
+`elasticsearch.startupTimeout` added[4.2]:: This parameter specifies the maximum wait time in milliseconds for Elasticsearch discovery at Kibana startup. Kibana repeats attempts to discover an Elasticsearch cluster after the specified time elapses.
++
+*alias*: `startup_timeout` deprecated[4.2]
++ 
+*default*: `5000`
 
-|`elasticsearch.startupTimeout` added[4.2] |`startup_timeout'
-| This parameter specifies the maximum wait time in milliseconds for Elasticsearch discovery at Kibana startup. Kibana 
-repeats attempts to discover an Elasticsearch cluster after the specified time elapses. The default value is `5000`.
+`kibana.index` added[4.2]:: The name of the index where saved searched, visualizations, and dashboards will be stored..
++
+*alias*: `kibana_index` deprecated[4.2]
++ 
+*default*: `.kibana`
 
-|`kibana.index` added[4.2] |`kibana_index`
-|The name of the index where saved searched, visualizations, and dashboards will be stored. Default value is `.kibana`.
+`kibana.defaultAppId` added[4.2]:: The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`.
++
+*alias*: `default_app_id` deprecated[4.2]
++ 
+*default*: `"discover"`
 
-|`kibana.defaultAppId` added[4.2] |`default_app_id` 
-|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default 
-value is`"discover"`. 
+`logging.silent` added[4.2]:: Set this value to `true` to suppress all logging output.
++
+*default*: `false`
 
-|`elasticsearch.requestTimeout` added[4.2] |`request_timeout` 
-|How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default value is 
-`500000`.
+`logging.quiet` added[4.2]:: Set this value to `true` to suppress all logging output except for log messages tagged `error`, `fatal`, or Hapi.js errors.
++
+*default*: `false`
 
-|`elasticsearch.shardTimeout` added[4.2] |`shard_timeout`
-|How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default value is `0`.
+`logging.verbose` added[4.2]:: Set this value to `true` to log all events, including system usage information and all requests.
++
+*default*: `false`
 
-|`elasticsearch.ssl.verify` added[4.2] |`verify_ssl`
-|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. 
-Default value is `true`.
+`logging.events` added[4.2]:: You can specify a map of log types to output tags for this parameter to create a customized set of loggable events, as in the following example:
++
+[source,json]
+{
+  log: ['info', 'warning', 'error', 'fatal'],
+  response: '*',
+  error: '*'
+}
 
-|`elasticsearch.ssl.ca` added[4.2] |`ca`
-|The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate 
-so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise. 
+`elasticsearch.requestTimeout` added[4.2]:: How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds.
++
+*alias*: `request_timeout` deprecated[4.2]
++ 
+*default*: `500000`
 
-|`server.ssl.key` added[4.2] |`ssl_key_file`
-|The path to your Kibana server's key file. Must be set to encrypt communications between the browser and Kibana. 
+`elasticsearch.shardTimeout` added[4.2]:: How long Elasticsearch should wait for responses from shards. Set to 0 to disable.
++
+*alias*: `shard_timeout` deprecated[4.2]
++ 
+*default*: `0`
 
-|`server.ssl.cert` added[4.2] |`ssl_cert_file`
-|The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana.
+`elasticsearch.ssl.verify` added[4.2]:: Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification.
++
+*alias*: `verify_ssl` deprecated[4.2]
++ 
+*default*: `true`
 
-|`pid.file` added[4.2] |`pid_file`
-|The location where you want to store the process ID file. If not specified, the PID file is stored in 
-`/var/run/kibana.pid`. 
+`elasticsearch.ssl.ca` added[4.2]:: The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise.
++
+*alias*: `ca` deprecated[4.2]
 
-|`logging.dest` added[4.2] |`log_file`
-|The location where you want to store the Kibana's log output. If not specified, log output is written to standard 
-output and not stored. Specifying a log file suppresses log writes to standard output. 
+`server.ssl.key` added[4.2]:: The path to your Kibana server's key file. Must be set to encrypt communications between the browser and Kibana.
++
+*alias*: `ssl_key_file` deprecated[4.2]
 
-|===
+`server.ssl.cert` added[4.2]:: The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana.
++
+*alias*: `ssl_cert_file` deprecated[4.2]
+
+`pid.file` added[4.2]:: The location where you want to store the process ID file.
++
+*alias*: `pid_file` deprecated[4.2]
++
+*default*: `/var/run/kibana.pid`
+
+`logging.dest` added[4.2]:: The location where you want to store the Kibana's log output. If not specified, log output is written to standard output and not stored. Specifying a log file suppresses log writes to standard output.
++
+*alias*: `log_file` deprecated[4.2]
