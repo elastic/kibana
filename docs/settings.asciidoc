@@ -293,7 +293,7 @@ The Kibana server reads properties from the `kibana.yml` file on startup. The de
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine, 
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
-NOTE: The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana.
+deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
 [horizontal]
 .Kibana Server Properties
