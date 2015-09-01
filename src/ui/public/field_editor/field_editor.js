@@ -80,7 +80,7 @@ define(function (require) {
           if (!changedFormat || !missingFormat) return;
 
           // reset to the defaults, but make sure it's an object
-          self.formatParams = _.assign({}, getFieldFormatType().paramDefaults);
+          self.formatParams = _.assign({}, _.cloneDeep(getFieldFormatType().paramDefaults));
         });
 
         $scope.$watch('editor.formatParams', function () {
