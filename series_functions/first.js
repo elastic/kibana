@@ -9,8 +9,8 @@ module.exports = new Chainable('first', {
   ],
   help: 'This is an internal function that simply returns the input series. Don\'t use this',
   fn: function firstFn(args) {
-    return alter(args, function (inputSeries) {
-      return inputSeries;
+    return alter(args, function (eachSeries) {
+      return eachSeries;
     });
   }
 });

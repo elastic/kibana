@@ -13,11 +13,11 @@ module.exports = new Chainable('bars', {
   ],
   help: 'Show the seriesList as bars',
   fn: function barsFn(args) {
-    return alter(args, function (inputSeries, width) {
-      inputSeries.bars = inputSeries.bars || {};
-      inputSeries.bars.show = width == null ? 1 : width;
-      inputSeries.bars.lineWidth = width == null ? 6 : width;
-      return inputSeries;
+    return alter(args, function (eachSeries, width) {
+      eachSeries.bars = eachSeries.bars || {};
+      eachSeries.bars.show = width == null ? 1 : width;
+      eachSeries.bars.lineWidth = width == null ? 6 : width;
+      return eachSeries;
     });
   }
 });

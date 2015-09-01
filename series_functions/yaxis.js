@@ -26,20 +26,20 @@ module.exports = new Chainable('yaxis', {
   ],
   help: 'This is an internal function that simply returns the input series. Don\'t use this',
   fn: function yaxisFn(args) {
-    return alter(args, function (inputSeries, yaxis, min, max, position) {
+    return alter(args, function (eachSeries, yaxis, min, max, position) {
       yaxis = yaxis || 1;
 
-      inputSeries.yaxis = yaxis;
-      inputSeries._global = inputSeries._global || {};
+      eachSeries.yaxis = yaxis;
+      eachSeries._global = eachSeries._global || {};
 
-      var yaxes = inputSeries._global.yaxes = inputSeries._global.yaxes || [];
+      var yaxes = eachSeries._global.yaxes = eachSeries._global.yaxes || [];
       var myAxis = yaxes[yaxis - 1] = yaxes[yaxis - 1] || {};
       myAxis.position = position;
       myAxis.min = min == null ? 0 : min;
       myAxis.max = max;
 
 
-      return inputSeries;
+      return eachSeries;
     });
   }
 });

@@ -10,14 +10,14 @@ module.exports = new Chainable('derivative', {
   ],
   help: 'Show the seriesList as bars',
   fn: function derivativeFn(args) {
-    return alter(args, function (inputSeries) {
-      var pairs = inputSeries.data;
-      inputSeries.data = _.map(pairs, function (point, i) {
+    return alter(args, function (eachSeries) {
+      var pairs = eachSeries.data;
+      eachSeries.data = _.map(pairs, function (point, i) {
         if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
         return [point[0], point[1] - pairs[i - 1][1]];
       });
 
-      return inputSeries;
+      return eachSeries;
     });
   }
 });

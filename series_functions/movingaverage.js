@@ -15,11 +15,11 @@ module.exports = new Chainable('movingaverage', {
   aliases: ['mvavg'],
   help: 'Calculate the moving average over a given window. Nice for smoothing noisey series',
   fn: function movingaverageFn(args) {
-    return alter(args, function (inputSeries, _window) {
+    return alter(args, function (eachSeries, _window) {
 
-      var pairs = inputSeries.data;
+      var pairs = eachSeries.data;
 
-      inputSeries.data = _.map(pairs, function (point, i) {
+      eachSeries.data = _.map(pairs, function (point, i) {
         if (i < _window) { return [point[0], null]; }
 
         var average = _.chain(pairs.slice(i - _window, i))
@@ -31,7 +31,7 @@ module.exports = new Chainable('movingaverage', {
 
         return [point[0], average];
       });
-      return inputSeries;
+      return eachSeries;
     });
   }
 });

@@ -13,9 +13,9 @@ module.exports = new Chainable('hide', {
   ],
   help: 'Hide the series by default',
   fn: function hideFn(args) {
-    return alter(args, function (inputSeries, hide) {
-      inputSeries._hide = hide == null ? true : hide;
-      return inputSeries;
+    return alter(args, function (eachSeries, hide) {
+      eachSeries._hide = hide == null ? true : hide;
+      return eachSeries;
     });
   }
 });

@@ -18,13 +18,13 @@ module.exports = new Chainable('legend', {
   ],
   help: 'Set the position and style of the legend on the plot',
   fn: function yaxisFn(args) {
-    return alter(args, function (inputSeries, position, columns) {
-      inputSeries._global = inputSeries._global || {};
-      inputSeries._global.legend = inputSeries._global.legend || {};
-      inputSeries._global.legend.position = position;
-      inputSeries._global.legend.noColumns = columns;
+    return alter(args, function (eachSeries, position, columns) {
+      eachSeries._global = eachSeries._global || {};
+      eachSeries._global.legend = eachSeries._global.legend || {};
+      eachSeries._global.legend.position = position;
+      eachSeries._global.legend.noColumns = columns;
 
-      return inputSeries;
+      return eachSeries;
     });
   }
 });

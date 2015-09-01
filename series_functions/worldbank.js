@@ -24,8 +24,6 @@ module.exports = new Datasource ('worldbank', {
       max:  moment(tlConfig.time.to).format('YYYY')
     };
 
-    console.log(time);
-
     var URL = 'http://api.worldbank.org/' + config.code +
       '?date=' + time.min + ':' + time.max +
       '&format=json' +

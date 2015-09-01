@@ -10,12 +10,12 @@ module.exports = new Chainable('abs', {
   ],
   help: 'Return the absolute value of each value in the series list',
   fn: function absFn(args) {
-    return alter(args, function (inputSeries) {
-      var data = _.map(inputSeries.data, function (point) {
+    return alter(args, function (eachSeries) {
+      var data = _.map(eachSeries.data, function (point) {
         return [point[0], Math.abs(point[1])];
       });
-      inputSeries.data = data;
-      return inputSeries;
+      eachSeries.data = data;
+      return eachSeries;
     });
   }
 });

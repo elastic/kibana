@@ -15,14 +15,14 @@ module.exports = new Chainable('label', {
   ],
   help: 'Change the label of the series. Use %s reference the existing label',
   fn:  function labelFn(args) {
-    return alter(args, function (inputSeries, label) {
+    return alter(args, function (eachSeries, label) {
       if (label.indexOf('%s') !== -1) {
-        inputSeries.label =  util.format(label, inputSeries.label);
+        eachSeries.label =  util.format(label, eachSeries.label);
       } else {
-        inputSeries.label =  label;
+        eachSeries.label =  label;
       }
 
-      return inputSeries;
+      return eachSeries;
     });
   }
 });

@@ -30,27 +30,27 @@ module.exports = new Chainable('points', {
   ],
   help: 'Show the series as points',
   fn: function pointsFn(args) {
-    return alter(args, function (inputSeries, radius, weight, fill, fillColor, show) {
-      inputSeries.points = inputSeries.points || {};
-      inputSeries.points.radius = radius == null ? undefined : radius;
+    return alter(args, function (eachSeries, radius, weight, fill, fillColor, show) {
+      eachSeries.points = eachSeries.points || {};
+      eachSeries.points.radius = radius == null ? undefined : radius;
 
       if (fill) {
-        inputSeries.points.fillColor = fillColor == null ? false : fillColor;
+        eachSeries.points.fillColor = fillColor == null ? false : fillColor;
       }
 
       if (fill != null) {
-        inputSeries.points.fill =  fill / 10;
+        eachSeries.points.fill =  fill / 10;
       }
 
       if (weight != null) {
-        inputSeries.points.lineWidth = weight;
+        eachSeries.points.lineWidth = weight;
       }
 
-      inputSeries.points.show = show == null ? true : show;
+      eachSeries.points.show = show == null ? true : show;
 
 
 
-      return inputSeries;
+      return eachSeries;
     });
   }
 });

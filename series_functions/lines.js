@@ -26,18 +26,18 @@ module.exports = new Chainable('lines', {
   ],
   help: 'Show the seriesList as lines',
   fn: function linesFn(args) {
-    return alter(args, function (inputSeries, width, fill, show, steps) {
-      inputSeries.lines = inputSeries.lines || {};
+    return alter(args, function (eachSeries, width, fill, show, steps) {
+      eachSeries.lines = eachSeries.lines || {};
 
       // Defaults
-      if (inputSeries.lines.lineWidth == null) inputSeries.lines.lineWidth = 3;
+      if (eachSeries.lines.lineWidth == null) eachSeries.lines.lineWidth = 3;
 
-      if (width != null) inputSeries.lines.lineWidth = width;
-      if (fill != null)  inputSeries.lines.fill = fill / 10;
-      if (show != null)  inputSeries.lines.show = show;
-      if (steps != null) inputSeries.lines.steps = steps;
+      if (width != null) eachSeries.lines.lineWidth = width;
+      if (fill != null)  eachSeries.lines.fill = fill / 10;
+      if (show != null)  eachSeries.lines.show = show;
+      if (steps != null) eachSeries.lines.steps = steps;
 
-      return inputSeries;
+      return eachSeries;
     });
   }
 });
