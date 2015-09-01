@@ -1,37 +1,29 @@
+module.exports = function ({env, bundle}) {
 
-module.exports = require('lodash').template(
-`
+  let pluginSlug = env.pluginInfo.sort()
+  .map(p => ' *  - ' + p)
+  .join('\n');
+
+  let requires = bundle.modules
+  .map(m => `require('${m}');`)
+  .join('\n');
+
+  return `
 /**
- * Optimized application entry file
+ * Test entry file
  *
  * This is programatically created and updated, do not modify
  *
  * context: <%= JSON.stringify(env.context) %>
  * includes code from:
-<%
-
-  env.pluginInfo.sort().forEach(function (plugin) {
-    print(\` *  - \${plugin}\n\`);
-  });
-
-%> *
+${pluginSlug}
+ *
  */
 
-require('ui/chrome');
-<%
-
-bundle.modules
-.filter(function (id) {
-  return id !== 'ui/chrome';
-})
-.forEach(function (id, i) {
-
-  if (i > 0) print('\\n');
-  print(\`require('\${id}');\`);
-
-});
-
-%>
+require('ui/chrome')
+${requires}
 require('ui/chrome').bootstrap(/* xoxo */);
-`
-);
+
+`;
+
+};

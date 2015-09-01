@@ -3,9 +3,7 @@ let babelOptions = require('requirefrom')('src')('optimize/babelOptions');
 
 module.exports = {
   build: {
-    options: defaults({
-      optional: ['runtime']
-    }, babelOptions),
+    options: babelOptions.node,
     src: [
       'build/kibana/**/*.js',
       '!**/public/**',
