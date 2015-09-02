@@ -2,15 +2,17 @@ define(function (require) {
   var d3 = require('d3');
   var _ = require('lodash');
 
-  // XXX: times param should accept array of d3 objects
-  function _render(obj, selection, xScale, height, times) {
+  function renderWith(opts, selection, xScale, height, times) {
     times = (times && times.length) ? times : [new Date().getTime()];
     times = times.map(function (time) {
-      return _.assign({}, obj, { 'time': time });
+      if (_.isUndefined(time.time)) {
+        time = { time: time };
+      }
+      return _.assign({}, opts, time);
     });
 
     selection.each(function () {
-      var markers = d3.select(this).selectAll('.' + obj.class)
+      var markers = d3.select(this).selectAll('.' + opts.class)
         .data(times);
       markers
         .enter().append('line')
@@ -39,23 +41,28 @@ define(function (require) {
     });
   }
 
-  function configure(obj) {
-    obj = _.assign({
-      'class': 'default-time-marker',
-      'color': '#aaa',
-      'opacity': 0.8,
-      'width': 1
-    }, obj || {});
+  function configureWith(baseOpts, opts) {
+    newOpts = _.assign({}, baseOpts, opts || {});
 
     return {
-      render: function render(selection, xScale, height, times) {
-        return _render(obj, selection, xScale, height, times);
-      }
+      render: (function _render(newOpts) {
+        return function render(selection, xScale, height, times) {
+          return renderWith(newOpts, selection, xScale, height, times);
+        };
+      })(newOpts),
+      configure: (function _configure(newOpts) {
+        return function configure(opts) {
+          return configureWith(newOpts, opts);
+        };
+      })(newOpts),
+      opts: newOpts
     };
   }
 
-  return {
-    render: configure().render,
-    configure: configure
-  };
+  return configureWith({
+    'class': 'default-time-marker',
+    color: '#aaa',
+    opacity: 0.8,
+    width: 1
+  });
 });

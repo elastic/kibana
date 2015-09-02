@@ -2,7 +2,7 @@ define(function (require) {
   return function TimeMarkerFactory() {
     var d3 = require('d3');
     var dateMath = require('ui/utils/dateMath');
-    var markerRenderer = require('./marker_renderer').configure({
+    var markerRenderer = require('ui/vislib/lib/marker_renderer').configure({
       'class': 'time-marker',
       'color': '#c80000',
       'opacity': 0.3,

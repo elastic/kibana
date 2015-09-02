@@ -6,7 +6,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var errors = require('ui/errors');
-    var markerRenderer = require('ui/vislib/visualizations/marker_renderer');
+    var markerRenderer = require('ui/vislib/lib/marker_renderer');
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
