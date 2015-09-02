@@ -22,6 +22,15 @@ module.exports = function (grunt) {
         }
       }
     },
-    dev: {}
+    dev: {},
+    ui: {
+      options: {
+        config: {
+          http: {
+            port: 9209
+          }
+        }
+      }
+    }
   };
 };
