@@ -4,6 +4,7 @@ define(function (require) {
     describe(require('specs/components/agg_types/_agg_params'));
     describe(require('specs/components/agg_types/_bucket_count_between'));
     describe(require('specs/components/agg_types/buckets/_histogram'));
+    describe(require('specs/components/agg_types/buckets/_range'));
 
     describe('bucket aggs', function () {
       var bucketAggs;
