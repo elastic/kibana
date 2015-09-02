@@ -1,64 +1,57 @@
 [[settings]]
 == Settings
 
-To use Kibana, you have to tell it about the Elasticsearch indices that you 
-want to explore by configuring one or more index patterns. You can also:
+To use Kibana, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more 
+index patterns. You can also:
 
-* Create scripted fields that are computed on the fly from your data. You can 
-browse and visualize scripted fields, but you cannot search them.
-* Set advanced options such as the number of rows to show in a table and 
-how many of the most popular fields to show. Use caution when modifying advanced options,
-as it's possible to set values that are incompatible with one another.
+* Create scripted fields that are computed on the fly from your data. You can browse and visualize scripted fields, but 
+you cannot search them.
+* Set advanced options such as the number of rows to show in a table and how many of the most popular fields to show. 
+Use caution when modifying advanced options, as it's possible to set values that are incompatible with one another.
 * Configure Kibana for a production environment
 
 [float]
 [[settings-create-pattern]]
 === Creating an Index Pattern to Connect to Elasticsearch
-An _index pattern_ identifies one or more Elasticsearch indices that you want to 
-explore with Kibana. Kibana looks for index names that match the specified pattern.
-An asterisk (*) in the pattern matches zero or more characters. For example, the pattern 
-`myindex-*` matches all indices whose names start with `myindex-`, such as `myindex-1` 
-and `myindex-2`. 
+An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibana. Kibana looks for 
+index names that match the specified pattern.
+An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all 
+indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`. 
 
-If you use event times to create index names (for example, if you're pushing data
-into Elasticsearch from Logstash), the index pattern can also contain a date format.
-In this case, the static text in the pattern must be enclosed in brackets, and you 
-specify the date format using the tokens described in <<date-format-tokens>>.
+If you use event times to create index names (for example, if you're pushing data into Elasticsearch from Logstash), 
+the index pattern can also contain a date format.
+In this case, the static text in the pattern must be enclosed in brackets, and you specify the date format using the 
+tokens described in <<date-format-tokens>>.
 
-For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a 
-timestamp of the form `YYYY.MM.DD` appended to the prefix `logstash-`, such as 
-`logstash-2015.01.31` and `logstash-2015-02-01`.
+For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended 
+to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
 
 An index pattern can also simply be the name of a single index.
 
 To create an index pattern to connect to Elasticsearch:
 
 . Go to the *Settings > Indices* tab.
-. Specify an index pattern that matches the name of one or more of your Elasticsearch 
-indices. By default, Kibana guesses that you're you're working with log data being 
-fed into Elasticsearch by Logstash.
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana 
+guesses that you're you're working with log data being fed into Elasticsearch by Logstash.
 +
-NOTE: When you switch between top-level tabs, Kibana remembers where you were.
-For example, if you view a particular index pattern from the Settings tab, switch
-to the Discover tab, and then go back to the Settings tab, Kibana displays the
-index pattern you last looked at. To get to the create pattern form, click 
-the *Add* button in the Index Patterns list.
+NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular 
+index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibana displays 
+the index pattern you last looked at. To get to the create pattern form, click the *Add* button in the Index Patterns 
+list.
 
-. If your index contains a timestamp field that you want to use to perform 
-time-based comparisons, select the *Index contains time-based events* option 
-and select the index field that contains the timestamp. Kibana reads the 
-index mapping to list all of the fields that contain a timestamp.
+. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index 
+contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index 
+mapping to list all of the fields that contain a timestamp.
 
-. If new indices are generated periodically and have a timestamp appended to 
-the name, select the *Use event times to create index names* option and select 
-the *Index pattern interval*. This enables Kibana to search only those indices 
-that could possibly contain data in the time range you specify. This is 
-primarily applicable if you are using Logstash to feed data into Elasticsearch.
+. If new indices are generated periodically and have a timestamp appended to the name, select the *Use event times to 
+create index names* option and select the *Index pattern interval*. This enables Kibana to search only those indices 
+that could possibly contain data in the time range you specify. This is primarily applicable if you are using Logstash 
+to feed data into Elasticsearch.
 
 . Click *Create* to add the index pattern. 
 
-. To designate the new pattern as the default pattern to load when you view
-the Discover tab, click the *favorite* button. 
+. To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite* 
+button. 
 
 [float]
 [[date-format-tokens]]
@@ -116,10 +109,9 @@ the Discover tab, click the *favorite* button.
 [float]
 [[set-default-pattern]]
 === Setting the Default Index Pattern
-The default index pattern is loaded by automatically when you view the *Discover* tab. 
-Kibana displays a star to the left of the name of the default pattern in the Index Patterns list 
-on the *Settings > Indices* tab. The first pattern you create is automatically
-designated as the default pattern.
+The default index pattern is loaded by automatically when you view the *Discover* tab. Kibana displays a star to the 
+left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern 
+you create is automatically designated as the default pattern.
 
 To set a different pattern as the default index pattern:
 
@@ -132,13 +124,11 @@ NOTE: You can also manually set the default index pattern in *Advanced > Setting
 [float]
 [[reload-fields]]
 === Reloading the Index Fields List
-When you add an index mapping, Kibana automatically scans the indices that 
-match the pattern to display a list of the index fields. You can reload the
-index fields list to pick up any newly-added fields. 
+When you add an index mapping, Kibana automatically scans the indices that match the pattern to display a list of the 
+index fields. You can reload the index fields list to pick up any newly-added fields. 
 
-Reloading the index fields list also resets Kibana's popularity counters for the fields. 
-The popularity counters keep track of the fields you've used most often within Kibana
-and are used to sort fields within lists. 
+Reloading the index fields list also resets Kibana's popularity counters for the fields. The popularity counters keep 
+track of the fields you've used most often within Kibana and are used to sort fields within lists. 
 
 To reload the index fields list:
 
@@ -168,20 +158,17 @@ You can also set the field's popularity value in the *Popularity* text entry box
 [float]
 [[create-scripted-field]]
 === Creating a Scripted Field
-Scripted fields compute data on the fly from the data in your
-Elasticsearch indices. Scripted field data is shown on the Discover tab as 
-part of the document data, and you can use scripted fields in your visualizations.
-(Scripted field values are computed at query time so they aren't indexed and
-cannot be searched.)
+Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on 
+the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
+Scripted field values are computed at query time so they aren't indexed and cannot be searched.
 
-WARNING: Computing data on the fly with scripted fields can be very resource 
-intensive and can have a direct impact on Kibana's performance. Keep in mind 
-that there's no built-in validation of a scripted field. If your scripts are 
-buggy, you'll get exceptions whenever you try to view the dynamically generated
-data.
+WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on 
+Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are 
+buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
 Scripted fields use the Lucene expression syntax. For more information, 
-see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[Lucene Expressions Scripts].
+see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[
+Lucene Expressions Scripts].
 
 You can reference any single value numeric field in your expressions, for example:
 
@@ -196,8 +183,7 @@ To create a scripted field:
 . Go to the pattern's *Scripted Fields* tab.
 . Click *Add Scripted Field*. 
 . Enter a name for the scripted field.
-. Enter the expression that you want to use to compute a value on the fly 
-from your index data.
+. Enter the expression that you want to use to compute a value on the fly from your index data.
 . Click *Save Scripted Field*.
 
 For more information about scripted fields in Elasticsearch, see 
@@ -215,10 +201,8 @@ To modify a scripted field:
 . Click the *Edit* button for the scripted field you want to change.
 . Make your changes and then click *Save Scripted Field* to update the field.
 
-WARNING: Keep in mind 
-that there's no built-in validation of a scripted field. If your scripts are 
-buggy, you'll get exceptions whenever you try to view the dynamically generated
-data.
+WARNING: Keep in mind that there's no built-in validation of a scripted field. If your scripts are buggy, you'll get 
+exceptions whenever you try to view the dynamically generated data.
 
 [float]
 [[delete-scripted-field]]
@@ -231,13 +215,12 @@ To delete a scripted field:
 
 [[advanced-options]]
 === Setting Advanced Options
-The Advanced Settings page enables you to directly edit settings that control
-the behavior of the Kibana application. For example, you can change the format
-used to display dates, specify the default index pattern, and set the precision
+The Advanced Settings page enables you to directly edit settings that control the behavior of the Kibana application. 
+For example, you can change the format used to display dates, specify the default index pattern, and set the precision 
 for displayed decimal values. 
 
-WARNING: Changing advanced settings can have unintended consequences. If you aren't
-sure what you're doing, it's best to leave these settings as-is.
+WARNING: Changing advanced settings can have unintended consequences. If you aren't sure what you're doing, it's best 
+to leave these settings as-is.
 
 To set advanced options:
 
@@ -253,30 +236,26 @@ To set advanced options:
 You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
 export or import sets of searches, visualizations, and dashboards.
 
-Viewing a saved object displays the selected item in the *Discover*, *Visualize*, 
-or *Dashboard* page. To view a saved object:
+Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved 
+object:
 
 . Go to *Settings > Objects*.
 . Select the object you want to view. 
 . Click the *View* button.
 
-Editing a saved object enables you to directly modify the object definition. 
-You can change the name of the object, add a description, and modify the
-JSON that defines the object's properties. 
+Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add 
+a description, and modify the JSON that defines the object's properties. 
 
-If you attempt to access an object whose index has been deleted, Kibana displays
-its Edit Object page. You can:
+If you attempt to access an object whose index has been deleted, Kibana displays its Edit Object page. You can:
 
 * Recreate the index so you can continue using the object.  
 * Delete the object and recreate it using a different index.
-* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON`
-to point to an existing index pattern. This is useful if the index you were working
-with has been renamed. 
+* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing 
+index pattern. This is useful if the index you were working with has been renamed. 
 
-WARNING: No validation is performed for object properties. Submitting invalid 
-changes will render the object unusable. Generally, you should use the 
-*Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of 
-directly editing existing ones. 
+WARNING: No validation is performed for object properties. Submitting invalid changes will render the object unusable. 
+Generally, you should use the *Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of directly 
+editing existing ones. 
 
 To edit a saved object:
 
@@ -310,64 +289,135 @@ To import a set of objects:
 [[kibana-server-properties]]
 === Setting Kibana Server Properties
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The default
-settings configure Kibana to run on `localhost:5601`. To change the host or port number, or
-connect to Elasticsearch running on a different machine, you'll need to update your `kibana.yml` file. You can also 
-enable SSL and set a variety of other options.
+The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run 
+on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine, 
+you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
+deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
+
+[horizontal]
 .Kibana Server Properties
-|===
-|Property |Description 
+`server.port` added[4.2]:: The port that the Kibana server runs on.
++
+*alias*: `port` deprecated[4.2]
++ 
+*default*: `5601`
 
-|`port`
-|The port that the Kibana server runs on. Default: `port: 5601`. 
+`server.host` added[4.2]:: The host to bind the Kibana server to.
++
+*alias*: `host` deprecated[4.2]
++
+*default*: `"0.0.0.0"`
 
-|`host`
-|The host to bind the Kibana server to. Default: `host: "0.0.0.0"`.
+`elasticsearch.url` added[4.2]:: The Elasticsearch instance where the indices you want to query reside.
++
+*alias*: `elasticsearch_url` deprecated[4.2]
++
+*default*: `"http://localhost:9200"`
 
-|`elasticsearch_url`
-|The Elasticsearch instance where the indices you want to query reside. Default:&nbsp;&nbsp;`elasticsearch_url: 
-"http://localhost:9200"`.
+`elasticsearch.preserveHost` added[4.2]:: By default, the host specified in the incoming request from the browser is specified as the host in the corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host specified in `elasticsearch_url`.
++
+*alias*: `elasticsearch_preserve_host` deprecated[4.2]
++ 
+*default*: `true`
 
-|`elasticsearch_preserve_host`
-|By default, the host specified in the incoming request from the browser is specified as the host in the 
-corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host
-specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default. 
-Default: `elasticsearch_preserve_host: true`.
+`elasticsearch.ssl.cert` added[4.2]:: This parameter specifies the path to the SSL certificate for Elasticsearch instances that require a client certificate.
++
+*alias*: `kibana_elasticsearch_client_crt` deprecated[4.2]
 
-|`kibana_index`
-|The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
+`elasticsearch.ssl.key` added[4.2]:: This parameter specifies the path to the SSL key for Elasticsearch instances that require a client key.
++
+*alias*: `kibana_elasticsearch_client_key` deprecated[4.2]
 
-|`default_app_id` 
-|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: 
-`default_app_id: "discover"`. 
+`elasticsearch.password` added[4.2]:: This parameter specifies the password for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
++
+*alias*: `kibana_elasticsearch_password` deprecated [4.2]
 
-|`request_timeout` 
-|How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000`.
+`elasticsearch.username` added[4.2]:: This parameter specifies the username for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
++
+*alias*: `kibana_elasticsearch_username` deprecated[4.2]
 
-|`shard_timeout`
-|How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default: `shard_timeout: 0`.
+`elasticsearch.pingTimeout` added[4.2]:: This parameter specifies the maximum wait time in milliseconds for ping responses by Elasticsearch.
++
+*alias*: `ping_timeout` deprecated[4.2]
++ 
+*default*: `1500`
 
-|`verify_ssl`
-|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification. 
-Default: `verify_ssl: true`.
+`elasticsearch.startupTimeout` added[4.2]:: This parameter specifies the maximum wait time in milliseconds for Elasticsearch discovery at Kibana startup. Kibana repeats attempts to discover an Elasticsearch cluster after the specified time elapses.
++
+*alias*: `startup_timeout` deprecated[4.2]
++ 
+*default*: `5000`
 
-|`ca`
-|The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate 
-so the certificate can be verified. (Otherwise, you have to disable `verify_ssl`.) Default: none.
+`kibana.index` added[4.2]:: The name of the index where saved searched, visualizations, and dashboards will be stored..
++
+*alias*: `kibana_index` deprecated[4.2]
++ 
+*default*: `.kibana`
 
-|`ssl_key_file`
-|The path to your Kibana server's key file. Must be set to encrypt communications between the browser and Kibana. Default: none.
+`kibana.defaultAppId` added[4.2]:: The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`.
++
+*alias*: `default_app_id` deprecated[4.2]
++ 
+*default*: `"discover"`
 
-|`ssl_cert_file`
-|The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana. Default: none.
+`logging.silent` added[4.2]:: Set this value to `true` to suppress all logging output.
++
+*default*: `false`
 
-|`pid_file`
-|The location where you want to store the process ID file. If not specified, the PID file is stored in 
-`/var/run/kibana.pid`. Default: none.
+`logging.quiet` added[4.2]:: Set this value to `true` to suppress all logging output except for log messages tagged `error`, `fatal`, or Hapi.js errors.
++
+*default*: `false`
 
-|`log_file`
-|The location where you want to store the Kibana's log output. If not specified, log output is written to standard 
-output and not stored. Specifying a log file suppresses log writes to standard output. Default: none.
+`logging.verbose` added[4.2]:: Set this value to `true` to log all events, including system usage information and all requests.
++
+*default*: `false`
 
-|===
+`logging.events` added[4.2]:: You can specify a map of log types to output tags for this parameter to create a customized set of loggable events, as in the following example:
++
+[source,json]
+{
+  log: ['info', 'warning', 'error', 'fatal'],
+  response: '*',
+  error: '*'
+}
+
+`elasticsearch.requestTimeout` added[4.2]:: How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds.
++
+*alias*: `request_timeout` deprecated[4.2]
++ 
+*default*: `500000`
+
+`elasticsearch.shardTimeout` added[4.2]:: How long Elasticsearch should wait for responses from shards. Set to 0 to disable.
++
+*alias*: `shard_timeout` deprecated[4.2]
++ 
+*default*: `0`
+
+`elasticsearch.ssl.verify` added[4.2]:: Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification.
++
+*alias*: `verify_ssl` deprecated[4.2]
++ 
+*default*: `true`
+
+`elasticsearch.ssl.ca` added[4.2]:: The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise.
++
+*alias*: `ca` deprecated[4.2]
+
+`server.ssl.key` added[4.2]:: The path to your Kibana server's key file. Must be set to encrypt communications between the browser and Kibana.
++
+*alias*: `ssl_key_file` deprecated[4.2]
+
+`server.ssl.cert` added[4.2]:: The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana.
++
+*alias*: `ssl_cert_file` deprecated[4.2]
+
+`pid.file` added[4.2]:: The location where you want to store the process ID file.
++
+*alias*: `pid_file` deprecated[4.2]
++
+*default*: `/var/run/kibana.pid`
+
+`logging.dest` added[4.2]:: The location where you want to store the Kibana's log output. If not specified, log output is written to standard output and not stored. Specifying a log file suppresses log writes to standard output.
++
+*alias*: `log_file` deprecated[4.2]

@@ -1,6 +1,14 @@
+module.exports = function ({env, bundle}) {
 
-module.exports = require('lodash').template(
-`
+  let pluginSlug = env.pluginInfo.sort()
+  .map(p => ' *  - ' + p)
+  .join('\n');
+
+  let requires = bundle.modules
+  .map(m => `require('${m}');`)
+  .join('\n');
+
+  return `
 /**
  * Test entry file
  *
@@ -8,14 +16,7 @@ module.exports = require('lodash').template(
  *
  * context: <%= JSON.stringify(env.context) %>
  * includes code from:
-<%
-
-env.pluginInfo.sort().forEach(function (plugin, i) {
-  if (i > 0) print('\\n');
-  print(' *  - ' + plugin);
-});
-
-%>
+${pluginSlug}
  *
  */
 
@@ -27,15 +28,9 @@ window.__KBN__ = {
 };
 
 require('ui/testHarness');
-<%
-
-bundle.modules.forEach(function (id, i) {
-  if (i > 0) print('\\n');
-  print(\`require('\${id.replace(/\\\\/g, '\\\\\\\\')}');\`);
-});
-
-%>
+${requires}
 require('ui/testHarness').bootstrap(/* go! */);
 
-`
-);
+`;
+
+};
