@@ -16,7 +16,7 @@ define(function (require) {
         var range = { gte: bucket.from, lt: bucket.to };
 
         if (range.gte == null) range.gte = -Infinity;
-        if (range.le == null) range.le = +Infinity;
+        if (range.lt == null) range.lt = +Infinity;
 
         return range;
       },
