@@ -2,9 +2,6 @@ var _ = require('lodash');
 
 var logoUrl = require('./logo.png');
 
-require('angular-resizable');
-require('angular-resizable/angular-resizable.min.css');
-
 require('./directives/chart_directive');
 require('./directives/expression_directive');
 require('./directives/docs');
@@ -18,7 +15,7 @@ require('ui/chrome')
   'smallLogo': 'url(' + timelionLogo + ') left no-repeat'
 }).setTabs([]);
 
-var app = require('ui/modules').get('apps/timelion', ['angularResizable']);
+var app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
