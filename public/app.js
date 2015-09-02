@@ -15,7 +15,7 @@ require('ui/chrome')
   'smallLogo': 'url(' + timelionLogo + ') left no-repeat'
 }).setTabs([]);
 
-var app = require('ui/modules').get('apps/timelion', ['angularResizable']);
+var app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
