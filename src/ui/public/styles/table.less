@@ -1,5 +1,12 @@
 @import "~ui/styles/variables";
 
+.table {
+  // Nesting
+  .table {
+    background-color: @table-nested-bg;
+  }
+}
+
 kbn-table, .kbn-table, tbody[kbn-rows] {
   // sub tables should not have a leading border
   .table .table {

@@ -53,12 +53,10 @@ chrome
     courier.start();
   });
 
-  function updateTheme() {
-    var theme = config.get('theme');
-    console.log(theme);
+  function updateTheme(obj, useDarkTheme) {
+    var theme = !!useDarkTheme ? 'dark' : 'light';
     chrome.setTheme(theme);
   }
+  $rootScope.$on('change:dashboard:darkTheme', updateTheme);
 
-  $rootScope.$on('init:config', updateTheme);
-  $rootScope.$on('change:config.theme', updateTheme);
 });

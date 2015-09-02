@@ -28,7 +28,8 @@ define(function (require) {
           version: 1,
           timeRestore: false,
           timeTo: undefined,
-          timeFrom: undefined
+          timeFrom: undefined,
+          darkTheme: false
         },
 
         // if an indexPattern was saved with the searchsource of a SavedDashboard
@@ -49,7 +50,8 @@ define(function (require) {
       version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',
-      timeFrom: 'string'
+      timeFrom: 'string',
+      darkTheme: 'boolean'
     };
 
     SavedDashboard.searchsource = true;

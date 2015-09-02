@@ -32,8 +32,12 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (savedDashboards) {
-        return savedDashboards.get();
+      dash: function (savedDashboards, config) {
+        return savedDashboards.get()
+        .then(function (dash) {
+          dash.darkTheme = !!config.get('dashboard:defaultDarkTheme');
+          return dash;
+        });
       }
     }
   })
@@ -51,7 +55,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
+      controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -60,6 +64,11 @@ define(function (require) {
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
+
+        $rootScope.$broadcast('change:dashboard:darkTheme', dash.darkTheme);
+        $scope.$watch('dash.darkTheme', function (value) {
+          $rootScope.$broadcast('change:dashboard:darkTheme', value);
+        });
 
         if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
           timefilter.time.to = dash.timeTo;
@@ -90,7 +99,8 @@ define(function (require) {
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
           load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
           share: require('plugins/kibana/dashboard/partials/share.html'),
-          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
+          options: require('plugins/kibana/dashboard/partials/options.html')
         });
 
         $scope.refresh = _.bindKey(courier, 'fetch');

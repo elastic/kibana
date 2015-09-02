@@ -60,7 +60,7 @@
 
     // Nesting
     .table {
-      background-color: @body-bg;
+      background-color: @table-nested-bg;
     }
   }
 
@@ -293,7 +293,7 @@
   }
 
   .tick text {
-    fill: @svg-tick-color;
+    fill: @svg-tick-text-color;
   }
 
   .brush .extent {
@@ -302,6 +302,7 @@
 
   .endzone {
     fill: @svg-endzone-bg;
+    //opacity: 1;
   }
 
 
@@ -476,6 +477,22 @@
   }
 
 
+// /src/ui/public/styles/pagination.less
+  paginate {
+    paginate-controls {
+      .pagination-other-pages {
+        &-list {
+          > li {
+            &.active a {
+              color: @paginate-page-link-active-color;
+            }
+          }
+        }
+      }
+    }
+  }
+
+
 // /src/plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
     background-color: @dashboard-bg;
@@ -507,5 +524,10 @@
     }
   }
 
+  // .dashboard-panel-picker {
+  //   & > .list-group-item {
+  //     background-color: @dashboard-add-vis-panel-bg;
+  //   }
+  // }
 
 }

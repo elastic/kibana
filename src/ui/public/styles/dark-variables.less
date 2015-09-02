@@ -24,7 +24,7 @@
 @body-bg:                                     @gray3;
 @text-color:                                  @brand-primary;
 
-@link-color:                                  #F3BC18;
+@link-color:                                  #b7e2ea;
 @link-hover-color:                            lighten(@link-color, 10%);
 
 @btn-default-color:                           @white;
@@ -50,9 +50,10 @@
 @action-remove:                               desaturate(@btn-danger-bg, 30%);
 
 @table-border-color:                          @gray6;
-@table-cell-hover-bg:                         @gray3;
+@table-cell-hover-bg:                         transparent;
 @table-cell-hover-hover-bg:                   @gray6;
 @table-row-hover-bg:                          lighten(@gray6, 4%);
+@table-nested-bg:                             transparent;
 
 @table-sort-color:                            @gray6;
 @table-sort-asc-color:                        @gray11;
@@ -65,9 +66,11 @@
 
 @nav-tabs-border-color:                       @gray6;
 @nav-tabs-link-hover-border-color:            @gray7;
-@nav-tabs-active-link-hover-border-color:     @gray14;
+@nav-tabs-active-link-hover-border-color:     @gray7;
 
 @nav-tabs-active-link-hover-color:            @brand-primary;
+
+@paginate-page-link-active-color:             @gray9;
 
 
 
@@ -85,7 +88,7 @@
 @dashboard-panel-heading-link-hover-color:    @link-hover-color;
 @dashboard-panel-load-error-color:            @btn-danger-bg;
 
-@collapser-bg:                                @gray3;
+@collapser-bg:                                @gray2;
 @collapser-border:                            @gray6;
 @collapser-color:                             @gray8;
 @collapser-hover-bg:                          @gray6;
@@ -97,12 +100,12 @@
 @visualize-show-spy-hover-bg:                 @collapser-hover-bg;
 @visualize-show-spy-hover-color:              @collapser-hover-color;
 
-@svg-axis-color:                              @gray13;
-@svg-tick-color:                              @gray8;
+@svg-axis-color:                              @gray8;
+@svg-tick-text-color:                         @gray10;
 @svg-brush-color:                             @white;
-@svg-endzone-bg:                              @black;
-@vis-axis-title-color:                        @gray8;
-@vis-chart-title-color:                       @gray8;
+@svg-endzone-bg:                              @white;
+@vis-axis-title-color:                        @gray10;
+@vis-chart-title-color:                       @gray10;
 
 @tilemap-border:                              @gray13;
 @tilemap-legend-base-bg:                      @gray3;
@@ -126,13 +129,12 @@
 @tooltip-bg:                                  fadeout(@gray4, 7%);
 @tooltip-color:                               @gray14;
 
-
 @filter-bar-confirm-bg:                       @gray3;
 @filter-bar-confirm-filter-color:             @gray3;
-@filter-bar-confirm-border:                   @gray12;
+@filter-bar-confirm-border:                   @black;
 @filter-bar-confirm-filter-bg:                @gray12;
 @filter-bar-bar-bg:                           @gray3;
-@filter-bar-bar-border:                       @gray12;
+@filter-bar-bar-border:                       @black;
 @filter-bar-bar-condensed-bg:                 darken(@filter-bar-bar-bg, 5%);
 @filter-bar-bar-filter-bg:                    @action-add;
 @filter-bar-bar-filter-color:                 @white;
@@ -148,7 +150,7 @@
 @saved-object-finder-link-color:              @text-color;
 @saved-object-finder-icon-color:              darken(@saved-object-finder-link-color, 10%);
 
-@list-group-bg:                               @gray5;
+@list-group-bg:                               @gray3;
 @list-group-border:                           @gray7;
 @list-group-hover-bg:                         @gray14;
 @list-group-link-color:                       @gray5;

@@ -149,9 +149,9 @@ define(function () {
           '}'
         ].join('\n')
       },
-      'theme' : {
-        value: 'bright',
-        description: 'Application theme. Valid values are "dark" and "bright"'
+      'dashboard:defaultDarkTheme': {
+        value: true,
+        description: 'New dashboards use dark theme by default',
       }
     };
   };
