@@ -96,11 +96,7 @@ define(function (require) {
 
       if (!state.index || !state.type || !state.id) return;
       return 'DocVersion:' + (
-        [
-          state.index,
-          state.type,
-          state.id
-        ]
+        [ state.index, state.type, state.id ]
         .map(encodeURIComponent)
         .join('/')
       );

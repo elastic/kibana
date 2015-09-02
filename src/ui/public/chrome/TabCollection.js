@@ -12,7 +12,7 @@ var parse = _.wrap(require('url').parse, function (parse, path) {
 
 function TabCollection() {
 
-  var tabs = null;
+  var tabs = [];
   var specs = null;
   var defaults = null;
   var activeTab = null;

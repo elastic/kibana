@@ -30,7 +30,7 @@ module.exports = function (grunt) {
       }
     }()),
 
-    nodeVersion: '2.5.0',
+    nodeVersion: grunt.file.read('.node-version').trim(),
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
