@@ -80,7 +80,7 @@ define(function () {
       'visualization:tileMap:WMSdefaults': {
         value: JSON.stringify({
           enabled: false,
-          url: 'http://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+          url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
           options: {
             version: '1.3.0',
             layers: '0',
