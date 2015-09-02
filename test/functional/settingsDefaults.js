@@ -13,7 +13,7 @@ define([
 
   registerSuite(function () {
     var settingsPage;
-    var url = 'http://localhost:5601';
+    var url = 'http://localhost:5620';
     return {
       // on setup, we create an settingsPage instance
       // that we will use for all the tests
@@ -60,7 +60,7 @@ define([
        */
       'testSettingsCheckboxHide': function () {
         return this.remote
-          .get('http://localhost:5601')
+          .get(url)
           .then(function () {
             return settingsPage
               .getTimeBasedEventsCheckbox()

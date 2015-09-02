@@ -27,7 +27,7 @@ module.exports = function (grunt) {
       options: {
         config: {
           http: {
-            port: 9209
+            port: 9220
           }
         }
       }

@@ -21,6 +21,21 @@ module.exports = function (grunt) {
       ]
     },
 
+    testUIServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      args: [
+        '--server.port=5620',
+        '--elasticsearch.url=http://localhost:9220',
+        '--logging.json=false'
+      ]
+    },
+
     testCoverageServer: {
       options: {
         wait: false,
