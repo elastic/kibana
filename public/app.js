@@ -2,9 +2,6 @@ var _ = require('lodash');
 
 var logoUrl = require('./logo.png');
 
-require('angular-resizable');
-require('angular-resizable/angular-resizable.min.css');
-
 require('./directives/chart_directive');
 require('./directives/expression_directive');
 require('./directives/docs');
