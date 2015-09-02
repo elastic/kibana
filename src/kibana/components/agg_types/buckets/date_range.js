@@ -14,12 +14,7 @@ define(function (require) {
       title: 'Date Range',
       createFilter: createFilter,
       getKey: function (bucket, key, agg) {
-        var formatter;
-        if (agg.field()) {
-          formatter = agg.field().format.getConverterFor('text');
-        } else {
-          formatter = fieldFormats.getDefaultInstance('date').getConverterFor('text');
-        }
+        var formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
         return dateRange.toString(bucket, formatter);
       },
       getFormat: function () {

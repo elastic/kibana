@@ -69,7 +69,7 @@ define(function (require) {
         var agg = firstAgg._next;
         var split = buildSplit(agg, metric, bucket[agg.id]);
         // Since splits display labels we need to set it.
-        split.label = firstAgg.fieldFormatter()(bucket.key);
+        split.label = firstAgg.fieldFormatter()(agg.getKey(bucket));
 
         var displayName = firstAgg.fieldDisplayName();
         if (!_.isEmpty(displayName)) split.label += ': ' + displayName;
