@@ -63,7 +63,7 @@ module.exports = function (grunt) {
     init: true,
     config: config,
     loadGruntTasks: {
-      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*']
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
     }
   });
 

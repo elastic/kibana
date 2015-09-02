@@ -14,6 +14,10 @@ module.exports = function (grunt) {
     'karma:dev'
   ]);
 
+  grunt.registerTask('test:ui', [
+    'intern:dev'
+  ]);
+
   grunt.registerTask('test', function (subTask) {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
