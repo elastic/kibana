@@ -4,5 +4,6 @@ define(function (require) {
   visTypes.register(require('plugins/kbn_vislib_vis_types/line'));
   visTypes.register(require('plugins/kbn_vislib_vis_types/pie'));
   visTypes.register(require('plugins/kbn_vislib_vis_types/area'));
+  visTypes.register(require('plugins/kbn_vislib_vis_types/sankey'));
   visTypes.register(require('plugins/kbn_vislib_vis_types/tileMap'));
 });

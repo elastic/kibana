@@ -12,6 +12,7 @@ define(function (require) {
       line: pointSeries.line,
       pie: Private(require('ui/vislib/lib/handler/types/pie')),
       area: pointSeries.area,
+      sankey: Private(require('ui/vislib/lib/handler/types/sankey')),
       tile_map: Private(require('ui/vislib/lib/handler/types/tile_map'))
     };
   };

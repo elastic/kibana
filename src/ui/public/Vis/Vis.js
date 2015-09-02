@@ -110,6 +110,14 @@ define(function (require) {
       }
     };
 
+    Vis.prototype.isSankey = function () {
+      if (_.isFunction(this.type.sankeyConverter)) {
+        return true;
+      } else {
+        return !!this.type.sankeyConverter;
+      }
+    };
+
     Vis.prototype.hasSchemaAgg = function (schemaName, aggTypeName) {
       var aggs = this.aggs.bySchemaName[schemaName] || [];
       return aggs.some(function (agg) {
