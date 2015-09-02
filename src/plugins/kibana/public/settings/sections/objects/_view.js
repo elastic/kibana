@@ -129,6 +129,8 @@ define(function (require) {
           if (_.contains(loadedEditors, editor)) return;
           loadedEditors.push(editor);
 
+          editor.$blockScrolling = Infinity;
+
           var session = editor.getSession();
           var fieldName = editor.container.id;
 

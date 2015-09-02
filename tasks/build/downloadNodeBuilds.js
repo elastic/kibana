@@ -70,11 +70,11 @@ module.exports = function (grunt) {
     grunt.log.ok(`downloading ${platform.name} - ${mb} mb`);
   };
 
-  grunt.registerTask('_build:downloadNodes:start', function () {
+  grunt.registerTask('_build:downloadNodeBuilds:start', function () {
     map(platforms, start).nodeify(this.async());
   });
 
-  grunt.registerTask('_build:downloadNodes:finish', function () {
+  grunt.registerTask('_build:downloadNodeBuilds:finish', function () {
     map(activeDownloads, async (platform) => {
       await platform.downloadPromise;
       grunt.log.ok(`${platform.name} download complete`);

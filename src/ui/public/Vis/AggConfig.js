@@ -260,7 +260,8 @@ define(function (require) {
 
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
-      return this.type.makeLabel(this);
+      var pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
+      return pre += this.type.makeLabel(this);
     };
 
     AggConfig.prototype.field = function () {

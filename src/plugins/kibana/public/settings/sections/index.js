@@ -5,6 +5,7 @@ define(function (require) {
     require('plugins/kibana/settings/sections/indices/index'),
     require('plugins/kibana/settings/sections/advanced/index'),
     require('plugins/kibana/settings/sections/objects/index'),
+    require('plugins/kibana/settings/sections/status/index'),
     require('plugins/kibana/settings/sections/about/index')
   ];
 });

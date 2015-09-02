@@ -19,7 +19,9 @@ let dead = fork => {
 };
 
 let kill = fork => {
-  fork.kill('SIGINT'); // make it snappy
+  // fork.kill() waits for process to disconnect, but causes occasional
+  // "ipc disconnected" errors and is too slow for the proc's "exit" event
+  fork.process.kill();
   fork.killed = true;
 };
 

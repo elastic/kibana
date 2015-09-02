@@ -23,16 +23,22 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install "$(cat .node-version)"
   ```
 
+- Install npm 3.2
+
+  ```sh
+  npm install -g npm@3.2
+  ```
+
 - Install dependencies
 
   ```sh
   npm install
   ```
 
-- Start elasticsearch, you can use [esvm](https://github.com/simianhacker/esvm) to make that easier.
+- Start elasticsearch
 
   ```sh
-  grunt esvm:dev:keepalive
+  npm run elasticsearch
   ```
 
 - Start the development server.

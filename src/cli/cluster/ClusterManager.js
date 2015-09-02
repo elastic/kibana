@@ -92,7 +92,8 @@ module.exports = class ClusterManager {
     rl.prompt();
 
     rl.on('line', line => {
-      nls = line.trim() ? 0 : nls + 1;
+      nls = nls + 1;
+
       if (nls >= 2) {
         clearSoon.cancel();
         clear();
