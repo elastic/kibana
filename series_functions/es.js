@@ -159,6 +159,8 @@ module.exports = new Datasource('es', {
     var body = buildRequest(config, tlConfig);
     return client.search(body).then(function (resp) {
 
+      if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
+
       var data = _.map(resp.aggregations.series.buckets, function (bucket) {
         var value;
         if (resp.aggregations.series.buckets[0].metric != null) {
