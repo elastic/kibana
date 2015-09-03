@@ -4,17 +4,11 @@ define(function (require) {
   var moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
-  module.factory('SavedDashboard', function (courier, Private) {
-    var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
-
+  module.factory('SavedDashboard', function (courier, config) {
     // SavedDashboard constructor. Usually you'd interact with an instance of this.
     // ID is option, without it one will be generated on save.
     _.class(SavedDashboard).inherits(courier.SavedObject);
     function SavedDashboard(id) {
-      var defaultDarkThemeConfig = new BoundToConfigObj({
-        pattern: '=dashboard:defaultDarkTheme'
-      });
-
       // Gives our SavedDashboard the properties of a SavedObject
       courier.SavedObject.call(this, {
         type: SavedDashboard.type,
@@ -34,7 +28,7 @@ define(function (require) {
           timeRestore: false,
           timeTo: undefined,
           timeFrom: undefined,
-          darkTheme: defaultDarkThemeConfig.pattern
+          darkTheme: config.get('dashboard:defaultDarkTheme')
         },
 
         // if an indexPattern was saved with the searchsource of a SavedDashboard

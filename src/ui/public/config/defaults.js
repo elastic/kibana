@@ -150,7 +150,7 @@ define(function () {
         ].join('\n')
       },
       'dashboard:defaultDarkTheme': {
-        value: true,
+        value: false,
         description: 'New dashboards use dark theme by default',
       }
     };
