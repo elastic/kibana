@@ -14,6 +14,7 @@ describe('Vislib Time Marker Test Suite', function () {
   var opacity = 0.5;
   var width = 3;
   var customClass = 'custom-time-marker';
+  var customLayer = 'custom-time-marker-layer';
   var dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
   var myTimes = dateMathTimes.map(function (dateMathString) {
     return {
@@ -49,7 +50,7 @@ describe('Vislib Time Marker Test Suite', function () {
     domain = [minDomain, maxDomain];
     xScale = d3.time.scale().domain(domain).range([0, 500]);
     defaultMarker = new TimeMarker(times, xScale, height);
-    customMarker = new TimeMarker(myTimes, xScale, height);
+    customMarker = new TimeMarker(myTimes, xScale, height, customLayer);
 
     selection = d3.select('body').append('div').attr('class', 'marker');
     selection.datum(series);
@@ -59,6 +60,7 @@ describe('Vislib Time Marker Test Suite', function () {
     selection.remove('*');
     selection = null;
     defaultMarker = null;
+    customMarker = null;
   });
 
   describe('_isTimeBaseChart method', function () {
@@ -87,11 +89,11 @@ describe('Vislib Time Marker Test Suite', function () {
     });
 
     it('should render the default line', function () {
-      expect(!!$('line.time-marker').length).to.be(true);
+      expect(!!$('.time-marker-layer line.time-marker').length).to.be(true);
     });
 
     it('should render the custom (user defined) lines', function () {
-      expect($('line.custom-time-marker').length).to.be(myTimes.length);
+      expect($('.custom-time-marker-layer line.custom-time-marker').length).to.be(myTimes.length);
     });
 
     it('should set the class', function () {

@@ -2,22 +2,34 @@ define(function (require) {
   return function TimeMarkerFactory() {
     var d3 = require('d3');
     var dateMath = require('ui/utils/dateMath');
-    var markerRenderer = require('ui/vislib/lib/marker_renderer').configure({
-      'class': 'time-marker',
+    var markerRenderer = require('ui/vislib/lib/marker_renderer');
+    var defaultOpts = {
       'color': '#c80000',
       'opacity': 0.3,
       'width': 2
-    });
+    };
 
-    function TimeMarker(times, xScale, height) {
+    function TimeMarker(times, xScale, height, layer) {
       if (!(this instanceof TimeMarker)) {
-        return new TimeMarker(times, xScale, height);
+        return new TimeMarker(times, xScale, height, layer);
       }
+
+      var opts = defaultOpts;
+      if (layer) {
+        opts = _.assign({}, defaultOpts, { layer: layer });
+      }
+      this.renderer = markerRenderer.configure(opts);
 
       this.xScale = xScale;
       this.height = height;
       this.times = (times.length) ? times.map(function (d) {
-        return dateMath.parse(d.time);
+        return _.omit({
+          'time': dateMath.parse(d.time),
+          'class': d.class,
+          'color': d.color,
+          'opacity': d.opacity,
+          'width': d.width
+        }, _.isUndefined);
       }) : [];
     }
 
@@ -34,7 +46,7 @@ define(function (require) {
       // return if not time based chart
       if (!self._isTimeBasedChart(selection)) return;
 
-      markerRenderer.render(selection, this.xScale, this.height, this.times);
+      this.renderer.render(selection, this.xScale, this.height, this.times);
     };
 
     return TimeMarker;
