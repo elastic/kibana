@@ -1,7 +1,10 @@
 var _ = require('lodash');
+var { startsWith } = require('lodash');
 var Tab = require('ui/chrome/Tab');
-var format = require('url').format;
-var parse = _.wrap(require('url').parse, function (parse, path) {
+var { format, parse } = require('url');
+var storage = window.sessionStorage;
+
+parse = _.wrap(parse, function (parse, path) {
   var parsed = parse(path, true);
   return {
     pathname: parsed.pathname,
@@ -42,18 +45,22 @@ function TabCollection() {
     return activeTab;
   };
 
-  this.consumeRouteUpdate = function ($location, persist) {
-    var url = parse($location.url(), true);
-    var id = $location.path().split('/')[1] || '';
+  this.consumeRouteUpdate = function (appId, href, path, persist) {
+    var url = parse(href, true);
 
     tabs.forEach(function (tab) {
-      var active = tab.active = (tab.id === id);
-      var lastUrl = active ? url : parse(tab.lastUrl || tab.rootUrl);
+      tab.active = tab.rootRegExp.test(path);
+
+      var lastUrl = tab.active ? url : parse(tab.lastUrl || tab.rootUrl);
       lastUrl.query._g = url.query._g;
 
       if (tab.active) activeTab = tab;
       if (persist) {
         tab.persistLastUrl(format(lastUrl));
+      }
+
+      if (tab.active) {
+        storage.setItem(`appLastUrl:${appId}`, href);
       }
     });
   };

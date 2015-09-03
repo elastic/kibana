@@ -44,7 +44,15 @@ module.exports = function (chrome, internals) {
           chrome.setVisible(!Boolean($location.search().embed));
 
           // listen for route changes, propogate to tabs
-          var onRouteChange = _.bindKey(internals.tabs, 'consumeRouteUpdate', $location, chrome.getVisible());
+          var onRouteChange = function () {
+            internals.tabs.consumeRouteUpdate(
+              chrome.getAppId(),
+              window.location.href,
+              $location.url(),
+              chrome.getVisible()
+            );
+          };
+
           $rootScope.$on('$routeChangeSuccess', onRouteChange);
           $rootScope.$on('$routeUpdate', onRouteChange);
           onRouteChange();
