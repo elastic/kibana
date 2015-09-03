@@ -61,19 +61,40 @@ module.exports = function (chrome, internals) {
   };
 
   /**
-   * @param {string} val - the name of the theme
+   * Adds a class to the application node
+   * @param {string} - the class name to add
    * @return {chrome}
    */
-  chrome.setTheme = function (val) {
-    internals.theme = val;
+  chrome.addApplicationClass = function (val) {
+    var classes = internals.applicationClasses || [];
+    classes.push(val);
+    classes = _.uniq(classes);
+
+    internals.applicationClasses = classes;
     return chrome;
   };
 
   /**
-   * @return {string} - the name of the theme
+   * Removes a class from the application node. Note: this only
+   * removes classes that were added via the addApplicationClass method
+   * @param  {string|[string]} - class or classes to be removed
+   * @return {chrome}
    */
-  chrome.getTheme = function () {
-    return internals.theme;
+  chrome.removeApplicationClass = function (val) {
+    var classesToRemove = [].concat(val || []);
+    var classes = internals.applicationClasses || [];
+    _.pull(classes, ...classesToRemove);
+
+    internals.applicationClasses = classes;
+    return chrome;
+  };
+
+  /**
+   * @return {string} - a space delimited string of the classes added by the
+   * addApplicationClass method
+   */
+  chrome.getApplicationClasses = function () {
+    return internals.applicationClasses.join(' ');
   };
 
 };

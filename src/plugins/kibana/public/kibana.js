@@ -52,11 +52,4 @@ chrome
   $scope.$on('application.load', function () {
     courier.start();
   });
-
-  function updateTheme(obj, useDarkTheme) {
-    var theme = !!useDarkTheme ? 'dark' : 'light';
-    chrome.setTheme(theme);
-  }
-  $rootScope.$on('change:dashboard:darkTheme', updateTheme);
-
 });

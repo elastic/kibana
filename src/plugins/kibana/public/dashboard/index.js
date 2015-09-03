@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var angular = require('angular');
   var ConfigTemplate = require('ui/ConfigTemplate');
+  var chrome = require('ui/chrome');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -33,11 +34,7 @@ define(function (require) {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, config) {
-        return savedDashboards.get()
-        .then(function (dash) {
-          dash.darkTheme = !!config.get('dashboard:defaultDarkTheme');
-          return dash;
-        });
+        return savedDashboards.get();
       }
     }
   })
@@ -64,11 +61,6 @@ define(function (require) {
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
-
-        $rootScope.$broadcast('change:dashboard:darkTheme', dash.darkTheme);
-        $scope.$watch('dash.darkTheme', function (value) {
-          $rootScope.$broadcast('change:dashboard:darkTheme', value);
-        });
 
         if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
           timefilter.time.to = dash.timeTo;
@@ -111,6 +103,11 @@ define(function (require) {
 
         courier.setRootSearchSource(dash.searchSource);
 
+        setDarkTheme(dash.darkTheme);
+        $scope.$watch('dash.darkTheme', function (value) {
+          setDarkTheme(value);
+        });
+
         function init() {
           updateQueryOnRootSource();
 
@@ -131,6 +128,12 @@ define(function (require) {
           } else {
             dash.searchSource.set('filter', filters);
           }
+        }
+
+        function setDarkTheme(enabled) {
+          var theme = !!enabled ? 'theme-dark' : 'theme-light';
+          chrome.removeApplicationClass(['theme-dark', 'theme-light']);
+          chrome.addApplicationClass(theme);
         }
 
         // update root source when filters update
