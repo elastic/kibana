@@ -2,6 +2,7 @@ module.exports = function (grunt) {
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [
+    'npm_shrinkwrap_exists',
     'distribute:load_s3_config',
     'build',
     's3:release',

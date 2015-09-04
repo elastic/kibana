@@ -9,7 +9,6 @@ module.exports = function (grunt) {
     var done = this.async();
     var command = 'npm install  --production --no-optional';
     var options = { cwd: srcPath };
-    grunt.log.debug('Installing from node modules in ' + srcPath);
     child_process.exec(command, options, function (err, stdout, stderr) {
       if (err) {
         grunt.log.error(stderr);
@@ -21,7 +20,6 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('npm_shrinkwrap_exists', 'Ensure npm shrinkwrap file exists', function () {
-    grunt.log.debug('Checking for shrinkwrap in ' + srcPath);
     try {
       statSync(join(srcPath, 'npm-shrinkwrap.json'));
     } catch (e) {

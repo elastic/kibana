@@ -1,6 +1,7 @@
 module.exports = function (grunt) {
   var version = grunt.config.get('pkg.version');
   var platforms = grunt.config.get('platforms');
+
   var config = {
 
     kibana_src: {
@@ -93,6 +94,11 @@ module.exports = function (grunt) {
           dest: '<%= build %>/dist/kibana/plugins/README.txt'
         }
       ]
+    },
+
+    shrinkwrap: {
+      src: '<%= root %>/npm-shrinkwrap.json',
+      dest: '<%= build %>/dist/kibana/src/npm-shrinkwrap.json'
     }
 
   };
