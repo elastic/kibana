@@ -56,7 +56,7 @@ define(function (require) {
       }
 
       // iterate through all the buckets
-      _.each(extractBuckets(data[agg.id]), function (bucket) {
+      _.each(extractBuckets(data[agg.id], agg), function (bucket) {
 
         var _record = _.flatten([record, bucket.key]);
         _.each(metrics, function (metric) {

@@ -21,7 +21,6 @@ define(function (require) {
       var dateInterval = moment.isDuration(interval) ? interval : false;
 
       return _(objKeys)
-      .pairs()
       .sortBy(function (d) {
         if (d[1].isDate || d[1].isOrdered) {
           return +d[0];

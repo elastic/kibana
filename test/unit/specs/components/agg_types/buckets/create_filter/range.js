@@ -32,7 +32,7 @@ define(function (require) {
         });
 
         var aggConfig = vis.aggs.byTypeName.range[0];
-        var filter = createFilter(aggConfig, '1024.0-2048.0');
+        var filter = createFilter(aggConfig, { gte: 1024, lt: 2048.0 });
         expect(filter).to.have.property('range');
         expect(filter).to.have.property('meta');
         expect(filter.meta).to.have.property('index', indexPattern.id);

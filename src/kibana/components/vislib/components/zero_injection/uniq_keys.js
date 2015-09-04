@@ -35,7 +35,7 @@ define(function (require) {
       });
 
       flattenedData.forEach(function (d, i) {
-        var key = d.x;
+        var key = (_.isPlainObject(d.x)) ? d.x.toString() : d.x;
         var prev = uniqueXValues[key];
 
         if (d.xi != null) {
@@ -46,15 +46,15 @@ define(function (require) {
           i = Math.min(i, prev.index);
         }
 
-        uniqueXValues[key] = {
+        uniqueXValues[key] = [d.x, {
           index: i,
           isDate: isDate,
           isOrdered: isOrdered,
           isNumber: _.isNumber(key)
-        };
+        }];
       });
 
-      return uniqueXValues;
+      return _.values(uniqueXValues);
     };
   };
 });
