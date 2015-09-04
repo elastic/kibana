@@ -3,7 +3,7 @@ define(function (require) {
   return function buildRangeFilter(field, params, indexPattern, formattedValue) {
     var filter = { meta: { index: indexPattern.id } };
     if (formattedValue) filter.meta.formattedValue = formattedValue;
-    params = _.clone(params);
+    params = _.omit(params, _.isFunction);
 
     if (params.gte && params.gt) throw new Error('gte and gt are mutually exclusive');
     if (params.lte && params.lt) throw new Error('lte and lt are mutually exclusive');
