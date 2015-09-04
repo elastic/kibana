@@ -476,12 +476,26 @@ define(function (require) {
         expect(_.isFunction(uniqueKeys)).to.be(true);
       });
 
-      it('should return an object', function () {
-        expect(_.isObject(results)).to.be(true);
+      it('should return an array of tuples', function () {
+        expect(_.isArray(results)).to.be(true);
+        _.each(results, function (tuple) {
+          expect(_.isArray(tuple)).to.be(true);
+        });
       });
 
-      it('should return an object of unique keys', function () {
-        expect(_.uniq(_.keys(results)).length).to.be(_.keys(results).length);
+      it('should return an ordered collection of tuples', function () {
+        var uniques = _(multiSeriesData.series)
+        .pluck('values')
+        .flatten()
+        .pluck('x')
+        .uniq()
+        .sort()
+        .value();
+
+        expect(results.length).to.be(uniques.length);
+        _.each(results, function (tuple, i) {
+          tuple[0] = uniques[i];
+        });
       });
     });
 
