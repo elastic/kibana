@@ -5,7 +5,6 @@ require('angular-nvd3');
 
 var toTitleCase = require('./lib/toTitleCase');
 var formatNumber = require('./lib/formatNumber');
-var getChartOptions = _.memoize(require('./lib/makeChartOptions'));
 var readStatData = require('./lib/readStatData');
 
 function calcAvg(metricList, metricNumberType) {
@@ -33,17 +32,16 @@ require('ui/modules')
 
       self.name = $scope.name;
       self.title = toTitleCase(self.name);
+      self.extendedTitle = self.title;
       self.numberType = 'precise';
       self.seriesNames = [];
 
       switch (self.name) {
         case 'heapTotal':
         case 'heapUsed':
-        case 'rss':
           self.numberType = 'byte';
           break;
 
-        case 'delay':
         case 'responseTimeAvg':
         case 'responseTimeMax':
           self.numberType = 'ms';
@@ -54,12 +52,22 @@ require('ui/modules')
           break;
       }
 
-      self.chartOptions = getChartOptions(self.numberType);
-
       $scope.$watch('data', function (data) {
         self.rawData = data;
         self.chartData = readStatData(self.rawData, self.seriesNames);
         self.averages = calcAvg(self.chartData, self.numberType);
+
+        var unit = '';
+        self.averages = self.averages.map(function (average) {
+          var parts = average.split(' ');
+          var value = parts.shift();
+          unit = parts.join(' ');
+          return value;
+        });
+        self.extendedTitle = self.title;
+        if (unit) {
+          self.extendedTitle = `${self.extendedTitle} (${unit})`;
+        }
       });
     }
   };

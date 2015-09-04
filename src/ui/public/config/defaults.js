@@ -31,8 +31,9 @@ define(function () {
           ']',
         description: 'Values that define the format used in situations where timebased' +
         ' data is rendered in order, and formatted timestamps should adapt to the' +
-        ' interval between measurements. Keys are ISO 8601 intervals:' +
-        ' http://en.wikipedia.org/wiki/ISO_8601#Time_intervals'
+        ' interval between measurements. Keys are' +
+        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
+        'ISO8601 intervals.</a>'
       },
       'defaultIndex': {
         value: null,
@@ -71,8 +72,26 @@ define(function () {
       'visualization:tileMap:maxPrecision': {
         value: 7,
         description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +
-        '12 is the max. Explanation of cell dimensions: http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
-        'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator',
+        '12 is the max. ' +
+        '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
+        'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
+        'Explanation of cell dimensions.</a>',
+      },
+      'visualization:tileMap:WMSdefaults': {
+        value: JSON.stringify({
+          enabled: false,
+          url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+          options: {
+            version: '1.3.0',
+            layers: '0',
+            format: 'image/png',
+            transparent: true,
+            attribution: 'Maps provided by USGS',
+            styles: '',
+          }
+        }, null, '  '),
+        type: 'json',
+        description: 'Default properties for the WMS map server support in the tile map'
       },
       'csv:separator': {
         value: ',',

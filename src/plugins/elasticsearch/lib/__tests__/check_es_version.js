@@ -13,6 +13,7 @@ describe('plugins/elasticsearch', function () {
       var get = sinon.stub().withArgs('elasticserach.minimumVerison').returns('1.4.3');
       var config = function () { return { get: get }; };
       server = {
+        log: _.noop,
         config: config,
         plugins: {
           elasticsearch: {

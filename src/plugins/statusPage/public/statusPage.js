@@ -9,7 +9,8 @@ require('ui/chrome')
 .setTabs([
   {
     id: '',
-    title: 'Server Status'
+    title: 'Server Status',
+    activeIndicatorColor: '#EFF0F2'
   }
 ])
 .setRootTemplate(require('plugins/statusPage/statusPage.html'))
@@ -24,6 +25,7 @@ require('ui/chrome')
     return $http
     .get('/api/status')
     .then(function (resp) {
+
       if (ui.fetchError) {
         ui.fetchError.clear();
         ui.fetchError = null;
@@ -36,7 +38,7 @@ require('ui/chrome')
       var overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {
         ui.serverState = overall.state;
-        ui.serverStateMessage = overall.nickname || overall.title;
+        ui.serverStateMessage = overall.title;
       }
     })
     .catch(function () {
@@ -50,9 +52,4 @@ require('ui/chrome')
   };
 
   ui.refresh();
-
-  // let the browser decide when to slow down requests
-  setInterval(function () {
-    $scope.$eval(ui.refresh);
-  }, 5000);
 });

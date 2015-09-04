@@ -23,7 +23,8 @@ module.exports = function (kibana) {
           cert: Joi.string(),
           key: Joi.string()
         }).default(),
-        minimumVerison: Joi.string().default('1.4.4')
+        apiVersion: Joi.string().default('master'),
+        minimumVerison: Joi.string().default('2.0.0')
       }).default();
     },
 
@@ -34,6 +35,7 @@ module.exports = function (kibana) {
       exposeClient(server);
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');
+      createProxy(server, 'POST', '/{index}/_search');
       createProxy(server, 'POST', '/_msearch');
 
       function noBulkCheck(request, reply) {

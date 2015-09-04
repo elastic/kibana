@@ -13,8 +13,11 @@ class Status extends EventEmitter {
 
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
-      server.log(['status', name, 'info'], {
-        tmpl: 'Status changed from <%= prevState %> to <%= state %><% message && print(` - ${message}`) %>',
+      var tags = ['status', name];
+      tags.push(this.state === 'red' ? 'error' : 'info');
+
+      server.log(tags, {
+        tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
         name: name,
         state: this.state,
         message: this.message,
@@ -42,8 +45,14 @@ states.all.forEach(function (state) {
     let previous = this.state;
     let previousMsg = this.message;
 
-    this.state = state.id;
+    this.error = null;
     this.message = message || state.title;
+    this.state = state.id;
+
+    if (message instanceof Error) {
+      this.error = message;
+      this.message = message.message;
+    }
 
     if (previous === this.state && previousMsg === this.message) {
       // noop

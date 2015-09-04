@@ -1,17 +1,22 @@
 module.exports = (kibana) => {
-  if (!kibana.config.get('optimize.tests')) return;
-
   let { union } = require('lodash');
 
   let utils = require('requirefrom')('src/utils');
   let fromRoot = utils('fromRoot');
-  let findSourceFiles = utils('findSourceFiles');
+  let findSourceFiles = require('./findSourceFiles');
 
   return new kibana.Plugin({
+    config: (Joi) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        instrument: Joi.boolean().default(false)
+      }).default();
+    },
+
     uiExports: {
       bundle: async (UiBundle, env, apps) => {
-
         let modules = [];
+        let config = kibana.config;
 
         // add the modules from all of the apps
         for (let app of apps) {
@@ -24,6 +29,14 @@ module.exports = (kibana) => {
         ]);
 
         for (let f of testFiles) modules.push(f);
+
+        if (config.get('testsBundle.instrument')) {
+          env.addPostLoader({
+            test: /\.jsx?$/,
+            exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
+            loader: 'istanbul-instrumenter'
+          });
+        }
 
         return new UiBundle({
           id: 'tests',

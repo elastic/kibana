@@ -1,30 +1,32 @@
 var url = require('url');
-var fs = require('fs');
+var _ = require('lodash');
+var readFile = _.partialRight(require('fs').readFileSync, 'utf8');
 var http = require('http');
-var agentOptions;
-module.exports = function (server) {
+var https = require('https');
+
+module.exports = _.memoize(function (server) {
   var config = server.config();
   var target = url.parse(config.get('elasticsearch.url'));
 
-  if (!agentOptions) {
-    agentOptions = {
-      rejectUnauthorized: config.get('elasticsearch.ssl.verify')
-    };
+  if (!/^https/.test(target.protocol)) return new http.Agent();
 
-    var customCA;
-    if (/^https/.test(target.protocol) && config.get('elasticsearch.ssl.ca')) {
-      customCA = fs.readFileSync(config.get('elasticsearch.ssl.ca'), 'utf8');
-      agentOptions.ca = [customCA];
-    }
+  var agentOptions = {
+    rejectUnauthorized: config.get('elasticsearch.ssl.verify')
+  };
 
-    // Add client certificate and key if required by elasticsearch
-    if (/^https/.test(target.protocol) &&
-        config.get('elasticsearch.ssl.cert') &&
-        config.get('elasticsearch.ssl.key')) {
-      agentOptions.crt = fs.readFileSync(config.get('elasticsearch.ssl.cert'), 'utf8');
-      agentOptions.key = fs.readFileSync(config.get('elasticsearch.ssl.key'), 'utf8');
-    }
+  if (config.get('elasticsearch.ssl.ca')) {
+    agentOptions.ca = [readFile(config.get('elasticsearch.ssl.ca'))];
   }
 
-  return new http.Agent(agentOptions);
-};
+  // Add client certificate and key if required by elasticsearch
+  if (config.get('elasticsearch.ssl.cert') && config.get('elasticsearch.ssl.key')) {
+    agentOptions.cert = readFile(config.get('elasticsearch.ssl.cert'));
+    agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
+  }
+
+  return new https.Agent(agentOptions);
+});
+
+// See https://lodash.com/docs#memoize: We use a Map() instead of the default, because we want the keys in the cache
+// to be the server objects, and by default these would be coerced to strings as keys (which wouldn't be useful)
+module.exports.cache = new Map();
