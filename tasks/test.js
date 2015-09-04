@@ -17,6 +17,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test:ui', [
     'esvm:ui',
     'loadFixtures',
+    'startSelenium',
     'run:testUIServer',
     'intern:dev'
   ]);
