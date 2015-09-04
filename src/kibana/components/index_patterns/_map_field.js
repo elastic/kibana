@@ -26,10 +26,6 @@ define(function (require) {
         _index: { type: 'string' },
         _type: { type: 'string' },
         _id: { type: 'string' },
-        _score: {
-          type: 'number',
-          indexed: false
-        }
       };
 
       if (!mapping.index || mapping.index === 'no') {

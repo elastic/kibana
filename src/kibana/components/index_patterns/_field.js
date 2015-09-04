@@ -38,8 +38,8 @@ define(function (require) {
 
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
-      var sortable = spec.name === '_score' || (indexed && type.sortable);
       var bucketable = indexed || scripted;
+      var sortable = bucketable && type.sortable;
       var filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
 
       obj.fact('name');
