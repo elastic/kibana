@@ -77,6 +77,22 @@ define(function () {
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
         'Explanation of cell dimensions.</a>',
       },
+      'visualization:tileMap:WMSdefaults': {
+        value: JSON.stringify({
+          enabled: false,
+          url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+          options: {
+            version: '1.3.0',
+            layers: '0',
+            format: 'image/png',
+            transparent: true,
+            attribution: 'Maps provided by USGS',
+            styles: '',
+          }
+        }, null, '  '),
+        type: 'json',
+        description: 'Default properties for the WMS map server support in the tile map'
+      },
       'csv:separator': {
         value: ',',
         description: 'Separate exported values with this string',
