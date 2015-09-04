@@ -48,7 +48,6 @@ function offsetTime(milliseconds, offset, reverse) {
 
 function buildRequest(config, tlConfig) {
 
-  //console.log(tlConfig);
   var filter = {range:{}};
   filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
 

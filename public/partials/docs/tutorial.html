@@ -40,7 +40,7 @@
       <div class="doc-container-buttons">
         <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
         <span ng-show="es.invalidCount > 0 && !es.valid">
-          <strong>Could not validate elasticsearch config. Check <code>timelion.json</code> and try again. ({{es.invalidCount}})</strong>
+          <strong>Could not validate elasticsearch config. Check <code>timelion.json</code>, restart Kibana, and try again. ({{es.invalidCount}})</strong>
         </span>
         <button ng-click="recheckElasticsearch()" class="btn btn-success btn-doc-next">Validate Config</button>
       </div>
