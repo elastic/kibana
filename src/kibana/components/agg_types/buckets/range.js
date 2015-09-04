@@ -13,12 +13,19 @@ define(function (require) {
         return aggConfig.params.field.displayName + ' ranges';
       },
       getKey: function (bucket, key, agg) {
-        var range = { gte: bucket.from, lt: bucket.to };
+        var id = 'from:' + bucket.from + ',to:' + bucket.to;
+        var keyCache = agg.$$rangeAggKeyCache = agg.$$rangeAggKeyCache || {};
+        var keyObj = keyCache[id];
 
-        if (range.gte == null) range.gte = -Infinity;
-        if (range.lt == null) range.lt = +Infinity;
+        if (!keyObj) {
+          keyObj = keyCache[id] = {
+            gte: bucket.from == null ? -Infinity : bucket.from,
+            lt: bucket.to == null ? +Infinity : bucket.to,
+            toString: _.constant(id)
+          };
+        }
 
-        return range;
+        return keyObj;
       },
       getFormat: function (agg) {
         if (agg.$$rangeAggTypeFormat) return agg.$$rangeAggTypeFormat;
@@ -28,7 +35,7 @@ define(function (require) {
           return format(range.gte) + ' to ' + format(range.lt);
         });
 
-        return (this.$$rangeAggTypeFormat = new RangeFormat());
+        return (agg.$$rangeAggTypeFormat = new RangeFormat());
       },
       params: [
         {
