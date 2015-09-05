@@ -2,7 +2,6 @@ var _ = require('lodash');
 var { startsWith } = require('lodash');
 var Tab = require('ui/chrome/Tab');
 var { format, parse } = require('url');
-var storage = window.sessionStorage;
 
 parse = _.wrap(parse, function (parse, path) {
   var parsed = parse(path, true);
@@ -13,12 +12,13 @@ parse = _.wrap(parse, function (parse, path) {
   };
 });
 
-function TabCollection() {
+function TabCollection(opts = {}) {
 
   var tabs = [];
   var specs = null;
-  var defaults = null;
+  var defaults = {};
   var activeTab = null;
+  var store = opts.store || window.sessionStorage;
 
   this.set = function (_specs) {
     specs = _.cloneDeep([].concat(_specs || []));
@@ -37,7 +37,7 @@ function TabCollection() {
   this._rebuildTabs = function () {
     _.invoke(this.get(), 'destroy');
     tabs = _.map(specs, function (spec) {
-      return new Tab(_.defaults({}, spec, defaults));
+      return new Tab(_.defaults({}, spec, defaults, { store }));
     });
   };
 
@@ -58,11 +58,9 @@ function TabCollection() {
       if (persist) {
         tab.persistLastUrl(format(lastUrl));
       }
-
-      if (tab.active) {
-        storage.setItem(`appLastUrl:${appId}`, href);
-      }
     });
+
+    store.setItem(`appLastUrl:${appId}`, href);
   };
 }
 

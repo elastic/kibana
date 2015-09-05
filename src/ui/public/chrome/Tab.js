@@ -1,17 +1,11 @@
 var _ = require('lodash');
 var reEsc = require('lodash').escapeRegExp;
-var storage = window.sessionStorage;
 
-function Tab(spec) {
+function Tab(spec = {}) {
   this.id = spec.id;
   this.title = spec.title;
-  this.active = false;
   this.resetWhenActive = !!spec.resetWhenActive;
-  this.lastUrlStoreKey = spec.trackLastPath ? 'lastUrl:' + this.id : null;
-  this.rootUrl = '/' + this.id;
-  this.rootRegExp = new RegExp(`^${reEsc(this.rootUrl)}(/|$|\\?)`);
-  this.lastUrl = this.lastUrlStoreKey && storage.getItem(this.lastUrlStoreKey);
-
+  this.trackLastUrl = !!spec.trackLastUrl;
   this.activeIndicatorColor = spec.activeIndicatorColor || null;
   if (_.isFunction(this.activeIndicatorColor)) {
     // convert to a getter
@@ -19,12 +13,21 @@ function Tab(spec) {
       get: this.activeIndicatorColor
     });
   }
+
+  this.active = false;
+  this.rootUrl = '/' + this.id;
+  this.rootRegExp = new RegExp(`^${reEsc(this.rootUrl)}(/|$|\\?|#)`);
+  this.store = spec.store || window.sessionStorage;
+
+  this.lastUrlStoreKey = 'lastUrl:' + this.id;
+  this.lastUrl = this.trackLastUrl && this.store.getItem(this.lastUrlStoreKey);
 }
 
 Tab.prototype.persistLastUrl = function (url) {
-  if (!this.lastUrlStoreKey) return;
+  if (!this.trackLastUrl) return;
+
   this.lastUrl = url;
-  storage.setItem(this.lastUrlStoreKey, this.lastUrl);
+  this.store.setItem(this.lastUrlStoreKey, this.lastUrl);
 };
 
 Tab.prototype.href = function () {

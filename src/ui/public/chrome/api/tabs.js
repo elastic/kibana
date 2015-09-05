@@ -26,7 +26,7 @@ module.exports = function (chrome, internals) {
    *     when the the tab is considered active, should clicking it
    *     cause a redirect to just the id?
    *
-   *   trackLastPath {boolean}
+   *   trackLastUrl {boolean}
    *     When this tab is active, should the current path be tracked
    *     and persisted to session storage, then used as the tabs href attribute when the user navigates
    *     away from the tab?
