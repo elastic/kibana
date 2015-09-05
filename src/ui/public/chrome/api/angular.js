@@ -45,12 +45,13 @@ module.exports = function (chrome, internals) {
 
           // listen for route changes, propogate to tabs
           var onRouteChange = function () {
-            internals.tabs.consumeRouteUpdate(
-              chrome.getAppId(),
-              window.location.href,
-              $location.url(),
-              chrome.getVisible()
-            );
+            let appId = chrome.getAppId();
+            let { href } = window.location;
+            let path = $location.url();
+            let persist = chrome.getVisible();
+
+            internals.tabs.consumeRouteUpdate(appId, href, path, persist);
+            chrome.setLastUrlFor(chrome.getAppId(), href);
           };
 
           $rootScope.$on('$routeChangeSuccess', onRouteChange);

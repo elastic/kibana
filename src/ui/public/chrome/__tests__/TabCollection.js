@@ -5,7 +5,7 @@ import TabFakeStore from './_utils/TabFakeStore';
 import TabCollection from '../TabCollection';
 import Tab from '../Tab';
 
-describe.only('Chrome TabCollection', function () {
+describe('Chrome TabCollection', function () {
   describe('empty state', function () {
     it('has no tabs', function () {
       let tabs = new TabCollection();
@@ -82,14 +82,6 @@ describe.only('Chrome TabCollection', function () {
       tabs.consumeRouteUpdate('app', 'http://localhost:9200/a?_g=1', '/a', true);
       expect(tabById.a.lastUrl).to.match(/_g=1/);
       expect(tabById.b.lastUrl).to.match(/_g=1/);
-    });
-
-    it('stores the lastUrl for the entire app in a safe place', function () {
-      let store = new TabFakeStore();
-      let tabs = new TabCollection({ store });
-      let url = 'http://localhost:9200/a';
-      tabs.consumeRouteUpdate('app', url, '/a');
-      expect(store.getItem(`appLastUrl:app`)).to.equal(url);
     });
   });
 

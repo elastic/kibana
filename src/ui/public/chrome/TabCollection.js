@@ -59,8 +59,6 @@ function TabCollection(opts = {}) {
         tab.persistLastUrl(format(lastUrl));
       }
     });
-
-    store.setItem(`appLastUrl:${appId}`, href);
   };
 }
 
