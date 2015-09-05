@@ -1,9 +1,9 @@
-import expect from 'expect.js';
-import { indexBy } from 'lodash';
+let expect = require('expect.js');
+let { indexBy } = require('lodash');
 
-import TabFakeStore from './_utils/TabFakeStore';
-import TabCollection from '../TabCollection';
-import Tab from '../Tab';
+let TabFakeStore = require('./_utils/TabFakeStore');
+let TabCollection = require('../TabCollection');
+let Tab = require('../Tab');
 
 describe('Chrome TabCollection', function () {
   describe('empty state', function () {
