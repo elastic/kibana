@@ -1,10 +1,11 @@
 define(function (require) {
-  return function ColorUtilService(Private) {
+  return function ColorUtilService(Private, config) {
     var _ = require('lodash');
 
     var createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
     var MappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
     var mappedColors = new MappedColors();
+    var colorMapping = config.get('visualization:colorMapping');
 
     /*
      * Accepts an array of strings or numbers that are used to create a
@@ -30,10 +31,12 @@ define(function (require) {
       var colorObj = _.zipObject(arrayOfStringsOrNumbers, uniqueColors);
 
       return function (value) {
-        if (!mappedColors.get(value)) {
-          mappedColors.add(value, colorObj[value]);
+        var mappedColor = mappedColors.get(value);
+        if (!mappedColor) {
+          mappedColor = colorMapping[value] || colorObj[value];
+          mappedColors.add(value, mappedColor);
         }
-        return mappedColors.get(value);
+        return mappedColor;
       };
     };
   };
