@@ -5,7 +5,6 @@ define(function (require) {
     var createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
     var MappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
     var mappedColors = new MappedColors();
-    var colorMapping = config.get('visualization:colorMapping');
 
     /*
      * Accepts an array of strings or numbers that are used to create a
@@ -25,17 +24,15 @@ define(function (require) {
         }
       });
 
+      var configColorMapping = config.get('visualization:colorMapping');
       var arrayLength = arrayOfStringsOrNumbers.length;
       var colors = createColorPalette(arrayLength + mappedColors.count());
       var uniqueColors = _.difference(colors, mappedColors.all()).slice(0, arrayLength + 1);
       var colorObj = _.zipObject(arrayOfStringsOrNumbers, uniqueColors);
 
       return function (value) {
-        var mappedColor = mappedColors.get(value);
-        if (!mappedColor) {
-          mappedColor = colorMapping[value] || colorObj[value];
-          mappedColors.add(value, mappedColor);
-        }
+        var mappedColor = configColorMapping[value] || mappedColors.get(value);
+        if (!mappedColor) mappedColors.add(value, mappedColor = colorObj[value]);
         return mappedColor;
       };
     };
