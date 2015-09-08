@@ -18,7 +18,7 @@
 
 
 define([
-    '_',
+    'vendor/_',
     'exports',
     'mappings',
     'es',

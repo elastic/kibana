@@ -20,7 +20,7 @@
 define([
   'ace',
   'input',
-  'jquery'
+  'vendor/jquery'
 ], function (ace, input, $) {
   'use strict';
 

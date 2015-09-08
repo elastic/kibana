@@ -18,10 +18,10 @@
 
 
 define([
-  '_',
+  'vendor/_',
   'ace',
   'curl',
-  'jquery',
+  'vendor/jquery',
   'sense_editor/row_parser',
   'sense_editor/mode/input',
   'utils',

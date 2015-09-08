@@ -18,10 +18,10 @@
 
 
 define([
-  '_',
+  'vendor/_',
   'sense_editor/editor',
-  'jquery',
-  'moment',
+  'vendor/jquery',
+  'vendor/moment',
   'settings'
 ], function (_, SenseEditor, $, moment) {
   'use strict';

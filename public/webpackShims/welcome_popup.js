@@ -19,7 +19,7 @@
 
 define([
   'sense_editor/editor',
-  'jquery',
+  'vendor/jquery',
 
   'bootstrap'
 ], function (SenseEditor, $) {

@@ -581,7 +581,7 @@
     }
 
     function normalizeLanguage(key) {
-        return key ? key.toLowerCase().replace('_', '-') : key;
+        return key ? key.toLowerCase().replace('vendor/_', '-') : key;
     }
 
     // Return a moment from input, that is local/utc/zone equivalent to model.
@@ -604,7 +604,7 @@
                 if (typeof prop === 'function') {
                     this[i] = prop;
                 } else {
-                    this['_' + i] = prop;
+                    this['vendor/_' + i] = prop;
                 }
             }
         },
@@ -803,11 +803,11 @@
     function getLangDefinition(key) {
         var i = 0, j, lang, next, split,
             get = function (k) {
-                if (!languages[k] && hasModule) {
-                    try {
-                        require('./lang/' + k);
-                    } catch (e) { }
-                }
+                //if (!languages[k] && hasModule) {
+                //    try {
+                //        require('./lang/' + k);
+                //    } catch (e) { }
+                //}
                 return languages[k];
             };
 

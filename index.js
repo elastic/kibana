@@ -7,8 +7,6 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     id: 'sense',
 
-    require: ['kibana'],
-
     init: function (server, options) {
       // http://hapijs.com/api/8.8.1#route-configuration
       server.route({
@@ -46,7 +44,7 @@ module.exports = function (kibana) {
 
       noParse: [
         join(modules, 'ace' + sep),
-        join(modules, 'moment_src' + sep),
+        join(modules, 'vendor/moment_src/moment' + sep),
         resolve(modules, 'sense_editor/mode/worker.js'),
       ]
     }

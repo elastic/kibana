@@ -78,7 +78,7 @@
   /** Used to assign default `context` object properties */
   var contextProps = [
     'Array', 'Boolean', 'Date', 'Error', 'Function', 'Math', 'Number', 'Object',
-    'RegExp', 'String', '_', 'attachEvent', 'clearTimeout', 'isFinite', 'isNaN',
+    'RegExp', 'String', 'vendor/_', 'attachEvent', 'clearTimeout', 'isFinite', 'isNaN',
     'parseInt', 'setTimeout'
   ];
 
@@ -865,7 +865,7 @@
          * @memberOf _.templateSettings.imports
          * @type Function
          */
-        '_': lodash
+        'vendor/_': lodash
       }
     };
 
@@ -3148,7 +3148,7 @@
      * // => { 'name': 'fred' }
      *
      * _.pick({ 'name': 'fred', '_userid': 'fred1' }, function(value, key) {
-     *   return key.charAt(0) != '_';
+     *   return key.charAt(0) != 'vendor/_';
      * });
      * // => { 'name': 'fred' }
      */
@@ -6006,7 +6006,7 @@
      * // => 'data'
      *
      * options.imports
-     * // => { '_': _, 'jq': $ }
+     * // => { 'vendor/_': _, 'jq': $ }
      */
     function partialRight(func) {
       return createWrapper(func, 32, null, slice(arguments, 1));
@@ -6286,7 +6286,7 @@
     }
 
     /**
-     * Reverts the '_' variable to its previous value and returns a reference to
+     * Reverts the 'vendor/_' variable to its previous value and returns a reference to
      * the `lodash` function.
      *
      * @static

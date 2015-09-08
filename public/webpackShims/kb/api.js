@@ -17,7 +17,7 @@
 
 
 
-define([ '_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params', 'autocomplete/body_completer'],
+define(['vendor/_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params', 'autocomplete/body_completer'],
   function (_, exports, url_pattern_matcher, url_params, body_completer) {
     'use strict';
 

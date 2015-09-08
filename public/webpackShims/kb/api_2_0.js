@@ -18,7 +18,7 @@
 
 
 define([
-  '_',
+  'vendor/_',
   './api',
   './api_2_0/aliases',
   './api_2_0/aggregations',

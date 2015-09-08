@@ -1,2 +1,2 @@
-require('jquery');
+require('vendor/jquery');
 require('./js/bootstrap');

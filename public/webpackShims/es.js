@@ -18,7 +18,7 @@
 
 
 define([
-    "_", "jquery", "exports"
+    'vendor/_', 'vendor/jquery', 'exports'
   ], function (_, $, exports) {
     "use strict";
 

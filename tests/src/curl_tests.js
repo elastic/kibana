@@ -18,7 +18,7 @@
 
 
 define([
-  '_',
+  'vendor/_',
   'curl',
   'text!test_src/curl_tests.txt'
 ], function (_, curl, curlTests) {

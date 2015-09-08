@@ -17,7 +17,7 @@
 
 
 
-define(["_"], function (_) {
+define(['vendor/_'], function (_) {
   'use strict';
 
 

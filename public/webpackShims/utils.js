@@ -18,7 +18,7 @@
 
 
 define([
-  'jquery'
+  'vendor/jquery'
 ], function ($) {
   'use strict';
 

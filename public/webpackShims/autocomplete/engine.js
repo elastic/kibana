@@ -19,7 +19,7 @@
 
 define([
     'exports',
-    '_'
+    'vendor/_'
   ],
   function (exports, _) {
     "use strict";

@@ -22,11 +22,11 @@ define([
     'kb',
     'mappings',
     'ace',
-    'jquery',
+    'vendor/jquery',
     'utils',
     'autocomplete/engine',
     'autocomplete/url_pattern_matcher',
-    '_',
+    'vendor/_',
     'ace/ext-language_tools'
   ], function (history, kb, mappings, ace, $, utils, autocomplete_engine, url_pattern_matcher, _) {
     'use strict';

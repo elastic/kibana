@@ -19,7 +19,7 @@
 
 define([
   'input',
-  'jquery',
+  'vendor/jquery',
   'kb',
   'kb/api',
   'mappings'

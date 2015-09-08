@@ -18,11 +18,11 @@
 
 
 define([
-    'jquery',
+    'vendor/jquery',
     'utils',
     'es',
     'settings',
-    '_'
+    'vendor/_'
   ], function ($, utils, es, settings, _) {
     'use strict';
 

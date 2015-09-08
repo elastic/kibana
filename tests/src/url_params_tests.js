@@ -18,7 +18,7 @@
 
 
 define([
-  '_',
+  'vendor/_',
   'autocomplete/url_params',
   'autocomplete/engine'
 ], function (_, url_params, autocomplete_engine) {

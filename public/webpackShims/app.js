@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-var $ = require('jquery');
+var $ = require('vendor/jquery');
 $(require('./modals.html')).appendTo('body');
 
 define([
@@ -23,13 +23,13 @@ define([
     'help_popup',
     'history',
     'input',
-    'jquery',
+    'vendor/jquery',
     'mappings',
     'output',
     'misc_inputs',
     'es',
     'utils',
-    '_',
+    'vendor/_',
     'analytics'
   ],
   function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, es, utils, _, ga) {
@@ -317,13 +317,12 @@ define([
           resizerHeight = newHeight;
           $resizer.css('line-height', newHeight + 'px');
         }
+        input.resize(true);
+        output.resize(true);
       }
 
       // update at key moments in the loading process
       $(update);
-      $(window).load(update);
-      // safe guard
-      setTimeout(update, 1000);
 
 
       // and when the window resizes (once every 30 ms)

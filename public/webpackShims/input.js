@@ -19,14 +19,14 @@
 define([
   'ace',
   'autocomplete',
-  'jquery',
+  'vendor/jquery',
   'mappings',
   'output',
   'sense_editor/editor',
   'settings',
   'require',
   'utils',
-  'zeroclip',
+  'vendor/zeroclip',
   'ace/ext-searchbox'
 ], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
   'use strict';

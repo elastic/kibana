@@ -17,7 +17,7 @@
 
 
 
-define(['_', 'kb', 'exports'], function (_, kb, exports) {
+define(['vendor/_', 'kb', 'exports'], function (_, kb, exports) {
   'use strict';
 
   var WALKER_MODE_EXPECTS_KEY = 1, WALKER_MODE_EXPECTS_CONTAINER = 2, WALKER_MODE_DONE = 3;

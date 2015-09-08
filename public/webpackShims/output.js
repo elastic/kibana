@@ -20,7 +20,7 @@
 define([
   'ace',
   'settings',
-  'jquery',
+  'vendor/jquery',
   'sense_editor/mode/output'
 ], function (ace, settings, $, OutputMode) {
   'use strict';

@@ -18,7 +18,7 @@
 
 
 define([
-  "_", "exports", "./engine"
+  'vendor/_', 'exports', './engine'
 ], function (_, exports, engine) {
   "use strict";
 
