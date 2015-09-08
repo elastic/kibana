@@ -23,7 +23,8 @@ ${pluginSlug}
 window.__KBN__ = {
   vars: {
     kbnIndex: '.kibana',
-    esShardTimeout: 1500
+    esShardTimeout: 1500,
+    esApiVersion: '2.0',
   }
 };
 
