@@ -242,7 +242,7 @@ Don't do this. Everything should be wrapped in a module that can be depended on 
 
 Prefer the use of function declarations over function expressions. Function expressions are allowed, but should usually be avoided.
 
-Also, keep function definitions above other code instead of relying on function hoising.
+Also, keep function definitions above other code instead of relying on function hoisting.
 
 *Preferred:*
 
@@ -812,7 +812,7 @@ Kibana is written in Angular, and uses several utility methods to make using Ang
 Angular modules are defined using a custom require module named `module`. It is used as follows:
 
 ```js
-var app = require('modules').get('app/namespace');
+var app = require('ui/modules').get('app/namespace');
 ```
 
 `app` above is a reference to an Angular module, and can be used to define controllers, providers and anything else used in Angular.
@@ -849,7 +849,7 @@ app.service('CustomService', function(Promise, otherDeps) {
 Angular routes are defined using a custom require modules named `routes` that remove much of the required boilerplate.
 
 ```js
-require('routes')
+require('ui/routes')
 .when('/my/object/route/:id?', {
   // angular route code goes here
 });

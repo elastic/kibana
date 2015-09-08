@@ -1,0 +1,75 @@
+<div class="doc-viewer">
+  <ul class="nav nav-tabs">
+    <li ng-class="{active: mode == 'table'}"><a ng-click="mode='table'">Table</a></li>
+    <li ng-class="{active: mode == 'json'}"><a ng-click="mode='json'">JSON</a></li>
+  </ul>
+
+  <div class="doc-viewer-content">
+    <table class="table table-condensed" ng-show="mode == 'table'">
+      <tbody>
+        <tr ng-repeat="field in fields">
+          <td field-name="field"
+              field-type="mapping[field].type"
+              width="1%"
+              class="doc-viewer-field">
+          </td>
+          <td width="1%" class="doc-viewer-buttons" ng-if="filter">
+            <span ng-if="mapping[field].filterable">
+              <i ng-click="filter(mapping[field], flattened[field], '+')"
+                tooltip="Filter for value"
+                tooltip-append-to-body="1"
+                class="fa fa-search-plus"></i>
+              <i ng-click="filter(mapping[field], flattened[field],'-')"
+                tooltip="Filter out value"
+                tooltip-append-to-body="1"
+                class="fa fa-search-minus"></i>
+            </span>
+            <span ng-if="!mapping[field].filterable" tooltip="Unindexed fields can not be searched">
+              <i class="fa fa-search-plus text-muted"></i>
+              <i class="fa fa-search-minus text-muted"></i>
+            </span>
+            <span ng-if="columns">
+              <i ng-click="toggleColumn(field)"
+                tooltip="Toggle column in table"
+                tooltip-append-to-body="1"
+                class="fa fa-columns"></i>
+            </span>
+          </td>
+
+          <td>
+            <i ng-if="!mapping[field] && field[0] === '_'"
+              tooltip-placement="top"
+              tooltip="Field names beginning with _ are not supported"
+              class="fa fa-warning text-color-warning ng-scope doc-viewer-underscore"></i>
+            <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
+              tooltip-placement="top"
+              tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
+              class="fa fa-warning text-color-warning ng-scope doc-viewer-no-mapping"></i>
+            <i ng-if="showArrayInObjectsWarning(doc, field)"
+              tooltip-placement="top"
+              tooltip="Objects in arrays are not well supported."
+              class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
+            <div class="doc-viewer-value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div
+      id="json-ace"
+      ng-show="mode == 'json'"
+      ng-model="hitJson"
+      readonly
+      ui-ace="{
+        useWrapMode: true,
+        advanced: {
+          highlightActiveLine: false
+        },
+        rendererOptions: {
+          showPrintMargin: false,
+          maxLines: 4294967296
+        },
+        mode: 'json'
+      }"></div>
+  </div>
+</div>

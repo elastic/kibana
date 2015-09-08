@@ -6,38 +6,24 @@ module.exports = function (grunt) {
       return;
     }
 
-    var tasks = [
-      'licenses',
-      'jshint:source',
-      'jscs:source',
-      'maybe_start_kibana',
-      'jade',
-      'less:build',
+    grunt.task.run(_.compact([
+      'eslint:source',
+      'maybeStartKibana',
       'simplemocha:all',
-      'mocha:unit'
-    ];
-
-    if (process.env.TRAVIS) tasks.unshift('esvm:dev');
-
-    grunt.task.run(tasks);
+      'karma:unit'
+    ]));
   });
 
   grunt.registerTask('quick-test', function () {
     grunt.task.run([
-      'maybe_start_kibana',
+      'maybeStartKibana',
       'simplemocha:all',
-      'mocha:unit'
+      'karma:unit'
     ]);
   });
 
-  grunt.registerTask('coverage', [
-    'blanket',
-    'maybe_start_kibana',
-    'mocha:coverage'
-  ]);
-
   grunt.registerTask('test:watch', [
-    'maybe_start_kibana',
+    'maybeStartKibana',
     'watch:test'
   ]);
 };

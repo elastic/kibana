@@ -10,19 +10,6 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 ### Development Environment Setup
 
-- Install node.js (we recommend using [nvm](https://github.com/creationix/nvm))
-
-  ```sh
-  ## follow directions at https://github.com/creationix/nvm, then
-  nvm install 0.10
-  ```
-
-- Install grunt and bower globally (as root if not using nvm)
-
-  ```sh
-  npm install -g grunt-cli bower
-  ```
-
 - Clone the kibana repo and move into it
 
   ```sh
@@ -30,30 +17,42 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   cd kibana
   ```
 
-- Install node and bower dependencies
+- Install the version of node.js listed in the `.node-version` file (this is made easy with tools like [nvm](https://github.com/creationix/nvm) and [avn](https://github.com/wbyoung/avn))
 
   ```sh
-  npm install && bower install
+  nvm install "$(cat .node-version)"
+  ```
+
+- Install dependencies
+
+  ```sh
+  npm install
+  ```
+
+- Start elasticsearch, you can use [esvm](https://github.com/simianhacker/esvm) to make that easier.
+
+  ```sh
+  grunt esvm:dev:keepalive
   ```
 
 - Start the development server.
 
   ```sh
-  grunt dev # use the "--with-es" flag to install & start elasticsearch too
+  ./bin/kibana --dev
   ```
 
 #### Linting
 
-A note about linting: We use both [jshint](http://jshint.com/) and [jscs](http://jscs.info/) to check that the [styleguide](STYLEGUIDE.md) is being followed. They run in a pre-commit hook and as a part of the tests, but most contributors integrate these linters with their code editors for real-time feedback.
+A note about linting: We use [eslint](http://eslint.org) to check that the [styleguide](STYLEGUIDE.md) is being followed. It runs in a pre-commit hook and as a part of the tests, but most contributors integrate it with their code editors for real-time feedback.
 
-Here are some hints for setting up the linters in your favorite editor:
+Here are some hints for getting eslint setup in your favorite editor:
 
-| Editor | JSHint | JSCS |
+| Editor | Plugin |
 | --- | --- | --- |
-| Sublime | [SublimeLinter-jshint](https://github.com/SublimeLinter/SublimeLinter-jshint#installation) | [SublimeLinter-jscs](https://github.com/SublimeLinter/SublimeLinter-jscs#installation) |
-| Atom | [linter-jshint](https://github.com/AtomLinter/linter-jshint#installation) | [linter-jscs](https://github.com/AtomLinter/linter-jscs#installation) |
-| IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » JSHint (be sure to check "Use config files") | « |
-| vi | ask @simianhacker | « |
+| Sublime | [SublimeLinter-eslint](https://github.com/roadhump/SublimeLinter-eslint#installation) |
+| Atom | [linter-eslint](https://github.com/AtomLinter/linter-eslint#installation) |
+| IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint |
+| vi | [scrooloose/syntastic](https://github.com/scrooloose/syntastic) |
 
 
 ### Testing and building
@@ -65,7 +64,7 @@ Before running the tests you will need to install the projects dependencies as d
 Once that is complete just run:
 
 ```sh
-grunt test build
+./node_modules/.bin/grunt test build
 ```
 
 Distributable, built packages can be found in `target/` after the build completes.

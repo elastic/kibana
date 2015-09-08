@@ -1,0 +1,61 @@
+<div>
+    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.length">
+      <tr>
+        <th>
+          <label>From</label>
+        </th>
+        <th colspan="2">
+          <label>To</label>
+        </th>
+      </tr>
+
+      <tr
+        ng-repeat="range in agg.params.ranges track by $index">
+        <td class="kbn-timepicker">
+          <input
+            ng-model="range.from"
+            validate-date-math
+            type="text"
+            class="form-control"
+            name="range.from" />
+        </td>
+        <td class="kbn-timepicker">
+          <input
+            ng-model="range.to"
+            validate-date-math
+            class="form-control"
+            name="range.to" />
+        </td>
+        <td>
+          <button
+            type="button"
+            ng-click="agg.params.ranges.splice($index, 1)"
+            class="btn btn-danger btn-xs">
+            <i class="fa fa-times" ></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <small>
+            <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#date-math">Accepted Date Formats <i class="fa-link fa"></i></a>
+          </small>
+        </td>
+      </tr>
+    </table>
+
+    <input ng-model="agg.params.ranges.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+    <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+      <p>
+        <i class="fa fa-danger text-danger"></i>
+        <strong>Required:</strong> You must specify at least one date range.
+      </p>
+    </div>
+
+    <div
+      ng-click="agg.params.ranges.push({})"
+      class="sidebar-item-button primary">
+      Add Range
+    </div>
+  </div>
+</div>

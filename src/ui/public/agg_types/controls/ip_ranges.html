@@ -1,0 +1,104 @@
+<div>
+  <p>
+    <button type="button" class="btn btn-default" ng-show="agg.params.ipRangeType == 'mask'" ng-click="agg.params.ipRangeType = 'fromTo'">Use From/To</button>
+    <button type="button" class="btn btn-default" ng-show="agg.params.ipRangeType != 'mask'" ng-click="agg.params.ipRangeType = 'mask'">Use CIDR Masks</button>
+  </p>
+
+  <div ng-show="agg.params.ipRangeType != 'mask'">
+    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.fromTo.length">
+      <tr>
+        <th>
+          <label>From</label>
+        </th>
+        <th colspan="2">
+          <label>To</label>
+        </th>
+      </tr>
+
+      <tr
+        ng-repeat="range in agg.params.ranges.fromTo track by $index">
+        <td>
+          <input
+            validate-ip
+            ng-model="range.from"
+            type="text"
+            class="form-control"
+            name="range.from" />
+        </td>
+        <td>
+          <input
+            validate-ip
+            ng-model="range.to"
+            class="form-control"
+            name="range.to" />
+        </td>
+        <td>
+          <button
+            type="button"
+            ng-click="agg.params.ranges.fromTo.splice($index, 1)"
+            class="btn btn-danger btn-xs">
+            <i class="fa fa-times" ></i>
+          </button>
+        </td>
+      </tr>
+    </table>
+
+    <input ng-if="agg.params.ipRangeType != 'mask'" ng-model="agg.params.ranges.fromTo.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+    <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+      <p>
+        <i class="fa fa-danger text-danger"></i>
+        <strong>Required:</strong> You must specify at least one IP range.
+      </p>
+    </div>
+
+    <div
+      ng-click="agg.params.ranges.fromTo.push({})"
+      class="sidebar-item-button primary">
+      Add Range
+    </div>
+  </div>
+
+  <div ng-show="agg.params.ipRangeType == 'mask'">
+    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.mask.length">
+      <tr>
+        <th>
+          <label>Mask</label>
+        </th>
+      </tr>
+
+      <tr
+        ng-repeat="range in agg.params.ranges.mask track by $index">
+        <td>
+          <input
+            validate-cidr-mask
+            ng-model="range.mask"
+            type="text"
+            class="form-control"
+            name="range.from" />
+        </td>
+        <td>
+          <button
+            type="button"
+            ng-click="agg.params.ranges.mask.splice($index, 1)"
+            class="btn btn-danger btn-xs">
+            <i class="fa fa-times" ></i>
+          </button>
+        </td>
+      </tr>
+    </table>
+
+    <input ng-if="agg.params.ipRangeType == 'mask'" ng-model="agg.params.ranges.mask.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+    <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+      <p>
+        <i class="fa fa-danger text-danger"></i>
+        <strong>Required:</strong> You must specify at least one IP range.
+      </p>
+    </div>
+
+    <div
+      ng-click="agg.params.ranges.mask.push({})"
+      class="sidebar-item-button primary">
+      Add Range
+    </div>
+  </div>
+</div>
