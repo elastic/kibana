@@ -24,6 +24,7 @@ describe('renderbot#buildChartData', function () {
       var football = {};
       var renderbot = {
         vis: {
+          isSankey: _.constant(false),
           isHierarchical: _.constant(true)
         }
       };
@@ -40,6 +41,7 @@ describe('renderbot#buildChartData', function () {
     it('calls tabify to simplify the data into a table', function () {
       var renderbot = {
         vis: {
+          isSankey: _.constant(false),
           isHierarchical: _.constant(false)
         }
       };
@@ -56,6 +58,7 @@ describe('renderbot#buildChartData', function () {
       var chart = { hits: 1, rows: [], columns: [] };
       var renderbot = {
         vis: {
+          isSankey: _.constant(false),
           isHierarchical: _.constant(false),
           type: {
             responseConverter: _.constant(chart)
@@ -77,6 +80,7 @@ describe('renderbot#buildChartData', function () {
 
       var renderbot = {
         vis: {
+          isSankey: _.constant(false),
           isHierarchical: _.constant(false),
           type: {
             responseConverter: converter

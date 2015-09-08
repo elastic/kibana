@@ -117,7 +117,7 @@ define(function (require) {
       if (_.isFunction(this.type.sankeyConverter)) {
         return true;
       } else {
-        return !!this.type.sankeyConverter;
+        return false;
       }
     };
 
