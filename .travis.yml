@@ -1,6 +1,8 @@
 language: node_js
-node_js: 'iojs-v2.4'
-install: npm install
+node_js: '0.12.7'
+install:
+  - npm install -g npm@3.2
+  - npm install
 script: ./node_modules/.bin/grunt travis
 sudo: false
 cache:

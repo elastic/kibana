@@ -1,4 +1,4 @@
-require('babel/register');
+require('babel/register')(require('./src/optimize/babelOptions').node);
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
@@ -16,6 +16,10 @@ module.exports = function (grunt) {
     configFile: __dirname + '/src/config/kibana.yml',
 
     karmaBrowser: (function () {
+      if (grunt.option('browser')) {
+        return grunt.option('browser');
+      }
+
       switch (require('os').platform()) {
         case 'win32':
           return 'IE';
@@ -26,16 +30,7 @@ module.exports = function (grunt) {
       }
     }()),
 
-    nodeVersion: '0.10.35',
-    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
-    services: [
-      ['launchd', '10.9'],
-      ['upstart', '1.5'],
-      ['systemd', 'default'],
-      ['sysv', 'lsb-3.1']
-    ],
-
-    devPlugins: 'devMode',
+    nodeVersion: grunt.file.read('.node-version').trim(),
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
@@ -44,6 +39,7 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
+
     lintThese: [
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
@@ -51,6 +47,13 @@ module.exports = function (grunt) {
       '!<%= src %>/fixtures/**/*.js'
     ]
   };
+
+  grunt.config.merge(config);
+
+  config.userScriptsDir = __dirname + '/build/userScripts';
+  // ensure that these run first, other configs need them
+  config.services = require('./tasks/config/services')(grunt);
+  config.platforms = require('./tasks/config/platforms')(grunt);
 
   grunt.config.merge(config);
 
@@ -66,4 +69,5 @@ module.exports = function (grunt) {
 
   // load task definitions
   grunt.task.loadTasks('tasks');
+  grunt.task.loadTasks('tasks/build');
 };

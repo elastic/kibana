@@ -14,15 +14,20 @@ module.exports = function (grunt) {
       diff(['--name-only', '--cached'])
       .then(function (files) {
         // match these patterns
-        var patterns = grunt.config.get('lintThese');
-        files = files.split('\n').filter(Boolean).map(function (file) {
+        var patterns = grunt.config.get('eslint.source.files.src');
+        if (!patterns) grunt.fail.warn('eslint file pattern is not defined');
+
+        files = files.split('\n').filter(Boolean)
+        .map(function (file) {
           return resolve(root, file);
+        })
+        .filter(function (file) {
+          return grunt.file.isMatch(patterns, file);
         });
 
-        files = grunt.file.match(patterns, files);
-        grunt.log.debug(files);
-
+        grunt.log.ok('Staged files to lint: ' + files.length);
         if (!_.size(files)) return;
+
         grunt.config.set('eslint.staged.files.src', files);
         grunt.task.run(['eslint:staged']);
       })

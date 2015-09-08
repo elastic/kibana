@@ -1,5 +1,4 @@
-let _ = require('lodash');
-let { EventEmitter } = require('events');
+let { constant, once, compact, flatten } = require('lodash');
 let { promisify, resolve, fromNode } = require('bluebird');
 let Hapi = require('hapi');
 
@@ -7,36 +6,45 @@ let utils = require('requirefrom')('src/utils');
 let rootDir = utils('fromRoot')('.');
 let pkg = utils('packageJson');
 
-module.exports = class KbnServer extends EventEmitter {
+module.exports = class KbnServer {
   constructor(settings) {
-    super();
-
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
-    this.server = new Hapi.Server();
     this.settings = settings || {};
 
-    this.ready = _.constant(this.mixin(
-      require('./config/setup'),
-      require('./http'),
+    this.ready = constant(this.mixin(
+      require('./config/setup'), // sets this.config, reads this.settings
+      require('./http'), // sets this.server
       require('./logging'),
-      require('./status'), // sets this.status
-      require('./plugins'), // sets this.plugins
+      require('./status'),
+
+      // find plugins and set this.plugins
+      require('./plugins/scan'),
+
+      // tell the config we are done loading plugins
       require('./config/complete'),
 
-      require('../ui'), // sets this.uiExports
+      // setup this.uiExports and this.bundles
+      require('../ui'),
+
+      // ensure that all bundles are built, or that the
+      // lazy bundle server is running
       require('../optimize'),
 
-      function () {
+      // finally, initialize the plugins
+      require('./plugins/initialize'),
+
+      () => {
         if (this.config.get('server.autoListen')) {
-          this.listen();
+          this.ready = constant(resolve());
+          return this.listen();
         }
       }
     ));
 
-    this.listen = _.once(this.listen);
+    this.listen = once(this.listen);
   }
 
   /**
@@ -49,55 +57,30 @@ module.exports = class KbnServer extends EventEmitter {
    *                         and can return a promise to delay execution of the next mixin
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */
-  mixin(/* ...fns */) {
-    let self = this;
-    return resolve(_.toArray(arguments))
-    .then(_.compact)
-    .each(function (fn) {
-      return fn.call(self, self, self.server, self.config);
-    })
-    .catch(function (err) {
-      self.server.log('fatal', err);
-      self.emit('error', err);
-
-      return self.close()
-      .then(function () {
-        // retrow once server is closed
-        throw err;
-      });
-    })
-    .return(undefined);
+  async mixin(...fns) {
+    for (let fn of compact(flatten(fns))) {
+      await fn.call(this, this, this.server, this.config);
+    }
   }
 
   /**
    * Tell the server to listen for incoming requests, or get
    * a promise that will be resolved once the server is listening.
    *
-   * Calling this function has no effect, unless the "server.autoListen"
-   * is set to false.
-   *
    * @return undefined
    */
-  listen() {
-    let self = this;
+  async listen() {
+    let { server, config } = this;
 
-    return self.ready()
-    .then(function () {
-      return self.mixin(
-        function () {
-          return fromNode(_.bindKey(self.server, 'start'));
-        },
-        require('./pid')
-      );
-    })
-    .then(function () {
-      self.server.log(['listening', 'info'], 'Server running at ' + self.server.info.uri);
-      self.emit('listening');
-      return self.server;
-    });
+    await this.ready();
+    await fromNode(cb => server.start(cb));
+    await require('./pid')(this, server, config);
+
+    server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
+    return server;
   }
 
-  close() {
-    return fromNode(_.bindKey(this.server, 'stop'));
+  async close() {
+    await fromNode(cb => this.server.stop(cb));
   }
 };

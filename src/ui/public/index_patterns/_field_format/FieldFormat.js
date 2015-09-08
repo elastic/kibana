@@ -21,6 +21,15 @@ define(function (require) {
       contentTypes.setup(self);
     }
 
+    FieldFormat.from = function (converter) {
+      _.class(FieldFormatFromConverter).inherits(FieldFormat);
+      function FieldFormatFromConverter(params) {
+        FieldFormatFromConverter.Super.call(this, params);
+      }
+      FieldFormatFromConverter.prototype._convert = converter;
+      return FieldFormatFromConverter;
+    };
+
     /**
      * Convert a raw value to a formated string
      * @param  {any} value

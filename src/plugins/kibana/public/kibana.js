@@ -4,14 +4,18 @@ require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
 require('plugins/kibana/doc/index');
 
+var chrome = require('ui/chrome');
+var routes = require('ui/routes');
+var modules = require('ui/modules');
+
 var kibanaLogoUrl = require('ui/images/kibana.png');
 
-require('ui/routes')
+routes
 .otherwise({
   redirectTo: '/discover'
 });
 
-require('ui/chrome')
+chrome
 .setBrand({
   'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
   'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
@@ -49,3 +53,4 @@ require('ui/chrome')
     courier.start();
   });
 });
+

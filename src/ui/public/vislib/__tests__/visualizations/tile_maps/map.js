@@ -24,7 +24,6 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 // ];
 
 describe('TileMap Map Tests', function () {
-  this.timeout(0);
   var $mockMapEl = $('<div>');
   var TileMapMap;
   var leafletStubs = {};
@@ -36,6 +35,8 @@ describe('TileMap Map Tests', function () {
     leafletMocks.tileLayer = { on: sinon.stub() };
     leafletMocks.map = { on: sinon.stub() };
     leafletStubs.tileLayer = sinon.stub(L, 'tileLayer', _.constant(leafletMocks.tileLayer));
+    leafletStubs.tileLayer.wms = sinon.stub(L.tileLayer, 'wms', _.constant(leafletMocks.tileLayer));
+
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
     TileMapMap = Private(require('ui/vislib/visualizations/_map'));
@@ -96,6 +97,14 @@ describe('TileMap Map Tests', function () {
       expect(mapStubs.destroy.callCount).to.equal(0);
       map._createMap({});
       expect(mapStubs.destroy.callCount).to.equal(1);
+    });
+
+    it('should create a WMS layer if WMS is enabled', function () {
+      expect(L.tileLayer.wms.called).to.be(false);
+      map = new TileMapMap($mockMapEl, geoJsonData, {attr: {wms: {enabled: true}}});
+      map._createMap({});
+      expect(L.tileLayer.wms.called).to.be(true);
+      L.tileLayer.restore();
     });
   });
 

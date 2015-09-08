@@ -4,7 +4,7 @@ define(function (require) {
   return function transformAggregationProvider(Private) {
     var AggConfigResult = require('ui/Vis/AggConfigResult');
     return function transformAggregation(agg, metric, aggData, parent) {
-      return _.map(extractBuckets(aggData), function (bucket) {
+      return _.map(extractBuckets(aggData, agg), function (bucket) {
         var aggConfigResult = new AggConfigResult(
           agg,
           parent && parent.aggConfigResult,

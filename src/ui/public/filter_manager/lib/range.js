@@ -1,7 +1,10 @@
 define(function (require) {
   var _ = require('lodash');
-  return function buildRangeFilter(field, params, indexPattern) {
-    var filter = { meta: { index: indexPattern.id} };
+  return function buildRangeFilter(field, params, indexPattern, formattedValue) {
+    var filter = { meta: { index: indexPattern.id } };
+    if (formattedValue) filter.meta.formattedValue = formattedValue;
+
+    params = _.clone(params);
 
     if (params.gte && params.gt) throw new Error('gte and gt are mutually exclusive');
     if (params.lte && params.lt) throw new Error('lte and lt are mutually exclusive');

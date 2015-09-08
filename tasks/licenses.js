@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     var done = this.async();
 
     var result = {};
-    var options = {start: process.cwd(), json: true };
+    var options = { start: process.cwd(), json: true };
     var checkQueueLength = 2;
 
     function processPackage(info, dependency) {

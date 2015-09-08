@@ -19,7 +19,7 @@
         <i aria-hidden="true" class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form" name="queryInput">
+      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form fill" name="queryInput">
         <div class="typeahead">
           <div class="input-group">
             <input
@@ -39,7 +39,7 @@
       <form
         ng-if="vis.type.requiresSearch && !$state.linked"
         ng-submit="fetch()"
-        class="inline-form"
+        class="inline-form fill"
         name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
@@ -130,8 +130,9 @@
 
     <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
       <div class="visualize-info" ng-if="savedVis.id">
-        <div class="visualize-info-tab">
-          <span ng-bind="::savedVis.title"></span>
+        <div class="visualize-info-tab" title="{{::savedVis.vis.type.title}}">
+          <i class="fa" aria-label="{{::savedVis.vis.type.title}} Icon" ng-class="savedVis.vis.type.icon"></i>
+          <span bindonce bo-bind="savedVis.title"></span>
         </div>
       </div>
 

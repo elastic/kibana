@@ -5,10 +5,15 @@ node_modules
 trash
 bundles
 target
+/build
 .jruby
 .idea
 *.iml
 *.log
-esvm
+/esvm
 .htpasswd
 installedPlugins
+disabledPlugins
+webpackstats.json
+config/kibana.dev.yml
+coverage

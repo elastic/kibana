@@ -16,6 +16,9 @@ define(function (require) {
   require('plugins/kibana/dashboard/services/saved_dashboards');
   require('plugins/kibana/dashboard/styles/main.less');
 
+  require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
+
+
   var app = require('ui/modules').get('app/dashboard', [
     'elasticsearch',
     'ngRoute',
@@ -49,6 +52,7 @@ define(function (require) {
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
+
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
         var notify = new Notifier({

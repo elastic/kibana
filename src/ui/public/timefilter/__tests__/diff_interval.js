@@ -6,12 +6,10 @@ describe('Timefilter service', function () {
   describe('Refresh interval diff watcher', function () {
 
     var fn;
-
     var update;
-
     var fetch;
-
     var timefilter;
+
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(ngMock.inject(function (Private) {
