@@ -25,22 +25,62 @@ define(function (require) {
     getIndexPatternField: function () {
       return this.remote
         .setFindTimeout(5000)
-        //findElement(By.name("name")).getAttribute("value") (from Selenium IDE -> Java)
         .findByName('name');
     },
 
     getTimeFieldNameField: function () {
       return this.remote
+        .setFindTimeout(5000)
         .findByXpath(
           '//body[@id=\'kibana-body\']/div[2]/div/kbn-settings-app/div/div/kbn-settings-indices/div[2]/div/div[2]/form/div[3]/select'
         );
     },
 
-    getCreateButton: function () {
-      return this.remote
-        .findByCssSelector('.btn');
-    }
+    selectTimeFieldOption: function (selection) {
+      var self = this;
+      return this
+        .getTimeFieldNameField().click()
+        .then(function () {
+          return self
+            .getTimeFieldNameField().click();
+        })
+        .then(function () {
+          return self
+            .getTimeFieldOption(selection);
+        });
+    },
 
+    getTimeFieldOption: function (selection) {
+      console.log('selection = ' + selection);
+      return this.remote
+        .setFindTimeout(10000)
+        .findByXpath(
+          '/html/body/div[2]/div/kbn-settings-app/div/div/kbn-settings-indices/div[2]/div/div[2]/form/div[3]/select/option[@label=\'' +
+          selection + '\']'
+        ).click();
+    },
+
+    clickCreateButton: function () {
+      return this.remote
+        .setFindTimeout(5000)
+        .findByCssSelector('.btn').click();
+    },
+
+    getDefaultIndexButton: function () {
+      return this.remote
+        .setFindTimeout(5000)
+        .findByXpath(
+          '/html/body/div[2]/div/kbn-settings-app/div/div/kbn-settings-indices/div[2]/div/div/kbn-settings-index-header/div/div/button[1]'
+        );
+    },
+
+    clickDefaultIndexButton: function () {
+      return this.remote
+        .setFindTimeout(5000)
+        .findByXpath(
+          '/html/body/div[2]/div/kbn-settings-app/div/div/kbn-settings-indices/div[2]/div/div/kbn-settings-index-header/div/div/button[1]'
+        ).click();
+    }
 
     // …additional page interaction tasks…
   };

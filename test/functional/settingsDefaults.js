@@ -49,6 +49,7 @@ define([
                           .then(function (timeField) {
                             assert.strictEqual(timeField, '@timestamp', 'Expected Time-field name @timestamp');
                           });
+
                       });
                   });
               });
