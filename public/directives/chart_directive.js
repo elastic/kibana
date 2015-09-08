@@ -4,6 +4,8 @@ var $ = require('jquery');
 require('flot');
 require('flotTime');
 require('flotCrosshair');
+require('flotThreshold');
+
 
 var app = require('ui/modules').get('apps/timelion', []);
 

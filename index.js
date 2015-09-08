@@ -27,6 +27,10 @@ module.exports = function (kibana) {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.time'),
           imports: 'flot'
         },
+        flotThreshold$: {
+          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.threshold'),
+          imports: 'flot'
+        },
         flotCrosshair$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.crosshair'),
           imports: 'flot'

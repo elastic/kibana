@@ -3,10 +3,14 @@
     ng-click="suggestions.selected = $index"
     ng-class="{active: $index === suggestions.selected}"
     ng-repeat="suggestion in suggestions.list track by $index | filter:!suggestiom.isAlias">
-    <h4><strong>{{suggestion.name}}()</strong> <small>{{suggestion.help}}</small></h4>
+    <h4><strong>{{suggestion.name}}()</strong> <small>{{suggestion.help}} {{suggestion.chainable}}</small></h4>
 
     <p>
-      <strong>Arguments:</strong> <span ng-repeat="arg in suggestion.args"><strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>) <em ng-show="!$last">,</em> </span>
+      <strong>Arguments:</strong>
+        <span ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
+          <strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>)
+          <em ng-show="!$last">,</em>
+        </span>
     </p>
   </div>
 </div>
