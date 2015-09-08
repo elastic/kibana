@@ -3,10 +3,11 @@ var $ = require('jquery');
 
 require('flot');
 require('flotTime');
+require('flotCrosshair');
 
 var app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('chart', function ($compile) {
+app.directive('chart', function ($compile, $rootScope) {
   return {
     restrict: 'A',
     scope: {
@@ -15,29 +16,39 @@ app.directive('chart', function ($compile) {
       cell: '='
     },
     link: function ($scope, $elem) {
-      console.log('loaded chart');
+      var legendValueNumbers;
+      var debouncedNumbers;
       var defaultOptions = {
         xaxis: {
           mode: 'time',
           tickLength: 0,
-          color: '#ee0'
+        },
+        crosshair: {
+          mode: 'x',
+          color: '#C66',
+          lineWidth: 2
         },
         grid: {
-          backgroundColor: '#fff',
+          backgroundColor: '#FFF',
           borderWidth: 0,
           borderColor: null,
           margin: 10,
+          hoverable: true,
+          autoHighlight: false
         },
         legend: {
           position: 'nw',
           labelBoxBorderColor: 'rgb(255,255,255,0)',
           labelFormatter: function (label, series) {
-            return '<span class="ngLegendValue" ng-click="toggleSeries(' + series._id + ')">' + label + '</span>';
+            return '<span class="ngLegendValue" ng-click="toggleSeries(' + series._id + ')">' +
+              label +
+              '<span class="ngLegendValueNumber"></span></span>';
           }
         },
         yaxes: [ {}, { position: 'right' } ],
-        colors: ['#01A4A4', '#c66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
+        colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
       };
+
 
       $scope.toggleSeries = function (id) {
         var series = $scope.chart[id];
@@ -51,7 +62,80 @@ app.directive('chart', function ($compile) {
 
       $scope.$on('$destroy', function () {
         $(window).off('resize'); //remove the handler added earlier
+        $elem.off('plothover');
+        $elem.off('mouseleave');
       });
+
+      $elem.on('plothover',  function (event, pos, item) {
+        $rootScope.$broadcast('timelionPlotHover', event, pos, item);
+      });
+
+      $elem.on('mouseleave', function () {
+        $rootScope.$broadcast('timelionPlotLeave');
+      });
+
+      $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos, time) {
+        $scope.plot.setCrosshair(pos);
+        setLegendNumbers(pos);
+      });
+
+      $scope.$on('timelionPlotLeave', function (angularEvent, flotEvent, pos, time) {
+        $scope.plot.clearCrosshair();
+        clearLegendNumbers();
+      });
+
+
+      // Shamelessly borrowed from the flotCrosshairs example
+      function setLegendNumbers(pos) {
+        var plot = $scope.plot;
+
+        var axes = plot.getAxes();
+        if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max) {
+          return;
+        }
+
+        var i;
+        var j;
+        var dataset = plot.getData();
+        for (i = 0; i < dataset.length; ++i) {
+
+          var series = dataset[i];
+          // Nearest point
+          for (j = 0; j < series.data.length; ++j) {
+            if (series.data[j][0] > pos.x) {
+              break;
+            }
+          }
+
+          // Interpolate
+          var y;
+          var p1 = series.data[j - 1];
+          var p2 = series.data[j];
+
+          if (p1 == null) {
+            y = p2[1];
+          } else if (p2 == null) {
+            y = p1[1];
+          } else if (p1[1] == null || p2[1] == null) {
+            y = null;
+          } else {
+            y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
+          }
+
+          if (y != null) {
+            legendValueNumbers.eq(i).text('(' + y.toFixed(2) + ')');
+          } else {
+            legendValueNumbers.eq(i).empty();
+          }
+
+        }
+      }
+
+      function clearLegendNumbers() {
+        _.each(legendValueNumbers, function (num) {
+          $(num).empty();
+        });
+      }
 
       function drawPlot(plotConfig) {
         var controllerHeight = $('.timelion-container').height() - 80;
@@ -85,6 +169,8 @@ app.directive('chart', function ($compile) {
 
         $scope.plot = $.plot($elem, _.compact(series), options);
 
+        // Used to toggle the series, and for displaying values on hover
+        legendValueNumbers = $elem.find('.ngLegendValueNumber');
         _.each($elem.find('.ngLegendValue'), function (elem) {
           $compile(elem)($scope);
         });
