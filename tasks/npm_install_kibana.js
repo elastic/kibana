@@ -20,15 +20,4 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('npm_shrinkwrap_exists', 'Ensure npm shrinkwrap file exists', function () {
-    grunt.log.debug('Checking for shrinkwrap in ' + srcPath);
-    try {
-      statSync(join(srcPath, 'npm-shrinkwrap.json'));
-    } catch (e) {
-      if (e.code !== 'ENOENT') throw e;
-      grunt.fail.warn('Releases require an npm-shrinkwrap.json file to exist');
-    }
-  });
 };
-
-

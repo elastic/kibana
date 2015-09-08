@@ -3,6 +3,7 @@ var join = require('path').join;
 var statSync = require('fs').statSync;
 
 module.exports = function (grunt) {
+  var root = grunt.config.get('root');
   var srcPath = join(grunt.config.get('build'), 'dist', 'kibana', 'src');
 
   grunt.registerTask('npm_install_kibana', 'NPM install kibana server into dist', function () {
@@ -21,12 +22,10 @@ module.exports = function (grunt) {
 
   grunt.registerTask('npm_shrinkwrap_exists', 'Ensure npm shrinkwrap file exists', function () {
     try {
-      statSync(join(srcPath, 'npm-shrinkwrap.json'));
+      statSync(join(root, 'npm-shrinkwrap.json'));
     } catch (e) {
       if (e.code !== 'ENOENT') throw e;
       grunt.fail.warn('Releases require an npm-shrinkwrap.json file to exist');
     }
   });
 };
-
-
