@@ -11,7 +11,9 @@ define(function (require) {
       browserName: 'firefox'
     }],
     tunnelOptions: serverConfig.webdriver,
-    functionalSuites: ['test/functional/status.js'],
+    functionalSuites: [
+      'test/functional/status.js'
+    ],
     excludeInstrumentation: /(fixtures|node_modules)\//
   }, serverConfig);
 });
