@@ -19,7 +19,7 @@ module.exports = function (grunt) {
         fs.createReadStream(path.join(FIXTURES_PATH, file))
         .pipe(request.post(`${config.server}/_bulk`, function (err, res, body) {
           if (err || res.statusCode !== 200) grunt.fail.warn(err || body);
-          grunt.log.write(`[${colors.green('success')}] ${file}`);
+          grunt.log.writeln(`[${colors.green('success')}] ${file}`);
           if (++doneProcessing === files.length) done();
         }));
       });
