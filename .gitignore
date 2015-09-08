@@ -17,3 +17,4 @@ disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
 coverage
+selenium
