@@ -33,6 +33,10 @@ define(function (require) {
 
       var buckets = vis.aggs.bySchemaGroup.buckets;
       buckets = arrayToLinkedList(buckets);
+      if (!buckets)  {
+        return {'slices':{'nodes':[],'links':[]}};
+      }
+
       var firstAgg = buckets[0];
       var aggData = resp.aggregations[firstAgg.id];
 
