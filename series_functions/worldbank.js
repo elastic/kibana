@@ -39,9 +39,11 @@ module.exports = new Datasource ('worldbank', {
         deduped[bucket.date] = bucket.value;
       });
 
-      var data = _.map(deduped, function (val, date) {
+      var data = _.compact(_.map(deduped, function (val, date) {
+        // Discard nulls
+        if (val == null) return;
         return [moment(date, 'YYYY').valueOf(), parseInt(val, 10)];
-      });
+      }));
 
       return {
         type: 'seriesList',
