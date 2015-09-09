@@ -49,7 +49,10 @@ module.exports = new Datasource ('worldbank', {
           data:  data,
           type: 'series',
           fit: 'nearest',
-          label: description
+          label: description,
+          _meta: {
+            worldbank_request: URL
+          }
         }]
       };
     }).catch(function (e) {
