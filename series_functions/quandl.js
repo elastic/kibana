@@ -29,12 +29,12 @@ module.exports = new Datasource ('quandl', {
       '1y': 'annual',
     };
 
-    var config = {
-      code: args[0] || 'WIKI/AAPL',
-      position: args[1] || 1,
+    var config = _.defaults(args.byName, {
+      code: 'WIKI/AAPL',
+      position: 1,
       interval: intervalMap[tlConfig.time.interval] || 'daily',
       apikey: tlConfig.file.quandl.key
-    };
+    });
 
     if (!config.interval) {
       throw 'quandl() unsupported interval: ' + tlConfig.time.interval + '. quandl() supports: ' + _.keys(intervalMap).join(', ');

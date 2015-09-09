@@ -20,10 +20,10 @@ module.exports = new Datasource ('worldbank_indicators', {
   aliases: ['wbi'],
   help: 'Pull data from http://data.worldbank.org/ using the country name and indicator.',
   fn: function worldbankIndicators(args, tlConfig) {
-    var config = {
-      country: args[0] || 'wld',
-      indicator: args[1] || 'SP.POP.TOTL'
-    };
+    var config = _.defaults(args.byName, {
+      country: 'wld',
+      indicator: 'SP.POP.TOTL'
+    });
 
     var countries = config.country.split(':');
     var seriesLists = _.map(countries, function (country) {

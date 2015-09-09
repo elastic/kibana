@@ -15,9 +15,9 @@ module.exports = new Datasource ('worldbank', {
   fn: function worldbank(args, tlConfig) {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
-    var config = {
-      code: args[0] || 'countries/all/indicators/SP.POP.TOTL'
-    };
+    var config = _.defaults(args.byName, {
+      code: 'countries/all/indicators/SP.POP.TOTL'
+    });
 
     var time = {
       min: moment(tlConfig.time.from).format('YYYY'),

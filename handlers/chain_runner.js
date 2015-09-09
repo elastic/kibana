@@ -9,6 +9,8 @@ var toMS = require('../lib/to_milliseconds.js');
 
 var loadFunctions = require('../lib/load_functions.js');
 var repositionArguments = require('./lib/reposition_arguments.js');
+var indexArguments = require('./lib/index_arguments.js');
+
 var buildTarget = require('../lib/build_target.js');
 // Load function plugins
 var functions  = loadFunctions('series_functions/');
@@ -97,6 +99,9 @@ function invoke(fnName, args) {
         throw new Error (fnName + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
       }
     });
+
+    args.byName = indexArguments(functionDef, args);
+
     return functionDef.fn(args, tlConfig);
   });
 }

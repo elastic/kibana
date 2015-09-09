@@ -15,9 +15,7 @@ module.exports = new Datasource ('graphite', {
   fn: function graphite(args, tlConfig) {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
-    var config = {
-      metric: args[0]
-    };
+    var config = args.byName;
 
     var time = {
       min: moment(tlConfig.time.from).format('HH:mm[_]YYYYMMDD'),

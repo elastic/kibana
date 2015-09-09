@@ -60,7 +60,7 @@ function buildRequest(config, tlConfig) {
         filtered: {
           query: {
             query_string: {
-              query: config.query
+              query: config.q
             }
           },
           filter: filter
@@ -141,18 +141,16 @@ module.exports = new Datasource('es', {
   aliases: ['elasticsearch'],
   fn: function esFn(args, tlConfig) {
 
-    var config = {
-      query: args[0] || '*',
-      metric: args[1],
-      index: args[2] || tlConfig.file.es.default_index,
-      timefield: args[3] || tlConfig.file.es.timefield,
-      offset: args[4],
-      interval: args[5] || tlConfig.time.interval,
-      url: tlConfig.file.es.allow_url_parameter && args[6] ? args[6] : tlConfig.file.es.url,
-      fit: args[7] || 'nearest'
-    };
+    var config = _.defaults(_.clone(args.byName), {
+      q: '*',
+      index: tlConfig.file.es.default_index,
+      timefield: tlConfig.file.es.timefield,
+      interval: tlConfig.time.interval,
+      url: tlConfig.file.es.url,
+      fit: 'nearest'
+    });
 
-    if (!tlConfig.file.es.allow_url_parameter && args[6]) {
+    if (!tlConfig.file.es.allow_url_parameter && args.byName.url) {
       throw new Error('url= is not allowed');
     }
 
@@ -189,7 +187,7 @@ module.exports = new Datasource('es', {
             es_request: body
           },
           //cacheKey: cacheKey,
-          label: config.query
+          label: config.q
         }]
       };
     }).catch(function (e) {
