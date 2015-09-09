@@ -32,16 +32,28 @@ function install(settings, logger) {
   })
   .then(async function() {
     logger.log('Optimizing and caching browser bundles...');
-    let serverConfig = readYamlConfig(settings.config);
-    _.set(serverConfig, 'logging.silent', settings.silent);
-    _.set(serverConfig, 'logging.quiet', !settings.silent);
-    _.set(serverConfig, 'logging.verbose', false);
-    _.set(serverConfig, 'optimize.useBundleCache', false);
-    _.set(serverConfig, 'server.autoListen', false);
-    _.set(serverConfig, 'plugins.initialize', false);
-    _.set(serverConfig, 'env', 'production');
-    _.set(serverConfig, 'plugins.scanDirs', [settings.pluginDir, fromRoot('src/plugins')]);
-    _.set(serverConfig, 'plugins.paths', [settings.workingPath]);
+    let serverConfig = _.merge(
+      readYamlConfig(settings.config),
+      {
+        env: 'production',
+        logging: {
+          silent: settings.silent,
+          quiet: !settings.silent,
+          verbose: false
+        },
+        optimize: {
+          useBundleCache: false
+        },
+        server: {
+          autoListen: false
+        },
+        plugins: {
+          initialize: false,
+          scanDirs: [settings.pluginDir, fromRoot('src/plugins')],
+          paths: [settings.workingPath]
+        }
+      }
+    );
 
     let kbnServer = new KbnServer(serverConfig);
     await kbnServer.ready();
