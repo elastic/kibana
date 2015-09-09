@@ -34,7 +34,7 @@ function install(settings, logger) {
     logger.log('Optimizing and caching browser bundles...');
     let serverConfig = readYamlConfig(settings.config);
     _.set(serverConfig, 'logging.silent', settings.silent);
-    _.set(serverConfig, 'logging.quiet', settings.quiet);
+    _.set(serverConfig, 'logging.quiet', !settings.silent);
     _.set(serverConfig, 'logging.verbose', false);
     _.set(serverConfig, 'optimize.useBundleCache', false);
     _.set(serverConfig, 'server.autoListen', false);
