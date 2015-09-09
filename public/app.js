@@ -95,12 +95,12 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   $scope.newCell = function () {
     $scope.state.sheet.push(defaultExpression);
     $scope.state.selected = $scope.state.sheet.length - 1;
-    $scope.search();
+    $scope.safeSearch();
   };
 
   $scope.removeCell = function (index) {
     _.pullAt($scope.state.sheet, index);
-    $scope.search();
+    $scope.safeSearch();
   };
 
   $scope.setActiveCell = function (cell) {
@@ -135,6 +135,9 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
       $scope.running = false;
     });
   };
+
+  $scope.safeSearch = _.debounce($scope.search, 500);
+
 
   function save() {
     savedSheet.id = savedSheet.title;

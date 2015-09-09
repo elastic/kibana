@@ -19,7 +19,7 @@ app.directive('chart', function ($compile, $rootScope) {
     },
     link: function ($scope, $elem) {
       var legendValueNumbers;
-      var debouncedNumbers;
+      var debouncedSetLegendNumbers;
       var defaultOptions = {
         xaxis: {
           mode: 'time',
@@ -78,7 +78,7 @@ app.directive('chart', function ($compile, $rootScope) {
 
       $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos, time) {
         $scope.plot.setCrosshair(pos);
-        setLegendNumbers(pos);
+        debouncedSetLegendNumbers(pos);
       });
 
       $scope.$on('timelionPlotLeave', function (angularEvent, flotEvent, pos, time) {
@@ -86,6 +86,10 @@ app.directive('chart', function ($compile, $rootScope) {
         clearLegendNumbers();
       });
 
+      var debounceDelay = 50;
+      debouncedSetLegendNumbers = _.debounce(setLegendNumbers, debounceDelay, {
+        maxWait: debounceDelay
+      });
 
       // Shamelessly borrowed from the flotCrosshairs example
       function setLegendNumbers(pos) {
@@ -124,8 +128,10 @@ app.directive('chart', function ($compile, $rootScope) {
             y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
           }
 
+          var precision = _.get(series, '_meta.precision', 2);
+
           if (y != null) {
-            legendValueNumbers.eq(i).text('(' + y.toFixed(2) + ')');
+            legendValueNumbers.eq(i).text('(' + y.toFixed(precision) + ')');
           } else {
             legendValueNumbers.eq(i).empty();
           }
