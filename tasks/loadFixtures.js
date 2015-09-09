@@ -18,8 +18,14 @@ module.exports = function (grunt) {
       files.forEach(function (file) {
         fs.createReadStream(path.join(FIXTURES_PATH, file))
         .pipe(request.post(`${config.server}/_bulk`, function (err, res, body) {
-          if (err || res.statusCode !== 200) grunt.fail.warn(err || body);
-          grunt.log.writeln(`[${colors.green('success')}] ${file}`);
+          var status;
+          if (err || res.statusCode !== 200) {
+            grunt.fail.warn(err || body);
+            status = colors.red('error');
+          } else {
+            status = colors.green('success');
+          }
+          grunt.log.writeln(`[${status}] ${file}`);
           if (++doneProcessing === files.length) done();
         }));
       });

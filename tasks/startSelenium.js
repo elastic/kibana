@@ -22,7 +22,7 @@ module.exports = function (grunt) {
     const SELENIUM_DOWNLOAD_URL = config.seleniumStandalone.server + config.seleniumStandalone.filename;
     const SELENIUM_HASH = config.seleniumStandalone.md5;
 
-    function waitForReadiness(seleniumProcess, ready) {
+    function waitForReadiness(seleniumProcess) {
       seleniumProcess.stderr.on('data', function (log) {
         if (~log.toString('utf8').indexOf('Selenium Server is up and running')) {
           grunt.log.writeln('Selenium standalone started on port 4444');
@@ -30,9 +30,6 @@ module.exports = function (grunt) {
         }
       });
 
-      process.on('exit', function () {
-        seleniumProcess.kill();
-      });
     }
 
     function validateDownload(path, expectedHash, success) {
@@ -48,6 +45,9 @@ module.exports = function (grunt) {
 
     function spawnSelenium() {
       var seleniumProcess = spawn('java', ['-jar', SELENIUM_FILE_PATH]);
+      process.on('exit', function () {
+        seleniumProcess.kill();
+      });
       waitForReadiness(seleniumProcess);
     }
 
@@ -67,7 +67,7 @@ module.exports = function (grunt) {
 
     function start() {
       fs.mkdir(SELENIUM_DIRECTORY, function (err) {
-        if (err && err.code !== 'EEXIST') grunt.fail.warn(err);
+        if (err && err.code !== 'EEXIST') return grunt.fail.warn(err);
         fs.exists(SELENIUM_FILE_PATH, function (exists) {
           if (exists) {
             spawnSelenium();
