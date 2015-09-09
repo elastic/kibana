@@ -49,9 +49,15 @@ function getPort(req) {
 router.use(function (req, res, next) {
   var uri = _.defaults({}, router.proxyTarget);
 
-  // Add a slash to the end of the URL so resolve doesn't remove it.
-  var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
-  path = url.resolve(path, '.' + req.url);
+  // better URL path merging
+  var path = req.path.replace('/elasticsearch', '');
+  var href = uri.href;
+  if (path) {
+    if (/\/$/.test(href)) href = href.substring(0, href.length - 1);
+    href += path;
+  }
+  var query = querystring.stringify(req.query);
+  if (query) href += '?' + query;
 
   if (uri.auth) {
     var auth = new Buffer(uri.auth);
@@ -60,7 +66,7 @@ router.use(function (req, res, next) {
 
   var options = {
     agent: router.proxyAgent,
-    url: config.elasticsearch + path,
+    url: href,
     method: req.method,
     headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,
