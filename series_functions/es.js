@@ -49,7 +49,7 @@ function offsetTime(milliseconds, offset, reverse) {
 function buildRequest(config, tlConfig) {
 
   var filter = {range:{}};
-  filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
+  filter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
 
   var searchRequest = {
     index: config.index,
@@ -69,8 +69,8 @@ function buildRequest(config, tlConfig) {
       aggs: {
         series: {
           date_histogram: {
-            field: tlConfig.file.es.timefield,
-            interval: config.interval || tlConfig.time.interval,
+            field: config.timefield,
+            interval: config.interval,
             extended_bounds: {
               min: tlConfig.time.from,
               max: tlConfig.time.to
@@ -115,6 +115,10 @@ module.exports = new Datasource('es', {
       types: ['string', 'null']
     },
     {
+      name: 'timefield',
+      types: ['string', 'null']
+    },
+    {
       name: 'offset',
       types: ['string', 'null']
     },
@@ -141,13 +145,14 @@ module.exports = new Datasource('es', {
       query: args[0] || '*',
       metric: args[1],
       index: args[2] || tlConfig.file.es.default_index,
-      offset: args[3],
-      interval: args[4],
-      url: tlConfig.file.es.allow_url_parameter && args[5] ? args[5] : tlConfig.file.es.url,
-      fit: args[6] || 'nearest'
+      timefield: args[3] || tlConfig.file.es.timefield,
+      offset: args[4],
+      interval: args[5] || tlConfig.time.interval,
+      url: tlConfig.file.es.allow_url_parameter && args[6] ? args[6] : tlConfig.file.es.url,
+      fit: args[7] || 'nearest'
     };
 
-    if (!tlConfig.file.es.allow_url_parameter && args[5]) {
+    if (!tlConfig.file.es.allow_url_parameter && args[6]) {
       throw new Error('url= is not allowed');
     }
 
