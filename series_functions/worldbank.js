@@ -40,7 +40,7 @@ module.exports = new Datasource ('worldbank', {
       });
 
       var data = _.map(deduped, function (val, date) {
-        return [moment(date, 'YYYY').valueOf(), val];
+        return [moment(date, 'YYYY').valueOf(), parseInt(val, 10)];
       });
 
       return {

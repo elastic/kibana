@@ -138,6 +138,7 @@ function resolveChainList(chainList) {
 
 
 function preProcessChain(chain, queries) {
+  queries = queries || {};
   function validateAndStore(item) {
     if (_.isObject(item) && item.type === 'function') {
       var functionDef = getFunctionByName(item.function);
@@ -184,8 +185,8 @@ function preProcessChain(chain, queries) {
 function preProcessSheet(sheet) {
 
   var queries = {};
-  _.each(sheet, function (chainList) {
-    preProcessChain(chainList, queries);
+  _.each(sheet, function (chainList, i) {
+    queries = _.extend(queries, preProcessChain(chainList));
   });
   queries = _.values(queries);
 
