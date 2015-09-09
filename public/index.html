@@ -90,10 +90,10 @@
 
   <div class="stats" ng-if="stats && showButtons">
     <center>
-      <strong>Cache Efficiency</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
-      <strong>Query Time:</strong> {{stats.queryTime - stats.invokeTime}}ms /
-      <strong>Resampling Time:</strong> {{stats.fitTime - stats.queryTime}}ms /
-      <strong>Processing Time:</strong> {{stats.sheetTime - stats.fitTime}}ms
+      <strong>Deduplication</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
+      <strong>Query Time</strong> {{stats.queryTime - stats.invokeTime}}ms /
+      <strong>Resampling Time</strong> {{stats.fitTime - stats.queryTime}}ms /
+      <strong>Processing Time</strong> {{stats.sheetTime - stats.fitTime}}ms
     </center>
   </div>
 
