@@ -5,16 +5,20 @@ let PluginApi = require('./PluginApi');
 let Collection = require('requirefrom')('src')('utils/Collection');
 
 let byIdCache = Symbol('byIdCache');
+let pluginApis = Symbol('pluginApis');
 
 module.exports = class Plugins extends Collection {
 
   constructor(kbnServer) {
     super();
     this.kbnServer = kbnServer;
+    this[pluginApis] = new Set();
   }
 
   async new(path) {
     let api = new PluginApi(this.kbnServer, path);
+    this[pluginApis].add(api);
+
     let output = [].concat(require(path)(api) || []);
     let config = this.kbnServer.config;
 
@@ -40,6 +44,10 @@ module.exports = class Plugins extends Collection {
 
   get byId() {
     return this[byIdCache] || (this[byIdCache] = indexBy([...this], 'id'));
+  }
+
+  getPluginApis() {
+    return this[pluginApis];
   }
 
 };
