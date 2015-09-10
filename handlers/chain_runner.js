@@ -172,19 +172,19 @@ function preProcessSheet(sheet) {
   });
   queries = _.values(queries);
 
-  var promises = _.chain(queries).values().map(function (item) {
-    return invoke(item.function, item.arguments);
+  var promises = _.chain(queries).values().map(function (query) {
+    return invoke(query.function, query.arguments);
   }).value();
 
-  return Promise.all(promises).then(function (results) {
+  return Promise.all(promises).then(function (resolvedDatasources) {
     stats.queryTime = (new Date()).getTime();
 
-    _.each(queries, function (item, i) {
+    _.each(queries, function (query, i) {
 
-      var functionDef = getFunctionByName(item.function);
+      var functionDef = getFunctionByName(query.function);
 
       // Fit each series
-      results[i].list = _.map(results[i].list, function (series) {
+      resolvedDatasources[i].list = _.map(resolvedDatasources[i].list, function (series) {
 
         if (series.data.length === 0) throw new Error (functionDef.name + '() returned no results');
         series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
@@ -192,7 +192,7 @@ function preProcessSheet(sheet) {
       });
 
       // And cache the fit series.
-      queryCache[functionDef.cacheKey(item)] = results[i];
+      queryCache[functionDef.cacheKey(query)] = resolvedDatasources[i];
     });
 
     stats.fitTime = (new Date()).getTime();

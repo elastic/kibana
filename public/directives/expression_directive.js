@@ -100,8 +100,23 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         else if ($scope.suggestions.selected < 0) $scope.suggestions.selected = 0;
       }
 
+      function completeExpression() {
+        if (!$scope.suggestions.list.length) return;
+        var expression = $attrs.timelionExpression;
+        var startOf = expression.slice(0, $scope.suggestions.position.min + 1);
+        var endOf =  expression.slice($scope.suggestions.position.max, expression.length);
+        var newVal = startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()' + endOf;
+
+        $elem.val(newVal);
+        $elem[0].selectionStart = $elem[0].selectionEnd =
+          (startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()').length - 1;
+        ngModelCtrl.$setViewValue(newVal);
+
+        resetSuggestions();
+      }
+
+
       function keyDownHandler(e) {
-        if (e.keyCode === keys.ENTER) return;
         if (_.contains(_.values(keys), e.keyCode)) e.preventDefault();
         switch (e.keyCode) {
           case keys.UP:
@@ -111,18 +126,14 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
             $scope.suggestions.selected++;
             break;
           case keys.TAB:
-            if (!$scope.suggestions.list.length) break;
-            var expression = $attrs.timelionExpression;
-            var startOf = expression.slice(0, $scope.suggestions.position.min + 1);
-            var endOf =  expression.slice($scope.suggestions.position.max, expression.length);
-            var newVal = startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()' + endOf;
-
-            $elem.val(newVal);
-            $elem[0].selectionStart = $elem[0].selectionEnd =
-              (startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()').length - 1;
-            ngModelCtrl.$setViewValue(newVal);
-
-            resetSuggestions();
+            completeExpression();
+            break;
+          case keys.ENTER:
+            if ($scope.suggestions.list.length) {
+              completeExpression();
+            } else {
+              $scope.search();
+            }
             break;
           case keys.ESC:
             resetSuggestions();
