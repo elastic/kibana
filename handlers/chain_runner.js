@@ -88,20 +88,7 @@ function invoke(fnName, args) {
 
 
   return Promise.all(args).then(function (args) {
-    if (args.length > functionDef.args.length) throw new Error ('Too many arguments passed to: ' + fnName);
-
-    _.each(args, function (arg, i) {
-      var type = argType(arg);
-      var required = functionDef.args[i].types;
-      var name = functionDef.args[i].name;
-
-      if (!(_.contains(required, type))) {
-        throw new Error (fnName + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
-      }
-    });
-
     args.byName = indexArguments(functionDef, args);
-
     return functionDef.fn(args, tlConfig);
   });
 }

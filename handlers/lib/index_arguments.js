@@ -1,7 +1,31 @@
 var _ = require('lodash');
 
+function argType(arg) {
+  if (_.isObject(arg) && arg) {
+    return arg.type;
+  }
+  if (arg == null) {
+    return 'null';
+  }
+  return typeof arg;
+}
+
 // Only applies to already resolved arguments
 module.exports = function indexArguments(functionDef, unorderedArgs) {
+
+  if (unorderedArgs.length > functionDef.args.length) throw new Error ('Too many arguments passed to: ' + fnName);
+
+  // Validation, does not change the arguments
+  _.each(unorderedArgs, function (arg, i) {
+    var type = argType(arg);
+    var required = functionDef.args[i].types;
+    var name = functionDef.args[i].name;
+
+    if (!(_.contains(required, type))) {
+      throw new Error (fnName + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
+    }
+  });
+
   var indexedArgs = {};
   var argumentsDef = functionDef.args;
 

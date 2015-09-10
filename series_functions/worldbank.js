@@ -7,7 +7,11 @@ module.exports = new Datasource ('worldbank', {
   args: [
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
-      types: ['string']
+      types: ['string', 'null']
+    },
+    {
+      name: 'fit',
+      types: ['string', 'null']
     }
   ],
   aliases: ['wb'],
@@ -16,7 +20,8 @@ module.exports = new Datasource ('worldbank', {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
     var config = _.defaults(args.byName, {
-      code: 'countries/wld/indicators/SP.POP.TOTL'
+      code: 'countries/wld/indicators/SP.POP.TOTL',
+      fit: 'nearest'
     });
 
     var time = {
@@ -50,7 +55,7 @@ module.exports = new Datasource ('worldbank', {
         list: [{
           data:  data,
           type: 'series',
-          fit: 'nearest',
+          fit: config.fit,
           label: description,
           _meta: {
             worldbank_request: URL
