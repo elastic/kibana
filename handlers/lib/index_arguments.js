@@ -1,5 +1,6 @@
 var _ = require('lodash');
 
+// This BS is why I need an argument object
 function argType(arg) {
   if (_.isObject(arg) && arg) {
     return arg.type;
@@ -13,7 +14,7 @@ function argType(arg) {
 // Only applies to already resolved arguments
 module.exports = function indexArguments(functionDef, unorderedArgs) {
 
-  if (unorderedArgs.length > functionDef.args.length) throw new Error ('Too many arguments passed to: ' + fnName);
+  if (unorderedArgs.length > functionDef.args.length) throw new Error ('Too many arguments passed to: ' + functionDef.name);
 
   // Validation, does not change the arguments
   _.each(unorderedArgs, function (arg, i) {
@@ -22,7 +23,7 @@ module.exports = function indexArguments(functionDef, unorderedArgs) {
     var name = functionDef.args[i].name;
 
     if (!(_.contains(required, type))) {
-      throw new Error (fnName + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
+      throw new Error (functionDef.name + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
     }
   });
 

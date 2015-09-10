@@ -18,6 +18,6 @@ module.exports = function (request, reply) {
     };
     reply(response);
   }).catch(function (e) {
-    reply({error: e.toString()}).code(400);
+    reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
   });
 };

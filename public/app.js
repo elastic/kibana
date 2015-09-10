@@ -130,9 +130,13 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
       $scope.running = false;
     })
     .error(function (resp) {
-      notify.error(resp.error);
       $scope.sheet = [];
       $scope.running = false;
+
+      var err = new Error(resp.message);
+      err.stack = resp.stack;
+      notify.error(err);
+
     });
   };
 

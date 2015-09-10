@@ -44,16 +44,6 @@ function getFunctionByName(name) {
   return functions[name];
 }
 
-function argType(arg) {
-  if (_.isObject(arg) && arg) {
-    return arg.type;
-  }
-  if (arg == null) {
-    return 'null';
-  }
-  return typeof arg;
-}
-
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke(fnName, args) {
   var functionDef = getFunctionByName(fnName);
@@ -195,6 +185,8 @@ function preProcessSheet(sheet) {
 
       // Fit each series
       results[i].list = _.map(results[i].list, function (series) {
+
+        if (series.data.length === 0) throw new Error (functionDef.name + '() returned no results');
         series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
         return series;
       });
