@@ -6,6 +6,8 @@ define(function (require) {
   var notifs = [];
   var setTO = setTimeout;
   var clearTO = clearTimeout;
+  var version;
+  var buildNum;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
   var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
@@ -85,12 +87,30 @@ define(function (require) {
     return rtn;
   }
 
+  function formatInfo(version, buildNum) {
+    var info = [];
+
+    if (!_.isUndefined(version)) {
+      info.push(`Version: ${version}`);
+    }
+
+    if (!_.isUndefined(buildNum)) {
+      info.push(`Build: ${buildNum}`);
+    }
+
+    return info.join('\n');
+  }
+
   // browsers format Error.stack differently; always include message
   function formatStack(err) {
     if (err.stack && !~err.stack.indexOf(err.message)) {
       return 'Error: ' + err.message + '\n' + err.stack;
     }
     return err.stack;
+  }
+
+  function infoAsObject(version, buildNum) {
+    return { version, buildNum };
   }
 
   /**
@@ -115,6 +135,14 @@ define(function (require) {
   Notifier.setTimerFns = function (set, clear) {
     setTO = set;
     clearTO = clear;
+  };
+
+  Notifier.setVersion = function (ver) {
+    version = ver;
+  };
+
+  Notifier.setBuildNum = function (number) {
+    buildNum = number;
   };
 
   // simply a pointer to the global notif list
@@ -192,6 +220,7 @@ define(function (require) {
     }
 
     var html = fatalToastTemplate({
+      info: formatInfo(version, buildNum),
       msg: formatMsg(err, this.from),
       stack: formatStack(err)
     });
@@ -219,6 +248,7 @@ define(function (require) {
     return add({
       type: 'danger',
       content: formatMsg(err, this.from),
+      info: infoAsObject(version, buildNum),
       icon: 'warning',
       title: 'Error',
       lifetime: Infinity,
@@ -236,6 +266,7 @@ define(function (require) {
     return add({
       type: 'warning',
       content: formatMsg(msg, this.from),
+      info: infoAsObject(version, buildNum),
       icon: 'warning',
       title: 'Warning',
       lifetime: 10000,
@@ -252,6 +283,7 @@ define(function (require) {
     return add({
       type: 'info',
       content: formatMsg(msg, this.from),
+      info: infoAsObject(version, buildNum),
       icon: 'info-circle',
       title: 'Debug',
       lifetime: 5000,
