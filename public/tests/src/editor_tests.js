@@ -20,11 +20,13 @@
 define([
   'ace',
   'input',
-  'text!test_src/editor_input1.txt'
+  'raw!./editor_input1.txt'
 ], function (ace, input, editor_input1) {
   'use strict';
 
   var aceRange = ace.require("ace/range");
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+
 
   module("Editor", {
     setup: function () {

@@ -27,7 +27,7 @@
  * http://jquery.org/license
  */
 
-(function (window) {
+(function () {
 
   var QUnit,
       config,
@@ -2005,6 +2005,4 @@
   }
 
 // get at whatever the global object is, like window in browsers
-}((function () {
-      return this;
-    }.call())));
+}());

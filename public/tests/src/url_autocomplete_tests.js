@@ -24,6 +24,8 @@ define([
 ], function (_, url_pattern_matcher, autocomplete_engine) {
   'use strict';
 
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+
   module("Url autocomplete");
 
   function patterns_test(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {

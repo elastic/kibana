@@ -23,6 +23,7 @@ define([
   'autocomplete/engine'
 ], function (_, url_params, autocomplete_engine) {
   'use strict';
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
 
   module("Url params");
 

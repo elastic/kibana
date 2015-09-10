@@ -22,6 +22,8 @@ define([
 ], function (mappings) {
   'use strict';
 
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+
   module("Mappings", {
     setup: function () {
       mappings.clear();
@@ -98,7 +100,7 @@ define([
       f("any_name", "string"), f("first_name", "string"), f("last_name", "string"), f("last_name.raw", "string")]);
   });
 
-  test("Simple fields", function () {
+  QUnit.test("Simple fields", function () {
     mappings.loadMappings({
       "index": {
         "tweet": {
@@ -117,7 +119,7 @@ define([
     deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string") ]);
   });
 
-  test("Simple fields - 1.0 style", function () {
+  QUnit.test("Simple fields - 1.0 style", function () {
     mappings.loadMappings({
       "index": {
         "mappings": {
@@ -138,7 +140,7 @@ define([
     deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string") ]);
   });
 
-  test("Nested fields", function () {
+  QUnit.test("Nested fields", function () {
     mappings.loadMappings({
       "index": {
         "tweet": {

@@ -26,6 +26,8 @@ define([
 ], function (input, $, kb, api, mappings) {
   'use strict';
 
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+
   module("Integration", {
     setup: function () {
       $("#editor_container").show();

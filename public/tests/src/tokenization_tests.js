@@ -25,6 +25,7 @@ define([
   'use strict';
 
   var token_iterator = ace.require("ace/token_iterator");
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
 
   module("Tokenization", {
     setup: function () {

@@ -31,16 +31,32 @@ module.exports = function (kibana) {
           }
         }
       });
+
+      server.route({
+        path: '/app/sense-tests',
+        method: 'GET',
+        handler: function (req, reply) {
+          return reply.renderApp(kibana.uiExports.apps.hidden.byId['sense-tests']);
+        }
+      });
     },
 
     uiExports: {
-      app: {
+      apps: [{
         title: 'Sense',
         description: 'JSON aware developer\'s interface to ElasticSearch',
         icon: 'plugins/sense/favicon.ico',
-        main: 'plugins/sense/index',
+        main: 'plugins/sense/sense',
         autoload: kibana.autoload.styles
       },
+        {
+          title: 'Sense Tests',
+          id: 'sense-tests',
+          main: 'plugins/sense/tests',
+          autoload: kibana.autoload.styles,
+          hidden: true
+          //listed: false // uncomment after https://github.com/elastic/kibana/pull/4755
+        }],
 
       noParse: [
         join(modules, 'ace' + sep),

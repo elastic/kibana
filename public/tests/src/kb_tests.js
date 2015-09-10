@@ -25,6 +25,8 @@ define([
 ], function (kb, mappings, api, autocomplete_engine) {
   'use strict';
 
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+
   module("Knowledge base", {
     setup: function () {
       mappings.clear();

@@ -20,9 +20,11 @@
 define([
   'vendor/_',
   'curl',
-  'text!test_src/curl_tests.txt'
+  'raw!./curl_tests.txt'
 ], function (_, curl, curlTests) {
   'use strict';
+
+  var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
 
   module("CURL");
 
