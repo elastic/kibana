@@ -5,14 +5,14 @@ define(function (require) {
   var es; // share the client amoungst all apps
   require('ui/modules')
     .get('kibana', ['elasticsearch', 'kibana/config'])
-    .service('es', function (esFactory, esUrl, $q) {
+    .service('es', function (esFactory, esUrl, $q, esApiVersion) {
       if (es) return es;
 
       es = esFactory({
         host: esUrl,
         log: 'info',
         requestTimeout: 0,
-        apiVersion: '1.4',
+        apiVersion: esApiVersion,
         plugins: [function (Client, config) {
 
           // esFactory automatically injects the AngularConnector to the config

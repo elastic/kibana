@@ -7,8 +7,18 @@ module.exports = async function (kbnServer, server, config) {
   }
 
   let { plugins } = kbnServer;
-  let path = [];
 
+  // extend plugin apis with additional context
+  plugins.getPluginApis().forEach(api => {
+
+    Object.defineProperty(api, 'uiExports', {
+      value: kbnServer.uiExports
+    });
+
+  });
+
+
+  let path = [];
   async function initialize(id) {
     let plugin = plugins.byId[id];
 
@@ -27,7 +37,6 @@ module.exports = async function (kbnServer, server, config) {
     }
 
     await plugin.init();
-
     path.pop();
   };
 

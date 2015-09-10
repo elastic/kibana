@@ -41,7 +41,7 @@ describe('AggConfig Filters', function () {
       expect(filter.range).to.have.property('bytes');
       expect(filter.range.bytes).to.have.property('gte', 1024.0);
       expect(filter.range.bytes).to.have.property('lt', 2048.0);
+      expect(filter.meta).to.have.property('formattedValue', '1,024 to 2,048');
     });
-
   });
 });

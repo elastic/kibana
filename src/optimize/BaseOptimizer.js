@@ -114,7 +114,7 @@ class BaseOptimizer {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
             loader: 'babel',
-            query: babelOptions
+            query: babelOptions.webpack
           },
           {
             test: /\.jsx$/,
@@ -122,7 +122,7 @@ class BaseOptimizer {
             loader: 'babel',
             query: defaults({
               nonStandard: true,
-            }, babelOptions)
+            }, babelOptions.webpack)
           }
         ].concat(this.env.loaders),
         postLoaders: this.env.postLoaders || [],
@@ -130,7 +130,7 @@ class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.babel.js', '.js', '.less', ''],
+        extensions: ['.js', '.jsx', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
         loaderPostfixes: ['-loader', ''],

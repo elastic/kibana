@@ -2,7 +2,7 @@ module.exports = function (grunt) {
   let { config } = grunt;
   let { statSync } = require('fs');
   let { join } = require('path');
-  let exec = (...args) => require('../utils/exec').silent(...args, { cwd: config.get('root') });
+  let exec = (...args) => require('../utils/exec')(...args, { cwd: config.get('root') });
   let newFiles = [];
   let shrinkwrapFile = join(config.get('root'), 'npm-shrinkwrap.json');
 
@@ -13,7 +13,7 @@ module.exports = function (grunt) {
       if (e.code !== 'ENOENT') throw e;
 
       if (createIfMissing) {
-        exec('npm', ['shrinkwrap', '--dev']);
+        exec('npm', ['shrinkwrap', '--dev', '--loglevel', 'error']);
         newFiles.push(shrinkwrapFile);
       }
       else grunt.fail.warn('Releases require an npm-shrinkwrap.json file to exist');
@@ -28,7 +28,7 @@ module.exports = function (grunt) {
     exec('cp', ['npm-shrinkwrap.json', join(config.get('root'), 'build', 'kibana', 'npm-shrinkwrap.build.json')]);
 
     // create shrinkwrap without dev dependencies and copy to build
-    exec('npm', ['shrinkwrap']);
+    exec('npm', ['shrinkwrap', '--loglevel', 'error']);
     exec('cp', ['npm-shrinkwrap.json', join(config.get('root'), 'build', 'kibana', 'npm-shrinkwrap.json')]);
 
     // restore the dev shrinkwrap
