@@ -88,7 +88,9 @@ app.directive('chart', function ($compile, $rootScope) {
 
       var debounceDelay = 50;
       debouncedSetLegendNumbers = _.debounce(setLegendNumbers, debounceDelay, {
-        maxWait: debounceDelay
+        maxWait: debounceDelay,
+        leading: true,
+        trailing: false
       });
 
       // Shamelessly borrowed from the flotCrosshairs example
