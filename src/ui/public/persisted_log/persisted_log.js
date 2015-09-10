@@ -7,10 +7,10 @@ define(function (require) {
     function PersistedLog(name, options) {
       options = options || {};
       this.name = name;
-      this.maxLength = options.maxLength;
+      this.maxLength = parseInt(options.maxLength, 10);
       this.filterDuplicates = options.filterDuplicates || false;
       this.items = localStorage.get(this.name) || [];
-      if (this.maxLength != null) this.items = _.take(this.items, this.maxLength);
+      if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
     }
 
     PersistedLog.prototype.add = function (val) {
@@ -28,7 +28,7 @@ define(function (require) {
       this.items.unshift(val);
 
       // if maxLength is set, truncate the stack
-      if (this.maxLength != null) this.items = _.take(this.items, this.maxLength);
+      if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
 
       // persist the stack
       localStorage.set(this.name, this.items);
