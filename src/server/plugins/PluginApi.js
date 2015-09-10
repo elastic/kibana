@@ -9,6 +9,9 @@ module.exports = class PluginApi {
     this.package = require(join(pluginPath, 'package.json'));
     this.autoload = require('../../ui/autoload');
     this.Plugin = Plugin.scoped(kibana, pluginPath, this.package);
-    this.mixin = _.bindKey(kibana, 'mixin');
+  }
+
+  get uiExports() {
+    throw new Error('plugin.uiExports is not defined until initialize phase');
   }
 };

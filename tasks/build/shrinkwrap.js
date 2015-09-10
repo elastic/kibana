@@ -13,7 +13,7 @@ module.exports = function (grunt) {
       if (e.code !== 'ENOENT') throw e;
 
       if (createIfMissing) {
-        exec('npm', ['shrinkwrap', '--dev', '--logLevel', 'error']);
+        exec('npm', ['shrinkwrap', '--dev', '--loglevel', 'error']);
         newFiles.push(shrinkwrapFile);
       }
       else grunt.fail.warn('Releases require an npm-shrinkwrap.json file to exist');
@@ -28,7 +28,7 @@ module.exports = function (grunt) {
     exec('cp', ['npm-shrinkwrap.json', join(config.get('root'), 'build', 'kibana', 'npm-shrinkwrap.build.json')]);
 
     // create shrinkwrap without dev dependencies and copy to build
-    exec('npm', ['shrinkwrap', '--logLevel', 'error']);
+    exec('npm', ['shrinkwrap', '--loglevel', 'error']);
     exec('cp', ['npm-shrinkwrap.json', join(config.get('root'), 'build', 'kibana', 'npm-shrinkwrap.json')]);
 
     // restore the dev shrinkwrap

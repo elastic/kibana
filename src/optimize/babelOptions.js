@@ -4,7 +4,4 @@ exports.webpack = {
   optional: ['runtime']
 };
 
-exports.node = Object.assign({}, exports.webpack, {
-  optional: ['runtime', 'asyncToGenerator'],
-  blacklist: ['regenerator']
-});
+exports.node = Object.assign({}, exports.webpack);
