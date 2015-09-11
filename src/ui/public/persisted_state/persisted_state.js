@@ -68,9 +68,9 @@ define(function (require) {
       // ensure the value being passed in is never mutated
       value = _.cloneDeep(value);
 
+      var val = this._set(key, value);
       this.emit('set');
-
-      return this._set(key, value);
+      return val;
     };
 
     PersistedState.prototype.reset = function (key) {
@@ -137,6 +137,7 @@ define(function (require) {
 
     PersistedState.prototype._set = function (key, value, initialChildState, defaultChildState) {
       var self = this;
+      var stateChanged = false;
       var initialState = !this._initialized;
       var keyPath = this._getIndex(key);
 
@@ -157,11 +158,11 @@ define(function (require) {
         // no path and no key, set the whole state
         if (!this._hasPath() && _.isUndefined(key)) {
           // check for changes and emit an event when found
-          if (!_.isEqual(this._changedState, value)) this.emit('change');
+          stateChanged = !_.isEqual(this._changedState, value);
           if (!initialChildState) this._changedState = value;
         } else {
           // check for changes and emit an event when found
-          if (!_.isEqual(this.get(keyPath), value)) this.emit('change');
+          stateChanged = !_.isEqual(this.get(keyPath), value);
 
           // arrays merge by index, not the desired behavior - ensure they are replaced
           if (!initialChildState) {
@@ -171,7 +172,6 @@ define(function (require) {
             _.set(this._changedState, keyPath, value);
           }
         }
-
       }
 
       var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
@@ -185,6 +185,8 @@ define(function (require) {
         }
       };
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
+
+      if (stateChanged) this.emit('change');
 
       return this;
     };
