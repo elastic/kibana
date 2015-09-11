@@ -1,13 +1,16 @@
 var angular = require('angular');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
+const _ = require('lodash');
+const d3 = require('d3');
 
 describe('Vislib Color Module Test Suite', function () {
   var seedColors;
-  var MappedColors;
   var mappedColors;
+  let config;
 
   describe('Color (main)', function () {
+    let previousConfig;
     var getColors;
     var arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
     var arrayOfNumbers = [1, 2, 3, 4, 5];
@@ -21,12 +24,17 @@ describe('Vislib Color Module Test Suite', function () {
     var color;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, config) {
+      previousConfig = config.get('visualization:colorMapping');
+      config.set('visualization:colorMapping', {});
       seedColors = Private(require('ui/vislib/components/color/seed_colors'));
       getColors = Private(require('ui/vislib/components/color/color'));
-      MappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
-      mappedColors = new MappedColors();
+      mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
       color = getColors(arr);
+    }));
+
+    afterEach(ngMock.inject(function (config) {
+      config.set('visualization:colorMapping', previousConfig);
     }));
 
     it('should throw an error if input is not an array', function () {
@@ -108,38 +116,66 @@ describe('Vislib Color Module Test Suite', function () {
     });
   });
 
-  describe('Mapped Colors', function () {
+  describe('Mapped Colors', () => {
+    let previousConfig;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      MappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
-      mappedColors = new MappedColors();
+    beforeEach(ngMock.inject((Private, config) => {
+      previousConfig = config.get('visualization:colorMapping');
+      mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
+      mappedColors.mapping = {};
     }));
 
-    it('should clear all the keys from the map table', function () {
-      mappedColors.reset();
-      expect(mappedColors.count()).to.be(0);
-    });
+    afterEach(ngMock.inject((config) => {
+      config.set('visualization:colorMapping', previousConfig);
+    }));
 
-    it('should return the color for the added value', function () {
-      mappedColors.reset();
-      mappedColors.add('value1', '#somecolor');
-      expect(mappedColors.get('value1')).to.be('#somecolor');
-    });
+    it('should properly map keys to unique colors', ngMock.inject((config) => {
+      config.set('visualization:colorMapping', {});
 
-    it('should return the count of mapped keys', function () {
-      mappedColors.reset();
-      mappedColors.add('value1', '#color1');
-      mappedColors.add('value2', '#color2');
-      expect(mappedColors.count()).to.be(2);
-    });
+      const arr = [1, 2, 3, 4, 5];
+      mappedColors.mapKeys(arr);
+      expect(_(mappedColors.mapping).values().uniq().size()).to.be(arr.length);
+    }));
 
-    it('should return all the colors in the map', function () {
-      mappedColors.reset();
-      mappedColors.add('value1', '#colors1');
-      mappedColors.add('value3', '#newColor');
-      expect(mappedColors.all()).to.eql(['#colors1', '#newColor']);
-    });
+    it('should not include colors used by the config', ngMock.inject((config) => {
+      const newConfig = {bar: seedColors[0]};
+      config.set('visualization:colorMapping', newConfig);
+
+      const arr = ['foo', 'baz', 'qux'];
+      mappedColors.mapKeys(arr);
+
+      const colorValues = _(mappedColors.mapping).values();
+      expect(colorValues.contains(seedColors[0])).to.be(false);
+      expect(colorValues.uniq().size()).to.be(arr.length);
+    }));
+
+    it('should create a unique array of colors even when config is set', ngMock.inject((config) => {
+      const newConfig = {bar: seedColors[0]};
+      config.set('visualization:colorMapping', newConfig);
+
+      const arr = ['foo', 'bar', 'baz', 'qux'];
+      mappedColors.mapKeys(arr);
+
+      const expectedSize = _(arr).difference(_.keys(newConfig)).size();
+      expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
+      expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
+    }));
+
+    it('should treat different formats of colors as equal', ngMock.inject((config) => {
+      const color = d3.rgb(seedColors[0]);
+      const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`;
+      const newConfig = {bar: rgb};
+      config.set('visualization:colorMapping', newConfig);
+
+      const arr = ['foo', 'bar', 'baz', 'qux'];
+      mappedColors.mapKeys(arr);
+
+      const expectedSize = _(arr).difference(_.keys(newConfig)).size();
+      expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
+      expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
+      expect(mappedColors.get('bar')).to.be(seedColors[0]);
+    }));
   });
 
   describe('Color Palette', function () {
