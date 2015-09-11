@@ -39,11 +39,14 @@ define(function (require) {
         }
 
         doc[method](vals)
-        .then(function (resp) {
-          queue.forEach(function (q) { q.resolve(resp); });
-        }, function (err) {
-          queue.forEach(function (q) { q.reject(err); });
-        })
+        .then(
+          function (resp) {
+            queue.forEach(function (q) { q.resolve(resp); });
+          },
+          function (err) {
+            queue.forEach(function (q) { q.reject(err); });
+          }
+        )
         .finally(function () {
           $rootScope.$broadcast('change:config', updated.concat(deleted));
         });

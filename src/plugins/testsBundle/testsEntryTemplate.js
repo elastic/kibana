@@ -14,7 +14,7 @@ module.exports = function ({env, bundle}) {
  *
  * This is programatically created and updated, do not modify
  *
- * context: <%= JSON.stringify(env.context) %>
+ * context: ${JSON.stringify(env.context)}
  * includes code from:
 ${pluginSlug}
  *
@@ -23,7 +23,8 @@ ${pluginSlug}
 window.__KBN__ = {
   vars: {
     kbnIndex: '.kibana',
-    esShardTimeout: 1500
+    esShardTimeout: 1500,
+    esApiVersion: '2.0',
   }
 };
 

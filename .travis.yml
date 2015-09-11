@@ -5,6 +5,8 @@ install:
   - npm install
 script: ./node_modules/.bin/grunt travis
 sudo: false
+addons:
+  firefox: "40.0"
 cache:
   directories:
   - esvm
