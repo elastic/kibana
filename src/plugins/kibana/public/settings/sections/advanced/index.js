@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var getValType = require('plugins/kibana/settings/sections/advanced/lib/get_val_type');
-  var getEditorType = require('plugins/kibana/settings/sections/advanced/lib/get_editor_type');
+  var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
 
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
@@ -33,31 +32,6 @@ define(function (require) {
 
         function notImmutableConfig(configName) {
           return !_.contains(IMMUTABLE_CONFIG_VALS, configName);
-        }
-
-        function toEditableConfig(def, name, value) {
-          var isCustom = !def;
-          if (isCustom) def = {};
-
-          var conf = {
-            name,
-            value,
-            isCustom,
-            defVal: def.value,
-            type: getValType(def, value),
-            description: def.description,
-            options: def.options
-          };
-
-          var editor = getEditorType(conf);
-          conf.json = editor === 'json';
-          conf.select = editor === 'select';
-          conf.bool = editor === 'boolean';
-          conf.array = editor === 'array';
-          conf.normal = editor === 'normal';
-          conf.tooComplex = !editor;
-
-          return conf;
         }
 
         function readConfigVals() {
