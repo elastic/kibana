@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var getValType = require('plugins/kibana/settings/sections/advanced/lib/get_val_type');
+  var getEditorType = require('plugins/kibana/settings/sections/advanced/lib/get_editor_type');
 
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
@@ -21,13 +22,6 @@ define(function (require) {
         };
 
         var IMMUTABLE_CONFIG_VALS = ['buildNum'];
-        var NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
-        var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
-
-        function getEditorType(conf) {
-          if (_.contains(NAMED_EDITORS, conf.type)) return conf.type;
-          if (_.contains(NORMAL_EDITOR, conf.type)) return 'normal';
-        }
 
         function isTypeComplex(conf) {
           return !(conf.json || conf.array || conf.bool || conf.normal);
