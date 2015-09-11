@@ -8,7 +8,7 @@ define(function (require) {
       name: 'sankey',
       title: 'Sankey chart',
       icon: 'fa-sankey-chart',
-      description: 'Sankey charts are ideal for displaying the parts of some whole. For example, sales percentages by department.' +
+      description: 'Sankey charts are ideal for displaying the material, energy and cost flows.' +
        'Pro Tip: Sankey charts are best used sparingly, and with no more than 7 slices per sankey.',
       params: {
         defaults: {
@@ -25,7 +25,7 @@ define(function (require) {
           name: 'metric',
           title: 'Slice Size',
           min: 1,
-          aggFilter: ['sum', 'count', 'cardinality'],
+          aggFilter: ['sum', 'count', 'cardinality', 'min', 'max', 'avg'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

@@ -9,7 +9,7 @@ define(function (require) {
     var links = {};
     var lastNode = -1;
 
-    function processEntry(aggConfig, aggData, prevNode) {
+    function processEntry(aggConfig, metric, aggData, prevNode) {
       _.each(aggData.buckets, function (b) {
         if (isNaN(nodes[b.key])) {
           nodes[b.key] = lastNode + 1;
@@ -18,19 +18,20 @@ define(function (require) {
         if (aggConfig._previous) {
           var k = prevNode + 'sankeysplitchar' + nodes[b.key];
           if (isNaN(links[k])) {
-            links[k] = b.doc_count;
+            links[k] = metric.getValue(b);
           } else {
-            links[k] += b.doc_count;
+            links[k] += metric.getValue(b);
           }
         }
         if (aggConfig._next) {
-          processEntry(aggConfig._next, b[aggConfig._next.id], nodes[b.key]);
+          processEntry(aggConfig._next, metric, b[aggConfig._next.id], nodes[b.key]);
         }
       });
     }
 
     return function (vis, resp) {
 
+      var metric = vis.aggs.bySchemaGroup.metrics[0];
       var buckets = vis.aggs.bySchemaGroup.buckets;
       buckets = arrayToLinkedList(buckets);
       if (!buckets)  {
@@ -44,7 +45,7 @@ define(function (require) {
         notify.error('need more than one sub aggs');
       }
 
-      processEntry(firstAgg, aggData, -1);
+      processEntry(firstAgg, metric, aggData, -1);
 
       var invertNodes = _.invert(nodes);
       var chart = {
