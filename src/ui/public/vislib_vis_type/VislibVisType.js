@@ -23,6 +23,7 @@ define(function (require) {
       }
 
       this.listeners = opts.listeners || {};
+      this.sankeyConverter = opts.sankeyConverter || false;
     }
 
     VislibVisType.prototype.createRenderbot = function (vis, $el) {

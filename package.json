@@ -76,6 +76,7 @@
     "commander": "^2.8.1",
     "css-loader": "^0.15.1",
     "d3": "^3.5.6",
+    "d3-plugins-sankey": "1.2.1",
     "elasticsearch": "^8.0.1",
     "elasticsearch-browser": "^8.0.1",
     "expiry-js": "^0.1.7",

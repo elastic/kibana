@@ -14,6 +14,7 @@ define(function (require) {
       pie: Private(require('ui/vislib/visualizations/pie_chart')),
       line: Private(require('ui/vislib/visualizations/line_chart')),
       area: Private(require('ui/vislib/visualizations/area_chart')),
+      sankey: Private(require('ui/vislib/visualizations/sankey_chart')),
       tile_map: Private(require('ui/vislib/visualizations/tile_map'))
     };
   };

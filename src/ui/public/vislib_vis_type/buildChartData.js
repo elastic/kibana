@@ -11,6 +11,10 @@ define(function (require) {
         return aggResponse.hierarchical(vis, esResponse);
       }
 
+      if (vis.isSankey()) {
+        return aggResponse.sankey(vis, esResponse);
+      }
+
       var tableGroup = aggResponse.tabify(vis, esResponse, {
         canSplit: true,
         asAggConfigResults: true

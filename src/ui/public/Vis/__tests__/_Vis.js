@@ -104,4 +104,23 @@ describe('Vis Class', function () {
     });
   });
 
+  describe('isSankey()', function () {
+    it('should return true for sankey vis', function () {
+      var stateFixture = {
+        type: 'sankey',
+        aggs: [
+          { type: 'count', schema: 'metric' },
+          { type: 'terms', schema: 'segment', params: { field: 'extension' }},
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+        ]
+      };
+      var vis = new Vis(indexPattern, stateFixture);
+      expect(vis.isSankey()).to.be(true);
+    });
+    it('should return false for non-sankey vis (like pie)', function () {
+      expect(vis.isSankey()).to.be(false);
+    });
+  });
+
 });
