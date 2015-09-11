@@ -20,6 +20,7 @@ define(function (require) {
           ESC: 27
         };
 
+        var IMMUTABLE_CONFIG_VALS = ['buildNum'];
         var NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
         var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
@@ -32,30 +33,51 @@ define(function (require) {
           return !(conf.json || conf.array || conf.bool || conf.normal);
         }
 
+        function notDefaultConfig(configName) {
+          return !(configName in configDefaults);
+        }
+
+        function notImmutableConfig(configName) {
+          return !_.contains(IMMUTABLE_CONFIG_VALS, configName);
+        }
+
+        function toEditableConfig(def, name, value) {
+          var isCustom = !def;
+          if (isCustom) def = {};
+
+          var conf = {
+            name,
+            value,
+            isCustom,
+            defVal: def.value,
+            type: getValType(def, value),
+            description: def.description,
+            options: def.options
+          };
+
+          var editor = getEditorType(conf);
+          conf.json = editor === 'json';
+          conf.select = editor === 'select';
+          conf.bool = editor === 'boolean';
+          conf.array = editor === 'array';
+          conf.normal = editor === 'normal';
+          conf.tooComplex = !editor;
+
+          return conf;
+        }
+
         function readConfigVals() {
           var configVals = config._vals();
 
-          $scope.configs = _.map(configDefaults, function (def, name) {
-            var val = configVals[name];
-            var conf = {
-              name: name,
-              defVal: def.value,
-              type: getValType(def, val),
-              description: def.description,
-              options: def.options,
-              value: val,
-            };
+          var customConfig = Object.keys(configVals)
+          .filter(notDefaultConfig)
+          .filter(notImmutableConfig)
+          .map(name => toEditableConfig(false, name, configVals[name]));
 
-            var editor = getEditorType(conf);
-            conf.json = editor === 'json';
-            conf.select = editor === 'select';
-            conf.bool = editor === 'boolean';
-            conf.array = editor === 'array';
-            conf.normal = editor === 'normal';
-            conf.tooComplex = !editor;
-
-            return conf;
-          });
+          $scope.configs = _(configDefaults)
+          .map((def, name) => toEditableConfig(def, name, configVals[name]))
+          .concat(customConfig)
+          .value();
         }
 
         readConfigVals();
