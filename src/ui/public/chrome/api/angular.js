@@ -50,8 +50,8 @@ module.exports = function (chrome, internals) {
             let path = $location.url();
             let persist = chrome.getVisible();
 
-            internals.tabs.consumeRouteUpdate(appId, href, path, persist);
-            chrome.setLastUrlFor(chrome.getAppId(), href);
+            internals.trackPossibleSubUrl(href);
+            internals.tabs.consumeRouteUpdate(appId, path, persist);
           };
 
           $rootScope.$on('$routeChangeSuccess', onRouteChange);

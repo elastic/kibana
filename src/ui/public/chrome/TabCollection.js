@@ -45,14 +45,14 @@ function TabCollection(opts = {}) {
     return activeTab;
   };
 
-  this.consumeRouteUpdate = function (appId, href, path, persist) {
-    var url = parse(href, true);
+  this.consumeRouteUpdate = function (appId, path, persist) {
+    var currentUrl = parse(path, true);
 
     tabs.forEach(function (tab) {
       tab.active = tab.rootRegExp.test(path);
 
-      var lastUrl = tab.active ? url : parse(tab.lastUrl || tab.rootUrl);
-      lastUrl.query._g = url.query._g;
+      var lastUrl = tab.active ? currentUrl : parse(tab.lastUrl || tab.rootUrl);
+      lastUrl.query._g = currentUrl.query._g;
 
       if (tab.active) activeTab = tab;
       if (persist) {
