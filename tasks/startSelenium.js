@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var {spawn} = require('child_process');
 
 module.exports = function (grunt) {
-  grunt.registerTask('startSelenium', 'Start an instance of selenium standalone', function () {
+  grunt.registerTask('startSelenium', 'Start an instance of selenium standalone', function (keepalive) {
     const done = this.async();
     const config = _.defaults(this.options(), {
       seleniumStandalone: {
@@ -26,7 +26,7 @@ module.exports = function (grunt) {
       seleniumProcess.stderr.on('data', function (log) {
         if (~log.toString('utf8').indexOf('Selenium Server is up and running')) {
           grunt.log.writeln('Selenium standalone started on port 4444');
-          done();
+          if (keepalive !== 'keepalive') done();
         }
       });
 

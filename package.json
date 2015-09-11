@@ -38,6 +38,8 @@
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
     "test:ui": "grunt test:ui",
+    "test:ui:server": "grunt test:ui:server",
+    "test:ui:runner": "grunt test:ui:runner",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
     "build": "grunt build",

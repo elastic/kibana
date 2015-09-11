@@ -23,6 +23,17 @@ module.exports = function (grunt) {
     'intern:dev'
   ]);
 
+  grunt.registerTask('test:ui:server', [
+    'esvm:ui',
+    'loadFixtures',
+    'run:testUIServer',
+    'startSelenium:keepalive'
+  ]);
+
+  grunt.registerTask('test:ui:runner', [
+    'intern:dev'
+  ]);
+
   grunt.registerTask('test', function (subTask) {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
