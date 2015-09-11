@@ -42,14 +42,11 @@ describe('Persisted State', function () {
       expect(persistedState.get()).to.not.equal(val);
     });
 
-    it('should create a state instance with a path', function () {
+    it('should create a copy of the state passed in', function () {
       var val = { red: 'blue' };
-      var path = 'test.path';
-      var compare = _.set({}, [path], val);
-      persistedState = new PersistedState(val, path);
+      persistedState = new PersistedState(val);
 
       expect(persistedState.get()).to.eql(val);
-      // ensure this is a copy of the object
       expect(persistedState.get()).to.not.equal(val);
     });
 
@@ -118,7 +115,7 @@ describe('Persisted State', function () {
     var childState;
 
     it('should not append the child state to the parent, without parent value', function () {
-      var childIndex = 'odd.keyname[]';
+      var childIndex = 'i can haz child';
       var persistedState = new PersistedState();
       childState = persistedState.createChild(childIndex);
 
@@ -128,7 +125,6 @@ describe('Persisted State', function () {
 
     it('should not append the child state to the parent, with parent value', function () {
       var childIndex = 'i can haz child';
-      var childStateValue = {};
       var persistedStateValue = { original: true };
       var persistedState = new PersistedState(persistedStateValue);
       childState = persistedState.createChild(childIndex);
@@ -190,6 +186,10 @@ describe('Persisted State', function () {
       var firstChildState = children[0].instance.get();
       expect(firstChildState).to.have.property(children[1].path);
       expect(firstChildState[children[1].path]).to.eql(children[1].value);
+
+      // check that the second child is still accessible from the parent instance
+      var firstChild = persistedState.get(children[0].path);
+      expect(firstChild).to.have.property(children[1].path);
     });
   });
 
