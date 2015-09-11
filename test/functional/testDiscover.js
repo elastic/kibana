@@ -42,49 +42,63 @@ define([
         return this.remote
           .get(url)
           .then(function () {
+            return remote
+              .setWindowSize(1600, 1024);
+          })
+          .then(function () {
+            console.log('Select Time Field Option @timestamp');
             return settingsPage
               .selectTimeFieldOption('@timestamp');
           })
           .then(function () {
+            console.log('Click Create button');
             return settingsPage
               .clickCreateButton();
           })
           .then(function () {
+            console.log('Click Default Index button');
             return settingsPage
               .clickDefaultIndexButton();
           })
           .then(function () {
-            return headerPage.clickDiscover();
+            console.log('Click Discover Tab');
+            return headerPage
+              .clickDiscover();
           })
           .then(function () {
+            console.log('Click time picker');
             return discoverPage
               .clickTimepicker();
           })
           .then(function () {
+            console.log('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
             return discoverPage
               .setAbsoluteRange(fromTime, toTime);
           })
           .then(function () {
+            console.log('Collapse Time Picker pane');
             return discoverPage
               .collapseTimepicker();
           })
           .then(function () {
+            console.log('Get the timestamp to verify');
             return discoverPage
               .getTimespanText();
           })
           .then(function (actualTimeString) {
-            console.log('actualTimeString = ' + actualTimeString);
+            console.log('actualTimeString = \"' + actualTimeString + '\"');
             assert.strictEqual(actualTimeString,
               timeRange,
               'Expected our absolute time range. '
             );
           })
-
-        .then(function () {
+          .then(function () {
+            console.log('Save Search as \"' + queryName1 + '\"');
             return discoverPage
               .saveSearch(queryName1);
           })
           .then(function () {
+            console.log('Get and verify the query name in upper-right corner of chart');
             return discoverPage
               .getCurrentQueryName()
               .then(function (actualQueryNameString) {

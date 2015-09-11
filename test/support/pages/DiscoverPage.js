@@ -13,9 +13,10 @@ define(function (require) {
     //a class="navbar-timepicker-time-desc"
     clickTimepicker: function () {
       return this.remote
-        .setFindTimeout(10000)
+        .setFindTimeout(15000)
         // .findByXpath('//a[@class=\'#/navbar-timepicker-time-desc\']')
-        .findByXpath('/html/body/div[2]/nav/div[2]/ul[2]/li[3]/a')
+        .findByXpath('/html/body/div[2]/nav/div[2]/ul[2]/li[3]/a') // this works find in Firefox but not Chrome?
+        //
         .then(function (picker) {
           return picker.click();
         });
@@ -129,17 +130,19 @@ define(function (require) {
           console.log('saveSearch button clicked');
           return self.remote
             .setFindTimeout(5000)
-            .findById('SaveSearch')
+            .findById('SaveSearch') // the ONLY 'id' I've found anywhere so far!
             .then(function (searchField) {
               return searchField
                 .type(searchName);
             })
             //   // click save button
             .then(function () {
+              console.log('find save button');
               return self.remote
                 .setFindTimeout(5000)
                 .findByXpath('//button[@ng-disabled=\'!opts.savedSearch.title\']')
                 .then(function (saveButton) {
+                  console.log('click save button');
                   return saveButton
                     .click();
                 });
@@ -149,9 +152,11 @@ define(function (require) {
 
     getCurrentQueryName: function () {
       return this.remote
-        .setFindTimeout(5000)
+        .setFindTimeout(15000)
         .findByXpath('//span[@bo-bind=\'opts.savedSearch.title\']')
+        // .findByXpath('/html/body/div[2]/div/div/div/div[2]/div[2]/div[1]/span/span')  /seems to find it but then times out getting visible text
         .then(function (queryNameField) {
+          console.log('found current query name element');
           return queryNameField
             .getVisibleText();
         });

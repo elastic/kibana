@@ -36,7 +36,13 @@ define({
     { browserName: 'safari', version: '8', platform: 'MAC' }  */
     // {
     //   browserName: 'chrome'
-    // },
+    // }
+    // {
+    //   browserName: 'internet explorer'
+    // }
+    // ,
+
+
     {
       browserName: 'firefox'
     }
@@ -47,6 +53,14 @@ define({
 
   // Whether or not to start Sauce Connect before running tests
   useSauceConnect: false,
+
+  // Whether or not events transmitted from the unit testing system to the test runner should cause the
+  // unit testing system to pause until a response is received from the test runner. This is necessary
+  // if you expect to be able to do things like take screenshots of the browser before/after each unit test
+  // executes from a custom reporter. This property can be set to true to always wait for the test runner
+  // after each event from the test system, or 'fail' to only wait if the event was a test failure or other error.
+  runnerClientReporter: true,
+
 
 
   // Name of the tunnel class to use for WebDriver tests.
@@ -88,6 +102,8 @@ define({
   // Functional test suite(s) to execute against each browser once non-functional tests are completed
   // functionalSuites: ['test/functional/settingsDefaults' /* 'myPackage/tests/functional' */ ],
   functionalSuites: ['test/functional/testDiscover' /* 'myPackage/tests/functional' */ ],
+  // functionalSuites: ['test/functional/testVisualize' /* 'myPackage/tests/functional' */ ],
+  // functionalSuites: ['test/functional/testScreenshot' /* 'myPackage/tests/functional' */ ],
 
   // A regular expression matching URLs to files that should not be included in code coverage analysis
   excludeInstrumentation: /^(?:tests|node_modules)\//

@@ -20,7 +20,9 @@ define(function (require) {
     clickVisualize: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//a[@href=\'#/visualize*\']')
+        //.//*[@id='kibana-body']/div[2]/nav/div[2]/ul[1]/li[4]/a
+        .findByXpath('.//*[@id=\'kibana-body\']/div[2]/nav/div[2]/ul[1]/li[4]/a')
+        // .findByXpath('//a[@href=\'#/visualize*\']')
         .click();
     },
     clickDashboard: function () {
