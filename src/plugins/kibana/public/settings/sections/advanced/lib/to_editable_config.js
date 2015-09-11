@@ -17,6 +17,7 @@ define(function (require) {
       name,
       value,
       isCustom,
+      readonly: !!def.readonly,
       defVal: def.value,
       type: getValType(def, value),
       description: def.description,

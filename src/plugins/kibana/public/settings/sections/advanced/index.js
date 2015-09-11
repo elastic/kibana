@@ -1,8 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
-  var isImmutableConfig = require('plugins/kibana/settings/sections/advanced/lib/is_immutable_config');
-  var notImmutableConfig = _.negate(isImmutableConfig);
 
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
@@ -35,11 +33,11 @@ define(function (require) {
 
           var customConfig = Object.keys(configVals)
           .filter(notDefaultConfig)
-          .filter(notImmutableConfig)
           .map(name => toEditableConfig(false, name, configVals[name]));
 
           $scope.configs = _(configDefaults)
           .map((def, name) => toEditableConfig(def, name, configVals[name]))
+          .reject('readonly')
           .concat(customConfig)
           .value();
         }

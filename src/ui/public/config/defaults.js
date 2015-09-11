@@ -3,6 +3,9 @@ define(function () {
     // wraped in provider so that a new instance is given to each app/test
 
     return {
+      'buildNum': {
+        readonly: true
+      },
       'query:queryString:options': {
         value: '{ "analyze_wildcard": true }',
         description: 'Options for the lucene query string parser',
