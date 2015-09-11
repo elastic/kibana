@@ -44,7 +44,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 - Start the development server.
 
   ```sh
-  ./bin/kibana --dev
+  npm start
   ```
 
 #### `config/kibana.dev.yml`
