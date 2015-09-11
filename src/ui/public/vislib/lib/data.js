@@ -672,8 +672,6 @@ define(function (require) {
       var names = [];
 
       _.forEach(data, function (obj) {
-        obj.slices = this._removeZeroSlices(obj.slices);
-
         _.forEach(obj.slices.nodes, function (node) {
           names.push(node.name);
         });
