@@ -1,6 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
+  var isImmutableConfig = require('plugins/kibana/settings/sections/advanced/lib/is_immutable_config');
+  var notImmutableConfig = _.negate(isImmutableConfig);
 
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
@@ -20,18 +22,12 @@ define(function (require) {
           ESC: 27
         };
 
-        var IMMUTABLE_CONFIG_VALS = ['buildNum'];
-
         function isTypeComplex(conf) {
           return !(conf.json || conf.array || conf.bool || conf.normal);
         }
 
         function notDefaultConfig(configName) {
           return !(configName in configDefaults);
-        }
-
-        function notImmutableConfig(configName) {
-          return !_.contains(IMMUTABLE_CONFIG_VALS, configName);
         }
 
         function readConfigVals() {
