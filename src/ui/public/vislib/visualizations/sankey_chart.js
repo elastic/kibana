@@ -7,7 +7,6 @@ define(function (require) {
     var S = require('d3-plugins-sankey');
     var formatNumber = d3.format(',.0f');
     var format = function (d) { return formatNumber(d) + ' TWh'; };
-    var color = d3.scale.category20();
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
     var errors = require('ui/errors');
@@ -54,6 +53,7 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var color = this.handler.data.getSankeyColorFunc();
       var width;
       var height;
       var div;
@@ -112,7 +112,7 @@ define(function (require) {
           node.append('rect')
               .attr('height', function (d) { return d.dy; })
               .attr('width', sankey.nodeWidth())
-              .style('fill', function (d) { return d.color = color(d.name.replace(/ .*/, '')); })
+              .style('fill', function (d) { return d.color = color(d.name); })
               .style('stroke', function (d) { return d3.rgb(d.color).darker(2); })
             .append('title')
               .text(function (d) { return d.name + '\n' + format(d.value); });

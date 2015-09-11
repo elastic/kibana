@@ -662,6 +662,27 @@ define(function (require) {
     };
 
     /**
+     * Returns a function that does color lookup on names for sankey charts
+     *
+     * @method getSankeyColorFunc
+     * @returns {Function} Performs lookup on string and returns hex color
+     */
+    Data.prototype.getSankeyColorFunc = function () {
+      var data = this.getVisData();
+      var names = [];
+
+      _.forEach(data, function (obj) {
+        obj.slices = this._removeZeroSlices(obj.slices);
+
+        _.forEach(obj.slices.nodes, function (node) {
+          names.push(node.name);
+        });
+      });
+
+      return color(names);
+    };
+
+    /**
      * ensure that the datas ordered property has a min and max
      * if the data represents an ordered date range.
      *
