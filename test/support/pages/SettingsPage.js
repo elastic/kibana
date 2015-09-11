@@ -51,7 +51,6 @@ define(function (require) {
     },
 
     getTimeFieldOption: function (selection) {
-      console.log('selection = ' + selection);
       return this.remote
         .setFindTimeout(10000)
         .findByXpath(
