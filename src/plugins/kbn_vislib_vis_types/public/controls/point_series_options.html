@@ -5,6 +5,12 @@
       Current time marker
     </label>
   </div>
+  <div class="vis-option-item" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
+    <label>
+      <input type="checkbox" ng-model="vis.params.syncTimeMarker" ng-checked="vis.params.syncTimeMarker">
+      Synchronized Time Marker
+    </label>
+  </div>
   <div class="vis-option-item">
     <label>
       <input type="checkbox" ng-model="vis.params.setYExtents">

@@ -18,6 +18,7 @@ define(function (require) {
           mode: 'stacked',
           times: [],
           addTimeMarker: false,
+          syncTimeMarker: false,
           defaultYExtents: false,
           setYExtents: false,
           yAxis: {}

@@ -4,12 +4,24 @@ define(function (require) {
   var SimpleEmitter = require('ui/utils/SimpleEmitter');
 
   module.factory('markerSync', function () {
+    /**
+     * Time Marker Synchronizer 
+     *
+     * @class MarkerSynchronizer
+     * @constructor
+     * @extends SimpleEmitter
+     */
     _.class(MarkerSynchronizer).inherits(SimpleEmitter);
     function MarkerSynchronizer() {
       MarkerSynchronizer.Super.call(this);
-      this._listeners = {};
     }
 
+    /**
+     * Returns function that emits 'sync' event.
+     *
+     * @method hoverHandler
+     * @returns {Function}
+     */
     MarkerSynchronizer.prototype.hoverHandler = function () {
       var self = this;
       return function (e) {

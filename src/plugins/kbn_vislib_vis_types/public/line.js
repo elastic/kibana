@@ -22,6 +22,7 @@ define(function (require) {
           radiusRatio: 9,
           times: [],
           addTimeMarker: false,
+          syncTimeMarker: false,
           defaultYExtents: false,
           setYExtents: false,
           yAxis: {}

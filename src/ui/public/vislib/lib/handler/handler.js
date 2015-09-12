@@ -46,18 +46,20 @@ define(function (require) {
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
 
-      // ignore if not time based chart
-      if (_.get(this.xAxis, 'ordered.date')) {
-        this.markerSyncHandler = function (e) {
-          var margin = self._attr.margin;
-          self.charts.forEach(function (chart) {
-            var height = $(chart.chartEl).height() - margin.top - margin.bottom;
-            var svg = d3.select(chart.chartEl).selectAll('svg > g');
-            markerRenderer.render(svg, self.xAxis.xScale, height, [e.point.x]);
-          });
-        };
+      if (this._attr.syncTimeMarker) {
+        // ignore if not time based chart
+        if (_.get(this.xAxis, 'ordered.date')) {
+          this.markerSyncHandler = function (e) {
+            var margin = self._attr.margin;
+            self.charts.forEach(function (chart) {
+              var height = $(chart.chartEl).height() - margin.top - margin.bottom;
+              var svg = d3.select(chart.chartEl).selectAll('svg > g');
+              markerRenderer.render(svg, self.xAxis.xScale, height, [e.point.x]);
+            });
+          };
 
-        markerSync.on('sync', this.markerSyncHandler);
+          markerSync.on('sync', this.markerSyncHandler);
+        }
       }
 
       if (this._attr.addLegend) {
