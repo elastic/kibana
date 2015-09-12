@@ -130,12 +130,10 @@ module.exports = new Datasource('es', {
       name: 'url',
       types: ['string', 'null']
     },
-    /*
     {
       name: 'fit', // If you went around fiddling with interval you probably need a better fit function
       types: ['string', 'null']
     }
-    */
   ],
   help: 'Pull data from an elasticsearch instance',
   aliases: ['elasticsearch'],

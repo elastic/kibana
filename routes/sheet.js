@@ -1,5 +1,9 @@
 var Promise = require('bluebird');
 
+function replyWithError(e, reply) {
+  reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
+}
+
 module.exports = function (request, reply) {
 
   var chainRunner = require('../handlers/chain_runner.js');
@@ -7,7 +11,7 @@ module.exports = function (request, reply) {
   try {
     sheet = chainRunner.processRequest(request.payload);
   } catch (e) {
-    reply({error: e.toString()}).code(400);
+    replyWithError(e, reply);
     return;
   }
 
@@ -17,7 +21,5 @@ module.exports = function (request, reply) {
       stats: chainRunner.getStats()
     };
     reply(response);
-  }).catch(function (e) {
-    reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
-  });
+  }).catch(function (e) {replyWithError(e, reply)});
 };

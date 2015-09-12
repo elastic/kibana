@@ -105,11 +105,14 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         var expression = $attrs.timelionExpression;
         var startOf = expression.slice(0, $scope.suggestions.position.min + 1);
         var endOf =  expression.slice($scope.suggestions.position.max, expression.length);
-        var newVal = startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()' + endOf;
+
+        var completeFunction = $scope.suggestions.list[$scope.suggestions.selected].name + '()';
+
+        var newVal = startOf + completeFunction + endOf;
 
         $elem.val(newVal);
         $elem[0].selectionStart = $elem[0].selectionEnd =
-          (startOf + $scope.suggestions.list[$scope.suggestions.selected].name + '()').length - 1;
+          (startOf + completeExpression).length - 1;
         ngModelCtrl.$setViewValue(newVal);
 
         resetSuggestions();
