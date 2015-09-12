@@ -75,19 +75,19 @@ define(function (require) {
    * @return {Object} configured renderer
    */
   function configureWith(baseOpts, opts) {
-    newOpts = _.assign({}, baseOpts, opts || {});
+    var newOpts = _.assign({}, baseOpts, opts || {});
 
     return {
       render: (function _render(newOpts) {
         return function render(selection, xScale, height, times) {
           return renderWith(newOpts, selection, xScale, height, times);
         };
-      })(newOpts),
+      }(newOpts)),
       configure: (function _configure(newOpts) {
         return function configure(opts) {
           return configureWith(newOpts, opts);
         };
-      })(newOpts),
+      }(newOpts)),
       opts: newOpts
     };
   }

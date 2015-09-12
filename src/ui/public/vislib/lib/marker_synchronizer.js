@@ -5,7 +5,7 @@ define(function (require) {
 
   module.factory('markerSync', function () {
     /**
-     * Time Marker Synchronizer 
+     * Time Marker Synchronizer
      *
      * @class MarkerSynchronizer
      * @constructor

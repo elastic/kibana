@@ -1,6 +1,7 @@
 define(function (require) {
   return function TimeMarkerFactory() {
     var d3 = require('d3');
+    var _ = require('lodash');
     var dateMath = require('ui/utils/dateMath');
     var markerRenderer = require('ui/vislib/lib/marker_renderer');
     var defaultOpts = {

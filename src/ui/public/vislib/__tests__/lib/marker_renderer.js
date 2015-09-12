@@ -4,6 +4,7 @@ var expect = require('expect.js');
 var sinon = require('sinon');
 var moment = require('moment');
 var _ = require('lodash');
+var $ = require('jquery');
 
 describe('Vislib Marker Renderer Test Suite', function () {
   var markerRenderer = require('ui/vislib/lib/marker_renderer');
@@ -95,7 +96,7 @@ describe('Vislib Marker Renderer Test Suite', function () {
     beforeEach(function () {
       clock = sinon.useFakeTimers();
 
-      var domain = [+moment().subtract(30, 'm'), +moment().add(30, 'm')]
+      var domain = [+moment().subtract(30, 'm'), +moment().add(30, 'm')];
       xScale = d3.time.scale().domain(domain).range([0, 600]);
 
       selection = d3.select('body').append('div').attr('class', 'marker');
@@ -133,7 +134,7 @@ describe('Vislib Marker Renderer Test Suite', function () {
     });
 
     it('should render specified times (d3 data series)', function () {
-      var times = [+moment().subtract(5, 'm'), +moment().add(5, 'm'), +moment().add(15, 'm')]
+      var times = [+moment().subtract(5, 'm'), +moment().add(5, 'm'), +moment().add(15, 'm')];
       times = times.map(function (time) {
         return { class: 'd3-time-marker', time: time };
       });
@@ -178,25 +179,25 @@ describe('Vislib Marker Renderer Test Suite', function () {
       expect(markers.length).to.be(1);
 
       var red = markers[0];
-      expect(red.getAttribute('stroke')).to.be('red')
-      expect(red.getAttribute('stroke-width')).to.be('1.5')
-      expect(red.getAttribute('stroke-opacity')).to.be('0.8')
+      expect(red.getAttribute('stroke')).to.be('red');
+      expect(red.getAttribute('stroke-width')).to.be('1.5');
+      expect(red.getAttribute('stroke-opacity')).to.be('0.8');
 
       markers = $('.time-marker-layer line.green-time-marker').get();
       expect(markers.length).to.be(1);
 
       var green = markers[0];
-      expect(green.getAttribute('stroke')).to.be('green')
-      expect(green.getAttribute('stroke-width')).to.be('1.5')
-      expect(green.getAttribute('stroke-opacity')).to.be('0.75')
+      expect(green.getAttribute('stroke')).to.be('green');
+      expect(green.getAttribute('stroke-width')).to.be('1.5');
+      expect(green.getAttribute('stroke-opacity')).to.be('0.75');
 
       markers = $('.time-marker-layer line.blue-time-marker').get();
       expect(markers.length).to.be(1);
 
       var blue = markers[0];
-      expect(blue.getAttribute('stroke')).to.be('blue')
-      expect(blue.getAttribute('stroke-width')).to.be('1')
-      expect(blue.getAttribute('stroke-opacity')).to.be('0.8')
+      expect(blue.getAttribute('stroke')).to.be('blue');
+      expect(blue.getAttribute('stroke-width')).to.be('1');
+      expect(blue.getAttribute('stroke-opacity')).to.be('0.8');
     });
 
     it('should render markers in separated layers', function () {
