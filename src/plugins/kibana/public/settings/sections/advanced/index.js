@@ -42,8 +42,12 @@ define(function (require) {
           .value();
         }
 
+        // react to changes of the config values
+        var unhook = $rootScope.$on('change:config', readConfigVals);
+        $scope.$on('$destroy', unhook);
+
+        // initial config setup
         readConfigVals();
-        $rootScope.$on('change:config', readConfigVals);
       }
     };
   });
