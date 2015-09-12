@@ -1,6 +1,13 @@
 var _ = require('lodash');
+var TabCollection = require('../TabCollection');
 
 module.exports = function (chrome, internals) {
+
+  internals.tabs = new TabCollection({
+    defaults: {
+      baseUrl: `${chrome.getAppUrl()}#/`
+    }
+  });
 
   /**
    * ui/chrome tabs API

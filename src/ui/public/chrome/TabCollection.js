@@ -1,24 +1,13 @@
 var _ = require('lodash');
-var { startsWith } = require('lodash');
+var { startsWith, get, set, omit, wrap, pick } = require('lodash');
 var Tab = require('ui/chrome/Tab');
-var { format, parse } = require('url');
-
-parse = _.wrap(parse, function (parse, path) {
-  var parsed = parse(path, true);
-  return {
-    pathname: parsed.pathname,
-    query: parsed.query || {},
-    hash: parsed.hash
-  };
-});
+var { parse } = require('url');
 
 function TabCollection(opts = {}) {
-
   var tabs = [];
   var specs = null;
-  var defaults = {};
+  var defaults = opts.defaults || {};
   var activeTab = null;
-  var store = opts.store || window.sessionStorage;
 
   this.set = function (_specs) {
     specs = _.cloneDeep([].concat(_specs || []));
@@ -26,7 +15,7 @@ function TabCollection(opts = {}) {
   };
 
   this.setDefaults = function () {
-    defaults = _.clone(arguments[0]);
+    defaults = _.defaults({}, arguments[0], defaults);
     this._rebuildTabs();
   };
 
@@ -37,7 +26,7 @@ function TabCollection(opts = {}) {
   this._rebuildTabs = function () {
     _.invoke(this.get(), 'destroy');
     tabs = _.map(specs, function (spec) {
-      return new Tab(_.defaults({}, spec, defaults, { store }));
+      return new Tab(_.defaults({}, spec, defaults));
     });
   };
 
@@ -45,20 +34,19 @@ function TabCollection(opts = {}) {
     return activeTab;
   };
 
-  this.consumeRouteUpdate = function (appId, path, persist) {
-    var currentUrl = parse(path, true);
-
+  this.consumeRouteUpdate = function (href, persist) {
     tabs.forEach(function (tab) {
-      tab.active = tab.rootRegExp.test(path);
-
-      var lastUrl = tab.active ? currentUrl : parse(tab.lastUrl || tab.rootUrl);
-      lastUrl.query._g = currentUrl.query._g;
-
-      if (tab.active) activeTab = tab;
-      if (persist) {
-        tab.persistLastUrl(format(lastUrl));
+      tab.active = tab.rootRegExp.test(href);
+      if (tab.active) {
+        activeTab = tab;
+        activeTab.setLastUrl(href);
       }
     });
+
+    if (!persist || !activeTab) return;
+
+    let globalState = get(parse(activeTab.getLastPath(), true), 'query._g');
+    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState));
   };
 }
 

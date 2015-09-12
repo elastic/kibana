@@ -1,7 +1,7 @@
 let expect = require('expect.js');
-let { indexBy } = require('lodash');
+let { indexBy, random } = require('lodash');
 
-let TabFakeStore = require('./_utils/TabFakeStore');
+let TabFakeStore = require('./_TabFakeStore');
 let TabCollection = require('../TabCollection');
 let Tab = require('../Tab');
 
@@ -55,33 +55,18 @@ describe('Chrome TabCollection', function () {
   describe('#consumeRouteUpdate()', function () {
     it('updates the active tab', function () {
       let store = new TabFakeStore();
-      let tabs = new TabCollection({ store });
+      let baseUrl = `http://localhost:${random(1000, 9999)}`;
+      let tabs = new TabCollection({ store, defaults: { baseUrl } });
       tabs.set([
         { id: 'a' },
         { id: 'b' }
       ]);
 
-      tabs.consumeRouteUpdate('app', 'http://localhost:9200/a', '/a');
-      let tabById = indexBy(tabs.get(), 'id');
-      expect(tabById.a.active).to.equal(true);
-      expect(tabById.b.active).to.equal(false);
-      expect(tabs.getActive()).to.equal(tabById.a);
-    });
-
-    it('updates the last url of each tab with the current global state', function () {
-      let store = new TabFakeStore();
-      let tabs = new TabCollection({ store });
-      tabs.set([
-        { id: 'a', trackLastUrl: true },
-        { id: 'b', trackLastUrl: true }
-      ]);
-      let tabById = indexBy(tabs.get(), 'id');
-
-      expect(tabById.a.lastUrl).to.not.match(/_g=1/);
-      expect(tabById.b.lastUrl).to.not.match(/_g=1/);
-      tabs.consumeRouteUpdate('app', 'http://localhost:9200/a?_g=1', '/a', true);
-      expect(tabById.a.lastUrl).to.match(/_g=1/);
-      expect(tabById.b.lastUrl).to.match(/_g=1/);
+      tabs.consumeRouteUpdate(`${baseUrl}/a`);
+      let {a, b} = indexBy(tabs.get(), 'id');
+      expect(a.active).to.equal(true);
+      expect(b.active).to.equal(false);
+      expect(tabs.getActive()).to.equal(a);
     });
   });
 

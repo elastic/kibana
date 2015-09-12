@@ -1,7 +1,7 @@
 let expect = require('expect.js');
 
-let setup = require('../../api/apps');
-let TabFakeStore = require('../_utils/TabFakeStore');
+let setup = require('../apps');
+let TabFakeStore = require('../../__tests__/_TabFakeStore');
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {
@@ -83,18 +83,18 @@ describe('Chrome API :: apps', function () {
     });
   });
 
-  describe('#getAppId()', function () {
-    it('returns the id property of the current app', function () {
+  describe('#getAppUrl()', function () {
+    it('returns the url property of the current app', function () {
       let chrome = {};
-      let app = { id: 'foo' };
+      let app = { url: 'foo' };
       setup(chrome, { app });
-      expect(chrome.getAppId()).to.eql('foo');
+      expect(chrome.getAppUrl()).to.eql('foo');
     });
 
     it('returns undefined if no active app', function () {
       let chrome = {};
       setup(chrome, {});
-      expect(chrome.getAppId()).to.equal(undefined);
+      expect(chrome.getAppUrl()).to.equal(undefined);
     });
   });
 

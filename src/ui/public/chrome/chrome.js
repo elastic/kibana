@@ -11,16 +11,10 @@ require('ui/promises');
 var metadata = require('ui/metadata');
 var TabCollection = require('ui/chrome/TabCollection');
 
-var chrome = {
-  navBackground: '#222222',
-  logo: null,
-  smallLogo: null
-};
-
-var internals = _.assign(
+var chrome = {};
+var internals = _.defaults(
   _.cloneDeep(metadata),
   {
-    tabs: new TabCollection(),
     rootController: null,
     rootTemplate: null,
     showAppsLink: null,
