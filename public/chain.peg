@@ -76,7 +76,6 @@ reference
 
 chain
  = func:function rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
-/*
  / '.' func:function_name? {
   var exception = {
     type: 'incompleteFunction',
@@ -89,7 +88,6 @@ chain
   }
   error(JSON.stringify(exception));
  }
-*/
 
 group
  = '(' space? grouped:series+ space? ')' functions:function* {
