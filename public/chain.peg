@@ -76,7 +76,7 @@ reference
 
 chain
  = func:function rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
- / '.' func:function_name? {
+ / '.' func:function_name? '('? {
   var exception = {
     type: 'incompleteFunction',
     function: func,
