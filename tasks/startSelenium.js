@@ -9,18 +9,10 @@ var {spawn} = require('child_process');
 module.exports = function (grunt) {
   grunt.registerTask('startSelenium', 'Start an instance of selenium standalone', function (keepalive) {
     const done = this.async();
-    const config = _.defaults(this.options(), {
-      seleniumStandalone: {
-        filename: 'selenium-server-standalone-2.47.1.jar',
-        server: 'https://selenium-release.storage.googleapis.com/2.47/',
-        md5: 'e6cb10b8f0f353c6ca4a8f62fb5cb472'
-      }
-    });
+    const config = this.options();
 
-    const SELENIUM_DIRECTORY = path.join(grunt.config.get('root'), 'selenium');
-    const SELENIUM_FILE_PATH = path.join(SELENIUM_DIRECTORY, config.seleniumStandalone.filename);
-    const SELENIUM_DOWNLOAD_URL = config.seleniumStandalone.server + config.seleniumStandalone.filename;
-    const SELENIUM_HASH = config.seleniumStandalone.md5;
+    const SELENIUM_FILE_PATH = path.join(config.selenium.directory, config.selenium.filename);
+    const SELENIUM_DOWNLOAD_URL = config.selenium.server + config.selenium.filename;
 
     function waitForReadiness(seleniumProcess) {
       seleniumProcess.stderr.on('data', function (log) {
@@ -57,7 +49,7 @@ module.exports = function (grunt) {
       .pipe(fs.createWriteStream(SELENIUM_FILE_PATH))
       .on('finish', function () {
         grunt.log.writeln('done');
-        validateDownload(SELENIUM_FILE_PATH, SELENIUM_HASH, success);
+        validateDownload(SELENIUM_FILE_PATH, config.selenium.md5, success);
       })
       .on('error', function (err) {
         grunt.fail.warn(err);
@@ -66,7 +58,7 @@ module.exports = function (grunt) {
 
 
     function start() {
-      fs.mkdir(SELENIUM_DIRECTORY, function (err) {
+      fs.mkdir(config.selenium.directory, function (err) {
         if (err && err.code !== 'EEXIST') return grunt.fail.warn(err);
         fs.exists(SELENIUM_FILE_PATH, function (exists) {
           if (exists) {
