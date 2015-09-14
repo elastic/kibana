@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var request = require('request');
+var wreck = require('wreck');
 var fs = require('fs');
 var path = require('path');
 var colors = require('ansicolors');
@@ -14,18 +14,20 @@ module.exports = function (grunt) {
 
       let doneProcessing = 0;
       files.forEach(function (file) {
-        fs.createReadStream(path.join(config.dataDir, file))
-        .pipe(request.post(`${config.server}/_bulk`, function (err, res, body) {
+        wreck.post(`${config.server}/_bulk`, {
+          payload: fs.createReadStream(path.join(config.dataDir, file)),
+          json: true
+        }, function (err, res, payload) {
           var status;
           if (err || res.statusCode !== 200) {
-            grunt.fail.warn(err || body);
+            grunt.fail.warn(err || payload);
             status = colors.red('error');
           } else {
             status = colors.green('success');
           }
           grunt.log.writeln(`[${status}] ${file}`);
           if (++doneProcessing === files.length) done();
-        }));
+        });
       });
     });
   });
