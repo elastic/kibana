@@ -17,6 +17,8 @@ module.exports = function (grunt) {
     '_build:shrinkwrap:cleanup',
     '_build:installNpmDeps',
     'clean:testsFromModules',
+    'clean:deepModuleBins',
+    'clean:deepModules',
     'run:optimizeBuild',
     'stop:optimizeBuild',
     '_build:downloadNodeBuilds:finish',
