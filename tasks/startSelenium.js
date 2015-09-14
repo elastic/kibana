@@ -56,18 +56,19 @@ module.exports = function (grunt) {
       });
     }
 
-
     function start() {
-      fs.mkdir(config.selenium.directory, function (err) {
-        if (err && err.code !== 'EEXIST') return grunt.fail.warn(err);
-        fs.exists(SELENIUM_FILE_PATH, function (exists) {
-          if (exists) {
-            spawnSelenium();
-          } else {
-            downloadSelenium(spawnSelenium);
-          }
-        });
-      });
+      try {
+        fs.mkdirSync(config.selenium.directory);
+
+      } catch (err) {
+        if (err && err.code !== 'EEXIST') grunt.fail.warn(err);
+      }
+
+      if (fs.existsSync(SELENIUM_FILE_PATH)) {
+        spawnSelenium();
+      } else {
+        downloadSelenium(spawnSelenium);
+      }
     }
 
     start();
