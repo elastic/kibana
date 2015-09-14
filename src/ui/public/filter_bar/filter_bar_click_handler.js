@@ -3,6 +3,25 @@ define(function (require) {
   var dedupFilters = require('./lib/dedupFilters');
   var uniqFilters = require('./lib/uniqFilters');
 
+  function findLabel(aggBuckets, event) {
+    // TODO: find out if there is always a fieldFormatter
+    return _.filter(aggBuckets, function (obj) {
+      var formatter = obj.aggConfig.fieldFormatter();
+      var labelParts = event.label.split(': ');
+      var normalizedLabel = _.slice(labelParts, 0, labelParts.length - 1).join(': ');
+      var formattedKey = formatter(obj.key);
+      return formattedKey === event.label || formattedKey === normalizedLabel;
+    });
+  }
+
+  function findAggConfig(values) {
+    if (_.isArray(values)) { // point series chart
+      var index = _.findIndex(values, 'aggConfigResult');
+      return values[index].aggConfigResult;
+    }
+    return values.aggConfigResult; // pie chart
+  }
+
   return function (Notifier) {
     return function ($state) {
       return function (event) {
@@ -22,27 +41,13 @@ define(function (require) {
           aggConfigResult = event.point.aggConfigResult;
         }
 
-        function findAggConfig(values) {
-          if (_.isArray(values)) { // point series chart
-            var index = _.findIndex(values, 'aggConfigResult');
-            return values[index].aggConfigResult;
-          }
-          return values.aggConfigResult; // pie chart
-        }
-
-        function findLabel(obj) {
-          // TODO: find out if there is always a fieldFormatter
-          var formatter = obj.aggConfig.fieldFormatter();
-          return formatter(obj.key) === event.label;
-        }
-
         if (aggConfigResult) {
           var isLegendLabel = !!event.point.values;
-          var results = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
+          var aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 
-          if (isLegendLabel) results = _.filter(results, findLabel); // filter results array by legend label
+          if (isLegendLabel) aggBuckets = findLabel(aggBuckets, event);
 
-          var filters = _(results)
+          var filters = _(aggBuckets)
           .map(function (result) {
             try {
               return result.createFilter();
