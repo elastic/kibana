@@ -44,6 +44,10 @@ function getFunctionByName(name) {
   return functions[name];
 }
 
+function throwWithCell(cell, exception) {
+  throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);
+}
+
 // Invokes a modifier function, resolving arguments into series as needed
 function invoke(fnName, args) {
   var functionDef = getFunctionByName(fnName);
@@ -168,7 +172,15 @@ function preProcessSheet(sheet) {
 
   var queries = {};
   _.each(sheet, function (chainList, i) {
-    queries = _.extend(queries, preProcessChain(chainList));
+    try {
+      var queriesInCell = _.mapValues(preProcessChain(chainList), function (val) {
+        val.cell = i;
+        return val;
+      });
+      queries = _.extend(queries, queriesInCell);
+    } catch (e) {
+      throwWithCell(i, e);
+    }
   });
   queries = _.values(queries);
 
@@ -176,23 +188,28 @@ function preProcessSheet(sheet) {
     return invoke(query.function, query.arguments);
   }).value();
 
-  return Promise.all(promises).then(function (resolvedDatasources) {
+  return Promise.settle(promises).then(function (resolvedDatasources) {
     stats.queryTime = (new Date()).getTime();
 
     _.each(queries, function (query, i) {
-
       var functionDef = getFunctionByName(query.function);
+      var resolvedDatasource = resolvedDatasources[i];
+
+      if (resolvedDatasource.isRejected()) {
+        throwWithCell(query.cell, resolvedDatasource.reason());
+      }
+
+      resolvedDatasource = resolvedDatasource.value();
 
       // Fit each series
-      resolvedDatasources[i].list = _.map(resolvedDatasources[i].list, function (series) {
-
-        if (series.data.length === 0) throw new Error (functionDef.name + '() returned no results');
+      resolvedDatasource.list = _.map(resolvedDatasource.list, function (series) {
+        if (series.data.length === 0) throwWithCell(query.cell, new Error(functionDef.name + '() returned no results'));
         series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
         return series;
       });
 
       // And cache the fit series.
-      queryCache[functionDef.cacheKey(query)] = resolvedDatasources[i];
+      queryCache[functionDef.cacheKey(query)] = resolvedDatasource;
     });
 
     stats.fitTime = (new Date()).getTime();
@@ -233,10 +250,12 @@ function processRequest(request) {
   targetSeries = buildTarget(tlConfig);
 
   return preProcessSheet(sheet).then(function () {
-    return _.map(sheet, function (chainList) {
+    return _.map(sheet, function (chainList, i) {
       return resolveChainList(chainList).then(function (seriesList) {
         stats.sheetTime = (new Date()).getTime();
         return seriesList.list;
+      }).catch(function (e) {
+        throwWithCell(i, e);
       });
     });
   });
