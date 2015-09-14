@@ -54,6 +54,10 @@ module.exports = function (options) {
       settings.urls.push(options.url);
     }
 
+    if (options.config) {
+      settings.config = options.config;
+    }
+
     if (options.install) {
       settings.action = 'install';
       parts = options.install.split('/');
