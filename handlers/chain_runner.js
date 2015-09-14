@@ -5,43 +5,23 @@ var Promise = require('bluebird');
 
 var parseSheet = require('./lib/parse_sheet.js');
 var parseDateMath = require('../lib/date_math.js');
-var toMS = require('../lib/to_milliseconds.js');
-
 var loadFunctions = require('../lib/load_functions.js');
 var repositionArguments = require('./lib/reposition_arguments.js');
 var indexArguments = require('./lib/index_arguments.js');
+var getFunctionByName = require('./lib/get_function_by_name.js');
+var preprocessChain = require('./lib/preprocess_chain');
+var validateTime = require('./lib/validate_time.js');
 
-var buildTarget = require('../lib/build_target.js');
-// Load function plugins
-var functions  = loadFunctions('series_functions/');
+var functions  = loadFunctions('series_functions');
 var fitFunctions  = loadFunctions('fit_functions');
-var config = require('../timelion.json');
 
-var tlConfig = {
-  time: {
-    from: 'now-12M',
-    to: 'now',
-    interval: config.default_interval
-  },
-  file: config,
-  getTargetSeries: function () {
-    return _.map(targetSeries, function (bucket) { // eslint-disable-line no-use-before-define
-      return [bucket, null];
-    });
-  }
-};
-var targetSeries;
+var tlConfig = require('./lib/tl_config');
 var queryCache = {};
 var stats = {};
 var sheet;
 
 function getQueryCacheKey(query) {
   return JSON.stringify(_.omit(query, 'label'));
-}
-
-function getFunctionByName(name) {
-  if (!functions[name]) throw new Error ('No such function: ' + name);
-  return functions[name];
 }
 
 function throwWithCell(cell, exception) {
@@ -122,58 +102,12 @@ function resolveChainList(chainList) {
   });
 }
 
-
-function preProcessChain(chain, queries) {
-  queries = queries || {};
-  function validateAndStore(item) {
-    if (_.isObject(item) && item.type === 'function') {
-      var functionDef = getFunctionByName(item.function);
-
-      if (functionDef.datasource) {
-        queries[functionDef.cacheKey(item)] = item;
-        return true;
-      }
-      return false;
-    }
-  }
-
-  // Is this thing a function?
-  if (validateAndStore(chain)) {
-    return;
-  }
-
-  if (!_.isArray(chain)) return;
-
-  _.each(chain, function (operator) {
-    if (!_.isObject(operator)) {
-      return;
-    }
-    switch (operator.type) {
-      case 'chain':
-        preProcessChain(operator.chain, queries);
-        break;
-      case 'chainList':
-        preProcessChain(operator.list, queries);
-        break;
-      case 'function':
-        if (validateAndStore(operator)) {
-          break;
-        } else {
-          preProcessChain(operator.arguments, queries);
-        }
-        break;
-    }
-  });
-
-  return queries;
-}
-
 function preProcessSheet(sheet) {
 
   var queries = {};
   _.each(sheet, function (chainList, i) {
     try {
-      var queriesInCell = _.mapValues(preProcessChain(chainList), function (val) {
+      var queriesInCell = _.mapValues(preprocessChain(chainList), function (val) {
         val.cell = i;
         return val;
       });
@@ -203,7 +137,10 @@ function preProcessSheet(sheet) {
 
       // Fit each series
       resolvedDatasource.list = _.map(resolvedDatasource.list, function (series) {
-        if (series.data.length === 0) throwWithCell(query.cell, new Error(functionDef.name + '() returned no results'));
+        if (series.data.length === 0) {
+          throwWithCell(query.cell, new Error(functionDef.name + '() returned no results'));
+        }
+
         series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
         return series;
       });
@@ -219,18 +156,6 @@ function preProcessSheet(sheet) {
   });
 }
 
-function validateTime(time) {
-  var span = parseDateMath(time.to, true) - parseDateMath(time.from);
-  var interval = toMS(time.interval);
-  var bucketCount = span / interval;
-  if (bucketCount > tlConfig.file.max_buckets) {
-    throw new Error('Max buckets exceeded: ' +
-      Math.round(bucketCount) + ' of ' + tlConfig.file.max_buckets + ' allowed. ' +
-      'Choose a larger interval or a shorter time span');
-  }
-  return true;
-}
-
 function processRequest(request) {
   if (!request) throw new Error('Empty request body');
 
@@ -239,15 +164,13 @@ function processRequest(request) {
   tlConfig.time = request.time;
   tlConfig.time.to = parseDateMath(request.time.to, true).valueOf();
   tlConfig.time.from = parseDateMath(request.time.from).valueOf();
-
+  tlConfig.setTargetSeries();
 
   stats.invokeTime = (new Date()).getTime();
   stats.queryCount = 0;
   queryCache = {};
   // This is setting the "global" sheet, required for resolving references
   sheet = parseSheet(request.sheet);
-
-  targetSeries = buildTarget(tlConfig);
 
   return preProcessSheet(sheet).then(function () {
     return _.map(sheet, function (chainList, i) {
@@ -266,12 +189,11 @@ module.exports = {
   getStats: function () { return stats; }
 };
 
-
+/*
 function logObj(obj, thing) {
   return JSON.stringify(obj, null, thing ? ' ' : undefined);
 }
 
-/*
 function debugSheet(sheet) {
   sheet = processRequest(sheet);
   Promise.all(sheet).then(function (sheet) {
