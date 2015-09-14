@@ -19,11 +19,9 @@ define(function (require) {
     return Notifier;
   });
 
-  module.run(function ($timeout, kbnVersion, buildNum) {
+  module.run(function ($timeout) {
     // provide alternate methods for setting timeouts, which will properly trigger digest cycles
     Notifier.setTimerFns($timeout, $timeout.cancel);
-    Notifier.setVersion(kbnVersion);
-    Notifier.setBuildNum(buildNum);
   });
 
   /**

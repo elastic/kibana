@@ -7,18 +7,14 @@ describe('Notifier', function () {
   var message = 'Oh, the humanity!';
   var notifier;
   var params;
-  var version;
-  var buildNum;
+  var version = window.__KBN__.version;
+  var buildNum = window.__KBN__.buildNum;
 
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(function () {
     params = { location: 'foo' };
-    version = '1.2.3';
-    buildNum = 12345;
     while (Notifier.prototype._notifs.pop()); // clear global notifications
-    Notifier.setVersion(undefined);
-    Notifier.setBuildNum(undefined);
     notifier = new Notifier(params);
   });
 
@@ -154,14 +150,12 @@ describe('Notifier', function () {
   function testVersionInfo(fnName) {
     context('when version is configured', function () {
       it('adds version to notification', function () {
-        Notifier.setVersion(version);
         var notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
     context('when build number is configured', function () {
       it('adds buildNum to notification', function () {
-        Notifier.setBuildNum(buildNum);
         var notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);
       });
