@@ -8,6 +8,7 @@ require('ui/timefilter');
 require('ui/private');
 require('ui/promises');
 
+var metadata = require('ui/metadata');
 var TabCollection = require('ui/chrome/TabCollection');
 
 var chrome = {
@@ -17,7 +18,7 @@ var chrome = {
 };
 
 var internals = _.assign(
-  _.cloneDeep(window.__KBN__ || {}),
+  _.cloneDeep(metadata),
   {
     tabs: new TabCollection(),
     rootController: null,
