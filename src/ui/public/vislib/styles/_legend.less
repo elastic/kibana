@@ -1,4 +1,5 @@
 @import "~ui/styles/mixins";
+@import "~ui/styles/variables";
 
 .legend-col-wrapper {
   .flex-parent(0, 0, auto);
@@ -43,7 +44,7 @@
       text-align: left;
       font-size: 12px;
       line-height: 13px;
-      color: #666;
+      color: @legend-item-color;
       cursor: default;
       text-align: left;
       white-space: nowrap;

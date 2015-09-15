@@ -32,8 +32,8 @@
 
   &-default {
     .badge {
-      background-color: #fff;
-      color: @navbar-default-bg;
+      background-color: @navbar-default-badge-bg;
+      color: @navbar-default-badge-color;
     }
   }
 
@@ -51,13 +51,13 @@
     }
 
     .badge {
-      background-color: #fff;
-      color: lighten(@navbar-inverse-bg, 10%);
+      background-color: @navbar-inverse-badge-bg;
+      color: @navbar-inverse-badge-color;
     }
   }
 
   .navbar-nav > .active > a {
-    border-bottom-color: @body-bg; // active-arrow-color
+    border-bottom-color: @navbar-nav-active-link-border;
 
     // navbar active arrow base styles
     &:before {
@@ -155,10 +155,10 @@ table,
   .warning,
   .danger,
   .info {
-    color: #fff;
+    color: @table-special-color;
 
     a {
-      color: #fff;
+      color: @table-special-color;
     }
   }
 
@@ -206,7 +206,8 @@ input, {
 
   .form-control,
   .form-control:focus {
-    border: @input-border-width solid @brand-warning;
+    border: @input-border-width solid;
+    border-color: @brand-warning;
   }
 
   .input-group-addon {
@@ -227,7 +228,8 @@ input, {
 
   .form-control,
   .form-control:focus {
-    border: @input-border-width solid @brand-danger;
+    border: @input-border-width solid;
+    border-color: @brand-danger;
   }
 
   .input-group-addon {
@@ -269,7 +271,7 @@ input, {
 .pager {
   a,
   a:hover {
-    color: #fff;
+    color: @pager-link-color;
   }
 
   .disabled {
@@ -296,18 +298,18 @@ input, {
 
   a,
   .alert-link {
-    color: #fff;
+    color: @alert-color;
     text-decoration: underline;
   }
 
   .close {
-    color: #fff;
+    color: @alert-color;
     text-decoration: none;
     opacity: 0.4;
 
     &:hover,
     &:focus {
-      color: #fff;
+      color: @alert-color;
       opacity: 1;
     }
   }

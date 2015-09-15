@@ -24,7 +24,8 @@ var internals = _.assign(
     rootController: null,
     rootTemplate: null,
     showAppsLink: null,
-    brand: null
+    brand: null,
+    applicationClasses: []
   }
 );
 
