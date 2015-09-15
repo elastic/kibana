@@ -113,7 +113,7 @@ function _optimize(properties, mergeAdjacent, aggressiveMerging, validator) {
     if (property.unused)
       continue;
 
-    if (position > 0 && _name == lastName && sameValue(position)) {
+    if (position > 0 && _name == lastName && isImportant == wasImportant && sameValue(position)) {
       property.unused = true;
       continue;
     }

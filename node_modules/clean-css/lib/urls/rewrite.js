@@ -35,12 +35,12 @@ function isData(uri) {
 
 function absolute(uri, options) {
   return path
-    .resolve(path.join(options.fromBase, uri))
+    .resolve(path.join(options.fromBase || '', uri))
     .replace(options.toBase, '');
 }
 
 function relative(uri, options) {
-  return path.relative(options.toBase, path.join(options.fromBase, uri));
+  return path.relative(options.toBase, path.join(options.fromBase || '', uri));
 }
 
 function normalize(uri) {
