@@ -2,6 +2,7 @@ var optimizeProperties = require('../properties/optimizer');
 var stringifyBody = require('../stringifier/one-time').body;
 var stringifySelectors = require('../stringifier/one-time').selectors;
 var isSpecial = require('./is-special');
+var cloneArray = require('../utils/clone-array');
 
 function reduceNonAdjacent(tokens, options, validator) {
   var candidates = {};
@@ -137,9 +138,10 @@ function reduceSelector(tokens, selector, data, context, options, validator) {
 
     var where = data[j].where;
     var token = tokens[where];
+    var clonedBody = cloneArray(token[2]);
 
-    bodies = bodies.concat(token[2]);
-    bodiesAsList.push(token[2]);
+    bodies = bodies.concat(clonedBody);
+    bodiesAsList.push(clonedBody);
     processedTokens.push(where);
   }
 

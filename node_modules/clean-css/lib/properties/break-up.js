@@ -159,11 +159,11 @@ function fourValues(property, compactable) {
     return [];
 
   if (value.length < 2)
-    value[1] = value[0];
+    value[1] = value[0].slice(0);
   if (value.length < 3)
-    value[2] = value[0];
+    value[2] = value[0].slice(0);
   if (value.length < 4)
-    value[3] = value[1];
+    value[3] = value[1].slice(0);
 
   for (var i = componentNames.length - 1; i >= 0; i--) {
     var component = wrapSingle([[componentNames[i], property.important]]);

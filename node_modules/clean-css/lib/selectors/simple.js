@@ -184,13 +184,13 @@ function pixelLengthMinifier(_, value, compatibility) {
     if (intVal === 0)
       return match;
 
-    if (compatibility.units.pt && intVal * 3 % 4 === 0)
+    if (compatibility.properties.shorterLengthUnits && compatibility.units.pt && intVal * 3 % 4 === 0)
       newValue = intVal * 3 / 4 + 'pt';
 
-    if (compatibility.units.pc && intVal % 16 === 0)
+    if (compatibility.properties.shorterLengthUnits && compatibility.units.pc && intVal % 16 === 0)
       newValue = intVal / 16 + 'pc';
 
-    if (compatibility.units.in && intVal % 96 === 0)
+    if (compatibility.properties.shorterLengthUnits && compatibility.units.in && intVal % 96 === 0)
       newValue = intVal / 96 + 'in';
 
     if (newValue)

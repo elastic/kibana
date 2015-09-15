@@ -306,6 +306,9 @@ function compactOverrides(properties, compatibility, validator) {
       } else if (left.shorthand && right.shorthand && left.name == right.name) {
         // merge if all components can be merged
 
+        if (!left.multiplex && right.multiplex)
+          continue;
+
         if (!right.important && left.important) {
           right.unused = true;
           continue propertyLoop;

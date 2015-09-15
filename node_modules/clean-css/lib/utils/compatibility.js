@@ -14,6 +14,7 @@ var DEFAULTS = {
       iePrefixHack: false, // underscore / asterisk prefix hacks on IE
       ieSuffixHack: true, // \9 suffix hacks on IE6-9
       merging: true, // merging properties into one
+      shorterLengthUnits: false, // optimize pixel units into `pt`, `pc` or `in` units
       spaceAfterClosingBrace: true, // 'url() no-repeat' to 'url()no-repeat'
       urlQuotes: false, // whether to wrap content of `url()` into quotes or not
       zeroUnits: true // 0[unit] -> 0
@@ -49,6 +50,7 @@ var DEFAULTS = {
       iePrefixHack: true,
       ieSuffixHack: true,
       merging: false,
+      shorterLengthUnits: false,
       spaceAfterClosingBrace: true,
       urlQuotes: false,
       zeroUnits: true
@@ -84,6 +86,7 @@ var DEFAULTS = {
       iePrefixHack: true,
       ieSuffixHack: true,
       merging: false,
+      shorterLengthUnits: false,
       spaceAfterClosingBrace: true,
       urlQuotes: false,
       zeroUnits: true

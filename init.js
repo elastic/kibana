@@ -18,5 +18,4 @@ module.exports = function (server) {
     path: '/timelion/validate/es',
     handler: require('./routes/validate_es.js')
   });
-
 };

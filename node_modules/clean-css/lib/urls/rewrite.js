@@ -60,7 +60,10 @@ function rebase(uri, options) {
   if (isData(uri))
     return '\'' + uri + '\'';
 
-  if (isRemote(uri) || isRemote(options.toBase))
+  if (isRemote(uri) && !isRemote(options.toBase))
+    return uri;
+
+  if (!isRemote(uri) && isRemote(options.toBase))
     return url.resolve(options.toBase, uri);
 
   return options.absolute ?

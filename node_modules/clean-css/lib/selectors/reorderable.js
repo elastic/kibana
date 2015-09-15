@@ -36,6 +36,8 @@ function canReorderSingle(left, right) {
     return false;
   if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
     return false;
+  if (leftNameRoot == 'border' && rightNameRoot == 'border' && leftName != rightName && (isSideBorder(leftName) && isStyleBorder(rightName) || isStyleBorder(leftName) && isSideBorder(rightName)))
+    return false;
   if (leftNameRoot != rightNameRoot)
     return true;
   if (leftName == rightName && leftNameRoot == rightNameRoot && (leftValue == rightValue || withDifferentVendorPrefix(leftValue, rightValue)))
@@ -56,6 +58,14 @@ function vendorPrefixed(name) {
 
 function unprefixed(name) {
   return name.replace(/^\-(?:moz|webkit|ms|o)\-/, '');
+}
+
+function isSideBorder(name) {
+  return name == 'border-top' || name == 'border-right' || name == 'border-bottom' || name == 'border-left';
+}
+
+function isStyleBorder(name) {
+  return name == 'border-color' || name == 'border-style' || name == 'border-width';
 }
 
 function withDifferentVendorPrefix(value1, value2) {

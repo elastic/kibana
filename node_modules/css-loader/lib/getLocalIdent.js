@@ -11,5 +11,5 @@ module.exports = function getLocalIdent(loaderContext, localIdentName, localName
 	options.context = loaderContext.options && typeof loaderContext.options.context === "string" ? loaderContext.options.context : loaderContext.context;
 	localIdentName = localIdentName.replace(/\[local\]/gi, localName);
 	var hash = loaderUtils.interpolateName(loaderContext, localIdentName, options);
-	return hash.replace(/[^a-zA-Z0-9\-_]/g, "-").replace(/^([^a-zA-Z_])/, "_$1");
+	return hash.replace(new RegExp("[^a-zA-Z0-9\\-_\u00A0-\uFFFF]", "g"), "-").replace(/^([^a-zA-Z_])/, "_$1");
 };
