@@ -22,13 +22,12 @@
 
         <h2>First time configuration</h2>
         <p>
-          First You'll need to edit your <code>timelion.json</code> to tell timelion where to fetch data. If you're using logstash (and the default <code>logstash-*</code> pattern), and Kibana is installed on the same host as Elasticsearch, you're already done. Otherwise, update the <code>timefield</code>, <code>default_index</code> and <code>url</code> parameters to match your environment. Look for this section:
+          First You'll need to edit your <code>timelion.json</code> to tell timelion where to fetch data. If you're using logstash (and the default <code>logstash-*</code> pattern), you're already done. Otherwise, update the <code>timefield</code> and <code>default_index</code> parameters to match your environment. Look for this section:
 
           <pre>
     "es": {
       "timefield": "@timestamp",
       "default_index": "logstash-*",
-      "url": "http://localhost:9200/",
       "allow_url_parameter": false
     },</pre>
         </p>

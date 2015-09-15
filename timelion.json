@@ -5,7 +5,6 @@
   "es": {
     "timefield": "@timestamp",
     "default_index": "logstash-*",
-    "url": "http://localhost:9200/",
     "allow_url_parameter": false
   },
   "graphite": {
