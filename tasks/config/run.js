@@ -74,6 +74,34 @@ module.exports = function (grunt) {
       ]
     },
 
+    seleniumServer: {
+      options: {
+        wait: false,
+        ready: /Selenium Server is up and running/,
+        quiet: true,
+        failOnError: false
+      },
+      cmd: 'java',
+      args: [
+        '-jar',
+        'selenium/selenium-server-standalone-2.47.1.jar'
+      ]
+    },
+
+    devSeleniumServer: {
+      options: {
+        wait: false,
+        ready: /Selenium Server is up and running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: 'java',
+      args: [
+        '-jar',
+        'selenium/selenium-server-standalone-2.47.1.jar'
+      ]
+    },
+
     optimizeBuild: {
       options: {
         wait: false,
