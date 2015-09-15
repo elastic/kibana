@@ -21,6 +21,7 @@ define(function (require) {
     // that either handles the mapping operation or not
     // and add it here. ProTip: These are executed in order listed
     var mappers = [
+      Private(require('./mapMatchAll')),
       Private(require('./mapTerms')),
       Private(require('./mapRange')),
       Private(require('./mapExists')),
