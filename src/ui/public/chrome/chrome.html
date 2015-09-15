@@ -41,13 +41,15 @@
 
         <li ng-if="chrome.getBrand('title')" class="navbar-brand">{{ chrome.getBrand('title') }}</li>
 
-        <li ng-if="chrome.getShowAppsLink()">
-          <a href="/apps"><i class="fa fa-th" alt="Go to app switcher"></i></a>
-        </li>
-
         <li ng-repeat="tab in chrome.getTabs()" ng-class="{ active: tab.active }">
           <a ng-href="{{ tab.href() }}" ng-style="{ 'border-bottom-color': tab.activeIndicatorColor }">
             {{ tab.title }}
+          </a>
+        </li>
+
+        <li class="to-body" ng-class="{active: appTemplate.is('switcher')}" ng-if="chrome.getShowAppsLink()">
+          <a ng-click="appTemplate.toggle('switcher')">
+            <i class="fa fa-th" alt="Go to app switcher"></i>
           </a>
         </li>
       </ul>
@@ -94,6 +96,12 @@
     </div>
     <!-- /Full navbar -->
   </nav>
+
+  <config
+    config-template="appTemplate"
+    config-object="switcher"
+    config-close="appTemplate.close">
+  </config>
 
   <config
     ng-show="timefilter.enabled"
