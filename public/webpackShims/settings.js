@@ -52,11 +52,6 @@ define([
     return true;
   }
 
-  function getBasicAuth() {
-    var mode = localStorage.getItem("basic_auth") || "false";
-    return mode == "true";
-  }
-
   function setBasicAuth(mode) {
     if (typeof mode !== "boolean") {
       return false;
@@ -126,15 +121,6 @@ define([
     }
   }
 
-  var basicAuthPopupShown = false;
-  function showBasicAuthPopupIfNotShown() {
-    if (basicAuthPopupShown) {
-      return;
-    }
-    $('#auth_alert').modal('show');
-    basicAuthPopupShown= true;
-  }
-
 
   var settings_popup = $("#settings_popup");
 
@@ -147,10 +133,6 @@ define([
   var wm = getWrapMode();
   wrap_mode_ctl.prop('checked', wm);
   //setWrapMode(wm);
-
-  var basic_auth_ctl = settings_popup.find("#basic_auth");
-  var ba = getBasicAuth();
-  basic_auth_ctl.prop('checked', ba);
 
   var theme_ctl = settings_popup.find("#theme");
   var theme = getTheme();
@@ -171,9 +153,6 @@ define([
     if (!setWrapMode(wrap_mode_ctl.prop("checked"))) {
       wrap_mode_ctl.prop('checked', getWrapMode());
     }
-    if (!setBasicAuth(basic_auth_ctl.prop("checked"))) {
-      basic_auth_ctl.prop('checked', getBasicAuth());
-    }
     if (!setTheme(theme_ctl.val())) {
       theme_ctl.val(getTheme());
     }
@@ -193,18 +172,8 @@ define([
     return false
   });
 
-  var enable_basic_auth_btn = $("#enable_basic_auth");
-  enable_basic_auth_btn.click(function () {
-    setBasicAuth(true);
-    $('#auth_alert').modal('hide');
-    es.forceRefresh();
-    return true;
-  });
-
   exports.getTheme = getTheme;
-  exports.getBasicAuth = getBasicAuth;
   exports.getAceTheme = getAceTheme;
   exports.getAutocomplete = getAutocomplete;
-  exports.showBasicAuthPopupIfNotShown = showBasicAuthPopupIfNotShown;
   exports.applyCurrentSettings = applyCurrentSettings;
 });

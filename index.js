@@ -17,7 +17,6 @@ module.exports = function (kibana) {
             proxy: {
               mapUri: function (req, cb) {
                 let { uri } = req.query;
-
                 if (!uri) {
                   cb(Boom.badRequest('URI is a required param.'));
                 }
@@ -26,7 +25,14 @@ module.exports = function (kibana) {
                 }
               },
               passThrough: true,
-              xforward: true
+              xforward: true,
+              onResponse: function (err, res, request, reply, settings, ttl) {
+                if (err != null) {
+                  reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+                } else {
+                  reply(null, res);
+                }
+              }
             }
           }
         }

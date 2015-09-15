@@ -61,9 +61,6 @@ define([
         password: password,
         username: uname,
         dataType: "text", // disable automatic guessing
-        xhrFields: {
-          withCredentials: settings.getBasicAuth()
-        }
       };
 
 
@@ -72,14 +69,8 @@ define([
           wrappedDfd.resolveWith(this, [data, textStatus, jqXHR]);
         },
         function (jqXHR, textStatus, errorThrown) {
-          if (jqXHR.status == 401 && !options.xhrFields.withCredentials && !disable_auth_alert) {
-            settings.showBasicAuthPopupIfNotShown();
-          } else if (jqXHR.status == 0 && jqXHR.state() == "rejected") {
-            jqXHR.responseText =
-              "\n\nElasticsearch may not be reachable or you may need to check your CORS settings." +
-              "If CORS is enabled, try turning off Sense's Basic Authentication support under Setting (cog icon)." +
-                "This will result in a less strict CORS enforcement by the browser." +
-              "\nPlease check the marvel documentation for more information."
+          if (jqXHR.status == 0) {
+            jqXHR.responseText = "\n\nFailed to connect to Sense's backend.\nPlease check the Kibana server is up and running";
           }
           wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
         });

@@ -250,7 +250,7 @@ define([
         api = "kb/api_2_0";
       }
       else {
-        api = "kb/api_0_90";
+        api = "kb/api_1_0";
       }
 
       if (api) {
