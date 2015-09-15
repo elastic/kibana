@@ -64,8 +64,12 @@
     }
   }
 
-  &-sidebar {
+  .collapsible-sidebar {
     .flex-parent(0, 0, auto);
+  }
+
+  &-sidebar {
+    .flex-parent(1, 0, auto);
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
