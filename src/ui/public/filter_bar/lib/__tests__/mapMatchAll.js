@@ -3,14 +3,14 @@ describe('ui/filter_bar/lib', function () {
   describe('mapMatchAll()', function () {
     const expect = require('expect.js');
     const ngMock = require('ngMock');
-    let resolvePromises;
+    let $rootScope;
     let mapMatchAll;
     let filter;
 
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, $rootScope) {
-      resolvePromises = () => $rootScope.$apply();
+    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
+      $rootScope = _$rootScope_;
       mapMatchAll = Private(require('ui/filter_bar/lib/mapMatchAll'));
       filter = {
         match_all: {},
@@ -28,7 +28,7 @@ describe('ui/filter_bar/lib', function () {
           expect(result).to.be(filter);
           done();
         });
-        resolvePromises();
+        $rootScope.$apply();
       });
     });
 
@@ -36,7 +36,7 @@ describe('ui/filter_bar/lib', function () {
       let result;
       beforeEach(function () {
         mapMatchAll(filter).then(r => result = r);
-        resolvePromises();
+        $rootScope.$apply();
       });
 
       it('key is set to meta field', function () {
