@@ -1,0 +1,70 @@
+[[kibana-plugins]]
+== Kibana Plugins
+
+Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin` 
+command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
+`plugins` directory.
+
+[float]
+=== Installing Plugins
+
+Use the following command to install a plugin:
+
+[source,shell]
+bin/kibana plugin --install <org>/<package>/<version>
+
+You can also use `-i` instead of `--install`, as in the following example:
+
+[source,shell]
+bin/kibana plugin -i elasticsearch/marvel-ui/latest
+
+Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the 
+plugin from `download.elastic.co`.
+
+[float]
+=== Installing Plugins from Github
+
+When the specified plugin is not found at `download.elastic.co`, the plugin management tool parses the element 
+as a Github user name, as in the following example:
+
+[source,shell]
+bin/kibana plugin --install rashidkpc/kibana-slideshow
+Installing kibana-slideshow
+Attempting to extract from https://download.elastic.co/rashidkpc/kibana-slideshow/kibana-slideshow-latest.tar.gz
+Attempting to extract from https://github.com/rashidkpc/kibana-slideshow/archive/master.tar.gz
+
+[float]
+=== Removing Plugins
+
+Use the `--remove` or `-r` option to remove a plugin, including any configuration information, as in the following 
+example:
+
+[source,shell]
+bin/kibana plugin --remove rashidkpc/kibana-slideshow
+
+[float]
+=== Configuring the Plugin Manager
+
+By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager 
+to perform. You can control the level of feedback with the `--quiet` and `--silent` options. Use the `--quiet` option to 
+suppress all non-error output. Use the `--silent` option to suppress all output.
+
+By default, plugin manager requests do not time out. Use the `--timeout` option, followed by a time, to change this 
+behavior, as in the following examples:
+
+[source,shell]
+.Waits for 30 seconds before failing
+bin/kibana plugin --install rashidkpc/kibana-slideshow --timeout 30s
+
+[source,shell]
+.Waits for 1 minute before failing
+bin/kibana plugin --install rashidkpc/kibana-slideshow --timeout 1m
+
+[float]
+=== Plugin Manager Exit Codes
+
+[horizontal]
+0:: Success
+64:: Unknown command or incorrect option parameter
+74:: I/O error
+70:: Other error
