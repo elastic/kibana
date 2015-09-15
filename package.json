@@ -11,9 +11,6 @@
     "node-fetch": "^1.3.2",
     "pegjs": "^0.8.0"
   },
-  "devDependencies": {
-    "babel-eslint": "^4.1.1"
-  },
   "scripts": {
     "test": "mocha --compilers js:babel/register series_functions/__test__/*.js"
   }
