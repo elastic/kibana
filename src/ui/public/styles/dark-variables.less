@@ -16,13 +16,13 @@
 @gray14:                                      #eeeeee;
 
 @brand-primary:                               @gray14;
-@brand-success:                               #31C471;
+@brand-success:                               #31c471;
 @brand-info:                                  #6482e5;
-@brand-warning:                               #F39C12;
-@brand-danger:                                #E74C3C;
+@brand-warning:                               #f39c12;
+@brand-danger:                                #e74c3c;
 
 @body-bg:                                     @gray3;
-@text-color:                                  @brand-primary;
+@text-color:                                  #cecece;
 
 @link-color:                                  #b7e2ea;
 @link-hover-color:                            lighten(@link-color, 10%);
@@ -49,7 +49,8 @@
 @action-add:                                  desaturate(@btn-success-bg, 30%);
 @action-remove:                               desaturate(@btn-danger-bg, 30%);
 
-@table-border-color:                          @gray6;
+
+@table-border-color:                          #5c5c5c;
 @table-cell-hover-bg:                         transparent;
 @table-cell-hover-hover-bg:                   @gray6;
 @table-row-hover-bg:                          lighten(@gray6, 4%);
@@ -58,7 +59,6 @@
 @table-sort-color:                            @gray6;
 @table-sort-asc-color:                        @gray11;
 @table-sort-desc-color:                       @gray11;
-
 
 
 @nav-link-hover-bg:                           @gray6;
@@ -73,23 +73,22 @@
 @paginate-page-link-active-color:             @gray9;
 
 
-
-@dashboard-bg:                                @gray3;
-@panel-bg:                                    @gray2;
+@dashboard-bg:                                #1e1b1e;
+@panel-bg:                                    #343434;
 @panel-inner-border:                          @gray13;
 
 @panel-default-text:                          @brand-primary;
-@panel-default-border:                        @gray4;
-@panel-default-heading-bg:                    @gray2;
+@panel-default-border:                        #5c5c5c;
+@panel-default-heading-bg:                    darken(@panel-bg, 5%);
 
 @dashboard-panel-bg:                          @panel-bg;
 @dashboard-panel-color:                       @text-color;
-@dashboard-panel-heading-link-color:          @text-color;
-@dashboard-panel-heading-link-hover-color:    @link-hover-color;
+@dashboard-panel-heading-link-color:          #a6a6a6;
+@dashboard-panel-heading-link-hover-color:    #a6a6a6;
 @dashboard-panel-load-error-color:            @btn-danger-bg;
 
-@collapser-bg:                                @gray2;
-@collapser-border:                            @gray6;
+@collapser-bg:                                @panel-bg;
+@collapser-border:                            #5c5c5c;
 @collapser-color:                             @gray8;
 @collapser-hover-bg:                          @gray6;
 @collapser-hover-color:                       @gray3;
@@ -167,3 +166,5 @@
 @navbar-default-color:                        @white;
 @navbar-default-bg:                           @gray3;
 @navbar-default-border:                       darken(@navbar-default-bg, 10%);
+
+@spinner-bg:                                  @white;

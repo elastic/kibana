@@ -35,7 +35,6 @@
   }
 
 
-
 // /node_modules/bootstrap/less/tables.less
   .table {
     // Cells
@@ -248,6 +247,12 @@
   }
   .cell-hover:hover {
     background-color: @table-cell-hover-hover-bg;
+  }
+
+
+// /src/ui/public/styles/spinner.less
+  .spinner > div {
+    background-color: @spinner-bg;
   }
 
 
@@ -513,6 +518,13 @@
               color: @dashboard-panel-heading-link-hover-color;
             }
           }
+          span.panel-title {
+            color: @dashboard-panel-heading-link-color;
+          }
+          i {
+            color: @dashboard-panel-heading-link-color;
+            opacity: 1;
+          }
         }
 
         .load-error {
@@ -523,11 +535,5 @@
       }
     }
   }
-
-  // .dashboard-panel-picker {
-  //   & > .list-group-item {
-  //     background-color: @dashboard-add-vis-panel-bg;
-  //   }
-  // }
 
 }
