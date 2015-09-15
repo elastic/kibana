@@ -7,12 +7,7 @@ curl -XPUT 'http://localhost:9200/twitter/tweet/1' -d '{
   "message" : "trying out Elastic Search"
 }'
 -------------------------------------
-{
-  "server": "http://localhost:9200",
-  "method": "PUT",
-  "url": "/twitter/tweet/1"
-}
--------------------------------------
+PUT /twitter/tweet/1
 {
   "user" : "kimchy",
   "post_date" : "2009-11-15T14:12:12",
@@ -25,12 +20,7 @@ curl -XGET "localhost/twitter/tweet/1?version=2" -d '{
    "message" : "elasticsearch now has versioning support, double cool!"
 }'
 -------------------------------------
-{
-   "server": "http://localhost",
-   "method": "GET",
-   "url": "/twitter/tweet/1?version=2"
-}
--------------------------------------
+GET /twitter/tweet/1?version=2
 {
    "message" : "elasticsearch now has versioning support, double cool!"
 }
@@ -41,12 +31,7 @@ curl -XPOST https://localhost/twitter/tweet/1?version=2 -d '{
    "message" : "elasticsearch now has versioning support, double cool!"
 }'
 -------------------------------------
-{
-    "server": "https://localhost",
-    "method": "POST",
-    "url": "/twitter/tweet/1?version=2"
-}
--------------------------------------
+POST /twitter/tweet/1?version=2
 {
    "message" : "elasticsearch now has versioning support, double cool!"
 }
@@ -55,23 +40,13 @@ Curl 4
 -------------------------------------
 curl -XPOST https://localhost/twitter
 -------------------------------------
-{
-  "server": "https://localhost",
-  "method": "POST",
-  "url": "/twitter"
-}
--------------------------------------
+POST /twitter
 ==========
 Curl 5
 -------------------------------------
 curl -X POST https://localhost/twitter/
 -------------------------------------
-{
-    "server": "https://localhost",
-    "method": "POST",
-    "url": "/twitter/"
-}
--------------------------------------
+POST /twitter/
 =============
 Curl 6
 -------------------------------------
@@ -81,12 +56,7 @@ curl -s -XPOST localhost:9200/missing-test -d'
   }
 }'
 -------------------------------------
-{
-  "server": "http://localhost:9200",
-  "method": "POST",
-  "url": "/missing-test"
-}
--------------------------------------
+POST /missing-test
 {
   "mappings": {
   }
@@ -100,12 +70,7 @@ curl 'localhost:9200/missing-test/doc/_search?pretty' -d'
   },
 }'
 -------------------------------------
-{
-  "server": "http://localhost:9200",
-  "method": "",
-  "url": "/missing-test/doc/_search?pretty"
-}
--------------------------------------
+GET /missing-test/doc/_search?pretty
 {
   "query": {
   },
@@ -119,14 +84,48 @@ curl localhost:9200/ -d'
   }
 }'
 -------------------------------------
-{
-  "server": "http://localhost:9200",
-  "method": "",
-  "url": "/"
-}
--------------------------------------
+GET /
 {
   "query": {
   }
 }
 ====================================
+Curl Script
+-------------------------------------
+#!bin/sh
+
+// test something
+curl 'localhost:9200/missing-test/doc/_search?pretty' -d'
+{
+  "query": {
+  },
+}'
+
+
+curl -XPOST https://localhost/twitter
+
+#someother comments
+curl localhost:9200/ -d'
+{
+  "query": {
+  }
+}'
+
+
+-------------------
+# test something
+GET /missing-test/doc/_search?pretty
+{
+  "query": {
+  },
+}
+
+POST /twitter
+
+#someother comments
+GET /
+{
+  "query": {
+  }
+}
+

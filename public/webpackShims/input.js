@@ -81,11 +81,11 @@ define([
       $copyAsCURL.hide();
     });
 
-    zc.on('load', function () {
+    zc.on('ready', function () {
       function setupCopyButton(cb) {
         cb = typeof cb === 'function' ? cb : $.noop;
         $copyAsCURL.css('visibility', 'hidden');
-        input.getCurrentRequestAsCURL(function (curl) {
+        input.getRequestsAsCURL(function (curl) {
           $copyAsCURL.attr('data-clipboard-text', curl);
           $copyAsCURL.css('visibility', 'visible');
           cb();
@@ -114,7 +114,7 @@ define([
     settings.applyCurrentSettings(input);
   }
   input.focus();
-  input.highlightCurrentRequestAndUpdateActionBar();
+  input.highlightCurrentRequestsAndUpdateActionBar();
 
   return input;
 });

@@ -21,7 +21,7 @@ require('ui/chrome')
 
     require('./src/url_autocomplete_tests.js');
     require('./src/url_params_tests.js');
-    require('./src/curl_tests.js');
+    require('./src/curl_parsing_tests.js');
     require('./src/kb_tests.js');
     require('./src/mapping_tests.js');
     require('./src/editor_tests.js');

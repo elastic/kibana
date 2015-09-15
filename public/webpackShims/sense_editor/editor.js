@@ -53,7 +53,7 @@ define([
       });
     }
 
-    // itterate all of the accessible properties/method, on the prototype and beyond
+    // iterate all of the accessible properties/method, on the prototype and beyond
     for (var key in aceEditor) {
       switch (typeof aceEditor[key]) {
         case 'function':
@@ -121,7 +121,10 @@ define([
       var curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
       while (curRow > 0 && !editor.parser.isStartRequestRow(curRow, editor)) curRow--;
 
-      return {row: curRow, column: 0};
+      return {
+        row: curRow,
+        column: 0
+      };
     };
 
     editor.nextRequestStart = function (rowOrPos) {
@@ -134,7 +137,10 @@ define([
           break;
         }
       }
-      return {row: curRow, column: 0};
+      return {
+        row: curRow,
+        column: 0
+      };
     };
 
     editor.autoIndent = onceDoneTokenizing(function () {
@@ -239,11 +245,11 @@ define([
 
       // move start row to the previous request start if in body, o.w. forward
       if (editor.parser.isInBetweenRequestsRow(startRow)) {
-        for (; startRow <= endRow; startRow++) {
-          if (editor.parser.isStartRequestRow(startRow)) {
-            break;
-          }
-        }
+        //for (; startRow <= endRow; startRow++) {
+        //  if (editor.parser.isStartRequestRow(startRow)) {
+        //    break;
+        //  }
+        //}
       }
       else {
         for (; startRow >= 0; startRow--) {
@@ -317,13 +323,13 @@ define([
 
       var bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
       var dataEndPos;
-      while (bodyStartRow < range.end.row
-      || (
-      bodyStartRow == range.end.row
-      && 0 < range.end.column
-      )
-        ) {
-        dataEndPos = editor.nextDataDocEnd({row: bodyStartRow, column: 0});
+      while (bodyStartRow < range.end.row || (
+        bodyStartRow == range.end.row && 0 < range.end.column
+      )) {
+        dataEndPos = editor.nextDataDocEnd({
+          row: bodyStartRow,
+          column: 0
+        });
         var bodyRange = new (ace.require("ace/range").Range)(
           bodyStartRow, 0,
           dataEndPos.row, dataEndPos.column
@@ -336,11 +342,16 @@ define([
       cb(request);
     });
 
-    editor.getRequestsInRange = function (range, cb) {
-      if (_.isUndefined(cb)) {
+    editor.getRequestsInRange = function (range, includeNonRequestBlocks, cb) {
+      if (_.isUndefined(includeNonRequestBlocks)) {
+        includeNonRequestBlocks = false;
         cb = range;
         range = null;
+      } else if (_.isUndefined(cb)) {
+        cb = includeNonRequestBlocks;
+        includeNonRequestBlocks = false;
       }
+
       function explicitRangeToRequests(requestsRange, tempCb) {
         if (!requestsRange) {
           tempCb([]);
@@ -351,22 +362,37 @@ define([
         var endRow = requestsRange.end.row;
 
         // move to the next request start (during the second iterations this may not be exactly on a request
-        for (; startRow <= endRow; startRow++) {
-          if (editor.parser.isStartRequestRow(startRow)) {
+        var currentRow = startRow;
+        for (; currentRow <= endRow; currentRow++) {
+          if (editor.parser.isStartRequestRow(currentRow)) {
             break;
           }
         }
 
-        if (startRow > endRow) {
-          tempCb([]);
+        var nonRequestPrefixBlock = null;
+        if (includeNonRequestBlocks && currentRow != startRow) {
+          nonRequestPrefixBlock = editor.getSession().getLines(startRow, currentRow - 1).join("\n");
+        }
+
+        if (currentRow > endRow) {
+          tempCb(nonRequestPrefixBlock ? [nonRequestPrefixBlock] : []);
           return;
         }
 
-        editor.getRequest(startRow, function (request) {
-          explicitRangeToRequests(
-            {start: {row: request.range.end.row + 1}, end: {row: requestsRange.end.row}},
+        editor.getRequest(currentRow, function (request) {
+          explicitRangeToRequests({
+              start: {
+                row: request.range.end.row + 1
+              },
+              end: {
+                row: requestsRange.end.row
+              }
+            },
             function (rest_of_requests) {
               rest_of_requests.unshift(request);
+              if (nonRequestPrefixBlock != null) {
+                rest_of_requests.unshift(nonRequestPrefixBlock);
+              }
               tempCb(rest_of_requests);
             }
           )
@@ -430,7 +456,10 @@ define([
 
       var column = (session.getLine(curRow) || "").replace(/\s+$/, "").length;
 
-      return {row: curRow, column: column};
+      return {
+        row: curRow,
+        column: column
+      };
     };
 
     editor.nextDataDocEnd = function (pos) {
@@ -453,7 +482,10 @@ define([
 
       var column = (session.getLine(curRow) || "").length;
 
-      return {row: curRow, column: column};
+      return {
+        row: curRow,
+        column: column
+      };
     };
 
     // overwrite the actual aceEditor's onPaste method
@@ -468,18 +500,11 @@ define([
 
     editor.handleCURLPaste = function (text) {
       var curlInput = curl.parseCURL(text);
-      if ($("#es_server").val()) {
-        curlInput.server = null;
-      } // do not override server
-
-      if (!curlInput.method) {
-        curlInput.method = "GET";
-      }
 
       editor.insert(utils.textFromRequest(curlInput));
     };
 
-    editor.highlightCurrentRequestAndUpdateActionBar = onceDoneTokenizing(function () {
+    editor.highlightCurrentRequestsAndUpdateActionBar = onceDoneTokenizing(function () {
       var session = editor.getSession();
       editor.getEngulfingRequestsRange(function (new_current_req_range) {
         if (new_current_req_range == null && CURRENT_REQ_RANGE == null) {
@@ -509,41 +534,55 @@ define([
       });
     }, true);
 
-    editor.getCurrentRequestAsCURL = function (cb) {
-      cb = typeof cb === 'function' ? cb : $.noop;
-      editor.getRequest(function (req) {
-        if (!req) {
-          return;
-        }
+    editor.getRequestsAsCURL = function (range, cb) {
+      if (_.isUndefined(cb)) {
+        cb = range;
+        range = null;
+      }
 
-        var
-          es_path = req.url,
-          es_method = req.method,
-          es_data = req.data;
+      if (_.isUndefined(cb)) {
+        cb = $.noop;
+      }
 
-        var url = es.constructESUrl(es_path);
+      editor.getRequestsInRange(range, true, function (requests) {
 
-        var curl = 'curl -X' + es_method + ' "' + url + '"';
-        if (es_data && es_data.length) {
-          curl += " -d'\n";
-          // since Sense doesn't allow single quote json string any single qoute is within a string.
-          curl += es_data.join("\n").replace(/'/g, '\\"');
-          if (es_data.length > 1) {
-            curl += "\n";
-          } // end with a new line
-          curl += "'";
-        }
+        var result = _.map(requests, function requestToCurl(req) {
 
-        cb(curl);
+          if (typeof req === "string") {
+            // no request block
+            return req;
+          }
+
+          var
+            es_path = req.url,
+            es_method = req.method,
+            es_data = req.data;
+
+          var url = es.constructESUrl(es_path);
+
+          var ret = 'curl -X' + es_method + ' "' + url + '"';
+          if (es_data && es_data.length) {
+            ret += " -d'\n";
+            // since Sense doesn't allow single quote json string any single qoute is within a string.
+            ret += es_data.join("\n").replace(/'/g, '\\"');
+            if (es_data.length > 1) {
+              ret += "\n";
+            } // end with a new line
+            ret += "'";
+          }
+          return ret;
+        });
+
+        cb(result.join("\n"));
       });
     };
 
     editor.getSession().on('tokenizerUpdate', function (e) {
-      editor.highlightCurrentRequestAndUpdateActionBar();
+      editor.highlightCurrentRequestsAndUpdateActionBar();
     });
 
     editor.getSession().selection.on('changeCursor', function (e) {
-      editor.highlightCurrentRequestAndUpdateActionBar();
+      editor.highlightCurrentRequestsAndUpdateActionBar();
     });
 
     editor.updateActionsBar = (function () {
@@ -614,4 +653,4 @@ define([
   }
 
   return SenseEditor;
-})
+});

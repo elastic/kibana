@@ -208,7 +208,7 @@ define([
         $.ajax(loadFrom).done(function (data) {
           resetToValues(defaultHost, data);
           input.moveToNextRequestEdge(true);
-          input.highlightCurrentRequestAndUpdateActionBar();
+          input.highlightCurrentRequestsAndUpdateActionBar();
           input.updateActionsBar();
         });
       }

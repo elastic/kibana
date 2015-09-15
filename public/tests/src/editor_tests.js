@@ -19,9 +19,10 @@
 
 define([
   'ace',
+  'es',
   'input',
   'raw!./editor_input1.txt'
-], function (ace, input, editor_input1) {
+], function (ace, es, input, editor_input1) {
   'use strict';
 
   var aceRange = ace.require("ace/range");
@@ -30,8 +31,10 @@ define([
 
   module("Editor", {
     setup: function () {
+      es.setBaseUrl("http://localhost:9200");
       input.$el.show();
       input.autocomplete._test.removeChangeListener();
+
     },
     teardown: function () {
       input.$el.hide();
@@ -289,7 +292,6 @@ define([
         start();
       });
     });
-
   }
 
   multi_req_test("mid body to mid body", editor_input1,
@@ -352,5 +354,28 @@ define([
 
   multi_req_test("between requests - before comment", editor_input1,
     {start: {row: 19}, end: {row: 22}}, []);
+
+
+  function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
+    utils_test("multi request copy as curl - " + name, editor_input, function () {
+      input.getRequestsAsCURL(range, function (curl) {
+        equal(curl, expected);
+        start();
+      });
+    });
+  }
+
+
+  multi_req_copy_as_curl_test("start to end, with comment", editor_input1,
+    {start: {row: 6}, end: {row: 13}}, `
+curl -XGET "http://localhost:9200/_stats?level=shards"
+
+#in between comment
+
+curl -XPUT "http://localhost:9200/index_1/type1/1" -d'
+{
+  "f": 1
+}'`.trim()
+  );
 
 });

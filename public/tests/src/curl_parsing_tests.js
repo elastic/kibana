@@ -20,7 +20,7 @@
 define([
   'vendor/_',
   'curl',
-  'raw!./curl_tests.txt'
+  'raw!./curl_parsing_tests.txt'
 ], function (_, curl, curlTests) {
   'use strict';
 
@@ -33,13 +33,6 @@ define([
     's;kdjfsldkfj curl -XDELETE ""',
     '{ "hello": 1 }'
   ];
-
-  function compareCURL(result, expected) {
-    deepEqual(result.server, expected.server);
-    deepEqual(result.method, expected.method);
-    deepEqual(result.url, expected.url);
-    deepEqual(result.data, expected.data);
-  }
 
 
   _.each(notCURLS, function (notCURL, i) {
@@ -54,21 +47,13 @@ define([
     }
     fixture = fixture.split(/^-+$/m);
     var name = fixture[0].trim(),
-      curlText = fixture[1].trim(),
-      response = fixture[2].trim(),
-      data = (fixture[3] || "").trim();
-
-    try {
-      response = JSON.parse(response);
-    } catch (e) {
-      throw "error parsing [" + name + ": " + response + "\n" + e;
-    }
-    response.data = data;
+      curlText = fixture[1],
+      response = fixture[2].trim();
 
     test("cURL Detection - " + name, function () {
       ok(curl.detectCURL(curlText), "marked as not curl while it was:" + curlText);
       var r = curl.parseCURL(curlText);
-      compareCURL(r, response);
+      equal(r, response);
     });
   })
     
