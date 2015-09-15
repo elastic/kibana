@@ -1,5 +1,5 @@
 define(function (require) {
-  return function ColorUtilService(Private, config) {
+  return function ColorUtilService(Private) {
     var _ = require('lodash');
     var mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
 

@@ -24,7 +24,7 @@ describe('Vislib Color Module Test Suite', function () {
     var color;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, config) {
+    beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
       config.set('visualization:colorMapping', {});
       seedColors = Private(require('ui/vislib/components/color/seed_colors'));
@@ -33,7 +33,7 @@ describe('Vislib Color Module Test Suite', function () {
       color = getColors(arr);
     }));
 
-    afterEach(ngMock.inject(function (config) {
+    afterEach(ngMock.inject((config) => {
       config.set('visualization:colorMapping', previousConfig);
     }));
 
