@@ -3,18 +3,7 @@ define(function (require) {
   var dedupFilters = require('./lib/dedupFilters');
   var uniqFilters = require('./lib/uniqFilters');
 
-  function findLabel(aggBuckets, event) {
-    // TODO: find out if there is always a fieldFormatter
-    return _.filter(aggBuckets, function (obj) {
-      var formatter = obj.aggConfig.fieldFormatter();
-      var labelParts = event.label.split(': ');
-      var normalizedLabel = _.slice(labelParts, 0, labelParts.length - 1).join(': ');
-      var formattedKey = formatter(obj.key);
-      return formattedKey === event.label || formattedKey === normalizedLabel;
-    });
-  }
-
-  function findAggConfig(values) {
+  function findAggConfigResult(values) {
     if (_.isArray(values)) { // point series chart
       var index = _.findIndex(values, 'aggConfigResult');
       return values[index].aggConfigResult;
@@ -36,7 +25,7 @@ define(function (require) {
         if (event.point.orig) {
           aggConfigResult = event.point.orig.aggConfigResult;
         } else if (event.point.values) {
-          aggConfigResult = findAggConfig(event.point.values);
+          aggConfigResult = findAggConfigResult(event.point.values);
         } else {
           aggConfigResult = event.point.aggConfigResult;
         }
@@ -45,7 +34,10 @@ define(function (require) {
           var isLegendLabel = !!event.point.values;
           var aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 
-          if (isLegendLabel) aggBuckets = findLabel(aggBuckets, event);
+          // For legend clicks, use the last bucket in the path
+          if (isLegendLabel) {
+            aggBuckets = _.slice(aggBuckets, aggBuckets.length - 1);
+          }
 
           var filters = _(aggBuckets)
           .map(function (result) {
