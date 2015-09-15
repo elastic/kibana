@@ -1,8 +1,7 @@
 var parseDateMath = require('../../lib/date_math.js');
 var toMS = require('../../lib/to_milliseconds.js');
-var tlConfig = require('./tl_config.js');
 
-module.exports = function validateTime(time) {
+module.exports = function validateTime(time, tlConfig) {
   var span = parseDateMath(time.to, true) - parseDateMath(time.from);
   var interval = toMS(time.interval);
   var bucketCount = span / interval;

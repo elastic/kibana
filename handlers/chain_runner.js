@@ -15,7 +15,7 @@ var validateTime = require('./lib/validate_time.js');
 var functions  = loadFunctions('series_functions');
 var fitFunctions  = loadFunctions('fit_functions');
 
-var tlConfig = require('./lib/tl_config');
+var tlConfig;
 var queryCache = {};
 var stats = {};
 var sheet;
@@ -159,7 +159,7 @@ function preProcessSheet(sheet) {
 function processRequest(request) {
   if (!request) throw new Error('Empty request body');
 
-  validateTime(request.time);
+  validateTime(request.time, tlConfig);
 
   tlConfig.time = request.time;
   tlConfig.time.to = parseDateMath(request.time.to, true).valueOf();
@@ -184,9 +184,12 @@ function processRequest(request) {
   });
 }
 
-module.exports = {
-  processRequest: processRequest,
-  getStats: function () { return stats; }
+module.exports = function (_tlConfig_) {
+  tlConfig = _tlConfig_;
+  return {
+    processRequest: processRequest,
+    getStats: function () { return stats; }
+  };
 };
 
 /*
