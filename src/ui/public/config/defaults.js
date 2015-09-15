@@ -166,6 +166,10 @@ define(function () {
           '  "value": 0',
           '}'
         ].join('\n')
+      },
+      'dashboard:defaultDarkTheme': {
+        value: false,
+        description: 'New dashboards use dark theme by default',
       }
     };
   };

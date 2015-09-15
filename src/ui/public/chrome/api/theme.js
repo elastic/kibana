@@ -60,4 +60,41 @@ module.exports = function (chrome, internals) {
     return internals.brand[item];
   };
 
+  /**
+   * Adds a class to the application node
+   * @param {string} - the class name to add
+   * @return {chrome}
+   */
+  chrome.addApplicationClass = function (val) {
+    var classes = internals.applicationClasses || [];
+    classes.push(val);
+    classes = _.uniq(classes);
+
+    internals.applicationClasses = classes;
+    return chrome;
+  };
+
+  /**
+   * Removes a class from the application node. Note: this only
+   * removes classes that were added via the addApplicationClass method
+   * @param  {string|[string]} - class or classes to be removed
+   * @return {chrome}
+   */
+  chrome.removeApplicationClass = function (val) {
+    var classesToRemove = [].concat(val || []);
+    var classes = internals.applicationClasses || [];
+    _.pull(classes, ...classesToRemove);
+
+    internals.applicationClasses = classes;
+    return chrome;
+  };
+
+  /**
+   * @return {string} - a space delimited string of the classes added by the
+   * addApplicationClass method
+   */
+  chrome.getApplicationClasses = function () {
+    return internals.applicationClasses.join(' ');
+  };
+
 };

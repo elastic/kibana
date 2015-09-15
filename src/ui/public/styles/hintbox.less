@@ -1,10 +1,5 @@
 @import "~ui/styles/variables";
 
-@hintbox-background-color: @gray-lighter;
-@hintbox-spacing-vertical: 10px;
-@hintbox-spacing-horizontal: 12px;
-@hintbox-table-border-color: #BFC9CA;
-
 .hintbox {
   padding: @hintbox-spacing-vertical @hintbox-spacing-horizontal;
   border-radius: 5px;
@@ -12,15 +7,15 @@
   background-color: @hintbox-background-color;
 
   a {
-    color: @link-color !important;
+    color: @hintbox-link-color !important;
 
     &:hover {
-      color: @text-color !important;
+      color: @hintbox-link-hover-color !important;
     }
   }
 
   pre {
-    background-color: white;
+    background-color: @hintbox-pre-bg;
   }
 
   &-label,

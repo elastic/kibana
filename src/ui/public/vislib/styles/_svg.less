@@ -1,10 +1,12 @@
+@import (reference) "~ui/styles/variables";
+
 /* Axis Styles */
 .axis {
   shape-rendering: crispEdges;
   stroke-width: 1px;
 
   line, path {
-    stroke: #ddd;
+    stroke: @svg-axis-color;
     fill: none;
     shape-rendering: crispEdges;
   }
@@ -16,12 +18,12 @@
 
 .tick text {
   font-size: 8pt;
-  fill: #848e96;
+  fill: @svg-tick-text-color;
 }
 
 /* Brush Styling */
 .brush .extent {
-  stroke: #fff;
+  stroke: @svg-brush-color;
   fill-opacity: .125;
   shape-rendering: crispEdges;
 }
@@ -89,6 +91,6 @@ path {
 
 .endzone {
   opacity: 0.05;
-  fill: #000;
+  fill: @svg-endzone-bg;
   pointer-events: none;
 }

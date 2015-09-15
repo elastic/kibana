@@ -8,15 +8,14 @@
   .app-link {
     display: inline-block;
     vertical-align: top;
-    text-align: center;
     width: @app-icon-size;
     margin: 0px 10px;
+    text-align: left;
 
     .app-icon {
       display: block;
       height: @app-icon-size;
       width: @app-icon-size;
-      background-size: cover;
       background-position: center;
       background-size: contain;
       border-radius: @border-radius-base;
@@ -27,11 +26,13 @@
       color: @text-color;
       font-size: 0.9em;
       width: 100%;
+      text-align: center;
     }
 
     &:hover .app-title {
       text-decoration: underline;
     }
+
   }
 
 }
