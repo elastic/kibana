@@ -64,7 +64,7 @@ describe('Filter Manager', function () {
       });
     });
 
-    context('when given params where one side is infinite', function () {
+    describe('when given params where one side is infinite', function () {
       let filter;
       beforeEach(function () {
         filter = fn(indexPattern.fields.byName['script number'], { gte: 0, lt: Infinity }, indexPattern);
@@ -90,7 +90,7 @@ describe('Filter Manager', function () {
       });
     });
 
-    context('when given params where both sides are infinite', function () {
+    describe('when given params where both sides are infinite', function () {
       let filter;
       beforeEach(function () {
         filter = fn(indexPattern.fields.byName['script number'], { gte: -Infinity, lt: Infinity }, indexPattern);
