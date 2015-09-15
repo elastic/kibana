@@ -1,7 +1,3 @@
-var Promise = require('bluebird');
-var elasticsearch = require('elasticsearch');
-
-
 module.exports = function (server) {
   server.route({
     method: 'GET',

@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var moment = require('moment');
 var Datasource = require('../lib/classes/datasource');
-var elasticsearch = require('elasticsearch');
 
 var offset = {
   request: function (request, offset) {
@@ -152,9 +151,7 @@ module.exports = new Datasource('es', {
       throw new Error('url= is not allowed');
     }
 
-    var client = new elasticsearch.Client({
-      host: config.url,
-    });
+    var client = tlConfig.server.plugins.elasticsearch.client;
 
     var body = buildRequest(config, tlConfig);
     return client.search(body).then(function (resp) {
