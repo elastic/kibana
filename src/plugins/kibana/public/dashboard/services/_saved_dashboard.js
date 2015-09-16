@@ -26,8 +26,8 @@ define(function (require) {
           panelsJSON: '[]',
           version: 1,
           timeRestore: false,
-          timeTo: undefined,
-          timeFrom: undefined,
+          timeTo: 'string',
+          timeFrom: 'string',
           darkTheme: config.get('dashboard:defaultDarkTheme')
         },
 
