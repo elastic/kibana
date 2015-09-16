@@ -6,7 +6,9 @@ define(function (require) {
     var filter = { meta: { index: indexPattern.id } };
     if (formattedValue) filter.meta.formattedValue = formattedValue;
 
-    params = _.clone(params);
+    // when there is a method attached to params elsewhere, it must be removed
+    // for filters to be generated correctly
+    params = _.omit(params, _.isFunction);
 
     if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
     if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
