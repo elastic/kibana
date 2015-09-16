@@ -78,12 +78,13 @@ class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
+      recordsPath: resolve(this.env.workingDir, 'webpack.records'),
+
       plugins: [
         new webpack.ResolverPlugin([
           new DirectoryNameAsMain()
         ]),
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.DedupePlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
         }),

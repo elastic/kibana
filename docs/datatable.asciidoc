@@ -31,7 +31,8 @@ remove a range.
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
 *Filters*:: You can specify a set of {ref}/search-aggregations-bucket-filters-aggregation.html[_filters_] for the data. 
 You can specify a filter as a query string or in JSON format, just as in the Discover search bar. Click *Add Filter* to 
-add another filter.
+add another filter. Click the image:images/labelbutton.png[] *label* button to open the label field, where you can type 
+in a name to display on the visualization.
 *Significant Terms*:: Displays the results of the experimental 
 {ref}/search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the 
 *Size* parameter defines the number of entries this aggregation returns.

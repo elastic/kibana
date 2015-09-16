@@ -47,10 +47,9 @@ chrome
     title: 'Settings'
   }
 ])
-.setRootController('kibana', function ($scope, courier) {
+.setRootController('kibana', function ($scope, $rootScope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
     courier.start();
   });
 });
-

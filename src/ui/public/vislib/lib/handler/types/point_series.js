@@ -67,7 +67,7 @@ define(function (require) {
           {
             type: 'warning',
             msg: 'Positive and negative values are not accurately represented by stacked ' +
-                 'area charts. Either changing the chart mode to "overlay" or using a ' +
+                 'area charts. Either changing the chart mode to "overlap" or using a ' +
                  'bar chart is recommended.',
             test: function (vis, data) {
               if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;

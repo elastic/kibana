@@ -155,10 +155,13 @@ define(function (require) {
       var pattern = mockIndexPattern(index);
 
       return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
-      .catch(notify.error)
+      .catch(function (err) {
+        if (err instanceof IndexPatternMissingIndices) return;
+        notify.error(err);
+      })
       .then(function (existing) {
-        var all = existing.all;
-        var matches = existing.matches;
+        var all = _.get(existing, 'all', []);
+        var matches = _.get(existing, 'matches', []);
         if (all.length) {
           index.existing = {
             class: 'success',

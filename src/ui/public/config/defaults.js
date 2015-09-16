@@ -3,6 +3,9 @@ define(function () {
     // wraped in provider so that a new instance is given to each app/test
 
     return {
+      'buildNum': {
+        readonly: true
+      },
       'query:queryString:options': {
         value: '{ "analyze_wildcard": true }',
         description: 'Options for the lucene query string parser',
@@ -57,10 +60,6 @@ define(function () {
         value: 10,
         description: 'The top N most popular fields to show',
       },
-      'format:numberPrecision': {
-        value: 3,
-        description: 'Round numbers to this many decimal places',
-      },
       'histogram:barTarget': {
         value: 50,
         description: 'Attempt to generate around this many bar when using "auto" interval in date histograms',
@@ -76,6 +75,29 @@ define(function () {
         '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
         'Explanation of cell dimensions.</a>',
+      },
+      'visualization:tileMap:WMSdefaults': {
+        value: JSON.stringify({
+          enabled: false,
+          url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+          options: {
+            version: '1.3.0',
+            layers: '0',
+            format: 'image/png',
+            transparent: true,
+            attribution: 'Maps provided by USGS',
+            styles: '',
+          }
+        }, null, '  '),
+        type: 'json',
+        description: 'Default properties for the WMS map server support in the tile map'
+      },
+      'visualization:colorMapping': {
+        type: 'json',
+        value: JSON.stringify({
+          'Count': '#57c17b'
+        }),
+        description: 'Maps values to specified colors within visualizations'
       },
       'csv:separator': {
         value: ',',
@@ -151,6 +173,10 @@ define(function () {
           '  "value": 0',
           '}'
         ].join('\n')
+      },
+      'dashboard:defaultDarkTheme': {
+        value: false,
+        description: 'New dashboards use dark theme by default',
       }
     };
   };

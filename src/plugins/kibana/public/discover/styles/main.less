@@ -61,16 +61,16 @@
 
     opacity: 0.75;
     text-align: center;
-    background-color: #ffffff;
+    background-color: transparent;
 
-    // spinner and prorgess counter
+    // spinner and progress counter
     > div {
       text-align: center;
     }
   }
 
   &-info {
-    background-color: @well-bg;
+    background-color: @discover-info-bg;
     float: right;
     padding: 5px 10px;
     border-bottom-left-radius: @border-radius-base;
@@ -94,7 +94,7 @@
     }
 
     &-footer {
-      background-color: @well-bg;
+      background-color: @discover-table-footer-bg;
       padding: 5px 10px;
     }
 
@@ -116,7 +116,7 @@
 
   &-field {
     &-filter {
-      background-color: @well-bg;
+      background-color: @discover-field-filter-bg;
       margin-right: 10px;
 
       .form-group {
@@ -126,16 +126,17 @@
     }
 
     &-toggle {
-      color: @btn-success-color;
+      color: @discover-field-toggle-color;
       font-size: 9px;
     }
   }
 }
 
 .shard-failures {
-  color: @brand-danger;
-  background-color: lighten(@brand-danger, 40%) !important;
-  border: 1px solid @brand-danger;
+  color: @discover-shard-failures-color;
+  background-color: @discover-shard-failures-bg !important;
+  border: 1px solid;
+  border-color: @discover-shard-failures-border;
   border-radius: @border-radius-base;
   padding: 0 20px 20px;
   li {
@@ -157,19 +158,21 @@
 }
 
 .discover-field-details {
-  border-top: 1px solid @well-border;
+  border-top: 1px solid;
+  border-top-color: @discover-field-details-border;
   padding: 5px 10px;
-  background-color: @body-bg;
-  color: @text-color;
+  background-color: @discover-field-details-bg;
+  color: @discover-field-details-color;
 
   &-close {
     text-align: center;
-    border-top: 1px solid @well-border;
-    background-color: @well-bg;
+    border-top: 1px solid;
+    border-color: @discover-field-details-close-border;
+    background-color: @discover-field-details-close-bg;
 
     &:hover {
-      background-color: @sidebar-hover-bg;
-      color: @sidebar-hover-color;
+      background-color: @discover-field-details-close-hover-bg;
+      color: @discover-field-details-close-hover-color;
     }
   }
 
@@ -190,11 +193,11 @@
   }
 
   a {
-    color: @link-color !important;
+    color: @discover-link-color !important;
   }
 
   a.btn {
-    color: @text-color !important;
+    color: @discover-link-btn-color !important;
   }
 
   .progress {
@@ -208,7 +211,7 @@
       border-radius: 4px;
 
       span {
-        background-color: @gray;
+        background-color: @discover-field-details-progress-bar-bg;
         padding: 3px;
         border-radius: 4px;
         margin-left: 3px;
@@ -225,11 +228,11 @@ field-name,
     text-align: center;
     display: inline-block;
     width: 12px;
-    color: @text-muted;
+    color: @field-name-color;
   }
 
   &.no-results {
-    color: @text-muted;
+    color: @field-name-no-results-color;
   }
 }
 

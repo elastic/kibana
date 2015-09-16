@@ -6,6 +6,7 @@ define(function (require) {
 
   require('ui/visualize');
   require('ui/clipboard');
+  require('ui/collapsible_sidebar');
 
   require('ui/routes')
   .when('/visualize/create', {

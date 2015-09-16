@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var angular = require('angular');
   var ConfigTemplate = require('ui/ConfigTemplate');
+  var chrome = require('ui/chrome');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -32,7 +33,7 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (savedDashboards) {
+      dash: function (savedDashboards, config) {
         return savedDashboards.get();
       }
     }
@@ -51,7 +52,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
+      controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -90,7 +91,8 @@ define(function (require) {
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
           load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
           share: require('plugins/kibana/dashboard/partials/share.html'),
-          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
+          options: require('plugins/kibana/dashboard/partials/options.html')
         });
 
         $scope.refresh = _.bindKey(courier, 'fetch');
@@ -100,6 +102,11 @@ define(function (require) {
         $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
         courier.setRootSearchSource(dash.searchSource);
+
+        setDarkTheme(dash.darkTheme);
+        $scope.$watch('dash.darkTheme', function (value) {
+          setDarkTheme(value);
+        });
 
         function init() {
           updateQueryOnRootSource();
@@ -121,6 +128,12 @@ define(function (require) {
           } else {
             dash.searchSource.set('filter', filters);
           }
+        }
+
+        function setDarkTheme(enabled) {
+          var theme = !!enabled ? 'theme-dark' : 'theme-light';
+          chrome.removeApplicationClass(['theme-dark', 'theme-light']);
+          chrome.addApplicationClass(theme);
         }
 
         // update root source when filters update

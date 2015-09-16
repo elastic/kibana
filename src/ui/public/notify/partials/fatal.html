@@ -12,6 +12,9 @@
     </h1>
   </div>
   <div class="panel-body fatal-body"><%- msg %></div>
+  <% if (info) { %>
+    <div class="panel-footer"><pre><%- info %></pre></div>
+  <% } %>
   <% if (stack) { %>
     <div class="panel-footer"><pre><%- stack %></pre></div>
   <% } %>

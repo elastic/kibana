@@ -24,20 +24,19 @@ kbn-settings-objects {
     margin-bottom: @line-height-computed;
   }
   .list-unstyled {
-    // border-top: 1px solid @gray-lighter;
-    // margin-top: @line-height-computed;
     li {
-      border-bottom: 1px solid @gray-lighter;
+      border-bottom: 1px solid;
+      border-bottom-color: @settings-objects-list-border;
       padding: 8px;
     }
   }
   .empty {
-    color: @gray-light;
+    color: @settings-objects-empty-color;
   }
 
   .action-bar {
     margin-top: 10px;
-    background-color: @gray-lighter;
+    background-color: @settings-objects-action-bar-bg;
     padding: 4px 12px;
 
     label {
@@ -98,7 +97,7 @@ kbn-settings-objects-view {
     width: 100%;
 
     tr.default td.value {
-      color: @input-color-placeholder;
+      color: @settings-advanced-table-default-color;
     }
 
     td {
@@ -127,7 +126,7 @@ kbn-settings-objects-view {
 
 .indices-settings {
   i.active {
-    color: @btn-success-bg;
+    color: @settings-indices-active-color;
   }
 
   tr.field-settings {

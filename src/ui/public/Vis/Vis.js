@@ -70,7 +70,10 @@ define(function (require) {
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
-      this.params = _.defaults({}, _.cloneDeep(state.params || {}), this.type.params.defaults || {});
+      this.params = _.defaults({},
+        _.cloneDeep(state.params || {}),
+        _.cloneDeep(this.type.params.defaults || {})
+      );
 
       this.aggs = new AggConfigs(this, state.aggs);
     };
