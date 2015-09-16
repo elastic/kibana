@@ -6,6 +6,8 @@ var pluginCleaner = require('./pluginCleaner');
 var KbnServer = require('../../server/KbnServer');
 var readYamlConfig = require('../serve/readYamlConfig');
 var fs = require('fs');
+var Promise = require('bluebird');
+var mkdirp = Promise.promisify(require('mkdirp'));
 
 module.exports = {
   install: install
@@ -27,6 +29,9 @@ function install(settings, logger) {
   var downloader = pluginDownloader(settings, logger);
 
   return cleaner.cleanPrevious()
+  .then(function () {
+    return mkdirp(settings.workingPath);
+  })
   .then(function () {
     return downloader.download();
   })

@@ -31,10 +31,12 @@ module.exports = function (logger, stream) {
     if (resp.statusCode >= 400) {
       handleError('ENOTFOUND', null);
     } else {
+      logger.log(`The file type is: '${resp.headers['content-type']}'! YAY!`);
+
       totalSize = parseInt(resp.headers['content-length'], 10) || 0;
       var totalDesc = totalSize || 'unknown number of';
 
-      logger.log('Downloading ' + totalDesc + ' bytes', true);
+      logger.log('Transferring ' + totalDesc + ' bytes', true);
     }
   }
 
