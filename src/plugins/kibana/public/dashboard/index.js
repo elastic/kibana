@@ -81,11 +81,13 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
           filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
+        var $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
@@ -116,7 +118,29 @@ define(function (require) {
             docTitle.change(dash.title);
           }
 
+          initPanelIndices();
+
           $scope.$emit('application.load');
+        }
+
+        function initPanelIndices() {
+          // find the largest panelIndex in all the panels
+          var maxIndex = $scope.state.panels.reduce(function (index, panel) {
+            return Math.max(index, panel.panelIndex || 0);
+          }, 0);
+
+          // ensure that all panels have a panelIndex
+          $scope.state.panels.forEach(function (panel) {
+            if (!panel.panelIndex) panel.panelIndex = ++maxIndex;
+          });
+        }
+
+        function getPanelIndex() {
+          var index = $scope.state.panels.reduce(function (index, panel) {
+            // if panel is missing an index, add one and increment the index
+            return Math.max(index, panel.panelIndex);
+          }, 0);
+          return ++index;
         }
 
         function updateQueryOnRootSource() {
@@ -158,7 +182,9 @@ define(function (require) {
         $scope.save = function () {
           $state.title = dash.id = dash.title;
           $state.save();
+
           dash.panelsJSON = angular.toJson($state.panels);
+          dash.uiStateJSON = angular.toJson($uiState.getChanges());
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
 
@@ -193,12 +219,12 @@ define(function (require) {
         // called by the saved-object-finder when a user clicks a vis
         $scope.addVis = function (hit) {
           pendingVis++;
-          $state.panels.push({ id: hit.id, type: 'visualization' });
+          $state.panels.push({ id: hit.id, type: 'visualization', panelIndex: getPanelIndex() });
         };
 
         $scope.addSearch = function (hit) {
           pendingVis++;
-          $state.panels.push({ id: hit.id, type: 'search' });
+          $state.panels.push({ id: hit.id, type: 'search', panelIndex: getPanelIndex() });
         };
 
         // Setup configurable values for config directive, after objects are initialized
