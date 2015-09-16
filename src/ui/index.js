@@ -66,7 +66,7 @@ module.exports = async (kbnServer, server, config) => {
     handler: function (req, reply) {
       let id = req.params.id;
       let app = uiExports.apps.byId[id];
-      if (!app) return reply(Boom.notFound('Unkown app ' + id));
+      if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
         return reply.renderApp(app);
