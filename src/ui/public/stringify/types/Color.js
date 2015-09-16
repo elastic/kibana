@@ -4,6 +4,7 @@ define(function (require) {
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
 
     require('ui/field_format_editor/samples/samples');
+    require('ui/stringify/editors/color.less');
 
     _.class(_Color).inherits(FieldFormat);
     function _Color(params) {
@@ -28,8 +29,6 @@ define(function (require) {
         };
       }
     };
-
-    _Color.sampleInputs = [0, 50, 100, 150, 200];
 
     _Color.paramDefaults = {
       colors: [{

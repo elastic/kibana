@@ -1,33 +1,44 @@
 <div class="form-group">
   <div ng-repeat="color in editor.formatParams.colors">
-    <button ng-if="$index > 0" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger pull-right">
-      <i aria-hidden="true" class="fa fa-times"></i>
-    </button>
-    <div class="form-group">
-      <label>Range
-        <small>
-          (min:max)
-        </small>
-    </label>
-      <input
-        ng-model="color.range"
-        class="form-control">
-    </div>
-    <div class="form-group">
-      <label>Font Color</label>
-      <input
-        ng-model="color.text"
-        colorpicker
-        type="text"
-        class="form-control">
-    </div>
-    <div class="form-group">
-      <label>Background Color</label>
-      <input
-        ng-model="color.background"
-        colorpicker
-        type="text"
-        class="form-control">
+    <div class="editor-color">
+      <button ng-if="$index > 0" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger editor-color-remove">
+        <i aria-hidden="true" class="fa fa-times"></i>
+      </button>
+      <div class="form-group">
+        <label>Range
+          <small>
+            (min:max)
+          </small>
+      </label>
+        <input
+          ng-model="color.range"
+          class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Font Color</label>
+        <input
+          ng-model="color.text"
+          colorpicker
+          type="text"
+          class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Background Color</label>
+        <input
+          ng-model="color.background"
+          colorpicker
+          type="text"
+          class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Example</label>
+          <div class="form-control"
+            ng-style="{color: color.text, 'background-color': color.background}"
+            value="formatted">
+            123456
+        </div>
+      </div>
+
     </div>
     <hr>
   </div>
@@ -36,9 +47,5 @@
       <span class="sr-only">Add Color</span>
       <i aria-hidden="true" class="fa fa-plus"></i> Add Color
   </button>
-
-  <field-format-editor-samples
-    inputs="editor.field.format.type.sampleInputs">
-  </field-format-editor-samples>
 
 </div>
