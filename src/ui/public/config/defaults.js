@@ -92,6 +92,13 @@ define(function () {
         type: 'json',
         description: 'Default properties for the WMS map server support in the tile map'
       },
+      'visualization:colorMapping': {
+        type: 'json',
+        value: JSON.stringify({
+          'Count': '#57c17b'
+        }),
+        description: 'Maps values to specified colors within visualizations'
+      },
       'csv:separator': {
         value: ',',
         description: 'Separate exported values with this string',
