@@ -28,10 +28,45 @@ When the specified plugin is not found at `download.elastic.co`, the plugin mana
 as a Github user name, as in the following example:
 
 [source,shell]
-bin/kibana plugin --install rashidkpc/kibana-slideshow
-Installing kibana-slideshow
-Attempting to extract from https://download.elastic.co/rashidkpc/kibana-slideshow/kibana-slideshow-latest.tar.gz
-Attempting to extract from https://github.com/rashidkpc/kibana-slideshow/archive/master.tar.gz
+bin/kibana plugin --install github-user/sample-plugin
+Installing sample-plugin
+Attempting to extract from https://download.elastic.co/github-user/sample-plugin/sample-plugin-latest.tar.gz
+Attempting to extract from https://github.com/github-user/sample-plugin/archive/master.tar.gz
+Downloading <some number> bytes....................
+Extraction complete
+Optimizing and caching browser bundles...
+Plugin installation complete
+
+[float]
+=== Installing Plugins from an Arbitrary URL
+
+You can specify a URL to a plugin with the `-u` or `--url` options after the `-i` or `--install` option, as in the
+following example:
+
+[source,shell]
+bin/kibana plugin -i sample-plugin -u https://some.sample.url/directory
+Installing sample-plugin
+Attempting to extract from https://some.sample.url/directory
+Downloading <some number> bytes....................
+Extraction complete
+Optimizing and caching browser bundles...
+Plugin installation complete
+
+[float]
+=== Installing Plugins to an Arbitrary Directory
+
+Use the `-d` or `--plugin-dir` option to specify a directory for plugins, as in the following example:
+
+[source,shell]
+bin/kibana plugin -i elasticsearch/sample-plugin/latest -d <path/to/directory>
+Installing sample-plugin
+Attempting to extract from https://download.elastic.co/elasticsearch/sample-plugin/sample-plugin-latest.tar.gz
+Downloading <some number> bytes....................
+Extraction complete
+Optimizing and caching browser bundles...
+Plugin installation complete
+
+NOTE: This command creates the specified directory if it does not already exist.
 
 [float]
 === Removing Plugins
@@ -40,7 +75,7 @@ Use the `--remove` or `-r` option to remove a plugin, including any configuratio
 example:
 
 [source,shell]
-bin/kibana plugin --remove rashidkpc/kibana-slideshow
+bin/kibana plugin --remove elasticsearch/marvel-ui
 
 [float]
 === Configuring the Plugin Manager
@@ -54,11 +89,18 @@ behavior, as in the following examples:
 
 [source,shell]
 .Waits for 30 seconds before failing
-bin/kibana plugin --install rashidkpc/kibana-slideshow --timeout 30s
+bin/kibana plugin --install username/sample-plugin --timeout 30s
 
 [source,shell]
 .Waits for 1 minute before failing
-bin/kibana plugin --install rashidkpc/kibana-slideshow --timeout 1m
+bin/kibana plugin --install username/sample-plugin --timeout 1m
+
+==== Plugins and Custom Kibana Configurations
+
+Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibana. By default, Kibana 
+uses the configuration file `config/kibana.yml`. When you change your installed plugins, the `bin/kibana plugin` command 
+restarts the Kibana server. When you are using a customized configuration file, you must specify the
+path to that configuration file each time you use the `bin/kibana plugin` command.
 
 [float]
 === Plugin Manager Exit Codes
