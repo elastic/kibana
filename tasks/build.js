@@ -15,6 +15,7 @@ module.exports = function (grunt) {
     'replace_package_json',
     'replace:dist',
     'copy:dist',
+    'copy:deps',
     'compile_dist_readme',
     'chmod_kibana',
     'make_plugin_dir',
