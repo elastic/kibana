@@ -1,43 +1,48 @@
 @import (reference) "~ui/styles/variables";
 
-.application {
-  background-color: @app-switcher-application-bg;
-}
+@app-icon-size: 48px;
 
 .app-links {
-  width: 700px;
-  margin: 25px auto;
   text-align: justify;
 
   .app-link {
     display: inline-block;
     vertical-align: top;
+    width: @app-icon-size;
+    margin: 0px 10px;
     text-align: left;
-    background: @app-switcher-app-link-color;
-    width: 200px;
-    margin: 0 30px 30px 0;
 
     .app-icon {
       display: block;
-      height: 200px;
-      background-size: cover;
+      height: @app-icon-size;
+      width: @app-icon-size;
       background-position: center;
-    }
+      background-size: contain;
+      border-radius: @border-radius-base;
+      background-color: @gray-light;
+      width: 100%;
 
-    .app-info {
-      display: block;
-      padding: 15px;
+      &-missing {
+        text-align: center;
+        font-size: 2.7em;
+        font-weight: bold;
+        font-family: @font-family-sans-serif;
+        color: #fff;
+      }
     }
 
     .app-title {
-      margin: 0 0 10px;
-      color: @app-switcher-app-title-color;
+      color: @text-color;
+      font-size: 0.9em;
+      width: 100%;
+      text-align: center;
+      margin-top: 3px;
     }
 
-    .app-description {
-      font-size: 1em;
-      color: @app-switcher-app-description-color;
-      margin: 0;
+    &:hover .app-title {
+      text-decoration: underline;
     }
+
   }
+
 }

@@ -7,5 +7,5 @@ module.exports = _.once(function (kbnServer) {
 
   // redirect to the single app
   let apps = kbnServer.uiExports.apps.toArray();
-  return apps.length === 1 ? `/app/${apps[0].id}` : '/apps';
+  return '/app/kibana';
 });
