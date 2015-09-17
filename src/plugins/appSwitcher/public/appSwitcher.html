@@ -2,7 +2,7 @@
   <div class="spinner large"></div>
 </div>
 <div ng-if="!switcher.loading" class="app-links">
-  <div class="app-link" ng-repeat="app in switcher.apps">
+  <div class="app-link" ng-repeat="app in switcher.apps | orderBy:'title'">
     <a ng-href="/app/{{app.id}}">
 
       <div ng-if="app.icon" ng-style="{ 'background-image': 'url(../' + app.icon + ')' }" class="app-icon"></div>
