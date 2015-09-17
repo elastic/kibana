@@ -1,7 +1,7 @@
-define([
-  'intern!object',
-  'intern/dojo/node!expect.js'
-], function (registerSuite, expect) {
+define(function (require) {
+  var registerSuite = require('intern!object');
+  var expect = require('intern/dojo/node!expect.js');
+
   registerSuite(function () {
     var url = 'http://localhost:5620/apps';
     return {
