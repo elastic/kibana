@@ -48,7 +48,7 @@ module.exports = function (grunt) {
       }
 
       if (fs.existsSync(SELENIUM_FILE_PATH)) {
-        done();
+        validateDownload(SELENIUM_FILE_PATH, config.selenium.md5, done);
       } else {
         downloadSelenium(done);
       }
