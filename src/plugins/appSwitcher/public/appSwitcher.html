@@ -4,7 +4,10 @@
 <div ng-if="!switcher.loading" class="app-links">
   <div class="app-link" ng-repeat="app in switcher.apps">
     <a ng-href="/app/{{app.id}}">
-      <div ng-style="{ 'background-image': 'url(../' + app.icon + ')' }" class="app-icon"></div>
+
+      <div ng-if="app.icon" ng-style="{ 'background-image': 'url(../' + app.icon + ')' }" class="app-icon"></div>
+      <div ng-if="!app.icon" class="app-icon app-icon-missing">{{app.title[0]}}</div>
+
       <div class="app-title">{{ app.title }}</div>
     </a>
   </div>
