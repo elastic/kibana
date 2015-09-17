@@ -189,7 +189,7 @@ module.exports = new Datasource('es', {
       if (e.message.root_cause) {
         throw new Error(e.message.root_cause[0].reason);
       } else {
-        throw new Error(e);
+        throw e;
       }
     });
   }
