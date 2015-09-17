@@ -558,7 +558,7 @@ define([
             es_method = req.method,
             es_data = req.data;
 
-          var url = es.constructESUrl(es_path);
+          var url = es.constructESUrl(es.getBaseUrl() || "localhost:9200", es_path);
 
           var ret = 'curl -X' + es_method + ' "' + url + '"';
           if (es_data && es_data.length) {
