@@ -501,7 +501,7 @@ define([
     editor.handleCURLPaste = function (text) {
       var curlInput = curl.parseCURL(text);
 
-      editor.insert(utils.textFromRequest(curlInput));
+      editor.insert(curlInput);
     };
 
     editor.highlightCurrentRequestsAndUpdateActionBar = onceDoneTokenizing(function () {
