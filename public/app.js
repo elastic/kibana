@@ -55,8 +55,13 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   $scope.configTemplate = new ConfigTemplate({
     load: require('plugins/timelion/partials/load_sheet.html'),
     save: require('plugins/timelion/partials/save_sheet.html'),
-    options: require('plugins/timelion/partials/sheet_options.html')
+    options: require('plugins/timelion/partials/sheet_options.html'),
+    docs: '<timelion-docs></timelion-docs>'
   });
+
+  if (config.get('timelion:showTutorial', true)) {
+    $scope.configTemplate.toggle('docs');
+  }
 
   $scope.state = new AppState(getStateDefaults());
   function getStateDefaults() {
@@ -79,7 +84,11 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
       save: save,
       savedSheet: savedSheet,
       state: $scope.state,
-      search: $scope.search
+      search: $scope.search,
+      dontShowHelp: function () {
+        config.set('timelion:showTutorial', false);
+        $scope.configTemplate.toggle('docs');
+      }
     };
   };
 

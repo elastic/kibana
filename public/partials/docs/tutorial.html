@@ -12,7 +12,7 @@
     </div>
 
     <div class="doc-container-buttons">
-      <button ng-click="disableTutorial()" class="btn btn-default btn-doc-prev">Don't show this again</button>
+      <button ng-click="opts.dontShowHelp()" class="btn btn-default btn-doc-prev">Don't show this again</button>
       <button ng-click="page = page+1" class="btn btn-primary btn-doc-next">Next</button>
     </div>
 	</div>
@@ -143,35 +143,8 @@
     </div>
     <div class="doc-container-buttons">
       <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
-      <button ng-click="section = 'reference'; page = 1" class="btn btn-success btn-doc-next">Function Reference</button>
+      <span><strong>Tip:</strong> You can always find this again by clicking the <i class="fa fa-question-circle"></i> in the menu</span>
+      <button ng-click="opts.dontShowHelp()" class="btn btn-default btn-doc-next">Don't show this again</button>
     </div>
-  </div>
-</div>
-
-<div ng-show="section === 'reference'">
-  <div class="doc-container-content">
-    <p>
-      <form>
-        <div class="form-group">
-          <label>Function reference <small class="text-muted">Note that when chaining, the first argument is supplied for you by the output of the previous function</small></label>
-          <a class="pull-right" ng-click="section='tutorial'; page=1"><i class="fa fa-link"> Getting started tutorial</i></a>
-          <input placeholder="Filter" ng-model="funcFilter" type="text" class="form-control"></input>
-        </div>
-      </form>
-      <table class="table table-condensed table-striped">
-        <thead>
-          <th>Function</th>
-          <th>Description</th>
-          <th>Arguments </th>
-        </thead>
-        <tr ng-repeat="func in functionList | filter:{name:funcFilter} | orderBy:'name'">
-          <td><strong>{{func.name}}()</strong></td>
-          <td>{{func.help}}</td>
-          <td>
-            <span ng-repeat="arg in func.args"><strong>{{arg.name}}</strong>=({{arg.types.join(' | ')}}) <span ng-show="!$last">,</span> </span>
-          </td>
-        </tr>
-      </table>
-    </p>
   </div>
 </div>

@@ -1,55 +1,26 @@
 @import "~ui/styles/variables.less";
 @import (reference) "~ui/styles/mixins";
 
-@chart-height: 330px;
-
-body > .content,  body > .content > .application {
-  overflow: hidden
-}
-
 .timelion {
-  overflow: hidden;
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
+  position: relative;
 
   &-container {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    overflow-y:auto;
+    margin: 20px;
+  }
 
-    &-sheet {
-      flex-grow: 1;
-      overflow-y: auto;
+  &-container-drawer {
+    position: fixed;
+    bottow: 0px;
 
-      &-margin {
-        margin: 20px;
-      }
-    }
-
-    &-drawer {
-      min-height: 350px;
-      overflow-y: auto;
-      z-index: 100;
-
-
-      &-tab {
-        text-align: center;
-        width: 100%;
-        background-color: whitesmoke;
-        margin: 0 auto;
-      }
+    &-tab {
+      width: 100%;
+      background-color: @gray-lighter;
     }
   }
 
   &-expression {
     position: relative !important;
   }
-}
-
-[chart] {
-  height: @chart-height;
 }
 
 [ng-click] {

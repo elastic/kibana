@@ -112,7 +112,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
 
         $elem.val(newVal);
         $elem[0].selectionStart = $elem[0].selectionEnd =
-          (startOf + completeExpression).length - 1;
+          (startOf + completeFunction).length - 1;
         ngModelCtrl.$setViewValue(newVal);
 
         resetSuggestions();

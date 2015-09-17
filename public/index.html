@@ -75,6 +75,13 @@
             <i aria-hidden="true" class="fa fa-area-chart"></i>
           </button>
         </kbn-tooltip>
+        <kbn-tooltip text="Show Help" placement="bottom" append-to-body="1">
+          <button
+            aria-label="Show Help"
+            ng-click="configTemplate.toggle('docs');">
+            <i aria-hidden="true" class="fa fa-question-circle"></i>
+          </button>
+        </kbn-tooltip>
       </div>
       <kbn-tooltip text="Toggle Menu" placement="bottom" append-to-body="1">
         <button
@@ -110,12 +117,6 @@
         </div>
       </div>
     </div>
-    <div class="timelion-container-drawer-tab" ng-click="toggle('showHelp')">
-      <i class="fa" ng-class="showHelp ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-    </div>
 
-    <div class="timelion-container-drawer" ng-show="showHelp">
-      <timelion-docs></timelion-docs>
-    </div>
   </div>
 </div>

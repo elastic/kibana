@@ -148,8 +148,7 @@ app.directive('chart', function ($compile, $rootScope) {
       }
 
       function drawPlot(plotConfig) {
-        var controllerHeight = $('.timelion-container').height() - 80;
-        $elem.height(controllerHeight / 2);
+        $elem.height(330);
 
         if (!plotConfig || !plotConfig.length) {
           $elem.empty();

@@ -9,14 +9,8 @@ define(function (require) {
       restrict: 'E',
       template: html,
       controller: function ($scope, config) {
-        $scope.section = 'reference';
-        $scope.showHelp = false;
+        $scope.section = 'tutorial';
         $scope.page = 1;
-
-        if (config.get('timelion:showTutorial', true)) {
-          $scope.section = 'tutorial';
-          $scope.showHelp = true;
-        }
 
         function init() {
           $scope.es = {
@@ -31,13 +25,6 @@ define(function (require) {
             $scope.functionList = resp.data;
           });
         }
-
-        $scope.disableTutorial = function () {
-          config.set('timelion:showTutorial', false);
-          $scope.showHelp = false;
-          $scope.section = 'reference';
-        };
-
         $scope.recheckElasticsearch = function () {
           $scope.es.valid = null;
           checkElasticsearch().then(function (valid) {
