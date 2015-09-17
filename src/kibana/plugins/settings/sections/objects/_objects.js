@@ -4,6 +4,7 @@ define(function (require) {
   var saveAs = require('file_saver');
   var registry = require('plugins/settings/saved_object_registry');
   var objectIndexHTML = require('text!plugins/settings/sections/objects/_objects.html');
+  var MAX_SIZE = Math.pow(2, 31) - 1;
 
   require('directives/file_upload');
 
@@ -91,10 +92,16 @@ define(function (require) {
         };
 
         $scope.exportAll = function () {
-          var objs = $scope.services.map(function (service) {
-            return service.data.map(_.partialRight(_.extend, {type: service.type}));
+          return Promise.map($scope.services, function (service) {
+            return service.service.find('', MAX_SIZE).then(function (results) {
+              return results.hits.map(function (hit) {
+                return _.extend(hit, {type: service.type});
+              });
+            });
+          })
+          .then(function (results) {
+            return retrieveAndExportDocs(_.deepFlatten(results));
           });
-          retrieveAndExportDocs(_.flatten(objs));
         };
 
         function retrieveAndExportDocs(objs) {

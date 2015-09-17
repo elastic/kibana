@@ -36,8 +36,9 @@ define(function (require) {
     };
 
 
-    this.find = function (searchString) {
+    this.find = function (searchString, size) {
       var self = this;
+      size = (size == null) ? 100 : size;
       var body;
       if (searchString) {
         body = {
@@ -57,7 +58,7 @@ define(function (require) {
         index: config.file.kibana_index,
         type: 'dashboard',
         body: body,
-        size: 100
+        size: size
       })
       .then(function (resp) {
         return {
