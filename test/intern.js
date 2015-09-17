@@ -12,6 +12,6 @@ define({
     host: 'localhost',
     port: 4444
   },
-  functionalSuites: ['test/functional/apps.js'],
+  functionalSuites: ['test/functional/status.js'],
   excludeInstrumentation: /^(?:tests|node_modules)\//
 });
