@@ -21,10 +21,10 @@ define(function (require) {
       var storedVersion = this.source._getStoredVersion();
 
       // conditions that equal "fetch This DOC!"
-      var unkown = !version && !storedVersion;
+      var unknown = !version && !storedVersion;
       var mismatch = version !== storedVersion;
 
-      return Boolean(mismatch || (unkown && !this.started));
+      return Boolean(mismatch || (unknown && !this.started));
     };
 
     DocRequest.prototype.handleResponse = function (resp) {
