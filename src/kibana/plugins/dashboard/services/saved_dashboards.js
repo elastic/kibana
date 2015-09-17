@@ -38,7 +38,7 @@ define(function (require) {
 
     this.find = function (searchString, size) {
       var self = this;
-      size = size || 100;
+      size = (size == null) ? 100 : size;
       var body;
       if (searchString) {
         body = {

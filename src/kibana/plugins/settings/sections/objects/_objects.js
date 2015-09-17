@@ -100,7 +100,7 @@ define(function (require) {
             });
           })
           .then(function (results) {
-            return retrieveAndExportDocs(_.flattenDeep(results));
+            return retrieveAndExportDocs(_.deepFlatten(results));
           });
         };
 
