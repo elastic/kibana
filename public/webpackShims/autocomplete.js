@@ -588,8 +588,8 @@ define([
         context.method = ret.method;
         context.otherTokenValues = ret.otherTokenValues;
         context.urlTokenPath = ret.urlTokenPath;
+        context.requestStartRow = ret.requestStartRow;
         if (!ret.urlTokenPath) { // zero length tokenPath is true
-
           console.log("Can't extract a valid url token path.");
           return context;
         }
@@ -740,6 +740,7 @@ define([
         ret.bodyTokenPath = bodyTokenPath;
         ret.urlTokenPath = [];
         ret.urlParamsTokenPath = null;
+        ret.requestStartRow = tokenIter.getCurrentTokenRow();
         var curUrlPart;
 
         while (t && isUrlParamsToken(t)) {

@@ -249,6 +249,9 @@ define([
       else if (version[0] === "2") {
         api = "kb/api_2_0";
       }
+      else if (version[0] === "3") {
+        api = "kb/api_2_0"; // TODO: change :)
+      }
       else {
         api = "kb/api_1_0";
       }

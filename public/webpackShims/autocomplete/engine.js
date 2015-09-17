@@ -28,6 +28,9 @@ define([
       this.name = name;
     };
 
+    /** called to get the possible suggestions for tokens, when this object is at the end of
+     * the resolving chain (and thus can suggest possible continuation paths)
+     */
     exports.AutocompleteComponent.prototype.getTerms = function (context, editor) {
       return [];
     };

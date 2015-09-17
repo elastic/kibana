@@ -75,54 +75,58 @@ define([
   }
 
   /**
-   * @param parent component for this description. can be null.
    * @param description a json dict describing the endpoint
    * @param compilingContext
    */
-  function compileDescription(parent, description, compilingContext) {
+  function compileDescription(description, compilingContext) {
     if (_.isArray(description)) {
-      return compileList(parent, description, compilingContext);
+      return [compileList(description, compilingContext)];
     }
     else if (_.isObject(description)) {
       // test for objects list as arrays are also objects
       if (description.__scope_link) {
-        return [new ScopeResolver(parent, description.__scope_link, compilingContext)]
+        return [new ScopeResolver(description.__scope_link, compilingContext)]
       }
       if (description.__any_of) {
-        return compileList(parent, description.__any_of, compilingContext);
+        return [compileList(description.__any_of, compilingContext)];
       }
       if (description.__one_of) {
-        return _.map(description.__one_of, function (d) {
-          return compileDescription(parent, d, compilingContext);
-        })
+        return _.flatten(_.map(description.__one_of, function (d) {
+          return compileDescription(d, compilingContext);
+        }));
       }
-      return compileObject(parent, description, compilingContext);
+      let obj = compileObject(description, compilingContext);
+      if (description.__condition) {
+        return [compileCondition(description.__condition, obj, compilingContext)];
+      } else {
+        return [obj];
+      }
     }
     else if (_.isString(description) && /^\{.*\}$/.test(description)) {
-      return compileParametrizedValue(parent, description, compilingContext);
+      return [compileParametrizedValue(description, compilingContext)];
     }
     else {
-      return [new engine.ConstantComponent(description, parent)];
+      return [new engine.ConstantComponent(description)];
     }
 
   }
 
-  function compileParametrizedValue(parent, value, compilingContext, template) {
+  function compileParametrizedValue(value, compilingContext, template) {
     value = value.substr(1, value.length - 2).toLowerCase();
     var component = compilingContext.parametrizedComponentFactories[value];
     if (!component) {
       throw new Error("no factory found for '" + value + "'");
     }
-    component = component(value, parent, template);
+    component = component(value, null, template);
     if (!_.isUndefined(template)) {
-      component = engine.wrapComponentWithDefaults(component, { template: template });
+      component = engine.wrapComponentWithDefaults(component, {template: template});
     }
-    return [ component ];
+    return component;
 
   }
 
-  function compileObject(parent, objDescription, compilingContext) {
-    var objectC = new engine.ConstantComponent("{", parent);
+  function compileObject(objDescription, compilingContext) {
+    var objectC = new engine.ConstantComponent("{");
     var constants = [], patterns = [];
     _.each(objDescription, function (desc, key) {
       if (key.indexOf("__") == 0) {
@@ -132,7 +136,7 @@ define([
 
       var options = getOptions(desc), component;
       if (/^\{.*\}$/.test(key)) {
-        component = compileParametrizedValue(null, key, compilingContext, options.template)[0];
+        component = compileParametrizedValue(key, compilingContext, options.template);
         patterns.push(component);
       }
       else if (key === "*") {
@@ -144,18 +148,34 @@ define([
         component = new engine.ConstantComponent(key, null, [options]);
         constants.push(component);
       }
-      compileDescription(component, desc, compilingContext);
+      _.map(compileDescription(desc, compilingContext), function (subComponent) {
+        component.addComponent(subComponent);
+      });
     });
     objectC.addComponent(new ObjectComponent("inner", constants, patterns));
-    return [objectC];
+    return objectC;
   }
 
-  function compileList(parent, listRule, compilingContext) {
-    var listC = new engine.ConstantComponent("[", parent);
+  function compileList(listRule, compilingContext) {
+    var listC = new engine.ConstantComponent("[");
     _.each(listRule, function (desc) {
-      compileDescription(listC, desc, compilingContext);
+      _.each(compileDescription(desc, compilingContext), function (component) {
+        listC.addComponent(component);
+      });
     });
-    return [listC];
+    return listC;
+  }
+
+  /** takes a compiled object and wraps in a {@link ConditionalProxy }*/
+  function compileCondition(description, compiledObject, compilingContext) {
+    if (description.lines_regex) {
+      return new ConditionalProxy(function (context, editor) {
+        let lines = editor.getSession().getLines(context.requestStartRow, editor.getCursorPosition().row).join("\n");
+        return new RegExp(description.lines_regex, "m").test(lines);
+      }, compiledObject);
+    } else {
+      throw "unknown condition type - got: " + JSON.stringify(description);
+    }
   }
 
   /**
@@ -171,7 +191,7 @@ define([
 
   ObjectComponent.prototype = _.create(
     engine.AutocompleteComponent.prototype,
-    { 'constructor': ObjectComponent  });
+    {'constructor': ObjectComponent});
 
 
   (function (cls) {
@@ -229,8 +249,8 @@ define([
    * For this to work we expect the context to include a method context.endpointComponentResolver(endpoint)
    * which should return the top level components for the given endpoint
    */
-  function ScopeResolver(parent, link, compilingContext) {
-    engine.SharedComponent.call(this, "__scope_link", parent);
+  function ScopeResolver(link, compilingContext) {
+    engine.SharedComponent.call(this, "__scope_link", null);
     if (_.isString(link) && link[0] === ".") {
       // relative link, inject current endpoint
       if (link === ".") {
@@ -246,7 +266,7 @@ define([
 
   ScopeResolver.prototype = _.create(
     engine.SharedComponent.prototype,
-    { 'constructor': ScopeResolver  });
+    {'constructor': ScopeResolver});
 
 
   (function (cls) {
@@ -254,7 +274,7 @@ define([
     cls.resolveLinkToComponents = function (context, editor) {
       if (_.isFunction(this.link)) {
         var desc = this.link(context, editor);
-        return compileDescription(null, desc, this.compilingContext);
+        return compileDescription(desc, this.compilingContext);
       }
       if (!_.isString(this.link)) {
         throw new Error("unsupported link format", this.link);
@@ -310,13 +330,44 @@ define([
   })(ScopeResolver.prototype);
 
 
+  function ConditionalProxy(predicate, delegate) {
+    engine.SharedComponent.call(this, "__condition", null);
+    this.predicate = predicate;
+    this.delegate = delegate;
+  }
+
+  ConditionalProxy.prototype = _.create(
+    engine.SharedComponent.prototype,
+    {'constructor': ConditionalProxy});
+
+
+  (function (cls) {
+
+    cls.getTerms = function (context, editor) {
+      if (this.predicate(context, editor)) {
+        return this.delegate.getTerms(context, editor);
+      } else {
+        return null;
+      }
+    };
+
+    cls.match = function (token, context, editor) {
+      if (this.predicate(context, editor)) {
+        return this.delegate.match(token, context, editor);
+      } else {
+        return false;
+      }
+    };
+  })(ConditionalProxy.prototype);
+
+
   function GlobalOnlyComponent(name) {
     engine.AutocompleteComponent.call(this, name);
   }
 
   GlobalOnlyComponent.prototype = _.create(
     engine.AutocompleteComponent.prototype,
-    { 'constructor': ObjectComponent  });
+    {'constructor': ObjectComponent});
 
 
   (function (cls) {
@@ -350,7 +401,7 @@ define([
 
   // a list of component that match anything but give auto complete suggestions based on global API entries.
   exports.globalsOnlyAutocompleteComponents = function () {
-    return [ new GlobalOnlyComponent("__global__")];
+    return [new GlobalOnlyComponent("__global__")];
   };
 
   /**
@@ -367,7 +418,7 @@ define([
    * }
    */
   exports.compileBodyDescription = function (endpoint_id, description, parametrizedComponentFactories) {
-    return compileDescription(null, description, new CompilingContext(endpoint_id, parametrizedComponentFactories));
+    return compileDescription(description, new CompilingContext(endpoint_id, parametrizedComponentFactories));
   };
 
 });

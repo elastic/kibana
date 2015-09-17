@@ -81,7 +81,7 @@ define([
     // mixin the RowParser
     editor.parser = new RowParser(editor);
 
-    // dirty check for tokenizer state, uses a lot less cylces
+    // dirty check for tokenizer state, uses a lot less cycles
     // than listening for tokenizerUpdate
     var onceDoneTokenizing = function (func, cancelAlreadyScheduledCalls) {
       var session = editor.getSession();
