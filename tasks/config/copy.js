@@ -72,7 +72,13 @@ module.exports = function (grunt) {
           cwd: '<%= server %>/config/',
           src: 'kibana.yml',
           dest: '<%= build %>/dist/kibana/config/'
-        },
+        }
+      ]
+    },
+
+    deps: {
+      options: { mode: '0644' },
+      files: [
         {
           expand: true,
           cwd: '<%= bowerComponentsDir %>/ace-builds/src-noconflict/',
