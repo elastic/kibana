@@ -95,6 +95,7 @@ bin/kibana plugin --install username/sample-plugin --timeout 30s
 .Waits for 1 minute before failing
 bin/kibana plugin --install username/sample-plugin --timeout 1m
 
+[float]
 ==== Plugins and Custom Kibana Configurations
 
 Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibana. By default, Kibana 
