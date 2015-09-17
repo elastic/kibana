@@ -115,8 +115,8 @@ Map Service (WMS) standard. Specify the following elements:
 layers.
 * *WMS version*: The WMS version used by this map service.
 * *WMS format*: The image format used by this map service. The two most common formats are `image/png` and `image/jpeg`.
-* *WMS attribution*: An attribution string to identify the map source. Maps display the attribution string in the lower 
-right corner.
+* *WMS attribution*: An optional, user-defined string that identifies the map source. Maps display the attribution string 
+in the lower right corner.
 * *WMS styles*: A comma-separated list of the styles to use in this visualization. Each map server provides its own styling 
 options.
 
