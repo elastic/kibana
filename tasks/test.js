@@ -21,7 +21,10 @@ module.exports = function (grunt) {
     'run:testUIServer',
     'downloadSelenium',
     'run:seleniumServer',
-    'intern:dev'
+    'intern:dev',
+    'esvm_shutdown:ui',
+    'stop:seleniumServer',
+    'stop:testUIServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
