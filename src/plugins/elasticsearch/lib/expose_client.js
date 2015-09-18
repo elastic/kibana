@@ -3,6 +3,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var util = require('util');
 var url = require('url');
+var callWithRequest = require('./call_with_request');
 
 module.exports = function (server) {
   var config = server.config();
@@ -17,18 +18,14 @@ module.exports = function (server) {
       clientKey: config.get('elasticsearch.ssl.key'),
       ca: config.get('elasticsearch.ssl.ca'),
       apiVersion: config.get('elasticsearch.apiVersion'),
-      keepAlive: true
+      keepAlive: true,
+      auth: true
     });
 
     var uri = url.parse(options.url);
 
     var authorization;
-    if (options.req) {
-      if (_.get(options.req, 'headers.authorization')) {
-        authorization = _.get(options.req, 'headers.authorization').replace('Basic ', '');
-        uri.auth = new Buffer(authorization, 'base64').toString('utf8');
-      }
-    } else if (options.username && options.password) {
+    if (options.auth && options.username && options.password) {
       uri.auth = util.format('%s:%s', options.username, options.password);
     }
 
@@ -63,8 +60,13 @@ module.exports = function (server) {
 
   var client = createClient();
   server.on('close', _.bindKey(client, 'close'));
+
+  var noAuthClient = createClient({ auth: false });
+  server.on('close', _.bindKey(noAuthClient, 'close'));
+
   server.expose('client', client);
   server.expose('createClient', createClient);
+  server.expose('callWithRequest', callWithRequest(noAuthClient));
 
   return client;
 
