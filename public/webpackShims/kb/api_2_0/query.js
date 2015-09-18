@@ -36,6 +36,12 @@ define(['vendor/_'], function (_) {
     },
     span_term: {
       __scope_link: '.span_term'
+    },
+    span_containing: {
+      __scope_link: '.span_containing'
+    },
+    span_within: {
+      __scope_link: '.span_within'
     }
   };
 
@@ -482,6 +488,76 @@ define(['vendor/_'], function (_) {
         clauses: [
           SPAN_QUERIES
         ]
+      },
+      span_containing: {
+        __template: {
+          little: {
+            span_term: {
+              'FIELD': {
+                'value': 'VALUE'
+              }
+            }
+          },
+          big: {
+            span_near: {
+              'clauses': [
+                {
+                  span_term: {
+                    'FIELD': {
+                      'value': 'VALUE'
+                    }
+                  }
+                },
+                {
+                  span_term: {
+                    'FIELD': {
+                      'value': 'VALUE'
+                    }
+                  }
+                }
+              ],
+              "slop": 5,
+              "in_order": false
+            }
+          }
+        },
+        little: SPAN_QUERIES,
+        big: SPAN_QUERIES
+      },
+      span_within: {
+        __template: {
+          little: {
+            span_term: {
+              'FIELD': {
+                'value': 'VALUE'
+              }
+            }
+          },
+          big: {
+            span_near: {
+              'clauses': [
+                {
+                  span_term: {
+                    'FIELD': {
+                      'value': 'VALUE'
+                    }
+                  }
+                },
+                {
+                  span_term: {
+                    'FIELD': {
+                      'value': 'VALUE'
+                    }
+                  }
+                }
+              ],
+              "slop": 5,
+              "in_order": false
+            }
+          }
+        },
+        little: SPAN_QUERIES,
+        big: SPAN_QUERIES
       },
       term: {
         __template: {
