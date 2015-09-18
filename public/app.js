@@ -75,8 +75,7 @@ app.controller('timelion', function (
 
   var init = function () {
     $scope.running = false;
-    $scope.committedSheet = _.clone($scope.state.sheet);
-    $scope.safeSearch();
+    $scope.search();
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
     $scope.$listen(timefilter, 'fetch', $scope.search);
@@ -136,7 +135,7 @@ app.controller('timelion', function (
     $scope.running = true;
 
     $http.post('/timelion/sheet', {
-      sheet: $scope.committedSheet,
+      sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
         interval: $scope.state.interval
       }),
@@ -164,16 +163,11 @@ app.controller('timelion', function (
     });
   };
 
-  $scope.commitAndSearch = function () {
-    $scope.committedSheet = _.clone($scope.state.sheet);
-    $scope.search();
-  };
-
   $scope.safeSearch = _.debounce($scope.search, 500);
 
   function save() {
     savedSheet.id = savedSheet.title;
-    savedSheet.timelion_sheet = $scope.committedSheet;
+    savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
     savedSheet.timelion_columns = $scope.state.columns;
     savedSheet.save().then(function (id) {
