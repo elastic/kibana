@@ -51,7 +51,8 @@ define([
     if (_.isUndefined(defaults)) {
       defaults = {
         "pretty": "__flag__",
-        "format": ["json", "yaml"]
+        "format": ["json", "yaml"],
+        "filter_path": "",
       };
     }
     description = _.clone(description || {});
