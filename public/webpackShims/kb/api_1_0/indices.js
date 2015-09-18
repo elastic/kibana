@@ -131,7 +131,8 @@ define(function () {
         "_validate/query"
       ],
       url_params: {
-        explain: "__flag__"
+        explain: "__flag__",
+        rewrite: "__flag__"
       },
       data_autocomplete_rules: {
         query: {
