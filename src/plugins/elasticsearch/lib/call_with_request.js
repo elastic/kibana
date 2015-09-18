@@ -6,13 +6,14 @@ module.exports = (client) => {
     if (req.headers.authorization) {
       _.set(params, 'headers.authorization', req.headers.authorization);
     }
-    const api = _.get(client, endpoint).bind(client);
-    return api(params).catch((err) => {
-      if (err.status === 401) {
-        const options = { realm: 'Authorization Required' };
-        return Promise.reject(Boom.unauthorized(err.body, 'Basic', options));
-      }
-      return Promise.reject(err);
-    });
+    return _.get(client, endpoint)
+      .call(client, params)
+      .catch((err) => {
+        if (err.status === 401) {
+          const options = { realm: 'Authorization Required' };
+          return Promise.reject(Boom.unauthorized(err.body, 'Basic', options));
+        }
+        return Promise.reject(err);
+      });
   };
 };
