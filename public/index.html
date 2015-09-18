@@ -28,61 +28,6 @@
 
 
     <div class="button-group" role="toolbar">
-      <div ng-if="showButtons">
-        <kbn-tooltip text="New Sheet" placement="bottom" append-to-body="1">
-          <button
-            ng-click="newSheet()"
-            aria-label="New Sheet">
-            <i aria-hidden="true" class="fa fa-file-new-o"></i>
-          </button>
-        </kbn-tooltip>
-
-        <kbn-tooltip text="Sheet Options" placement="bottom" append-to-body="1">
-          <button
-            ng-click="configTemplate.toggle('options');"
-            ng-class="{active: configTemplate.is('options')}"
-            aria-haspopup="true"
-            aria-expanded="{{ configTemplate.is('options') }}"
-            aria-label="Sheet Options">
-            <i aria-hidden="true" class="fa fa-cog"></i>
-          </button>
-        </kbn-tooltip>
-
-        <kbn-tooltip text="Save Sheet" placement="bottom" append-to-body="1">
-          <button
-            ng-click="configTemplate.toggle('save');"
-            ng-class="{active: configTemplate.is('save')}"
-            aria-haspopup="true"
-            aria-expanded="{{ configTemplate.is('save') }}"
-            aria-label="Save Search">
-            <i aria-hidden="true" class="fa fa-save"></i>
-          </button>
-        </kbn-tooltip>
-        <kbn-tooltip text="Load Sheet" placement="bottom" append-to-body="1">
-          <button
-            aria-haspopup="true"
-            aria-expanded="{{ configTemplate.is('load') }}"
-            ng-click="configTemplate.toggle('load');"
-            ng-class="{active: configTemplate.is('load')}"
-            aria-label="Load Saved Search">
-            <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-          </button>
-        </kbn-tooltip>
-        <kbn-tooltip text="Add Chart" placement="bottom" append-to-body="1">
-          <button
-            aria-label="Add Chart"
-            ng-click="newCell()">
-            <i aria-hidden="true" class="fa fa-area-chart"></i>
-          </button>
-        </kbn-tooltip>
-        <kbn-tooltip text="Show Help" placement="bottom" append-to-body="1">
-          <button
-            aria-label="Show Help"
-            ng-click="configTemplate.toggle('docs');">
-            <i aria-hidden="true" class="fa fa-question-circle"></i>
-          </button>
-        </kbn-tooltip>
-      </div>
       <kbn-tooltip text="Toggle Menu" placement="bottom" append-to-body="1">
         <button
           ng-click="toggle('showButtons')"
@@ -93,16 +38,72 @@
     </div>
   </navbar>
 
-  <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
-
-  <div class="stats" ng-if="stats && showButtons">
-    <center>
+  <div ng-if="showButtons" class="timelion-subnav">
+    <div class="timelion-stats">
       <strong>Deduplication</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
       <strong>Query Time</strong> {{stats.queryTime - stats.invokeTime}}ms /
       <strong>Resampling Time</strong> {{stats.fitTime - stats.queryTime}}ms /
       <strong>Processing Time</strong> {{stats.sheetTime - stats.fitTime}}ms
-    </center>
+    </div>
+    <div ng-if="showButtons" class="timelion-buttons">
+      <kbn-tooltip text="New Sheet" placement="bottom" append-to-body="1">
+        <a
+          ng-click="newSheet()"
+          aria-label="New Sheet">
+          <i aria-hidden="true" class="fa fa-file-new-o"></i>
+        </a>
+      </kbn-tooltip>
+
+      <kbn-tooltip text="Sheet Options" placement="bottom" append-to-body="1">
+        <a
+          ng-click="configTemplate.toggle('options');"
+          ng-class="{active: configTemplate.is('options')}"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('options') }}"
+          aria-label="Sheet Options">
+          <i aria-hidden="true" class="fa fa-cog"></i>
+        </a>
+      </kbn-tooltip>
+
+      <kbn-tooltip text="Save Sheet" placement="bottom" append-to-body="1">
+        <a
+          ng-click="configTemplate.toggle('save');"
+          ng-class="{active: configTemplate.is('save')}"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('save') }}"
+          aria-label="Save Search">
+          <i aria-hidden="true" class="fa fa-save"></i>
+        </a>
+      </kbn-tooltip>
+      <kbn-tooltip text="Load Sheet" placement="bottom" append-to-body="1">
+        <a
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('load') }}"
+          ng-click="configTemplate.toggle('load');"
+          ng-class="{active: configTemplate.is('load')}"
+          aria-label="Load Saved Search">
+          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+        </a>
+      </kbn-tooltip>
+      <kbn-tooltip text="Add Chart" placement="bottom" append-to-body="1">
+        <a
+          aria-label="Add Chart"
+          ng-click="newCell()">
+          <i aria-hidden="true" class="fa fa-area-chart"></i>
+        </a>
+      </kbn-tooltip>
+      <kbn-tooltip text="Show Help" placement="bottom" append-to-body="1">
+        <a
+          aria-label="Show Help"
+          ng-click="configTemplate.toggle('docs');">
+          <i aria-hidden="true" class="fa fa-question-circle"></i>
+        </a>
+      </kbn-tooltip>
+    </div>
   </div>
+
+  <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
+
 
   <div class="timelion-container">
     <div class="timelion-container-sheet">

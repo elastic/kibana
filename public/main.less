@@ -21,6 +21,32 @@
   &-expression {
     position: relative !important;
   }
+
+  &-subnav {
+    background-color: @gray-lighter;
+    margin: 0px
+  }
+
+  &-stats {
+    color: @text-color;
+    font-size: 0.9em;
+    padding: 5px 20px;
+    display: inline-block;
+  }
+
+  &-buttons {
+    position: absolute;
+    right: 0px;
+    display: inline-block;
+    padding: 5px 20px;
+    background-color: @navbar-default-bg;
+    border-bottom-left-radius: @border-radius-base;
+
+    a {
+      margin: 5px;
+      color: #FFF;
+    }
+  }
 }
 
 [ng-click] {
@@ -52,14 +78,6 @@ navbar.timelion-navbar .form-control:focus {
 select.timelion-interval {
  -webkit-appearance: none;
 }
-
-.stats {
-  background-color: whitesmoke;
-  padding: 5px 20px;
-  font-size: 0.9em;
-}
-
-
 
 .suggestions {
   position: absolute;
