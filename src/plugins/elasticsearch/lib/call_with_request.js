@@ -7,7 +7,6 @@ module.exports = (client) => {
       _.set(params, 'headers.authorization', req.headers.authorization);
     }
     const api = _.get(client, endpoint).bind(client);
-    console.log(params);
     return api(params).catch((err) => {
       if (err.status === 401) {
         const options = { realm: 'Authorization Required' };
