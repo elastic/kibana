@@ -22,6 +22,7 @@ define(function () {
   var simple_metric = {
     __template: { field: ""},
     field: "{field}",
+    missing: 0,
     script: {
       // populated by a global rule
     }
@@ -114,7 +115,8 @@ define(function () {
         "exclude": "*",
         "execution_hint": { __one_of: ["map", "global_ordinals", "global_ordinals_hash", "global_ordinals_low_cardinality"] },
         "show_term_doc_count_error": { __one_of: [ true, false ]},
-        "collect_mode": { __one_of: [ "depth_first", "breadth_first"]}
+        "collect_mode": { __one_of: [ "depth_first", "breadth_first"]},
+        "missing": ""
       },
       "significant_terms": {
         __template: {
@@ -208,8 +210,8 @@ define(function () {
           "_count": { __one_of: ["asc", "desc"] },
           "*": { __one_of: ["asc", "desc"] }
         },
-        "keyed": { __one_of: [true, false]}
-
+        "keyed": { __one_of: [true, false]},
+        "missing": 0
       },
       "date_histogram": {
         __template: {
@@ -235,7 +237,8 @@ define(function () {
         "pre_offset": "1d",
         "post_offset": "1d",
         "format": "yyyy-MM-dd",
-        "time_zone": "00:00"
+        "time_zone": "00:00",
+        "missing": ""
       },
       "geo_distance": {
         __template: {
@@ -278,7 +281,9 @@ define(function () {
         "script": {
           // populated by a global rule
         },
-        "compression": 100
+        "compression": 100,
+        "method": { __one_of: ["hdr", "tdigest"]},
+        missing: 0
       },
       "cardinality": {
         __template: {
@@ -288,7 +293,8 @@ define(function () {
         "rehash": true,
         "script": {
           // populated by a global rule
-        }
+        },
+        missing: ""
       },
       "scripted_metric": {
         __template: {
@@ -353,7 +359,9 @@ define(function () {
         "script": {
           // populated by a global rule
         },
-        "compression": 100
+        "compression": 100,
+        "method": { __one_of: ["hdr", "tdigest"]},
+        missing: 0
       },
       "sampler": {
         __template: {
@@ -402,6 +410,16 @@ define(function () {
         buckets_path: "",
         format: ""
       },
+      "serial_diff": {
+        __template: {
+          buckets_path: "",
+          lag: 7
+        },
+        lag: 7,
+        gap_policy: gap_policy,
+        buckets_path: "",
+        format: ""
+      },
       "bucket_script": {
         __template: {
           buckets_path: "",
@@ -409,6 +427,17 @@ define(function () {
         },
         buckets_path: "",
         format: "",
+        gap_policy: gap_policy,
+        script: {
+          // populated by a global rule
+        }
+      },
+      "bucket_selector": {
+        __template: {
+          buckets_path: "",
+          script: {}
+        },
+        buckets_path: "",
         gap_policy: gap_policy,
         script: {
           // populated by a global rule
