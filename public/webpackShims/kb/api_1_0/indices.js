@@ -40,6 +40,14 @@ define(function () {
         force: [true, false]
       }
     });
+    
+    api.addEndpointDescription('_flush_synced', {
+      methods: ['POST'],
+      patterns: [
+        "_flush/synced",
+        "{indices}/_flush/synced"
+      ]
+    });
 
     api.addEndpointDescription('_stats', {
       patterns: [
@@ -67,6 +75,7 @@ define(function () {
           "completion",
           "translog",
           "query_cache",
+          "commit",
           "_all"
         ]
       },
