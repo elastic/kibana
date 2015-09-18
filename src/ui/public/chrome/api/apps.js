@@ -23,7 +23,7 @@ module.exports = function (chrome, internals) {
   };
 
   chrome.getShowAppsLink = function () {
-    return internals.showAppsLink == null ? internals.appCount > 1 : internals.showAppsLink;
+    return internals.showAppsLink == null ? internals.nav.length > 1 : internals.showAppsLink;
   };
 
   chrome.getApp = function () {

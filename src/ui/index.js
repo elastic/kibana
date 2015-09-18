@@ -69,6 +69,7 @@ module.exports = async (kbnServer, server, config) => {
     let payload = {
       app: app,
       appCount: uiExports.apps.size,
+      nav: uiExports.apps,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
