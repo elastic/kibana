@@ -13,6 +13,7 @@
   "private": false,
   "version": "4.2.0-snapshot",
   "build": {
+  "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
@@ -76,6 +77,7 @@
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
+    "decompress-zip": "0.2.0",
     "elasticsearch": "8.0.1",
     "elasticsearch-browser": "8.0.1",
     "expiry-js": "0.1.7",
