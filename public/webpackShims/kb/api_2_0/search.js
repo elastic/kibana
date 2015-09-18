@@ -57,14 +57,6 @@ define(function () {
         query: {
           // populated by a global rule
         },
-        facets: {
-          __template: {
-            'NAME': {
-              'TYPE': {}
-            }
-          }
-          // populated by a global rule
-        },
         aggs: {
           __template: {
             "NAME": {
