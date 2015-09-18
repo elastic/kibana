@@ -1,6 +1,6 @@
 <div class="timelion" ng-controller="timelion">
   <navbar class="timelion-navbar">
-    <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
+    <form role="form" class="fill inline-form" ng-submit="commitAndSearch()" name="discoverSearch">
       <div class="typeahead">
         <div class="input-group"
           ng-class="discoverSearch.$invalid ? 'has-error' : ''">
@@ -110,7 +110,7 @@
         <div class="chart-container col-md-{{(12 / state.columns)}}"
           ng-repeat="cell in state.sheet track by $index"
           ng-click="setActiveCell($index)"
-          ng-class="{active: $index === state.selected, running: running}"
+          ng-class="{active: $index === state.selected}"
           >
           <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
           <div chart="sheet[$index]" cell="$index"></div>
