@@ -107,6 +107,18 @@ heatmap dots appear at full intensity.
 * *Show Tooltip*: Check this box to have a tooltip with the values for a given dot when the cursor is on that dot.
 
 *Desaturate map tiles*:: Desaturate the map's color in order to make the markers stand out more clearly.
+*WMS compliant map server*:: Check this box to enable the use of a third-party mapping service that complies with the Web
+Map Service (WMS) standard. Specify the following elements:
+
+* *WMS url*: The URL for the WMS map service.
+* *WMS layers*: A comma-separated list of the layers to use in this visualization. Each map server provides its own list of
+layers.
+* *WMS version*: The WMS version used by this map service.
+* *WMS format*: The image format used by this map service. The two most common formats are `image/png` and `image/jpeg`.
+* *WMS attribution*: An optional, user-defined string that identifies the map source. Maps display the attribution string 
+in the lower right corner.
+* *WMS styles*: A comma-separated list of the styles to use in this visualization. Each map server provides its own styling 
+options.
 
 After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
