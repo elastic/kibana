@@ -5,87 +5,58 @@ A JSON aware developer's interface to ElasticSearch. Comes with handy machinery 
 formatting and code folding.
 
 Installation
-------------
+======
 
-Sense is installed as a Chrome Extension. Install it from
-the [Chrome Webstore](http://bit.ly/es_sense) .
+TBD
 
-Screenshots
------------
 
-### Syntax highlighting
-![Syntax highlighting](https://github.com/bleskes/sense/raw/master/docs/syntaxhighlighting.png)
+Setting up a development environment
+======
 
-### Auto complete
-![Auto complete](https://github.com/bleskes/sense/raw/master/docs/autocomplete.png)
+1. setup kibana
+--------
 
-### Broken JSON detection
-![Broken JSON](https://github.com/bleskes/sense/raw/master/docs/broken.png)
+- Install nvm:  brew install nvm  (or any other way)
+- Clone kibana:
 
-### History
-![History](https://github.com/bleskes/sense/raw/master/docs/history.png)
+```
+git clone git@github.com:elastic/kibana.git  kibana
+cd kibana
+git checkout 327f5898a79564123651f71fe71fb1a17477f977
+```
 
-Other goodies
------
+- Finish installation according to https://github.com/elastic/kibana/blob/327f5898a79564123651f71fe71fb1a17477f977/CONTRIBUTING.md#development-environment-setup
+  - Skip running elasticsearch
+  - Do not run `./bin/kibana --dev` just yet.
 
-- Keep multiple requests at hand:
-
-  ![Multiple requests](https://github.com/bleskes/sense/raw/master/docs/requestformat.png)
-- Copy and paste requests as cURL
-- Resizable panels
-- Friendly keyboard shortcuts (for a complete list, click the help button):
-    * `Ctrl/Cmd + I`         - Auto indent current request.
-    * `Ctrl + Space`         - Open Auto complete (even if not typing).
-    * `Ctrl/Cmd + Enter`     - Submit request.
-    * `Ctrl/Cmd + Shift + C` - Copy request in cURL format.
-    * `Ctrl/Cmd + Up/Down`   - Jump to the previous/next request start or end.
-    * `Ctrl/Cmd + Alt + L`   - Collapse/expand current scope.
-
-Changes
+2. Add development config
 -------
 
-### v0.8
-- Major rewrite to support multiple requests in the editor.
-- You can now move the split between editor & output.
-- New shortcuts to navigate through requests quickly (see help).
-- Improved help popup.
-- Added editor support for request with multiple documents, separated by a new line.
-- Auto indent now toggels between single line per doc and multi-line formatted & indented.
-- Use Tab (as well as Enter) to select autocomplete suggestions.
-- Auto complete suggestion now sort prefix matches first.
-- Added a welcome message (which will only be shown once)
+create a file named `config/kibana.dev.yml`, with the following content:
 
-### v0.7
-- Increased history size to 500 elements
-- Add mappings to the KB.
-- Auto complete menu opens automatically when typing (read help for details on keyboard usage)
-- Added the possibility to indicate an endpoint needs one or more indexes to KB (previously had 0 or more).
-- GET request ignore editor content and the editor is visually disabled.
-- Double a click a history item to select it and close.
-- Changed icons to latest ES icons (thanks to @spenceralger)
-- Reduced size of method selector (v0.7.9)
+```
+kibana.enabled: false
+elasticsearch.enabled: false
+optimize:
+  sourceMaps: '#cheap-module-source-map'
+  unsafeCache: true
+  lazyPrebuild: false
+```
 
-### v0.6
-- Added support for username passwords in the url.
-- Added support for cURL copy & paste.
-    - You can now copy current request in curl format (using menu button or a keyboard shortcut)
-    - Paste a curl command into the editor and it will be parsed and all the correct fields populated
+3. check out sense
+---
 
-### v0.5
-- Mapping integration - autocomplete on indices, aliases and fields.
-- Added facets to the KB.
-- Enabled soft wrap in both input and output editors
+```
+cd installedPlugins
+git clone git@github.com:elastic/sense.git
+```
 
-### v0.4
-- Completed knowledge base and autocomplete for Query DSL
+4. run!
+---
+from the kibana root:
 
-### v0.3
-- Moved to a Chrome Extension for better deployment and upgrading infrastructure.
-- Introduced a knowledge base system to better manage growing size.
-- Added an automated test suite.
+```
+./bin/kibana --dev
+```
 
-### v0.2
-- History support
-
-### v0.1
-- Initial release
+verify by visiting: http://localhost:5601/app/sense/
