@@ -77,7 +77,9 @@ Use the `--remove` or `-r` option to remove a plugin, including any configuratio
 example:
 
 [source,shell]
-bin/kibana plugin --remove elasticsearch/marvel-ui
+bin/kibana plugin --remove marvel-ui
+
+You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
 
 [float]
 === Updating Plugins
