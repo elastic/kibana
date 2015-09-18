@@ -19,6 +19,7 @@ var internals = _.defaults(
     rootTemplate: null,
     showAppsLink: null,
     brand: null,
+    nav: [],
     applicationClasses: []
   }
 );
