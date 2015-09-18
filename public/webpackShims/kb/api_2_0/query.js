@@ -361,7 +361,8 @@ define(['vendor/_'], function (_) {
         use_dis_max: {
           __one_of: [true, false]
         },
-        tie_breaker: 0
+        tie_breaker: 0,
+        time_zone: "+1:00"
       },
       simple_query_string: {
         __template: {
