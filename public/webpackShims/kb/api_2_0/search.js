@@ -207,6 +207,23 @@ define(function () {
         }
       }
     });
+    
+    api.addEndpointDescription('_render_search_template', {
+      methods: ['GET'],
+      patterns: [
+        "_render/template"
+      ],
+      data_autocomplete_rules: {
+        "inline": {
+          __one_of: [
+            {__scope_link: "_search"},
+            {__scope_link: "GLOBAL.script"}
+          ]
+        },
+        "params": {
+        }
+      }
+    });
 
     api.addEndpointDescription('_get_delete_search_template', {
       methods: ['GET', 'DELETE'],
