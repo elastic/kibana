@@ -222,6 +222,17 @@ define(function () {
         }
       }
     });
+    
+    api.addEndpointDescription('_render_search_template_with_id', {
+      methods: ['GET'],
+      patterns: [
+        "_render/template/{id}"
+      ],
+      data_autocomplete_rules: {
+          "params": {
+        }
+      }
+    });
 
     api.addEndpointDescription('_get_delete_search_template', {
       methods: ['GET', 'DELETE'],
