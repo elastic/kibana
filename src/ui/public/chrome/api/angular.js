@@ -1,6 +1,10 @@
-var modules = require('ui/modules');
 var $ = require('jquery');
 var _ = require('lodash');
+
+require('../appSwitcher/appSwitcher.less');
+var modules = require('ui/modules');
+var ConfigTemplate = require('ui/ConfigTemplate');
+require('ui/directives/config');
 
 module.exports = function (chrome, internals) {
   chrome.setupAngular = function () {
@@ -58,6 +62,9 @@ module.exports = function (chrome, internals) {
           // and some local values
           $scope.httpActive = $http.pendingRequests;
           $scope.notifList = require('ui/notify')._notifs;
+          $scope.appSwitcherTemplate = new ConfigTemplate({
+            switcher: require('../appSwitcher/appSwitcher.html')
+          });
 
           return chrome;
         }
