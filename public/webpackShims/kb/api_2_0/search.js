@@ -214,12 +214,10 @@ define(function () {
         "_render/template"
       ],
       data_autocomplete_rules: {
-        "inline": {
-          __one_of: [
-            {__scope_link: "_search"},
-            {__scope_link: "GLOBAL.script"}
-          ]
-        },
+        __one_of: [
+          {"inline": {__scope_link: "_search"}},
+          {__scope_link: "GLOBAL.script"}
+        ],
         "params": {
         }
       }
