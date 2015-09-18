@@ -2,7 +2,7 @@ const Tab = require('../Tab');
 const expect = require('expect.js');
 const TabFakeStore = require('./_TabFakeStore');
 
-describe.only('Chrome Tab', function () {
+describe('Chrome Tab', function () {
   describe('construction', function () {
     it('accepts id, title, resetWhenActive, trackLastUrl, activeIndicatorColor, baseUrl', function () {
       const tab = new Tab({
