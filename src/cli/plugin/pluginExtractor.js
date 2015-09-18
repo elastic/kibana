@@ -9,5 +9,7 @@ module.exports = function (settings, logger, archiveType) {
     case '.tar.gz':
       return tarGzExtract(settings, logger);
       break;
+    default:
+      throw new Error('Unsupported archive format.');
   }
 };
