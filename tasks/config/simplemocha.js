@@ -8,6 +8,7 @@ module.exports = {
   all: {
     src: [
       'src/**/__tests__/**/*.js',
+      'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
       '!src/ui/**'
     ]
