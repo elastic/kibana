@@ -33,7 +33,7 @@ module.exports = function (settings) {
       data.pipe(process.stderr);
       return;
     }
-    process.stderr.write(data + '\n');
+    process.stderr.write(`${data}\n`);
     previousLineEnded = true;
   }
 
