@@ -17,7 +17,7 @@ Setting up a development environment
 --------
 
 - Install nvm:  brew install nvm  (or any other way)
-- If installing with brew on OS X, add "source $(brew --prefix nvm)/nvm.sh" to your login profile so that you can use "nvm" on the command line
+- If installing with brew on OS X, add `source $(brew --prefix nvm)/nvm.sh` to your login profile so that you can use `nvm` on the command line
 - Clone kibana:
 
 ```
