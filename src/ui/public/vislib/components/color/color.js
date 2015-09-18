@@ -1,10 +1,7 @@
 define(function (require) {
   return function ColorUtilService(Private) {
     var _ = require('lodash');
-
-    var createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
-    var MappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
-    var mappedColors = new MappedColors();
+    var mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
 
     /*
      * Accepts an array of strings or numbers that are used to create a
@@ -24,15 +21,9 @@ define(function (require) {
         }
       });
 
-      var arrayLength = arrayOfStringsOrNumbers.length;
-      var colors = createColorPalette(arrayLength + mappedColors.count());
-      var uniqueColors = _.difference(colors, mappedColors.all()).slice(0, arrayLength + 1);
-      var colorObj = _.zipObject(arrayOfStringsOrNumbers, uniqueColors);
+      mappedColors.mapKeys(arrayOfStringsOrNumbers);
 
       return function (value) {
-        if (!mappedColors.get(value)) {
-          mappedColors.add(value, colorObj[value]);
-        }
         return mappedColors.get(value);
       };
     };

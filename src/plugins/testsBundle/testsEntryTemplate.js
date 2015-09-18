@@ -21,6 +21,8 @@ ${pluginSlug}
  */
 
 window.__KBN__ = {
+  version: '1.2.3',
+  buildNum: 1234,
   vars: {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,

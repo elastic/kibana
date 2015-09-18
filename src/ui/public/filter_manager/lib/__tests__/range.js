@@ -63,5 +63,53 @@ describe('Filter Manager', function () {
 
       });
     });
+
+    describe('when given params where one side is infinite', function () {
+      let filter;
+      beforeEach(function () {
+        filter = fn(indexPattern.fields.byName['script number'], { gte: 0, lt: Infinity }, indexPattern);
+      });
+
+      describe('returned filter', function () {
+        it('is a script filter', function () {
+          expect(filter).to.have.property('script');
+        });
+
+        it('contain a param for the finite side', function () {
+          expect(filter.script.params).to.have.property('gte', 0);
+        });
+
+        it('does not contain a param for the infinite side', function () {
+          expect(filter.script.params).not.to.have.property('lt');
+        });
+
+        it('does not contain a script condition for the infinite side', function () {
+          const script = indexPattern.fields.byName['script number'].script;
+          expect(filter.script.script).to.equal(`(${script})>=gte`);
+        });
+      });
+    });
+
+    describe('when given params where both sides are infinite', function () {
+      let filter;
+      beforeEach(function () {
+        filter = fn(indexPattern.fields.byName['script number'], { gte: -Infinity, lt: Infinity }, indexPattern);
+      });
+
+      describe('returned filter', function () {
+        it('is a match_all filter', function () {
+          expect(filter).not.to.have.property('script');
+          expect(filter).to.have.property('match_all');
+        });
+
+        it('does not contain params', function () {
+          expect(filter).not.to.have.property('params');
+        });
+
+        it('meta field is set to field name', function () {
+          expect(filter.meta.field).to.equal('script number');
+        });
+      });
+    });
   });
 });

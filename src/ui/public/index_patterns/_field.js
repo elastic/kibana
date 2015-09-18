@@ -19,11 +19,11 @@ define(function (require) {
         spec.type = '_source';
       }
 
-      // find the type for this field, fallback to unkown type
+      // find the type for this field, fallback to unknown type
       var type = fieldTypes.byName[spec.type];
       if (spec.type && !type) {
         notify.error(
-          'Unkown field type "' + spec.type + '"' +
+          'Unknown field type "' + spec.type + '"' +
           ' for field "' + spec.name + '"' +
           ' in indexPattern "' + indexPattern.id + '"'
         );

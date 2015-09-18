@@ -35,6 +35,11 @@ module.exports = function (program) {
     .option('-s, --silent', 'Disable all process messaging')
     .option('-u, --url <url>', 'Specify download url')
     .option(
+      '-c, --config <path>',
+      'Path to the config file',
+      fromRoot('config/kibana.yml')
+    )
+    .option(
       '-t, --timeout <duration>',
       'Length of time before failing; 0 for never fail',
       settingParser.parseMilliseconds

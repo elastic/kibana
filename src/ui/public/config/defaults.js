@@ -3,6 +3,9 @@ define(function () {
     // wraped in provider so that a new instance is given to each app/test
 
     return {
+      'buildNum': {
+        readonly: true
+      },
       'query:queryString:options': {
         value: '{ "analyze_wildcard": true }',
         description: 'Options for the lucene query string parser',
@@ -89,6 +92,13 @@ define(function () {
         type: 'json',
         description: 'Default properties for the WMS map server support in the tile map'
       },
+      'visualization:colorMapping': {
+        type: 'json',
+        value: JSON.stringify({
+          'Count': '#57c17b'
+        }),
+        description: 'Maps values to specified colors within visualizations'
+      },
       'csv:separator': {
         value: ',',
         description: 'Separate exported values with this string',
@@ -163,6 +173,10 @@ define(function () {
           '  "value": 0',
           '}'
         ].join('\n')
+      },
+      'dashboard:defaultDarkTheme': {
+        value: false,
+        description: 'New dashboards use dark theme by default',
       }
     };
   };

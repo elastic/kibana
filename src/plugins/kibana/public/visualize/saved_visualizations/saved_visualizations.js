@@ -41,7 +41,7 @@ define(function (require) {
       });
     };
 
-    this.find = function (searchString) {
+    this.find = function (searchString, size = 100) {
       var self = this;
       var body;
       if (searchString) {
@@ -62,7 +62,7 @@ define(function (require) {
         index: kbnIndex,
         type: 'visualization',
         body: body,
-        size: 100,
+        size: size
       })
       .then(function (resp) {
         return {

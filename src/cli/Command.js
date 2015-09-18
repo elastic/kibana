@@ -31,8 +31,8 @@ ${help(this, '  ')}
 };
 
 Command.prototype.unknownArgv = function (argv) {
-  if (argv) this.__unkownArgv = argv;
-  return this.__unkownArgv ? this.__unkownArgv.slice(0) : [];
+  if (argv) this.__unknownArgv = argv;
+  return this.__unknownArgv ? this.__unknownArgv.slice(0) : [];
 };
 
 /**
