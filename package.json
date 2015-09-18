@@ -4,43 +4,12 @@
     "company": "Elasticsearch BV"
   },
   "name": "marvel",
-  "version": "1.4.0-SNAPSHOT",
+  "version": "2.0.0-SNAPSHOT",
   "repository": {
     "type": "git",
-    "url": "http://github.com/elasticsearch/elasticsearch-marvel.git"
+    "url": "http://github.com/elastic/sense.git"
   },
   "devDependencies": {
-    "rjs-build-analysis": "0.0.3",
-    "grunt": "~0.4.1",
-    "grunt-contrib-copy": "~0.4.1",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-compress": "~0.5.2",
-    "grunt-s3": "~0.2.0-alpha.2",
-    "grunt-ngmin": "0.0.3",
-    "grunt-contrib-less": "^0.10.0",
-    "grunt-git-describe": "~2.3.2",
-    "grunt-contrib-cssmin": "~0.6.2",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-htmlmin": "~0.1.3",
-    "grunt-contrib-requirejs": "~0.4.1",
-    "grunt-angular-templates": "~0.3.12",
-    "grunt-contrib-uglify": "~0.2.4",
-    "load-grunt-tasks": "~0.2.0",
-    "glob": "~3.2.7",
-    "grunt-contrib-symlink": "~0.2.0",
-    "grunt-replace": "~0.5.1",
-    "grunt-string-replace": "~0.2.4",
-    "grunt-shell": "~0.6.0",
-    "grunt-contrib-connect": "~0.5.0",
-    "grunt-connect-rewrite": "~0.1.1",
-    "csso": "~1.3.10",
-    "grunt-mocha": "~0.4.10",
-    "mocha": "~1.17.1",
-    "grunt-contrib-jade": "~0.10.0",
-    "lodash": "~2.4.1",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-blanket-mocha": "^0.4.0",
-    "moment": "~2.6.0"
   },
   "dependencies": {}
 }
