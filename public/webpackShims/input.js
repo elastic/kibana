@@ -231,7 +231,7 @@ define([
               value = "# " + req.method + " " + req.url + "\n" + value;
             }
             if (isFirstRequest) {
-              output.update(value, mimetype);
+              output.update(value, mode);
             }
             else {
               output.append("\n" + value);
