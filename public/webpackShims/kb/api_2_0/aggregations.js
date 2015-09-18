@@ -140,6 +140,7 @@ define(function () {
           "include_negatives": { __one_of: [ true, false ] },
           "background_is_superset": { __one_of: [ true, false ] }
         },
+        "percentage":{},
         "gnd": {
           "background_is_superset": { __one_of: [ true, false ] }
         }
