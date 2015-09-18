@@ -38,7 +38,6 @@ define([
     $(document.body).removeClass('fouc');
 
     var $esServer = miscInputs.$esServer;
-    var $send = miscInputs.$send;
 
     var marvelOpts = localStorage.getItem('marvelOpts');
     if (marvelOpts) {
@@ -53,121 +52,6 @@ define([
     }
     else {
       marvelOpts = {status: 'trial'};
-    }
-
-    var CURRENT_REQ_ID = 0;
-
-    function submitCurrentRequestToES() {
-
-      var req_id = ++CURRENT_REQ_ID;
-
-      input.getRequestsInRange(function (requests) {
-        if (req_id != CURRENT_REQ_ID) {
-          return;
-        }
-        output.update('');
-
-        if (requests.length == 0) {
-          return;
-        }
-
-        var isMultiRequest = requests.length > 1;
-
-        saveCurrentState();
-
-        $("#notification").text("Calling ES....").css("visibility", "visible");
-
-        var finishChain = function () {
-          $("#notification").text("").css("visibility", "hidden");
-        };
-
-        var isFirstRequest = true;
-
-        var sendNextRequest = function () {
-          if (req_id != CURRENT_REQ_ID) {
-            return;
-          }
-          if (requests.length == 0) {
-            finishChain();
-            return;
-          }
-          var req = requests.shift();
-          var es_path = req.url;
-          var es_method = req.method;
-          var es_data = req.data.join("\n");
-          if (es_data) {
-            es_data += "\n";
-          } //append a new line for bulk requests.
-
-          es.send(es_method, es_path, es_data).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
-            if (req_id != CURRENT_REQ_ID) {
-              return;
-            }
-            var xhr;
-            if (dataOrjqXHR.promise) {
-              xhr = dataOrjqXHR;
-            }
-            else {
-              xhr = jqXhrORerrorThrown;
-            }
-            if (typeof xhr.status == "number" &&
-              ((xhr.status >= 400 && xhr.status < 600) ||
-                (xhr.status >= 200 && xhr.status < 300)
-              )) {
-              // we have someone on the other side. Add to history
-              history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
-
-
-              var value = xhr.responseText;
-              var mode = null;
-              var contentType = xhr.getAllResponseHeaders("Content-Type") || "";
-              if (contentType.indexOf("text/plain") >= 0) {
-                mode = "ace/mode/text";
-              }
-              else if (contentType.indexOf("application/yaml") >= 0) {
-                mode = "ace/mode/yaml"
-              }
-              else {
-                // assume json - auto pretty
-                try {
-                  value = JSON.stringify(JSON.parse(value), null, 3);
-                }
-                catch (e) {
-
-                }
-              }
-
-              if (isMultiRequest) {
-                value = "# " + req.method + " " + req.url + "\n" + value;
-              }
-              if (isFirstRequest) {
-                output.update(value, mode);
-              }
-              else {
-                output.append("\n" + value);
-              }
-              isFirstRequest = false;
-              // single request terminate via sendNextRequest as well
-              sendNextRequest();
-            }
-            else {
-              var value = "Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText;
-              if (isMultiRequest) {
-                value = "# " + req.method + " " + req.url + "\n" + value;
-              }
-              if (isFirstRequest) {
-                output.update(value, 'ace/mode/text');
-              }
-              else {
-                output.append("\n" + value);
-              }
-              finishChain();
-            }
-          });
-        };
-
-        sendNextRequest();
-      });
     }
 
     // set the value of the server and/or the input and clear the output
@@ -334,21 +218,6 @@ define([
         });
 
     }());
-
-    /**
-     * Setup the "send" shortcut
-     */
-    input.commands.addCommand({
-      name: 'send to elasticsearch',
-      bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
-      exec: submitCurrentRequestToES
-    });
-
-    $send.click(function () {
-      input.focus();
-      submitCurrentRequestToES();
-      return false;
-    });
 
     /**
      * Display the welcome popup if it has not been shown yet

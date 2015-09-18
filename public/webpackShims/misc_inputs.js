@@ -81,9 +81,14 @@ define([
     $esServer.val(server);
   });
 
+  $send.click(function () {
+    input.focus();
+    input.sendCurrentRequestToES();
+    return false;
+  });
+
   return {
     $esServer: $esServer,
-    $send: $send,
     $autoIndent: $autoIndent,
     $header: $header,
     $resizer: $resizer

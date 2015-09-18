@@ -26,9 +26,12 @@ define([
   'settings',
   'require',
   'utils',
+  'es',
+  'history',
   'vendor/zeroclip',
   'ace/ext-searchbox'
-], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
+], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, es, history,
+             ZeroClipboard) {
   'use strict';
 
   var input = new SenseEditor($('#editor'));
@@ -108,6 +111,149 @@ define([
   }());
 
   /**
+   * Setup the "send" shortcut
+   */
+
+  var CURRENT_REQ_ID = 0;
+
+  function sendCurrentRequestToES() {
+
+    var req_id = ++CURRENT_REQ_ID;
+
+    input.getRequestsInRange(function (requests) {
+      if (req_id != CURRENT_REQ_ID) {
+        return;
+      }
+      output.update('');
+
+      if (requests.length == 0) {
+        return;
+      }
+
+      var isMultiRequest = requests.length > 1;
+
+      $("#notification").text("Calling ES....").css("visibility", "visible");
+
+      var finishChain = function () {
+        $("#notification").text("").css("visibility", "hidden");
+      };
+
+      var isFirstRequest = true;
+
+      var sendNextRequest = function () {
+        if (req_id != CURRENT_REQ_ID) {
+          return;
+        }
+        if (requests.length == 0) {
+          finishChain();
+          return;
+        }
+        var req = requests.shift();
+        var es_path = req.url;
+        var es_method = req.method;
+        var es_data = req.data.join("\n");
+        if (es_data) {
+          es_data += "\n";
+        } //append a new line for bulk requests.
+
+        es.send(es_method, es_path, es_data).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
+          if (req_id != CURRENT_REQ_ID) {
+            return;
+          }
+          var xhr;
+          if (dataOrjqXHR.promise) {
+            xhr = dataOrjqXHR;
+          }
+          else {
+            xhr = jqXhrORerrorThrown;
+          }
+          function modeForContentType(contentType) {
+            if (contentType.indexOf("text/plain") >= 0) {
+              return "ace/mode/text";
+            }
+            else if (contentType.indexOf("application/yaml") >= 0) {
+              return "ace/mode/yaml";
+            }
+            return null;
+          }
+
+          if (typeof xhr.status == "number" &&
+              // things like DELETE index where the index is not there are OK.
+            ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 404)
+          ) {
+            // we have someone on the other side. Add to history
+            history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
+
+
+            let value = xhr.responseText;
+            let mode = modeForContentType(xhr.getAllResponseHeaders("Content-Type") || "");
+
+            if (mode === null || mode === "application/json") {
+              // assume json - auto pretty
+              try {
+                value = JSON.stringify(JSON.parse(value), null, 3);
+              }
+              catch (e) {
+
+              }
+            }
+
+            if (isMultiRequest) {
+              value = "# " + req.method + " " + req.url + "\n" + value;
+            }
+            if (isFirstRequest) {
+              output.update(value, mode);
+            }
+            else {
+              output.append("\n" + value);
+            }
+            isFirstRequest = false;
+            // single request terminate via sendNextRequest as well
+            sendNextRequest();
+          }
+          else {
+            let value, mode;
+            if (xhr.responseText) {
+              value = xhr.responseText; // ES error should be shown
+              mode = modeForContentType(xhr.getAllResponseHeaders("Content-Type") || "");
+              if (value[0] == "{") {
+                try {
+                  value = JSON.stringify(JSON.parse(value), null, 3);
+                }
+                catch (e) {
+                }
+              }
+            } else {
+              value = "Request failed to get to the server (status code: " + xhr.status + ")";
+              mode = 'ace/mode/text';
+            }
+            if (isMultiRequest) {
+              value = "# " + req.method + " " + req.url + "\n" + value;
+            }
+            if (isFirstRequest) {
+              output.update(value, mimetype);
+            }
+            else {
+              output.append("\n" + value);
+            }
+            finishChain();
+          }
+        });
+      };
+
+      sendNextRequest();
+    });
+  }
+
+
+  input.commands.addCommand({
+    name: 'send to elasticsearch',
+    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+    exec: sendCurrentRequestToES
+  });
+
+
+  /**
    * Init the editor
    */
   if (settings) {
@@ -115,6 +261,8 @@ define([
   }
   input.focus();
   input.highlightCurrentRequestsAndUpdateActionBar();
+
+  input.sendCurrentRequestToES = sendCurrentRequestToES;
 
   return input;
 });
