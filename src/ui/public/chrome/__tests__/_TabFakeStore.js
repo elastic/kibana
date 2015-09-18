@@ -1,4 +1,4 @@
-let store = Symbol('store');
+const store = Symbol('store');
 
 export default class TabFakeStore {
   constructor() { this[store] = new Map(); }

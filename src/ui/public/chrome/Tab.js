@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var reEsc = require('lodash').escapeRegExp;
-var { parse, format } = require('url');
+const _ = require('lodash');
+const reEsc = require('lodash').escapeRegExp;
+const { parse, format } = require('url');
 
 const urlJoin = (a, b) => {
   if (!b) return a;

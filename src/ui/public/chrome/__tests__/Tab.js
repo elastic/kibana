@@ -1,11 +1,11 @@
-let Tab = require('../Tab');
-let expect = require('expect.js');
-let TabFakeStore = require('./_TabFakeStore');
+const Tab = require('../Tab');
+const expect = require('expect.js');
+const TabFakeStore = require('./_TabFakeStore');
 
 describe.only('Chrome Tab', function () {
   describe('construction', function () {
     it('accepts id, title, resetWhenActive, trackLastUrl, activeIndicatorColor, baseUrl', function () {
-      let tab = new Tab({
+      const tab = new Tab({
         id: 'foo',
         title: 'Foo App',
         resetWhenActive: false,
@@ -19,7 +19,7 @@ describe.only('Chrome Tab', function () {
       expect(tab.activeIndicatorColor).to.equal(true);
       expect(tab.rootUrl).to.equal('proto:host.domain:999/foo');
 
-      tab = new Tab({
+      const tab2 = new Tab({
         id: 'bar',
         title: 'Bar App',
         resetWhenActive: true,
@@ -27,27 +27,27 @@ describe.only('Chrome Tab', function () {
         baseUrl: 'proto:host.domain:999/sub/#/'
       });
 
-      expect(tab.id).to.equal('bar');
-      expect(tab.title).to.equal('Bar App');
-      expect(tab.resetWhenActive).to.equal(true);
-      expect(tab.activeIndicatorColor).to.equal(null);
-      expect(tab.rootUrl).to.equal('proto:host.domain:999/sub/#/bar');
+      expect(tab2.id).to.equal('bar');
+      expect(tab2.title).to.equal('Bar App');
+      expect(tab2.resetWhenActive).to.equal(true);
+      expect(tab2.activeIndicatorColor).to.equal(null);
+      expect(tab2.rootUrl).to.equal('proto:host.domain:999/sub/#/bar');
     });
 
     it('starts inactive', function () {
-      let tab = new Tab();
+      const tab = new Tab();
       expect(tab.active).to.equal(false);
     });
 
     it('uses the id to set the rootUrl', function () {
-      let id = 'foo';
-      let tab = new Tab({ id });
+      const id = 'foo';
+      const tab = new Tab({ id });
       expect(tab.id).to.equal(id);
       expect(tab.rootUrl).to.equal(`/${id}`);
     });
 
     it('creates a regexp for matching the rootUrl', function () {
-      let tab = new Tab({ id: 'foo' });
+      const tab = new Tab({ id: 'foo' });
 
       expect('/foo').to.match(tab.rootRegExp);
       expect('/foo/bar').to.match(tab.rootRegExp);
@@ -62,7 +62,7 @@ describe.only('Chrome Tab', function () {
     });
 
     it('includes the baseUrl in the rootRegExp if specified', function () {
-      let tab = new Tab({
+      const tab = new Tab({
         id: 'foo',
         baseUrl: 'http://spiderman.com/kibana'
       });
@@ -75,7 +75,7 @@ describe.only('Chrome Tab', function () {
 
     it('accepts a function for activeIndicatorColor', function () {
       let i = 0;
-      let tab = new Tab({
+      const tab = new Tab({
         activeIndicatorColor: function () {
           return i++;
         }
@@ -87,23 +87,23 @@ describe.only('Chrome Tab', function () {
     });
 
     it('discovers the lastUrl', function () {
-      let lastUrlStore = new TabFakeStore();
-      let tab = new Tab({ id: 'foo', lastUrlStore });
+      const lastUrlStore = new TabFakeStore();
+      const tab = new Tab({ id: 'foo', lastUrlStore });
       expect(tab.lastUrl).to.not.equal('bar');
 
       tab.setLastUrl('bar');
       expect(tab.lastUrl).to.equal('bar');
 
-      tab = new Tab({ id: 'foo', lastUrlStore });
-      expect(tab.lastUrl).to.equal('bar');
+      const tab2 = new Tab({ id: 'foo', lastUrlStore });
+      expect(tab2.lastUrl).to.equal('bar');
     });
   });
 
 
   describe('#setLastUrl()', function () {
     it('updates the lastUrl and storage value if passed a lastUrlStore', function () {
-      let lastUrlStore = new TabFakeStore();
-      let tab = new Tab({ id: 'foo', lastUrlStore });
+      const lastUrlStore = new TabFakeStore();
+      const tab = new Tab({ id: 'foo', lastUrlStore });
 
       expect(tab.lastUrl).to.not.equal('foo');
       tab.setLastUrl('foo');
@@ -112,35 +112,35 @@ describe.only('Chrome Tab', function () {
     });
 
     it('only updates lastUrl if no lastUrlStore', function () {
-      let tab = new Tab({ id: 'foo' });
+      const tab = new Tab({ id: 'foo' });
 
       expect(tab.lastUrl).to.equal(null);
       tab.setLastUrl('foo');
       expect(tab.lastUrl).to.equal('foo');
 
-      tab = new Tab({ id: 'foo' });
-      expect(tab.lastUrl).to.not.equal('foo');
+      const tab2 = new Tab({ id: 'foo' });
+      expect(tab2.lastUrl).to.not.equal('foo');
     });
   });
 
 
   describe('#href()', function () {
     it('returns the rootUrl/id be default', function () {
-      let tab = new Tab({ id: 'foo' });
+      const tab = new Tab({ id: 'foo' });
       expect(tab.href()).to.equal(tab.rootUrl);
     });
 
     it('returns the lastUrl if tracking is on', function () {
-      let tab = new Tab({ id: 'foo' });
+      const tab = new Tab({ id: 'foo' });
       tab.setLastUrl('okay');
       expect(tab.href()).to.equal('okay');
     });
 
     describe('when the tab is active', function () {
       it('returns the rootUrl when resetWhenActive: true', function () {
-        let id = 'foo';
-        let resetWhenActive = true;
-        let tab = new Tab({ id, resetWhenActive });
+        const id = 'foo';
+        const resetWhenActive = true;
+        const tab = new Tab({ id, resetWhenActive });
 
         tab.active = true;
 
@@ -149,7 +149,7 @@ describe.only('Chrome Tab', function () {
       });
 
       it('or returns null when not', function () {
-        let tab = new Tab({ id: 'foo', resetWhenActive: false });
+        const tab = new Tab({ id: 'foo', resetWhenActive: false });
         tab.active = true;
 
         expect(tab.href()).to.not.equal('butt');
@@ -160,8 +160,8 @@ describe.only('Chrome Tab', function () {
 
   describe('#getLastPath()', function () {
     it('parses a path out of the lastUrl by removing the baseUrl', function () {
-      let baseUrl = 'http://local:5601/app/visualize#';
-      let tab = new Tab({ baseUrl });
+      const baseUrl = 'http://local:5601/app/visualize#';
+      const tab = new Tab({ baseUrl });
 
       tab.setLastUrl('http://local:5601/app/visualize#/index');
       expect(tab.getLastPath()).to.equal('/index');
@@ -169,8 +169,8 @@ describe.only('Chrome Tab', function () {
 
     it('throws an error if the lastUrl does not extend the root url', function () {
       expect(function () {
-        let baseUrl = 'http://local:5601/app/visualize#';
-        let tab = new Tab({ baseUrl });
+        const baseUrl = 'http://local:5601/app/visualize#';
+        const tab = new Tab({ baseUrl });
 
         tab.setLastUrl('http://local:5601/');
         tab.getLastPath();
@@ -179,7 +179,7 @@ describe.only('Chrome Tab', function () {
   });
 
   describe('updateLastUrlGlobalState', function () {
-    let bases = [
+    const bases = [
       'http://local:5601',
       '',
       'weird.domain/with/subpath?path#',
@@ -187,7 +187,7 @@ describe.only('Chrome Tab', function () {
     ];
 
     context('with new state sets _g properly', function () {
-      let paths = [
+      const paths = [
         [ '/', '/?_g=newState' ],
         [ '/?first', '/?first=&_g=newState' ],
         [ '/path?first=1&_g=afterHash', '/path?first=1&_g=newState' ],
@@ -200,10 +200,10 @@ describe.only('Chrome Tab', function () {
 
       bases.forEach(baseUrl => {
         paths.forEach(([pathFrom, pathTo]) => {
-          let fromUrl = `${baseUrl}${pathFrom}`;
-          let toUrl = `${baseUrl}${pathTo}`;
+          const fromUrl = `${baseUrl}${pathFrom}`;
+          const toUrl = `${baseUrl}${pathTo}`;
           it(`${fromUrl} => ${toUrl}`, function () {
-            let tab = new Tab({ baseUrl });
+            const tab = new Tab({ baseUrl });
             tab.setLastUrl(fromUrl);
             tab.updateLastUrlGlobalState('newState');
             expect(tab.getLastUrl()).to.equal(toUrl);
@@ -213,7 +213,7 @@ describe.only('Chrome Tab', function () {
     });
 
     context('with new empty state removes _g', function () {
-      let paths = [
+      const paths = [
         [ '/', '/' ],
         [ '/?first', '/?first=' ],
         [ '/path?first=1&_g=afterHash', '/path?first=1' ],
@@ -226,10 +226,10 @@ describe.only('Chrome Tab', function () {
 
       bases.forEach(baseUrl => {
         paths.forEach(([pathFrom, pathTo]) => {
-          let fromUrl = `${baseUrl}${pathFrom}`;
-          let toUrl = `${baseUrl}${pathTo}`;
+          const fromUrl = `${baseUrl}${pathFrom}`;
+          const toUrl = `${baseUrl}${pathTo}`;
           it(`${fromUrl}`, function () {
-            let tab = new Tab({ baseUrl });
+            const tab = new Tab({ baseUrl });
             tab.setLastUrl(fromUrl);
             tab.updateLastUrlGlobalState();
             expect(tab.getLastUrl()).to.equal(toUrl);

@@ -1,5 +1,5 @@
-let { clone, get } = require('lodash');
-let { resolve } = require('url');
+const { clone, get } = require('lodash');
+const { resolve } = require('url');
 
 module.exports = function (chrome, internals) {
 

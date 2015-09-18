@@ -1,19 +1,19 @@
-let expect = require('expect.js');
+const expect = require('expect.js');
 
-let setup = require('../apps');
-let TabFakeStore = require('../../__tests__/_TabFakeStore');
+const setup = require('../apps');
+const TabFakeStore = require('../../__tests__/_TabFakeStore');
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {
     describe('defaults to false if there are less than two apps', function () {
       it('appCount = 0', function () {
-        let chrome = {};
+        const chrome = {};
         setup(chrome, { appCount: 0 });
         expect(chrome.getShowAppsLink()).to.equal(false);
       });
 
       it('appCount = 1', function () {
-        let chrome = {};
+        const chrome = {};
         setup(chrome, { appCount: 1 });
         expect(chrome.getShowAppsLink()).to.equal(false);
       });
@@ -21,26 +21,26 @@ describe('Chrome API :: apps', function () {
 
     describe('defaults to true if there are two or more apps', function () {
       it('appCount = 2', function () {
-        let chrome = {};
+        const chrome = {};
         setup(chrome, { appCount: 2 });
         expect(chrome.getShowAppsLink()).to.equal(true);
       });
 
       it('appCount = 3', function () {
-        let chrome = {};
+        const chrome = {};
         setup(chrome, { appCount: 3 });
         expect(chrome.getShowAppsLink()).to.equal(true);
       });
     });
 
     it('is chainable', function () {
-      let chrome = {};
+      const chrome = {};
       setup(chrome, { appCount: 1 });
       expect(chrome.setShowAppsLink(true)).to.equal(chrome);
     });
 
     it('can be changed', function () {
-      let chrome = {};
+      const chrome = {};
       setup(chrome, { appCount: 1 });
 
       expect(chrome.setShowAppsLink(true).getShowAppsLink()).to.equal(true);
@@ -53,8 +53,8 @@ describe('Chrome API :: apps', function () {
 
   describe('#getApp()', function () {
     it('returns a clone of the current app', function () {
-      let chrome = {};
-      let app = { 1: 2 };
+      const chrome = {};
+      const app = { 1: 2 };
       setup(chrome, { app });
 
       expect(chrome.getApp()).to.eql(app);
@@ -62,7 +62,7 @@ describe('Chrome API :: apps', function () {
     });
 
     it('returns undefined if no active app', function () {
-      let chrome = {};
+      const chrome = {};
       setup(chrome, {});
       expect(chrome.getApp()).to.equal(undefined);
     });
@@ -70,14 +70,14 @@ describe('Chrome API :: apps', function () {
 
   describe('#getAppTitle()', function () {
     it('returns the title property of the current app', function () {
-      let chrome = {};
-      let app = { title: 'foo' };
+      const chrome = {};
+      const app = { title: 'foo' };
       setup(chrome, { app });
       expect(chrome.getAppTitle()).to.eql('foo');
     });
 
     it('returns undefined if no active app', function () {
-      let chrome = {};
+      const chrome = {};
       setup(chrome, {});
       expect(chrome.getAppTitle()).to.equal(undefined);
     });
@@ -85,14 +85,14 @@ describe('Chrome API :: apps', function () {
 
   describe('#getAppUrl()', function () {
     it('returns the url property of the current app', function () {
-      let chrome = {};
-      let app = { url: 'foo' };
+      const chrome = {};
+      const app = { url: 'foo' };
       setup(chrome, { app });
       expect(chrome.getAppUrl()).to.eql('foo');
     });
 
     it('returns undefined if no active app', function () {
-      let chrome = {};
+      const chrome = {};
       setup(chrome, {});
       expect(chrome.getAppUrl()).to.equal(undefined);
     });
@@ -101,8 +101,8 @@ describe('Chrome API :: apps', function () {
   describe('#getInjected()', function () {
     describe('called without args', function () {
       it('returns a clone of all injectedVars', function () {
-        let chrome = {};
-        let vars = { name: 'foo' };
+        const chrome = {};
+        const vars = { name: 'foo' };
         setup(chrome, { vars });
         expect(chrome.getInjected()).to.eql(vars);
         expect(chrome.getInjected()).to.not.equal(vars);
@@ -111,8 +111,8 @@ describe('Chrome API :: apps', function () {
 
     describe('called with a var name', function () {
       it('returns the var at that name', function () {
-        let chrome = {};
-        let vars = { name: 'foo' };
+        const chrome = {};
+        const vars = { name: 'foo' };
         setup(chrome, { vars });
         expect(chrome.getInjected('name')).to.equal('foo');
       });
@@ -120,22 +120,22 @@ describe('Chrome API :: apps', function () {
 
     describe('called with a var name and default', function () {
       it('returns the default when the var is undefined', function () {
-        let chrome = {};
-        let vars = { name: undefined };
+        const chrome = {};
+        const vars = { name: undefined };
         setup(chrome, { vars });
         expect(chrome.getInjected('name', 'bar')).to.equal('bar');
       });
 
       it('returns null when the var is null', function () {
-        let chrome = {};
-        let vars = { name: null };
+        const chrome = {};
+        const vars = { name: null };
         setup(chrome, { vars });
         expect(chrome.getInjected('name', 'bar')).to.equal(null);
       });
 
       it('returns var if not undefined', function () {
-        let chrome = {};
-        let vars = { name: 'kim' };
+        const chrome = {};
+        const vars = { name: 'kim' };
         setup(chrome, { vars });
         expect(chrome.getInjected('name', 'bar')).to.equal('kim');
       });
@@ -143,8 +143,8 @@ describe('Chrome API :: apps', function () {
 
     describe('#get/setLastUrlFor()', function () {
       it('reads/writes last url from storage', function () {
-        let chrome = {};
-        let store = new TabFakeStore();
+        const chrome = {};
+        const store = new TabFakeStore();
         setup(chrome, { appUrlStore: store });
         expect(chrome.getLastUrlFor('app')).to.equal(undefined);
         chrome.setLastUrlFor('app', 'url');
