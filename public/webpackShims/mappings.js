@@ -196,7 +196,7 @@ define([
 
     function getFieldNamesFromTypeMapping(type_mapping) {
       var field_list =
-        $.map(type_mapping['properties'], function (field_mapping, field_name) {
+        $.map(type_mapping['properties'] || {}, function (field_mapping, field_name) {
           return getFieldNamesFromFieldMapping(field_name, field_mapping);
         });
 
