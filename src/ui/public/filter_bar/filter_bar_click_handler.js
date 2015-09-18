@@ -3,12 +3,12 @@ define(function (require) {
   var dedupFilters = require('./lib/dedupFilters');
   var uniqFilters = require('./lib/uniqFilters');
 
-  function findAggConfigResult(values) {
+  function findByParam(values, param) {
     if (_.isArray(values)) { // point series chart
-      var index = _.findIndex(values, 'aggConfigResult');
-      return values[index].aggConfigResult;
+      var index = _.findIndex(values, param);
+      return values[index][param];
     }
-    return values.aggConfigResult; // pie chart
+    return values[param]; // pie chart
   }
 
   return function (Notifier) {
@@ -25,7 +25,7 @@ define(function (require) {
         if (event.point.orig) {
           aggConfigResult = event.point.orig.aggConfigResult;
         } else if (event.point.values) {
-          aggConfigResult = findAggConfigResult(event.point.values);
+          aggConfigResult = findByParam(event.point.values, 'aggConfigResult');
         } else {
           aggConfigResult = event.point.aggConfigResult;
         }
@@ -38,8 +38,8 @@ define(function (require) {
           if (isLegendLabel) {
             // series data has multiple values, use aggConfig on the first
             // hierarchical data values is an object with the addConfig
-            var value = _.isArray(event.point.values) ? event.point.values[0] : event.point.values;
-            aggBuckets = aggBuckets.filter(result => result.aggConfig === value.aggConfig);
+            var aggConfig = findByParam(event.point.values, 'aggConfig');
+            aggBuckets = aggBuckets.filter((result) => result.aggConfig === aggConfig);
           }
 
           var filters = _(aggBuckets)
