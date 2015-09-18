@@ -169,7 +169,7 @@ define(function () {
       ]
     });
 
-    api.addEndpointDescription('_get_index_stats', {
+    api.addEndpointDescription('_get_index_settings', {
       methods: ['GET', ],
       patterns: [
         "{indices}/_settings",
