@@ -38,6 +38,20 @@ define(['vendor/_'], function (_) {
       patterns: patterns || [endpoint]
     });
   }
+  
+  function addNodeattrsCat(api) {
+    api.addEndpointDescription('_cat/nodeattrs', {
+      methods: ['GET'],
+      patterns: [
+        "_cat/nodeattrs"
+      ],
+      url_params: {
+        help: "__flag__",
+        v: "__flag__",
+        h: ["node", "name", "id", "nodeId", "pid", "p", "host", "h", "ip", "i", "port", "po", "attr", "attr.name", "value", "attr.value"]
+      }
+    });
+  }
 
   return function init(api) {
     addSimpleCat('_cat/aliases', api);
@@ -59,5 +73,6 @@ define(['vendor/_'], function (_) {
     addSimpleCat('_cat/shards', api);
     addSimpleCat('_cat/plugins', api);
     addSimpleCat('_cat/segments', api);
+    addNodeattrsCat(api);
   };
 });
