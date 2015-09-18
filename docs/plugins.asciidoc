@@ -78,6 +78,11 @@ example:
 bin/kibana plugin --remove elasticsearch/marvel-ui
 
 [float]
+=== Updating Plugins
+
+To update a plugin, remove the current version and reinstall the plugin.
+
+[float]
 === Configuring the Plugin Manager
 
 By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager 
