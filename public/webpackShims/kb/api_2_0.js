@@ -26,6 +26,7 @@ define([
   './api_2_0/cluster',
   './api_2_0/count',
   './api_2_0/document',
+  './api_2_0/field_stats',
   './api_2_0/filter',
   './api_2_0/nodes',
   './api_2_0/globals',
