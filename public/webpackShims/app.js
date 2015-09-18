@@ -112,7 +112,7 @@ define([
             }
             if (typeof xhr.status == "number" &&
               ((xhr.status >= 400 && xhr.status < 600) ||
-              (xhr.status >= 200 && xhr.status < 300)
+                (xhr.status >= 200 && xhr.status < 300)
               )) {
               // we have someone on the other side. Add to history
               history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
@@ -354,17 +354,15 @@ define([
      * Display the welcome popup if it has not been shown yet
      */
     if (!localStorage.getItem("version_welcome_shown")) {
-      require(['welcome_popup'], function ($welcomePopup) {
-        $welcomePopup.on('shown', function () {
-          localStorage.setItem("version_welcome_shown", '@@MARVEL_REVISION');
-        });
-        $welcomePopup.one('hidden', function () {
-          loadSavedState();
-          setupAutosave();
-        });
-        $welcomePopup.modal('show');
-
+      let $welcomePopup = require('welcome_popup');
+      $welcomePopup.on('shown', function () {
+        localStorage.setItem("version_welcome_shown", '@@SENSE_REVISION');
       });
+      $welcomePopup.one('hidden', function () {
+        loadSavedState();
+        setupAutosave();
+      });
+      $welcomePopup.modal('show');
     }
     else {
       loadSavedState();

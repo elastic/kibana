@@ -24,7 +24,7 @@ define([
   'mappings',
   'output',
   'es',
-  'bootstrap'
+  'vendor/bootstrap'
 ], function ($, history, input, mappings, output, es) {
   'use strict';
 

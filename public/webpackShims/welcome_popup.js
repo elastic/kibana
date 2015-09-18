@@ -21,7 +21,7 @@ define([
   'sense_editor/editor',
   'vendor/jquery',
 
-  'bootstrap'
+  'vendor/bootstrap'
 ], function (SenseEditor, $) {
   'use strict';
 
@@ -39,7 +39,7 @@ define([
     'GET index/type/1</div>'
   ].join('\n');
 
-  $welcomePopup.modal();
+  $welcomePopup.modal({show: false});
   $welcomePopup.on('shown', function () {
     $example = $(html)
       .appendTo("#welcome_example_container");
