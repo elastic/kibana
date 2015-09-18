@@ -36,7 +36,10 @@ define(function (require) {
 
           // For legend clicks, use the last bucket in the path
           if (isLegendLabel) {
-            aggBuckets = _.slice(aggBuckets, aggBuckets.length - 1);
+            // series data has multiple values, use aggConfig on the first
+            // hierarchical data values is an object with the addConfig
+            var value = _.isArray(event.point.values) ? event.point.values[0] : event.point.values;
+            aggBuckets = aggBuckets.filter(result => result.aggConfig === value.aggConfig);
           }
 
           var filters = _(aggBuckets)
