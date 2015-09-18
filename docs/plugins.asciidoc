@@ -3,7 +3,7 @@
 
 Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin` 
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
-`plugins` directory.
+`installedPlugins` directory and unpacking the plugin files into a new directory.
 
 [float]
 === Installing Plugins
@@ -51,6 +51,8 @@ Downloading <some number> bytes....................
 Extraction complete
 Optimizing and caching browser bundles...
 Plugin installation complete
+
+You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 
 [float]
 === Installing Plugins to an Arbitrary Directory
