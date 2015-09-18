@@ -40,12 +40,12 @@ require('ui/routes')
     }
   });
 
-app.controller('timelion', function ($scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config) {
+app.controller('timelion', function (
+  $scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config, $timeout) {
   timefilter.enabled = true;
   var notify = new Notifier({
     location: 'Timelion'
   });
-
 
   var defaultExpression = '.es(*)';
   var savedSheet = $route.current.locals.savedSheet;
@@ -91,6 +91,20 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
       }
     };
   };
+
+  var refresher;
+  $scope.$watchCollection('timefilter.refreshInterval', function (interval) {
+    if (refresher) $timeout.cancel(refresher);
+    if (interval.value > 0 && !interval.pause) {
+      function startRefresh() {
+        refresher = $timeout(function () {
+          if (!$scope.running) $scope.search();
+          startRefresh();
+        }, interval.value);
+      };
+      startRefresh();
+    }
+  });
 
   $scope.toggle = function (property) {
     console.log(property);
@@ -150,7 +164,6 @@ app.controller('timelion', function ($scope, $http, timefilter, AppState, courie
   };
 
   $scope.safeSearch = _.debounce($scope.search, 500);
-
 
   function save() {
     savedSheet.id = savedSheet.title;
