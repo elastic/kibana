@@ -394,7 +394,9 @@ define(['vendor/_'], function (_) {
           lte: 20,
           lt: 20,
           time_zone: "+1:00",
-          boost: 1.0
+          boost: 1.0,
+          "format": "dd/MM/yyyy||yyyy"
+
         }
       },
       span_first: {
