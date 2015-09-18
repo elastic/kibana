@@ -605,7 +605,8 @@ define(['vendor/_'], function (_) {
           boost: 1.0,
           boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"]},
           score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"]},
-          max_boost: 10
+          max_boost: 10,
+          min_score: 1.0
         },
         SCORING_FUNCS
       )
