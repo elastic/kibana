@@ -1,6 +1,7 @@
 module.exports = function (kibana) {
   var healthCheck = require('./lib/health_check');
   var exposeClient = require('./lib/expose_client');
+  var exposeAuthHandler = require('./lib/expose_auth_handler');
   var createProxy = require('./lib/create_proxy');
 
   return new kibana.Plugin({
@@ -33,6 +34,7 @@ module.exports = function (kibana) {
 
       // Expose the client to the server
       exposeClient(server);
+      exposeAuthHandler(server);
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');
       createProxy(server, 'POST', '/{index}/_search');

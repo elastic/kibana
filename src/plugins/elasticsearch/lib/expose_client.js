@@ -6,48 +6,65 @@ var url = require('url');
 
 module.exports = function (server) {
   var config = server.config();
-  var uri = url.parse(config.get('elasticsearch.url'));
-  var username = config.get('elasticsearch.username');
-  var password = config.get('elasticsearch.password');
-  var verifySsl = config.get('elasticsearch.ssl.verify');
-  var clientCrt = config.get('elasticsearch.ssl.cert');
-  var clientKey = config.get('elasticsearch.ssl.key');
-  var ca = config.get('elasticsearch.ssl.ca');
-  var apiVersion = config.get('elasticsearch.apiVersion');
 
-  if (username && password) {
-    uri.auth = util.format('%s:%s', username, password);
-  }
+  function createClient(options) {
+    options = _.defaults(options || {}, {
+      url: config.get('elasticsearch.url'),
+      username: config.get('elasticsearch.username'),
+      password: config.get('elasticsearch.password'),
+      verifySsl: config.get('elasticsearch.ssl.verify'),
+      clientCrt: config.get('elasticsearch.ssl.cert'),
+      clientKey: config.get('elasticsearch.ssl.key'),
+      ca: config.get('elasticsearch.ssl.ca'),
+      apiVersion: config.get('elasticsearch.apiVersion'),
+      keepAlive: true
+    });
 
-  var ssl = { rejectUnauthorized: verifySsl };
-  if (clientCrt && clientKey) {
-    ssl.cert = fs.readFileSync(clientCrt, 'utf8');
-    ssl.key = fs.readFileSync(clientKey, 'utf8');
-  }
-  if (ca) {
-    ssl.ca = fs.readFileSync(ca, 'utf8');
-  }
+    var uri = url.parse(options.url);
 
-  var client = new elasticsearch.Client({
-    host: url.format(uri),
-    ssl: ssl,
-    apiVersion: apiVersion,
-    log: function () {
-      this.error = function (err) {
-        server.log(['error', 'elasticsearch'], err);
-      };
-      this.warning = function (message) {
-        server.log(['warning', 'elasticsearch'], message);
-      };
-      this.info = _.noop;
-      this.debug = _.noop;
-      this.trace = _.noop;
-      this.close = _.noop;
+    var authorization;
+    if (options.req) {
+      if (_.get(options.req, 'headers.authorization')) {
+        authorization = _.get(options.req, 'headers.authorization').replace('Basic ', '');
+        uri.auth = new Buffer(authorization, 'base64').toString('utf8');
+      }
+    } else if (options.username && options.password) {
+      uri.auth = util.format('%s:%s', options.username, options.password);
     }
-  });
 
+    var ssl = { rejectUnauthorized: options.verifySsl };
+    if (options.clientCrt && options.clientKey) {
+      ssl.cert = fs.readFileSync(options.clientCrt, 'utf8');
+      ssl.key = fs.readFileSync(options.clientKey, 'utf8');
+    }
+    if (options.ca) {
+      ssl.ca = fs.readFileSync(options.ca, 'utf8');
+    }
+
+    return new elasticsearch.Client({
+      host: url.format(uri),
+      ssl: ssl,
+      apiVersion: options.apiVersion,
+      keepAlive: options.keepAlive,
+      log: function () {
+        this.error = function (err) {
+          server.log(['error', 'elasticsearch'], err);
+        };
+        this.warning = function (message) {
+          server.log(['warning', 'elasticsearch'], message);
+        };
+        this.info = _.noop;
+        this.debug = _.noop;
+        this.trace = _.noop;
+        this.close = _.noop;
+      }
+    });
+  }
+
+  var client = createClient();
   server.on('close', _.bindKey(client, 'close'));
   server.expose('client', client);
+  server.expose('createClient', createClient);
 
   return client;
 
