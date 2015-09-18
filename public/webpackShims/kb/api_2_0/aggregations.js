@@ -143,6 +143,14 @@ define(function () {
         "percentage":{},
         "gnd": {
           "background_is_superset": { __one_of: [ true, false ] }
+        },
+        "script_heuristic":{
+          __template: {
+            "script": "_subset_freq/(_superset_freq - _subset_freq + 1)"
+          },
+          "script": {
+            // populated by a global rule
+          }
         }
       },
       "range": {
