@@ -1,1 +1,1 @@
-require('@spalger/numeral');
+module.exports = require('@spalger/numeral');
