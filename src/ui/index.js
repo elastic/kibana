@@ -59,7 +59,6 @@ module.exports = async (kbnServer, server, config) => {
   server.decorate('reply', 'renderApp', function (app) {
     let payload = {
       app: app,
-      appCount: uiExports.apps.size,
       nav: uiExports.apps,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),

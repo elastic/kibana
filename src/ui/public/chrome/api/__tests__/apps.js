@@ -8,13 +8,13 @@ describe('Chrome API :: apps', function () {
     describe('defaults to false if there are less than two apps', function () {
       it('appCount = 0', function () {
         const chrome = {};
-        setup(chrome, { appCount: 0 });
+        setup(chrome, { nav: [] });
         expect(chrome.getShowAppsLink()).to.equal(false);
       });
 
       it('appCount = 1', function () {
         const chrome = {};
-        setup(chrome, { appCount: 1 });
+        setup(chrome, { nav: [ { url: '/' } ] });
         expect(chrome.getShowAppsLink()).to.equal(false);
       });
     });
@@ -22,26 +22,26 @@ describe('Chrome API :: apps', function () {
     describe('defaults to true if there are two or more apps', function () {
       it('appCount = 2', function () {
         const chrome = {};
-        setup(chrome, { appCount: 2 });
+        setup(chrome, { nav: [ { url: '/' }, { url: '/2' } ] });
         expect(chrome.getShowAppsLink()).to.equal(true);
       });
 
       it('appCount = 3', function () {
         const chrome = {};
-        setup(chrome, { appCount: 3 });
+        setup(chrome, { nav: [ { url: '/' }, { url: '/2' }, { url: '/3' } ] });
         expect(chrome.getShowAppsLink()).to.equal(true);
       });
     });
 
     it('is chainable', function () {
       const chrome = {};
-      setup(chrome, { appCount: 1 });
+      setup(chrome, { nav: [ { url: '/' } ] });
       expect(chrome.setShowAppsLink(true)).to.equal(chrome);
     });
 
     it('can be changed', function () {
       const chrome = {};
-      setup(chrome, { appCount: 1 });
+      setup(chrome, { nav: [ { url: '/' } ] });
 
       expect(chrome.setShowAppsLink(true).getShowAppsLink()).to.equal(true);
       expect(chrome.getShowAppsLink()).to.equal(true);
@@ -54,7 +54,7 @@ describe('Chrome API :: apps', function () {
   describe('#getApp()', function () {
     it('returns a clone of the current app', function () {
       const chrome = {};
-      const app = { 1: 2 };
+      const app = { url: '/' };
       setup(chrome, { app });
 
       expect(chrome.getApp()).to.eql(app);
@@ -71,7 +71,7 @@ describe('Chrome API :: apps', function () {
   describe('#getAppTitle()', function () {
     it('returns the title property of the current app', function () {
       const chrome = {};
-      const app = { title: 'foo' };
+      const app = { url: '/', title: 'foo' };
       setup(chrome, { app });
       expect(chrome.getAppTitle()).to.eql('foo');
     });
@@ -84,11 +84,14 @@ describe('Chrome API :: apps', function () {
   });
 
   describe('#getAppUrl()', function () {
-    it('returns the url property of the current app', function () {
+    it('returns the resolved url of the current app', function () {
       const chrome = {};
-      const app = { url: 'foo' };
+      const app = { url: '/foo' };
       setup(chrome, { app });
-      expect(chrome.getAppUrl()).to.eql('foo');
+
+      const a = document.createElement('a');
+      a.setAttribute('href', app.url);
+      expect(chrome.getAppUrl()).to.equal(a.href);
     });
 
     it('returns undefined if no active app', function () {
