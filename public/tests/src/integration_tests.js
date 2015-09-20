@@ -21,9 +21,8 @@ define([
   'input',
   'vendor/jquery',
   'kb',
-  'kb/api',
   'mappings'
-], function (input, $, kb, api, mappings) {
+], function (input, $, kb, mappings) {
   'use strict';
 
   var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
@@ -60,20 +59,22 @@ define([
 
       mappings.clear();
       mappings.loadMappings(mapping);
-      var test_api = new api.Api('test', kb._test.globalUrlComponentFactories, kb._test.globalBodyComponentFactories);
-      if (kb_schemes) {
-        if (kb_schemes.globals) {
-          $.each(kb_schemes.globals, function (parent, rules) {
-            test_api.addGlobalAutocompleteRules(parent, rules);
-          });
-        }
-        if (kb_schemes.endpoints) {
-          $.each(kb_schemes.endpoints, function (endpoint, scheme) {
-            _.defaults(scheme, {methods: null}); // disable method testing unless specified in test
-            test_api.addEndpointDescription(endpoint, scheme);
-          });
-        }
-      }
+      let json = {};
+      json[test.name] = kb_schemes || {};
+      var test_api = kb._test.loadApisFromJson(json);
+      //if (kb_schemes) {
+      //  if (kb_schemes.globals) {
+      //    $.each(kb_schemes.globals, function (parent, rules) {
+      //      test_api.addGlobalAutocompleteRules(parent, rules);
+      //    });
+      //  }
+      //  if (kb_schemes.endpoints) {
+      //    $.each(kb_schemes.endpoints, function (endpoint, scheme) {
+      //      _.defaults(scheme, {methods: null}); // disable method testing unless specified in test
+      //      test_api.addEndpointDescription(endpoint, scheme);
+      //    });
+      //  }
+      //}
       kb.setActiveApi(test_api);
 
       input.update(editorValue, function () {
@@ -187,6 +188,7 @@ define([
   var SEARCH_KB = {
     endpoints: {
       _search: {
+        methods: ["GET", "POST"],
         patterns: [
           "{indices}/{types}/_search",
           "{indices}/_search",
@@ -414,7 +416,7 @@ define([
         }
       }
     },
-    "POST _test",
+    "GET _test",
     [
       {
         name: "not matching object when { is not opened",
@@ -461,7 +463,7 @@ define([
     },
     MAPPING,
     SEARCH_KB,
-    "POST _search",
+    "GET _search",
     [
       {
         name: "* matching everything",
@@ -495,7 +497,7 @@ define([
         }
       }
     },
-    "POST _test",
+    "GET _test",
     [
       {
         name: "{index} matching",
@@ -540,7 +542,7 @@ define([
         }
       }
     },
-    "POST _endpoint",
+    "GET _endpoint",
     [
       {
         name: "Templates 1",
@@ -587,7 +589,7 @@ define([
         }
       }
     },
-    "POST _endpoint",
+    "GET _endpoint",
     [
       {
         name: "Conditionals",
@@ -644,7 +646,7 @@ define([
         }
       }
     },
-    "POST _endpoint",
+    "GET _endpoint",
     [
       {
         name: "Any of - templates",
@@ -699,7 +701,7 @@ define([
         }
       }
     },
-    "POST _endpoint",
+    "GET _endpoint",
     [
       {
         name: "Empty string as default",
@@ -781,7 +783,7 @@ define([
         }
       }
     },
-    "POST _current",
+    "GET _current",
     [
       {
         name: "Relative scope link test",
@@ -843,14 +845,14 @@ define([
       endpoints: {
         _current: {
           patterns: ["_current"],
-          id: "POST _current",
+          id: "GET _current",
           data_autocomplete_rules: {
             __scope_link: "GLOBAL.gtarget"
           }
         }
       }
     },
-    "POST _current",
+    "GET _current",
     [
       {
         name: "Top level scope link",
@@ -878,7 +880,7 @@ define([
         }
       }
     },
-    "POST _endpoint",
+    "GET _endpoint",
     [
       {
         name: "Path after empty object",
@@ -925,7 +927,7 @@ define([
         }
       }
     },
-    "POST _endpoint",
+    "GET _endpoint",
     [
       {
         name: "List of objects - internal autocomplete",
@@ -1049,7 +1051,7 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
-    "POST _cluster",
+    "GET _cluster",
     [
       {
         name: "Endpoints with slashes - no slash",
@@ -1065,25 +1067,25 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
-    "POST _cluster/",
+    "GET _cluster/",
     [
       {
         name: "Endpoints with slashes - before slash",
-        cursor: {row: 0, column: 8},
+        cursor: {row: 0, column: 7},
         autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
         prefixToAdd: "",
         suffixToAdd: ""
       },
       {
         name: "Endpoints with slashes - on slash",
-        cursor: {row: 0, column: 13},
+        cursor: {row: 0, column: 12},
         autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
         prefixToAdd: "",
         suffixToAdd: ""
       },
       {
         name: "Endpoints with slashes - after slash",
-        cursor: {row: 0, column: 14},
+        cursor: {row: 0, column: 13},
         autoCompleteSet: ["nodes/stats", "stats"],
         prefixToAdd: "",
         suffixToAdd: ""
@@ -1095,11 +1097,11 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
-    "POST _cluster/no",
+    "GET _cluster/no",
     [
       {
         name: "Endpoints with slashes - after slash",
-        cursor: {row: 0, column: 15},
+        cursor: {row: 0, column: 14},
         autoCompleteSet: [
           {name: "nodes/stats", meta: "endpoint"},
           {name: "stats", meta: "endpoint"}
@@ -1115,11 +1117,11 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
-    "POST _cluster/nodes/st",
+    "GET _cluster/nodes/st",
     [
       {
         name: "Endpoints with two slashes",
-        cursor: {row: 0, column: 21},
+        cursor: {row: 0, column: 20},
         autoCompleteSet: ["stats"],
         prefixToAdd: "",
         suffixToAdd: "",
@@ -1132,11 +1134,11 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
-    "POST ",
+    "GET ",
     [
       {
         name: "Immediately after space + method",
-        cursor: {row: 0, column: 5},
+        cursor: {row: 0, column: 4},
         autoCompleteSet: [
           {name: "_cluster/nodes/stats", meta: "endpoint"},
           {name: "_cluster/stats", meta: "endpoint"},
@@ -1155,11 +1157,11 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
-    "POST cl",
+    "GET cl",
     [
       {
         name: "Endpoints by subpart",
-        cursor: {row: 0, column: 7},
+        cursor: {row: 0, column: 6},
         autoCompleteSet: [
           {name: "_cluster/nodes/stats", meta: "endpoint"},
           {name: "_cluster/stats", meta: "endpoint"},

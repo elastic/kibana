@@ -39,6 +39,22 @@ module.exports = function (kibana) {
       });
 
       server.route({
+        path: '/api/sense/api_server',
+        method: ['GET', 'POST'],
+        handler: function (req, reply) {
+
+          let server = require('./public/api_server/server');
+          let {sense_version, apis} = req.query;
+          if (!apis) {
+            reply(Boom.badRequest('"apis" is a required param.'));
+            return;
+          }
+
+          return server.resolveApi(sense_version, apis.split(","), reply);
+        }
+      });
+
+      server.route({
         path: '/app/sense-tests',
         method: 'GET',
         handler: function (req, reply) {
@@ -71,4 +87,4 @@ module.exports = function (kibana) {
       ]
     }
   })
-}
+};

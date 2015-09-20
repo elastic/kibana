@@ -18,18 +18,18 @@
 
 
 define([
+    'vendor/jquery',
     'vendor/_',
     'exports',
     'mappings',
     'es',
     'kb/api',
-    'autocomplete/engine',
-    'require'
+    'autocomplete/engine'
   ],
-  function (_, exports, mappings, es, api, autocomplete_engine, require) {
+  function ($, _, exports, mappings, es, Api, autocomplete_engine) {
     'use strict';
 
-    var ACTIVE_API = new api.Api("empty");
+    var ACTIVE_API = new Api();
 
     function nonValidIndexType(token) {
       return !(token === "_all" || token[0] !== "_");
@@ -41,7 +41,7 @@ define([
 
     IndexAutocompleteComponent.prototype = _.create(
       autocomplete_engine.ListComponent.prototype,
-      { 'constructor': IndexAutocompleteComponent  });
+      {'constructor': IndexAutocompleteComponent});
 
     (function (cls) {
       cls.validateTokens = function (tokens) {
@@ -71,7 +71,7 @@ define([
 
     TypeAutocompleteComponent.prototype = _.create(
       autocomplete_engine.ListComponent.prototype,
-      { 'constructor': TypeAutocompleteComponent  });
+      {'constructor': TypeAutocompleteComponent});
 
     (function (cls) {
       cls.validateTokens = function (tokens) {
@@ -93,7 +93,7 @@ define([
 
     function FieldGenerator(context) {
       return _.map(mappings.getFields(context.indices, context.types), function (field) {
-        return { name: field.name, meta: field.type };
+        return {name: field.name, meta: field.type};
       });
     }
 
@@ -103,7 +103,7 @@ define([
 
     FieldAutocompleteComponent.prototype = _.create(
       autocomplete_engine.ListComponent.prototype,
-      { 'constructor': FieldAutocompleteComponent  });
+      {'constructor': FieldAutocompleteComponent});
 
     (function (cls) {
       cls.validateTokens = function (tokens) {
@@ -133,7 +133,7 @@ define([
 
     IdAutocompleteComponent.prototype = _.create(
       autocomplete_engine.SharedComponent.prototype,
-      { 'constructor': IdAutocompleteComponent  });
+      {'constructor': IdAutocompleteComponent});
 
     (function (cls) {
       cls.match = function (token, context, editor) {
@@ -145,8 +145,8 @@ define([
         }
         token = _.isArray(token) ? token : [token];
         if (_.find(token, function (t) {
-          return t.match(/[\/,]/);
-        })) {
+            return t.match(/[\/,]/);
+          })) {
           return null;
         }
         var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
@@ -223,37 +223,61 @@ define([
       return ACTIVE_API.getGlobalAutocompleteComponents(term, throwOnMissing);
     }
 
+    function loadApisFromJson(json, urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
+      urlParametrizedComponentFactories = urlParametrizedComponentFactories || parametrizedComponentFactories;
+      bodyParametrizedComponentFactories = bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
+      let api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
+      let names = [];
+      _.each(json, function (apiJson, name) {
+        names.unshift(name);
+        _.each(apiJson.globals || {}, function (globalJson, globalName) {
+          api.addGlobalAutocompleteRules(globalName, globalJson);
+        });
+        _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
+          api.addEndpointDescription(endpointName, endpointJson);
+        });
+      });
+      api.name = names.join(",");
+      return api;
+    }
+
     function setActiveApi(api) {
       if (_.isString(api)) {
-        api = api.match(/api_(\d+_\d+)/)[1] + '.js';
-        api = require('./kb/api_' + api);
-      }
-
-      if (_.isFunction(api)) {
-        /* jshint -W055 */
-        setActiveApi(new api(parametrizedComponentFactories, parametrizedComponentFactories));
+        $.ajax({
+            url: '/api/sense/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + "&apis=" + encodeURIComponent(api),
+            dataType: "json", // disable automatic guessing
+          }
+        ).then(
+          function (data, textStatus, jqXHR) {
+            setActiveApi(loadApisFromJson(data));
+          },
+          function (jqXHR) {
+            console.log("failed to load API '" + api + "': " + jqXHR.responseText);
+          });
         return;
+
       }
+      console.log("setting active api to [" + api.name + "]");
+
       ACTIVE_API = api;
-      console.log("setting api to " + api.name);
     }
 
     es.addServerChangeListener(function () {
       var version = es.getVersion(), api;
       if (!version || version.length == 0) {
-        api = "kb/api_1_0";
+        api = "es_1_0";
       }
       else if (version[0] === "1") {
-        api = "kb/api_1_0";
+        api = "es_1_0";
       }
       else if (version[0] === "2") {
-        api = "kb/api_2_0";
+        api = "es_2_0";
       }
       else if (version[0] === "3") {
-        api = "kb/api_2_0"; // TODO: change :)
+        api = "es_2_0"; // TODO: change :)
       }
       else {
-        api = "kb/api_1_0";
+        api = "es_1_0";
       }
 
       if (api) {
@@ -270,8 +294,7 @@ define([
     exports.getUnmatchedEndpointComponents = getUnmatchedEndpointComponents;
 
     exports._test = {
-      globalUrlComponentFactories: parametrizedComponentFactories,
-      globalBodyComponentFactories: parametrizedComponentFactories
+      loadApisFromJson: loadApisFromJson
     };
 
     return exports;

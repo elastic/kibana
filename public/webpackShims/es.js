@@ -49,7 +49,7 @@ define([
         method = "POST";
       }
 
-      // delayed loading for ciruclar references
+      // delayed loading for circular references
       var settings = require("settings");
 
       var options = {

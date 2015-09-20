@@ -17,25 +17,24 @@
 
 
 
-define(['vendor/_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params', 'autocomplete/body_completer'],
-  function (_, exports, url_pattern_matcher, url_params, body_completer) {
+define(['vendor/_', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params', 'autocomplete/body_completer'],
+  function (_, url_pattern_matcher, url_params, body_completer) {
     'use strict';
 
     /**
      *
-     * @param name
      * @param urlParametrizedComponentFactories a dictionary of factory functions
      * that will be used as fallback for parametrized path part (i.e., {indices} )
      * see url_pattern_matcher.UrlPatternMatcher
      * @constructor
      * @param bodyParametrizedComponentFactories same as urlParametrizedComponentFactories but used for body compilation
      */
-    function Api(name, urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
+    function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
       this.globalRules = {};
       this.endpoints = {};
-      this.name = name;
       this.urlPatternMatcher = new url_pattern_matcher.UrlPatternMatcher(urlParametrizedComponentFactories);
       this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
+      this.name = "";
     }
 
     (function (cls) {
@@ -92,7 +91,6 @@ define(['vendor/_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete
     }(Api.prototype));
 
 
-    exports.Api = Api;
-    return exports;
+    return Api;
   }
 );
