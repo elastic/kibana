@@ -165,6 +165,7 @@ module.exports = function (api) {
     patterns: [
       "{index}/{type}/_termvectors"
     ],
+    priority: 10, // collides with get doc by id
     url_params: {
       "fields": "",
       "offsets": "__flag__",
@@ -182,19 +183,19 @@ module.exports = function (api) {
       fields: [
         "{field}"
       ],
-      "offsets": {__one_of: [false, true]},
-      "payloads": {__one_of: [false, true]},
-      "positions": {__one_of: [false, true]},
-      "term_statistics": {__one_of: [true, false]},
-      "field_statistics": {__one_of: [false, true]},
-      "per_field_analyzer": {
+      offsets: {__one_of: [false, true]},
+      payloads: {__one_of: [false, true]},
+      positions: {__one_of: [false, true]},
+      term_statistics: {__one_of: [true, false]},
+      field_statistics: {__one_of: [false, true]},
+      per_field_analyzer: {
         __template: {"FIELD": ""},
         "{field}": ""
       },
-      "routing": "",
-      "version": 1,
-      "version_type": ["external", "external_gt", "external_gte", "force", "internal"],
-      "doc": {}
+      routing: "",
+      version: 1,
+      version_type: ["external", "external_gt", "external_gte", "force", "internal"],
+      doc: {}
     }
   });
 
