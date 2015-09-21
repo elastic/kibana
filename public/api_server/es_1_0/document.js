@@ -15,8 +15,6 @@
  * from Elasticsearch Incorporated.
  */
 
-
-
 'use strict';
 
 module.exports = function (api) {
@@ -162,5 +160,80 @@ module.exports = function (api) {
     }
   });
 
+  api.addEndpointDescription('_termvectors', {
+    methods: ['GET', 'POST'],
+    patterns: [
+      "{index}/{type}/_termvectors"
+    ],
+    url_params: {
+      "fields": "",
+      "offsets": "__flag__",
+      "payloads": "__flag__",
+      "positions": "__flag__",
+      "term_statistics": "__flag__",
+      "field_statistics": "__flag__",
+      "routing": "",
+      "version": 1,
+      "version_type": ["external", "external_gt", "external_gte", "force", "internal"],
+      "parent": "",
+      "preference": ""
+    },
+    data_autocomplete_rules: {
+      fields: [
+        "{field}"
+      ],
+      "offsets": {__one_of: [false, true]},
+      "payloads": {__one_of: [false, true]},
+      "positions": {__one_of: [false, true]},
+      "term_statistics": {__one_of: [true, false]},
+      "field_statistics": {__one_of: [false, true]},
+      "per_field_analyzer": {
+        __template: {"FIELD": ""},
+        "{field}": ""
+      },
+      "routing": "",
+      "version": 1,
+      "version_type": ["external", "external_gt", "external_gte", "force", "internal"],
+      "doc": {}
+    }
+  });
+
+  api.addEndpointDescription('_termvectors_id', {
+    methods: ['GET', 'POST'],
+    patterns: [
+      "{index}/{type}/{id}/_termvectors"
+    ],
+    url_params: {
+      "fields": "",
+      "offsets": "__flag__",
+      "payloads": "__flag__",
+      "positions": "__flag__",
+      "term_statistics": "__flag__",
+      "field_statistics": "__flag__",
+      "routing": "",
+      "version": 1,
+      "version_type": ["external", "external_gt", "external_gte", "force", "internal"],
+      "parent": "",
+      "preference": ""
+    },
+    data_autocomplete_rules: {
+      fields: [
+        "{field}"
+      ],
+      "offsets": {__one_of: [false, true]},
+      "payloads": {__one_of: [false, true]},
+      "positions": {__one_of: [false, true]},
+      "term_statistics": {__one_of: [true, false]},
+      "field_statistics": {__one_of: [false, true]},
+      "dfs": {__one_of: [true, false]},
+      "per_field_analyzer": {
+        __template: {"FIELD": ""},
+        "{field}": ""
+      },
+      "routing": "",
+      "version": 1,
+      "version_type": ["external", "external_gt", "external_gte", "force", "internal"]
+    }
+  });
 
 };
