@@ -159,7 +159,7 @@ module.exports = function (api) {
         __scope_link: '_put_mapping'
       },
       settings: {
-        __scope_link: '_put_settings.index'
+        __scope_link: '_put_settings'
       },
       aliases: {
         __template: {
