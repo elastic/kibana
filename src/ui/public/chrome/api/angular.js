@@ -1,6 +1,10 @@
-var modules = require('ui/modules');
 var $ = require('jquery');
 var _ = require('lodash');
+
+require('../appSwitcher/appSwitcher.less');
+var modules = require('ui/modules');
+var ConfigTemplate = require('ui/ConfigTemplate');
+require('ui/directives/config');
 
 module.exports = function (chrome, internals) {
   chrome.setupAngular = function () {
@@ -44,7 +48,13 @@ module.exports = function (chrome, internals) {
           chrome.setVisible(!Boolean($location.search().embed));
 
           // listen for route changes, propogate to tabs
-          var onRouteChange = _.bindKey(internals.tabs, 'consumeRouteUpdate', $location, chrome.getVisible());
+          var onRouteChange = function () {
+            let { href } = window.location;
+            let persist = chrome.getVisible();
+            internals.trackPossibleSubUrl(href);
+            internals.tabs.consumeRouteUpdate(href, persist);
+          };
+
           $rootScope.$on('$routeChangeSuccess', onRouteChange);
           $rootScope.$on('$routeUpdate', onRouteChange);
           onRouteChange();
@@ -52,6 +62,9 @@ module.exports = function (chrome, internals) {
           // and some local values
           $scope.httpActive = $http.pendingRequests;
           $scope.notifList = require('ui/notify')._notifs;
+          $scope.appSwitcherTemplate = new ConfigTemplate({
+            switcher: require('../appSwitcher/appSwitcher.html')
+          });
 
           return chrome;
         }
