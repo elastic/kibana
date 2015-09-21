@@ -96,7 +96,10 @@ module.exports = function (api) {
       shared_filesystem: {
         __one_of: [true, false]
       },
-      data_path: 'path'
+      data_path: 'path',
+      codec: {
+        __one_of: ['default', 'best_compression', 'lucene_default']
+      }
     }
   });
 };

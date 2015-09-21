@@ -68,7 +68,7 @@ module.exports = function (kibana) {
         title: 'Sense',
         description: 'JSON aware developer\'s interface to ElasticSearch',
         icon: 'plugins/sense/favicon.ico',
-        main: 'plugins/sense/sense',
+        main: 'plugins/sense',
         autoload: kibana.autoload.styles
       },
         {
