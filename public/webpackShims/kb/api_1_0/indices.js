@@ -40,7 +40,7 @@ define(function () {
         force: [true, false]
       }
     });
-    
+
     api.addEndpointDescription('_flush_synced', {
       methods: ['POST'],
       patterns: [
@@ -170,6 +170,16 @@ define(function () {
       ]
     });
 
+    api.addEndpointDescription('_get_index_settings', {
+      methods: ['GET', ],
+      patterns: [
+        "{indices}/_settings",
+      ],
+      url_params: {
+        flat_settings: "__flag__"
+      }
+    });
+
     api.addEndpointDescription('_get_index', {
       methods: ['GET', ],
       patterns: [
@@ -178,7 +188,6 @@ define(function () {
       ],
       url_components: {
         "feature": [
-          "_settings",
           "_mappings",
           "_warmers",
           "_aliases"

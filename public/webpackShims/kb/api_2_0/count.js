@@ -32,7 +32,8 @@ define(function () {
       url_params: {
         preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
         routing: "",
-        min_score: 1.0
+        min_score: 1.0,
+        terminate_after: 10,
       },
       data_autocomplete_rules: {
         query: {
