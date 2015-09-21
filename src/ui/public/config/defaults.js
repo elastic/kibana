@@ -140,19 +140,23 @@ define(function () {
       },
       'format:number:defaultPattern': {
         type: 'string',
-        value: '0,0.[000]'
+        value: '0,0.[000]',
+        description: 'Default numeral format for the "number" format'
       },
       'format:bytes:defaultPattern': {
         type: 'string',
-        value: '0,0.[000]b'
+        value: '0,0.[000]b',
+        description: 'Default numeral format for the "bytes" format'
       },
       'format:percent:defaultPattern': {
         type: 'string',
-        value: '0,0.[000]%'
+        value: '0,0.[000]%',
+        description: 'Default numeral format for the "percent" format'
       },
       'format:currency:defaultPattern': {
         type: 'string',
-        value: '($0,0.[00])'
+        value: '($0,0.[00])',
+        description: 'Default numeral format for the "currency" format'
       },
       'timepicker:timeDefaults': {
         type: 'json',
@@ -162,7 +166,8 @@ define(function () {
           '  "to": "now",',
           '  "mode": "quick"',
           '}'
-        ].join('\n')
+        ].join('\n'),
+        description: 'The timefilter selection to use when Kibana is started without one.'
       },
       'timepicker:refreshIntervalDefaults': {
         type: 'json',
@@ -172,7 +177,8 @@ define(function () {
           '  "pause": false,',
           '  "value": 0',
           '}'
-        ].join('\n')
+        ].join('\n'),
+        description: 'The timefilter\'s default refresh interval.'
       },
       'dashboard:defaultDarkTheme': {
         value: false,
