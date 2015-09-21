@@ -19,9 +19,12 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 The first time you click the *Dashboard* tab, Kibana displays an empty dashboard.
 
-image:images/NewDashboard.jpg[New Dashboard screen]
+image:images/NewDashboard.png[New Dashboard screen]
 
-Build your dashboard by adding visualizations.
+Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color 
+theme instead, click the *Use dark theme* box.
+
+image:images/darktheme.png[Dark Theme Example]
 
 [float]
 [[dash-autorefresh]]
