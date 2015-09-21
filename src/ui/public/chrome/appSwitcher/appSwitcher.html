@@ -1,6 +1,12 @@
-<div class="app-links">
-  <div class="app-link" ng-repeat="app in chrome.getNavLinks() | orderBy:'title'" ng-class="{ active: app.active }">
-    <a ng-href="{{ app.lastSubUrl || app.url }}">
+<div app-switcher class="app-links">
+  <div
+    class="app-link"
+    ng-repeat="app in chrome.getNavLinks() | orderBy:'title'"
+    ng-class="{ active: app.active }">
+
+    <a
+      ng-click="switcher.ensureNavigation($event, app)"
+      ng-href="{{ app.active ? app.url : (app.lastSubUrl || app.url) }}">
 
       <div ng-if="app.icon" ng-style="{ 'background-image': 'url(../' + app.icon + ')' }" class="app-icon"></div>
       <div ng-if="!app.icon" class="app-icon app-icon-missing">{{app.title[0]}}</div>

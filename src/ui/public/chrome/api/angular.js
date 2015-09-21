@@ -1,7 +1,7 @@
 var $ = require('jquery');
 var _ = require('lodash');
 
-require('../appSwitcher/appSwitcher.less');
+require('../appSwitcher');
 var modules = require('ui/modules');
 var ConfigTemplate = require('ui/ConfigTemplate');
 require('ui/directives/config');
