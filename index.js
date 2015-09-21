@@ -42,8 +42,7 @@ module.exports = function (kibana) {
         path: '/api/sense/api_server',
         method: ['GET', 'POST'],
         handler: function (req, reply) {
-
-          let server = require('./public/api_server/server');
+          let server = require('./api_server/server');
           let {sense_version, apis} = req.query;
           if (!apis) {
             reply(Boom.badRequest('"apis" is a required param.'));
@@ -68,7 +67,7 @@ module.exports = function (kibana) {
         title: 'Sense',
         description: 'JSON aware developer\'s interface to ElasticSearch',
         icon: 'plugins/sense/favicon.ico',
-        main: 'plugins/sense',
+        main: 'plugins/sense/sense',
         autoload: kibana.autoload.styles
       },
         {

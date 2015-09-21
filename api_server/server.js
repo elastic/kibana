@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../webpackShims/vendor/_");
+let _ = require("../public/webpackShims/vendor/_");
 
 module.exports.resolveApi = function (sense_version, apis, reply) {
   let result = {};

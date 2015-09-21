@@ -17,7 +17,7 @@
 
 'use strict';
 
-let _ = require('../webpackShims/vendor/_');
+let _ = require('../public/webpackShims/vendor/_');
 let Api = require('./api');
 
 let parts = [

@@ -16,7 +16,7 @@
  */
 'use strict';
 
-let _ = require("../../webpackShims/vendor/_");
+let _ = require("../../public/webpackShims/vendor/_");
 
 var SPAN_QUERIES = {
   // TODO add one_of for objects
