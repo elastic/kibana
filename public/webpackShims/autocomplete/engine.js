@@ -240,6 +240,13 @@ define([
       return new Wrapper();
     };
 
+    let tracer = function () {
+      if (window.engine_trace) {
+        console.log.call(console, arguments);
+      }
+    };
+
+
     function passThroughContext(context, extensionList) {
       function PTC() {
 
@@ -271,11 +278,15 @@ define([
       var token = tokenPath[0],
         nextWalkingStates = [];
 
+      tracer("starting token evaluation [" + token + "]");
+
       _.each(walkingStates, function (ws) {
         var contextForState = passThroughContext(context, ws.contextExtensionList);
         _.each(ws.components, function (component) {
+          tracer("evaluating [" + token + "] with [" + component.name + "]", component);
           var result = component.match(token, contextForState, editor);
           if (result && !_.isEmpty(result)) {
+            tracer("matched [" + token + "] with:", result);
             var next, extensionList;
             if (result.next && !_.isArray(result.next)) {
               next = [result.next];
@@ -352,12 +363,16 @@ define([
         wsToUse = _.find(walkStates, function (ws) {
           return _.isEmpty(ws.components)
         });
+        console.log("resolved ", tokenPath, 'to', walkStates);
         if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
           console.info("more then one context active for current path, but autocomplete isn't requested", walkStates);
         }
         if (!wsToUse) {
           wsToUse = walkStates[0];
         }
+
+        console.log("resolved ", tokenPath, 'to', wsToUse, 'options were', walkStates);
+
         _.each(wsToUse.contextExtensionList, function (extension) {
           _.assign(context, extension);
         });
