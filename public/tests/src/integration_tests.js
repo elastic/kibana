@@ -1210,6 +1210,7 @@ define([
         name: "Params just after ?",
         cursor: {row: 0, column: 12},
         autoCompleteSet: [
+          {name: "filter_path", meta: "param", "insert_value": "filter_path="},
           {name: "format", meta: "param", "insert_value": "format="},
           {name: "pretty", meta: "flag"},
           {name: "scroll", meta: "param", "insert_value": "scroll="},
@@ -1250,6 +1251,7 @@ define([
         name: "Params after amp",
         cursor: {row: 0, column: 24},
         autoCompleteSet: [
+          {name: "filter_path", meta: "param", "insert_value": "filter_path="},
           {name: "format", meta: "param", "insert_value": "format="},
           {name: "pretty", meta: "flag"},
           {name: "scroll", meta: "param", "insert_value": "scroll="},
@@ -1275,6 +1277,7 @@ define([
           end: {row: 0, column: 30}
         },
         autoCompleteSet: [
+          {name: "filter_path", meta: "param", "insert_value": "filter_path="},
           {name: "format", meta: "param", "insert_value": "format="},
           {name: "pretty", meta: "flag"},
           {name: "scroll", meta: "param", "insert_value": "scroll="},
