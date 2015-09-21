@@ -3,9 +3,12 @@ define(function (require) {
   var dedupFilters = require('./lib/dedupFilters');
   var uniqFilters = require('./lib/uniqFilters');
 
+  // given an object or array of objects, return the value of the passed param
+  // if the param is missing, return undefined
   function findByParam(values, param) {
     if (_.isArray(values)) { // point series chart
       var index = _.findIndex(values, param);
+      if (index === -1) return;
       return values[index][param];
     }
     return values[param]; // pie chart
@@ -39,7 +42,7 @@ define(function (require) {
             // series data has multiple values, use aggConfig on the first
             // hierarchical data values is an object with the addConfig
             var aggConfig = findByParam(event.point.values, 'aggConfig');
-            aggBuckets = aggBuckets.filter((result) => result.aggConfig === aggConfig);
+            aggBuckets = aggBuckets.filter((result) => result.aggConfig && result.aggConfig === aggConfig);
           }
 
           var filters = _(aggBuckets)
