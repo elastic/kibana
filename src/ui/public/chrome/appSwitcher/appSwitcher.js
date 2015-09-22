@@ -28,13 +28,14 @@ require('ui/modules')
         }
 
         var toParsed = parse(app.url);
-        var fromParsed = parse(window.location.href);
+        var fromParsed = parse($window.location.href);
         var sameProto = toParsed.protocol === fromParsed.protocol;
         var sameHost = toParsed.host === fromParsed.host;
         var samePath = toParsed.path === fromParsed.path;
 
         if (sameProto && sameHost && samePath) {
-          window.location.reload(true);
+          $window.location.reload();
+          event.preventDefault();
         }
       };
 
