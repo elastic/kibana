@@ -207,6 +207,7 @@ define(function (require) {
         // Setup configurable values for config directive, after objects are initialized
         $scope.opts = {
           dashboard: dash,
+          ui: $state.options,
           save: $scope.save,
           addVis: $scope.addVis,
           addSearch: $scope.addSearch,
