@@ -63,7 +63,7 @@ module.exports = function (chrome, internals) {
           $scope.httpActive = $http.pendingRequests;
           $scope.notifList = require('ui/notify')._notifs;
           $scope.appSwitcherTemplate = new ConfigTemplate({
-            switcher: require('../appSwitcher/appSwitcher.html')
+            switcher: '<app-switcher></app-switcher>'
           });
 
           return chrome;

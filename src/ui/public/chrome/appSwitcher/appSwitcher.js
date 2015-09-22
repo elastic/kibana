@@ -6,7 +6,8 @@ require('ui/modules')
 .get('kibana')
 .directive('appSwitcher', function () {
   return {
-    restrict: 'A',
+    restrict: 'E',
+    template: require('./appSwitcher.html'),
     controllerAs: 'switcher',
     controller: function () {
 
