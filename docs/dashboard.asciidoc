@@ -26,6 +26,8 @@ theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button
 
 image:images/darktheme.png[Dark Theme Example]
 
+NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
+
 [float]
 [[dash-autorefresh]]
 include::autorefresh.asciidoc[]
