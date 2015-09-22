@@ -6,7 +6,7 @@ let request = require('request');
 let progressReporter = require('./progressReporter');
 
 module.exports = function (settings, logger) {
-  let archiveType = undefined;
+  let archiveType;
 
   //Attempts to download each url in turn until one is successful
   function download() {
@@ -97,10 +97,10 @@ module.exports = function (settings, logger) {
   }
 
   function getArchiveTypeFromFilename(filePath) {
-    if (/.zip$/.test(filePath)) {
+    if (/\.zip$/i.test(filePath)) {
       return '.zip';
     }
-    if (/.tar.gz$/.test(filePath)) {
+    if (/\.tar\.gz$/i.test(filePath)) {
       return '.tar.gz';
     }
   }

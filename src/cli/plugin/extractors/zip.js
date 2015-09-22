@@ -21,7 +21,8 @@ module.exports = function (settings, logger) {
       path: settings.workingPath,
       filter: function (file) {
         return file.type !== 'SymbolicLink';
-      }
+      },
+      strip: 1
     });
   });
 };
