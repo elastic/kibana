@@ -89,6 +89,10 @@ define(function (require) {
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
+        $scope.$watchCollection('state.options', function (newVal, oldVal) {
+          if (!angular.equals(newVal, oldVal)) $state.save();
+        });
+        $scope.$watch('state.options.darkTheme', setDarkTheme);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
@@ -105,11 +109,6 @@ define(function (require) {
         $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
         courier.setRootSearchSource(dash.searchSource);
-
-        setDarkTheme(dash.darkTheme);
-        $scope.$watch('dash.darkTheme', function (value) {
-          setDarkTheme(value);
-        });
 
         function init() {
           updateQueryOnRootSource();
@@ -134,7 +133,7 @@ define(function (require) {
         }
 
         function setDarkTheme(enabled) {
-          var theme = !!enabled ? 'theme-dark' : 'theme-light';
+          var theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
           chrome.removeApplicationClass(['theme-dark', 'theme-light']);
           chrome.addApplicationClass(theme);
         }
@@ -164,6 +163,7 @@ define(function (require) {
           dash.panelsJSON = angular.toJson($state.panels);
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
+          dash.darkTheme = $state.options.darkTheme;
 
           dash.save()
           .then(function (id) {
