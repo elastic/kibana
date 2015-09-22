@@ -129,15 +129,17 @@ define(function (require) {
             self._attr.mapZoom = map.getZoom();
             self._attr.mapCenter = map.getCenter();
 
+            self.hideTooltip(map);
+            self.unbindPopups();
+
+            map.removeLayer(featureLayer);
+            featureLayer = self.markerType(map).addTo(map);
+
             self.events.emit('mapMoveEnd', {
               chart: self.originalConfig,
               zoom: self._attr.mapZoom,
               center: self._attr.mapCenter
             });
-
-            map.removeLayer(featureLayer);
-
-            featureLayer = self.markerType(map).addTo(map);
           });
 
           map.on('draw:created', function (e) {
@@ -404,6 +406,16 @@ define(function (require) {
     };
 
     /**
+     * Hides tooltip by closing popup from the map object
+     *
+     * @method hideTooltip
+     * @return undefined
+     */
+    TileMap.prototype.hideTooltip = function (map) {
+      map.closePopup();
+    };
+
+    /**
      * Switch type of data overlay for map:
      * creates featurelayer from mapData (geoJson)
      *
@@ -598,11 +610,11 @@ define(function (require) {
           'trailing': false
         }));
         map.on('mouseout', function (e) {
-          map.closePopup();
+          self.hideTooltip(map);
         });
         map.on('mousedown', function () {
           self._attr.disableTooltips = true;
-          map.closePopup();
+          self.hideTooltip(map);
         });
         map.on('mouseup', function () {
           self._attr.disableTooltips = false;
@@ -610,7 +622,7 @@ define(function (require) {
       }
 
       function mouseMoveLocation(e) {
-        map.closePopup();
+        self.hideTooltip(map);
 
         // unhighlight all svgs
         d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
@@ -757,11 +769,26 @@ define(function (require) {
           self.showTooltip(map, feature, latlng);
         },
         mouseout: function (e) {
-          map.closePopup();
+          self.hideTooltip(map);
         }
       });
 
       this.popups.push(popup);
+    };
+
+    /**
+     * Unbinds the events on each of the marker layers
+     *
+     * @method unbindPopups
+     * return {undefined}
+     */
+    TileMap.prototype.unbindPopups = function () {
+      if (this.popups) {
+        this.popups.forEach(function (popup) {
+          popup.off('mouseover').off('mouseout');
+        });
+        this.popups = [];
+      }
     };
 
     /**
@@ -900,12 +927,7 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
-      if (this.popups) {
-        this.popups.forEach(function (popup) {
-          popup.off('mouseover').off('mouseout');
-        });
-        this.popups = [];
-      }
+      this.unbindPopups();
 
       if (this.maps) {
         this.maps.forEach(function (map) {
