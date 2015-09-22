@@ -54,7 +54,7 @@ define(function () {
         value: 30,
         description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
           'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
-          'cause requests to take much longer to process.'
+          'cause requests to take much longer to process'
       },
       'fields:popularLimit': {
         value: 10,
@@ -74,7 +74,7 @@ define(function () {
         '12 is the max. ' +
         '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
-        'Explanation of cell dimensions.</a>',
+        'Explanation of cell dimensions</a>',
       },
       'visualization:tileMap:WMSdefaults': {
         value: JSON.stringify({
@@ -117,12 +117,12 @@ define(function () {
       },
       'truncate:maxHeight': {
         value: 115,
-        description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
+        description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation'
       },
       'indexPattern:fieldMapping:lookBack': {
         value: 5,
         description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
-          'patterns from which to query the field mapping.'
+          'patterns from which to query the field mapping'
       },
       'format:defaultTypeMap': {
         type: 'json',
@@ -136,7 +136,7 @@ define(function () {
           '}',
         ].join('\n'),
         description: 'Map of the format name to use by default for each field type. ' +
-          '"_default_" is used if the field type is not mentioned explicitly.'
+          '"_default_" is used if the field type is not mentioned explicitly'
       },
       'format:number:defaultPattern': {
         type: 'string',
@@ -167,7 +167,7 @@ define(function () {
           '  "mode": "quick"',
           '}'
         ].join('\n'),
-        description: 'The timefilter selection to use when Kibana is started without one.'
+        description: 'The timefilter selection to use when Kibana is started without one'
       },
       'timepicker:refreshIntervalDefaults': {
         type: 'json',
@@ -178,7 +178,7 @@ define(function () {
           '  "value": 0',
           '}'
         ].join('\n'),
-        description: 'The timefilter\'s default refresh interval.'
+        description: 'The timefilter\'s default refresh interval'
       },
       'dashboard:defaultDarkTheme': {
         value: false,
