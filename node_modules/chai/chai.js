@@ -15,7 +15,7 @@ var used = []
  * Chai version
  */
 
-exports.version = '3.2.0';
+exports.version = '3.3.0';
 
 /*!
  * Assertion Error
@@ -503,7 +503,7 @@ module.exports = function (chai, _) {
       for (var k in val) subset[k] = obj[k];
       expected = _.eql(subset, val);
     } else {
-      expected = obj && ~obj.indexOf(val);
+      expected = (obj != undefined) && ~obj.indexOf(val);
     }
     this.assert(
         expected
@@ -681,17 +681,8 @@ module.exports = function (chai, _) {
    */
 
   Assertion.addProperty('empty', function () {
-    var obj = flag(this, 'object')
-      , expected = obj;
-
-    if (Array.isArray(obj) || 'string' === typeof object) {
-      expected = obj.length;
-    } else if (typeof obj === 'object') {
-      expected = Object.keys(obj).length;
-    }
-
     this.assert(
-        !expected
+        Object.keys(Object(flag(this, 'object'))).length === 0
       , 'expected #{this} to be empty'
       , 'expected #{this} not to be empty'
     );
@@ -1727,7 +1718,7 @@ module.exports = function (chai, _) {
       , result
     );
   }
-  
+
   Assertion.addMethod('satisfy', satisfy);
   Assertion.addMethod('satisfies', satisfy);
 
@@ -1937,7 +1928,7 @@ module.exports = function (chai, _) {
   /**
    * ### .extensible
    *
-   * Asserts that the target is extensible (can have new properties added to 
+   * Asserts that the target is extensible (can have new properties added to
    * it).
    *
    *     var nonExtensibleObject = Object.preventExtensions({});
@@ -1956,8 +1947,22 @@ module.exports = function (chai, _) {
   Assertion.addProperty('extensible', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a non-extensible ordinary object, simply return false.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isExtensible
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isExtensible;
+
+    try {
+      isExtensible = Object.isExtensible(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isExtensible = false;
+      else throw err;
+    }
+
     this.assert(
-      Object.isExtensible(obj)
+      isExtensible
       , 'expected #{this} to be extensible'
       , 'expected #{this} to not be extensible'
     );
@@ -1983,8 +1988,22 @@ module.exports = function (chai, _) {
   Assertion.addProperty('sealed', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a sealed ordinary object, simply return true.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isSealed
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isSealed;
+
+    try {
+      isSealed = Object.isSealed(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isSealed = true;
+      else throw err;
+    }
+
     this.assert(
-      Object.isSealed(obj)
+      isSealed
       , 'expected #{this} to be sealed'
       , 'expected #{this} to not be sealed'
     );
@@ -2008,13 +2027,26 @@ module.exports = function (chai, _) {
   Assertion.addProperty('frozen', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a frozen ordinary object, simply return true.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isFrozen
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isFrozen;
+
+    try {
+      isFrozen = Object.isFrozen(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isFrozen = true;
+      else throw err;
+    }
+
     this.assert(
-      Object.isFrozen(obj)
+      isFrozen
       , 'expected #{this} to be frozen'
       , 'expected #{this} to not be frozen'
     );
   });
-
 };
 
 },{}],6:[function(require,module,exports){
@@ -2245,24 +2277,6 @@ module.exports = function (chai, util) {
     new Assertion(act, msg).to.not.eql(exp);
   };
 
-  /**
-   * ### .isTrue(value, [message])
-   *
-   * Asserts that `value` is true.
-   *
-   *     var teaServed = true;
-   *     assert.isTrue(teaServed, 'the tea has been served');
-   *
-   * @name isTrue
-   * @param {Mixed} value
-   * @param {String} message
-   * @api public
-   */
-
-  assert.isAbove = function (val, abv, msg) {
-    new Assertion(val, msg).to.be.above(abv);
-  };
-
    /**
    * ### .isAbove(valueToCheck, valueToBeAbove, [message])
    *
@@ -2277,8 +2291,27 @@ module.exports = function (chai, util) {
    * @api public
    */
 
-  assert.isBelow = function (val, blw, msg) {
-    new Assertion(val, msg).to.be.below(blw);
+  assert.isAbove = function (val, abv, msg) {
+    new Assertion(val, msg).to.be.above(abv);
+  };
+
+   /**
+   * ### .isAtLeast(valueToCheck, valueToBeAtLeast, [message])
+   *
+   * Asserts `valueToCheck` is greater than or equal to (>=) `valueToBeAtLeast`
+   *
+   *     assert.isAtLeast(5, 2, '5 is greater or equal to 2');
+   *     assert.isAtLeast(3, 3, '3 is greater or equal to 3');
+   *
+   * @name isAtLeast
+   * @param {Mixed} valueToCheck
+   * @param {Mixed} valueToBeAtLeast
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isAtLeast = function (val, atlst, msg) {
+    new Assertion(val, msg).to.be.least(atlst);
   };
 
    /**
@@ -2295,8 +2328,63 @@ module.exports = function (chai, util) {
    * @api public
    */
 
+  assert.isBelow = function (val, blw, msg) {
+    new Assertion(val, msg).to.be.below(blw);
+  };
+
+   /**
+   * ### .isAtMost(valueToCheck, valueToBeAtMost, [message])
+   *
+   * Asserts `valueToCheck` is less than or equal to (<=) `valueToBeAtMost`
+   *
+   *     assert.isAtMost(3, 6, '3 is less than or equal to 6');
+   *     assert.isAtMost(4, 4, '4 is less than or equal to 4');
+   *
+   * @name isAtMost
+   * @param {Mixed} valueToCheck
+   * @param {Mixed} valueToBeAtMost
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isAtMost = function (val, atmst, msg) {
+    new Assertion(val, msg).to.be.most(atmst);
+  };
+
+  /**
+   * ### .isTrue(value, [message])
+   *
+   * Asserts that `value` is true.
+   *
+   *     var teaServed = true;
+   *     assert.isTrue(teaServed, 'the tea has been served');
+   *
+   * @name isTrue
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
   assert.isTrue = function (val, msg) {
     new Assertion(val, msg).is['true'];
+  };
+
+  /**
+   * ### .isNotTrue(value, [message])
+   *
+   * Asserts that `value` is not true.
+   *
+   *     var tea = 'tasty chai';
+   *     assert.isNotTrue(tea, 'great, time for tea!');
+   *
+   * @name isNotTrue
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isNotTrue = function (val, msg) {
+    new Assertion(val, msg).to.not.equal(true);
   };
 
   /**
@@ -2315,6 +2403,24 @@ module.exports = function (chai, util) {
 
   assert.isFalse = function (val, msg) {
     new Assertion(val, msg).is['false'];
+  };
+
+  /**
+   * ### .isNotFalse(value, [message])
+   *
+   * Asserts that `value` is not false.
+   *
+   *     var tea = 'tasty chai';
+   *     assert.isNotFalse(tea, 'great, time for tea!');
+   *
+   * @name isNotFalse
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isNotFalse = function (val, msg) {
+    new Assertion(val, msg).to.not.equal(false);
   };
 
   /**
@@ -3757,6 +3863,9 @@ module.exports = function (ctx, name, method) {
  * MIT Licensed
  */
 
+var config = require('../config');
+var flag = require('./flag');
+
 /**
  * ### addProperty (ctx, name, getter)
  *
@@ -3784,7 +3893,11 @@ module.exports = function (ctx, name, method) {
 
 module.exports = function (ctx, name, getter) {
   Object.defineProperty(ctx, name,
-    { get: function () {
+    { get: function addProperty() {
+        var old_ssfi = flag(this, 'ssfi');
+        if (old_ssfi && config.includeStack === false)
+          flag(this, 'ssfi', addProperty);
+
         var result = getter.call(this);
         return result === undefined ? this : result;
       }
@@ -3792,7 +3905,7 @@ module.exports = function (ctx, name, getter) {
   });
 };
 
-},{}],12:[function(require,module,exports){
+},{"../config":4,"./flag":12}],12:[function(require,module,exports){
 /*!
  * Chai - flag utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>

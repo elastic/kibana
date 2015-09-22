@@ -214,7 +214,7 @@ module.exports = function (chai, _) {
       for (var k in val) subset[k] = obj[k];
       expected = _.eql(subset, val);
     } else {
-      expected = obj && ~obj.indexOf(val);
+      expected = (obj != undefined) && ~obj.indexOf(val);
     }
     this.assert(
         expected
@@ -392,17 +392,8 @@ module.exports = function (chai, _) {
    */
 
   Assertion.addProperty('empty', function () {
-    var obj = flag(this, 'object')
-      , expected = obj;
-
-    if (Array.isArray(obj) || 'string' === typeof object) {
-      expected = obj.length;
-    } else if (typeof obj === 'object') {
-      expected = Object.keys(obj).length;
-    }
-
     this.assert(
-        !expected
+        Object.keys(Object(flag(this, 'object'))).length === 0
       , 'expected #{this} to be empty'
       , 'expected #{this} not to be empty'
     );
@@ -1438,7 +1429,7 @@ module.exports = function (chai, _) {
       , result
     );
   }
-  
+
   Assertion.addMethod('satisfy', satisfy);
   Assertion.addMethod('satisfies', satisfy);
 
@@ -1648,7 +1639,7 @@ module.exports = function (chai, _) {
   /**
    * ### .extensible
    *
-   * Asserts that the target is extensible (can have new properties added to 
+   * Asserts that the target is extensible (can have new properties added to
    * it).
    *
    *     var nonExtensibleObject = Object.preventExtensions({});
@@ -1667,8 +1658,22 @@ module.exports = function (chai, _) {
   Assertion.addProperty('extensible', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a non-extensible ordinary object, simply return false.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isExtensible
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isExtensible;
+
+    try {
+      isExtensible = Object.isExtensible(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isExtensible = false;
+      else throw err;
+    }
+
     this.assert(
-      Object.isExtensible(obj)
+      isExtensible
       , 'expected #{this} to be extensible'
       , 'expected #{this} to not be extensible'
     );
@@ -1694,8 +1699,22 @@ module.exports = function (chai, _) {
   Assertion.addProperty('sealed', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a sealed ordinary object, simply return true.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isSealed
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isSealed;
+
+    try {
+      isSealed = Object.isSealed(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isSealed = true;
+      else throw err;
+    }
+
     this.assert(
-      Object.isSealed(obj)
+      isSealed
       , 'expected #{this} to be sealed'
       , 'expected #{this} to not be sealed'
     );
@@ -1719,11 +1738,24 @@ module.exports = function (chai, _) {
   Assertion.addProperty('frozen', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a frozen ordinary object, simply return true.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isFrozen
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isFrozen;
+
+    try {
+      isFrozen = Object.isFrozen(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isFrozen = true;
+      else throw err;
+    }
+
     this.assert(
-      Object.isFrozen(obj)
+      isFrozen
       , 'expected #{this} to be frozen'
       , 'expected #{this} to not be frozen'
     );
   });
-
 };

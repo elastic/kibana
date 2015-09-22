@@ -1,9 +1,35 @@
+2.3.3 / 2015-09-19
+==================
+
+ * [#1875] - Fix Markdown reporter exceeds maximum call stack size ([@danielstjules])
+ * [#1864] - Fix xunit missing output with --reporter-options output ([@danielstjules])
+ * [#1846] - Support all harmony flags ([@danielstjules])
+ * Fix fragile xunit reporter spec ([@danielstjules])
+ * [#1669] - Fix catch uncaught errors outside test suite execution ([@danielstjules])
+ * [#1868] - Revert jade to support npm < v1.3.7 ([@danielstjules])
+ * [#1766] - Don't remove modules/components from stack trace in the browser ([@danielstjules])
+ * [#1798] - Fix correctly attribute mutiple done err with hooks ([@danielstjules])
+ * Fix use utils.reduce for IE8 compatibility ([@wsw0108])
+ * Some linting errors fixed by [@danielstjules]
+ * Call the inspect() function if message is not set ([@kevinburke])
+
+[#1875]: https://github.com/mochajs/mocha/issues/1875
+[#1864]: https://github.com/mochajs/mocha/issues/1864
+[#1846]: https://github.com/mochajs/mocha/issues/1846
+[#1669]: https://github.com/mochajs/mocha/issues/1669
+[#1868]: https://github.com/mochajs/mocha/issues/1868
+[#1766]: https://github.com/mochajs/mocha/issues/1766
+[#1798]: https://github.com/mochajs/mocha/issues/1798
+[@danielstjules]: https://github.com/danielstjules
+[@wsw0108]: https://github.com/wsw0108
+[@kevinburke]: https://github.com/kevinburke
+
 2.3.2 / 2015-09-07
 ==================
  * [#1868] - Fix compatibility with older versions of NPM ([@boneskull])
 
   [#1868]: https://github.com/mochajs/mocha/issues/1868
-  
+
 2.3.1 / 2015-09-06
 ==================
 
@@ -23,7 +49,7 @@
   * [#1230] - More descriptive beforeEach/afterEach messages ([@duncanbeevers])
   * [#1787] - Scope loading behaviour instead of using early return ([@aryeguy])
   * [#1789] - Fix: html-runner crashing ([@sunesimonsen])
-  * [#1749] - Fix maximum call stack error on large amount of tests ([@tinganho])  
+  * [#1749] - Fix maximum call stack error on large amount of tests ([@tinganho])
   * [#1230] - Decorate failed hook titles with test title ([@duncanbeevers])
   * [#1260] - Build using Browserify ([@ndhoule])
   * [#1728] - Don't use `__proto__` ([@ndhoule])
@@ -32,7 +58,7 @@
   * [#1766] - Fix overly aggressive stack suppression ([@moll])
   * [#1752] - Avoid potential infinite loop ([@gsilk])
   * [#1761] - Fix problems running under PhantomJS ([@chromakode])
-  * [#1700] - Fix more problems running under PhantomJS ([@jbnicolai])  
+  * [#1700] - Fix more problems running under PhantomJS ([@jbnicolai])
   * [#1774] - Support escaped spaces in CLI options ([@adamgruber])
   * [#1687] - Fix HTML reporter links with special chars ([@benvinegar])
   * [#1359] - Adopt code style and enforce it using ESLint ([@ndhoule] w/ assist from [@jbnicolai] & [@boneskull])

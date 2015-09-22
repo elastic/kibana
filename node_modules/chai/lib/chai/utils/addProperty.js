@@ -4,6 +4,9 @@
  * MIT Licensed
  */
 
+var config = require('../config');
+var flag = require('./flag');
+
 /**
  * ### addProperty (ctx, name, getter)
  *
@@ -31,7 +34,11 @@
 
 module.exports = function (ctx, name, getter) {
   Object.defineProperty(ctx, name,
-    { get: function () {
+    { get: function addProperty() {
+        var old_ssfi = flag(this, 'ssfi');
+        if (old_ssfi && config.includeStack === false)
+          flag(this, 'ssfi', addProperty);
+
         var result = getter.call(this);
         return result === undefined ? this : result;
       }

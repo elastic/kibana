@@ -225,24 +225,6 @@ module.exports = function (chai, util) {
     new Assertion(act, msg).to.not.eql(exp);
   };
 
-  /**
-   * ### .isTrue(value, [message])
-   *
-   * Asserts that `value` is true.
-   *
-   *     var teaServed = true;
-   *     assert.isTrue(teaServed, 'the tea has been served');
-   *
-   * @name isTrue
-   * @param {Mixed} value
-   * @param {String} message
-   * @api public
-   */
-
-  assert.isAbove = function (val, abv, msg) {
-    new Assertion(val, msg).to.be.above(abv);
-  };
-
    /**
    * ### .isAbove(valueToCheck, valueToBeAbove, [message])
    *
@@ -257,8 +239,27 @@ module.exports = function (chai, util) {
    * @api public
    */
 
-  assert.isBelow = function (val, blw, msg) {
-    new Assertion(val, msg).to.be.below(blw);
+  assert.isAbove = function (val, abv, msg) {
+    new Assertion(val, msg).to.be.above(abv);
+  };
+
+   /**
+   * ### .isAtLeast(valueToCheck, valueToBeAtLeast, [message])
+   *
+   * Asserts `valueToCheck` is greater than or equal to (>=) `valueToBeAtLeast`
+   *
+   *     assert.isAtLeast(5, 2, '5 is greater or equal to 2');
+   *     assert.isAtLeast(3, 3, '3 is greater or equal to 3');
+   *
+   * @name isAtLeast
+   * @param {Mixed} valueToCheck
+   * @param {Mixed} valueToBeAtLeast
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isAtLeast = function (val, atlst, msg) {
+    new Assertion(val, msg).to.be.least(atlst);
   };
 
    /**
@@ -275,8 +276,63 @@ module.exports = function (chai, util) {
    * @api public
    */
 
+  assert.isBelow = function (val, blw, msg) {
+    new Assertion(val, msg).to.be.below(blw);
+  };
+
+   /**
+   * ### .isAtMost(valueToCheck, valueToBeAtMost, [message])
+   *
+   * Asserts `valueToCheck` is less than or equal to (<=) `valueToBeAtMost`
+   *
+   *     assert.isAtMost(3, 6, '3 is less than or equal to 6');
+   *     assert.isAtMost(4, 4, '4 is less than or equal to 4');
+   *
+   * @name isAtMost
+   * @param {Mixed} valueToCheck
+   * @param {Mixed} valueToBeAtMost
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isAtMost = function (val, atmst, msg) {
+    new Assertion(val, msg).to.be.most(atmst);
+  };
+
+  /**
+   * ### .isTrue(value, [message])
+   *
+   * Asserts that `value` is true.
+   *
+   *     var teaServed = true;
+   *     assert.isTrue(teaServed, 'the tea has been served');
+   *
+   * @name isTrue
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
   assert.isTrue = function (val, msg) {
     new Assertion(val, msg).is['true'];
+  };
+
+  /**
+   * ### .isNotTrue(value, [message])
+   *
+   * Asserts that `value` is not true.
+   *
+   *     var tea = 'tasty chai';
+   *     assert.isNotTrue(tea, 'great, time for tea!');
+   *
+   * @name isNotTrue
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isNotTrue = function (val, msg) {
+    new Assertion(val, msg).to.not.equal(true);
   };
 
   /**
@@ -295,6 +351,24 @@ module.exports = function (chai, util) {
 
   assert.isFalse = function (val, msg) {
     new Assertion(val, msg).is['false'];
+  };
+
+  /**
+   * ### .isNotFalse(value, [message])
+   *
+   * Asserts that `value` is not false.
+   *
+   *     var tea = 'tasty chai';
+   *     assert.isNotFalse(tea, 'great, time for tea!');
+   *
+   * @name isNotFalse
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isNotFalse = function (val, msg) {
+    new Assertion(val, msg).to.not.equal(false);
   };
 
   /**

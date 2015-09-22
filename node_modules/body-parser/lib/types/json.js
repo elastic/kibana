@@ -80,7 +80,7 @@ function json(options) {
 
       if (first !== '{' && first !== '[') {
         debug('strict violation')
-        throw new Error('invalid json')
+        throw new SyntaxError('Unexpected token ' + first)
       }
     }
 
