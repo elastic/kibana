@@ -398,9 +398,9 @@ define(function (require) {
       var latLng = L.latLng(lat, lng);
 
       L.popup({autoPan: false})
-       .setLatLng(latLng)
-       .setContent(content)
-       .openOn(map);
+      .setLatLng(latLng)
+      .setContent(content)
+      .openOn(map);
     };
 
     /**
