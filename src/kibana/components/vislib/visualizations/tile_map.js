@@ -413,23 +413,19 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map) {
-      if (this._attr.mapType === 'Scaled Circle Markers') {
-        return this.scaledCircleMarkers(map);
-      }
+      switch (this._attr.mapType) {
+        case 'Heatmap':
+          return this.heatMap(map);
 
-      if (this._attr.mapType === 'Heatmap') {
-        return this.heatMap(map);
-      }
+        case 'Shaded Circle Markers':
+          return this.shadedCircleMarkers(map);
 
-      if (this._attr.mapType === 'Shaded Circle Markers') {
-        return this.shadedCircleMarkers(map);
-      }
+        case 'Shaded Geohash Grid':
+          return this.shadedGeohashGrid(map);
 
-      if (this._attr.mapType === 'Shaded Geohash Grid') {
-        return this.shadedGeohashGrid(map);
+        default:
+          return this.scaledCircleMarkers(map);
       }
-
-      return this.scaledCircleMarkers(map);
     };
 
     /**
