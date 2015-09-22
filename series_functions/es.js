@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var moment = require('moment');
+var toMS = require('../lib/to_milliseconds.js');
 var Datasource = require('../lib/classes/datasource');
 
 var offset = {
@@ -97,6 +98,10 @@ function buildRequest(config, tlConfig) {
   }
 
   return searchRequest;
+}
+
+function validateInterval(interval) {
+  console.log(toMS(interval));
 }
 
 module.exports = new Datasource('es', {

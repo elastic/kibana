@@ -12,11 +12,8 @@
             type="text"
             class="form-control timelion-expression">
 
-          <select class="form-control timelion-interval"
-            ng-change="search()"
-            ng-options="interval for interval in ['1m','1h','1d', '1w', '1M', '1y']"
+          <input class="form-control timelion-interval"
             ng-model="state.interval">
-          </select>
 
           <button type="submit"
             ng-disabled="discoverSearch.$invalid"
