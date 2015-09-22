@@ -1,11 +1,15 @@
 let _ = require('lodash');
-var utils = require('requirefrom')('src/utils');
-var fromRoot = utils('fromRoot');
-var pluginDownloader = require('./pluginDownloader');
-var pluginCleaner = require('./pluginCleaner');
-var KbnServer = require('../../server/KbnServer');
-var readYamlConfig = require('../serve/readYamlConfig');
-var fs = require('fs');
+let utils = require('requirefrom')('src/utils');
+let fromRoot = utils('fromRoot');
+let pluginDownloader = require('./pluginDownloader');
+let pluginCleaner = require('./pluginCleaner');
+let pluginExtractor = require('./pluginExtractor');
+let KbnServer = require('../../server/KbnServer');
+let readYamlConfig = require('../serve/readYamlConfig');
+let fs = require('fs');
+let Promise = require('bluebird');
+let rimraf = require('rimraf');
+let mkdirp = Promise.promisify(require('mkdirp'));
 
 module.exports = {
   install: install
@@ -23,12 +27,18 @@ function install(settings, logger) {
     if (e.code !== 'ENOENT') throw e;
   }
 
-  var cleaner = pluginCleaner(settings, logger);
-  var downloader = pluginDownloader(settings, logger);
+  let cleaner = pluginCleaner(settings, logger);
+  let downloader = pluginDownloader(settings, logger);
 
   return cleaner.cleanPrevious()
-  .then(function () {
+  .then(() => {
+    return mkdirp(settings.workingPath);
+  })
+  .then(() => {
     return downloader.download();
+  })
+  .then((archiveType) => {
+    return pluginExtractor (settings, logger, archiveType);
   })
   .then(async function() {
     logger.log('Optimizing and caching browser bundles...');
@@ -59,12 +69,15 @@ function install(settings, logger) {
     await kbnServer.ready();
     await kbnServer.close();
   })
-  .then(function () {
+  .then(() => {
+    rimraf.sync(settings.tempArchiveFile);
+  })
+  .then(() => {
     fs.renameSync(settings.workingPath, settings.pluginPath);
     logger.log('Plugin installation complete');
   })
-  .catch(function (e) {
-    logger.error(`Plugin installation was unsuccessful due to error "${e.message}"`);
+  .catch((err) => {
+    logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
     cleaner.cleanError();
     process.exit(70); // eslint-disable-line no-process-exit
   });

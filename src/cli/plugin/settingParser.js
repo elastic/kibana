@@ -100,6 +100,7 @@ module.exports = function (options) {
     if (settings.package) {
       settings.pluginPath = resolve(settings.pluginDir, settings.package);
       settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
+      settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
     }
 
     return settings;

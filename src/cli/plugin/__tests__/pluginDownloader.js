@@ -82,25 +82,6 @@ describe('kibana cli', function () {
         });
       });
 
-      it('should abort the download and extraction for a corrupt archive.', function () {
-        var filename = join(__dirname, 'replies/corrupt.tar.gz');
-        var couchdb = nock('http://www.files.com')
-        .get('/plugin.tar.gz')
-        .replyWithFile(200, filename);
-
-        var source = 'http://www.files.com/plugin.tar.gz';
-
-        var errorStub = sinon.stub();
-        return downloader._downloadSingle(source, testWorkingPath, 0, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-        });
-      });
-
     });
 
     describe('download', function () {

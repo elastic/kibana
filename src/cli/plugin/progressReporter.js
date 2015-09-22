@@ -1,18 +1,19 @@
-var Promise = require('bluebird');
+let Promise = require('bluebird');
 
 /*
-Responsible for reporting the progress of the file stream
+Responsible for reporting the progress of the readStream
 */
-module.exports = function (logger, stream) {
-  var oldDotCount = 0;
-  var runningTotal = 0;
-  var totalSize = 0;
-  var hasError = false;
-  var _resolve;
-  var _reject;
-  var _resp;
+module.exports = function (logger, readStream) {
+  let oldDotCount = 0;
+  let runningTotal = 0;
+  let totalSize = 0;
+  let hasError = false;
+  let archiveType = undefined;
+  let _resolve;
+  let _reject;
+  let _resp;
 
-  var promise = new Promise(function (resolve, reject) {
+  let promise = new Promise(function (resolve, reject) {
     _resolve = resolve;
     _reject = reject;
   });
@@ -22,7 +23,7 @@ module.exports = function (logger, stream) {
 
     if (err) logger.error(err);
     hasError = true;
-    if (stream.abort) stream.abort();
+    if (readStream.abort) readStream.abort();
     _reject(new Error(errorMessage));
   }
 
@@ -31,23 +32,26 @@ module.exports = function (logger, stream) {
     if (resp.statusCode >= 400) {
       handleError('ENOTFOUND', null);
     } else {
-      totalSize = parseInt(resp.headers['content-length'], 10) || 0;
-      var totalDesc = totalSize || 'unknown number of';
+      archiveType = getArchiveTypeFromResponse(resp.headers['content-type']);
 
-      logger.log('Downloading ' + totalDesc + ' bytes', true);
+      totalSize = parseInt(resp.headers['content-length'], 10) || 0;
+      let totalDesc = totalSize || 'unknown number of';
+
+      logger.log('Transferring ' + totalDesc + ' bytes', true);
     }
   }
 
   //Should log a dot for every 5% of progress
   //Note: no progress is logged if the plugin is downloaded in a single packet
   function handleData(buffer) {
+    //process.stdout.write(`*`);
     if (hasError) return;
     if (!totalSize) return;
 
     runningTotal += buffer.length;
-    var dotCount = Math.round(runningTotal / totalSize * 100 / 5);
+    let dotCount = Math.round(runningTotal / totalSize * 100 / 5);
     if (dotCount > 20) dotCount = 20;
-    for (var i = 0; i < (dotCount - oldDotCount); i++) {
+    for (let i = 0; i < (dotCount - oldDotCount); i++) {
       logger.log('.', true);
     }
     oldDotCount = dotCount;
@@ -56,8 +60,23 @@ module.exports = function (logger, stream) {
   function handleEnd() {
     if (hasError) return;
 
-    logger.log('Extraction complete');
-    _resolve();
+    logger.log('Transfer complete');
+    _resolve({
+      archiveType: archiveType
+    });
+  }
+
+  function getArchiveTypeFromResponse(contentType) {
+    contentType = contentType || '';
+
+    switch (contentType.toLowerCase()) {
+      case 'application/zip':
+        return '.zip';
+        break;
+      case 'application/x-gzip':
+        return '.tar.gz';
+        break;
+    }
   }
 
   return {

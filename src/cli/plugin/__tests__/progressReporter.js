@@ -139,7 +139,7 @@ describe('kibana cli', function () {
           .catch(errorStub)
           .then(function (data) {
             expect(logger.log.callCount).to.be(2);
-            expect(logger.log.getCall(0).args[0]).to.match(/downloading/i);
+            expect(logger.log.getCall(0).args[0]).to.match(/transfer/i);
             expect(logger.log.getCall(1).args[0]).to.match(/complete/i);
           });
         });
@@ -154,7 +154,7 @@ describe('kibana cli', function () {
           .catch(errorStub)
           .then(function (data) {
             expect(logger.log.callCount).to.be(22);
-            expect(logger.log.getCall(0).args[0]).to.match(/downloading/i);
+            expect(logger.log.getCall(0).args[0]).to.match(/transfer/i);
             expect(logger.log.getCall(1).args[0]).to.be('.');
             expect(logger.log.getCall(2).args[0]).to.be('.');
             expect(logger.log.getCall(3).args[0]).to.be('.');
@@ -211,7 +211,7 @@ describe('kibana cli', function () {
           .catch(errorStub)
           .then(function (data) {
             expect(errorStub.called).to.be(false);
-            expect(logger.log.getCall(0).args[0]).to.match(/downloading/i);
+            expect(logger.log.getCall(0).args[0]).to.match(/transfer/i);
             expect(logger.log.getCall(21).args[0]).to.match(/complete/i);
           });
         });
