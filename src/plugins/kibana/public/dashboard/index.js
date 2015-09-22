@@ -81,8 +81,11 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          options: {
+            darkTheme: dash.darkTheme
+          },
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
-          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
+          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
