@@ -72,8 +72,7 @@ in your Web page.
 NOTE: A user must have Kibana access in order to view embedded dashboards.
 
 Click the *Share* button to display HTML code to embed the dashboard in another Web page, along with a direct link to 
-the dashboard. Click the copy button image:images/Clipboard.png[Copy to Clipboard button] next to either option to copy 
-the code or the link to your clipboard.
+the dashboard. You can select the text in either option to copy the code or the link to your clipboard.
 
 [float]
 [[embedding-dashboards]]
