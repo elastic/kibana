@@ -36,7 +36,7 @@ require('ui/modules')
         var samePath = toParsed.path === fromParsed.path;
 
         if (sameProto && sameHost && samePath) {
-          domLocation.reload();
+          toParsed.hash && domLocation.reload();
 
           // event.preventDefault() keeps the browser from seeing the new url as an update
           // and even setting window.location does not mimic that behavior, so instead
