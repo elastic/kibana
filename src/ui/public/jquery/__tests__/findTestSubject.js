@@ -16,7 +16,17 @@ describe('jQuery.findTestSubject', function () {
     expect($found.is($noMatch)).to.be(false);
   });
 
-  it('finds all of the elements with either "saveButton" or "cancelButton"', function () {
+  it('finds multiple elements with a subject', function () {
+    var $container = $('<div>');
+    var $match = $make('subject').appendTo($container);
+    var $otherMatch = $make('subject').appendTo($container);
+
+    var $found = $container.findTestSubject('subject');
+    expect($found.filter($match).size()).to.be(1);
+    expect($found.filter($otherMatch).size()).to.be(1);
+  });
+
+  it('finds all of the elements with either subject', function () {
     var $container = $('<div>');
     var $match1 = $make('subject').appendTo($container);
     var $match2 = $make('alsoSubject').appendTo($container);
