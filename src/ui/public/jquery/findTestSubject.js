@@ -1,6 +1,6 @@
 module.exports = function bindToJquery($) {
 
-  $.fn.findTestSubject = function (/* ...subjectSelectors */) {
+  function findTestSubject(/* ...subjectSelectors */) {
     var subjectSelectors = [].slice.apply(arguments);
     var $els = $();
     var $context = this;
@@ -14,6 +14,11 @@ module.exports = function bindToJquery($) {
     });
 
     return $els;
+  };
+
+  $.fn.findTestSubject = findTestSubject;
+  $.findTestSubject = function () {
+    return findTestSubject.apply($(document.body), arguments);
   };
 
 };
