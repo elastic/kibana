@@ -332,6 +332,7 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
+    padding-left: @collapser-width;
 
     &.embedded {
       flex-shrink: 1;
@@ -357,22 +358,6 @@
     .visualize-chart {
       flex: 1 1 100%;
       position: relative;
-    }
-
-    .table-vis-container {
-      padding-left: 20px;
-    }
-
-    .leaflet-left .leaflet-control {
-      margin-left: 30px;
-    }
-
-    .markdown-vis {
-      padding: 20px;
-    }
-
-    .y-axis-col-wrapper {
-      padding-left: 20px;
     }
   }
 }
