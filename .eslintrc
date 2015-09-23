@@ -1,6 +1,9 @@
 ---
 parser: babel-eslint
 
+plugins:
+  - mocha
+
 env:
   es6: true
   amd: true
@@ -67,3 +70,6 @@ rules:
   valid-typeof: 2
   wrap-iife: [ 2, outside ]
   yoda: 0
+
+  mocha/no-exclusive-tests: 2
+  mocha/handle-done-callback: 2
