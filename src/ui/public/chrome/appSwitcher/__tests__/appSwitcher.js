@@ -121,36 +121,13 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('clicking a link that matches entire url', function () {
-    var url = 'http://localhost:555/app/myApp#/lastSubUrl';
-    beforeEach(setup(url, [
-      { url: url }
-    ]));
-
-    it('calls window.location.reload and prevents default behavior', function () {
-      var event = new $.Event('click');
-
-      expect(env.location.reload.callCount).to.be(0);
-      expect(event.isDefaultPrevented()).to.be(false);
-      expect(event.isPropagationStopped()).to.be(false);
-
-      var $link = findTestSubject(env.$el, 'appLink');
-      expect($link.prop('href')).to.be(env.currentHref);
-      $link.trigger(event);
-
-      expect(event.isPropagationStopped()).to.be(false);
-      expect(event.isDefaultPrevented()).to.be(true);
-      expect(env.location.reload.callCount).to.be(1);
-    });
-  });
-
-  context('clicking a link with matching href except different hash', function () {
+  context('clicking a link with matching href but missing hash', function () {
     var url = 'http://localhost:555/app/myApp?query=1';
     beforeEach(setup(url + '#/lastSubUrl', [
       { url: url }
     ]));
 
-    it('calls window.location.reload and prevents default behavior', function () {
+    it('just prevents propogation (no reload)', function () {
       var event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
@@ -161,9 +138,57 @@ describe('appSwitcher directive', function () {
       expect($link.prop('href')).to.be(url);
       $link.trigger(event);
 
+      expect(env.location.reload.callCount).to.be(0);
+      expect(event.isDefaultPrevented()).to.be(false);
+      expect(event.isPropagationStopped()).to.be(true);
+    });
+  });
+
+  context('clicking a link that matches entire url', function () {
+    var url = 'http://localhost:555/app/myApp#/lastSubUrl';
+    beforeEach(setup(url, [
+      { url: url }
+    ]));
+
+    it('calls window.location.reload and prevents propogation', function () {
+      var event = new $.Event('click');
+
+      expect(env.location.reload.callCount).to.be(0);
+      expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
-      expect(event.isDefaultPrevented()).to.be(true);
+
+      var $link = findTestSubject(env.$el, 'appLink');
+      expect($link.prop('href')).to.be(env.currentHref);
+      $link.trigger(event);
+
       expect(env.location.reload.callCount).to.be(1);
+      expect(event.isDefaultPrevented()).to.be(false);
+      expect(event.isPropagationStopped()).to.be(true);
+    });
+  });
+
+  context('clicking a link with matching href but changed hash', function () {
+    var rootUrl = 'http://localhost:555/app/myApp?query=1';
+    var url = rootUrl + '#/lastSubUrl2';
+
+    beforeEach(setup(url + '#/lastSubUrl', [
+      { url: url }
+    ]));
+
+    it('calls window.location.reload and prevents propogation', function () {
+      var event = new $.Event('click');
+
+      expect(env.location.reload.callCount).to.be(0);
+      expect(event.isDefaultPrevented()).to.be(false);
+      expect(event.isPropagationStopped()).to.be(false);
+
+      var $link = findTestSubject(env.$el, 'appLink');
+      expect($link.prop('href')).to.be(url);
+      $link.trigger(event);
+
+      expect(env.location.reload.callCount).to.be(1);
+      expect(event.isDefaultPrevented()).to.be(false);
+      expect(event.isPropagationStopped()).to.be(true);
     });
   });
 
