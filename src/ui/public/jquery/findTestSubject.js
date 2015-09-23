@@ -44,12 +44,23 @@ module.exports = function bindToJquery($) {
     var $els = $();
     var $context = this;
 
-    subjectSelectors.forEach(function (subjects) {
-      var selector = subjects.split(/\s+/).map(function (subject) {
-        return '[data-test-subj~="' + subject + '"]';
-      }).join(' ');
+    subjectSelectors.forEach(function (subjectSelector) {
+      var cssSelectors = [];
+      var terms = subjectSelector
+        .replace(/\s*&\s*/g, '&') // remove all whitespace around joins
+        .split(/\s+/);
 
-      $els = $els.add($context.find(selector));
+      function termToCssSelector(term) {
+        return term ? '[data-test-subj~="' + term + '"]' : '';
+      }
+
+      while (terms.length) {
+        var term = terms.shift();
+        // split each term by joins/& and map to css selectors
+        cssSelectors.push(term.split('&').map(termToCssSelector).join(''));
+      }
+
+      $els = $els.add($context.find(cssSelectors.join(' ')));
     });
 
     return $els;
