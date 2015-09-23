@@ -10,7 +10,6 @@ define(function (require) {
   require('ui/config');
   require('ui/notify');
   require('ui/typeahead');
-  require('ui/clipboard');
 
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
