@@ -5,7 +5,7 @@ module.exports = function ({env, bundle}) {
   .join('\n');
 
   let requires = bundle.modules
-  .map(m => `require('${m}');`)
+  .map(m => `require(${JSON.stringify(m)});`)
   .join('\n');
 
   return `
