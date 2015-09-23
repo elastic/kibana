@@ -29,7 +29,7 @@ require('ui/modules')
           return;
         }
 
-        var toParsed = parse(app.url);
+        var toParsed = parse(event.delegateTarget.href);
         var fromParsed = parse(domLocation.href);
         var sameProto = toParsed.protocol === fromParsed.protocol;
         var sameHost = toParsed.host === fromParsed.host;
