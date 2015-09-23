@@ -54,7 +54,7 @@ define(function () {
         value: 30,
         description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
           'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
-          'cause requests to take much longer to process.'
+          'cause requests to take much longer to process'
       },
       'fields:popularLimit': {
         value: 10,
@@ -74,7 +74,7 @@ define(function () {
         '12 is the max. ' +
         '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
-        'Explanation of cell dimensions.</a>',
+        'Explanation of cell dimensions</a>',
       },
       'visualization:tileMap:WMSdefaults': {
         value: JSON.stringify({
@@ -117,12 +117,12 @@ define(function () {
       },
       'truncate:maxHeight': {
         value: 115,
-        description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
+        description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation'
       },
       'indexPattern:fieldMapping:lookBack': {
         value: 5,
         description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
-          'patterns from which to query the field mapping.'
+          'patterns from which to query the field mapping'
       },
       'format:defaultTypeMap': {
         type: 'json',
@@ -136,23 +136,27 @@ define(function () {
           '}',
         ].join('\n'),
         description: 'Map of the format name to use by default for each field type. ' +
-          '"_default_" is used if the field type is not mentioned explicitly.'
+          '"_default_" is used if the field type is not mentioned explicitly'
       },
       'format:number:defaultPattern': {
         type: 'string',
-        value: '0,0.[000]'
+        value: '0,0.[000]',
+        description: 'Default numeral format for the "number" format'
       },
       'format:bytes:defaultPattern': {
         type: 'string',
-        value: '0,0.[000]b'
+        value: '0,0.[000]b',
+        description: 'Default numeral format for the "bytes" format'
       },
       'format:percent:defaultPattern': {
         type: 'string',
-        value: '0,0.[000]%'
+        value: '0,0.[000]%',
+        description: 'Default numeral format for the "percent" format'
       },
       'format:currency:defaultPattern': {
         type: 'string',
-        value: '($0,0.[00])'
+        value: '($0,0.[00])',
+        description: 'Default numeral format for the "currency" format'
       },
       'timepicker:timeDefaults': {
         type: 'json',
@@ -162,7 +166,8 @@ define(function () {
           '  "to": "now",',
           '  "mode": "quick"',
           '}'
-        ].join('\n')
+        ].join('\n'),
+        description: 'The timefilter selection to use when Kibana is started without one'
       },
       'timepicker:refreshIntervalDefaults': {
         type: 'json',
@@ -172,7 +177,8 @@ define(function () {
           '  "pause": false,',
           '  "value": 0',
           '}'
-        ].join('\n')
+        ].join('\n'),
+        description: 'The timefilter\'s default refresh interval'
       },
       'dashboard:defaultDarkTheme': {
         value: false,

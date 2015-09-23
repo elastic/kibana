@@ -1,6 +1,13 @@
-var _ = require('lodash');
+const { clone, get } = require('lodash');
+const { resolve } = require('url');
 
 module.exports = function (chrome, internals) {
+
+  if (internals.app) {
+    internals.app.url = resolve(window.location.href, internals.app.url);
+  }
+
+  internals.appUrlStore = internals.appUrlStore || window.sessionStorage;
 
   /**
    * ui/chrome apps API
@@ -16,24 +23,33 @@ module.exports = function (chrome, internals) {
   };
 
   chrome.getShowAppsLink = function () {
-    return internals.showAppsLink == null ? internals.appCount > 1 : internals.showAppsLink;
+    return internals.showAppsLink == null ? internals.nav.length > 1 : internals.showAppsLink;
   };
 
   chrome.getApp = function () {
-    return _.clone(internals.app);
+    return clone(internals.app);
   };
 
   chrome.getAppTitle = function () {
-    return internals.app.title;
+    return get(internals, ['app', 'title']);
   };
 
-  chrome.getAppId = function () {
-    return internals.app.id;
+  chrome.getAppUrl = function () {
+    return get(internals, ['app', 'url']);
   };
 
   chrome.getInjected = function (name, def) {
-    if (name == null) return _.clone(internals.vars) || {};
-    return _.get(internals.vars, name, def);
+    if (name == null) return clone(internals.vars) || {};
+    return get(internals.vars, name, def);
   };
+
+  chrome.getLastUrlFor = function (appId) {
+    return internals.appUrlStore.getItem(`appLastUrl:${appId}`);
+  };
+
+  chrome.setLastUrlFor = function (appId, url) {
+    internals.appUrlStore.setItem(`appLastUrl:${appId}`, url);
+  };
+
 
 };

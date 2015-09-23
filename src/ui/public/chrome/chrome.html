@@ -47,9 +47,9 @@
           </a>
         </li>
 
-        <li class="to-body" ng-class="{active: appTemplate.is('switcher')}" ng-if="chrome.getShowAppsLink()">
-          <a ng-click="appTemplate.toggle('switcher')">
-            <i class="fa fa-th" alt="Go to app switcher"></i>
+        <li class="to-body" ng-class="{ active: appSwitcherTemplate.is('switcher') }" ng-if="chrome.getShowAppsLink()">
+          <a ng-click="appSwitcherTemplate.toggle('switcher')">
+            <i class="fa fa-th" alt="Show app switcher"></i>
           </a>
         </li>
       </ul>
@@ -98,9 +98,9 @@
   </nav>
 
   <config
-    config-template="appTemplate"
-    config-object="switcher"
-    config-close="appTemplate.close">
+    config-template="appSwitcherTemplate"
+    config-object="chrome"
+    config-close="appSwitcherTemplate.close">
   </config>
 
   <config

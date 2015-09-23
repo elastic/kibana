@@ -40,15 +40,6 @@ module.exports = async (kbnServer, server, config) => {
   server.setupViews(resolve(__dirname, 'views'));
   server.exposeStaticFile('/loading.gif', resolve(__dirname, 'public/loading.gif'));
 
-  // serve the app switcher
-  server.route({
-    path: '/api/apps',
-    method: 'GET',
-    handler: function (req, reply) {
-      return reply(uiExports.apps);
-    }
-  });
-
   server.route({
     path: '/app/{id}',
     method: 'GET',
@@ -68,7 +59,7 @@ module.exports = async (kbnServer, server, config) => {
   server.decorate('reply', 'renderApp', function (app) {
     let payload = {
       app: app,
-      appCount: uiExports.apps.size,
+      nav: uiExports.apps,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),

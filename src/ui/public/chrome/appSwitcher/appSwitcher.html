@@ -1,0 +1,18 @@
+<div class="app-links">
+  <div
+    class="app-link"
+    ng-repeat="link in switcher.getNavLinks() | orderBy:'title'"
+    ng-class="{ active: link.active }">
+
+    <a
+      ng-click="switcher.ensureNavigation($event, link)"
+      ng-href="{{ link.active ? link.url : (link.lastSubUrl || link.url) }}"
+      data-test-subj="appLink">
+
+      <div ng-if="link.icon" ng-style="{ 'background-image': 'url(../' + link.icon + ')' }" class="app-icon"></div>
+      <div ng-if="!link.icon" class="app-icon app-icon-missing">{{ link.title[0] }}</div>
+
+      <div class="app-title">{{ link.title }}</div>
+    </a>
+  </div>
+</div>
