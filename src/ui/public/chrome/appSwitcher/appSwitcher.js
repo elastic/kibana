@@ -37,7 +37,12 @@ require('ui/modules')
 
         if (sameProto && sameHost && samePath) {
           domLocation.reload();
-          event.preventDefault();
+
+          // event.preventDefault() keeps the browser from seeing the new url as an update
+          // and even setting window.location does not mimic that behavior, so instead
+          // we use stopPropagation() to prevent angular from seeing the click and
+          // starting a digest cycle/attempting to handle it in the router.
+          event.stopPropagation();
         }
       };
 
