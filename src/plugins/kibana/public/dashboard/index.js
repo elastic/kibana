@@ -81,9 +81,7 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
-          options: {
-            darkTheme: dash.darkTheme
-          },
+          options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
           filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
         };
@@ -163,7 +161,7 @@ define(function (require) {
           dash.panelsJSON = angular.toJson($state.panels);
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
-          dash.darkTheme = $state.options.darkTheme;
+          dash.optionsJSON = angular.toJson($state.options);
 
           dash.save()
           .then(function (id) {
