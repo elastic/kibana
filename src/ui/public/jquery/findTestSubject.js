@@ -3,28 +3,30 @@ module.exports = function bindToJquery($) {
   /**
    * Find elements with the `data-test-subj` attribute by the terms in that attribute.
    *
-   * Find all of the element inside $el with the "saveButton" subject.
-   *
    * ```js
-   * var $button = $el.findTestSubject('saveButton');
+   * // this
+   * var $button = $('[data-test-subj~="saveButton"]');
+   *
+   * // becomes this
+   * var $button = $.findTestSubject('saveButton');
    * ```
    *
-   * Find all of the elements with either "saveButton" or "cancelButton"
-   *
+   * Supports multiple subjects
    * ```js
+   * // find any saveButton or cancelButton
    * var $buttons = $.findTestSubject('saveButton', 'cancelButton');
    * ```
    *
-   * Find all of the elements with a subject that decent from another subject
-   *
+   * Supports subject "selectors"
    * ```js
+   * // find any saveButton inside a savedObjectForm
    * var $button = $.findTestSubject('savedObjectForm saveButton');
    * ```
    *
-   * Find all of the elements which have both subjects
-   *
+   * Supports selecting compound subjects
    * ```js
-   * var $input = $.findTestSubject('smallButton&saveButton');
+   * // find any smallButton that is also a saveButton inside a savedObjectForm
+   * var $input = $.findTestSubject('savedObjectForm smallButton&saveButton');
    * ```
    *
    * @return {jQueryCollection}
