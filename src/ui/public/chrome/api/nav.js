@@ -25,6 +25,10 @@ module.exports = function (chrome, internals) {
     a.setAttribute('href', link.url);
     link.url = a.href;
     link.lastSubUrl = chrome.getLastSubUrlFor(link.url);
+
+    if (link.url === chrome.getAppUrl()) {
+      link.active = true;
+    }
   });
 
 };

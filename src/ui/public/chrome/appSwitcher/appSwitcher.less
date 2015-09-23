@@ -1,6 +1,7 @@
 @import (reference) "~ui/styles/variables";
 
 @app-icon-size: 48px;
+@app-icon-padding: 10px;
 
 .app-links {
   text-align: justify;
@@ -8,9 +9,11 @@
   .app-link {
     display: inline-block;
     vertical-align: top;
-    width: @app-icon-size;
-    margin: 0px 10px;
     text-align: left;
+    width: @app-icon-size + (@app-icon-padding * 2);
+    margin: 0px 10px;
+    padding: @app-icon-padding;
+    border-radius: @border-radius-base;
 
     .app-icon {
       display: block;
@@ -41,6 +44,13 @@
 
     &:hover .app-title {
       text-decoration: underline;
+    }
+
+    &.active {
+      background: @gray-lighter;
+      .app-title {
+        text-decoration: underline;
+      }
     }
 
   }
