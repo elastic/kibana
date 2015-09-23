@@ -14,14 +14,20 @@
     cursor: pointer;
     z-index: -1;
 
+    &:hover {
+      background-color: @collapser-hover-bg;
+      border-color: @collapser-hover-bg;
+      color: @collapser-hover-color;
+    }
+
     .chevron-cont{
       position: absolute;
-      left: 4px;
-      top: 5px;
+      left: 2px;
+      top: 8px;
+      font-size: 10px;
 
       &:before {
         font-family: FontAwesome;
-        color: @collapser-color;
         content: "\F053";
       }
     }
