@@ -1,5 +1,6 @@
 define(function (require) {
   var module = require('ui/modules').get('app/dashboard');
+  var angular = require('angular');
   var _ = require('lodash');
   var moment = require('moment');
 
@@ -24,11 +25,13 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]',
+          optionsJSON: angular.toJson({
+            darkTheme: config.get('dashboard:defaultDarkTheme')
+          }),
           version: 1,
           timeRestore: false,
           timeTo: undefined,
           timeFrom: undefined,
-          darkTheme: config.get('dashboard:defaultDarkTheme')
         },
 
         // if an indexPattern was saved with the searchsource of a SavedDashboard
@@ -46,11 +49,11 @@ define(function (require) {
       hits: 'integer',
       description: 'string',
       panelsJSON: 'string',
+      optionsJSON: 'string',
       version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',
       timeFrom: 'string',
-      darkTheme: 'boolean'
     };
 
     SavedDashboard.searchsource = true;
