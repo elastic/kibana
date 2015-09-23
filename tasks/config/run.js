@@ -2,6 +2,7 @@ module.exports = function (grunt) {
   let platform = require('os').platform();
   let {resolve} = require('path');
   let root = p => resolve(__dirname, '../../', p);
+  let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
 
   return {
     testServer: {
@@ -11,7 +12,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      cmd: binScript,
       args: [
         '--server.port=5610',
         '--env.name=development',
@@ -28,7 +29,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      cmd: binScript,
       args: [
         '--server.port=5610',
         '--env.name=development',
@@ -46,7 +47,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: './bin/kibana',
+      cmd: binScript,
       args: [
         '--dev',
         '--no-watch',
