@@ -105,7 +105,6 @@
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "2.10.6",
-    "ng-clip": "0.2.6",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "requirefrom": "0.2.0",
@@ -118,8 +117,7 @@
     "url-loader": "0.5.6",
     "webpack": "1.12.1",
     "webpack-directory-name-as-main": "1.0.0",
-    "whatwg-fetch": "0.9.0",
-    "zeroclipboard": "2.2.0"
+    "whatwg-fetch": "0.9.0"
   },
   "devDependencies": {
     "angular-mocks": "1.2.28",
