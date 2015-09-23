@@ -13,7 +13,7 @@ module.exports = function (grunt) {
       }
     },
 
-    // just lint the source dir
+    // lint the source and fix any fixable errors
     fixSource: {
       options: {
         cache: resolve(grunt.config.get('root'), '.eslint.fixSource.cache'),
