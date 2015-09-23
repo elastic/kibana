@@ -8,6 +8,10 @@ it requires only a plain webserver, Kibana requires no fancy server side compone
 Kibana strives to be easy to get started with, while also being flexible and powerful, just like
 Elasticsearch.
 
+NOTE: Kibana 3 depends on the https://www.elastic.co/guide/en/elasticsearch/reference/current/search-facets.html[_facets_]
+feature. Facets were removed in the 2.0 release of Elasticsearch. Kibana 3 does not support Elasticsearch versions greater
+than 1.7.
+
 include::./tutorials/tutorials.asciidoc[]
 
 include::./kibana/configuration/config.js.asciidoc[]
