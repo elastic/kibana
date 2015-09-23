@@ -11,22 +11,6 @@ require('ui/chrome');
 require('ui/chrome/appSwitcher');
 var DomLocationProvider = require('ui/domLocation');
 
-function findTestSubject() {
-  var subjectSelectors = [].slice.apply(arguments);
-  var $context = subjectSelectors.shift();
-  var $els = $();
-
-  subjectSelectors.forEach(function (subjects) {
-    var selector = subjects.split(/\s+/).map(function (subject) {
-      return '[data-test-subj~="' + subject + '"]';
-    }).join(' ');
-
-    $els = $els.add($context.find(selector));
-  });
-
-  return $els;
-}
-
 describe('appSwitcher directive', function () {
   var env;
 
@@ -79,13 +63,13 @@ describe('appSwitcher directive', function () {
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
 
     it('links to the inactive apps base url', function () {
-      var $myLink = findTestSubject(env.$el, 'appLink').eq(0);
+      var $myLink = env.$el.findTestSubject('appLink').eq(0);
       expect($myLink.prop('href')).to.be(myLink.url);
       expect($myLink.prop('href')).to.not.be(myLink.lastSubUrl);
     });
 
     it('links to the inactive apps last sub url', function () {
-      var $notMyLink = findTestSubject(env.$el, 'appLink').eq(1);
+      var $notMyLink = env.$el.findTestSubject('appLink').eq(1);
       expect($notMyLink.prop('href')).to.be(notMyLink.lastSubUrl);
       expect($notMyLink.prop('href')).to.not.be(notMyLink.url);
     });
@@ -109,7 +93,7 @@ describe('appSwitcher directive', function () {
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
 
     it('links to the lastSubUrl for each', function () {
-      var $links = findTestSubject(env.$el, 'appLink');
+      var $links = env.$el.findTestSubject('appLink');
       var $myLink = $links.eq(0);
       var $notMyLink = $links.eq(1);
 
@@ -134,7 +118,7 @@ describe('appSwitcher directive', function () {
       expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
 
-      var $link = findTestSubject(env.$el, 'appLink');
+      var $link = env.$el.findTestSubject('appLink');
       expect($link.prop('href')).to.be(url);
       $link.trigger(event);
 
@@ -157,7 +141,7 @@ describe('appSwitcher directive', function () {
       expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
 
-      var $link = findTestSubject(env.$el, 'appLink');
+      var $link = env.$el.findTestSubject('appLink');
       expect($link.prop('href')).to.be(env.currentHref);
       $link.trigger(event);
 
@@ -182,7 +166,7 @@ describe('appSwitcher directive', function () {
       expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
 
-      var $link = findTestSubject(env.$el, 'appLink');
+      var $link = env.$el.findTestSubject('appLink');
       expect($link.prop('href')).to.be(url);
       $link.trigger(event);
 
@@ -206,7 +190,7 @@ describe('appSwitcher directive', function () {
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
 
-      findTestSubject(env.$el, 'appLink').trigger(event);
+      env.$el.findTestSubject('appLink').trigger(event);
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
@@ -227,7 +211,7 @@ describe('appSwitcher directive', function () {
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
 
-      findTestSubject(env.$el, 'appLink').trigger(event);
+      env.$el.findTestSubject('appLink').trigger(event);
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
