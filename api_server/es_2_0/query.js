@@ -156,6 +156,9 @@ module.exports = function (api) {
           __scope_link: '.'
         }
       ],
+      filter: {
+        __scope_link: 'GLOBAL.filter'
+      },
       minimum_number_should_match: 1,
       boost: 1.0
     },
@@ -212,14 +215,6 @@ module.exports = function (api) {
       },
       query: {},
       filter: {}
-    },
-    fuzzy_like_this: {
-      fields: [],
-      like_text: '',
-      max_query_terms: 12
-    },
-    flt: {
-      __scope_link: '.fuzzy_like_this'
     },
     fuzzy: {
       '{field}': {
@@ -291,29 +286,6 @@ module.exports = function (api) {
         'max_query_terms': 12
       },
       __scope_link: ".more_like_this"
-    },
-    more_like_this_field: {
-      __template: {
-        'FIELD': {
-          'like_text': 'text like this one',
-          'min_term_freq': 1,
-          'max_query_terms': 12
-        }
-      },
-      '{field}': {
-        like_text: '',
-        percent_terms_to_match: 0.3,
-        min_term_freq: 2,
-        max_query_terms: 25,
-        stop_words: [''],
-        min_doc_freq: 5,
-        max_doc_freq: 100,
-        min_word_len: 0,
-        max_word_len: 0,
-        boost_terms: 1,
-        boost: 1.0,
-        analyzer: ''
-      }
     },
     prefix: {
       __template: {
@@ -574,19 +546,6 @@ module.exports = function (api) {
       },
       '{field}': [''],
       minimum_match: 1
-    },
-    top_children: {
-      __template: {
-        type: 'CHILD_TYPE',
-        query: {}
-      },
-      type: '$CHILD_TYPE$',
-      query: {},
-      score: {
-        __one_of: ['max', 'sum', 'avg']
-      },
-      factor: 5,
-      incremental_factor: 2
     },
     wildcard: {
       __template: {

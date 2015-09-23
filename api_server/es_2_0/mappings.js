@@ -18,6 +18,8 @@
 
 'use strict';
 
+let _ = require("../../public/webpackShims/vendor/_");
+
 var INDEX_SETTING = {
   __one_of: ['analyzed', 'not_analyzed', 'no']
 }, BOOLEAN = {
@@ -69,37 +71,20 @@ module.exports = function (api) {
           'FIELD': {}
         }
       },
-      '_id': {
-        'index': INDEX_SETTING,
-        'store': BOOLEAN,
-        'path': ""
-      },
-      '_type': {
-        'index': INDEX_SETTING,
-        'store': BOOLEAN
-      },
       '_source': {
         'enabled': BOOLEAN
       },
       '_all': {
         'enabled': BOOLEAN
       },
-      '_analyzer': {
-        'path': ""
-      },
       '_field_names': {
         'index': INDEX_SETTING
       },
       '_routing': {
         'required': BOOLEAN,
-        'path': ""
       },
       '_index': {
         'enabled': BOOLEAN
-      },
-      '_size': {
-        'enabled': BOOLEAN,
-        'store': BOOLEAN
       },
       '_parent': {
         __template: {
@@ -109,13 +94,9 @@ module.exports = function (api) {
       },
       '_timestamp': {
         'enabled': BOOLEAN,
-        'path': '',
         'format': 'YYYY-MM-dd',
         'default': ""
       },
-      'index_analyzer': 'standard',
-      'search_analyzer': 'standard',
-      'analyzer': 'standard',
       'dynamic_date_formats': ['yyyy-MM-dd'],
       'date_detection': BOOLEAN,
       'numeric_detection': BOOLEAN,
@@ -145,7 +126,6 @@ module.exports = function (api) {
           },
 
           // strings
-          index_name: '',
           store: BOOLEAN,
           index: INDEX_SETTING,
           term_vector: {
@@ -160,13 +140,12 @@ module.exports = function (api) {
             __one_of: ['docs', 'freqs', 'positions']
           },
           analyzer: 'standard',
-          index_analyzer: 'standard',
           search_analyzer: 'standard',
           include_in_all: {
             __one_of: [false, true]
           },
           ignore_above: 10,
-          position_offset_gap: 0,
+          position_increment_gap: 0,
 
           // numeric
           precision_step: 4,
@@ -213,17 +192,20 @@ module.exports = function (api) {
 
           // dates
           format: {
-            __one_of: ['basic_date', 'basic_date_time', 'basic_date_time_no_millis',
-              'basic_ordinal_date', 'basic_ordinal_date_time', 'basic_ordinal_date_time_no_millis',
-              'basic_time', 'basic_time_no_millis', 'basic_t_time', 'basic_t_time_no_millis',
-              'basic_week_date', 'basic_week_date_time', 'basic_week_date_time_no_millis',
-              'date', 'date_hour', 'date_hour_minute', 'date_hour_minute_second', 'date_hour_minute_second_fraction',
-              'date_hour_minute_second_millis', 'date_optional_time', 'date_time', 'date_time_no_millis',
-              'hour', 'hour_minute', 'hour_minute_second', 'hour_minute_second_fraction', 'hour_minute_second_millis',
-              'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis', 'time', 'time_no_millis',
-              't_time', 't_time_no_millis', 'week_date', 'week_date_time', 'weekDateTimeNoMillis', 'week_year',
-              'weekyearWeek', 'weekyearWeekDay', 'year', 'year_month', 'year_month_day'
-            ]
+            __one_of: _.flatten([_.map(['date', 'date_time', 'date_time_no_millis',
+              'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis',
+              'time', 'time_no_millis', 't_time', 't_time_no_millis',
+              'week_date', 'week_date_time', 'week_date_time_no_millis'], function (s) {
+              return ['basic_' + s, 'strict_' + s];
+            }),
+              [
+                'date', 'date_hour', 'date_hour_minute', 'date_hour_minute_second', 'date_hour_minute_second_fraction',
+                'date_hour_minute_second_millis', 'date_optional_time', 'date_time', 'date_time_no_millis',
+                'hour', 'hour_minute', 'hour_minute_second', 'hour_minute_second_fraction', 'hour_minute_second_millis',
+                'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis', 'time', 'time_no_millis',
+                't_time', 't_time_no_millis', 'week_date', 'week_date_time', 'weekDateTimeNoMillis', 'week_year',
+                'weekyearWeek', 'weekyearWeekDay', 'year', 'year_month', 'year_month_day', 'epoch_millis', 'epoch_second'
+              ]])
           },
 
           fielddata: {
@@ -236,9 +218,6 @@ module.exports = function (api) {
               }
             }
           },
-          postings_format: {
-            __one_of: ['direct', 'memory', 'pulsing', 'bloom_default', 'bloom_pulsing', 'default']
-          },
           similarity: {
             __one_of: ['default', 'BM25']
           },
@@ -249,9 +228,6 @@ module.exports = function (api) {
           },
 
           // multi_field
-          path: {
-            __one_of: ['just_name', 'full']
-          },
           fields: {
             '*': {
               __scope_link: '_put_mapping.type.properties.field'

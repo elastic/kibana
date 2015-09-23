@@ -71,7 +71,6 @@ module.exports = function (api) {
       "timestamp": "",
       "ttl": "5m",
       "consistency": ["qurom", "one", "all"],
-      "replication": ["sync", "async"],
       "refresh": "__flag__",
       "timeout": "1m"
     }
@@ -89,7 +88,6 @@ module.exports = function (api) {
       "timestamp": "",
       "ttl": "5m",
       "consistency": ["qurom", "one", "all"],
-      "replication": ["sync", "async"],
       "refresh": "__flag__",
       "timeout": "1m"
     }
@@ -107,7 +105,6 @@ module.exports = function (api) {
       "timestamp": "",
       "ttl": "5m",
       "consistency": ["qurom", "one", "all"],
-      "replication": ["sync", "async"],
       "refresh": "__flag__",
       "timeout": "1m"
     }
@@ -125,7 +122,6 @@ module.exports = function (api) {
       "parent": "",
       "timestamp": "",
       "consistency": ["qurom", "one", "all"],
-      "replication": ["sync", "async"],
       "refresh": "__flag__",
       "timeout": "1m",
       "retry_on_conflict": 3,

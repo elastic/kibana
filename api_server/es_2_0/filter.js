@@ -31,31 +31,11 @@ filters.and = {
       __scope_link: '.'
     }
   ],
-  _cache: {
-    __one_of: [false, true]
-  }
 };
 
 
 filters.bool = {
-  must: [
-    {
-      __scope_link: '.'
-    }
-  ],
-  must_not: [
-    {
-      __scope_link: '.'
-    }
-  ],
-  should: [
-    {
-      __scope_link: '.'
-    }
-  ],
-  _cache: {
-    __one_of: [false, true]
-  }
+  __scope_link: 'GLOBAL.query'
 };
 
 
@@ -119,9 +99,6 @@ filters.geo_bounding_box = {
   type: {
     __one_of: ['memory', 'indexed']
   },
-  _cache: {
-    __one_of: [false, true]
-  }
 };
 
 
@@ -148,9 +125,6 @@ filters.geo_distance = {
     lat: 40.73,
     lon: -74.1
   },
-  _cache: {
-    __one_of: [false, true]
-  }
 };
 
 
@@ -183,9 +157,6 @@ filters.geo_distance_range = {
   '{field}': {
     lat: 40.73,
     lon: -74.1
-  },
-  _cache: {
-    __one_of: [false, true]
   }
 };
 
@@ -212,9 +183,6 @@ filters.geo_polygon = {
         lon: -74.1
       }
     ]
-  },
-  _cache: {
-    __one_of: [false, true]
   }
 };
 
@@ -294,10 +262,7 @@ filters.not = {
   __template: {
     filter: {}
   },
-  filter: {},
-  _cache: {
-    __one_of: [true, false]
-  }
+  filter: {}
 };
 
 
@@ -316,11 +281,7 @@ filters.range = {
     time_zone: "+1:00",
     "format": "dd/MM/yyyy||yyyy",
     execution: {__one_of: ["index", "fielddata"]}
-  },
-  _cache: {
-    __one_of: [false, true]
-  },
-  _cache_key: ""
+  }
 };
 
 
@@ -334,10 +295,7 @@ filters.or = {
     {
       __scope_link: '.'
     }
-  ],
-  _cache: {
-    __one_of: [false, true]
-  }
+  ]
 };
 
 
@@ -345,29 +303,12 @@ filters.prefix = {
   __template: {
     'FIELD': 'VALUE'
   },
-  '{field}': '',
-  _cache: {
-    __one_of: [true, false]
-  }
+  '{field}': ''
 };
 
 
 filters.query = {
   // global query
-};
-
-
-filters.fquery = {
-  __template: {
-    query: {},
-    _cache: true
-  },
-  query: {
-    //global query
-  },
-  _cache: {
-    __one_of: [true, false]
-  }
 };
 
 filters.script = {
@@ -376,9 +317,6 @@ filters.script = {
   },
   script: {
     // populated by a global rule
-  },
-  _cache: {
-    __one_of: [true, false]
   }
 };
 
@@ -387,10 +325,7 @@ filters.term = {
   __template: {
     'FIELD': 'VALUE'
   },
-  '{field}': '',
-  _cache: {
-    __one_of: [false, true]
-  }
+  '{field}': ''
 };
 
 
@@ -401,9 +336,6 @@ filters.terms = {
   field: ['{field}'],
   execution: {
     __one_of: ['plain', 'bool', 'and', 'or', 'bool_nocache', 'and_nocache', 'or_nocache']
-  },
-  _cache: {
-    __one_of: [false, true]
   }
 };
 
@@ -415,9 +347,6 @@ filters.nested = {
   },
   query: {},
   path: '',
-  _cache: {
-    __one_of: [true, false]
-  },
   _name: ''
 };
 

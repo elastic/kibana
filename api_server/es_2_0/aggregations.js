@@ -106,9 +106,8 @@ var rules = {
       "script": {
         // populated by a global rule
       },
-      // TODO: these also support regex - extend!
-      "include": "*",
-      "exclude": "*",
+      "include": ".*",
+      "exclude": ".*",
       "execution_hint": {__one_of: ["map", "global_ordinals", "global_ordinals_hash", "global_ordinals_low_cardinality"]},
       "show_term_doc_count_error": {__one_of: [true, false]},
       "collect_mode": {__one_of: ["depth_first", "breadth_first"]},

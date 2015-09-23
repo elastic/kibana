@@ -32,7 +32,6 @@ module.exports = function (api) {
       "timestamp": "",
       "ttl": "5m",
       "consistency": ["qurom", "one", "all"],
-      "replication": ["sync", "async"],
       "refresh": "__flag__",
       "timeout": "1m"
     },

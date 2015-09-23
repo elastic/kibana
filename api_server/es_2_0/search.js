@@ -50,7 +50,7 @@ module.exports = function (api) {
       scroll: "5m",
       scroll_id: "",
       routing: "",
-      query_cache: ["true", "false"]
+      request_cache: ["true", "false"]
     },
     data_autocomplete_rules: {
       query: {

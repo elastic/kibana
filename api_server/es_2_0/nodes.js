@@ -78,7 +78,6 @@ module.exports = function (api) {
         "flush",
         "refresh",
         "filter_cache",
-        "id_cache",
         "fielddata",
         "docs",
         "warmer",

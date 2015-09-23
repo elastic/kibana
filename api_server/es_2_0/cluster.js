@@ -26,7 +26,7 @@ module.exports = function (api) {
       "_cluster/state/{metrics}/{indices}"
     ],
     url_components: {
-      "metrics": ["version", "master_node", "nodes", "routing_table", "metadata", "blocks"]
+      "metrics": ["version", "master_node", "nodes", "routing_table", "routing_node", "metadata", "blocks"]
     }
   });
   api.addEndpointDescription('_cluster/health', {

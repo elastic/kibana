@@ -65,7 +65,6 @@ module.exports = function (api) {
         "flush",
         "warmer",
         "filter_cache",
-        "id_cache",
         "percolate",
         "segments",
         "fielddata",
@@ -205,13 +204,6 @@ module.exports = function (api) {
     patterns: [
       "_cache/clear",
       "{indices}/_cache/clear"
-    ]
-  });
-
-  api.addEndpointDescription('_status', {
-    patterns: [
-      "_status",
-      "{indices}/_status"
     ]
   });
 };
