@@ -2,6 +2,7 @@ var parse = require('url').parse;
 var bindKey = require('lodash').bindKey;
 
 require('../appSwitcher/appSwitcher.less');
+var DomLocationProvider = require('ui/domLocation');
 
 require('ui/modules')
 .get('kibana')
@@ -10,7 +11,8 @@ require('ui/modules')
     restrict: 'E',
     template: require('./appSwitcher.html'),
     controllerAs: 'switcher',
-    controller: function ($scope, $window) {
+    controller: function ($scope, Private) {
+      var domLocation = Private(DomLocationProvider);
 
       // since we render this in an isolate scope we can't "require: ^chrome", but
       // rather than remove all helpfull checks we can just check here.
@@ -28,13 +30,13 @@ require('ui/modules')
         }
 
         var toParsed = parse(app.url);
-        var fromParsed = parse($window.location.href);
+        var fromParsed = parse(domLocation.href);
         var sameProto = toParsed.protocol === fromParsed.protocol;
         var sameHost = toParsed.host === fromParsed.host;
         var samePath = toParsed.path === fromParsed.path;
 
         if (sameProto && sameHost && samePath) {
-          $window.location.reload();
+          domLocation.reload();
           event.preventDefault();
         }
       };
