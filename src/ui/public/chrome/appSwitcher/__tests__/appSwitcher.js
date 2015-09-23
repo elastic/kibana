@@ -9,6 +9,7 @@ var indexBy = require('lodash').indexBy;
 
 require('ui/chrome');
 require('ui/chrome/appSwitcher');
+var DomLocationProvider = require('ui/domLocation');
 
 function findTestSubject() {
   var subjectSelectors = [].slice.apply(arguments);
@@ -29,14 +30,12 @@ function findTestSubject() {
 describe('appSwitcher directive', function () {
   var env;
 
-  beforeEach(ngMock.module('kibana', function ($provide) {
-    $provide.decorator('$window', function ($delegate) {
-      return Object.create($delegate, set({}, 'location.value', Object.create($delegate.location)));
-    });
-  }));
+  beforeEach(ngMock.module('kibana'));
 
   function setup(href, links) {
-    return ngMock.inject(function ($window, $rootScope, $compile) {
+    return ngMock.inject(function ($window, $rootScope, $compile, Private) {
+      var domLocation = Private(DomLocationProvider);
+
       $rootScope.chrome = {
         getNavLinks: constant(cloneDeep(links)),
       };
@@ -44,12 +43,11 @@ describe('appSwitcher directive', function () {
       env = {
         $scope: $rootScope,
         $el: $compile($('<app-switcher>'))($rootScope),
-        $links: $rootScope.chrome.getNavLinks(),
         currentHref: href,
-        location: $window.location
+        location: domLocation
       };
 
-      Object.defineProperties($window.location, {
+      Object.defineProperties(domLocation, {
         href: {
           get: function () { return env.currentHref; },
           set: function (val) { return env.currentHref = val; },
@@ -63,7 +61,7 @@ describe('appSwitcher directive', function () {
     });
   }
 
-  context('when one links is for the active app', function () {
+  context('when one link is for the active app', function () {
     var myLink = {
       active: true,
       title: 'myLink',
@@ -80,7 +78,7 @@ describe('appSwitcher directive', function () {
 
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
 
-    it('links to the active apps base url', function () {
+    it('links to the inactive apps base url', function () {
       var $myLink = findTestSubject(env.$el, 'appLink').eq(0);
       expect($myLink.prop('href')).to.be(myLink.url);
       expect($myLink.prop('href')).to.not.be(myLink.lastSubUrl);
