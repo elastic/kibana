@@ -1,11 +1,27 @@
+@tilemap-leaflet-footer-bg: red;
 @font-size-smaller: ceil((@font-size-base * 0.75));
 @input-border-width: 2px;
 
+@action-add: desaturate(@btn-success-bg, 30%);
+@action-remove: desaturate(@btn-danger-bg, 30%);
+
+@field-collapse-toggle-color: #999;
+
+@mark-bg: #fce571;
+
+
+// Sidebar =====================================================================
 @sidebar-color: @text-color;
 @sidebar-bg: @well-bg;
 @sidebar-border: @well-border;
+
+@sidebar-well-bg: darken(@sidebar-bg, 5%);
+
+@sidebar-header-border: transparent;
 @sidebar-header-color: @brand-primary;
 @sidebar-item-font-size: @font-size-small;
+@sidebar-item-color: @text-color;
+@sidebar-item-text-bg: @white;
 
 @sidebar-hover-color: @sidebar-color;
 @sidebar-hover-bg: darken(@sidebar-bg, 10%);
@@ -15,6 +31,290 @@
 @sidebar-active-hover-bg: @component-active-bg;
 @sidebar-active-hover-color: @component-active-color;
 
-@action-add: desaturate(@btn-success-bg, 30%);
-@action-remove: desaturate(@btn-danger-bg, 30%);
+@sidebar-index-pattern-selection-bg: @brand-primary;
+@sidebar-index-pattern-selection-color: @gray8;
 
+
+// Discover ====================================================================
+@discover-info-bg: @well-bg;
+
+@discover-link-color: @link-color;
+@discover-link-btn-color: @text-color;
+
+@discover-table-footer-bg: @well-bg;
+@discover-field-filter-bg: @well-bg;
+
+@discover-shard-failures-color: @brand-danger;
+@discover-shard-failures-bg: lighten(@discover-shard-failures-color, 40%);
+@discover-shard-failures-border: @brand-danger;
+
+@discover-field-toggle-color: @btn-success-color;
+@discover-field-details-border: @well-border;
+@discover-field-details-color: @text-color;
+@discover-field-details-bg: @body-bg;
+@discover-field-details-close-border: @well-border;
+@discover-field-details-close-bg: @well-bg;
+@discover-field-details-close-hover-bg: @sidebar-hover-bg;
+@discover-field-details-close-hover-color: @sidebar-hover-color;
+@discover-field-details-progress-bar-bg: @gray;
+
+
+// Field name ==================================================================
+@field-name-color: @text-muted;
+@field-name-no-results-color: @text-muted;
+
+
+// Collapser ===================================================================
+@collapser-bg: @gray-lighter;
+@collapser-border: @collapser-bg;
+@collapser-color: @gray3;
+
+@collapser-hover-bg: @gray-light;
+@collapser-hover-border: @collapser-hover-bg;
+@collapser-hover-color: @white;
+
+@collapser-width: 12px;
+
+
+// Dashboard ===================================================================
+@dashboard-bg: @gray-lighter;
+@dashboard-panel-bg: @panel-bg;
+@dashboard-panel-color: @text-color;
+@dashboard-panel-heading-link-color: @text-color;
+@dashboard-panel-heading-link-hover-color: @link-hover-color;
+@dashboard-panel-load-error-color: @btn-danger-bg;
+
+
+// table =======================================================================
+@table-dt-bg: @gray-lighter;
+@table-dt-color: @brand-primary;
+@table-cell-hover-bg: white;
+@table-cell-hover-hover-bg: @gray-lighter;
+@table-row-hover-bg: lighten(@gray-lighter, 4%);
+@table-nested-bg: @body-bg;
+
+@table-sort-color: @gray-light;
+@table-sort-asc-color: @gray-light;
+@table-sort-desc-color: @gray-light;
+
+@table-special-color: @white;
+
+
+// NavBar ======================================================================
+@navbar-button-border: @input-border;
+@navbar-button-color: @brand-primary;
+@navbar-button-bg: @input-group-addon-bg;
+
+
+// AppSwitcher =================================================================
+@app-switcher-application-bg: @gray-lighter;
+@app-switcher-app-link-color: @white;
+@app-switcher-app-title-color: @text-color;
+@app-switcher-app-description-color: @gray;
+
+
+// Settings ====================================================================
+@settings-objects-list-border: @gray-lighter;
+@settings-objects-empty-color: @gray-light;
+@settings-objects-action-bar-bg: @gray-lighter;
+
+@settings-advanced-table-default-color: @input-color-placeholder;
+
+@settings-indices-active-color: @btn-success-bg;
+
+
+// Visualize ===================================================================
+@visualize-show-spy-border: @collapser-border;
+@visualize-show-spy-bg: @collapser-bg;
+@visualize-show-spy-color: @collapser-color;
+
+@visualize-show-spy-hover-bg: @collapser-hover-bg;
+@visualize-show-spy-hover-color: @collapser-hover-color;
+
+@visualize-info-bg: @well-bg;
+
+
+// Vis Editor ==================================================================
+@wizard-vis-type-description-color: @brand-primary;
+
+@vis-editor-navbar-current-tab-color: @gray-lighter;
+@vis-editor-navbar-error-state-bg: @btn-danger-bg;
+@vis-editor-navbar-error-state-color: @btn-danger-color;
+
+@vis-editor-navbar-modal-bg: @navbar-default-bg;
+@vis-editor-navbar-modal-color: @white;
+@vis-editor-navbar-modal-link-color: @white;
+
+@vis-editor-sidebar-bg: @body-bg;
+@vis-editor-sidebar-border: @sidebar-bg;
+@vis-editor-sidebar-title-bg: @gray-lighter;
+@vis-editor-sidebar-title-hover-bg: @vis-editor-sidebar-title-bg;
+@vis-editor-sidebar-title-hover-color: @text-color;
+
+@vis-editor-agg-group-color: @text-color;
+
+@vis-editor-agg-error-color: @btn-danger-color;
+@vis-editor-agg-error-bg: @btn-danger-bg;
+
+@vis-editor-agg-editor-flags-color: @link-color;
+
+@vis-editor-agg-wide-btn-border: @gray-lighter;
+@vis-editor-agg-wide-btn-bg: @body-bg;
+
+@vis-editor-agg-wide-btn-hover-bg: @collapser-hover-bg;
+@vis-editor-agg-wide-btn-hover-color: @collapser-hover-color;
+
+@vis-editor-agg-editor-order-bg: transparent;
+@vis-editor-agg-editor-order-border: @gray-lighter;
+
+@vis-editor-nesting-indicator-bg: @brand-success;
+
+
+// List Group Menu =============================================================
+@list-group-menu-item-color: @link-color;
+@list-group-menu-item-select-color: @link-color;
+@list-group-menu-item-active-bg: @well-bg;
+@list-group-menu-item-hover-bg: @well-bg;
+
+
+// Hint Box ====================================================================
+@hintbox-background-color: @gray-lighter;
+@hintbox-spacing-vertical: 10px;
+@hintbox-spacing-horizontal: 12px;
+@hintbox-table-border-color: #BFC9CA;
+
+
+// Filter Bar ==================================================================
+@filter-bar-confirm-bg: @gray-lighter;
+@filter-bar-confirm-filter-color: #333;
+@filter-bar-confirm-border: #ccc;
+@filter-bar-confirm-filter-bg: @gray-light;
+
+@filter-bar-bar-bg: @gray-lighter;
+@filter-bar-bar-border: #ccc;
+@filter-bar-bar-condensed-bg: darken(@filter-bar-bar-bg, 5%);
+
+@filter-bar-bar-filter-bg: @action-add;
+@filter-bar-bar-filter-color: @white;
+@filter-bar-bar-filter-negate-bg: @action-remove;
+
+
+// Config ======================================================================
+@config-border: darken(@body-bg, 10%);
+@config-bg: @body-bg;
+
+@config-close-bg: @well-bg;
+
+@config-saved-object-finder-options-bg: @body-bg;
+
+
+// Hintbox =====================================================================
+@hintbox-link-color: @link-color;
+@hintbox-link-hover-color: @text-color;
+@hintbox-pre-bg: @white;
+
+
+// Input =======================================================================
+@input-error-color: @brand-danger;
+
+
+// Paginate ====================================================================
+@paginate-page-link-active-color: @text-color;
+
+
+// Spinner =====================================================================
+@spinner-bg: @text-color;
+
+
+// Navbar ======================================================================
+@navbar-default-badge-bg: @white;
+@navbar-default-badge-color: @navbar-default-bg;
+@navbar-inverse-badge-bg: @white;
+@navbar-inverse-badge-color: lighten(@navbar-inverse-bg, 10%);
+@navbar-nav-active-link-border: @body-bg;
+
+
+// Pager =======================================================================
+@pager-link-color: @white;
+
+
+// Indicators ==================================================================
+@alert-color: @white;
+
+
+// Truncate ====================================================================
+@truncate-color: @body-bg;
+
+
+// Typeahead ===================================================================
+@typeahead-items-border: @popover-border-color;
+@typeahead-items-color: @text-color;
+@typeahead-items-bg: @body-bg;
+
+@typeahead-item-color: @text-color;
+@typeahead-item-border: lighten(@popover-border-color, 60%);
+@typeahead-item-bg: @well-bg;
+
+
+// Alerts ======================================================================
+@alert-vis-alert-color: @white;
+@alert-vis-alert-border: @white;
+
+
+// Legend ======================================================================
+@legend-item-color: #666;
+
+
+// Tilemap =====================================================================
+@tilemap-border: #ddd;
+@tilemap-legend-base-bg: @white;
+@tilemap-legend-bg: fade(@tilemap-legend-base-bg, 8%);
+@tilemap-color: #666;
+
+@tilemap-legend-i-border: #999;
+@tilemap-legend-i-bg: #aaa;
+
+
+@tilemap-info-base-bg: @white;
+@tilemap-info-bg: fade(@tilemap-info-base-bg, 92%);
+@tilemap-info-header-color: #444;
+
+@tilemap-leaflet-control-bg: @white;
+@tilemap-leaflet-control-outline: @black;
+@tilemap-leaflet-control-color: @black;
+
+@tilemap-leaflet-control-draw-action-bg: #ddd;
+
+@tilemap-leaflet-container-bg: @white;
+
+@tilemap-leaflet-popup-border: @gray;
+
+@tilemap-leaflet-footer-bg: fade(#fff, 30%);
+@tilemap-leaflet-footer-color: #333;
+
+@tilemap-filter: brightness(1.03) grayscale(0.83) contrast(1.07);
+
+
+// Tooltip =====================================================================
+@tooltip-space: 8px;
+@tooltip-space-tight: @tooltip-space / 2;
+
+@tooltip-bg: fadeout(@gray-darker, 7%);
+@tooltip-color: @gray-lighter;
+
+@tooltip-table-border: @gray;
+
+
+// Svg =========================================================================
+@svg-axis-color: #ddd;
+@svg-tick-text-color: #848e96;
+@svg-brush-color: @white;
+@svg-endzone-bg: @black;
+
+@vis-axis-title-color: #848e96;
+@vis-chart-title-color: #848e96;
+
+
+// Saved Object Finder =========================================================
+@saved-object-finder-link-color: @link-color;
+@saved-object-finder-icon-color: darken(@saved-object-finder-link-color, 10%);

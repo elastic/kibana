@@ -8,7 +8,6 @@ var fromRoot = src('utils/fromRoot');
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
-    before(require('./_ensure_elasticsearch'));
 
     var kbnServer;
 

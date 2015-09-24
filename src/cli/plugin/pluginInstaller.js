@@ -1,5 +1,10 @@
+let _ = require('lodash');
+var utils = require('requirefrom')('src/utils');
+var fromRoot = utils('fromRoot');
 var pluginDownloader = require('./pluginDownloader');
 var pluginCleaner = require('./pluginCleaner');
+var KbnServer = require('../../server/KbnServer');
+var readYamlConfig = require('../serve/readYamlConfig');
 var fs = require('fs');
 
 module.exports = {
@@ -25,7 +30,36 @@ function install(settings, logger) {
   .then(function () {
     return downloader.download();
   })
-  .then(function (curious) {
+  .then(async function() {
+    logger.log('Optimizing and caching browser bundles...');
+    let serverConfig = _.merge(
+      readYamlConfig(settings.config),
+      {
+        env: 'production',
+        logging: {
+          silent: settings.silent,
+          quiet: !settings.silent,
+          verbose: false
+        },
+        optimize: {
+          useBundleCache: false
+        },
+        server: {
+          autoListen: false
+        },
+        plugins: {
+          initialize: false,
+          scanDirs: [settings.pluginDir, fromRoot('src/plugins')],
+          paths: [settings.workingPath]
+        }
+      }
+    );
+
+    let kbnServer = new KbnServer(serverConfig);
+    await kbnServer.ready();
+    await kbnServer.close();
+  })
+  .then(function () {
     fs.renameSync(settings.workingPath, settings.pluginPath);
     logger.log('Plugin installation complete');
   })

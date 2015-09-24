@@ -3,13 +3,13 @@ define(function (require) {
   var $ = require('jquery');
   var angular = require('angular');
   var ConfigTemplate = require('ui/ConfigTemplate');
+  var chrome = require('ui/chrome');
 
   require('ui/directives/config');
   require('ui/courier');
   require('ui/config');
   require('ui/notify');
   require('ui/typeahead');
-  require('ui/clipboard');
 
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
@@ -32,7 +32,7 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (savedDashboards) {
+      dash: function (savedDashboards, config) {
         return savedDashboards.get();
       }
     }
@@ -51,7 +51,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, Private, getAppState) {
+      controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -80,17 +80,23 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
-          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
+          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
+        $scope.$watchCollection('state.options', function (newVal, oldVal) {
+          if (!angular.equals(newVal, oldVal)) $state.save();
+        });
+        $scope.$watch('state.options.darkTheme', setDarkTheme);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
           load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
           share: require('plugins/kibana/dashboard/partials/share.html'),
-          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+          pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
+          options: require('plugins/kibana/dashboard/partials/options.html')
         });
 
         $scope.refresh = _.bindKey(courier, 'fetch');
@@ -123,6 +129,12 @@ define(function (require) {
           }
         }
 
+        function setDarkTheme(enabled) {
+          var theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
+          chrome.removeApplicationClass(['theme-dark', 'theme-light']);
+          chrome.addApplicationClass(theme);
+        }
+
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
           updateQueryOnRootSource();
@@ -148,6 +160,7 @@ define(function (require) {
           dash.panelsJSON = angular.toJson($state.panels);
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
+          dash.optionsJSON = angular.toJson($state.options);
 
           dash.save()
           .then(function (id) {
@@ -191,6 +204,7 @@ define(function (require) {
         // Setup configurable values for config directive, after objects are initialized
         $scope.opts = {
           dashboard: dash,
+          ui: $state.options,
           save: $scope.save,
           addVis: $scope.addVis,
           addSearch: $scope.addSearch,

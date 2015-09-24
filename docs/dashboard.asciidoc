@@ -19,9 +19,14 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 The first time you click the *Dashboard* tab, Kibana displays an empty dashboard.
 
-image:images/NewDashboard.jpg[New Dashboard screen]
+image:images/NewDashboard.png[New Dashboard screen]
 
-Build your dashboard by adding visualizations.
+Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color 
+theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button and check the *Use dark theme* box.
+
+image:images/darktheme.png[Dark Theme Example]
+
+NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
 [float]
 [[dash-autorefresh]]
@@ -67,8 +72,7 @@ in your Web page.
 NOTE: A user must have Kibana access in order to view embedded dashboards.
 
 Click the *Share* button to display HTML code to embed the dashboard in another Web page, along with a direct link to 
-the dashboard. Click the copy button image:images/Clipboard.png[Copy to Clipboard button] next to either option to copy 
-the code or the link to your clipboard.
+the dashboard. You can select the text in either option to copy the code or the link to your clipboard.
 
 [float]
 [[embedding-dashboards]]

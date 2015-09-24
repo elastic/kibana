@@ -85,7 +85,6 @@ class BaseOptimizer {
           new DirectoryNameAsMain()
         ]),
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.DedupePlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
         }),
@@ -101,7 +100,7 @@ class BaseOptimizer {
             test: /\.less$/,
             loader: ExtractTextPlugin.extract(
               'style',
-              `css${mapQ}!autoprefixer?{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+              `css${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
             )
           },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },

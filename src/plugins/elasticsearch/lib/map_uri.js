@@ -5,8 +5,10 @@ module.exports = function mapUri(server, prefix) {
   return function (request, done) {
     var path = request.path.replace('/elasticsearch', '');
     var url = config.get('elasticsearch.url');
-    if (!/\/$/.test(url)) url += '/';
-    if (path) url = resolve(url, path);
+    if (path) {
+      if (/\/$/.test(url)) url = url.substring(0, url.length - 1);
+      url += path;
+    }
     var query = querystring.stringify(request.query);
     if (query) url += '?' + query;
     done(null, url);

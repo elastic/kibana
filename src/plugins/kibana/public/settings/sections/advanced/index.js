@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var getValType = require('plugins/kibana/settings/sections/advanced/lib/get_val_type');
+  var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
 
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
@@ -20,46 +20,34 @@ define(function (require) {
           ESC: 27
         };
 
-        var NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
-        var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
-
-        function getEditorType(conf) {
-          if (_.contains(NAMED_EDITORS, conf.type)) return conf.type;
-          if (_.contains(NORMAL_EDITOR, conf.type)) return 'normal';
-        }
-
         function isTypeComplex(conf) {
           return !(conf.json || conf.array || conf.bool || conf.normal);
+        }
+
+        function notDefaultConfig(configName) {
+          return !(configName in configDefaults);
         }
 
         function readConfigVals() {
           var configVals = config._vals();
 
-          $scope.configs = _.map(configDefaults, function (def, name) {
-            var val = configVals[name];
-            var conf = {
-              name: name,
-              defVal: def.value,
-              type: getValType(def, val),
-              description: def.description,
-              options: def.options,
-              value: val,
-            };
+          var customConfig = Object.keys(configVals)
+          .filter(notDefaultConfig)
+          .map(name => toEditableConfig(false, name, configVals[name]));
 
-            var editor = getEditorType(conf);
-            conf.json = editor === 'json';
-            conf.select = editor === 'select';
-            conf.bool = editor === 'boolean';
-            conf.array = editor === 'array';
-            conf.normal = editor === 'normal';
-            conf.tooComplex = !editor;
-
-            return conf;
-          });
+          $scope.configs = _(configDefaults)
+          .map((def, name) => toEditableConfig(def, name, configVals[name]))
+          .reject('readonly')
+          .concat(customConfig)
+          .value();
         }
 
+        // react to changes of the config values
+        var unhook = $rootScope.$on('change:config', readConfigVals);
+        $scope.$on('$destroy', unhook);
+
+        // initial config setup
         readConfigVals();
-        $rootScope.$on('change:config', readConfigVals);
       }
     };
   });

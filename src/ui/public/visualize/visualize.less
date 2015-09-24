@@ -75,23 +75,27 @@ visualize-spy {
   .visualize-show-spy {
     flex: 0 0 auto;
 
-    border-top: 1px solid #ecf0f1;
+    border-top: 1px solid;
+    border-top-color: @visualize-show-spy-border;
     margin-bottom: 3px;
 
     &-tab {
       margin: 0px auto;
       margin-top: -1px;
-      border: 1px solid #ecf0f1;
+      border: 1px solid;
+      border-color: @visualize-show-spy-border;
       border-top: 0px;
       border-width: 0px 1px 1px 1px;
       border-bottom-left-radius: @border-radius-base;
       border-bottom-right-radius: @border-radius-base;
       width: 50px;
-      background: @body-bg;
+      background: @visualize-show-spy-bg;
       text-align: center;
+      color: @visualize-show-spy-color;
 
       &:hover {
-        background-color: @gray-lighter;
+        background-color: @visualize-show-spy-hover-bg;
+        color: @visualize-show-spy-hover-color;
       }
     }
 

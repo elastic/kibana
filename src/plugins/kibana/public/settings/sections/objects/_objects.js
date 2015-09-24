@@ -4,6 +4,7 @@ define(function (require) {
   var saveAs = require('@spalger/filesaver').saveAs;
   var registry = require('plugins/kibana/settings/saved_object_registry');
   var objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
+  const MAX_SIZE = Math.pow(2, 31) - 1;
 
   require('ui/directives/file_upload');
 
@@ -91,11 +92,12 @@ define(function (require) {
           retrieveAndExportDocs(objs);
         };
 
-        $scope.exportAll = function () {
-          var objs = $scope.services.map(function (service) {
-            return service.data.map(_.partialRight(_.extend, {type: service.type}));
-          });
-          retrieveAndExportDocs(_.flattenDeep(objs));
+        $scope.exportAll = () => {
+          Promise.map($scope.services, (service) =>
+            service.service.find('', MAX_SIZE).then((results) =>
+              results.hits.map((hit) => _.extend(hit, {type: service.type}))
+            )
+          ).then((results) => retrieveAndExportDocs(_.flattenDeep(results)));
         };
 
         function retrieveAndExportDocs(objs) {

@@ -19,6 +19,7 @@ class UiApp {
     this.hidden = this.spec.hidden;
     this.autoloadOverrides = this.spec.autoload;
     this.templateName = this.spec.templateName || 'uiApp';
+    this.url = this.spec.url || '/app/' + this.id;
 
     // once this resolves, no reason to run it again
     this.getModules = _.once(this.getModules);
@@ -39,7 +40,7 @@ class UiApp {
   }
 
   toJSON() {
-    return _.pick(this, ['id', 'title', 'description', 'icon', 'main']);
+    return _.pick(this, ['id', 'title', 'description', 'icon', 'main', 'url']);
   }
 }
 

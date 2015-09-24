@@ -1,20 +1,12 @@
 var _ = require('lodash');
+var { startsWith, get, set, omit, wrap, pick } = require('lodash');
 var Tab = require('ui/chrome/Tab');
-var format = require('url').format;
-var parse = _.wrap(require('url').parse, function (parse, path) {
-  var parsed = parse(path, true);
-  return {
-    pathname: parsed.pathname,
-    query: parsed.query || {},
-    hash: parsed.hash
-  };
-});
+var { parse } = require('url');
 
-function TabCollection() {
-
+function TabCollection(opts = {}) {
   var tabs = [];
   var specs = null;
-  var defaults = null;
+  var defaults = opts.defaults || {};
   var activeTab = null;
 
   this.set = function (_specs) {
@@ -23,7 +15,7 @@ function TabCollection() {
   };
 
   this.setDefaults = function () {
-    defaults = _.clone(arguments[0]);
+    defaults = _.defaults({}, arguments[0], defaults);
     this._rebuildTabs();
   };
 
@@ -42,20 +34,19 @@ function TabCollection() {
     return activeTab;
   };
 
-  this.consumeRouteUpdate = function ($location, persist) {
-    var url = parse($location.url(), true);
-    var id = $location.path().split('/')[1] || '';
-
+  this.consumeRouteUpdate = function (href, persist) {
     tabs.forEach(function (tab) {
-      var active = tab.active = (tab.id === id);
-      var lastUrl = active ? url : parse(tab.lastUrl || tab.rootUrl);
-      lastUrl.query._g = url.query._g;
-
-      if (tab.active) activeTab = tab;
-      if (persist) {
-        tab.persistLastUrl(format(lastUrl));
+      tab.active = tab.rootRegExp.test(href);
+      if (tab.active) {
+        activeTab = tab;
+        activeTab.setLastUrl(href);
       }
     });
+
+    if (!persist || !activeTab) return;
+
+    let globalState = get(parse(activeTab.getLastPath(), true), 'query._g');
+    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState));
   };
 }
 
