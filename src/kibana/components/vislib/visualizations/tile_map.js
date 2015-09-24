@@ -129,15 +129,17 @@ define(function (require) {
             self._attr.mapZoom = map.getZoom();
             self._attr.mapCenter = map.getCenter();
 
+            self.hideTooltip(map);
+            self.unbindPopups();
+
+            map.removeLayer(featureLayer);
+            featureLayer = self.markerType(map).addTo(map);
+
             self.events.emit('mapMoveEnd', {
               chart: self.originalConfig,
               zoom: self._attr.mapZoom,
               center: self._attr.mapCenter
             });
-
-            map.removeLayer(featureLayer);
-
-            featureLayer = self.markerType(map).addTo(map);
           });
 
           map.on('draw:created', function (e) {
@@ -398,9 +400,19 @@ define(function (require) {
       var latLng = L.latLng(lat, lng);
 
       L.popup({autoPan: false})
-       .setLatLng(latLng)
-       .setContent(content)
-       .openOn(map);
+      .setLatLng(latLng)
+      .setContent(content)
+      .openOn(map);
+    };
+
+    /**
+     * Hides tooltip by closing popup from the map object
+     *
+     * @method hideTooltip
+     * @return undefined
+     */
+    TileMap.prototype.hideTooltip = function (map) {
+      map.closePopup();
     };
 
     /**
@@ -413,23 +425,19 @@ define(function (require) {
      * @return {Leaflet object} featureLayer
      */
     TileMap.prototype.markerType = function (map) {
-      if (this._attr.mapType === 'Scaled Circle Markers') {
-        return this.scaledCircleMarkers(map);
-      }
+      switch (this._attr.mapType) {
+        case 'Heatmap':
+          return this.heatMap(map);
 
-      if (this._attr.mapType === 'Heatmap') {
-        return this.heatMap(map);
-      }
+        case 'Shaded Circle Markers':
+          return this.shadedCircleMarkers(map);
 
-      if (this._attr.mapType === 'Shaded Circle Markers') {
-        return this.shadedCircleMarkers(map);
-      }
+        case 'Shaded Geohash Grid':
+          return this.shadedGeohashGrid(map);
 
-      if (this._attr.mapType === 'Shaded Geohash Grid') {
-        return this.shadedGeohashGrid(map);
+        default:
+          return this.scaledCircleMarkers(map);
       }
-
-      return this.scaledCircleMarkers(map);
     };
 
     /**
@@ -602,11 +610,11 @@ define(function (require) {
           'trailing': false
         }));
         map.on('mouseout', function (e) {
-          map.closePopup();
+          self.hideTooltip(map);
         });
         map.on('mousedown', function () {
           self._attr.disableTooltips = true;
-          map.closePopup();
+          self.hideTooltip(map);
         });
         map.on('mouseup', function () {
           self._attr.disableTooltips = false;
@@ -614,7 +622,7 @@ define(function (require) {
       }
 
       function mouseMoveLocation(e) {
-        map.closePopup();
+        self.hideTooltip(map);
 
         // unhighlight all svgs
         d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
@@ -761,11 +769,26 @@ define(function (require) {
           self.showTooltip(map, feature, latlng);
         },
         mouseout: function (e) {
-          map.closePopup();
+          self.hideTooltip(map);
         }
       });
 
       this.popups.push(popup);
+    };
+
+    /**
+     * Unbinds the events on each of the marker layers
+     *
+     * @method unbindPopups
+     * return {undefined}
+     */
+    TileMap.prototype.unbindPopups = function () {
+      if (this.popups) {
+        this.popups.forEach(function (popup) {
+          popup.off('mouseover').off('mouseout');
+        });
+        this.popups = [];
+      }
     };
 
     /**
@@ -904,12 +927,7 @@ define(function (require) {
      * @return {undefined}
      */
     TileMap.prototype.destroy = function () {
-      if (this.popups) {
-        this.popups.forEach(function (popup) {
-          popup.off('mouseover').off('mouseout');
-        });
-        this.popups = [];
-      }
+      this.unbindPopups();
 
       if (this.maps) {
         this.maps.forEach(function (map) {
