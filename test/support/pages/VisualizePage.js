@@ -1,7 +1,10 @@
-// in test/support/pages/DiscoverPage.js
-define([
-  'intern/chai!assert'
-], function (assert, require) {
+define(function (require) {
+
+  var registerSuite = require('intern!object');
+  //var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
+
+  var defaultTimeout = 5000;
+
   // the page object is created as a constructor
   // so we can provide the remote Command object
   // at runtime
@@ -95,7 +98,7 @@ define([
     getChartTypeCount: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findAllByXpath('.//*[@id=\'kibana-body\']/div[2]/div/div/div/a')
+        .findAllByCssSelector('a.wizard-vis-type.ng-scope')
         .then(function (chartTypes) {
           return chartTypes
             .length;
@@ -106,7 +109,7 @@ define([
       var types = [];
       return this.remote
         .setFindTimeout(5000)
-        .findAllByXpath('.//h4[@class=\'ng-binding\']')
+        .findAllByCssSelector('a.wizard-vis-type.ng-scope h4')
         .then(function (chartTypes) {
           function getChartType(chart) {
             return chart
@@ -125,10 +128,91 @@ define([
         });
     },
 
+    clickTimepicker: function () {
+      return this.remote
+        .setFindTimeout(15000)
+        .findByClassName('navbar-timepicker-time-desc')
+        .then(function (picker) {
+          return picker.click();
+        });
+    },
+
+    clickAbsoluteButton: function () {
+      return this.remote
+        .setFindTimeout(10000)
+        .findByCssSelector('ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")')
+        .then(function (picker) {
+          return picker.click();
+        });
+    },
+
+    setFromTime: function (timeString) {
+      return this.remote
+        .setFindTimeout(10000)
+        .findByCssSelector('input[ng-model="absolute.from"]')
+        .then(function (picker) {
+          // first delete the existing date
+          return picker.type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
+            '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
+            '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
+        });
+    },
+
+    setToTime: function (timeString) {
+      return this.remote
+        .setFindTimeout(10000)
+        .findByCssSelector('input[ng-model="absolute.to"]')
+        .then(function (picker) {
+          return picker.type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
+            '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
+            '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
+        });
+    },
+
+    clickGoButton: function () {
+      return this.remote
+        .setFindTimeout(10000)
+        .findByClassName('kbn-timepicker-go')
+        .then(function (button) {
+          return button.click();
+        });
+    },
+
+
+    setAbsoluteRange: function (fromTime, toTime) {
+      var self = this;
+      console.log('--Clicking Absolute button');
+      return self
+        .clickAbsoluteButton()
+        .then(function () {
+          console.log('--Setting From Time : ' + fromTime);
+          return self
+            .setFromTime(fromTime)
+            .then(function () {
+              console.log('--Setting To Time : ' + toTime);
+              return self
+                .setToTime(toTime)
+                .then(function () {
+                  return self
+                    .clickGoButton();
+                });
+            });
+
+        });
+    },
+
+    collapseTimepicker: function () {
+      return this.remote
+        .setFindTimeout(5000)
+        .findByCssSelector('i.fa.fa-chevron-up')
+        .click();
+    },
+
+
     clickNewSearch: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//li[@ng-click=\"stepTwoMode=\'new\'\"]')
+        .findByCssSelector('li[ng-click="stepTwoMode=\'new\'"]')
         .then(function (chart) {
           return chart
             .click();
@@ -138,7 +222,7 @@ define([
     clickSavedSearch: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//li[@ng-click=\"stepTwoMode=\'saved\'\"]')
+        .findByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]')
         .then(function (chart) {
           return chart
             .click();
@@ -148,7 +232,7 @@ define([
     getErrorMessage: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//visualize[@class=\'ng-isolate-scope only-visualization\']')
+        .findByCssSelector('div.visualize-error.chart.error h4')
         .then(function (chart) {
           return chart
             .getVisibleText();
@@ -159,13 +243,15 @@ define([
     clickBucket: function (bucketName) {
       return this.remote
         .setFindTimeout(5000)
-        .findAllByXpath('.//*[@id=\'kibana-body\']/div[2]/div/div/div/vis-editor-sidebar' +
-          '/div/form/div[2]/vis-editor-agg-group[2]/div/div[2]/vis-editor-agg-add/div[1]/ul/li')
+        .findAllByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope')
         .then(function (chartTypes) {
+          console.log('found bucket types ' + chartTypes.length);
+
           function getChartType(chart) {
             return chart
               .getVisibleText()
               .then(function (chartString) {
+                console.log(chartString);
                 if (chartString === bucketName) {
                   chart.click();
                 }
@@ -180,30 +266,7 @@ define([
       var self = this;
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath(
-          './/*[@id=\'kibana-body\']/div[2]/div/div/div/vis-editor-sidebar/div/form/div[2]/' +
-          'vis-editor-agg-group[2]/div/div[2]/div/ng-form/vis-editor-agg-params/div[2]/select'
-        )
-        .then(function (selectList) {
-          return selectList
-            .click();
-        })
-        .then(function () {
-          return self.remote
-            .setFindTimeout(5000)
-            .findByXpath('//option[@label=\'' + myString + '\']')
-            .then(function (option) {
-              return option
-                .click();
-            });
-        });
-    },
-
-    selectAggregation2: function (myString) {
-      var self = this;
-      return this.remote
-        .setFindTimeout(5000)
-        .findByXpath('//option[@label=\'' + myString + '\']')
+        .findByCssSelector('option[label="' + myString + '"]')
         .then(function (option) {
           return option
             .click();
@@ -213,7 +276,7 @@ define([
     getField: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//select[@name=\'field\']/optgroup/option[@selected=\'selected\']')
+        .findByCssSelector('.ng-valid-required[name="field"] option[selected="selected"]') //
         .then(function (field) {
           return field
             .getVisibleText();
@@ -223,7 +286,7 @@ define([
     getInterval: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//select[@ng-model=\'agg.params.interval\']/option[@selected=\'selected\']')
+        .findByCssSelector('select[ng-model="agg.params.interval"] option[selected="selected"]')
         .then(function (interval) {
           return interval
             .getVisibleText();
@@ -245,7 +308,7 @@ define([
       var self = this;
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//button[@aria-label=\'Save Visualization\']')
+        .findByCssSelector('button.ng-scope[aria-label="Save Visualization"]')
         .then(function (saveButton) {
           return saveButton
             .click();
@@ -274,7 +337,7 @@ define([
             .then(function () {
               return self.remote
                 .setFindTimeout(5000)
-                .findByXpath('.//*[@id=\'kibana-body\']/div[1]/ul/li/div/kbn-truncated')
+                .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
                 .then(function (messageBar) {
                   return messageBar
                     .getVisibleText();
@@ -290,13 +353,13 @@ define([
       var self = this;
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//button[@aria-label=\'Load Saved Visualization\']')
+        .findByCssSelector('button.ng-scope[aria-label="Load Saved Visualization"]')
         .then(function (loadButton) {
           return loadButton
             .click();
         })
         .then(function () {
-          console.log('Load Saved Vis button clicked ' + Date.now());
+          console.log(Date.now() + ' Load Saved Vis button clicked');
           return self.remote
             .setFindTimeout(5000)
             .findByLinkText(vizName)
@@ -310,7 +373,7 @@ define([
     getXAxisLabels: function () {
       return this.remote
         .setFindTimeout(15000)
-        .findByXpath('.//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[3]/div[1]/div')
+        .findByCssSelector('div.x-axis-div')
         .then(function (xAxis) {
           return xAxis
             .getVisibleText()
@@ -324,7 +387,7 @@ define([
     getYAxisLabels: function () {
       return this.remote
         .setFindTimeout(15000)
-        .findByXpath('.//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[1]/div[1]/div[2]/div')
+        .findByCssSelector('div.y-axis-div')
         .then(function (yAxis) {
           return yAxis
             .getVisibleText()
@@ -335,70 +398,78 @@ define([
         });
     },
 
-    getChartData: function () {
-      var types = [];
+    getAreaChartData: function () {
+      var chartData = [];
       return this.remote
-        .setFindTimeout(5000)
-        // .findAllByXpath('//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div/svg/g/g')
-        .findAllByXpath('//*[local-name()=\'path\']') // findAll ? g returned 32, path returned 3
-
-      //.findAllByXpath('//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[1]/div[1]/div[2]/div/svg/g/g[8]/text') // findAll ? g returned 32, path returned 3
-      // //*[@id="kibana-body"]/div[2]/div/div/div/div/visualize/div[2]/div/div[1]/div[1]/div[2]/div/svg/g/g[8]/text
-
-      .then(function (chartTypes) {
+        .setFindTimeout(15000)
+        .findAllByCssSelector('path')
+        .then(function (chartTypes) {
           function getChartType(chart) {
             return chart
-              .getAttribute('d')
+              .getAttribute('data-label')
               .then(function (chartString) {
-                types.push(chartString);
-                //console.log('types here = ' + types);
+                console.log('data-label  = ' + chartString);
+                if (chartString === 'Count') {
+                  return chart.getAttribute('d')
+                    .then(function (data) {
+                      // console.log('Chart data = ' + data);
+                      chartData = data.split('L');
+                    });
+                }
               });
           }
           var getChartTypesPromises = chartTypes.map(getChartType);
           return Promise.all(getChartTypesPromises);
         })
         .then(function () {
-          //console.log('returning types array here? ' + types);
-          return types;
+          return chartData;
         });
     },
 
-    getChartData2: function () {
+    // experiemental method to try to get the data path with a single selector (not working)
+    getAreaChartData2: function () {
+      var chartData = [];
       return this.remote
         .setFindTimeout(15000)
-        // .findByXpath('//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div/svg/g/g[4]')  NoSuchElement
-        .findAllByXpath('.//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div/svg/g/g[1]') /// returned 0
-        // .findAllByXpath('//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div/svg/g/g') // findAll ? length = 0 ???
-        // .findAllByXpath('//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div/svg') // findAll ? // returned 0 - WHY???
-        // .findAllByXpath('//*[name()=\'svg\']') // findAll ? returned 5
-        // .findAllByXpath('//*[name()=\'path\']') // findAll ? returned 3
-        // .findAllByXpath('//*[name()=\'g\']') // findAll ? returned 32
-        // .findAllByXpath('//*[@id=\'kibana-body\']/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div') // findAll ? // returned 1
-
-      // .findByCssSelector('.pathgroup > path:nth-child(1)')  // no errors on this, but also no data below
-      // .findByCssSelector('.pathgroup') // no errors on this, but also no data below
-
-      // .findByCssSelector('#kibana-body > div.content > div > div > div > div > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.pathgroup.\\30')
-      // #kibana-body > div.content > div > div > div > div > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.pathgroup.\30 > path
-      // //*[@id="kibana-body"]/div[2]/div/div/div/div/visualize/div[2]/div/div[2]/div[1]/div/svg/g/g[4]/path
-
-      // .findByCssSelector('g.pathgroup.0')   'g.pathgroup.0' is not a valid selector.
-      // .findByCssSelector('pathgroup.0') 'pathgroup.0' is not a valid selector.
-      // .findByCssSelector('.pathgroup.0')  '.pathgroup.0' is not a valid selector.
+        // html body#kibana-body div.content div.application.ng-scope.tab-visualize div.vis-editor.vis-type-area div.vis-editor-content div.vis-editor-canvas
+        // visualize.ng-isolate-scope.only-visualization div.visualize-chart div.vis-wrapper div.vis-col-wrapper div.chart-wrapper div.chart svg g g.pathgroup.0 path
+        // .findAllByCssSelector('g.pathgroup.0')  // InvalidSelector
+        // .findByCssSelector('g.pathgroup.0') // InvalidSelector
+        .findAllByCssSelector('path')
+        .then(function (chart) {
+          console.log('chart length = ' + chart.length);
+          return chart.getAttribute('d');
+        });
+    },
 
 
-      // .findByClassName('pathgroup 0')
-      .then(function (yAxis) {
-        return yAxis
-          .length;
-        // .then(function (yAxisText) {
-        //   console.log('Data here = ' + yAxisText);
-        //   return yAxisText;
-        // });
-      });
+
+    getChartAreaWidth: function () {
+      return this.remote
+        .setFindTimeout(5000)
+        .findByCssSelector('clipPath rect')
+        .then(function (chartAreaObj) {
+          return chartAreaObj
+            .getAttribute('width');
+        });
+    },
+    getChartAreaHeight: function () {
+      return this.remote
+        .setFindTimeout(5000)
+        .findByCssSelector('clipPath rect')
+        .then(function (chartAreaObj) {
+          return chartAreaObj
+            .getAttribute('height');
+        });
+    },
+
+    getSpinnerDone: function () {
+      console.log('--getSpinner done method');
+      return this.remote
+        .setFindTimeout(15000)
+        .findByCssSelector('span.spinner.ng-hide');
     }
 
-    // …additional page interaction tasks…
   };
 
   return VisualizePage;
