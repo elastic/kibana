@@ -13,26 +13,38 @@ define(function (require) {
     clickDiscover: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('/html/body/div[2]/nav/div[2]/ul[1]/li[3]/a')
-        .click();
+        .findByCssSelector('a[href*=\'discover\']')
+        .then(function (tab) {
+          return tab.click();
+        });
     },
     clickVisualize: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('.//*[@id=\'kibana-body\']/div[2]/nav/div[2]/ul[1]/li[4]/a')
-        .click();
+        .findByCssSelector('a[href*=\'visualize\']')
+        .then(function (tab) {
+          return tab.click();
+        });
     },
     clickDashboard: function () {
       return this.remote
         .setFindTimeout(5000)
-        .findByXpath('//a[@href=\'#/dashboard.*\']')
-        .click();
+        .findByCssSelector('a[href*=\'dashboard\']')
+        .then(function (tab) {
+          return tab.click();
+        });
     },
     clickSettings: function () {
       return this.remote
-        .setFindTimeout(15000)
-        .findByXpath('//a[@ng-href=\'#/settings\']')
-        .click();
+        .setFindTimeout(5000)
+        .findByCssSelector('a[href*=\'settings\']')
+        .then(function (tab) {
+          return tab.click();
+        });
+    },
+
+    log: function (logString) {
+      console.log(Date.now() + ' : ' + logString);
     }
   };
 
