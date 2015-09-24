@@ -1,0 +1,24 @@
+[[releasenotes]]
+== Kibana 4.2 Release Notes
+
+* Starting with the 2.0 release of Elasticsearch, you can https://github.com/elastic/elasticsearch/pull/9670[no longer] 
+reference fields by leafnode. For example, the `geoip.country_code` field can no longer support searches such as 
+`country_code:US`. Instead, use the entire field name. This change affects saved searches, visualizations, and dashboards 
+from previous versions of Kibana.
+
+[float]
+[[key-features]]
+== Key Features
+
+* {k4issue}2855[Issue 2855]: You can now configure Kibana log levels.
+* {k4issue}4204[Issue 4204]: Kibana now has a plugin manager.
+* {k4pull}4951[Pull Request 4951]: New UI to support plugin context changes.
+* {k4issue}3270[Issue 3270]: Kibana now displays a server status page.
+
+[float]
+[[improvements]]
+== Improvements
+
+* {k4issue}2245[Issue 2245]: You can now customize the descriptions shown in the visualization.
+* {k4pull}4702[Pull Request 4702]: Dark theme added to dashboards.
+* {k4issue}1902[Issue 1902]: Tile maps support configurable WMS-compliant map servers.
