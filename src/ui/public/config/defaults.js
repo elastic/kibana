@@ -76,9 +76,12 @@ define(function () {
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
         'Explanation of cell dimensions</a>',
       },
+      'visualization:tileMap:defaultServerType': {
+        value: 'TMS',
+        description: 'Default tile map server type, TMS or WMS',
+      },
       'visualization:tileMap:WMSdefaults': {
         value: JSON.stringify({
-          enabled: false,
           url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
           options: {
             version: '1.3.0',
@@ -91,6 +94,19 @@ define(function () {
         }, null, '  '),
         type: 'json',
         description: 'Default properties for the WMS map server support in the tile map'
+      },
+      'visualization:tileMap:TMSdefaults': {
+        value: JSON.stringify({
+          url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
+          options: {
+            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
+              'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            subdomains: '1234'
+          }
+        }, null, '  '),
+        type: 'json',
+        description: 'Default properties for the TMS map server support in the tile map'
       },
       'visualization:colorMapping': {
         type: 'json',

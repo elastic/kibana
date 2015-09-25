@@ -22,9 +22,13 @@ define(function (require) {
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
-          wms: config.get('visualization:tileMap:WMSdefaults')
+          defaultServerType: config.get('visualization:tileMap:defaultServerType'),
+          serverType: 'Default',
+          wms: config.get('visualization:tileMap:WMSdefaults'),
+          tms: config.get('visualization:tileMap:TMSdefaults')
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
+        serverTypes: ['Default', 'TMS', 'WMS'],
         canDesaturate: !!supports.cssFilters,
         editor: require('plugins/kbn_vislib_vis_types/editors/tile_map.html')
       },

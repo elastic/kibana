@@ -117,20 +117,19 @@
   </label>
 </div>
 
-<div class="vis-option-item form-group">
-  <label>
-    <input type="checkbox"
-    name="wms.enabled"
-    ng-model="vis.params.wms.enabled">
-
-    WMS compliant map server
-
-    <kbn-info info="Use WMS compliant map tile server. For advanced users only."></kbn-info>
-  </label>
+<div class="form-group">
+  <label>Mapping server</label>
+    <select name="agg"
+    class="form-control"
+    ng-model="vis.params.serverType"
+    ng-init="vis.params.serverType || vis.type.params.serverTypes[0]"
+    ng-options="serverType as serverType for serverType in vis.type.params.serverTypes"
+    >
+  </select>
 </div>
 
-<div ng-show="vis.params.wms.enabled" class="well">
-  <div class="vis-option-item form-group">
+<div ng-if="vis.params.serverType === 'WMS'" class="form-group">
+  <div>
     
     <p>
       WMS maps are 3rd party mapping services that have not been verified to work with Kibana. 
@@ -138,7 +137,7 @@
     </p>
 
     <label>
-      WMS url*
+      URL*
     </label>
     <input type="text" class="form-control"
       name="wms.url"
@@ -147,17 +146,16 @@
 
   <div class="vis-option-item form-group">
     <label>
-      WMS layers* <kbn-info info="A comma seperated list of layers to use."></kbn-info>
+      Layers* <kbn-info info="A comma seperated list of layers to use."></kbn-info>
     </label>
     <input type="text" class="form-control"
-      ng-require="vis.params.wms.enabled"
       ng-model="vis.params.wms.options.layers"   
       name="wms.options.layers">
   </div>
 
   <div class="vis-option-item form-group">
     <label>
-      WMS version* <kbn-info info="The version of WMS the server supports"></kbn-info>
+      Version* <kbn-info info="The version of WMS the server supports"></kbn-info>
     </label>
     <input type="text" class="form-control"
       name="wms.options.version"
@@ -166,7 +164,7 @@
 
   <div class="vis-option-item form-group">
     <label>
-      WMS format* <kbn-info info="Usually image/png or image/jpeg. Use png if the server will return transparent layers"></kbn-info>
+      Format* <kbn-info info="Usually image/png or image/jpeg. Use png if the server will return transparent layers"></kbn-info>
     </label>
     <input type="text" class="form-control"
       name="wms.options.format"
@@ -175,7 +173,7 @@
   
   <div class="vis-option-item form-group">
     <label>
-      WMS attribution <kbn-info info="Attribution string for the lower right corner<"></kbn-info>
+      Attribution <kbn-info info="Attribution string for the lower right corner<"></kbn-info>
     </label>
     <input type="text" class="form-control"
       name="wms.options.attribution"
@@ -184,11 +182,49 @@
 
   <div class="vis-option-item form-group">
     <label>
-      WMS styles* <kbn-info info="A comma seperated list of WMS server supported styles to use. Blank in most cases."></kbn-info>
+      Styles* <kbn-info info="A comma seperated list of WMS server supported styles to use. Blank in most cases."></kbn-info>
     </label>
     <input type="text" class="form-control"
       name="wms.options.styles"
       ng-model="vis.params.wms.options.styles">    
+  </div>
+
+  <p>* if this parameter is incorrect, maps will fail to load.</p>
+
+
+</div>
+
+<div ng-if="vis.params.serverType === 'TMS'" class="form-group">
+  <div>
+
+    <p>
+      A number of alternative mapping providers can be found <a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">here</a>.
+    </p>
+
+    <label>
+      URL* <kbn-info info="Should contain {z}, {x}, {y} and optionally {s}"></kbn-info>
+    </label>
+    <input type="text" class="form-control"
+      name="tms.url"
+      ng-model="vis.params.tms.url">
+  </div>
+
+  <div class="vis-option-item form-group">
+    <label>
+      Attribution <kbn-info info="Attribution string for the lower right corner"></kbn-info>
+    </label>
+    <input type="text" class="form-control"
+      name="tms.options.attribution"
+      ng-model="vis.params.tms.options.attribution">
+  </div>
+
+  <div class="vis-option-item form-group">
+    <label>
+      Subdomains* <kbn-info info="Each letter is a subdomain name"></kbn-info>
+    </label>
+    <input type="text" class="form-control"
+      name="tms.options.subdomains"
+      ng-model="vis.params.tms.options.subdomains">
   </div>
 
   <p>* if this parameter is incorrect, maps will fail to load.</p>
