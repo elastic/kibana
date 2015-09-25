@@ -42,7 +42,10 @@ module.exports = function (kbnServer, server, config) {
             reporter: require('./LogReporter'),
             config: {
               json: config.get('logging.json'),
-              dest: config.get('logging.dest')
+              dest: config.get('logging.dest'),
+              filter: {
+                authorization: 'remove'
+              }
             },
             events: _.transform(events, function (filtered, val, key) {
               // provide a string compatible way to remove events
