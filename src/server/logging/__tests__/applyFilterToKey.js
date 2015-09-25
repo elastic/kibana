@@ -21,6 +21,14 @@ describe('applyFilterToKey(obj, key, action)', function () {
     });
   });
 
+  it('should remove an entire branch', function () {
+    var data = fixture();
+    applyFilterToKey(data, 'headers', 'remove');
+    expect(data).to.eql({
+      req: { }
+    });
+  });
+
   it('should censor a key in an object recursivly', function () {
     var data = fixture();
     applyFilterToKey(data, 'authorization', 'censor');
