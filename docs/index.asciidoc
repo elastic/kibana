@@ -11,8 +11,6 @@ include::setup.asciidoc[]
 
 include::getting-started.asciidoc[]
 
-include::apps.asciidoc[]
-
 include::plugins.asciidoc[]
 
 include::access.asciidoc[]
