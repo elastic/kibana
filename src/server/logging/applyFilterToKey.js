@@ -18,11 +18,9 @@ module.exports = function applyFilterToKey(obj, key, action) {
         }
         else if (/\/.+\//.test(action)) {
           var matches = action.match(/\/(.+)\//);
-          try {
+          if (matches) {
             let regex = new RegExp(matches[1]);
             obj[k] = ('' + val).replace(regex, replacer);
-          } catch (e) {
-            //meh
           }
         }
       } else if (typeof val === 'object') {
