@@ -29,6 +29,14 @@ describe('applyFilterToKey(obj, key, action)', function () {
     });
   });
 
+  it('should remove an entire branch with censor', function () {
+    var data = fixture();
+    applyFilterToKey(data, 'headers', 'censor');
+    expect(data).to.eql({
+      req: { }
+    });
+  });
+
   it('should censor a key in an object recursivly', function () {
     var data = fixture();
     applyFilterToKey(data, 'authorization', 'censor');
@@ -43,7 +51,7 @@ describe('applyFilterToKey(obj, key, action)', function () {
 
   it('should censor key with a RegEx in an object recursivly', function () {
     var data = fixture();
-    var regex = /([^\s]+)$/;
+    var regex = '/([^\\s]+)$/';
     applyFilterToKey(data, 'authorization', regex);
     expect(data).to.eql({
       req: {
