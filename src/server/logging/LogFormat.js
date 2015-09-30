@@ -6,7 +6,7 @@ let ansicolors = require('ansicolors');
 let stringify = require('json-stringify-safe');
 let querystring = require('querystring');
 let inspect = require('util').inspect;
-let applyFilterToKey = require('./applyFilterToKey');
+let applyFiltersToKeys = require('./applyFilterToKey').applyFiltersToKeys;
 
 function serializeError(err) {
   return {
@@ -36,12 +36,8 @@ module.exports = class TransformObjStream extends Stream.Transform {
   }
 
   filter(data) {
-    if (this.config.filter) {
-      _.each(this.config.filter, (action, key) => {
-        applyFilterToKey(data, key, action);
-      });
-    }
-    return data;
+    if (!this.config.filter) return data;
+    return applyFiltersToKeys(data, this.config.filter);
   }
 
   _transform(event, enc, next) {
