@@ -103,7 +103,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
       function completeExpression() {
         if (!$scope.suggestions.list.length) return;
         var expression = $attrs.timelionExpression;
-        var startOf = expression.slice(0, $scope.suggestions.location.start.column + 1);
+        var startOf = expression.slice(0, $scope.suggestions.location.start.column);
         var endOf =  expression.slice($scope.suggestions.location.end.column, expression.length);
 
         var completeFunction = $scope.suggestions.list[$scope.suggestions.selected].name + '()';

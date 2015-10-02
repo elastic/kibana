@@ -50,6 +50,8 @@ function invoke(fnName, args) {
           return invokeChain(item);
         case 'chainList':
           return resolveChainList(item.list);
+        case 'literal':
+          return item.value;
         case 'requestList':
         case 'seriesList':
           return item;
