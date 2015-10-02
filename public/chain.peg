@@ -48,17 +48,13 @@ function_name // check
  = (first:[a-zA-Z]+ rest:[a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
 
 function "function"
- = '.' name:function_name '(' space? arguments:arg_list? space? ')' {
+ = '.' name:function_name '(' space? args:arg_list? space? ')' {
   var result = {
     type: 'function',
     function: name,
-    arguments: arguments || [],
-    position: {
-      min: offset(),
-      max: offset() + text().length,
-      text: text()
-    }
-
+    arguments: args || [],
+    location: location(),
+    text: text()
   }
 
   functions.push(result)
@@ -80,11 +76,8 @@ chain
   var exception = {
     type: 'incompleteFunction',
     function: func,
-    position: {
-      min: offset(),
-      max: offset() + text().length,
-      text: text()
-    }
+    location: location(),
+    text: text()
   }
   error(JSON.stringify(exception));
  }

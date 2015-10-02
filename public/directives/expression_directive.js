@@ -86,7 +86,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
                 }));
               }
             }
-            $scope.suggestions.position = e.position;
+            $scope.suggestions.location = e.location;
           } catch (e) {
             resetSuggestions();
           }
@@ -103,8 +103,8 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
       function completeExpression() {
         if (!$scope.suggestions.list.length) return;
         var expression = $attrs.timelionExpression;
-        var startOf = expression.slice(0, $scope.suggestions.position.min + 1);
-        var endOf =  expression.slice($scope.suggestions.position.max, expression.length);
+        var startOf = expression.slice(0, $scope.suggestions.location.start.column + 1);
+        var endOf =  expression.slice($scope.suggestions.location.end.column, expression.length);
 
         var completeFunction = $scope.suggestions.list[$scope.suggestions.selected].name + '()';
 
@@ -177,8 +177,8 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         var bestFunction;
 
         _.each(functionList, function (func) {
-          if ((func.position.min) < position && position < (func.position.max)) {
-            if (!bestFunction || func.position.text.length < bestFunction.position.text.length) {
+          if ((func.location.start.column) < position && position < (func.location.end.column)) {
+            if (!bestFunction || func.text.length < bestFunction.text.length) {
               bestFunction = func;
             }
           }

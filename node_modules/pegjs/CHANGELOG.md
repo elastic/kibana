@@ -1,3 +1,78 @@
+Change Log
+==========
+
+This file documents all notable changes to PEG.js. The releases follow [semantic
+versioning](http://semver.org/).
+
+0.9.0
+-----
+
+Released: August 30, 2015
+
+### Major Changes
+
+  * **Tracing support.** Parsers can be compiled with support for tracing their
+    progress, which can help debugging complex grammars. This feature is
+    experimental and is expected to evolve over time as experience is gained.
+    [More details](https://github.com/pegjs/pegjs/commit/da57118a43a904f753d44d407994cf0b36358adc)
+
+  * **Infinite loop detection.** Grammar constructs that could cause infinite
+    loops in generated parsers are detected during compilation and cause errors.
+
+  * **Improved location information API.** The `line`, `column`, and `offset`
+    functions available in parser code were replaced by a single `location`
+    function which returns an object describing the current location. Similarly,
+    the `line`, `column`, and `offset` properties of exceptions were replaced by
+    a single `location` property. The location is no longer a single point but a
+    character range, which is meaningful mainly in actions where the range
+    covers action’s expression.
+    [More details](https://github.com/pegjs/pegjs/compare/e75f21dc8f0e66b3d87c4c19b3fcb8f89d9c3acd...eaca5f0acf97b66ef141fed84aa95d4e72e33757)
+
+  * **Improved error reporting.** All exceptions thrown when generating a parser
+    have associated location information. And all exceptions thrown by generated
+    parser and PEG.js itself have a stack trace (the `stack` property) in
+    environments that support `Error.captureStackTrace`.
+
+  * **Strict mode code**. All PEG.js and generated parser code is written using
+    [JavaScript strict mode](https://developer.mozilla.org/cs/docs/Web/JavaScript/Reference/Strict_mode).
+
+### Minor Changes
+
+  * Labels behave like block-scoped variables. This means parser code can see
+    labels defined outside expressions containing code.
+
+  * Empty sequences are no longer allowed.
+
+  * Label names can’t be JavaScript reserved words.
+
+  * Rule and label names can contain Unicode characters like in JavaScript.
+
+  * Rules have to be separated either by `;` or a newline (until now, any
+    whitespace was enough).
+
+  * The PEG.js grammar and all the example grammars were completely rewritten.
+    This rewrite included a number of cleanups, formatting changes, naming
+    changes, and bug fixes.
+
+  * The parser object can now be accessed as `parser` in parser code.
+
+  * Location information computation is faster.
+
+  * Added support for Node.js >= 0.10.x, io.js, and Edge. Removed support for
+    Node.js < 0.10.x.
+
+### Bug Fixes
+
+  * Fixed left recursion detector which missed many cases.
+
+  * Fixed escaping of U+0100—U+107F and U+1000—U+107F in generated code and
+    error messages.
+
+  * Renamed `parse` and `SyntaxError` to `peg$parse` and `peg$SyntaxError` to
+    mark them as internal identifiers.
+
+[Complete set of changes](https://github.com/pegjs/pegjs/compare/v0.8.0...v0.9.0)
+
 0.8.0
 -----
 
