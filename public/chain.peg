@@ -3,19 +3,26 @@
  */
 
 {
-  function ltoo (literal) {
-   return {type: 'literal', value: literal}
+ function ltoo (literal) {
+  return {type: 'literal', value: literal}
+ }
+
+ function simpleLocation (location) {
+  return {
+   min: location.start.column,
+   max: location.end.column
   }
-  var completable = [];
-  var functions = [];
-  var args = [];
+ }
+
+ var functions = [];
+ var args = [];
 
 }
 
 start
  = tree:series+ {
   return {
-    //tree: tree,
+    tree: tree,
     functions: functions,
     args: args
   }
@@ -30,13 +37,13 @@ more_args
  = ','? space? arg:argument {return arg;}
 
 argument
- = name:function_name '=' value:arg_type? {
+ = name:function_name '=' value:arg_type {
 
   return {
    type: 'namedArg',
    name: name,
    value: value,
-   location: location(),
+   location: simpleLocation(location()),
    text: text()
   }
  }
@@ -46,7 +53,7 @@ arg_type
  = series_type
  / literal:literal {
   var result = ltoo(literal);
-  result.location = location();
+  result.location = simpleLocation(location()),
   result.text = text();
   return result;
  }
@@ -68,7 +75,7 @@ function "function"
     type: 'function',
     function: name,
     arguments: arg_list || [],
-    location: location(),
+    location: simpleLocation(location()),
     text: text()
   }
 
@@ -84,7 +91,7 @@ function "function"
   var exception = {
    type: 'incompleteFunction',
    function: func,
-   location: location(),
+   location: simpleLocation(location()),
    text: text()
   }
   error(JSON.stringify(exception));

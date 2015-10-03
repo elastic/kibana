@@ -74,6 +74,10 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         } catch (e) {
           try { // Is this a structured exception?
             e = JSON.parse(e.message);
+            if (e.location.min > getCaretPos() || e.location.max <= getCaretPos()) {
+              resetSuggestions();
+              return;
+            }
             // TODO: Abstract structured exception handling;
             if (e.type === 'incompleteFunction') {
               if (e.function == null) {
@@ -103,8 +107,8 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
       function completeExpression() {
         if (!$scope.suggestions.list.length) return;
         var expression = $attrs.timelionExpression;
-        var startOf = expression.slice(0, $scope.suggestions.location.start.column);
-        var endOf =  expression.slice($scope.suggestions.location.end.column, expression.length);
+        var startOf = expression.slice(0, $scope.suggestions.location.min);
+        var endOf =  expression.slice($scope.suggestions.location.max, expression.length);
 
         var completeFunction = $scope.suggestions.list[$scope.suggestions.selected].name + '()';
 
@@ -177,7 +181,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         var bestFunction;
 
         _.each(functionList, function (func) {
-          if ((func.location.start.column) < position && position < (func.location.end.column)) {
+          if ((func.location.min) < position && position < (func.location.max)) {
             if (!bestFunction || func.text.length < bestFunction.text.length) {
               bestFunction = func;
             }
