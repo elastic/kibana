@@ -1,8 +1,12 @@
+function toPojo(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 function replacer(match, group) {
   return (new Array(group.length + 1).join('X'));
 }
 
-module.exports = function applyFilterToKey(obj, key, action) {
+function apply(obj, key, action) {
   for (let k in obj)  {
     if (obj.hasOwnProperty(k)) {
       let val = obj[k];
@@ -24,8 +28,19 @@ module.exports = function applyFilterToKey(obj, key, action) {
           }
         }
       } else if (typeof val === 'object') {
-        applyFilterToKey(val, key, action);
+        val = apply(val, key, action);
       }
     }
   }
+  return obj;
+}
+
+module.exports = function applyFilterToKey(obj, key, action) {
+  return apply(toPojo(obj), key, action);
+};
+
+module.exports.applyFiltersToKeys = function (obj, actionsByKey) {
+  return Object.keys(actionsByKey).reduce((output, key) => {
+    return apply(output, key, actionsByKey[key]);
+  }, toPojo(obj));
 };
