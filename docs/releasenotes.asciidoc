@@ -23,6 +23,8 @@ from previous versions of Kibana.
 * {k4issue}2760[Issue 2760]: Adds ability to filter by clicking on a legend. 
 * {k4issue}485[Issue 485]: Adds color rationalization across visualizations.
 
+[float]
+[[bugfixes]]
 == Bug Fixes
 
 * {k4issue}4902[Issue 4902]: Fixes a problem with object export logic.
