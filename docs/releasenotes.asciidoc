@@ -10,10 +10,24 @@ from previous versions of Kibana.
 [[enhancementss]]
 == Enhancements
 
-* {k4issue}2855[Issue 2855]: You can now configure Kibana log levels.
-* {k4issue}4204[Issue 4204]: Kibana now has a plugin manager.
-* {k4pull}4951[Pull Request 4951]: New UI to support plugin context changes.
-* {k4issue}3270[Issue 3270]: Kibana now displays a server status page.
-* {k4issue}2245[Issue 2245]: You can now customize the descriptions shown in the visualization.
-* {k4pull}4702[Pull Request 4702]: Dark theme added to dashboards.
+* {k4issue}2855[Issue 2855]: Configurable Kibana log levels.
+* {k4issue}4204[Issue 4204]: Plugin manager for Kibana server.
+* {k4issue}4218[Issue 4218]: New interface for switching between plugins.
+* {k4issue}3270[Issue 3270]: Server status page.
+* {k4issue}2245[Issue 2245]: Customizable visualization descriptions.
+* {k4issue}2906[Issue 2906]: Dark theme added to dashboards.
 * {k4issue}1902[Issue 1902]: Tile maps support configurable WMS-compliant map servers.
+* {k4issue}2245[Issue 2245]: Customize legends for the Filter aggregation.
+* {k4issue}4817[Issue 4817]: Advanced Settings option maps values to colors. 
+* {k4issue}2874[Issue 2874]: Advanced Settings option to change default timepicker value.
+* {k4issue}2760[Issue 2760]: Adds ability to filter by clicking on a legend. 
+* {k4issue}485[Issue 485]: Adds color rationalization across visualizations.
+
+== Bug Fixes
+
+* {k4issue}4902[Issue 4902]: Fixes a problem with object export logic.
+* {k4issue}3694[Issue 3694]: Improves timezone handling in visualizations as a result of Olson timezone support in ES.
+* {k4issue}4261[Issue 4261]: Improves highlighting on embedded searches in dashboards.
+* {k4issue}4816[Issue 4816]: Improves history limit setting to clear past history.
+* {k4issue}4670[Issue 4670]: Fixes issue with range aggregation.
+* {k4issue}4244[Issue 4244]: Fixes issue with pie chart labels.
