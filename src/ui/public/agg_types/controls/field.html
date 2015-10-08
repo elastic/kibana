@@ -7,7 +7,7 @@
       ng-click="showAnalyzedFieldWarning = !showAnalyzedFieldWarning">
     <i class="fa fa-warning"></i> Analyzed Field
   </span>
-  <div class="hintbox" ng-show="showAnalyzedFieldWarning">
+  <div class="hintbox" ng-show="showAnalyzedFieldWarning && agg.params.field.analyzed">
     <p>
     <strong>Careful!</strong> The field selected contains analyzed strings. Analyzed strings are highly unique and can use a lot of memory to visualize. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
     </p>
