@@ -6,7 +6,7 @@ let ansicolors = require('ansicolors');
 let stringify = require('json-stringify-safe');
 let querystring = require('querystring');
 let inspect = require('util').inspect;
-let applyFiltersToKeys = require('./applyFilterToKey').applyFiltersToKeys;
+let applyFiltersToKeys = require('./applyFiltersToKeys');
 
 function serializeError(err) {
   return {
