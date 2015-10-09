@@ -35,17 +35,17 @@ define({
     { browserName: 'chrome', version: '39', platform: [ 'WINDOWS', 'MAC' ] },
     { browserName: 'safari', version: '8', platform: 'MAC' }  */
     // {
-    //   browserName: 'chrome'
-    // }
-    // {
     //   browserName: 'internet explorer'
     // }
     // ,
 
-
     {
-      browserName: 'firefox'
+      browserName: 'chrome'
     }
+    // ,
+    // {
+    //   browserName: 'firefox'
+    // }
   ],
 
   // Maximum number of simultaneous integration tests that should be executed on the remote WebDriver service
@@ -74,7 +74,16 @@ define({
     host: 'localhost',
     port: 4444
   },
-
+  kibana: {
+    protocol: 'http',
+    hostname: 'localhost',
+    port: 5601
+  },
+  elasticsearch: {
+    protocol: 'http',
+    hostname: 'localhost',
+    port: 9220
+  },
 
   // Configuration options for the module loader; any AMD configuration options supported by the AMD loader in use
   // can be used here.
@@ -92,19 +101,22 @@ define({
       'intern-selftest': {
         dojo: 'intern-selftest/node_modules/dojo'
       }
+    },
+    paths: {
+      'bluebird': './node_modules/bluebird/js/browser/bluebird.js'
     }
-
   },
 
   // Non-functional test suite(s) to run in each browser
   suites: [ /* 'tests/unit/hello'  'myPackage/tests/foo', 'myPackage/tests/bar' */ ],
 
   // Functional test suite(s) to execute against each browser once non-functional tests are completed
-  // functionalSuites: ['test/functional/settingsDefaults' /* 'myPackage/tests/functional' */ ],
-  functionalSuites: ['test/functional/testDiscover' /* 'myPackage/tests/functional' */ ],
-  // functionalSuites: ['test/functional/testVisualize' /* 'myPackage/tests/functional' */ ],
-  // functionalSuites: ['test/functional/testScreenshot' /* 'myPackage/tests/functional' */ ],
+  // functionalSuites: ['test/functional/testSettings', 'test/functional/testDiscover', 'test/functional/testVisualize'],
+  // functionalSuites: ['test/functional/testSettings' /* 'myPackage/tests/functional' */ ],
+  // functionalSuites: ['test/functional/testDiscover' /* 'myPackage/tests/functional' */ ],
+  functionalSuites: ['test/functional/testVisualize' /* 'myPackage/tests/functional' */ ],
 
   // A regular expression matching URLs to files that should not be included in code coverage analysis
-  excludeInstrumentation: /^(?:tests|node_modules)\//
+  // excludeInstrumentation: /^(?:tests|node_modules)\//
+  excludeInstrumentation: /^(node_modules)\//
 });

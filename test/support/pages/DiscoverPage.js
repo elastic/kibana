@@ -3,17 +3,20 @@ define(function (require) {
   // the page object is created as a constructor
   // so we can provide the remote Command object
   // at runtime
+  var Common = require('./Common');
 
   var defaultTimeout = 5000;
+  var common;
 
   function DiscoverPage(remote) {
     this.remote = remote;
+    common = new Common(this.remote);
   }
 
   DiscoverPage.prototype = {
     constructor: DiscoverPage,
 
-    clickTimepicker: function () {
+    clickTimepicker: function clickTimepicker() {
       return this.remote
         .setFindTimeout(defaultTimeout * 3)
         .findByClassName('navbar-timepicker-time-desc')
@@ -22,7 +25,7 @@ define(function (require) {
         });
     },
 
-    clickAbsoluteButton: function () {
+    clickAbsoluteButton: function clickAbsoluteButton() {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('a[ng-click="setMode(\'absolute\')"')
@@ -31,7 +34,7 @@ define(function (require) {
         });
     },
 
-    setFromTime: function (timeString) {
+    setFromTime: function setFromTime(timeString) {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('input[ng-model=\'absolute.from\']')
@@ -43,7 +46,7 @@ define(function (require) {
         });
     },
 
-    setToTime: function (timeString) {
+    setToTime: function setToTime(timeString) {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('input[ng-model=\'absolute.to\']')
@@ -54,7 +57,7 @@ define(function (require) {
         });
     },
 
-    clickGoButton: function () {
+    clickGoButton: function clickGoButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByClassName('kbn-timepicker-go')
@@ -64,18 +67,18 @@ define(function (require) {
     },
 
 
-    setAbsoluteRange: function (fromTime, toTime) {
+    setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
       var self = this;
-      console.log('--Clicking Absolute button');
+      common.log('--Clicking Absolute button');
       return self
         .clickAbsoluteButton()
         .then(function () {
-          console.log('--Setting From Time : ' + fromTime);
+          common.log('--Setting From Time : ' + fromTime);
           return self
             .setFromTime(fromTime);
         })
         .then(function () {
-          console.log('--Setting To Time : ' + toTime);
+          common.log('--Setting To Time : ' + toTime);
           return self
             .setToTime(toTime);
         })
@@ -85,26 +88,26 @@ define(function (require) {
         });
     },
 
-    collapseTimepicker: function () {
+    collapseTimepicker: function collapseTimepicker() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('.fa.fa-chevron-up')
         .click();
     },
 
-    getQueryField: function () {
+    getQueryField: function getQueryField() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('input[ng-model=\'state.query\']');
     },
 
-    getQuerySearchButton: function () {
+    getQuerySearchButton: function getQuerySearchButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button[aria-label=\'Search\']');
     },
 
-    getTimespanText: function () {
+    getTimespanText: function getTimespanText() {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('a.navbar-timepicker-time-desc pretty-duration.ng-isolate-scope')
@@ -114,12 +117,12 @@ define(function (require) {
         });
     },
 
-    saveSearch: function (searchName) {
+    saveSearch: function saveSearch(searchName) {
       var self = this;
       return self
         .clickSaveSearchButton()
         .then(function () {
-          console.log('--saveSearch button clicked');
+          common.log('--saveSearch button clicked');
           return self.remote
             .setFindTimeout(defaultTimeout)
             .findById('SaveSearch')
@@ -130,19 +133,19 @@ define(function (require) {
         })
         //   // click save button
         .then(function clickSave() {
-          console.log('--find save button');
+          common.log('--find save button');
           return self.remote
             .setFindTimeout(defaultTimeout)
             .findByCssSelector('button[ng-disabled="!opts.savedSearch.title"]')
             .then(function (saveButton) {
-              console.log('--click save button');
+              common.log('--click save button');
               return saveButton
                 .click();
             });
         });
     },
 
-    clickNewSearchButton: function () {
+    clickNewSearchButton: function clickNewSearchButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button[aria-label="New Search"]')
@@ -151,7 +154,7 @@ define(function (require) {
             .click();
         });
     },
-    clickSaveSearchButton: function () {
+    clickSaveSearchButton: function clickSaveSearchButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button[aria-label="Save Search"]')
@@ -161,7 +164,7 @@ define(function (require) {
         });
     },
 
-    getCurrentQueryName: function () {
+    getCurrentQueryName: function getCurrentQueryName() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('span[bo-bind="opts.savedSearch.title"]')
@@ -169,13 +172,13 @@ define(function (require) {
           return queryNameField
             .getVisibleText();
           // .then(function (theString) {
-          //   console.log('--found current query name element ' + theString);
+          //   common.log('--found current query name element ' + theString);
           // });
 
         });
     },
 
-    getBarChartData: function () {
+    getBarChartData: function getBarChartData() {
       var barMap = {};
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
@@ -196,7 +199,7 @@ define(function (require) {
                           // Add each "x-position : height" pair to the map/object this eliminates problems
                           // with plain hight elements being out of order.
                           // Chrome reads a smaller height than Firefox
-                          //console.log(Math.round(x) + ': ' + height + ', ');
+                          common.log(Math.round(x) + ': ' + height + ', ');
                           barMap[Math.round(x / 10) * 10] = height;
                         });
                     });
@@ -211,8 +214,8 @@ define(function (require) {
         });
     },
 
-    getSpinnerDone: function () {
-      console.log('--getSpinner done method');
+    getSpinnerDone: function getSpinnerDone() {
+      common.log('--getSpinner done method');
       return this.remote
         .setFindTimeout(defaultTimeout * 3)
         .findByCssSelector('span.spinner.ng-hide');

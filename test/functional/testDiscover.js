@@ -5,38 +5,20 @@ define(function (require) {
   //var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
   var fs = require('intern/dojo/node!fs');
   var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+  var Common = require('../support/pages/Common');
   var SettingsPage = require('../support/pages/SettingsPage');
   var HeaderPage = require('../support/pages/HeaderPage');
   var DiscoverPage = require('../support/pages/DiscoverPage');
-  var Promise = require('bluebird');
-
-  function tryForTime(timeout, block) {
-    var start = Date.now();
-    var lastTry = 0;
-
-    function attempt() {
-      lastTry = Date.now();
-
-      if (lastTry - start > timeout) {
-        throw new Error('timeout');
-      }
-
-      return Promise.try(block).catch(function (err) {
-        console.log('failed with ' + err.message);
-        console.log('trying again in 1 second');
-        return Promise.delay(1000).then(attempt);
-      });
-    }
-
-    return Promise.try(attempt);
-  }
-
+  var config = require('intern').config;
+  var url = require('intern/dojo/node!url');
+  var _ = require('intern/dojo/node!lodash');
 
   registerSuite(function () {
+    var common;
     var settingsPage;
     var headerPage;
     var discoverPage;
-    var url = 'http://localhost:5601';
+    //var url = 'http://localhost:5601';
     var fromTime = '2015-09-20 06:31:44.000';
     var toTime = '2015-09-21 18:31:44.000';
     // time range in top right uses 'to'
@@ -125,6 +107,7 @@ define(function (require) {
     return {
       setup: function () {
         // curl -XDELETE http://localhost:9200/.kibana
+        common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         headerPage = new HeaderPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
@@ -134,8 +117,9 @@ define(function (require) {
         var remote = this.remote;
 
         return this.remote
-          // .httpGet()
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             return remote
               // IMPORTANT!  Changing this size would impact the expected Chart data (please avoid changing)
@@ -143,66 +127,66 @@ define(function (require) {
             // .setWindowSize(1008, 800); // 4.2-beta2
           })
           .then(function () {
-            headerPage.log('Select Time Field Option @timestamp');
+            common.log('Select Time Field Option @timestamp');
             return settingsPage
               .selectTimeFieldOption('@timestamp');
           })
           .then(function () {
-            headerPage.log('Click Create button');
+            common.log('Click Create button');
             return settingsPage
               .clickCreateButton();
           })
           .then(function () {
-            headerPage.log('Click Default Index button');
+            common.log('Click Default Index button');
             return settingsPage
               .clickDefaultIndexButton();
           })
           .then(function () {
-            headerPage.log('Click Discover Tab');
+            common.log('Click Discover Tab');
             return headerPage
               .clickDiscover();
           })
           .then(function () {
-            headerPage.log('Wait for spinner done');
+            common.log('Wait for spinner done');
             return discoverPage
               .getSpinnerDone(); // only matches the hidden spinner
           })
           .then(function () {
-            headerPage.log('Wait for spinner done');
+            common.log('Wait for spinner done');
             return discoverPage
               .getSpinnerDone(); // only matches the hidden spinner
           })
           .then(function () {
-            headerPage.log('Click time picker');
+            common.log('Click time picker');
             return discoverPage
               .clickTimepicker();
           })
           .then(function () {
-            headerPage.log('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+            common.log('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
             return discoverPage
               .setAbsoluteRange(fromTime, toTime);
           })
           .then(function () {
-            headerPage.log('Collapse Time Picker pane');
+            common.log('Collapse Time Picker pane');
             return discoverPage
               .collapseTimepicker();
           })
           .then(function () {
-            headerPage.log('Get the timestamp to verify');
+            common.log('Get the timestamp to verify');
             return discoverPage
               .getTimespanText();
           })
           .then(function (actualTimeString) {
-            headerPage.log('actualTimeString = \"' + actualTimeString + '\"');
+            common.log('actualTimeString = \"' + actualTimeString + '\"');
             expect(actualTimeString).to.be(timeRange);
           })
           .then(function () {
-            headerPage.log('Save Search as \"' + queryName1 + '\"');
+            common.log('Save Search as \"' + queryName1 + '\"');
             return discoverPage
               .saveSearch(queryName1);
           })
           .then(function () {
-            headerPage.log('Wait for spinner done');
+            common.log('Wait for spinner done');
             return discoverPage
               .getSpinnerDone(); // only matches the hidden spinner
           })
@@ -210,33 +194,33 @@ define(function (require) {
             return discoverPage
               .getCurrentQueryName()
               .then(function (name) {
-                headerPage.log(name);
+                common.log(name);
               });
           })
           .then(function () {
-            return tryForTime(5000, function () {
+            return common.tryForTime(5000, function () {
               return discoverPage
                 .getCurrentQueryName()
                 .then(function (name) {
                   if (name !== queryName1) {
                     throw new Error('waiting for ' + queryName1 + ' got ' + name);
                   } else {
-                    headerPage.log('found current query name "' + name + '"');
+                    common.log('found current query name "' + name + '"');
                     return name;
                   }
                 });
             });
           })
           .then(function () {
-            headerPage.log(' Get Bar Chart data');
+            common.log(' Get Bar Chart data');
             return discoverPage
               .getBarChartData()
               .then(function (paths) {
-                headerPage.log('Verify Bar Chart data');
-                headerPage.log('total rectangles found = ' + Object.keys(paths).length +
+                common.log('Verify Bar Chart data');
+                common.log('total rectangles found = ' + Object.keys(paths).length +
                   ' Expected (map size) = ' + Object.keys(expectedChartData).length
                 );
-                headerPage.log('keys = ' + Object.keys(paths));
+                common.log('keys = ' + Object.keys(paths));
                 /* NOTE: an assert.deepEqual between the 'paths' object and the 'expectedChartData' object
                  ** does work OK for either Chrome or Firefox, but not both because of some slight height differences.
                  ** Rounding didn't seem to fix it, so below we check each value with a tolerance.
@@ -245,12 +229,12 @@ define(function (require) {
                 for (var x in expectedChartData) {
                   if (expectedChartData.hasOwnProperty(x)) {
                     // uncomment for debugging
-                    headerPage.log(x + '  Expected: ' + expectedChartData[x] + ' Actual: ' +
+                    common.log(x + '  Expected: ' + expectedChartData[x] + ' Actual: ' +
                       paths[x] + ' diff =' + (expectedChartData[x] - paths[x]) + '\n');
                     expect(Math.abs(expectedChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
                   }
                 }
-                headerPage.log('Done');
+                common.log('Done');
               });
 
           });
