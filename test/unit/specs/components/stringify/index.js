@@ -4,5 +4,6 @@ define(function (require) {
     describe(require('specs/components/stringify/_ip'));
     describe(require('specs/components/stringify/_source'));
     describe(require('specs/components/stringify/_url'));
+    describe(require('specs/components/stringify/_date'));
   });
 });
