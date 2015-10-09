@@ -1,9 +1,14 @@
 define(function (require) {
   return function _StringProvider(Private) {
-    var _ = require('lodash');
-    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
-
     require('ui/stringify/editors/color.less');
+
+    const _ = require('lodash');
+    const FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+    const DEFAULT_COLOR = {
+      range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
+      text: '#000000',
+      background: '#ffffff'
+    };
 
     _.class(_Color).inherits(FieldFormat);
     function _Color(params) {
@@ -20,7 +25,7 @@ define(function (require) {
       template: require('ui/stringify/editors/color.html'),
       controller($scope) {
         $scope.addColor = function () {
-          $scope.editor.formatParams.colors.push({});
+          $scope.editor.formatParams.colors.push(_.cloneDeep(DEFAULT_COLOR));
         };
 
         $scope.removeColor = function (index) {
@@ -29,12 +34,9 @@ define(function (require) {
       }
     };
 
+
     _Color.paramDefaults = {
-      colors: [{
-        range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-        text: '#000000',
-        background: '#ffffff'
-      }]
+      colors: [_.cloneDeep(DEFAULT_COLOR)]
     };
 
     _Color.prototype._convert = {
