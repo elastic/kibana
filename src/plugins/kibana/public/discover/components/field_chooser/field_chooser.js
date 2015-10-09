@@ -1,6 +1,8 @@
 define(function (require) {
   var app = require('ui/modules').get('apps/discover');
 
+  var $ = require('jquery');
+
   require('ui/directives/css_truncate');
   require('ui/directives/field_name');
   require('ui/filters/unique');
@@ -151,7 +153,7 @@ define(function (require) {
           $scope.indexPattern.popularizeField(fieldName, 1);
         };
 
-        $scope.runAgg = function (field) {
+        $scope.vizLocation = function (field) {
           var agg = {};
           var isGeoPoint = field.type === 'geo_point';
           var type = isGeoPoint ? 'tile_map' : 'histogram';
@@ -188,7 +190,7 @@ define(function (require) {
             };
           }
 
-          $location.path('/visualize/create').search({
+          return '#/visualize/create?' + $.param({
             indexPattern: $scope.state.index,
             type: type,
             _a: rison.encode({
@@ -201,7 +203,8 @@ define(function (require) {
                   {schema: 'metric', type: 'count', 'id': '2'}
                 ]
               }
-            })
+            }),
+            _g: $location.search()._g
           });
         };
 
