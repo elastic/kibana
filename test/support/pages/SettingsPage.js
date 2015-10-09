@@ -4,40 +4,44 @@ define(function (require) {
   // so we can provide the remote Command object
   // at runtime
 
+  var Common = require('./Common');
+
   var defaultTimeout = 5000;
+  var common;
 
   function SettingsPage(remote) {
     this.remote = remote;
+    common = new Common(this.remote);
   }
 
   SettingsPage.prototype = {
     constructor: SettingsPage,
 
-    getTimeBasedEventsCheckbox: function () {
+    getTimeBasedEventsCheckbox: function getTimeBasedEventsCheckbox() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
-    getNameIsPatternCheckbox: function () {
+    getNameIsPatternCheckbox: function getNameIsPatternCheckbox() {
       return this.remote
         .setFindTimeout(defaultTimeout / 2) // fail faster since we're sometimes checking that it doesn't exist
         .findByCssSelector('input[ng-model="index.nameIsPattern"]');
     },
 
-    getIndexPatternField: function () {
+    getIndexPatternField: function getIndexPatternField() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('[ng-model="index.name"]');
     },
 
-    getTimeFieldNameField: function () {
+    getTimeFieldNameField: function getTimeFieldNameField() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('select[ng-model="index.timeField"]');
     },
 
-    selectTimeFieldOption: function (selection) {
+    selectTimeFieldOption: function selectTimeFieldOption(selection) {
       var self = this;
       return this
         .getTimeFieldNameField().click()
@@ -51,72 +55,72 @@ define(function (require) {
         });
     },
 
-    getTimeFieldOption: function (selection) {
+    getTimeFieldOption: function getTimeFieldOption(selection) {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('option[label="' + selection + '"]')
         .click();
     },
 
-    getCreateButton: function () {
+    getCreateButton: function getCreateButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('.btn');
     },
 
-    clickCreateButton: function () {
+    clickCreateButton: function clickCreateButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('.btn').click();
     },
 
-    clickDefaultIndexButton: function () {
+    clickDefaultIndexButton: function clickDefaultIndexButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button[tooltip="Set as default index"')
         .click();
     },
 
-    clickDeletePattern: function () {
+    clickDeletePattern: function clickDeletePattern() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button[tooltip="Remove index pattern"')
         .click();
     },
 
-    getIndexPageHeading: function () {
+    getIndexPageHeading: function getIndexPageHeading() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('h1.title.ng-binding.ng-isolate-scope');
     },
 
-    getConfigureHeader: function () {
+    getConfigureHeader: function getConfigureHeader() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('h1');
     },
-    getTableHeader: function () {
+    getTableHeader: function getTableHeader() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findAllByCssSelector('table.table.table-condensed thead tr th');
     },
 
 
-    sortBy: function (columnName) {
-      // console.log('sorting by ' + columnName);
+    sortBy: function sortBy(columnName) {
+      // common.log('sorting by ' + columnName);
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findAllByCssSelector('table.table.table-condensed thead tr th span')
         .then(function (chartTypes) {
-          // console.log('found bucket types ' + chartTypes.length);
+          // common.log('found bucket types ' + chartTypes.length);
 
           function getChartType(chart) {
             return chart
               .getVisibleText()
               .then(function (chartString) {
-                //console.log(chartString);
+                //common.log(chartString);
                 if (chartString === columnName) {
-                  // console.log('sorting by ' + columnName);
+                  // common.log('sorting by ' + columnName);
                   return chart
                     .click();
                 }
@@ -127,7 +131,7 @@ define(function (require) {
         });
     },
 
-    getTableRow: function (rowNumber, colNumber) {
+    getTableRow: function getTableRow(rowNumber, colNumber) {
       return this.remote
         .setFindTimeout(defaultTimeout)
         // passing in zero-based index, but adding 1 for css 1-based indexes
@@ -137,7 +141,7 @@ define(function (require) {
         );
     },
 
-    getFieldsTabCount: function () {
+    getFieldsTabCount: function getFieldsTabCount() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         // passing in zero-based index, but adding 1 for css 1-based indexes
@@ -152,13 +156,13 @@ define(function (require) {
         });
     },
 
-    getPageSize: function () {
+    getPageSize: function getPageSize() {
       var selectedItemLabel = '';
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
         .then(function (chartTypes) {
-          //console.log('found selection options ' + chartTypes.length);
+          //common.log('found selection options ' + chartTypes.length);
 
           function getChartType(chart) {
             var thisChart = chart;
@@ -166,11 +170,11 @@ define(function (require) {
               .isSelected()
               .then(function (isSelected) {
                 if (isSelected === true) {
-                  //console.log('Found selected option ');
+                  //common.log('Found selected option ');
                   return thisChart
                     .getProperty('label')
                     .then(function (theLabel) {
-                      // console.log('Page size = ' + theLabel);
+                      // common.log('Page size = ' + theLabel);
                       selectedItemLabel = theLabel;
                     });
                 }
@@ -180,18 +184,18 @@ define(function (require) {
           return Promise.all(getChartTypesPromises);
         })
         .then(function () {
-          //console.log('returning types array here? ' + types);
+          //common.log('returning types array here? ' + types);
           return selectedItemLabel;
         });
     },
 
-    getPageFieldCount: function () {
+    getPageFieldCount: function getPageFieldCount() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findAllByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr td.ng-scope:nth-child(1) span.ng-binding');
     },
 
-    goToPage: function (pageNum) {
+    goToPage: function goToPage(pageNum) {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
@@ -202,7 +206,7 @@ define(function (require) {
         });
     },
 
-    openControlsRow: function (row) {
+    openControlsRow: function openControlsRow(row) {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
@@ -213,7 +217,7 @@ define(function (require) {
         });
     },
 
-    openControlsByName: function (name) {
+    openControlsByName: function openControlsByName(name) {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         // .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href="#/settings/indices/logstash-*/field/' + name + '"]')
@@ -223,7 +227,7 @@ define(function (require) {
         });
     },
 
-    increasePopularity: function () {
+    increasePopularity: function increasePopularity() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
@@ -232,7 +236,7 @@ define(function (require) {
         });
     },
 
-    getPopularity: function () {
+    getPopularity: function getPopularity() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('input.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-number')
@@ -242,7 +246,7 @@ define(function (require) {
         });
     },
 
-    controlChangeCancel: function () {
+    controlChangeCancel: function controlChangeCancel() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
@@ -251,7 +255,7 @@ define(function (require) {
         });
     },
 
-    controlChangeSave: function () {
+    controlChangeSave: function controlChangeSave() {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
@@ -260,7 +264,7 @@ define(function (require) {
         });
     },
 
-    setPageSize: function (size) {
+    setPageSize: function setPageSize(size) {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')

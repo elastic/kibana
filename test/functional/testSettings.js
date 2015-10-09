@@ -7,38 +7,20 @@ define(function (require) {
   //var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
   var fs = require('intern/dojo/node!fs');
   var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+  var Common = require('../support/pages/Common');
   var SettingsPage = require('../support/pages/SettingsPage');
   var HeaderPage = require('../support/pages/HeaderPage');
   var DiscoverPage = require('../support/pages/DiscoverPage');
-  var Promise = require('bluebird');
-
-
-  function tryForTime(timeout, block) {
-    var start = Date.now();
-    var lastTry = 0;
-
-    function attempt() {
-      lastTry = Date.now();
-
-      if (lastTry - start > timeout) {
-        throw new Error('timeout');
-      }
-
-      return Promise.try(block).catch(function (err) {
-        console.log('failed with ' + err.message);
-        console.log('trying again in 1 second');
-        return Promise.delay(1000).then(attempt);
-      });
-    }
-
-    return Promise.try(attempt);
-  }
+  var config = require('intern').config;
+  var url = require('intern/dojo/node!url');
+  var _ = require('intern/dojo/node!lodash');
 
 
   registerSuite(function () {
+    var common;
     var settingsPage;
     var headerPage;
-    var url = 'http://localhost:5601';
+    //var url = 'http://localhost:5601';
 
     var expectedAlertText = 'Are you sure you want to remove this index pattern?';
     return {
@@ -47,6 +29,7 @@ define(function (require) {
       setup: function () {
         // curl -XDELETE http://localhost:9200/.kibana
 
+        common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         headerPage = new HeaderPage(this.remote);
       },
@@ -56,7 +39,9 @@ define(function (require) {
        */
       'testSettingsInitialState': function () {
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             return settingsPage
               .getTimeBasedEventsCheckbox()
@@ -75,12 +60,12 @@ define(function (require) {
                     return patternField
                       .getProperty('value')
                       .then(function (pattern) {
-                        headerPage.log('patternField value = ' + pattern);
+                        common.log('patternField value = ' + pattern);
                         expect(pattern).to.be('logstash-*');
                         return settingsPage.getTimeFieldNameField()
                           .isSelected()
                           .then(function (timeFieldIsSelected) {
-                            headerPage.log('timeField isSelected = ' + timeFieldIsSelected);
+                            common.log('timeField isSelected = ' + timeFieldIsSelected);
                             expect(timeFieldIsSelected).to.not.be.ok();
                           });
                       });
@@ -94,7 +79,9 @@ define(function (require) {
        */
       'testCreateButtonDisabledUntilTimeFieldSelected': function () {
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -124,7 +111,9 @@ define(function (require) {
        */
       'testSettingsCheckboxHide': function () {
         return this.remote
-          .get('http://localhost:5601')
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             return settingsPage
               .getTimeBasedEventsCheckbox()
@@ -152,7 +141,9 @@ define(function (require) {
       'testCreateRemoveIndexPattern': function () {
         var self = this.remote;
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             // select a time field and then Create button
             return settingsPage
@@ -167,7 +158,7 @@ define(function (require) {
             return settingsPage
               .getIndexPageHeading()
               .then(function (getIndexPageHeading) {
-                headerPage.log(getIndexPageHeading.getVisibleText());
+                common.log(getIndexPageHeading.getVisibleText());
               })
               .then(function () {
                 // delete the index pattern
@@ -175,7 +166,7 @@ define(function (require) {
                   .clickDeletePattern();
               })
               .then(function () {
-                return tryForTime(3000, function () {
+                return common.tryForTime(3000, function () {
                   return self
                     .getAlertText();
                 });
@@ -189,7 +180,7 @@ define(function (require) {
                 return self
                   .getCurrentUrl()
                   .then(function (currentUrl) {
-                    headerPage.log('currentUrl = ' + currentUrl);
+                    common.log('currentUrl = ' + currentUrl);
                   });
               })
               // pollUntil we find the Create button
@@ -205,7 +196,7 @@ define(function (require) {
                 return self
                   .getCurrentUrl()
                   .then(function (currentUrl) {
-                    headerPage.log('currentUrl = ' + currentUrl);
+                    common.log('currentUrl = ' + currentUrl);
                   });
               });
           });
@@ -214,7 +205,9 @@ define(function (require) {
       'testIndexPatternResultsHeader': function () {
         var self = this.remote;
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             // select a time field and then Create button
             return settingsPage
@@ -240,12 +233,12 @@ define(function (require) {
                 return settingsPage
                   .getTableHeader()
                   .then(function (header) {
-                    headerPage.log('header.length = ' + header.length); // 6 name   type  format  analyzed  indexed   controls
+                    common.log('header.length = ' + header.length); // 6 name   type  format  analyzed  indexed   controls
                     expect(header.length).to.be(6);
                     return header[0]
                       .getVisibleText()
                       .then(function (text) {
-                        headerPage.log('header[0] = ' + text); // name
+                        common.log('header[0] = ' + text); // name
                         expect(text).to.be('name');
                         return header;
                       });
@@ -254,7 +247,7 @@ define(function (require) {
                     return header[1]
                       .getVisibleText()
                       .then(function (text) {
-                        headerPage.log('header[1] = ' + text);
+                        common.log('header[1] = ' + text);
                         expect(text).to.be('type');
                         return header;
                       });
@@ -263,7 +256,7 @@ define(function (require) {
                     return header[2]
                       .getVisibleText()
                       .then(function (text) {
-                        headerPage.log('header[2] = ' + text);
+                        common.log('header[2] = ' + text);
                         expect(text).to.be('format');
                         return header;
                       });
@@ -272,7 +265,7 @@ define(function (require) {
                     return header[3]
                       .getVisibleText()
                       .then(function (text) {
-                        headerPage.log('header[3] = ' + text);
+                        common.log('header[3] = ' + text);
                         expect(text).to.be('analyzed');
                         return header;
                       });
@@ -281,7 +274,7 @@ define(function (require) {
                     return header[4]
                       .getVisibleText()
                       .then(function (text) {
-                        headerPage.log('header[4] = ' + text);
+                        common.log('header[4] = ' + text);
                         expect(text).to.be('indexed');
                         return header;
                       });
@@ -290,7 +283,7 @@ define(function (require) {
                     return header[5]
                       .getVisibleText()
                       .then(function (text) {
-                        headerPage.log('header[5] = ' + text);
+                        common.log('header[5] = ' + text);
                         expect(text).to.be('controls');
                         return header;
                       });
@@ -301,7 +294,7 @@ define(function (require) {
                       .clickDeletePattern();
                   })
                   .then(function () {
-                    return tryForTime(3000, function () {
+                    return common.tryForTime(3000, function () {
                       return self
                         .getAlertText();
                     });
@@ -310,7 +303,7 @@ define(function (require) {
                     return self
                       .getAlertText()
                       .then(function (alertText) {
-                        headerPage.log('alertText = ' + alertText);
+                        common.log('alertText = ' + alertText);
                         expect(alertText).to.be(expectedAlertText);
                       });
                   })
@@ -327,7 +320,9 @@ define(function (require) {
       'testIndexPatternResultsSort': function () {
         var self = this.remote;
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             // select a time field and then Create button
             return settingsPage
@@ -364,7 +359,7 @@ define(function (require) {
                 return row
                   .getVisibleText()
                   .then(function (rowText) {
-                    //headerPage.log('After name-sort first row first column = ' + rowText);
+                    //common.log('After name-sort first row first column = ' + rowText);
                     expect(rowText).to.be('@message');
                   });
               });
@@ -382,7 +377,7 @@ define(function (require) {
                 return row
                   .getVisibleText()
                   .then(function (rowText) {
-                    //headerPage.log('After name-sort first row first column = ' + rowText);
+                    //common.log('After name-sort first row first column = ' + rowText);
                     expect(rowText).to.be('xss.raw');
                   });
               });
@@ -400,7 +395,7 @@ define(function (require) {
                 return row
                   .getVisibleText()
                   .then(function (rowText) {
-                    //headerPage.log('After type-sort first row first column = ' + rowText);
+                    //common.log('After type-sort first row first column = ' + rowText);
                     expect(rowText).to.be('_source');
                   });
               });
@@ -418,7 +413,7 @@ define(function (require) {
                 return row
                   .getVisibleText()
                   .then(function (rowText) {
-                    headerPage.log('After type-sort first row first column = ' + rowText);
+                    common.log('After type-sort first row first column = ' + rowText);
                     expect(rowText).to.be('string');
                   });
               });
@@ -433,7 +428,7 @@ define(function (require) {
             return settingsPage
               .getFieldsTabCount()
               .then(function (tabCount) {
-                headerPage.log('fields item count = ' + tabCount); // 85
+                common.log('fields item count = ' + tabCount); // 85
                 expect(tabCount).to.be('85');
               });
           })
@@ -451,7 +446,7 @@ define(function (require) {
             return settingsPage
               .getPageFieldCount()
               .then(function (pageCount) {
-                headerPage.log('Page 1 count = ' + pageCount.length);
+                common.log('Page 1 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(25);
               });
           })
@@ -464,7 +459,7 @@ define(function (require) {
             return settingsPage
               .getPageFieldCount()
               .then(function (pageCount) {
-                headerPage.log('Page 2 count = ' + pageCount.length);
+                common.log('Page 2 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(25);
               });
           })
@@ -477,7 +472,7 @@ define(function (require) {
             return settingsPage
               .getPageFieldCount()
               .then(function (pageCount) {
-                headerPage.log('Page 3 count = ' + pageCount.length);
+                common.log('Page 3 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(25);
               });
           })
@@ -490,7 +485,7 @@ define(function (require) {
             return settingsPage
               .getPageFieldCount()
               .then(function (pageCount) {
-                headerPage.log('Page 4 count = ' + pageCount.length);
+                common.log('Page 4 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(10);
               });
           })
@@ -500,7 +495,7 @@ define(function (require) {
               .clickDeletePattern();
           })
           .then(function () {
-            return tryForTime(3000, function () {
+            return common.tryForTime(3000, function () {
               return self
                 .getAlertText();
             });
@@ -509,7 +504,7 @@ define(function (require) {
             return self
               .getAlertText()
               .then(function (alertText) {
-                headerPage.log('alertText = ' + alertText);
+                common.log('alertText = ' + alertText);
                 expect(alertText).to.be(expectedAlertText);
               });
           })
@@ -523,7 +518,9 @@ define(function (require) {
       'testIndexPatternPopularity': function () {
         var self = this.remote;
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
           .then(function () {
             // select a time field and then Create button
             return settingsPage
@@ -564,7 +561,7 @@ define(function (require) {
             return settingsPage
               .getPopularity()
               .then(function (popularity) {
-                headerPage.log('popularity = ' + popularity);
+                common.log('popularity = ' + popularity);
                 expect(popularity).to.be('1');
               });
           })
@@ -587,7 +584,7 @@ define(function (require) {
             return settingsPage
               .getPopularity()
               .then(function (popularity) {
-                headerPage.log('popularity = ' + popularity);
+                common.log('popularity = ' + popularity);
                 expect(popularity).to.be('0');
               });
           })
@@ -615,7 +612,7 @@ define(function (require) {
             return settingsPage
               .getPopularity()
               .then(function (popularity) {
-                headerPage.log('popularity = ' + popularity);
+                common.log('popularity = ' + popularity);
                 expect(popularity).to.be('1');
               });
           })
@@ -636,7 +633,7 @@ define(function (require) {
               .clickDeletePattern();
           })
           .then(function () {
-            return tryForTime(3000, function () {
+            return common.tryForTime(3000, function () {
               return self
                 .getAlertText();
             });
@@ -645,7 +642,7 @@ define(function (require) {
             return self
               .getAlertText()
               .then(function (alertText) {
-                headerPage.log('alertText = ' + alertText);
+                common.log('alertText = ' + alertText);
                 expect(alertText).to.be(expectedAlertText);
               });
           })
