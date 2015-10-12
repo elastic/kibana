@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, indexPatterns) {
+  return function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
     var angular = require('angular');
     var errors = require('ui/errors');
     var _ = require('lodash');
@@ -252,12 +252,12 @@ define(function (require) {
           if (_.get(err, 'origError.status') === 409) {
             var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
-            if (window.confirm(confirmMessage)) { // eslint-disable-line no-alert
-              return docSource.doIndex(source).then(finish);
-            }
-
-            // if the user doesn't overwrite record, just swallow the error
-            return;
+            return safeConfirm(confirmMessage).then(
+              function () {
+                return docSource.doIndex(source).then(finish);
+              },
+              _.noop // if the user doesn't overwrite record, just swallow the error
+            );
           }
           return Promise.reject(err);
         });
