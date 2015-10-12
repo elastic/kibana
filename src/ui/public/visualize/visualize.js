@@ -46,6 +46,24 @@ define(function (require) {
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
+        $scope.showNoResultsMessage = function (scope) {
+          var requiresSearch = _.get(scope, 'vis.type.requiresSearch');
+          var hasZeroHits = _.get(scope, 'esResp.hits.total') === 0;
+          if (requiresSearch && hasZeroHits) {
+            // check for any visType that can visualize zero hits
+            return _.get(scope, 'vis.type.name') !== 'metric';
+          }
+          return true;
+        };
+
+        $scope.hasResults = function (scope) {
+          var requiresSearch = _.get(scope, 'vis.type.requiresSearch');
+          var hasZeroHits = _.get(scope, 'esResp.hits.total') === 0;
+          var canBeZero = _.get(scope, 'vis.type.name') === 'metric';
+
+          return requiresSearch && (hasZeroHits || canBeZero);
+        };
+
         var applyClassNames = function () {
           var $spyEl = getSpyEl();
           var $visEl = getVisEl();
