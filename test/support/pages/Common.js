@@ -41,9 +41,11 @@ define(function (require) {
       return Promise.try(attempt);
     },
 
+
     log: function log(logString) {
       console.log(Date.now() + ' : ' + logString);
     },
+
 
     sleep: function sleep(sleepMilliseconds) {
       var self = this;
@@ -51,13 +53,8 @@ define(function (require) {
       return this.remote
         .setFindTimeout(sleepMilliseconds)
         .findByCssSelector('youWillNeverFindThis')
-        .then(function () {
-          self.log('Nobody should ever see this');
-          return;
-        })
-        .catch(function () {
+        .catch(function (reason) {
           self.log('... sleep(' + sleepMilliseconds + ') end');
-          return;
         });
 
     }
