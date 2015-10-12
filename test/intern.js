@@ -19,7 +19,7 @@ define({
   // environment automatically
   capabilities: {
     'selenium-version': '2.45.0',
-    'idle-timeout': 30
+    'idle-timeout': 60
 
     //'browserstack.selenium_version': '2.45.0'
   },
@@ -39,13 +39,13 @@ define({
     // }
     // ,
 
-    {
-      browserName: 'chrome'
-    }
-    // ,
     // {
-    //   browserName: 'firefox'
+    //   browserName: 'chrome'
     // }
+    // ,
+    {
+      browserName: 'firefox'
+    }
   ],
 
   // Maximum number of simultaneous integration tests that should be executed on the remote WebDriver service
@@ -111,10 +111,10 @@ define({
   suites: [ /* 'tests/unit/hello'  'myPackage/tests/foo', 'myPackage/tests/bar' */ ],
 
   // Functional test suite(s) to execute against each browser once non-functional tests are completed
-  // functionalSuites: ['test/functional/testSettings', 'test/functional/testDiscover', 'test/functional/testVisualize'],
+  functionalSuites: ['test/functional/testSettings', 'test/functional/testDiscover', 'test/functional/testVisualize'],
   // functionalSuites: ['test/functional/testSettings' /* 'myPackage/tests/functional' */ ],
   // functionalSuites: ['test/functional/testDiscover' /* 'myPackage/tests/functional' */ ],
-  functionalSuites: ['test/functional/testVisualize' /* 'myPackage/tests/functional' */ ],
+  // functionalSuites: ['test/functional/testVisualize' /* 'myPackage/tests/functional' */ ],
 
   // A regular expression matching URLs to files that should not be included in code coverage analysis
   // excludeInstrumentation: /^(?:tests|node_modules)\//

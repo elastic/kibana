@@ -115,6 +115,7 @@ define(function (require) {
 
       'testSavingQuery': function () {
         var remote = this.remote;
+        this.timeout = 80000;
 
         return this.remote
           .get(url.format(_.assign(config.kibana, {

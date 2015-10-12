@@ -260,6 +260,15 @@ define(function (require) {
             .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
             .then(function (textField) {
               return textField
+                .clearValue();
+            });
+        })
+        .then(function () {
+          return self
+            .setFindTimeout(defaultTimeout)
+            .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
+            .then(function (textField1) {
+              return textField1
                 .type(newValue);
             });
         });
@@ -489,57 +498,78 @@ define(function (require) {
         });
     },
 
-    getXAxisLabels: function getXAxisLabels() { // doesn't split on Firefox
-      return this.remote
-        .setFindTimeout(defaultTimeout * 2)
-        .findByCssSelector('div.x-axis-div')
-        .then(function (xAxis) {
-          return xAxis
-            .getVisibleText()
-            .then(function (xAxisText) {
-              return xAxisText;
-            });
-        });
-    },
-
-
-    // getXAxisLabels: function getXAxisLabels() {
-    //   //var types = [];
+    // getXAxisLabels2: function getXAxisLabels() { // doesn't split on Firefox
     //   return this.remote
-    //     .setFindTimeout(defaultTimeout * 5)
-    //     .findAllByCssSelector('.x > g')
-    //     .then(function (chartTypes) {
-    //       function getChartType(chart) {
-    //         return chart
-    //           .getVisibleText()
-    //           .then(function (theText) {
-    //             common.log('theText = ' + theText);
-    //             return theText;
-    //           });
-    //       }
-    //       var getChartTypesPromises = chartTypes.map(getChartType);
-    //       return Promise.all(getChartTypesPromises);
-    //     })
-    //     .then(function (texts) {
-    //       common.log('returning types array here? ' + texts);
-    //       return texts;
+    //     .setFindTimeout(defaultTimeout * 2)
+    //     .findByCssSelector('div.x-axis-div')
+    //     .then(function (xAxis) {
+    //       return xAxis
+    //         .getVisibleText()
+    //         .then(function (xAxisText) {
+    //           return xAxisText;
+    //         });
     //     });
     // },
 
 
-    getYAxisLabels: function getYAxisLabels() {
+
+    getXAxisLabels: function getXAxisLabels() {
       return this.remote
-        .setFindTimeout(defaultTimeout * 2)
-        .findByCssSelector('div.y-axis-div')
-        .then(function (yAxis) {
-          return yAxis
-            .getVisibleText()
-            .then(function (yAxisText) {
-              //common.log('yAxisText here = ' + yAxisText);
-              return yAxisText;
-            });
+        .setFindTimeout(defaultTimeout)
+        .findAllByCssSelector('.x > g')
+        .then(function (chartTypes) {
+          function getChartType(chart) {
+            return chart
+              .getVisibleText()
+              .then(function (theText) {
+                return theText;
+              });
+          }
+          var getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then(function (texts) {
+          // common.log('returning types array ' + texts + ' array length =' + texts.length);
+          return texts;
         });
     },
+
+
+    // getYAxisLabels2: function getYAxisLabels() {
+    //   return this.remote
+    //     .setFindTimeout(defaultTimeout * 2)
+    //     .findByCssSelector('div.y-axis-div')
+    //     .then(function (yAxis) {
+    //       return yAxis
+    //         .getVisibleText()
+    //         .then(function (yAxisText) {
+    //           //common.log('yAxisText here = ' + yAxisText);
+    //           return yAxisText;
+    //         });
+    //     });
+    // },
+
+    getYAxisLabels: function getYAxisLabels() {
+      return this.remote
+        .setFindTimeout(defaultTimeout)
+        .findAllByCssSelector('.y > g')
+        .then(function (chartTypes) {
+          function getChartType(chart) {
+            return chart
+              .getVisibleText()
+              .then(function (theText) {
+                return theText;
+              });
+          }
+          var getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then(function (texts) {
+          // common.log('returning types array ' + texts + ' array length =' + texts.length);
+          return texts;
+        });
+    },
+
 
     /*
      ** This method gets the chart data and scales it based on chart height and label.
