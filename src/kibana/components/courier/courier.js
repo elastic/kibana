@@ -4,6 +4,7 @@ define(function (require) {
 
   require('services/es');
   require('services/promises');
+  require('components/safe_confirm/safe_confirm');
   require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
