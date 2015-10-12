@@ -1,4 +1,6 @@
 define(function () {
+  var {FieldNotFoundInCache} = require('ui/errors');
+
   return function mapScriptProvider(Promise, courier) {
     return function (filter) {
       var key;
@@ -10,6 +12,7 @@ define(function () {
         .get(filter.meta.index).then(function (indexPattern) {
           key = filter.meta.field;
           field = indexPattern.fields.byName[key];
+          if (!field) return Promise.reject(new FieldNotFoundInCache(key));
 
           if (filter.meta.formattedValue) {
             value = filter.meta.formattedValue;

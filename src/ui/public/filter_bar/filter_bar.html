@@ -32,7 +32,34 @@
       <a class="action filter-remove" ng-click="removeFilter(filter)">
         <i class="fa fa-fw fa-trash"></i>
       </a>
+      <a class="action filter-edit" ng-click="startEditingFilter(filter)">
+        <i class="fa fa-fw fa-edit"></i>
+      </a>
     </div>
+  </div>
+  <div class="filter-edit-container" ng-if="editingFilter">
+    <div class="bs-callout bs-callout-warning">
+      <h4>Proceed with caution</h4>
+      <p>Modifying filters is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse.</p>
+    </div>
+    <div class="form-group hintbox" ng-if="editingFilter.error">
+      <h4 class="hintbox-heading">
+        <i class="fa fa-danger text-danger"></i> Filter error
+      </h4>
+      <p>
+        An error occured while trying to use this filter configuration.
+      </p>
+      <pre>{{ editingFilter.error.message }}</pre>
+    </div>
+
+    <div
+      ui-ace="{
+        mode: 'json',
+        onLoad: aceLoaded
+      }"
+      ng-model="editingFilter.model"></div>
+    <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
+    <button class="btn btn-success" ng-click="editDone()">Save filter</button>
   </div>
   <div class="filter-link">
     <div class="filter-description small">
