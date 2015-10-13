@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Boom = require('boom');
+const getBasicAuthRealm = require('./get_basic_auth_realm');
+
 module.exports = (client) => {
   return (req, endpoint, params = {}) => {
     if (req.headers.authorization) {
@@ -11,7 +13,10 @@ module.exports = (client) => {
     return api.call(client, params)
       .catch((err) => {
         if (err.status === 401) {
-          const options = { realm: 'Authorization Required' };
+          // TODO: The err.message is temporary until we have support for getting headers in the client.
+          // Once we have that, we should be able to pass the contents of the WWW-Authenticate head to getRealm
+          const realm = getBasicAuthRealm(err.message) || 'Authorization Required';
+          const options = { realm: realm };
           return Promise.reject(Boom.unauthorized('Unauthorized', 'Basic', options));
         }
         return Promise.reject(err);
