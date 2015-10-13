@@ -845,7 +845,7 @@ define(function (require) {
           .then(function toastMessage(messages) {
             //common.log('here');
             if (messages.length > 0) {
-              throw new Error('waiting for messages = 0  ');
+              throw new Error('waiting for toast message to clear');
             } else {
               //common.log('now messages = 0 "' + messages + '"');
               return messages;

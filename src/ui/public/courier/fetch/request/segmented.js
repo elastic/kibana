@@ -138,7 +138,7 @@ define(function (require) {
         case 'desc':
           return (this._direction = dir);
         default:
-          throw new TypeError('unkown sort direction "' + dir + '"');
+          throw new TypeError('unknown sort direction "' + dir + '"');
       }
     };
 

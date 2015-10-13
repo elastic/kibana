@@ -4,7 +4,7 @@ define(function (require) {
 
   var registerSuite = require('intern!object');
   var expect = require('intern/dojo/node!expect.js');
-  //var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
+  var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
   var fs = require('intern/dojo/node!fs');
   var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
   var Common = require('../support/pages/Common');
@@ -20,6 +20,7 @@ define(function (require) {
     var common;
     var settingsPage;
     var headerPage;
+    var scenarioManager;
     //var url = 'http://localhost:5601';
 
     var expectedAlertText = 'Are you sure you want to remove this index pattern?';
@@ -32,13 +33,39 @@ define(function (require) {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         headerPage = new HeaderPage(this.remote);
+        scenarioManager = new ScenarioManager(url.format(config.elasticsearch));
+
+      },
+
+      beforeEach: function () {
+        // start each test with an empty kibana index
+        return common
+          .sleep(1000)
+          .then(function () {
+            return scenarioManager
+              .unload('emptyKibana');
+          })
+          .then(function () {
+            return common
+              .sleep(2000);
+          })
+          .then(function () {
+            return scenarioManager
+              .load('emptyKibana');
+          })
+          .then(function () {
+            return common
+              .sleep(2000);
+          });
       },
 
       /*
        ** Test the default state of checboxes and the 2 text input fields
        */
       'testSettingsInitialState': function () {
-        return this.remote
+        var self = this;
+
+        return self.remote
           .get(url.format(_.assign(config.kibana, {
             pathname: ''
           })))
@@ -378,7 +405,7 @@ define(function (require) {
                   .getVisibleText()
                   .then(function (rowText) {
                     //common.log('After name-sort first row first column = ' + rowText);
-                    expect(rowText).to.be('xss.raw');
+                    expect(rowText).to.be('xss');
                   });
               });
           })
@@ -428,8 +455,8 @@ define(function (require) {
             return settingsPage
               .getFieldsTabCount()
               .then(function (tabCount) {
-                common.log('fields item count = ' + tabCount); // 85
-                expect(tabCount).to.be('85');
+                common.log('fields item count = ' + tabCount); // 51
+                expect(tabCount).to.be('51');
               });
           })
           // verify the page size is 25
@@ -473,20 +500,7 @@ define(function (require) {
               .getPageFieldCount()
               .then(function (pageCount) {
                 common.log('Page 3 count = ' + pageCount.length);
-                expect(pageCount.length).to.be(25);
-              });
-          })
-          //page 2 should also have 25 items
-          .then(function goPage2() {
-            return settingsPage
-              .goToPage(4);
-          })
-          .then(function getPageFieldCount() {
-            return settingsPage
-              .getPageFieldCount()
-              .then(function (pageCount) {
-                common.log('Page 4 count = ' + pageCount.length);
-                expect(pageCount.length).to.be(10);
+                expect(pageCount.length).to.be(1);
               });
           })
           .then(function () {
@@ -519,8 +533,12 @@ define(function (require) {
         var self = this.remote;
         return this.remote
           .get(url.format(_.assign(config.kibana, {
-            pathname: ''
+            pathname: '/'
           })))
+          // .then(function () {
+          //   return headerPage
+          //     .clickSettings();
+          // })
           .then(function () {
             // select a time field and then Create button
             return settingsPage
@@ -551,7 +569,7 @@ define(function (require) {
           // increase Popularity
           .then(function openControlsByName() {
             return settingsPage
-              .openControlsByName('geo.coordinates');
+              .openControlsByName('geo.coordinates.lon');
           })
           .then(function increasePopularity() {
             return settingsPage
@@ -577,7 +595,7 @@ define(function (require) {
           })
           .then(function openControlsByName() {
             return settingsPage
-              .openControlsByName('geo.coordinates');
+              .openControlsByName('geo.coordinates.lon');
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
@@ -605,7 +623,7 @@ define(function (require) {
           // open it again to see that it saved
           .then(function openControlsByName() {
             return settingsPage
-              .openControlsByName('geo.coordinates');
+              .openControlsByName('geo.coordinates.lon');
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {

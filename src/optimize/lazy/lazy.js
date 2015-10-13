@@ -29,7 +29,7 @@ module.exports = async (kbnServer, server, config) => {
       break;
 
     default:
-      throw new Error(`unkown kbnWorkerType "${process.env.kbnWorkerType}"`);
+      throw new Error(`unknown kbnWorkerType "${process.env.kbnWorkerType}"`);
   }
 
 };

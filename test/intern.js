@@ -1,52 +1,11 @@
-// Learn more about configuring this file at <https://theintern.github.io/intern/#configuration>.
-// These default settings work OK for most people. The options that *must* be changed below are the
-// packages, suites, excludeInstrumentation, and (if you want functional tests) functionalSuites
 define({
-
-  // The port on which the instrumenting proxy will listen
-  proxyPort: 9000,
-
-  // A fully qualified URL to the Intern proxy
-  proxyUrl: 'http://localhost:9000/',
-
-
-  // Default desired capabilities for all environments. Individual capabilities can be overridden by any of the
-  // specified browser environments in the `environments` array below as well. See
-  // <https://theintern.github.io/intern/#option-capabilities> for links to the different capabilities options for
-  // different services.
-  //
-  // Note that the `build` capability will be filled in with the current commit ID or build tag from the CI
-  // environment automatically
   capabilities: {
-    'selenium-version': '2.45.0',
-    'idle-timeout': 60
-
-    //'browserstack.selenium_version': '2.45.0'
+    'selenium-version': '2.47.1',
+    'idle-timeout': 30
   },
-
-  // Browsers to run integration testing against. Note that version numbers must be strings if used with Sauce
-  // OnDemand. Options that will be permutated are browserName, version, platform, and platformVersion; any other
-  // capabilities options specified for an environment will be copied as-is
-  environments: [
-    /*{ browserName: 'internet explorer', version: '11', platform: 'WIN8' },
-    { browserName: 'internet explorer', version: '10', platform: 'WIN8' },
-    { browserName: 'internet explorer', version: '9', platform: 'WINDOWS' },
-    { browserName: 'firefox', version: '37', platform: [ 'WINDOWS', 'MAC' ] },
-    { browserName: 'chrome', version: '39', platform: [ 'WINDOWS', 'MAC' ] },
-    { browserName: 'safari', version: '8', platform: 'MAC' }  */
-    // {
-    //   browserName: 'internet explorer'
-    // }
-    // ,
-
-    // {
-    //   browserName: 'chrome'
-    // }
-    // ,
-    {
-      browserName: 'firefox'
-    }
-  ],
+  environments: [{
+    browserName: 'firefox' // chrome
+  }],
 
   // Maximum number of simultaneous integration tests that should be executed on the remote WebDriver service
   maxConcurrency: 1,
@@ -82,7 +41,7 @@ define({
   elasticsearch: {
     protocol: 'http',
     hostname: 'localhost',
-    port: 9220
+    port: 9200
   },
 
   // Configuration options for the module loader; any AMD configuration options supported by the AMD loader in use
@@ -111,12 +70,13 @@ define({
   suites: [ /* 'tests/unit/hello'  'myPackage/tests/foo', 'myPackage/tests/bar' */ ],
 
   // Functional test suite(s) to execute against each browser once non-functional tests are completed
-  functionalSuites: ['test/functional/testSettings', 'test/functional/testDiscover', 'test/functional/testVisualize'],
+  // functionalSuites: ['test/functional/testSettings', 'test/functional/testDiscover', 'test/functional/testVisualize'],
   // functionalSuites: ['test/functional/testSettings' /* 'myPackage/tests/functional' */ ],
-  // functionalSuites: ['test/functional/testDiscover' /* 'myPackage/tests/functional' */ ],
+  functionalSuites: ['test/functional/testDiscover' /* 'myPackage/tests/functional' */ ],
   // functionalSuites: ['test/functional/testVisualize' /* 'myPackage/tests/functional' */ ],
 
   // A regular expression matching URLs to files that should not be included in code coverage analysis
   // excludeInstrumentation: /^(?:tests|node_modules)\//
   excludeInstrumentation: /^(node_modules)\//
+    // excludeInstrumentation: /(fixtures|node_modules)\//
 });

@@ -12,15 +12,15 @@ define(function (require) {
 
   var registerSuite = require('intern!object');
   var expect = require('intern/dojo/node!expect.js');
-  //var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
+  var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
   var fs = require('intern/dojo/node!fs');
-  var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+  //var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
   var Common = require('../support/pages/Common');
   var SettingsPage = require('../support/pages/SettingsPage');
   var HeaderPage = require('../support/pages/HeaderPage');
   var DiscoverPage = require('../support/pages/DiscoverPage');
   var VisualizePage = require('../support/pages/VisualizePage');
-  var Promise = require('bluebird');
+  // var Promise = require('bluebird');
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
   var _ = require('intern/dojo/node!lodash');
@@ -31,6 +31,7 @@ define(function (require) {
     var headerPage;
     var visualizePage;
     var discoverPage;
+    var scenarioManager;
     var fromTime = '2015-09-20 06:31:44.000';
     var toTime = '2015-09-21 18:31:44.000';
     //var url = 'http://localhost:5601';
@@ -39,19 +40,46 @@ define(function (require) {
 
     return {
       setup: function () {
+        var self = this;
         // curl -XDELETE http://localhost:9200/.kibana
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         headerPage = new HeaderPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
+        scenarioManager = new ScenarioManager(url.format(config.elasticsearch));
 
         common.log('testVisualize Setup');
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .setWindowSize(1011, 800)
+
+        return common
+          .sleep(1000)
+          .then(function () {
+            return scenarioManager
+              .unload('emptyKibana');
+          })
+          .then(function () {
+            return common
+              .sleep(2000);
+          })
+          .then(function () {
+            return scenarioManager
+              .load('emptyKibana');
+          })
+          .then(function () {
+            return scenarioManager
+              .loadIfEmpty('logstashFunctional');
+          })
+          .then(function () {
+            return common
+              .sleep(2000);
+          })
+          .then(function () {
+            return self.remote
+              .get(url.format(_.assign(config.kibana, {
+                pathname: ''
+              })))
+              .setWindowSize(1011, 800);
+          })
           // Here we can handle the situation if a default index exists or not
           // If it do exist, we'll be on the Discover tab when Kibana opens.
 
@@ -59,6 +87,7 @@ define(function (require) {
           return settingsPage
             .selectTimeFieldOption('@timestamp')
             .then(function clickCreateButton() {
+              common.log('Found @timestamp on Settings page so we need to create a default index pattern');
               return settingsPage
                 .clickCreateButton()
                 .then(function clickDefaultIndexButton() {
@@ -67,7 +96,7 @@ define(function (require) {
                 });
             })
             .catch(function (reason) {
-              common.log('we already have a default index so skip setting one');
+              common.log('We already have a default index so skip setting one');
               return;
             });
         });
