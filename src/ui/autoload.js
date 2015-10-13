@@ -55,6 +55,7 @@ exports.reload = function () {
     'ui/persisted_log',
     'ui/private',
     'ui/promises',
+    'ui/safe_confirm',
     'ui/state_management/app_state',
     'ui/state_management/global_state',
     'ui/storage',
