@@ -89,7 +89,6 @@
     .sidebar-container {
       .flex-parent(1, 1, auto);
       background-color: @vis-editor-sidebar-bg;
-      border-right-color: @vis-editor-sidebar-border;
 
       form {
         .flex-parent(1, 1, auto);
@@ -332,6 +331,7 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
+    padding-left: @collapser-width;
 
     &.embedded {
       flex-shrink: 1;

@@ -1,11 +1,12 @@
 let Stream = require('stream');
 let moment = require('moment');
 let _ = require('lodash');
-let numeral = require('numeral');
+let numeral = require('@spalger/numeral');
 let ansicolors = require('ansicolors');
 let stringify = require('json-stringify-safe');
 let querystring = require('querystring');
 let inspect = require('util').inspect;
+let applyFiltersToKeys = require('./applyFiltersToKeys');
 
 function serializeError(err) {
   return {
@@ -24,16 +25,23 @@ let levelColor = function (code) {
   return ansicolors.red(code);
 };
 
+
 module.exports = class TransformObjStream extends Stream.Transform {
-  constructor() {
+  constructor(config) {
     super({
       readableObjectMode: false,
       writableObjectMode: true
     });
+    this.config = config;
+  }
+
+  filter(data) {
+    if (!this.config.filter) return data;
+    return applyFiltersToKeys(data, this.config.filter);
   }
 
   _transform(event, enc, next) {
-    var data = this.readEvent(event);
+    var data = this.filter(this.readEvent(event));
     this.push(this.format(data) + '\n');
     next();
   }

@@ -111,6 +111,22 @@ describe('Filter Manager', function () {
     filterManager.add('_exists_', 'myField', '-', 'myIndex');
     checkAddFilters(0, null, 3);
     expect(appState.filters).to.have.length(2);
+
+    var scriptedField = {name: 'scriptedField', scripted: true, script: 1};
+    filterManager.add(scriptedField, 1, '+', 'myIndex');
+    checkAddFilters(1, [{
+      meta: {index: 'myIndex', negate: false, field: 'scriptedField'},
+      script: {
+        script: '(' + scriptedField.script + ') == value',
+        lang: scriptedField.lang,
+        params: {value: 1}
+      }
+    }], 4);
+    expect(appState.filters).to.have.length(3);
+
+    filterManager.add(scriptedField, 1, '-', 'myIndex');
+    checkAddFilters(0, null, 5);
+    expect(appState.filters).to.have.length(3);
   });
 
   it('should enable matching filters being changed', function () {

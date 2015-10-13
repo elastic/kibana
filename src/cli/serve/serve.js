@@ -119,7 +119,7 @@ module.exports = function (program) {
       let { server } = kbnServer;
 
       if (server) server.log(['fatal'], err);
-      else console.error('FATAL', err);
+      console.error('FATAL', err);
 
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit

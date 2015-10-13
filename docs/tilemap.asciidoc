@@ -27,8 +27,7 @@ Coordinates* on a single chart. A multiple chart split must run before any other
 Tile maps use the *Geohash* aggregation as their initial aggregation. Select a field, typically coordinates, from the
 drop-down. The *Precision* slider determines the granularity of the results displayed on the map. See the documentation 
 for the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid] 
-aggregation for details on the area specified by each precision level. As of the 4.1 release, Kibana supports a maximum 
-geohash length of 7.
+aggregation for details on the area specified by each precision level. Kibana supports a maximum geohash length of 7.
 
 NOTE: Higher precisions increase memory usage for the browser displaying Kibana as well as for the underlying 
 Elasticsearch cluster.

@@ -61,7 +61,7 @@ module.exports = Joi.object({
 
     events: Joi.any().default({}),
     dest: Joi.string().default('stdout'),
-
+    filter: Joi.any().default({}),
     json: Joi.boolean()
     .when('dest', {
       is: 'stdout',
