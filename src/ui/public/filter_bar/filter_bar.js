@@ -3,6 +3,7 @@ define(function (require) {
   var module = require('ui/modules').get('kibana');
   var template = require('ui/filter_bar/filter_bar.html');
   var moment = require('moment');
+  var angular = require('angular');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
@@ -28,12 +29,20 @@ define(function (require) {
           'invertFilter',
           'invertAll',
           'removeFilter',
-          'removeAll'
+          'removeAll',
+          'updateFilter'
         ].forEach(function (method) {
           $scope[method] = queryFilter[method];
         });
 
         $scope.state = getAppState();
+
+        $scope.aceLoaded = function (editor) {
+          editor.$blockScrolling = Infinity;
+          var session = editor.getSession();
+          session.setTabSize(2);
+          session.setUseSoftTabs(true);
+        };
 
         $scope.applyFilters = function (filters) {
           // add new filters
@@ -46,6 +55,36 @@ define(function (require) {
           }
         };
 
+        var privateFieldRegexp = /(^\$|meta)/;
+        $scope.startEditingFilter = function (source) {
+          var model = _.cloneDeep(source);
+          var filterType;
+
+          //Hide private properties and figure out what type of filter this is
+          _.each(model, function (value, key) {
+            if (key.match(privateFieldRegexp)) {
+              delete model[key];
+            } else {
+              filterType = key;
+            }
+          });
+
+          $scope.editingFilter = {
+            source,
+            type: filterType,
+            model: angular.toJson(model, true)
+          };
+        };
+
+        $scope.stopEditingFilter = function () {
+          $scope.editingFilter = null;
+        };
+
+        $scope.editDone = function () {
+          $scope.updateFilter($scope.editingFilter);
+          $scope.stopEditingFilter();
+        };
+
         $scope.clearFilterBar = function () {
           $scope.newFilters = [];
           $scope.changeTimeFilter = null;
@@ -53,6 +92,7 @@ define(function (require) {
 
         // update the scope filter list on filter changes
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.stopEditingFilter();
           updateFilters();
         });
 

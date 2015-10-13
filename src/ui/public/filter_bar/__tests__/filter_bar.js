@@ -1,9 +1,9 @@
-
 var angular = require('angular');
 var _ = require('lodash');
 var $ = require('jquery');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
+var sinon = require('sinon');
 
 require('ui/filter_bar');
 var MockState = require('fixtures/mock_state');
@@ -17,6 +17,7 @@ describe('Filter Bar Directive', function () {
   var queryFilter;
   var mapFilter;
   var $el;
+  var $scope;
   // require('testUtils/noDigestPromises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
@@ -59,6 +60,7 @@ describe('Filter Bar Directive', function () {
       Promise.map(filters, mapFilter).then(function (filters) {
         appState.filters = filters;
         $el = $compile('<filter-bar></filter-bar>')($rootScope);
+        $scope = $el.isolateScope();
       });
 
       var off = $rootScope.$on('filterbar:updated', function () {
@@ -82,6 +84,30 @@ describe('Filter Bar Directive', function () {
       expect($(filters[2]).find('span')[1].innerHTML).to.equal('"@timestamp"');
       expect($(filters[3]).find('span')[0].innerHTML).to.equal('missing:');
       expect($(filters[3]).find('span')[1].innerHTML).to.equal('"host"');
+    });
+
+    describe('editing filters', function () {
+      beforeEach(function () {
+        $scope.startEditingFilter(appState.filters[3]);
+        $scope.$digest();
+      });
+
+      it('should be able to edit a filter', function () {
+        expect($el.find('.filter-edit-container').length).to.be(1);
+      });
+
+      it('should be able to stop editing a filter', function () {
+        $scope.stopEditingFilter();
+        $scope.$digest();
+        expect($el.find('.filter-edit-container').length).to.be(0);
+      });
+
+      it('should merge changes after clicking done', function () {
+        sinon.spy($scope, 'updateFilter');
+
+        $scope.editDone();
+        expect($scope.updateFilter.called).to.be(true);
+      });
     });
   });
 });
