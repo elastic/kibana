@@ -39,6 +39,7 @@ ScenarioManager.prototype.load = function (id) {
 
 /**
  * Load a testing scenario if not already loaded
+ * NOTE: The files must be named the same as the index they contain for the check to work.
  * @param {string} id The scenario id to load
  * @return {Promise} A promise that is resolved when elasticsearch has a response
  */
