@@ -17,7 +17,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui', [
     'esvm:ui',
-    'loadFixtures',
     'run:testUIServer',
     'downloadSelenium',
     'run:seleniumServer',
@@ -29,7 +28,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui:server', [
     'esvm:ui',
-    'loadFixtures',
     'run:testUIServer',
     'downloadSelenium',
     'run:devSeleniumServer:keepalive'

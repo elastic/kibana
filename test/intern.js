@@ -13,5 +13,5 @@ define({
     port: 4444
   },
   functionalSuites: ['test/functional/status.js'],
-  excludeInstrumentation: /^(?:tests|node_modules)\//
+  excludeInstrumentation: /(fixtures|node_modules)\//
 });
