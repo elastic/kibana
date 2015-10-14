@@ -218,7 +218,7 @@ define(function () {
 
       // Nothing else matches, so output with a prefix of !!! for debugging purposes
       else {
-        out.push('!!! ' + line);
+        out.push('### ' + line);
         line = '';
       }
     }

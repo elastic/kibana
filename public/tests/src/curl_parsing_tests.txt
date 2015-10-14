@@ -128,4 +128,19 @@ GET /
   "query": {
   }
 }
+====================================
+Curl with some text
+-------------------------------------
+This is what I meant:
 
+curl 'localhost:9200/missing-test/doc/_search?'
+
+This, however, does work:
+curl 'localhost:9200/missing/doc/_search?'
+-------------------
+### This is what I meant:
+
+GET /missing-test/doc/_search?
+
+### This, however, does work:
+GET /missing/doc/_search?
