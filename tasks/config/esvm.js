@@ -36,6 +36,17 @@ module.exports = function (grunt) {
         directory: resolve(directory, 'test'),
         purge: true
       }
+    },
+    ui: {
+      options: {
+        directory: resolve(directory, 'test'),
+        purge: true,
+        config: {
+          http: {
+            port: 9220
+          }
+        }
+      }
     }
   };
 };
