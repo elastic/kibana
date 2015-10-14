@@ -39,8 +39,8 @@ module.exports = function (api) {
     data_autocomplete_rules: {
       template: 'index*',
       warmers: {__scope_link: '_warmer'},
-      mappings: {},
-      settings: {}
+      mappings: {__scope_link: '_put_mapping'},
+      settings: {__scope_link: '_put_settings'}
     }
   });
 };

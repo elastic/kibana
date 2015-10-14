@@ -90,14 +90,13 @@ module.exports = function (api) {
       'cache.query.enable': {
         __one_of: [true, false]
       },
-      __one_of: [true, false]
-    },
-    shadow_replicas: {
-      __one_of: [true, false]
-    },
-    shared_filesystem: {
-      __one_of: [true, false]
-    },
-    data_path: 'path'
+      shadow_replicas: {
+        __one_of: [true, false]
+      },
+      shared_filesystem: {
+        __one_of: [true, false]
+      },
+      data_path: 'path'
+    }
   });
 };
