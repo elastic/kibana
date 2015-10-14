@@ -12,6 +12,16 @@ define({
     host: 'localhost',
     port: 4444
   },
+  kibana: {
+    protocol: 'http',
+    hostname: 'localhost',
+    port: 5620
+  },
+  elasticsearch: {
+    protocol: 'http',
+    hostname: 'localhost',
+    port: 9220
+  },
   functionalSuites: ['test/functional/status.js'],
   excludeInstrumentation: /(fixtures|node_modules)\//
 });
