@@ -19,7 +19,7 @@
 
 'use strict';
 
-let _ = require("../public/webpackShims/vendor/_");
+let _ = require("../public/webpackShims/_");
 let Api = require('./api');
 let parts = [
   require('./es_2_0/aliases'),

@@ -11,9 +11,9 @@ require('ui/chrome')
   }])
   .setRootTemplate(require('./index.html'))
   .setRootController(function () {
-    window.QUnit = require('vendor/qunit-1.10.0');
+    window.QUnit = require('qunit-1.10.0');
 
-    require('vendor/qunit-1.10.0.css');
+    require('qunit-1.10.0.css');
     require('ace');
     /* global QUnit */
     QUnit.config.autostart = false;

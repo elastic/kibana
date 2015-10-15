@@ -15,17 +15,31 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../public/webpackShims/_");
+let SenseEditor = require('./sense_editor/editor');
+let $ = require('jquery');
+let bootstrap = require('bootstrap');
 
-module.exports.resolveApi = function (sense_version, apis, reply) {
-  let result = {};
-  _.each(apis, function (name) {
-    {
-      // for now we ignore sense_version. might add it in the api name later
-      let api = require('./' + name);
-      result[name] = api.asJson();
-    }
-  });
+var $helpPopup = $("#help_popup");
 
-  return reply(result).type("application/json");
-};
+var html = [
+  '<div id="help_example_editor"># index a doc',
+  'PUT index/type/1',
+  '{',
+  '   "body": "here"',
+  '}',
+  '',
+  '# and get it ... ',
+  'GET index/type/1</div>'
+].join('\n');
+
+$helpPopup.on('shown', function () {
+  $(html).appendTo("#help_example_container");
+  var example_editor = new SenseEditor($("#help_example_editor"));
+  example_editor.setReadOnly(true);
+});
+
+$helpPopup.on('hidden', function () {
+  $('#help_example_editor').remove();
+});
+
+module.exports = $helpPopup;

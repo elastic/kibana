@@ -15,17 +15,37 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../public/webpackShims/_");
+let SenseEditor = require('./sense_editor/editor');
+let $ = require('jquery');
+let bootstrap = require('bootstrap');
 
-module.exports.resolveApi = function (sense_version, apis, reply) {
-  let result = {};
-  _.each(apis, function (name) {
-    {
-      // for now we ignore sense_version. might add it in the api name later
-      let api = require('./' + name);
-      result[name] = api.asJson();
-    }
-  });
+let $welcomePopup = $("#welcome_popup");
 
-  return reply(result).type("application/json");
-};
+let $example;
+let html = ```
+  <div id="welcome_example_editor">
+  # index a doc
+  PUT index/type/1
+  {
+     "body": "here"
+  }
+
+  # and get it ...
+  GET index/type/1</div>
+```;
+
+$welcomePopup.modal({show: false});
+$welcomePopup.on('shown', function () {
+  $example = $(html)
+    .appendTo("#welcome_example_container");
+
+  let editor = new SenseEditor($("#welcome_example_editor"));
+  editor.setReadOnly(true);
+});
+
+$welcomePopup.on('hidden', function () {
+  $example.remove();
+  $example = null;
+});
+
+module.exports = $welcomePopup;

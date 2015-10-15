@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../public/webpackShims/vendor/_");
+let _ = require("../public/webpackShims/_");
 
 'use strict';
 

@@ -15,17 +15,28 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../public/webpackShims/_");
 
-module.exports.resolveApi = function (sense_version, apis, reply) {
-  let result = {};
-  _.each(apis, function (name) {
+let ace = require('ace');
+let ace_mode_json = require('ace/mode-json');
+
+var oop = ace.require("ace/lib/oop");
+var JsonHighlightRules = ace.require("ace/mode/json_highlight_rules").JsonHighlightRules;
+
+var OutputJsonHighlightRules = function () {
+
+  // regexp must not have capturing parentheses. Use (?:) instead.
+  // regexps are ordered -> the first match is used
+  this.$rules = new JsonHighlightRules().getRules();
+
+  this.$rules.start.unshift(
     {
-      // for now we ignore sense_version. might add it in the api name later
-      let api = require('./' + name);
-      result[name] = api.asJson();
+      "token": "comment",
+      "regex": "#.*$"
     }
-  });
+  );
 
-  return reply(result).type("application/json");
 };
+
+oop.inherits(OutputJsonHighlightRules, JsonHighlightRules);
+
+module.exports.OutputJsonHighlightRules = OutputJsonHighlightRules;

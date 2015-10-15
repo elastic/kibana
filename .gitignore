@@ -11,7 +11,7 @@
 /agent/.local-execution-hints.log
 .DS_Store
 *.iml
-/kibana/vendor/kibana
+/kibana/kibana
 /node_modules
 /build
 /.aws-config.json

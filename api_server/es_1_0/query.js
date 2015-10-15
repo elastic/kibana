@@ -17,7 +17,7 @@
 
 'use strict';
 
-let _ = require("../../public/webpackShims/vendor/_");
+let _ = require("../../public/webpackShims/_");
 
 
 var SPAN_QUERIES = {

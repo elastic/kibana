@@ -23,10 +23,10 @@ Setting up a development environment
 ```
 git clone https://github.com/elastic/kibana.git  kibana
 cd kibana
-git checkout 327f5898a79564123651f71fe71fb1a17477f977
+git checkout 4.2
 ```
 
-- Finish installation according to https://github.com/elastic/kibana/blob/327f5898a79564123651f71fe71fb1a17477f977/CONTRIBUTING.md#development-environment-setup
+- Finish installation according to https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#development-environment-setup
   - Skip running elasticsearch
   - Do not run `./bin/kibana --dev` just yet.
 

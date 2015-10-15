@@ -18,7 +18,7 @@
 
 'use strict';
 
-let _ = require("../../public/webpackShims/vendor/_");
+let _ = require("../../public/webpackShims/_");
 
 var INDEX_SETTING = {
   __one_of: ['analyzed', 'not_analyzed', 'no']

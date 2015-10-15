@@ -19,7 +19,7 @@
 
 'use strict';
 
-let _ = require("../../public/webpackShims/vendor/_");
+let _ = require("../../public/webpackShims/_");
 
 function addSimpleCat(endpoint, api, params, patterns) {
   var url_params = {"help": "__flag__", "v": "__flag__", "bytes": ["b"]};

@@ -16293,11 +16293,11 @@ var WorkerClient = function(topLevelNamespaces, mod, classname) {
         workerUrl = config.moduleUrl(mod, "worker");
     } else {
         var normalizePath = this.$normalizePath;
-        workerUrl = normalizePath(require.toUrl("ace/worker/worker.js", null, 'vendor/_'));
+        workerUrl = normalizePath(require.toUrl("ace/worker/worker.js", null, '_'));
 
         var tlns = {};
         topLevelNamespaces.forEach(function(ns) {
-            tlns[ns] = normalizePath(require.toUrl(ns, null, 'vendor/_').replace(/(\.js)?(\?.*)?$/, ""));
+            tlns[ns] = normalizePath(require.toUrl(ns, null, '_').replace(/(\.js)?(\?.*)?$/, ""));
         });
     }
 

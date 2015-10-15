@@ -3,6 +3,7 @@ module.exports = function (kibana) {
   let Joi = require('joi');
   let Boom = require('boom');
   let modules = resolve(__dirname, 'public/webpackShims/');
+  let src = resolve(__dirname, 'public/src/');
 
   return new kibana.Plugin({
     id: 'sense',
@@ -81,8 +82,8 @@ module.exports = function (kibana) {
 
       noParse: [
         join(modules, 'ace' + sep),
-        join(modules, 'vendor/moment_src/moment' + sep),
-        resolve(modules, 'sense_editor/mode/worker.js'),
+        join(modules, 'moment_src/moment' + sep),
+        join(src, 'sense_editor/mode/worker.js')
       ]
     }
   })
