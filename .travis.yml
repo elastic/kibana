@@ -1,10 +1,11 @@
 language: node_js
 node_js: '0.12.7'
 install:
-  - npm install -g npm@3.2
   - npm install
 script: ./node_modules/.bin/grunt travis
 sudo: false
+addons:
+  firefox: "40.0"
 cache:
   directories:
   - esvm

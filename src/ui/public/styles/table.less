@@ -1,5 +1,12 @@
 @import "~ui/styles/variables";
 
+.table {
+  // Nesting
+  .table {
+    background-color: @table-nested-bg;
+  }
+}
+
 kbn-table, .kbn-table, tbody[kbn-rows] {
   // sub tables should not have a leading border
   .table .table {
@@ -24,7 +31,8 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     }
 
     dt {
-      background: @gray-lighter;
+      background: @table-dt-bg;
+      color: @table-dt-color;
       padding: @padding-xs-vertical @padding-xs-horizontal;
       margin-right: @padding-xs-horizontal;
       font-family: monospace;
@@ -32,4 +40,22 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     }
   }
 
+}
+
+table {
+  th {
+    i.fa-sort {
+      color: @table-sort-color;
+    }
+
+    i.fa-sort-asc,
+    i.fa-sort-down {
+      color: @table-sort-asc-color;
+    }
+
+    i.fa-sort-desc,
+    i.fa-sort-up {
+      color: @table-sort-desc-color;
+    }
+  }
 }

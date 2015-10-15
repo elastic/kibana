@@ -48,7 +48,6 @@ module.exports = function (grunt) {
         'Nonsense@0.1.2': ['Public-Domain'],
         'pkginfo@0.2.3': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
-        'zeroclipboard@2.2.0': ['MIT'],
       }
     }
   };

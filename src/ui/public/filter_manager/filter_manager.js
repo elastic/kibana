@@ -26,6 +26,10 @@ define(function (require) {
           if (filter.query) {
             return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
           }
+
+          if (filter.script) {
+            return filter.meta.field === fieldName && filter.script.params.value === value;
+          }
         });
 
         if (existing) {

@@ -73,6 +73,16 @@
           <i aria-hidden="true" class="fa fa-plus-circle"></i>
         </button>
       </kbn-tooltip>
+      <kbn-tooltip text="Options" placement="bottom" append-to-body="1">
+        <button
+          aria-label="Options"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('options') }}"
+          ng-class="{active: configTemplate.is('options')}"
+          ng-click="configTemplate.toggle('options');">
+          <i aria-hidden="true" class="fa fa-gear"></i>
+        </button>
+      </kbn-tooltip>
     </div>
   </navbar>
 

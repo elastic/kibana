@@ -1,11 +1,11 @@
 define(function (require) {
   var module = require('ui/modules').get('app/dashboard');
+  var angular = require('angular');
   var _ = require('lodash');
   var moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
-  module.factory('SavedDashboard', function (courier) {
-
+  module.factory('SavedDashboard', function (courier, config) {
     // SavedDashboard constructor. Usually you'd interact with an instance of this.
     // ID is option, without it one will be generated on save.
     _.class(SavedDashboard).inherits(courier.SavedObject);
@@ -25,10 +25,13 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]',
+          optionsJSON: angular.toJson({
+            darkTheme: config.get('dashboard:defaultDarkTheme')
+          }),
           version: 1,
           timeRestore: false,
           timeTo: undefined,
-          timeFrom: undefined
+          timeFrom: undefined,
         },
 
         // if an indexPattern was saved with the searchsource of a SavedDashboard
@@ -46,10 +49,11 @@ define(function (require) {
       hits: 'integer',
       description: 'string',
       panelsJSON: 'string',
+      optionsJSON: 'string',
       version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',
-      timeFrom: 'string'
+      timeFrom: 'string',
     };
 
     SavedDashboard.searchsource = true;

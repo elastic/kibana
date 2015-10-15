@@ -23,7 +23,7 @@ chrome
 .setNavBackground('#222222')
 .setTabDefaults({
   resetWhenActive: true,
-  trackLastPath: true,
+  lastUrlStore: window.sessionStore,
   activeIndicatorColor: '#656a76'
 })
 .setTabs([
@@ -47,10 +47,9 @@ chrome
     title: 'Settings'
   }
 ])
-.setRootController('kibana', function ($scope, courier) {
+.setRootController('kibana', function ($scope, $rootScope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
     courier.start();
   });
 });
-

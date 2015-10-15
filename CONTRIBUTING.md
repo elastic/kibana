@@ -23,12 +23,6 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   nvm install "$(cat .node-version)"
   ```
 
-- Install npm 3.2
-
-  ```sh
-  npm install -g npm@3.2
-  ```
-
 - Install dependencies
 
   ```sh
@@ -44,8 +38,21 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 - Start the development server.
 
   ```sh
-  ./bin/kibana --dev
+  npm start
   ```
+
+#### `config/kibana.dev.yml`
+
+The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
+
+The `config/kibana.dev.yml` file is very commonly used to store some opt-in/**unsafe** optimizer tweaks which can significantly increase build performance. Below is a commonly used `config/kibana.dev.yml` file, but additional options can be found [in #4611](https://github.com/elastic/kibana/pull/4611#issue-99706918).
+
+```yaml
+optimize:
+  sourceMaps: '#cheap-source-map' # options -> http://webpack.github.io/docs/configuration.html#devtool
+  unsafeCache: true
+  lazyPrebuild: false
+```
 
 #### Linting
 
@@ -60,6 +67,7 @@ Here are some hints for getting eslint setup in your favorite editor:
 | IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint |
 | vi | [scrooloose/syntastic](https://github.com/scrooloose/syntastic) |
 
+Another tool we use for enforcing consistent coding style is Editorconfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [Editorconfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
 ### Testing and building
 

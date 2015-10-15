@@ -5,7 +5,7 @@ module.exports = function ({env, bundle}) {
   .join('\n');
 
   let requires = bundle.modules
-  .map(m => `require('${m}');`)
+  .map(m => `require(${JSON.stringify(m)});`)
   .join('\n');
 
   return `
@@ -14,13 +14,15 @@ module.exports = function ({env, bundle}) {
  *
  * This is programatically created and updated, do not modify
  *
- * context: <%= JSON.stringify(env.context) %>
+ * context: ${JSON.stringify(env.context)}
  * includes code from:
 ${pluginSlug}
  *
  */
 
 window.__KBN__ = {
+  version: '1.2.3',
+  buildNum: 1234,
   vars: {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,

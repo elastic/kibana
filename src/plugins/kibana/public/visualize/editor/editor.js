@@ -5,7 +5,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/agg_filter');
 
   require('ui/visualize');
-  require('ui/clipboard');
+  require('ui/collapsible_sidebar');
 
   require('ui/routes')
   .when('/visualize/create', {

@@ -3,13 +3,15 @@
 
 :ref: http://www.elastic.co/guide/en/elasticsearch/reference/current/
 :shield: https://www.elastic.co/guide/en/shield/current
-:k4pull: https://github.com/elastic/kibana/pull/
+:k4issue: https://github.com/elastic/kibana/issues/
 
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
 include::getting-started.asciidoc[]
+
+include::plugins.asciidoc[]
 
 include::access.asciidoc[]
 
@@ -23,4 +25,4 @@ include::settings.asciidoc[]
 
 include::production.asciidoc[]
 
-include::whats-new.asciidoc[]
+include::releasenotes.asciidoc[]

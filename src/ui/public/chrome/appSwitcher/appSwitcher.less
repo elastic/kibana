@@ -1,0 +1,58 @@
+@import (reference) "~ui/styles/variables";
+
+@app-icon-size: 48px;
+@app-icon-padding: 10px;
+
+.app-links {
+  text-align: justify;
+
+  .app-link {
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+    width: @app-icon-size + (@app-icon-padding * 2);
+    margin: 0px 10px;
+    padding: @app-icon-padding;
+    border-radius: @border-radius-base;
+
+    .app-icon {
+      display: block;
+      height: @app-icon-size;
+      width: @app-icon-size;
+      background-position: center;
+      background-size: contain;
+      border-radius: @border-radius-base;
+      background-color: @gray-light;
+      width: 100%;
+
+      &-missing {
+        text-align: center;
+        font-size: 2.7em;
+        font-weight: bold;
+        font-family: @font-family-sans-serif;
+        color: #fff;
+      }
+    }
+
+    .app-title {
+      color: @text-color;
+      font-size: 0.9em;
+      width: 100%;
+      text-align: center;
+      margin-top: 3px;
+    }
+
+    &:hover .app-title {
+      text-decoration: underline;
+    }
+
+    &.active {
+      background: @gray-lighter;
+      .app-title {
+        text-decoration: underline;
+      }
+    }
+
+  }
+
+}
