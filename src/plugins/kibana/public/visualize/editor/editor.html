@@ -134,7 +134,7 @@
       <div class="visualize-info" ng-if="savedVis.id">
         <div class="visualize-info-tab" title="{{::savedVis.vis.type.title}}">
           <i class="fa" aria-label="{{::savedVis.vis.type.title}} Icon" ng-class="savedVis.vis.type.icon"></i>
-          <span bindonce bo-bind="savedVis.title"></span>
+          <span ng-bind="::savedVis.title"></span>
         </div>
       </div>
 

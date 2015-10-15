@@ -1,9 +1,8 @@
 <kbn-notifications list="notifList"></kbn-notifications>
 <div class="content" chrome-context >
   <nav
-    ng-style="{ background: chrome.getNavBackground() }"
-    ng-class="{ show: chrome.getVisible() }"
-    bindonce
+    ng-style="::{ background: chrome.getNavBackground() }"
+    ng-class="::{ show: chrome.getVisible() }"
     class="hide navbar navbar-inverse navbar-static-top">
 
     <!-- Mobile navbar -->
