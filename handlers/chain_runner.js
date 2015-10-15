@@ -132,7 +132,11 @@ function preProcessSheet(sheet) {
       var resolvedDatasource = resolvedDatasources[i];
 
       if (resolvedDatasource.isRejected()) {
-        throwWithCell(query.cell, resolvedDatasource.reason());
+        if (resolvedDatasource.reason().isBoom) {
+          throw resolvedDatasource.reason();
+        } else {
+          throwWithCell(query.cell, resolvedDatasource.reason());
+        }
       }
 
       resolvedDatasource = resolvedDatasource.value();

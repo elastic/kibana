@@ -4,13 +4,12 @@ var buildTarget = require('../../lib/build_target.js');
 var targetSeries;
 
 module.exports = function (setup) {
-  return {
+  var tlConfig = {
     time: {
       from: 'now-12M',
       to: 'now',
       interval: config.default_interval
     },
-    server: setup.server,
     file: config,
     getTargetSeries: function () {
       return _.map(targetSeries, function (bucket) { // eslint-disable-line no-use-before-define
@@ -21,4 +20,7 @@ module.exports = function (setup) {
       targetSeries = buildTarget(this);
     }
   };
+
+  tlConfig = _.extend(tlConfig, setup);
+  return tlConfig;
 };

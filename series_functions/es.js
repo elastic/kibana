@@ -157,10 +157,11 @@ module.exports = new Datasource('es', {
     }
 
     var client = tlConfig.server.plugins.elasticsearch.client;
+    var callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
 
     var body = buildRequest(config, tlConfig);
-    return client.search(body).then(function (resp) {
 
+    return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
 
       var data = _.map(resp.aggregations.series.buckets, function (bucket) {
@@ -190,12 +191,6 @@ module.exports = new Datasource('es', {
           label: config.q
         }]
       };
-    }).catch(function (e) {
-      if (e.message.root_cause) {
-        throw new Error(e.message.root_cause[0].reason);
-      } else {
-        throw e;
-      }
     });
   }
 });
