@@ -8,6 +8,8 @@ describe('scenario manager', function () {
   var manager = new ScenarioManager('http://localhost:9200');
 
   describe('loading and unloading', function () {
+    this.timeout(60000);
+
     var bulk;
     var create;
     var indicesDelete;
