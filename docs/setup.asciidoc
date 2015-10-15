@@ -38,22 +38,10 @@ to use fields in visualizations correctly, as well as to manage the `.kibana` in
 visualizations, and dashboards are stored.
 
 If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide mappings for
-fields that Kibana uses to create visualizations. You also need to manually enable dynamic mapping for the `.kibana`
-index.
+fields that Kibana uses to create visualizations.
 
-The following procedure assumes that the `.kibana` index does not already exist in Elasticsearch and that the
-`index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
-
-. Start Elasticsearch.
-. Create the `.kibana` index with dynamic mapping enabled just for that index:
-+
-[source,shell]
-PUT .kibana
-{
-	"index.mapper.dynamic": true
-}
-+
-. Start Kibana and navigate to the web UI and verify that there are no error messages related to dynamic mapping.
+When Kibana is started and the `.kibana` index does not exist it will be created automatically, with the
+`index.mapper.dynamic` setting set to `true`.
 
 [float]
 [[connect]]
