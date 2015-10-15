@@ -3,12 +3,22 @@ var rootDir = path.join(__dirname, 'scenarios');
 
 module.exports = {
   makelogs: {
-    base: path.join(rootDir, 'makelogs'),
-    mapping: 'mapping',
-    bulk: ['logstash-2015.09.17', 'logstash-2015.09.18']
+    baseDir: path.join(rootDir, 'makelogs'),
+    bulk: [{
+      indexDefinition: 'makelogsIndexDefinition.js',
+      indexName: 'logstash-2015.09.17',
+      source: 'logstash-2015.09.17.js'
+    }, {
+      indexDefinition: 'makelogsIndexDefinition.js',
+      indexName: 'logstash-2015.09.18',
+      source: 'logstash-2015.09.18.js'
+    }]
   },
   emptyKibana: {
-    base: path.join(rootDir, 'emptyKibana'),
-    bulk: ['.kibana']
+    baseDir: path.join(rootDir, 'emptyKibana'),
+    bulk: [{
+      indexName: '.kibana',
+      source: 'kibana.js'
+    }]
   }
 };
