@@ -1,32 +1,37 @@
 define(function (require) {
   return function TimeMarkerFactory() {
     var d3 = require('d3');
+    var _ = require('lodash');
     var dateMath = require('ui/utils/dateMath');
+    var markerRenderer = require('ui/vislib/lib/marker_renderer');
+    var defaultOpts = {
+      'color': '#c80000',
+      'opacity': 0.3,
+      'width': 2
+    };
 
-    function TimeMarker(times, xScale, height) {
+    function TimeMarker(times, xScale, height, layer) {
       if (!(this instanceof TimeMarker)) {
-        return new TimeMarker(times, xScale, height);
+        return new TimeMarker(times, xScale, height, layer);
       }
 
-      var currentTimeArr = [{
-        'time': new Date().getTime(),
-        'class': 'time-marker',
-        'color': '#c80000',
-        'opacity': 0.3,
-        'width': 2
-      }];
+      var opts = defaultOpts;
+      if (layer) {
+        opts = _.assign({}, defaultOpts, { layer: layer });
+      }
+      this.renderer = markerRenderer.configure(opts);
 
       this.xScale = xScale;
       this.height = height;
       this.times = (times.length) ? times.map(function (d) {
-        return {
+        return _.omit({
           'time': dateMath.parse(d.time),
-          'class': d.class || 'time-marker',
-          'color': d.color || '#c80000',
-          'opacity': d.opacity || 0.3,
-          'width': d.width || 2
-        };
-      }) : currentTimeArr;
+          'class': d.class,
+          'color': d.color,
+          'opacity': d.opacity,
+          'width': d.width
+        }, _.isUndefined);
+      }) : [];
     }
 
     TimeMarker.prototype._isTimeBasedChart = function (selection) {
@@ -42,32 +47,7 @@ define(function (require) {
       // return if not time based chart
       if (!self._isTimeBasedChart(selection)) return;
 
-      selection.each(function () {
-        d3.select(this).selectAll('time-marker')
-          .data(self.times)
-          .enter().append('line')
-          .attr('class', function (d) {
-            return d.class;
-          })
-          .attr('pointer-events', 'none')
-          .attr('stroke', function (d) {
-            return d.color;
-          })
-          .attr('stroke-width', function (d) {
-            return d.width;
-          })
-          .attr('stroke-opacity', function (d) {
-            return d.opacity;
-          })
-          .attr('x1', function (d) {
-            return self.xScale(d.time);
-          })
-          .attr('x2', function (d) {
-            return self.xScale(d.time);
-          })
-          .attr('y1', self.height)
-          .attr('y2', self.xScale.range()[0]);
-      });
+      this.renderer.render(selection, this.xScale, this.height, this.times);
     };
 
     return TimeMarker;

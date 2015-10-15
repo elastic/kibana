@@ -1,8 +1,14 @@
 define(function (require) {
-  return function HandlerBaseClass(Private) {
+  require('ui/vislib/lib/marker_synchronizer');
+
+  return function HandlerBaseClass(Private, markerSync) {
     var d3 = require('d3');
+    var $ = require('jquery');
     var _ = require('lodash');
     var errors = require('ui/errors');
+    var markerRenderer = require('ui/vislib/lib/marker_renderer').configure({
+      layer: 'sync-time-marker-layer'
+    });
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
@@ -22,6 +28,8 @@ define(function (require) {
         return new Handler(vis, opts);
       }
 
+      var self = this;
+
       this.data = opts.data || new Data(vis.data, vis._attr);
       this.vis = vis;
       this.el = vis.el;
@@ -38,6 +46,22 @@ define(function (require) {
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
 
+      if (this._attr.syncTimeMarker) {
+        // ignore if not time based chart
+        if (_.get(this.xAxis, 'ordered.date')) {
+          this.markerSyncHandler = function (e) {
+            var margin = self._attr.margin;
+            self.charts.forEach(function (chart) {
+              var height = $(chart.chartEl).height() - margin.top - margin.bottom;
+              var svg = d3.select(chart.chartEl).selectAll('svg > g');
+              markerRenderer.render(svg, self.xAxis.xScale, height, [e.point.x]);
+            });
+          };
+
+          markerSync.on('sync', this.markerSyncHandler);
+        }
+      }
+
       if (this._attr.addLegend) {
         this.legend = opts.legend;
       }
@@ -51,7 +75,7 @@ define(function (require) {
         this.chartTitle,
         this.alerts,
         this.xAxis,
-        this.yAxis,
+        this.yAxis
       ], Boolean);
 
       // memoize so that the same function is returned every time,
@@ -210,6 +234,11 @@ define(function (require) {
       });
 
       this.charts.length = 0;
+
+      if (this.markerSyncHandler) {
+        markerSync.off('sync', this.markerSyncHandler);
+        this.markerSyncHandler = null;
+      }
     };
 
     return Handler;
