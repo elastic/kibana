@@ -47,6 +47,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         });
         $elem.on('keydown',  keyDownHandler);
         $elem.on('keyup',  keyUpHandler);
+        $elem.on('blur', resetSuggestions);
 
         $elem.after($compile(template)($scope));
         $http.get('/timelion/functions').then(function (resp) {
@@ -54,6 +55,13 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
           functionReference.list = resp.data;
         });
       }
+
+      $scope.$on('$destroy', function () {
+        $elem.off('mouseup');
+        $elem.off('keydown');
+        $elem.off('keyup');
+        $elem.off('blur');
+      });
 
       function suggest(val) {
         try {

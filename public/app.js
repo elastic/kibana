@@ -69,7 +69,8 @@ app.controller('timelion', function (
       sheet: savedSheet.timelion_sheet,
       selected: 0,
       columns: savedSheet.timelion_columns,
-      interval: savedSheet.timelion_interval
+      interval: savedSheet.timelion_interval,
+      otherInterval: savedSheet.timelion_other_interval
     };
   }
 
@@ -106,6 +107,11 @@ app.controller('timelion', function (
     }
   });
 
+  $scope.$watch('state.interval', function (newInterval, oldInterval) {
+    if (oldInterval === 'other') return;
+    $scope.state.otherInterval = oldInterval;
+  });
+
   $scope.toggle = function (property) {
     console.log(property);
     $scope[property] = !$scope[property];
@@ -137,7 +143,7 @@ app.controller('timelion', function (
     $http.post('/timelion/sheet', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
-        interval: $scope.state.interval
+        interval: $scope.state.interval === 'other' ? $scope.state.otherInterval : $scope.state.interval
       }),
     })
     // data, status, headers, config
@@ -169,6 +175,7 @@ app.controller('timelion', function (
     savedSheet.id = savedSheet.title;
     savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
+    savedSheet.timelion_other_interval = $scope.state.otherInterval;
     savedSheet.timelion_columns = $scope.state.columns;
     savedSheet.save().then(function (id) {
       $scope.configTemplate.close('save');

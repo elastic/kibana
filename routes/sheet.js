@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var Boom = require('boom');
 
 
 function replyWithError(e, reply) {
@@ -13,7 +14,8 @@ module.exports = function (server) {
     path: '/timelion/sheet',
     handler: function (request, reply) {
       var tlConfig = require('../handlers/lib/tl_config.js')({
-        server: server
+        server: server,
+        request: request
       });
       var chainRunner = require('../handlers/chain_runner.js')(tlConfig);
 
@@ -31,7 +33,14 @@ module.exports = function (server) {
           stats: chainRunner.getStats()
         };
         reply(response);
-      }).catch(function (e) { replyWithError(e, reply); });
+      }).catch(function (e) {
+        // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
+        if (e.isBoom) {
+          reply(e);
+        } else {
+          replyWithError(e, reply);
+        }
+      });
     }
   });
 
