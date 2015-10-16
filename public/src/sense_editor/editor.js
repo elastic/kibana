@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require('_');
+let _ = require('lodash');
 let ace = require('ace');
 let $ = require('jquery');
 let curl = require('../curl');

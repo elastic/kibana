@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../public/webpackShims/_");
+let _ = require("lodash");
 
 module.exports.resolveApi = function (sense_version, apis, reply) {
   let result = {};

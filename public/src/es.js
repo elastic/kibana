@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require('_');
+let _ = require('lodash');
 let $ = require('jquery');
 
 let baseUrl;

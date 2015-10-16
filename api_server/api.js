@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require("../public/webpackShims/_");
+let _ = require("lodash");
 
 'use strict';
 

@@ -22,7 +22,7 @@ let ace = require('ace');
 let utils = require('./utils');
 let autocomplete_engine = require('./autocomplete/engine');
 let url_pattern_matcher = require('./autocomplete/url_pattern_matcher');
-let _ = require('_');
+let _ = require('lodash');
 let $ = require('jquery');
 let ext_lang_tools = require('ace/ext-language_tools');
 

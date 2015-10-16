@@ -18,7 +18,7 @@
 
 'use strict';
 
-let _ = require("../../public/webpackShims/_");
+let _ = require("lodash");
 
 var INDEX_SETTING = {
   __one_of: ['analyzed', 'not_analyzed', 'no']

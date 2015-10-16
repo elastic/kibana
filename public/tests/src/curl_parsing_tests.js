@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require('_');
+let _ = require('lodash');
 let curl = require('../../src/curl');
 let curlTests = require('raw!./curl_parsing_tests.txt');
 

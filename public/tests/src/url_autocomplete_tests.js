@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require('_');
+let _ = require('lodash');
 let url_pattern_matcher = require('../../src/autocomplete/url_pattern_matcher');
 let autocomplete_engine = require('../../src/autocomplete/engine');
 

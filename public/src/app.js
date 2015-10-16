@@ -27,7 +27,7 @@ let output = require('./output');
 let miscInputs = require('./misc_inputs');
 let es = require('./es');
 let utils = require('./utils');
-let _ = require('_');
+let _ = require('lodash');
 let ga = require('analytics');
 
 

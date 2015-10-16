@@ -16,7 +16,7 @@
  */
 'use strict';
 
-let _ = require("../../public/webpackShims/_");
+let _ = require("lodash");
 
 var SPAN_QUERIES = {
   // TODO add one_of for objects

@@ -16,7 +16,7 @@
  */
 
 let $ = require('jquery');
-let _ = require('_');
+let _ = require('lodash');
 let utils = require('./utils');
 let es = require('./es');
 let settings = require('./settings');

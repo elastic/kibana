@@ -16,7 +16,7 @@
  */
 
 let SenseEditor = require('./sense_editor/editor');
-let _ = require('_');
+let _ = require('lodash');
 let $ = require('jquery');
 let moment = require('moment');
 

@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require('_');
+let _ = require('lodash');
 
 module.exports.AutocompleteComponent = function (name) {
   this.name = name;

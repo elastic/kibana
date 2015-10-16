@@ -16,7 +16,7 @@
  */
 
 let $ = require('jquery');
-let _ = require('_');
+let _ = require('lodash');
 let mappings = require('./mappings');
 let es = require('./es');
 let Api = require('./kb/api');

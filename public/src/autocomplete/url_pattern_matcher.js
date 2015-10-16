@@ -15,7 +15,7 @@
  * from Elasticsearch Incorporated.
  */
 
-let _ = require('_');
+let _ = require('lodash');
 let engine = require('./engine');
 
 module.exports.URL_PATH_END_MARKER = "__url_path_end__";
