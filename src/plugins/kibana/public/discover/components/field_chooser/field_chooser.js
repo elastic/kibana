@@ -154,6 +154,8 @@ define(function (require) {
         };
 
         $scope.vizLocation = function (field) {
+          if (!$scope.state) {return '';}
+
           var agg = {};
           var isGeoPoint = field.type === 'geo_point';
           var type = isGeoPoint ? 'tile_map' : 'histogram';
@@ -190,7 +192,7 @@ define(function (require) {
             };
           }
 
-          return $scope.state ? '#/visualize/create?' + $.param(_.assign($location.search(), {
+          return '#/visualize/create?' + $.param(_.assign($location.search(), {
             indexPattern: $scope.state.index,
             type: type,
             _a: rison.encode({
@@ -204,7 +206,7 @@ define(function (require) {
                 ]
               }
             })
-          })) : '';
+          }));
         };
 
         $scope.details = function (field, recompute) {
