@@ -1,7 +1,6 @@
 define(function (require) {
   var app = require('ui/modules').get('apps/discover');
 
-
   require('ui/directives/css_truncate');
   require('ui/directives/field_name');
   require('ui/filters/unique');
@@ -9,7 +8,6 @@ define(function (require) {
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
     var _ = require('lodash');
-    var $ = require('jquery');
     var rison = require('ui/utils/rison');
     var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
     var FieldList = Private(require('ui/index_patterns/_field_list'));
@@ -153,7 +151,7 @@ define(function (require) {
           $scope.indexPattern.popularizeField(fieldName, 1);
         };
 
-        $scope.vizLocation = function (field) {
+        $scope.runAgg = function (field) {
           var agg = {};
           var isGeoPoint = field.type === 'geo_point';
           var type = isGeoPoint ? 'tile_map' : 'histogram';
@@ -190,7 +188,7 @@ define(function (require) {
             };
           }
 
-          return '#/visualize/create?' + $.param(_.assign($location.search(), {
+          $location.path('/visualize/create').search({
             indexPattern: $scope.state.index,
             type: type,
             _a: rison.encode({
@@ -204,7 +202,7 @@ define(function (require) {
                 ]
               }
             })
-          }));
+          });
         };
 
         $scope.details = function (field, recompute) {
