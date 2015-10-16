@@ -4,7 +4,7 @@ var $ = require('jquery');
 require('flot');
 require('flotTime');
 require('flotCrosshair');
-require('flotThreshold');
+require('flotCanvas');
 
 
 var app = require('ui/modules').get('apps/timelion', []);
@@ -21,6 +21,7 @@ app.directive('chart', function ($compile, $rootScope) {
       var legendValueNumbers;
       var debouncedSetLegendNumbers;
       var defaultOptions = {
+        canvas: true,
         xaxis: {
           mode: 'time',
           tickLength: 0,
