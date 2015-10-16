@@ -190,7 +190,7 @@ define(function (require) {
             };
           }
 
-          return '#/visualize/create?' + $.param(_.assign($location.search(), {
+          return $scope.state ? '#/visualize/create?' + $.param(_.assign($location.search(), {
             indexPattern: $scope.state.index,
             type: type,
             _a: rison.encode({
@@ -204,7 +204,7 @@ define(function (require) {
                 ]
               }
             })
-          }));
+          })) : '';
         };
 
         $scope.details = function (field, recompute) {
