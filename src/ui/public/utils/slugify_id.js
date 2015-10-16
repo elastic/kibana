@@ -7,7 +7,8 @@ define(function (require) {
       '/' : '-slash-',
       '\\?' : '-questionmark-',
       '\\&' : '-ampersand-',
-      '=' : '-equal-'
+      '=' : '-equal-',
+      '#' : '-hash-'
     };
     _.each(trans, function (val, key) {
       var regex = new RegExp(key, 'g');

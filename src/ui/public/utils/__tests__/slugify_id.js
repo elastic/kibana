@@ -5,6 +5,7 @@ var expect = require('expect.js');
 describe('slugifyId()', function () {
 
   var fixtures = [
+    ['test#test', 'test-hash-test'],
     ['test/test', 'test-slash-test'],
     ['test?test', 'test-questionmark-test'],
     ['test=test', 'test-equal-test'],
