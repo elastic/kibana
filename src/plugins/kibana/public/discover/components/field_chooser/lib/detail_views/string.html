@@ -35,14 +35,14 @@
         </div>
       </div>
 
-      <a ng-show="field.indexed || field.scripted"
-        ng-href="{{vizLocation(field)}}"
+      <div ng-show="field.indexed || field.scripted"
+        ng-click="runAgg(field)"
         class="sidebar-item-button primary">
           Visualize
           <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
           ( {{warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
           </span>
-      </a>
+      </div>
 
       <div ng-show="!field.indexed && !field.scripted"
           disabled="disabled"
