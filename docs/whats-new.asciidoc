@@ -24,7 +24,7 @@ exported.
 
 * {k4pull}3164[Pull Request 3164]: You can now store a specific time range with a dashboard.
 * {k4pull}3233[Pull Request 3233]: New Y axis scale options, log scale and square root scale.
-* {k4pull}3237[Pull Request 3237]: Dat Histogram bucket aggregation now supports custom intervals, from seconds to 
+* {k4pull}3237[Pull Request 3237]: Date Histogram bucket aggregation now supports custom intervals, from seconds to 
 years.
 * {k4pull}3273[Pull Request 3273]: Line smoothing for for line and area charts.
 * {k4pull}3464[Pull Request 3464]: You can now specify the extent of the Y axis for charts.
