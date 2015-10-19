@@ -29,7 +29,7 @@ Two of the data sets are compressed. Use the following commands to extract the f
 
 [source,shell]
 unzip accounts.zip
-gunzip logstash.jsonl.gz
+gunzip logs.jsonl.gz
 
 The Shakespeare data set is organized in the following schema:
 
