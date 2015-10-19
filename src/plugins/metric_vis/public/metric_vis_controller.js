@@ -12,8 +12,13 @@ define(function (require) {
       tableGroups.tables.forEach(function (table) {
         table.columns.forEach(function (column, i) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
+          var title;
+          if ($scope.vis.params.metricsLabels) {
+            title = $scope.vis.params.metricsLabels[i];
+          }
           metrics.push({
-            label: column.title,
+            // label: column.title,
+            label: title  || column.title,
             value: fieldFormatter(table.rows[0][i])
           });
         });

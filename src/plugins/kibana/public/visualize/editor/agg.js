@@ -71,6 +71,49 @@ define(function (require) {
           return metricCount > aggregation.schema.min;
         };
 
+        // TODO: include metric labels in params in Agg
+        function setMetricsLabels() {
+          if ($scope.vis.params.metricsLabels === undefined) {
+            $scope.vis.params.metricsLabels = {};
+            return;
+          }
+
+          var metricsLabels = $scope.vis.params.metricsLabels;
+          var firstSibling = $scope;
+
+          // Find the first sibling (scope)
+          while (firstSibling.$$prevSibling !== null) {
+            firstSibling = firstSibling.$$prevSibling;
+          }
+
+          var sibling = firstSibling;
+          // Travel all siblings setting metric label
+          while (sibling !== null) {
+            sibling.metric_label = metricsLabels[sibling.$index];
+            sibling = sibling.$$nextSibling;
+          }
+        }
+
+        setMetricsLabels(); // Fill with saved labels the metrics labels forms
+
+        $scope.showFormLabel = function () {
+          $scope.vis.params.metricsLabels[$scope.$index] = $scope.metric_label;
+
+          $scope.showMetricLabel = !$scope.showMetricLabel;
+          // TODO: Hack, labels should be params so viz.dirty is auto changed
+          $scope.vis.dirty = true;
+        };
+
+        $scope.useAggLabels = function (aggregation) {
+          var supported = false;
+
+          // Only supported in Metric vis yet
+          if (aggregation.vis.type.name === 'metric') {
+            supported = true;
+          }
+          return supported;
+        };
+
         function calcAggIsTooLow() {
           if (!$scope.agg.schema.mustBeFirst) {
             return false;
