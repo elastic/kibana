@@ -30,21 +30,23 @@ define(function (require) {
         return new Handler(vis, {
           data: data,
           legend: new Legend(vis, vis.data),
-          axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
-          chartTitle: new ChartTitle(vis.el),
+          axisTitle: new AxisTitle(vis.selection, data.get('xAxisLabel'), data.get('yAxisLabel')),
+          chartTitle: new ChartTitle(vis.el, vis.selection),
           xAxis: new XAxis({
-            el                : vis.el,
-            xValues           : data.xValues(),
-            ordered           : data.get('ordered'),
-            xAxisFormatter    : data.get('xAxisFormatter'),
-            expandLastBucket  : opts.expandLastBucket,
-            _attr             : vis._attr
+            el: vis.el,
+            selection: vis.selection,
+            xValues: data.xValues(),
+            ordered: data.get('ordered'),
+            xAxisFormatter: data.get('xAxisFormatter'),
+            expandLastBucket: opts.expandLastBucket,
+            _attr: vis._attr
           }),
           alerts: new Alerts(vis, data, opts.alerts),
           yAxis: new YAxis({
-            el   : vis.el,
-            yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
-            yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
+            el: vis.el,
+            selection: vis.selection,
+            yMin: isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
+            yMax: isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
             yAxisFormatter: data.get('yAxisFormatter'),
             _attr: vis._attr
           })

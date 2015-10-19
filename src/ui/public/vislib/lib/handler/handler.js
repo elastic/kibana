@@ -156,13 +156,11 @@ define(function (require) {
      * Removes all DOM elements from the HTML element provided
      *
      * @method removeAll
-     * @param el {HTMLElement} Reference to the HTML Element that
-     * contains the chart
      * @returns {D3.Selection|D3.Transition.Transition} With the chart
      * child element removed
      */
-    Handler.prototype.removeAll = function (el) {
-      return this.selection.selectAll('*').remove();
+    Handler.prototype.removeAll = function () {
+      this.selection.selectAll('*').remove();
     };
 
     /**
@@ -173,7 +171,7 @@ define(function (require) {
      * @returns {HTMLElement} Displays the input message
      */
     Handler.prototype.error = function (message) {
-      this.removeAll(this.el);
+      this.removeAll();
 
       var div = this.selection.append('div')
       // class name needs `chart` in it for the polling checkSize function

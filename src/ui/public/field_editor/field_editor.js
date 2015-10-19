@@ -1,9 +1,11 @@
 define(function (require) {
 
   require('ui/field_format_editor');
+  require('angular-bootstrap-colorpicker');
+  require('angular-bootstrap-colorpicker/css/colorpicker.css');
 
   require('ui/modules')
-  .get('kibana')
+  .get('kibana', ['colorpicker.module'])
   .directive('fieldEditor', function (Private, $sce) {
     var _ = require('lodash');
     var fieldFormats = Private(require('ui/registry/field_formats'));
@@ -78,7 +80,7 @@ define(function (require) {
           if (!changedFormat || !missingFormat) return;
 
           // reset to the defaults, but make sure it's an object
-          self.formatParams = _.assign({}, getFieldFormatType().paramDefaults);
+          self.formatParams = _.assign({}, _.cloneDeep(getFieldFormatType().paramDefaults));
         });
 
         $scope.$watch('editor.formatParams', function () {

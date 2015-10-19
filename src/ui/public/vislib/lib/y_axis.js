@@ -17,6 +17,7 @@ define(function (require) {
     _.class(YAxis).inherits(ErrorHandler);
     function YAxis(args) {
       this.el = args.el;
+      this.selection = args.selection;
       this.scale = null;
       this.domain = [args.yMin, args.yMax];
       this.yAxisFormatter = args.yAxisFormatter;
@@ -30,7 +31,7 @@ define(function (require) {
      * @return {D3.UpdateSelection} Renders y axis to visualization
      */
     YAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
+      this.selection.selectAll('.y-axis-div').call(this.draw());
     };
 
     YAxis.prototype._isPercentage = function () {

@@ -16,12 +16,12 @@ define(function (require) {
      * @param yTitle {String} Y-axis title
      */
     _.class(AxisTitle).inherits(ErrorHandler);
-    function AxisTitle(el, xTitle, yTitle) {
+    function AxisTitle(selection, xTitle, yTitle) {
       if (!(this instanceof AxisTitle)) {
-        return new AxisTitle(el, xTitle, yTitle);
+        return new AxisTitle(selection, xTitle, yTitle);
       }
 
-      this.el = el;
+      this.selection = selection;
       this.xTitle = xTitle;
       this.yTitle = yTitle;
     }
@@ -33,8 +33,8 @@ define(function (require) {
      * @returns {HTMLElement} DOM Element with axis titles
      */
     AxisTitle.prototype.render = function () {
-      d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
-      d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
+      this.selection.select('.x-axis-title').call(this.draw(this.xTitle));
+      this.selection.select('.y-axis-title').call(this.draw(this.yTitle));
     };
 
     /**

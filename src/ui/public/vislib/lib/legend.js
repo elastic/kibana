@@ -27,7 +27,7 @@ define(function (require) {
 
       this.events = new Dispatch();
       this.vis = vis;
-      this.el = vis.el;
+      this.selection = vis.selection;
       this.color = color(labelsArray);
       this._attr = _.defaults({}, vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
@@ -139,7 +139,7 @@ define(function (require) {
      */
     Legend.prototype.render = function () {
       var self = this;
-      var visEl = d3.select(this.el);
+      var visEl = this.selection;
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
       this._header(legendDiv, this);

@@ -111,7 +111,8 @@ define(function (require) {
       this.resizeChecker.destroy();
       if (this.handler) this._runOnHandler('destroy');
 
-      this.selection.selectAll('*').remove();
+      this.selection.data(null);
+      this.selection.remove();
       this.selection = null;
     };
 

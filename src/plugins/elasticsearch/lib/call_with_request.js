@@ -12,7 +12,7 @@ module.exports = (client) => {
       .catch((err) => {
         if (err.status === 401) {
           const options = { realm: 'Authorization Required' };
-          return Promise.reject(Boom.unauthorized(err.body, 'Basic', options));
+          return Promise.reject(Boom.unauthorized('Unauthorized', 'Basic', options));
         }
         return Promise.reject(err);
       });

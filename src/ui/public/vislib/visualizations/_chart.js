@@ -82,7 +82,7 @@ define(function (require) {
      */
     Chart.prototype.destroy = function () {
       var selection = d3.select(this.chartEl);
-      this.events.removeAllListeners();
+      this.events.removeListeners(selection);
       if (this.tooltip) this.tooltip.hide();
       selection.remove();
       selection = null;
