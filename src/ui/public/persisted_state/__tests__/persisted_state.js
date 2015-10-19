@@ -119,8 +119,9 @@ describe('Persisted State', function () {
       var persistedState = new PersistedState();
       childState = persistedState.createChild(childIndex);
 
-      // parent state should contain the child and its original state
+      // parent state should not contain the child state
       expect(persistedState.get()).to.not.have.property(childIndex);
+      expect(persistedState.get()).to.eql({});
     });
 
     it('should not append the child state to the parent, with parent value', function () {
@@ -132,8 +133,9 @@ describe('Persisted State', function () {
       // child state should be empty, we didn't give it any default data
       expect(childState.get()).to.be(undefined);
 
-      // parent state should contain the child and its original state value
+      // parent state should not contain the child state
       expect(persistedState.get()).to.not.have.property(childIndex);
+      expect(persistedState.get()).to.eql(persistedStateValue);
     });
 
     it('should append the child state to the parent, with parent and child values', function () {
@@ -142,9 +144,6 @@ describe('Persisted State', function () {
       var persistedStateValue = { original: true };
       var persistedState = new PersistedState(persistedStateValue);
       childState = persistedState.createChild(childIndex, childStateValue);
-
-      // child state should be empty, we didn't give it any default data
-      expect(childState.get()).to.eql(childStateValue);
 
       // parent state should contain the child and its original state value
       var parentState = persistedState.get();
