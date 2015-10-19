@@ -22,17 +22,15 @@ let bootstrap = require('bootstrap');
 let $welcomePopup = $("#welcome_popup");
 
 let $example;
-let html = ```
-  <div id="welcome_example_editor">
-  # index a doc
-  PUT index/type/1
-  {
-     "body": "here"
-  }
+let html = `<div id="welcome_example_editor">
+# index a doc
+PUT index/type/1
+{
+   "body": "here"
+}
 
-  # and get it ...
-  GET index/type/1</div>
-```;
+# and get it ...
+GET index/type/1</div>`;
 
 $welcomePopup.modal({show: false});
 $welcomePopup.on('shown', function () {

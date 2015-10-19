@@ -20,9 +20,6 @@ let _ = require('lodash');
 let $ = require('jquery');
 let moment = require('moment');
 
-console.log(moment);
-
-
 function History() {
   var $historyPopup = $("#history_popup");
   var historyViewer;
