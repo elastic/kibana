@@ -42,7 +42,7 @@
 
     <!-- down button -->
     <button
-      aria-lebl="Decrease Priority"
+      aria-label="Decrease Priority"
       ng-if="stats.count > 1"
       ng-class="{ disabled: $last }"
       ng-click="moveDown(agg)"
@@ -51,6 +51,20 @@
       type="button"
       class="btn btn-xs btn-default">
       <i aria-hidden="true" class="fa fa-caret-down"></i>
+    </button>
+
+    <!-- metric label button -->
+    <!-- Next line won't work with tooltip or ng-if -->
+    <!-- ng-click="showMetricLabel = !showMetricLabel" -->
+    <button
+      aria-label="Label"
+      ng-if="useAggLabels(agg)"
+      ng-click="showFormLabel(agg)"
+      tooltip="Label for the aggregation"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-tag"></i>
     </button>
 
     <!-- remove button -->
@@ -65,8 +79,20 @@
       class="btn btn-xs btn-danger">
       <i aria-hidden="true" class="fa fa-times"></i>
     </button>
+
   </div>
+
 </div>
+
+  <div class="form-group" ng-show="showMetricLabel">
+    <label>Metric {{$index + 1}} label</label>
+    <input
+      ng-model="metric_label"
+      placeholder="Label"
+      type="text"
+      class="form-control"
+      name="label{{$index}}">
+  </div>
 
 <vis-editor-agg-params
   agg="agg"
