@@ -89,17 +89,12 @@ define(function (require) {
 
         // Remove listeners from the elements
         elements.forEach(function (element) {
-          var el = selection.selectAll(element)[0];
-
-          if (el.length) {
-            events.forEach(function (event) {
-              selection.selectAll(element).on(event, null);
+          events.forEach(function (event) {
+            selection.selectAll(element).each(function () {
+              d3.select(this).on(event, null);
             });
-          }
+          });
         });
-
-        selection.remove();
-        selection = null;
       }
     };
 
