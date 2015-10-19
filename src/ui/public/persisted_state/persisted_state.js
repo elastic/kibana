@@ -125,7 +125,7 @@ define(function (require) {
 
     PersistedState.prototype._get = function (key, def) {
       // delegate to parent instance
-      if (this._parent) return this._parent._get(this._getIndex(key), key);
+      if (this._parent) return this._parent._get(this._getIndex(key), def);
 
       // no path and no key, get the whole state
       if (!this._hasPath() && _.isUndefined(key)) {

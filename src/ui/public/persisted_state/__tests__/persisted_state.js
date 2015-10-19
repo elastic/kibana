@@ -299,7 +299,7 @@ describe('Persisted State', function () {
   });
 
   describe('get state', function () {
-    it('should perform deep gets with vairous formats', function () {
+    it('should perform deep gets with various formats', function () {
       var obj = {
         red: {
           green: {
@@ -335,6 +335,15 @@ describe('Persisted State', function () {
       expect(persistedState.get()).to.eql({ hello: { nouns: ['world', 'humans', 'everyone'] } });
       expect(persistedState.get('hello')).to.eql({ nouns: ['world', 'humans', 'everyone'] });
       expect(persistedState.get('hello.nouns')).to.eql(['world', 'humans', 'everyone']);
+    });
+
+    it('should pass defaults to parent delegation', function () {
+      var persistedState = new PersistedState({ parent: true });
+      var childState = persistedState.createChild('child', { account: { name: 'first child' }});
+      var defaultValue = 'i have no data';
+
+      expect(childState.get('account.name', defaultValue)).to.eql('first child');
+      expect(childState.get('account.age', defaultValue)).to.eql(defaultValue);
     });
   });
 
