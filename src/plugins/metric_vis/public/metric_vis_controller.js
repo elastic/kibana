@@ -13,7 +13,7 @@ define(function (require) {
         table.columns.forEach(function (column, i) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
           var title;
-          if ($scope.vis.params.metricsLabels) {
+          if ($scope.vis && $scope.vis.params.metricsLabels) {
             title = $scope.vis.params.metricsLabels[i];
           }
           metrics.push({
