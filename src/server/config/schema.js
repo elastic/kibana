@@ -61,7 +61,7 @@ module.exports = Joi.object({
 
     events: Joi.any().default({}),
     dest: Joi.string().default('stdout'),
-
+    filter: Joi.any().default({}),
     json: Joi.boolean()
     .when('dest', {
       is: 'stdout',
@@ -87,6 +87,7 @@ module.exports = Joi.object({
     lazyHost: Joi.string().hostname().default('localhost'),
     lazyPrebuild: Joi.boolean().default(false),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
+    useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     unsafeCache: Joi
       .alternatives()
       .try(

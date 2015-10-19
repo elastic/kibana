@@ -3,9 +3,13 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
 
+  var metadata = require('ui/metadata');
+
   var notifs = [];
   var setTO = setTimeout;
   var clearTO = clearTimeout;
+  var version = metadata.version;
+  var buildNum = metadata.buildNum;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
   var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
@@ -40,6 +44,9 @@ define(function (require) {
   }
 
   function add(notif, cb) {
+    _.set(notif, 'info.version', version);
+    _.set(notif, 'info.buildNum', buildNum);
+
     if (notif.lifetime !== Infinity) {
       notif.timerId = setTO(function () {
         closeNotif(cb, 'ignore').call(notif);
@@ -83,6 +90,20 @@ define(function (require) {
     }
 
     return rtn;
+  }
+
+  function formatInfo() {
+    var info = [];
+
+    if (!_.isUndefined(version)) {
+      info.push(`Version: ${version}`);
+    }
+
+    if (!_.isUndefined(buildNum)) {
+      info.push(`Build: ${buildNum}`);
+    }
+
+    return info.join('\n');
   }
 
   // browsers format Error.stack differently; always include message
@@ -192,6 +213,7 @@ define(function (require) {
     }
 
     var html = fatalToastTemplate({
+      info: formatInfo(),
       msg: formatMsg(err, this.from),
       stack: formatStack(err)
     });

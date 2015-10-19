@@ -12,6 +12,7 @@ var formatIds = [
   'ip',
   'number',
   'percent',
+  'color',
   'string',
   'url',
   '_source'

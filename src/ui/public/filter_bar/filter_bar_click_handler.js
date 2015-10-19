@@ -3,6 +3,17 @@ define(function (require) {
   var dedupFilters = require('./lib/dedupFilters');
   var uniqFilters = require('./lib/uniqFilters');
 
+  // given an object or array of objects, return the value of the passed param
+  // if the param is missing, return undefined
+  function findByParam(values, param) {
+    if (_.isArray(values)) { // point series chart
+      var index = _.findIndex(values, param);
+      if (index === -1) return;
+      return values[index][param];
+    }
+    return values[param]; // pie chart
+  }
+
   return function (Notifier) {
     return function ($state) {
       return function (event) {
@@ -17,32 +28,24 @@ define(function (require) {
         if (event.point.orig) {
           aggConfigResult = event.point.orig.aggConfigResult;
         } else if (event.point.values) {
-          aggConfigResult = findAggConfig(event.point.values);
+          aggConfigResult = findByParam(event.point.values, 'aggConfigResult');
         } else {
           aggConfigResult = event.point.aggConfigResult;
         }
 
-        function findAggConfig(values) {
-          if (_.isArray(values)) { // point series chart
-            var index = _.findIndex(values, 'aggConfigResult');
-            return values[index].aggConfigResult;
-          }
-          return values.aggConfigResult; // pie chart
-        }
-
-        function findLabel(obj) {
-          // TODO: find out if there is always a fieldFormatter
-          var formatter = obj.aggConfig.fieldFormatter();
-          return formatter(obj.key) === event.label;
-        }
-
         if (aggConfigResult) {
           var isLegendLabel = !!event.point.values;
-          var results = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
+          var aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 
-          if (isLegendLabel) results = _.filter(results, findLabel); // filter results array by legend label
+          // For legend clicks, use the last bucket in the path
+          if (isLegendLabel) {
+            // series data has multiple values, use aggConfig on the first
+            // hierarchical data values is an object with the addConfig
+            var aggConfig = findByParam(event.point.values, 'aggConfig');
+            aggBuckets = aggBuckets.filter((result) => result.aggConfig && result.aggConfig === aggConfig);
+          }
 
-          var filters = _(results)
+          var filters = _(aggBuckets)
           .map(function (result) {
             try {
               return result.createFilter();

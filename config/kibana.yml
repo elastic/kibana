@@ -19,13 +19,17 @@
 # kibana.defaultAppId: "discover"
 
 # If your Elasticsearch is protected with basic auth, this is the user credentials
-# used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
+# used by the Kibana server to perform maintenance on the kibana_index at startup. Your Kibana
 # users will still need to authenticate with Elasticsearch (which is proxied through
 # the Kibana server)
 # elasticsearch.username: user
 # elasticsearch.password: pass
 
-# If your Elasticsearch requires client certificate and key
+# SSL for outgoing requests from the Kibana Server to the browser (PEM formatted)
+# server.ssl.cert: /path/to/your/server.crt
+# server.ssl.key: /path/to/your/server.key
+
+# Optional setting to validate that your Elasticsearch backend uses the same key files (PEM formatted)
 # elasticsearch.ssl.cert: /path/to/your/client.crt
 # elasticsearch.ssl.key: /path/to/your/client.key
 
@@ -52,12 +56,17 @@
 # Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying
 # elasticsearch.startupTimeout: 5000
 
-# SSL for outgoing requests from the Kibana Server (PEM formatted)
-# server.ssl.cert: /path/to/your/server.key
-# server.ssl.key: /path/to/your/server.crt
-
 # Set the path to where you would like the process id file to be created.
 # pid.file: /var/run/kibana.pid
 
 # If you would like to send the log output to a file you can set the path below.
 # logging.dest: stdout
+
+# Set this to true to suppress all logging output.
+# logging.silent: false
+
+# Set this to true to suppress all logging output except for error messages.
+# logging.quiet: false
+
+# Set this to true to log all events, including system usage information and all requests.
+# logging.verbose

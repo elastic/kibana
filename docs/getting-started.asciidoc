@@ -6,7 +6,7 @@ key Kibana functionality. By the end of this tutorial, you will have:
 
 * Loaded a sample data set into your Elasticsearch installation
 * Defined at least one index pattern
-* Used the <<discover, Discover>> functionality to explore your data
+* Use the <<discover, Discover>> functionality to explore your data
 * Set up some <<visualize,_visualizations_>> to graphically represent your data
 * Assembled visualizations into a <<dashboard,Dashboard>>
 
@@ -29,7 +29,7 @@ Two of the data sets are compressed. Use the following commands to extract the f
 
 [source,shell]
 unzip accounts.zip
-gunzip logstash.jsonl.gz
+gunzip logs.jsonl.gz
 
 The Shakespeare data set is organized in the following schema:
 

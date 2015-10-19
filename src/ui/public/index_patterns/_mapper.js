@@ -64,15 +64,7 @@ define(function (require) {
             includeDefaults: true
           });
         })
-        .catch(function (err) {
-          if (err.status >= 400) {
-            // transform specific error type
-            throw new IndexPatternMissingIndices();
-          } else {
-            // rethrow all others
-            throw err;
-          }
-        })
+        .catch(handleMissingIndexPattern)
         .then(transformMappingIntoFields)
         .then(function (fields) {
           fieldCache.set(id, fields);
@@ -108,7 +100,8 @@ define(function (require) {
             all: all,
             matches: matches
           };
-        });
+        })
+        .catch(handleMissingIndexPattern);
       };
 
       /**
@@ -121,6 +114,16 @@ define(function (require) {
         fieldCache.clear(indexPattern);
         return Promise.resolve();
       };
+    }
+
+    function handleMissingIndexPattern(err) {
+      if (err.status >= 400) {
+        // transform specific error type
+        return Promise.reject(new IndexPatternMissingIndices());
+      } else {
+        // rethrow all others
+        throw err;
+      }
     }
 
     return new Mapper();

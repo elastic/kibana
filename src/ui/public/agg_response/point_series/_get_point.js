@@ -26,6 +26,7 @@ define(function (require) {
       }
 
       if (series) {
+        point.aggConfig = series.agg;
         point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
       }
 

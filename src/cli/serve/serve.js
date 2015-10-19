@@ -32,7 +32,10 @@ module.exports = function (program) {
   .description('Run the kibana server')
   .collectUnknownOptions()
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
-  .option('-c, --config <path>', 'Path to the config file')
+  .option(
+    '-c, --config <path>',
+    'Path to the config file',
+    fromRoot('config/kibana.yml'))
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
   .option('-Q, --silent', 'Prevent all logging')
@@ -76,7 +79,7 @@ module.exports = function (program) {
     let readYamlConfig = require('./readYamlConfig');
     let KbnServer = src('server/KbnServer');
 
-    let settings = readYamlConfig(opts.config || fromRoot('config/kibana.yml'));
+    let settings = readYamlConfig(opts.config);
 
     if (opts.dev) {
       try { _.merge(settings, readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
@@ -116,7 +119,7 @@ module.exports = function (program) {
       let { server } = kbnServer;
 
       if (server) server.log(['fatal'], err);
-      else console.error('FATAL', err);
+      console.error('FATAL', err);
 
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit

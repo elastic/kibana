@@ -1,5 +1,4 @@
-@tooltip-space: 8px;
-@tooltip-space-tight: @tooltip-space / 2;
+@import (reference) "~ui/styles/variables";
 
 .vis-tooltip,
 .vis-tooltip-sizing-clone {
@@ -7,8 +6,8 @@
   line-height: 1.1;
   font-size: 12px;
   font-weight: normal;
-  background: fadeout(@gray-darker, 7%);
-  color: @gray-lighter;
+  background: @tooltip-bg;
+  color: @tooltip-color;
   border-radius: 4px;
   position: fixed;
   z-index: 120;
@@ -37,12 +36,14 @@
     // if there is a header, give it a border that matches
     // those in the body
     thead tr {
-      border-bottom: 1px solid @gray;
+      border-bottom: 1px solid;
+      border-bottom-color: @tooltip-table-border;
     }
 
     // only apply to tr in the body, not the header
     tbody tr {
-      border-top: 1px solid @gray;
+      border-top: 1px solid;
+      border-top-color: @tooltip-table-border;
       &:first-child {
         border-top: none;
       }

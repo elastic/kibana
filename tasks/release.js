@@ -1,5 +1,4 @@
 module.exports = function (grunt) {
-
   var readline = require('readline');
 
   // build, then zip and upload to s3

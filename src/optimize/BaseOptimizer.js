@@ -11,7 +11,7 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 let babelOptions = require('./babelOptions');
-let babelExclude = [/[\/\\](node_modules|bower_components)[\/\\]/];
+let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
 class BaseOptimizer {
   constructor(opts) {
@@ -85,7 +85,6 @@ class BaseOptimizer {
           new DirectoryNameAsMain()
         ]),
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.DedupePlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
         }),
@@ -101,7 +100,7 @@ class BaseOptimizer {
             test: /\.less$/,
             loader: ExtractTextPlugin.extract(
               'style',
-              `css${mapQ}!autoprefixer?{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+              `css${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
             )
           },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
@@ -114,7 +113,7 @@ class BaseOptimizer {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
             loader: 'babel',
-            query: babelOptions
+            query: babelOptions.webpack
           },
           {
             test: /\.jsx$/,
@@ -122,16 +121,17 @@ class BaseOptimizer {
             loader: 'babel',
             query: defaults({
               nonStandard: true,
-            }, babelOptions)
+            }, babelOptions.webpack)
           }
         ].concat(this.env.loaders),
+        postLoaders: this.env.postLoaders || [],
         noParse: this.env.noParse,
       },
 
       resolve: {
-        extensions: ['.babel.js', '.js', '.less', ''],
+        extensions: ['.js', '.jsx', '.less', ''],
         postfixes: [''],
-        modulesDirectories: ['node_modules'],
+        modulesDirectories: ['webpackShims', 'node_modules'],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,

@@ -1,4 +1,4 @@
-require('babel/register')(require('./src/optimize/babelOptions'));
+require('babel/register')(require('./src/optimize/babelOptions').node);
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
@@ -30,7 +30,7 @@ module.exports = function (grunt) {
       }
     }()),
 
-    nodeVersion: '2.5.0',
+    nodeVersion: grunt.file.read('.node-version').trim(),
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
@@ -46,7 +46,6 @@ module.exports = function (grunt) {
       '<%= src %>/**/*.js',
       '!<%= src %>/fixtures/**/*.js'
     ],
-
     deepModules: {
       'caniuse-db': '1.0.30000265',
       'chalk': '1.1.0',
@@ -79,7 +78,7 @@ module.exports = function (grunt) {
     init: true,
     config: config,
     loadGruntTasks: {
-      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*']
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
     }
   });
 

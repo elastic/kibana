@@ -5,11 +5,11 @@
   padding-left: 0px !important;
   padding-right: 0px !important;
   background-color: @sidebar-bg;
-  border-right: 1px solid @sidebar-border;
-  border-bottom: 1px solid @sidebar-border;
+  border-right-color: @sidebar-border;
+  border-bottom-color: @sidebar-border;
 
   .sidebar-well {
-    background-color: darken(@sidebar-bg, 5%);
+    background-color: @sidebar-well-bg;
   }
 
   .sidebar-list {
@@ -22,18 +22,20 @@
       padding-left: 10px;
       padding-right: 10px;
       color: @sidebar-header-color;
-      border: 1px solid rgba(0, 0, 0, 0);
+      border: 1px solid;
+      border-color: @sidebar-header-border;
     }
 
     .sidebar-item {
-      border-top: 1px solid @sidebar-border;
+      border-top: 1px solid;
+      border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
 
-      a {
-        color: @text-color;
+      a:not(.sidebar-item-button) {
+        color: @sidebar-item-color;
 
         &:hover {
-          color: @text-color;
+          color: @sidebar-item-color;
           text-decoration: none;
         }
       }
@@ -66,11 +68,12 @@
       }
 
       &-text {
-        background: white;
+        background: @sidebar-item-text-bg;
       }
 
       &-button {
         font-size: inherit;
+        display: block;
 
         &[disabled] {
           opacity: 0.65;
@@ -134,6 +137,7 @@
   }
 
   .index-pattern-selection .sidebar-item-title {
-    background-color: white;
+    background-color: @sidebar-index-pattern-selection-bg;
+    color: @sidebar-index-pattern-selection-color;
   }
 }

@@ -3,8 +3,6 @@ define(function (require) {
   require('ui/registry/spy_modes').register(VisDetailsSpyProvider);
 
   function VisDetailsSpyProvider(Notifier, $filter, $rootScope, config) {
-    require('ui/clipboard');
-
     return {
       name: 'debug',
       display: 'Debug',

@@ -7,18 +7,20 @@ module.exports = async function (kbnServer, server, config) {
   }
 
   let { plugins } = kbnServer;
-  let enabledPlugins = {};
 
-  // setup config and filter out disabled plugins
-  for (let plugin of plugins) {
-    if (config.get([plugin.id, 'enabled'])) {
-      enabledPlugins[plugin.id] = plugin;
-    }
-  }
+  // extend plugin apis with additional context
+  plugins.getPluginApis().forEach(api => {
+
+    Object.defineProperty(api, 'uiExports', {
+      value: kbnServer.uiExports
+    });
+
+  });
+
 
   let path = [];
-  let initialize = async id => {
-    let plugin = enabledPlugins[id];
+  async function initialize(id) {
+    let plugin = plugins.byId[id];
 
     if (includes(path, id)) {
       throw new Error(`circular dependencies found: "${path.concat(id).join(' -> ')}"`);
@@ -27,20 +29,18 @@ module.exports = async function (kbnServer, server, config) {
     path.push(id);
 
     for (let reqId of plugin.requiredIds) {
-      if (!enabledPlugins[reqId]) {
-        if (plugins.byId[reqId]) {
-          throw new Error(`Requirement "${reqId}" for plugin "${plugin.id}" is disabled.`);
-        } else {
-          throw new Error(`Unmet requirement "${reqId}" for plugin "${plugin.id}"`);
-        }
+      if (!plugins.byId[reqId]) {
+        throw new Error(`Unmet requirement "${reqId}" for plugin "${id}"`);
       }
+
       await initialize(reqId);
     }
 
     await plugin.init();
-
     path.pop();
   };
 
-  for (let id of keys(enabledPlugins)) await initialize(id);
+  for (let {id} of plugins) {
+    await initialize(id);
+  }
 };
