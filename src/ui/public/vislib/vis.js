@@ -25,6 +25,7 @@ define(function (require) {
       }
       Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
+      this.selection = d3.select(this.el);
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults({}, config || {}, {
         legendOpen: true
@@ -106,14 +107,13 @@ define(function (require) {
      * @method destroy
      */
     Vis.prototype.destroy = function () {
-      var selection = d3.select(this.el).select('.vis-wrapper');
-
       this.resizeChecker.off('resize', this.resize);
       this.resizeChecker.destroy();
       if (this.handler) this._runOnHandler('destroy');
 
-      selection.remove();
-      selection = null;
+      this.selection.data(null);
+      this.selection.remove();
+      this.selection = null;
     };
 
     /**

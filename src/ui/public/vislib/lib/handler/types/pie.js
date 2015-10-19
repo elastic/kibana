@@ -12,7 +12,7 @@ define(function (require) {
     return function (vis) {
       return new Handler(vis, {
         legend: new Legend(vis),
-        chartTitle: new ChartTitle(vis.el)
+        chartTitle: new ChartTitle(vis.el, vis.selection)
       });
     };
   };

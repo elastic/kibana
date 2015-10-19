@@ -24,7 +24,7 @@ define(function (require) {
 
       this.data = opts.data || new Data(vis.data, vis._attr);
       this.vis = vis;
-      this.el = vis.el;
+      this.selection = vis.selection;
       this.ChartClass = vis.ChartClass;
       this.charts = [];
 
@@ -89,9 +89,8 @@ define(function (require) {
     Handler.prototype.render = function () {
       var self = this;
       var charts = this.charts = [];
-      var selection = d3.select(this.el);
 
-      selection.selectAll('*').remove();
+      this.selection.selectAll('*').remove();
 
       this._validateData();
       this.renderArray.forEach(function (property) {
@@ -107,7 +106,7 @@ define(function (require) {
       });
 
       // render the chart(s)
-      selection.selectAll('.chart')
+      this.selection.selectAll('.chart')
       .each(function (chartData) {
         var chart = new self.ChartClass(self, this, chartData);
 
@@ -157,13 +156,11 @@ define(function (require) {
      * Removes all DOM elements from the HTML element provided
      *
      * @method removeAll
-     * @param el {HTMLElement} Reference to the HTML Element that
-     * contains the chart
      * @returns {D3.Selection|D3.Transition.Transition} With the chart
      * child element removed
      */
-    Handler.prototype.removeAll = function (el) {
-      return d3.select(el).selectAll('*').remove();
+    Handler.prototype.removeAll = function () {
+      this.selection.selectAll('*').remove();
     };
 
     /**
@@ -174,10 +171,9 @@ define(function (require) {
      * @returns {HTMLElement} Displays the input message
      */
     Handler.prototype.error = function (message) {
-      this.removeAll(this.el);
+      this.removeAll();
 
-      var div = d3.select(this.el)
-      .append('div')
+      var div = this.selection.append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
       .attr('class', 'visualize-error chart error');

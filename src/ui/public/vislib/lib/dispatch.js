@@ -76,37 +76,31 @@ define(function (require) {
       return eventData;
     };
 
-    Dispatch.prototype.removeAllListeners = function (selection) {
-      var attachedListeners = [
-        'mousedown.brush',
-        'touchstart.brush',
-        'click',
-        'mousedown',
-        'mouseover',
-        'mouseout'
-      ];
-      function walkTheDOM(node, func) {
-        func(node);
-        node = node && node.node() ? node.node().firstChild : undefined;
-        while (node) {
-          walkTheDOM(d3.select(node), func);
-          node = node.nextSibling;
-        }
-      }
-
-      walkTheDOM(selection, function (selection) {
-        if (!selection) return;
-
-        selection.each(function () {
-          var self = this;
-
-          attachedListeners.forEach(function (event) {
-            d3.select(self).on(event, null);
-          });
-        });
-      });
-
+    Dispatch.prototype.removeListeners = function (selection) {
+      var events = ['click', 'mousedown', 'mouseout', 'mouseover'];
+      var elements = ['circle', 'rect', 'path'];
       this.removeAllListeners();
+
+      if (selection) {
+        // Remove listeners from the brush
+        selection.selectAll('g.brush')
+          .on('mousedown.brush', null)
+          .on('touchstart.brush', null);
+
+        // Remove listeners from the elements
+        elements.forEach(function (element) {
+          var el = selection.selectAll(element)[0];
+
+          if (el.length) {
+            events.forEach(function (event) {
+              selection.selectAll(element).on(event, null);
+            });
+          }
+        });
+
+        selection.remove();
+        selection = null;
+      }
     };
 
     /**
@@ -344,7 +338,6 @@ define(function (require) {
     function validBrushClick(event) {
       return event.button === 0;
     }
-
 
     return Dispatch;
   };

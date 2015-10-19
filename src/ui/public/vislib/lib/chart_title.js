@@ -1,7 +1,6 @@
 define(function (require) {
   return function ChartTitleFactory(Private) {
     var d3 = require('d3');
-    var $ = require('jquery');
     var _ = require('lodash');
 
     var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
@@ -15,12 +14,13 @@ define(function (require) {
      * @param el {HTMLElement} Reference to DOM element
      */
     _.class(ChartTitle).inherits(ErrorHandler);
-    function ChartTitle(el) {
+    function ChartTitle(el, selection) {
       if (!(this instanceof ChartTitle)) {
-        return new ChartTitle(el);
+        return new ChartTitle(el, selection);
       }
 
       this.el = el;
+      this.selection = selection;
       this.tooltip = new Tooltip('chart-title', el, function (d) {
         return '<p>' + _.escape(d.label) + '</p>';
       });
@@ -33,11 +33,11 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
     ChartTitle.prototype.render = function () {
-      var el = d3.select(this.el).select('.chart-title').node();
+      var el = this.selection.select('.chart-title').node();
       var width = el ? el.clientWidth : 0;
       var height = el ? el.clientHeight : 0;
 
-      return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
+      return this.selection.selectAll('.chart-title').call(this.draw(width, height));
     };
 
     /**
