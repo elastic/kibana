@@ -50,7 +50,7 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
   var self = this;
   return Promise.all(scenario.bulk
     .map(function createIndex(bulk) {
-      console.log(' bulk=' + bulk + ' bulk.file=' + bulk.file); // { file: '.kibana' }
+      console.log('bulk.file=' + bulk.file);
 
       return self.client.count({
         index: bulk.file

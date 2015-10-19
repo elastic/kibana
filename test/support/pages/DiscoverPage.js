@@ -171,10 +171,6 @@ define(function (require) {
         .then(function (queryNameField) {
           return queryNameField
             .getVisibleText();
-          // .then(function (theString) {
-          //   common.log('--found current query name element ' + theString);
-          // });
-
         });
     },
 

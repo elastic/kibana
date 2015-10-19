@@ -21,7 +21,6 @@ define(function (require) {
     var settingsPage;
     var headerPage;
     var scenarioManager;
-    //var url = 'http://localhost:5601';
 
     var expectedAlertText = 'Are you sure you want to remove this index pattern?';
     return {
@@ -54,9 +53,18 @@ define(function (require) {
               .load('emptyKibana');
           })
           .then(function () {
+            return scenarioManager
+              .loadIfEmpty('logstash');
+          })
+          .then(function () {
             return common
               .sleep(2000);
           });
+      },
+
+      teardown: function () {
+        return scenarioManager
+          .unload('logstash');
       },
 
       /*
@@ -72,32 +80,39 @@ define(function (require) {
           .then(function () {
             return settingsPage
               .getTimeBasedEventsCheckbox()
-              .isSelected();
+              .isSelected()
+              .then(function (selected) {
+                expect(selected).to.be.ok();
+              });
           })
-          .then(function (selected) {
-            expect(selected).to.be.ok();
+          .then(function () {
             return settingsPage
               .getNameIsPatternCheckbox()
               .isSelected()
               .then(function (nameIsPatternSelected) {
                 expect(nameIsPatternSelected).to.not.be.ok();
-                return settingsPage
-                  .getIndexPatternField()
-                  .then(function (patternField) {
-                    return patternField
-                      .getProperty('value')
-                      .then(function (pattern) {
-                        common.log('patternField value = ' + pattern);
-                        expect(pattern).to.be('logstash-*');
-                        return settingsPage.getTimeFieldNameField()
-                          .isSelected()
-                          .then(function (timeFieldIsSelected) {
-                            common.log('timeField isSelected = ' + timeFieldIsSelected);
-                            expect(timeFieldIsSelected).to.not.be.ok();
-                          });
-                      });
+              });
+          })
+          .then(function () {
+            return settingsPage
+              .getIndexPatternField()
+              .then(function (patternField) {
+                return patternField
+                  .getProperty('value')
+                  .then(function (pattern) {
+                    common.log('patternField value = ' + pattern);
+                    expect(pattern).to.be('logstash-*');
                   });
               });
+          })
+          .then(function () {
+            return settingsPage.getTimeFieldNameField()
+              .isSelected()
+              .then(function (timeFieldIsSelected) {
+                common.log('timeField isSelected = ' + timeFieldIsSelected);
+                expect(timeFieldIsSelected).to.not.be.ok();
+              });
+
           });
       },
 
@@ -112,10 +127,10 @@ define(function (require) {
           .then(function () {
             return settingsPage
               .getCreateButton()
-              .isEnabled();
-          })
-          .then(function (enabled) {
-            expect(enabled).to.not.be.ok();
+              .isEnabled()
+              .then(function (enabled) {
+                expect(enabled).to.not.be.ok();
+              });
           })
           .then(function () {
             // select a time field and check that Create button is enabled
@@ -125,10 +140,10 @@ define(function (require) {
           .then(function () {
             return settingsPage
               .getCreateButton()
-              .isEnabled();
-          })
-          .then(function (enabled) {
-            expect(enabled).to.be.ok();
+              .isEnabled()
+              .then(function (enabled) {
+                expect(enabled).to.be.ok();
+              });
           });
       },
 
@@ -147,20 +162,20 @@ define(function (require) {
               .then(function (selected) {
                 // uncheck the 'time-based events' checkbox
                 return selected.click();
-              })
-              // try to find the name is pattern checkbox (shouldn't find it)
-              .then(function () {
-                return settingsPage.getNameIsPatternCheckbox();
-              })
-              .then(function (selected1) {
-                expect(
-                  true, false, 'Did not expect to find the Name is Pattern checkbox when the TimeBasedEvents checkbox is unchecked'
-                );
-              })
-              .catch(function (reason) {
-                // it's OK.  We expected not to find the getNameIsPatternCheckbox.
-                return;
               });
+          })
+          // try to find the name is pattern checkbox (shouldn't find it)
+          .then(function () {
+            return settingsPage.getNameIsPatternCheckbox();
+          })
+          .then(function (selected1) {
+            expect(
+              true, false, 'Did not expect to find the Name is Pattern checkbox when the TimeBasedEvents checkbox is unchecked'
+            );
+          })
+          .catch(function (reason) {
+            // it's OK.  We expected not to find the getNameIsPatternCheckbox.
+            return;
           });
       },
       // Index pattern field list
@@ -255,90 +270,89 @@ define(function (require) {
                     expect(pageText).to.be('logstash-*');
                     // return
                   });
+              });
+          })
+          .then(function () {
+            return settingsPage
+              .getTableHeader()
+              .then(function (header) {
+                common.log('header.length = ' + header.length); // 6 name   type  format  analyzed  indexed   controls
+                expect(header.length).to.be(6);
+                return header[0]
+                  .getVisibleText()
+                  .then(function (text) {
+                    common.log('header[0] = ' + text); // name
+                    expect(text).to.be('name');
+                    return header;
+                  });
+              })
+              .then(function (header) {
+                return header[1]
+                  .getVisibleText()
+                  .then(function (text) {
+                    common.log('header[1] = ' + text);
+                    expect(text).to.be('type');
+                    return header;
+                  });
+              })
+              .then(function (header) {
+                return header[2]
+                  .getVisibleText()
+                  .then(function (text) {
+                    common.log('header[2] = ' + text);
+                    expect(text).to.be('format');
+                    return header;
+                  });
+              })
+              .then(function (header) {
+                return header[3]
+                  .getVisibleText()
+                  .then(function (text) {
+                    common.log('header[3] = ' + text);
+                    expect(text).to.be('analyzed');
+                    return header;
+                  });
+              })
+              .then(function (header) {
+                return header[4]
+                  .getVisibleText()
+                  .then(function (text) {
+                    common.log('header[4] = ' + text);
+                    expect(text).to.be('indexed');
+                    return header;
+                  });
+              })
+              .then(function (header) {
+                return header[5]
+                  .getVisibleText()
+                  .then(function (text) {
+                    common.log('header[5] = ' + text);
+                    expect(text).to.be('controls');
+                    return header;
+                  });
               })
               .then(function () {
+                // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
                 return settingsPage
-                  .getTableHeader()
-                  .then(function (header) {
-                    common.log('header.length = ' + header.length); // 6 name   type  format  analyzed  indexed   controls
-                    expect(header.length).to.be(6);
-                    return header[0]
-                      .getVisibleText()
-                      .then(function (text) {
-                        common.log('header[0] = ' + text); // name
-                        expect(text).to.be('name');
-                        return header;
-                      });
-                  })
-                  .then(function (header) {
-                    return header[1]
-                      .getVisibleText()
-                      .then(function (text) {
-                        common.log('header[1] = ' + text);
-                        expect(text).to.be('type');
-                        return header;
-                      });
-                  })
-                  .then(function (header) {
-                    return header[2]
-                      .getVisibleText()
-                      .then(function (text) {
-                        common.log('header[2] = ' + text);
-                        expect(text).to.be('format');
-                        return header;
-                      });
-                  })
-                  .then(function (header) {
-                    return header[3]
-                      .getVisibleText()
-                      .then(function (text) {
-                        common.log('header[3] = ' + text);
-                        expect(text).to.be('analyzed');
-                        return header;
-                      });
-                  })
-                  .then(function (header) {
-                    return header[4]
-                      .getVisibleText()
-                      .then(function (text) {
-                        common.log('header[4] = ' + text);
-                        expect(text).to.be('indexed');
-                        return header;
-                      });
-                  })
-                  .then(function (header) {
-                    return header[5]
-                      .getVisibleText()
-                      .then(function (text) {
-                        common.log('header[5] = ' + text);
-                        expect(text).to.be('controls');
-                        return header;
-                      });
-                  })
-                  .then(function () {
-                    // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-                    return settingsPage
-                      .clickDeletePattern();
-                  })
-                  .then(function () {
-                    return common.tryForTime(3000, function () {
-                      return self
-                        .getAlertText();
-                    });
-                  })
-                  .then(function () {
-                    return self
-                      .getAlertText()
-                      .then(function (alertText) {
-                        common.log('alertText = ' + alertText);
-                        expect(alertText).to.be(expectedAlertText);
-                      });
-                  })
-                  .then(function () {
-                    return self
-                      .acceptAlert();
+                  .clickDeletePattern();
+              })
+              .then(function () {
+                return common.tryForTime(3000, function () {
+                  return self
+                    .getAlertText();
+                });
+              })
+              .then(function () {
+                return self
+                  .getAlertText()
+                  .then(function (alertText) {
+                    common.log('alertText = ' + alertText);
+                    expect(alertText).to.be(expectedAlertText);
                   });
-
+              })
+              .then(function () {
+                return self
+                  .acceptAlert();
               });
           });
       },
@@ -405,7 +419,7 @@ define(function (require) {
                   .getVisibleText()
                   .then(function (rowText) {
                     //common.log('After name-sort first row first column = ' + rowText);
-                    expect(rowText).to.be('xss');
+                    expect(rowText).to.be('xss.raw');
                   });
               });
           })
@@ -455,8 +469,8 @@ define(function (require) {
             return settingsPage
               .getFieldsTabCount()
               .then(function (tabCount) {
-                common.log('fields item count = ' + tabCount); // 51
-                expect(tabCount).to.be('51');
+                common.log('fields item count = ' + tabCount);
+                expect(tabCount).to.be('85');
               });
           })
           // verify the page size is 25
@@ -490,8 +504,8 @@ define(function (require) {
                 expect(pageCount.length).to.be(25);
               });
           })
-          //page 2 should also have 25 items
-          .then(function goPage2() {
+          //page 3 should also have 25 items
+          .then(function goPage3() {
             return settingsPage
               .goToPage(3);
           })
@@ -500,7 +514,20 @@ define(function (require) {
               .getPageFieldCount()
               .then(function (pageCount) {
                 common.log('Page 3 count = ' + pageCount.length);
-                expect(pageCount.length).to.be(1);
+                expect(pageCount.length).to.be(25);
+              });
+          })
+          //page 4 should also have 10 items
+          .then(function goPage4() {
+            return settingsPage
+              .goToPage(4);
+          })
+          .then(function getPageFieldCount() {
+            return settingsPage
+              .getPageFieldCount()
+              .then(function (pageCount) {
+                common.log('Page 4 count = ' + pageCount.length);
+                expect(pageCount.length).to.be(10);
               });
           })
           .then(function () {
@@ -569,7 +596,7 @@ define(function (require) {
           // increase Popularity
           .then(function openControlsByName() {
             return settingsPage
-              .openControlsByName('geo.coordinates.lon');
+              .openControlsByName('geo.coordinates');
           })
           .then(function increasePopularity() {
             return settingsPage
@@ -595,7 +622,7 @@ define(function (require) {
           })
           .then(function openControlsByName() {
             return settingsPage
-              .openControlsByName('geo.coordinates.lon');
+              .openControlsByName('geo.coordinates');
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
@@ -623,7 +650,7 @@ define(function (require) {
           // open it again to see that it saved
           .then(function openControlsByName() {
             return settingsPage
-              .openControlsByName('geo.coordinates.lon');
+              .openControlsByName('geo.coordinates');
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {

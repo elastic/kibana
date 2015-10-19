@@ -482,14 +482,18 @@ define(function (require) {
           return loadButton
             .click();
         })
-        .then(function () {
+        .then(function findVizByLinkedText() {
           common.log('Load Saved Vis button clicked');
           return self.remote
             .setFindTimeout(defaultTimeout)
             .findByLinkText(vizName)
-            .then(function (viz) {
+            .then(function clickSavedViz(viz) {
               return viz
                 .click();
+            })
+            .then(function getSpinnerDone() {
+              return self
+                .getSpinnerDone(); // only matches the hidden spinners
             })
             .catch(function () {
               common.log('didn\'t find vis name on first page');
@@ -720,7 +724,7 @@ define(function (require) {
     },
 
 
-    // this is ALMOST identical to DiscoverPAge.getBarChartData
+    // this is ALMOST identical to DiscoverPage.getBarChartData
     getBarChartData: function getBarChartData() {
       var self = this.remote;
       var yAxisLabel = 0;
@@ -785,6 +789,34 @@ define(function (require) {
 
     },
 
+    // https://jbkflex.wordpress.com/2011/07/28/creating-a-svg-pie-chart-html5/
+    // http://www.w3.org/TR/SVG2/paths.html#PathDataEllipticalArcCommands
+    getPieChartData: function getPieChartData() {
+      var self = this.remote;
+
+      // 1). get the maximim chart Y-Axis marker value
+      return this.remote
+        .setFindTimeout(defaultTimeout * 2)
+        // path.slice:nth-child(11)
+        .findAllByCssSelector('path.slice')
+        .then(function (chartTypes) {
+          function getChartType(chart) {
+            return chart
+              .getAttribute('d')
+              .then(function (slice) {
+                return slice;
+              });
+          }
+          var getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then(function (slices) {
+          //common.log('slices=' + slices);
+          return slices;
+        });
+    },
+
+
 
 
     getChartAreaWidth: function getChartAreaWidth() {
@@ -807,15 +839,25 @@ define(function (require) {
     },
 
     getSpinnerDone: function getSpinnerDone() {
+      var self = this;
       return this.remote
-        .setFindTimeout(defaultTimeout * 2)
-        .findByCssSelector('span.spinner.ng-hide');
+        .setFindTimeout(defaultTimeout * 10)
+        //#kibana-body > div.content > nav > div.navbar-header > span > span.spinner.ng-hide
+        // <span ng-show="chrome.httpActive.length" class="spinner ng-hide"><div class="bounce1"></div> <div class="bounce2"></div> <div class="bounce3"></div></span>
+
+      // #kibana-body > div.content > nav > div.navbar-collapse.collapse > ul:nth-child(3) > li > div [class=spinner]
+
+      // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.spinner.large.ng-hide
+      .findByCssSelector('span.spinner.ng-hide')
+        .then(function () {
+          return self.remote
+            .setFindTimeout(defaultTimeout * 10)
+            .findByCssSelector('div.spinner.large.ng-hide');
+        });
     },
 
 
     getDataTableData: function getDataTableData() {
-      // html body#kibana-body div.content div.application.ng-scope.tab-visualize div.vis-editor.vis-type-table div.vis-editor-content div.vis-editor-canvas visualize.ng-isolate-scope.only-visualization div.visualize-chart div.table-vis.ng-scope div.table-vis-container.ng-scope kbn-agg-table-group.ng-isolate-scope table.table.agg-table-group.ng-scope tbody.ng-scope tr td kbn-agg-table.ng-scope.ng-isolate-scope paginated-table.ng-scope.ng-isolate-scope paginate.agg-table.ng-scope div.agg-table-paginated table.table.table-condensed tbody
-      // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > visualize-spy > div.visualize-spy-container > div > kbn-agg-table > paginated-table > paginate > div.agg-table-paginated > table > tbody > tr:nth-child(1) > td.cell-hover.ng-scope
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('table.table.table-condensed tbody')
@@ -827,8 +869,6 @@ define(function (require) {
     clickColumns: function clickColumns() {
       return this.remote
         .setFindTimeout(defaultTimeout)
-        // html body#kibana-body div.content div.application.ng-scope.tab-visualize div.vis-editor.vis-type-line div.vis-editor-content div.collapsible-sidebar vis-editor-sidebar.vis-editor-sidebar.ng-scope div.sidebar-container form.sidebar-list.ng-dirty.ng-valid.ng-valid-required div.vis-editor-config vis-editor-agg-group.ng-scope div.sidebar-item div.vis-editor-agg-group.buckets div.vis-editor-agg-wrapper.ng-scope ng-form.vis-editor-agg.ng-dirty.ng-valid.ng-valid-required vis-editor-agg-params.vis-editor-agg-editor.ng-scope div.schemaEditors.ng-scope div.form-group div.btn-group button.btn.btn-xs.btn-default.ng-valid.ng-dirty.active.ng-touched
-        // #kibana-body > div.content > div > div > div > div.collapsible-sidebar > vis-editor-sidebar > div > form > div:nth-child(3) > vis-editor-agg-group:nth-child(2) > div > div.vis-editor-agg-group.buckets > div > ng-form > vis-editor-agg-params > div.schemaEditors.ng-scope > div > div > button:nth-child(2)
         .findByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)')
         .then(function clickIt(chart) {
           return chart

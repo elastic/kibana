@@ -215,14 +215,7 @@ define(function (require) {
               .getSpinnerDone(); // only matches the hidden spinner
           })
           .then(function () {
-            return discoverPage
-              .getCurrentQueryName()
-              .then(function (name) {
-                common.log(name);
-              });
-          })
-          .then(function () {
-            return common.tryForTime(5000, function () {
+            return common.tryForTime(15000, function () {
               return discoverPage
                 .getCurrentQueryName()
                 .then(function (name) {
@@ -259,8 +252,16 @@ define(function (require) {
                   }
                 }
                 common.log('Done');
+              })
+              .catch(function screenshotError(reason) {
+                common.log('Test Failed, taking screenshot "./screenshot-testSavingQuery-ERROR- + Date.now() + .png"');
+                return remote
+                  .takeScreenshot()
+                  .then(function screenshot2a(data) {
+                    fs.writeFileSync('./screenshot-testSavingQuery-ERROR-' + Date.now() + '.png', data);
+                    throw new Error(reason);
+                  });
               });
-
           });
       }
     };

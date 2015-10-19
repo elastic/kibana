@@ -36,7 +36,6 @@ define(function (require) {
     var toTime = '2015-09-21 18:31:44.000';
     //var url = 'http://localhost:5601';
     // inverted timestamp makes loading saved items much easier in paginated lists
-    var timestamp = '__' + (2000000000000 - Date.now());
 
     return {
       setup: function () {
@@ -104,9 +103,13 @@ define(function (require) {
 
 
       'testAreaChartVisualization': function () {
+        var testSubName = 'AreaChart';
+        common.log('Start of test' + testSubName + 'Visualization');
         this.timeout = 60000;
-
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
         var remote = this.remote;
+
         var expectedChartTypeCount = 8;
         var chartHeight = 0;
         var expectedChartTypes = [
@@ -153,29 +156,28 @@ define(function (require) {
         ];
 
 
-        common.log('Start of testAreaChartVisualization');
         return this.remote
           .get(url.format(_.assign(config.kibana, {
             pathname: ''
           })))
           .setWindowSize(1011, 800)
-          .then(function () {
+          .then(function clickVisualize() {
             return headerPage
               .clickVisualize();
           })
           // find all the chart types and make sure there all there
-          .then(function () {
+          .then(function getChartTypeCount() {
             return visualizePage
               .getChartTypeCount()
-              .then(function (chartTypeCount) {
+              .then(function verifyChartTypeCount(chartTypeCount) {
                 common.log('chartTypeCount = ' + chartTypeCount + ' Expected = ' + expectedChartTypeCount);
                 expect(chartTypeCount).to.be(expectedChartTypeCount);
               });
           })
-          .then(function () {
+          .then(function getChartTypes() {
             return visualizePage
               .getChartTypes()
-              .then(function (chartTypes) {
+              .then(function testChartTypes(chartTypes) {
                 common.log('returned chart types = ' + chartTypes);
                 common.log('expected chart types = ' + expectedChartTypes);
                 expect(chartTypes).to.eql(expectedChartTypes);
@@ -203,27 +205,27 @@ define(function (require) {
         // })
 
 
-        .then(function () {
+        .then(function clickAreaChart() {
             return visualizePage
               .clickAreaChart();
           })
-          .then(function () {
+          .then(function clickNewSearch() {
             return visualizePage
               .clickNewSearch();
           })
-          .then(function () {
+          .then(function clickTimepicker() {
             return common.tryForTime(5000, function () {
               return discoverPage
                 .clickTimepicker();
             });
           })
 
-        .then(function () {
+        .then(function setAbsoluteRange() {
             common.log('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
             return discoverPage
               .setAbsoluteRange(fromTime, toTime);
           })
-          .then(function () {
+          .then(function collapseTimepicker() {
             common.log('Collapse Time Picker pane');
             return discoverPage
               .collapseTimepicker();
@@ -237,12 +239,12 @@ define(function (require) {
                 expect(message).to.be('Area charts require more than one data point. Try adding an X-Axis Aggregation');
               });
           })
-          .then(function () {
+          .then(function clickBucket() {
             common.log('Click X-Axis');
             return visualizePage
               .clickBucket('X-Axis');
           })
-          .then(function () {
+          .then(function selectAggregation() {
             common.log('Click Date Histogram');
             return visualizePage
               .selectAggregation('Date Histogram');
@@ -251,7 +253,7 @@ define(function (require) {
             return visualizePage
               .getSpinnerDone();
           })
-          .then(function () {
+          .then(function getField() {
             common.log('Check field value');
             return visualizePage
               .getField()
@@ -260,7 +262,7 @@ define(function (require) {
                 expect(fieldValue).to.be('@timestamp');
               });
           })
-          .then(function () {
+          .then(function getInterval() {
             return visualizePage
               .getInterval()
               .then(function (intervalValue) {
@@ -268,7 +270,7 @@ define(function (require) {
                 expect(intervalValue).to.be('Auto');
               });
           })
-          .then(function () {
+          .then(function clickGo() {
             return visualizePage
               .clickGo();
           })
@@ -276,7 +278,7 @@ define(function (require) {
             return visualizePage
               .getSpinnerDone(); // only matches the hidden spinner
           })
-          .then(function () {
+          .then(function saveVisualization() {
             return visualizePage
               .saveVisualization(vizName1)
               .then(function (message) {
@@ -288,20 +290,16 @@ define(function (require) {
             return visualizePage
               .waitForToastMessageGone();
           })
-          .then(function () {
+          .then(function loadSavedVisualization() {
             return visualizePage
               .loadSavedVisualization(vizName1)
               // take a snapshot just as an example.  Probably need to change the location to save them...
               .takeScreenshot()
               .then(function (data) {
-                fs.writeFileSync('./screenshot-AreaChart.png', data);
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
               });
           })
-          .then(function sleep() {
-            return common
-              .sleep(1000);
-          })
-          .then(function () {
+          .then(function getXAxisLabels() {
             return visualizePage
               .getXAxisLabels()
               .then(function (labels) {
@@ -309,7 +307,7 @@ define(function (require) {
                 expect(labels).to.eql(xAxisLabels);
               });
           })
-          .then(function () {
+          .then(function getYAxisLabels() {
             return visualizePage
               .getYAxisLabels()
               .then(function (labels) {
@@ -318,11 +316,11 @@ define(function (require) {
               });
           })
           // before we get the points on the chart, lets get the data below it and change that
-          .then(function () {
+          .then(function collapseChart() {
             return visualizePage
               .collapseChart();
           })
-          .then(function () {
+          .then(function setPageSize() {
             return settingsPage
               .setPageSize('All');
           })
@@ -335,7 +333,7 @@ define(function (require) {
               });
           })
           // expandChart (toggle)
-          .then(function () {
+          .then(function collapseChart() {
             return visualizePage
               .collapseChart();
           })
@@ -343,7 +341,7 @@ define(function (require) {
             return common
               .sleep(500);
           })
-          .then(function () {
+          .then(function getAreaChartData() {
             //return common.tryForTime(500, function () {
             return visualizePage
               .getAreaChartData()
@@ -351,23 +349,33 @@ define(function (require) {
                 expect(paths).to.eql(expectedAreaChartData);
               });
             //});
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
-      // ///////////////////////////////////////////////////////////////////////////////////////
+
       'testDataTableVisualization': function () {
+        var testSubName = 'DataTable';
+        common.log('Start of test' + testSubName + 'Visualization');
+        this.timeout = 60000;
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
         var remote = this.remote;
+
         var expectedChartTypeCount = 8;
         var chartHeight = 0;
         var vizName2 = timestamp + ' Visualization Data Table';
         var expectedChartData = ['0 1,063', '2,000 1,422', '4,000 1,408', '6,000 1,477',
           '8,000 1,471', '10,000 82', '12,000 76', '14,000 66', '16,000 78', '18,000 66'
         ];
-
-
-
-        common.log('Start of testDataTableVisualization');
-        this.timeout = 60000;
 
         return this.remote
           .get(url.format(_.assign(config.kibana, {
@@ -472,19 +480,14 @@ define(function (require) {
                 expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName2 + '\"');
               });
           })
-          // .then(function () {
-          //   return visualizePage
-          //     .getSpinnerDone();
-          // })
-          .then(function loadSavedVisualization() {
+          .then(function () {
             return visualizePage
-              .loadSavedVisualization(vizName2)
+              .loadSavedVisualization(vizName1)
               // take a snapshot just as an example.  Probably need to change the location to save them...
               .takeScreenshot()
               .then(function (data) {
-                fs.writeFileSync('./screenshot-DataTable.png', data);
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
               });
-
           })
           .then(function getDataTableData() {
             return visualizePage
@@ -493,20 +496,30 @@ define(function (require) {
                 common.log(data.split('\n'));
                 expect(data.split('\n')).to.eql(expectedChartData);
               });
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
 
-
       'testLineChartVisualization': function () {
 
+        var testSubName = 'LineChart';
+        common.log('Start of test' + testSubName + 'Visualization');
+        this.timeout = 60000;
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
         var remote = this.remote;
-        var vizName1 = timestamp + ' Visualization Line Chart';
+
         var expectedChartData = ['jpg 4,683', 'css 1,106', 'png 701', 'gif 494', 'php 225'];
 
-
-        common.log('Start of testLineChartVisualization');
-        this.timeout = 80000;
         return this.remote
           .get(url.format(_.assign(config.kibana, {
             pathname: ''
@@ -611,13 +624,13 @@ define(function (require) {
             return visualizePage
               .waitForToastMessageGone();
           })
-          .then(function loadSavedVisualization() {
+          .then(function () {
             return visualizePage
               .loadSavedVisualization(vizName1)
               // take a snapshot just as an example.  Probably need to change the location to save them...
               .takeScreenshot()
               .then(function (data) {
-                fs.writeFileSync('./screenshot-LineChart.png', data);
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
               });
           })
           // before we get the points on the chart, lets get the data below it and change that
@@ -657,14 +670,28 @@ define(function (require) {
                 }
                 common.log('Done');
               });
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
 
       'testMetricChartVisualization': function () {
 
+        var testSubName = 'MetricChart';
+        common.log('Start of test' + testSubName + 'Visualization');
+        this.timeout = 60000;
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
         var remote = this.remote;
-        var vizName1 = timestamp + ' Visualization Metric Chart';
+
         var expectedCount = ['7,209', 'Count'];
         var avgMachineRam = ['13,109,049,499.121', 'Average machine.ram'];
         var sumPhpMemory = ['45,433,560', 'Sum of phpmemory'];
@@ -682,8 +709,6 @@ define(function (require) {
         ];
         var percentileRankBytes = ['1.36%', 'Percentile rank 99 of "memory"'];
 
-        common.log('Start of testMetricChartVisualization');
-        this.timeout = 80000;
         return this.remote
           .get(url.format(_.assign(config.kibana, {
             pathname: ''
@@ -1000,21 +1025,36 @@ define(function (require) {
             return visualizePage
               .waitForToastMessageGone();
           })
-          .then(function loadSavedVisualization() {
+          .then(function () {
             return visualizePage
               .loadSavedVisualization(vizName1)
               // take a snapshot just as an example.  Probably need to change the location to save them...
               .takeScreenshot()
               .then(function (data) {
-                fs.writeFileSync('./screenshot-MetricChart.png', data);
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
+              });
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
               });
           });
       },
 
+
       'testVerticalBarChartVisualization': function () {
 
+        var testSubName = 'VerticalBarChart';
+        common.log('Start of test' + testSubName + 'Visualization');
+        this.timeout = 60000;
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
         var remote = this.remote;
-        var vizName1 = timestamp + ' Visualization Vertical Bar Chart';
+
         // this is only the first page of the tabular data.
         var expectedChartData = ['September 20th 2015, 06:30:00.000 254',
           'September 20th 2015, 07:00:00.000 282',
@@ -1033,9 +1073,6 @@ define(function (require) {
           211, 235, 272, 241, 258, 262, 234, 240, 228, 193, 158, 149, 122, 108, 89, 81, 52, 47, 19, 29, 13, 17, 7, 8, 8, 2, 2
         ];
 
-        common.log('Start of testVerticalBarChartVisualization');
-
-        this.timeout = 80000;
         return this.remote
           .get(url.format(_.assign(config.kibana, {
             pathname: ''
@@ -1130,14 +1167,19 @@ define(function (require) {
             return visualizePage
               .waitForToastMessageGone();
           })
-          .then(function loadSavedVisualization() {
+          .then(function () {
             return visualizePage
               .loadSavedVisualization(vizName1)
               // take a snapshot just as an example.  Probably need to change the location to save them...
               .takeScreenshot()
               .then(function (data) {
-                fs.writeFileSync('./screenshot-LineChart.png', data);
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
               });
+          })
+          // there shouldn't be any message here
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return visualizePage
+              .waitForToastMessageGone();
           })
           // before we get the points on the chart, lets get the data below it and change that
           .then(function () {
@@ -1170,10 +1212,473 @@ define(function (require) {
                 expect(data).to.eql(expectedChartValues);
                 common.log('Done');
               });
+          })
+          .then(function () {
+            return common
+              .sleep(2000);
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
+          });
+      },
+
+
+      'testTileMapVisualization': function () {
+        var testSubName = 'TileMap';
+        common.log('Start of test' + testSubName + 'Visualization');
+        this.timeout = 60000;
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
+        var remote = this.remote;
+        var expectedTableData = ['dn 742',
+          'dp 723',
+          '9y 629',
+          '9z 559',
+          'dr 525',
+          'dj 520',
+          '9v 503',
+          '9q 370',
+          '9w 248',
+          'c2 227',
+          'cb 225',
+          '9x 223',
+          'dq 193',
+          '9r 188',
+          '9t 147',
+          'c8 142',
+          'dh 113',
+          'bd 109',
+          'b6 105',
+          'b7 88',
+          'be 70',
+          'f0 69',
+          '9m 69',
+          'bf 47',
+          'de 44',
+          'bg 35',
+          '9p 35',
+          '9u 29',
+          'c4 28',
+          '8e 25',
+          'c1 24',
+          'f2 21',
+          '87 19',
+          'c0 18',
+          'bs 18',
+          'b3 16',
+          'bk 12',
+          '84 11',
+          'b5 9',
+          '8f 8',
+          'bu 6',
+          'b1 5',
+          'dx 4',
+          'b4 4',
+          '9n 2'
+        ];
+
+
+        return this.remote
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
+          .setWindowSize(1011, 800)
+          .then(function sleep() {
+            return common
+              .sleep(1000);
+          })
+          .then(function () {
+            return headerPage
+              .clickVisualize();
+          })
+
+        // Here's a variation in behavior depending on whether or not there is an
+        // existing visualization (saved or not saved?).
+        // If there is no vis, you get the chart type selection.
+        // If there is, you get the existing (or most recent) vis.
+
+        // If the 'New Visualization' button is there, click it,
+        //   else, go on to select chart type.
+        .then(function () {
+            return visualizePage
+              .clickNewVisualization()
+              .then(function () {
+                common.log('We found and clicked on the New Visualization button so there must be existing vis');
+                return;
+              })
+              .catch(function () {
+                common.log('We didn\'t find the New Visualization button so this must be the first');
+                return;
+              });
+          })
+          .then(function () {
+            return visualizePage
+              .clickTileMap();
+          })
+          .then(function () {
+            return visualizePage
+              .clickNewSearch();
+          })
+          .then(function () {
+            return common.tryForTime(5000, function () {
+              return discoverPage
+                .clickTimepicker();
+            });
+          })
+          .then(function () {
+            common.log('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+            return discoverPage
+              .setAbsoluteRange(fromTime, toTime);
+          })
+          .then(function () {
+            common.log('Collapse Time Picker pane');
+            return discoverPage
+              .collapseTimepicker();
+          })
+          .then(function () {
+            common.log('select bucket Geo Coordinates');
+            return visualizePage
+              .clickBucket('Geo Coordinates');
+          })
+          .then(function () {
+            common.log('Click aggregation Geohash');
+            return visualizePage
+              .selectAggregation('Geohash');
+          })
+          .then(function () {
+            common.log('Click field geo.coordinates');
+            return common.tryForTime(1000, function () {
+              return visualizePage
+                .selectField('geo.coordinates');
+            });
+          })
+          .then(function () {
+            return visualizePage
+              .clickGo();
+          })
+          .then(function () {
+            return visualizePage
+              .getSpinnerDone(); // only matches the hidden spinner
+          })
+          .then(function () {
+            return visualizePage
+              .saveVisualization(vizName1)
+              .then(function (message) {
+                common.log('Saved viz message = ' + message);
+                expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+              });
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return visualizePage
+              .waitForToastMessageGone();
+          })
+          .then(function () {
+            return visualizePage
+              .loadSavedVisualization(vizName1)
+              // take a snapshot just as an example.  Probably need to change the location to save them...
+              .takeScreenshot()
+              .then(function (data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
+              });
+          })
+          .then(function sleep() {
+            return common
+              .sleep(500);
+          })
+          // before we get the points on the chart, lets get the data below it and change that
+          .then(function () {
+            return visualizePage
+              .collapseChart();
+          })
+          .then(function () {
+            return settingsPage
+              .setPageSize('All');
+          })
+          .then(function getDataTableData() {
+            return visualizePage
+              .getDataTableData()
+              .then(function showData(data) {
+                common.log(data.split('\n'));
+                expect(data.trim().split('\n')).to.eql(expectedTableData);
+              });
+          })
+          // expandChart (toggle)
+          .then(function () {
+            return visualizePage
+              .collapseChart();
+            // })
+            // .then(function sleep() {
+            //   return common
+            //     .sleep(100);
+            // })
+            // .then(function () {
+            //   //return common.tryForTime(500, function () {
+            //   return visualizePage
+            //     .getTileMapData()
+            //     .then(function (mapData) {
+            //       common.log('Pie Chart slice data=' + mapData);
+            //       //expect(slices).to.eql(expectedAreaChartData);
+            //     });
+            //});
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
+          });
+      },
+
+
+      'testPieChartVisualization': function () {
+        var testSubName = 'PieChart';
+        common.log('Start of test' + testSubName + 'Visualization');
+        this.timeout = 60000;
+        var timestamp = '__' + (2000000000000 - Date.now());
+        var vizName1 = timestamp + ' Visualization ' + testSubName;
+        var remote = this.remote;
+
+        var expectedTableData = ['0 23',
+          '40,000 22',
+          '80,000 23',
+          '120,000 23',
+          '160,000 19',
+          '200,000 24',
+          '240,000 21',
+          '280,000 22',
+          '320,000 20',
+          '360,000 28'
+        ];
+
+        return this.remote
+          .get(url.format(_.assign(config.kibana, {
+            pathname: ''
+          })))
+          .then(function sleep() {
+            return common
+              .sleep(100);
+          })
+          .setWindowSize(1011, 800)
+          .then(function () {
+            return headerPage
+              .clickVisualize();
+          })
+
+        // Here's a variation in behavior depending on whether or not there is an
+        // existing visualization (saved or not saved?).
+        // If there is no vis, you get the chart type selection.
+        // If there is, you get the existing (or most recent) vis.
+
+        // If the 'New Visualization' button is there, click it,
+        //   else, go on to select chart type.
+        .then(function () {
+            return visualizePage
+              .clickNewVisualization()
+              .then(function () {
+                common.log('We found and clicked on the New Visualization button so there must be existing vis');
+                return;
+              })
+              .catch(function () {
+                common.log('We didn\'t find the New Visualization button so this must be the first');
+                return;
+              });
+          })
+          .then(function () {
+            return visualizePage
+              .clickPieChart();
+          })
+          .then(function () {
+            return visualizePage
+              .clickNewSearch();
+          })
+          .then(function () {
+            return common.tryForTime(5000, function () {
+              return discoverPage
+                .clickTimepicker();
+            });
+          })
+
+        .then(function () {
+            common.log('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+            return discoverPage
+              .setAbsoluteRange(fromTime, toTime);
+          })
+          .then(function () {
+            common.log('Collapse Time Picker pane');
+            return discoverPage
+              .collapseTimepicker();
+          })
+          /////////////////
+          // .then(function () {
+          //   return visualizePage
+          //     .getErrorMessage()
+          //     .then(function (message) {
+          //       common.log('message = ' + message);
+          //       expect(message).to.be('Area charts require more than one data point. Try adding an X-Axis Aggregation');
+          //     });
+          // })
+          .then(function () {
+            common.log('select bucket Split Slices');
+            return visualizePage
+              .clickBucket('Split Slices');
+          })
+          .then(function () {
+            common.log('Click aggregation Histogram');
+            return visualizePage
+              .selectAggregation('Histogram');
+          })
+          .then(function () {
+            common.log('Click field memory');
+            return visualizePage
+              .selectField('memory');
+          })
+          .then(function () {
+            return visualizePage
+              .getSpinnerDone();
+          })
+          .then(function () {
+            return visualizePage
+              .setNumericInterval('40000');
+          })
+          .then(function () {
+            return visualizePage
+              .clickGo();
+          })
+          .then(function () {
+            return visualizePage
+              .getSpinnerDone(); // only matches the hidden spinner
+          })
+          .then(function () {
+            return visualizePage
+              .saveVisualization(vizName1)
+              .then(function (message) {
+                common.log('Saved viz message = ' + message);
+                expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+              });
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return visualizePage
+              .waitForToastMessageGone();
+          })
+          .then(function () {
+            return visualizePage
+              .loadSavedVisualization(vizName1)
+              // take a snapshot just as an example.  Probably need to change the location to save them...
+              .takeScreenshot()
+              .then(function (data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
+              });
+          })
+          .then(function sleep() {
+            return common
+              .sleep(500);
+          })
+          // before we get the points on the chart, lets get the data below it and change that
+          .then(function () {
+            return visualizePage
+              .collapseChart();
+          })
+          .then(function () {
+            return settingsPage
+              .setPageSize('All');
+          })
+          .then(function getDataTableData() {
+            return visualizePage
+              .getDataTableData()
+              .then(function showData(data) {
+                common.log(data.split('\n'));
+                expect(data.trim().split('\n')).to.eql(expectedTableData);
+              });
+          })
+          // expandChart (toggle)
+          .then(function () {
+            return visualizePage
+              .collapseChart();
+          })
+          .then(function sleep() {
+            return common
+              .sleep(500);
+          })
+          .then(function () {
+            //return common.tryForTime(500, function () {
+            return visualizePage
+              .getPieChartData()
+              .then(function (slices) {
+                common.log('Pie Chart slice data=' + slices);
+                // this logs 13.  There's 12 slices (the last element of the split is empty).
+                common.log('Pie Chart typeof(slice)=' + (slices.toString()).split('Z').length);
+
+                //expect(slices).to.eql(expectedAreaChartData);
+
+                // Each slice below has 4 commands;
+                // * Move to one of the ends of a slice arc
+                // * Arc clickwise(1) to another point
+                // * Line to center 0,0
+                // * Zclose
+
+                // slices=
+                // M1.526981477686856e-14,-249.375
+                //   A249.375,249.375 0 0,1 1.7392608661981475,-249.36893470646922
+                //   L0,0Z,
+                // M1.7392608661981475,-249.36893470646922
+                //   A249.375,249.375 0 0,1 38.75851337184286,-246.34461282156076
+                //   L0,0Z,
+                // M38.75851337184286,-246.34461282156076
+                //   A249.375,249.375 0 0,1 88.47259401416454,-233.1533631183664
+                //   L0,0Z,
+                // M88.47259401416454,-233.1533631183664
+                //   A249.375,249.375 0 0,1 116.20119793670887,-220.64716681406497
+                //   L0,0Z,
+                // M116.20119793670887,-220.64716681406497
+                //   A249.375,249.375 0 0,1 131.48011654525644,-211.89825289097072
+                //   L0,0Z,
+                // M131.48011654525644,-211.89825289097072
+                //   A249.375,249.375 0 0,1 185.912174295682,-166.20635990735116
+                //   L0,0Z,
+                // M185.912174295682,-166.20635990735116
+                //   A249.375,249.375 0 0,1 247.9484003980758,-26.63609139936818
+                //   L0,0Z,
+                // M247.9484003980758,-26.63609139936818
+                //   A249.375,249.375 0 0,1 223.7787036397108,110.04990877929197
+                //   L0,0Z,
+                // M223.7787036397108,110.04990877929197
+                //   A249.375,249.375 0 0,1 -97.64922270251822,229.46136914651672
+                //   L0,0Z,
+                // M-97.64922270251822,229.46136914651672
+                //   A249.375,249.375 0 0,1 -206.364967580836,-140.0049669846056
+                //   L0,0Z,
+                // M-206.364967580836,-140.0049669846056
+                //   A249.375,249.375 0 0,1 -27.77067802839771,-247.82388921740994
+                //   L0,0Z,
+                // M-27.77067802839771,-247.82388921740994
+                //   A249.375,249.375 0 0,1 -4.5809444330605675e-14,-249.375
+                //   L0,0Z
+
+              })
+              .then(function () {
+                return common
+                  .sleep(2000);
+              })
+              .catch(function screenshotError(reason) {
+                common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+                return remote
+                  .takeScreenshot()
+                  .then(function screenshot2a(data) {
+                    fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                    throw new Error(reason);
+                  });
+              });
           });
       }
-
-
 
     };
   });
