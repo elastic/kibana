@@ -15,6 +15,6 @@ define(function (require) {
       'test/functional/status.js',
       'test/functional/testSettings'
     ],
-    excludeInstrumentation: /(fixtures|node_modules)\//
+    excludeInstrumentation: /^(?:tests|fixtures|node_modules)\//
   }, serverConfig);
 });

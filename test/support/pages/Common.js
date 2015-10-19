@@ -31,11 +31,17 @@ define(function (require) {
           throw new Error('timeout');
         }
 
-        return Promise.try(block).catch(function (err) {
-          self.log('failed with "' + err.message + '"');
-          self.log('trying again in 1/2 second');
-          return Promise.delay(500).then(attempt);
-        });
+        return Promise
+          .try(block)
+          .then(function tryForTimeSuccess() {
+            self.log('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
+            return (lastTry - start);
+          })
+          .catch(function tryForTimeCatch(err) {
+            self.log('failed with "' + err.message + '"');
+            self.log('trying again in 1/2 second');
+            return Promise.delay(500).then(attempt);
+          });
       }
 
       return Promise.try(attempt);
