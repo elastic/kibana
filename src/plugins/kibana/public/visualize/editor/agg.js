@@ -73,6 +73,10 @@ define(function (require) {
 
         // TODO: include metric labels in params in Agg
         function setMetricsLabels() {
+          if (!$scope.vis) { // For testing
+            return;
+          }
+
           if ($scope.vis.params.metricsLabels === undefined) {
             $scope.vis.params.metricsLabels = {};
             return;
@@ -108,7 +112,7 @@ define(function (require) {
           var supported = false;
 
           // Only supported in Metric vis yet
-          if (aggregation.vis.type.name === 'metric') {
+          if (aggregation.vis && aggregation.vis.type.name === 'metric') {
             supported = true;
           }
           return supported;
