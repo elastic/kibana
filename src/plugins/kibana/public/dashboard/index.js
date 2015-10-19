@@ -119,26 +119,25 @@ define(function (require) {
           }
 
           initPanelIndices();
-
           $scope.$emit('application.load');
         }
 
         function initPanelIndices() {
           // find the largest panelIndex in all the panels
-          var maxIndex = $scope.state.panels.reduce(function (index, panel) {
-            return Math.max(index, panel.panelIndex || 0);
-          }, 0);
+          var maxIndex = getPanelIndex();
 
           // ensure that all panels have a panelIndex
           $scope.state.panels.forEach(function (panel) {
-            if (!panel.panelIndex) panel.panelIndex = ++maxIndex;
+            if (!panel.panelIndex) {
+              panel.panelIndex = maxIndex++;
+            }
           });
         }
 
         function getPanelIndex() {
-          var index = $scope.state.panels.reduce(function (index, panel) {
+          var index = $scope.state.panels.reduce(function (idx, panel) {
             // if panel is missing an index, add one and increment the index
-            return Math.max(index, panel.panelIndex);
+            return Math.max(idx, panel.panelIndex || idx);
           }, 0);
           return ++index;
         }
