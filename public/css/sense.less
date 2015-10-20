@@ -13,7 +13,8 @@
 
 #editor_container {
   display: flex;
-  flex: 0 0 468px;
+  flex: 0 0 auto;
+  width: 468px;
 
   #autocomplete {
     position: absolute;
@@ -31,9 +32,11 @@
 }
 
 #editor_resizer {
+  display: flex;
   flex: 0 0 13px;
   cursor: ew-resize;
   background-color: transparent;
+  align-items: center;
 
   &:hover {
     background-color: #DCDCDC;

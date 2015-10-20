@@ -47,30 +47,51 @@ var $autoIndent = $("#auto_indent").click(function (e) {
   input.focus();
 });
 
-var $header = $('.navbar.navbar-static-top');
-
 // containers for the two editors
 var $left = input.$el.parent();
 var $right = output.$el.parent();
 
-$left.resizable({
-  autoHide: false,
-  handles: 'e',
-  start: function () {
-    $resizer.addClass('active');
-  },
-  resize: function () {
-    $right.css('left', $left.outerWidth() + 20);
-  },
-  stop: function () {
-    $resizer.removeClass('active');
-    $left.css('height', 'auto'); // $.resizeable sets the height which prevents it from reshaping later
-    input.resize(true);
-    output.resize(true);
+function readStoredEditorWidth() {
+  var json = window.localStorage.getItem('sense:editorWidth');
+  if (json !== null) {
+    return JSON.parse(json);
   }
-});
+}
 
-var $resizer = input.$el.siblings('.ui-resizable-e');
+function storeEditorWidth(editorWidth) {
+  window.localStorage.setItem('sense:editorWidth', JSON.stringify(editorWidth))
+}
+
+function setEditorWidth(editorWidth) {
+  storeEditorWidth(editorWidth);
+  $left.width(editorWidth);
+}
+
+var $resizer = $('#editor_resizer');
+$resizer
+  .on('mousedown', function (event) {
+    $resizer.addClass('active');
+    var startWidth = $left.width();
+    var startX = event.pageX;
+
+    function onMove(event) {
+      setEditorWidth(startWidth + event.pageX - startX)
+    }
+
+    $(document.body)
+      .on('mousemove', onMove)
+      .one('mouseup', function () {
+        $resizer.removeClass('active');
+        $(this).off('mousemove', onMove);
+        input.resize(true);
+        output.resize(true);
+      });
+  });
+
+const initialEditorWidth = readStoredEditorWidth();
+if (initialEditorWidth != null) {
+  setEditorWidth(initialEditorWidth);
+}
 
 es.addServerChangeListener(function (server) {
   $esServer.val(server);
@@ -85,6 +106,5 @@ $send.click(function () {
 module.exports = {
   $esServer: $esServer,
   $autoIndent: $autoIndent,
-  $header: $header,
   $resizer: $resizer
 };
