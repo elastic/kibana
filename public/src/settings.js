@@ -17,7 +17,6 @@
 
 let $ = require('jquery');
 let es = require('./es');
-//  './sense_editor/theme-sense-dark'
 
 function getFontSize() {
   return localStorage.getItem("font_size") || "12";
@@ -79,37 +78,12 @@ function setAutocomplete(settings) {
   return true;
 }
 
-function getTheme() {
-  return localStorage.getItem("theme") || "light";
-}
-
-function getAceTheme(mode) {
-  mode = mode || localStorage.getItem("theme") || "light";
-  return mode === "light" ? "" : "ace/theme/sense-dark";
-}
-
-
-function setTheme(mode) {
-  localStorage.setItem("theme", mode);
-
-  applyCurrentSettings();
-  return true;
-}
-
-function applyThemeToBody() {
-  var theme = getTheme();
-  $("#bootstrapThemeCss").attr("href", "/plugins/sense/webpackShims/bootstrap/css/bootstrap." + theme + ".min.css");
-  $("#senseThemeCss").attr("href", "/plugins/sense/css/sense." + theme + ".css");
-}
-
 function applyCurrentSettings(editor) {
   if (typeof editor === "undefined") {
     applyCurrentSettings(require('./input'));
     applyCurrentSettings(require('./output'));
-    applyThemeToBody();
   }
   if (editor) {
-    editor.setTheme(getAceTheme());
     editor.getSession().setUseWrapMode(getWrapMode());
     editor.$el.css("font-size", getFontSize() + "px");
   }
@@ -128,11 +102,6 @@ var wm = getWrapMode();
 wrap_mode_ctl.prop('checked', wm);
 //setWrapMode(wm);
 
-var theme_ctl = settings_popup.find("#theme");
-var theme = getTheme();
-theme_ctl.val(theme);
-applyThemeToBody();
-
 var autocompleteSettings = getAutocomplete();
 var autocomplete_fields_ctl = settings_popup.find("#autocomplete_fields");
 autocomplete_fields_ctl.prop('checked', autocompleteSettings.fields);
@@ -146,9 +115,6 @@ function save() {
   }
   if (!setWrapMode(wrap_mode_ctl.prop("checked"))) {
     wrap_mode_ctl.prop('checked', getWrapMode());
-  }
-  if (!setTheme(theme_ctl.val())) {
-    theme_ctl.val(getTheme());
   }
   setAutocomplete({
     fields: autocomplete_fields_ctl.prop('checked'),
@@ -166,7 +132,5 @@ settings_popup.find("form").submit(function () {
   return false
 });
 
-module.exports.getTheme = getTheme;
-module.exports.getAceTheme = getAceTheme;
 module.exports.getAutocomplete = getAutocomplete;
 module.exports.applyCurrentSettings = applyCurrentSettings;
