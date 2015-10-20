@@ -191,18 +191,18 @@ define(function (require) {
 
         // If the 'New Visualization' button is there, click it,
         //   else, go on to select chart type.
-        // .then(function () {
-        //   return visualizePage
-        //     .clickNewVisualization()
-        //     .then(function () {
-        //       common.log('We found and clicked on the New Visualization button so there must be existing vis');
-        //       return;
-        //     })
-        //     .catch(function () {
-        //       common.log('We didn\'t find the New Visualization button so this must be the first');
-        //       return;
-        //     });
-        // })
+        .then(function () {
+          return visualizePage
+            .clickNewVisualization()
+            .then(function () {
+              common.log('We found and clicked on the New Visualization button so there must be existing vis');
+              return;
+            })
+            .catch(function () {
+              common.log('We didn\'t find the New Visualization button so this must be the first');
+              return;
+            });
+        })
 
 
         .then(function clickAreaChart() {
