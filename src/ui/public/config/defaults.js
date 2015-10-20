@@ -24,10 +24,10 @@ define(function (require) {
         description: 'When displaying a pretty formatted date, use this format',
       },
       'dateFormat:tz': {
-        value: 'Default',
-        description: 'Which timezone should be used.  "Default" will use your detected timezone.',
+        value: 'Browser',
+        description: 'Which timezone should be used.  "Browser" will use the timezone detected by your browser.',
         type: 'select',
-        options: _.union(['Default'], moment.tz.names())
+        options: _.union(['Browser'], moment.tz.names())
       },
       'dateFormat:scaled': {
         type: 'json',
