@@ -90,6 +90,7 @@ ScenarioManager.prototype.deleteAll = function () {
  * @return {Promise} A promise that is resolved when elasticsearch has a response
  */
 ScenarioManager.prototype.loadIfEmpty = function (id) {
+  var self = this;
   var scenario = config[id];
   if (!scenario) throw new Error('No scenario found for ' + id);
 
@@ -100,27 +101,14 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
     return self.client.count({
       index: bulk.indexName
     }, function handleCountResponse(error, response) {
-      if (error) {
-        console.log('Need to load index.  error=' + error);
-      } else {
-        console.log('index=' + bulk.indexName + ' count=' + response.count);
-      }
-      // if the index is undefined or count ===0 then we need to load it
+      // if (error) {
+      //   console.log('Need to load index.  error=' + error);
+      // } else {
+      //   console.log('index=' + bulk.indexName + ' count=' + response.count);
+      // }
+      // if the index is undefined or count ===0 then call the load function above
       if (error || response.count === 0) {
-        if (bulk.indexDefinition) {
-          loadIndexDefinition = self.client.indices.create({
-            index: bulk.indexName,
-            body: require(path.join(scenario.baseDir, bulk.indexDefinition))
-          });
-        } else {
-          loadIndexDefinition = Promise.resolve();
-        }
-
-        return loadIndexDefinition.then(function bulkRequest() {
-          self.client.bulk({
-            body: require(path.join(scenario.baseDir, bulk.source)),
-          });
-        });
+        self.load(id);
       }
     });
   }));

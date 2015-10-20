@@ -1,16 +1,18 @@
 define(function (require) {
   var registerSuite = require('intern!object');
   var expect = require('intern/dojo/node!expect.js');
-  var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
+  var config = require('intern').config;
+  var url = require('intern/dojo/node!url');
+  var _ = require('intern/dojo/node!lodash');
 
   registerSuite(function () {
-    var url = 'http://localhost:5620/status';
-    var manager = new ScenarioManager('http://localhost:9220');
 
     return {
       'status': function () {
         return this.remote
-          .get(url)
+          .get(url.format(_.assign(config.kibana, {
+            pathname: '/status'
+          })))
           .setFindTimeout(60000)
           .findByCssSelector('.plugin_status_breakdown')
           .getVisibleText()
