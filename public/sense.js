@@ -1,4 +1,5 @@
 require('ace');
+require('./css/sense.css');
 
 require('ui/chrome')
 .setBrand({
@@ -11,5 +12,5 @@ require('ui/chrome')
 }])
 .setRootTemplate(require('./index.html'))
 .setRootController(function () {
-    require('./src/app');
+  require('./src/app');
 });

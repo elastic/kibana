@@ -1,20 +1,4 @@
-body {
-  margin: 0;
-  overflow: hidden;
-}
-
-body.fouc {
-  display: none;
-}
-
-.pull-right-btn {
-  float: right;
-  margin-right: 5px;
-}
-
-.pull-right-btn:first-of-type {
-  margin-right: 0;
-}
+@import "./sense.light.css";
 
 #es_method {
   width: 100px;
@@ -55,12 +39,6 @@ body.fouc {
   text-decoration: none;
 }
 
-.overlay {
-  background-color: #000;
-  opacity: 0.5;
-  z-index: 100;
-}
-
 #output, #editor {
   height: 100%;
   width: 100%;
@@ -88,47 +66,6 @@ body.fouc {
   margin: auto !important;
 }
 
-#history_popup {
-  width: 90%;
-  margin-left: -45%;
-  height: 90%;
-  top: 5%;
-  margin-top: 0;
-}
-
-#history_popup .modal-body {
-  position: relative;
-  max-height: none;
-  height: 100%;
-}
-
-#history_popup .modal-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  /* by pass body overlay*/
-  z-index: 10;
-}
-
-#history_popup .modal-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  /* by pass ace gutter */
-  z-index: 10;
-}
-
-#history_popup .nav {
-  position: absolute;
-  width: 400px;
-  left: 0;
-  top: 60px;
-  bottom: 70px;
-  overflow-y: auto;
-}
-
 #help_example_container,
 #welcome_example_container {
   width: 100%;
@@ -150,28 +87,6 @@ body.fouc {
   opacity: .25;
 }
 
-#history_popup .nav a {
-  display: block;
-  margin: 0 0 -1px;
-  padding: 8px 14px;
-  border: 1px solid #e5e5e5;
-  white-space: nowrap;
-  position: relative;
-  overflow: hidden;
-}
-
-#history_popup .nav li:first-child > a {
-  -webkit-border-radius: 6px 6px 0 0;
-  -moz-border-radius: 6px 6px 0 0;
-  border-radius: 6px 6px 0 0;
-}
-
-#history_popup .nav li:last-child > a {
-  -webkit-border-radius: 0 0 6px 6px;
-  -moz-border-radius: 0 0 6px 6px;
-  border-radius: 0 0 6px 6px;
-}
-
 #history_viewer {
   position: absolute;
   left: 430px;
@@ -185,27 +100,12 @@ body.fouc {
   height: 100%;
 }
 
-#welcome_popup {
-  top: 40%;
-}
-
-#welcome_popup .modal-body {
-  max-height: 600px;
-}
-
 .ui-autocomplete {
   z-index: 400 !important;
 }
 
 .ace_editor {
   line-height: normal;
-}
-
-.out_of_screen {
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  margin-left: -1000px;
 }
 
 .ace_layer.ace_marker-layer {
@@ -251,7 +151,3 @@ body.fouc {
 }
 
 /** END COPIED **/
-
-.modal.closed {
-  display: none;
-}
