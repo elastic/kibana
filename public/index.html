@@ -1,30 +1,66 @@
 <link rel="shortcut icon" href="/plugins/sense/favicon.ico">
 
-<div class="navbar navbar-static-top">
-  <div class="navbar-inner">
-    <div class="container-fluid">
-      <span class="brand" id="server_label">Server</span>
+<navbar>
+  <span class="name">Server</span>
 
-      <form class="navbar-form pull-left">
-        <input id="es_server" type="text" class="span5" value=""/>
-      </form>
-        <span class="pull-left btn btn-link"><span id="notification" style="visibility: hidden"
-            class="label label-info"></span></span>
-      <ul class="nav pull-right">
-        <li id="history_btn" data-toggle="modal" data-target="#history_popup">
-          <a title="History" href="#" data-placement="bottom"><i class="fa fa-clock-o"></i></a>
-        </li>
-        <li id="settings_btn" data-toggle="modal" data-target="#settings_popup">
-          <a title="Settings" href="#" data-placement="bottom"><i class="fa fa-cog"></i></a>
-        </li>
-        <li id="help_btn" data-toggle="modal" data-target="#help_popup">
-          <a title="Help" href="#" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
-        </li>
-      </ul>
-    </div>
+  <form
+    name="serverInput"
+    class="inline-form"
+    role="form">
 
+    <input
+      type="text"
+      id="es_server"
+      placeholder="http://servername:port"
+      aria-label="Server Name"
+      class="form-control">
+  </form>
+
+  <div class="fill">
+    <span class="label">
+      <span id="notification" class="hidden label label-info"></span>
+    </span>
   </div>
-</div>
+
+  <div class="button-group" role="toolbar">
+    <kbn-tooltip text="History" placement="bottom" append-to-body="1">
+      <button
+        id="history_btn"
+        aria-label="History"
+        aria-haspopup="true"
+        aria-expanded="{{ configTemplate.is('history') }}"
+        ng-class="{ active: configTemplate.is('history') }"
+        ng-click="configTemplate.toggle('history');">
+        <i aria-hidden="true" class="fa fa-clock-o"></i>
+      </button>
+    </kbn-tooltip>
+
+    <kbn-tooltip text="Settings" placement="bottom" append-to-body="1">
+      <button
+        id="settings_btn"
+        aria-label="Settings"
+        aria-haspopup="true"
+        aria-expanded="{{ configTemplate.is('settings') }}"
+        ng-class="{ active: configTemplate.is('settings') }"
+        ng-click="configTemplate.toggle('settings');">
+        <i aria-hidden="true" class="fa fa-cog"></i>
+      </button>
+    </kbn-tooltip>
+
+    <kbn-tooltip text="Help" placement="bottom" append-to-body="1">
+      <button
+        id="help_btn"
+        aria-label="Help"
+        aria-haspopup="true"
+        aria-expanded="{{ configTemplate.is('help') }}"
+        ng-class="{ active: configTemplate.is('help') }"
+        ng-click="configTemplate.toggle('help');">
+        <i aria-hidden="true" class="fa fa-question-circle"></i>
+      </button>
+    </kbn-tooltip>
+  </div>
+</navbar>
+
 <div id="main" class="container-fluid">
   <div id="editor_container">
     <div id="editor">GET _search
