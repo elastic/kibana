@@ -4,6 +4,8 @@ require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
 require('plugins/kibana/doc/index');
 
+var moment = require('moment-timezone');
+
 var chrome = require('ui/chrome');
 var routes = require('ui/routes');
 var modules = require('ui/modules');
@@ -48,8 +50,15 @@ chrome
   }
 ])
 .setRootController('kibana', function ($scope, $rootScope, courier, config) {
+  function setDefaultTimezone() {
+    moment.tz.setDefault(config.get('dateFormat:tz'));
+  }
+
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
     courier.start();
   });
+
+  $scope.$on('init:config', setDefaultTimezone);
+  $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
 });
