@@ -2,6 +2,7 @@ require('ace');
 require('./css/sense.less');
 require('./src/directives/senseHistory');
 require('./src/directives/senseHistoryViewer');
+require('./src/directives/senseSettings');
 
 require('ui/chrome')
 .setBrand({
@@ -20,7 +21,7 @@ require('ui/chrome')
 
   this.dropdown = new ConfigTemplate({
     history: '<sense-history></sense-history>',
-    settings: require('./src/modals/settings.html'),
+    settings: '<sense-settings></sense-settings>',
     help: require('./src/modals/help.html'),
   });
 });

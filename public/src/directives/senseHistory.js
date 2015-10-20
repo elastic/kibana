@@ -12,8 +12,8 @@ require('ui/modules')
     controllerAs: 'history',
     controller: function ($scope, $element) {
       this.reqs = history.getHistory();
-      this.activeReq = this.reqs[0];
-      this.viewingReq = this.activeReq;
+      this.selectedReq = this.reqs[0];
+      this.viewingReq = this.selectedReq;
 
       // calculate the text description of a request
       this.describeReq = memoize((req) => {
@@ -35,7 +35,7 @@ require('ui/modules')
         $scope.close();
       };
 
-      this.restore = (req = this.activeReq) => {
+      this.restore = (req = this.selectedReq) => {
         history.restoreFromHistory(req);
         $scope.close();
       };

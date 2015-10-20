@@ -89,48 +89,27 @@ function applyCurrentSettings(editor) {
   }
 }
 
-
-var settings_popup = $("#settings_popup");
-
-var font_size_ctl = settings_popup.find("#font_size");
-var fs = getFontSize();
-font_size_ctl.val(fs);
-//setFontSize(fs);
-
-var wrap_mode_ctl = settings_popup.find("#wrap_mode");
-var wm = getWrapMode();
-wrap_mode_ctl.prop('checked', wm);
-//setWrapMode(wm);
-
-var autocompleteSettings = getAutocomplete();
-var autocomplete_fields_ctl = settings_popup.find("#autocomplete_fields");
-autocomplete_fields_ctl.prop('checked', autocompleteSettings.fields);
-var autocomplete_indices_ctl = settings_popup.find("#autocomplete_indices");
-autocomplete_indices_ctl.prop('checked', autocompleteSettings.indices);
-
-
-function save() {
-  if (!setFontSize(font_size_ctl.val())) {
-    font_size_ctl.val(getFontSize());
-  }
-  if (!setWrapMode(wrap_mode_ctl.prop("checked"))) {
-    wrap_mode_ctl.prop('checked', getWrapMode());
-  }
-  setAutocomplete({
-    fields: autocomplete_fields_ctl.prop('checked'),
-    indices: autocomplete_indices_ctl.prop('checked')
-  });
-  require('./input').focus();
-  es.forceRefresh();
-  return true;
+function getCurrentSettings() {
+  return {
+    autocomplete: getAutocomplete(),
+    wrapMode: getWrapMode(),
+    fontSize: parseFloat(getFontSize()),
+  };
 }
 
-var save_button = settings_popup.find(".btn-primary");
-save_button.click(save);
-settings_popup.find("form").submit(function () {
-  save_button.click();
-  return false
-});
+function updateSettings({ fontSize, wrapMode, autocomplete}) {
+  setFontSize(fontSize);
+  setWrapMode(wrapMode);
+  setAutocomplete(autocomplete);
+  require('./input').focus();
+  es.forceRefresh();
+  return getCurrentSettings();
+}
 
-module.exports.getAutocomplete = getAutocomplete;
-module.exports.applyCurrentSettings = applyCurrentSettings;
+module.exports = {
+  getAutocomplete,
+  applyCurrentSettings,
+
+  getCurrentSettings,
+  updateSettings,
+};

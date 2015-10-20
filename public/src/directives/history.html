@@ -4,10 +4,10 @@
   <ul class="list-group history-reqs">
     <li
       ng-repeat="req in history.reqs"
-      ng-class="{ selected: history.selectedReq === req }"
-      ng-click="history.selectedReq = req; history.viewedReq = req"
-      ng-hover="history.viewedReq = req"
-      ng-blur="history.viewedReq = history.selectedReq"
+      ng-class="{ selected: history.viewingReq === req }"
+      ng-click="history.selectedReq = req; history.viewingReq = req"
+      ng-mouseenter="history.viewingReq = req"
+      ng-mouseleave="history.viewingReq = history.selectedReq"
       ng-dblclick="history.restore(req)"
       title="{{ req.description }}"
       class="list-group-item history-req"
@@ -18,7 +18,7 @@
     </li>
   </ul>
 
-  <sense-history-viewer class="history-viewer" req="history.viewedReq" />
+  <sense-history-viewer class="history-viewer" req="history.viewingReq" />
 </div>
 
 <div class="history-footer">
