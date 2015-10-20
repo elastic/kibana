@@ -40,7 +40,7 @@ define(function (require) {
         // start each test with an empty kibana index
         return common
           .sleep(1000)
-          .then(function () {
+          .then(function unloadKibana() {
             return scenarioManager
               .unload('emptyKibana');
           })
@@ -48,13 +48,13 @@ define(function (require) {
             return common
               .sleep(2000);
           })
-          .then(function () {
+          .then(function loadEmptyKibana() {
             return scenarioManager
               .load('emptyKibana');
           })
-          .then(function () {
+          .then(function loadIfEmptyMakelogs() {
             return scenarioManager
-              .loadIfEmpty('logstash');
+              .loadIfEmpty('makelogs');
           })
           .then(function () {
             return common
@@ -62,9 +62,9 @@ define(function (require) {
           });
       },
 
-      teardown: function () {
+      teardown: function unloadMakelogs() {
         return scenarioManager
-          .unload('logstash');
+          .unload('makelogs');
       },
 
       /*
