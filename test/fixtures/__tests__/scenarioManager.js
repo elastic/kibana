@@ -19,13 +19,12 @@ describe('scenario manager', function () {
       indicesDelete = sinon.stub(manager.client.indices, 'delete', Promise.resolve);
     });
 
-    it('should be able to load scenarios', function (done) {
-      manager.load('makelogs')
+    it('should be able to load scenarios', function () {
+      return manager.load('makelogs')
       .then(function () {
         expect(create.getCall(0).args[0].index).to.be('logstash-2015.09.17');
         expect(create.getCall(1).args[0].index).to.be('logstash-2015.09.18');
         expect(bulk.called).to.be(true);
-        done();
       });
     });
 
@@ -43,18 +42,16 @@ describe('scenario manager', function () {
       })).to.be(true);
     });
 
-    it('should be able to reload a scenario', function (done) {
+    it('should be able to reload a scenario', function () {
       var load = sinon.stub(manager, 'load', Promise.resolve);
       var unload = sinon.stub(manager, 'unload', Promise.resolve);
       var id = 'makelogs';
-      manager.reload(id).then(function () {
+      return manager.reload(id).then(function () {
         expect(load.calledWith(id)).to.be(true);
         expect(unload.calledWith(id)).to.be(true);
 
         load.restore();
         unload.restore();
-
-        done();
       });
     });
 
