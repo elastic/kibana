@@ -28,27 +28,10 @@ let miscInputs = require('./misc_inputs');
 let es = require('./es');
 let utils = require('./utils');
 let _ = require('lodash');
-let ga = require('analytics');
-
 
 $(document.body).removeClass('fouc');
 
 var $esServer = miscInputs.$esServer;
-
-var marvelOpts = localStorage.getItem('marvelOpts');
-if (marvelOpts) {
-  try {
-    marvelOpts = JSON.parse(marvelOpts);
-    if (marvelOpts.version && marvelOpts.report) {
-      ga.pageview();
-    }
-  } catch (e) {
-    marvelOpts = {status: 'trial'};
-  } // Meh! Who cares...
-}
-else {
-  marvelOpts = {status: 'trial'};
-}
 
 // set the value of the server and/or the input and clear the output
 function resetToValues(server, content) {
@@ -232,8 +215,4 @@ if (!localStorage.getItem("version_welcome_shown")) {
 else {
   loadSavedState();
   setupAutosave();
-}
-
-if (marvelOpts.status && marvelOpts.version && marvelOpts.report) {
-  ga.pageview();
 }
