@@ -192,6 +192,11 @@ define(function (require) {
       'dashboard:defaultDarkTheme': {
         value: false,
         description: 'New dashboards use dark theme by default',
+      },
+      'dashboard:disableLoadingIndicator': {
+        value: false,
+        description: 'Disable the loading indicator on dashboard visualizations. ' +
+        'This setting is only applicable when auto-refresh is on'
       }
     };
   };
