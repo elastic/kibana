@@ -4,20 +4,53 @@
   width: 100px;
 }
 
+#editor_output_container {
+  display: flex;
+  flex: 1 1 auto;
+  position: relative;
+  padding: 10px;
+}
+
 #editor_container {
-  position: absolute;
-  top: 50px;
-  bottom: 5px;
-  left: 5px;
-  width: 468px;
+  display: flex;
+  flex: 0 0 468px;
+
+  #autocomplete {
+    position: absolute;
+    left: -1000px;
+  }
+
+  #editor_actions {
+    position: absolute;
+    left: -1000px;
+  }
+
+  #editor {
+    flex: 1 1 1px;
+  }
+}
+
+#editor_resizer {
+  flex: 0 0 13px;
+  cursor: ew-resize;
+  background-color: transparent;
+
+  &:hover {
+    background-color: #DCDCDC;
+  }
+
+  &.active {
+    background-color: rgba(194, 193, 208, 100);
+  }
 }
 
 #output_container {
-  position: absolute;
-  top: 50px;
-  bottom: 5px;
-  left: 488px;
-  right: 5px;
+  display: flex;
+  flex: 1 1 1px;
+
+  #output {
+    flex: 1 1 1px;
+  }
 }
 
 #editor_actions {
@@ -37,11 +70,6 @@
 #editor_actions > .btn-group > a:hover {
   padding: 2px 4px;
   text-decoration: none;
-}
-
-#output, #editor {
-  height: 100%;
-  width: 100%;
 }
 
 .ace_gutter {
@@ -117,19 +145,19 @@
   width: 100% !important;
 }
 
-.ui-resizable-e {
-  cursor: ew-resize;
-  width: 13px;
-  right: -14px;
-  top: -1px;
-  bottom: -2px;
-  background-color: transparent;
-  position: absolute;
-}
-
-.ui-resizable-e:hover {
-  background-color: #DCDCDC;
-}
+// .ui-resizable-e {
+//   cursor: ew-resize;
+//   width: 13px;
+//   right: -14px;
+//   top: -1px;
+//   bottom: -2px;
+//   background-color: transparent;
+//   position: absolute;
+// }
+//
+// .ui-resizable-e:hover {
+//   background-color: #DCDCDC;
+// }
 
 .ui-resizable-e.active {
   background-color: rgba(194, 193, 208, 100);

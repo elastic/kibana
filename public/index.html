@@ -28,9 +28,9 @@
         id="history_btn"
         aria-label="History"
         aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('history') }}"
-        ng-class="{ active: configTemplate.is('history') }"
-        ng-click="configTemplate.toggle('history');">
+        aria-expanded="{{ sense.dropdown.is('history') }}"
+        ng-class="{ active: sense.dropdown.is('history') }"
+        ng-click="sense.dropdown.toggle('history');">
         <i aria-hidden="true" class="fa fa-clock-o"></i>
       </button>
     </kbn-tooltip>
@@ -40,9 +40,9 @@
         id="settings_btn"
         aria-label="Settings"
         aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('settings') }}"
-        ng-class="{ active: configTemplate.is('settings') }"
-        ng-click="configTemplate.toggle('settings');">
+        aria-expanded="{{ sense.dropdown.is('settings') }}"
+        ng-class="{ active: sense.dropdown.is('settings') }"
+        ng-click="sense.dropdown.toggle('settings');">
         <i aria-hidden="true" class="fa fa-cog"></i>
       </button>
     </kbn-tooltip>
@@ -52,21 +52,20 @@
         id="help_btn"
         aria-label="Help"
         aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('help') }}"
-        ng-class="{ active: configTemplate.is('help') }"
-        ng-click="configTemplate.toggle('help');">
+        aria-expanded="{{ sense.dropdown.is('help') }}"
+        ng-class="{ active: sense.dropdown.is('help') }"
+        ng-click="sense.dropdown.toggle('help');">
         <i aria-hidden="true" class="fa fa-question-circle"></i>
       </button>
     </kbn-tooltip>
   </div>
 </navbar>
 
-<div id="main" class="container-fluid">
+<config config-template="sense.dropdown" config-object="sense"></config>
+
+<div id="editor_output_container">
   <div id="editor_container">
-    <div id="editor">GET _search
-{
-  "query": { "match_all": {} }
-}</div>
+    <ul id="autocomplete"></ul>
     <div id="editor_actions">
       <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
           class="fa fa-play"></i></a>
@@ -77,9 +76,15 @@
         <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
       </ul>
     </div>
+
+    <div id="editor">GET _search
+{
+  "query": { "match_all": {} }
+}</div>
+
   </div>
+  <div id="editor_resizer">&#xFE19;</div>
   <div id="output_container">
     <div id="output">{}</div>
   </div>
-  <ul id="autocomplete" style="left: -1000px;"></ul>
 </div>

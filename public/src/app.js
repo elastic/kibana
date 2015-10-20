@@ -16,7 +16,6 @@
  */
 
 var $ = require('jquery');
-$(require('./modals.html')).appendTo('body');
 
 let curl = require('./curl');
 let $helpPopup = require('./help_popup');
@@ -167,43 +166,18 @@ history.restoreFromHistory = function applyHistoryElem(req) {
 };
 
 (function stuffThatsTooHardWithCSS() {
-  var $editors = input.$el.parent().add(output.$el.parent());
-  var $resizer = miscInputs.$resizer;
-  var $header = miscInputs.$header;
-
-  var delay;
-  var headerHeight;
-  var resizerHeight;
-
-  $resizer
-    .html('&#xFE19;') // vertical elipses
-    .css('vertical-align', 'middle');
+  var delay = null;
 
   function update() {
-    var newHeight;
-
     if (delay) {
       delay = clearTimeout(delay);
     }
 
-    newHeight = $header.outerHeight();
-    if (headerHeight != newHeight) {
-      headerHeight = newHeight;
-      $editors.css('top', newHeight + 10);
-    }
-
-    newHeight = $resizer.height();
-    if (resizerHeight != newHeight) {
-      resizerHeight = newHeight;
-      $resizer.css('line-height', newHeight + 'px');
-    }
     input.resize(true);
     output.resize(true);
   }
 
-  // update at key moments in the loading process
-  $(update);
-
+  update();
 
   // and when the window resizes (once every 30 ms)
   $(window)
@@ -212,7 +186,6 @@ history.restoreFromHistory = function applyHistoryElem(req) {
         delay = setTimeout(update, 30);
       }
     });
-
 }());
 
 /**
