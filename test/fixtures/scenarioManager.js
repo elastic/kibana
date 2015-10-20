@@ -82,4 +82,34 @@ ScenarioManager.prototype.deleteAll = function () {
   });
 };
 
+/**
+ * Load a testing scenario if not already loaded
+ * @param {string} id The scenario id to load
+ * @return {Promise} A promise that is resolved when elasticsearch has a response
+ */
+ScenarioManager.prototype.loadIfEmpty = function (id) {
+  var self = this;
+  var scenario = config[id];
+  if (!scenario) throw new Error('No scenario found for ' + id);
+
+  var self = this;
+  return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
+    var loadIndexDefinition;
+
+    return self.client.count({
+      index: bulk.indexName
+    }, function handleCountResponse(error, response) {
+      // if (error) {
+      //   console.log('Need to load index.  error=' + error);
+      // } else {
+      //   console.log('index=' + bulk.indexName + ' count=' + response.count);
+      // }
+      // if the index is undefined or count ===0 then call the load function above
+      if (error || response.count === 0) {
+        self.load(id);
+      }
+    });
+  }));
+};
+
 module.exports = ScenarioManager;
