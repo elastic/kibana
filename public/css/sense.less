@@ -1,4 +1,5 @@
 @import "./sense.light.css";
+@import (reference) "~ui/styles/variables";
 
 #es_method {
   width: 100px;
@@ -110,25 +111,40 @@
   height: 100%;
 }
 
-.icon-chevron-right {
-  position: absolute;
-  right: 10px;
-  margin-top: 2px;
-  margin-right: -6px;
-  opacity: .25;
+.history-body {
+  display: flex;
+  height: 300px;
+
+  .history-reqs,
+  .history-viewer {
+    flex: 0 0 50%;
+  }
+
+  .history-reqs {
+    overflow: auto;
+    margin: 0 25px 0 0;
+  }
+
+  .history-req {
+    display: flex;
+
+    &.selected {
+      background-color: #DCDCDC;
+    }
+
+    .history-req-icon {
+      flex: 1 0 auto;
+      text-align: right;
+      .fa-chevron-right {
+        opacity: .25;
+      }
+    }
+  }
 }
 
-#history_viewer {
-  position: absolute;
-  left: 430px;
-  right: 0;
-  margin-right: 9px;
-  top: 60px;
-  bottom: 70px;
-}
-
-#history_viewer_editor {
-  height: 100%;
+.history-footer {
+  text-align: right;
+  padding-top: 10px;
 }
 
 .ui-autocomplete {
