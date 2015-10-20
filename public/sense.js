@@ -11,5 +11,5 @@ require('ui/chrome')
 }])
 .setRootTemplate(require('./index.html'))
 .setRootController(function () {
-    require('./src/app');
+  require('./src/app');
 });
