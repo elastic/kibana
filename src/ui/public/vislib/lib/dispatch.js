@@ -22,7 +22,6 @@ define(function (require) {
 
       Dispatch.Super.call(this);
       this.handler = handler;
-      this._listeners = {};
     }
 
     /**

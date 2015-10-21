@@ -114,6 +114,7 @@ define(function (require) {
       this.selection.data(null);
       this.selection.remove();
       this.selection = null;
+      this.handler = null;
     };
 
     /**

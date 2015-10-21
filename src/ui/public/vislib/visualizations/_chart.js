@@ -24,8 +24,8 @@ define(function (require) {
 
       this.handler = handler;
       this.chartEl = el;
+      this.selection = d3.select(this.chartEl);
       this.chartData = chartData;
-
       var events = this.events = new Dispatch(handler);
 
       if (_.get(this.handler, '_attr.addTooltip')) {
@@ -47,10 +47,8 @@ define(function (require) {
      * @returns {HTMLElement} Contains the D3 chart
      */
     Chart.prototype.render = function () {
-      var selection = d3.select(this.chartEl);
-
-      selection.selectAll('*').remove();
-      selection.call(this.draw());
+      this.selection.selectAll('*').remove();
+      this.selection.call(this.draw());
     };
 
     /**
@@ -81,11 +79,10 @@ define(function (require) {
      * @method destroy
      */
     Chart.prototype.destroy = function () {
-      var selection = d3.select(this.chartEl);
-      this.events.removeListeners(selection);
+      this.events.removeAllListeners();
       if (this.tooltip) this.tooltip.hide();
-      selection.remove();
-      selection = null;
+      this.selection.remove();
+      this.selection = null;
     };
 
     return Chart;

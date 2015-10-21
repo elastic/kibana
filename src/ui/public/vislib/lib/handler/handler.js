@@ -199,6 +199,7 @@ define(function (require) {
      * @method destroy
      */
     Handler.prototype.destroy = function () {
+      // turn off events on legend
       this.charts.forEach(function (chart) {
         if (_.isFunction(chart.destroy)) {
           chart.destroy();

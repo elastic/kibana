@@ -302,7 +302,7 @@ define(function (require) {
           self.createEndZones(svg);
 
           // Adds event listeners
-          self.addBarEvents(svg);
+          //self.addBarEvents(svg);
 
           var line = svg.append('line')
           .attr('class', 'base-line')

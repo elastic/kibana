@@ -19,7 +19,6 @@ define(function (require) {
         return new ChartTitle(el, selection);
       }
 
-      this.el = el;
       this.selection = selection;
       this.tooltip = new Tooltip('chart-title', el, function (d) {
         return '<p>' + _.escape(d.label) + '</p>';
