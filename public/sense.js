@@ -8,13 +8,9 @@ require('./src/directives/senseNavbar');
 
 require('ui/chrome')
 .setBrand({
-  logo: 'url(/plugins/sense/favicon.ico) center no-repeat',
-  smallLogo: 'url(/plugins/sense/favicon.ico) center no-repeat'
+  logo: 'url(/plugins/sense/icon.png) center no-repeat',
+  smallLogo: 'url(/plugins/sense/icon.png) center no-repeat'
 })
-.setTabs([{
-  id: '',
-  title: 'Sense'
-}])
 .setRootTemplate(require('./index.html'))
 .setRootController('sense', function ($scope) {
   // require the root app code, which expects to execute once the dom is loaded up
