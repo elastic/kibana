@@ -39,6 +39,7 @@ module.exports = function (kibana) {
 
           return {
             kbnIndex: config.get('kibana.index'),
+            kbnDefaultAppId: config.get('kibana.defaultAppId'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
             esApiVersion: config.get('elasticsearch.apiVersion'),
           };
