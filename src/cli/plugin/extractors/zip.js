@@ -1,5 +1,5 @@
 var Promise = require('bluebird');
-var DecompressZip = require('decompress-zip');
+var DecompressZip = require('@bigfunger/decompress-zip');
 
 module.exports = function (settings, logger) {
   return new Promise(function (resolve, reject) {

@@ -50,6 +50,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
+    "@bigfunger/decompress-zip": "^0.2.0-stripfix2",
     "@spalger/angular-bootstrap": "0.10.0",
     "@spalger/angular-nvd3": "1.0.0-beta",
     "@spalger/filesaver": "1.1.2",
@@ -76,7 +77,6 @@
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
-    "decompress-zip": "0.2.0",
     "elasticsearch": "8.0.1",
     "elasticsearch-browser": "8.0.1",
     "expiry-js": "0.1.7",
