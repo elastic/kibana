@@ -55,7 +55,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@spalger/angular-bootstrap": "0.10.0",
+    "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/angular-nvd3": "1.0.0-beta",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
