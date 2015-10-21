@@ -206,6 +206,7 @@ define(function (require) {
       });
 
       this.map.on('moveend', function setZoomCenter(ev) {
+        if (!self.map) return;
         // update internal center and zoom references
         self._mapCenter = self.map.getCenter();
         self._mapZoom = self.map.getZoom();
@@ -245,6 +246,7 @@ define(function (require) {
       });
 
       this.map.on('zoomend', function () {
+        if (!self.map) return;
         self._mapZoom = self.map.getZoom();
         if (!self._events) return;
 
