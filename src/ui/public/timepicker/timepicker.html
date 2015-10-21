@@ -124,7 +124,7 @@
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
                   </div>
                   <div>
-                    <datepicker ng-model="absolute.from" max="absolute.to" show-weeks="false"></datepicker>
+                    <datepicker ng-model="absolute.from" max-date="absolute.to" show-weeks="false"></datepicker>
                   </div>
                 </div>
 
@@ -137,7 +137,7 @@
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
                   </div>
                   <div>
-                    <datepicker ng-model="absolute.to" min="absolute.from" show-weeks="false"></datepicker>
+                    <datepicker ng-model="absolute.to" min-date="absolute.from" show-weeks="false"></datepicker>
                   </div>
                 </div>
 
