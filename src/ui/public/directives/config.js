@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  require('ui/watch_multi');
   var ConfigTemplate = require('ui/ConfigTemplate');
   var angular = require('angular');
   var module = require('ui/modules').get('kibana');
@@ -39,7 +40,10 @@ define(function (require) {
           }
         };
 
-        var render = function (newTemplate, oldTemplate) {
+        $scope.$watchMulti([
+          'configSubmit',
+          'configTemplate.current || configTemplate'
+        ], function () {
           var tmpl = $scope.configTemplate;
           if (tmpl instanceof ConfigTemplate) {
             tmpl = tmpl.toString();
@@ -62,10 +66,7 @@ define(function (require) {
           }
 
           element.html(html);
-        };
-
-        $scope.$watch('configSubmit', render);
-        $scope.$watch('configTemplate.current || configTemplate', render);
+        });
 
 
         $scope.close = function () {
