@@ -11,12 +11,13 @@
     placeholder="http://servername:port"
     aria-label="Server Name"
     class="form-control"
-    ng-model="sense.serverUrl"
     ng-focus="navbar.updateServerUrlHistory()"
-    ng-keypress="navbar.submitOnEnter($event)"
-    typeahead="url for url in navbar.serverUrlHistory"
+
+    sense-uib-typeahead="url for url in navbar.serverUrlHistory"
+    ng-model="sense.serverUrl"
     typeahead-append-to-body="true"
     typeahead-focus-first="false"
+
     required>
 </form>
 

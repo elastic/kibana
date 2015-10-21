@@ -1,4 +1,8 @@
 require('ace');
+
+require('ui-bootstrap-custom');
+require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
+
 require('ui/tooltip');
 require('./css/sense.less');
 require('./src/directives/senseHistory');
