@@ -23,6 +23,7 @@ require('ui/chrome')
   const ConfigTemplate = require('ui/ConfigTemplate');
   const input = require('./src/input');
   const es = require('./src/es');
+  const storage = require('./src/storage');
 
   this.dropdown = new ConfigTemplate({
     welcome: '<sense-welcome></sense-welcome>',
@@ -34,9 +35,9 @@ require('ui/chrome')
   /**
    * Display the welcome dropdown if it has not been shown yet
    */
-  if (!localStorage.getItem("version_welcome_shown")) {
+  if (!storage.get('version_welcome_shown')) {
     this.dropdown.open('welcome');
-    localStorage.setItem("version_welcome_shown", '@@SENSE_REVISION');
+    storage.set('version_welcome_shown', '@@SENSE_REVISION');
   }
 
   this.sendSelected = () => {

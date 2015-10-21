@@ -17,6 +17,7 @@
 
 const $ = require('jquery');
 const { uniq } = require('lodash');
+const storage = require('./storage');
 
 const history = module.exports = {
   restoreFromHistory() {
@@ -27,23 +28,16 @@ const history = module.exports = {
   },
 
   getHistoryKeys() {
-    var keys = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
-      if (k.indexOf("hist_elem") == 0) {
-        keys.push(k);
-      }
-    }
-
-    keys.sort();
-    keys.reverse();
-    return keys;
+    return storage.keys()
+      .filter(key => key.indexOf('hist_elem') === 0)
+      .sort()
+      .reverse();
   },
 
   getHistory() {
     return history
       .getHistoryKeys()
-      .map(key => JSON.parse(localStorage.getItem(key)));
+      .map(key => storage.get(key));
   },
 
   getHistoricalServers() {
@@ -54,34 +48,36 @@ const history = module.exports = {
     var keys = history.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     $.each(keys, function (i, k) {
-      localStorage.removeItem(k);
+      storage.remove(k);
     });
 
     var timestamp = new Date().getTime();
     var k = "hist_elem_" + timestamp;
-    localStorage.setItem(k, JSON.stringify({
+    storage.set(k, {
       time: timestamp,
       server: server,
       endpoint: endpoint,
       method: method,
       data: data
-    }));
+    });
   },
 
   updateCurrentState(server, content) {
     var timestamp = new Date().getTime();
-    localStorage.setItem("editor_state", JSON.stringify(
-        {'time': timestamp, 'server': server, 'content': content})
-    );
+    storage.set("editor_state", {
+      time: timestamp,
+      server: server,
+      content: content
+    });
   },
 
   getSavedEditorState(server, content) {
-    return JSON.parse(localStorage.getItem("editor_state"));
+    return storage.get('editor_state');
   },
 
   clearHistory($el) {
     history
       .getHistoryKeys()
-      .forEach(key => localStorage.removeItem(key));
+      .forEach(key => storage.delete(key));
   }
 };

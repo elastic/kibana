@@ -16,19 +16,18 @@
  */
 
 const $ = require('jquery');
+const storage = require('./storage');
+
 module.exports = function (input, output) {
 
   const $left = input.$el.parent();
 
   function readStoredEditorWidth() {
-    const json = window.localStorage.getItem('sense:editorWidth');
-    if (json !== null) {
-      return JSON.parse(json);
-    }
+    return storage.get('editorWidth');
   }
 
   function storeEditorWidth(editorWidth) {
-    window.localStorage.setItem('sense:editorWidth', JSON.stringify(editorWidth))
+    storage.set('editorWidth', editorWidth);
   }
 
   function setEditorWidth(editorWidth) {

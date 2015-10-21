@@ -24,6 +24,7 @@ let mappings = require('./mappings');
 let output = require('./output');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');
+let storage = require('./storage');
 let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
@@ -71,9 +72,9 @@ var zc = (function setupZeroClipboard() {
   var zc = new ZeroClipboard($copyAsCURL); // the ZeroClipboard instance
 
   zc.on('wrongflash noflash', function () {
-    if (!localStorage.getItem('flash_warning_shown')) {
+    if (!storage.get('flash_warning_shown')) {
       alert('Sense needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
-      localStorage.setItem('flash_warning_shown', 'true');
+      storage.set('flash_warning_shown', 'true');
     }
     $copyAsCURL.hide();
   });

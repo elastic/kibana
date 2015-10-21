@@ -17,75 +17,51 @@
 
 let $ = require('jquery');
 let es = require('./es');
+const storage = require('./storage');
 
 function getFontSize() {
-  return localStorage.getItem("font_size") || "12";
+  return storage.get('font_size') || 12;
 }
 
 function setFontSize(size) {
-  if (!/^([1-9]\d*)$/.test(size)) {
-    return false;
-  }
-  localStorage.setItem("font_size", size);
+  storage.set('font_size', size);
   applyCurrentSettings();
   return true;
 }
 
 function getWrapMode() {
-  var mode = localStorage.getItem("wrap_mode") || "true";
-  return mode == "true";
+  return storage.get('wrap_mode') || true;
 }
 
 function setWrapMode(mode) {
-  if (typeof mode !== "boolean") {
-    return false;
-  }
-  localStorage.setItem("wrap_mode", mode);
+  storage.set('wrap_mode', mode);
   applyCurrentSettings();
   return true;
 }
 
 function setBasicAuth(mode) {
-  if (typeof mode !== "boolean") {
-    return false;
-  }
-  localStorage.setItem("basic_auth", mode);
+  storage.set('basic_auth', mode);
   applyCurrentSettings();
   return true;
 }
 
 function getAutocomplete() {
-  var settings = localStorage.getItem("autocomplete_settings");
-  var defaults = {fields: true, indices: true};
-  if (settings) {
-    try {
-      settings = JSON.parse(settings);
-      if (typeof settings != "object") {
-        settings = defaults;
-      }
-    } catch (e) {
-      settings = defaults;
-    }
-  }
-  else {
-    settings = defaults;
-  }
-  return settings;
+  return storage.get('autocomplete_settings') || { fields: true, indices: true };
 }
 
 function setAutocomplete(settings) {
-  localStorage.setItem("autocomplete_settings", JSON.stringify(settings));
+  storage.set('autocomplete_settings', settings);
   return true;
 }
 
 function applyCurrentSettings(editor) {
-  if (typeof editor === "undefined") {
+  if (typeof editor === 'undefined') {
     applyCurrentSettings(require('./input'));
     applyCurrentSettings(require('./output'));
   }
   if (editor) {
     editor.getSession().setUseWrapMode(getWrapMode());
-    editor.$el.css("font-size", getFontSize() + "px");
+    editor.$el.css('font-size', getFontSize() + 'px');
   }
 }
 
