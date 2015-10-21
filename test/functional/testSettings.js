@@ -10,7 +10,6 @@ define(function (require) {
   var Common = require('../support/pages/Common');
   var SettingsPage = require('../support/pages/SettingsPage');
   var HeaderPage = require('../support/pages/HeaderPage');
-  var DiscoverPage = require('../support/pages/DiscoverPage');
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
   var _ = require('intern/dojo/node!lodash');
