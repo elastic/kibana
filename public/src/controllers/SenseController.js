@@ -22,7 +22,6 @@ require('ui/modules')
    */
   if (!storage.get('version_welcome_shown')) {
     this.dropdown.open('welcome');
-    storage.set('version_welcome_shown', '@@SENSE_REVISION');
   }
 
   this.sendSelected = () => {
