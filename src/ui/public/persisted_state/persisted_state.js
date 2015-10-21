@@ -77,12 +77,18 @@ define(function (require) {
       this.set(key, undefined);
     };
 
-    PersistedState.prototype.clear = function (key) {
-      this.set(key, null);
-    };
-
     PersistedState.prototype.createChild = function (path, value) {
       return new PersistedState(value, this._getIndex(path), this._parent || this);
+    };
+
+    PersistedState.prototype.removeChild = function (path) {
+      var origValue = _.get(this._defaultState, this._getIndex(path));
+
+      if (_.isUndefined(origValue)) {
+        this.reset(path);
+      } else {
+        this.set(path, origValue);
+      }
     };
 
     PersistedState.prototype.getChanges = function () {
@@ -157,33 +163,40 @@ define(function (require) {
       if (!initialState) {
         // no path and no key, set the whole state
         if (!this._hasPath() && _.isUndefined(key)) {
-          // check for changes and emit an event when found
+          // compare changedState and new state, emit an event when different
           stateChanged = !_.isEqual(this._changedState, value);
           if (!initialChildState) this._changedState = value;
         } else {
-          // check for changes and emit an event when found
+          // check for changes at path, emit an event when different
           stateChanged = !_.isEqual(this.get(keyPath), value);
 
-          // arrays merge by index, not the desired behavior - ensure they are replaced
           if (!initialChildState) {
+            // arrays are merge by index, not desired - ensure they are replaced
             if (_.isArray(_.get(this._mergedState, keyPath))) {
               _.set(this._mergedState, keyPath, undefined);
             }
+
             _.set(this._changedState, keyPath, value);
           }
         }
       }
 
+      // update the merged state value
       var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
       var sourceObj = _.merge({}, defaultChildState, this._changedState);
+
+      // handler arguments are (targetValue, sourceValue, key, target, source)
       var mergeMethod = function (targetValue, sourceValue, mergeKey) {
-        // If `mergeMethod` is provided it is invoked to produce the merged values of the destination and
-        // source properties. If `mergeMethod` returns `undefined` merging is handled by the method instead
-        // handler arguments are (targetValue, sourceValue, key, target, source)
+        // if not initial state, skip default merge method (ie. return value, see note below)
         if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
+          // use the sourceValue or fall back to targetValue
           return !_.isUndefined(sourceValue) ? sourceValue : targetValue;
         }
       };
+
+      // If `mergeMethod` is provided it is invoked to produce the merged values of the
+      // destination and source properties.
+      // If `mergeMethod` returns `undefined` the default merging method is used
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
 
       if (stateChanged) this.emit('change');
