@@ -15,7 +15,8 @@
  * from Elasticsearch Incorporated.
  */
 
-let $ = require('jquery');
+const $ = require('jquery');
+const { uniq } = require('lodash');
 
 const history = module.exports = {
   restoreFromHistory() {
@@ -46,11 +47,7 @@ const history = module.exports = {
   },
 
   getHistoricalServers() {
-    var servers = {};
-    $.each(history.getHistory(), function (i, h) {
-      servers[h.server] = 1;
-    });
-    return Object.keys(servers);
+    return uniq(history.getHistory().map(req => req.server));
   },
 
   addToHistory(server, endpoint, method, data) {

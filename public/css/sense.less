@@ -79,15 +79,21 @@ navbar {
   padding: 1px 3px 0 0;
   /* by pass any other element in ace and resize bar, but not modal popups  */
   z-index: 1005;
-}
 
-#editor_actions > .btn-group > a {
-  padding: 2px 4px;
-}
+  .editor_action {
+    padding: 2px 4px;
+    &:hover {
+      text-decoration: none;
+    }
+  }
 
-#editor_actions > .btn-group > a:hover {
-  padding: 2px 4px;
-  text-decoration: none;
+  .fa-wrench {
+    color: rgb(51, 51, 51);
+  }
+
+  .fa-play {
+    color: rgb(112, 186, 86);
+  }
 }
 
 .ace_gutter {

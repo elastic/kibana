@@ -23,14 +23,11 @@ let history = require('./history');
 let input = require('./input');
 let mappings = require('./mappings');
 let output = require('./output');
-let miscInputs = require('./misc_inputs');
 let es = require('./es');
 let utils = require('./utils');
 let _ = require('lodash');
 
 $(document.body).removeClass('fouc');
-
-var $esServer = miscInputs.$esServer;
 
 // set the value of the server and/or the input and clear the output
 function resetToValues(server, content) {
@@ -87,22 +84,20 @@ function setupAutosave() {
   var timer;
   var saveDelay = 500;
 
-  function doSave() {
-    saveCurrentState();
-  }
-
   input.getSession().on("change", function onChange(e) {
     if (timer) {
       timer = clearTimeout(timer);
     }
-    timer = setTimeout(doSave, saveDelay);
+    timer = setTimeout(saveCurrentState, saveDelay);
   });
+
+  es.addServerChangeListener(saveCurrentState);
 }
 
 function saveCurrentState() {
   try {
     var content = input.getValue();
-    var server = $esServer.val();
+    var server = es.getBaseUrl();
     history.updateCurrentState(server, content);
   }
   catch (e) {

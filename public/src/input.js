@@ -28,7 +28,6 @@ let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
 
-
 var input = new SenseEditor($('#editor'));
 
 input.autocomplete = new Autocomplete(input);
@@ -258,5 +257,6 @@ input.focus();
 input.highlightCurrentRequestsAndUpdateActionBar();
 
 input.sendCurrentRequestToES = sendCurrentRequestToES;
+require('./input_resize')(input, output);
 
 module.exports = input;
