@@ -2,7 +2,7 @@
 
 <form
   name="serverInput"
-  class="inline-form"
+  class="inline-form fill"
   role="form"
   ng-submit="sense.sendSelected()">
 
@@ -19,10 +19,6 @@
     typeahead-focus-first="false"
     required>
 </form>
-
-<div class="notification-container fill">
-  <span id="notification" class="label label-info"></span>
-</div>
 
 <div class="button-group" role="toolbar">
   <kbn-tooltip text="History" placement="bottom" append-to-body="1">

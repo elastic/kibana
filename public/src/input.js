@@ -125,12 +125,7 @@ function sendCurrentRequestToES() {
     }
 
     var isMultiRequest = requests.length > 1;
-
-    $("#notification").text("Calling ES....").css("visibility", "visible");
-
-    var finishChain = function () {
-      $("#notification").text("").css("visibility", "hidden");
-    };
+    var finishChain = function () { /* noop */ };
 
     var isFirstRequest = true;
 
