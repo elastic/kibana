@@ -18,7 +18,6 @@
 var $ = require('jquery');
 
 let curl = require('./curl');
-let $helpPopup = require('./help_popup');
 let history = require('./history');
 let input = require('./input');
 let mappings = require('./mappings');

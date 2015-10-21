@@ -6,8 +6,8 @@ require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
 require('ui/tooltip');
 require('./css/sense.less');
 require('./src/directives/senseHistory');
-require('./src/directives/senseHistoryViewer');
 require('./src/directives/senseSettings');
+require('./src/directives/senseHelp');
 require('./src/directives/senseNavbar');
 
 require('ui/chrome')
@@ -22,12 +22,11 @@ require('ui/chrome')
   const ConfigTemplate = require('ui/ConfigTemplate');
   const input = require('./src/input');
   const es = require('./src/es');
-  const history = require('./src/history');
 
   this.dropdown = new ConfigTemplate({
     history: '<sense-history></sense-history>',
     settings: '<sense-settings></sense-settings>',
-    help: require('./src/modals/help.html'),
+    help: '<sense-help></sense-help>',
   });
 
   this.sendSelected = () => {

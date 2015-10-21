@@ -2,6 +2,7 @@ var { assign, memoize } = require('lodash');
 let moment = require('moment');
 
 var history = require('../history');
+require('./senseHistoryViewer');
 
 require('ui/modules')
 .get('app/sense')
