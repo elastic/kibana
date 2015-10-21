@@ -6,12 +6,12 @@ define(function (require) {
       /**
        * Flatten a series of requests into as ES request body
        * @param  {array} requests - an array of flattened requests
-       * @return {string} - the request body
+       * @return {Promise} - a promise that is fulfilled by the request body
        */
       reqsFetchParamsToBody: function (reqsFetchParams) {
-        return {
+        return Promise.resolve({
           docs: reqsFetchParams
-        };
+        });
       },
 
       /**

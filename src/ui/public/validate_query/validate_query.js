@@ -6,7 +6,7 @@ define(function (require) {
 
   require('ui/modules')
     .get('kibana')
-    .directive('validateQuery', function (es, $compile, timefilter, kbnIndex, debounce, Private) {
+    .directive('validateQuery', function (es, $compile, timefilter, kbnIndex, debounce, Promise, Private) {
       var fromUser = Private(require('ui/validate_query/lib/from_user'));
       var toUser = require('ui/validate_query/lib/to_user');
 
@@ -32,40 +32,37 @@ define(function (require) {
           };
 
           function validator(query) {
-            var index;
-            var type;
             if (request.abort) request.abort();
 
-            if ($scope.queryInput) {
-              useSearchSource();
-            } else {
-              useDefaults();
-            }
+            var prepare = $scope.queryInput ? useSearchSource : useDefaults;
 
-            return sendRequest();
+            request = prepare().then(sendRequest);
 
             function useSearchSource() {
               var pattern = $scope.queryInput.get('index');
-              if (!pattern) return useDefaults();
 
               if (_.isString(pattern)) {
-                index = pattern;
-              } else if (_.isFunction(pattern.toIndexList)) {
-                index = pattern.toIndexList();
+                return Promise.resolve({ index: pattern });
+              } else if (_.isFunction(_.get(pattern, 'toIndexList'))) {
+                return pattern.toIndexList().then(function (indexList) {
+                  return { index: indexList };
+                });
               } else {
-                useDefaults();
+                return useDefaults();
               }
             }
 
             function useDefaults() {
-              index = kbnIndex;
-              type = '__kibanaQueryValidator';
+              return Promise.resolve({
+                index: kbnIndex,
+                type: '__kibanaQueryValidator'
+              });
             }
 
-            function sendRequest() {
-              request = es.indices.validateQuery({
-                index: index,
-                type: type,
+            function sendRequest(config) {
+              return es.indices.validateQuery({
+                index: config.index,
+                type: config.type,
                 explain: true,
                 ignoreUnavailable: true,
                 body: {

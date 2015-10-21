@@ -176,12 +176,15 @@ define(function (require) {
       };
 
       self.toIndexList = function (start, stop) {
-        var interval = this.getInterval();
-        if (interval) {
-          return intervals.toIndexList(self.id, interval, start, stop);
-        } else {
-          return self.id;
-        }
+        var self = this;
+        return new Promise(function (resolve) {
+          var interval = self.getInterval();
+          if (interval) {
+            resolve(intervals.toIndexList(self.id, interval, start, stop));
+          } else {
+            resolve(self.id);
+          }
+        });
       };
 
       self.prepBody = function () {
