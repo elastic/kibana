@@ -13,14 +13,14 @@ define({
   kibana: {
     protocol: 'http',
     hostname: 'localhost',
-    // port: 5620
-    port: 5601
+    port: 5620
+    // port: 5601
   },
   elasticsearch: {
     protocol: 'http',
     hostname: 'localhost',
-    // port: 9220
-    port: 9200
+    port: 9220
+    // port: 9200
   },
   loaderOptions: {
     packages: [{
