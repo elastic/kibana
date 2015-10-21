@@ -23,13 +23,13 @@ describe('scenario manager', function () {
     });
 
     it('should be able to load scenarios', function (done) {
-      manager.load('logstash')
-      .then(function () {
-        expect(create.getCall(0).args[0].index).to.be('logstash-2015.09.17');
-        expect(create.getCall(1).args[0].index).to.be('logstash-2015.09.18');
-        expect(bulk.called).to.be(true);
-        done();
-      });
+      manager.load('makelogs')
+        .then(function () {
+          expect(create.getCall(0).args[0].index).to.be('logstash-2015.09.17');
+          expect(create.getCall(1).args[0].index).to.be('logstash-2015.09.18');
+          expect(bulk.called).to.be(true);
+          done();
+        });
     });
 
     it('should be able to delete all indices', function () {
@@ -40,7 +40,7 @@ describe('scenario manager', function () {
     });
 
     it('should be able to delete a scenario', function () {
-      manager.unload('logstash');
+      manager.unload('makelogs');
       expect(indicesDelete.calledWith({
         index: ['logstash-2015.09.17', 'logstash-2015.09.18']
       })).to.be(true);
@@ -54,7 +54,7 @@ describe('scenario manager', function () {
   });
 
   it('should throw an error if the scenario is not defined', function () {
-    expect(manager.load).withArgs('logstash').to.throwError();
+    expect(manager.load).withArgs('makelogs').to.throwError();
   });
 
   it('should throw an error if an index is not defined when clearing', function () {
