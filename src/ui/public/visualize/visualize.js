@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $rootScope) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -38,6 +38,20 @@ define(function (require) {
 
         $scope.spy = {mode: false};
         $scope.fullScreenSpy = false;
+
+        // Evaluate if the .loading class should be applied when fetching
+        $scope.showLoading = true;
+        var monitorRefreshIntervalChange = function () {
+          // Listen for refreshInterval changes
+          $rootScope.$watchCollection('timefilter.refreshInterval', function () {
+            var refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+            $scope.showLoading = refreshPause;
+          });
+        };
+
+        if (config.get('dashboard:disableLoadingIndicator')) {
+          monitorRefreshIntervalChange();
+        }
 
         var applyClassNames = function () {
           var $spyEl = getSpyEl();
