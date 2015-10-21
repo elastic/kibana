@@ -165,21 +165,5 @@ history.restoreFromHistory = function applyHistoryElem(req) {
   });
 }());
 
-/**
- * Display the welcome popup if it has not been shown yet
- */
-if (!localStorage.getItem("version_welcome_shown")) {
-  let $welcomePopup = require('./welcome_popup');
-  $welcomePopup.on('shown', function () {
-    localStorage.setItem("version_welcome_shown", '@@SENSE_REVISION');
-  });
-  $welcomePopup.one('hidden', function () {
-    loadSavedState();
-    setupAutosave();
-  });
-  $welcomePopup.modal('show');
-}
-else {
-  loadSavedState();
-  setupAutosave();
-}
+loadSavedState();
+setupAutosave();

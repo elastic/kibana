@@ -8,6 +8,7 @@ require('./css/sense.less');
 require('./src/directives/senseHistory');
 require('./src/directives/senseSettings');
 require('./src/directives/senseHelp');
+require('./src/directives/senseWelcome');
 require('./src/directives/senseNavbar');
 
 require('ui/chrome')
@@ -24,10 +25,19 @@ require('ui/chrome')
   const es = require('./src/es');
 
   this.dropdown = new ConfigTemplate({
+    welcome: '<sense-welcome></sense-welcome>',
     history: '<sense-history></sense-history>',
     settings: '<sense-settings></sense-settings>',
     help: '<sense-help></sense-help>',
   });
+
+  /**
+   * Display the welcome dropdown if it has not been shown yet
+   */
+  if (!localStorage.getItem("version_welcome_shown")) {
+    this.dropdown.open('welcome');
+    localStorage.setItem("version_welcome_shown", '@@SENSE_REVISION');
+  }
 
   this.sendSelected = () => {
     input.focus();
