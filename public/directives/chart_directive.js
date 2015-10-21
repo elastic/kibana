@@ -109,6 +109,9 @@ app.directive('chart', function ($compile, $rootScope) {
         for (i = 0; i < dataset.length; ++i) {
 
           var series = dataset[i];
+
+          if (series._hide) continue;
+
           // Nearest point
           for (j = 0; j < series.data.length; ++j) {
             if (series.data[j][0] > pos.x) {
@@ -148,6 +151,7 @@ app.directive('chart', function ($compile, $rootScope) {
         });
       }
 
+      var legendScope = $scope.$new();
       function drawPlot(plotConfig) {
         $elem.height(330);
 
@@ -179,10 +183,12 @@ app.directive('chart', function ($compile, $rootScope) {
 
         $scope.plot = $.plot($elem, _.compact(series), options);
 
+        legendScope.$destroy();
+        legendScope = $scope.$new();
         // Used to toggle the series, and for displaying values on hover
         legendValueNumbers = $elem.find('.ngLegendValueNumber');
         _.each($elem.find('.ngLegendValue'), function (elem) {
-          $compile(elem)($scope);
+          $compile(elem)(legendScope);
         });
       }
 

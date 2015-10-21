@@ -35,11 +35,14 @@ module.exports = new Datasource ('worldbank', {
       '&per_page=1000';
 
     return fetch(URL).then(function (resp) { return resp.json(); }).then(function (resp) {
+      var hasData = false;
+
       var respSeries = resp[1];
 
       var deduped = {};
       var description;
       _.each (respSeries, function (bucket) {
+        if (bucket.value != null) hasData = true;
         description = bucket.country.value + ' ' + bucket.indicator.value;
         deduped[bucket.date] = bucket.value;
       });
@@ -49,6 +52,9 @@ module.exports = new Datasource ('worldbank', {
         if (val == null) return;
         return [moment(date, 'YYYY').valueOf(), parseInt(val, 10)];
       }));
+
+      console.log(hasData);
+      if (!hasData) throw new Error('Worldbank request succeeded, but there was no data for ' + config.code);
 
       return {
         type: 'seriesList',
