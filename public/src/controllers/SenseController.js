@@ -1,6 +1,11 @@
+require('ui/doc_title');
+
+
 require('ui/modules')
 .get('app/sense')
-.controller('SenseController', function SenseController($scope) {
+.controller('SenseController', function SenseController($scope, docTitle) {
+
+  docTitle.change('Sense');
 
   // require the root app code, which expects to execute once the dom is loaded up
   require('../app');
