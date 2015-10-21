@@ -60,7 +60,7 @@ define(function (require) {
     PersistedState.prototype.set = function (key, value) {
       // key must be the value, set the entire state using it
       if (_.isUndefined(value) && _.isPlainObject(key)) {
-        // swap the key and value to write to the state
+        // setting entire tree, swap the key and value to write to the state
         value = key;
         key = undefined;
       }
@@ -73,8 +73,29 @@ define(function (require) {
       return val;
     };
 
-    PersistedState.prototype.reset = function (key) {
-      this.set(key, undefined);
+    PersistedState.prototype.reset = function (path) {
+      var keyPath = this._getIndex(path);
+      var origValue = _.get(this._defaultState, keyPath);
+      var currentValue = _.get(this._mergedState, keyPath);
+
+      if (_.isUndefined(origValue)) {
+        var partialPath = this._getPartialIndex(path);
+        var remove = true;
+
+        // recursively delete _mergedState value, when no other keys exist
+        while (partialPath.length > 0) {
+          var lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
+          var statePath = this._path.concat(partialPath);
+          var state = statePath.length > 0 ? _.get(this._mergedState, statePath) : this._mergedState;
+
+          if (remove) delete state[lastKey];
+          if (Object.keys(state).length > 0) remove = false;
+        }
+      } else {
+        _.set(this._mergedState, keyPath, origValue);
+      }
+
+      if (!_.isEqual(currentValue, origValue)) this.emit('change');
     };
 
     PersistedState.prototype.createChild = function (path, value) {
@@ -110,6 +131,11 @@ define(function (require) {
     PersistedState.prototype._getIndex = function (key) {
       if (_.isUndefined(key)) return this._path;
       return (this._path || []).concat(toPath(key));
+    };
+
+    PersistedState.prototype._getPartialIndex = function (key) {
+      var keyPath = this._getIndex(key);
+      return keyPath.slice(this._path.length);
     };
 
     PersistedState.prototype._getDefault = function () {

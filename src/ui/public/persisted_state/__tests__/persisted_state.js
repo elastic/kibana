@@ -192,6 +192,53 @@ describe('Persisted State', function () {
     });
   });
 
+  describe('child state removal', function () {
+    it('should clear path from parent state', function () {
+      var persistedState = new PersistedState();
+      var childState = persistedState.createChild('child', { userId: 1234 });
+      expect(persistedState.get()).to.eql({ child: { userId: 1234 }});
+      persistedState.removeChild('child');
+      expect(persistedState.get()).to.eql({});
+    });
+
+    it('should reset original parent value at path', function () {
+      var persistedState = new PersistedState({ user: 1234 });
+      var childState = persistedState.createChild('user', { id: 5678 });
+      expect(persistedState.get()).to.eql({ user: { id: 5678 }});
+
+      persistedState.removeChild('user');
+      expect(persistedState.get()).to.eql({ user: 1234 });
+    });
+  });
+
+  describe('deep child state removal', function () {
+    it('should clear path from parent state', function () {
+      var persistedState = new PersistedState();
+      var childState = persistedState.createChild('child.state', { userId: 1234 });
+      expect(persistedState.get()).to.eql({ child: { state: { userId: 1234 }}});
+      persistedState.removeChild('child.state');
+      expect(persistedState.get()).to.eql({});
+    });
+
+    it('should reset original parent value at path', function () {
+      var persistedState = new PersistedState({ user: { id: 1234 }});
+      var childState = persistedState.createChild('user.id', 5678);
+      expect(persistedState.get()).to.eql({ user: { id: 5678 }});
+
+      persistedState.removeChild('user.id');
+      expect(persistedState.get()).to.eql({ user: { id: 1234 }});
+    });
+
+    it('should reset original parent other values at path', function () {
+      var persistedState = new PersistedState({ user: { name: 'user' }});
+      var childState = persistedState.createChild('user.id', 5678);
+      expect(persistedState.get()).to.eql({ user: { name: 'user', id: 5678 }});
+
+      persistedState.removeChild('user.id');
+      expect(persistedState.get()).to.eql({ user: { name: 'user' }});
+    });
+  });
+
   describe('colliding child paths and parent state values', function () {
     it('should not change the child path value by default', function () {
       var childIndex = 'childTest';
@@ -226,7 +273,7 @@ describe('Persisted State', function () {
       // pass in child state value
       var childState = persistedState.createChild(childIndex, childStateValue);
 
-      // parent's default state overrides child state
+      // parent's default state is merged with child state
       var compare = _.merge({}, childStateValue, persistedStateValue[childIndex]);
       expect(childState.get()).to.eql(compare);
       state = persistedState.get();
