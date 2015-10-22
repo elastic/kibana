@@ -43,7 +43,10 @@ define(function (require) {
             // These could be done in loadPanel, putting them here to make them more explicit
             $scope.savedObj = panelConfig.savedObj;
             $scope.editUrl = panelConfig.editUrl;
-            $scope.$on('$destroy', panelConfig.savedObj.destroy);
+            $scope.$on('$destroy', function (args) {
+              panelConfig.savedObj.destroy();
+              $scope.parentUiState.removeChild(getPanelId(panelConfig.panel));
+            });
 
             // create child ui state from the savedObj
             var uiState = panelConfig.uiState || {};
