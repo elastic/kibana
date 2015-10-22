@@ -2,7 +2,7 @@
 = Kibana User Guide
 
 :ref: http://www.elastic.co/guide/en/elasticsearch/reference/2.0/
-:shield: https://www.elastic.co/guide/en/shield/2.0
+:shield: https://www.elastic.co/guide/en/shield/2.0-rc1
 :k4issue: https://github.com/elastic/kibana/issues/
 
 include::introduction.asciidoc[]
