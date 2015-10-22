@@ -9,7 +9,7 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Visualizations are based on the {ref}/search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x. 
+Visualizations are based on the {ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x. 
 
 [float]
 [[createvis]]
@@ -89,9 +89,9 @@ the current visualization.
 [[aggregation-builder]]
 ===== Aggregation Builder
 
-Use the aggregation builder on the left of the page to configure the {ref}/search-aggregations.html#_metrics_aggregations[metric] and {ref}/search-aggregations.html#_bucket_aggregations[bucket] aggregations used in your 
+Use the aggregation builder on the left of the page to configure the {ref}search-aggregations-metrics.html[metric] and {ref}search-aggregations-bucket.html[bucket] aggregations used in your 
 visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
-{ref}/search-aggregations.html[Elasticsearch aggregations reference].
+{ref}search-aggregations.html[Elasticsearch aggregations reference].
 
 Bar, line, or area chart visualizations use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
 colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of 

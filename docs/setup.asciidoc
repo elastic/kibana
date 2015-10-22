@@ -33,7 +33,7 @@ That's it! Kibana is now running on port 5601.
 [float]
 [[kibana-dynamic-mapping]]
 ==== Kibana and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {ref}mapping-dynamic-mapping.html[dynamic mapping] for fields. Kibana needs dynamic mapping
+By default, Elasticsearch enables {ref}dynamic-mapping.html[dynamic mapping] for fields. Kibana needs dynamic mapping
 to use fields in visualizations correctly, as well as to manage the `.kibana` index where saved searches,
 visualizations, and dashboards are stored.
 
