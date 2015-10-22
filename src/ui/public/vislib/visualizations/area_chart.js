@@ -338,7 +338,7 @@ define(function (require) {
           circles = self.addCircles(svg, layers);
 
           // add click and hover events to circles
-          self.addCircleEvents(circles, svg);
+          //self.addCircleEvents(circles, svg);
 
           // chart base line
           var line = svg.append('line')

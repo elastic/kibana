@@ -71,6 +71,7 @@ define(function (require) {
       bars
       .enter()
       .append('rect')
+      .attr('class', 'rects')
       .call(this._addIdentifier)
       .attr('fill', function (d) {
         return color(d.label);
@@ -82,8 +83,6 @@ define(function (require) {
       if (isTooltip) {
         bars.call(tooltip.render());
       }
-
-      return bars;
     };
 
     /**
@@ -233,14 +232,14 @@ define(function (require) {
      * @param svg {D3.UpdateSelection} chart SVG
      * @returns {D3.Selection} rect with event listeners attached
      */
-    ColumnChart.prototype.addBarEvents = function (element, svg) {
+    ColumnChart.prototype.addBarEvents = function (svg) {
       var events = this.events;
       var isBrushable = events.isBrushable();
       var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
       var hover = events.addHoverEvent();
       var mouseout = events.addMouseoutEvent();
       var click = events.addClickEvent();
-      var attachedEvents = element.call(hover).call(mouseout).call(click);
+      var attachedEvents = svg.selectAll('.rects').call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -299,11 +298,11 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          bars = self.addBars(svg, layers);
+          self.addBars(svg, layers);
           self.createEndZones(svg);
 
           // Adds event listeners
-          self.addBarEvents(bars, svg);
+          //self.addBarEvents(svg);
 
           var line = svg.append('line')
           .attr('class', 'base-line')

@@ -22,6 +22,7 @@ define(function (require) {
       }
 
       this.el = args.el;
+      this.selection = args.selection;
       this.xValues = args.xValues;
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
@@ -36,7 +37,7 @@ define(function (require) {
      * @returns {D3.UpdateSelection} Appends x axis to visualization
      */
     XAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
+      this.selection.selectAll('.x-axis-div').call(this.draw());
     };
 
     /**
@@ -251,7 +252,6 @@ define(function (require) {
         .width();
 
         selection.each(function () {
-
           div = d3.select(this);
           width = parentWidth / n;
           height = $(this.parentElement).height();
@@ -442,7 +442,6 @@ define(function (require) {
       var titles;
 
       return function () {
-
         visEls.each(function () {
           var visEl = d3.select(this);
           var $visEl = $(this);
@@ -503,7 +502,7 @@ define(function (require) {
      * @method updateXaxisHeight
      */
     XAxis.prototype.updateXaxisHeight = function () {
-      var selection = d3.select(this.el).selectAll('.vis-wrapper');
+      var selection = this.selection.selectAll('.vis-wrapper');
 
       selection.each(function () {
         var visEl = d3.select(this);

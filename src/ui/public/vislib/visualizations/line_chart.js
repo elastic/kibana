@@ -328,7 +328,7 @@ define(function (require) {
             lines = self.addLines(svg, data.series);
           }
           circles = self.addCircles(svg, layers);
-          self.addCircleEvents(circles, svg);
+          //self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
 
           var scale = (scaleType === 'log') ? yScale(1) : yScale(0);

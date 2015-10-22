@@ -22,7 +22,6 @@ define(function (require) {
 
       Dispatch.Super.call(this);
       this.handler = handler;
-      this._listeners = {};
     }
 
     /**
@@ -74,6 +73,28 @@ define(function (require) {
       }
 
       return eventData;
+    };
+
+    Dispatch.prototype.removeListeners = function (selection) {
+      var events = ['click', 'mousedown', 'mouseout', 'mouseover'];
+      var elements = ['circle', 'rect', 'path'];
+      this.removeAllListeners();
+
+      if (selection) {
+        // Remove listeners from the brush
+        selection.selectAll('g.brush')
+          .on('mousedown.brush', null)
+          .on('touchstart.brush', null);
+
+        // Remove listeners from the elements
+        elements.forEach(function (element) {
+          events.forEach(function (event) {
+            selection.selectAll(element).each(function () {
+              d3.select(this).on(event, null);
+            });
+          });
+        });
+      }
     };
 
     /**
@@ -311,7 +332,6 @@ define(function (require) {
     function validBrushClick(event) {
       return event.button === 0;
     }
-
 
     return Dispatch;
   };
