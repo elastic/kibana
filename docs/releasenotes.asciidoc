@@ -1,6 +1,8 @@
 [[releasenotes]]
 == Kibana 4.2 Release Notes
 
+:k4issue: https://github.com/elastic/kibana/issues/
+
 * Starting with the 2.0 release of Elasticsearch, you can https://github.com/elastic/elasticsearch/pull/9670[no longer] 
 reference fields by leafnode. For example, the `geoip.country_code` field can no longer support searches such as 
 `country_code:US`. Instead, use the entire field name. This change affects saved searches, visualizations, and dashboards 
