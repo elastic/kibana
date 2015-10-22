@@ -31,8 +31,12 @@ class Storage {
     return val;
   }
 
+  has(key) {
+    return this.engine.getItem(this.encodeKey(key)) != null;
+  }
+
   get(key, _default) {
-    if (this.engine.hasItem(this.encodeKey(key))) {
+    if (this.has(key)) {
       return this.decode(this.engine.getItem(this.encodeKey(key)));
     } else {
       return _default;
