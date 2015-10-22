@@ -1,8 +1,8 @@
 {
-  "author": {
-    "name": "Elasticsearch",
-    "company": "Elasticsearch BV"
-  },
+  "author": "Boaz Leskes <boaz@elastic.co>",
+  "contributors": [
+    "Spencer Alger <spencer.alger@elastic.co>"
+  ],
   "name": "Sense",
   "version": "2.0.0-SNAPSHOT",
   "repository": {
