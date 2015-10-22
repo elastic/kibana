@@ -22,6 +22,21 @@ define(function (require) {
       if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
     }
 
+    function prepSetParams(key, value) {
+      // key must be the value, set the entire state using it
+      if (_.isUndefined(value) && _.isPlainObject(key)) {
+        // setting entire tree, swap the key and value to write to the state
+        value = key;
+        key = undefined;
+      }
+
+      // ensure the value being passed in is never mutated
+      return {
+        value: _.cloneDeep(value),
+        key: key
+      };
+    }
+
     function parentDelegationMixin(from, to) {
       _.forOwn(from.prototype, function (method, methodName) {
         to.prototype[methodName] = function () {
@@ -58,19 +73,15 @@ define(function (require) {
     };
 
     PersistedState.prototype.set = function (key, value) {
-      // key must be the value, set the entire state using it
-      if (_.isUndefined(value) && _.isPlainObject(key)) {
-        // setting entire tree, swap the key and value to write to the state
-        value = key;
-        key = undefined;
-      }
-
-      // ensure the value being passed in is never mutated
-      value = _.cloneDeep(value);
-
-      var val = this._set(key, value);
+      var params = prepSetParams(key, value);
+      var val = this._set(params.key, params.value);
       this.emit('set');
       return val;
+    };
+
+    PersistedState.prototype.setSilent = function (key, value) {
+      var params = prepSetParams(key, value);
+      return this._set(params.key, params.value, true);
     };
 
     PersistedState.prototype.reset = function (path) {
@@ -167,7 +178,7 @@ define(function (require) {
       return _.get(this._mergedState, this._getIndex(key), def);
     };
 
-    PersistedState.prototype._set = function (key, value, initialChildState, defaultChildState) {
+    PersistedState.prototype._set = function (key, value, silent, initialChildState, defaultChildState) {
       var self = this;
       var stateChanged = false;
       var initialState = !this._initialized;
@@ -182,7 +193,7 @@ define(function (require) {
 
       // delegate to parent instance, passing child's default value
       if (this._parent) {
-        return this._parent._set(keyPath, value, initialState, this._defaultState);
+        return this._parent._set(keyPath, value, silent, initialState, this._defaultState);
       }
 
       // everything in here affects only the parent state
@@ -225,7 +236,7 @@ define(function (require) {
       // If `mergeMethod` returns `undefined` the default merging method is used
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
 
-      if (stateChanged) this.emit('change');
+      if (!silent && stateChanged) this.emit('change');
 
       return this;
     };
