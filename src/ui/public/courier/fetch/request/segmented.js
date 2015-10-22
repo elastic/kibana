@@ -56,7 +56,6 @@ define(function (require) {
       if (_.isFunction(this._initFn)) this._initFn(this._handle);
       this._createQueue().then(function (queue) {
         self._all = queue.slice(0);
-        self._queueCreated = true;
 
         // Send the initial fetch status
         self._reportStatus();
@@ -107,7 +106,9 @@ define(function (require) {
     };
 
     SegmentedReq.prototype.isIncomplete = function () {
-      return !this._queueCreated || this._queue.length > 0;
+      var queueNotCreated = !this._queueCreated;
+      var queueNotEmpty = this._queue.length > 0;
+      return queueNotCreated || queueNotEmpty;
     };
 
     SegmentedReq.prototype.clone = function () {
@@ -174,6 +175,7 @@ define(function (require) {
         if (self._direction === 'desc') queue = queue.reverse();
 
         self._queue = queue;
+        self._queueCreated = true;
 
         return queue;
       });
