@@ -73,7 +73,10 @@ define(function (require) {
           $scope.$watchMulti([
             'spy.mode.name',
             'spy.mode.fill'
-          ], function () {
+          ], function (newVals) {
+            // do nothing on watch setup
+            if (newVals.filter((val) => !_.isUndefined(val)).length === 0) return;
+
             // update the ui state, if passed in
             if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
             renderSpy(_.get($scope.spy, 'mode.name', null));
