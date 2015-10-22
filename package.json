@@ -10,7 +10,5 @@
     "url": "http://github.com/elastic/sense.git"
   },
   "devDependencies": {},
-  "dependencies": {
-    "@spalger/angular-bootstrap": "^0.12.1"
-  }
+  "dependencies": {}
 }

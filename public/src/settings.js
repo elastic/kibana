@@ -20,7 +20,7 @@ let es = require('./es');
 const storage = require('./storage');
 
 function getFontSize() {
-  return storage.get('font_size') || 12;
+  return storage.get('font_size', 12);
 }
 
 function setFontSize(size) {
@@ -30,7 +30,7 @@ function setFontSize(size) {
 }
 
 function getWrapMode() {
-  return storage.get('wrap_mode') || true;
+  return storage.get('wrap_mode', true);
 }
 
 function setWrapMode(mode) {
@@ -46,7 +46,7 @@ function setBasicAuth(mode) {
 }
 
 function getAutocomplete() {
-  return storage.get('autocomplete_settings') || { fields: true, indices: true };
+  return storage.get('autocomplete_settings', { fields: true, indices: true });
 }
 
 function setAutocomplete(settings) {
