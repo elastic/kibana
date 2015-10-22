@@ -21,6 +21,7 @@ define(function (require) {
       this._maxSegments = config.get('courier:maxSegmentCount');
       this._hitsReceived = 0;
       this._direction = 'desc';
+      this._queueCreated = false;
       this._handle = new SegmentedHandle(this);
 
       // prevent the source from changing between requests,
@@ -33,9 +34,13 @@ define(function (require) {
      *********/
 
     SegmentedReq.prototype.start = function () {
+      var self = this;
+
       this._complete = [];
       this._active = null;
       this._segments = [];
+      this._all = [];
+      this._queue = [];
 
       this._mergedResp = {
         took: 0,
@@ -49,11 +54,12 @@ define(function (require) {
       // give the request consumer a chance to receive each segment and set
       // parameters via the handle
       if (_.isFunction(this._initFn)) this._initFn(this._handle);
-      this._createQueue();
-      this._all = this._queue.slice(0);
+      this._createQueue().then(function (queue) {
+        self._all = queue.slice(0);
 
-      // Send the initial fetch status
-      this._reportStatus();
+        // Send the initial fetch status
+        self._reportStatus();
+      });
 
       return SearchReq.prototype.start.call(this);
     };
@@ -100,7 +106,9 @@ define(function (require) {
     };
 
     SegmentedReq.prototype.isIncomplete = function () {
-      return this._queue.length > 0;
+      var queueNotCreated = !this._queueCreated;
+      var queueNotEmpty = this._queue.length > 0;
+      return queueNotCreated || queueNotEmpty;
     };
 
     SegmentedReq.prototype.clone = function () {
@@ -157,22 +165,28 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._createQueue = function () {
+      var self = this;
       var timeBounds = timefilter.getBounds();
       var indexPattern = this.source.get('index');
-      var queue = indexPattern.toIndexList(timeBounds.min, timeBounds.max);
 
-      if (!_.isArray(queue)) queue = [queue];
-      if (this._direction === 'desc') queue = queue.reverse();
+      return indexPattern.toIndexList(timeBounds.min, timeBounds.max)
+      .then(function (queue) {
+        if (!_.isArray(queue)) queue = [queue];
+        if (self._direction === 'desc') queue = queue.reverse();
 
-      return (this._queue = queue);
+        self._queue = queue;
+        self._queueCreated = true;
+
+        return queue;
+      });
     };
 
     SegmentedReq.prototype._reportStatus = function () {
       return this._handle.emit('status', {
-        total: this._all.length,
-        complete: this._complete.length,
-        remaining: this._queue.length,
-        hitCount: this._mergedResp.hits.hits.length
+        total: this._queueCreated ? this._all.length : NaN,
+        complete: this._queueCreated ? this._complete.length : NaN,
+        remaining: this._queueCreated ? this._queue.length : NaN,
+        hitCount: this._queueCreated ? this._mergedResp.hits.hits.length : NaN
       });
     };
 
