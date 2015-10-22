@@ -16,22 +16,17 @@
  */
 
 var $ = require('jquery');
-$(require('./modals.html')).appendTo('body');
 
 let curl = require('./curl');
-let $helpPopup = require('./help_popup');
 let history = require('./history');
 let input = require('./input');
 let mappings = require('./mappings');
 let output = require('./output');
-let miscInputs = require('./misc_inputs');
 let es = require('./es');
 let utils = require('./utils');
 let _ = require('lodash');
 
 $(document.body).removeClass('fouc');
-
-var $esServer = miscInputs.$esServer;
 
 // set the value of the server and/or the input and clear the output
 function resetToValues(server, content) {
@@ -88,22 +83,20 @@ function setupAutosave() {
   var timer;
   var saveDelay = 500;
 
-  function doSave() {
-    saveCurrentState();
-  }
-
   input.getSession().on("change", function onChange(e) {
     if (timer) {
       timer = clearTimeout(timer);
     }
-    timer = setTimeout(doSave, saveDelay);
+    timer = setTimeout(saveCurrentState, saveDelay);
   });
+
+  es.addServerChangeListener(saveCurrentState);
 }
 
 function saveCurrentState() {
   try {
     var content = input.getValue();
-    var server = $esServer.val();
+    var server = es.getBaseUrl();
     history.updateCurrentState(server, content);
   }
   catch (e) {
@@ -150,69 +143,27 @@ history.restoreFromHistory = function applyHistoryElem(req) {
 };
 
 (function stuffThatsTooHardWithCSS() {
-  var $editors = input.$el.parent().add(output.$el.parent());
-  var $resizer = miscInputs.$resizer;
-  var $header = miscInputs.$header;
-
-  var delay;
-  var headerHeight;
-  var resizerHeight;
-
-  $resizer
-    .html('&#xFE19;') // vertical elipses
-    .css('vertical-align', 'middle');
+  var delay = null;
 
   function update() {
-    var newHeight;
-
     if (delay) {
       delay = clearTimeout(delay);
     }
 
-    newHeight = $header.outerHeight();
-    if (headerHeight != newHeight) {
-      headerHeight = newHeight;
-      $editors.css('top', newHeight + 10);
-    }
-
-    newHeight = $resizer.height();
-    if (resizerHeight != newHeight) {
-      resizerHeight = newHeight;
-      $resizer.css('line-height', newHeight + 'px');
-    }
     input.resize(true);
     output.resize(true);
   }
 
-  // update at key moments in the loading process
-  $(update);
+  update();
 
-
-  // and when the window resizes (once every 30 ms)
+  // and when the window resizes (once every 500 ms)
   $(window)
-    .resize(function (event) {
-      if (!delay && event.target === window) {
-        delay = setTimeout(update, 30);
-      }
-    });
-
+  .resize(function (event) {
+    if (!delay && event.target === window) {
+      delay = setTimeout(update, 500);
+    }
+  });
 }());
 
-/**
- * Display the welcome popup if it has not been shown yet
- */
-if (!localStorage.getItem("version_welcome_shown")) {
-  let $welcomePopup = require('./welcome_popup');
-  $welcomePopup.on('shown', function () {
-    localStorage.setItem("version_welcome_shown", '@@SENSE_REVISION');
-  });
-  $welcomePopup.one('hidden', function () {
-    loadSavedState();
-    setupAutosave();
-  });
-  $welcomePopup.modal('show');
-}
-else {
-  loadSavedState();
-  setupAutosave();
-}
+loadSavedState();
+setupAutosave();

@@ -24,10 +24,10 @@ let mappings = require('./mappings');
 let output = require('./output');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');
+let storage = require('./storage');
 let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
-
 
 var input = new SenseEditor($('#editor'));
 
@@ -72,9 +72,9 @@ var zc = (function setupZeroClipboard() {
   var zc = new ZeroClipboard($copyAsCURL); // the ZeroClipboard instance
 
   zc.on('wrongflash noflash', function () {
-    if (!localStorage.getItem('flash_warning_shown')) {
+    if (!storage.get('flash_warning_shown')) {
       alert('Sense needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
-      localStorage.setItem('flash_warning_shown', 'true');
+      storage.set('flash_warning_shown', 'true');
     }
     $copyAsCURL.hide();
   });
@@ -126,12 +126,7 @@ function sendCurrentRequestToES() {
     }
 
     var isMultiRequest = requests.length > 1;
-
-    $("#notification").text("Calling ES....").css("visibility", "visible");
-
-    var finishChain = function () {
-      $("#notification").text("").css("visibility", "hidden");
-    };
+    var finishChain = function () { /* noop */ };
 
     var isFirstRequest = true;
 
@@ -258,5 +253,6 @@ input.focus();
 input.highlightCurrentRequestsAndUpdateActionBar();
 
 input.sendCurrentRequestToES = sendCurrentRequestToES;
+require('./input_resize')(input, output);
 
 module.exports = input;

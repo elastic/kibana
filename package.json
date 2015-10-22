@@ -9,7 +9,6 @@
     "type": "git",
     "url": "http://github.com/elastic/sense.git"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {}
 }

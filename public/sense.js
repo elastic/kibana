@@ -1,15 +1,21 @@
 require('ace');
 
+require('ui-bootstrap-custom');
+require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
+
+require('ui/tooltip');
+require('./css/sense.less');
+require('./src/controllers/SenseController');
+require('./src/directives/senseHistory');
+require('./src/directives/senseSettings');
+require('./src/directives/senseHelp');
+require('./src/directives/senseWelcome');
+require('./src/directives/senseNavbar');
+
 require('ui/chrome')
 .setBrand({
-  logo: 'url(/plugins/sense/favicon.ico) center no-repeat',
-  smallLogo: 'url(/plugins/sense/favicon.ico) center no-repeat'
+  logo: 'url(/plugins/sense/icon.png) center no-repeat',
+  smallLogo: 'url(/plugins/sense/icon.png) center no-repeat'
 })
-.setTabs([{
-  id: '',
-  title: 'Sense'
-}])
 .setRootTemplate(require('./index.html'))
-.setRootController(function () {
-  require('./src/app');
-});
+.setRootController('sense', 'SenseController');

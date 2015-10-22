@@ -17,120 +17,75 @@
 
 let $ = require('jquery');
 let es = require('./es');
+const storage = require('./storage');
 
 function getFontSize() {
-  return localStorage.getItem("font_size") || "12";
+  return storage.get('font_size', 12);
 }
 
 function setFontSize(size) {
-  if (!/^([1-9]\d*)$/.test(size)) {
-    return false;
-  }
-  localStorage.setItem("font_size", size);
+  storage.set('font_size', size);
   applyCurrentSettings();
   return true;
 }
 
 function getWrapMode() {
-  var mode = localStorage.getItem("wrap_mode") || "true";
-  return mode == "true";
+  return storage.get('wrap_mode', true);
 }
 
 function setWrapMode(mode) {
-  if (typeof mode !== "boolean") {
-    return false;
-  }
-  localStorage.setItem("wrap_mode", mode);
+  storage.set('wrap_mode', mode);
   applyCurrentSettings();
   return true;
 }
 
 function setBasicAuth(mode) {
-  if (typeof mode !== "boolean") {
-    return false;
-  }
-  localStorage.setItem("basic_auth", mode);
+  storage.set('basic_auth', mode);
   applyCurrentSettings();
   return true;
 }
 
 function getAutocomplete() {
-  var settings = localStorage.getItem("autocomplete_settings");
-  var defaults = {fields: true, indices: true};
-  if (settings) {
-    try {
-      settings = JSON.parse(settings);
-      if (typeof settings != "object") {
-        settings = defaults;
-      }
-    } catch (e) {
-      settings = defaults;
-    }
-  }
-  else {
-    settings = defaults;
-  }
-  return settings;
+  return storage.get('autocomplete_settings', { fields: true, indices: true });
 }
 
 function setAutocomplete(settings) {
-  localStorage.setItem("autocomplete_settings", JSON.stringify(settings));
+  storage.set('autocomplete_settings', settings);
   return true;
 }
 
 function applyCurrentSettings(editor) {
-  if (typeof editor === "undefined") {
+  if (typeof editor === 'undefined') {
     applyCurrentSettings(require('./input'));
     applyCurrentSettings(require('./output'));
   }
   if (editor) {
     editor.getSession().setUseWrapMode(getWrapMode());
-    editor.$el.css("font-size", getFontSize() + "px");
+    editor.$el.css('font-size', getFontSize() + 'px');
   }
 }
 
+function getCurrentSettings() {
+  return {
+    autocomplete: getAutocomplete(),
+    wrapMode: getWrapMode(),
+    fontSize: parseFloat(getFontSize()),
+  };
+}
 
-var settings_popup = $("#settings_popup");
-
-var font_size_ctl = settings_popup.find("#font_size");
-var fs = getFontSize();
-font_size_ctl.val(fs);
-//setFontSize(fs);
-
-var wrap_mode_ctl = settings_popup.find("#wrap_mode");
-var wm = getWrapMode();
-wrap_mode_ctl.prop('checked', wm);
-//setWrapMode(wm);
-
-var autocompleteSettings = getAutocomplete();
-var autocomplete_fields_ctl = settings_popup.find("#autocomplete_fields");
-autocomplete_fields_ctl.prop('checked', autocompleteSettings.fields);
-var autocomplete_indices_ctl = settings_popup.find("#autocomplete_indices");
-autocomplete_indices_ctl.prop('checked', autocompleteSettings.indices);
-
-
-function save() {
-  if (!setFontSize(font_size_ctl.val())) {
-    font_size_ctl.val(getFontSize());
-  }
-  if (!setWrapMode(wrap_mode_ctl.prop("checked"))) {
-    wrap_mode_ctl.prop('checked', getWrapMode());
-  }
-  setAutocomplete({
-    fields: autocomplete_fields_ctl.prop('checked'),
-    indices: autocomplete_indices_ctl.prop('checked')
-  });
+function updateSettings({ fontSize, wrapMode, autocomplete}) {
+  setFontSize(fontSize);
+  setWrapMode(wrapMode);
+  setAutocomplete(autocomplete);
   require('./input').focus();
   es.forceRefresh();
-  return true;
+  return getCurrentSettings();
 }
 
-var save_button = settings_popup.find(".btn-primary");
-save_button.click(save);
-settings_popup.find("form").submit(function () {
-  save_button.click();
-  return false
-});
+module.exports = {
+  getAutocomplete,
+  applyCurrentSettings,
 
-module.exports.getAutocomplete = getAutocomplete;
-module.exports.applyCurrentSettings = applyCurrentSettings;
+  getCurrentSettings,
+  updateSettings,
+};

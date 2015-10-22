@@ -39,14 +39,6 @@ body {
   margin-top: -1px; /* compensate for background */
 }
 
-#request_wrench i {
-  color: rgb(51, 51, 51);
-}
-
-#send i {
-  color: rgb(112, 186, 86);
-}
-
 
 .ui-menu {
   background-color: white;
