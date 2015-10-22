@@ -50,7 +50,7 @@ define(function (require) {
 
             // create child ui state from the savedObj
             var uiState = panelConfig.uiState || {};
-            $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState);
+            $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
 
             $scope.filter = function (field, value, operator) {
               var index = $scope.savedObj.searchSource.get('index').id;
