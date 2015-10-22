@@ -17,6 +17,13 @@ define(function (require) {
           var fullPageSpy = _.get($scope.spy, 'mode.fill', false);
           $scope.modes = spyModes;
 
+          function getSpyObject(name) {
+            return {
+              name: name || $scope.spy.mode.name,
+              fill: fullPageSpy,
+            };
+          }
+
           var renderSpy = function (spyName) {
             var newMode = $scope.modes.byName[spyName];
 
@@ -32,11 +39,7 @@ define(function (require) {
             if (!newMode) return;
 
             // update the spy mode and append to the container
-            $scope.spy.mode = {
-              name: newMode.name,
-              fill: fullPageSpy,
-              // display: newMode.display,
-            };
+            $scope.spy.mode = getSpyObject(newMode.name);
 
             currentSpy = _.assign({
               $scope: $scope.$new(),
@@ -53,13 +56,14 @@ define(function (require) {
           };
 
           $scope.toggleFullPage = function () {
-            fullPageSpy = $scope.spy.mode.fill = !fullPageSpy;
+            fullPageSpy = !fullPageSpy;
+            $scope.spy.mode = getSpyObject();
           };
 
           $scope.setSpyMode = function (modeName) {
             // save the spy mode to the UI state
             if (!_.isString(modeName)) modeName = null;
-            $scope.spy.mode.name = modeName;
+            $scope.spy.mode = getSpyObject(modeName);
           };
 
           if ($scope.uiState) {
