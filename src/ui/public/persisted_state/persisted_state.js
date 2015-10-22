@@ -22,9 +22,9 @@ define(function (require) {
       if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
     }
 
-    function prepSetParams(key, value) {
+    function prepSetParams(key, value, path) {
       // key must be the value, set the entire state using it
-      if (_.isUndefined(value) && _.isPlainObject(key)) {
+      if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
         // setting entire tree, swap the key and value to write to the state
         value = key;
         key = undefined;
@@ -73,14 +73,14 @@ define(function (require) {
     };
 
     PersistedState.prototype.set = function (key, value) {
-      var params = prepSetParams(key, value);
+      var params = prepSetParams(key, value, this._path);
       var val = this._set(params.key, params.value);
       this.emit('set');
       return val;
     };
 
     PersistedState.prototype.setSilent = function (key, value) {
-      var params = prepSetParams(key, value);
+      var params = prepSetParams(key, value, this._path);
       return this._set(params.key, params.value, true);
     };
 
