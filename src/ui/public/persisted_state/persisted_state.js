@@ -202,7 +202,7 @@ define(function (require) {
         if (!this._hasPath() && _.isUndefined(key)) {
           // compare changedState and new state, emit an event when different
           stateChanged = !_.isEqual(this._changedState, value);
-          if (!initialChildState) this._changedState = value;
+          if (!initialChildState) this._changedState = this._mergedState = value;
         } else {
           // check for changes at path, emit an event when different
           stateChanged = !_.isEqual(this.get(keyPath), value);
