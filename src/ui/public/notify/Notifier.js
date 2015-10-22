@@ -77,14 +77,29 @@ define(function (require) {
     return notif;
   }
 
+  // Utilize the extended error information returned from elasticsearch
+  function formatESMsg(msg) {
+    var rootCause = _.get(msg, 'resp.error.root_cause');
+    if (!rootCause) {
+      return; //undefined
+    }
+
+    var result = _.pluck(rootCause, 'reason').join('\n');
+    return result;
+  }
+
   function formatMsg(msg, from) {
     var rtn = '';
     if (from) {
       rtn += from + ': ';
     }
 
+    var esMsg = formatESMsg(msg);
+
     if (typeof msg === 'string') {
       rtn += msg;
+    } else if (esMsg) {
+      rtn += esMsg;
     } else if (msg instanceof Error) {
       rtn += msg.message;
     }
