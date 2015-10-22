@@ -49,7 +49,7 @@ define(function (require) {
     parentDelegationMixin(SimpleEmitter, PersistedState);
     parentDelegationMixin(Events, PersistedState);
 
-    function PersistedState(value, path, parent) {
+    function PersistedState(value, path, parent, silent) {
       PersistedState.Super.call(this);
 
       this._path = this._setPath(path);
@@ -64,7 +64,7 @@ define(function (require) {
       value = value || this._getDefault();
 
       // copy passed state values and create internal trackers
-      this.set(value);
+      (silent) ? this.setSilent(value) : this.set(value);
       this._initialized = true; // used to track state changes
     }
 
@@ -109,8 +109,8 @@ define(function (require) {
       if (!_.isEqual(currentValue, origValue)) this.emit('change');
     };
 
-    PersistedState.prototype.createChild = function (path, value) {
-      return new PersistedState(value, this._getIndex(path), this._parent || this);
+    PersistedState.prototype.createChild = function (path, value, silent) {
+      return new PersistedState(value, this._getIndex(path), this._parent || this, silent);
     };
 
     PersistedState.prototype.removeChild = function (path) {
