@@ -57,8 +57,8 @@ define(function (require) {
       handlePersist('on');
       eventUnsubscribers.push(() => handlePersist('off'));
 
-      // if the thing we're making stateful has a value, keep it around
-      if (self[prop]) persistedStates[prop].set(self[prop]);
+      // if the thing we're making stateful has an appState value, write to persisted state
+      if (self[prop]) persistedStates[prop].setSilent(self[prop]);
 
       return persistedStates[prop];
     };
