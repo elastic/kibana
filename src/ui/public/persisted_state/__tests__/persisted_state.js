@@ -527,10 +527,22 @@ describe('Persisted State', function () {
       expect(getByType('set')).to.have.length(1);
     });
 
+    it('should not emit when setting value silently', function () {
+      expect(getByType('set')).to.have.length(0);
+      persistedState.setSilent('checker.time', 'now');
+      expect(getByType('set')).to.have.length(0);
+    });
+
     it('should emit change when changing values', function () {
       expect(getByType('change')).to.have.length(0);
       persistedState.set('checker.time', 'now');
       expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit when changing values silently', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.setSilent('checker.time', 'now');
+      expect(getByType('change')).to.have.length(0);
     });
 
     it('should not emit change when values are identical', function () {
@@ -566,6 +578,12 @@ describe('Persisted State', function () {
       expect(getByType('change')).to.have.length(0);
       persistedState.createChild('checker', { events: 'changed via child' });
       expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit when createChild set to silent', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('checker', { events: 'changed via child' }, true);
+      expect(getByType('change')).to.have.length(0);
     });
 
     it('should emit change when createChild adds new value', function () {
