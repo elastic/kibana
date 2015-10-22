@@ -18,6 +18,7 @@ visualize {
 
     &.spy-visible {
       margin-bottom: 10px;
+      height: 0px;
     }
 
     &.spy-only {
@@ -55,7 +56,7 @@ ul.visualizations .media-body {
 
 visualize-spy {
   // this element should flex
-  flex: 0 0 auto;
+  flex: 0 1 auto;
 
   // it's children should also flex vertically
   flex-direction: column;
@@ -124,7 +125,6 @@ visualize-spy {
 
     header + * {
       flex: 1 1 auto;
-      overflow: auto;
     }
 
     > .alert {
