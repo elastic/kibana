@@ -1,5 +1,8 @@
 [[setup]]
 == Getting Kibana Up and Running
+
+:shield: https://www.elastic.co/guide/en/shield/current
+
 You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
