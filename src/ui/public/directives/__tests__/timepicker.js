@@ -369,8 +369,8 @@ describe('timepicker directive', function () {
       inputs = {
         fromInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.from"]'),
         toInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.to"]'),
-        fromCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.from"] '),
-        toCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.to"] '),
+        fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.from"] '),
+        toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.to"] '),
       };
 
     });
