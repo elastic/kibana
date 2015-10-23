@@ -41,7 +41,9 @@ Binder.prototype.fakeD3Bind = function (el, event, handler) {
 };
 
 Binder.prototype.destroy = function () {
-  callEach(this.disposal.slice(0));
+  var destroyers = this.disposal;
+  this.disposal = [];
+  callEach(destroyers);
 };
 
 module.exports = Binder;
