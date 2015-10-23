@@ -217,7 +217,10 @@ define(function (require) {
             if (rows == null && oldRows == null) return status.LOADING;
 
             var rowsEmpty = _.isEmpty(rows);
-            if (rowsEmpty && fetchStatus) return status.LOADING;
+            // an undefined fetchStatus means the requests are still being
+            // prepared to be sent
+            if (_.isUndefined(fetchStatus)) return status.LOADING;
+            else if (rowsEmpty && fetchStatus) return status.LOADING;
             else if (!rowsEmpty) return status.READY;
             else return status.NO_RESULTS;
           }
