@@ -54,14 +54,14 @@ define(function (require) {
       // give the request consumer a chance to receive each segment and set
       // parameters via the handle
       if (_.isFunction(this._initFn)) this._initFn(this._handle);
-      this._createQueue().then(function (queue) {
+      return this._createQueue().then(function (queue) {
         self._all = queue.slice(0);
 
         // Send the initial fetch status
         self._reportStatus();
-      });
 
-      return SearchReq.prototype.start.call(this);
+        return SearchReq.prototype.start.call(self);
+      });
     };
 
     SegmentedReq.prototype.continue = function () {
