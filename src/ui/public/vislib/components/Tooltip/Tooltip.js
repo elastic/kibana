@@ -162,7 +162,7 @@ Tooltip.prototype.render = function () {
         }
       }
 
-      this.binder.fakeD3Bind(this, 'mousemove', function () {
+      self.binder.fakeD3Bind(this, 'mousemove', function () {
         if (!self.showCondition.call(element, d, i)) {
           return render();
         }
@@ -171,7 +171,7 @@ Tooltip.prototype.render = function () {
         return render(self.formatter(events));
       });
 
-      this.binder.fakeD3Bind(this, 'mouseleave', function () {
+      self.binder.fakeD3Bind(this, 'mouseleave', function () {
         render();
       });
     });
