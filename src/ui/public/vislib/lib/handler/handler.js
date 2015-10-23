@@ -205,6 +205,13 @@ define(function (require) {
      */
     Handler.prototype.destroy = function () {
       this.binder.destroy();
+
+      this.renderArray.forEach(function (renderable) {
+        if (_.isFunction(renderable.destroy)) {
+          renderable.destroy();
+        }
+      });
+
       this.charts.splice(0).forEach(function (chart) {
         if (_.isFunction(chart.destroy)) {
           chart.destroy();
