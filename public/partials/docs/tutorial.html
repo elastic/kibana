@@ -7,7 +7,7 @@
   		</p>
 
   		<p>
-  			Why start with elasticsearch? Well, you're using timelion, so we know you have Kibana, so you definitely have Elasticsearch. So the answer is: <strong>Because its easy.</strong> Timelion want everything to be easy. Ok, lets do this thing. If you already know what you're doing, <a ng-click="section = 'reference'; page = 1">skip to the Function Reference</a>. Otherwise, click the <strong>Next</strong> button in the lower right corner.
+  			Why start with elasticsearch? Well, you're using timelion, so we know you have Kibana, so you definitely have Elasticsearch. So the answer is: <strong>Because its easy.</strong> Timelion want everything to be easy. Ok, lets do this thing. Click the <strong>Next</strong> button in the lower right corner.
   		</p>
     </div>
 
@@ -137,7 +137,7 @@
     <div class="doc-container-content">
       <h2>Data: Transform <small>insert beat boxing</small></h2>
       <p>
-        We can make our charts pretty all day, but its time for <strong>businessing</strong>. As an example exercise, we're going to figure out what percentage some subset of our data represents of the whole, over time. For example, what percentage of my web traffic comes from the US? Lets start with finding all events that contain US: <code>(`US`)</code>. Now, to find that ratio to the whole, we'd need to divide <code>`US`</code> by everything, try this: <code>(`US`).divide(`*`)</code>. Ah, not bad, but of course this provides us with a number between 0 and 1, lets correct that to a percentage: <code>(`US`).divide(`*`).multiply(100)</code>. There, now we've divide all US traffic by all worldwide traffic, then multiplied the result by 100 to get a percentage.
+        We can make our charts pretty all day, but its time for <strong>businessing</strong>. As an example exercise, we're going to figure out what percentage some subset of our data represents of the whole, over time. For example, what percentage of my web traffic comes from the US? Lets start with finding all events that contain US: <code>.es('US')</code>. Now, to find that ratio to the whole, we'd need to divide <code>'US'</code> by everything, try this: <code>.es('US').divide(.es())</code>. Ah, not bad, but of course this provides us with a number between 0 and 1, lets correct that to a percentage: <code>.es('US').divide(.es()).multiply(100)</code>. There, now we've divided all US traffic by all worldwide traffic, then multiplied the result by 100 to get a percentage.
       </p>
       <p>Timelion has a number of built in arithmetic function, such as <code>sum</code>, <code>subtract</code>, <code>multiply</code> and <code>divide</code>, many of which can take a series or a number. There are also other data transformation functions including <code>movingaverage</code>, <code>abs</code> and <code>derivative</code>. In addition there are other view transformation functions than the ones we learned on the previous page. See the function reference for the complete list of transforming, and drawing functions.
     </div>
