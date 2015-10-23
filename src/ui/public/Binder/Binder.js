@@ -19,7 +19,7 @@ Binder.prototype._bind = function (on, off, emitter, args) {
 };
 
 Binder.prototype.on = function (emitter/*, ...args */) {
-  this._bind(emitter.on, emitter.removeListener, emitter, rest(arguments));
+  this._bind(emitter.on, emitter.off || emitter.removeListener, emitter, rest(arguments));
 };
 
 Binder.prototype.jqOn = function (el/*, ...args */) {
