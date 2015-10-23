@@ -1,6 +1,8 @@
 [[visualize]]
 == Visualize
 
+:ref: http://www.elastic.co/guide/en/elasticsearch/reference/current/
+
 You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use
 them individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following 
 data source types:
