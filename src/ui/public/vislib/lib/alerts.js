@@ -3,6 +3,7 @@ define(function (require) {
     var d3 = require('d3');
     var $ = require('jquery');
     var _ = require('lodash');
+    var Binder = require('ui/Binder');
 
     /**
      * Adds allerts that float in front of a visualization
@@ -18,9 +19,10 @@ define(function (require) {
 
       this.vis = vis;
       this.data = data;
+      this.binder = new Binder();
       this.alertDefs = alertDefs || [];
 
-      vis.binder.jqOn(vis.el, 'mouseenter', '.vis-alerts-tray', function () {
+      this.binder.jqOn(vis.el, 'mouseenter', '.vis-alerts-tray', function () {
         var $tray = $(this);
         hide();
         $(vis.el).on('mousemove', checkForExit);
@@ -85,6 +87,14 @@ define(function (require) {
       $(vis.el).find('.vis-alerts').append(
         $('<div>').addClass('vis-alerts-tray').append(alerts.value())
       );
+    };
+
+    /**
+     * Tear down the Alerts
+     * @return {undefined}
+     */
+    Alerts.prototype.destroy = function () {
+      this.binder.destroy();
     };
 
     return Alerts;
