@@ -11,14 +11,20 @@ function Binder($scope) {
   }
 }
 
+Binder.prototype._bind = function (on, off, emitter, args) {
+  on.apply(emitter, args);
+  this.disposal.push(function () {
+    off.apply(emitter, args);
+  });
+};
+
+Binder.prototype.on = function (emitter/*, ...args */) {
+  this._bind(emitter.on, emitter.removeListener, emitter, rest(arguments));
+};
+
 Binder.prototype.jqOn = function (el/*, ...args */) {
   var $el = $(el);
-  var args = rest(arguments);
-  $el.on.apply($el, args);
-  this.disposal.push(function () {
-    $el.off.apply($el, args);
-    $el = null;
-  });
+  this._bind($el.on, $el.off, $el, rest(arguments));
 };
 
 Binder.prototype.fakeD3Bind = function (el, event, handler) {
