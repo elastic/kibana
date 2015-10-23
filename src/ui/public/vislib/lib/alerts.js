@@ -20,7 +20,7 @@ define(function (require) {
       this.data = data;
       this.alertDefs = alertDefs || [];
 
-      $(vis.el).on('mouseenter', '.vis-alerts-tray', function () {
+      vis.binder.jqOn(vis.el, 'mouseenter', '.vis-alerts-tray', function () {
         var $tray = $(this);
         hide();
         $(vis.el).on('mousemove', checkForExit);
