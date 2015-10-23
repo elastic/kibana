@@ -25,6 +25,7 @@ define(function (require) {
       this.handler = handler;
       this.chartEl = el;
       this.chartData = chartData;
+      this.tooltips = [];
 
       var events = this.events = new Dispatch(handler);
 
@@ -34,6 +35,7 @@ define(function (require) {
 
         // Add tooltip
         this.tooltip = new Tooltip('chart', $el, formatter, events);
+        this.tooltips.push(this.tooltip);
       }
 
       this._attr = _.defaults(this.handler._attr || {}, {});
@@ -83,7 +85,9 @@ define(function (require) {
     Chart.prototype.destroy = function () {
       var selection = d3.select(this.chartEl);
       this.events.removeAllListeners();
-      if (this.tooltip) this.tooltip.hide();
+      this.tooltips.forEach(function (tooltip) {
+        tooltip.destroy();
+      });
       selection.remove();
       selection = null;
     };

@@ -1,6 +1,7 @@
 var d3 = require('d3');
 var _ = require('lodash');
 var $ = require('jquery');
+var Binder = require('ui/Binder');
 var positionTooltip = require('./positionTooltip');
 
 var allContents = [];
@@ -28,6 +29,8 @@ function Tooltip(id, el, formatter, events) {
   this.tooltipClass = 'vis-tooltip';
   this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
   this.showCondition = _.constant(true);
+
+  this.binder = new Binder();
 }
 
 /**
@@ -128,7 +131,7 @@ Tooltip.prototype.render = function () {
 
     var $chart = self.$getChart();
     if ($chart) {
-      $chart.on('mouseleave', function (event) {
+      self.binder.jqOn($chart, 'mouseleave', function (event) {
         // only clear when we leave the chart, so that
         // moving between points doesn't make it reposition
         $chart.removeData('previousPlacement');
@@ -159,7 +162,7 @@ Tooltip.prototype.render = function () {
         }
       }
 
-      fakeD3Bind(this, 'mousemove', function () {
+      this.binder.fakeD3Bind(this, 'mousemove', function () {
         if (!self.showCondition.call(element, d, i)) {
           return render();
         }
@@ -168,26 +171,16 @@ Tooltip.prototype.render = function () {
         return render(self.formatter(events));
       });
 
-      fakeD3Bind(this, 'mouseleave', function () {
+      this.binder.fakeD3Bind(this, 'mouseleave', function () {
         render();
       });
-
     });
   };
 };
 
-function fakeD3Bind(el, event, handler) {
-  $(el).on(event, function (e) {
-    // mimick https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
-    var o = d3.event; // Events can be reentrant (e.g., focus).
-    d3.event = e;
-    try {
-      handler.apply(this, [this.__data__]);
-    } finally {
-      d3.event = o;
-    }
-  });
-}
+Tooltip.prototype.destroy = function () {
+  this.binder.destroy();
+};
 
 module.exports = function TooltipFactoryProvider() {
   return Tooltip;
