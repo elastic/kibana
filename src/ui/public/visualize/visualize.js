@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $rootScope) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, timefilter) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -39,18 +39,43 @@ define(function (require) {
         $scope.spy = {mode: false};
         $scope.fullScreenSpy = false;
 
-        // Evaluate if the .loading class should be applied when fetching
-        $scope.showLoading = true;
-        var monitorRefreshIntervalChange = function () {
-          // Listen for refreshInterval changes
-          $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-            var refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
-            $scope.showLoading = refreshPause;
-          });
+        ////////////////////////////////////
+
+        // el ng-class is bound to this property
+        $scope.applyLoadingClass = false;
+
+        // get the seconds value from config
+
+        let delay = config.get('dashboard:loadingIndicatorDelay');
+        let loadingEnabled = !!~-1;
+        console.log('enabled', delay, loadingEnabled);
+
+        let loadingIndicatorDelay = 1000 * delay;
+        let applyLoadingFn;
+
+        var fetchingChanged = function () {
+          let fetching = $scope.vis.type.requiresSearch && !!$scope.searchSource.activeFetchCount;
+
+          if (!fetching && applyLoadingFn) {
+            applyLoadingFn.cancel();
+            $scope.applyLoadingClass = false;
+          }
+
+          if (fetching) applyLoadingFn();
         };
 
-        if (config.get('dashboard:disableLoadingIndicator')) {
-          monitorRefreshIntervalChange();
+        $scope.$watchMulti([
+          'vis.type.requiresSearch',
+          'searchSource.activeFetchCount'
+        ], fetchingChanged);
+
+        if (!applyLoadingFn) {
+          applyLoadingFn = _.debounce(function () {
+            // apply the loading element to the thing
+            $scope.applyLoadingClass = true;
+          },
+          loadingIndicatorDelay,
+          { 'leading': false, 'trailing': true });
         }
 
         var applyClassNames = function () {
