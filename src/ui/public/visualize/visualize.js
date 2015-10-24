@@ -44,38 +44,48 @@ define(function (require) {
         // el ng-class is bound to this property
         $scope.applyLoadingClass = false;
 
+        // TODO: test when config is changed, then return to dashboard
+        // TODO: better names for things
+
         // get the seconds value from config
+        let delay = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
+        let loadingEnabled = delay !== -1;
 
-        let delay = config.get('dashboard:loadingIndicatorDelay');
-        let loadingEnabled = !!~-1;
-        console.log('enabled', delay, loadingEnabled);
+        var loadingIndicator = function () {
 
-        let loadingIndicatorDelay = 1000 * delay;
-        let applyLoadingFn;
+          console.log('loadingIndicator()');
 
-        var fetchingChanged = function () {
-          let fetching = $scope.vis.type.requiresSearch && !!$scope.searchSource.activeFetchCount;
+          let loadingIndicatorDelay = 1000 * delay;
+          let applyLoadingFn;
 
-          if (!fetching && applyLoadingFn) {
-            applyLoadingFn.cancel();
-            $scope.applyLoadingClass = false;
+          var fetchingChanged = function () {
+            let fetching = $scope.vis.type.requiresSearch && !!$scope.searchSource.activeFetchCount;
+
+            if (!fetching && applyLoadingFn) {
+              applyLoadingFn.cancel();
+              $scope.applyLoadingClass = false;
+            }
+
+            if (fetching) applyLoadingFn();
+          };
+
+          $scope.$watchMulti([
+            'vis.type.requiresSearch',
+            'searchSource.activeFetchCount'
+          ], fetchingChanged);
+
+          if (!applyLoadingFn) {
+            applyLoadingFn = _.debounce(function () {
+              // apply the loading element to the thing
+              $scope.applyLoadingClass = true;
+            },
+            loadingIndicatorDelay,
+            { 'leading': false, 'trailing': true });
           }
-
-          if (fetching) applyLoadingFn();
         };
 
-        $scope.$watchMulti([
-          'vis.type.requiresSearch',
-          'searchSource.activeFetchCount'
-        ], fetchingChanged);
-
-        if (!applyLoadingFn) {
-          applyLoadingFn = _.debounce(function () {
-            // apply the loading element to the thing
-            $scope.applyLoadingClass = true;
-          },
-          loadingIndicatorDelay,
-          { 'leading': false, 'trailing': true });
+        if (loadingEnabled) {
+          loadingIndicator();
         }
 
         var applyClassNames = function () {
