@@ -5,7 +5,7 @@
 * <<controlling-access, Controlling Access>>
 * <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
 
-How you deploy Kibana largely depends on your use case. If you are the only user,
+How you deploy Kibana largely depends on your use case. When you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
 Elasticsearch instance you want to interact with. Conversely, if you have a large
 number of heavy Kibana users, you might need to load balance across multiple
