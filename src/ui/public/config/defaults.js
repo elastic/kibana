@@ -197,11 +197,6 @@ define(function (require) {
         value: 2,
         description: 'Delay in seconds until the loading indicator is applied to the ' +
         'visualizations. Set as -1 to disable the loading indicator completely'
-      },
-      'dashboard:disableLoadingIndicator': {
-        value: false,
-        description: 'Disable the loading indicator on dashboard visualizations. ' +
-        'This setting is only applicable when auto-refresh is on'
       }
     };
   };
