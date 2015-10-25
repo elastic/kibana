@@ -39,34 +39,28 @@ define(function (require) {
         $scope.spy = {mode: false};
         $scope.fullScreenSpy = false;
 
-        ////////////////////////////////////
-
-        // el ng-class is bound to this property
         $scope.applyLoadingClass = false;
 
-        // TODO: test when config is changed, then return to dashboard
-        // TODO: better names for things
-
         // get the seconds value from config
-        let delay = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
-        let loadingEnabled = delay !== -1;
+        var delay = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
+        var loadingEnabled = delay !== -1;
 
         var loadingIndicator = function () {
 
-          console.log('loadingIndicator()');
-
-          let loadingIndicatorDelay = 1000 * delay;
-          let applyLoadingFn;
+          var loadingIndicatorDelay = 1000 * delay;
+          var debouncedApplyLoading;
 
           var fetchingChanged = function () {
-            let fetching = $scope.vis.type.requiresSearch && !!$scope.searchSource.activeFetchCount;
+            var fetching = $scope.vis.type.requiresSearch && !!$scope.searchSource.activeFetchCount;
 
-            if (!fetching && applyLoadingFn) {
-              applyLoadingFn.cancel();
+            if (!fetching && debouncedApplyLoading) {
+              debouncedApplyLoading.cancel();
               $scope.applyLoadingClass = false;
             }
 
-            if (fetching) applyLoadingFn();
+            if (fetching) {
+              debouncedApplyLoading();
+            }
           };
 
           $scope.$watchMulti([
@@ -74,9 +68,8 @@ define(function (require) {
             'searchSource.activeFetchCount'
           ], fetchingChanged);
 
-          if (!applyLoadingFn) {
-            applyLoadingFn = _.debounce(function () {
-              // apply the loading element to the thing
+          if (!debouncedApplyLoading) {
+            debouncedApplyLoading = _.debounce(function () {
               $scope.applyLoadingClass = true;
             },
             loadingIndicatorDelay,
