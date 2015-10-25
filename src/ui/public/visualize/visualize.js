@@ -39,48 +39,6 @@ define(function (require) {
         $scope.spy = {mode: false};
         $scope.fullScreenSpy = false;
 
-        $scope.applyLoadingClass = false;
-
-        // get the seconds value from config
-        var delay = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
-        var loadingEnabled = delay !== -1;
-
-        var loadingIndicator = function () {
-
-          var loadingIndicatorDelay = 1000 * delay;
-          var debouncedApplyLoading;
-
-          var fetchingChanged = function () {
-            var fetching = $scope.vis.type.requiresSearch && !!$scope.searchSource.activeFetchCount;
-
-            if (!fetching && debouncedApplyLoading) {
-              debouncedApplyLoading.cancel();
-              $scope.applyLoadingClass = false;
-            }
-
-            if (fetching) {
-              debouncedApplyLoading();
-            }
-          };
-
-          $scope.$watchMulti([
-            'vis.type.requiresSearch',
-            'searchSource.activeFetchCount'
-          ], fetchingChanged);
-
-          if (!debouncedApplyLoading) {
-            debouncedApplyLoading = _.debounce(function () {
-              $scope.applyLoadingClass = true;
-            },
-            loadingIndicatorDelay,
-            { 'leading': false, 'trailing': true });
-          }
-        };
-
-        if (loadingEnabled) {
-          loadingIndicator();
-        }
-
         var applyClassNames = function () {
           var $spyEl = getSpyEl();
           var $visEl = getVisEl();
@@ -117,6 +75,50 @@ define(function (require) {
             };
           };
         }());
+
+        $scope.applyLoadingClass = false;
+
+        // get the seconds value from config
+        var delay = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
+        var loadingEnabled = (delay !== -1);
+
+        var monitorForLoading = function () {
+
+          var loadingIndicatorDelay = 1000 * delay;
+          var debouncedApplyLoading;
+
+          var fetchingChanged = function () {
+            if (!$scope.vis || !$scope.searchSource) return;
+
+            var fetching = $scope.vis.type.requiresSearch && $scope.searchSource.activeFetchCount > 0;
+
+            if (!fetching && debouncedApplyLoading) {
+              debouncedApplyLoading.cancel();
+              $scope.applyLoadingClass = false;
+            }
+
+            if (fetching) {
+              debouncedApplyLoading();
+            }
+          };
+
+          $scope.$watchMulti([
+            'vis.type.requiresSearch',
+            'searchSource.activeFetchCount'
+          ], prereq(fetchingChanged));
+
+          if (!debouncedApplyLoading) {
+            debouncedApplyLoading = _.debounce(function () {
+              $scope.applyLoadingClass = true;
+            },
+            loadingIndicatorDelay,
+            { 'leading': false, 'trailing': true });
+          }
+        };
+
+        if (loadingEnabled) {
+          monitorForLoading();
+        }
 
         $scope.$watch('fullScreenSpy', applyClassNames);
         $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
