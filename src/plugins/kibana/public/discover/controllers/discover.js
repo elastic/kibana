@@ -217,8 +217,10 @@ define(function (require) {
             if (rows == null && oldRows == null) return status.LOADING;
 
             var rowsEmpty = _.isEmpty(rows);
-            // an undefined fetchStatus means the requests are still being
-            // prepared to be sent
+            // An undefined fetchStatus means the requests are still being
+            // prepared to be sent. When all requests are completed,
+            // fetchStatus is set to null, so it's important that we
+            // specifically check for undefined to determine a loading status.
             var preparingForFetch = _.isUndefined(fetchStatus);
             if (preparingForFetch) return status.LOADING;
             else if (rowsEmpty && fetchStatus) return status.LOADING;
