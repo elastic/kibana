@@ -136,7 +136,6 @@ define(function (require) {
       index: $scope.indexPattern.id,
       timefield: $scope.indexPattern.timeFieldName,
       savedSearch: savedSearch,
-      highlight: config.get('discover:highlight'),
       indexPatternList: $route.current.locals.ip.list
     };
 
@@ -430,7 +429,7 @@ define(function (require) {
       .query(!$state.query ? null : $state.query)
       .set('filter', queryFilter.getFilters());
 
-      if ($scope.opts.highlight) {
+      if (config.get('discover:highlight')) {
         $scope.searchSource.highlight({
           pre_tags: [highlightTags.pre],
           post_tags: [highlightTags.post],

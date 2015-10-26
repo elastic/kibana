@@ -61,7 +61,7 @@ define(function (require) {
       },
       'discover:highlight': {
         value: true,
-        description: 'Highlight results in discover',
+        description: 'Highlight results in discover. Highlighing makes request slow when working on big documents.',
       },
       'courier:maxSegmentCount': {
         value: 30,
