@@ -3,7 +3,7 @@ describe('ui/courier/fetch/request/segmented', () => {
   const expect = require('expect.js');
   const ngMock = require('ngMock');
 
-  let _Promise;
+  let Promise;
   let $rootScope;
   let SegmentedReq;
   let segmentedReq;
@@ -11,8 +11,8 @@ describe('ui/courier/fetch/request/segmented', () => {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject((Private, Promise, $injector) => {
-    _Promise = Promise;
+  beforeEach(ngMock.inject((Private, $injector) => {
+    Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
     SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
     searchReqStart = sinon.spy(Private(require('ui/courier/fetch/request/search')).prototype, 'start');
@@ -49,7 +49,7 @@ describe('ui/courier/fetch/request/segmented', () => {
   function mockIndexPattern() {
     const queue = [1, 2, 3];
     return {
-      toIndexList: sinon.stub().returns(_Promise.resolve(queue))
+      toIndexList: sinon.stub().returns(Promise.resolve(queue))
     };
   }
 });

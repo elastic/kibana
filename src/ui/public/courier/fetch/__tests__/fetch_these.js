@@ -4,7 +4,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
   const expect = require('expect.js');
   const ngMock = require('ngMock');
 
-  let _Promise;
+  let Promise;
   let $rootScope;
   let fetchThese;
   let request;
@@ -26,9 +26,9 @@ describe('ui/courier/fetch/_fetch_these', () => {
     PrivateProvider.swap(require('ui/courier/fetch/_continue_incomplete'), FakeResponsesProvider);
   }));
 
-  beforeEach(ngMock.inject((Private, Promise, $injector) => {
-    _Promise = Promise;
+  beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
+    Promise = $injector.get('Promise');
     fetchThese = Private(require('ui/courier/fetch/_fetch_these'));
     request = mockRequest();
     requests = [ request ];
@@ -44,7 +44,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
     });
 
     it('waits for returned promise from start() to be fulfilled', () => {
-      request.start = sinon.stub().returns(_Promise.resolve(request));
+      request.start = sinon.stub().returns(Promise.resolve(request));
       fetchThese(requests);
 
       expect(request.start.callCount).to.be(1);
@@ -61,7 +61,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
       expect(request.continue.called).to.be(true);
     });
     it('waits for returned promise to be fulfilled', () => {
-      request.continue = sinon.stub().returns(_Promise.resolve(request));
+      request.continue = sinon.stub().returns(Promise.resolve(request));
       fetchThese(requests);
 
       expect(request.continue.callCount).to.be(1);
