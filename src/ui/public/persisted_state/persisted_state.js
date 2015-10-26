@@ -151,6 +151,9 @@ define(function (require) {
         var statePath = this._path.concat(partialPath);
         var stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
 
+        // if stateVal isn't an object, do nothing
+        if (!_.isPlainObject(stateVal)) return;
+
         if (remove) delete stateVal[lastKey];
         if (Object.keys(stateVal).length > 0) remove = false;
       }
