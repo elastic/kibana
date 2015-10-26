@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, timefilter) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
