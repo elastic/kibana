@@ -18,8 +18,11 @@ define(function (require) {
           $scope.modes = spyModes;
 
           function getSpyObject(name) {
+            name = _.isUndefined(name) ? $scope.spy.mode.name : name;
+            if (_.isNull(name)) fullPageSpy = false;
+
             return {
-              name: name || $scope.spy.mode.name,
+              name: name,
               fill: fullPageSpy,
             };
           }
