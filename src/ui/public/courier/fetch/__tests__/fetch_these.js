@@ -35,7 +35,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
   }));
 
   context('when request has not started', () => {
-    beforeEach(() => _.forEach(requests, req => req.started = false));
+    beforeEach(() => requests.forEach(req => req.started = false));
 
     it('starts request', () => {
       fetchThese(requests);
