@@ -1,0 +1,71 @@
+[[installing]]
+== Installing Sense
+
+Sense is a Kibana app. To get up and running you will first need to download Kibana and install as instructed https://www.elastic.co/downloads/kibana[here].
+You will need Kibana {kibanaversion} or higher.
+Once Kibana is installed, you can install Sense running the following command from your Kibana folder:
+
+[source,bash]
+-----------
+$./bin/kibana plugin --install elastic/sense
+-----------
+
+This will download and install the latest available version of Sense.
+
+You will now need to start Kibana:
+
+[source,bash]
+-----------
+$./bin/kibana
+-----------
+
+You should now be able to access Sense with a web browser on http://localhost:5601/app/sense (replace host and port
+if you configured them differently in Kibana).
+
+[NOTE]
+By default, Kibana 4.2 requires an active Elasticsearch instance of version 2.0 or higher.
+If you want to use Sense without this requirement
+see instructions <<disable_discover,here>>.
+
+[[min_req]]
+=== Minimum Requirements
+
+To run Sense you will need:
+
+ - Kibana of version {kibanaversion} or later.
+ - A [modern browser](https://www.elastic.co/support/matrix#matrix_browsers)
+
+
+[[disable_discover]]
+=== Running against Elasticsearch 1.x / disabling Kibana's Discover,Visualize & Dashboard apps
+
+Kibana ships by default with 3 handy apps called Discover, Visualize and Dashboard. These applications
+require an active Elasticsearch cluster of version 2.0 or higher.
+
+In order to use Sense with an Elasticsearch 1.x alone, or if you don't want the overhead of the extra
+apps, add the following lines to your `config/kibana.yml` file:
+
+[source,yaml]
+------------
+kibana.enabled: false        # disable the standard kibana discovery, visualize & dashboard plugins
+elasticsearch.enabled: false # do not require a running Elasticsearch 2.0 instance
+------------
+
+After this change you will need to restart Kibana.
+
+
+[[manual_download]]
+=== Manual Download
+
+Kibana’s `bin/plugin` script requires direct internet access for downloading and installing Sense.
+If your server doesn’t have internet access, you can download the Sense tar file from the following link:
+https://download.elasticsearch.org/elastic/sense/sense-latest.zip
+
+Once downloaded you can install Sense using the following command:
+
+[source,bash]
+-------------
+$ bin/kibana plugin -i sense -u file://PATH_TO_SENSE_TAR_FILE
+-------------
+
+

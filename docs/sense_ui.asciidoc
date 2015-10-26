@@ -1,0 +1,85 @@
+[[sense-ui]]
+== The Sense UI
+
+In this section you will find a more detailed description of UI of Sense. The basic aspects of the UI are explained
+in the <<introduction>> section.
+
+[[multi-req]]
+=== Multiple Requests Support
+
+The Sense editor allows writing multiple request bellow each other. As shown in the <<introduction>> section, you
+can submit a request to Elasticsearch by positioning the cursor and using the <<action_menu,Action Menu>>. Similarly
+you can select multiple requests in one go:
+
+.Selecting Multiple Requests
+image::images/multiple_requests.png[Multiple Requests]
+
+Sense will send the request one by one to Elasticsearch and show the output on the right pane as Elasticsearch responds.
+This is very handy when debugging an issue or trying query combinations in multiple scenarios.
+
+Selecting multiple requests also allows you to auto formatting them and copy them as cURL in one go.
+
+
+[[auto_formatting]]
+=== Auto Formatting
+
+Sense allows you to auto format messy requests. To do so, position the cursor on the request you would like to format
+and select Auto Indent from the action menu:
+
+.Auto Indent a request
+image::images/auto_format_before.png["Auto format before",width=500,align="center"]
+
+Sense will adjust the JSON body of the request and it will now look like this:
+
+.A formatted request
+image::images/auto_format_after.png["Auto format after",width=500,align="center"]
+
+If you select Auto Indent on a request that is already perfectly formatted, Sense will collapse the
+request body to a single line per document. This is very handy when working with Elasticsearch's bulk APIs:
+
+.One doc per line
+image::images/auto_format_bulk.png["Auto format bulk",width=550,align="center"]
+
+
+[[keyboard_shortcuts]]
+=== Keyboard shortcuts
+
+Sense comes with a set of nifty keyboard shortcuts making working with it even more efficient. Here is an overview:
+
+==== General editing
+
+Ctrl/Cmd + I:: Auto indent current request.
+Ctrl + Space:: Open Auto complete (even if not typing).
+Ctrl/Cmd + Enter:: Submit request.
+Ctrl/Cmd + Up/Down:: Jump to the previous/next request start or end.
+Ctrl/Cmd + Alt + L:: Collapse/expand current scope.
+Ctrl/Cmd + Option + 0:: Collapse all scopes but the current one. Expand by adding a shift.
+
+==== When auto-complete is visible
+
+Down arrow:: Switch focus to auto-complete menu. Use arrows to further select a term.
+Enter/Tab::  Select the currently selected or the top most term in auto-complete menu.
+Esc:: Close auto-complete menu.
+
+
+=== History
+
+Sense maintains a list of the last 500 request that were successfully executed by Elasticsearch. The history
+is available by clicking the clock icon on the top right side of the window. The icons opens the history panel
+where you can see the old requests. You can also select a request here and it will be added to the editor at
+the current cursor position.
+
+.History Panel
+image::images/history.png["History Panel"]
+
+
+=== Settings
+
+Sense has multiple settings you can set. All of them are available in the Settings panel. To open the panel
+click on the cog icon on the top right.
+
+.Settings Panel
+image::images/settings.png["Setting Panel"]
+
+
+
