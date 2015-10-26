@@ -1,7 +1,10 @@
 define(function (require) {
+
+  require('ui/debounce');
+
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, debounce) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -108,11 +111,9 @@ define(function (require) {
           ], prereq(fetchingChanged));
 
           if (!debouncedApplyLoading) {
-            debouncedApplyLoading = _.debounce(function () {
+            debouncedApplyLoading = debounce(function () {
               $scope.applyLoadingClass = true;
-            },
-            loadingIndicatorDelay,
-            { 'leading': false, 'trailing': true });
+            }, loadingIndicatorDelay);
           }
         };
 
