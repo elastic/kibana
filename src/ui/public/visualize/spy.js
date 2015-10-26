@@ -81,12 +81,12 @@ define(function (require) {
             'spy.mode.name',
             'spy.mode.fill'
           ], function (newVals, oldVals) {
-            // do nothing on watch setup
-            var undefinedVals = newVals.filter((val) => !_.isUndefined(val)).length === 0;
-            if (undefinedVals || _.isEqual(newVals, oldVals)) return;
+            // update the ui state, but only if it really changes
+            var changedVals = newVals.filter((val) => !_.isUndefined(val)).length > 0;
+            if (changedVals && !_.isEqual(newVals, oldVals)) {
+              if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
+            }
 
-            // update the ui state, if passed in
-            if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
             renderSpy(_.get($scope.spy, 'mode.name', null));
           });
         }
