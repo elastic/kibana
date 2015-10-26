@@ -79,47 +79,59 @@ define(function (require) {
           };
         }());
 
-        $scope.applyLoadingClass = false;
+        // apply the loading class if there are active requests that are
+        // in flight for greater than the delay set in the advanced config
+        var monitorLoading = function () {
 
-        // get the seconds value from config
-        var delay = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
-        var loadingEnabled = (delay !== -1);
+          var loadingIndicatorDelaySeconds = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
+          var loadingIndicatorDelay = loadingIndicatorDelaySeconds * 1000;
+          var monitorLoadingEnabled = (loadingIndicatorDelaySeconds !== -1);
+          var debouncedApplyLoadingIndicator;
 
-        var monitorForLoading = function () {
+          hideLoadingIndicator();
 
-          var loadingIndicatorDelay = 1000 * delay;
-          var debouncedApplyLoading;
+          if (!monitorLoadingEnabled) return;
+          if (!$scope.vis || !$scope.searchSource) return;
 
-          var fetchingChanged = function () {
-            if (!$scope.vis || !$scope.searchSource) return;
+          function isLoading() {
+            return (
+              $scope.vis.type.requiresSearch &&
+              $scope.searchSource.activeFetchCount > 0
+            );
+          }
 
-            var fetching = $scope.vis.type.requiresSearch && $scope.searchSource.activeFetchCount > 0;
-
-            if (!fetching && debouncedApplyLoading) {
-              debouncedApplyLoading.cancel();
-              $scope.applyLoadingClass = false;
+          function showLoadingIndicator() {
+            if (!debouncedApplyLoadingIndicator) {
+              debouncedApplyLoadingIndicator = debounce(function () {
+                $scope.applyLoadingClass = true;
+              }, loadingIndicatorDelay);
             }
 
-            if (fetching) {
-              debouncedApplyLoading();
+            debouncedApplyLoadingIndicator();
+          }
+
+          function hideLoadingIndicator() {
+            if (debouncedApplyLoadingIndicator) {
+              debouncedApplyLoadingIndicator.cancel();
+              debouncedApplyLoadingIndicator = null;
             }
-          };
+
+            $scope.applyLoadingClass = false;
+          }
 
           $scope.$watchMulti([
             'vis.type.requiresSearch',
             'searchSource.activeFetchCount'
-          ], prereq(fetchingChanged));
-
-          if (!debouncedApplyLoading) {
-            debouncedApplyLoading = debounce(function () {
-              $scope.applyLoadingClass = true;
-            }, loadingIndicatorDelay);
-          }
+          ], prereq(function () {
+            if (isLoading()) {
+              showLoadingIndicator();
+            } else {
+              hideLoadingIndicator();
+            }
+          }));
         };
 
-        if (loadingEnabled) {
-          monitorForLoading();
-        }
+        monitorLoading();
 
         $scope.$watch('fullScreenSpy', applyClassNames);
         $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
