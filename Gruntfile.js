@@ -1,19 +1,20 @@
 module.exports = function (grunt) {
-  require('jit-grunt')(grunt);
+  require('jit-grunt')(grunt, {
+    s3: 'grunt-aws'
+  });
 
   grunt.initConfig({
     pkg: require('./package.json'),
 
     clean: {
-      build: {
-        src: 'build'
-      }
+      build: { src: 'build' },
+      target: { src: 'target' },
     },
 
     compress: {
       build: {
         options: {
-          archive: 'target/sense-<%= pkg.version %>.zip'
+          archive: 'target/sense-<%= pkg.version %>.tar.gz'
         },
         files: [
           { src: ['build/**'], dest: '/' },
@@ -38,13 +39,24 @@ module.exports = function (grunt) {
           },
         ]
       }
+    },
+
+    s3: {
+      release: {
+        options: {
+          bucket: 'download.elasticsearch.org',
+          access: 'private',
+        },
+        files: [
+          {
+            src: 'target/sense-<%= pkg.version %>.tar.gz',
+            dest: 'elasticsearch/sense/sense-<%= pkg.version %>.tar.gz'
+          }
+        ]
+      }
     }
   });
 
-  grunt.registerTask('build', [
-    'clean:build',
-    'copy:build',
-    'compress:build'
-  ]);
-
+  require('./tasks/build')(grunt);
+  require('./tasks/release')(grunt);
 };
