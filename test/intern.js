@@ -33,7 +33,8 @@ define({
       }
     },
     paths: {
-      'bluebird': './node_modules/bluebird/js/browser/bluebird.js'
+      'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
+      'moment': './node_modules/moment/moment.js'
     }
   },
   // functionalSuites: ['test/functional/status.js'],

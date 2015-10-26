@@ -4,6 +4,7 @@ define(function (require) {
   var registerSuite = require('intern!object');
   var expect = require('intern/dojo/node!expect.js');
   var Promise = require('bluebird');
+  var moment = require('moment');
 
 
   // the page object is created as a constructor
@@ -49,7 +50,7 @@ define(function (require) {
 
 
     log: function log(logString) {
-      console.log(Date.now() + ' : ' + logString);
+      console.log(moment().format('hh:mm:ss.SSS') + ': ' + logString);
     },
 
 
