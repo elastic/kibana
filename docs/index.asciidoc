@@ -1,0 +1,14 @@
+= Sense Documentation
+
+
+:kibanaversion: 4.2+
+:senseversion: 2.0
+:forum: https://discuss.elastic.co/c/elasticsearch
+
+include::introduction.asciidoc[]
+
+include::installing-sense.asciidoc[]
+
+include::the-sense-ui.asciidoc[]
+
+include::release-notes.asciidoc[]

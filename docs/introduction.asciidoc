@@ -1,0 +1,63 @@
+[[introduction]]
+== Introduction
+
+Sense is handy console for interacting with the REST API of Elasticsearch. As you can see bellow, Sense is composed of
+two main panes. The left pane, named the editor, is where you type the requests you will submit to Elasticsearch.
+The responses from Elasticsearch are shown on the right hand panel.
+
+.The Sense UI
+image::images/introduction_screen.png[Screenshot]
+
+Sense understands commands in a cURL-like syntax. For example the following Sense command
+
+[source,js]
+----------------------------------
+GET /_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+----------------------------------
+
+is a simple `GET` request to Elasticsearch's `_search API`. Here is the equivalent command in cURL.
+
+
+[source,bash]
+----------------------------------
+curl -XGET "http://localhost:9200/_search" -d'
+{
+  "query": {
+    "match_all": {}
+  }
+}'
+----------------------------------
+
+
+In fact, you can paste the above command into Sense and it will automatically be converted into the Sense syntax.
+
+When typing a command, Sense will make context sensitive <<suggestions,suggestions>. You can use those to find out
+what are the possible parameters to each API or to just speed up typing. Sense will suggest APIs, indexes and field
+names.
+
+[[suggestions]]
+.API suggestions
+image::images/introduction_suggestion.png["Suggestions",width=400,align="center"]
+
+
+Once you have typed a command in to the left pane, you can submit it to Elasticsearch by clicking the little green
+triangle that appears next to the url line of the request. Notice that as you move the cursor around, the little
+ triangle and wrench icons follow you around. We call this the <<action_menu,Action Menu>>. You can also select
+ multiple requests and submit them all at once.
+
+[[action_menu]]
+.The Action Menu
+image::images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
+
+When the response come back, you should see it in the left hand panel:
+
+.The Output Pane
+image::images/introduction_output.png[Screenshot]
+
+This pretty much covers the basics. To follow up, read the <<installation, installation instructions>> or dive deeper
+into the <<sense-ui,UI>>.
