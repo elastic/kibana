@@ -2,17 +2,13 @@ define(function (require) {
   var registerSuite = require('intern!object');
   var expect = require('intern/dojo/node!expect.js');
   var config = require('intern').config;
-  var url = require('intern/dojo/node!url');
-  var _ = require('intern/dojo/node!lodash');
+  var getPage = require('intern/dojo/node!../utils/getPage');
 
   registerSuite(function () {
-
     return {
       'status': function () {
         return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: '/status'
-          })))
+          .get(getPage(config.kibana, 'status'))
           .setFindTimeout(60000)
           .findByCssSelector('.plugin_status_breakdown')
           .getVisibleText()

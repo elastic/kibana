@@ -36,20 +36,14 @@ define(function (require) {
       },
 
       beforeEach: function () {
+        var self = this;
+
         // start each test with an empty kibana index
         return common
           .sleep(1000)
           .then(function unloadKibana() {
             return scenarioManager
-              .unload('emptyKibana');
-          })
-          .then(function () {
-            return common
-              .sleep(2000);
-          })
-          .then(function loadEmptyKibana() {
-            return scenarioManager
-              .load('emptyKibana');
+              .reload('emptyKibana');
           })
           .then(function loadIfEmptyMakelogs() {
             return scenarioManager
@@ -57,7 +51,14 @@ define(function (require) {
           })
           .then(function () {
             return common
-              .sleep(2000);
+              .sleep(3000);
+          })
+          .then(function () {
+            return self.remote
+              .get(
+                url.format(_.assign(config.kibana, {
+                  pathname: ''
+                })));
           });
       },
 
@@ -72,17 +73,18 @@ define(function (require) {
       'testSettingsInitialState': function () {
         var self = this;
 
-        return self.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            return settingsPage
-              .getTimeBasedEventsCheckbox()
-              .isSelected()
-              .then(function (selected) {
-                expect(selected).to.be.ok();
-              });
+        // return self.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: ''
+        //   })))
+        //   .then(function () {
+
+        return settingsPage
+          .getTimeBasedEventsCheckbox()
+          .isSelected()
+          .then(function (selected) {
+            expect(selected).to.be.ok();
+            // });
           })
           .then(function () {
             return settingsPage
@@ -119,17 +121,17 @@ define(function (require) {
        ** Ensure Create button is disabled until you select a time field
        */
       'testCreateButtonDisabledUntilTimeFieldSelected': function () {
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            return settingsPage
-              .getCreateButton()
-              .isEnabled()
-              .then(function (enabled) {
-                expect(enabled).to.not.be.ok();
-              });
+        // return this.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: ''
+        //   })))
+        //   .then(function () {
+        return settingsPage
+          .getCreateButton()
+          .isEnabled()
+          .then(function (enabled) {
+            expect(enabled).to.not.be.ok();
+            // });
           })
           .then(function () {
             // select a time field and check that Create button is enabled
@@ -151,17 +153,17 @@ define(function (require) {
        ** Test that unchecking the Time-based Events checkbox hides the Name is pattern checkbox
        */
       'testSettingsCheckboxHide': function () {
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            return settingsPage
-              .getTimeBasedEventsCheckbox()
-              .then(function (selected) {
-                // uncheck the 'time-based events' checkbox
-                return selected.click();
-              });
+        // return this.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: ''
+        //   })))
+        //   .then(function () {
+        return settingsPage
+          .getTimeBasedEventsCheckbox()
+          .then(function (selected) {
+            // uncheck the 'time-based events' checkbox
+            return selected.click();
+            // });
           })
           // try to find the name is pattern checkbox (shouldn't find it)
           .then(function () {
@@ -181,15 +183,15 @@ define(function (require) {
 
       'testCreateRemoveIndexPattern': function () {
         var self = this.remote;
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            // select a time field and then Create button
-            return settingsPage
-              .selectTimeFieldOption('@timestamp');
-          })
+        // return this.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: ''
+        //   })))
+        //   .then(function () {
+        // select a time field and then Create button
+        return settingsPage
+          .selectTimeFieldOption('@timestamp')
+          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -245,15 +247,15 @@ define(function (require) {
 
       'testIndexPatternResultsHeader': function () {
         var self = this.remote;
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            // select a time field and then Create button
-            return settingsPage
-              .selectTimeFieldOption('@timestamp');
-          })
+        // return this.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: ''
+        //   })))
+        //   .then(function () {
+        // select a time field and then Create button
+        return settingsPage
+          .selectTimeFieldOption('@timestamp')
+          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -359,15 +361,15 @@ define(function (require) {
 
       'testIndexPatternResultsSort': function () {
         var self = this.remote;
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            // select a time field and then Create button
-            return settingsPage
-              .selectTimeFieldOption('@timestamp');
-          })
+        // return this.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: ''
+        //   })))
+        //   .then(function () {
+        // select a time field and then Create button
+        return settingsPage
+          .selectTimeFieldOption('@timestamp')
+          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -557,19 +559,19 @@ define(function (require) {
 
       'testIndexPatternPopularity': function () {
         var self = this.remote;
-        return this.remote
-          .get(url.format(_.assign(config.kibana, {
-            pathname: '/'
-          })))
-          // .then(function () {
-          //   return headerPage
-          //     .clickSettings();
+        // return this.remote
+        //   .get(url.format(_.assign(config.kibana, {
+        //     pathname: '/'
+        //   })))
+        //   // .then(function () {
+        //   //   return headerPage
+        //   //     .clickSettings();
+        //   // })
+        //   .then(function () {
+        // select a time field and then Create button
+        return settingsPage
+          .selectTimeFieldOption('@timestamp')
           // })
-          .then(function () {
-            // select a time field and then Create button
-            return settingsPage
-              .selectTimeFieldOption('@timestamp');
-          })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -665,14 +667,9 @@ define(function (require) {
             return settingsPage
               .controlChangeCancel();
           })
-
-        // should this test go to discover page and verify the Popular field?
-        // ul.list-unstyled.sidebar-well.discover-popular-fields.hidden-sm.hidden-xs li.sidebar-item.ng-scope div.sidebar-item-title
-        // field-name.ng-isolate-scope
-
-
-        // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-        .then(function () {
+          // should this test go to discover page and verify the Popular field?
+          // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+          .then(function () {
             return settingsPage
               .clickDeletePattern();
           })
