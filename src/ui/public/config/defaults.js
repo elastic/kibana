@@ -59,6 +59,10 @@ define(function (require) {
         value: 500,
         description: 'The number of rows to show in the table',
       },
+      'discover:highlight': {
+        value: true,
+        description: 'Highlight results in discover',
+      },
       'courier:maxSegmentCount': {
         value: 30,
         description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
