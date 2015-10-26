@@ -19,7 +19,7 @@ define(function (require) {
 
           function getSpyObject(name) {
             name = _.isUndefined(name) ? $scope.spy.mode.name : name;
-            if (_.isNull(name)) fullPageSpy = false;
+            fullPageSpy = (_.isNull(name)) ? false : _.get($scope.spy, 'mode.fill', fullPageSpy);
 
             return {
               name: name,
