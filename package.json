@@ -4,7 +4,7 @@
     "company": "Elasticsearch BV"
   },
   "name": "Sense",
-  "version": "2.0.0-SNAPSHOT",
+  "version": "2.0.0-snapshot",
   "repository": {
     "type": "git",
     "url": "http://github.com/elastic/sense.git"
