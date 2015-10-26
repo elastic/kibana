@@ -124,7 +124,7 @@ define(function (require) {
 
         function initPanelIndices() {
           // find the largest panelIndex in all the panels
-          var maxIndex = getPanelIndex();
+          var maxIndex = getMaxPanelIndex();
 
           // ensure that all panels have a panelIndex
           $scope.state.panels.forEach(function (panel) {
@@ -134,7 +134,7 @@ define(function (require) {
           });
         }
 
-        function getPanelIndex() {
+        function getMaxPanelIndex() {
           var index = $scope.state.panels.reduce(function (idx, panel) {
             // if panel is missing an index, add one and increment the index
             return Math.max(idx, panel.panelIndex || idx);
@@ -219,12 +219,12 @@ define(function (require) {
         // called by the saved-object-finder when a user clicks a vis
         $scope.addVis = function (hit) {
           pendingVis++;
-          $state.panels.push({ id: hit.id, type: 'visualization', panelIndex: getPanelIndex() });
+          $state.panels.push({ id: hit.id, type: 'visualization', panelIndex: getMaxPanelIndex() });
         };
 
         $scope.addSearch = function (hit) {
           pendingVis++;
-          $state.panels.push({ id: hit.id, type: 'search', panelIndex: getPanelIndex() });
+          $state.panels.push({ id: hit.id, type: 'search', panelIndex: getMaxPanelIndex() });
         };
 
         // Setup configurable values for config directive, after objects are initialized
