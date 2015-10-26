@@ -209,6 +209,16 @@ describe('Persisted State', function () {
       persistedState.removeChild('user');
       expect(persistedState.get()).to.eql({ user: 1234 });
     });
+
+    it('should clear changedState', function () {
+      var persistedState = new PersistedState({ user: 1234 });
+      var childState = persistedState.createChild('user');
+      childState.set('name', 'user name');
+      expect(persistedState.getChanges()).to.eql({ user: { name: 'user name' }});
+
+      persistedState.removeChild('user');
+      expect(persistedState.getChanges()).to.eql({});
+    });
   });
 
   describe('deep child state removal', function () {
@@ -236,6 +246,17 @@ describe('Persisted State', function () {
 
       persistedState.removeChild('user.id');
       expect(persistedState.get()).to.eql({ user: { name: 'user' }});
+    });
+
+    it('should clear the changed state', function () {
+      var persistedState = new PersistedState({ user: { id: 1234 }});
+      var childState = persistedState.createChild('user.name');
+      childState.set('user name');
+      expect(persistedState.getChanges()).to.eql({ user: { name: 'user name' }});
+
+      persistedState.removeChild('user.name');
+      expect(persistedState.getChanges()).to.eql({});
+
     });
   });
 

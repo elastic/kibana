@@ -249,6 +249,9 @@ define(function (require) {
       // If `mergeMethod` returns `undefined` the default merging method is used
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
 
+      // sanity check; verify that there are actually changes
+      if (_.isEqual(this._mergedState, this._defaultState)) this._changedState = {};
+
       if (!silent && stateChanged) this.emit('change');
 
       return this;
