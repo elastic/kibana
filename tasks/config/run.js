@@ -1,8 +1,10 @@
 module.exports = function (grunt) {
   let platform = require('os').platform();
+  let {format} = require('url');
   let {resolve} = require('path');
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
+  let uiConfig = require(root('test/serverConfig'));
 
   return {
     testServer: {
@@ -31,8 +33,8 @@ module.exports = function (grunt) {
       },
       cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
       args: [
-        '--server.port=5620',
-        '--elasticsearch.url=http://localhost:9220',
+        '--server.port=' + uiConfig.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.elasticsearch),
         '--logging.json=false'
       ]
     },
@@ -85,7 +87,9 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.47.1.jar'
+        'selenium/selenium-server-standalone-2.47.1.jar',
+        '-port',
+        uiConfig.webdriver.port
       ]
     },
 
@@ -99,7 +103,9 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.47.1.jar'
+        'selenium/selenium-server-standalone-2.47.1.jar',
+        '-port',
+        uiConfig.webdriver.port
       ]
     },
 

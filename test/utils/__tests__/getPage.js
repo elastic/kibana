@@ -2,7 +2,7 @@ var expect = require('expect.js');
 var getUrl = require('../getUrl');
 
 describe('getUrl', function () {
-  it('should be able to convert a config and a path to a url', function() {
+  it('should be able to convert a config and a path to a url', function () {
     expect(getUrl({
       protocol: 'http',
       hostname: 'localhost',
