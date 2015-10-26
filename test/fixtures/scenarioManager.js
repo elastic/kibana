@@ -1,7 +1,6 @@
 var path = require('path');
 var config = require('./config');
 var elasticsearch = require('elasticsearch');
-var chunkSize = 100;
 
 function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
@@ -34,7 +33,6 @@ ScenarioManager.prototype.load = function (id) {
     }
 
     return loadIndexDefinition.then(function bulkRequest() {
-      console.log('bulk.indexName = ' + bulk.indexName + '  bulk.source.size = ' + bulk.source.length);
       self.client.bulk({
         body: require(path.join(scenario.baseDir, bulk.source)),
       });

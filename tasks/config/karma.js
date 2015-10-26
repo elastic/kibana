@@ -14,7 +14,7 @@ module.exports = function (grunt) {
       browsers: ['<%= karmaBrowser %>'],
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-      reporters: ['progress', 'growl'],
+      reporters: process.env.CI ? ['dots'] : ['progress', 'growl'],
 
       // list of files / patterns to load in the browser
       files: [

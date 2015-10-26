@@ -4,5 +4,6 @@ describe('Stringify Component', function () {
   require('./_source');
   require('./_string');
   require('./_url');
+  require('./_color');
   require('./_date');
 });

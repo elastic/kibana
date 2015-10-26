@@ -63,34 +63,36 @@ describe('Vislib Color Module Test Suite', function () {
       }).to.throwError();
     });
 
-    it('should throw an error if array is not composed of numbers, strings, or ' +
-      'undefined values', function () {
-      expect(function () {
-        getColors(arrayOfObjects);
-      }).to.throwError();
+    context('when array is not composed of numbers, strings, or undefined values', function () {
+      it('should throw an error', function () {
+        expect(function () {
+          getColors(arrayOfObjects);
+        }).to.throwError();
 
-      expect(function () {
-        getColors(arrayOfBooleans);
-      }).to.throwError();
+        expect(function () {
+          getColors(arrayOfBooleans);
+        }).to.throwError();
 
-      expect(function () {
-        getColors(arrayOfNullValues);
-      }).to.throwError();
+        expect(function () {
+          getColors(arrayOfNullValues);
+        }).to.throwError();
+      });
     });
 
-    it('should not throw an error if input is an array of strings, numbers, or' +
-      ' undefined values', function () {
-      expect(function () {
-        getColors(arr);
-      }).to.not.throwError();
+    context('when input is an array of strings, numbers, or undefined values', function () {
+      it('should not throw an error', function () {
+        expect(function () {
+          getColors(arr);
+        }).to.not.throwError();
 
-      expect(function () {
-        getColors(arrayOfNumbers);
-      }).to.not.throwError();
+        expect(function () {
+          getColors(arrayOfNumbers);
+        }).to.not.throwError();
 
-      expect(function () {
-        getColors(arrayOfUndefinedValues);
-      }).to.not.throwError();
+        expect(function () {
+          getColors(arrayOfUndefinedValues);
+        }).to.not.throwError();
+      });
     });
 
     it('should be a function', function () {

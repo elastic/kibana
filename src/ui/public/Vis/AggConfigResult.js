@@ -16,7 +16,7 @@ define(function () {
   }
 
   /**
-   * Returns an array of the aggConfigResult and parents up te branch
+   * Returns an array of the aggConfigResult and parents up the branch
    * @returns {array} Array of aggConfigResults
    */
   AggConfigResult.prototype.getPath = function () {

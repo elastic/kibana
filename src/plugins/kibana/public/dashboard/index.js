@@ -10,7 +10,6 @@ define(function (require) {
   require('ui/config');
   require('ui/notify');
   require('ui/typeahead');
-  require('ui/clipboard');
 
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
@@ -81,11 +80,16 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
-          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
+          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
+        $scope.$watchCollection('state.options', function (newVal, oldVal) {
+          if (!angular.equals(newVal, oldVal)) $state.save();
+        });
+        $scope.$watch('state.options.darkTheme', setDarkTheme);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
@@ -102,11 +106,6 @@ define(function (require) {
         $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
         courier.setRootSearchSource(dash.searchSource);
-
-        setDarkTheme(dash.darkTheme);
-        $scope.$watch('dash.darkTheme', function (value) {
-          setDarkTheme(value);
-        });
 
         function init() {
           updateQueryOnRootSource();
@@ -131,7 +130,7 @@ define(function (require) {
         }
 
         function setDarkTheme(enabled) {
-          var theme = !!enabled ? 'theme-dark' : 'theme-light';
+          var theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
           chrome.removeApplicationClass(['theme-dark', 'theme-light']);
           chrome.addApplicationClass(theme);
         }
@@ -161,6 +160,7 @@ define(function (require) {
           dash.panelsJSON = angular.toJson($state.panels);
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
+          dash.optionsJSON = angular.toJson($state.options);
 
           dash.save()
           .then(function (id) {
@@ -204,6 +204,7 @@ define(function (require) {
         // Setup configurable values for config directive, after objects are initialized
         $scope.opts = {
           dashboard: dash,
+          ui: $state.options,
           save: $scope.save,
           addVis: $scope.addVis,
           addSearch: $scope.addSearch,

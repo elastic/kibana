@@ -13,6 +13,7 @@ module.exports = function (grunt) {
     '_build:packageJson',
     '_build:readme',
     '_build:installNpmDeps',
+    '_build:removePkgJsonDeps',
     'clean:testsFromModules',
     'clean:deepModuleBins',
     'clean:deepModules',
