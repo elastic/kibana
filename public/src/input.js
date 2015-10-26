@@ -164,7 +164,7 @@ function sendCurrentRequestToES() {
           if (mode === null || mode === "application/json") {
             // assume json - auto pretty
             try {
-              value = JSON.stringify(JSON.parse(value), null, 3);
+              value = JSON.stringify(JSON.parse(value), null, 2);
             }
             catch (e) {
 
