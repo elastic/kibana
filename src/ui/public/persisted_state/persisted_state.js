@@ -90,21 +90,13 @@ define(function (require) {
       var currentValue = _.get(this._mergedState, keyPath);
 
       if (_.isUndefined(origValue)) {
-        var partialPath = this._getPartialIndex(path);
-        var remove = true;
-
-        // recursively delete _mergedState value, when no other keys exist
-        while (partialPath.length > 0) {
-          var lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
-          var statePath = this._path.concat(partialPath);
-          var state = statePath.length > 0 ? _.get(this._mergedState, statePath) : this._mergedState;
-
-          if (remove) delete state[lastKey];
-          if (Object.keys(state).length > 0) remove = false;
-        }
+        this._cleanPath(path, this._mergedState);
       } else {
         _.set(this._mergedState, keyPath, origValue);
       }
+
+      // clean up the changedState tree
+      this._cleanPath(path, this._changedState);
 
       if (!_.isEqual(currentValue, origValue)) this.emit('change');
     };
@@ -147,6 +139,21 @@ define(function (require) {
     PersistedState.prototype._getPartialIndex = function (key) {
       var keyPath = this._getIndex(key);
       return keyPath.slice(this._path.length);
+    };
+
+    PersistedState.prototype._cleanPath = function (path, stateTree) {
+      var partialPath = this._getPartialIndex(path);
+      var remove = true;
+
+      // recursively delete value tree, when no other keys exist
+      while (partialPath.length > 0) {
+        var lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
+        var statePath = this._path.concat(partialPath);
+        var stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
+
+        if (remove) delete stateVal[lastKey];
+        if (Object.keys(stateVal).length > 0) remove = false;
+      }
     };
 
     PersistedState.prototype._getDefault = function () {
