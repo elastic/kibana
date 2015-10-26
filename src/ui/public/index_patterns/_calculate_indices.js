@@ -43,9 +43,7 @@ define(function (require) {
       return new Promise(function (resolve, reject) {
         es.transport.request(options, function (err, response) {
           if (err) return reject(err);
-          var indices = _.map(response.indices, function (info, index) {
-            return index;
-          });
+          const indices = _.map(response.indices, (info, index) => index);
           resolve(indices);
         });
       });
