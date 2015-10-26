@@ -15,6 +15,12 @@ define(function (require) {
       'test/functional/status.js',
       'test/functional/testSettings'
     ],
-    excludeInstrumentation: /(fixtures|node_modules)\//
+    excludeInstrumentation: /(fixtures|node_modules)\//,
+    loaderOptions: {
+      paths: {
+        'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
+        'moment': './node_modules/moment/moment.js'
+      }
+    }
   }, serverConfig);
 });
