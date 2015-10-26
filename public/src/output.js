@@ -46,11 +46,17 @@ output.append = function (val, fold_previous, cb) {
 };
 
 output.$el = $el;
-output.getSession().setMode("ace/mode/text");
-output.getSession().setFoldStyle('markbeginend');
-output.getSession().setUseWrapMode(true);
+
+(function (session) {
+  session.setMode("ace/mode/text");
+  session.setFoldStyle('markbeginend');
+  session.setTabSize(2);
+  session.setUseWrapMode(true);
+}(output.getSession()));
+
 output.setShowPrintMargin(false);
 output.setReadOnly(true);
+
 if (settings) {
   settings.applyCurrentSettings(output);
 }
