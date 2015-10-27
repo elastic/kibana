@@ -39,26 +39,32 @@ define(function (require) {
         var self = this;
 
         // start each test with an empty kibana index
-        return common
-          .sleep(1000)
-          .then(function unloadKibana() {
-            return scenarioManager
-              .reload('emptyKibana');
-          })
+        return scenarioManager
+          .reload('emptyKibana')
+          // and load a minimal set of makelogs data
           .then(function loadIfEmptyMakelogs() {
             return scenarioManager
               .loadIfEmpty('makelogs');
           })
           .then(function () {
-            return common
-              .sleep(3000);
-          })
-          .then(function () {
-            return self.remote
-              .get(
-                url.format(_.assign(config.kibana, {
-                  pathname: ''
-                })));
+            return common.tryForTime(5000, function () {
+              return self.remote
+                .get(
+                  url.format(_.assign(config.kibana, {
+                    pathname: ''
+                  })))
+                .then(function () {
+                  return common
+                    .sleep(500);
+                })
+                .then(function () {
+                  return self.remote
+                    .getCurrentUrl()
+                    .then(function (currentUrl) {
+                      expect(currentUrl).to.contain('settings');
+                    });
+                });
+            });
           });
       },
 
