@@ -14,7 +14,6 @@ define(function (require) {
   require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
-  require('ui/validate_query');
   require('ui/filters/moment');
   require('ui/courier');
   require('ui/index_patterns');
@@ -240,8 +239,7 @@ define(function (require) {
         }()));
 
         $scope.searchSource.onError(function (err) {
-          console.log(err);
-          notify.error('An error occurred with your request. Reset your inputs and try again.');
+          notify.error(err);
         }).catch(notify.fatal);
 
         function initForTime() {

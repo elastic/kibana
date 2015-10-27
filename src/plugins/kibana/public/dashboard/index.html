@@ -11,14 +11,15 @@
         <div class="input-group"
           ng-class="queryInput.$invalid ? 'has-error' : ''">
 
-          <input type="text"
+          <input
+            type="text"
             placeholder="Filter..."
             aria-label="Filter input"
             class="form-control"
             ng-model="state.query"
             input-focus
             kbn-typeahead-input
-            validate-query>
+            parse-query>
           <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid" aria-label="Filter dashboards">
             <span aria-hidden="true" class="fa fa-search"></span>
           </button>
