@@ -1,6 +1,9 @@
 const $ = require('jquery');
 const { uniq } = require('lodash');
 const storage = require('./storage');
+const chrome = require('ui/chrome');
+
+const defaultServerUrl = chrome.getInjected('defaultServerUrl');
 
 const history = module.exports = {
   restoreFromHistory() {
@@ -49,13 +52,16 @@ const history = module.exports = {
     var timestamp = new Date().getTime();
     storage.set("editor_state", {
       time: timestamp,
-      server: server,
+      server: server === defaultServerUrl ? undefined : server,
       content: content
     });
   },
 
-  getSavedEditorState(server, content) {
-    return storage.get('editor_state');
+  getSavedEditorState() {
+    const saved = storage.get('editor_state');
+    if (!saved) return;
+    const { time, server = defaultServerUrl, content } = saved;
+    return { time, server, content };
   },
 
   clearHistory($el) {

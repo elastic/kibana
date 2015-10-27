@@ -8,6 +8,9 @@ let output = require('./output');
 let es = require('./es');
 let utils = require('./utils');
 let _ = require('lodash');
+const chrome = require('ui/chrome');
+
+const defaultServerUrl = chrome.getInjected('defaultServerUrl');
 
 $(document.body).removeClass('fouc');
 
@@ -26,18 +29,12 @@ function loadSavedState() {
   var sourceLocation = utils.getUrlParam('load_from') || "stored";
   var previousSaveState = history.getSavedEditorState();
 
-  var defaultHost = "localhost:9200";
-  if (document.location.pathname && document.location.pathname.indexOf("_plugin") == 1) {
-    // running as an ES plugin. Always assume we are using that elasticsearch
-    defaultHost = document.location.host;
-  }
-
   if (sourceLocation == "stored") {
     if (previousSaveState) {
       resetToValues(previousSaveState.server, previousSaveState.content);
     }
     else {
-      resetToValues(defaultHost);
+      resetToValues(defaultServerUrl);
       input.autoIndent();
     }
   }
@@ -47,7 +44,7 @@ function loadSavedState() {
       loadFrom.headers = {Accept: "application/vnd.github.v3.raw"};
     }
     $.ajax(loadFrom).done(function (data) {
-      resetToValues(defaultHost, data);
+      resetToValues(defaultServerUrl, data);
       input.moveToNextRequestEdge(true);
       input.highlightCurrentRequestsAndUpdateActionBar();
       input.updateActionsBar();
@@ -57,7 +54,7 @@ function loadSavedState() {
     resetToValues(previousSaveState.server);
   }
   else {
-    resetToValues(defaultHost);
+    resetToValues(defaultServerUrl);
   }
   input.moveToNextRequestEdge(true);
 }

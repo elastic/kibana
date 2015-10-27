@@ -42,19 +42,19 @@ Follow the instruction described on the [Kibana Contributing Guide](https://gith
 
 Once Kibana is setup, make sure your have the 4.2 branch checkout:
 
-```
-$ git checkout 4.2
+```sh
+git checkout 4.2
 ```
 
 Next, clone your Sense fork into it's `installedPlugin` folder:
 
-```
-$ git clone git@github.com:YOUR_GITHUB_HANDLE/sense.git installedPlugins/sense
+```sh
+git clone git@github.com:YOUR_GITHUB_HANDLE/sense.git installedPlugins/sense
 ```
 
 Create a file named `config/kibana.dev.yml` (under the Kibana *root folder*), with the following content:
 
-```
+```yaml
 kibana.enabled: false  # do not load the Discover, Visualize and Dashboard tabs of Kibana. This saves time
 elasticsearch.enabled: false # do not require an active Elasticsearch instance to run
 optimize:
@@ -65,12 +65,29 @@ optimize:
 
 last, run Kibana in development mode:
 
-```
-$ ./bin/kibana --dev
+```sh
+./bin/kibana --dev
 ```
 
 Congratulations, you should have Sense up and running now.
 You can check that by pointing your browser at http://localhost:5601/app/sense/
+
+### Linting your code
+
+Sense uses the fantastic [eslint](http://eslint.org) tool to detect common programming errors and to enforce a uniform code style. To check your code with the linter simply run the lint script in your terminal:
+
+```sh
+npm run lint
+```
+
+Eslint also has plugins for most text editors and IDEs so that you can get linting results as you work. Here are some hints for getting eslint setup in your favorite editor:
+
+| Editor | Plugin |
+| --- | --- | --- |
+| Sublime | [SublimeLinter-eslint](https://github.com/roadhump/SublimeLinter-eslint#installation) |
+| Atom | [linter-eslint](https://github.com/AtomLinter/linter-eslint#installation) |
+| IntelliJ | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint |
+| vi | [scrooloose/syntastic](https://github.com/scrooloose/syntastic) |
 
 ### Submitting your changes
 
@@ -99,4 +116,3 @@ Once your changes and tests are ready to submit for review:
 
 Then sit back and wait. There will probably be discussion about the pull request and, if any changes are needed,
 we would love to work with you to get your pull request merged into Sense.
-
