@@ -17,7 +17,7 @@ image::images/multiple_requests.png[Multiple Requests]
 Sense will send the request one by one to Elasticsearch and show the output on the right pane as Elasticsearch responds.
 This is very handy when debugging an issue or trying query combinations in multiple scenarios.
 
-Selecting multiple requests also allows you to auto formatting them and copy them as cURL in one go.
+Selecting multiple requests also allows you to auto format and copy them as cURL in one go.
 
 
 [[auto_formatting]]

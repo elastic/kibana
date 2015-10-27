@@ -33,16 +33,16 @@ see instructions <<disable_discover,here>>.
 To run Sense you will need:
 
  - Kibana of version {kibanaversion} or later.
- - A [modern browser](https://www.elastic.co/support/matrix#matrix_browsers)
+ - A https://www.elastic.co/support/matrix#matrix_browsers[modern browser]
 
 
 [[disable_discover]]
-=== Running against Elasticsearch 1.x / disabling Kibana's Discover,Visualize & Dashboard apps
+=== Running against Elasticsearch 1.x / disabling Kibana's Discover, Visualize & Dashboard apps
 
 Kibana ships by default with 3 handy apps called Discover, Visualize and Dashboard. These applications
 require an active Elasticsearch cluster of version 2.0 or higher.
 
-In order to use Sense with an Elasticsearch 1.x alone, or if you don't want the overhead of the extra
+In order to use Sense with Elasticsearch 1.x, or if you don't want the overhead of the extra
 apps, add the following lines to your `config/kibana.yml` file:
 
 [source,yaml]

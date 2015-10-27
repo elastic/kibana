@@ -1,7 +1,7 @@
 [[introduction]]
 == Introduction
 
-Sense is handy console for interacting with the REST API of Elasticsearch. As you can see bellow, Sense is composed of
+Sense is a handy console for interacting with the REST API of Elasticsearch. As you can see below, Sense is composed of
 two main panes. The left pane, named the editor, is where you type the requests you will submit to Elasticsearch.
 The responses from Elasticsearch are shown on the right hand panel.
 
@@ -36,8 +36,8 @@ curl -XGET "http://localhost:9200/_search" -d'
 
 In fact, you can paste the above command into Sense and it will automatically be converted into the Sense syntax.
 
-When typing a command, Sense will make context sensitive <<suggestions,suggestions>. You can use those to find out
-what are the possible parameters to each API or to just speed up typing. Sense will suggest APIs, indexes and field
+When typing a command, Sense will make context sensitive <<suggestions,suggestions>>. These suggestions can help
+you explore parameters for each API, or to just speed up typing. Sense will suggest APIs, indexes and field
 names.
 
 [[suggestions]]
