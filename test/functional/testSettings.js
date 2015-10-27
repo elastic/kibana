@@ -221,8 +221,10 @@ define(function (require) {
               })
               .then(function () {
                 // delete the index pattern
-                return settingsPage
-                  .clickDeletePattern();
+                return common.tryForTime(3000, function () {
+                  return settingsPage
+                    .clickDeletePattern();
+                });
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
@@ -352,9 +354,11 @@ define(function (require) {
                   });
               })
               .then(function () {
-                // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-                return settingsPage
-                  .clickDeletePattern();
+                return common.tryForTime(3000, function () {
+                  // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+                  return settingsPage
+                    .clickDeletePattern();
+                });
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
@@ -555,9 +559,11 @@ define(function (require) {
               });
           })
           .then(function () {
-            // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-            return settingsPage
-              .clickDeletePattern();
+            return common.tryForTime(3000, function () {
+              // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+              return settingsPage
+                .clickDeletePattern();
+            });
           })
           .then(function () {
             return common.tryForTime(3000, function () {
@@ -691,10 +697,12 @@ define(function (require) {
               .controlChangeCancel();
           })
           // should this test go to discover page and verify the Popular field?
-          // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
           .then(function () {
-            return settingsPage
-              .clickDeletePattern();
+            return common.tryForTime(3000, function () {
+              // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+              return settingsPage
+                .clickDeletePattern();
+            });
           })
           .then(function () {
             return common.tryForTime(3000, function () {
