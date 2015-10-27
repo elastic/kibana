@@ -49,9 +49,4 @@ require('ui/modules')
       this.serverUrl = server;
     });
   });
-
-  // sync ui changes back to the es module
-  $scope.$watch('sense.serverUrl', (serverUrl) => {
-    es.setBaseUrl(serverUrl);
-  });
 });
