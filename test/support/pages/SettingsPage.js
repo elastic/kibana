@@ -56,7 +56,6 @@ define(function (require) {
     },
 
     getTimeFieldOption: function getTimeFieldOption(selection) {
-      //common.log('selection = ' + selection);
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('option[label="' + selection + '"]')
@@ -74,14 +73,6 @@ define(function (require) {
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('.btn').click();
     },
-
-    // getDefaultIndexButton: function getDefaultIndexButton() {
-    //   return this.remote
-    //     .setFindTimeout(defaultTimeout)
-    //     .findByXpath(
-    //       '/html/body/div[2]/div/kbn-settings-app/div/div/kbn-settings-indices/div[2]/div/div/kbn-settings-index-header/div/div/button[1]'
-    //     );
-    // },
 
     clickDefaultIndexButton: function clickDefaultIndexButton() {
       return this.remote
@@ -116,20 +107,16 @@ define(function (require) {
 
 
     sortBy: function sortBy(columnName) {
-      // common.log('sorting by ' + columnName);
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findAllByCssSelector('table.table.table-condensed thead tr th span')
         .then(function (chartTypes) {
-          // common.log('found bucket types ' + chartTypes.length);
 
           function getChartType(chart) {
             return chart
               .getVisibleText()
               .then(function (chartString) {
-                //common.log(chartString);
                 if (chartString === columnName) {
-                  // common.log('sorting by ' + columnName);
                   return chart
                     .click();
                 }
@@ -171,7 +158,6 @@ define(function (require) {
         .setFindTimeout(defaultTimeout)
         .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
         .then(function (chartTypes) {
-          //common.log('found selection options ' + chartTypes.length);
 
           function getChartType(chart) {
             var thisChart = chart;
@@ -179,11 +165,9 @@ define(function (require) {
               .isSelected()
               .then(function (isSelected) {
                 if (isSelected === true) {
-                  //common.log('Found selected option ');
                   return thisChart
                     .getProperty('label')
                     .then(function (theLabel) {
-                      // common.log('Page size = ' + theLabel);
                       selectedItemLabel = theLabel;
                     });
                 }
@@ -193,7 +177,6 @@ define(function (require) {
           return Promise.all(getChartTypesPromises);
         })
         .then(function () {
-          //common.log('returning types array here? ' + types);
           return selectedItemLabel;
         });
     },
@@ -229,7 +212,6 @@ define(function (require) {
     openControlsByName: function openControlsByName(name) {
       return this.remote
         .setFindTimeout(defaultTimeout * 2)
-        // .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href="#/settings/indices/logstash-*/field/' + name + '"]')
         .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
         .then(function (button) {
           return button.click();
