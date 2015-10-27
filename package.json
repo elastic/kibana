@@ -11,7 +11,8 @@
   },
   "scripts": {
     "build": "grunt build",
-    "release": "grunt release"
+    "release": "grunt release",
+    "lint": "grunt eslint:source"
   },
   "devDependencies": {
     "eslint": "^1.7.3",
