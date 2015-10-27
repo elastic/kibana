@@ -1,8 +1,8 @@
 {
-  "author": {
-    "name": "Elasticsearch",
-    "company": "Elasticsearch BV"
-  },
+  "author": "Boaz Leskes <boaz@elastic.co>",
+  "contributors": [
+    "Spencer Alger <spencer.alger@elastic.co>"
+  ],
   "name": "Sense",
   "version": "2.0.0-snapshot",
   "repository": {
@@ -27,5 +27,6 @@
     "gruntify-eslint": "^1.2.0",
     "jit-grunt": "^0.9.1"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "license": "Apache-2.0",
 }

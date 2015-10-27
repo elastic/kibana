@@ -64,6 +64,16 @@ module.exports = function (api) {
             '{field}': {
               'order': {
                 __one_of: ['desc', 'asc']
+              },
+              missing: {
+                __one_of: ['_last', '_first']
+              },
+              mode: {
+                __one_of: ['min', 'max', 'avg', 'sum']
+              },
+              nested_path: "",
+              nested_filter: {
+                __scope_link: "GLOBAL.filter"
               }
             }
           },
