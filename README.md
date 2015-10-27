@@ -43,7 +43,7 @@ Sometimes it is hard to find that little missing comma. Sense automatically high
 Working on a big JSON query can be distracting. Using the mouse or via a handy keyboard shortcut (Ctrl/Cmd+Option+0)
 , Sense allows you to focus on a sub section and fold others away.
 
-<img src="https://github.com/elastic/sense/raw/master/docs/images/readme_scope_collpasing.png" width="400px" title="Folding">
+<img src="https://github.com/elastic/sense/raw/master/docs/images/readme_scope_collapsing.png" width="400px" title="Folding">
 
 ### Auto formatting
 
