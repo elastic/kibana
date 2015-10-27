@@ -221,8 +221,10 @@ define(function (require) {
               })
               .then(function () {
                 // delete the index pattern
-                return settingsPage
-                  .clickDeletePattern();
+                return common.tryForTime(3000, function () {
+                  return settingsPage
+                    .clickDeletePattern();
+                });
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
@@ -352,9 +354,11 @@ define(function (require) {
                   });
               })
               .then(function () {
-                // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-                return settingsPage
-                  .clickDeletePattern();
+                return common.tryForTime(3000, function () {
+                  // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+                  return settingsPage
+                    .clickDeletePattern();
+                });
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
@@ -555,9 +559,11 @@ define(function (require) {
               });
           })
           .then(function () {
-            // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-            return settingsPage
-              .clickDeletePattern();
+            return common.tryForTime(3000, function () {
+              // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+              return settingsPage
+                .clickDeletePattern();
+            });
           })
           .then(function () {
             return common.tryForTime(3000, function () {
@@ -690,16 +696,13 @@ define(function (require) {
             return settingsPage
               .controlChangeCancel();
           })
-
-        // should this test go to discover page and verify the Popular field?
-        // ul.list-unstyled.sidebar-well.discover-popular-fields.hidden-sm.hidden-xs li.sidebar-item.ng-scope div.sidebar-item-title
-        // field-name.ng-isolate-scope
-
-
-        // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-        .then(function () {
-            return settingsPage
-              .clickDeletePattern();
+          // should this test go to discover page and verify the Popular field?
+          .then(function () {
+            return common.tryForTime(3000, function () {
+              // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+              return settingsPage
+                .clickDeletePattern();
+            });
           })
           .then(function () {
             return common.tryForTime(3000, function () {
