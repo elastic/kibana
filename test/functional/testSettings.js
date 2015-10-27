@@ -26,17 +26,14 @@ define(function (require) {
       // on setup, we create an settingsPage instance
       // that we will use for all the tests
       setup: function () {
-        // curl -XDELETE http://localhost:9200/.kibana
-
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         headerPage = new HeaderPage(this.remote);
         scenarioManager = new ScenarioManager(url.format(config.elasticsearch));
-
       },
 
       beforeEach: function () {
-        var self = this;
+        var remote = this.remote;
 
         // start each test with an empty kibana index
         return scenarioManager
@@ -48,7 +45,7 @@ define(function (require) {
           })
           .then(function () {
             return common.tryForTime(25000, function () {
-              return self.remote
+              return remote
                 .get(
                   url.format(_.assign(config.kibana, {
                     pathname: ''
@@ -58,7 +55,7 @@ define(function (require) {
                     .sleep(500);
                 })
                 .then(function () {
-                  return self.remote
+                  return remote
                     .getCurrentUrl()
                     .then(function (currentUrl) {
                       expect(currentUrl).to.contain('settings');
@@ -77,20 +74,14 @@ define(function (require) {
        ** Test the default state of checboxes and the 2 text input fields
        */
       'testSettingsInitialState': function () {
-        var self = this;
-
-        // return self.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: ''
-        //   })))
-        //   .then(function () {
+        var remote = this.remote;
+        var testSubName = 'testSettingsInitialState';
 
         return settingsPage
           .getTimeBasedEventsCheckbox()
           .isSelected()
           .then(function (selected) {
             expect(selected).to.be.ok();
-            // });
           })
           .then(function () {
             return settingsPage
@@ -120,6 +111,15 @@ define(function (require) {
                 expect(timeFieldIsSelected).to.not.be.ok();
               });
 
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
@@ -127,17 +127,14 @@ define(function (require) {
        ** Ensure Create button is disabled until you select a time field
        */
       'testCreateButtonDisabledUntilTimeFieldSelected': function () {
-        // return this.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: ''
-        //   })))
-        //   .then(function () {
+        var testSubName = 'testCreateButtonDisabledUntilTimeFieldSelected';
+        var remote = this.remote;
+
         return settingsPage
           .getCreateButton()
           .isEnabled()
           .then(function (enabled) {
             expect(enabled).to.not.be.ok();
-            // });
           })
           .then(function () {
             // select a time field and check that Create button is enabled
@@ -151,6 +148,15 @@ define(function (require) {
               .then(function (enabled) {
                 expect(enabled).to.be.ok();
               });
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
@@ -159,17 +165,13 @@ define(function (require) {
        ** Test that unchecking the Time-based Events checkbox hides the Name is pattern checkbox
        */
       'testSettingsCheckboxHide': function () {
-        // return this.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: ''
-        //   })))
-        //   .then(function () {
+        var testSubName = 'testSettingsCheckboxHide';
+
         return settingsPage
           .getTimeBasedEventsCheckbox()
           .then(function (selected) {
             // uncheck the 'time-based events' checkbox
             return selected.click();
-            // });
           })
           // try to find the name is pattern checkbox (shouldn't find it)
           .then(function () {
@@ -188,16 +190,12 @@ define(function (require) {
       // Index pattern field list
 
       'testCreateRemoveIndexPattern': function () {
-        var self = this.remote;
-        // return this.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: ''
-        //   })))
-        //   .then(function () {
+        var remote = this.remote;
+        var testSubName = 'testCreateRemoveIndexPattern';
+
         // select a time field and then Create button
         return settingsPage
           .selectTimeFieldOption('@timestamp')
-          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -216,17 +214,17 @@ define(function (require) {
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
-                  return self
+                  return remote
                     .getAlertText();
                 });
               })
               .then(function () {
-                return self
+                return remote
                   .acceptAlert();
               })
               // getting the current URL which shows 'logstash-*' pattern
               .then(function () {
-                return self
+                return remote
                   .getCurrentUrl()
                   .then(function (currentUrl) {
                     common.log('currentUrl = ' + currentUrl);
@@ -242,26 +240,30 @@ define(function (require) {
               })
               // getting the current URL which no longer includes 'logstash-*'
               .then(function () {
-                return self
+                return remote
                   .getCurrentUrl()
                   .then(function (currentUrl) {
                     common.log('currentUrl = ' + currentUrl);
                   });
               });
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
       'testIndexPatternResultsHeader': function () {
-        var self = this.remote;
-        // return this.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: ''
-        //   })))
-        //   .then(function () {
-        // select a time field and then Create button
+        var remote = this.remote;
+        var testSubName = 'testIndexPatternResultsHeader';
+
         return settingsPage
           .selectTimeFieldOption('@timestamp')
-          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -275,7 +277,6 @@ define(function (require) {
                   .getVisibleText()
                   .then(function (pageText) {
                     expect(pageText).to.be('logstash-*');
-                    // return
                   });
               });
           })
@@ -345,12 +346,12 @@ define(function (require) {
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
-                  return self
+                  return remote
                     .getAlertText();
                 });
               })
               .then(function () {
-                return self
+                return remote
                   .getAlertText()
                   .then(function (alertText) {
                     common.log('alertText = ' + alertText);
@@ -358,24 +359,28 @@ define(function (require) {
                   });
               })
               .then(function () {
-                return self
+                return remote
                   .acceptAlert();
+              });
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
               });
           });
       },
 
 
       'testIndexPatternResultsSort': function () {
-        var self = this.remote;
-        // return this.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: ''
-        //   })))
-        //   .then(function () {
-        // select a time field and then Create button
+        var remote = this.remote;
+        var testSubName = 'testIndexPatternResultsSort';
+
         return settingsPage
           .selectTimeFieldOption('@timestamp')
-          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -544,12 +549,12 @@ define(function (require) {
           })
           .then(function () {
             return common.tryForTime(3000, function () {
-              return self
+              return remote
                 .getAlertText();
             });
           })
           .then(function () {
-            return self
+            return remote
               .getAlertText()
               .then(function (alertText) {
                 common.log('alertText = ' + alertText);
@@ -557,27 +562,27 @@ define(function (require) {
               });
           })
           .then(function () {
-            return self
+            return remote
               .acceptAlert();
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       },
 
 
       'testIndexPatternPopularity': function () {
-        var self = this.remote;
-        // return this.remote
-        //   .get(url.format(_.assign(config.kibana, {
-        //     pathname: '/'
-        //   })))
-        //   // .then(function () {
-        //   //   return headerPage
-        //   //     .clickSettings();
-        //   // })
-        //   .then(function () {
-        // select a time field and then Create button
+        var remote = this.remote;
+        var testSubName = 'testIndexPatternPopularity';
+
         return settingsPage
           .selectTimeFieldOption('@timestamp')
-          // })
           .then(function () {
             return settingsPage
               .getCreateButton()
@@ -681,12 +686,12 @@ define(function (require) {
           })
           .then(function () {
             return common.tryForTime(3000, function () {
-              return self
+              return remote
                 .getAlertText();
             });
           })
           .then(function () {
-            return self
+            return remote
               .getAlertText()
               .then(function (alertText) {
                 common.log('alertText = ' + alertText);
@@ -694,8 +699,17 @@ define(function (require) {
               });
           })
           .then(function () {
-            return self
+            return remote
               .acceptAlert();
+          })
+          .catch(function screenshotError(reason) {
+            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
+            return remote
+              .takeScreenshot()
+              .then(function screenshot2a(data) {
+                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
+                throw new Error(reason);
+              });
           });
       }
 
