@@ -45,7 +45,9 @@ require('ui/modules')
 
   // read server url changes into scope
   es.addServerChangeListener((server) => {
-    this.serverUrl = server;
+    $scope.$evalAsync(() => {
+      this.serverUrl = server;
+    });
   });
 
   // sync ui changes back to the es module
