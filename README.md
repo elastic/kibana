@@ -36,6 +36,7 @@ Sense offers handy contextual suggestion to the Elasticsearch API.
 ### Format validation
 
 Sometimes it is hard to find that little missing comma. Sense automatically highlights and explains invalid input.
+
 <img src="https://github.com/elastic/sense/raw/master/docs/images/readme_errors.png" width="400px" title="Format validation">
 
 ### Scope collapsing
