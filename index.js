@@ -12,7 +12,10 @@ module.exports = function (kibana) {
       description: 'JSON aware developer\'s interface to ElasticSearch',
       icon: 'plugins/sense/favicon.ico',
       main: 'plugins/sense/sense',
-      autoload: kibana.autoload.styles
+      autoload: kibana.autoload.styles,
+      injectVars: function (server, options) {
+        return options;
+      }
     }
   ];
 
@@ -29,6 +32,16 @@ module.exports = function (kibana) {
 
   return new kibana.Plugin({
     id: 'sense',
+
+    config: function (Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        defaultServerUrl: Joi.string().default('http://localhost:9200'),
+        proxyFilter: Joi.array().items(
+          Joi.string().label('Regexp or host+port')
+        ).single().default(['/.*/']),
+      }).default();
+    },
 
     init: function (server, options) {
       // http://hapijs.com/api/8.8.1#route-configuration
