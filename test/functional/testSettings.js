@@ -37,7 +37,19 @@ define(function (require) {
 
         // start each test with an empty kibana index
         return scenarioManager
-          .reload('emptyKibana')
+          .unload('emptyKibana')
+          .then(function () {
+            return common
+              .sleep(500);
+          })
+          .then(function () {
+            return scenarioManager
+              .load('emptyKibana');
+          })
+          .then(function () {
+            return common
+              .sleep(2000);
+          })
           // and load a minimal set of makelogs data
           .then(function loadIfEmptyMakelogs() {
             return scenarioManager
