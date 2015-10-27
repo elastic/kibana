@@ -60,7 +60,9 @@ module.exports = function (kibana) {
                 }
 
                 if (!filters.some(re => re.test(uri))) {
-                  cb(Boom.forbidden('Unable to send requests to that url'));
+                  const err = Boom.forbidden();
+                  err.output.payload = 'Unable to send requests to that url';
+                  cb(err);
                   return;
                 }
 
