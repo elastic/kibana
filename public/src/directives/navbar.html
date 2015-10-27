@@ -12,9 +12,10 @@
     aria-label="Server Name"
     class="form-control"
     ng-focus="navbar.updateServerUrlHistory()"
+    ng-blur="navbar.commitServerUrlFormModel()"
 
     sense-uib-typeahead="url for url in navbar.serverUrlHistory"
-    ng-model="sense.serverUrl"
+    ng-model="navbar.serverUrlFormModel"
     typeahead-append-to-body="true"
     typeahead-focus-first="false"
 
