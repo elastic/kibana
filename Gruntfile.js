@@ -4,6 +4,22 @@ module.exports = function (grunt) {
     eslint: 'gruntify-eslint'
   });
 
+  const srcFiles = [
+    {
+      expand: true,
+      src: [
+        'public/**',
+        '!public/tests/**',
+        'api_server/**',
+        'index.js',
+        'LICENSE.md',
+        'package.json',
+        'README.md',
+      ],
+      dest: 'build/sense-<%= pkg.version %>'
+    }
+  ];
+
   grunt.initConfig({
     pkg: require('./package.json'),
 
@@ -31,21 +47,7 @@ module.exports = function (grunt) {
 
     copy: {
       build: {
-        files: [
-          {
-            expand: true,
-            src: [
-              'public/**',
-              '!public/tests/**',
-              'api_server/**',
-              'index.js',
-              'LICENSE.md',
-              'package.json',
-              'README.md',
-            ],
-            dest: 'build/sense-<%= pkg.version %>'
-          },
-        ]
+        files: srcFiles
       }
     },
 
@@ -71,6 +73,22 @@ module.exports = function (grunt) {
           'public/**/*.js',
           '!**/webpackShims/**'
         ]
+      }
+    },
+
+    gitinfo: {},
+
+    replace: {
+      build: {
+        options: {
+          patterns: [
+            {
+              match: 'SENSE_REVISION',
+              replacement: '<%= gitinfo.local.branch.current.SHA %>'
+            }
+          ]
+        },
+        files: srcFiles
       }
     }
   });
