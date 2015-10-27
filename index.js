@@ -4,6 +4,28 @@ module.exports = function (kibana) {
   let Boom = require('boom');
   let modules = resolve(__dirname, 'public/webpackShims/');
   let src = resolve(__dirname, 'public/src/');
+  let { existsSync } = require('fs');
+
+  const apps = [
+    {
+      title: 'Sense',
+      description: 'JSON aware developer\'s interface to ElasticSearch',
+      icon: 'plugins/sense/favicon.ico',
+      main: 'plugins/sense/sense',
+      autoload: kibana.autoload.styles
+    }
+  ];
+
+  if (existsSync(resolve(__dirname, 'public/tests'))) {
+    apps.push({
+      title: 'Sense Tests',
+      id: 'sense-tests',
+      main: 'plugins/sense/tests',
+      autoload: kibana.autoload.styles,
+      hidden: true
+      //listed: false // uncomment after https://github.com/elastic/kibana/pull/4755
+    });
+  }
 
   return new kibana.Plugin({
     id: 'sense',
@@ -64,21 +86,7 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
-      apps: [{
-        title: 'Sense',
-        description: 'JSON aware developer\'s interface to ElasticSearch',
-        icon: 'plugins/sense/favicon.ico',
-        main: 'plugins/sense/sense',
-        autoload: kibana.autoload.styles
-      },
-        {
-          title: 'Sense Tests',
-          id: 'sense-tests',
-          main: 'plugins/sense/tests',
-          autoload: kibana.autoload.styles,
-          hidden: true
-          //listed: false // uncomment after https://github.com/elastic/kibana/pull/4755
-        }],
+      apps: apps,
 
       noParse: [
         join(modules, 'ace' + sep),
