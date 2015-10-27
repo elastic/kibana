@@ -54,6 +54,7 @@ module.exports = function (grunt) {
         options: {
           bucket: 'download.elasticsearch.org',
           access: 'private',
+          gzip: false
         },
         files: [
           {
