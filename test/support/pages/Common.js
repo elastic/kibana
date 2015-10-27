@@ -50,7 +50,7 @@ define(function (require) {
 
 
     log: function log(logString) {
-      console.log(moment().format('hh:mm:ss.SSS') + ': ' + logString);
+      console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
 
