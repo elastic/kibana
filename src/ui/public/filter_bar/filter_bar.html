@@ -48,6 +48,7 @@
     <button class="btn btn-success"
       ng-disabled="editingFilterError"
       ng-click="editDone()">Done</button>
+    <small ng-show="editingFilterError">Could not parse JSON input</small>
   </div>
   <div class="filter-link">
     <div class="filter-description small">

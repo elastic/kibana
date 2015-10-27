@@ -46,6 +46,15 @@ define(function (require) {
           session.on('changeAnnotation', function checkIfValid() {
             var annotations = session.getAnnotations();
             $scope.editingFilterError = _.some(annotations, {type: 'error'});
+
+            //Make sure we have at least one filter defined
+            var validFilterJSON = $scope.editingFilter && !$scope.editingFilterError;
+            if (validFilterJSON) {
+              var model = $scope.editingFilter.model;
+              var singleFilterUsed = model.length > 0 && Object.keys(JSON.parse(model)).length > 0;
+              $scope.editingFilterError = !singleFilterUsed;
+            }
+
           });
         };
 

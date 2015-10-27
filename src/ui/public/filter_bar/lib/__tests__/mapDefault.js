@@ -21,8 +21,26 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
-    it('should return undefined for none matching', function (done) {
-      var filter = { range: { gt: 0, lt: 1024 } };
+    it('should work with undefined filter types', function (done) {
+      var filter = {
+        'bool': {
+          'must': {
+            'term': {
+              'geo.src': 'US'
+            }
+          }
+        }
+      };
+      mapDefault(filter).then(function (result) {
+        expect(result).to.have.property('key', 'bool');
+        expect(result).to.have.property('value', JSON.stringify(filter.bool));
+        done();
+      });
+      $rootScope.$apply();
+    });
+
+    it('should return undefined if there is no valid key', function (done) {
+      var filter = { meta: {} };
       mapDefault(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
