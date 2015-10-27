@@ -16,6 +16,7 @@ define(function (require) {
     return {
       restrict: 'E',
       scope : {
+        chrome: '=',
         vis: '=',
         editableVis: '=?',
         esResp: '=?',
