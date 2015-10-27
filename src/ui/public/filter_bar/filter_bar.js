@@ -42,6 +42,11 @@ define(function (require) {
           var session = editor.getSession();
           session.setTabSize(2);
           session.setUseSoftTabs(true);
+
+          session.on('changeAnnotation', function checkIfValid() {
+            var annotations = session.getAnnotations();
+            $scope.editingFilterError = _.some(annotations, {type: 'error'});
+          });
         };
 
         $scope.applyFilters = function (filters) {
@@ -70,7 +75,7 @@ define(function (require) {
           });
 
           $scope.editingFilter = {
-            source,
+            source: source,
             type: filterType,
             model: angular.toJson(model, true)
           };

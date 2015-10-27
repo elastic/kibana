@@ -85,27 +85,23 @@ define(function (require) {
 
     /**
     * Updates an existing filter
-    * @param {object} Contains a reference to a filter and its new model
+    * @param {object} filter Contains a reference to a filter and its new model
+    * @param {object} filter.source The filter reference
+    * @param {string} filter.model The edited filter
     * @returns {object} Promise that resolves to the new filter on a successful merge
     */
-    queryFilter.updateFilter = function ({ source, model, type}) {
-      var editedFilter;
-      try {
-        editedFilter = JSON.parse(model);
-      } catch (e) {
-        return;
-      }
-
-      var mergedFilter = _.assign({}, source, editedFilter);
+    queryFilter.updateFilter = function (filter) {
+      var editedFilter = JSON.parse(filter.model);
+      var mergedFilter = _.assign({}, filter.source, editedFilter);
 
       //If the filter type is changed we want to discard the old type
       //when merging changes back in
-      var filterTypeReplaced = !editedFilter[type] && mergedFilter[type];
+      var filterTypeReplaced = editedFilter[filter.type] !== mergedFilter[filter.type];
       if (filterTypeReplaced) {
-        delete mergedFilter[type];
+        delete mergedFilter[filter.type];
       }
 
-      return angular.copy(mergedFilter, source);
+      return angular.copy(mergedFilter, filter.source);
     };
 
     /**

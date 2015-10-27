@@ -45,7 +45,9 @@
       }"
       ng-model="editingFilter.model"></div>
     <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
-    <button class="btn btn-success" ng-click="editDone()">Done</button>
+    <button class="btn btn-success"
+      ng-disabled="editingFilterError"
+      ng-click="editDone()">Done</button>
   </div>
   <div class="filter-link">
     <div class="filter-description small">

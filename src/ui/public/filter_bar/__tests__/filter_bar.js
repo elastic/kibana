@@ -108,6 +108,13 @@ describe('Filter Bar Directive', function () {
         $scope.editDone();
         expect($scope.updateFilter.called).to.be(true);
       });
+
+      it('should disabled done if the edited filter is flagged as invalid', function () {
+        $scope.startEditingFilter(appState.filters[3]);
+        $scope.editingFilterError = true;
+        $scope.$digest();
+        expect($el.find('.filter-edit-container .btn-success:disabled').length === 1).to.be(true);
+      });
     });
   });
 });

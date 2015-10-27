@@ -8,7 +8,6 @@ describe('update filters', function () {
     app: 'appState',
     global: 'globalState'
   };
-  var filters;
   var queryFilter;
   var appState;
   var globalState;
@@ -36,25 +35,17 @@ describe('update filters', function () {
   beforeEach(ngMock.inject(function (Private, _$rootScope_) {
     $rootScope = _$rootScope_;
     queryFilter = Private(require('ui/filter_bar/query_filter'));
-    filters = [
-      {
-        query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      }
-    ];
   }));
 
   describe('updating', function () {
     var currentFilter;
-    var newFilter;
 
     beforeEach(function () {
-      currentFilter = filters[0];
-      newFilter = _.cloneDeep(currentFilter);
-      delete newFilter.meta;
+      currentFilter = {query: { match: { extension: { query: 'jpg', type: 'phrase' } } } };
     });
 
     it('should be able to update a filter', function () {
+      var newFilter = _.cloneDeep(currentFilter);
       newFilter.query.match.extension.query = 'png';
 
       expect(currentFilter.query.match.extension.query).to.be('jpg');
@@ -65,5 +56,30 @@ describe('update filters', function () {
       $rootScope.$digest();
       expect(currentFilter.query.match.extension.query).to.be('png');
     });
+
+    it('should replace the filter type if it is changed', function () {
+      var newFilter = {
+        'range': {
+          'bytes': {
+            'gte': 0,
+            'lt': 1000
+          }
+        }
+      };
+
+      expect(currentFilter.query).not.to.be(undefined);
+
+      queryFilter.updateFilter({
+        source: currentFilter,
+        model: JSON.stringify(newFilter),
+        type: 'query'
+      });
+      $rootScope.$digest();
+
+      expect(currentFilter.query).to.be(undefined);
+      expect(currentFilter.range).not.to.be(undefined);
+      expect(_.eq(currentFilter.range, newFilter.range)).to.be(true);
+    });
+
   });
 });
