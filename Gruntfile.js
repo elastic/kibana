@@ -15,10 +15,16 @@ module.exports = function (grunt) {
     compress: {
       build: {
         options: {
+          mode: 'tgz',
           archive: 'target/sense-<%= pkg.version %>.tar.gz'
         },
         files: [
-          { src: ['build/**'], dest: '/' },
+          {
+            expand: true,
+            cwd: 'build/',
+            src: ['**'],
+            dest: ''
+          },
         ]
       }
     },
@@ -37,7 +43,7 @@ module.exports = function (grunt) {
               'package.json',
               'README.md',
             ],
-            dest: 'build/'
+            dest: 'build/sense-<%= pkg.version %>'
           },
         ]
       }
@@ -48,6 +54,7 @@ module.exports = function (grunt) {
         options: {
           bucket: 'download.elasticsearch.org',
           access: 'private',
+          gzip: false
         },
         files: [
           {
