@@ -19,7 +19,7 @@ define(function (require) {
 
           function getSpyObject(name) {
             name = _.isUndefined(name) ? $scope.spy.mode.name : name;
-            fullPageSpy = (_.isNull(name)) ? false : _.get($scope.spy, 'mode.fill', fullPageSpy);
+            fullPageSpy = (_.isNull(name)) ? false : fullPageSpy;
 
             return {
               name: name,
@@ -86,6 +86,9 @@ define(function (require) {
             if (changedVals && !_.isEqual(newVals, oldVals)) {
               if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
             }
+
+            // ensure the fill mode is synced
+            fullPageSpy = _.get($scope.spy, 'mode.fill', fullPageSpy);
 
             renderSpy(_.get($scope.spy, 'mode.name', null));
           });
