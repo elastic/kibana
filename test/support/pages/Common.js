@@ -7,9 +7,6 @@ define(function (require) {
   var moment = require('moment');
 
 
-  // the page object is created as a constructor
-  // so we can provide the remote Command object
-  // at runtime
   function Common(remote) {
     this.remote = remote;
   }
@@ -53,26 +50,19 @@ define(function (require) {
       console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
-
     sleep: function sleep(sleepMilliseconds) {
       var self = this;
       self.log('... sleep(' + sleepMilliseconds + ') start');
-      return this.remote
-        .setFindTimeout(sleepMilliseconds)
-        .findByCssSelector('youWillNeverFindThis')
-        // .then(function () {
-        //   //self.log('Nobody should ever see this');
-        //   // return;
-        // })
-        .catch(function (reason) {
-          self.log('... sleep(' + sleepMilliseconds + ') end');
-          //return;
-        });
 
+      var promise = new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          self.log('... sleep(' + sleepMilliseconds + ') end');
+          resolve({});
+        }, sleepMilliseconds);
+      });
+      return promise;
     }
 
-
-    // …additional page interaction tasks…
   };
 
   return Common;
