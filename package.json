@@ -9,6 +9,6 @@
     "type": "git",
     "url": "http://github.com/elastic/sense.git"
   },
-  "devDependencies": {},
+  "license": "SEE LICENSE IN LICENSE.MD",
   "dependencies": {}
 }
