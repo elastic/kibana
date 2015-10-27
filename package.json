@@ -15,6 +15,8 @@
   },
   "devDependencies": {
     "eslint": "^1.7.3",
+    "eslint-config-airbnb": "^0.1.0",
+    "eslint-plugin-react": "^3.6.3",
     "grunt": "^0.4.5",
     "grunt-aws": "^0.6.1",
     "grunt-cli": "^0.1.13",

@@ -1,6 +1,7 @@
 module.exports = function (grunt) {
   require('jit-grunt')(grunt, {
-    s3: 'grunt-aws'
+    s3: 'grunt-aws',
+    eslint: 'gruntify-eslint'
   });
 
   grunt.initConfig({
@@ -52,6 +53,15 @@ module.exports = function (grunt) {
             src: 'target/sense-<%= pkg.version %>.tar.gz',
             dest: 'elasticsearch/sense/sense-<%= pkg.version %>.tar.gz'
           }
+        ]
+      }
+    },
+
+    eslint: {
+      source: {
+        src: [
+          'public/**/*.js',
+          '!**/webpackShims/**'
         ]
       }
     }

@@ -1,0 +1,56 @@
+---
+
+root: true
+extends: airbnb
+
+env:
+  node: true
+  amd: true
+
+rules:
+  no-undef: [1]
+
+  func-names: [0]
+  quotes: [0]
+  space-before-function-paren: [0]
+  vars-on-top: [0]
+  no-cond-assign: [0]
+  no-param-reassign: [0]
+  comma-dangle: [0]
+  no-var: [0]
+  one-var: [0]
+  id-length: [0]
+  eol-last: [0]
+  consistent-return: [0]
+  no-use-before-define: [0]
+  no-nested-ternary: [0]
+  new-cap: [0]
+  wrap-iife: [0]
+  eqeqeq: [0]
+  no-use-before-define: [0]
+  no-else-return: [0]
+  indent: [0]
+  spaced-comment: [0]
+  key-spacing: [0]
+  space-infix-ops: [0]
+  prefer-const: [0]
+  camelcase: [0]
+  no-unused-vars: [0]
+  padded-blocks: [0]
+  no-shadow: [0]
+  semi: [0]
+  no-console: [0]
+  brace-style: [0]
+  no-empty: [0]
+  strict: [0]
+  no-redeclare: [0]
+  curly: [0]
+  default-case: [0]
+  dot-notation: [0]
+  no-multi-spaces: [0]
+  guard-for-in: [0]
+  yoda: [0]
+  no-new: [0]
+  no-throw-literal: [0]
+  no-unreachable: [0]
+  no-multi-str: [0]
