@@ -20,6 +20,7 @@ define(function (require) {
     var settingsPage;
     var headerPage;
     var scenarioManager;
+    var remote;
 
     var expectedAlertText = 'Are you sure you want to remove this index pattern?';
     return {
@@ -30,10 +31,10 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         headerPage = new HeaderPage(this.remote);
         scenarioManager = new ScenarioManager(url.format(config.elasticsearch));
+        remote = this.remote;
       },
 
       beforeEach: function () {
-        var remote = this.remote;
 
         // start each test with an empty kibana index
         return scenarioManager
@@ -250,7 +251,7 @@ define(function (require) {
                 return element ? element : null;
               }, ['Configure an index pattern'], 8000))
               .then(function () {
-                console.log('success');
+                common.log('success');
               })
               // getting the current URL which no longer includes 'logstash-*'
               .then(function () {
