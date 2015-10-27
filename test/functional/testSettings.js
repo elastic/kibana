@@ -45,7 +45,7 @@ define(function (require) {
               .load('emptyKibana');
           })
           .then(function () {
-            return common.tryForTime(5000, function () {
+            return common.tryForTime(25000, function () {
               return self.remote
                 .get(
                   url.format(_.assign(config.kibana, {
