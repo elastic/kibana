@@ -86,14 +86,14 @@ define(function (require) {
     clickDefaultIndexButton: function clickDefaultIndexButton() {
       return this.remote
         .setFindTimeout(defaultTimeout)
-        .findByCssSelector('button[tooltip="Set as default index"')
+        .findByCssSelector('button.btn.btn-warning.ng-scope')
         .click();
     },
 
     clickDeletePattern: function clickDeletePattern() {
       return this.remote
         .setFindTimeout(defaultTimeout)
-        .findByCssSelector('button[tooltip="Remove index pattern"')
+        .findByCssSelector('button.btn.btn-danger.ng-scope')
         .click();
     },
 
