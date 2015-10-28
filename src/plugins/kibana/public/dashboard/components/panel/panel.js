@@ -23,7 +23,7 @@ define(function (require) {
     var brushEvent = Private(require('ui/utils/brush_event'));
 
     var getPanelId = function (panel) {
-      return ['P', panel.id, panel.panelIndex].join('-');
+      return ['P', panel.panelIndex].join('-');
     };
 
     return {
