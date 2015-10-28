@@ -20,6 +20,24 @@ module.exports = function (grunt) {
     }
   ];
 
+  const replaceSrcFiles = [
+    {
+      expand: true,
+      src: [
+        'public/**/*.js',
+        'public/**/*.css',
+        '!public/tests/**',
+        'api_server/**',
+        'index.js',
+        'LICENSE.md',
+        'package.json',
+        'README.md',
+      ],
+      dest: 'build/sense-<%= pkg.version %>'
+    }
+  ];
+
+
   grunt.initConfig({
     pkg: require('./package.json'),
 
@@ -88,7 +106,7 @@ module.exports = function (grunt) {
             }
           ]
         },
-        files: srcFiles
+        files: replaceSrcFiles
       }
     }
   });
