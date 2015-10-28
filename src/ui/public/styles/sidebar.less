@@ -27,11 +27,10 @@
     }
 
     .sidebar-item {
-      border-top: 1px solid;
       border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
 
-      a {
+      a:not(.sidebar-item-button) {
         color: @sidebar-item-color;
 
         &:hover {
@@ -73,6 +72,7 @@
 
       &-button {
         font-size: inherit;
+        display: block;
 
         &[disabled] {
           opacity: 0.65;
@@ -137,6 +137,5 @@
 
   .index-pattern-selection .sidebar-item-title {
     background-color: @sidebar-index-pattern-selection-bg;
-    color: @sidebar-index-pattern-selection-color;
   }
 }

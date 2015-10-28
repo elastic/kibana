@@ -25,20 +25,10 @@ define(function (require) {
     function fetchWithStrategy(strategy, requests) {
 
       requests = requests.map(function (req) {
-        if (req.aborted) {
-          return ABORTED;
-        }
-
-        if (req.started) {
-          req.continue();
-        } else {
-          req.start();
-        }
-
-        return req;
+        return req.aborted ? ABORTED : req;
       });
 
-      return Promise.resolve()
+      return startRequests(requests)
       .then(function () {
         return callClient(strategy, requests);
       })
@@ -59,6 +49,19 @@ define(function (require) {
             default:
               return resp;
           }
+        });
+      });
+    }
+
+    function startRequests(requests) {
+      return Promise.map(requests, function (req) {
+        if (req === ABORTED) {
+          return req;
+        }
+
+        return new Promise(function (resolve) {
+          var action = req.started ? req.continue : req.start;
+          resolve(action.call(req));
         });
       });
     }

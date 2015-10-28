@@ -1,48 +1,38 @@
-define({
-  capabilities: {
-    'selenium-version': '2.47.1',
-    'idle-timeout': 30
-  },
-  environments: [{
-    browserName: 'firefox'
-  }],
-  webdriver: {
-    host: 'localhost',
-    port: 4444
-  },
-  kibana: {
-    protocol: 'http',
-    hostname: 'localhost',
-    port: 5620
-      // port: 5601
-  },
-  elasticsearch: {
-    protocol: 'http',
-    hostname: 'localhost',
-    port: 9220
-      // port: 9200
-  },
-  loaderOptions: {
-    packages: [{
-      name: 'intern-selftest',
-      location: '.'
-    }],
-    map: {
-      'intern-selftest': {
-        dojo: 'intern-selftest/node_modules/dojo'
-      }
+define(function (require) {
+  var serverConfig = require('intern/dojo/node!./serverConfig');
+  var _ = require('intern/dojo/node!lodash');
+
+  return _.assign({
+    capabilities: {
+      'selenium-version': '2.47.1',
+      'idle-timeout': 30
     },
-    paths: {
-      'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
-      'moment': './node_modules/moment/moment.js'
+    environments: [{
+      browserName: 'firefox'
+    }],
+
+    tunnelOptions: serverConfig.webdriver,
+    functionalSuites: ['test/functional/status.js', 'test/functional/testSettings'],
+    excludeInstrumentation: /(fixtures|node_modules)\//,
+
+    loaderOptions: {
+      packages: [{
+        name: 'intern-selftest',
+        location: '.'
+      }],
+
+      map: {
+        'intern-selftest': {
+          dojo: 'intern-selftest/node_modules/dojo'
+        }
+      },
+
+      paths: {
+        'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
+        'moment': './node_modules/moment/moment.js'
+      }
     }
-  },
-  // functionalSuites: ['test/functional/status.js'],
-  // functionalSuites: ['test/functional/testSettings'],
-  // functionalSuites: ['test/functional/testDiscover'],
-  // functionalSuites: ['test/functional/testVisualize'],
-  functionalSuites: ['test/functional/status.js', 'test/functional/testSettings'],
-  // functionalSuites: ['test/functional/testDiscover', 'test/functional/testVisualize'],
-  // functionalSuites: ['test/functional/testSettings', 'test/functional/testDiscover', 'test/functional/testVisualize'],
-  excludeInstrumentation: /(fixtures|node_modules)\//
+  }, serverConfig);
+
+
 });

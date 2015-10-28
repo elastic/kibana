@@ -15,9 +15,13 @@ describe('index pattern', function () {
   var docSourceResponse;
   var indexPatternId = 'test-pattern';
   var indexPattern;
+  var calculateIndices;
+  var $rootScope;
+  var intervals;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
+    $rootScope = $injector.get('$rootScope');
     config = _config_;
     mockLogstashFields = Private(require('fixtures/logstash_fields'));
     docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
@@ -37,6 +41,16 @@ describe('index pattern', function () {
     sinon.stub(mappingSetup, 'isDefined', function () {
       return Promise.resolve(true);
     });
+
+    // stub calculateIndices
+    calculateIndices = sinon.spy(function () {
+      return $injector.get('Promise').resolve(['foo', 'bar']);
+    });
+    Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
+
+    // spy on intervals
+    intervals = Private(require('ui/index_patterns/_intervals'));
+    sinon.stub(intervals, 'toIndexList').returns(['foo', 'bar']);
 
     IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
   }));
@@ -271,6 +285,107 @@ describe('index pattern', function () {
         indexPattern.popularizeField(field.name, decrementAmount);
         expect(field.count).to.equal(0);
       });
+    });
+  });
+
+  describe('#toIndexList', function () {
+    context('when index pattern is an interval', function () {
+      var interval;
+      beforeEach(function () {
+        interval = 'result:getInterval';
+        sinon.stub(indexPattern, 'getInterval').returns(interval);
+      });
+
+      it('invokes interval toIndexList with given start/stop times', function () {
+        indexPattern.toIndexList(1, 2);
+        $rootScope.$apply();
+
+        var id = indexPattern.id;
+        expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
+      });
+      it('is fulfilled by the result of interval toIndexList', function () {
+        var indexList;
+        indexPattern.toIndexList().then(function (val) {
+          indexList = val;
+        });
+        $rootScope.$apply();
+
+        expect(indexList[0]).to.equal('foo');
+        expect(indexList[1]).to.equal('bar');
+      });
+    });
+
+    context('when index pattern is a time-base wildcard', function () {
+      beforeEach(function () {
+        sinon.stub(indexPattern, 'getInterval').returns(false);
+        sinon.stub(indexPattern, 'hasTimeField').returns(true);
+        sinon.stub(indexPattern, 'isWildcard').returns(true);
+      });
+
+      it('invokes calculateIndices with given start/stop times', function () {
+        indexPattern.toIndexList(1, 2);
+        $rootScope.$apply();
+
+        var id = indexPattern.id;
+        var field = indexPattern.timeFieldName;
+        expect(calculateIndices.calledWith(id, field, 1, 2)).to.be(true);
+      });
+      it('is fulfilled by the result of calculateIndices', function () {
+        var indexList;
+        indexPattern.toIndexList().then(function (val) {
+          indexList = val;
+        });
+        $rootScope.$apply();
+
+        expect(indexList[0]).to.equal('foo');
+        expect(indexList[1]).to.equal('bar');
+      });
+    });
+
+    context('when index pattern is neither an interval nor a time-based wildcard', function () {
+      beforeEach(function () {
+        sinon.stub(indexPattern, 'getInterval').returns(false);
+      });
+
+      it('is fulfilled by id', function () {
+        var indexList;
+        indexPattern.toIndexList().then(function (val) {
+          indexList = val;
+        });
+        $rootScope.$apply();
+
+        expect(indexList).to.equal(indexPattern.id);
+      });
+    });
+  });
+
+  describe('#hasTimeField()', function () {
+    beforeEach(function () {
+      // for the sake of these tests, it doesn't much matter what type of field
+      // this is so long as it exists
+      indexPattern.timeFieldName = 'bytes';
+    });
+    it('returns false if no time field', function () {
+      delete indexPattern.timeFieldName;
+      expect(indexPattern.hasTimeField()).to.be(false);
+    });
+    it('returns false if time field does not actually exist in fields', function () {
+      indexPattern.timeFieldName = 'does not exist';
+      expect(indexPattern.hasTimeField()).to.be(false);
+    });
+    it('returns true if valid time field is configured', function () {
+      expect(indexPattern.hasTimeField()).to.be(true);
+    });
+  });
+
+  describe('#isWildcard()', function () {
+    it('returns true if id has an *', function () {
+      indexPattern.id = 'foo*';
+      expect(indexPattern.isWildcard()).to.be(true);
+    });
+    it('returns false if id has no *', function () {
+      indexPattern.id = 'foo';
+      expect(indexPattern.isWildcard()).to.be(false);
     });
   });
 });

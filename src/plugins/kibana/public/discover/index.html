@@ -4,7 +4,8 @@
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
           ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-          <input validate-query="searchSource"
+          <input
+            parse-query
             input-focus
             kbn-typeahead-input
             ng-model="state.query"
@@ -16,7 +17,6 @@
             ng-disabled="discoverSearch.$invalid"
             aria-label="Search">
             <span aria-hidden="true" class="fa fa-search"></span></button>
-          <!--<button type="button" ng-click="resetQuery()" aria-label="Reset query"><span aria-hidden="true" class="fa fa-ban"></span></button>-->
         </div>
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>

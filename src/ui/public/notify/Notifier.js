@@ -4,6 +4,7 @@ define(function (require) {
   var $ = require('jquery');
 
   var metadata = require('ui/metadata');
+  var formatMsg = require('ui/notify/lib/_format_msg');
 
   var notifs = [];
   var setTO = setTimeout;
@@ -75,21 +76,6 @@ define(function (require) {
     notif.stacks = [notif.stack];
     notifs.push(notif);
     return notif;
-  }
-
-  function formatMsg(msg, from) {
-    var rtn = '';
-    if (from) {
-      rtn += from + ': ';
-    }
-
-    if (typeof msg === 'string') {
-      rtn += msg;
-    } else if (msg instanceof Error) {
-      rtn += msg.message;
-    }
-
-    return rtn;
   }
 
   function formatInfo() {

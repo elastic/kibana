@@ -2,6 +2,7 @@ define(function (require) {
   return function (Private) {
     var _ = require('lodash');
     var sinon = require('sinon');
+    var Promise = require('bluebird');
     var IndexedArray = require('ui/IndexedArray');
     var IndexPattern = require('ui/index_patterns/_index_pattern');
     var fieldFormats = Private(require('ui/registry/field_formats'));
@@ -21,7 +22,7 @@ define(function (require) {
       this.fieldFormatMap = {};
       this.routes = IndexPattern.prototype.routes;
 
-      this.toIndexList = _.constant([pattern]);
+      this.toIndexList = _.constant(Promise.resolve([pattern]));
       this.getComputedFields = _.bind(getComputedFields, this);
       this.flattenHit = flattenHit(this);
       this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
