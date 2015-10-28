@@ -1,5 +1,3 @@
-// https://github.com/elastic/kibana-qa/blob/master/settings.md
-
 define(function (require) {
 
   var registerSuite = require('intern!object');
