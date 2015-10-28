@@ -53,6 +53,42 @@ elasticsearch.enabled: false # do not require a running Elasticsearch 2.0 instan
 
 After this change you will need to restart Kibana.
 
+[[securing_sense]]
+=== Securing Sense
+
+Sense is meant to be used as a local development tool. As such, it will send requests to any host & port combination,
+just as a local curl command would. To overcome the CORS limitations enforced by browsers, Sense's Node.js backend
+serves as a proxy to send requests on behalf of the browser. However, if put on a server and exposed to the internet
+this can become a security risk. In those cases, we highly recommend you lock down the proxy by setting the
+`sense.proxyFilter` setting. The setting accepts a list of regular expressions that are evaluated against each URL
+ the proxy is requested to retrieve. If none of the regular expressions match the proxy will reject the request.
+
+Here is an example configuration the only allows Sense to connect to localhost:
+
+[source,yaml]
+--------
+sense.proxyFilter:
+  - ^https?://(localhost|127\.0\.0\.1|\[::0\]).*
+--------
+
+You will need to restart Kibana for these changes to take effect.
+
+[[configuration]]
+=== Configuration
+
+You can add the following options in the `config/kibana.yml` file:
+
+`sense.defaultServerUrl`::
+  The default value of the Server text box, where Sense sends all its requests to.
+  Note that Sense remember the last server you used. This setting only has effect when Sense first loaded.
+  Defaults to `localhost:9200`
+
+`sense.proxyFilter`:: A list of regular expressions that are used to validate any outgoing request from Sense. If none
+ of these match, the request will be rejected. Defaults to `.*` . See <<securing_sense>> for more details.
+
+[NOTE]
+
+Kibana needs to be restarted after each change to the configuration for them to be applied.
 
 [[manual_download]]
 === Manual Download

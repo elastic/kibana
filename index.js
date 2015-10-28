@@ -61,7 +61,7 @@ module.exports = function (kibana) {
 
                 if (!filters.some(re => re.test(uri))) {
                   const err = Boom.forbidden();
-                  err.output.payload = 'Unable to send requests to that url';
+                  err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
                   err.output.headers['content-type'] = 'text/plain';
                   cb(err);
                   return;

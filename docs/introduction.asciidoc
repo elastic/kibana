@@ -3,7 +3,8 @@
 
 Sense is a handy console for interacting with the REST API of Elasticsearch. As you can see below, Sense is composed of
 two main panes. The left pane, named the editor, is where you type the requests you will submit to Elasticsearch.
-The responses from Elasticsearch are shown on the right hand panel.
+The responses from Elasticsearch are shown on the right hand panel. The address of your Elasticsearch server should
+be entered in the text box on the top of screen (and defaults to `localhost:9200`).
 
 .The Sense UI
 image::images/introduction_screen.png[Screenshot]
@@ -67,3 +68,7 @@ image::images/introduction_server.png["Server",width=400,align="center"]
 
 This pretty much covers the basics. To follow up, read the <<installing, installation instructions>> or dive deeper
 into the <<sense-ui,UI>>.
+
+[NOTE]
+Sense is a development tool and is configured by default to run on a laptop. If you install it on a server please
+look at the <<securing_sense>> for instructions on how make it secure.
