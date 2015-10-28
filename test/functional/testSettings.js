@@ -86,7 +86,6 @@ define(function (require) {
        ** Test the default state of checboxes and the 2 text input fields
        */
       'testSettingsInitialState': function () {
-        var remote = this.remote;
         var testSubName = 'testSettingsInitialState';
 
         return settingsPage
@@ -135,7 +134,6 @@ define(function (require) {
        */
       'testCreateButtonDisabledUntilTimeFieldSelected': function () {
         var testSubName = 'testCreateButtonDisabledUntilTimeFieldSelected';
-        var remote = this.remote;
 
         return settingsPage
           .getCreateButton()
@@ -192,7 +190,6 @@ define(function (require) {
       // Index pattern field list
 
       'testCreateRemoveIndexPattern': function () {
-        var remote = this.remote;
         var testSubName = 'testCreateRemoveIndexPattern';
 
         // select a time field and then Create button
@@ -258,7 +255,6 @@ define(function (require) {
       },
 
       'testIndexPatternResultsHeader': function () {
-        var remote = this.remote;
         var testSubName = 'testIndexPatternResultsHeader';
 
         return settingsPage
@@ -372,7 +368,6 @@ define(function (require) {
 
 
       'testIndexPatternResultsSort': function () {
-        var remote = this.remote;
         var testSubName = 'testIndexPatternResultsSort';
 
         return settingsPage
@@ -571,7 +566,6 @@ define(function (require) {
 
 
       'testIndexPatternPopularity': function () {
-        var remote = this.remote;
         var testSubName = 'testIndexPatternPopularity';
 
         return settingsPage

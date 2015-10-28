@@ -39,15 +39,7 @@ define(function (require) {
           .setFindTimeout(defaultTimeout)
           .findByCssSelector('a[href*=\'visualize\']')
           .then(function (tab) {
-            return tab.click()
-              .then(function checkUrl() {
-                return self
-                  .getCurrentUrl()
-                  .then(function logUrl(currentUrl) {
-                    common.log('currentUrl = ' + currentUrl);
-                    expect(currentUrl).to.contain('visualize');
-                  });
-              });
+            return tab.click();
           });
       });
     },
