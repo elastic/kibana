@@ -1,15 +1,17 @@
 Sense
 =====
 
-A JSON aware developer's interface to Elasticsearch. Comes with handy machinery such as syntax highlighting, API suggestions, formatting and code folding.
+A JSON aware developer's interface to Elasticsearch. Comes with handy machinery such as syntax highlighting, API suggestions,
+formatting and code folding.
 
 Installation
 -----
 
-Sense is a Kibana app. To get up and running you will first need to download Kibana and install as instructed [here](https://www.elastic.co/downloads/kibana). Once Kibana is installed, you can simply install Sense running the following command from your Kibana folder:
+Sense is a Kibana app. To get up and running you will first need to download Kibana and install as instructed [here](https://www.elastic.co/downloads/kibana).
+Once Kibana is installed, you can simply install Sense running the following command from your Kibana folder:
 
 ```
-$ ./bin/plugin install elastic/sense
+$ ./bin/kibana plugin --install elastic/sense
 ```
 
 Now start your Kibana server by running:
@@ -20,7 +22,7 @@ $ ./bin/kibana
 
 Sense should be available on `localhost:5601/app/sense` (assuming Kibana defaults).
 
-For more information and advanced setting please see the [documentation INSERT LINK]()
+For more information and advanced setting please see the [documentation](https://www.elastic.co/guide/en/sense/current/installing.html)
 
 
 Screenshots
@@ -85,6 +87,6 @@ curl -XPUT "http://localhost:9200/website/blog/123" -d'
 Documentation
 --------
 
-Visit [elastic.co INSERT LINK]() for the full documentation.
+Visit [elastic.co](https://stag-www.elastic.co/guide/en/sense/current/index.html) for the full documentation.
 
 
