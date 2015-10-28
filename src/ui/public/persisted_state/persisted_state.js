@@ -95,13 +95,15 @@ define(function (require) {
         _.set(this._mergedState, keyPath, origValue);
       }
 
-      // clean up the changedState tree
+      // clean up the changedState and defaultChildState trees
       this._cleanPath(path, this._changedState);
+      this._cleanPath(path, this._defaultChildState);
 
       if (!_.isEqual(currentValue, origValue)) this.emit('change');
     };
 
     PersistedState.prototype.createChild = function (path, value, silent) {
+      this._setChild(this._getIndex(path), value, this._parent || this);
       return new PersistedState(value, this._getIndex(path), this._parent || this, silent);
     };
 
@@ -172,6 +174,11 @@ define(function (require) {
       return (isString) ? [this._getIndex(path)] : path;
     };
 
+    PersistedState.prototype._setChild = function (path, value, parent) {
+      parent._defaultChildState = parent._defaultChildState || {};
+      _.set(parent._defaultChildState, path, value);
+    };
+
     PersistedState.prototype._hasPath = function () {
       return this._path.length > 0;
     };
@@ -188,7 +195,7 @@ define(function (require) {
       return _.get(this._mergedState, this._getIndex(key), def);
     };
 
-    PersistedState.prototype._set = function (key, value, silent, initialChildState, defaultChildState) {
+    PersistedState.prototype._set = function (key, value, silent, initialChildState) {
       var self = this;
       var stateChanged = false;
       var initialState = !this._initialized;
@@ -203,7 +210,7 @@ define(function (require) {
 
       // delegate to parent instance, passing child's default value
       if (this._parent) {
-        return this._parent._set(keyPath, value, silent, initialState, this._defaultState);
+        return this._parent._set(keyPath, value, silent, initialState);
       }
 
       // everything in here affects only the parent state
@@ -233,7 +240,7 @@ define(function (require) {
 
       // update the merged state value
       var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
-      var sourceObj = _.merge({}, defaultChildState, this._changedState);
+      var sourceObj = _.merge({}, this._defaultChildState, this._changedState);
 
       // handler arguments are (targetValue, sourceValue, key, target, source)
       var mergeMethod = function (targetValue, sourceValue, mergeKey) {
