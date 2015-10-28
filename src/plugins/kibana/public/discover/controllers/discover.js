@@ -433,14 +433,17 @@ define(function (require) {
       .size($scope.opts.sampleSize)
       .sort(getSort($state.sort, $scope.indexPattern))
       .query(!$state.query ? null : $state.query)
-      .highlight({
-        pre_tags: [highlightTags.pre],
-        post_tags: [highlightTags.post],
-        fields: {'*': {}},
-        require_field_match: false,
-        fragment_size: 2147483647 // Limit of an integer.
-      })
       .set('filter', queryFilter.getFilters());
+
+      if (config.get('doc_table:highlight')) {
+        $scope.searchSource.highlight({
+          pre_tags: [highlightTags.pre],
+          post_tags: [highlightTags.post],
+          fields: {'*': {}},
+          require_field_match: false,
+          fragment_size: 2147483647 // Limit of an integer.
+        });
+      }
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
