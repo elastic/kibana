@@ -41,7 +41,7 @@ define(function (require) {
           .unload('emptyKibana')
           .then(function () {
             return common
-              .sleep(500);
+              .sleep(1000);
           })
           .then(function () {
             return scenarioManager
@@ -65,7 +65,7 @@ define(function (require) {
                   })))
                 .then(function () {
                   return common
-                    .sleep(500);
+                    .sleep(2000);
                 })
                 .then(function () {
                   return remote
