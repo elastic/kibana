@@ -260,6 +260,57 @@ describe('Persisted State', function () {
     });
   });
 
+  describe('child state conditions', function () {
+    it('should be merged with the parent state', function () {
+      var parent = new PersistedState({ name: 'test' });
+      var child = parent.createChild('child', 'value');
+      expect(parent.get()).to.eql({
+        name: 'test',
+        child: 'value'
+      });
+
+      parent.set('id', 1234);
+      expect(parent.get()).to.eql({
+        id: 1234,
+        name: 'test',
+        child: 'value'
+      });
+
+      parent.set({});
+      expect(parent.get()).to.eql({
+        child: 'value'
+      });
+    });
+
+    it('should give child state precedence', function () {
+      var parent = new PersistedState({ user: { id: 1234, name: 'test' }});
+      var child = parent.createChild('user', { name: 'child test' });
+      expect(parent.get()).to.eql({
+        user: {
+          id: 1234,
+          name: 'child test'
+        }
+      });
+
+      parent.set({});
+      expect(parent.get()).to.eql({ user: { name: 'child test' }});
+    });
+
+    it('should be cleaned up with removeChild', function () {
+      var parent = new PersistedState({ name: 'test' });
+      var child = parent.createChild('child', 'value');
+      expect(parent.get()).to.eql({
+        name: 'test',
+        child: 'value'
+      });
+
+      parent.removeChild('child');
+      expect(parent.get()).to.eql({
+        name: 'test'
+      });
+    });
+  });
+
   describe('colliding child paths and parent state values', function () {
     it('should not change the child path value by default', function () {
       var childIndex = 'childTest';
