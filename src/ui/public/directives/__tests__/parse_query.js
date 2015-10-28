@@ -12,12 +12,10 @@ var $compile;
 var Promise;
 var Private;
 var config;
-var debounceDelay = 300;
 var $elemScope;
 var $elem;
 
 var cycleIndex = 0;
-var mockValidateQuery;
 var markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 var fromUser;
 var toUser = require('ui/parse_query/lib/to_user');
