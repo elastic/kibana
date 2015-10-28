@@ -187,4 +187,23 @@ module.exports = function (api) {
       "{indices}/_cache/clear"
     ]
   });
+
+  api.addEndpointDescription('_upgrade', {
+    methods: ["POST"],
+    patterns: [
+      "_upgrade",
+      "{indices}/_upgrade"
+    ],
+    url_params: {
+      wait_for_completion: "__flag__"
+    }
+  });
+
+  api.addEndpointDescription('_upgrade_status', {
+    methods: ["GET"],
+    patterns: [
+      "_upgrade",
+      "{indices}/_upgrade"
+    ]
+  });
 };
