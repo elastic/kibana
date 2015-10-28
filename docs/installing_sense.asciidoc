@@ -95,7 +95,7 @@ Kibana needs to be restarted after each change to the configuration for them to 
 
 Kibana’s `bin/plugin` script requires direct internet access for downloading and installing Sense.
 If your server doesn’t have internet access, you can download the Sense tar file from the following link:
-https://download.elasticsearch.org/elastic/sense/sense-latest.zip
+https://download.elasticsearch.org/elastic/sense/sense-latest.tar.gz
 
 Once downloaded you can install Sense using the following command:
 
