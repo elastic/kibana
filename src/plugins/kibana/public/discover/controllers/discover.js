@@ -429,7 +429,7 @@ define(function (require) {
       .query(!$state.query ? null : $state.query)
       .set('filter', queryFilter.getFilters());
 
-      if (config.get('discover:highlight')) {
+      if (config.get('doc_table:highlight')) {
         $scope.searchSource.highlight({
           pre_tags: [highlightTags.pre],
           post_tags: [highlightTags.post],
