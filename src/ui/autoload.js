@@ -52,6 +52,7 @@ exports.reload = function () {
     'ui/index_patterns',
     'ui/listen',
     'ui/notify',
+    'ui/parse_query',
     'ui/persisted_log',
     'ui/private',
     'ui/promises',
@@ -67,7 +68,6 @@ exports.reload = function () {
     'ui/typeahead',
     'ui/url',
     'ui/validateDateInterval',
-    'ui/validate_query',
     'ui/watch_multi'
   ];
 
