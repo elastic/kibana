@@ -4,8 +4,7 @@ define(function (require) {
 
   var registerSuite = require('intern!object');
   var expect = require('intern/dojo/node!expect.js');
-  //var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
-  var fs = require('intern/dojo/node!fs');
+  var ScenarioManager = require('intern/dojo/node!../fixtures/scenarioManager');
   var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
   var Common = require('../support/pages/Common');
   var SettingsPage = require('../support/pages/SettingsPage');
@@ -126,13 +125,8 @@ define(function (require) {
 
           })
           .catch(function screenshotError(reason) {
-            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
-            return remote
-              .takeScreenshot()
-              .then(function screenshot2a(data) {
-                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
-                throw new Error(reason);
-              });
+            return common
+              .screenshotError(testSubName, reason);
           });
       },
 
@@ -163,13 +157,8 @@ define(function (require) {
               });
           })
           .catch(function screenshotError(reason) {
-            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
-            return remote
-              .takeScreenshot()
-              .then(function screenshot2a(data) {
-                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
-                throw new Error(reason);
-              });
+            return common
+              .screenshotError(testSubName, reason);
           });
       },
 
@@ -263,13 +252,8 @@ define(function (require) {
               });
           })
           .catch(function screenshotError(reason) {
-            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
-            return remote
-              .takeScreenshot()
-              .then(function screenshot2a(data) {
-                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
-                throw new Error(reason);
-              });
+            return common
+              .screenshotError(testSubName, reason);
           });
       },
 
@@ -381,13 +365,8 @@ define(function (require) {
               });
           })
           .catch(function screenshotError(reason) {
-            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
-            return remote
-              .takeScreenshot()
-              .then(function screenshot2a(data) {
-                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
-                throw new Error(reason);
-              });
+            return common
+              .screenshotError(testSubName, reason);
           });
       },
 
@@ -585,13 +564,8 @@ define(function (require) {
               .acceptAlert();
           })
           .catch(function screenshotError(reason) {
-            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
-            return remote
-              .takeScreenshot()
-              .then(function screenshot2a(data) {
-                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
-                throw new Error(reason);
-              });
+            return common
+              .screenshotError(testSubName, reason);
           });
       },
 
@@ -724,13 +698,8 @@ define(function (require) {
               .acceptAlert();
           })
           .catch(function screenshotError(reason) {
-            common.log('Test Failed, taking screenshot "./screenshot-' + testSubName + '-ERROR- + Date.now() + .png"');
-            return remote
-              .takeScreenshot()
-              .then(function screenshot2a(data) {
-                fs.writeFileSync('./screenshot-' + testSubName + '-ERROR-' + Date.now() + '.png', data);
-                throw new Error(reason);
-              });
+            return common
+              .screenshotError(testSubName, reason);
           });
       }
 
