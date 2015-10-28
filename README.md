@@ -22,7 +22,7 @@ $ ./bin/kibana
 
 Sense should be available on `localhost:5601/app/sense` (assuming Kibana defaults).
 
-For more information and advanced setting please see the [documentation](https://www.elastic.co/guide/en/sense/current/installing.html)
+For more information and advanced setting please see the [documentation](https://www.elastic.co/guide/en/sense/current/installing.html).
 
 
 Screenshots
@@ -87,6 +87,6 @@ curl -XPUT "http://localhost:9200/website/blog/123" -d'
 Documentation
 --------
 
-Visit [elastic.co](https://stag-www.elastic.co/guide/en/sense/current/index.html) for the full documentation.
+Visit [elastic.co](https://www.elastic.co/guide/en/sense/current/index.html) for the full documentation.
 
 
