@@ -25,7 +25,7 @@ require('ui/modules')
   /**
    * Display the welcome dropdown if it has not been shown yet
    */
-  if (!storage.get('version_welcome_shown')) {
+    if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
     this.dropdown.open('welcome');
   }
 
