@@ -200,6 +200,7 @@ define(function (require) {
       var stateChanged = false;
       var initialState = !this._initialized;
       var keyPath = this._getIndex(key);
+      var hasKeyPath = keyPath.length > 0;
 
       // if this is the initial state value, save value as the default
       if (initialState) {
@@ -225,15 +226,18 @@ define(function (require) {
           }
         } else {
           // check for changes at path, emit an event when different
-          stateChanged = !_.isEqual(this.get(keyPath), value);
+          var curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
+          stateChanged = !_.isEqual(curVal, value);
 
           if (!initialChildState) {
             // arrays are merge by index, not desired - ensure they are replaced
             if (_.isArray(_.get(this._mergedState, keyPath))) {
-              _.set(this._mergedState, keyPath, undefined);
+              if (hasKeyPath) _.set(this._mergedState, keyPath, undefined);
+              else this._mergedState = undefined;
             }
 
-            _.set(this._changedState, keyPath, value);
+            if (hasKeyPath) _.set(this._changedState, keyPath, value);
+            else this._changedState = _.isPlainObject(value) ? value : {};
           }
         }
       }
