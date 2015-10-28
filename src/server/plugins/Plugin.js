@@ -18,7 +18,9 @@ module.exports = class Plugin {
     this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
-    this.publicDir = opts.publicDir !== false ? resolve(path, 'public') : null;
+    this.publicDir = opts.publicDir !== false
+        ? resolve(path, opts.publicDir || 'public')
+        : null;
     this.externalCondition = opts.initCondition || _.constant(true);
     this.externalInit = opts.init || _.noop;
     this.getConfigSchema = opts.config || _.noop;
