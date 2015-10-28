@@ -4,7 +4,7 @@
   },
   "es": {
     "timefield": "@timestamp",
-    "default_index": "logstash-*",
+    "default_index": "usagov*",
     "allow_url_parameter": false
   },
   "graphite": {

@@ -45,8 +45,7 @@
     <div class="timelion-stats">
       <strong>Deduplication</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
       <strong>Query Time</strong> {{stats.queryTime - stats.invokeTime}}ms /
-      <strong>Resampling Time</strong> {{stats.fitTime - stats.queryTime}}ms /
-      <strong>Processing Time</strong> {{stats.sheetTime - stats.fitTime}}ms
+      <strong>Processing Time</strong> {{stats.sheetTime - stats.queryTime}}ms
     </div>
     <div ng-if="showButtons" class="timelion-buttons">
       <kbn-tooltip text="New Sheet" placement="bottom" append-to-body="1">

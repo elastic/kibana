@@ -139,23 +139,8 @@ function preProcessSheet(sheet) {
         }
       }
 
-      resolvedDatasource = resolvedDatasource.value();
-
-      // Fit each series
-      resolvedDatasource.list = _.map(resolvedDatasource.list, function (series) {
-        if (series.data.length === 0) {
-          throwWithCell(query.cell, new Error(functionDef.name + '() returned no results'));
-        }
-
-        series.data = fitFunctions[series.fit || 'nearest'](series.data, tlConfig.getTargetSeries());
-        return series;
-      });
-
-      // And cache the fit series.
-      queryCache[functionDef.cacheKey(query)] = resolvedDatasource;
+      queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
     });
-
-    stats.fitTime = (new Date()).getTime();
 
     stats.cacheCount = _.keys(queryCache).length;
     return queryCache;
