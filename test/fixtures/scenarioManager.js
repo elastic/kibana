@@ -98,18 +98,17 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
 
     return self.client.count({
       index: bulk.indexName
-    }, function handleCountResponse(error, response) {
-      // if (error) {
-      //   console.log('Need to load index.  error=' + error);
-      // } else {
-      //   console.log('index=' + bulk.indexName + ' count=' + response.count);
-      // }
-      // if the index is undefined or count ===0 then call the load function above
-      if (error || response.count === 0) {
+    })
+    .then(function handleCountResponse(response) {
+      if (response.count === 0) {
         self.load(id);
       }
+    })
+    .catch(function (reason) {
+      self.load(id);
     });
   }));
 };
+
 
 module.exports = ScenarioManager;
