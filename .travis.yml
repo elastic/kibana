@@ -6,7 +6,7 @@ script: ./node_modules/.bin/grunt travis
 sudo: false
 addons:
   firefox: "40.0"
-  artifacts: true
+  artifacts:
     s3_region: "us-east-1"
     debug: true
     paths:
