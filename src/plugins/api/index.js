@@ -59,6 +59,25 @@ module.exports = function (kibana) {
 
       server.route({
         path: '/api/index-patterns/{id}',
+        method: 'PUT',
+        handler: function (req, reply) {
+          let client = server.plugins.elasticsearch.client;
+
+          client.update({
+            index: '.kibana',
+            type: 'index-pattern',
+            id: req.params.id,
+            body: {
+              doc: req.payload
+            }
+          }).then(function (pattern) {
+            reply(pattern);
+          });
+        }
+      });
+
+      server.route({
+        path: '/api/index-patterns/{id}',
         method: 'DELETE',
         handler: function (req, reply) {
           let client = server.plugins.elasticsearch.client;
