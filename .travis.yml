@@ -9,8 +9,9 @@ addons:
   artifacts: true
   s3_region: "us-east-1"
   artifacts:
+    debug: true
     paths:
-    - $(ls ./*.png | tr "\n" ":")
+    - $(ls $TRAVIS_BUILD_DIR/*.png | tr "\n" ":")
 cache:
   directories:
   - esvm
