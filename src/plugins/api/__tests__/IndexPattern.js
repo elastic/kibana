@@ -1,0 +1,5 @@
+describe('IndexPattern class', function () {
+
+
+
+});
