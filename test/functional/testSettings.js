@@ -34,16 +34,7 @@ define(function (require) {
       beforeEach: function () {
 
         // start each test with an empty kibana index
-        return scenarioManager.unload('emptyKibana')
-          .then(function () {
-            return common.sleep(1000);
-          })
-          .then(function () {
-            return scenarioManager.load('emptyKibana');
-          })
-          .then(function () {
-            return common.sleep(2000);
-          })
+        return scenarioManager.reload('emptyKibana')
           // and load a minimal set of makelogs data
           .then(function loadIfEmptyMakelogs() {
             return scenarioManager.loadIfEmpty('makelogs');
@@ -73,7 +64,7 @@ define(function (require) {
       /*
        ** Test the default state of checboxes and the 2 text input fields
        */
-      'testSettingsInitialState': function () {
+      testSettingsInitialState: function () {
         var testSubName = 'testSettingsInitialState';
 
         return settingsPage.getTimeBasedEventsCheckbox().isSelected()
@@ -112,7 +103,7 @@ define(function (require) {
       /*
        ** Ensure Create button is disabled until you select a time field
        */
-      'testCreateButtonDisabledUntilTimeFieldSelected': function () {
+      testCreateButtonDisabledUntilTimeFieldSelected: function () {
         var testSubName = 'testCreateButtonDisabledUntilTimeFieldSelected';
 
         return settingsPage.getCreateButton().isEnabled()
@@ -139,7 +130,7 @@ define(function (require) {
       /*
        ** Test that unchecking the Time-based Events checkbox hides the Name is pattern checkbox
        */
-      'testSettingsCheckboxHide': function () {
+      testSettingsCheckboxHide: function () {
         var testSubName = 'testSettingsCheckboxHide';
 
         return settingsPage.getTimeBasedEventsCheckbox()
@@ -163,7 +154,7 @@ define(function (require) {
       },
       // Index pattern field list
 
-      'testCreateRemoveIndexPattern': function () {
+      testCreateRemoveIndexPattern: function () {
         var testSubName = 'testCreateRemoveIndexPattern';
 
         // select a time field and then Create button
@@ -218,7 +209,7 @@ define(function (require) {
           });
       },
 
-      'testIndexPatternResultsHeader': function () {
+      testIndexPatternResultsHeader: function () {
         var testSubName = 'testIndexPatternResultsHeader';
 
         return settingsPage.selectTimeFieldOption('@timestamp')
@@ -314,7 +305,7 @@ define(function (require) {
       },
 
 
-      'testIndexPatternResultsSort': function () {
+      testIndexPatternResultsSort: function () {
         var testSubName = 'testIndexPatternResultsSort';
 
         return settingsPage.selectTimeFieldOption('@timestamp')
@@ -480,7 +471,7 @@ define(function (require) {
       },
 
 
-      'testIndexPatternPopularity': function () {
+      testIndexPatternPopularity: function () {
         var testSubName = 'testIndexPatternPopularity';
 
         return settingsPage.selectTimeFieldOption('@timestamp')
