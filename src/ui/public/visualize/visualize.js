@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -75,6 +75,11 @@ define(function (require) {
             };
           };
         }());
+
+        $scope.loadingDelay = {
+          '-webkit-transition-delay': config.get('visualization:loadingDelay', '2s'),
+          'transition-delay': config.get('visualization:loadingDelay', '2s')
+        };
 
         $scope.$watch('fullScreenSpy', applyClassNames);
         $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
