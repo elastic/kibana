@@ -10,8 +10,7 @@ addons:
   s3_region: "us-east-1"
   artifacts:
     paths:
-    - ./*.png
-      - 
+    - $(ls ./*.png | tr "\n" ":")
 cache:
   directories:
   - esvm
