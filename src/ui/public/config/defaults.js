@@ -197,6 +197,11 @@ define(function (require) {
       'dashboard:defaultDarkTheme': {
         value: false,
         description: 'New dashboards use dark theme by default',
+      },
+      'dashboard:loadingIndicatorDelay': {
+        value: 2,
+        description: 'Delay in seconds until the loading indicator is applied to the ' +
+        'visualizations. Set as -1 to disable the loading indicator completely'
       }
     };
   };

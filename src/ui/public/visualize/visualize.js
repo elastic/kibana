@@ -1,7 +1,10 @@
 define(function (require) {
+
+  require('ui/debounce');
+
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, debounce) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -75,6 +78,60 @@ define(function (require) {
             };
           };
         }());
+
+        // apply the loading class if there are active requests that are
+        // in flight for greater than the delay set in the advanced config
+        var monitorLoading = function () {
+
+          var loadingIndicatorDelaySeconds = parseInt(config.get('dashboard:loadingIndicatorDelay'), 10);
+          var loadingIndicatorDelay = loadingIndicatorDelaySeconds * 1000;
+          var monitorLoadingEnabled = (loadingIndicatorDelaySeconds !== -1);
+          var debouncedApplyLoadingIndicator;
+
+          hideLoadingIndicator();
+
+          if (!monitorLoadingEnabled) return;
+          if (!$scope.vis || !$scope.searchSource) return;
+
+          function isLoading() {
+            return (
+              $scope.vis.type.requiresSearch &&
+              $scope.searchSource.activeFetchCount > 0
+            );
+          }
+
+          function showLoadingIndicator() {
+            if (!debouncedApplyLoadingIndicator) {
+              debouncedApplyLoadingIndicator = debounce(function () {
+                $scope.applyLoadingClass = true;
+              }, loadingIndicatorDelay);
+            }
+
+            debouncedApplyLoadingIndicator();
+          }
+
+          function hideLoadingIndicator() {
+            if (debouncedApplyLoadingIndicator) {
+              debouncedApplyLoadingIndicator.cancel();
+              debouncedApplyLoadingIndicator = null;
+            }
+
+            $scope.applyLoadingClass = false;
+          }
+
+          $scope.$watchMulti([
+            'vis.type.requiresSearch',
+            'searchSource.activeFetchCount'
+          ], prereq(function () {
+            if (isLoading()) {
+              showLoadingIndicator();
+            } else {
+              hideLoadingIndicator();
+            }
+          }));
+        };
+
+        monitorLoading();
 
         $scope.$watch('fullScreenSpy', applyClassNames);
         $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
