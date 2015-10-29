@@ -9,7 +9,8 @@ addons:
   artifacts: true
   s3_region: "us-east-1"
   artifacts:
-    paths:./*.png
+    paths:
+    - ./*.png
       - 
 cache:
   directories:
