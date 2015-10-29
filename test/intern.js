@@ -16,16 +16,6 @@ define(function (require) {
     excludeInstrumentation: /(fixtures|node_modules)\//,
 
     loaderOptions: {
-      packages: [{
-        name: 'intern-selftest',
-        location: '.'
-      }],
-
-      map: {
-        'intern-selftest': {
-          dojo: 'intern-selftest/node_modules/dojo'
-        }
-      },
 
       paths: {
         'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
