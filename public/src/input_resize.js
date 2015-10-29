@@ -34,8 +34,8 @@ module.exports = function (input, output) {
         .one('mouseup', function () {
           $resizer.removeClass('active');
           $(this).off('mousemove', onMove);
-          input.resize(true);
-          output.resize(true);
+          input.resize();
+          output.resize();
         });
     });
 

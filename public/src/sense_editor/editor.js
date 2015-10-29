@@ -6,6 +6,7 @@ let RowParser = require('./row_parser');
 let InputMode = require('./mode/input');
 let utils = require('../utils');
 let es = require('../es');
+const smartResize = require('../smart_resize');
 
 function isInt(x) {
   return !isNaN(parseInt(x, 10));
@@ -58,6 +59,7 @@ function SenseEditor($el) {
 
   // mixin the RowParser
   editor.parser = new RowParser(editor);
+  editor.resize = smartResize(editor);
 
   // dirty check for tokenizer state, uses a lot less cycles
   // than listening for tokenizerUpdate
