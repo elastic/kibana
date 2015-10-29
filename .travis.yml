@@ -7,11 +7,11 @@ sudo: false
 addons:
   firefox: "40.0"
   artifacts: true
-  s3_region: "us-east-1"
-  artifacts:
+    s3_region: "us-east-1"
     debug: true
     paths:
-    - $(ls $TRAVIS_BUILD_DIR/*.png | tr "\n" ":")
+      - $(ls $TRAVIS_BUILD_DIR/*.png | tr "\n" ":")
+    target_paths: $TRAVIS_BUILD_NUMBER
 cache:
   directories:
   - esvm
