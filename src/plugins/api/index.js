@@ -44,8 +44,32 @@ module.exports = function (kibana) {
         path: '/api/index-patterns',
         method: 'POST',
         handler: function (req, reply) {
-          console.log(req.payload.title);
-          return reply('POST Hello, world!');
+          let client = server.plugins.elasticsearch.client;
+
+          client.create({
+            index: '.kibana',
+            type: 'index-pattern',
+            id: req.payload.title,
+            body: req.payload
+          }).then(function (pattern) {
+            reply(pattern);
+          });
+        }
+      });
+
+      server.route({
+        path: '/api/index-patterns/{id}',
+        method: 'DELETE',
+        handler: function (req, reply) {
+          let client = server.plugins.elasticsearch.client;
+
+          client.delete({
+            index: '.kibana',
+            type: 'index-pattern',
+            id: req.params.id
+          }).then(function (pattern) {
+            reply(pattern);
+          });
         }
       });
 
