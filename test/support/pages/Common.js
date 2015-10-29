@@ -29,16 +29,16 @@ define(function (require) {
         }
 
         return Promise
-          .try(block)
-          .then(function tryForTimeSuccess() {
-            self.log('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
-            return (lastTry - start);
-          })
-          .catch(function tryForTimeCatch(err) {
-            self.log('failed with "' + err.message + '"');
-            self.log('trying again in 1/2 second');
-            return Promise.delay(500).then(attempt);
-          });
+        .try(block)
+        .then(function tryForTimeSuccess() {
+          self.log('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
+          return (lastTry - start);
+        })
+        .catch(function tryForTimeCatch(err) {
+          self.log('failed with "' + err.message + '"');
+          self.log('trying again in 1/2 second');
+          return Promise.delay(500).then(attempt);
+        });
       }
 
       return Promise.try(attempt);
@@ -68,10 +68,10 @@ define(function (require) {
       var filename = './screenshot-' + testSubName + '-ERROR-' + now + '.png';
       self.log('Test Failed, taking screenshot "' + filename + '"');
       return self.remote.takeScreenshot()
-        .then(function writeScreenshot(data) {
-          fs.writeFileSync(filename, data);
-          throw new Error(reason);
-        });
+      .then(function writeScreenshot(data) {
+        fs.writeFileSync(filename, data);
+        throw new Error(reason);
+      });
     }
   };
 
