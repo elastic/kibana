@@ -237,7 +237,7 @@ describe('timepicker directive', function () {
       expect(button.length).to.be(0);
 
       // Make the form invalid
-      $scope.relative.count = 'foo';
+      $scope.relative.count = -3;
       $scope.formatRelative();
       $scope.$digest();
 
@@ -263,12 +263,12 @@ describe('timepicker directive', function () {
       expect(checkbox.length).to.be(1);
 
       // Rounding is disabled by default
-      expect(checkbox.attr('checked')).to.be(undefined);
+      expect(checkbox.prop('checked')).to.be(false);
 
       // Enable rounding
       $scope.relative.round = true;
       $scope.$digest();
-      expect(checkbox.attr('checked')).to.be('checked');
+      expect(checkbox.prop('checked')).to.be(true);
 
       done();
     });
@@ -344,13 +344,11 @@ describe('timepicker directive', function () {
 
 
       // Should update the selected option
-      var i = 0;
       _.each($scope.units, function (longUnit, shortUnit) {
         $scope.relative.unit = shortUnit;
         $scope.$digest();
 
-        expect(select.val()).to.be(i.toString());
-        i++;
+        expect(select.val().split(':')[1]).to.be(shortUnit);
       });
 
       done();
@@ -371,8 +369,8 @@ describe('timepicker directive', function () {
       inputs = {
         fromInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.from"]'),
         toInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.to"]'),
-        fromCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.from"] '),
-        toCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.to"] '),
+        fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.from"] '),
+        toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.to"] '),
       };
 
     });

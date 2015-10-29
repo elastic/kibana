@@ -3,7 +3,6 @@ define(function (require) {
   var $ = require('jquery');
 
   var KbnFormController = require('ui/fancy_forms/KbnFormController');
-  var KbnModelController = require('ui/fancy_forms/KbnModelController');
 
   require('ui/modules')
   .get('kibana')
@@ -40,6 +39,5 @@ define(function (require) {
 
     $provide.decorator('formDirective', decorateDirectiveController(KbnFormController));
     $provide.decorator('ngFormDirective', decorateDirectiveController(KbnFormController));
-    $provide.decorator('ngModelDirective', decorateDirectiveController(KbnModelController));
   });
 });

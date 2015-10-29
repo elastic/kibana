@@ -77,7 +77,7 @@
 
         <div class="discover-info">
           <span ng-show="opts.savedSearch.id" class="discover-info-title">
-            <span bindonce bo-bind="opts.savedSearch.title"></span>
+            <span ng-bind="::opts.savedSearch.title"></span>
             <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
           </span>
 
