@@ -505,6 +505,13 @@ d3.selectAll('g.bar')
 .each(function() ... )
 ```
 
+```js
+$http.get('/info')
+.then(({ data }) => this.transfromInfo(data))
+.then((transformed) => $http.post('/new-info', transformed))
+.then(({ data }) => console.log(data));
+```
+
 *Wrong:*
 
 ```js
@@ -517,6 +524,13 @@ $('.someClass')
 d3.selectAll('g.bar')
 .enter().append('thing').data(anything).exit()
 .each(function() ... )
+```
+
+```js
+$http.get('/info')
+  .then(({ data }) => this.transfromInfo(data))
+  .then((transformed) => $http.post('/new-info', transformed))
+  .then(({ data }) => console.log(data));
 ```
 
 ## Name your closures
@@ -867,7 +881,7 @@ When a node has multiple attributes that would cause it to exceed the line chara
   attribute1="value1"
   attribute2="value2"
   attribute3="value3">
-  
+
   <li></li>
   <li></li>
   ...
