@@ -67,8 +67,7 @@ define(function (require) {
       var now = Date.now();
       var filename = './screenshot-' + testSubName + '-ERROR-' + now + '.png';
       self.log('Test Failed, taking screenshot "' + filename + '"');
-      return self.remote
-        .takeScreenshot()
+      return self.remote.takeScreenshot()
         .then(function writeScreenshot(data) {
           fs.writeFileSync(filename, data);
           throw new Error(reason);

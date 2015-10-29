@@ -34,50 +34,40 @@ define(function (require) {
       beforeEach: function () {
 
         // start each test with an empty kibana index
-        return scenarioManager
-          .unload('emptyKibana')
+        return scenarioManager.unload('emptyKibana')
           .then(function () {
-            return common
-              .sleep(1000);
+            return common.sleep(1000);
           })
           .then(function () {
-            return scenarioManager
-              .load('emptyKibana');
+            return scenarioManager.load('emptyKibana');
           })
           .then(function () {
-            return common
-              .sleep(2000);
+            return common.sleep(2000);
           })
           // and load a minimal set of makelogs data
           .then(function loadIfEmptyMakelogs() {
-            return scenarioManager
-              .load('emptyKibana');
+            return scenarioManager.loadIfEmpty('makelogs');
           })
           .then(function () {
             return common.tryForTime(25000, function () {
-              return remote
-                .get(
-                  url.format(_.assign(config.kibana, {
-                    pathname: ''
-                  })))
-                .then(function () {
-                  return common
-                    .sleep(2000);
-                })
-                .then(function () {
-                  return remote
-                    .getCurrentUrl()
-                    .then(function (currentUrl) {
-                      expect(currentUrl).to.contain('settings');
-                    });
-                });
+              return remote.get(url.format(_.assign(config.kibana, {
+                pathname: ''
+              })))
+              .then(function () {
+                return common.sleep(2000);
+              })
+              .then(function () {
+                return remote.getCurrentUrl()
+                  .then(function (currentUrl) {
+                    expect(currentUrl).to.contain('settings');
+                  });
+              });
             });
           });
       },
 
-      teardown: function () {
-        return scenarioManager
-          .unload('logstash');
+      teardown: function unloadMakelogs() {
+        return scenarioManager.unload('makelogs');
       },
 
       /*
@@ -86,26 +76,20 @@ define(function (require) {
       'testSettingsInitialState': function () {
         var testSubName = 'testSettingsInitialState';
 
-        return settingsPage
-          .getTimeBasedEventsCheckbox()
-          .isSelected()
+        return settingsPage.getTimeBasedEventsCheckbox().isSelected()
           .then(function (selected) {
             expect(selected).to.be.ok();
           })
           .then(function () {
-            return settingsPage
-              .getNameIsPatternCheckbox()
-              .isSelected()
+            return settingsPage.getNameIsPatternCheckbox().isSelected()
               .then(function (nameIsPatternSelected) {
                 expect(nameIsPatternSelected).to.not.be.ok();
               });
           })
           .then(function () {
-            return settingsPage
-              .getIndexPatternField()
+            return settingsPage.getIndexPatternField()
               .then(function (patternField) {
-                return patternField
-                  .getProperty('value')
+                return patternField.getProperty('value')
                   .then(function (pattern) {
                     common.log('patternField value = ' + pattern);
                     expect(pattern).to.be('logstash-*');
@@ -113,8 +97,7 @@ define(function (require) {
               });
           })
           .then(function () {
-            return settingsPage.getTimeFieldNameField()
-              .isSelected()
+            return settingsPage.getTimeFieldNameField().isSelected()
               .then(function (timeFieldIsSelected) {
                 common.log('timeField isSelected = ' + timeFieldIsSelected);
                 expect(timeFieldIsSelected).to.not.be.ok();
@@ -122,8 +105,7 @@ define(function (require) {
 
           })
           .catch(function screenshotError(reason) {
-            return common
-              .screenshotError(testSubName, reason);
+            return common.screenshotError(testSubName, reason);
           });
       },
 
@@ -133,9 +115,7 @@ define(function (require) {
       'testCreateButtonDisabledUntilTimeFieldSelected': function () {
         var testSubName = 'testCreateButtonDisabledUntilTimeFieldSelected';
 
-        return settingsPage
-          .getCreateButton()
-          .isEnabled()
+        return settingsPage.getCreateButton().isEnabled()
           .then(function (enabled) {
             expect(enabled).to.not.be.ok();
           })
@@ -145,16 +125,13 @@ define(function (require) {
               .selectTimeFieldOption('@timestamp');
           })
           .then(function () {
-            return settingsPage
-              .getCreateButton()
-              .isEnabled()
+            return settingsPage.getCreateButton().isEnabled()
               .then(function (enabled) {
                 expect(enabled).to.be.ok();
               });
           })
           .catch(function screenshotError(reason) {
-            return common
-              .screenshotError(testSubName, reason);
+            return common.screenshotError(testSubName, reason);
           });
       },
 
@@ -165,8 +142,7 @@ define(function (require) {
       'testSettingsCheckboxHide': function () {
         var testSubName = 'testSettingsCheckboxHide';
 
-        return settingsPage
-          .getTimeBasedEventsCheckbox()
+        return settingsPage.getTimeBasedEventsCheckbox()
           .then(function (selected) {
             // uncheck the 'time-based events' checkbox
             return selected.click();
@@ -191,40 +167,32 @@ define(function (require) {
         var testSubName = 'testCreateRemoveIndexPattern';
 
         // select a time field and then Create button
-        return settingsPage
-          .selectTimeFieldOption('@timestamp')
+        return settingsPage.selectTimeFieldOption('@timestamp')
           .then(function () {
-            return settingsPage
-              .getCreateButton()
-              .click();
+            return settingsPage.getCreateButton().click();
           })
           .then(function () {
-            return settingsPage
-              .getIndexPageHeading()
+            return settingsPage.getIndexPageHeading()
               .then(function (getIndexPageHeading) {
                 common.log(getIndexPageHeading.getVisibleText());
               })
               .then(function () {
                 // delete the index pattern
                 return common.tryForTime(3000, function () {
-                  return settingsPage
-                    .clickDeletePattern();
+                  return settingsPage.clickDeletePattern();
                 });
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
-                  return remote
-                    .getAlertText();
+                  return remote.getAlertText();
                 });
               })
               .then(function () {
-                return remote
-                  .acceptAlert();
+                return remote.acceptAlert();
               })
               // getting the current URL which shows 'logstash-*' pattern
               .then(function () {
-                return remote
-                  .getCurrentUrl()
+                return remote.getCurrentUrl()
                   .then(function (currentUrl) {
                     common.log('currentUrl = ' + currentUrl);
                   });
@@ -239,48 +207,39 @@ define(function (require) {
               })
               // getting the current URL which no longer includes 'logstash-*'
               .then(function () {
-                return remote
-                  .getCurrentUrl()
+                return remote.getCurrentUrl()
                   .then(function (currentUrl) {
                     common.log('currentUrl = ' + currentUrl);
                   });
               });
           })
           .catch(function screenshotError(reason) {
-            return common
-              .screenshotError(testSubName, reason);
+            return common.screenshotError(testSubName, reason);
           });
       },
 
       'testIndexPatternResultsHeader': function () {
         var testSubName = 'testIndexPatternResultsHeader';
 
-        return settingsPage
-          .selectTimeFieldOption('@timestamp')
+        return settingsPage.selectTimeFieldOption('@timestamp')
           .then(function () {
-            return settingsPage
-              .getCreateButton()
-              .click();
+            return settingsPage.getCreateButton().click();
           })
           .then(function () {
-            return settingsPage
-              .getIndexPageHeading()
+            return settingsPage.getIndexPageHeading()
               .then(function (getIndexPageHeading) {
-                return getIndexPageHeading
-                  .getVisibleText()
+                return getIndexPageHeading.getVisibleText()
                   .then(function (pageText) {
                     expect(pageText).to.be('logstash-*');
                   });
               });
           })
           .then(function () {
-            return settingsPage
-              .getTableHeader()
+            return settingsPage.getTableHeader()
               .then(function (header) {
                 common.log('header.length = ' + header.length); // 6 name   type  format  analyzed  indexed   controls
                 expect(header.length).to.be(6);
-                return header[0]
-                  .getVisibleText()
+                return header[0].getVisibleText()
                   .then(function (text) {
                     common.log('header[0] = ' + text); // name
                     expect(text).to.be('name');
@@ -288,8 +247,7 @@ define(function (require) {
                   });
               })
               .then(function (header) {
-                return header[1]
-                  .getVisibleText()
+                return header[1].getVisibleText()
                   .then(function (text) {
                     common.log('header[1] = ' + text);
                     expect(text).to.be('type');
@@ -297,8 +255,7 @@ define(function (require) {
                   });
               })
               .then(function (header) {
-                return header[2]
-                  .getVisibleText()
+                return header[2].getVisibleText()
                   .then(function (text) {
                     common.log('header[2] = ' + text);
                     expect(text).to.be('format');
@@ -306,8 +263,7 @@ define(function (require) {
                   });
               })
               .then(function (header) {
-                return header[3]
-                  .getVisibleText()
+                return header[3].getVisibleText()
                   .then(function (text) {
                     common.log('header[3] = ' + text);
                     expect(text).to.be('analyzed');
@@ -315,8 +271,7 @@ define(function (require) {
                   });
               })
               .then(function (header) {
-                return header[4]
-                  .getVisibleText()
+                return header[4].getVisibleText()
                   .then(function (text) {
                     common.log('header[4] = ' + text);
                     expect(text).to.be('indexed');
@@ -324,8 +279,7 @@ define(function (require) {
                   });
               })
               .then(function (header) {
-                return header[5]
-                  .getVisibleText()
+                return header[5].getVisibleText()
                   .then(function (text) {
                     common.log('header[5] = ' + text);
                     expect(text).to.be('controls');
@@ -335,32 +289,27 @@ define(function (require) {
               .then(function () {
                 return common.tryForTime(3000, function () {
                   // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-                  return settingsPage
-                    .clickDeletePattern();
+                  return settingsPage.clickDeletePattern();
                 });
               })
               .then(function () {
                 return common.tryForTime(3000, function () {
-                  return remote
-                    .getAlertText();
+                  return remote.getAlertText();
                 });
               })
               .then(function () {
-                return remote
-                  .getAlertText()
+                return remote.getAlertText()
                   .then(function (alertText) {
                     common.log('alertText = ' + alertText);
                     expect(alertText).to.be(expectedAlertText);
                   });
               })
               .then(function () {
-                return remote
-                  .acceptAlert();
+                return remote.acceptAlert();
               });
           })
           .catch(function screenshotError(reason) {
-            return common
-              .screenshotError(testSubName, reason);
+            return common.screenshotError(testSubName, reason);
           });
       },
 
@@ -368,20 +317,15 @@ define(function (require) {
       'testIndexPatternResultsSort': function () {
         var testSubName = 'testIndexPatternResultsSort';
 
-        return settingsPage
-          .selectTimeFieldOption('@timestamp')
+        return settingsPage.selectTimeFieldOption('@timestamp')
           .then(function () {
-            return settingsPage
-              .getCreateButton()
-              .click();
+            return settingsPage.getCreateButton().click();
           })
           // check the page header to make sure we see logstash-*
           .then(function () {
-            return settingsPage
-              .getIndexPageHeading()
+            return settingsPage.getIndexPageHeading()
               .then(function (getIndexPageHeading) {
-                return getIndexPageHeading
-                  .getVisibleText()
+                return getIndexPageHeading.getVisibleText()
                   .then(function (pageText) {
                     expect(pageText).to.be('logstash-*');
                     // return
@@ -390,16 +334,13 @@ define(function (require) {
           })
           // Sort by Name
           .then(function sortByName() {
-            return settingsPage
-              .sortBy('name');
+            return settingsPage.sortBy('name');
           })
           // check name sort
           .then(function sortAgain() {
-            return settingsPage
-              .getTableRow(0, 0)
+            return settingsPage.getTableRow(0, 0)
               .then(function (row) {
-                return row
-                  .getVisibleText()
+                return row.getVisibleText()
                   .then(function (rowText) {
                     //common.log('After name-sort first row first column = ' + rowText);
                     expect(rowText).to.be('@message');
@@ -408,16 +349,13 @@ define(function (require) {
           })
           // Sort by Name again
           .then(function sortByName2() {
-            return settingsPage
-              .sortBy('name');
+            return settingsPage.sortBy('name');
           })
           // check name sort
           .then(function sortAgain2() {
-            return settingsPage
-              .getTableRow(0, 0)
+            return settingsPage.getTableRow(0, 0)
               .then(function (row) {
-                return row
-                  .getVisibleText()
+                return row.getVisibleText()
                   .then(function (rowText) {
                     //common.log('After name-sort first row first column = ' + rowText);
                     expect(rowText).to.be('xss.raw');
@@ -426,16 +364,13 @@ define(function (require) {
           })
           // Sort by type
           .then(function sortByType() {
-            return settingsPage
-              .sortBy('type');
+            return settingsPage.sortBy('type');
           })
           // check type sort
           .then(function checksort() {
-            return settingsPage
-              .getTableRow(0, 1)
+            return settingsPage.getTableRow(0, 1)
               .then(function (row) {
-                return row
-                  .getVisibleText()
+                return row.getVisibleText()
                   .then(function (rowText) {
                     //common.log('After type-sort first row first column = ' + rowText);
                     expect(rowText).to.be('_source');
@@ -444,16 +379,13 @@ define(function (require) {
           })
           // Sort by type again
           .then(function sortByType2() {
-            return settingsPage
-              .sortBy('type');
+            return settingsPage.sortBy('type');
           })
           // check type sort
           .then(function checksort2() {
-            return settingsPage
-              .getTableRow(0, 1)
+            return settingsPage.getTableRow(0, 1)
               .then(function (row) {
-                return row
-                  .getVisibleText()
+                return row.getVisibleText()
                   .then(function (rowText) {
                     common.log('After type-sort first row first column = ' + rowText);
                     expect(rowText).to.be('string');
@@ -462,13 +394,11 @@ define(function (require) {
           })
           // Sort by type again (this time it "unsorts it")
           .then(function sortByType2() {
-            return settingsPage
-              .sortBy('type');
+            return settingsPage.sortBy('type');
           })
           // check pagination
           .then(function getFieldsTabCount() {
-            return settingsPage
-              .getFieldsTabCount()
+            return settingsPage.getFieldsTabCount()
               .then(function (tabCount) {
                 common.log('fields item count = ' + tabCount);
                 expect(tabCount).to.be('85');
@@ -476,8 +406,7 @@ define(function (require) {
           })
           // verify the page size is 25
           .then(function checkPageSize() {
-            return settingsPage
-              .getPageSize()
+            return settingsPage.getPageSize()
               .then(function (pageSize) {
                 expect(pageSize).to.be('25');
               });
@@ -485,8 +414,7 @@ define(function (require) {
           // we know with 25 fields per page and 85 fields there should be 4 pages.
           // the first page should have 25 items on it.
           .then(function getPageFieldCount() {
-            return settingsPage
-              .getPageFieldCount()
+            return settingsPage.getPageFieldCount()
               .then(function (pageCount) {
                 common.log('Page 1 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(25);
@@ -494,12 +422,10 @@ define(function (require) {
           })
           //page 2 should also have 25 items
           .then(function goPage2() {
-            return settingsPage
-              .goToPage(2);
+            return settingsPage.goToPage(2);
           })
           .then(function getPageFieldCount() {
-            return settingsPage
-              .getPageFieldCount()
+            return settingsPage.getPageFieldCount()
               .then(function (pageCount) {
                 common.log('Page 2 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(25);
@@ -507,12 +433,10 @@ define(function (require) {
           })
           //page 3 should also have 25 items
           .then(function goPage3() {
-            return settingsPage
-              .goToPage(3);
+            return settingsPage.goToPage(3);
           })
           .then(function getPageFieldCount() {
-            return settingsPage
-              .getPageFieldCount()
+            return settingsPage.getPageFieldCount()
               .then(function (pageCount) {
                 common.log('Page 3 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(25);
@@ -520,12 +444,10 @@ define(function (require) {
           })
           //page 4 should also have 10 items
           .then(function goPage4() {
-            return settingsPage
-              .goToPage(4);
+            return settingsPage.goToPage(4);
           })
           .then(function getPageFieldCount() {
-            return settingsPage
-              .getPageFieldCount()
+            return settingsPage.getPageFieldCount()
               .then(function (pageCount) {
                 common.log('Page 4 count = ' + pageCount.length);
                 expect(pageCount.length).to.be(10);
@@ -534,31 +456,26 @@ define(function (require) {
           .then(function () {
             return common.tryForTime(3000, function () {
               // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-              return settingsPage
-                .clickDeletePattern();
+              return settingsPage.clickDeletePattern();
             });
           })
           .then(function () {
             return common.tryForTime(3000, function () {
-              return remote
-                .getAlertText();
+              return remote.getAlertText();
             });
           })
           .then(function () {
-            return remote
-              .getAlertText()
+            return remote.getAlertText()
               .then(function (alertText) {
                 common.log('alertText = ' + alertText);
                 expect(alertText).to.be(expectedAlertText);
               });
           })
           .then(function () {
-            return remote
-              .acceptAlert();
+            return remote.acceptAlert();
           })
           .catch(function screenshotError(reason) {
-            return common
-              .screenshotError(testSubName, reason);
+            return common.screenshotError(testSubName, reason);
           });
       },
 
@@ -566,20 +483,15 @@ define(function (require) {
       'testIndexPatternPopularity': function () {
         var testSubName = 'testIndexPatternPopularity';
 
-        return settingsPage
-          .selectTimeFieldOption('@timestamp')
+        return settingsPage.selectTimeFieldOption('@timestamp')
           .then(function () {
-            return settingsPage
-              .getCreateButton()
-              .click();
+            return settingsPage.getCreateButton().click();
           })
           // check the page header to make sure we see logstash-*
           .then(function () {
-            return settingsPage
-              .getIndexPageHeading()
+            return settingsPage.getIndexPageHeading()
               .then(function (getIndexPageHeading) {
-                return getIndexPageHeading
-                  .getVisibleText()
+                return getIndexPageHeading.getVisibleText()
                   .then(function (pageText) {
                     expect(pageText).to.be('logstash-*');
                     // return
@@ -587,21 +499,17 @@ define(function (require) {
               });
           })
           .then(function () {
-            return settingsPage
-              .setPageSize('All');
+            return settingsPage.setPageSize('All');
           })
           // increase Popularity
           .then(function openControlsByName() {
-            return settingsPage
-              .openControlsByName('geo.coordinates');
+            return settingsPage.openControlsByName('geo.coordinates');
           })
           .then(function increasePopularity() {
-            return settingsPage
-              .increasePopularity();
+            return settingsPage.increasePopularity();
           })
           .then(function getPopularity() {
-            return settingsPage
-              .getPopularity()
+            return settingsPage.getPopularity()
               .then(function (popularity) {
                 common.log('popularity = ' + popularity);
                 expect(popularity).to.be('1');
@@ -609,50 +517,41 @@ define(function (require) {
           })
           // Cancel saving the popularity change
           .then(function controlChangeCancel() {
-            return settingsPage
-              .controlChangeCancel();
+            return settingsPage.controlChangeCancel();
           })
           // set the page size to All again, https://github.com/elastic/kibana/issues/5030
           .then(function () {
-            return settingsPage
-              .setPageSize('All');
+            return settingsPage.setPageSize('All');
           })
           .then(function openControlsByName() {
-            return settingsPage
-              .openControlsByName('geo.coordinates');
+            return settingsPage.openControlsByName('geo.coordinates');
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
-            return settingsPage
-              .getPopularity()
+            return settingsPage.getPopularity()
               .then(function (popularity) {
                 common.log('popularity = ' + popularity);
                 expect(popularity).to.be('0');
               });
           })
           .then(function increasePopularity() {
-            return settingsPage
-              .increasePopularity();
+            return settingsPage.increasePopularity();
           })
           // Saving the popularity change
           .then(function controlChangeSave() {
-            return settingsPage
-              .controlChangeSave();
+            return settingsPage.controlChangeSave();
           })
           // set the page size to All again, https://github.com/elastic/kibana/issues/5030
           .then(function () {
-            return settingsPage
-              .setPageSize('All');
+            return settingsPage.setPageSize('All');
           })
           // open it again to see that it saved
           .then(function openControlsByName() {
-            return settingsPage
-              .openControlsByName('geo.coordinates');
+            return settingsPage.openControlsByName('geo.coordinates');
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
-            return settingsPage
-              .getPopularity()
+            return settingsPage.getPopularity()
               .then(function (popularity) {
                 common.log('popularity = ' + popularity);
                 expect(popularity).to.be('1');
@@ -660,38 +559,32 @@ define(function (require) {
           })
           // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
           .then(function controlChangeCancel() {
-            return settingsPage
-              .controlChangeCancel();
+            return settingsPage.controlChangeCancel();
           })
           // should this test go to discover page and verify the Popular field?
           .then(function () {
             return common.tryForTime(3000, function () {
-              // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-              return settingsPage
-                .clickDeletePattern();
+              // delete the index pattern
+              return settingsPage.clickDeletePattern();
             });
           })
           .then(function () {
             return common.tryForTime(3000, function () {
-              return remote
-                .getAlertText();
+              return remote.getAlertText();
             });
           })
           .then(function () {
-            return remote
-              .getAlertText()
+            return remote.getAlertText()
               .then(function (alertText) {
                 common.log('alertText = ' + alertText);
                 expect(alertText).to.be(expectedAlertText);
               });
           })
           .then(function () {
-            return remote
-              .acceptAlert();
+            return remote.acceptAlert();
           })
           .catch(function screenshotError(reason) {
-            return common
-              .screenshotError(testSubName, reason);
+            return common.screenshotError(testSubName, reason);
           });
       }
 

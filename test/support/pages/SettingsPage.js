@@ -18,107 +18,87 @@ define(function (require) {
     constructor: SettingsPage,
 
     getTimeBasedEventsCheckbox: function getTimeBasedEventsCheckbox() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
     getNameIsPatternCheckbox: function getNameIsPatternCheckbox() {
-      return this.remote
-        .setFindTimeout(defaultTimeout / 2) // fail faster since we're sometimes checking that it doesn't exist
+      // fail faster since we're sometimes checking that it doesn't exist
+      return this.remote.setFindTimeout(defaultTimeout / 2)
         .findByCssSelector('input[ng-model="index.nameIsPattern"]');
     },
 
     getIndexPatternField: function getIndexPatternField() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('[ng-model="index.name"]');
     },
 
     getTimeFieldNameField: function getTimeFieldNameField() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('select[ng-model="index.timeField"]');
     },
 
     selectTimeFieldOption: function selectTimeFieldOption(selection) {
       var self = this;
-      return this
-        .getTimeFieldNameField().click()
+      return this.getTimeFieldNameField().click()
         .then(function () {
-          return self
-            .getTimeFieldNameField().click();
+          return self.getTimeFieldNameField().click();
         })
         .then(function () {
-          return self
-            .getTimeFieldOption(selection);
+          return self.getTimeFieldOption(selection);
         });
     },
 
     getTimeFieldOption: function getTimeFieldOption(selection) {
-      return this.remote
-        .setFindTimeout(defaultTimeout * 2)
-        .findByCssSelector('option[label="' + selection + '"]')
-        .click();
+      return this.remote.setFindTimeout(defaultTimeout * 2)
+        .findByCssSelector('option[label="' + selection + '"]').click();
     },
 
     getCreateButton: function getCreateButton() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('.btn');
     },
 
     clickCreateButton: function clickCreateButton() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('.btn').click();
     },
 
     clickDefaultIndexButton: function clickDefaultIndexButton() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
-        .findByCssSelector('button.btn.btn-warning.ng-scope')
-        .click();
+      return this.remote.setFindTimeout(defaultTimeout)
+        .findByCssSelector('button.btn.btn-warning.ng-scope').click();
     },
 
     clickDeletePattern: function clickDeletePattern() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
-        .findByCssSelector('button.btn.btn-danger.ng-scope')
-        .click();
+      return this.remote.setFindTimeout(defaultTimeout)
+        .findByCssSelector('button.btn.btn-danger.ng-scope').click();
     },
 
     getIndexPageHeading: function getIndexPageHeading() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('h1.title.ng-binding.ng-isolate-scope');
     },
 
     getConfigureHeader: function getConfigureHeader() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('h1');
     },
     getTableHeader: function getTableHeader() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findAllByCssSelector('table.table.table-condensed thead tr th');
     },
 
 
     sortBy: function sortBy(columnName) {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findAllByCssSelector('table.table.table-condensed thead tr th span')
         .then(function (chartTypes) {
 
           function getChartType(chart) {
-            return chart
-              .getVisibleText()
+            return chart.getVisibleText()
               .then(function (chartString) {
                 if (chartString === columnName) {
-                  return chart
-                    .click();
+                  return chart.click();
                 }
               });
           }
@@ -128,8 +108,7 @@ define(function (require) {
     },
 
     getTableRow: function getTableRow(rowNumber, colNumber) {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         // passing in zero-based index, but adding 1 for css 1-based indexes
         .findByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr:nth-child(' +
           (rowNumber + 1) + ') td.ng-scope:nth-child(' +
@@ -138,13 +117,11 @@ define(function (require) {
     },
 
     getFieldsTabCount: function getFieldsTabCount() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         // passing in zero-based index, but adding 1 for css 1-based indexes
         .findByCssSelector('li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding')
         .then(function (tabData) {
-          return tabData
-            .getVisibleText()
+          return tabData.getVisibleText()
             .then(function (theText) {
               // the value has () around it, remove them
               return theText.replace(/\((.*)\)/, '$1');
@@ -154,19 +131,16 @@ define(function (require) {
 
     getPageSize: function getPageSize() {
       var selectedItemLabel = '';
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
         .then(function (chartTypes) {
 
           function getChartType(chart) {
             var thisChart = chart;
-            return chart
-              .isSelected()
+            return chart.isSelected()
               .then(function (isSelected) {
                 if (isSelected === true) {
-                  return thisChart
-                    .getProperty('label')
+                  return thisChart.getProperty('label')
                     .then(function (theLabel) {
                       selectedItemLabel = theLabel;
                     });
@@ -182,14 +156,12 @@ define(function (require) {
     },
 
     getPageFieldCount: function getPageFieldCount() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findAllByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr td.ng-scope:nth-child(1) span.ng-binding');
     },
 
     goToPage: function goToPage(pageNum) {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
           (pageNum + 1) + ') a.ng-binding'
         )
@@ -199,8 +171,7 @@ define(function (require) {
     },
 
     openControlsRow: function openControlsRow(row) {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
           (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil'
         )
@@ -210,8 +181,7 @@ define(function (require) {
     },
 
     openControlsByName: function openControlsByName(name) {
-      return this.remote
-        .setFindTimeout(defaultTimeout * 2)
+      return this.remote.setFindTimeout(defaultTimeout * 2)
         .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
         .then(function (button) {
           return button.click();
@@ -219,8 +189,7 @@ define(function (require) {
     },
 
     increasePopularity: function increasePopularity() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
         .then(function (button) {
           return button.click();
@@ -228,18 +197,15 @@ define(function (require) {
     },
 
     getPopularity: function getPopularity() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('input.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-number')
         .then(function (input) {
-          return input
-            .getProperty('value');
+          return input.getProperty('value');
         });
     },
 
     controlChangeCancel: function controlChangeCancel() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
         .then(function (button) {
           return button.click();
@@ -247,8 +213,7 @@ define(function (require) {
     },
 
     controlChangeSave: function controlChangeSave() {
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
         .then(function (button) {
           return button.click();
@@ -263,6 +228,10 @@ define(function (require) {
           return button.click();
         });
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24da64f... No code changes, only style change to unwrap a lot of superfluous line breaks on chained calls.
   };
 
   return SettingsPage;
