@@ -20,8 +20,6 @@ module.exports = class KbnServer {
       require('./logging'),
       require('./status'),
 
-      require('./api'),
-
       // find plugins and set this.plugins
       require('./plugins/scan'),
 
