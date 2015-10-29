@@ -2,8 +2,6 @@
 define(function (require) {
 
   var Common = require('./Common');
-  var url = require('intern/dojo/node!url');
-  var expect = require('intern/dojo/node!expect.js');
 
   var common;
 
@@ -23,8 +21,7 @@ define(function (require) {
 
     clickDiscover: function clickDiscover() {
       common.log('Click Discover tab');
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('a[href*=\'discover\']')
         .then(function (tab) {
           return tab.click();
@@ -35,8 +32,7 @@ define(function (require) {
       var self = this.remote;
       common.log('Click Visualize tab');
       return common.tryForTime(5000, function () {
-        return self
-          .setFindTimeout(defaultTimeout)
+        return self.setFindTimeout(defaultTimeout)
           .findByCssSelector('a[href*=\'visualize\']')
           .then(function (tab) {
             return tab.click();
@@ -46,8 +42,7 @@ define(function (require) {
 
     clickDashboard: function clickDashboard() {
       common.log('Click Dashboard tab');
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('a[href*=\'dashboard\']')
         .then(function (tab) {
           return tab.click();
@@ -56,8 +51,7 @@ define(function (require) {
 
     clickSettings: function clickSettings() {
       common.log('Click Settings tab');
-      return this.remote
-        .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('a[href*=\'settings\']')
         .then(function (tab) {
           return tab.click();
