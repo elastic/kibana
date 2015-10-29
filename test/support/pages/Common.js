@@ -6,6 +6,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var moment = require('moment');
   var fs = require('intern/dojo/node!fs');
+  var path = require('intern/dojo/node!path');
 
   function Common(remote) {
     this.remote = remote;
@@ -61,11 +62,10 @@ define(function (require) {
       return promise;
     },
 
-
     screenshotError: function screenshotError(testSubName, reason) {
       var self = this;
       var now = Date.now();
-      var filename = './screenshot-' + testSubName + '-ERROR-' + now + '.png';
+      var filename = path.resolve('./screenshot-' + testSubName + '-ERROR-' + now + '.png');
       self.log('Test Failed, taking screenshot "' + filename + '"');
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
