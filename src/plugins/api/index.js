@@ -8,7 +8,35 @@ module.exports = function (kibana) {
         path: '/api/index-patterns',
         method: 'GET',
         handler: function (req, reply) {
-          return reply('GET Hello, world!');
+          let client = server.plugins.elasticsearch.client;
+
+          client.search({
+            index: '.kibana',
+            type: 'index-pattern',
+            body: {
+              query: {
+                match_all: {}
+              }
+            }
+          }).then(function (patterns) {
+            reply(patterns);
+          });
+        }
+      });
+
+      server.route({
+        path: '/api/index-patterns/{id}',
+        method: 'GET',
+        handler: function (req, reply) {
+          let client = server.plugins.elasticsearch.client;
+
+          client.get({
+            index: '.kibana',
+            type: 'index-pattern',
+            id: req.params.id
+          }).then(function (pattern) {
+            reply(pattern);
+          });
         }
       });
 
