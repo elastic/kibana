@@ -1,4 +1,27 @@
+let esErrors = require('elasticsearch').errors;
+let Boom = require('Boom');
+
 export default function (server) {
+
+  let handleESError = function (error) {
+    if (error instanceof esErrors.ConnectionFault ||
+        error instanceof esErrors.ServiceUnavailable ||
+        error instanceof esErrors.NoConnections ||
+        error instanceof esErrors.RequestTimeout) {
+      return Boom.serverTimeout();
+    } else if (error instanceof esErrors.Conflict) {
+      return Boom.conflict();
+    } else if (error instanceof esErrors[403]) {
+      return Boom.forbidden();
+    } else if (error instanceof esErrors.NotFound) {
+      return Boom.notFound();
+    } else if (error instanceof esErrors.BadRequest) {
+      return Boom.badRequest();
+    } else {
+      return error;
+    }
+  };
+
   server.route({
     path: '/api/index-patterns',
     method: 'GET',
@@ -15,6 +38,8 @@ export default function (server) {
         }
       }).then(function (patterns) {
         reply(patterns);
+      }, function (error) {
+        reply(handleESError(error));
       });
     }
   });
@@ -31,6 +56,8 @@ export default function (server) {
         id: req.params.id
       }).then(function (pattern) {
         reply(pattern);
+      }, function (error) {
+        reply(handleESError(error));
       });
     }
   });
@@ -48,6 +75,8 @@ export default function (server) {
         body: req.payload
       }).then(function (pattern) {
         reply(pattern);
+      }, function (error) {
+        reply(handleESError(error));
       });
     }
   });
@@ -67,6 +96,8 @@ export default function (server) {
         }
       }).then(function (pattern) {
         reply(pattern);
+      }, function (error) {
+        reply(handleESError(error));
       });
     }
   });
@@ -83,6 +114,8 @@ export default function (server) {
         id: req.params.id
       }).then(function (pattern) {
         reply(pattern);
+      }, function (error) {
+        reply(handleESError(error));
       });
     }
   });
