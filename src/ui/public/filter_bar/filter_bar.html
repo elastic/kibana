@@ -41,7 +41,8 @@
   <div class="filter-edit-container" ng-if="editingFilter">
     <form role="form" name="editFilterForm" ng-submit="editDone()">
       <div
-        editable-filter
+        json-input
+        require-keys=false
         ui-ace="{
           mode: 'json',
           onLoad: aceLoaded

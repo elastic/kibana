@@ -5,7 +5,7 @@ define(function (require) {
   var moment = require('moment');
   var angular = require('angular');
 
-  require('ui/filter_bar/editable_filter');
+  require('ui/directives/json_input');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));

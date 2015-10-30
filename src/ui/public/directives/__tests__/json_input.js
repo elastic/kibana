@@ -2,12 +2,12 @@ var angular = require('angular');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-require('ui/filter_bar/editable_filter');
+require('ui/directives/json_input');
 
-describe('Editable filter directive', function () {
+describe('JSON input validation', function () {
   var $compile;
   var $rootScope;
-  var html = '<input ng-model="value" editable-filter />';
+  var html = '<input ng-model="value" json-input require-keys=true />';
   var element;
 
   beforeEach(ngMock.module('kibana'));
@@ -21,10 +21,19 @@ describe('Editable filter directive', function () {
     element = $compile(html)($rootScope);
   });
 
-  it('should not allow empty filters', function () {
+  it('should be able to require keys', function () {
     element.val('{}');
     element.trigger('input');
     expect(element.hasClass('ng-invalid')).to.be.ok();
+  });
+
+  it('should be able to not require keys', function () {
+    var html = '<input ng-model="value" json-input require-keys=false />';
+    var element = $compile(html)($rootScope);
+
+    element.val('{}');
+    element.trigger('input');
+    expect(element.hasClass('ng-valid')).to.be.ok();
   });
 
   it('should be able to read parse an input', function () {
