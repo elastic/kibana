@@ -14,8 +14,6 @@ define(function (require) {
       });
 
       bdd.it('should load with time pattern checked', function () {
-        console.log(Object.keys(this));
-
         return settingsPage.getTimeBasedEventsCheckbox().isSelected()
         .then(function (selected) {
           expect(selected).to.be.ok();

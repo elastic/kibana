@@ -37,7 +37,6 @@ ScenarioManager.prototype.load = function (id) {
         body: require(path.join(scenario.baseDir, bulk.source)),
       });
     });
-
   }));
 };
 
