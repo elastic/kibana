@@ -91,6 +91,9 @@ define(function (require) {
     * @returns {object} Promise that resolves to the new filter on a successful merge
     */
     queryFilter.updateFilter = function (filter) {
+      filter.source.meta.alias = filter.model.alias;
+      delete filter.model.alias;
+
       var mergedFilter = _.assign({}, filter.source, filter.model);
 
       //If the filter type is changed we want to discard the old type

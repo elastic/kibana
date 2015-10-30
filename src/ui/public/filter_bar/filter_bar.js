@@ -15,6 +15,7 @@ define(function (require) {
     var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
+    var privateFilterFieldRegex = /(^\$|meta)/;
 
     return {
       restrict: 'E',
@@ -57,24 +58,13 @@ define(function (require) {
           }
         };
 
-        var privateFieldRegexp = /(^\$|meta)/;
         $scope.startEditingFilter = function (source) {
-          var model = _.cloneDeep(source);
-          var filterType;
-
-          //Hide private properties and figure out what type of filter this is
-          _.each(model, function (value, key) {
-            if (key.match(privateFieldRegexp)) {
-              delete model[key];
-            } else {
-              filterType = key;
-            }
-          });
-
-          $scope.editingFilter = {
+          return $scope.editingFilter = {
             source: source,
-            type: filterType,
-            model: model
+            type: _.first(_.filter(_.keys(source), function (key) {
+              return !key.match(privateFilterFieldRegex);
+            })),
+            model: convertToEditableFilter(source)
           };
         };
 
@@ -136,6 +126,21 @@ define(function (require) {
             .then($scope.addFilters);
           }
         });
+
+        function convertToEditableFilter(filter) {
+          var model = _.cloneDeep(filter);
+          model.alias = filter.meta.alias;
+
+          var filterType;
+          //Hide private properties
+          _.each(model, function (value, key) {
+            if (key.match(privateFilterFieldRegex)) {
+              delete model[key];
+            }
+          });
+
+          return model;
+        }
 
         function updateFilters() {
           var filters = queryFilter.getFilters();
