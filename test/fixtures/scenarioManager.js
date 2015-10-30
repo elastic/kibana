@@ -1,5 +1,5 @@
 var path = require('path');
-var config = require('./config');
+var config = require('./config').scenarios;
 var elasticsearch = require('elasticsearch');
 
 function ScenarioManager(server) {
