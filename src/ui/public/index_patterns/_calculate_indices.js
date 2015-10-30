@@ -43,7 +43,7 @@ define(function (require) {
       .map((stats, index) => (
         { index, edge: stats.fields[timeFieldName][edgeKey] }
       ))
-      .sortBy('edge')
+      .sortByOrder(['edge'], [sortDirection])
       .pluck('index')
       .value();
     }

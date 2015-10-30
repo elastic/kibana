@@ -111,7 +111,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
         };
 
         return calculateIndices('*', 'time', null, null, 'desc').then(function (resp) {
-          expect(resp).to.eql(['b', 'c', 'a']);
+          expect(resp).to.eql(['a', 'c', 'b']);
         });
       });
     });
