@@ -37,19 +37,26 @@
       </a>
     </div>
   </div>
+
   <div class="filter-edit-container" ng-if="editingFilter">
-    <div
-      ui-ace="{
-        mode: 'json',
-        onLoad: aceLoaded
-      }"
-      ng-model="editingFilter.model"></div>
-    <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
-    <button class="btn btn-success"
-      ng-disabled="editingFilterError"
-      ng-click="editDone()">Done</button>
-    <small ng-show="editingFilterError">Could not parse JSON input</small>
+    <form role="form" name="editFilterForm" ng-submit="editDone()">
+      <div
+        editable-filter
+        ui-ace="{
+          mode: 'json',
+          onLoad: aceLoaded
+        }"
+        ng-model="editingFilter.model"></div>
+      <div class="form-group">
+        <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
+        <button type="submit" class="btn btn-success"
+          ng-disabled="editFilterForm.$invalid"
+          >Done</button>
+        <small ng-show="editFilterForm.$invalid">Could not parse JSON input</small>
+      </div>
+    </form>
   </div>
+
   <div class="filter-link">
     <div class="filter-description small">
       <a ng-click="showFilterActions = !showFilterActions">

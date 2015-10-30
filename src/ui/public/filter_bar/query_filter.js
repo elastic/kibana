@@ -91,12 +91,11 @@ define(function (require) {
     * @returns {object} Promise that resolves to the new filter on a successful merge
     */
     queryFilter.updateFilter = function (filter) {
-      var editedFilter = JSON.parse(filter.model);
-      var mergedFilter = _.assign({}, filter.source, editedFilter);
+      var mergedFilter = _.assign({}, filter.source, filter.model);
 
       //If the filter type is changed we want to discard the old type
       //when merging changes back in
-      var filterTypeReplaced = editedFilter[filter.type] !== mergedFilter[filter.type];
+      var filterTypeReplaced = filter.model[filter.type] !== mergedFilter[filter.type];
       if (filterTypeReplaced) {
         delete mergedFilter[filter.type];
       }

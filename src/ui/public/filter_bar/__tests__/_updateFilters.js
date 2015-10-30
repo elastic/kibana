@@ -51,7 +51,7 @@ describe('update filters', function () {
       expect(currentFilter.query.match.extension.query).to.be('jpg');
       queryFilter.updateFilter({
         source: currentFilter,
-        model: JSON.stringify(newFilter)
+        model: newFilter
       });
       $rootScope.$digest();
       expect(currentFilter.query.match.extension.query).to.be('png');
@@ -71,7 +71,7 @@ describe('update filters', function () {
 
       queryFilter.updateFilter({
         source: currentFilter,
-        model: JSON.stringify(newFilter),
+        model: newFilter,
         type: 'query'
       });
       $rootScope.$digest();

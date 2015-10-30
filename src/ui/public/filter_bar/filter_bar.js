@@ -5,6 +5,8 @@ define(function (require) {
   var moment = require('moment');
   var angular = require('angular');
 
+  require('ui/filter_bar/editable_filter');
+
   module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -42,20 +44,6 @@ define(function (require) {
           var session = editor.getSession();
           session.setTabSize(2);
           session.setUseSoftTabs(true);
-
-          session.on('changeAnnotation', function checkIfValid() {
-            var annotations = session.getAnnotations();
-            $scope.editingFilterError = _.some(annotations, {type: 'error'});
-
-            //Make sure we have at least one filter defined
-            var validFilterJSON = $scope.editingFilter && !$scope.editingFilterError;
-            if (validFilterJSON) {
-              var model = $scope.editingFilter.model;
-              var singleFilterUsed = model.length > 0 && Object.keys(JSON.parse(model)).length > 0;
-              $scope.editingFilterError = !singleFilterUsed;
-            }
-
-          });
         };
 
         $scope.applyFilters = function (filters) {
@@ -86,7 +74,7 @@ define(function (require) {
           $scope.editingFilter = {
             source: source,
             type: filterType,
-            model: angular.toJson(model, true)
+            model: model
           };
         };
 
