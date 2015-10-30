@@ -15,6 +15,7 @@ define(function (require) {
 
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
+    var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
 
     var type = 'index-pattern';
 
@@ -176,12 +177,28 @@ define(function (require) {
       };
 
       self.toIndexList = function (start, stop) {
-        var interval = this.getInterval();
-        if (interval) {
-          return intervals.toIndexList(self.id, interval, start, stop);
-        } else {
-          return self.id;
-        }
+        return new Promise(function (resolve) {
+          var indexList;
+          var interval = self.getInterval();
+
+          if (interval) {
+            indexList = intervals.toIndexList(self.id, interval, start, stop);
+          } else if (self.isWildcard() && self.hasTimeField()) {
+            indexList = calculateIndices(self.id, self.timeFieldName, start, stop);
+          } else {
+            indexList = self.id;
+          }
+
+          resolve(indexList);
+        });
+      };
+
+      self.hasTimeField = function () {
+        return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+      };
+
+      self.isWildcard = function () {
+        return _.includes(this.id, '*');
       };
 
       self.prepBody = function () {

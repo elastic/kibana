@@ -10,26 +10,33 @@ define(function (require) {
        * Flatten a series of requests into as ES request body
        *
        * @param  {array} requests - the requests to serialize
-       * @return {string} - the request body
+       * @return {Promise} - a promise that is fulfilled by the request body
        */
       reqsFetchParamsToBody: function (reqsFetchParams) {
-        return reqsFetchParams.map(function (fetchParams) {
-          var indexList = fetchParams.index;
+        return Promise.map(reqsFetchParams, function (fetchParams) {
+          return Promise.resolve(fetchParams.index)
+          .then(function (indexList) {
+            if (!_.isFunction(_.get(indexList, 'toIndexList'))) {
+              return indexList;
+            }
 
-          if (_.isFunction(_.get(indexList, 'toIndexList'))) {
             var timeBounds = timefilter.getBounds();
-            indexList = indexList.toIndexList(timeBounds.min, timeBounds.max);
-          }
-
-          return angular.toJson({
-            index: indexList,
-            type: fetchParams.type,
-            search_type: fetchParams.search_type,
-            ignore_unavailable: true
+            return indexList.toIndexList(timeBounds.min, timeBounds.max);
           })
-          + '\n'
-          + angular.toJson(fetchParams.body || {});
-        }).join('\n') + '\n';
+          .then(function (indexList) {
+            return angular.toJson({
+              index: indexList,
+              type: fetchParams.type,
+              search_type: fetchParams.search_type,
+              ignore_unavailable: true
+            })
+            + '\n'
+            + angular.toJson(fetchParams.body || {});
+          });
+        })
+        .then(function (requests) {
+          return requests.join('\n') + '\n';
+        });
       },
 
       /**
