@@ -25,7 +25,7 @@ define(function (require) {
 
       return {
         method: 'POST',
-        path: `/${pattern}/_field_stats`,
+        path: `/${encodeURIComponent(pattern)}/_field_stats`,
         query: {
           level: 'indices'
         },
