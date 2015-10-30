@@ -8,6 +8,7 @@ define(function (require) {
     var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
     var compareFilters = require('ui/filter_bar/lib/compareFilters');
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+    var angular = require('angular');
 
     var queryFilter = new EventEmitter();
 
@@ -80,6 +81,26 @@ define(function (require) {
       }
 
       state.filters.splice(index, 1);
+    };
+
+    /**
+    * Updates an existing filter
+    * @param {object} filter Contains a reference to a filter and its new model
+    * @param {object} filter.source The filter reference
+    * @param {string} filter.model The edited filter
+    * @returns {object} Promise that resolves to the new filter on a successful merge
+    */
+    queryFilter.updateFilter = function (filter) {
+      var mergedFilter = _.assign({}, filter.source, filter.model);
+
+      //If the filter type is changed we want to discard the old type
+      //when merging changes back in
+      var filterTypeReplaced = filter.model[filter.type] !== mergedFilter[filter.type];
+      if (filterTypeReplaced) {
+        delete mergedFilter[filter.type];
+      }
+
+      return angular.copy(mergedFilter, filter.source);
     };
 
     /**
