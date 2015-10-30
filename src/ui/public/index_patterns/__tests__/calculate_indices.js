@@ -7,37 +7,37 @@ describe('ui/index_patterns/_calculate_indices', () => {
   let Promise;
   let $rootScope;
   let calculateIndices;
-  let error;
-  let response;
-  let transportRequest;
+  let es;
   let config;
   let constraints;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
-    error = undefined;
-    response = { indices: { 'mock-*': 'irrelevant, is ignored' } };
-    transportRequest = sinon.spy((options, fn) => fn(error, response));
-    $provide.value('es', _.set({}, 'transport.request', transportRequest));
+    $provide.service('es', function (Promise) {
+      return {
+        fieldStats: sinon.stub().returns(Promise.resolve({
+          indices: {
+            'mock-*': 'irrelevant, is ignored'
+          }
+        }))
+      };
+    });
   }));
 
   beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
+    es = $injector.get('es');
     Promise = $injector.get('Promise');
     calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
   }));
 
   describe('transport configuration', () => {
-    it('is POST', () => {
+    it('uses pattern path for indec', () => {
       run();
-      expect(config.method).to.equal('POST');
-    });
-    it('uses pattern path for _field_stats', () => {
-      run();
-      expect(config.path).to.equal('/wat-*-no/_field_stats');
+      expect(config.index).to.equal('wat-*-no');
     });
     it('has level indices', () => {
       run();
-      expect(config.query.level).to.equal('indices');
+      expect(config.level).to.equal('indices');
     });
     it('includes time field', () => {
       run();
@@ -69,30 +69,10 @@ describe('ui/index_patterns/_calculate_indices', () => {
     });
   });
 
-  describe('returned promise', () => {
-    it('is rejected by transport errors', () => {
-      error = 'something';
-
-      let reason;
-      calculateIndices('one', 'two').then(null, val => reason = val);
-      $rootScope.$apply();
-
-      expect(reason).to.equal(error);
-    });
-    it('is fulfilled by array of indices in successful response', () => {
-
-      let indices;
-      calculateIndices('one', 'two').then(val => indices = val);
-      $rootScope.$apply();
-
-      expect(_.first(indices)).to.equal('mock-*');
-    });
-  });
-
   function run({ start = undefined, stop = undefined } = {}) {
     calculateIndices('wat-*-no', '@something', start, stop);
     $rootScope.$apply();
-    config = _.first(transportRequest.firstCall.args);
+    config = _.first(es.fieldStats.firstCall.args);
     constraints = config.body.index_constraints;
   }
 });
