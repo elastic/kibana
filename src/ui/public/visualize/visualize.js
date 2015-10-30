@@ -76,7 +76,7 @@ define(function (require) {
           };
         }());
 
-        var loadingDelay = config.get('visualization:loadingDelay', '2s');
+        var loadingDelay = config.get('visualization:loadingDelay');
         $scope.loadingStyle = {
           '-webkit-transition-delay': loadingDelay,
           'transition-delay': loadingDelay
