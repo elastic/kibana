@@ -59,6 +59,11 @@ define(function (require) {
         value: 500,
         description: 'The number of rows to show in the table',
       },
+      'doc_table:highlight': {
+        value: true,
+        description: 'Highlight results in Discover and Saved Searches Dashboard.' +
+          'Highlighing makes request slow when working on big documents.',
+      },
       'courier:maxSegmentCount': {
         value: 30,
         description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
@@ -107,6 +112,10 @@ define(function (require) {
           'Count': '#57c17b'
         }),
         description: 'Maps values to specified colors within visualizations'
+      },
+      'visualization:loadingDelay': {
+        value: '2s',
+        description: 'Time to wait before dimming visualizations during query'
       },
       'csv:separator': {
         value: ',',

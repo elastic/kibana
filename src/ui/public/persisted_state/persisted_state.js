@@ -22,6 +22,21 @@ define(function (require) {
       if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
     }
 
+    function prepSetParams(key, value, path) {
+      // key must be the value, set the entire state using it
+      if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
+        // setting entire tree, swap the key and value to write to the state
+        value = key;
+        key = undefined;
+      }
+
+      // ensure the value being passed in is never mutated
+      return {
+        value: _.cloneDeep(value),
+        key: key
+      };
+    }
+
     function parentDelegationMixin(from, to) {
       _.forOwn(from.prototype, function (method, methodName) {
         to.prototype[methodName] = function () {
@@ -34,7 +49,7 @@ define(function (require) {
     parentDelegationMixin(SimpleEmitter, PersistedState);
     parentDelegationMixin(Events, PersistedState);
 
-    function PersistedState(value, path, parent) {
+    function PersistedState(value, path, parent, silent) {
       PersistedState.Super.call(this);
 
       this._path = this._setPath(path);
@@ -49,7 +64,7 @@ define(function (require) {
       value = value || this._getDefault();
 
       // copy passed state values and create internal trackers
-      this.set(value);
+      (silent) ? this.setSilent(value) : this.set(value);
       this._initialized = true; // used to track state changes
     }
 
@@ -58,31 +73,48 @@ define(function (require) {
     };
 
     PersistedState.prototype.set = function (key, value) {
-      // key must be the value, set the entire state using it
-      if (_.isUndefined(value) && _.isPlainObject(key)) {
-        // swap the key and value to write to the state
-        value = key;
-        key = undefined;
-      }
-
-      // ensure the value being passed in is never mutated
-      value = _.cloneDeep(value);
-
-      var val = this._set(key, value);
+      var params = prepSetParams(key, value, this._path);
+      var val = this._set(params.key, params.value);
       this.emit('set');
       return val;
     };
 
-    PersistedState.prototype.reset = function (key) {
-      this.set(key, undefined);
+    PersistedState.prototype.setSilent = function (key, value) {
+      var params = prepSetParams(key, value, this._path);
+      return this._set(params.key, params.value, true);
     };
 
-    PersistedState.prototype.clear = function (key) {
-      this.set(key, null);
+    PersistedState.prototype.reset = function (path) {
+      var keyPath = this._getIndex(path);
+      var origValue = _.get(this._defaultState, keyPath);
+      var currentValue = _.get(this._mergedState, keyPath);
+
+      if (_.isUndefined(origValue)) {
+        this._cleanPath(path, this._mergedState);
+      } else {
+        _.set(this._mergedState, keyPath, origValue);
+      }
+
+      // clean up the changedState and defaultChildState trees
+      this._cleanPath(path, this._changedState);
+      this._cleanPath(path, this._defaultChildState);
+
+      if (!_.isEqual(currentValue, origValue)) this.emit('change');
     };
 
-    PersistedState.prototype.createChild = function (path, value) {
-      return new PersistedState(value, this._getIndex(path), this._parent || this);
+    PersistedState.prototype.createChild = function (path, value, silent) {
+      this._setChild(this._getIndex(path), value, this._parent || this);
+      return new PersistedState(value, this._getIndex(path), this._parent || this, silent);
+    };
+
+    PersistedState.prototype.removeChild = function (path) {
+      var origValue = _.get(this._defaultState, this._getIndex(path));
+
+      if (_.isUndefined(origValue)) {
+        this.reset(path);
+      } else {
+        this.set(path, origValue);
+      }
     };
 
     PersistedState.prototype.getChanges = function () {
@@ -106,6 +138,29 @@ define(function (require) {
       return (this._path || []).concat(toPath(key));
     };
 
+    PersistedState.prototype._getPartialIndex = function (key) {
+      var keyPath = this._getIndex(key);
+      return keyPath.slice(this._path.length);
+    };
+
+    PersistedState.prototype._cleanPath = function (path, stateTree) {
+      var partialPath = this._getPartialIndex(path);
+      var remove = true;
+
+      // recursively delete value tree, when no other keys exist
+      while (partialPath.length > 0) {
+        var lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
+        var statePath = this._path.concat(partialPath);
+        var stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
+
+        // if stateVal isn't an object, do nothing
+        if (!_.isPlainObject(stateVal)) return;
+
+        if (remove) delete stateVal[lastKey];
+        if (Object.keys(stateVal).length > 0) remove = false;
+      }
+    };
+
     PersistedState.prototype._getDefault = function () {
       var def = (this._hasPath()) ? undefined : {};
       return (this._parent ? this.get() : def);
@@ -119,13 +174,18 @@ define(function (require) {
       return (isString) ? [this._getIndex(path)] : path;
     };
 
+    PersistedState.prototype._setChild = function (path, value, parent) {
+      parent._defaultChildState = parent._defaultChildState || {};
+      _.set(parent._defaultChildState, path, value);
+    };
+
     PersistedState.prototype._hasPath = function () {
       return this._path.length > 0;
     };
 
     PersistedState.prototype._get = function (key, def) {
       // delegate to parent instance
-      if (this._parent) return this._parent._get(this._getIndex(key), key);
+      if (this._parent) return this._parent._get(this._getIndex(key), def);
 
       // no path and no key, get the whole state
       if (!this._hasPath() && _.isUndefined(key)) {
@@ -135,11 +195,12 @@ define(function (require) {
       return _.get(this._mergedState, this._getIndex(key), def);
     };
 
-    PersistedState.prototype._set = function (key, value, initialChildState, defaultChildState) {
+    PersistedState.prototype._set = function (key, value, silent, initialChildState) {
       var self = this;
       var stateChanged = false;
       var initialState = !this._initialized;
       var keyPath = this._getIndex(key);
+      var hasKeyPath = keyPath.length > 0;
 
       // if this is the initial state value, save value as the default
       if (initialState) {
@@ -150,43 +211,59 @@ define(function (require) {
 
       // delegate to parent instance, passing child's default value
       if (this._parent) {
-        return this._parent._set(keyPath, value, initialState, this._defaultState);
+        return this._parent._set(keyPath, value, silent, initialState);
       }
 
       // everything in here affects only the parent state
       if (!initialState) {
         // no path and no key, set the whole state
         if (!this._hasPath() && _.isUndefined(key)) {
-          // check for changes and emit an event when found
+          // compare changedState and new state, emit an event when different
           stateChanged = !_.isEqual(this._changedState, value);
-          if (!initialChildState) this._changedState = value;
-        } else {
-          // check for changes and emit an event when found
-          stateChanged = !_.isEqual(this.get(keyPath), value);
-
-          // arrays merge by index, not the desired behavior - ensure they are replaced
           if (!initialChildState) {
+            this._changedState = value;
+            this._mergedState = _.cloneDeep(value);
+          }
+        } else {
+          // check for changes at path, emit an event when different
+          var curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
+          stateChanged = !_.isEqual(curVal, value);
+
+          if (!initialChildState) {
+            // arrays are merge by index, not desired - ensure they are replaced
             if (_.isArray(_.get(this._mergedState, keyPath))) {
-              _.set(this._mergedState, keyPath, undefined);
+              if (hasKeyPath) _.set(this._mergedState, keyPath, undefined);
+              else this._mergedState = undefined;
             }
-            _.set(this._changedState, keyPath, value);
+
+            if (hasKeyPath) _.set(this._changedState, keyPath, value);
+            else this._changedState = _.isPlainObject(value) ? value : {};
           }
         }
       }
 
+      // update the merged state value
       var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
-      var sourceObj = _.merge({}, defaultChildState, this._changedState);
+      var sourceObj = _.merge({}, this._defaultChildState, this._changedState);
+
+      // handler arguments are (targetValue, sourceValue, key, target, source)
       var mergeMethod = function (targetValue, sourceValue, mergeKey) {
-        // If `mergeMethod` is provided it is invoked to produce the merged values of the destination and
-        // source properties. If `mergeMethod` returns `undefined` merging is handled by the method instead
-        // handler arguments are (targetValue, sourceValue, key, target, source)
+        // if not initial state, skip default merge method (ie. return value, see note below)
         if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
+          // use the sourceValue or fall back to targetValue
           return !_.isUndefined(sourceValue) ? sourceValue : targetValue;
         }
       };
+
+      // If `mergeMethod` is provided it is invoked to produce the merged values of the
+      // destination and source properties.
+      // If `mergeMethod` returns `undefined` the default merging method is used
       this._mergedState = _.merge(targetObj, sourceObj, mergeMethod);
 
-      if (stateChanged) this.emit('change');
+      // sanity check; verify that there are actually changes
+      if (_.isEqual(this._mergedState, this._defaultState)) this._changedState = {};
+
+      if (!silent && stateChanged) this.emit('change');
 
       return this;
     };

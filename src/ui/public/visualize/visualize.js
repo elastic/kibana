@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -18,9 +18,10 @@ define(function (require) {
       scope : {
         showSpyPanel: '=?',
         vis: '=',
+        uiState: '=?',
+        searchSource: '=?',
         editableVis: '=?',
         esResp: '=?',
-        searchSource: '=?'
       },
       template: require('ui/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
@@ -41,8 +42,9 @@ define(function (require) {
         var getVisEl = getter('.visualize-chart');
         var getSpyEl = getter('visualize-spy');
 
-        $scope.spy = {mode: false};
         $scope.fullScreenSpy = false;
+        $scope.spy = {};
+        $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
         var applyClassNames = function () {
           var $spyEl = getSpyEl();
@@ -81,7 +83,15 @@ define(function (require) {
           };
         }());
 
+        var loadingDelay = config.get('visualization:loadingDelay');
+        $scope.loadingStyle = {
+          '-webkit-transition-delay': loadingDelay,
+          'transition-delay': loadingDelay
+        };
+
+        // spy watchers
         $scope.$watch('fullScreenSpy', applyClassNames);
+
         $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
           var $visEl = getVisEl();
           if (!$visEl) return;
@@ -90,6 +100,7 @@ define(function (require) {
           if (spyMode && !oldSpyMode) {
             $scope.fullScreenSpy = $visEl.height() < minVisChartHeight;
           }
+
           applyClassNames();
         });
 

@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var moment = require('moment');
 var numeral = require('numeral');
-require('angular-nvd3');
 
 var toTitleCase = require('./lib/toTitleCase');
 var formatNumber = require('./lib/formatNumber');
@@ -17,7 +16,7 @@ function calcAvg(metricList, metricNumberType) {
 }
 
 require('ui/modules')
-.get('kibana', ['nvd3'])
+.get('kibana', [])
 .directive('statusPageMetric', function () {
   return {
     restrict: 'E',

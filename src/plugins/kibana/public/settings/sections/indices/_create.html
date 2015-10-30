@@ -19,11 +19,25 @@
             <br>
             <label ng-if="index.isTimeBased">
               <input ng-model="index.nameIsPattern" type="checkbox">
-              Use event times to create index names
+              Use event times to create index names <small>[DEPRECATED]</small>
             </label>
           </div>
 
           <div class="form-group" ng-if="index.isTimeBased && index.nameIsPattern">
+            <div class="alert alert-warning">
+              <h4>Time-interval based index patterns are deprecated!</h4>
+              <p>
+                We <strong>strongly recommend</strong> using wildcard pattern names instead of
+                time-interval based index patterns.
+              </p>
+              <p>
+                Kibana is now smart enough to automatically determine which
+                indices to search against within the current time range for
+                wildcard index patterns. This means that wildcard
+                index patterns now get the same performance optimizations when
+                searching within a time range as time-interval patterns.
+              </p>
+            </div>
             <label>
               Index pattern interval&nbsp;
               <kbn-info info="The interval at which index names rotate."></kbn-info>

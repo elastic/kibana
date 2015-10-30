@@ -3,6 +3,7 @@ define(function (require) {
     var d3 = require('d3');
     var _ = require('lodash');
     var errors = require('ui/errors');
+    var Binder = require('ui/Binder');
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
@@ -43,7 +44,7 @@ define(function (require) {
       }
 
       this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
-
+      this.binder = new Binder();
       this.renderArray = _.filter([
         this.layout,
         this.legend,
@@ -203,13 +204,19 @@ define(function (require) {
      * @method destroy
      */
     Handler.prototype.destroy = function () {
-      this.charts.forEach(function (chart) {
+      this.binder.destroy();
+
+      this.renderArray.forEach(function (renderable) {
+        if (_.isFunction(renderable.destroy)) {
+          renderable.destroy();
+        }
+      });
+
+      this.charts.splice(0).forEach(function (chart) {
         if (_.isFunction(chart.destroy)) {
           chart.destroy();
         }
       });
-
-      this.charts.length = 0;
     };
 
     return Handler;
