@@ -16,6 +16,7 @@ define(function (require) {
     return {
       restrict: 'E',
       scope : {
+        showSpyPanel: '=?',
         vis: '=',
         uiState: '=?',
         searchSource: '=?',
@@ -26,6 +27,10 @@ define(function (require) {
       link: function ($scope, $el, attr) {
         var chart; // set in "vis" watcher
         var minVisChartHeight = 180;
+
+        if (_.isUndefined($scope.showSpyPanel)) {
+          $scope.showSpyPanel = true;
+        }
 
         function getter(selector) {
           return function () {
