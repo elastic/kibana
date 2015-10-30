@@ -32,7 +32,7 @@ define(function (require) {
         return scenarioManager.loadIfEmpty('makelogs');
       })
       .then(function () {
-        return common.sleep(2500);
+        return common.sleep(3000);
       })
       .then(function () {
         return common.tryForTime(25000, function () {
@@ -40,6 +40,7 @@ define(function (require) {
             pathname: ''
           })))
           .then(function () {
+            // give angular enough time to update the URL
             return common.sleep(2000);
           })
           .then(function () {
