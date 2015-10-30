@@ -76,9 +76,10 @@ define(function (require) {
           };
         }());
 
-        $scope.loadingDelay = {
-          '-webkit-transition-delay': config.get('visualization:loadingDelay', '2s'),
-          'transition-delay': config.get('visualization:loadingDelay', '2s')
+        var loadingDelay = config.get('visualization:loadingDelay', '2s');
+        $scope.loadingStyle = {
+          '-webkit-transition-delay': loadingDelay,
+          'transition-delay': loadingDelay
         };
 
         $scope.$watch('fullScreenSpy', applyClassNames);

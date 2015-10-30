@@ -8,7 +8,7 @@
   <div class="item bottom"></div>
 </div>
 <div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
-  ng-style="loadingDelay"
+  ng-style="loadingStyle"
   ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
   class="visualize-chart"></div>
 <!-- <pre>{{chartData | json}}</pre> -->
