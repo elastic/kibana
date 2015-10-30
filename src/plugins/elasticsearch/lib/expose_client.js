@@ -1,6 +1,6 @@
 var elasticsearch = require('elasticsearch');
 var _ = require('lodash');
-var fs = require('fs');
+var readFile = (file) => require('fs').readFileSync(file, 'utf8');
 var util = require('util');
 var url = require('url');
 var callWithRequest = require('./call_with_request');
@@ -31,11 +31,11 @@ module.exports = function (server) {
 
     var ssl = { rejectUnauthorized: options.verifySsl };
     if (options.clientCrt && options.clientKey) {
-      ssl.cert = fs.readFileSync(options.clientCrt, 'utf8');
-      ssl.key = fs.readFileSync(options.clientKey, 'utf8');
+      ssl.cert = readFile(options.clientCrt);
+      ssl.key = readFile(options.clientKey);
     }
     if (options.ca) {
-      ssl.ca = fs.readFileSync(options.ca, 'utf8');
+      ssl.ca = options.ca.map(readFile);
     }
 
     return new elasticsearch.Client({
