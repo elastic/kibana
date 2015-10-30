@@ -1,5 +1,5 @@
 define(function (require) {
-  const { keys } = require('lodash');
+  const _ = require('lodash');
   const moment = require('moment');
 
   return function CalculateIndicesFactory(Promise, es) {
@@ -7,8 +7,9 @@ define(function (require) {
     // Uses the field stats api to determine the names of indices that need to
     // be queried against that match the given pattern and fall within the
     // given time range
-    function calculateIndices(pattern, timeFieldName, start, stop) {
-      return getFieldStats(pattern, timeFieldName, start, stop).then(resp => keys(resp.indices));
+    function calculateIndices(pattern, timeFieldName, start, stop, sortDirection) {
+      return getFieldStats(pattern, timeFieldName, start, stop)
+      .then(resp => sortIndexStats(resp, timeFieldName, sortDirection));
     };
 
     // creates the configuration hash that must be passed to the elasticsearch
@@ -32,6 +33,19 @@ define(function (require) {
           }
         }
       });
+    }
+
+    function sortIndexStats(resp, timeFieldName, sortDirection) {
+      if (!sortDirection) return _.keys(resp.indices);
+
+      const edgeKey = sortDirection === 'desc' ? 'max_value' : 'min_value';
+      return _(resp.indices)
+      .map((stats, index) => (
+        { index, edge: stats.fields[timeFieldName][edgeKey] }
+      ))
+      .sortBy('edge')
+      .pluck('index')
+      .value();
     }
 
     return calculateIndices;

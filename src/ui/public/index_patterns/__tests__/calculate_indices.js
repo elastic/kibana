@@ -8,17 +8,22 @@ describe('ui/index_patterns/_calculate_indices', () => {
   let $rootScope;
   let calculateIndices;
   let es;
+  let response;
   let config;
   let constraints;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
+    response = {
+      indices: {
+        'mock-*': 'irrelevant, is ignored'
+      }
+    };
+
     $provide.service('es', function (Promise) {
       return {
-        fieldStats: sinon.stub().returns(Promise.resolve({
-          indices: {
-            'mock-*': 'irrelevant, is ignored'
-          }
-        }))
+        fieldStats: sinon.spy(function () {
+          return Promise.resolve(response);
+        })
       };
     });
   }));
@@ -29,6 +34,13 @@ describe('ui/index_patterns/_calculate_indices', () => {
     Promise = $injector.get('Promise');
     calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
   }));
+
+  function run({ start = undefined, stop = undefined } = {}) {
+    calculateIndices('wat-*-no', '@something', start, stop);
+    $rootScope.$apply();
+    config = _.first(es.fieldStats.firstCall.args);
+    constraints = config.body.index_constraints;
+  }
 
   describe('transport configuration', () => {
     it('uses pattern path for indec', () => {
@@ -69,10 +81,55 @@ describe('ui/index_patterns/_calculate_indices', () => {
     });
   });
 
-  function run({ start = undefined, stop = undefined } = {}) {
-    calculateIndices('wat-*-no', '@something', start, stop);
-    $rootScope.$apply();
-    config = _.first(es.fieldStats.firstCall.args);
-    constraints = config.body.index_constraints;
-  }
+  describe('response sorting', function () {
+    require('testUtils/noDigestPromises').activateForSuite();
+
+    context('when no sorting direction given', function () {
+      it('returns the indices in the order that elasticsearch sends them', function () {
+        response = {
+          indices: {
+            c: { fields: { time: {} } },
+            a: { fields: { time: {} } },
+            b: { fields: { time: {} } },
+          }
+        };
+
+        return calculateIndices('*', 'time', null, null).then(function (resp) {
+          expect(resp).to.eql(['c', 'a', 'b']);
+        });
+      });
+    });
+
+    context('when sorting desc', function () {
+      it('returns the indices in max_value order', function () {
+        response = {
+          indices: {
+            c: { fields: { time: { max_value: 10 } } },
+            a: { fields: { time: { max_value: 15 } } },
+            b: { fields: { time: { max_value: 1 } } },
+          }
+        };
+
+        return calculateIndices('*', 'time', null, null, 'desc').then(function (resp) {
+          expect(resp).to.eql(['b', 'c', 'a']);
+        });
+      });
+    });
+
+    context('when sorting asc', function () {
+      it('returns the indices in min_value order', function () {
+        response = {
+          indices: {
+            c: { fields: { time: { max_value: 10, min_value: 9 } } },
+            a: { fields: { time: { max_value: 15, min_value: 5 } } },
+            b: { fields: { time: { max_value: 1, min_value: 0 } } },
+          }
+        };
+
+        return calculateIndices('*', 'time', null, null, 'asc').then(function (resp) {
+          expect(resp).to.eql(['b', 'a', 'c']);
+        });
+      });
+    });
+  });
 });
