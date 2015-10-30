@@ -198,7 +198,7 @@ define(function (require) {
 
     getPopularity: function getPopularity() {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('input.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-number')
+      .findByCssSelector('input[ng-model="editor.field.count"]')
       .then(function (input) {
         return input.getProperty('value');
       });

@@ -496,12 +496,15 @@ define(function (require) {
         })
         // increase Popularity
         .then(function openControlsByName() {
+          common.log('Starting openControlsByName "geo.coordinates"');
           return settingsPage.openControlsByName('geo.coordinates');
         })
         .then(function increasePopularity() {
+          common.log('increasePopularity');
           return settingsPage.increasePopularity();
         })
         .then(function getPopularity() {
+          common.log('getPopularity');
           return settingsPage.getPopularity()
           .then(function (popularity) {
             common.log('popularity = ' + popularity);
