@@ -19,3 +19,4 @@ webpackstats.json
 config/kibana.dev.yml
 coverage
 selenium
+.babelcache.json
