@@ -48,16 +48,11 @@ define(function (require) {
     },
 
     sleep: function sleep(sleepMilliseconds) {
-      var self = this;
-      self.log('... sleep(' + sleepMilliseconds + ') start');
+      var log = this.log;
+      log('... sleep(' + sleepMilliseconds + ') start');
 
-      var promise = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          self.log('... sleep(' + sleepMilliseconds + ') end');
-          resolve({});
-        }, sleepMilliseconds);
-      });
-      return promise;
+      return Promise.resolve().delay(sleepMilliseconds)
+      .then(function () { log('... sleep(' + sleepMilliseconds + ') end'); })
     },
 
     screenshotError: function screenshotError(testSubName, reason) {
