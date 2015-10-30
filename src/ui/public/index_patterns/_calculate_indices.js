@@ -38,7 +38,10 @@ define(function (require) {
     function sortIndexStats(resp, timeFieldName, sortDirection) {
       if (!sortDirection) return _.keys(resp.indices);
 
+      // FIXME: Once https://github.com/elastic/elasticsearch/issues/14404 is closed
+      // this should be sorting based on the sortable value of a field.
       const edgeKey = sortDirection === 'desc' ? 'max_value' : 'min_value';
+
       return _(resp.indices)
       .map((stats, index) => (
         { index, edge: stats.fields[timeFieldName][edgeKey] }
