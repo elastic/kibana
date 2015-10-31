@@ -18,13 +18,15 @@ define(function (require) {
         .then(function (selected) {
           expect(selected).to.be.ok();
         })
+        .catch(common.handleError(this));
       });
 
       bdd.it('should load with name pattern unchecked', function () {
         return settingsPage.getNameIsPatternCheckbox().isSelected()
         .then(function (selected) {
           expect(selected).to.not.be.ok();
-        });
+        })
+        .catch(common.handleError(this));
       });
 
       bdd.it('should contain default index pattern', function () {
@@ -34,6 +36,7 @@ define(function (require) {
         .then(function (pattern) {
           expect(pattern).to.be(defaultPattern);
         })
+        .catch(common.handleError(this));
       });
 
       bdd.it('should not select the time field', function () {
@@ -41,13 +44,9 @@ define(function (require) {
         .then(function (timeFieldIsSelected) {
           common.log('timeField isSelected = ' + timeFieldIsSelected);
           expect(timeFieldIsSelected).to.not.be.ok();
-        });
+        })
+        .catch(common.handleError(this));
       });
-
-      // var testSubName = 'testSettingsInitialState';
-      // function screenshotError(reason) {
-      //   return common.screenshotError(testSubName, reason);
-      // }
     });
   };
 });
