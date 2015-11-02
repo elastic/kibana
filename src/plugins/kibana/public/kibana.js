@@ -12,6 +12,8 @@ var modules = require('ui/modules');
 
 var kibanaLogoUrl = require('ui/images/kibana.svg');
 
+routes.enable();
+
 routes
 .otherwise({
   redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
