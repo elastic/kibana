@@ -71,12 +71,12 @@ describe('update filters', function () {
     });
 
     it('should set an alias in the meta object', function () {
-      newFilter.alias = 'foo';
 
       queryFilter.updateFilter({
         source: currentFilter,
         model: newFilter,
-        type: 'query'
+        type: 'query',
+        alias: 'foo'
       });
       $rootScope.$digest();
       expect(currentFilter.meta.alias).to.be('foo');

@@ -64,7 +64,8 @@ define(function (require) {
             type: _.first(_.filter(_.keys(source), function (key) {
               return !key.match(privateFilterFieldRegex);
             })),
-            model: convertToEditableFilter(source)
+            model: convertToEditableFilter(source),
+            alias: source.meta.alias
           };
         };
 
@@ -129,7 +130,6 @@ define(function (require) {
 
         function convertToEditableFilter(filter) {
           var model = _.cloneDeep(filter);
-          model.alias = filter.meta.alias;
 
           var filterType;
           //Hide private properties
