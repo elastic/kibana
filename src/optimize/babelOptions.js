@@ -1,4 +1,6 @@
-process.env.BABEL_CACHE_PATH = require('path').resolve(__dirname, '../../optimize/.babelcache.json');
+var cloneDeep = require('lodash').cloneDeep;
+var fromRoot = require('path').resolve.bind(null, __dirname, '../../');
+process.env.BABEL_CACHE_PATH = fromRoot('optimize/.babelcache.json');
 
 exports.webpack = {
   stage: 1,
@@ -6,4 +8,4 @@ exports.webpack = {
   optional: ['runtime']
 };
 
-exports.node = Object.assign({}, exports.webpack);
+exports.node = cloneDeep(exports.webpack);
