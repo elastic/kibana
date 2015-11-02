@@ -12,7 +12,14 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('_cluster/health', {
     url_params: {
-      "level": ["indices", "shards"]
+      "local": "__flag__",
+      "level": ["indices", "shards"],
+      "master_timeout": "30s",
+      "timeout": "30s",
+      "wait_for_status": ["yellow", "green"],
+      "wait_for_relocating_shards": 0,
+      "wait_for_active_shards": 0,
+      "wait_for_nodes": 0
     }
   });
   api.addEndpointDescription('_cluster/pending_tasks');
