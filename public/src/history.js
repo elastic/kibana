@@ -34,7 +34,7 @@ const history = module.exports = {
     var keys = history.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     $.each(keys, function (i, k) {
-      storage.remove(k);
+      storage.delete(k);
     });
 
     var timestamp = new Date().getTime();
