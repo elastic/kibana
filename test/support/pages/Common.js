@@ -52,12 +52,12 @@ define(function (require) {
       log('... sleep(' + sleepMilliseconds + ') start');
 
       return Promise.resolve().delay(sleepMilliseconds)
-      .then(function () { log('... sleep(' + sleepMilliseconds + ') end'); })
+      .then(function () { log('... sleep(' + sleepMilliseconds + ') end'); });
     },
 
     handleError: function (testObj) {
       var self = this;
-      testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
+      var testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
 
       return function (reason) {
         var now = Date.now();
@@ -66,7 +66,7 @@ define(function (require) {
         return self.saveScreenshot(filename)
         .then(function () {
           throw new Error(reason);
-        })
+        });
       };
     },
 
