@@ -44,7 +44,7 @@ sets an interval based on the time range.
 === Searching Your Data
 You can search the indices that match the current index pattern by submitting a search from the Discover page.
 You can enter simple query strings, use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query 
-syntax], or use the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]. 
+syntax], or use the full JSON-based https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html[Elasticsearch Query DSL]. 
 
 When you submit a search, the histogram, Documents table, and Fields list are updated to reflect 
 the search results. The total number of hits (matching documents) is shown in the upper right corner of the
