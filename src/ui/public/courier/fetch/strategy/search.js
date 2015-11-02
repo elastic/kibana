@@ -24,6 +24,9 @@ define(function (require) {
             return indexList.toIndexList(timeBounds.min, timeBounds.max);
           })
           .then(function (indexList) {
+            if (_.isArray(indexList) && indexList.length === 0) {
+              indexList.push('-*');
+            }
             return angular.toJson({
               index: indexList,
               type: fetchParams.type,
