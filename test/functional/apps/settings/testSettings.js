@@ -4,18 +4,22 @@ define(function (require) {
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
   var _ = require('intern/dojo/node!lodash');
-
   var Common = require('../../../support/pages/Common');
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
   // var HeaderPage = require('../../../support/pages/HeaderPage');
   // var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+  var initialStateTest = require('./_initial_state');
+  var createButtonTest = require('./_create_button');
+  var namePatternCheckboxTest = require('./_name_pattern_checkbox');
+  var indexPatternCreateDeleteTest = require('./_index_pattern_create_delete');
+  // var indexPatternResultsSortTest = require('./_index_pattern_results_sort');
+  // var indexPatternPopularityTest = require('./_index_pattern_popularity');
 
   bdd.describe('settings app', function () {
     var common;
     var scenarioManager;
     var remote;
 
-    var expectedAlertText = 'Are you sure you want to remove this index pattern?';
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     bdd.before(function () {
@@ -25,6 +29,7 @@ define(function (require) {
     });
 
     bdd.beforeEach(function () {
+      common.log('running bdd.beforeEach');
       // start each test with an empty kibana index
       return scenarioManager.reload('emptyKibana')
       // and load a minimal set of makelogs data
@@ -57,7 +62,12 @@ define(function (require) {
       return scenarioManager.unload('makelogs');
     });
 
-    require('./_initial_state')(bdd);
+    initialStateTest(bdd);
 
+    createButtonTest(bdd);
+
+    namePatternCheckboxTest(bdd);
+
+    indexPatternCreateDeleteTest(bdd);
   });
 });
