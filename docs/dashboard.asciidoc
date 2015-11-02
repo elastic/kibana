@@ -21,12 +21,11 @@ The first time you click the *Dashboard* tab, Kibana displays an empty dashboard
 
 image:images/NewDashboard.png[New Dashboard screen]
 
-Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color 
-theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button and check the *Use dark theme* box.
+//Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button and check the *Use dark theme* box.
 
-image:images/darktheme.png[Dark Theme Example]
+//image:images/darktheme.png[Dark Theme Example]
 
-NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
+//NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
 [float]
 [[dash-autorefresh]]
