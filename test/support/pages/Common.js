@@ -1,5 +1,6 @@
 // in test/support/pages/Common.js
 define(function (require) {
+  var config = require('intern').config;
   var Promise = require('bluebird');
   var moment = require('moment');
   var fs = require('intern/dojo/node!fs');
@@ -27,12 +28,12 @@ define(function (require) {
         return Promise
         .try(block)
         .then(function tryForTimeSuccess() {
-          self.log('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
+          self.debug('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
           return (lastTry - start);
         })
         .catch(function tryForTimeCatch(err) {
-          self.log('failed with "' + err.message + '"');
-          self.log('trying again in 1/2 second');
+          self.debug('failed with "' + err.message + '"');
+          self.debug('trying again in 1/2 second');
           return Promise.delay(500).then(attempt);
         });
       }
@@ -44,12 +45,16 @@ define(function (require) {
       console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
+    debug: function debug(logString) {
+      if (config.debug) this.log(logString);
+    },
+
     sleep: function sleep(sleepMilliseconds) {
-      var log = this.log;
-      log('... sleep(' + sleepMilliseconds + ') start');
+      var debug = this.debug;
+      debug('... sleep(' + sleepMilliseconds + ') start');
 
       return Promise.resolve().delay(sleepMilliseconds)
-      .then(function () { log('... sleep(' + sleepMilliseconds + ') end'); });
+      .then(function () { debug('... sleep(' + sleepMilliseconds + ') end'); });
     },
 
     handleError: function (testObj) {
@@ -68,7 +73,7 @@ define(function (require) {
     },
 
     saveScreenshot: function saveScreenshot(filename) {
-      this.log('Test Failed, taking screenshot "' + filename + '"');
+      this.debug('Test Failed, taking screenshot "' + filename + '"');
 
       return this.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
