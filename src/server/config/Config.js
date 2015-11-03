@@ -4,19 +4,12 @@ let _ = require('lodash');
 let { zipObject } = require('lodash');
 let override = require('./override');
 let pkg = require('requirefrom')('src/utils')('packageJson');
+const clone = require('./deepCloneWithBuffers');
 
 const schema = Symbol('Joi Schema');
 const schemaKeys = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
-
-const clone = (vals) => {
-  return _.cloneDeep(vals, function (val) {
-    if (Buffer.isBuffer(val)) {
-      return new Buffer(val);
-    }
-  });
-};
 
 module.exports = class Config {
   constructor(initialSchema, initialSettings) {
