@@ -6,6 +6,12 @@ script: ./node_modules/.bin/grunt travis
 sudo: false
 addons:
   firefox: "40.0"
+  artifacts:
+    s3_region: "us-east-1"
+    debug: true
+    paths:
+      - $(ls $TRAVIS_BUILD_DIR/*.png | tr "\n" ":")
+    target_paths: $TRAVIS_BUILD_NUMBER
 cache:
   directories:
   - esvm
@@ -26,3 +32,8 @@ notifications:
     on_success: change
     template:
     - ! '%{repository_slug}/%{branch} by %{author}: %{commit_message} (<a href="%{build_url}">open</a>)'
+env:
+  global:
+    - secure: "BOr34R2nlZzMD0cHT6zfmCP+4nsoBCGOvNmz6yUBmEX49mQefKpgSCfxn3gkTsfcvcNOnpdF+4pJGjiIPYvTx+tz8D1MKMD6GUCC3BeH8RiJEb/m39EZcz2fx+A2F4i0jpDgT9t4yaL1KuPwMBzXAJEE9hs/U/u4RUeH+u9iY10="
+    - secure: "Z3Xhk+NCFnBRBvOdogJPi8wVEOs8dQYa5yYLzNHseDICVQc3LXxq7gOZDX35ETbU19Ye3PzdB6aoEbIDXS8C5MVqHIa1ZpUWwii6VnhmOGiROnf4oa0uPqDdDiSYI8imzSitQxbnP/C3Q2xuGNVIbsO0AnyzZ0uTUveW1sFwCzg="
+    - secure: "lUctc79nAqSygumqR1GBQRdL51la1a2caNn3jGtelT2uyuqExISjSy9TNdqsbPrjmD7H6joie783Ye/inOC7b2P/cYx4vHzT2/x3IRMhBu7SU1fU6fcKT4Rn5sFfxWetG815uc7j/13Wse2s9kWO8N0Ks/P1fyAperP5suk0uqw="

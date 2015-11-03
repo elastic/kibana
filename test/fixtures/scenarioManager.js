@@ -11,10 +11,10 @@ function ScenarioManager(server) {
 }
 
 /**
-* Load a testing scenario
-* @param {string} id The scenario id to load
-* @return {Promise} A promise that is resolved when elasticsearch has a response
-*/
+ * Load a testing scenario
+ * @param {string} id The scenario id to load
+ * @return {Promise} A promise that is resolved when elasticsearch has a response
+ */
 ScenarioManager.prototype.load = function (id) {
   var scenario = config[id];
   if (!scenario) throw new Error('No scenario found for ' + id);
@@ -42,10 +42,10 @@ ScenarioManager.prototype.load = function (id) {
 };
 
 /**
-* Delete a scenario
-* @param {string} index
-* @return {Promise} A promise that is resolved when elasticsearch has a response
-*/
+ * Delete a scenario
+ * @param {string} index
+ * @return {Promise} A promise that is resolved when elasticsearch has a response
+ */
 ScenarioManager.prototype.unload = function (id) {
   var scenario = config[id];
   if (!scenario) throw new Error('Expected index');
@@ -60,10 +60,10 @@ ScenarioManager.prototype.unload = function (id) {
 };
 
 /**
-* Reload a scenario
-* @param {string} index
-* @return {Promise} A promise that is resolved when elasticsearch has a response
-*/
+ * Reload a scenario
+ * @param {string} index
+ * @return {Promise} A promise that is resolved when elasticsearch has a response
+ */
 ScenarioManager.prototype.reload = function (id) {
   var self = this;
 
@@ -73,13 +73,42 @@ ScenarioManager.prototype.reload = function (id) {
 };
 
 /**
-* Sends a delete all indices request
-* @return {Promise} A promise that is resolved when elasticsearch has a response
-*/
+ * Sends a delete all indices request
+ * @return {Promise} A promise that is resolved when elasticsearch has a response
+ */
 ScenarioManager.prototype.deleteAll = function () {
   return this.client.indices.delete({
     index: '*'
   });
 };
+
+/**
+ * Load a testing scenario if not already loaded
+ * @param {string} id The scenario id to load
+ * @return {Promise} A promise that is resolved when elasticsearch has a response
+ */
+ScenarioManager.prototype.loadIfEmpty = function (id) {
+  var self = this;
+  var scenario = config[id];
+  if (!scenario) throw new Error('No scenario found for ' + id);
+
+  var self = this;
+  return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
+    var loadIndexDefinition;
+
+    return self.client.count({
+      index: bulk.indexName
+    })
+    .then(function handleCountResponse(response) {
+      if (response.count === 0) {
+        self.load(id);
+      }
+    })
+    .catch(function (reason) {
+      self.load(id);
+    });
+  }));
+};
+
 
 module.exports = ScenarioManager;

@@ -6,7 +6,7 @@ define(function (require) {
 
   registerSuite(function () {
     return {
-      'status': function () {
+      status: function () {
         return this.remote
           .get(getUrl(config.kibana, 'status'))
           .setFindTimeout(60000)
