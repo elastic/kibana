@@ -102,7 +102,7 @@ The accounts and logstash data sets don't require any mappings, so at this point
 Elasticsearch with the following commands:
 
 [source,shell]
-curl -XPOST 'localhost:9200/bank/_bulk?pretty' --data-binary @accounts.json
+curl -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
 curl -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
 curl -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logstash.json
 
