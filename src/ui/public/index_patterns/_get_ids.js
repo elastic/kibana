@@ -20,7 +20,7 @@ define(function (require) {
         fields: [],
         body: {
           query: { match_all: {} },
-          size: 2147483647
+          size: 10000
         }
       })
       .then(function (resp) {
