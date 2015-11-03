@@ -53,8 +53,7 @@ module.exports = async (kbnServer, server, config) => {
       } else {
         return reply.renderStatusPage();
       }
-    },
-    config: {auth: false}
+    }
   });
 
   server.decorate('reply', 'renderApp', function (app) {
