@@ -1,8 +1,5 @@
 // in test/support/pages/Common.js
 define(function (require) {
-
-  var registerSuite = require('intern!object');
-  var expect = require('intern/dojo/node!expect.js');
   var Promise = require('bluebird');
   var moment = require('moment');
   var fs = require('intern/dojo/node!fs');
