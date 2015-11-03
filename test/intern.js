@@ -5,7 +5,7 @@ define(function (require) {
   return _.assign({
     capabilities: {
       'selenium-version': '2.47.1',
-      'idle-timeout': 60
+      'idle-timeout': 30
     },
     environments: [{
       browserName: 'firefox'
