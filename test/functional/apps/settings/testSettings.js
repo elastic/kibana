@@ -19,43 +19,46 @@ define(function (require) {
     var scenarioManager;
     var remote;
 
+    function checkForSettingsUrl() {
+      return common.tryForTime(25000, function () {
+        return remote.get(url.format(_.assign(config.kibana, {
+          pathname: ''
+        })))
+        .then(function () {
+          // give angular enough time to update the URL
+          return common.sleep(2000);
+        })
+        .then(function () {
+          return remote.getCurrentUrl()
+          .then(function (currentUrl) {
+            expect(currentUrl).to.contain('settings');
+          });
+        });
+      });
+    }
+
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     bdd.before(function () {
       common = new Common(this.remote);
       scenarioManager = new ScenarioManager(url.format(config.elasticsearch));
       remote = this.remote;
+
+      return scenarioManager.loadIfEmpty('makelogs');
     });
 
     bdd.beforeEach(function () {
-      common.log('running bdd.beforeEach');
-      // start each test with an empty kibana index
       return scenarioManager.reload('emptyKibana')
-      // and load a minimal set of makelogs data
-      .then(function loadIfEmptyMakelogs() {
-        return scenarioManager.loadIfEmpty('makelogs');
-      })
       .then(function () {
-        return common.tryForTime(25000, function () {
-          return remote.get(url.format(_.assign(config.kibana, {
-            pathname: ''
-          })))
-          .then(function () {
-            // give angular enough time to update the URL
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return remote.getCurrentUrl()
-            .then(function (currentUrl) {
-              expect(currentUrl).to.contain('settings');
-            });
-          });
-        });
+        return checkForSettingsUrl();
       });
     });
 
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('makelogs');
+    bdd.after(function () {
+      return scenarioManager.unload('makelogs')
+      .then(function () {
+        scenarioManager.unload('emptyKibana');
+      });
     });
 
     initialStateTest(bdd);
