@@ -10,12 +10,20 @@ const schemaKeys = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
 
+const clone = (vals) => {
+  return _.cloneDeep(vals, function (val) {
+    if (Buffer.isBuffer(val)) {
+      return new Buffer(val);
+    }
+  });
+};
+
 module.exports = class Config {
   constructor(initialSchema, initialSettings) {
     this[schemaKeys] = new Map();
 
     this[vals] = Object.create(null);
-    this[pendingSets] = new Map(_.pairs(_.cloneDeep(initialSettings || {})));
+    this[pendingSets] = new Map(_.pairs(clone(initialSettings || {})));
 
     if (initialSchema) this.extendSchema(initialSchema);
   }
@@ -64,7 +72,7 @@ module.exports = class Config {
 
   set(key, value) {
     // clone and modify the config
-    let config = _.cloneDeep(this[vals]);
+    let config = clone(this[vals]);
     if (_.isPlainObject(key)) {
       config = override(config, key);
     } else {
@@ -114,7 +122,7 @@ module.exports = class Config {
 
   get(key) {
     if (!key) {
-      return _.cloneDeep(this[vals]);
+      return clone(this[vals]);
     }
 
     let value = _.get(this[vals], key);
@@ -123,7 +131,7 @@ module.exports = class Config {
         throw new Error('Unknown config key: ' + key);
       }
     }
-    return _.cloneDeep(value);
+    return clone(value);
   }
 
   has(key) {
