@@ -10,7 +10,7 @@ target
 .idea
 *.iml
 *.log
-screenshot-*.png
+screenshot*.png
 /esvm
 .htpasswd
 .eslintcache
