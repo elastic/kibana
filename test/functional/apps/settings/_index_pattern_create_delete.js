@@ -9,7 +9,6 @@ define(function (require) {
       var common;
       var settingsPage;
       var remote;
-      var expectedAlertText = 'Are you sure you want to remove this index pattern?';
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -18,38 +17,17 @@ define(function (require) {
       });
 
 
-      function createIndex() {
-        return settingsPage.selectTimeFieldOption('@timestamp')
-        .then(function () {
-          return settingsPage.getCreateButton().click();
-        });
-      }
-
-      function removeIndex() {
-        return common.tryForTime(3000, function () {
-          // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-          return settingsPage.clickDeletePattern();
-        })
-        .then(function () {
-          return common.tryForTime(3000, function () {
-            return remote.getAlertText()
-            .then(function (alertText) {
-              expect(alertText).to.be(expectedAlertText);
-            });
-          });
-        })
-        .then(function () {
-          return remote.acceptAlert();
-        });
-      }
-
       bdd.describe('index pattern creation', function indexPatternCreation() {
         bdd.beforeEach(function be() {
-          return createIndex();
+          return settingsPage.createIndex();
         });
 
         bdd.afterEach(function ae() {
-          return removeIndex();
+          var expectedAlertText = 'Are you sure you want to remove this index pattern?';
+          return settingsPage.removeIndex()
+          .then(function (alertText) {
+            expect(alertText).to.be(expectedAlertText);
+          });
         });
 
         bdd.it('should have index pattern in page header', function pageHeader() {
@@ -99,7 +77,16 @@ define(function (require) {
         });
       });
 
+
       bdd.describe('index pattern deletion', function indexDelete() {
+
+        bdd.beforeEach(function be() {
+          return settingsPage.createIndex()
+          .then(function () {
+            return settingsPage.removeIndex();
+          });
+        });
+
         bdd.it('should return to index pattern creation page', function returnToPage() {
           return common.tryForTime(5000, function () {
             return settingsPage.getCreateButton();

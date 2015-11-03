@@ -12,7 +12,7 @@ define(function (require) {
   var createButtonTest = require('./_create_button');
   var namePatternCheckboxTest = require('./_name_pattern_checkbox');
   var indexPatternCreateDeleteTest = require('./_index_pattern_create_delete');
-  // var indexPatternResultsSortTest = require('./_index_pattern_results_sort');
+  var indexPatternResultsSortTest = require('./_index_pattern_results_sort');
   // var indexPatternPopularityTest = require('./_index_pattern_popularity');
 
   bdd.describe('settings app', function () {
@@ -62,12 +62,14 @@ define(function (require) {
       return scenarioManager.unload('makelogs');
     });
 
-    initialStateTest(bdd);
+    // initialStateTest(bdd);
+    //
+    // createButtonTest(bdd);
+    //
+    // namePatternCheckboxTest(bdd);
+    //
+    // indexPatternCreateDeleteTest(bdd);
 
-    createButtonTest(bdd);
-
-    namePatternCheckboxTest(bdd);
-
-    indexPatternCreateDeleteTest(bdd);
+    indexPatternResultsSortTest(bdd);
   });
 });

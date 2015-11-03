@@ -119,13 +119,10 @@ define(function (require) {
     getFieldsTabCount: function getFieldsTabCount() {
       return this.remote.setFindTimeout(defaultTimeout)
         // passing in zero-based index, but adding 1 for css 1-based indexes
-      .findByCssSelector('li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding')
-      .then(function (tabData) {
-        return tabData.getVisibleText()
-        .then(function (theText) {
-          // the value has () around it, remove them
-          return theText.replace(/\((.*)\)/, '$1');
-        });
+      .findByCssSelector('li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding').getVisibleText()
+      .then(function (theText) {
+        // the value has () around it, remove them
+        return theText.replace(/\((.*)\)/, '$1');
       });
     },
 
@@ -226,6 +223,47 @@ define(function (require) {
       .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
       .then(function (button) {
         return button.click();
+      });
+    },
+
+    createIndex: function createIndex() {
+      var self = this;
+      return this.selectTimeFieldOption('@timestamp')
+      .then(function () {
+        return self.getCreateButton().click();
+      })
+      .then(function () {
+        return common.tryForTime(3000, function () {
+          return self.remote.getCurrentUrl()
+          .then(function (currentUrl) {
+            if (!currentUrl.match(/indices\/.+\?/)) {
+              throw new Error('Index pattern not created');
+            }
+          });
+        });
+      });
+    },
+
+    removeIndex: function removeIndex() {
+      var self = this;
+      var alertText;
+      return common.tryForTime(3000, function () {
+        // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
+        return self.clickDeletePattern();
+      })
+      .then(function () {
+        return common.tryForTime(3000, function () {
+          return self.remote.getAlertText()
+          .then(function (text) {
+            alertText = text;
+          });
+        });
+      })
+      .then(function () {
+        return self.remote.acceptAlert();
+      })
+      .then(function () {
+        return alertText;
       });
     }
   };
