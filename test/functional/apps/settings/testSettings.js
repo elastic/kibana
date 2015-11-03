@@ -37,9 +37,6 @@ define(function (require) {
         return scenarioManager.loadIfEmpty('makelogs');
       })
       .then(function () {
-        return common.sleep(3000);
-      })
-      .then(function () {
         return common.tryForTime(25000, function () {
           return remote.get(url.format(_.assign(config.kibana, {
             pathname: ''
