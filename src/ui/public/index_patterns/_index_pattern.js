@@ -183,7 +183,7 @@ define(function (require) {
 
           if (interval) {
             indexList = intervals.toIndexList(self.id, interval, start, stop);
-            if (sortDirection === 'desc') sortDirection = sortDirection.reverse();
+            if (sortDirection === 'desc') indexList = indexList.reverse();
           } else if (self.isWildcard() && self.hasTimeField()) {
             indexList = calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
           } else {
