@@ -4,7 +4,7 @@
   },
   "es": {
     "timefield": "@timestamp",
-    "default_index": "usagov*",
+    "default_index": "_all",
     "allow_url_parameter": false
   },
   "graphite": {
