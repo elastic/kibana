@@ -313,6 +313,31 @@ describe('index pattern', function () {
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
       });
+
+      context('with sort order', function () {
+        require('testUtils/noDigestPromises').activateForSuite();
+
+        context('undefined', function () {
+          it('provides the index list in tact', async function () {
+            const indexList = await indexPattern.toIndexList();
+            expect(indexList).to.eql(['foo', 'bar']);
+          });
+        });
+
+        context('asc', function () {
+          it('provides the index list in tact', async function () {
+            const indexList = await indexPattern.toIndexList(1, 2, 'asc');
+            expect(indexList).to.eql(['foo', 'bar']);
+          });
+        });
+
+        context('desc', function () {
+          it('reverses the index list', async function () {
+            const indexList = await indexPattern.toIndexList(1, 2, 'desc');
+            expect(indexList).to.eql(['bar', 'foo']);
+          });
+        });
+      });
     });
 
     context('when index pattern is a time-base wildcard', function () {
@@ -322,13 +347,13 @@ describe('index pattern', function () {
         sinon.stub(indexPattern, 'isWildcard').returns(true);
       });
 
-      it('invokes calculateIndices with given start/stop times', function () {
-        indexPattern.toIndexList(1, 2);
+      it('invokes calculateIndices with given start/stop times and sortOrder', function () {
+        indexPattern.toIndexList(1, 2, 'sortOrder');
         $rootScope.$apply();
 
         var id = indexPattern.id;
         var field = indexPattern.timeFieldName;
-        expect(calculateIndices.calledWith(id, field, 1, 2)).to.be(true);
+        expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
       it('is fulfilled by the result of calculateIndices', function () {
         var indexList;
