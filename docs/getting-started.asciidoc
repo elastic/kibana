@@ -230,7 +230,7 @@ image::images/tutorial-visualize-bar-1.png[]
 For the Y-axis metrics aggregation, select *Unique Count*, with *speaker* as the field. For Shakespeare plays, it might 
 be useful to know which plays have the lowest number of distinct speaking parts, if your theater company is short on 
 actors. For the X-Axis buckets, select the *Terms* aggregation with the *play_name* field. For the *Order*, select
-*Bottom*, leaving the *Size* at 5.
+*Ascending*, leaving the *Size* at 5.
 
 Leave the other elements at their default values and click the green *Apply changes* button. Your chart should now look 
 like this:
