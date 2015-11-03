@@ -16,15 +16,17 @@
 
  var functions = [];
  var args = [];
+ var variables = {};
 
 }
 
 start
  = tree:series+ {
   return {
-    tree: tree,
+    tree: tree.filter(function (o) {return o != null}),
     functions: functions,
-    args: args
+    args: args,
+    variables: variables
   }
  }
 
@@ -38,7 +40,6 @@ more_args
 
 argument
  = name:function_name '=' value:arg_type {
-
   return {
    type: 'namedArg',
    name: name,
@@ -50,7 +51,8 @@ argument
  / element:arg_type {return element}
 
 arg_type
- = series_type
+ = variable_get
+ / series_type
  / literal:literal {
   var result = ltoo(literal);
   result.location = simpleLocation(location()),
@@ -58,8 +60,23 @@ arg_type
   return result;
  }
 
+variable_get
+ = '$' name:function_name {
+  if (variables[name]) {
+   return variables[name];
+  } else {
+   error('$' + name + ' is not defined')
+  }
+ }
+
+variable_set
+ = '$' name:function_name space? '=' space? value:arg_type {
+  variables[name] = value;
+ }
+
 series_type
- = group
+ = variable_set
+ / group
  / chain
  / reference
 
@@ -98,13 +115,20 @@ function "function"
  }
 
 reference
- = plot:integer ':' series:integer {
+ = '@' plot:integer ':' series:integer {
   return {
    type: 'reference',
    plot: plot,
    series: series
   }
  }
+ / '@' plot:integer {
+  return {
+   type: 'reference',
+   plot: plot
+  }
+ }
+
 
 chain
  = func:function rest:function* {return {type: 'chain', chain: [func].concat(rest)}}

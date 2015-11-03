@@ -44,7 +44,15 @@ function invoke(fnName, args) {
           }
           return invoke(item.function, item.arguments);
         case 'reference':
-          var reference = sheet[item.plot - 1][item.series - 1];
+          var reference;
+          if (item.series) {
+            reference = sheet[item.plot - 1][item.series - 1]
+          } else {
+            reference = {
+              type: 'chainList',
+              list: sheet[item.plot - 1]
+            }
+          }
           return invoke('first', [reference]);
         case 'chain':
           return invokeChain(item);
