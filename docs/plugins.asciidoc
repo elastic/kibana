@@ -16,7 +16,7 @@ bin/kibana plugin --install <org>/<package>/<version>
 You can also use `-i` instead of `--install`, as in the following example:
 
 [source,shell]
-bin/kibana plugin -i elasticsearch/marvel-ui/latest
+bin/kibana plugin -i elasticsearch/marvel/latest
 
 Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the 
 plugin from `download.elastic.co`.
