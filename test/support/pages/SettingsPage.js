@@ -228,10 +228,6 @@ define(function (require) {
         return button.click();
       });
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 24da64f... No code changes, only style change to unwrap a lot of superfluous line breaks on chained calls.
   };
 
   return SettingsPage;
