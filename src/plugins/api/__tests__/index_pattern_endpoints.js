@@ -32,7 +32,9 @@ describe('plugins/api', function () {
     });
 
     describe('POST index-patterns', function () {
-      it('should return 200 and successfully create an index pattern', function () {
+      let response;
+
+      beforeEach(function (done) {
         kbnServer.server.inject({
           method: 'POST',
           url: '/api/index-patterns',
@@ -42,20 +44,32 @@ describe('plugins/api', function () {
             fields: '[{\"name\":\"referer\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,' +
             '\"analyzed\":false,\"doc_values\":true}]'
           }
-        }, function (response) {
-          expect(response.statusCode).to.be(200);
+        }, function (res) {
+          response = res;
+          done();
         });
+      });
+
+      it('should return 200 and successfully create an index pattern', function () {
+        expect(response.statusCode).to.be(200);
       });
     });
 
     describe('GET index-patterns', function () {
-      it('should return 200', function () {
+      let response;
+
+      beforeEach(function (done) {
         kbnServer.server.inject({
           method: 'GET',
           url: '/api/index-patterns'
-        }, function (response) {
-          expect(response.statusCode).to.be(200);
+        }, function (res) {
+          response = res;
+          done();
         });
+      });
+
+      it('should return 200', function () {
+        expect(response.statusCode).to.be(200);
       });
     });
   });
