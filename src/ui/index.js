@@ -57,6 +57,8 @@ module.exports = async (kbnServer, server, config) => {
   });
 
   server.decorate('reply', 'renderApp', function (app) {
+    if (_.isString(app)) app = uiExports.getApp(app) || uiExports.getHiddenApp(app);
+
     let payload = {
       app: app,
       nav: uiExports.apps,
