@@ -6,8 +6,7 @@ define(function (require) {
   var _ = require('intern/dojo/node!lodash');
   var Common = require('../../../support/pages/Common');
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
-  // var HeaderPage = require('../../../support/pages/HeaderPage');
-  // var pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+
   var initialStateTest = require('./_initial_state');
   var createButtonTest = require('./_create_button');
   var namePatternCheckboxTest = require('./_name_pattern_checkbox');

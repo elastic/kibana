@@ -24,86 +24,80 @@ define(function (require) {
         return settingsPage.removeIndex();
       });
 
-
       bdd.describe('change popularity', function indexPatternCreation() {
+        var fieldName = 'geo.coordinates';
 
-        bdd.it('can be cancelled', function pageHeader() {
+        // set the page size to All again, https://github.com/elastic/kibana/issues/5030
+        // TODO: remove this after #5030 is closed
+        function fix5030() {
           return settingsPage.setPageSize('All')
-          // increase Popularity
+          .then(function () {
+            return common.sleep(1000);
+          });
+        }
+
+        bdd.beforeEach(function () {
+          // increase Popularity of geo.coordinates
+          return settingsPage.setPageSize('All')
+          .then(function () {
+            return common.sleep(1000);
+          })
           .then(function openControlsByName() {
-            common.log('Starting openControlsByName "geo.coordinates"');
-            return settingsPage.openControlsByName('geo.coordinates');
+            return settingsPage.openControlsByName(fieldName);
           })
           .then(function increasePopularity() {
-            common.log('increasePopularity');
             return settingsPage.increasePopularity();
-          })
-          .then(function getPopularity() {
-            return settingsPage.getPopularity();
-          })
+          });
+        });
+
+        bdd.afterEach(function () {
+          // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
+          return settingsPage.controlChangeCancel();
+        });
+
+        bdd.it('should update the popularity input', function () {
+          return settingsPage.getPopularity()
           .then(function (popularity) {
-            common.log('popularity = ' + popularity);
             expect(popularity).to.be('1');
           })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should be reset on cancel', function pageHeader() {
           // Cancel saving the popularity change
-          .then(function controlChangeCancel() {
-            return settingsPage.controlChangeCancel();
-          })
-          // set the page size to All again, https://github.com/elastic/kibana/issues/5030
+
+          return settingsPage.controlChangeCancel()
           .then(function () {
-            return settingsPage.setPageSize('All');
+            return fix5030();
           })
           .then(function openControlsByName() {
-            return settingsPage.openControlsByName('geo.coordinates');
+            return settingsPage.openControlsByName(fieldName);
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
             return settingsPage.getPopularity()
+          })
           .then(function (popularity) {
-            common.log('popularity = ' + popularity);
             expect(popularity).to.be('0');
           })
-          // Cancel saving the popularity change (we were just checking)
-          .then(function controlChangeCancel() {
-            return settingsPage.controlChangeCancel();
-          })
           .catch(common.handleError(this));
-          });
         });
 
         bdd.it('can be saved', function pageHeader() {
-          return settingsPage.setPageSize('All')
-          // increase Popularity
-          .then(function openControlsByName() {
-            common.log('Starting openControlsByName "geo.coordinates"');
-            return settingsPage.openControlsByName('geo.coordinates');
-          })
-          .then(function increasePopularity() {
-            return settingsPage.increasePopularity();
-          })
           // Saving the popularity change
-          .then(function controlChangeSave() {
-            return settingsPage.controlChangeSave();
-          })
-          // set the page size to All again, https://github.com/elastic/kibana/issues/5030
+          return settingsPage.controlChangeSave()
           .then(function () {
-            return settingsPage.setPageSize('All');
+            return fix5030();
           })
-          // open it again to see that it saved
           .then(function openControlsByName() {
-            return settingsPage.openControlsByName('geo.coordinates');
+            return settingsPage.openControlsByName(fieldName);
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
             return settingsPage.getPopularity();
           })
           .then(function (popularity) {
-            common.log('popularity = ' + popularity);
             expect(popularity).to.be('1');
-          })
-          // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
-          .then(function controlChangeCancel() {
-            return settingsPage.controlChangeCancel();
           })
           .catch(common.handleError(this));
         });
