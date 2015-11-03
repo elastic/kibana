@@ -1,5 +1,5 @@
 var path = require('path');
-var config = require('./config');
+var config = require('./config').scenarios;
 var elasticsearch = require('elasticsearch');
 
 function ScenarioManager(server) {
@@ -37,7 +37,6 @@ ScenarioManager.prototype.load = function (id) {
         body: require(path.join(scenario.baseDir, bulk.source)),
       });
     });
-
   }));
 };
 

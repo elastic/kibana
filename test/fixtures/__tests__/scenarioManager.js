@@ -84,7 +84,7 @@ describe('scenario manager', function () {
     });
 
 
-    it('should load if the index is empty', function () {
+    it('should not load if the index is not empty', function () {
       var load = sinon.stub(manager, 'load', Promise.resolve);
       var returnOne = sinon.stub(manager.client, 'count', function () {
         return Promise.resolve({
