@@ -50,21 +50,21 @@ describe('ui/index_patterns/_calculate_indices', () => {
 
     context('when given start', () => {
       beforeEach(() => run({ start: '1234567890' }));
-      it('includes min_value', () => {
-        expect(constraints['@something']).to.have.property('min_value');
+      it('includes max_value', () => {
+        expect(constraints['@something']).to.have.property('max_value');
       });
-      it('min_value is gte', () => {
-        expect(constraints['@something'].min_value).to.have.property('gte');
+      it('max_value is gte', () => {
+        expect(constraints['@something'].max_value).to.have.property('gte');
       });
     });
 
     context('when given stop', () => {
       beforeEach(() => run({ stop: '1234567890' }));
-      it('includes max_value', () => {
-        expect(constraints['@something']).to.have.property('max_value');
+      it('includes min_value', () => {
+        expect(constraints['@something']).to.have.property('min_value');
       });
-      it('max_value is lt', () => {
-        expect(constraints['@something'].max_value).to.have.property('lt');
+      it('min_value is lte', () => {
+        expect(constraints['@something'].min_value).to.have.property('lte');
       });
     });
   });

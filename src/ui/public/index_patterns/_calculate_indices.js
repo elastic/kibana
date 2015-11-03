@@ -17,10 +17,10 @@ define(function (require) {
     function compileOptions(pattern, timeFieldName, start, stop) {
       const constraints = {};
       if (start) {
-        constraints.min_value = { gte: moment(start).valueOf() };
+        constraints.max_value = { gte: moment(start).valueOf() };
       }
       if (stop) {
-        constraints.max_value = { lt: moment(stop).valueOf() };
+        constraints.min_value = { lte: moment(stop).valueOf() };
       }
 
       return {
