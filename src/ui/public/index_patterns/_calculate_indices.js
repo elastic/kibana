@@ -7,14 +7,14 @@ define(function (require) {
     // Uses the field stats api to determine the names of indices that need to
     // be queried against that match the given pattern and fall within the
     // given time range
-    function calculateIndices(...args) {
-      const options = compileOptions(...args);
-      return sendRequest(options);
+    function calculateIndices(pattern, timeFieldName, start, stop, sortDirection) {
+      return getFieldStats(pattern, timeFieldName, start, stop)
+      .then(resp => sortIndexStats(resp, timeFieldName, sortDirection));
     };
 
     // creates the configuration hash that must be passed to the elasticsearch
     // client
-    function compileOptions(pattern, timeFieldName, start, stop) {
+    function getFieldStats(pattern, timeFieldName, start, stop) {
       const constraints = {};
       if (start) {
         constraints.max_value = { gte: moment(start).valueOf() };
@@ -23,30 +23,32 @@ define(function (require) {
         constraints.min_value = { lte: moment(stop).valueOf() };
       }
 
-      return {
-        method: 'POST',
-        path: `/${pattern}/_field_stats`,
-        query: {
-          level: 'indices'
-        },
+      return es.fieldStats({
+        index: pattern,
+        level: 'indices',
         body: {
           fields: [ timeFieldName ],
           index_constraints: {
             [timeFieldName]: constraints
           }
         }
-      };
+      });
     }
 
-    // executes a request to elasticsearch with the given configuration hash
-    function sendRequest(options) {
-      return new Promise(function (resolve, reject) {
-        es.transport.request(options, function (err, response) {
-          if (err) return reject(err);
-          const indices = _.map(response.indices, (info, index) => index);
-          resolve(indices);
-        });
-      });
+    function sortIndexStats(resp, timeFieldName, sortDirection) {
+      if (!sortDirection) return _.keys(resp.indices);
+
+      // FIXME: Once https://github.com/elastic/elasticsearch/issues/14404 is closed
+      // this should be sorting based on the sortable value of a field.
+      const edgeKey = sortDirection === 'desc' ? 'max_value' : 'min_value';
+
+      return _(resp.indices)
+      .map((stats, index) => (
+        { index, edge: stats.fields[timeFieldName][edgeKey] }
+      ))
+      .sortByOrder(['edge'], [sortDirection])
+      .pluck('index')
+      .value();
     }
 
     return calculateIndices;
