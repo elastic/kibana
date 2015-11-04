@@ -38,10 +38,7 @@ module.exports = function (kibana) {
           let config = server.config();
 
           return {
-            kbnIndex: config.get('kibana.index'),
-            kbnDefaultAppId: config.get('kibana.defaultAppId'),
-            esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion'),
+            kbnDefaultAppId: config.get('kibana.defaultAppId')
           };
         }
       }
