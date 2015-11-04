@@ -45,7 +45,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     expect(output).to.equal(indices);
   });
 
-  it(`tells the index pattern it's direction`, async function () {
+  it('tells the index pattern its direction', async function () {
     const source = new MockSource();
     const ip = source.get('index');
     const req = new SegmentedReq(source);
