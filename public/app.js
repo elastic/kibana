@@ -2,6 +2,8 @@ var _ = require('lodash');
 
 var logoUrl = require('./logo.png');
 
+require('angularSortableView');
+
 require('./directives/chart_directive');
 require('./directives/expression_directive');
 require('./directives/docs');
@@ -15,7 +17,7 @@ require('ui/chrome')
   'smallLogo': 'url(' + timelionLogo + ') left no-repeat'
 }).setTabs([]);
 
-var app = require('ui/modules').get('apps/timelion', []);
+var app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
@@ -111,6 +113,11 @@ app.controller('timelion', function (
     if (oldInterval === 'other') return;
     $scope.state.otherInterval = oldInterval;
   });
+
+  $scope.drop = function (item, partFrom, partTo, indexFrom, indexTo) {
+    $scope.state.selected = indexTo;
+    _.move($scope.sheet, indexFrom, indexTo);
+  };
 
   $scope.toggle = function (property) {
     console.log(property);

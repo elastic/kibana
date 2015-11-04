@@ -106,11 +106,12 @@
 
   <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
 
-
   <div class="timelion-container">
     <div class="timelion-container-sheet">
-      <div class="timelion-container-sheet-margin">
-        <div class="chart-container col-md-{{(12 / state.columns)}}"
+      <div class="timelion-container-sheet-margin"
+        sv-root sv-part="state.sheet"
+        sv-on-sort="drop($item, $partFrom, $partTo, $indexFrom, $indexTo)">
+        <div class="chart-container col-md-{{(12 / state.columns)}}" sv-element
           ng-repeat="cell in state.sheet track by $index"
           ng-click="setActiveCell($index)"
           ng-class="{active: $index === state.selected}"
@@ -120,6 +121,5 @@
         </div>
       </div>
     </div>
-
   </div>
 </div>

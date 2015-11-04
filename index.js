@@ -32,6 +32,9 @@ module.exports = function (kibana) {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.canvas'),
           imports: 'flot'
         },
+        angularSortableView$: {
+          path: path.resolve(__dirname, 'bower_components/angular-sortable-view/src/angular-sortable-view.js')
+        },
         flotCrosshair$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.crosshair'),
           imports: 'flot'
