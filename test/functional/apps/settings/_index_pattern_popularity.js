@@ -17,11 +17,11 @@ define(function (require) {
       });
 
       bdd.beforeEach(function be() {
-        return settingsPage.createIndex();
+        return settingsPage.createIndexPattern();
       });
 
       bdd.afterEach(function ae() {
-        return settingsPage.removeIndex();
+        return settingsPage.removeIndexPattern();
       });
 
       bdd.describe('change popularity', function indexPatternCreation() {
