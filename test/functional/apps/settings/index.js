@@ -21,7 +21,7 @@ define(function (require) {
 
     function checkForSettingsUrl() {
       return common.tryForTime(25000, function () {
-        return remote.get(url.format(_.assign(config.kibana, {
+        return remote.get(url.format(_.assign(config.servers.kibana, {
           pathname: ''
         })))
         .then(function () {
@@ -41,7 +41,7 @@ define(function (require) {
     // that we will use for all the tests
     bdd.before(function () {
       common = new Common(this.remote);
-      scenarioManager = new ScenarioManager(url.format(config.elasticsearch));
+      scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
       remote = this.remote;
 
       return scenarioManager.loadIfEmpty('makelogs');
