@@ -20,7 +20,7 @@ define(function (require) {
       var defer = Promise.defer();
 
       fetchThese([
-        source._createRequest(defer.resolve)
+        source._createRequest(defer)
       ]);
 
       return defer.promise;
