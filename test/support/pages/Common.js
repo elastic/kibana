@@ -50,11 +50,11 @@ define(function (require) {
     },
 
     sleep: function sleep(sleepMilliseconds) {
-      var debug = this.debug;
-      debug('... sleep(' + sleepMilliseconds + ') start');
+      var self = this;
+      self.debug('... sleep(' + sleepMilliseconds + ') start');
 
       return Promise.resolve().delay(sleepMilliseconds)
-      .then(function () { debug('... sleep(' + sleepMilliseconds + ') end'); });
+      .then(function () { self.debug('... sleep(' + sleepMilliseconds + ') end'); });
     },
 
     handleError: function (testObj) {
