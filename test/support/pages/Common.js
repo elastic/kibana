@@ -63,7 +63,7 @@ define(function (require) {
 
       return function (reason) {
         var now = Date.now();
-        var filename = path.resolve(['./screenshot', now, testName, '.png'].join('_'));
+        var filename = ['failure', now, testName].join('_') + '.png';
 
         return self.saveScreenshot(filename)
         .finally(function () {
@@ -73,11 +73,17 @@ define(function (require) {
     },
 
     saveScreenshot: function saveScreenshot(filename) {
-      this.debug('Test Failed, taking screenshot "' + filename + '"');
+      var self = this;
+      var outDir = path.resolve('test', 'output');
 
-      return this.remote.takeScreenshot()
+      return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
-        fs.writeFileSync(filename, data);
+        var filepath = path.resolve(outDir, filename);
+        self.debug('Test Failed, taking screenshot "' + filepath + '"');
+        fs.writeFileSync(filepath, data);
+      })
+      .catch(function (err) {
+        self.log('SCREENSHOT FAILED: ' + err);
       });
     }
   };
