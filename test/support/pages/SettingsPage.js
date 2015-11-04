@@ -226,7 +226,7 @@ define(function (require) {
       });
     },
 
-    createIndex: function createIndex() {
+    createIndexPattern: function createIndexPattern() {
       var self = this;
       return this.selectTimeFieldOption('@timestamp')
       .then(function () {
@@ -244,7 +244,7 @@ define(function (require) {
       });
     },
 
-    removeIndex: function removeIndex() {
+    removeIndexPattern: function removeIndexPattern() {
       var self = this;
       var alertText;
       return common.tryForTime(3000, function () {

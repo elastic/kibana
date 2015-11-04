@@ -16,15 +16,14 @@ define(function (require) {
         remote = this.remote;
       });
 
-
       bdd.describe('index pattern creation', function indexPatternCreation() {
         bdd.beforeEach(function be() {
-          return settingsPage.createIndex();
+          return settingsPage.createIndexPattern();
         });
 
         bdd.afterEach(function ae() {
           var expectedAlertText = 'Are you sure you want to remove this index pattern?';
-          return settingsPage.removeIndex()
+          return settingsPage.removeIndexPattern()
           .then(function (alertText) {
             expect(alertText).to.be(expectedAlertText);
           });
@@ -78,11 +77,10 @@ define(function (require) {
 
 
       bdd.describe('index pattern deletion', function indexDelete() {
-
         bdd.beforeEach(function be() {
-          return settingsPage.createIndex()
+          return settingsPage.createIndexPattern()
           .then(function () {
-            return settingsPage.removeIndex();
+            return settingsPage.removeIndexPattern();
           });
         });
 
