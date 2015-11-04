@@ -228,6 +228,7 @@ define(function (require) {
 
     createIndexPattern: function createIndexPattern() {
       var self = this;
+
       return this.selectTimeFieldOption('@timestamp')
       .then(function () {
         return self.getCreateButton().click();
@@ -247,10 +248,8 @@ define(function (require) {
     removeIndexPattern: function removeIndexPattern() {
       var self = this;
       var alertText;
-      return common.tryForTime(3000, function () {
-        // delete the index pattern -X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X
-        return self.clickDeletePattern();
-      })
+
+      return self.clickDeletePattern()
       .then(function () {
         return common.tryForTime(3000, function () {
           return self.remote.getAlertText()
@@ -261,6 +260,16 @@ define(function (require) {
       })
       .then(function () {
         return self.remote.acceptAlert();
+      })
+      .then(function () {
+        common.tryForTime(3000, function () {
+          return self.remote.getCurrentUrl()
+          .then(function (currentUrl) {
+            if (currentUrl.match(/indices\/.+\?/)) {
+              throw new Error('Index pattern not removed');
+            }
+          });
+        });
       })
       .then(function () {
         return alertText;
