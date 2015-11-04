@@ -11,7 +11,7 @@ define(function (require) {
     environments: [{
       browserName: 'firefox'
     }],
-    tunnelOptions: serverConfig.webdriver,
+    tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
       'test/functional/status_page/index',
       'test/functional/apps/settings/index'

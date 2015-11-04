@@ -14,7 +14,7 @@ define(function (require) {
 
     bdd.beforeEach(function () {
       // load the status page
-      return this.remote.get(getUrl(config.kibana, 'status'));
+      return this.remote.get(getUrl(config.servers.kibana, 'status'));
     });
 
     bdd.it('should show the kibana plugin as ready', function () {
