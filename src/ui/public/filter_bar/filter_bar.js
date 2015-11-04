@@ -61,9 +61,9 @@ define(function (require) {
         $scope.startEditingFilter = function (source) {
           return $scope.editingFilter = {
             source: source,
-            type: _.first(_.filter(_.keys(source), function (key) {
+            type: _.findKey(source, function (val, key) {
               return !key.match(privateFilterFieldRegex);
-            })),
+            }),
             model: convertToEditableFilter(source),
             alias: source.meta.alias
           };
@@ -129,17 +129,9 @@ define(function (require) {
         });
 
         function convertToEditableFilter(filter) {
-          var model = _.cloneDeep(filter);
-
-          var filterType;
-          //Hide private properties
-          _.each(model, function (value, key) {
-            if (key.match(privateFilterFieldRegex)) {
-              delete model[key];
-            }
+          return _.omit(_.cloneDeep(filter), function (val, key) {
+            return key.match(privateFilterFieldRegex);
           });
-
-          return model;
         }
 
         function updateFilters() {
