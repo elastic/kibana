@@ -23,7 +23,6 @@ define(function (require) {
         return compileRecursiveDirective.compile($el);
       },
       controller: function ($scope) {
-        console.log('agg-table scope: ', $scope);
         var self = this;
 
         self.sort = null;
