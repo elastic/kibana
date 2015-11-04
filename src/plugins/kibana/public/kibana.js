@@ -10,7 +10,7 @@ var chrome = require('ui/chrome');
 var routes = require('ui/routes');
 var modules = require('ui/modules');
 
-var kibanaLogoUrl = require('ui/images/kibana.png');
+var kibanaLogoUrl = require('ui/images/kibana.svg');
 
 routes
 .otherwise({

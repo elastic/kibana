@@ -4,6 +4,7 @@ let _ = require('lodash');
 let { zipObject } = require('lodash');
 let override = require('./override');
 let pkg = require('requirefrom')('src/utils')('packageJson');
+const clone = require('./deepCloneWithBuffers');
 
 const schema = Symbol('Joi Schema');
 const schemaKeys = Symbol('Schema Extensions');
@@ -15,7 +16,7 @@ module.exports = class Config {
     this[schemaKeys] = new Map();
 
     this[vals] = Object.create(null);
-    this[pendingSets] = new Map(_.pairs(_.cloneDeep(initialSettings || {})));
+    this[pendingSets] = new Map(_.pairs(clone(initialSettings || {})));
 
     if (initialSchema) this.extendSchema(initialSchema);
   }
@@ -64,7 +65,7 @@ module.exports = class Config {
 
   set(key, value) {
     // clone and modify the config
-    let config = _.cloneDeep(this[vals]);
+    let config = clone(this[vals]);
     if (_.isPlainObject(key)) {
       config = override(config, key);
     } else {
@@ -114,7 +115,7 @@ module.exports = class Config {
 
   get(key) {
     if (!key) {
-      return _.cloneDeep(this[vals]);
+      return clone(this[vals]);
     }
 
     let value = _.get(this[vals], key);
@@ -123,7 +124,7 @@ module.exports = class Config {
         throw new Error('Unknown config key: ' + key);
       }
     }
-    return _.cloneDeep(value);
+    return clone(value);
   }
 
   has(key) {

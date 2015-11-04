@@ -19,7 +19,7 @@ module.exports = function (kibana) {
         startupTimeout: Joi.number().default(5000),
         ssl: Joi.object({
           verify: Joi.boolean().default(true),
-          ca: Joi.string(),
+          ca: Joi.array().single().items(Joi.string()),
           cert: Joi.string(),
           key: Joi.string()
         }).default(),

@@ -1,4 +1,4 @@
-<div class="col-md-2 sidebar-container" bindonce="indexPatternList">
+<div class="col-md-2 sidebar-container">
   <div class="sidebar-list">
     <div class="sidebar-list-header">
       <h5>
@@ -24,10 +24,10 @@
       <li
         ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
         class="sidebar-item">
-        <a bo-href="pattern.url">
-          <div bo-class="pattern.class">
+        <a href="{{::pattern.url}}">
+          <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
-            <span bo-text="pattern.id"></span>
+            <span ng-bind="::pattern.id"></span>
           </div>
         </a>
       </li>

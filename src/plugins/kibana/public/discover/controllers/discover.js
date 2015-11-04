@@ -14,7 +14,6 @@ define(function (require) {
   require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
-  require('ui/validate_query');
   require('ui/filters/moment');
   require('ui/courier');
   require('ui/index_patterns');
@@ -246,8 +245,7 @@ define(function (require) {
         }()));
 
         $scope.searchSource.onError(function (err) {
-          console.log(err);
-          notify.error('An error occurred with your request. Reset your inputs and try again.');
+          notify.error(err);
         }).catch(notify.fatal);
 
         function initForTime() {
@@ -433,14 +431,17 @@ define(function (require) {
       .size($scope.opts.sampleSize)
       .sort(getSort($state.sort, $scope.indexPattern))
       .query(!$state.query ? null : $state.query)
-      .highlight({
-        pre_tags: [highlightTags.pre],
-        post_tags: [highlightTags.post],
-        fields: {'*': {}},
-        require_field_match: false,
-        fragment_size: 2147483647 // Limit of an integer.
-      })
       .set('filter', queryFilter.getFilters());
+
+      if (config.get('doc_table:highlight')) {
+        $scope.searchSource.highlight({
+          pre_tags: [highlightTags.pre],
+          post_tags: [highlightTags.post],
+          fields: {'*': {}},
+          require_field_match: false,
+          fragment_size: 2147483647 // Limit of an integer.
+        });
+      }
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms

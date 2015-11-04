@@ -6,12 +6,12 @@
   <div class="agg-table-paginated">
     <table class="table table-condensed">
       <thead>
-        <tr bindonce>
+        <tr>
           <th
-            ng-repeat="col in columns"
+            ng-repeat="col in ::columns"
             ng-click="paginatedTable.sortColumn($index)"
             class="{{ col.class }}">
-            <span bo-text="col.title"></span>
+            <span ng-bind="::col.title"></span>
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
             <i
               ng-if="col.sortable !== false"

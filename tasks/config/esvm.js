@@ -2,10 +2,11 @@ module.exports = function (grunt) {
   var resolve = require('path').resolve;
   var directory = resolve(__dirname, '../../esvm');
   var dataDir = resolve(directory, 'data_dir');
+  var uiConfig = require('requirefrom')('test')('serverConfig');
 
   return {
     options: {
-      branch: '2.0',
+      branch: '2.1',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         network: {
@@ -43,7 +44,7 @@ module.exports = function (grunt) {
         purge: true,
         config: {
           http: {
-            port: 9220
+            port: uiConfig.elasticsearch.port
           }
         }
       }

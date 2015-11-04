@@ -40,7 +40,8 @@ module.exports = function (kbnServer, server, config) {
           listing: true,
           lookupCompressed: true
         }
-      }
+      },
+      config: {auth: false}
     });
   });
 
@@ -51,7 +52,8 @@ module.exports = function (kbnServer, server, config) {
       method: 'GET',
       handler: {
         file: filePath
-      }
+      },
+      config: {auth: false}
     });
   });
 

@@ -20,9 +20,11 @@ define(function (require) {
       if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
       if (resp && resp.hits) stats.push(['Hits', resp.hits.total]);
 
-      if (req.fetchParams.index) stats.push(['Index', req.fetchParams.index]);
-      if (req.fetchParams.type) stats.push(['Type', req.fetchParams.type]);
-      if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
+      if (req.fetchParams) {
+        if (req.fetchParams.index) stats.push(['Index', req.fetchParams.index]);
+        if (req.fetchParams.type) stats.push(['Type', req.fetchParams.type]);
+        if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
+      }
     });
   };
 
