@@ -92,11 +92,9 @@ define(function (require) {
         });
 
         bdd.it('should remove index pattern from url', function indexNotInUrl() {
-          return common.tryForTime(3000, function () {
-            return remote.getCurrentUrl()
-            .then(function (currentUrl) {
-              expect(currentUrl).to.not.contain('logstash-*');
-            });
+          return remote.getCurrentUrl()
+          .then(function (currentUrl) {
+            expect(currentUrl).to.not.contain('logstash-*');
           })
           .catch(common.handleError(this));
         });
