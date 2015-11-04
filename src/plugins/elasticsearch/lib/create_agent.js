@@ -1,6 +1,6 @@
 var url = require('url');
 var _ = require('lodash');
-var readFile = _.partialRight(require('fs').readFileSync, 'utf8');
+var readFile = (file) => require('fs').readFileSync(file, 'utf8');
 var http = require('http');
 var https = require('https');
 
@@ -14,8 +14,8 @@ module.exports = _.memoize(function (server) {
     rejectUnauthorized: config.get('elasticsearch.ssl.verify')
   };
 
-  if (config.get('elasticsearch.ssl.ca')) {
-    agentOptions.ca = [readFile(config.get('elasticsearch.ssl.ca'))];
+  if (_.size(config.get('elasticsearch.ssl.ca'))) {
+    agentOptions.ca = config.get('elasticsearch.ssl.ca').map(readFile);
   }
 
   // Add client certificate and key if required by elasticsearch

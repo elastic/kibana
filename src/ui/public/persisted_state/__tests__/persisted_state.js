@@ -192,6 +192,125 @@ describe('Persisted State', function () {
     });
   });
 
+  describe('child state removal', function () {
+    it('should clear path from parent state', function () {
+      var persistedState = new PersistedState();
+      var childState = persistedState.createChild('child', { userId: 1234 });
+      expect(persistedState.get()).to.eql({ child: { userId: 1234 }});
+      persistedState.removeChild('child');
+      expect(persistedState.get()).to.eql({});
+    });
+
+    it('should reset original parent value at path', function () {
+      var persistedState = new PersistedState({ user: 1234 });
+      var childState = persistedState.createChild('user', { id: 5678 });
+      expect(persistedState.get()).to.eql({ user: { id: 5678 }});
+
+      persistedState.removeChild('user');
+      expect(persistedState.get()).to.eql({ user: 1234 });
+    });
+
+    it('should clear changedState', function () {
+      var persistedState = new PersistedState({ user: 1234 });
+      var childState = persistedState.createChild('user');
+      childState.set('name', 'user name');
+      expect(persistedState.getChanges()).to.eql({ user: { name: 'user name' }});
+
+      persistedState.removeChild('user');
+      expect(persistedState.getChanges()).to.eql({});
+    });
+  });
+
+  describe('deep child state removal', function () {
+    it('should clear path from parent state', function () {
+      var persistedState = new PersistedState();
+      var childState = persistedState.createChild('child.state', { userId: 1234 });
+      expect(persistedState.get()).to.eql({ child: { state: { userId: 1234 }}});
+      persistedState.removeChild('child.state');
+      expect(persistedState.get()).to.eql({});
+    });
+
+    it('should reset original parent value at path', function () {
+      var persistedState = new PersistedState({ user: { id: 1234 }});
+      var childState = persistedState.createChild('user.id', 5678);
+      expect(persistedState.get()).to.eql({ user: { id: 5678 }});
+
+      persistedState.removeChild('user.id');
+      expect(persistedState.get()).to.eql({ user: { id: 1234 }});
+    });
+
+    it('should reset original parent other values at path', function () {
+      var persistedState = new PersistedState({ user: { name: 'user' }});
+      var childState = persistedState.createChild('user.id', 5678);
+      expect(persistedState.get()).to.eql({ user: { name: 'user', id: 5678 }});
+
+      persistedState.removeChild('user.id');
+      expect(persistedState.get()).to.eql({ user: { name: 'user' }});
+    });
+
+    it('should clear the changed state', function () {
+      var persistedState = new PersistedState({ user: { id: 1234 }});
+      var childState = persistedState.createChild('user.name');
+      childState.set('user name');
+      expect(persistedState.getChanges()).to.eql({ user: { name: 'user name' }});
+
+      persistedState.removeChild('user.name');
+      expect(persistedState.getChanges()).to.eql({});
+
+    });
+  });
+
+  describe('child state conditions', function () {
+    it('should be merged with the parent state', function () {
+      var parent = new PersistedState({ name: 'test' });
+      var child = parent.createChild('child', 'value');
+      expect(parent.get()).to.eql({
+        name: 'test',
+        child: 'value'
+      });
+
+      parent.set('id', 1234);
+      expect(parent.get()).to.eql({
+        id: 1234,
+        name: 'test',
+        child: 'value'
+      });
+
+      parent.set({});
+      expect(parent.get()).to.eql({
+        child: 'value'
+      });
+    });
+
+    it('should give child state precedence', function () {
+      var parent = new PersistedState({ user: { id: 1234, name: 'test' }});
+      var child = parent.createChild('user', { name: 'child test' });
+      expect(parent.get()).to.eql({
+        user: {
+          id: 1234,
+          name: 'child test'
+        }
+      });
+
+      parent.set({});
+      expect(parent.get()).to.eql({ user: { name: 'child test' }});
+    });
+
+    it('should be cleaned up with removeChild', function () {
+      var parent = new PersistedState({ name: 'test' });
+      var child = parent.createChild('child', 'value');
+      expect(parent.get()).to.eql({
+        name: 'test',
+        child: 'value'
+      });
+
+      parent.removeChild('child');
+      expect(parent.get()).to.eql({
+        name: 'test'
+      });
+    });
+  });
+
   describe('colliding child paths and parent state values', function () {
     it('should not change the child path value by default', function () {
       var childIndex = 'childTest';
@@ -226,7 +345,7 @@ describe('Persisted State', function () {
       // pass in child state value
       var childState = persistedState.createChild(childIndex, childStateValue);
 
-      // parent's default state overrides child state
+      // parent's default state is merged with child state
       var compare = _.merge({}, childStateValue, persistedStateValue[childIndex]);
       expect(childState.get()).to.eql(compare);
       state = persistedState.get();
@@ -299,7 +418,7 @@ describe('Persisted State', function () {
   });
 
   describe('get state', function () {
-    it('should perform deep gets with vairous formats', function () {
+    it('should perform deep gets with various formats', function () {
       var obj = {
         red: {
           green: {
@@ -335,6 +454,15 @@ describe('Persisted State', function () {
       expect(persistedState.get()).to.eql({ hello: { nouns: ['world', 'humans', 'everyone'] } });
       expect(persistedState.get('hello')).to.eql({ nouns: ['world', 'humans', 'everyone'] });
       expect(persistedState.get('hello.nouns')).to.eql(['world', 'humans', 'everyone']);
+    });
+
+    it('should pass defaults to parent delegation', function () {
+      var persistedState = new PersistedState({ parent: true });
+      var childState = persistedState.createChild('child', { account: { name: 'first child' }});
+      var defaultValue = 'i have no data';
+
+      expect(childState.get('account.name', defaultValue)).to.eql('first child');
+      expect(childState.get('account.age', defaultValue)).to.eql(defaultValue);
     });
   });
 
@@ -471,10 +599,22 @@ describe('Persisted State', function () {
       expect(getByType('set')).to.have.length(1);
     });
 
+    it('should not emit when setting value silently', function () {
+      expect(getByType('set')).to.have.length(0);
+      persistedState.setSilent('checker.time', 'now');
+      expect(getByType('set')).to.have.length(0);
+    });
+
     it('should emit change when changing values', function () {
       expect(getByType('change')).to.have.length(0);
       persistedState.set('checker.time', 'now');
       expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit when changing values silently', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.setSilent('checker.time', 'now');
+      expect(getByType('change')).to.have.length(0);
     });
 
     it('should not emit change when values are identical', function () {
@@ -510,6 +650,12 @@ describe('Persisted State', function () {
       expect(getByType('change')).to.have.length(0);
       persistedState.createChild('checker', { events: 'changed via child' });
       expect(getByType('change')).to.have.length(1);
+    });
+
+    it('should not emit when createChild set to silent', function () {
+      expect(getByType('change')).to.have.length(0);
+      persistedState.createChild('checker', { events: 'changed via child' }, true);
+      expect(getByType('change')).to.have.length(0);
     });
 
     it('should emit change when createChild adds new value', function () {

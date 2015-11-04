@@ -113,6 +113,10 @@ define(function (require) {
         }),
         description: 'Maps values to specified colors within visualizations'
       },
+      'visualization:loadingDelay': {
+        value: '2s',
+        description: 'Time to wait before dimming visualizations during query'
+      },
       'csv:separator': {
         value: ',',
         description: 'Separate exported values with this string',
