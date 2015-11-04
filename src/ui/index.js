@@ -1,5 +1,5 @@
 module.exports = async (kbnServer, server, config) => {
-  let _ = require('lodash');
+  let { defaults } = require('lodash');
   let Boom = require('boom');
   let formatUrl = require('url').format;
   let { resolve } = require('path');
@@ -56,6 +56,15 @@ module.exports = async (kbnServer, server, config) => {
     }
   });
 
+  const defaultInjectedVars = {};
+  if (config.has('kibana')) {
+    defaultInjectedVars.kbnIndex = config.get('kibana.index');
+  }
+  if (config.has('elasticsearch')) {
+    defaultInjectedVars.esShardTimeout = config.get('elasticsearch.shardTimeout');
+    defaultInjectedVars.esApiVersion = config.get('elasticsearch.apiVersion');
+  }
+
   server.decorate('reply', 'renderApp', function (app) {
     let payload = {
       app: app,
@@ -63,7 +72,7 @@ module.exports = async (kbnServer, server, config) => {
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
-      vars: app.getInjectedVars()
+      vars: defaults(app.getInjectedVars(), defaultInjectedVars),
     };
 
     return this.view(app.templateName, {
