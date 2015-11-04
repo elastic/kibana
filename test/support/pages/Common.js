@@ -66,7 +66,7 @@ define(function (require) {
         var filename = path.resolve(['./screenshot', now, testName, '.png'].join('_'));
 
         return self.saveScreenshot(filename)
-        .then(function () {
+        .finally(function () {
           throw new Error(reason);
         });
       };
