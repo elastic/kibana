@@ -13,6 +13,7 @@ define(function (require) {
       template: require('ui/agg_table/agg_table.html'),
       scope: {
         table: '=',
+        exportTitle: '@',
         perPage: '=?'
       },
       controllerAs: 'aggTable',
@@ -22,6 +23,7 @@ define(function (require) {
         return compileRecursiveDirective.compile($el);
       },
       controller: function ($scope) {
+        console.log('agg-table scope: ', $scope);
         var self = this;
 
         self.sort = null;
@@ -75,7 +77,7 @@ define(function (require) {
             return;
           }
 
-          self.csv.filename = (table.title() || 'table') + '.csv';
+          self.csv.filename = ($scope.exportTitle || table.title() || 'table') + '.csv';
           $scope.rows = table.rows;
           $scope.formattedColumns = table.columns.map(function (col, i) {
             var agg = $scope.table.aggConfig(col);

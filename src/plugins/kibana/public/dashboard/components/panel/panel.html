@@ -25,9 +25,11 @@
     <span ng-bind="error"></span>
   </div>
 
-  <visualize ng-switch-when="visualization"
+  <visualize
+    ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
+    export-title="{{savedObj.title}}"
     class="panel-content">
   </visualize>
 

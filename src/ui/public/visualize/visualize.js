@@ -17,6 +17,7 @@ define(function (require) {
       restrict: 'E',
       scope : {
         vis: '=',
+        exportTitle: '@?',
         editableVis: '=?',
         esResp: '=?',
         searchSource: '=?'
