@@ -4,6 +4,10 @@
 # The host to bind the server to.
 # server.host: "0.0.0.0"
 
+# If you are running kibana behind a proxy, and want to mount it at a path,
+# specify that path here. The basePath can't end in a slash.
+# server.basePath: ""
+
 # A value to use as a XSRF token. This token is sent back to the server on each request
 # and required if you want to execute requests from other clients (like curl).
 # server.xsrf.token: ""
