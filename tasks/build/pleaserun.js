@@ -2,7 +2,7 @@ module.exports = function createServices(grunt) {
   var { resolve } = require('path');
 
   let exec = require('../utils/exec');
-  let userScriptsPath = grunt.config.get('userScriptsPath');
+  let userScriptsDir = grunt.config.get('userScriptsDir');
 
   grunt.registerTask('_build:pleaseRun', function () {
     // TODO(sissel): Detect if 'pleaserun' is found, and provide a useful error
@@ -23,8 +23,8 @@ module.exports = function createServices(grunt) {
       ]);
     });
 
-    grunt.file.mkdir(userScriptsPath);
-    exec('please-manage-user', ['--output', userScriptsPath, 'kibana']);
+    grunt.file.mkdir(userScriptsDir);
+    exec('please-manage-user', ['--output', userScriptsDir, 'kibana']);
 
   });
 };
