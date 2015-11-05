@@ -9,7 +9,6 @@ require('ui/private');
 require('ui/promises');
 
 var metadata = require('ui/metadata');
-var TabCollection = require('ui/chrome/TabCollection');
 
 var chrome = {};
 var internals = _.defaults(

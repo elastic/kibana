@@ -38,6 +38,7 @@ module.exports = async (kbnServer, server, config) => {
     env: bundles.env,
     bundles: bundles,
     profile: config.get('optimize.profile'),
+    urlBasePath: config.get('server.basePath'),
     sourceMaps: config.get('optimize.sourceMaps'),
     unsafeCache: config.get('optimize.unsafeCache'),
   });

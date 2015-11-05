@@ -16,6 +16,7 @@ let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 class BaseOptimizer {
   constructor(opts) {
     this.env = opts.env;
+    this.urlBasePath = opts.urlBasePath;
     this.bundles = opts.bundles;
     this.profile = opts.profile || false;
 
@@ -74,7 +75,7 @@ class BaseOptimizer {
         path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
-        publicPath: '/bundles/',
+        publicPath: this.urlBasePath + '/bundles/',
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
