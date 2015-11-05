@@ -22,8 +22,8 @@
 # used by the Kibana server to perform maintenance on the kibana_index at startup. Your Kibana
 # users will still need to authenticate with Elasticsearch (which is proxied through
 # the Kibana server)
-# elasticsearch.username: user
-# elasticsearch.password: pass
+# elasticsearch.username: "user"
+# elasticsearch.password: "pass"
 
 # SSL for outgoing requests from the Kibana Server to the browser (PEM formatted)
 # server.ssl.cert: /path/to/your/server.crt
