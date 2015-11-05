@@ -75,7 +75,7 @@ class BaseOptimizer {
         path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
-        publicPath: this.urlBasePath + '/bundles/',
+        publicPath: (this.urlBasePath || '') + '/bundles/',
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
