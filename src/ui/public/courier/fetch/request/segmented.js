@@ -167,12 +167,12 @@ define(function (require) {
     SegmentedReq.prototype._createQueue = function () {
       var self = this;
       var timeBounds = timefilter.getBounds();
-      var indexPattern = this.source.get('index');
+      var indexPattern = self.source.get('index');
+      self._queueCreated = false;
 
-      return indexPattern.toIndexList(timeBounds.min, timeBounds.max)
+      return indexPattern.toIndexList(timeBounds.min, timeBounds.max, self._direction)
       .then(function (queue) {
         if (!_.isArray(queue)) queue = [queue];
-        if (self._direction === 'desc') queue = queue.reverse();
 
         self._queue = queue;
         self._queueCreated = true;

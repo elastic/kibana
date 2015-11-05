@@ -86,6 +86,15 @@ define(function (require) {
 
       return Promise.resolve(value);
     };
+    Promise.fromNode = function (takesCbFn) {
+      return new Promise(function (resolve, reject) {
+        takesCbFn(function (err, ...results) {
+          if (err) reject(err);
+          else if (results.length > 1) resolve(results);
+          else resolve(results[0]);
+        });
+      });
+    };
 
     return Promise;
   });

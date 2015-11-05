@@ -176,15 +176,16 @@ define(function (require) {
         return this.intervalName && _.find(intervals, { name: this.intervalName });
       };
 
-      self.toIndexList = function (start, stop) {
+      self.toIndexList = function (start, stop, sortDirection) {
         return new Promise(function (resolve) {
           var indexList;
           var interval = self.getInterval();
 
           if (interval) {
             indexList = intervals.toIndexList(self.id, interval, start, stop);
+            if (sortDirection === 'desc') indexList = indexList.reverse();
           } else if (self.isWildcard() && self.hasTimeField()) {
-            indexList = calculateIndices(self.id, self.timeFieldName, start, stop);
+            indexList = calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
           } else {
             indexList = self.id;
           }
