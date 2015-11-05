@@ -23,7 +23,7 @@ require('ui/chrome')
 
     // go ahead and get the info you want
     return $http
-    .get('/api/status')
+    .get('./api/status')
     .then(function (resp) {
 
       if (ui.fetchError) {

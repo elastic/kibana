@@ -21,7 +21,7 @@ module.exports = function (chrome, internals) {
     .value('sessionId', Date.now())
     .value('esUrl', (function () {
       var a = document.createElement('a');
-      a.href = '/elasticsearch';
+      a.href = '../elasticsearch';
       return a.href;
     }()))
     .directive('kbnChrome', function ($rootScope) {
