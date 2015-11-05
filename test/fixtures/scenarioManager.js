@@ -17,24 +17,27 @@ function ScenarioManager(server) {
 */
 ScenarioManager.prototype.load = function (id) {
   var scenario = config[id];
-  if (!scenario) throw new Error('No scenario found for ' + id);
+  if (!scenario) return Promise.reject('No scenario found for ' + id);
 
   var self = this;
   return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
     var loadIndexDefinition;
-
     if (bulk.indexDefinition) {
+      var body = require(path.join(scenario.baseDir, bulk.indexDefinition));
+
       loadIndexDefinition = self.client.indices.create({
         index: bulk.indexName,
-        body: require(path.join(scenario.baseDir, bulk.indexDefinition))
+        body: body
       });
     } else {
       loadIndexDefinition = Promise.resolve();
     }
 
     return loadIndexDefinition.then(function bulkRequest() {
+      var body = require(path.join(scenario.baseDir, bulk.source));
+
       self.client.bulk({
-        body: require(path.join(scenario.baseDir, bulk.source)),
+        body: body
       });
     });
   }));
@@ -47,7 +50,7 @@ ScenarioManager.prototype.load = function (id) {
 */
 ScenarioManager.prototype.unload = function (id) {
   var scenario = config[id];
-  if (!scenario) throw new Error('Expected index');
+  if (!scenario) return Promise.reject('No scenario found for ' + id);
 
   var indices = scenario.bulk.map(function mapBulk(bulk) {
     return bulk.indexName;
