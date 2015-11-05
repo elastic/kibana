@@ -4,7 +4,7 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   //var Promise = require('bluebird');
 
-  return function (bdd) {
+  return function (bdd, scenarioManager) {
     bdd.describe('index result popularity', function describeIndexTests() {
       var common;
       var settingsPage;
@@ -14,6 +14,11 @@ define(function (require) {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         remote = this.remote;
+
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          return settingsPage.navigateTo();
+        });
       });
 
       bdd.beforeEach(function be() {
@@ -28,7 +33,7 @@ define(function (require) {
         var fieldName = 'geo.coordinates';
 
         // set the page size to All again, https://github.com/elastic/kibana/issues/5030
-        // TODO: remove this after #5030 is closed
+        // TODO: remove this after issue #5030 is closed
         function fix5030() {
           return settingsPage.setPageSize('All')
           .then(function () {
@@ -65,7 +70,6 @@ define(function (require) {
 
         bdd.it('should be reset on cancel', function pageHeader() {
           // Cancel saving the popularity change
-
           return settingsPage.controlChangeCancel()
           .then(function () {
             return fix5030();
@@ -101,9 +105,7 @@ define(function (require) {
           })
           .catch(common.handleError(this));
         });
-
       }); // end 'change popularity'
-
     }); // end index result popularity
   };
 });

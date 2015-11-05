@@ -4,7 +4,7 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var Promise = require('bluebird');
 
-  return function (bdd) {
+  return function (bdd, scenarioManager) {
     bdd.describe('index result field sort', function describeIndexTests() {
       var common;
       var settingsPage;
@@ -13,88 +13,90 @@ define(function (require) {
       bdd.before(function () {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
-        remote = this.remote;
+        remote = this.remote
+
+        return scenarioManager.reload('emptyKibana')
       });
 
-      bdd.beforeEach(function be() {
-        return settingsPage.createIndexPattern();
-      });
+      var columns = [{
+        heading: 'name',
+        first: '@message',
+        last: 'xss.raw',
+        selector: function () {
+          return settingsPage.getTableRow(0, 0).getVisibleText()
+        }
+      }, {
+        heading: 'type',
+        first: '_source',
+        last: 'string',
+        selector: function () {
+          return settingsPage.getTableRow(0, 1).getVisibleText()
+        }
+      }];
 
-      bdd.afterEach(function ae() {
-        return settingsPage.removeIndexPattern();
-      });
+      columns.forEach(function (col) {
+        bdd.describe('sort by heading - ' + col.heading, function indexPatternCreation() {
+          bdd.before(function () {
+            return settingsPage.navigateTo()
+          });
 
+          bdd.beforeEach(function () {
+            return settingsPage.createIndexPattern();
+          });
 
-      bdd.describe('sort by name', function indexPatternCreation() {
+          bdd.afterEach(function () {
+            return settingsPage.removeIndexPattern();
+          });
 
-        bdd.it('should sort ascending', function pageHeader() {
-          return settingsPage.sortBy('name')
-          .then(function getText() {
-            return settingsPage.getTableRow(0, 0).getVisibleText();
-          })
-          .then(function (rowText) {
-            expect(rowText).to.be('@message');
-          })
-          .catch(common.handleError(this));
-        });
+          bdd.it('should sort ascending, then descending', function pageHeader() {
+            return settingsPage.sortBy(col.heading)
+            .then(function getText() {
+              return col.selector();
+            })
+            .then(function (rowText) {
+              expect(rowText).to.be(col.first);
+            })
+            .catch(common.handleError(this));
+          });
 
-        bdd.it('should sort descending', function pageHeader() {
-          return settingsPage.sortBy('name')
-          .then(function sortAgain() {
-            return settingsPage.sortBy('name');
-          })
-          .then(function getText() {
-            return settingsPage.getTableRow(0, 0).getVisibleText();
-          })
-          .then(function (rowText) {
-            expect(rowText).to.be('xss.raw');
-          })
-          .catch(common.handleError(this));
-        });
-      });
-
-      bdd.describe('sort by type', function indexPatternCreation() {
-
-        bdd.it('should sort ascending', function pageHeader() {
-          return settingsPage.sortBy('type')
-          .then(function getText() {
-            return settingsPage.getTableRow(0, 1).getVisibleText();
-          })
-          .then(function (rowText) {
-            expect(rowText).to.be('_source');
-          })
-          .catch(common.handleError(this));
-        });
-
-        bdd.it('should sort descending', function pageHeader() {
-          return settingsPage.sortBy('type')
-          .then(function sortAgain() {
-            return settingsPage.sortBy('type');
-          })
-          .then(function getText() {
-            return settingsPage.getTableRow(0, 1).getVisibleText();
-          })
-          .then(function (rowText) {
-            expect(rowText).to.be('string');
-          })
-          .catch(common.handleError(this));
+          bdd.it('should sort descending', function pageHeader() {
+            return settingsPage.sortBy(col.heading)
+            .then(function sortAgain() {
+              return settingsPage.sortBy(col.heading);
+            })
+            .then(function getText() {
+              return col.selector();
+            })
+            .then(function (rowText) {
+              expect(rowText).to.be(col.last);
+            })
+            .catch(common.handleError(this));
+          });
         });
       });
 
-      bdd.describe('pagination', function () {
+      bdd.describe('field list pagination', function () {
         var expectedDefaultPageSize = 25;
         var expectedFieldCount = 85;
         var expectedLastPageCount = 10;
         var pages = [1, 2, 3, 4];
 
-        bdd.it('makelogs data should have expected number of fields', function () {
-          return common.sleep(1000)
+        bdd.before(function () {
+          return settingsPage.navigateTo()
           .then(function () {
-            return common.tryForTime(5000, function () {
-              return settingsPage.getFieldsTabCount()
-              .then(function (tabCount) {
-                expect(tabCount).to.be('' + expectedFieldCount);
-              });
+            return settingsPage.createIndexPattern();
+          });
+        });
+
+        bdd.after(function () {
+          return settingsPage.removeIndexPattern();
+        });
+
+        bdd.it('makelogs data should have expected number of fields', function () {
+          return common.tryForTime(15000, function () {
+            return settingsPage.getFieldsTabCount()
+            .then(function (tabCount) {
+              expect(tabCount).to.be('' + expectedFieldCount);
             });
           })
           .catch(common.handleError(this));
@@ -128,9 +130,7 @@ define(function (require) {
 
           return chain.catch(common.handleError(this));
         });
-
       }); // end describe pagination
-
     }); // end index result field sort
   };
 });

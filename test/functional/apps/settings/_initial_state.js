@@ -1,9 +1,9 @@
 define(function (require) {
+  var expect = require('intern/dojo/node!expect.js');
   var Common = require('../../../support/pages/Common');
   var SettingsPage = require('../../../support/pages/SettingsPage');
-  var expect = require('intern/dojo/node!expect.js');
 
-  return function (bdd) {
+  return function (bdd, scenarioManager) {
     bdd.describe('initial state', function () {
       var common;
       var settingsPage;
@@ -11,6 +11,11 @@ define(function (require) {
       bdd.before(function () {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
+
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          return settingsPage.navigateTo();
+        });
       });
 
       bdd.it('should load with time pattern checked', function () {
@@ -22,7 +27,7 @@ define(function (require) {
       });
 
       bdd.it('should load with name pattern unchecked', function () {
-        return settingsPage.getNameIsPatternCheckbox().isSelected()
+        return settingsPage.getTimeBasedIndexPatternCheckbox().isSelected()
         .then(function (selected) {
           expect(selected).to.not.be.ok();
         })
@@ -43,6 +48,14 @@ define(function (require) {
         return settingsPage.getTimeFieldNameField().isSelected()
         .then(function (timeFieldIsSelected) {
           expect(timeFieldIsSelected).to.not.be.ok();
+        })
+        .catch(common.handleError(this));
+      });
+
+      bdd.it('should not be enable creation', function () {
+        return settingsPage.getCreateButton().isEnabled()
+        .then(function (enabled) {
+          expect(enabled).to.not.be.ok();
         })
         .catch(common.handleError(this));
       });
