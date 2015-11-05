@@ -3,6 +3,7 @@ define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
   var moment = require('moment');
+  var getUrl = require('intern/dojo/node!../../utils/getUrl');
   var fs = require('intern/dojo/node!fs');
   var path = require('intern/dojo/node!path');
 
@@ -12,6 +13,74 @@ define(function (require) {
 
   Common.prototype = {
     constructor: Common,
+
+    navigateToApp: function (appName, testStatusPage) {
+      var self = this;
+      var urlTimeout = 10000;
+      var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
+
+      var doNavigation = function (url) {
+        return self.tryForTime(urlTimeout, function () {
+          // since we're using hash URLs, always reload first to force re-render
+          return self.remote.refresh()
+          .then(function () {
+            return self.remote.get(url)
+          })
+          .then(function () {
+            if (testStatusPage !== false) {
+              return self.checkForStatusPage()
+              .then(function (onStatusPage) {
+                if (onStatusPage) throw new Error('Hit status page, retrying');
+              });
+            }
+          })
+          .then(function () {
+            return self.remote.getCurrentUrl();
+          })
+          .then(function (currentUrl) {
+            var navSuccessful = new RegExp(appUrl).test(currentUrl);
+            if (!navSuccessful) throw new Error('App failed to load: ' + appName);
+          })
+        });
+      };
+
+      return doNavigation(appUrl)
+      .then(function () {
+        return self.remote.getCurrentUrl();
+      })
+      .then(function (currentUrl) {
+        var lastUrl = currentUrl;
+        return self.tryForTime(urlTimeout, function () {
+          // give the app time to update the URL
+          return self.sleep(1000)
+          .then(function () {
+            return self.remote.getCurrentUrl();
+          })
+          .then(function (currentUrl) {
+            if (lastUrl !== currentUrl) {
+              lastUrl = currentUrl;
+              throw new Error('URL changed, waiting for it to settle');
+            }
+          });
+        });
+      });
+    },
+
+    checkForStatusPage: function () {
+      var self = this;
+
+      self.debug('Checking for status page');
+      return self.remote.setFindTimeout(2000)
+      .findByCssSelector('.application .container h1').getVisibleText()
+      .then(function (text) {
+        if (text.match(/status\:/i)) return true;
+        return false;
+      })
+      .catch(function (err) {
+        self.debug('Status page title not found');
+        return false;
+      });
+    },
 
     tryForTime: function tryForTime(timeout, block) {
       var self = this;

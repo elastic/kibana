@@ -17,6 +17,10 @@ define(function (require) {
   SettingsPage.prototype = {
     constructor: SettingsPage,
 
+    navigateTo: function () {
+      return common.navigateToApp('settings');
+    },
+
     getTimeBasedEventsCheckbox: function getTimeBasedEventsCheckbox() {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('input[ng-model="index.isTimeBased"]');
