@@ -39,7 +39,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |  |
 | --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-windows.zip) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-darwin-x64.zip) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-linux-x64.zip) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-linux-x86.zip) |
+| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.3.0-snapshot-windows.zip) |
