@@ -5,9 +5,19 @@
 module.exports = function (iconv) {
     var original = undefined; // Place to keep original methods.
 
+    // Node authors rewrote Buffer internals to make it compatible with
+    // Uint8Array and we cannot patch key functions since then.
+    iconv.supportsNodeEncodingsExtension = !(new Buffer(0) instanceof Uint8Array);
+
     iconv.extendNodeEncodings = function extendNodeEncodings() {
         if (original) return;
         original = {};
+
+        if (!iconv.supportsNodeEncodingsExtension) {
+            console.warning("ACTION NEEDED: require('iconv-lite').extendNodeEncodings() is not supported in your version of Node");
+            console.warning("See more info at https://github.com/ashtuchkin/iconv-lite/wiki/Node-v4-compatibility");
+            return;
+        }
 
         var nodeNativeEncodings = {
             'hex': true, 'utf8': true, 'utf-8': true, 'ascii': true, 'binary': true, 
@@ -175,6 +185,8 @@ module.exports = function (iconv) {
 
     // Remove iconv-lite Node primitive extensions.
     iconv.undoExtendNodeEncodings = function undoExtendNodeEncodings() {
+        if (!iconv.supportsNodeEncodingsExtension)
+            return;
         if (!original)
             throw new Error("require('iconv-lite').undoExtendNodeEncodings(): Nothing to undo; extendNodeEncodings() is not called.")
 

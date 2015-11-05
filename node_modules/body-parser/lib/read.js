@@ -37,14 +37,20 @@ module.exports = read
 
 function read(req, res, next, parse, debug, options) {
   var length
+  var opts = options || {}
   var stream
 
   // flag as parsed
   req._body = true
 
-  var opts = options || {}
+  // read options
+  var encoding = opts.encoding !== null
+    ? opts.encoding || 'utf-8'
+    : null
+  var verify = opts.verify
 
   try {
+    // get the content stream
     stream = contentstream(req, debug, opts.inflate)
     length = stream.length
     stream.length = undefined
@@ -52,16 +58,18 @@ function read(req, res, next, parse, debug, options) {
     return next(err)
   }
 
+  // set raw-body options
   opts.length = length
-
-  var encoding = opts.encoding !== null
-    ? opts.encoding || 'utf-8'
-    : null
-  var verify = opts.verify
-
   opts.encoding = verify
     ? null
     : encoding
+
+  // assert charset is supported
+  if (opts.encoding === null && encoding !== null && !iconv.encodingExists(encoding)) {
+    return next(createError(415, 'unsupported charset "' + encoding.toUpperCase() + '"', {
+      charset: encoding.toLowerCase()
+    }))
+  }
 
   // read body
   debug('read body')

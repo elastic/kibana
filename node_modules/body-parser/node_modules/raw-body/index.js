@@ -24,6 +24,13 @@ var unpipe = require('unpipe')
 module.exports = getRawBody
 
 /**
+ * Module variables.
+ * @private
+ */
+
+var iconvEncodingMessageRegExp = /^Encoding not recognized: /
+
+/**
  * Get the decoder for a given encoding.
  *
  * @param {string} encoding
@@ -36,6 +43,10 @@ function getDecoder(encoding) {
   try {
     return iconv.getDecoder(encoding)
   } catch (e) {
+    // error getting decoder
+    if (!iconvEncodingMessageRegExp.test(e.message)) throw e
+
+    // the encoding was not found
     throw createError(415, 'specified encoding unsupported', 'encoding.unsupported', {
       encoding: encoding
     })

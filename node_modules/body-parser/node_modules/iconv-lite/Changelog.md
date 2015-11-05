@@ -1,4 +1,12 @@
 
+# 0.4.12 / 2015-09-26
+
+ * Node v4 support:
+   * Added CESU-8 decoding (#106)
+   * Added deprecation notice for `extendNodeEncodings`
+   * Added Travis tests for Node v4 and io.js latest (#105 by @Mithgol)
+
+
 # 0.4.11 / 2015-07-03
 
  * Added CESU-8 encoding.

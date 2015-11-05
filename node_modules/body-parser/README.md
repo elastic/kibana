@@ -287,7 +287,7 @@ set to `413`.
 ### request size did not match content length
 
 This error will occur when the request's length did not match the length from
-the `Content-Length` header. This typically occurs when the requst is malformed,
+the `Content-Length` header. This typically occurs when the request is malformed,
 typically when the `Content-Length` header was calculated based on characters
 instead of bytes. The `status` property is set to `400`.
 

@@ -80,6 +80,13 @@ TestServer.prototype.router = function(req, res) {
 		res.end('fake sdch string');
 	}
 
+	if (p === '/invalid-content-encoding') {
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'text/plain');
+		res.setHeader('Content-Encoding', 'gzip');
+		res.end('fake gzip string');
+	}
+
 	if (p === '/timeout') {
 		setTimeout(function() {
 			res.statusCode = 200;

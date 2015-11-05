@@ -1,0 +1,7 @@
+node_js:
+- "0.10"
+- "0.11"
+language: node_js
+matrix:
+  allow_failures:
+    - node_js: "0.11"

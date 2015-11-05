@@ -1,0 +1,66 @@
+{
+  "name": "get-stdin",
+  "version": "5.0.0",
+  "description": "Get stdin as a string or buffer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sindresorhus/get-stdin.git"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "scripts": {
+    "test": "xo && ava test.js test-buffer.js && echo unicorns | ava test-real.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "std",
+    "stdin",
+    "stdio",
+    "concat",
+    "buffer",
+    "stream",
+    "process",
+    "read"
+  ],
+  "devDependencies": {
+    "ava": "*",
+    "buffer-equals": "^1.0.3",
+    "xo": "*"
+  },
+  "gitHead": "3847c3da6c8c78b8edcc12dd41c8a754a92d664c",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/get-stdin/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/get-stdin",
+  "_id": "get-stdin@5.0.0",
+  "_shasum": "92ac421f64f6c12a1f9612c092fbd661989272d3",
+  "_from": "get-stdin@*",
+  "_npmVersion": "2.11.3",
+  "_nodeVersion": "0.12.7",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "dist": {
+    "shasum": "92ac421f64f6c12a1f9612c092fbd661989272d3",
+    "tarball": "http://registry.npmjs.org/get-stdin/-/get-stdin-5.0.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/get-stdin/-/get-stdin-5.0.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

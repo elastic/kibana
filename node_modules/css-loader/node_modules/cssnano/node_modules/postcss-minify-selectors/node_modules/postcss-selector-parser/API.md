@@ -132,6 +132,19 @@ Arguments:
 
 * `props (object)`: The new node's properties.
 
+### `parser.string([props])`
+
+Creates a new string node.
+
+```js
+parser.string();
+// => (empty)
+```
+
+Arguments:
+
+* `props (object)`: The new node's properties.
+
 ### `parser.tag([props])`
 
 Creates a new tag selector.
@@ -164,7 +177,7 @@ Arguments:
 
 A string representation of the selector type. It can be one of the following;
 `attribute`, `class`, `combinator`, `comment`, `id`, `pseudo`, `root`,
-`selector`, `tag`, or `universal`.
+`selector`, `string`, `tag`, or `universal`.
 
 ```js
 parser.attribute({attribute: 'href'}).type;

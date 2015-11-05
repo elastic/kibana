@@ -6,7 +6,7 @@
  * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
  * Intuitive encode/decode API
  * Streaming support for Node v0.10+
- * Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings.
+ * [Deprecated] Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings.
  * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * License: MIT.
 
@@ -55,7 +55,9 @@ http.createServer(function(req, res) {
 });
 ```
 
-### Extend Node.js own encodings
+### [Deprecated] Extend Node.js own encodings
+> NOTE: This doesn't work on latest Node versions. See [details](https://github.com/ashtuchkin/iconv-lite/wiki/Node-v4-compatibility).
+
 ```javascript
 // After this call all Node basic primitives will understand iconv-lite encodings.
 iconv.extendNodeEncodings();

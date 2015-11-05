@@ -13,19 +13,19 @@ $ npm install --save query-string
 ## Usage
 
 ```js
-var queryString = require('query-string');
+const queryString = require('query-string');
 
 console.log(location.search);
 //=> '?foo=bar'
 
-var parsed = queryString.parse(location.search);
+const parsed = queryString.parse(location.search);
 console.log(parsed);
 //=> {foo: 'bar'}
 
 console.log(location.hash);
 //=> '#token=bada55cafe'
 
-var parsedHash = queryString.parse(location.hash);
+const parsedHash = queryString.parse(location.hash);
 console.log(parsedHash);
 //=> {token: 'bada55cafe'}
 

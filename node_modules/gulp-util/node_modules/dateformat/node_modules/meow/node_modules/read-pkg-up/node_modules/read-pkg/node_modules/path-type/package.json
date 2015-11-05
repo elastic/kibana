@@ -1,0 +1,77 @@
+{
+  "name": "path-type",
+  "version": "1.0.0",
+  "description": "Check if a path is a file, directory, or symlink",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sindresorhus/path-type.git"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "xo && ava"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "path",
+    "fs",
+    "type",
+    "is",
+    "check",
+    "directory",
+    "dir",
+    "file",
+    "filepath",
+    "symlink",
+    "symbolic",
+    "link",
+    "stat",
+    "stats",
+    "filesystem"
+  ],
+  "dependencies": {
+    "graceful-fs": "^4.1.2",
+    "pify": "^2.0.0",
+    "pinkie-promise": "^1.0.0"
+  },
+  "devDependencies": {
+    "ava": "*",
+    "xo": "*"
+  },
+  "gitHead": "b29ddf1e71fe346a1034e3914efb70287e2ddf64",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/path-type/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/path-type",
+  "_id": "path-type@1.0.0",
+  "_shasum": "51b127d4884100f5808256e45d471716ba16f62d",
+  "_from": "path-type@>=1.0.0 <2.0.0",
+  "_npmVersion": "2.11.3",
+  "_nodeVersion": "0.12.7",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "dist": {
+    "shasum": "51b127d4884100f5808256e45d471716ba16f62d",
+    "tarball": "http://registry.npmjs.org/path-type/-/path-type-1.0.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/path-type/-/path-type-1.0.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

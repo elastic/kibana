@@ -15,7 +15,7 @@ $ npm install --save normalize-url
 ## Usage
 
 ```js
-var normalizeUrl = require('normalize-url');
+const normalizeUrl = require('normalize-url');
 
 normalizeUrl('sindresorhus.com');
 //=> 'http://sindresorhus.com'
@@ -31,7 +31,6 @@ normalizeUrl('HTTP://xn--xample-hva.com:80/?b=bar&a=foo');
 
 #### url
 
-*Required*  
 Type: `string`
 
 URL to normalize.

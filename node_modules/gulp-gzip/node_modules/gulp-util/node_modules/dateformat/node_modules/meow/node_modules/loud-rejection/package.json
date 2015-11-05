@@ -1,0 +1,66 @@
+{
+  "name": "loud-rejection",
+  "version": "1.0.0",
+  "description": "Make unhandled promise rejections fail loudly instead of the default silent fail",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sindresorhus/loud-rejection.git"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "node test.js || exit 0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "promise",
+    "unhandled",
+    "rejection",
+    "loud",
+    "fail",
+    "catch",
+    "throw",
+    "handler",
+    "exit"
+  ],
+  "devDependencies": {
+    "ava": "*",
+    "xo": "*"
+  },
+  "gitHead": "276a6a83238acf9be535f3a78cd07cf5a40bf967",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/loud-rejection/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/loud-rejection",
+  "_id": "loud-rejection@1.0.0",
+  "_shasum": "d7da07377ebe8c769c9a9dff42b226b085e83246",
+  "_from": "loud-rejection@>=1.0.0 <2.0.0",
+  "_npmVersion": "2.14.4",
+  "_nodeVersion": "4.1.1",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "dist": {
+    "shasum": "d7da07377ebe8c769c9a9dff42b226b085e83246",
+    "tarball": "http://registry.npmjs.org/loud-rejection/-/loud-rejection-1.0.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/loud-rejection/-/loud-rejection-1.0.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

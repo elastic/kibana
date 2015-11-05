@@ -5,7 +5,14 @@ Changelog
 
 # 1.x release
 
-## v1.3.2 (master)
+## v1.3.3 (master)
+
+- Fix: make sure `Content-Length` header is set when body is string for POST/PUT/PATCH requests
+- Fix: handle body stream error, for cases such as incorrect `Content-Encoding` header
+- Fix: when following certain redirects, use `GET` on subsequent request per Fetch Spec
+- Fix: `Request` and `Response` constructors now parse headers input using `Headers`
+
+## v1.3.2
 
 - Enhance: allow auto detect of form-data input (no `FormData` spec on node.js, this is form-data specific feature)
 

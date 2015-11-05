@@ -49,7 +49,7 @@ list of contributors.
 
 ### Core Contributors
 
-Feel free to reach out to any of the core-contributors with you questions or
+Feel free to reach out to any of the core contributors with your questions or
 concerns. We will do our best to respond in a timely manner.
 
 [![Jake Luer](https://avatars3.githubusercontent.com/u/58988?v=3&s=50)](https://github.com/logicalparadox)

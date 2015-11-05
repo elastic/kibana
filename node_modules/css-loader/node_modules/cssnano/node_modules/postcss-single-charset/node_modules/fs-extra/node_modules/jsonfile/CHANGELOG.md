@@ -1,3 +1,7 @@
+2.2.3 / 2015-10-14
+------------------
+- include file name in parse error. See: https://github.com/jprichardson/node-jsonfile/pull/34
+
 2.2.2 / 2015-09-16
 ------------------
 - split out tests into separate files

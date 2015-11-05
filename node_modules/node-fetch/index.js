@@ -82,6 +82,16 @@ function Fetch(url, opts) {
 			headers.set('content-type', 'multipart/form-data; boundary=' + options.body.getBoundary());
 		}
 
+		// bring node-fetch closer to browser behavior by setting content-length automatically for POST, PUT, PATCH requests when body is empty or string
+		if (!headers.has('content-length') && options.method.substr(0, 1).toUpperCase() === 'P') {
+			if (typeof options.body === 'string') {
+				headers.set('content-length', Buffer.byteLength(options.body));
+			// this is only necessary for older nodejs releases (before iojs merge)
+			} else if (options.body === undefined || options.body === null) {
+				headers.set('content-length', '0');
+			}
+		}
+
 		options.headers = headers.raw();
 
 		// http.request only support string as host header, this hack make custom host header possible
@@ -120,6 +130,15 @@ function Fetch(url, opts) {
 				if (!res.headers.location) {
 					reject(new Error('redirect location header missing at: ' + options.url));
 					return;
+				}
+
+				// per fetch spec, for POST request with 301/302 response, or any request with 303 response, use GET when following redirect
+				if (res.statusCode === 303
+					|| ((res.statusCode === 301 || res.statusCode === 302) && options.method === 'POST'))
+				{
+					options.method = 'GET';
+					delete options.body;
+					delete options.headers['content-length'];
 				}
 
 				options.counter++;

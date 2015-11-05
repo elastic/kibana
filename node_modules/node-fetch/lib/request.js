@@ -6,6 +6,7 @@
  */
 
 var parse_url = require('url').parse;
+var Headers = require('./headers');
 
 module.exports = Request;
 
@@ -42,7 +43,7 @@ function Request(input, init) {
 
 	// fetch spec options
 	this.method = init.method || input.method || 'GET';
-	this.headers = init.headers || input.headers || {};
+	this.headers = new Headers(init.headers || input.headers || {});
 	this.body = init.body || input.body;
 	this.url = url;
 

@@ -1,0 +1,36 @@
+
+# Have an option to set the cwd
+
+See https://github.com/jerrysu/gulp-rsync for "inspiration".
+Basically you want to be able to call rsync from an arbitrary location, but tell it to use another location as its "root".
+
+
+# Reply
+
+I hope I full understand this request, but here goes.
+
+This library is intended to provide easy access to the rsync command and to features rsync provides.
+It is not inteded to provide abstractions or introduce new "features". The use case for this request
+(and from what I read in the `gulp-rsync` documentation) should be done outside the library and
+can be achieved with regular node/javascript.
+
+Generating an rsync command that is location agnostic (can be called from any location) should be done
+by specifying the complete path to the source(s). If this needs to be done dynamicly the `path`
+module and `__filename`/`__directory` globals can be used to do this:
+
+  Rsync.build({
+    source: [ path.normalize(__directory + '../../the_source_directory/') ]
+  });
+
+If more sources need to be prefixed the `Array.prototype.map` function can be used:
+
+  function prefixPath(source) {
+    return path.normalize('/the/full/path', source);
+  }
+
+  Rsync.build({
+    source: [ 'file1', 'file2', 'fileN' ].map(prefixPath)
+  })
+
+
+I'm reluctant to add this to node-rsync because it diverges from features rsync provides.

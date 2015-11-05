@@ -23,6 +23,11 @@ exports.test = require('./test');
 exports.type = require('type-detect');
 
 /*!
+ * expectTypes utility
+ */
+exports.expectTypes = require('./expectTypes');
+
+/*!
  * message utility
  */
 
@@ -123,4 +128,3 @@ exports.addChainableMethod = require('./addChainableMethod');
  */
 
 exports.overwriteChainableMethod = require('./overwriteChainableMethod');
-

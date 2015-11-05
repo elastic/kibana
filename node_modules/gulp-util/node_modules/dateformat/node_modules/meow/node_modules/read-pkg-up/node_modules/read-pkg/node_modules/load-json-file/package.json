@@ -1,0 +1,71 @@
+{
+  "name": "load-json-file",
+  "version": "1.0.1",
+  "description": "Read and parse a JSON file",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sindresorhus/load-json-file.git"
+  },
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "xo && ava"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "json",
+    "read",
+    "parse",
+    "file",
+    "fs",
+    "graceful",
+    "load"
+  ],
+  "dependencies": {
+    "graceful-fs": "^4.1.2",
+    "parse-json": "^2.2.0",
+    "pify": "^2.0.0",
+    "pinkie-promise": "^1.0.0",
+    "strip-bom": "^2.0.0"
+  },
+  "devDependencies": {
+    "ava": "*",
+    "xo": "*"
+  },
+  "gitHead": "3735e52cca5cb3fc459786ac35db13b7142ee349",
+  "bugs": {
+    "url": "https://github.com/sindresorhus/load-json-file/issues"
+  },
+  "homepage": "https://github.com/sindresorhus/load-json-file",
+  "_id": "load-json-file@1.0.1",
+  "_shasum": "d24e14be27f68a6aec0f82365b23e1014603fc19",
+  "_from": "load-json-file@>=1.0.0 <2.0.0",
+  "_npmVersion": "2.11.3",
+  "_nodeVersion": "0.12.7",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "dist": {
+    "shasum": "d24e14be27f68a6aec0f82365b23e1014603fc19",
+    "tarball": "http://registry.npmjs.org/load-json-file/-/load-json-file-1.0.1.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/load-json-file/-/load-json-file-1.0.1.tgz",
+  "readme": "ERROR: No README data found!"
+}
