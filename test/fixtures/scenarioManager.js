@@ -16,15 +16,14 @@ function ScenarioManager(server) {
 * @return {Promise} A promise that is resolved when elasticsearch has a response
 */
 ScenarioManager.prototype.load = function (id) {
+  var self = this;
   var scenario = config[id];
   if (!scenario) return Promise.reject('No scenario found for ' + id);
 
-  var self = this;
   return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
     var loadIndexDefinition;
     if (bulk.indexDefinition) {
       var body = require(path.join(scenario.baseDir, bulk.indexDefinition));
-
       loadIndexDefinition = self.client.indices.create({
         index: bulk.indexName,
         body: body
@@ -33,10 +32,10 @@ ScenarioManager.prototype.load = function (id) {
       loadIndexDefinition = Promise.resolve();
     }
 
-    return loadIndexDefinition.then(function bulkRequest() {
+    return loadIndexDefinition
+    .then(function bulkRequest() {
       var body = require(path.join(scenario.baseDir, bulk.source));
-
-      self.client.bulk({
+      return self.client.bulk({
         body: body
       });
     });
@@ -69,7 +68,8 @@ ScenarioManager.prototype.unload = function (id) {
 ScenarioManager.prototype.reload = function (id) {
   var self = this;
 
-  return this.unload(id).then(function load() {
+  return self.unload(id)
+  .then(function load() {
     return self.load(id);
   });
 };
@@ -103,14 +103,13 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
     })
     .then(function handleCountResponse(response) {
       if (response.count === 0) {
-        self.load(id);
+        return self.load(id);
       }
     })
-    .catch(function (reason) {
-      self.load(id);
-    });
-  }));
+  }))
+  .catch(function (reason) {
+    return self.load(id);
+  });
 };
-
 
 module.exports = ScenarioManager;
