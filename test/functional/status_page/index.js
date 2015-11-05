@@ -2,7 +2,6 @@ define(function (require) {
   var bdd = require('intern!bdd');
   var expect = require('intern/dojo/node!expect.js');
   var config = require('intern').config;
-  var getUrl = require('intern/dojo/node!../../utils/getUrl');
   var Common = require('../../support/pages/Common');
 
   bdd.describe('status page', function () {
@@ -10,11 +9,8 @@ define(function (require) {
 
     bdd.before(function () {
       common = new Common(this.remote);
-    });
-
-    bdd.beforeEach(function () {
       // load the status page
-      return this.remote.get(getUrl(config.servers.kibana, 'status'));
+      return common.navigateToApp('statusPage', false);
     });
 
     bdd.it('should show the kibana plugin as ready', function () {
