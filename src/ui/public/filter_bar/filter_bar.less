@@ -28,7 +28,10 @@ filter-bar .confirm {
     position: relative;
     display: inline-block;
     text-align: center;
-    min-width: 140px;
+    // Number of filter icons multiplied by icon width
+    // Escaped to prevent less math
+    min-width: ~"calc(5*(1.414em + 13px))";
+
 
     font-size: @font-size-small;
     background-color: @filter-bar-confirm-filter-bg;
@@ -60,6 +63,10 @@ filter-bar .bar {
     margin: 15px 0;
   }
 
+  .filter-edit-alias {
+    margin-top: 15px;
+  }
+
   .filter-link {
     position: relative;
     display: inline-block;
@@ -77,8 +84,9 @@ filter-bar .bar {
     position: relative;
     display: inline-block;
     text-align: center;
-    min-width: 140px;
-
+    // Number of filter icons multiplied by icon width
+    // Escaped to prevent less math
+    min-width: ~"calc(5*(1.414em + 13px))";
     font-size: @font-size-small;
     background-color: @filter-bar-bar-filter-bg;
     color: @filter-bar-bar-filter-color;

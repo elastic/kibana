@@ -92,7 +92,7 @@ define(function (require) {
     */
     queryFilter.updateFilter = function (filter) {
       var mergedFilter = _.assign({}, filter.source, filter.model);
-
+      mergedFilter.meta.alias = filter.alias;
       //If the filter type is changed we want to discard the old type
       //when merging changes back in
       var filterTypeReplaced = filter.model[filter.type] !== mergedFilter[filter.type];

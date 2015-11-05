@@ -13,8 +13,9 @@
   <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
-      <span>{{ filter.meta.key }}:</span>
-      <span>"{{ filter.meta.value }}"</span>
+      <span ng-if="filter.meta.alias">{{ filter.meta.alias }}</span>
+      <span ng-if="!filter.meta.alias">{{ filter.meta.key }}:</span>
+      <span ng-if="!filter.meta.alias">"{{ filter.meta.value }}"</span>
     </div>
     <div class="filter-actions">
       <a class="action filter-toggle" ng-click="toggleFilter(filter)">
@@ -40,6 +41,15 @@
 
   <div class="filter-edit-container" ng-if="editingFilter">
     <form role="form" name="editFilterForm" ng-submit="editDone()">
+      <div class="form-group filter-edit-alias">
+        <label>Filter Alias
+          <small>(optional)</small>
+        </label>
+        <input
+          ng-model="editingFilter.alias"
+          type="text"
+          class="form-control">
+      </div>
       <div
         json-input
         require-keys="true"
