@@ -29,7 +29,7 @@ define(function (require) {
             ignore_unavailable: true
           })
           + '\n'
-          + toJson(fetchParams.body || {}, angular.json);
+          + toJson(fetchParams.body || {}, angular.toJson);
         }).join('\n') + '\n';
       },
 
