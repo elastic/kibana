@@ -1,13 +1,14 @@
 let esErrors = require('elasticsearch').errors;
 let Boom = require('Boom');
+let _ = require('lodash');
 
 export default function (server) {
 
   let handleESError = function (error) {
     if (error instanceof esErrors.ConnectionFault ||
-        error instanceof esErrors.ServiceUnavailable ||
-        error instanceof esErrors.NoConnections ||
-        error instanceof esErrors.RequestTimeout) {
+      error instanceof esErrors.ServiceUnavailable ||
+      error instanceof esErrors.NoConnections ||
+      error instanceof esErrors.RequestTimeout) {
       return Boom.serverTimeout();
     } else if (error instanceof esErrors.Conflict) {
       return Boom.conflict();
@@ -67,15 +68,30 @@ export default function (server) {
     method: 'POST',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
+      let isWildcard = _.contains(req.payload.title, '*');
 
       client.create({
         index: '.kibana',
         type: 'index-pattern',
         id: req.payload.title,
         body: req.payload
-      }).then(function (pattern) {
-        reply(pattern);
-      }, function (error) {
+      }).then((patternResponse) => {
+        if (!isWildcard) {
+          return patternResponse;
+        }
+        else {
+          return client.indices.putTemplate({
+            order: 0,
+            create: true,
+            name: 'kibana-' + req.payload.title,
+            body: {
+              template: req.payload.title
+            }
+          });
+        }
+      }).then((response) => {
+        reply('success').statusCode = 201;
+      }).catch(function (error) {
         reply(handleESError(error));
       });
     }
