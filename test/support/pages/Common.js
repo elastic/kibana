@@ -85,6 +85,7 @@ define(function (require) {
     tryForTime: function tryForTime(timeout, block) {
       var self = this;
       var start = Date.now();
+      var retryDelay = 500;
       var lastTry = 0;
 
       function attempt() {
@@ -97,13 +98,12 @@ define(function (require) {
         return Promise
         .try(block)
         .then(function tryForTimeSuccess() {
-          self.debug('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
+          self.debug('tryForTime success in about ' + (lastTry - start) + ' ms');
           return (lastTry - start);
         })
         .catch(function tryForTimeCatch(err) {
-          self.debug('failed with "' + err.message + '"');
-          self.debug('trying again in 1/2 second');
-          return Promise.delay(500).then(attempt);
+          self.debug('tryForTime failure, retry in ' + retryDelay + 'ms - ' + err.message);
+          return Promise.delay(retryDelay).then(attempt);
         });
       }
 
