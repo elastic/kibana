@@ -33,8 +33,9 @@ module.exports = function (grunt) {
       // kibana.rpm and kibana.deb
       if (/linux-x(86|64)$/.test(name)) {
         let sysv = servicesByName.sysv.outputDir + '/etc/=/etc/';
-        fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv));
-        fpm(args.concat('-t', 'deb', '-a', arch, files, sysv));
+        let systemd = servicesByName.systemd.outputDir + '/lib/=/lib/';
+        fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv, systemd));
+        fpm(args.concat('-t', 'deb', '-a', arch, files, sysv, systemd));
         return;
       }
 
