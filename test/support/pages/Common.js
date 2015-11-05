@@ -119,11 +119,8 @@ define(function (require) {
     },
 
     sleep: function sleep(sleepMilliseconds) {
-      var self = this;
-      self.debug('... sleep(' + sleepMilliseconds + ') start');
-
-      return Promise.resolve().delay(sleepMilliseconds)
-      .then(function () { self.debug('... sleep(' + sleepMilliseconds + ') end'); });
+      this.debug('sleeping for ' + sleepMilliseconds + 'ms');
+      return Promise.resolve().delay(sleepMilliseconds);
     },
 
     handleError: function (testObj) {
