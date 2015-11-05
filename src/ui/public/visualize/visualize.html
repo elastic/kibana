@@ -11,4 +11,4 @@
   ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
   class="visualize-chart"></div>
 <!-- <pre>{{chartData | json}}</pre> -->
-<visualize-spy ng-if="vis.type.requiresSearch"></visualize-spy>
+<visualize-spy ng-if="vis.type.requiresSearch && showSpyPanel"></visualize-spy>
