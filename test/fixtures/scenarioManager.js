@@ -38,6 +38,10 @@ ScenarioManager.prototype.load = function (id) {
       return self.client.bulk({
         body: body
       });
+    })
+    .catch(function (err) {
+      if (bulk.haltOnFailure === false) return;
+      throw err;
     });
   }));
 };

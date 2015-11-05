@@ -24,7 +24,7 @@ define(function (require) {
           // since we're using hash URLs, always reload first to force re-render
           return self.remote.refresh()
           .then(function () {
-            return self.remote.get(url)
+            return self.remote.get(url);
           })
           .then(function () {
             if (testStatusPage !== false) {

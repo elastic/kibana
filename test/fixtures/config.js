@@ -20,7 +20,8 @@ module.exports = {
       bulk: [{
         indexName: '.kibana',
         indexDefinition: 'kibanaDefinition.js',
-        source: 'kibana.js'
+        source: 'kibana.js',
+        haltOnFailure: false
       }]
     }
   }
