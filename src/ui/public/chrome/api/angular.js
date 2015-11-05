@@ -45,7 +45,7 @@ module.exports = function (chrome, internals) {
         controller: function ($scope, $rootScope, $location, $http) {
 
           // are we showing the embedded version of the chrome?
-          chrome.setVisible(!Boolean($location.search().embed));
+          internals.setVisibleDefault(!$location.search().embed);
 
           // listen for route changes, propogate to tabs
           var onRouteChange = function () {
