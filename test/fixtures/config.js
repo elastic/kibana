@@ -6,12 +6,12 @@ module.exports = {
     makelogs: {
       baseDir: path.join(rootDir, 'makelogs'),
       bulk: [{
-        indexDefinition: 'makelogsIndexDefinition.js',
         indexName: 'logstash-2015.09.17',
+        indexDefinition: 'makelogsIndexDefinition.js',
         source: 'logstash-2015.09.17.js'
       }, {
-        indexDefinition: 'makelogsIndexDefinition.js',
         indexName: 'logstash-2015.09.18',
+        indexDefinition: 'makelogsIndexDefinition.js',
         source: 'logstash-2015.09.18.js'
       }]
     },
@@ -19,6 +19,7 @@ module.exports = {
       baseDir: path.join(rootDir, 'emptyKibana'),
       bulk: [{
         indexName: '.kibana',
+        indexDefinition: 'kibanaDefinition.js',
         source: 'kibana.js'
       }]
     }
