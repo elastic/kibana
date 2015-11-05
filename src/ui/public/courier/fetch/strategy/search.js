@@ -43,7 +43,7 @@ define(function (require) {
               ignore_unavailable: true
             })
             + '\n'
-            + toJson(fetchParams.body || {}, angular.json);
+            + toJson(fetchParams.body || {}, angular.toJson);
           });
         })
         .then(function (requests) {

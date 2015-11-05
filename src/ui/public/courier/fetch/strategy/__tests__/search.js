@@ -20,7 +20,7 @@ describe('ui/courier/fetch/strategy/search', () => {
         index: ['logstash-123'],
         type: 'blah',
         search_type: 'blah2',
-        body: 'hm this is the body'
+        body: { foo: 'bar', $foo: 'bar' }
       }
     ];
   }));
@@ -32,6 +32,14 @@ describe('ui/courier/fetch/strategy/search', () => {
   });
 
   describe('#reqsFetchParamsToBody()', () => {
+    it('filters out any body properties that begin with $', () => {
+      let value;
+      search.reqsFetchParamsToBody(reqsFetchParams).then(val => value = val);
+      $rootScope.$apply();
+      expect(_.includes(value, 'foo')).to.be(true);
+      expect(_.includes(value, '$foo')).to.be(false);
+    });
+
     context('when indexList is not empty', () => {
       it('includes the index', () => {
         let value;
