@@ -1,6 +1,8 @@
 @import "~ui/styles/variables.less";
 @import (reference) "~ui/styles/mixins";
 
+
+
 .timelion {
   position: relative;
 
@@ -69,6 +71,26 @@
 
 navbar.timelion-navbar .form-control:focus {
   border-color: @gray-lighter;
+}
+
+.timelion-nav-wrapper {
+  z-index: 20;
+}
+
+.timelion-scroll-class {
+  &-header {
+    top: 0;
+    position: fixed;
+    width: 100%;
+  }
+
+  &-options {
+    display: none !important;
+  }
+
+  &-body {
+    margin-top: 65px;
+  }
 }
 
 .chart-container.running {

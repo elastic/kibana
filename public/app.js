@@ -6,6 +6,7 @@ require('angularSortableView');
 
 require('./directives/chart_directive');
 require('./directives/expression_directive');
+require('./directives/scroll_class');
 require('./directives/docs');
 require('./main.less');
 
