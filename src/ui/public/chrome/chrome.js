@@ -14,6 +14,7 @@ var chrome = {};
 var internals = _.defaults(
   _.cloneDeep(metadata),
   {
+    basePath: '',
     rootController: null,
     rootTemplate: null,
     showAppsLink: null,

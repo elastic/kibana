@@ -5,7 +5,7 @@ var notify = require('ui/notify');
 require('plugins/statusPage/statusPageMetric');
 require('plugins/statusPage/statusPage.less');
 
-require('ui/chrome')
+var chrome = require('ui/chrome')
 .setTabs([
   {
     id: '',
@@ -23,7 +23,7 @@ require('ui/chrome')
 
     // go ahead and get the info you want
     return $http
-    .get('./api/status')
+    .get(chrome.addBasePath('/api/status'))
     .then(function (resp) {
 
       if (ui.fetchError) {
