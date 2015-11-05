@@ -4,7 +4,7 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var Promise = require('bluebird');
 
-  return function (bdd) {
+  return function (bdd, scenarioManager) {
     bdd.describe('creating and deleting default index', function describeIndexTests() {
       var common;
       var settingsPage;
@@ -14,19 +14,16 @@ define(function (require) {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
         remote = this.remote;
+
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          return settingsPage.navigateTo();
+        });
       });
 
       bdd.describe('index pattern creation', function indexPatternCreation() {
-        bdd.beforeEach(function be() {
+        bdd.before(function () {
           return settingsPage.createIndexPattern();
-        });
-
-        bdd.afterEach(function ae() {
-          var expectedAlertText = 'Are you sure you want to remove this index pattern?';
-          return settingsPage.removeIndexPattern()
-          .then(function (alertText) {
-            expect(alertText).to.be(expectedAlertText);
-          });
         });
 
         bdd.it('should have index pattern in page header', function pageHeader() {
@@ -75,12 +72,12 @@ define(function (require) {
         });
       });
 
-
       bdd.describe('index pattern deletion', function indexDelete() {
-        bdd.beforeEach(function be() {
-          return settingsPage.createIndexPattern()
-          .then(function () {
-            return settingsPage.removeIndexPattern();
+        bdd.before(function () {
+          var expectedAlertText = 'Are you sure you want to remove this index pattern?';
+          return settingsPage.removeIndexPattern()
+          .then(function (alertText) {
+            expect(alertText).to.be(expectedAlertText);
           });
         });
 
@@ -99,7 +96,6 @@ define(function (require) {
           .catch(common.handleError(this));
         });
       });
-
     });
   };
 });

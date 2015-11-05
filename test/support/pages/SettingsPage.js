@@ -26,7 +26,7 @@ define(function (require) {
       .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
-    getNameIsPatternCheckbox: function getNameIsPatternCheckbox() {
+    getTimeBasedIndexPatternCheckbox: function getTimeBasedIndexPatternCheckbox() {
       // fail faster since we're sometimes checking that it doesn't exist
       return this.remote.setFindTimeout(defaultTimeout / 2)
       .findByCssSelector('input[ng-model="index.nameIsPattern"]');
@@ -121,7 +121,7 @@ define(function (require) {
     },
 
     getFieldsTabCount: function getFieldsTabCount() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout * 2)
         // passing in zero-based index, but adding 1 for css 1-based indexes
       .findByCssSelector('li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding').getVisibleText()
       .then(function (theText) {
