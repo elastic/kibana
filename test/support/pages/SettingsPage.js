@@ -6,7 +6,7 @@ define(function (require) {
 
   var Common = require('./Common');
 
-  var defaultTimeout = 6000;
+  var defaultTimeout = 5000;
   var common;
 
   function SettingsPage(remote) {
@@ -233,9 +233,11 @@ define(function (require) {
     createIndexPattern: function createIndexPattern() {
       var self = this;
 
-      return this.selectTimeFieldOption('@timestamp')
-      .then(function () {
-        return self.getCreateButton().click();
+      return common.tryForTime(defaultTimeout, function () {
+        return self.selectTimeFieldOption('@timestamp')
+        .then(function () {
+          return self.getCreateButton().click();
+        });
       })
       .then(function () {
         return common.tryForTime(defaultTimeout, function () {
@@ -253,20 +255,20 @@ define(function (require) {
       var self = this;
       var alertText;
 
-      return self.clickDeletePattern()
-      .then(function () {
-        return common.tryForTime(defaultTimeout, function () {
-          return self.remote.getAlertText()
-          .then(function (text) {
-            alertText = text;
-          });
+      return common.tryForTime(defaultTimeout, function () {
+        return self.clickDeletePattern()
+        .then(function () {
+          return self.remote.getAlertText();
+        })
+        .then(function (text) {
+          alertText = text;
+        })
+        .then(function () {
+          return self.remote.acceptAlert();
         });
       })
       .then(function () {
-        return self.remote.acceptAlert();
-      })
-      .then(function () {
-        common.tryForTime(defaultTimeout, function () {
+        return common.tryForTime(defaultTimeout, function () {
           return self.remote.getCurrentUrl()
           .then(function (currentUrl) {
             if (currentUrl.match(/indices\/.+\?/)) {
