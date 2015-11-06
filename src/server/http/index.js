@@ -119,4 +119,6 @@ module.exports = function (kbnServer, server, config) {
       .permanent(true);
     }
   });
+
+  return kbnServer.mixin(require('./xsrf'));
 };

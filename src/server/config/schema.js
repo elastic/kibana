@@ -5,6 +5,7 @@ let path = require('path');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
+const randomBytes = require('crypto').randomBytes;
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -39,7 +40,8 @@ module.exports = () => Joi.object({
         origin: ['*://localhost:9876'] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
-    })
+    }),
+    xsrfToken: Joi.string().default(randomBytes(256).toString('hex'))
   }).default(),
 
   logging: Joi.object().keys({
