@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('intern/dojo/node!lodash');
 
   return _.assign({
-    debug: true,
+    debug: false,
     capabilities: {
       'selenium-version': '2.47.1',
       'idle-timeout': 30

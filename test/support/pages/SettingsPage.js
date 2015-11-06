@@ -124,16 +124,12 @@ define(function (require) {
     getFieldsTabCount: function getFieldsTabCount() {
       var self = this;
       var selector = 'li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding';
+      var timeout = defaultTimeout * 2; // takes a little extra time to render
 
-      return common.tryForTime(defaultTimeout, function () {
-        return self.remote.findByCssSelector(selector);
-      })
-      .then(function () {
-        return self.remote.findByCssSelector(selector).getVisibleText()
-        .then(function (theText) {
-          // the value has () around it, remove them
-          return theText.replace(/\((.*)\)/, '$1');
-        });
+      return self.remote.setFindTimeout(timeout).findByCssSelector(selector).getVisibleText()
+      .then(function (theText) {
+        // the value has () around it, remove them
+        return theText.replace(/\((.*)\)/, '$1');
       });
     },
 
