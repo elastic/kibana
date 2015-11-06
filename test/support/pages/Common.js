@@ -80,13 +80,8 @@ define(function (require) {
 
           if (ready && hasJQuery) {
             console.log('doc ready, jquery loaded');
-            // var appScope = $('.application').scope();
-
-            // if (appScope) {
-              console.log('app scope found');
-              clearInterval(interval);
-              done();
-            // }
+            clearInterval(interval);
+            done();
           }
         }, 10);
       }).then(function () {
@@ -95,11 +90,17 @@ define(function (require) {
     },
 
     getApp: function () {
-      return this.runScript(function () {
-        var $ = window.$;
-        // var $scope = $('nav').scope();
-        var $scope = $('.application').scope();
-        return $scope ? $scope.chrome.getApp() : {};
+      var self = this;
+
+      return self.tryForTime(5000, function () {
+        self.remote.findByCssSelector('.content > .application');
+      })
+      .then(function () {
+        return self.runScript(function () {
+          var $ = window.$;
+          var $scope = $('.content > .application').scope();
+          return $scope ? $scope.chrome.getApp() : {};
+        });
       });
     },
 
