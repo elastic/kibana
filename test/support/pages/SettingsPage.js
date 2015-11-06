@@ -94,7 +94,6 @@ define(function (require) {
       .findAllByCssSelector('table.table.table-condensed thead tr th');
     },
 
-
     sortBy: function sortBy(columnName) {
       return this.remote.setFindTimeout(defaultTimeout)
       .findAllByCssSelector('table.table.table-condensed thead tr th span')
