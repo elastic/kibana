@@ -190,40 +190,48 @@ div.doc-container {
   }
 }
 
-.cell-id {
+.cell-actions {
   position: absolute;
   bottom:5px;
   left:5px;
-  font-size: 10px;
   line-height: 10px;
-  text-align: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  border: 1px solid #666;
-  padding: 3px;
-  font-weight: bold;
-  background-color: #ccc;
-  opacity: 0.50;
-  z-index: 10;
+
+  > div {
+    display: inline-block;
+    font-size: 10px;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border: 1px solid #666;
+    padding: 3px;
+    font-weight: bold;
+    background-color: #ccc;
+    opacity: 0.50;
+    z-index: 10;
+  }
 }
 
-.chart-container:hover .cell-id {
-  background-color: #a00;
-  border-color: #a00;
-  color: #fff;
-}
+.chart-container:hover {
 
-.chart-container:hover .cell-id span {
-  display: none;
-}
+  .cell-id {
+    background-color: #a00;
+    border-color: #a00;
+    color: #fff;
 
-.chart-container:hover .cell-id:after {
-  content: "X";
-}
+    &:hover {
+      opacity: 1;
+    }
 
-.chart-container:hover .cell-id:hover {
-  opacity: 1;
+    &:after {
+      content: "X";
+    }
+
+    span {
+      display: none;
+    }
+
+  }
 }
 
 .legendLabel {

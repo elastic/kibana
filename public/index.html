@@ -118,7 +118,10 @@
           ng-click="setActiveCell($index)"
           ng-class="{active: $index === state.selected}"
           >
-          <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
+          <div class="cell-actions">
+            <div class="cell-id" ng-click="removeCell($index)"><span>{{$index + 1}}</span></div>
+            <div class="cell-move" sv-handle><i class="fa fa-arrows"></i></div>
+          </div>
           <div chart="sheet[$index]" cell="$index"></div>
         </div>
       </div>
