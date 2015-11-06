@@ -6,7 +6,7 @@ define(function (require) {
 
   var Common = require('./Common');
 
-  var defaultTimeout = 6000;
+  var defaultTimeout = 5000;
   var common;
 
   function SettingsPage(remote) {
@@ -55,7 +55,7 @@ define(function (require) {
       })
       // DEBUGGING
       .catch(function (err) {
-        common.debug('FAILED to creat index patter');
+        common.debug('selectTimeFieldOption: FAILED to create index pattern');
         return common.checkForKibanaApp()
         .then(function (onKibana) {
           common.debug('onKibana')
@@ -142,7 +142,8 @@ define(function (require) {
       var selector = 'li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding';
       var timeout = defaultTimeout * 2; // takes a little extra time to render
 
-      return self.remote.setFindTimeout(timeout).findByCssSelector(selector).getVisibleText()
+      return self.remote.setFindTimeout(timeout)
+      .findByCssSelector(selector).getVisibleText()
       .then(function (theText) {
         // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
@@ -241,8 +242,7 @@ define(function (require) {
     },
 
     setPageSize: function setPageSize(size) {
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
       .then(function (button) {
         return button.click();
@@ -270,7 +270,7 @@ define(function (require) {
       })
       // DEBUGGING
       .catch(function (err) {
-        common.debug('FAILED to create index pattern');
+        common.debug('createIndexPattern: FAILED to create index pattern');
         return common.checkForKibanaApp()
         .then(function (onKibana) {
           common.debug('onKibana')
