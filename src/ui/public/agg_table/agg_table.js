@@ -13,8 +13,8 @@ define(function (require) {
       template: require('ui/agg_table/agg_table.html'),
       scope: {
         table: '=',
-        exportTitle: '@',
-        perPage: '=?'
+        perPage: '=?',
+        exportTitle: '=?'
       },
       controllerAs: 'aggTable',
       compile: function ($el) {

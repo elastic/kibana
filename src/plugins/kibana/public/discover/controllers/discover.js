@@ -486,6 +486,7 @@ define(function (require) {
       }
 
       $scope.vis = new Vis($scope.indexPattern, {
+        title: savedSearch.title,
         type: 'histogram',
         params: {
           addLegend: false,

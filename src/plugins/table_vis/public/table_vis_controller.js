@@ -32,7 +32,6 @@ define(function (require) {
       if (hasSomeRows) {
         $scope.tableGroups = tableGroups;
       }
-
     });
   });
 

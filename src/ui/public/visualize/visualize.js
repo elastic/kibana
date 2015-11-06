@@ -22,7 +22,6 @@ define(function (require) {
         searchSource: '=?',
         editableVis: '=?',
         esResp: '=?',
-        exportTitle: '@?',
       },
       template: require('ui/visualize/visualize.html'),
       link: function ($scope, $el, attr) {

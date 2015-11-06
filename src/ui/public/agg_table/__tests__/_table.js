@@ -183,7 +183,7 @@ describe('AggTable Directive', function () {
 
     it('should use the export-title attribute', function () {
       var expected = 'export file name';
-      var $el = $compile(`<kbn-agg-table table="table" export-title="${expected}">`)($scope);
+      var $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
       $scope.$digest();
 
       var $tableScope = $el.isolateScope();
@@ -192,6 +192,7 @@ describe('AggTable Directive', function () {
         columns: [],
         rows: []
       };
+      $tableScope.exportTitle = expected;
       $scope.$digest();
 
       expect(aggTable.csv.filename).to.equal(`${expected}.csv`);

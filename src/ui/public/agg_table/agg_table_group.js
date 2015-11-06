@@ -10,8 +10,8 @@ define(function (require) {
       template: require('ui/agg_table/agg_table_group.html'),
       scope: {
         group: '=',
-        exportTitle: '@',
-        perPage: '=?'
+        perPage: '=?',
+        exportTitle: '=?'
       },
       compile: function ($el) {
         // Use the compile function from the RecursionHelper,
