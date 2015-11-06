@@ -28,9 +28,9 @@ define(function (require) {
           })
           .then(function () {
             if (testStatusPage !== false) {
-              return self.checkForStatusPage()
-              .then(function (onStatusPage) {
-                if (onStatusPage) throw new Error('Hit status page, retrying');
+              return self.checkForKibanaApp()
+              .then(function (kibanaLoaded) {
+                if (!kibanaLoaded) throw new Error('Kibana is not loaded, retrying');
               });
             }
           })
@@ -97,14 +97,14 @@ define(function (require) {
       });
     },
 
-    checkForStatusPage: function () {
+    checkForKibanaApp: function () {
       var self = this;
 
-      self.debug('Checking for status page');
+      self.debug('Checking for kibana app');
       return self.getApp()
       .then(function (app) {
         self.debug('current app: ' + app.id);
-        return app.id === 'statusPage';
+        return app.id === 'kibana';
       });
     },
 
