@@ -151,7 +151,7 @@ app.controller('timelion', function (
     $http.post('/timelion/sheet', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
-        interval: $scope.state.interval === 'other' ? $scope.state.otherInterval : $scope.state.interval
+        interval: getInterval($scope.state)
       }),
     })
     // data, status, headers, config
@@ -176,6 +176,13 @@ app.controller('timelion', function (
 
     });
   };
+
+  function getInterval (state) {
+    if (state.interval === 'other') {
+      return state.otherInterval
+    }
+    return state.interval;
+  }
 
   $scope.safeSearch = _.debounce($scope.search, 500);
 
