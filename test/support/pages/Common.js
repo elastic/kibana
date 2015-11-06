@@ -68,7 +68,7 @@ define(function (require) {
 
     runScript: function (fn, timeout) {
       var self = this;
-      timeout = timeout || 1000;
+      timeout = timeout || 2000;
 
       // wait for deps on window before running script
       return self.remote
@@ -80,8 +80,13 @@ define(function (require) {
 
           if (ready && hasJQuery) {
             console.log('doc ready, jquery loaded');
-            clearInterval(interval);
-            done();
+            // var appScope = $('.application').scope();
+
+            // if (appScope) {
+              console.log('app scope found');
+              clearInterval(interval);
+              done();
+            // }
           }
         }, 10);
       }).then(function () {
@@ -92,19 +97,26 @@ define(function (require) {
     getApp: function () {
       return this.runScript(function () {
         var $ = window.$;
-        var $scope = $('nav').scope();
-        return $scope.chrome.getApp();
+        // var $scope = $('nav').scope();
+        var $scope = $('.application').scope();
+        return $scope ? $scope.chrome.getApp() : {};
       });
     },
 
     checkForKibanaApp: function () {
       var self = this;
 
-      self.debug('Checking for kibana app');
       return self.getApp()
       .then(function (app) {
-        self.debug('current app: ' + app.id);
-        return app.id === 'kibana';
+        var appId = app.id;
+        self.debug('current application: ' + appId);
+        return appId === 'kibana';
+      })
+      .catch(function (err) {
+        self.debug('kibana check failed');
+        self.debug(err);
+        // not on the kibana app...
+        return false;
       });
     },
 
