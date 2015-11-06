@@ -13,7 +13,10 @@ describe('plugins/elasticsearch', function () {
 
     before(function () {
       kbnServer = new KbnServer({
-        server: { autoListen: false },
+        server: {
+          autoListen: false,
+          xsrfToken: false
+        },
         logging: { quiet: true },
         plugins: {
           scanDirs: [
@@ -104,5 +107,3 @@ describe('plugins/elasticsearch', function () {
 
   });
 });
-
-
