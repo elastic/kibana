@@ -43,7 +43,7 @@ define(function (require) {
         });
       });
 
-      bdd.it('should be enable creation after selecting time field', function () {
+      bdd.it('should enable creation after selecting time field', function () {
         // select a time field and check that Create button is enabled
         return settingsPage.selectTimeFieldOption('@timestamp')
         .then(function () {
