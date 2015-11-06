@@ -179,7 +179,7 @@ app.controller('timelion', function (
 
   function getInterval (state) {
     if (state.interval === 'other') {
-      return state.otherInterval
+      return state.otherInterval;
     }
     return state.interval;
   }
