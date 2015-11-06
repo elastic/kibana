@@ -44,7 +44,9 @@ define(function (require) {
 
     selectTimeFieldOption: function selectTimeFieldOption(selection) {
       var self = this;
-      return this.getTimeFieldNameField().click()
+      return common.tryForTime(defaultTimeout * 2, function () {
+        return self.getTimeFieldNameField().click();
+      })
       .then(function () {
         return self.getTimeFieldNameField().click();
       })
