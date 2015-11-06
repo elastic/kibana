@@ -6,7 +6,7 @@ define(function (require) {
 
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 6000;
   var common;
 
   function SettingsPage(remote) {
@@ -52,6 +52,22 @@ define(function (require) {
       })
       .then(function () {
         return self.getTimeFieldOption(selection);
+      })
+      // DEBUGGING
+      .catch(function (err) {
+        common.debug('FAILED to creat index patter');
+        return common.checkForKibanaApp()
+        .then(function (onKibana) {
+          common.debug('onKibana')
+          common.debug(onKibana)
+        })
+        .then(function () {
+          return self.remote.getCurrentUrl();
+        })
+        .then(function (url) {
+          common.debug('FAILED on url ' + url);
+          throw err
+        })
       });
     },
 
@@ -251,6 +267,22 @@ define(function (require) {
             }
           });
         });
+      })
+      // DEBUGGING
+      .catch(function (err) {
+        common.debug('FAILED to create index pattern');
+        return common.checkForKibanaApp()
+        .then(function (onKibana) {
+          common.debug('onKibana')
+          common.debug(onKibana)
+        })
+        .then(function () {
+          return self.remote.getCurrentUrl();
+        })
+        .then(function (url) {
+          common.debug('FAILED on url ' + url);
+          throw err
+        })
       });
     },
 
