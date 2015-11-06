@@ -47,7 +47,11 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         });
         $elem.on('keydown',  keyDownHandler);
         $elem.on('keyup',  keyUpHandler);
-        $elem.on('blur', resetSuggestions);
+        $elem.on('blur', function () {
+          $timeout(function () {
+            $scope.suggestions.show = false;
+          }, 100);
+        });
 
         $elem.after($compile(template)($scope));
         $http.get('/timelion/functions').then(function (resp) {
@@ -75,6 +79,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
           if (functionReference.byName) {
             if (functionReference.byName[possible.function]) {
               $scope.suggestions.list = [functionReference.byName[possible.function]];
+              $scope.suggestions.show = true;
             } else {
               resetSuggestions();
             }
@@ -97,6 +102,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
                   }
                 }));
               }
+              $scope.suggestions.show = true;
             }
             $scope.suggestions.location = e.location;
           } catch (e) {
@@ -112,13 +118,14 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         else if ($scope.suggestions.selected < 0) $scope.suggestions.selected = 0;
       }
 
-      function completeExpression() {
+      $scope.completeExpression = function (selected) {
+        console.log('completing', selected, $scope.suggestions.list);
         if (!$scope.suggestions.list.length) return;
         var expression = $attrs.timelionExpression;
         var startOf = expression.slice(0, $scope.suggestions.location.min);
         var endOf =  expression.slice($scope.suggestions.location.max, expression.length);
 
-        var completeFunction = $scope.suggestions.list[$scope.suggestions.selected].name + '()';
+        var completeFunction = $scope.suggestions.list[selected].name + '()';
 
         var newVal = startOf + completeFunction + endOf;
 
@@ -128,7 +135,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         ngModelCtrl.$setViewValue(newVal);
 
         resetSuggestions();
-      }
+      };
 
 
       function keyDownHandler(e) {
@@ -141,17 +148,17 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
             $scope.suggestions.selected++;
             break;
           case keys.TAB:
-            completeExpression();
+            $scope.completeExpression($scope.suggestions.selected);
             break;
           case keys.ENTER:
             if ($scope.suggestions.list.length) {
-              completeExpression();
+              $scope.completeExpression($scope.suggestions.selected);
             } else {
               $scope.search();
             }
             break;
           case keys.ESC:
-            resetSuggestions();
+            $scope.suggestions.show = false;
             break;
         }
         scrollTo($scope.suggestions);
@@ -170,7 +177,8 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         $scope.suggestions = {
           selected: 0,
           list: [],
-          position: {}
+          position: {},
+          show: false
         };
         return $scope.suggestions;
       }

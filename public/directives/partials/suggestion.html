@@ -1,6 +1,6 @@
-<div class="suggestions" ng-if="suggestions.list">
+<div class="suggestions" ng-show="suggestions.show">
   <div class="suggestion"
-    ng-click="suggestions.selected = $index"
+    ng-click="completeExpression($index)"
     ng-class="{active: $index === suggestions.selected}"
     ng-repeat="suggestion in suggestions.list track by $index | orderBy:'name'">
     <h4><strong>{{suggestion.name}}()</strong> <small>{{suggestion.help}} {{suggestion.chainable}}</small></h4>

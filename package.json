@@ -11,7 +11,11 @@
     "pegjs": "^0.9.0"
   },
   "devDependencies": {
+    "babel-eslint": "^4.1.4",
     "bluebird": "^3.0.5",
+    "chai": "^3.2.0",
+    "eslint": "^1.9.0",
+    "eslint-plugin-mocha": "^1.0.0",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.0.0",
     "gulp-gzip": "^1.2.0",
@@ -19,10 +23,9 @@
     "gulp-util": "^3.0.7",
     "lodash": "^3.10.1",
     "mkdirp": "^0.5.1",
+    "mocha": "^2.3.0",
     "rimraf": "^2.4.3",
-    "rsync": "^0.4.0",
-    "chai": "^3.2.0",
-    "mocha": "^2.3.0"
+    "rsync": "^0.4.0"
   },
   "scripts": {
     "test": "mocha --compilers js:babel/register series_functions/__test__/*.js"
