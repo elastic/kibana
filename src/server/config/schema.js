@@ -6,7 +6,7 @@ let path = require('path');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 
-module.exports = Joi.object({
+module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
@@ -106,4 +106,3 @@ module.exports = Joi.object({
   }).default()
 
 }).default();
-
