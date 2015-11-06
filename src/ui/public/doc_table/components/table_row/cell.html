@@ -10,4 +10,11 @@ if (timefield) {
 %>
 <td <%= attributes %>>
   <%= formatted %>
+  <span class="table-cell-filter">
+    <% if (filterable) { %>
+      <i>&nbsp;</i>
+      <i ng-click="inlineFilter($event, '+')" class="fa fa-search-plus" data-column="<%- column %>" tooltip="Filter for value" tooltip-append-to-body="1"></i>
+      <i ng-click="inlineFilter($event, '-')" class="fa fa-search-minus" data-column="<%- column %>" tooltip="Filter out value" tooltip-append-to-body="1"></i>
+    <% } %>
+  </span>
 </td>

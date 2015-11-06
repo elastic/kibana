@@ -24,9 +24,10 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile) {
+module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Private) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+  const filterManager = Private(require('ui/filter_manager'));
 
   return {
     restrict: 'A',
@@ -83,6 +84,14 @@ module.directive('kbnTableRow', function ($compile) {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
+      $scope.inlineFilter = function ($event, type) {
+        const column = $($event.target).data().column;
+        const field = $scope.indexPattern.fields.byName[column];
+        $scope.indexPattern.popularizeField(field, 1);
+        const flattened = $scope.indexPattern.flattenHit($scope.row);
+        filterManager.add(field, flattened[column], type, $scope.indexPattern.id);
+      };
+
       // create a tr element that lists the value for each *column*
       function createSummaryRow(row) {
         const indexPattern = $scope.indexPattern;
@@ -92,18 +101,26 @@ module.directive('kbnTableRow', function ($compile) {
           openRowHtml
         ];
 
+        const mapping = indexPattern.fields.byName;
         if (indexPattern.timeFieldName) {
           newHtmls.push(cellTemplate({
             timefield: true,
-            formatted: _displayField(row, indexPattern.timeFieldName)
+            formatted: _displayField(row, indexPattern.timeFieldName),
+            filterable: mapping[indexPattern.timeFieldName].filterable,
+            column: indexPattern.timeFieldName
           }));
         }
 
         $scope.columns.forEach(function (column) {
+          var filterable = mapping[column] ? mapping[column].filterable : false;
+          const flattened = indexPattern.flattenHit(row);
+          filterable = flattened[column] === undefined ? false : filterable;
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
-            formatted: _displayField(row, column, true)
+            formatted: _displayField(row, column, true),
+            filterable: filterable,
+            column: column
           }));
         });
 
@@ -128,7 +145,7 @@ module.directive('kbnTableRow', function ($compile) {
           // rebuild cells since we modified the children
           $cells = $el.children();
 
-          if (i === 0 && !reuse) {
+          if (!reuse) {
             $toggleScope = $scope.$new();
             $compile($target)($toggleScope);
           }
@@ -160,4 +177,4 @@ module.directive('kbnTableRow', function ($compile) {
       }
     }
   };
-});
+}]);
