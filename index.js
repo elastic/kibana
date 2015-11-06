@@ -38,6 +38,10 @@ module.exports = function (kibana) {
         flotCrosshair$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.crosshair'),
           imports: 'flot'
+        },
+        flotSelection$: {
+          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.selection'),
+          imports: 'flot'
         }
       }
     },

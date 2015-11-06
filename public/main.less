@@ -210,6 +210,10 @@ div.doc-container {
     opacity: 0.50;
     z-index: 10;
   }
+
+  .cell-move {
+    opacity: 0;
+  }
 }
 
 .chart-container:hover {
@@ -230,7 +234,14 @@ div.doc-container {
     span {
       display: none;
     }
+  }
 
+  .cell-move {
+    opacity: 0.50;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 

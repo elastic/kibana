@@ -1,21 +1,23 @@
 var _ = require('lodash');
 var $ = require('jquery');
+var moment = require('moment');
 
 require('flot');
 require('flotTime');
 require('flotCrosshair');
 require('flotCanvas');
+require('flotSelection');
 
 
 var app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('chart', function ($compile, $rootScope) {
+app.directive('chart', function ($compile, $rootScope, timefilter) {
   return {
     restrict: 'A',
     scope: {
       chart: '=',
-      rows: '=',
-      cell: '='
+      cell: '=',
+      search: '='
     },
     link: function ($scope, $elem) {
       var legendValueNumbers;
@@ -25,6 +27,10 @@ app.directive('chart', function ($compile, $rootScope) {
         xaxis: {
           mode: 'time',
           tickLength: 0,
+        },
+        selection: {
+          mode: 'x',
+          color: '#ccc'
         },
         crosshair: {
           mode: 'x',
@@ -66,11 +72,20 @@ app.directive('chart', function ($compile, $rootScope) {
       $scope.$on('$destroy', function () {
         $(window).off('resize'); //remove the handler added earlier
         $elem.off('plothover');
+        $elem.off('plotselected');
         $elem.off('mouseleave');
       });
 
       $elem.on('plothover',  function (event, pos, item) {
         $rootScope.$broadcast('timelionPlotHover', event, pos, item);
+      });
+
+      $elem.on('plotselected', function (event, ranges) {
+        console.log(ranges, timefilter);
+        timefilter.time.from = moment(ranges.xaxis.from);
+        timefilter.time.to = moment(ranges.xaxis.to);
+        timefilter.time.mode = 'absolute';
+        $scope.search();
       });
 
       $elem.on('mouseleave', function () {
