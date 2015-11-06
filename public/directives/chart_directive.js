@@ -81,7 +81,6 @@ app.directive('chart', function ($compile, $rootScope, timefilter) {
       });
 
       $elem.on('plotselected', function (event, ranges) {
-        console.log(ranges, timefilter);
         timefilter.time.from = moment(ranges.xaxis.from);
         timefilter.time.to = moment(ranges.xaxis.to);
         timefilter.time.mode = 'absolute';

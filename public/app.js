@@ -121,7 +121,6 @@ app.controller('timelion', function (
   };
 
   $scope.toggle = function (property) {
-    console.log(property);
     $scope[property] = !$scope[property];
   };
 

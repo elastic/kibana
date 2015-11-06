@@ -51,10 +51,6 @@ function buildRequest(config, tlConfig) {
   return searchRequest;
 }
 
-function validateInterval(interval) {
-  console.log(toMS(interval));
-}
-
 module.exports = new Datasource('es', {
   args: [
     {

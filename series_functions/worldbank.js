@@ -53,7 +53,6 @@ module.exports = new Datasource ('worldbank', {
         return [moment(date, 'YYYY').valueOf(), parseInt(val, 10)];
       }));
 
-      console.log(hasData);
       if (!hasData) throw new Error('Worldbank request succeeded, but there was no data for ' + config.code);
 
       return {
