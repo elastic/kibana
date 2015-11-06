@@ -66,19 +66,45 @@ define(function (require) {
       });
     },
 
+    runScript: function (fn, timeout) {
+      var self = this;
+      timeout = timeout || 1000;
+
+      // wait for deps on window before running script
+      return self.remote
+      .setExecuteAsyncTimeout(timeout)
+      .executeAsync(function (done) {
+        var interval = setInterval(function () {
+          var ready = (document.readyState === 'complete');
+          var hasJQuery = !!window.$;
+
+          if (ready && hasJQuery) {
+            console.log('doc ready, jquery loaded');
+            clearInterval(interval);
+            done();
+          }
+        }, 10);
+      }).then(function () {
+        return self.remote.execute(fn);
+      });
+    },
+
+    getApp: function () {
+      return this.runScript(function () {
+        var $ = window.$;
+        var $scope = $('nav').scope();
+        return $scope.chrome.getApp();
+      });
+    },
+
     checkForStatusPage: function () {
       var self = this;
 
       self.debug('Checking for status page');
-      return self.remote.setFindTimeout(2000)
-      .findByCssSelector('.application .container h1').getVisibleText()
-      .then(function (text) {
-        if (text.match(/status\:/i)) return true;
-        return false;
-      })
-      .catch(function (err) {
-        self.debug('Status page title not found');
-        return false;
+      return self.getApp()
+      .then(function (app) {
+        self.debug('current app: ' + app.id);
+        return app.id === 'statusPage';
       });
     },
 
