@@ -19,7 +19,7 @@ class UiApp {
     this.hidden = this.spec.hidden;
     this.autoloadOverrides = this.spec.autoload;
     this.templateName = this.spec.templateName || 'uiApp';
-    this.url = (spec.urlBasePath || '') + (this.spec.url || '/app/' + this.id);
+    this.url = `${spec.urlBasePath || ''}${this.spec.url || `/app/${this.id}`}`;
 
     // once this resolves, no reason to run it again
     this.getModules = _.once(this.getModules);
