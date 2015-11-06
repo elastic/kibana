@@ -108,12 +108,40 @@ describe('scenario manager', function () {
     });
   });
 
-  it('should throw an error if the scenario is not defined', function () {
-    expect(manager.load).withArgs('makelogs').to.throwError();
+  describe('load', function () {
+    it('should reject if the scenario is not specified', function () {
+      return manager.load()
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
+
+    it('should reject if the scenario is not defined', function () {
+      return manager.load('idonotexist')
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
   });
 
-  it('should throw an error if an index is not defined when clearing', function () {
-    expect(manager.unload).to.throwError();
+  describe('unload', function () {
+    it('should reject if the scenario is not specified', function () {
+      return manager.unload()
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
+
+    it('should reject if the scenario is not defined', function () {
+      return manager.unload('idonotexist')
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
   });
 
   it('should throw an error if an es server is not specified', function () {
