@@ -48,7 +48,7 @@ define(function (require) {
             return settingsPage.removeIndexPattern();
           });
 
-          bdd.it('should sort ascending, then descending', function pageHeader() {
+          bdd.it('should sort ascending', function pageHeader() {
             return settingsPage.sortBy(col.heading)
             .then(function getText() {
               return col.selector();
