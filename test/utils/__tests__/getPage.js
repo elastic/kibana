@@ -10,7 +10,7 @@ describe('getUrl', function () {
       pathname: 'foo'
     });
 
-    expect(url).to.be('http://localhost:9220/foo');
+    expect(url).to.be('http://localhost/foo');
   });
 
   it('should convert to a secure url with port', function () {
