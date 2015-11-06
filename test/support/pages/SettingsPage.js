@@ -6,7 +6,7 @@ define(function (require) {
 
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 6000;
   var common;
 
   function SettingsPage(remote) {
@@ -238,7 +238,7 @@ define(function (require) {
         return self.getCreateButton().click();
       })
       .then(function () {
-        return common.tryForTime(3000, function () {
+        return common.tryForTime(defaultTimeout, function () {
           return self.remote.getCurrentUrl()
           .then(function (currentUrl) {
             if (!currentUrl.match(/indices\/.+\?/)) {
@@ -255,7 +255,7 @@ define(function (require) {
 
       return self.clickDeletePattern()
       .then(function () {
-        return common.tryForTime(3000, function () {
+        return common.tryForTime(defaultTimeout, function () {
           return self.remote.getAlertText()
           .then(function (text) {
             alertText = text;
@@ -266,7 +266,7 @@ define(function (require) {
         return self.remote.acceptAlert();
       })
       .then(function () {
-        common.tryForTime(3000, function () {
+        common.tryForTime(defaultTimeout, function () {
           return self.remote.getCurrentUrl()
           .then(function (currentUrl) {
             if (currentUrl.match(/indices\/.+\?/)) {
