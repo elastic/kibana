@@ -82,7 +82,7 @@ module.exports = async (kbnServer, server, config) => {
       app: app,
       loadingGif: loadingGif,
       kibanaPayload: payload,
-      bundlePath: config.get('server.basePath') + '/bundles',
+      bundlePath: `${config.get('server.basePath')}/bundles`,
     });
   });
 };
