@@ -30,7 +30,7 @@ module.exports = new Datasource ('worldbank_indicators', {
       var code = 'countries/' + country + '/indicators/' + config.indicator;
       var wbArgs = [code];
       wbArgs.byName = {code: code};
-      return worldbank.fn(wbArgs, tlConfig);
+      return worldbank._fn(wbArgs, tlConfig);
     });
 
     return Promise.map(seriesLists, function (seriesList) {
