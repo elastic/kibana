@@ -110,6 +110,18 @@ gulp.task('package', ['build'], function (done) {
 });
 
 gulp.task('dev', ['sync'], function (done) {
-  gulp.watch(['package.json', 'index.js', 'public/**/*'], ['sync', 'lint']);
+  gulp.watch([
+    'index.js',
+    'node_modules',
+    'public/**/*',
+    'bower_components',
+    'fit_functions/*',
+    'handlers/**/*',
+    'init.js',
+    'lib/**/*',
+    'routes/**/*',
+    'series_functions/**/*',
+    'timelion.json'
+  ], ['sync', 'lint']);
 });
 
