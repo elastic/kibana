@@ -22,9 +22,9 @@ define(function (require) {
       var doNavigation = function (url) {
         return self.tryForTime(urlTimeout, function () {
           // since we're using hash URLs, always reload first to force re-render
-          return self.remote.refresh()
+          return self.remote.get(url)
           .then(function () {
-            return self.remote.get(url);
+            return self.remote.refresh();
           })
           .then(function () {
             if (testStatusPage !== false) {
