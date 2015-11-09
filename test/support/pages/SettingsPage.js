@@ -140,11 +140,19 @@ define(function (require) {
 
     getFieldsTabCount: function getFieldsTabCount() {
       var self = this;
-      var selector = 'li.kbn-settings-tab.ng-scope.active a.ng-binding small.ng-binding';
-      var timeout = defaultTimeout * 2; // takes a little extra time to render
+      var selector = 'li.kbn-settings-tab.active a small';
 
-      return self.remote.setFindTimeout(timeout)
-      .findByCssSelector(selector).getVisibleText()
+      var getText = function () {
+        return self.remote.setFindTimeout(defaultTimeout)
+        .findByCssSelector(selector).getVisibleText();
+      }
+
+      return common.tryForTime(defaultTimeout * 4, function () {
+        return getText();
+      })
+      .then(function () {
+        return getText();
+      })
       .then(function (theText) {
         // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
