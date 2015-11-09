@@ -4,6 +4,7 @@ define(function (require) {
   // so we can provide the remote Command object
   // at runtime
 
+  var Promise = require('bluebird');
   var Common = require('./Common');
 
   var defaultTimeout = 5000;
