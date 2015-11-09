@@ -92,8 +92,8 @@ define(function (require) {
     getApp: function () {
       var self = this;
 
-      return self.tryForTime(5000, function () {
-        self.remote.findByCssSelector('.content > .application');
+      return self.tryForTime(3000, function () {
+        return self.remote.findByCssSelector('.content > .application');
       })
       .then(function () {
         return self.runScript(function () {
