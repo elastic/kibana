@@ -135,6 +135,7 @@
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "4.1.3",
     "chokidar": "1.0.5",
+    "core-js": "1.2.5",
     "eslint": "1.5.1",
     "eslint-plugin-mocha": "1.0.0",
     "expect.js": "0.3.1",
