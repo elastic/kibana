@@ -1,15 +1,17 @@
 import expect from 'expect.js';
 import { fromNode as fn } from 'bluebird';
+import { resolve } from 'path';
 
 import KbnServer from '../../KbnServer';
 
 const nonDestructiveMethods = ['GET'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
+const fromFixture = resolve.bind(null, __dirname, '../../../fixtures/');
 
 describe('xsrf request filter', function () {
-  async function makeServer(token) {
+  async function makeServer(token, ssl) {
     const kbnServer = new KbnServer({
-      server: { autoListen: false, xsrfToken: token },
+      server: { autoListen: false, xsrfToken: token, ssl: ssl },
       logging: { quiet: true },
       optimize: { enabled: false },
     });
@@ -34,6 +36,26 @@ describe('xsrf request filter', function () {
 
     return kbnServer;
   }
+
+  context('with ssl', function () {
+    let kbnServer;
+    beforeEach(async () => {
+      kbnServer = await makeServer(undefined, {
+        cert: fromFixture('localhost.cert'),
+        key: fromFixture('localhost.key')
+      });
+    });
+    afterEach(async () => await kbnServer.close());
+
+    it('sets the secure cookie flag', async function () {
+      var resp = await kbnServer.inject({
+        method: 'GET',
+        url: '/csrf/test/route',
+      });
+
+      expect(resp.headers['set-cookie'][0]).to.match(/^XSRF-TOKEN=[^;]{512}; Secure; Path=\/$/);
+    });
+  });
 
   context('without configured token', function () {
     let kbnServer;
