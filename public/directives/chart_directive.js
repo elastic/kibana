@@ -7,6 +7,8 @@ require('flotTime');
 require('flotCrosshair');
 require('flotCanvas');
 require('flotSelection');
+require('flotSymbol');
+
 
 
 var app = require('ui/modules').get('apps/timelion', []);
@@ -17,6 +19,8 @@ app.directive('chart', function ($compile, $rootScope, timefilter) {
     scope: {
       chart: '=',
       cell: '=',
+      rows: '=',
+      columns: '=',
       search: '='
     },
     link: function ($scope, $elem) {
@@ -167,11 +171,21 @@ app.directive('chart', function ($compile, $rootScope, timefilter) {
 
       var legendScope = $scope.$new();
       function drawPlot(plotConfig) {
-        $elem.height(330);
-
         if (!plotConfig || !plotConfig.length) {
           $elem.empty();
           return;
+        }
+
+        var headerHeight = 80 + 28;
+        var verticalCellPadding = 14;
+        var containerPadding = 20;
+        var horizontalCellPadding = 4;
+        $elem.height((($(window).height() - (headerHeight + (containerPadding * 2))) /  $scope.rows) - verticalCellPadding);
+
+        if ($(window).width() < 768) {
+          $elem.width($(window).width() - (containerPadding * 2));
+        } else {
+          $elem.width((($(window).width() - (containerPadding * 2)) /  $scope.columns) - horizontalCellPadding);
         }
 
         var options = _.cloneDeep(defaultOptions);

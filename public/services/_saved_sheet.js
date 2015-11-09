@@ -28,6 +28,7 @@ define(function (require) {
           timelion_other_interval: '1d',
           timelion_chart_height: 275,
           timelion_columns: 3,
+          timelion_rows: 3,
           version: 1,
         }
       });
@@ -46,6 +47,7 @@ define(function (require) {
       timelion_other_interval: 'string',
       timelion_chart_height: 'integer',
       timelion_columns: 'integer',
+      timelion_rows: 'integer',
       version: 'integer'
     };
 

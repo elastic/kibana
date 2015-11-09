@@ -72,6 +72,7 @@ app.controller('timelion', function (
       sheet: savedSheet.timelion_sheet,
       selected: 0,
       columns: savedSheet.timelion_columns,
+      rows: savedSheet.timelion_rows,
       interval: savedSheet.timelion_interval,
       otherInterval: savedSheet.timelion_other_interval
     };
@@ -176,7 +177,7 @@ app.controller('timelion', function (
     });
   };
 
-  function getInterval (state) {
+  function getInterval(state) {
     if (state.interval === 'other') {
       return state.otherInterval;
     }
@@ -191,6 +192,7 @@ app.controller('timelion', function (
     savedSheet.timelion_interval = $scope.state.interval;
     savedSheet.timelion_other_interval = $scope.state.otherInterval;
     savedSheet.timelion_columns = $scope.state.columns;
+    savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       $scope.configTemplate.close('save');
       if (id) {
