@@ -15,7 +15,9 @@ describe('plugins/elasticsearch', function () {
       kbnServer = new KbnServer({
         server: {
           autoListen: false,
-          xsrfToken: false
+          xsrf: {
+            disableProtection: true
+          }
         },
         logging: { quiet: true },
         plugins: {
