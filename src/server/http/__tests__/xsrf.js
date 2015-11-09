@@ -19,7 +19,7 @@ describe('xsrf request filter', function () {
     await kbnServer.ready();
 
     kbnServer.server.route({
-      path: '/csrf/test/route',
+      path: '/xsrf/test/route',
       method: [...nonDestructiveMethods, ...destructiveMethods],
       handler: function (req, reply) {
         reply(null, 'ok');
@@ -50,7 +50,7 @@ describe('xsrf request filter', function () {
     it('sets the secure cookie flag', async function () {
       var resp = await kbnServer.inject({
         method: 'GET',
-        url: '/csrf/test/route',
+        url: '/xsrf/test/route',
       });
 
       expect(resp.headers['set-cookie'][0]).to.match(/^XSRF-TOKEN=[^;]{512}; Secure; Path=\/$/);
@@ -65,7 +65,7 @@ describe('xsrf request filter', function () {
     it('responds with a random token', async function () {
       var resp = await kbnServer.inject({
         method: 'GET',
-        url: '/csrf/test/route',
+        url: '/xsrf/test/route',
       });
 
       expect(resp.headers['set-cookie'][0]).to.match(/^XSRF-TOKEN=[^;]{512}; Path=\/$/);
@@ -82,7 +82,7 @@ describe('xsrf request filter', function () {
       context(`nonDestructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
         it('accepts requests without a token and sends it', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method
           });
 
@@ -92,7 +92,7 @@ describe('xsrf request filter', function () {
 
         it('responds with the token to requests without a token', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method
           });
 
@@ -101,7 +101,7 @@ describe('xsrf request filter', function () {
 
         it('does not respond with the token to requests with a token', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method,
             headers: {
               'X-XSRF-TOKEN': token,
@@ -113,7 +113,7 @@ describe('xsrf request filter', function () {
 
         it('does not respond with the token to requests that already have token in cookie', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method,
             headers: {
               'X-XSRF-TOKEN': token,
@@ -130,7 +130,7 @@ describe('xsrf request filter', function () {
       context(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
         it('rejects requests without a token', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method
           });
 
@@ -140,7 +140,7 @@ describe('xsrf request filter', function () {
 
         it('accepts requests with the correct token', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method,
             headers: {
               'X-XSRF-TOKEN': token,
@@ -153,7 +153,7 @@ describe('xsrf request filter', function () {
 
         it('rejects requests with an invalid token', async function () {
           const resp = await kbnServer.inject({
-            url: '/csrf/test/route',
+            url: '/xsrf/test/route',
             method: method,
             headers: {
               'X-XSRF-TOKEN': `invalid:${token}`,
