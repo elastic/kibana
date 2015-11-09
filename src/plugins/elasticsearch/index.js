@@ -17,12 +17,20 @@ module.exports = function (kibana) {
         requestTimeout: Joi.number().default(30000),
         pingTimeout: Joi.number().default(30000),
         startupTimeout: Joi.number().default(5000),
-        ssl: Joi.object({
+        ssl: Joi
+        .object({
           verify: Joi.boolean().default(true),
           ca: Joi.array().single().items(Joi.string()),
           cert: Joi.string(),
-          key: Joi.string()
-        }).default(),
+          key: Joi.string(),
+          enabled: Joi.boolean().when('cert', {
+            is: Joi.string().required(),
+            then: Joi.valid(true).default(true),
+            otherwise: Joi.valid(false).default(false)
+          }),
+        })
+        .and('cert', 'key')
+        .default(),
         apiVersion: Joi.string().default('2.0'),
         minimumVerison: Joi.string().default('2.0.0')
       }).default();
