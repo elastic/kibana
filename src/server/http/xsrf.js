@@ -3,7 +3,7 @@ import { forbidden } from 'boom';
 export default function (kbnServer, server, config) {
   const token = config.get('server.xsrfToken');
   const stateOpts = {
-    isSecure: config.get('server.ssl.cert') && config.get('server.ssl.key'),
+    isSecure: Boolean(config.get('server.ssl.cert') && config.get('server.ssl.key')),
     isHttpOnly: false,
     path: '/',
   };
