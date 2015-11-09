@@ -60,8 +60,8 @@ To encrypt communications between the browser and the Kibana server, you configu
 [source,text]
 ----
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
-ssl_key_file: /path/to/your/server.key
-ssl_cert_file: /path/to/your/server.crt
+server.ssl.key: /path/to/your/server.key
+server.ssl.cert: /path/to/your/server.crt
 ----
 
 If you are using Shield or a proxy that provides an HTTPS endpoint for Elasticsearch,
