@@ -1,7 +1,9 @@
 import { forbidden } from 'boom';
 
 export default function (kbnServer, server, config) {
-  const token = config.get('server.xsrfToken');
+  const token = config.get('server.xsrf.token');
+  const disabled = config.get('server.xsrf.disableProtection');
+
   const stateOpts = {
     isSecure: Boolean(config.get('server.ssl.cert') && config.get('server.ssl.key')),
     isHttpOnly: false,
@@ -9,9 +11,7 @@ export default function (kbnServer, server, config) {
   };
 
   server.ext('onPostAuth', function (req, reply) {
-    if (!token) {
-      return reply.continue();
-    }
+    if (disabled) return reply.continue();
 
     if (req.method === 'get' && !req.state['XSRF-TOKEN'] && !req.headers['x-xsrf-token']) {
       reply.state('XSRF-TOKEN', token, stateOpts);

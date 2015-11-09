@@ -11,7 +11,7 @@ const fromFixture = resolve.bind(null, __dirname, '../../../fixtures/');
 describe('xsrf request filter', function () {
   async function makeServer(token, ssl) {
     const kbnServer = new KbnServer({
-      server: { autoListen: false, xsrfToken: token, ssl: ssl },
+      server: { autoListen: false, ssl: ssl, xsrf: { token } },
       logging: { quiet: true },
       optimize: { enabled: false },
     });
