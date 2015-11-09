@@ -5,7 +5,7 @@ export default function (kbnServer, server, config) {
   const disabled = config.get('server.xsrf.disableProtection');
 
   const stateOpts = {
-    isSecure: Boolean(config.get('server.ssl.cert') && config.get('server.ssl.key')),
+    isSecure: config.get('server.ssl.enabled'),
     isHttpOnly: false,
     path: '/',
   };
