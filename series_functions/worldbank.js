@@ -15,7 +15,12 @@ module.exports = new Datasource ('worldbank', {
     }
   ],
   aliases: ['wb'],
-  help: 'Pull data from http://data.worldbank.org/ using path to series.',
+  help: 'Pull data from http://data.worldbank.org/ using path to series.' +
+  ' This is usually everything after the domain, before the querystring. Eg: ' +
+  '/en/countries/ind;chn/indicators/DPANUSSPF.' +
+  ' The worldbank provides' +
+  ' mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent' +
+  ' time ranges.',
   fn: function worldbank(args, tlConfig) {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 

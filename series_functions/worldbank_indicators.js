@@ -18,7 +18,9 @@ module.exports = new Datasource ('worldbank_indicators', {
     }
   ],
   aliases: ['wbi'],
-  help: 'Pull data from http://data.worldbank.org/ using the country name and indicator.',
+  help: 'Pull data from http://data.worldbank.org/ using the country name and indicator. The worldbank provides' +
+  ' mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent' +
+  ' time ranges.',
   fn: function worldbankIndicators(args, tlConfig) {
     var config = _.defaults(args.byName, {
       country: 'wld',
