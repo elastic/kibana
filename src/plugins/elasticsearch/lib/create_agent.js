@@ -19,7 +19,7 @@ module.exports = _.memoize(function (server) {
   }
 
   // Add client certificate and key if required by elasticsearch
-  if (config.get('elasticsearch.ssl.cert') && config.get('elasticsearch.ssl.key')) {
+  if (config.get('elasticsearch.ssl.enabled')) {
     agentOptions.cert = readFile(config.get('elasticsearch.ssl.cert'));
     agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
   }

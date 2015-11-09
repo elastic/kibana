@@ -20,7 +20,7 @@ module.exports = function (kbnServer, server, config) {
   };
 
   // enable tls if ssl key and cert are defined
-  if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
+  if (config.get('server.ssl.enabled')) {
     connectionOptions.tls = {
       key: fs.readFileSync(config.get('server.ssl.key')),
       cert: fs.readFileSync(config.get('server.ssl.cert'))
