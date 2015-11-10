@@ -52,7 +52,7 @@ define(function (require) {
         var lastUrl = currentUrl;
         return self.tryForTime(urlTimeout, function () {
           // give the app time to update the URL
-          return self.sleep(1000)
+          return self.sleep(500)
           .then(function () {
             return self.remote.getCurrentUrl();
           })
@@ -91,9 +91,11 @@ define(function (require) {
 
     getApp: function () {
       var self = this;
+      var loadTimeout = 5000;
 
       return self.tryForTime(3000, function () {
-        return self.remote.findByCssSelector('.content > .application');
+        return self.remote.setFindTimeout(loadTimeout)
+        .findByCssSelector('.content > .application');
       })
       .then(function () {
         return self.runScript(function () {
