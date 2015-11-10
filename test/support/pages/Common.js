@@ -68,7 +68,7 @@ define(function (require) {
 
     runScript: function (fn, timeout) {
       var self = this;
-      timeout = timeout || 5000;
+      timeout = timeout || 10000;
 
       // wait for deps on window before running script
       return self.remote
@@ -91,7 +91,7 @@ define(function (require) {
 
     getApp: function () {
       var self = this;
-      var loadTimeout = 10000;
+      var loadTimeout = 20000;
 
       return Promise.try(function () {
         return self.remote.setFindTimeout(loadTimeout)
