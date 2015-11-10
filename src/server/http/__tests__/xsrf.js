@@ -65,7 +65,7 @@ describe('xsrf request filter', function () {
         url: '/app/kibana',
       });
 
-      expect(resp.payload).to.match(/"xsrfToken":".{512}"/);
+      expect(resp.payload).to.match(/"xsrfToken":".{64}"/);
     });
   });
 
