@@ -123,7 +123,7 @@ define(function (require) {
       });
     },
 
-    tryForTime: function tryForTime(timeout, block) {
+    tryForTime: function (timeout, block) {
       var self = this;
       var start = Date.now();
       var retryDelay = 500;
@@ -151,15 +151,15 @@ define(function (require) {
       return Promise.try(attempt);
     },
 
-    log: function log(logString) {
+    log: function (logString) {
       console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
-    debug: function debug(logString) {
+    debug: function (logString) {
       if (config.debug) this.log(logString);
     },
 
-    sleep: function sleep(sleepMilliseconds) {
+    sleep: function (sleepMilliseconds) {
       this.debug('sleeping for ' + sleepMilliseconds + 'ms');
       return Promise.resolve().delay(sleepMilliseconds);
     },
@@ -179,7 +179,7 @@ define(function (require) {
       };
     },
 
-    saveScreenshot: function saveScreenshot(filename) {
+    saveScreenshot: function (filename) {
       var self = this;
       var outDir = path.resolve('test', 'output');
 
