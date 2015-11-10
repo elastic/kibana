@@ -101,6 +101,7 @@
     "simple-git": "^0.11.0",
     "sinon": "^1.12.2",
     "sinon-as-promised": "^2.0.3",
+    "supertest": "^1.1.0",
     "tar": "^1.0.1"
   },
   "engines": {
