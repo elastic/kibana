@@ -3,6 +3,7 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var requestLogger = require('./lib/requestLogger');
 var auth = require('./lib/auth');
+var xsrf = require('./lib/xsrf');
 var appHeaders = require('./lib/appHeaders');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -21,6 +22,7 @@ app.set('x-powered-by', false);
 
 app.use(requestLogger());
 app.use(auth());
+app.use(xsrf(config.kibana.xsrf_token));
 app.use(appHeaders());
 app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 
