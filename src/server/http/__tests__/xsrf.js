@@ -9,6 +9,14 @@ const destructiveMethods = ['POST', 'PUT', 'DELETE'];
 const src = resolve.bind(null, __dirname, '../../../../src');
 
 describe('xsrf request filter', function () {
+  function inject(kbnServer, opts) {
+    return fn(cb => {
+      kbnServer.server.inject(opts, (resp) => {
+        cb(null, resp);
+      });
+    });
+  }
+
   async function makeServer(token) {
     const kbnServer = new KbnServer({
       server: { autoListen: false, xsrf: { token } },
@@ -27,14 +35,6 @@ describe('xsrf request filter', function () {
       }
     });
 
-    kbnServer.inject = function (opts) {
-      return fn(cb => {
-        kbnServer.server.inject(opts, (resp) => {
-          cb(null, resp);
-        });
-      });
-    };
-
     return kbnServer;
   }
 
@@ -45,7 +45,7 @@ describe('xsrf request filter', function () {
     afterEach(async () => await kbnServer.close());
 
     it('sends a token when rendering an app', async function () {
-      var resp = await kbnServer.inject({
+      var resp = await inject(kbnServer, {
         method: 'GET',
         url: '/app/kibana',
       });
@@ -60,7 +60,7 @@ describe('xsrf request filter', function () {
     afterEach(async () => await kbnServer.close());
 
     it('responds with a random token', async function () {
-      var resp = await kbnServer.inject({
+      var resp = await inject(kbnServer, {
         method: 'GET',
         url: '/app/kibana',
       });
@@ -78,7 +78,7 @@ describe('xsrf request filter', function () {
     for (const method of nonDestructiveMethods) {
       context(`nonDestructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
         it('accepts requests without a token', async function () {
-          const resp = await kbnServer.inject({
+          const resp = await inject(kbnServer, {
             url: '/xsrf/test/route',
             method: method
           });
@@ -88,7 +88,7 @@ describe('xsrf request filter', function () {
         });
 
         it('ignores invalid tokens', async function () {
-          const resp = await kbnServer.inject({
+          const resp = await inject(kbnServer, {
             url: '/xsrf/test/route',
             method: method,
             headers: {
@@ -105,7 +105,7 @@ describe('xsrf request filter', function () {
     for (const method of destructiveMethods) {
       context(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
         it('accepts requests with the correct token', async function () {
-          const resp = await kbnServer.inject({
+          const resp = await inject(kbnServer, {
             url: '/xsrf/test/route',
             method: method,
             headers: {
@@ -118,7 +118,7 @@ describe('xsrf request filter', function () {
         });
 
         it('rejects requests without a token', async function () {
-          const resp = await kbnServer.inject({
+          const resp = await inject(kbnServer, {
             url: '/xsrf/test/route',
             method: method
           });
@@ -128,7 +128,7 @@ describe('xsrf request filter', function () {
         });
 
         it('rejects requests with an invalid token', async function () {
-          const resp = await kbnServer.inject({
+          const resp = await inject(kbnServer, {
             url: '/xsrf/test/route',
             method: method,
             headers: {
