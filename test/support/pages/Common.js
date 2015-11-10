@@ -68,7 +68,7 @@ define(function (require) {
 
     runScript: function (fn, timeout) {
       var self = this;
-      timeout = timeout || 10000;
+      timeout = timeout || 5000;
 
       // wait for deps on window before running script
       return self.remote
@@ -102,7 +102,7 @@ define(function (require) {
           var $ = window.$;
           var $scope = $('.content > .application').scope();
           return $scope ? $scope.chrome.getApp() : {};
-        });
+        }, loadTimeout / 2);
       });
     },
 
