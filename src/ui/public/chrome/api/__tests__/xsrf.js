@@ -9,6 +9,14 @@ const xsrfHeader = 'kbn-xsrf-token';
 const xsrfToken = 'xsrfToken';
 
 describe('chrome xsrf apis', function () {
+  describe('#getXsrfToken()', function () {
+    it('exposes the token', function () {
+      const chrome = {};
+      xsrfChromeApi(chrome, { xsrfToken });
+      expect(chrome.getXsrfToken()).to.be(xsrfToken);
+    });
+  });
+
   context('jQuery support', function () {
     it('adds a global jQuery prefilter', function () {
       stub($, 'ajaxPrefilter');
