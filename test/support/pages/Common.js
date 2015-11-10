@@ -123,7 +123,7 @@ define(function (require) {
       });
     },
 
-    tryForTime: function tryForTime(timeout, block) {
+    tryForTime: function (timeout, block) {
       var self = this;
       var start = Date.now();
       var retryDelay = 500;
@@ -151,15 +151,15 @@ define(function (require) {
       return Promise.try(attempt);
     },
 
-    log: function log(logString) {
+    log: function (logString) {
       console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
-    debug: function debug(logString) {
+    debug: function (logString) {
       if (config.debug) this.log(logString);
     },
 
-    sleep: function sleep(sleepMilliseconds) {
+    sleep: function (sleepMilliseconds) {
       this.debug('sleeping for ' + sleepMilliseconds + 'ms');
       return Promise.resolve().delay(sleepMilliseconds);
     },
@@ -170,7 +170,7 @@ define(function (require) {
 
       return function (reason) {
         var now = Date.now();
-        var filename = path.resolve(['./screenshot', now, testName, '.png'].join('_'));
+        var filename = ['failure', now, testName].join('_') + '.png';
 
         return self.saveScreenshot(filename)
         .finally(function () {
@@ -179,12 +179,18 @@ define(function (require) {
       };
     },
 
-    saveScreenshot: function saveScreenshot(filename) {
-      this.debug('Test Failed, taking screenshot "' + filename + '"');
+    saveScreenshot: function (filename) {
+      var self = this;
+      var outDir = path.resolve('test', 'output');
 
-      return this.remote.takeScreenshot()
+      return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
-        fs.writeFileSync(filename, data);
+        var filepath = path.resolve(outDir, filename);
+        self.debug('Test Failed, taking screenshot "' + filepath + '"');
+        fs.writeFileSync(filepath, data);
+      })
+      .catch(function (err) {
+        self.log('SCREENSHOT FAILED: ' + err);
       });
     }
   };
