@@ -35,13 +35,13 @@ define(function (require) {
     },
 
     clickVisualize: function () {
-      common.debug('click Discover tab');
+      common.debug('click Visualize tab');
       this.clickSelector('a[href*=\'visualize\']');
     },
 
     clickDashboard: function () {
       common.debug('click Dashboard tab');
-      this.clickSelector('a[href*=\'visualize\']');
+      this.clickSelector('a[href*=\'dashboard\']');
     },
 
     clickSettings: function () {
