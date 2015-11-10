@@ -6,12 +6,13 @@ import KbnServer from '../../KbnServer';
 
 const nonDestructiveMethods = ['GET'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
-const fromFixture = resolve.bind(null, __dirname, '../../../fixtures/');
+const src = resolve.bind(null, __dirname, '../../../../src');
 
 describe('xsrf request filter', function () {
-  async function makeServer(token, ssl) {
+  async function makeServer(token) {
     const kbnServer = new KbnServer({
-      server: { autoListen: false, ssl: ssl, xsrf: { token } },
+      server: { autoListen: false, xsrf: { token } },
+      plugins: { scanDirs: [src('plugins')] },
       logging: { quiet: true },
       optimize: { enabled: false },
     });
@@ -37,23 +38,19 @@ describe('xsrf request filter', function () {
     return kbnServer;
   }
 
-  context('with ssl', function () {
+  describe('issuing tokens', function () {
+    const token = 'secur3';
     let kbnServer;
-    beforeEach(async () => {
-      kbnServer = await makeServer(undefined, {
-        cert: fromFixture('localhost.cert'),
-        key: fromFixture('localhost.key')
-      });
-    });
+    beforeEach(async () => kbnServer = await makeServer(token));
     afterEach(async () => await kbnServer.close());
 
-    it('sets the secure cookie flag', async function () {
+    it('sends a token when rendering an app', async function () {
       var resp = await kbnServer.inject({
         method: 'GET',
-        url: '/xsrf/test/route',
+        url: '/app/kibana',
       });
 
-      expect(resp.headers['set-cookie'][0]).to.match(/^XSRF-TOKEN=[^;]{512}; Secure; Path=\/$/);
+      expect(resp.payload).to.contain(`"xsrfToken":"${token}"`);
     });
   });
 
@@ -65,10 +62,10 @@ describe('xsrf request filter', function () {
     it('responds with a random token', async function () {
       var resp = await kbnServer.inject({
         method: 'GET',
-        url: '/xsrf/test/route',
+        url: '/app/kibana',
       });
 
-      expect(resp.headers['set-cookie'][0]).to.match(/^XSRF-TOKEN=[^;]{512}; Path=\/$/);
+      expect(resp.payload).to.match(/"xsrfToken":".{512}"/);
     });
   });
 
@@ -80,7 +77,7 @@ describe('xsrf request filter', function () {
 
     for (const method of nonDestructiveMethods) {
       context(`nonDestructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
-        it('accepts requests without a token and sends it', async function () {
+        it('accepts requests without a token', async function () {
           const resp = await kbnServer.inject({
             url: '/xsrf/test/route',
             method: method
@@ -90,44 +87,36 @@ describe('xsrf request filter', function () {
           expect(resp.payload).to.be('ok');
         });
 
-        it('responds with the token to requests without a token', async function () {
-          const resp = await kbnServer.inject({
-            url: '/xsrf/test/route',
-            method: method
-          });
-
-          expect(resp.headers['set-cookie']).to.eql([`XSRF-TOKEN=${token}; Path=/`]);
-        });
-
-        it('does not respond with the token to requests with a token', async function () {
+        it('ignores invalid tokens', async function () {
           const resp = await kbnServer.inject({
             url: '/xsrf/test/route',
             method: method,
             headers: {
-              'X-XSRF-TOKEN': token,
+              'kbn-xsrf-token': `invalid:${token}`,
             },
           });
 
-          expect(resp.headers).to.not.have.property('set-cookie');
-        });
-
-        it('does not respond with the token to requests that already have token in cookie', async function () {
-          const resp = await kbnServer.inject({
-            url: '/xsrf/test/route',
-            method: method,
-            headers: {
-              'X-XSRF-TOKEN': token,
-              'cookie': `XSRF-TOKEN=${token}`
-            },
-          });
-
-          expect(resp.headers).to.not.have.property('set-cookie');
+          expect(resp.statusCode).to.be(200);
+          expect(resp.headers).to.not.have.property('kbn-xsrf-token');
         });
       });
     }
 
     for (const method of destructiveMethods) {
       context(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
+        it('accepts requests with the correct token', async function () {
+          const resp = await kbnServer.inject({
+            url: '/xsrf/test/route',
+            method: method,
+            headers: {
+              'kbn-xsrf-token': token,
+            },
+          });
+
+          expect(resp.statusCode).to.be(200);
+          expect(resp.payload).to.be('ok');
+        });
+
         it('rejects requests without a token', async function () {
           const resp = await kbnServer.inject({
             url: '/xsrf/test/route',
@@ -138,25 +127,12 @@ describe('xsrf request filter', function () {
           expect(resp.payload).to.match(/"Missing XSRF token"/);
         });
 
-        it('accepts requests with the correct token', async function () {
-          const resp = await kbnServer.inject({
-            url: '/xsrf/test/route',
-            method: method,
-            headers: {
-              'X-XSRF-TOKEN': token,
-            },
-          });
-
-          expect(resp.statusCode).to.be(200);
-          expect(resp.payload).to.be('ok');
-        });
-
         it('rejects requests with an invalid token', async function () {
           const resp = await kbnServer.inject({
             url: '/xsrf/test/route',
             method: method,
             headers: {
-              'X-XSRF-TOKEN': `invalid:${token}`,
+              'kbn-xsrf-token': `invalid:${token}`,
             },
           });
 
