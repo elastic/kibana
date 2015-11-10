@@ -10,7 +10,8 @@ module.exports = new Chainable('label', {
     },
     {
       name: 'label',
-      types: ['string']
+      types: ['string'],
+      help: 'Legend value for series. You can use %s to reference to current label.'
     }
   ],
   help: 'Change the label of the series. Use %s reference the existing label',

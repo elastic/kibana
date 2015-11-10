@@ -8,7 +8,8 @@ module.exports = new Datasource ('graphite', {
   args: [
     {
       name: 'metric', // _test-data.users.*.data
-      types: ['string']
+      types: ['string'],
+      help: 'Graphite metric to pull, eg _test-data.users.*.data'
     }
   ],
   help: 'Pull data grahite',

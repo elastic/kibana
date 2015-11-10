@@ -9,7 +9,8 @@ module.exports = new Chainable('derivative', {
     },
     {
       name: 'base',
-      types: ['number']
+      types: ['number'],
+      help: 'Number to start at. Basically just adds this to the beginning of the series'
     }
   ],
   help: 'Return the cumulative sum of a series, starting at a base.',

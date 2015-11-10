@@ -8,7 +8,8 @@ module.exports = new Chainable('hide', {
     },
     {
       name: 'hide',
-      types: ['number', 'null']
+      types: ['boolean', 'null'],
+      help: 'Hide or unhide the series'
     }
   ],
   help: 'Hide the series by default',

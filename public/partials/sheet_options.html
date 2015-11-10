@@ -1,9 +1,9 @@
 <form role="form" class="container-fluid">
     <div class="form-group col-md-6">
-      <label>Columns</label>
+      <label>Columns <small>Column count must be divisible by 12</small></label>
       <select class="form-control"
         ng-change="opts.search()"
-        ng-options="column for column in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+        ng-options="column for column in [1, 2, 3, 4, 6, 12]"
         ng-model="opts.state.columns">
       </select>
     </div>

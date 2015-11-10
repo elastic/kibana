@@ -66,6 +66,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
 
       $(window).resize(function () {
         if (!$scope.plot) return;
+        console.log('redrawing');
         $timeout(function () {
           // This is a lot faster than calling drawPlot(); Stolen from the borked flot.resize plugin
           $scope.plot.resize();
@@ -173,6 +174,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
 
       var legendScope = $scope.$new();
       function drawPlot(plotConfig) {
+
         if (!plotConfig || !plotConfig.length) {
           $elem.empty();
           return;

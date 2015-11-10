@@ -9,19 +9,23 @@ module.exports = new Chainable('yaxis', {
     },
     {
       name: 'yaxis',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.'
     },
     {
       name: 'min',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Min value'
     },
     {
       name: 'max',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Max value'
     },
     {
       name: 'position',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'left or right'
     },
   ],
   help: 'This is an internal function that simply returns the input series. Don\'t use this',

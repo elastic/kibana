@@ -8,7 +8,8 @@ module.exports = new Chainable('bars', {
     },
     {
       name: 'width',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Width of bars in pixels'
     }
   ],
   help: 'Show the seriesList as bars',

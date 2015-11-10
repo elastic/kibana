@@ -7,17 +7,14 @@ module.exports = new Datasource ('worldbank', {
   args: [
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
-      types: ['string', 'null']
-    },
-    {
-      name: 'fit',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Worldbank API path.' +
+        ' This is usually everything after the domain, before the querystring. Eg: ' +
+        '/en/countries/ind;chn/indicators/DPANUSSPF.'
     }
   ],
   aliases: ['wb'],
   help: 'Pull data from http://data.worldbank.org/ using path to series.' +
-  ' This is usually everything after the domain, before the querystring. Eg: ' +
-  '/en/countries/ind;chn/indicators/DPANUSSPF.' +
   ' The worldbank provides' +
   ' mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent' +
   ' time ranges.',
@@ -25,8 +22,7 @@ module.exports = new Datasource ('worldbank', {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
     var config = _.defaults(args.byName, {
-      code: 'countries/wld/indicators/SP.POP.TOTL',
-      fit: 'nearest'
+      code: 'countries/wld/indicators/SP.POP.TOTL'
     });
 
     var time = {
@@ -65,7 +61,6 @@ module.exports = new Datasource ('worldbank', {
         list: [{
           data:  data,
           type: 'series',
-          fit: config.fit,
           label: description,
           _meta: {
             worldbank_request: URL

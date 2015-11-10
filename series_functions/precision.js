@@ -11,7 +11,8 @@ module.exports = new Chainable('precision', {
     },
     {
       name: 'precision',
-      types: ['number']
+      types: ['number'],
+      help: 'Number of digits to round each value to'
     }
   ],
   help: 'number of digits to round the decimal portion of the value to',

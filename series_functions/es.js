@@ -55,27 +55,33 @@ module.exports = new Datasource('es', {
   args: [
     {
       name: 'q',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Query in lucene query string syntax'
     },
     {
       name: 'metric',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality'
     },
     {
       name: 'index',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Index to query, wildcards accepted'
     },
     {
       name: 'timefield',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Field of type "date" to use for x-axis'
     },
     {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Interval to use for date histogram **DO NOT USE THIS**. Its fun for debugging fit functions, but other use the interval picker'
     },
     {
       name: 'url',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Elasticsearch server URL, eg http://localhost:9200'
     }
   ],
   help: 'Pull data from an elasticsearch instance',

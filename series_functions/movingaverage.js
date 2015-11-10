@@ -9,7 +9,8 @@ module.exports = new Chainable('movingaverage', {
     },
     {
       name: 'window',
-      types: ['number']
+      types: ['number'],
+      help: 'Number of points to average over'
     }
   ],
   aliases: ['mvavg'],

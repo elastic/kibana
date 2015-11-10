@@ -9,11 +9,13 @@ module.exports = new Chainable('legend', {
     },
     {
       name: 'position',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Corner to place the legend in: nw, ne, se, or sw'
     },
     {
       name: 'columns',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Number of columns to divide the legend into'
     },
   ],
   help: 'Set the position and style of the legend on the plot',

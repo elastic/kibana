@@ -10,7 +10,8 @@ module.exports = new Chainable('subtract', {
     },
     {
       name: 'term',
-      types: ['seriesList', 'number']
+      types: ['seriesList', 'number'],
+      help: 'Number or series to subtract from input. If passing a seriesList it must contain exactly 1 series.'
     }
   ],
   help: 'Subtract the values of one or more series in a seriesList to each position, in each series, of the input seriesList',

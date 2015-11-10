@@ -10,11 +10,13 @@ module.exports = new Datasource ('worldbank_indicators', {
   args: [
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'Worldbank country identifier. Usually the country\'s 2 letter code'
     },
     {
       name: 'indicator',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'The indicator code to use. You\'ll have to look this up on data.worldbank.org. Often pretty obtuse. Eg SP.POP.TOTL is population'
     }
   ],
   aliases: ['wbi'],

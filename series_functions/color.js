@@ -8,7 +8,8 @@ module.exports = new Chainable('color', {
     },
     {
       name: 'color',
-      types: ['string']
+      types: ['string'],
+      help: 'Color of series, as hex, eg #c6c6c6 is a lovely light grey.'
     }
   ],
   help: 'Change the color of the series',

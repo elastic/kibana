@@ -9,19 +9,23 @@ module.exports = new Chainable('lines', {
     },
     {
       name: 'width',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Line thickness'
     },
     {
       name: 'fill',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Number between 0 and 10. Use for making area charts'
     },
     {
       name: 'show',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Show or hide lines'
     },
     {
       name: 'steps',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Show line as step, eg, do not interpolate between points'
     }
   ],
   help: 'Show the seriesList as lines',

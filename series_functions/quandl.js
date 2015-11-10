@@ -13,11 +13,13 @@ module.exports = new Datasource ('quandl', {
   args: [
     {
       name: 'code',
-      types: ['string', 'null']
+      types: ['string', 'null'],
+      help: 'The quandl code to plot. You can find these on quandl.com.'
     },
     {
       name: 'position',
-      types: ['number', 'null']
+      types: ['number', 'null'],
+      help: 'Some quandl sources return multiple series, which one should I use? 1 based index.'
     }
   ],
   help: 'Pull data from quandl.com using the quandl code',

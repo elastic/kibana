@@ -7,7 +7,7 @@ module.exports = new Chainable('first', {
       types: ['seriesList']
     }
   ],
-  help: 'This is an internal function that simply returns the input series. Don\'t use this',
+  help: 'This is an internal function that simply returns the input seriesList. Don\'t use this',
   fn: function firstFn(args) {
     return alter(args, function (eachSeries) {
       return eachSeries;
