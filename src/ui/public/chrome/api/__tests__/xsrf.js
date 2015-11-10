@@ -5,7 +5,7 @@ import ngMock from 'ngMock';
 
 import xsrfChromeApi from '../xsrf';
 
-const xsrfHeader = 'kbn-xsrf-header';
+const xsrfHeader = 'kbn-xsrf-token';
 const xsrfToken = 'xsrfToken';
 
 describe('chrome xsrf apis', function () {
@@ -39,13 +39,8 @@ describe('chrome xsrf apis', function () {
 
       it('can be canceled by setting the kbnXsrfToken option', function () {
         const setHeader = stub();
-        prefilter({}, {}, { setRequestHeader: setHeader });
-
-        expect(setHeader.callCount).to.be(1);
-        expect(setHeader.args[0]).to.eql([
-          xsrfHeader,
-          xsrfToken
-        ]);
+        prefilter({ kbnXsrfToken: false }, {}, { setRequestHeader: setHeader });
+        expect(setHeader.callCount).to.be(0);
       });
     });
 
@@ -58,7 +53,7 @@ describe('chrome xsrf apis', function () {
         stub($, 'ajaxPrefilter');
         const chrome = {};
         xsrfChromeApi(chrome, { xsrfToken });
-        ngMock.module(chrome.$setupCsrfRequestInterceptor);
+        ngMock.module(chrome.$setupXsrfRequestInterceptor);
       });
 
       beforeEach(ngMock.inject(function ($injector) {
@@ -84,24 +79,42 @@ describe('chrome xsrf apis', function () {
         $httpBackend.flush();
       });
 
-      it('skips requests with the kbnCsrfToken set falsey', function () {
+      it('skips requests with the kbnXsrfToken set falsey', function () {
         $httpBackend.expectPOST('/api/test', undefined, function (headers) {
           return !(xsrfHeader in headers);
         }).respond(200, '');
 
-        $http.post({
+        $http({
+          method: 'POST',
           url: '/api/test',
-          xsrfHeader: 0
+          kbnXsrfToken: 0
         });
 
-        $http.post({
+        $http({
+          method: 'POST',
           url: '/api/test',
-          xsrfHeader: ''
+          kbnXsrfToken: ''
         });
 
-        $http.post({
+        $http({
+          method: 'POST',
           url: '/api/test',
-          xsrfHeader: false
+          kbnXsrfToken: false
+        });
+
+        $httpBackend.flush();
+      });
+
+      it('accepts alternate tokens to use', function () {
+        const customToken = `custom:${xsrfToken}`;
+        $httpBackend.expectPOST('/api/test', undefined, function (headers) {
+          return headers[xsrfHeader] === customToken;
+        }).respond(200, '');
+
+        $http({
+          method: 'POST',
+          url: '/api/test',
+          kbnXsrfToken: customToken
         });
 
         $httpBackend.flush();

@@ -7,20 +7,21 @@ export default function (chrome, internals) {
     return internals.xsrfToken;
   };
 
-  $.ajaxPrefilter(function ({ kbnCsrfToken = internals.xsrfToken }, originalOptions, jqXHR) {
-    if (kbnCsrfToken) {
-      jqXHR.setRequestHeader('kbn-xsrf-token', kbnCsrfToken);
+  $.ajaxPrefilter(function ({ kbnXsrfToken = internals.xsrfToken }, originalOptions, jqXHR) {
+    if (kbnXsrfToken) {
+      jqXHR.setRequestHeader('kbn-xsrf-token', kbnXsrfToken);
     }
   });
 
-  chrome.$setupCsrfRequestInterceptor = function ($httpProvider) {
+  chrome.$setupXsrfRequestInterceptor = function ($httpProvider) {
     $httpProvider.interceptors.push(function () {
       return {
         request: function (opts) {
-          const { kbnCsrfToken = internals.xsrfToken } = opts;
-          if (kbnCsrfToken) {
-            return set(opts, ['headers', 'kbn-xsrf-token'], kbnCsrfToken);
+          const { kbnXsrfToken = internals.xsrfToken } = opts;
+          if (kbnXsrfToken) {
+            set(opts, ['headers', 'kbn-xsrf-token'], kbnXsrfToken);
           }
+          return opts;
         }
       };
     });
