@@ -16,7 +16,6 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
     restrict: 'A',
     scope: {
       chart: '=',
-      cell: '=',
       search: '='
     },
     link: function ($scope, $elem) {
