@@ -7,6 +7,7 @@ require('angularSortableView');
 require('./directives/chart_directive');
 require('./directives/expression_directive');
 require('./directives/scroll_class');
+require('./directives/timelion_grid');
 require('./directives/docs');
 require('./main.less');
 
@@ -71,7 +72,7 @@ app.controller('timelion', function (
     return {
       sheet: savedSheet.timelion_sheet,
       selected: 0,
-      columns: savedSheet.timelion_columns,
+      timelion_columns: savedSheet.timelion_columns,
       rows: savedSheet.timelion_rows,
       interval: savedSheet.timelion_interval,
       otherInterval: savedSheet.timelion_other_interval

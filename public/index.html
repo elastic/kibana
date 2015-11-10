@@ -113,12 +113,13 @@
       <div class="timelion-container-sheet-margin"
         sv-root sv-part="state.sheet"
         sv-on-sort="drop($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-        <div class="chart-container" sv-element
+        <div class="chart-container col-md-{{state.columns}} col-sm-12 col-xs-12" sv-element
+          timelion-grid timelion-grid-rows="state.rows"
           ng-repeat="cell in state.sheet track by $index"
           ng-click="setActiveCell($index)"
           ng-class="{active: $index === state.selected}"
           >
-          <div chart="sheet[$index]" cell="$index" search="search" rows="state.rows" columns="state.columns"></div>
+          <div chart="sheet[$index]" cell="$index" search="search"></div>
           <div class="cell-actions">
             <div class="cell-id" ng-click="removeCell($index)" tooltip="Remove" tooltip-append-to-body="1"><span>{{$index + 1}}</span></div>
             <div class="cell-move" tooltip="Drag to reorder" tooltip-append-to-body="1" sv-handle><span class="fa fa-arrows"></span></div>

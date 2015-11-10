@@ -9,18 +9,14 @@ require('flotCanvas');
 require('flotSelection');
 require('flotSymbol');
 
-
-
 var app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('chart', function ($compile, $rootScope, timefilter) {
+app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
   return {
     restrict: 'A',
     scope: {
       chart: '=',
       cell: '=',
-      rows: '=',
-      columns: '=',
       search: '='
     },
     link: function ($scope, $elem) {
@@ -70,7 +66,13 @@ app.directive('chart', function ($compile, $rootScope, timefilter) {
       };
 
       $(window).resize(function () {
-        drawPlot($scope.chart);
+        if (!$scope.plot) return;
+        $timeout(function () {
+          // This is a lot faster than calling drawPlot(); Stolen from the borked flot.resize plugin
+          $scope.plot.resize();
+          $scope.plot.setupGrid();
+          $scope.plot.draw();
+        }, 0);
       });
 
       $scope.$on('$destroy', function () {
@@ -83,6 +85,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter) {
       $elem.on('plothover',  function (event, pos, item) {
         $rootScope.$broadcast('timelionPlotHover', event, pos, item);
       });
+
 
       $elem.on('plotselected', function (event, ranges) {
         timefilter.time.from = moment(ranges.xaxis.from);
@@ -174,18 +177,6 @@ app.directive('chart', function ($compile, $rootScope, timefilter) {
         if (!plotConfig || !plotConfig.length) {
           $elem.empty();
           return;
-        }
-
-        var headerHeight = 80 + 28;
-        var verticalCellPadding = 14;
-        var containerPadding = 20;
-        var horizontalCellPadding = 4;
-        $elem.height((($(window).height() - (headerHeight + (containerPadding * 2))) /  $scope.rows) - verticalCellPadding);
-
-        if ($(window).width() < 768) {
-          $elem.width($(window).width() - (containerPadding * 2));
-        } else {
-          $elem.width((($(window).width() - (containerPadding * 2)) /  $scope.columns) - horizontalCellPadding);
         }
 
         var options = _.cloneDeep(defaultOptions);
