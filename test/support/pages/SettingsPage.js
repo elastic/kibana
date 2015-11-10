@@ -7,7 +7,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 30000;
   var common;
 
   function SettingsPage(remote) {

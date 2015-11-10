@@ -16,7 +16,7 @@ define(function (require) {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      var urlTimeout = 10000;
+      var urlTimeout = 60000;
       var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
 
       var doNavigation = function (url) {
@@ -68,7 +68,7 @@ define(function (require) {
 
     runScript: function (fn, timeout) {
       var self = this;
-      timeout = timeout || 2000;
+      timeout = timeout || 5000;
 
       // wait for deps on window before running script
       return self.remote
@@ -91,7 +91,7 @@ define(function (require) {
 
     getApp: function () {
       var self = this;
-      var loadTimeout = 5000;
+      var loadTimeout = 10000;
 
       return self.tryForTime(3000, function () {
         return self.remote.setFindTimeout(loadTimeout)
