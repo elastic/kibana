@@ -67,14 +67,22 @@ export default function (server) {
     path: '/api/index-patterns',
     method: 'POST',
     handler: function (req, reply) {
-      let client = server.plugins.elasticsearch.client;
-      let isWildcard = _.contains(req.payload.title, '*');
+      const client = server.plugins.elasticsearch.client;
+      const isWildcard = _.contains(req.payload.title, '*');
+      const mappings = _.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
+        return value.mapping;
+      });
+      const indexPattern = _.cloneDeep(req.payload);
+      indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
+        return _.omit(field, 'mapping');
+      }));
+
 
       client.create({
         index: '.kibana',
         type: 'index-pattern',
-        id: req.payload.title,
-        body: req.payload
+        id: indexPattern.title,
+        body: indexPattern
       }).then((patternResponse) => {
         if (!isWildcard) {
           return patternResponse;
@@ -83,13 +91,18 @@ export default function (server) {
           return client.indices.putTemplate({
             order: 0,
             create: true,
-            name: 'kibana-' + req.payload.title,
+            name: 'kibana-' + indexPattern.title,
             body: {
-              template: req.payload.title
+              template: indexPattern.title,
+              mappings: {
+                _default_: {
+                  properties: mappings
+                }
+              }
             }
           });
         }
-      }).then((response) => {
+      }).then(() => {
         reply('success').statusCode = 201;
       }).catch(function (error) {
         reply(handleESError(error));
