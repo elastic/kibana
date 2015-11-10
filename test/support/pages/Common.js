@@ -93,7 +93,7 @@ define(function (require) {
       var self = this;
       var loadTimeout = 10000;
 
-      return self.tryForTime(3000, function () {
+      return Promise.try(function () {
         return self.remote.setFindTimeout(loadTimeout)
         .findByCssSelector('.content > .application');
       })
