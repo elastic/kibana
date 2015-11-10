@@ -42,7 +42,7 @@ module.exports = () => Joi.object({
       otherwise: Joi.boolean().default(false)
     }),
     xsrf: Joi.object({
-      token: Joi.string().default(randomBytes(256).toString('hex')),
+      token: Joi.string().default(randomBytes(32).toString('hex')),
       disableProtection: Joi.boolean().default(false),
     }).default(),
   }).default(),
