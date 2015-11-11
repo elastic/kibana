@@ -41,7 +41,7 @@ define(function (require) {
           .then(function (currentUrl) {
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) throw new Error('App failed to load: ' + appName);
-          })
+          });
         });
       };
 

@@ -18,8 +18,8 @@ define(function (require) {
     bdd.before(function () {
       return scenarioManager.reload('emptyKibana')
       .then(function () {
-        return scenarioManager.loadIfEmpty('makelogs')
-      })
+        return scenarioManager.loadIfEmpty('makelogs');
+      });
     });
 
     bdd.after(function () {
