@@ -1,5 +1,5 @@
-var fs = require('fs');
-var rimraf = require('rimraf');
+const fs = require('fs');
+const rimraf = require('rimraf');
 
 module.exports = {
   remove: remove

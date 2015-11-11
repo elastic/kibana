@@ -1,11 +1,15 @@
-let _ = require('lodash');
-var utils = require('requirefrom')('src/utils');
-var fromRoot = utils('fromRoot');
-var pluginDownloader = require('./pluginDownloader');
-var pluginCleaner = require('./pluginCleaner');
-var KbnServer = require('../../server/KbnServer');
-var readYamlConfig = require('../serve/readYamlConfig');
-var fs = require('fs');
+const _ = require('lodash');
+const utils = require('requirefrom')('src/utils');
+const fromRoot = utils('fromRoot');
+const pluginDownloader = require('./pluginDownloader');
+const pluginCleaner = require('./pluginCleaner');
+const pluginExtractor = require('./pluginExtractor');
+const KbnServer = require('../../server/KbnServer');
+const readYamlConfig = require('../serve/readYamlConfig');
+const fs = require('fs');
+const Promise = require('bluebird');
+const rimraf = require('rimraf');
+const mkdirp = Promise.promisify(require('mkdirp'));
 
 module.exports = {
   install: install
@@ -23,16 +27,22 @@ function install(settings, logger) {
     if (e.code !== 'ENOENT') throw e;
   }
 
-  var cleaner = pluginCleaner(settings, logger);
-  var downloader = pluginDownloader(settings, logger);
+  const cleaner = pluginCleaner(settings, logger);
+  const downloader = pluginDownloader(settings, logger);
 
   return cleaner.cleanPrevious()
-  .then(function () {
+  .then(() => {
+    return mkdirp(settings.workingPath);
+  })
+  .then(() => {
     return downloader.download();
+  })
+  .then((archiveType) => {
+    return pluginExtractor (settings, logger, archiveType);
   })
   .then(async function() {
     logger.log('Optimizing and caching browser bundles...');
-    let serverConfig = _.merge(
+    const serverConfig = _.merge(
       readYamlConfig(settings.config),
       {
         env: 'production',
@@ -55,16 +65,19 @@ function install(settings, logger) {
       }
     );
 
-    let kbnServer = new KbnServer(serverConfig);
+    const kbnServer = new KbnServer(serverConfig);
     await kbnServer.ready();
     await kbnServer.close();
   })
-  .then(function () {
+  .then(() => {
+    rimraf.sync(settings.tempArchiveFile);
+  })
+  .then(() => {
     fs.renameSync(settings.workingPath, settings.pluginPath);
     logger.log('Plugin installation complete');
   })
-  .catch(function (e) {
-    logger.error(`Plugin installation was unsuccessful due to error "${e.message}"`);
+  .catch((err) => {
+    logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
     cleaner.cleanError();
     process.exit(70); // eslint-disable-line no-process-exit
   });

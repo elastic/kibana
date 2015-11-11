@@ -1,9 +1,8 @@
-var rimraf = require('rimraf');
-var fs = require('fs');
-var Promise = require('bluebird');
+const rimraf = require('rimraf');
+const fs = require('fs');
+const Promise = require('bluebird');
 
 module.exports = function (settings, logger) {
-
   function cleanPrevious() {
     return new Promise(function (resolve, reject) {
       try {

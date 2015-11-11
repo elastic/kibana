@@ -1,39 +1,35 @@
-var _ = require('lodash');
-var zlib = require('zlib');
-var Promise = require('bluebird');
-var url = require('url');
-var fs = require('fs');
-var request = require('request');
-var tar = require('tar');
-var progressReporter = require('./progressReporter');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const urlParse = require('url').parse;
+const fs = require('fs');
+const request = require('request');
+const progressReporter = require('./progressReporter');
 
 module.exports = function (settings, logger) {
+  let archiveType;
 
   //Attempts to download each url in turn until one is successful
   function download() {
-    var urls = settings.urls;
+    const urls = settings.urls;
 
     function tryNext() {
-      var sourceUrl = urls.shift();
+      const sourceUrl = urls.shift();
       if (!sourceUrl) {
-        throw new Error('Not a valid url.');
+        throw new Error('No valid url specified.');
       }
 
-      logger.log('Attempting to extract from ' + sourceUrl);
+      logger.log(`Attempting to transfer from ${sourceUrl}`);
 
-      return Promise.try(function () {
-        return downloadSingle(sourceUrl, settings.workingPath, settings.timeout, logger)
-        .catch(function (err) {
+      return Promise.try(() => {
+        return downloadSingle(sourceUrl)
+        .catch((err) => {
           if (err.message === 'ENOTFOUND') {
             return tryNext();
-          }
-          if (err.message === 'EEXTRACT') {
-            throw (new Error('Error extracting the plugin archive... is this a valid tar.gz file?'));
           }
           throw (err);
         });
       })
-      .catch(function (err) {
+      .catch((err) => {
         //Special case for when request.get throws an exception
         if (err.message.match(/invalid uri/i)) {
           return tryNext();
@@ -45,44 +41,58 @@ module.exports = function (settings, logger) {
     return tryNext();
   }
 
-  //Attempts to download a single url
-  function downloadSingle(source, dest, timeout) {
-    var gunzip = zlib.createGunzip();
-    var tarExtract = new tar.Extract({ path: dest, strip: 1 });
+  function downloadSingle(source) {
+    return getReadStream(source)
+    .then((readStream) => {
+      console.log('downloadSingle after getReadStream');
+      let reporter = progressReporter(logger, readStream, settings.tempArchiveFile);
 
-    var requestOptions = { url: source };
-    if (timeout !== 0) {
-      requestOptions.timeout = timeout;
-    }
-
-    return wrappedRequest(requestOptions)
-    .then(function (fileStream) {
-      var reporter = progressReporter(logger, fileStream);
-
-      fileStream
+      readStream
       .on('response', reporter.handleResponse)
       .on('data', reporter.handleData)
       .on('error', _.partial(reporter.handleError, 'ENOTFOUND'))
-      .pipe(gunzip)
-      .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
-      .pipe(tarExtract)
-      .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
-      .on('end', reporter.handleEnd);
+      .pipe(reporter.writeStream, { end: true })
+      .on('finish', reporter.handleEnd);
 
       return reporter.promise;
+    })
+    .then((downloadResult) => {
+      //If installing from a local file, the archiveType will be determined by the
+      //file extension in getReadStreamFromFile. Otherwise it is determined
+      //by the progressReporter by examining the response header.
+      archiveType = archiveType || downloadResult.archiveType;
+      return archiveType;
     });
   }
 
-  function wrappedRequest(requestOptions) {
-    return Promise.try(function () {
-      let urlInfo = url.parse(requestOptions.url);
-      if (/^file/.test(urlInfo.protocol)) {
-        return fs.createReadStream(urlInfo.path);
-      } else {
-        return request.get(requestOptions);
-      }
+  function getReadStream(sourceUrl) {
+    const urlInfo = urlParse(sourceUrl);
+
+    if (/^file/.test(urlInfo.protocol)) {
+      return getReadStreamFromFile(urlInfo.path);
+    } else {
+      return getReadStreamFromUrl(sourceUrl);
+    }
+  }
+
+  function getReadStreamFromFile(filePath) {
+    console.log('getReadStreamFromFile: ', filePath);
+    return Promise.try(() => {
+      archiveType = getArchiveTypeFromFilename(filePath);
+      return fs.createReadStream(filePath);
+    });
+  }
+
+  function getReadStreamFromUrl(sourceUrl) {
+    let requestOptions = { url: sourceUrl };
+    if (settings.timeout !== 0) {
+      requestOptions.timeout = settings.timeout;
+    }
+
+    return Promise.try(() => {
+      return request.get(requestOptions);
     })
-    .catch(function (err) {
+    .catch((err) => {
       if (err.message.match(/invalid uri/i)) {
         throw new Error('ENOTFOUND');
       }
@@ -90,6 +100,14 @@ module.exports = function (settings, logger) {
     });
   }
 
+  function getArchiveTypeFromFilename(filePath) {
+    if (/\.zip$/i.test(filePath)) {
+      return '.zip';
+    }
+    if (/\.tar\.gz$/i.test(filePath)) {
+      return '.tar.gz';
+    }
+  }
 
   return {
     download: download,
