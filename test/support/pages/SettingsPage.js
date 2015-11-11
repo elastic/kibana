@@ -7,7 +7,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 60000;
   var common;
 
   function SettingsPage(remote) {
@@ -27,9 +27,10 @@ define(function (require) {
       .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
-    getTimeBasedIndexPatternCheckbox: function () {
+    getTimeBasedIndexPatternCheckbox: function (timeout) {
+      timeout = timeout || defaultTimeout;
       // fail faster since we're sometimes checking that it doesn't exist
-      return this.remote.setFindTimeout(defaultTimeout / 2)
+      return this.remote.setFindTimeout(timeout)
       .findByCssSelector('input[ng-model="index.nameIsPattern"]');
     },
 
@@ -45,35 +46,18 @@ define(function (require) {
 
     selectTimeFieldOption: function (selection) {
       var self = this;
-      return common.tryForTime(defaultTimeout * 2, function () {
-        return self.getTimeFieldNameField().click();
-      })
+
+      return self.getTimeFieldNameField().click()
       .then(function () {
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
         return self.getTimeFieldOption(selection);
-      })
-      // DEBUGGING
-      .catch(function (err) {
-        common.debug('selectTimeFieldOption: FAILED to create index pattern');
-        return common.checkForKibanaApp()
-        .then(function (onKibana) {
-          common.debug('onKibana')
-          common.debug(onKibana)
-        })
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (url) {
-          common.debug('FAILED on url ' + url);
-          throw err
-        })
       });
     },
 
     getTimeFieldOption: function (selection) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('option[label="' + selection + '"]').click();
     },
 
@@ -142,17 +126,8 @@ define(function (require) {
       var self = this;
       var selector = 'li.kbn-settings-tab.active a small';
 
-      var getText = function () {
-        return self.remote.setFindTimeout(defaultTimeout)
-        .findByCssSelector(selector).getVisibleText();
-      }
-
-      return common.tryForTime(defaultTimeout * 4, function () {
-        return getText();
-      })
-      .then(function () {
-        return getText();
-      })
+      return self.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector(selector).getVisibleText()
       .then(function (theText) {
         // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
@@ -211,7 +186,7 @@ define(function (require) {
     },
 
     openControlsByName: function (name) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
       .then(function (button) {
         return button.click();
@@ -276,22 +251,6 @@ define(function (require) {
             }
           });
         });
-      })
-      // DEBUGGING
-      .catch(function (err) {
-        common.debug('createIndexPattern: FAILED to create index pattern');
-        return common.checkForKibanaApp()
-        .then(function (onKibana) {
-          common.debug('onKibana')
-          common.debug(onKibana)
-        })
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (url) {
-          common.debug('FAILED on url ' + url);
-          throw err
-        })
       });
     },
 
