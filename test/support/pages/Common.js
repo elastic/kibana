@@ -11,16 +11,17 @@ define(function (require) {
     this.remote = remote;
   }
 
+  var defaultTimeout = 60000;
+
   Common.prototype = {
     constructor: Common,
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      var urlTimeout = 60000;
       var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
 
       var doNavigation = function (url) {
-        return self.tryForTime(urlTimeout, function () {
+        return self.tryForTime(defaultTimeout, function () {
           // since we're using hash URLs, always reload first to force re-render
           return self.remote.get(url)
           .then(function () {
@@ -50,7 +51,7 @@ define(function (require) {
       })
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
-        return self.tryForTime(urlTimeout, function () {
+        return self.tryForTime(defaultTimeout, function () {
           // give the app time to update the URL
           return self.sleep(500)
           .then(function () {
@@ -68,7 +69,8 @@ define(function (require) {
 
     runScript: function (fn, timeout) {
       var self = this;
-      timeout = timeout || 5000;
+      // by default, give the app 10 seconds to load
+      timeout = timeout || 10000;
 
       // wait for deps on window before running script
       return self.remote
@@ -91,10 +93,9 @@ define(function (require) {
 
     getApp: function () {
       var self = this;
-      var loadTimeout = 20000;
 
       return Promise.try(function () {
-        return self.remote.setFindTimeout(loadTimeout)
+        return self.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector('.content > .application');
       })
       .then(function () {
@@ -102,7 +103,7 @@ define(function (require) {
           var $ = window.$;
           var $scope = $('.content > .application').scope();
           return $scope ? $scope.chrome.getApp() : {};
-        }, loadTimeout / 2);
+        });
       });
     },
 
