@@ -4,8 +4,7 @@ define(function (require) {
 
   // gets parsed value if given arg is a moment object
   function timeValue(val) {
-    const hasValueOfFn = _.isFunction(_.get(val, 'valueOf'));
-    return hasValueOfFn ? val.valueOf() : val;
+    return moment.isMoment(val) ? val.valueOf() : val;
   }
 
   return function CalculateIndicesFactory(Promise, es) {
