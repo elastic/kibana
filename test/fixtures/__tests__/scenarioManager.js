@@ -112,7 +112,7 @@ describe('scenario manager', function () {
     it('should reject if the scenario is not specified', function () {
       return manager.load()
       .then(function () {
-        throw new Error('Promise should reject')
+        throw new Error('Promise should reject');
       })
       .catch(function () { return; });
     });
@@ -120,7 +120,7 @@ describe('scenario manager', function () {
     it('should reject if the scenario is not defined', function () {
       return manager.load('idonotexist')
       .then(function () {
-        throw new Error('Promise should reject')
+        throw new Error('Promise should reject');
       })
       .catch(function () { return; });
     });
@@ -130,7 +130,7 @@ describe('scenario manager', function () {
     it('should reject if the scenario is not specified', function () {
       return manager.unload()
       .then(function () {
-        throw new Error('Promise should reject')
+        throw new Error('Promise should reject');
       })
       .catch(function () { return; });
     });
@@ -138,7 +138,7 @@ describe('scenario manager', function () {
     it('should reject if the scenario is not defined', function () {
       return manager.unload('idonotexist')
       .then(function () {
-        throw new Error('Promise should reject')
+        throw new Error('Promise should reject');
       })
       .catch(function () { return; });
     });

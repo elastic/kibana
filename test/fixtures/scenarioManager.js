@@ -110,7 +110,7 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
       if (response.count === 0) {
         return self.load(id);
       }
-    })
+    });
   }))
   .catch(function (reason) {
     return self.load(id);
