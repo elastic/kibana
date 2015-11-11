@@ -13,9 +13,9 @@ define(function (require) {
       bdd.before(function () {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
-        remote = this.remote
+        remote = this.remote;
 
-        return scenarioManager.reload('emptyKibana')
+        return scenarioManager.reload('emptyKibana');
       });
 
       var columns = [{
@@ -23,21 +23,21 @@ define(function (require) {
         first: '@message',
         last: 'xss.raw',
         selector: function () {
-          return settingsPage.getTableRow(0, 0).getVisibleText()
+          return settingsPage.getTableRow(0, 0).getVisibleText();
         }
       }, {
         heading: 'type',
         first: '_source',
         last: 'string',
         selector: function () {
-          return settingsPage.getTableRow(0, 1).getVisibleText()
+          return settingsPage.getTableRow(0, 1).getVisibleText();
         }
       }];
 
       columns.forEach(function (col) {
         bdd.describe('sort by heading - ' + col.heading, function indexPatternCreation() {
           bdd.before(function () {
-            return settingsPage.navigateTo()
+            return settingsPage.navigateTo();
           });
 
           bdd.beforeEach(function () {

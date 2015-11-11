@@ -79,7 +79,7 @@ define(function (require) {
           })
           // check that its 0 (previous increase was cancelled)
           .then(function getPopularity() {
-            return settingsPage.getPopularity()
+            return settingsPage.getPopularity();
           })
           .then(function (popularity) {
             expect(popularity).to.be('0');

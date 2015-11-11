@@ -22,7 +22,7 @@ define(function (require) {
         .getVisibleText()
         .then(function (text) {
           expect(text.indexOf('plugin:kibana Ready')).to.be.above(-1);
-        })
+        });
       })
       .catch(common.handleError(self));
     });
