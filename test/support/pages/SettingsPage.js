@@ -27,9 +27,10 @@ define(function (require) {
       .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
-    getTimeBasedIndexPatternCheckbox: function () {
+    getTimeBasedIndexPatternCheckbox: function (timeout) {
+      timeout = timeout || defaultTimeout;
       // fail faster since we're sometimes checking that it doesn't exist
-      return this.remote.setFindTimeout(defaultTimeout / 2)
+      return this.remote.setFindTimeout(timeout)
       .findByCssSelector('input[ng-model="index.nameIsPattern"]');
     },
 
