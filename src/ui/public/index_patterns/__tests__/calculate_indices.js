@@ -3,6 +3,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
   const sinon = require('auto-release-sinon');
   const expect = require('expect.js');
   const ngMock = require('ngMock');
+  const moment = require('moment');
 
   let Promise;
   let $rootScope;
@@ -38,7 +39,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
   function run({ start = undefined, stop = undefined } = {}) {
     calculateIndices('wat-*-no', '@something', start, stop);
     $rootScope.$apply();
-    config = _.first(es.fieldStats.firstCall.args);
+    config = _.first(es.fieldStats.lastCall.args);
     constraints = config.body.index_constraints;
   }
 
@@ -68,6 +69,14 @@ describe('ui/index_patterns/_calculate_indices', () => {
       it('max_value is gte', () => {
         expect(constraints['@something'].max_value).to.have.property('gte');
       });
+      it('max_value is set to original if not a moment object', () => {
+        expect(constraints['@something'].max_value.gte).to.equal('1234567890');
+      });
+      it('max_value is set to moment.valueOf if given a moment object', () => {
+        const start = moment();
+        run({ start });
+        expect(constraints['@something'].max_value.gte).to.equal(start.valueOf());
+      });
     });
 
     context('when given stop', () => {
@@ -77,6 +86,14 @@ describe('ui/index_patterns/_calculate_indices', () => {
       });
       it('min_value is lte', () => {
         expect(constraints['@something'].min_value).to.have.property('lte');
+      });
+      it('min_value is set to original if not a moment object', () => {
+        expect(constraints['@something'].min_value.lte).to.equal('1234567890');
+      });
+      it('max_value is set to moment.valueOf if given a moment object', () => {
+        const stop = moment();
+        run({ stop });
+        expect(constraints['@something'].min_value.lte).to.equal(stop.valueOf());
       });
     });
   });

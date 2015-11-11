@@ -2,6 +2,12 @@ define(function (require) {
   const _ = require('lodash');
   const moment = require('moment');
 
+  // gets parsed value if given arg is a moment object
+  function timeValue(val) {
+    const hasValueOfFn = _.isFunction(_.get(val, 'valueOf'));
+    return hasValueOfFn ? val.valueOf() : val;
+  }
+
   return function CalculateIndicesFactory(Promise, es) {
 
     // Uses the field stats api to determine the names of indices that need to
@@ -17,10 +23,10 @@ define(function (require) {
     function getFieldStats(pattern, timeFieldName, start, stop) {
       const constraints = {};
       if (start) {
-        constraints.max_value = { gte: moment(start).valueOf() };
+        constraints.max_value = { gte: timeValue(start) };
       }
       if (stop) {
-        constraints.min_value = { lte: moment(stop).valueOf() };
+        constraints.min_value = { lte: timeValue(stop) };
       }
 
       return es.fieldStats({
