@@ -33,9 +33,9 @@ module.exports = function (grunt) {
       },
       cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
       args: [
-        '--server.port=' + uiConfig.kibana.port,
+        '--server.port=' + uiConfig.servers.kibana.port,
         '--env.name=development',
-        '--elasticsearch.url=' + format(uiConfig.elasticsearch),
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
         '--logging.json=false'
       ]
     },
@@ -90,7 +90,7 @@ module.exports = function (grunt) {
         '-jar',
         'selenium/selenium-server-standalone-2.47.1.jar',
         '-port',
-        uiConfig.webdriver.port
+        uiConfig.servers.webdriver.port
       ]
     },
 
@@ -106,7 +106,7 @@ module.exports = function (grunt) {
         '-jar',
         'selenium/selenium-server-standalone-2.47.1.jar',
         '-port',
-        uiConfig.webdriver.port
+        uiConfig.servers.webdriver.port
       ]
     },
 
