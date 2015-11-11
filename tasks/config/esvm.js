@@ -44,7 +44,7 @@ module.exports = function (grunt) {
         purge: true,
         config: {
           http: {
-            port: uiConfig.elasticsearch.port
+            port: uiConfig.servers.elasticsearch.port
           }
         }
       }
