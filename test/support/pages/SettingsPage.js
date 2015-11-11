@@ -53,22 +53,6 @@ define(function (require) {
       })
       .then(function () {
         return self.getTimeFieldOption(selection);
-      })
-      // DEBUGGING
-      .catch(function (err) {
-        common.debug('selectTimeFieldOption: FAILED to create index pattern');
-        return common.checkForKibanaApp()
-        .then(function (onKibana) {
-          common.debug('onKibana')
-          common.debug(onKibana)
-        })
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (url) {
-          common.debug('FAILED on url ' + url);
-          throw err
-        })
       });
     },
 
@@ -145,7 +129,7 @@ define(function (require) {
       var getText = function () {
         return self.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector(selector).getVisibleText();
-      }
+      };
 
       return common.tryForTime(defaultTimeout, function () {
         return getText();
@@ -276,22 +260,6 @@ define(function (require) {
             }
           });
         });
-      })
-      // DEBUGGING
-      .catch(function (err) {
-        common.debug('createIndexPattern: FAILED to create index pattern');
-        return common.checkForKibanaApp()
-        .then(function (onKibana) {
-          common.debug('onKibana')
-          common.debug(onKibana)
-        })
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (url) {
-          common.debug('FAILED on url ' + url);
-          throw err
-        })
       });
     },
 
