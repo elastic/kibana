@@ -94,10 +94,8 @@ define(function (require) {
     getApp: function () {
       var self = this;
 
-      return Promise.try(function () {
-        return self.remote.setFindTimeout(defaultTimeout)
-        .findByCssSelector('.content > .application');
-      })
+      return self.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector('.content > .application')
       .then(function () {
         return self.runScript(function () {
           var $ = window.$;
