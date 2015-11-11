@@ -204,9 +204,10 @@ format, and an index pattern for May would look something like `logstash-2015.05
 
 For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and 
 navigate to `localhost:5601`. Click the *Settings* tab, then the *Indices* tab. Click *Add New* to define a new index 
-pattern. Since these data sets don't contain time-series data, make sure the *Index contains time-based events* box 
-is unchecked. Specify `shakes*`  as the index pattern for the Shakespeare data set and click *Create* to define the 
-index pattern, then define a second index pattern named `ba*`.
+pattern. Two of the sample data sets, the Shakespeare plays and the financial accounts, don't contain time-series data.
+Make sure the *Index contains time-based events* box is unchecked when you create index patterns for these data sets.
+Specify `shakes*`  as the index pattern for the Shakespeare data set and click *Create* to define the index pattern, then 
+define a second index pattern named `ba*`.
 
 The Logstash data set does contain time-series data, so after clicking *Add New* to define the index for this data
 set, make sure the *Index contains time-based events* box is checked and select the `@timestamp` field from the 
