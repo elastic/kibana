@@ -108,8 +108,8 @@ export default function (server) {
             }).then(() => {
               throw templateError;
             }, () => {
-              throw new Error('index-pattern created successfully but index template creation failed.' +
-                'Failed to rollback index-pattern creation, please delete manually');
+              throw new Error(`index-pattern ${indexPattern.title} created successfully but index template creation
+                failed. Failed to rollback index-pattern creation, must delete manually.`);
             });
           });
         }
