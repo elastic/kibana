@@ -105,7 +105,28 @@ there are multiple words in the field.
 * The same applies to the _play_name_ field.
 * The line_id and speech_number fields are integers.
 
-The accounts and logstash data sets don't require any mappings, so at this point we're ready to load the data sets into 
+For logstash data sets we need to define geopoint field type. We can use elasticsearch template, that creates mapping for all indexes with prefix logstash-
+
+[source,shell]
+curl -XPUT http://localhost:9200/_template/logstash -d '
+{
+ "template" : "logstash-*",
+ "mappings" : {
+  "_default_" : {
+   "properties" : {
+    "geo" : {
+       "properties" : {
+         "coordinates" : { "type" : "geo_point" }
+       }
+     }
+   }
+  }
+ }
+}
+';
+
+
+The accounts data sets doesn't require any mappings, so at this point we're ready to load the data sets into 
 Elasticsearch with the following commands:
 
 [source,shell]
