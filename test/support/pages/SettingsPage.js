@@ -49,7 +49,7 @@ define(function (require) {
 
       return self.getTimeFieldNameField().click()
       .then(function () {
-        return self.getTimeFieldNameField().click()
+        return self.getTimeFieldNameField().click();
       })
       .then(function () {
         return self.getTimeFieldOption(selection);
