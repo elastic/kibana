@@ -3,11 +3,11 @@
     <div class="doc-container-content">
   		<h1>Welcome to <strong>timelion</strong> <small> the timeseries expression interface for everything</small></h1>
   		<p>
-  			Timelion. Timeline. Get it? Ok, enough with the puns. Timelion is the, clawing, gnashing, zebra killing, pluggable timeseries interface for <em>everything</em>. If your datastore can produce a timeseries, then you have all of the awesome power of timelion at your disposal. Timelion lets you compare, combine and combobulate (not actually a word) datasets across multiple data sources, even entirely different technologies, all with the same easy-to-master expression syntax.  While the beginning of this tutorial will focus on Elasticsearch, once you're rolling you'll discover you can use nearly everything you learn here with any datasource timelion supports.
+  			Timelion. Timeline. Get it? Ok, enough with the puns. Timelion is the, clawing, gnashing, zebra killing, pluggable timeseries interface for <em>everything</em>. If your datastore can produce a timeseries, then you have all of the awesome power of Timelion at your disposal. Timelion lets you compare, combine and combobulate (not actually a word) datasets across multiple data sources, even entirely different technologies, all with the same easy-to-master expression syntax.  While the beginning of this tutorial will focus on Elasticsearch, once you're rolling you'll discover you can use nearly everything you learn here with any datasource timelion supports.
   		</p>
 
   		<p>
-  			Why start with elasticsearch? Well, you're using timelion, so we know you have Kibana, so you definitely have Elasticsearch. So the answer is: <strong>Because its easy.</strong> Timelion want everything to be easy. Ok, lets do this thing. Click the <strong>Next</strong> button in the lower right corner.
+  			Why start with elasticsearch? Well, you're using timelion, so we know you have Kibana, so you definitely have Elasticsearch. So the answer is: <strong>Because its easy.</strong> Timelion want everything to be easy. Ok, lets do this thing. If you're already familar with Timelion's syntax, <a ng-click="section = 'functions'">Jump to the function reference</a>, otherwise click the <strong>Next</strong> button in the lower right corner.
   		</p>
     </div>
 
@@ -140,6 +140,8 @@
         We can make our charts pretty all day, but its time for <strong>businessing</strong>. As an example exercise, we're going to figure out what percentage some subset of our data represents of the whole, over time. For example, what percentage of my web traffic comes from the US? Lets start with finding all events that contain US: <code>.es('US')</code>. Now, to find that ratio to the whole, we'd need to divide <code>'US'</code> by everything, try this: <code>.es('US').divide(.es())</code>. Ah, not bad, but of course this provides us with a number between 0 and 1, lets correct that to a percentage: <code>.es('US').divide(.es()).multiply(100)</code>. There, now we've divided all US traffic by all worldwide traffic, then multiplied the result by 100 to get a percentage.
       </p>
       <p>Timelion has a number of built in arithmetic function, such as <code>sum</code>, <code>subtract</code>, <code>multiply</code> and <code>divide</code>, many of which can take a series or a number. There are also other data transformation functions including <code>movingaverage</code>, <code>abs</code> and <code>derivative</code>. In addition there are other view transformation functions than the ones we learned on the previous page. See the function reference for the complete list of transforming, and drawing functions.
+
+      <p>Now that you know the syntax, jump over to the <a ng-click="section = 'functions'">Function Reference</a> for detailed info on all of Timelions available functions.
     </div>
     <div class="doc-container-buttons">
       <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
@@ -148,3 +150,47 @@
     </div>
   </div>
 </div>
+
+<div ng-show="section === 'functions'" class="doc-container-functions">
+  <h3>
+    Function reference
+    <small>
+      Click a function for details and arguments or <a ng-click="section = 'tutorial'">return to the tutorial.</a>
+    </small>
+  </h3>
+  <table class="table table-condensed table-striped table-bordered">
+    <tr class="function"
+      ng-repeat-start="function in functions.list"
+      ng-class="{active: functions.details === function.name}"
+      ng-click="functions.details = (functions.details === function.name ? null : function.name)">
+      <td><strong>.{{function.name}}()</strong></td>
+      <td>{{function.help}}</td>
+    </tr>
+    <tr ng-if="functions.details === function.name" ng-repeat-end>
+      <td colspan=2>
+        <div class="suggestion-details" >
+          <table class="table table-striped table-condensed table-bordered"
+            ng-show="function.args.length > (function.chainable ? 1: 0)">
+          <thead>
+            <th>Argument Name</th>
+            <th>Accepted Types</th>
+            <th>Information</th>
+          </thead>
+          <tr ng-repeat="arg in function.args" ng-hide="$index < 1 && function.chainable">
+            <td>{{arg.name}}</td>
+            <td><em>{{arg.types.join(', ')}}</em></td>
+            <td>{{arg.help}}</td>
+          </tr>
+          </table>
+          <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
+            <em>This function does not accept any arguments. Well that's simple, isn't it?</em>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+
+

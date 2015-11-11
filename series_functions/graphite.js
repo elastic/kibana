@@ -12,9 +12,8 @@ module.exports = new Datasource ('graphite', {
       help: 'Graphite metric to pull, eg _test-data.users.*.data'
     }
   ],
-  help: 'Pull data grahite',
+  help: 'Pull data from grahite. Configure your graphite server in timelion.json',
   fn: function graphite(args, tlConfig) {
-    // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
     var config = args.byName;
 

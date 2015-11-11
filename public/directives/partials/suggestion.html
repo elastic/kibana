@@ -4,7 +4,7 @@
     ng-class="{active: $index === suggestions.selected}"
     ng-repeat="suggestion in suggestions.list track by $index | orderBy:'name'">
     <h4>
-      <strong>{{suggestion.name}}()</strong>
+      <strong>.{{suggestion.name}}()</strong>
       <small>
         {{suggestion.help}}
         {{suggestion.chainable ? '(Chainable)' : '(Data Source)'}}

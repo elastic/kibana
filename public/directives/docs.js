@@ -9,8 +9,12 @@ define(function (require) {
       restrict: 'E',
       template: html,
       controller: function ($scope, config) {
-        $scope.section = 'tutorial';
+        $scope.section = config.get('timelion:showTutorial', true) ? 'tutorial' : 'functions';
         $scope.page = 1;
+        $scope.functions = {
+          list: [],
+          details: null
+        };
 
         function init() {
           $scope.es = {
@@ -22,7 +26,7 @@ define(function (require) {
 
         function getFunctions() {
           return $http.get('/timelion/functions').then(function (resp) {
-            $scope.functionList = resp.data;
+            $scope.functions.list = resp.data;
           });
         }
         $scope.recheckElasticsearch = function () {

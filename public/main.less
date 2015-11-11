@@ -177,6 +177,22 @@ input.timelion-interval {
 }
 
 div.doc-container {
+  &-functions {
+    height: 310px;
+    overflow-y: auto;
+    background-color: @body-bg;
+    position: relative;
+    padding: 0px;
+
+    h3 {
+      margin-top: 0px;
+    }
+
+    tr.function:hover {
+      background-color: @gray-lighter;
+    }
+  }
+
   &-content {
     padding: 0 20px 20px 20px;
     height: 310px;

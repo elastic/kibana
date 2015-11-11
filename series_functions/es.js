@@ -76,7 +76,7 @@ module.exports = new Datasource('es', {
     {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
-      help: 'Interval to use for date histogram **DO NOT USE THIS**. Its fun for debugging fit functions, but other use the interval picker'
+      help: 'Interval to use for date histogram **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker'
     },
     {
       name: 'url',
