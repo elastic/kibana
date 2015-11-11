@@ -16,8 +16,8 @@ export default function (server) {
       return Boom.forbidden();
     } else if (error instanceof esErrors.NotFound) {
       return Boom.notFound();
-    } else if (error instanceof esErrors.BadRequest) {
-      return Boom.badRequest();
+    } else if (error instanceof esErrors.BadRequest || error instanceof TypeError) {
+      return Boom.badRequest(error);
     } else {
       return error;
     }
@@ -100,6 +100,17 @@ export default function (server) {
                 }
               }
             }
+          }).catch((templateError) => {
+            return client.delete({
+              index: '.kibana',
+              type: 'index-pattern',
+              id: indexPattern.title
+            }).then(() => {
+              throw templateError;
+            }, () => {
+              throw new Error('index-pattern created successfully but index template creation failed.' +
+                'Failed to rollback index-pattern creation, please delete manually');
+            });
           });
         }
       }).then(() => {
