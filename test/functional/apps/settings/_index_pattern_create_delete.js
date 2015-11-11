@@ -94,7 +94,7 @@ define(function (require) {
             return remote.getCurrentUrl()
             .then(function (currentUrl) {
               expect(currentUrl).to.not.contain('logstash-*');
-            })
+            });
           })
           .catch(common.handleError(this));
         });

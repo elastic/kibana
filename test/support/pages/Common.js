@@ -40,7 +40,7 @@ define(function (require) {
           .then(function (currentUrl) {
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) throw new Error('App failed to load: ' + appName);
-          })
+          });
         });
       };
 
@@ -186,7 +186,7 @@ define(function (require) {
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
         var filepath = path.resolve(outDir, filename);
-        self.debug('Test Failed, taking screenshot "' + filepath + '"');
+        self.debug('Taking screenshot "' + filepath + '"');
         fs.writeFileSync(filepath, data);
       })
       .catch(function (err) {
