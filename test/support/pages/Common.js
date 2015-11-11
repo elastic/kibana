@@ -11,24 +11,35 @@ define(function (require) {
     this.remote = remote;
   }
 
+  var defaultTimeout = 60000;
+
   Common.prototype = {
     constructor: Common,
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      var urlTimeout = 10000;
       var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
 
+      self.debug('navigateToApp: ' + appName);
       var doNavigation = function (url) {
-        return self.tryForTime(urlTimeout, function () {
+        return self.tryForTime(defaultTimeout, function () {
           // since we're using hash URLs, always reload first to force re-render
+          self.debug('navigateToApp load url: ' + url);
           return self.remote.get(url)
           .then(function () {
+            self.debug('refresh the page');
             return self.remote.refresh();
           })
           .then(function () {
             if (testStatusPage !== false) {
-              return self.checkForKibanaApp()
+              return self.remote.getCurrentUrl()
+              .then(function (url) {
+                self.debug('navigateToApp current URL: ' + url);
+                self.debug('navigateToApp checking for kibana app...');
+              })
+              .then(function () {
+                return self.checkForKibanaApp();
+              })
               .then(function (kibanaLoaded) {
                 if (!kibanaLoaded) throw new Error('Kibana is not loaded, retrying');
               });
@@ -50,7 +61,7 @@ define(function (require) {
       })
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
-        return self.tryForTime(urlTimeout, function () {
+        return self.tryForTime(defaultTimeout, function () {
           // give the app time to update the URL
           return self.sleep(500)
           .then(function () {
@@ -68,7 +79,8 @@ define(function (require) {
 
     runScript: function (fn, timeout) {
       var self = this;
-      timeout = timeout || 2000;
+      // by default, give the app 10 seconds to load
+      timeout = timeout || 10000;
 
       // wait for deps on window before running script
       return self.remote
@@ -91,12 +103,9 @@ define(function (require) {
 
     getApp: function () {
       var self = this;
-      var loadTimeout = 5000;
 
-      return self.tryForTime(3000, function () {
-        return self.remote.setFindTimeout(loadTimeout)
-        .findByCssSelector('.content > .application');
-      })
+      return self.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector('.content > .application')
       .then(function () {
         return self.runScript(function () {
           var $ = window.$;
