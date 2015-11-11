@@ -21,11 +21,11 @@ describe('scenario manager', function () {
 
     it('should be able to load scenarios', function () {
       return manager.load('makelogs')
-      .then(function () {
-        expect(create.getCall(0).args[0].index).to.be('logstash-2015.09.17');
-        expect(create.getCall(1).args[0].index).to.be('logstash-2015.09.18');
-        expect(bulk.called).to.be(true);
-      });
+        .then(function () {
+          expect(create.getCall(0).args[0].index).to.be('logstash-2015.09.17');
+          expect(create.getCall(1).args[0].index).to.be('logstash-2015.09.18');
+          expect(bulk.called).to.be(true);
+        });
     });
 
     it('should be able to delete all indices', function () {
@@ -55,6 +55,52 @@ describe('scenario manager', function () {
       });
     });
 
+    it('should load if the index does not exist', function () {
+      var load = sinon.stub(manager, 'load', Promise.resolve);
+      var throwError = sinon.stub(manager.client, 'count', Promise.reject);
+      var id = 'makelogs';
+      return manager.loadIfEmpty(id).then(function () {
+        expect(load.calledWith(id)).to.be(true);
+
+        load.restore();
+        throwError.restore();
+      });
+    });
+
+    it('should load if the index is empty', function () {
+      var load = sinon.stub(manager, 'load', Promise.resolve);
+      var returnZero = sinon.stub(manager.client, 'count', function () {
+        return Promise.resolve({
+          'count': 0
+        });
+      });
+      var id = 'makelogs';
+      return manager.loadIfEmpty(id).then(function () {
+        expect(load.calledWith(id)).to.be(true);
+
+        load.restore();
+        returnZero.restore();
+      });
+    });
+
+
+    it('should not load if the index is not empty', function () {
+      var load = sinon.stub(manager, 'load', Promise.resolve);
+      var returnOne = sinon.stub(manager.client, 'count', function () {
+        return Promise.resolve({
+          'count': 1
+        });
+      });
+      var id = 'makelogs';
+      return manager.loadIfEmpty(id).then(function () {
+        expect(load.called).to.be(false);
+
+        load.restore();
+        returnOne.restore();
+      });
+    });
+
+
     afterEach(function () {
       bulk.restore();
       create.restore();
@@ -62,12 +108,40 @@ describe('scenario manager', function () {
     });
   });
 
-  it('should throw an error if the scenario is not defined', function () {
-    expect(manager.load).withArgs('makelogs').to.throwError();
+  describe('load', function () {
+    it('should reject if the scenario is not specified', function () {
+      return manager.load()
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
+
+    it('should reject if the scenario is not defined', function () {
+      return manager.load('idonotexist')
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
   });
 
-  it('should throw an error if an index is not defined when clearing', function () {
-    expect(manager.unload).to.throwError();
+  describe('unload', function () {
+    it('should reject if the scenario is not specified', function () {
+      return manager.unload()
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
+
+    it('should reject if the scenario is not defined', function () {
+      return manager.unload('idonotexist')
+      .then(function () {
+        throw new Error('Promise should reject')
+      })
+      .catch(function () { return; });
+    });
   });
 
   it('should throw an error if an es server is not specified', function () {
