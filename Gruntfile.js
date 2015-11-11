@@ -43,6 +43,7 @@ module.exports = function (grunt) {
     lintThese: [
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
+      '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
       '!<%= src %>/fixtures/**/*.js'
     ],
