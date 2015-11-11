@@ -20,16 +20,26 @@ define(function (require) {
       var self = this;
       var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
 
+      self.debug('navigateToApp: ' + appName);
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
           // since we're using hash URLs, always reload first to force re-render
+          self.debug('navigateToApp load url: ' + url);
           return self.remote.get(url)
           .then(function () {
+            self.debug('refresh the page');
             return self.remote.refresh();
           })
           .then(function () {
             if (testStatusPage !== false) {
-              return self.checkForKibanaApp()
+              return self.remote.getCurrentUrl()
+              .then(function (url) {
+                self.debug('navigateToApp current URL: ' + url);
+                self.debug('navigateToApp checking for kibana app...');
+              })
+              .then(function () {
+                return self.checkForKibanaApp();
+              })
               .then(function (kibanaLoaded) {
                 if (!kibanaLoaded) throw new Error('Kibana is not loaded, retrying');
               });
