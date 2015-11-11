@@ -7,7 +7,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./Common');
 
-  var defaultTimeout = 30000;
+  var defaultTimeout = 60000;
   var common;
 
   function SettingsPage(remote) {
@@ -22,31 +22,31 @@ define(function (require) {
       return common.navigateToApp('settings');
     },
 
-    getTimeBasedEventsCheckbox: function getTimeBasedEventsCheckbox() {
+    getTimeBasedEventsCheckbox: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
-    getTimeBasedIndexPatternCheckbox: function getTimeBasedIndexPatternCheckbox(timeout) {
+    getTimeBasedIndexPatternCheckbox: function (timeout) {
       timeout = timeout || defaultTimeout;
       // fail faster since we're sometimes checking that it doesn't exist
       return this.remote.setFindTimeout(timeout)
       .findByCssSelector('input[ng-model="index.nameIsPattern"]');
     },
 
-    getIndexPatternField: function getIndexPatternField() {
+    getIndexPatternField: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('[ng-model="index.name"]');
     },
 
-    getTimeFieldNameField: function getTimeFieldNameField() {
+    getTimeFieldNameField: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('select[ng-model="index.timeField"]');
     },
 
-    selectTimeFieldOption: function selectTimeFieldOption(selection) {
+    selectTimeFieldOption: function (selection) {
       var self = this;
-      return common.tryForTime(defaultTimeout * 2, function () {
+      return common.tryForTime(defaultTimeout, function () {
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
@@ -73,46 +73,46 @@ define(function (require) {
       });
     },
 
-    getTimeFieldOption: function getTimeFieldOption(selection) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+    getTimeFieldOption: function (selection) {
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('option[label="' + selection + '"]').click();
     },
 
-    getCreateButton: function getCreateButton() {
+    getCreateButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('.btn');
     },
 
-    clickCreateButton: function clickCreateButton() {
+    clickCreateButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('.btn').click();
     },
 
-    clickDefaultIndexButton: function clickDefaultIndexButton() {
+    clickDefaultIndexButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('button.btn.btn-warning.ng-scope').click();
     },
 
-    clickDeletePattern: function clickDeletePattern() {
+    clickDeletePattern: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('button.btn.btn-danger.ng-scope').click();
     },
 
-    getIndexPageHeading: function getIndexPageHeading() {
+    getIndexPageHeading: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('h1.title.ng-binding.ng-isolate-scope');
     },
 
-    getConfigureHeader: function getConfigureHeader() {
+    getConfigureHeader: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('h1');
     },
-    getTableHeader: function getTableHeader() {
+    getTableHeader: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findAllByCssSelector('table.table.table-condensed thead tr th');
     },
 
-    sortBy: function sortBy(columnName) {
+    sortBy: function (columnName) {
       return this.remote.setFindTimeout(defaultTimeout)
       .findAllByCssSelector('table.table.table-condensed thead tr th span')
       .then(function (chartTypes) {
@@ -130,7 +130,7 @@ define(function (require) {
       });
     },
 
-    getTableRow: function getTableRow(rowNumber, colNumber) {
+    getTableRow: function (rowNumber, colNumber) {
       return this.remote.setFindTimeout(defaultTimeout)
       // passing in zero-based index, but adding 1 for css 1-based indexes
       .findByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr:nth-child(' +
@@ -139,7 +139,7 @@ define(function (require) {
       );
     },
 
-    getFieldsTabCount: function getFieldsTabCount() {
+    getFieldsTabCount: function () {
       var self = this;
       var selector = 'li.kbn-settings-tab.active a small';
 
@@ -148,7 +148,7 @@ define(function (require) {
         .findByCssSelector(selector).getVisibleText();
       }
 
-      return common.tryForTime(defaultTimeout * 4, function () {
+      return common.tryForTime(defaultTimeout, function () {
         return getText();
       })
       .then(function () {
@@ -160,7 +160,7 @@ define(function (require) {
       });
     },
 
-    getPageSize: function getPageSize() {
+    getPageSize: function () {
       var selectedItemLabel = '';
       return this.remote.setFindTimeout(defaultTimeout)
       .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
@@ -186,12 +186,12 @@ define(function (require) {
       });
     },
 
-    getPageFieldCount: function getPageFieldCount() {
+    getPageFieldCount: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findAllByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr td.ng-scope:nth-child(1) span.ng-binding');
     },
 
-    goToPage: function goToPage(pageNum) {
+    goToPage: function (pageNum) {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
         (pageNum + 1) + ') a.ng-binding'
@@ -201,7 +201,7 @@ define(function (require) {
       });
     },
 
-    openControlsRow: function openControlsRow(row) {
+    openControlsRow: function (row) {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
         (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil'
@@ -211,15 +211,15 @@ define(function (require) {
       });
     },
 
-    openControlsByName: function openControlsByName(name) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+    openControlsByName: function (name) {
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
       .then(function (button) {
         return button.click();
       });
     },
 
-    increasePopularity: function increasePopularity() {
+    increasePopularity: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
       .then(function (button) {
@@ -227,7 +227,7 @@ define(function (require) {
       });
     },
 
-    getPopularity: function getPopularity() {
+    getPopularity: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('input[ng-model="editor.field.count"]')
       .then(function (input) {
@@ -235,7 +235,7 @@ define(function (require) {
       });
     },
 
-    controlChangeCancel: function controlChangeCancel() {
+    controlChangeCancel: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
       .then(function (button) {
@@ -243,7 +243,7 @@ define(function (require) {
       });
     },
 
-    controlChangeSave: function controlChangeSave() {
+    controlChangeSave: function () {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
       .then(function (button) {
@@ -251,7 +251,7 @@ define(function (require) {
       });
     },
 
-    setPageSize: function setPageSize(size) {
+    setPageSize: function (size) {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
       .then(function (button) {
@@ -259,7 +259,7 @@ define(function (require) {
       });
     },
 
-    createIndexPattern: function createIndexPattern() {
+    createIndexPattern: function () {
       var self = this;
 
       return common.tryForTime(defaultTimeout, function () {
@@ -296,7 +296,7 @@ define(function (require) {
       });
     },
 
-    removeIndexPattern: function removeIndexPattern() {
+    removeIndexPattern: function () {
       var self = this;
       var alertText;
 
