@@ -59,16 +59,16 @@ define(function (require) {
         common.debug('selectTimeFieldOption: FAILED to create index pattern');
         return common.checkForKibanaApp()
         .then(function (onKibana) {
-          common.debug('onKibana')
-          common.debug(onKibana)
+          common.debug('onKibana');
+          common.debug(onKibana);
         })
         .then(function () {
           return self.remote.getCurrentUrl();
         })
         .then(function (url) {
           common.debug('FAILED on url ' + url);
-          throw err
-        })
+          throw err;
+        });
       });
     },
 
@@ -145,7 +145,7 @@ define(function (require) {
       var getText = function () {
         return self.remote.setFindTimeout(defaultTimeout)
         .findByCssSelector(selector).getVisibleText();
-      }
+      };
 
       return common.tryForTime(defaultTimeout * 4, function () {
         return getText();
@@ -282,16 +282,16 @@ define(function (require) {
         common.debug('createIndexPattern: FAILED to create index pattern');
         return common.checkForKibanaApp()
         .then(function (onKibana) {
-          common.debug('onKibana')
-          common.debug(onKibana)
+          common.debug('onKibana');
+          common.debug(onKibana);
         })
         .then(function () {
           return self.remote.getCurrentUrl();
         })
         .then(function (url) {
           common.debug('FAILED on url ' + url);
-          throw err
-        })
+          throw err;
+        });
       });
     },
 
