@@ -29,7 +29,8 @@ define(function (require) {
         })
         // try to find the checkbox (this shouldn fail)
         .then(function () {
-          return settingsPage.getTimeBasedIndexPatternCheckbox();
+          var waitTime = 10000;
+          return settingsPage.getTimeBasedIndexPatternCheckbox(waitTime);
         })
         .then(function () {
           // we expect the promise above to fail

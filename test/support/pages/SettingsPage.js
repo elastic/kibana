@@ -7,7 +7,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 60000;
   var common;
 
   function SettingsPage(remote) {
@@ -27,9 +27,10 @@ define(function (require) {
       .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
-    getTimeBasedIndexPatternCheckbox: function () {
+    getTimeBasedIndexPatternCheckbox: function (timeout) {
+      timeout = timeout || defaultTimeout;
       // fail faster since we're sometimes checking that it doesn't exist
-      return this.remote.setFindTimeout(defaultTimeout / 2)
+      return this.remote.setFindTimeout(timeout)
       .findByCssSelector('input[ng-model="index.nameIsPattern"]');
     },
 
@@ -45,9 +46,8 @@ define(function (require) {
 
     selectTimeFieldOption: function (selection) {
       var self = this;
-      return common.tryForTime(defaultTimeout * 2, function () {
-        return self.getTimeFieldNameField().click();
-      })
+
+      return self.getTimeFieldNameField().click()
       .then(function () {
         return self.getTimeFieldNameField().click();
       })
@@ -73,7 +73,7 @@ define(function (require) {
     },
 
     getTimeFieldOption: function (selection) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('option[label="' + selection + '"]').click();
     },
 
@@ -211,7 +211,7 @@ define(function (require) {
     },
 
     openControlsByName: function (name) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      return this.remote.setFindTimeout(defaultTimeout)
       .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
       .then(function (button) {
         return button.click();
