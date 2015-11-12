@@ -2,6 +2,8 @@ define(function (require) {
   return function VisFactory(d3, Private) {
     var _ = require('lodash');
 
+    var Binder = require('utils/Binder');
+
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
     var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
@@ -24,13 +26,14 @@ define(function (require) {
       }
       Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
+      this.binder = new Binder();
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults({}, config || {}, {});
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
       this.resizeChecker = new ResizeChecker(this.el);
-      this.resizeChecker.on('resize', this.resize);
+      this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
     /**
@@ -105,7 +108,7 @@ define(function (require) {
     Vis.prototype.destroy = function () {
       var selection = d3.select(this.el).select('.vis-wrapper');
 
-      this.resizeChecker.off('resize', this.resize);
+      this.binder.destroy();
       this.resizeChecker.destroy();
       if (this.handler) this._runOnHandler('destroy');
 
