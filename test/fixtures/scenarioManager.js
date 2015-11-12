@@ -62,6 +62,13 @@ ScenarioManager.prototype.unload = function (id) {
 
   return this.client.indices.delete({
     index: indices
+  })
+  .catch(function (reason) {
+    // if the index never existed yet, or was already deleted it's OK
+    if (reason.message.indexOf('index_not_found_exception') < 0) {
+      console.log('reason.message: ' + reason.message);
+      throw reason;
+    }
   });
 };
 
@@ -110,7 +117,7 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
       if (response.count === 0) {
         return self.load(id);
       }
-    })
+    });
   }))
   .catch(function (reason) {
     return self.load(id);
