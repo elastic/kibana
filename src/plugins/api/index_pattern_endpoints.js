@@ -69,9 +69,9 @@ export default function (server) {
     handler: function (req, reply) {
       const client = server.plugins.elasticsearch.client;
       const isWildcard = _.contains(req.payload.title, '*');
-      const mappings = _.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
+      const mappings = _.omit(_.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
         return value.mapping;
-      });
+      }), _.isUndefined);
       const indexPattern = _.cloneDeep(req.payload);
       indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
         return _.omit(field, 'mapping');
@@ -84,21 +84,31 @@ export default function (server) {
         id: indexPattern.title,
         body: indexPattern
       }).then((patternResponse) => {
-        if (!isWildcard) {
+        if (!isWildcard || _.isEmpty(mappings)) {
           return patternResponse;
         }
         else {
-          return client.indices.putTemplate({
-            order: 0,
-            create: true,
-            name: 'kibana-' + indexPattern.title,
-            body: {
-              template: indexPattern.title,
-              mappings: {
-                _default_: {
-                  properties: mappings
+          return client.indices.exists({
+            index: indexPattern.title,
+            allowNoIndices: true
+          }).then((matchingIndices) => {
+            if (matchingIndices) {
+              throw Boom.conflict('Cannot create an index template if existing indices already match index pattern');
+            }
+            else {
+              return client.indices.putTemplate({
+                order: 0,
+                create: true,
+                name: 'kibana-' + indexPattern.title,
+                body: {
+                  template: indexPattern.title,
+                  mappings: {
+                    _default_: {
+                      properties: mappings
+                    }
+                  }
                 }
-              }
+              });
             }
           }).catch((templateError) => {
             return client.delete({
