@@ -8,18 +8,29 @@ var template =  require('./partials/suggestion.html');
 var app = require('ui/modules').get('apps/timelion', []);
 
 /*
-Two kinds of suggestors
+Autocomplete proposal, this file doesn't actually work like this
 
-Completion suggestor
-- When expression fails to parse
-- Hitting tab will replace failing postion with suggestion
+function names
+Do not auto complete .sometext(, rather insert a closing ) whenever a ( is typed.
 
-Reference suggestor
-- When inside a:
- - function
-  - suggest named argument in order of position
- - named argument
-  - suggest argument value
+.| (single dot)
+.func|
+
+argument names
+We’ll need to sort out which function we’re inside, must be inside a function though
+
+.function(|) // Suggest the first name aka most important arg, e.g. foo=
+.function(fo|) // Suggest foo=
+.function(foo=|) // Suggest [bar,baz]
+
+.function(arg=bar, |) Suggest 2nd arg name, and so on
+
+argument values
+Only named arguments, necessarily provided optional by a plugin.
+Must be inside a function, and start must be adjacent to the argument name
+
+.function(arg=b|)
+
 
 */
 
