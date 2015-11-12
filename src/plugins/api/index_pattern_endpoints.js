@@ -99,7 +99,7 @@ export default function (server) {
               return client.indices.putTemplate({
                 order: 0,
                 create: true,
-                name: 'kibana-' + indexPattern.title,
+                name: 'kibana-' + indexPattern.title.toLowerCase(),
                 body: {
                   template: indexPattern.title,
                   mappings: {
