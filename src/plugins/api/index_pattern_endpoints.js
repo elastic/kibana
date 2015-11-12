@@ -135,19 +135,31 @@ export default function (server) {
     method: 'PUT',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
+      const indexPattern = _.cloneDeep(req.payload);
+      const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
+      const mappings = _.omit(_.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
+        return value.mapping;
+      }), _.isUndefined);
+      indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
+        return _.omit(field, 'mapping');
+      }));
 
-      client.update({
-        index: '.kibana',
-        type: 'index-pattern',
-        id: req.params.id,
-        body: {
-          doc: req.payload
-        }
-      }).then(function (pattern) {
-        reply(pattern);
-      }, function (error) {
-        reply(handleESError(error));
-      });
+      if (!_.isEmpty(mappings)) {
+        reply(Boom.badRequest('Mappings cannot be updated'));
+      } else {
+        client.update({
+          index: '.kibana',
+          type: 'index-pattern',
+          id: req.params.id,
+          body: {
+            doc: indexPattern
+          }
+        }).then(function (pattern) {
+          reply(pattern);
+        }, function (error) {
+          reply(handleESError(error));
+        });
+      }
     }
   });
 
