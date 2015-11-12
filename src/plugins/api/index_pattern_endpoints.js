@@ -1,6 +1,7 @@
 let esErrors = require('elasticsearch').errors;
 let Boom = require('Boom');
 let _ = require('lodash');
+let Promise = require('bluebird');
 
 export default function (server) {
 
@@ -50,12 +51,37 @@ export default function (server) {
     method: 'GET',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
+      let templateName = `kibana-${req.params.id.toLowerCase()}`;
 
-      client.get({
-        index: '.kibana',
-        type: 'index-pattern',
-        id: req.params.id
-      }).then(function (pattern) {
+      Promise.join(
+        client.get({
+          index: '.kibana',
+          type: 'index-pattern',
+          id: req.params.id
+        }),
+        client.indices.getTemplate({
+          name: templateName
+        }),
+        function (pattern, template) {
+          pattern = pattern._source;
+          pattern.fields = JSON.parse(pattern.fields);
+          template = template[templateName];
+          let mappings = template.mappings;
+
+          let allTypeMappings = {};
+          _.forEach(mappings, (type) => {
+            _.forEach(type.properties, (value, key) => {
+              allTypeMappings[key] = value;
+            });
+          });
+
+          _.forEach(allTypeMappings, (value, key) => {
+            _.find(pattern.fields, {name: key}).mapping = value;
+          });
+
+          return pattern;
+        }
+      ).then(function (pattern) {
         reply(pattern);
       }, function (error) {
         reply(handleESError(error));
