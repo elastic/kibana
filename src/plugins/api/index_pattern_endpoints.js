@@ -68,11 +68,11 @@ export default function (server) {
     method: 'POST',
     handler: function (req, reply) {
       const client = server.plugins.elasticsearch.client;
-      const isWildcard = _.contains(req.payload.title, '*');
+      const indexPattern = _.cloneDeep(req.payload);
+      const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
       const mappings = _.omit(_.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
         return value.mapping;
       }), _.isUndefined);
-      const indexPattern = _.cloneDeep(req.payload);
       indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
         return _.omit(field, 'mapping');
       }));
