@@ -89,8 +89,7 @@ export default function (server) {
         }
         else {
           return client.indices.exists({
-            index: indexPattern.title,
-            allowNoIndices: true
+            index: indexPattern.title
           }).then((matchingIndices) => {
             if (matchingIndices) {
               throw Boom.conflict('Cannot create an index template if existing indices already match index pattern');
