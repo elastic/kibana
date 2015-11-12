@@ -5,39 +5,36 @@ define(function (require) {
   // at runtime
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 20000;
   var common;
+  var thisTime;
 
   function DiscoverPage(remote) {
     this.remote = remote;
     common = new Common(this.remote);
+    thisTime = this.remote.setFindTimeout(defaultTimeout);
   }
 
   DiscoverPage.prototype = {
     constructor: DiscoverPage,
 
     clickTimepicker: function clickTimepicker() {
-      return this.remote.setFindTimeout(defaultTimeout * 3)
-      .findByClassName('navbar-timepicker-time-desc')
-      .click();
+      return thisTime.findByClassName('navbar-timepicker-time-desc').click();
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
-      .findByCssSelector('a[ng-click="setMode(\'absolute\')"')
-      .click();
+      return thisTime.findByCssSelector('a[ng-click="setMode(\'absolute\')"').click();
     },
 
     setFromTime: function setFromTime(timeString) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
-      .findByCssSelector('input[ng-model=\'absolute.from\']')
+      return thisTime.findByCssSelector('input[ng-model=\'absolute.from\']')
       .type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
           '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
           '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
     },
 
     setToTime: function setToTime(timeString) {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      return thisTime
       .findByCssSelector('input[ng-model=\'absolute.to\']')
       .type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
           '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
@@ -45,7 +42,7 @@ define(function (require) {
     },
 
     clickGoButton: function clickGoButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByClassName('kbn-timepicker-go')
       .click();
     },
@@ -69,59 +66,92 @@ define(function (require) {
     },
 
     collapseTimepicker: function collapseTimepicker() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('.fa.fa-chevron-up')
       .click();
     },
 
     getQueryField: function getQueryField() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('input[ng-model=\'state.query\']');
     },
 
     getQuerySearchButton: function getQuerySearchButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button[aria-label=\'Search\']');
     },
 
     getTimespanText: function getTimespanText() {
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      return thisTime
       .findByCssSelector('a.navbar-timepicker-time-desc pretty-duration.ng-isolate-scope')
       .getVisibleText();
     },
 
     saveSearch: function saveSearch(searchName) {
       var self = this;
-      return self
-      .clickSaveSearchButton()
+      return self.clickSaveSearchButton()
       .then(function () {
         common.debug('--saveSearch button clicked');
-        return self.remote.setFindTimeout(defaultTimeout)
-        .findById('SaveSearch')
+        return thisTime.findById('SaveSearch')
         .type(searchName);
       })
-      //   // click save button
       .then(function clickSave() {
         common.debug('--find save button');
-        return self.remote.setFindTimeout(defaultTimeout)
+        return thisTime
         .findByCssSelector('button[ng-disabled="!opts.savedSearch.title"]')
         .click();
       });
     },
 
+    getToastMessage: function getToastMessage() {
+      return thisTime
+      .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      .getVisibleText();
+    },
+
+    waitForToastMessageGone: function waitForToastMessageGone() {
+      var self = this;
+      return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
+        return thisTime
+        .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+        .then(function toastMessage(messages) {
+          if (messages.length > 0) {
+            throw new Error('waiting for toast message to clear');
+          } else {
+            common.debug('now messages = 0 "' + messages + '"');
+            return messages;
+          }
+        });
+      });
+    },
+
+    loadSavedSearch: function loadSavedSearch(searchName) {
+      var self = this;
+      return self.clickLoadSavedSearchButton()
+      .then(function () {
+        thisTime.findByLinkText(searchName).click();
+      });
+    },
+
     clickNewSearchButton: function clickNewSearchButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button[aria-label="New Search"]')
       .click();
     },
     clickSaveSearchButton: function clickSaveSearchButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button[aria-label="Save Search"]')
       .click();
     },
 
+    clickLoadSavedSearchButton: function clickSaveSearchButton() {
+      return thisTime
+      .findByCssSelector('button[aria-label="Load Saved Search"]')
+      .click();
+    },
+
     getCurrentQueryName: function getCurrentQueryName() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('span.discover-info-title')
       // .findByCssSelector('span[bo-bind="opts.savedSearch.title"]')
       .getVisibleText();
@@ -130,7 +160,8 @@ define(function (require) {
     getBarChartData: function getBarChartData() {
       // var barMap = {};
       var barArray = [];
-      return this.remote.setFindTimeout(defaultTimeout * 2)
+      common.log('in getBarChartData');
+      return thisTime
       .findAllByCssSelector('rect')
       .then(function (chartData) {
 
@@ -142,7 +173,7 @@ define(function (require) {
               return chart
               .getAttribute('height')
               .then(function (height) {
-                // common.debug(': ' + height + ', ');
+                common.debug(': ' + height + ', ');
                 barArray.push(height);
               });
             }
@@ -159,12 +190,8 @@ define(function (require) {
 
     getSpinnerDone: function getSpinnerDone() {
       common.debug('--getSpinner done method');
-      return this.remote.setFindTimeout(defaultTimeout * 3)
-      .findByCssSelector('span.spinner.ng-hide');
+      return thisTime.findByCssSelector('span.spinner.ng-hide');
     }
-
-
-
 
   };
 
