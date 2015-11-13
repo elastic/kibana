@@ -29,27 +29,27 @@ define(function (require) {
           return scenarioManager.loadIfEmpty('logstashFunctional');
         })
         .then(function (navigateTo) {
-          common.log('navigateTo');
+          common.debug('navigateTo');
           return settingsPage.navigateTo();
         })
         .then(function () {
-          common.log('createIndexPattern');
+          common.debug('createIndexPattern');
           return settingsPage.createIndexPattern();
         })
         .then(function () {
-          common.log('discover');
+          common.debug('discover');
           return common.navigateToApp('discover');
         })
         .then(function () {
-          common.log('clickTimepicker');
+          common.debug('clickTimepicker');
           return discoverPage.clickTimepicker();
         })
         .then(function () {
-          common.log('setAbsoluteRange');
+          common.debug('setAbsoluteRange');
           return discoverPage.setAbsoluteRange(fromTime, toTime);
         })
         .then(function () {
-          common.log('collapseTimepicker');
+          common.debug('collapseTimepicker');
           return discoverPage.collapseTimepicker();
         });
       });
