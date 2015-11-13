@@ -3,17 +3,14 @@ import { throttle } from 'lodash';
 module.exports = function (editor) {
   let resize = editor.resize;
   let lastDemensions = [];
+  let timeout = null;
 
   let checkDelay = 250;
-  let recheckDelay = 500;
-  let stableAfter = 5000;
-  let timeouts = [];
-
   let stableChecks = 0;
-  let maxStableChecks = stableAfter / recheckDelay;
+  let maxStableChecks = 20;
 
-  function exec() {
-    timeouts.splice(0).map(clearTimeout);
+  function check() {
+    clearTimeout(timeout);
 
     const $container = editor.$el.parent();
     const demensions = [$container.width(), $container.height()];
@@ -29,17 +26,17 @@ module.exports = function (editor) {
     }
 
     if (stableChecks < maxStableChecks) {
-      scheduleRecheck();
+      scheduleCheck();
     }
+  }
+
+  function scheduleCheck() {
+    if (!timeout) timeout = setTimeout(check, checkDelay);
   }
 
   function requestResize() {
     stableChecks = 0;
-    if (!timeouts[0]) timeouts[0] = setTimeout(exec, checkDelay);
-  }
-
-  function scheduleRecheck() {
-    if (!timeouts[1]) timeouts[1] = setTimeout(exec, recheckDelay);
+    scheduleCheck();
   }
 
   return requestResize;
