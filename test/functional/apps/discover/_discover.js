@@ -63,6 +63,7 @@ define(function (require) {
 
         bdd.it('save query should show toast message and display query name', function () {
           var expectedSavedQueryMessage = 'Discover: Saved Data Source "' + queryName1 + '"';
+          this.timeout = 60000;
           return discoverPage.saveSearch(queryName1)
           .then(function () {
             return discoverPage.getToastMessage(2000);
