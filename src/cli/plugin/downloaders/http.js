@@ -22,17 +22,12 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
     _reject = reject;
   });
 
-  function handleClose() {
-    console.log('handleClose');
-  }
-
   function consumeStreams() {
     //console.log('http.consumeStreams');
     _readStream
       .on('response', handleResponse)
       .on('data', handleData)
       .on('error', _.partial(handleError, 'ENOTFOUND'))
-      .on('end', handleClose)
       .pipe(_writeStream, { end: true })
       .on('finish', handleEnd);
 
@@ -64,13 +59,16 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
     //console.log('http.createWriteStream');
     _writeStream = fs.createWriteStream(targetPath);
     _writeStream.on('error', function (err) {
-      console.log('_writeStream.error', err);
+      //console.log('_writeStream.error', err);
     });
     _writeStream.on('finish', function () {
-      console.log('_writeStream.finish');
+      //console.log('_writeStream.finish');
       if (!_hasError) return;
-      fs.unlinkSync(targetPath);
-      _reject(new Error(_errorMessage));
+
+      setTimeout (function() {
+        fs.unlinkSync(targetPath);
+        _reject(new Error(_errorMessage));
+      }, 10);
     });
 
     return;
@@ -110,10 +108,12 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
     //console.log('http.handleEnd', _hasError);
     if (_hasError) return;
 
-    logger.log('Transfer complete');
-    _resolve({
-      archiveType: _archiveType
-    });
+    setTimeout (function() {
+      logger.log('Transfer complete');
+      _resolve({
+        archiveType: _archiveType
+      });
+    }, 10);
   }
 
   function getArchiveTypeFromResponse(contentType) {
