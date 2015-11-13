@@ -45,395 +45,46 @@ describe('kibana cli', function () {
         downloader = pluginDownloader(settings, logger);
       });
 
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
+      for (var i=0;i<10000;i++) {
 
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
+        it(`[${i}] should throw an error when it doesn't find a good url.`, function () {
+          //this.timeout(5000);
+          var settings = {
+            urls: [
+              'http://www.files.com/badfile1.tar.gz',
+              'http://www.files.com/badfile2.tar.gz',
+              'http://www.files.com/badfile3.tar.gz'
+            ],
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            timeout: 0
+          };
+          downloader = pluginDownloader(settings, logger);
 
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
+          var couchdb = nock('http://www.files.com')
+          .defaultReplyHeaders({
+            'content-length': '10'
+          })
+          .get('/badfile1.tar.gz')
+          .reply(404)
+          .get('/badfile2.tar.gz')
+          .reply(404)
+          .get('/badfile3.tar.gz')
+          .reply(404);
 
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
+          var errorStub = sinon.stub();
+          return downloader.download(settings, logger)
+          .catch(errorStub)
+          .then(function (data) {
+            expect(errorStub.called).to.be(true);
+            expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
 
-          done();
+            var files = glob.sync('**/*', { cwd: testWorkingPath });
+            expect(files).to.eql([]);
+          });
         });
-      });
 
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
-
-      it('should throw an error when it doesn\'t find a good url.', function (done) {
-        this.timeout(5000);
-        var settings = {
-          urls: [
-            'http://www.files.com/badfile1.tar.gz',
-            'http://www.files.com/badfile2.tar.gz',
-            'http://www.files.com/badfile3.tar.gz'
-          ],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
-
-        var errorStub = sinon.stub();
-        return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
-
-          done();
-        });
-      });
+      }
 
     });
 
@@ -449,7 +100,7 @@ describe('kibana cli', function () {
         downloader = pluginDownloader(settings, logger);
       });
 
-      describe.skip('http downloader', function () {
+      describe('http downloader', function () {
 
         it('should download an unsupported file type, but return undefined for archiveType', function (done) {
           var filename = join(__dirname, 'replies/Banana21.jpg');

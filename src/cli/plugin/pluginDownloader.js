@@ -4,7 +4,7 @@ const urlParse = require('url').parse;
 const fs = require('fs');
 const request = require('request');
 const progressReporter = require('./progressReporter');
-const downloadHttpFile = require('./downloaders/http');
+const downloadHttpFile = require('./downloaders/http2');
 const downloadLocalFile = require('./downloaders/file');
 
 module.exports = function (settings, logger) {
@@ -13,7 +13,7 @@ module.exports = function (settings, logger) {
 
   //Attempts to download each url in turn until one is successful
   function download() {
-    const urls = settings.urls;
+    const urls = settings.urls.slice(0);
 
     function tryNext() {
       const sourceUrl = urls.shift();

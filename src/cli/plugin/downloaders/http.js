@@ -27,9 +27,8 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
     _readStream
       .on('response', handleResponse)
       .on('data', handleData)
-      .on('error', _.partial(handleError, 'ENOTFOUND'))
-      .pipe(_writeStream, { end: true })
-      .on('finish', handleEnd);
+      .on('error', _.partial(handleError, 'ENOTFOUND'));
+      //.pipe(_writeStream)
 
     return promise;
   }
@@ -55,23 +54,27 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
     });
   }
 
-  function createWriteStream(readStream) {
+  function createWriteStream() {
     //console.log('http.createWriteStream');
     _writeStream = fs.createWriteStream(targetPath);
     _writeStream.on('error', function (err) {
-      //console.log('_writeStream.error', err);
+      console.log('_writeStream.error', err);
     });
     _writeStream.on('finish', function () {
       //console.log('_writeStream.finish');
-      if (!_hasError) return;
 
-      setTimeout (function() {
+      //setTimeout (function() {
+      if (_hasError) {
         fs.unlinkSync(targetPath);
         _reject(new Error(_errorMessage));
-      }, 10);
+      } else {
+        logger.log('Transfer complete');
+        _resolve({
+          archiveType: _archiveType
+        });
+      }
+      //}, 10);
     });
-
-    return;
   }
 
   function handleError(errorMessage, err) {
@@ -86,15 +89,18 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
   }
 
   function handleResponse(resp) {
+    //console.log(resp);
     //console.log('http.handleResponse', resp.statusCode);
     if (resp.statusCode >= 400) {
       handleError('ENOTFOUND', null);
     } else {
+      resp.pipe(_writeStream);
       _archiveType = getArchiveTypeFromResponse(resp.headers['content-type']);
       let totalSize = parseInt(resp.headers['content-length'], 10) || 0;
 
       //Note: no progress is logged if the plugin is downloaded in a single packet
       _progressReporter.init(totalSize);
+
     }
   }
 
@@ -102,18 +108,6 @@ module.exports = function (logger, sourceUrl, targetPath, timeout) {
     //console.log('http.handleData');
     if (_hasError) return;
     _progressReporter.progress(buffer.length);
-  }
-
-  function handleEnd() {
-    //console.log('http.handleEnd', _hasError);
-    if (_hasError) return;
-
-    setTimeout (function() {
-      logger.log('Transfer complete');
-      _resolve({
-        archiveType: _archiveType
-      });
-    }, 10);
   }
 
   function getArchiveTypeFromResponse(contentType) {
