@@ -3,6 +3,7 @@ const Boom = require('Boom');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const getMappings = require('./lib/get_mappings');
+const stitchPatternAndMappings = require('./lib/stitch_pattern_and_mappings');
 
 export default function (server) {
 
@@ -39,7 +40,21 @@ export default function (server) {
             match_all: {}
           }
         }
-      }).then(function (patterns) {
+      }).then(function parseResults(results) {
+        const hits = results.hits.hits;
+        return _.map(hits, (patternHit) => {
+          patternHit._source.fields = JSON.parse(patternHit._source.fields);
+          return patternHit._source;
+        });
+      }).then((patterns) => {
+        return Promise.map(patterns, (pattern) => {
+          return getMappings(pattern.title, client).catch(() => {
+            return {};
+          }).then((mappings) => {
+            return stitchPatternAndMappings(pattern, mappings);
+          });
+        });
+      }).then((patterns) => {
         reply(patterns);
       }, function (error) {
         reply(handleESError(error));
@@ -59,21 +74,12 @@ export default function (server) {
           index: '.kibana',
           type: 'index-pattern',
           id: req.params.id
+        }).then((result) => {
+          result._source.fields = JSON.parse(result._source.fields);
+          return result._source;
         }),
         getMappings(pattern, client),
-        function (pattern, mappings) {
-          pattern = pattern._source;
-          pattern.fields = JSON.parse(pattern.fields);
-
-          _.forEach(mappings, (value, key) => {
-            let field = _.find(pattern.fields, {name: key});
-            if (field) {
-              field.mapping = value;
-            }
-          });
-
-          return pattern;
-        }
+        stitchPatternAndMappings
       ).then(function (pattern) {
         reply(pattern);
       }, function (error) {
