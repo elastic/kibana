@@ -112,7 +112,7 @@ define(function (require) {
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
       return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
-        return thisTime
+        return self.remote.setFindTimeout(1000)
         .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
         .then(function toastMessage(messages) {
           if (messages.length > 0) {
