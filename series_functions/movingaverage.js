@@ -19,7 +19,7 @@ module.exports = new Chainable('movingaverage', {
     return alter(args, function (eachSeries, _window) {
 
       var pairs = eachSeries.data;
-
+      eachSeries.label = eachSeries.label + ' mvavg=' + _window;
       eachSeries.data = _.map(pairs, function (point, i) {
         if (i < _window) { return [point[0], null]; }
 
