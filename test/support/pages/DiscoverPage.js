@@ -28,17 +28,15 @@ define(function (require) {
 
     setFromTime: function setFromTime(timeString) {
       return thisTime.findByCssSelector('input[ng-model=\'absolute.from\']')
-      .type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-          '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-          '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
+      .clearValue()
+      .type(timeString);
     },
 
     setToTime: function setToTime(timeString) {
       return thisTime
       .findByCssSelector('input[ng-model=\'absolute.to\']')
-      .type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-          '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-          '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
+      .clearValue()
+      .type(timeString);
     },
 
     clickGoButton: function clickGoButton() {
@@ -160,7 +158,7 @@ define(function (require) {
     getBarChartData: function getBarChartData() {
       // var barMap = {};
       var barArray = [];
-      common.log('in getBarChartData');
+      common.debug('in getBarChartData');
       return thisTime
       .findAllByCssSelector('rect')
       .then(function (chartData) {
