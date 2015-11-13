@@ -23,7 +23,7 @@ define(function (require) {
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
-      return thisTime.findByCssSelector('a[ng-click="setMode(\'absolute\')"').click();
+      return thisTime.findByLinkText('Absolute').click();
     },
 
     setFromTime: function setFromTime(timeString) {
