@@ -12,6 +12,7 @@ define(function (require) {
       var remote;
       var fromTime;
       var toTime;
+      this.timeout = 2 * 60 * 1000;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -27,22 +28,28 @@ define(function (require) {
         .then(function loadIfEmptyMakelogs() {
           return scenarioManager.loadIfEmpty('logstashFunctional');
         })
-        .then(function () {
+        .then(function (navigateTo) {
+          common.log('navigateTo');
           return settingsPage.navigateTo();
         })
         .then(function () {
+          common.log('createIndexPattern');
           return settingsPage.createIndexPattern();
         })
         .then(function () {
+          common.log('discover');
           return common.navigateToApp('discover');
         })
         .then(function () {
+          common.log('clickTimepicker');
           return discoverPage.clickTimepicker();
         })
         .then(function () {
+          common.log('setAbsoluteRange');
           return discoverPage.setAbsoluteRange(fromTime, toTime);
         })
         .then(function () {
+          common.log('collapseTimepicker');
           return discoverPage.collapseTimepicker();
         });
       });
