@@ -12,7 +12,7 @@ define(function (require) {
       var remote;
       var fromTime;
       var toTime;
-      this.timeout = 2 * 60 * 1000;
+      this.timeout = 3 * 60 * 1000;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -113,14 +113,16 @@ define(function (require) {
           this.timeout = 80000;
           return common.sleep(4000)
           .then(function () {
-            return discoverPage.getBarChartData();
-          })
-          .then(function compareData(paths) {
-            // the largest bars are over 100 pixels high so this is less than 1% tolerance
-            var barHeightTolerance = 1;
-            for (var x = 0; x < expectedBarChartData.size; x++) {
-              expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
-            }
+            return common.tryForTime(60 * 1000, function tryingForTime() {
+              return discoverPage.getBarChartData()
+              .then(function compareData(paths) {
+                // the largest bars are over 100 pixels high so this is less than 1% tolerance
+                var barHeightTolerance = 1;
+                for (var x = 0; x < expectedBarChartData.size; x++) {
+                  expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
+                }
+              });
+            });
           })
           .catch(common.handleError(this));
         });
