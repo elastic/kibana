@@ -61,22 +61,39 @@ export default function (server) {
         }),
         client.indices.getTemplate({
           name: templateName
-        }),
-        function (pattern, template) {
-          pattern = pattern._source;
-          pattern.fields = JSON.parse(pattern.fields);
-          template = template[templateName];
-          let mappings = template.mappings;
-
-          let allTypeMappings = {};
+        }).then((template) => {
+          let mappings = template[templateName].mappings;
+          let mergedMappings = {};
           _.forEach(mappings, (type) => {
             _.forEach(type.properties, (value, key) => {
-              allTypeMappings[key] = value;
+              mergedMappings[key] = value;
             });
           });
+          return mergedMappings;
+        }, (error) => {
+          return client.indices.getFieldMapping({
+            index: req.params.id,
+            field: '*',
+            ignore_unavailable: false,
+            allow_no_indices: false,
+            include_defaults: true
+          }).then((fieldMappings) => {
+            return _.reduce(fieldMappings, (mergedMappings, indexMappings) => {
+              return _.reduce(indexMappings.mappings, (mergedMappings, typeMappings) => {
+                return _.defaults(mergedMappings, typeMappings);
+              }, mergedMappings);
+            }, {});
+          });
+        }),
+        function (pattern, mappings) {
+          pattern = pattern._source;
+          pattern.fields = JSON.parse(pattern.fields);
 
-          _.forEach(allTypeMappings, (value, key) => {
-            _.find(pattern.fields, {name: key}).mapping = value;
+          _.forEach(mappings, (value, key) => {
+            let field = _.find(pattern.fields, {name: key});
+            if (field) {
+              field.mapping = value;
+            }
           });
 
           return pattern;
