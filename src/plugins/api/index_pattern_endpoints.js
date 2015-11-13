@@ -1,7 +1,8 @@
-let esErrors = require('elasticsearch').errors;
-let Boom = require('Boom');
-let _ = require('lodash');
-let Promise = require('bluebird');
+const esErrors = require('elasticsearch').errors;
+const Boom = require('Boom');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const getMappings = require('./lib/get_mappings');
 
 export default function (server) {
 
@@ -51,7 +52,7 @@ export default function (server) {
     method: 'GET',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
-      let templateName = `kibana-${req.params.id.toLowerCase()}`;
+      let pattern = req.params.id;
 
       Promise.join(
         client.get({
@@ -59,34 +60,7 @@ export default function (server) {
           type: 'index-pattern',
           id: req.params.id
         }),
-        client.indices.getTemplate({
-          name: templateName
-        }).then((template) => {
-          let mappings = template[templateName].mappings;
-          let mergedMappings = {};
-          _.forEach(mappings, (type) => {
-            _.forEach(type.properties, (value, key) => {
-              mergedMappings[key] = value;
-            });
-          });
-          return mergedMappings;
-        }, (error) => {
-          return client.indices.getFieldMapping({
-            index: req.params.id,
-            field: '*',
-            ignore_unavailable: false,
-            allow_no_indices: false,
-            include_defaults: true
-          }).then((fieldMappings) => {
-            return _.mapValues(_.reduce(fieldMappings, (mergedMappings, indexMappings) => {
-              return _.reduce(indexMappings.mappings, (mergedMappings, typeMappings) => {
-                return _.defaults(mergedMappings, typeMappings);
-              }, mergedMappings);
-            }, {}), (value) => {
-              return value.mapping[_.last(value.full_name.split('.'))];
-            });
-          });
-        }),
+        getMappings(pattern, client),
         function (pattern, mappings) {
           pattern = pattern._source;
           pattern.fields = JSON.parse(pattern.fields);
