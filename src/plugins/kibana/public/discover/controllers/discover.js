@@ -110,6 +110,8 @@ define(function (require) {
     }
 
     var $state = $scope.state = new AppState(getStateDefaults());
+    $scope.uiState = $state.makeStateful('uiState');
+
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
