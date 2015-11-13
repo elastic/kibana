@@ -18,6 +18,9 @@ module.exports = function (setup) {
     },
     setTargetSeries: function () {
       targetSeries = buildTarget(this);
+    },
+    writeTargetSeries: function (series) {
+      targetSeries = _.map(series, function (p) {return p[0]});
     }
   };
 
