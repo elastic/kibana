@@ -78,11 +78,13 @@ export default function (server) {
             allow_no_indices: false,
             include_defaults: true
           }).then((fieldMappings) => {
-            return _.reduce(fieldMappings, (mergedMappings, indexMappings) => {
+            return _.mapValues(_.reduce(fieldMappings, (mergedMappings, indexMappings) => {
               return _.reduce(indexMappings.mappings, (mergedMappings, typeMappings) => {
                 return _.defaults(mergedMappings, typeMappings);
               }, mergedMappings);
-            }, {});
+            }, {}), (value) => {
+              return value.mapping[_.last(value.full_name.split('.'))];
+            });
           });
         }),
         function (pattern, mappings) {
