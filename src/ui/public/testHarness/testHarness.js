@@ -1,4 +1,8 @@
 /* global mocha */
+
+// chrome expects to be loaded first, let it get its way
+var chrome = require('ui/chrome');
+
 var Nonsense = require('Nonsense');
 var sinon = require('sinon');
 var $ = require('jquery');
@@ -6,8 +10,6 @@ var _ = require('lodash');
 var parse = require('url').parse;
 
 var StackTraceMapper = require('ui/StackTraceMapper');
-var chrome = require('ui/chrome');
-
 
 /*** the vislib tests have certain style requirements, so lets make sure they are met ***/
 $('body').attr('id', 'test-harness-body'); // so we can make high priority selectors
