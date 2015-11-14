@@ -1,8 +1,9 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
+const {templateToPattern, patternToTemplate} = require('./convert_pattern_and_template_name');
 
 module.exports = function getMappings(pattern, client) {
-  const templateName = `kibana-${pattern.toLowerCase()}`;
+  const templateName = patternToTemplate(pattern);
 
   return client.indices.getTemplate({
     name: templateName
