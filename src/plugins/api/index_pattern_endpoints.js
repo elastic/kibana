@@ -5,6 +5,7 @@ const Promise = require('bluebird');
 const getMappings = require('./lib/get_mappings');
 const stitchPatternAndMappings = require('./lib/stitch_pattern_and_mappings');
 const {templateToPattern, patternToTemplate} = require('./lib/convert_pattern_and_template_name');
+const removeDeprecatedFieldProps = require('./lib/remove_deprecated_field_props');
 
 export default function (server) {
 
@@ -55,11 +56,12 @@ export default function (server) {
             return stitchPatternAndMappings(pattern, mappings);
           });
         });
-      }).then((patterns) => {
-        reply(patterns);
-      }, function (error) {
-        reply(handleESError(error));
-      });
+      }).then(removeDeprecatedFieldProps)
+        .then((patterns) => {
+          reply(patterns);
+        }, function (error) {
+          reply(handleESError(error));
+        });
     }
   });
 
@@ -81,11 +83,12 @@ export default function (server) {
         }),
         getMappings(pattern, client),
         stitchPatternAndMappings
-      ).then(function (pattern) {
-        reply(pattern);
-      }, function (error) {
-        reply(handleESError(error));
-      });
+      ).then(removeDeprecatedFieldProps)
+        .then(function (pattern) {
+          reply(pattern);
+        }, function (error) {
+          reply(handleESError(error));
+        });
     }
   });
 
