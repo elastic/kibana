@@ -18,57 +18,6 @@ define(function (require) {
   DiscoverPage.prototype = {
     constructor: DiscoverPage,
 
-    clickTimepicker: function clickTimepicker() {
-      return thisTime.findByClassName('navbar-timepicker-time-desc').click();
-    },
-
-    clickAbsoluteButton: function clickAbsoluteButton() {
-      return thisTime.findByLinkText('Absolute').click();
-    },
-
-    setFromTime: function setFromTime(timeString) {
-      return thisTime.findByCssSelector('input[ng-model=\'absolute.from\']')
-      .clearValue()
-      .type(timeString);
-    },
-
-    setToTime: function setToTime(timeString) {
-      return thisTime
-      .findByCssSelector('input[ng-model=\'absolute.to\']')
-      .clearValue()
-      .type(timeString);
-    },
-
-    clickGoButton: function clickGoButton() {
-      return thisTime
-      .findByClassName('kbn-timepicker-go')
-      .click();
-    },
-
-
-    setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
-      var self = this;
-      common.debug('--Clicking Absolute button');
-      return self.clickAbsoluteButton()
-      .then(function () {
-        common.debug('--Setting From Time : ' + fromTime);
-        return self.setFromTime(fromTime);
-      })
-      .then(function () {
-        common.debug('--Setting To Time : ' + toTime);
-        return self.setToTime(toTime);
-      })
-      .then(function () {
-        return self.clickGoButton();
-      });
-    },
-
-    collapseTimepicker: function collapseTimepicker() {
-      return thisTime
-      .findByCssSelector('.fa.fa-chevron-up')
-      .click();
-    },
-
     getQueryField: function getQueryField() {
       return thisTime
       .findByCssSelector('input[ng-model=\'state.query\']');
@@ -98,28 +47,6 @@ define(function (require) {
         return thisTime
         .findByCssSelector('button[ng-disabled="!opts.savedSearch.title"]')
         .click();
-      });
-    },
-
-    getToastMessage: function getToastMessage() {
-      return thisTime
-      .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-      .getVisibleText();
-    },
-
-    waitForToastMessageGone: function waitForToastMessageGone() {
-      var self = this;
-      return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
-        return self.remote.setFindTimeout(1000)
-        .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-        .then(function toastMessage(messages) {
-          if (messages.length > 0) {
-            throw new Error('waiting for toast message to clear');
-          } else {
-            common.debug('now messages = 0 "' + messages + '"');
-            return messages;
-          }
-        });
       });
     },
 
