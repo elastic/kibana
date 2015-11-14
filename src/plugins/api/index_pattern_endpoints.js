@@ -195,12 +195,21 @@ export default function (server) {
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
 
-      client.delete({
-        index: '.kibana',
-        type: 'index-pattern',
-        id: req.params.id
-      }).then(function (pattern) {
-        reply(pattern);
+      Promise.all([
+        client.delete({
+          index: '.kibana',
+          type: 'index-pattern',
+          id: req.params.id
+        }),
+        client.indices.deleteTemplate({
+          name: patternToTemplate(req.params.id)
+        }).catch((error) => {
+          if (!error.status || error.status !== 404) {
+            throw error;
+          }
+        })
+      ]).then(function (pattern) {
+        reply('success');
       }, function (error) {
         reply(handleESError(error));
       });
