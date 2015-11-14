@@ -1,5 +1,6 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
+  var HeaderPage = require('../../../support/pages/HeaderPage');
   var SettingsPage = require('../../../support/pages/SettingsPage');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var expect = require('intern/dojo/node!expect.js');
@@ -7,20 +8,20 @@ define(function (require) {
   return function (bdd, scenarioManager) {
     bdd.describe('discover app', function describeIndexTests() {
       var common;
+      var headerPage;
       var settingsPage;
       var discoverPage;
       var remote;
-      var fromTime;
-      var toTime;
-      this.timeout = 3 * 60 * 1000;
+      this.timeout = 60000;
 
       bdd.before(function () {
         common = new Common(this.remote);
+        headerPage = new HeaderPage(this.remote);
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
         remote = this.remote;
-        fromTime = '2015-09-19 06:31:44.000';
-        toTime = '2015-09-23 18:31:44.000';
+        var fromTime = '2015-09-19 06:31:44.000';
+        var toTime = '2015-09-23 18:31:44.000';
 
         // start each test with an empty kibana index
         return scenarioManager.reload('emptyKibana')
@@ -42,15 +43,15 @@ define(function (require) {
         })
         .then(function () {
           common.debug('clickTimepicker');
-          return discoverPage.clickTimepicker();
+          return headerPage.clickTimepicker();
         })
         .then(function () {
           common.debug('setAbsoluteRange');
-          return discoverPage.setAbsoluteRange(fromTime, toTime);
+          return headerPage.setAbsoluteRange(fromTime, toTime);
         })
         .then(function () {
           common.debug('collapseTimepicker');
-          return discoverPage.collapseTimepicker();
+          return headerPage.collapseTimepicker();
         });
       });
 
@@ -73,13 +74,13 @@ define(function (require) {
           this.timeout = 60000;
           return discoverPage.saveSearch(queryName1)
           .then(function () {
-            return discoverPage.getToastMessage(2000);
+            return headerPage.getToastMessage();
           })
           .then(function (toastMessage) {
             expect(toastMessage).to.be(expectedSavedQueryMessage);
           })
           .then(function () {
-            return discoverPage.waitForToastMessageGone();
+            return headerPage.waitForToastMessageGone();
           })
           .then(function () {
             return discoverPage.getCurrentQueryName();
@@ -110,7 +111,6 @@ define(function (require) {
             70.05375000000001,23.180625000000006,4.0218750000000085,1.2431250000000063,
             6.435000000000002,36.416250000000005,88.408125,108.81,
             69.395625,22.522499999999994,5.4112499999999955,0.29249999999998977,0,0,0,0,0,0,0,0];
-          this.timeout = 80000;
           return common.sleep(4000)
           .then(function () {
             return common.tryForTime(60 * 1000, function tryingForTime() {
