@@ -4,6 +4,7 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 const getMappings = require('./lib/get_mappings');
 const stitchPatternAndMappings = require('./lib/stitch_pattern_and_mappings');
+const {templateToPattern, patternToTemplate} = require('./lib/convert_pattern_and_template_name');
 
 export default function (server) {
 
@@ -123,7 +124,7 @@ export default function (server) {
               return client.indices.putTemplate({
                 order: 0,
                 create: true,
-                name: 'kibana-' + indexPattern.title.toLowerCase(),
+                name: patternToTemplate(indexPattern.title),
                 body: {
                   template: indexPattern.title,
                   mappings: {
