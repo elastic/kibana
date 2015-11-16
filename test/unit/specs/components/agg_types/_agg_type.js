@@ -123,20 +123,22 @@ define(function (require) {
 
           it('defaults to AggParams object with JSON param', function () {
             var aggType = new AggType({
-              name: 'smart agg'
+              name: 'smart agg',
+              nested: 'nested'
             });
 
             expect(aggType.params).to.be.an(AggParams);
-            expect(aggType.params.length).to.be(1);
+            expect(aggType.params.length).to.be(2);
             expect(aggType.params[0].name).to.be('json');
           });
 
           it('passes the params arg directly to the AggParams constructor', function () {
             var params = [
               {name: 'one'},
-              {name: 'two'}
+              {name: 'two'},
+              {name: 'nested'}
             ];
-            var paramLength = params.length + 1; // json is always appended
+            var paramLength = params.length + 2; // json is always appended
 
             var aggType = new AggType({
               name: 'bucketeer',
