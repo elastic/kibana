@@ -30,8 +30,22 @@ define(function (require) {
   // ensure that the kibana module requires ui.bootstrap
   require('modules')
   .get('kibana', ['ui.bootstrap'])
-  .config(function ($tooltipProvider) {
+  .config(function ($tooltipProvider, $httpProvider, configFile) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
+    $httpProvider.interceptors.push(function () {
+      return {
+        request: function (opts) {
+          var kbnXsrfToken = configFile.xsrf_token;
+
+          if (kbnXsrfToken) {
+            var headers = opts.headers || (opts.headers = {});
+            headers['kbn-xsrf-token'] = kbnXsrfToken;
+          }
+
+          return opts;
+        }
+      };
+    });
   })
   .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
     return {
