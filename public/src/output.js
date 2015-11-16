@@ -2,12 +2,14 @@ let ace = require('ace');
 let $ = require('jquery');
 let settings = require('./settings');
 let OutputMode = require('./sense_editor/mode/output');
+const smartResize = require('./smart_resize');
 
 var $el = $("#output");
 var output = ace.require('ace/ace').edit($el[0]);
 
 var outputMode = new OutputMode.Mode();
 
+output.resize = smartResize(output);
 output.update = function (val, mode, cb) {
   if (typeof mode === 'function') {
     cb = mode;

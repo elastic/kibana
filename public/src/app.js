@@ -122,28 +122,15 @@ history.restoreFromHistory = function applyHistoryElem(req) {
   input.focus();
 };
 
-(function stuffThatsTooHardWithCSS() {
-  var delay = null;
+function resize() {
+  input.resize();
+  output.resize();
+}
 
-  function update() {
-    if (delay) {
-      delay = clearTimeout(delay);
-    }
-
-    input.resize(true);
-    output.resize(true);
-  }
-
-  update();
-
-  // and when the window resizes (once every 500 ms)
-  $(window)
-  .resize(function (event) {
-    if (!delay && event.target === window) {
-      delay = setTimeout(update, 500);
-    }
-  });
-}());
+resize();
+$(window).resize((event) => {
+  if (event.target === window) resize();
+});
 
 loadSavedState();
 setupAutosave();
