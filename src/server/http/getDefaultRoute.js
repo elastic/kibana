@@ -6,5 +6,5 @@ module.exports = _.once(function (kbnServer) {
   let defaultConfig = config.get('server.defaultRoute');
   if (defaultConfig) return defaultConfig;
 
-  return `${config.get('basePath')}/app/kibana`;
+  return `${config.get('server.basePath')}/app/kibana`;
 });
