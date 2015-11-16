@@ -152,6 +152,11 @@ define(function (require) {
               orderAgg = vis.aggs.byId[orderAgg.parentId];
             }
 
+            // if the target aggregation is nested, refer to it by its nested location
+            if (orderAgg.params.nested && (orderAgg.params.nested.path || orderAgg.params.nested.reverse)) {
+              orderAggId = 'nested_' + orderAggId + '>' + orderAggId;
+            }
+
             output.subAggs = (output.subAggs || []).concat(orderAgg);
             order[orderAggId] = dir;
           }

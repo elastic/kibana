@@ -96,6 +96,12 @@ define(function (require) {
           type: 'json',
           advanced: true
         });
+        // always append the nested-path param
+        this.params.push({
+          name: 'nested',
+          type: 'nested',
+          advanced: true
+        });
 
         this.params = new AggParams(this.params);
       }

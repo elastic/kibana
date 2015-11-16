@@ -1,0 +1,19 @@
+<div class="form-group">
+  <span class="hintbox-label" ng-click="showNestedHint = !showNestedHint">
+    <label>Nested Path</label>
+    <i class="fa fa-info-circle"></i>
+  </span>
+
+  <div class="hintbox" ng-show="showNestedHint">
+    <p>
+      Causes this bucket and its child buckets to be evaluated in the context of a nested entity.
+      This field should be filled in for the outermost bucket which references the nested entity.
+    </p>
+  </div>
+  <div class="input-group">
+    <input type="text" ng-model="agg.params.nested.path" class="form-control"/>
+    <span class="input-group-addon">
+      <input type="checkbox" ng-model="agg.params.nested.reverse"/> Reverse
+    </span>
+  </div>
+</div>
