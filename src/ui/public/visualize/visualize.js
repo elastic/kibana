@@ -49,17 +49,13 @@ define(function (require) {
         var applyClassNames = function () {
           var $spyEl = getSpyEl();
           var $visEl = getVisEl();
-          var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
+          $scope.fullScreenSpyPanel = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
           // external
           $el.toggleClass('only-visualization', !$scope.spy.mode);
-          $el.toggleClass('visualization-and-spy', $scope.spy.mode && !fullSpy);
-          $el.toggleClass('only-spy', Boolean(fullSpy));
-          if ($spyEl) $spyEl.toggleClass('only', Boolean(fullSpy));
-
-          // internal
-          $visEl.toggleClass('spy-visible', Boolean($scope.spy.mode));
-          $visEl.toggleClass('spy-only', Boolean(fullSpy));
+          $el.toggleClass('visualization-and-spy', $scope.spy.mode && !$scope.fullScreenSpyPanel);
+          $el.toggleClass('only-spy', Boolean($scope.fullScreenSpyPanel));
+          if ($spyEl) $spyEl.toggleClass('only', Boolean($scope.fullScreenSpyPanel));
         };
 
         // we need to wait for some watchers to fire at least once
