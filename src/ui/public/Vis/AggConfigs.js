@@ -81,7 +81,11 @@ define(function (require) {
 
         if (subAggs && nestedMetrics) {
           nestedMetrics.forEach(function (agg) {
-            agg.toDslNested(subAggs);
+            if (typeof agg === AggConfig) {
+              agg.toDslNested(subAggs);
+            } else {
+              subAggs[agg.config.id] = agg.dsl;
+            }
           });
         }
 
