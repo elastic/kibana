@@ -34,61 +34,61 @@ describe('kibana cli', function () {
       rimraf.sync(testWorkingPath);
     });
 
-    describe('kill everything', function () {
-      beforeEach(function () {
-        var settings = {
-          urls: [],
-          workingPath: testWorkingPath,
-          tempArchiveFile: tempArchiveFilePath,
-          timeout: 0
-        };
-        downloader = pluginDownloader(settings, logger);
-      });
+    // describe('kill everything', function () {
+    //   beforeEach(function () {
+    //     var settings = {
+    //       urls: [],
+    //       workingPath: testWorkingPath,
+    //       tempArchiveFile: tempArchiveFilePath,
+    //       timeout: 0
+    //     };
+    //     downloader = pluginDownloader(settings, logger);
+    //   });
 
-      for (var i=0;i<10000;i++) {
+    //   for (var i=0;i<10000;i++) {
 
-        it(`[${i}] should throw an error when it doesn't find a good url.`, function () {
-          //this.timeout(5000);
-          var settings = {
-            urls: [
-              'http://www.files.com/badfile1.tar.gz',
-              'http://www.files.com/badfile2.tar.gz',
-              'http://www.files.com/badfile3.tar.gz'
-            ],
-            workingPath: testWorkingPath,
-            tempArchiveFile: tempArchiveFilePath,
-            timeout: 0
-          };
-          downloader = pluginDownloader(settings, logger);
+    //     it(`[${i}] should throw an error when it doesn't find a good url.`, function () {
+    //       //this.timeout(5000);
+    //       var settings = {
+    //         urls: [
+    //           'http://www.files.com/badfile1.tar.gz',
+    //           'http://www.files.com/badfile2.tar.gz',
+    //           'http://www.files.com/badfile3.tar.gz'
+    //         ],
+    //         workingPath: testWorkingPath,
+    //         tempArchiveFile: tempArchiveFilePath,
+    //         timeout: 0
+    //       };
+    //       downloader = pluginDownloader(settings, logger);
 
-          var couchdb = nock('http://www.files.com')
-          .defaultReplyHeaders({
-            'content-length': '10'
-          })
-          .get('/badfile1.tar.gz')
-          .reply(404)
-          .get('/badfile2.tar.gz')
-          .reply(404)
-          .get('/badfile3.tar.gz')
-          .reply(404);
+    //       var couchdb = nock('http://www.files.com')
+    //       .defaultReplyHeaders({
+    //         'content-length': '10'
+    //       })
+    //       .get('/badfile1.tar.gz')
+    //       .reply(404)
+    //       .get('/badfile2.tar.gz')
+    //       .reply(404)
+    //       .get('/badfile3.tar.gz')
+    //       .reply(404);
 
-          var errorStub = sinon.stub();
-          return downloader.download(settings, logger)
-          .catch(errorStub)
-          .then(function (data) {
-            expect(errorStub.called).to.be(true);
-            expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
+    //       var errorStub = sinon.stub();
+    //       return downloader.download(settings, logger)
+    //       .catch(errorStub)
+    //       .then(function (data) {
+    //         expect(errorStub.called).to.be(true);
+    //         expect(errorStub.lastCall.args[0].message).to.match(/no valid url specified/i);
 
-            var files = glob.sync('**/*', { cwd: testWorkingPath });
-            expect(files).to.eql([]);
-          });
-        });
+    //         var files = glob.sync('**/*', { cwd: testWorkingPath });
+    //         expect(files).to.eql([]);
+    //       });
+    //     });
 
-      }
+    //   }
 
-    });
+    // });
 
-    describe.skip('_downloadSingle', function () {
+    describe('_downloadSingle', function () {
 
       beforeEach(function () {
         var settings = {

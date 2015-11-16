@@ -4,7 +4,7 @@ const urlParse = require('url').parse;
 const fs = require('fs');
 const request = require('request');
 const progressReporter = require('./progressReporter');
-const downloadHttpFile = require('./downloaders/http2');
+const downloadHttpFile = require('./downloaders/http_spencer');
 const downloadLocalFile = require('./downloaders/file');
 
 module.exports = function (settings, logger) {
