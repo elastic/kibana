@@ -17,7 +17,7 @@ describe('xsrf request filter', function () {
     });
   }
 
-  async function makeServer(token) {
+  const makeServer = async function (token) {
     const kbnServer = new KbnServer({
       server: { autoListen: false, xsrf: { token } },
       plugins: { scanDirs: [src('plugins')] },
@@ -36,7 +36,7 @@ describe('xsrf request filter', function () {
     });
 
     return kbnServer;
-  }
+  };
 
   describe('issuing tokens', function () {
     const token = 'secur3';
