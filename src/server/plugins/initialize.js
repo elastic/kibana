@@ -19,7 +19,7 @@ module.exports = async function (kbnServer, server, config) {
 
 
   let path = [];
-  async function initialize(id) {
+  const initialize = async function (id) {
     let plugin = plugins.byId[id];
 
     if (includes(path, id)) {

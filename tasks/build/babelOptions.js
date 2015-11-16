@@ -8,6 +8,7 @@ module.exports = function (grunt) {
   grunt.registerTask('_build:babelOptions', function () {
     unlink(srcFile);
     rename(buildFile, srcFile);
+    grunt.file.mkdir('build/kibana/optimize');
   });
 
 };

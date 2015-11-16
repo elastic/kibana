@@ -173,7 +173,7 @@
     "npm": "2.11.0",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
-    "sinon": "1.16.1",
+    "sinon": "1.17.2",
     "source-map": "0.4.4",
     "wreck": "6.2.0"
   },
