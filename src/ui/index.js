@@ -69,7 +69,7 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   server.decorate('reply', 'renderApp', function (app) {
-    let payload = {
+    const payload = {
       app: app,
       nav: uiExports.apps,
       version: kbnServer.version,
@@ -77,6 +77,7 @@ module.exports = async (kbnServer, server, config) => {
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
       vars: defaults(app.getInjectedVars(), defaultInjectedVars),
+      xsrfToken: this.issueXsrfToken(),
     };
 
     return this.view(app.templateName, {
