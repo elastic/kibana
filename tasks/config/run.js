@@ -34,6 +34,7 @@ module.exports = function (grunt) {
       cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
       args: [
         '--server.port=' + uiConfig.servers.kibana.port,
+        '--server.xsrf.disableProtection=true',
         '--optimize.enabled=false',
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
         '--logging.json=false'
