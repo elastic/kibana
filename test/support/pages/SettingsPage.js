@@ -126,17 +126,8 @@ define(function (require) {
       var self = this;
       var selector = 'li.kbn-settings-tab.active a small';
 
-      var getText = function () {
-        return self.remote.setFindTimeout(defaultTimeout)
-        .findByCssSelector(selector).getVisibleText();
-      };
-
-      return common.tryForTime(defaultTimeout, function () {
-        return getText();
-      })
-      .then(function () {
-        return getText();
-      })
+      return self.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector(selector).getVisibleText()
       .then(function (theText) {
         // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
