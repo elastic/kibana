@@ -53,22 +53,6 @@ define(function (require) {
       })
       .then(function () {
         return self.getTimeFieldOption(selection);
-      })
-      // DEBUGGING
-      .catch(function (err) {
-        common.debug('selectTimeFieldOption: FAILED to create index pattern');
-        return common.checkForKibanaApp()
-        .then(function (onKibana) {
-          common.debug('onKibana');
-          common.debug(onKibana);
-        })
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (url) {
-          common.debug('FAILED on url ' + url);
-          throw err;
-        });
       });
     },
 
@@ -142,17 +126,8 @@ define(function (require) {
       var self = this;
       var selector = 'li.kbn-settings-tab.active a small';
 
-      var getText = function () {
-        return self.remote.setFindTimeout(defaultTimeout)
-        .findByCssSelector(selector).getVisibleText();
-      };
-
-      return common.tryForTime(defaultTimeout * 4, function () {
-        return getText();
-      })
-      .then(function () {
-        return getText();
-      })
+      return self.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector(selector).getVisibleText()
       .then(function (theText) {
         // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
@@ -275,22 +250,6 @@ define(function (require) {
               throw new Error('Index pattern not created');
             }
           });
-        });
-      })
-      // DEBUGGING
-      .catch(function (err) {
-        common.debug('createIndexPattern: FAILED to create index pattern');
-        return common.checkForKibanaApp()
-        .then(function (onKibana) {
-          common.debug('onKibana');
-          common.debug(onKibana);
-        })
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (url) {
-          common.debug('FAILED on url ' + url);
-          throw err;
         });
       });
     },
