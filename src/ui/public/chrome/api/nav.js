@@ -1,12 +1,37 @@
-module.exports = function (chrome, internals) {
-  const { startsWith } = require('lodash');
+const { startsWith, isString } = require('lodash');
+import { parse, format } from 'url';
 
+export default function (chrome, internals) {
   chrome.getNavLinks = function () {
     return internals.nav;
   };
 
   chrome.getLastSubUrlFor = function (url) {
     return internals.appUrlStore.getItem(`lastSubUrl:${url}`);
+  };
+
+  chrome.getBasePath = function () {
+    return internals.basePath || '';
+  };
+
+  chrome.addBasePath = function (url) {
+    var isUrl = url && isString(url);
+    if (!isUrl) return url;
+
+    var parsed = parse(url);
+    if (!parsed.host && parsed.pathname) {
+      if (parsed.pathname[0] === '/') {
+        parsed.pathname = chrome.getBasePath() + parsed.pathname;
+      }
+    }
+
+    return format({
+      protocol: parsed.protocol,
+      host: parsed.host,
+      pathname: parsed.pathname,
+      query: parsed.query,
+      hash: parsed.hash,
+    });
   };
 
   internals.trackPossibleSubUrl = function (url) {
