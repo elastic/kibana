@@ -24,5 +24,16 @@ define(function (require) {
       });
 
     });
+
+    bdd.describe('POST index-patterns', function postIndexPatterns() {
+
+      bdd.it('missing payload should return 400', function missingPayload() {
+        return request.post('/index-patterns')
+          .send({})
+          .expect(400);
+      });
+
+    });
+
   });
 });

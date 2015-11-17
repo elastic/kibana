@@ -96,6 +96,8 @@ export default function (server) {
     path: '/api/index-patterns',
     method: 'POST',
     handler: function (req, reply) {
+      if (_.isEmpty(req.payload)) { reply(Boom.badRequest('Payload required')); }
+
       const client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
       const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
