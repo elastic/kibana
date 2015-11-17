@@ -23,8 +23,10 @@ define(function (require) {
 
     var mapping = mappingSetup.expandShorthand({
       title: 'string',
+      indexName: 'string',
       timeFieldName: 'string',
       intervalName: 'string',
+      nestedPath: 'string',
       fields: 'json',
       fieldFormatMap: {
         type: 'string',
@@ -182,12 +184,12 @@ define(function (require) {
           var interval = self.getInterval();
 
           if (interval) {
-            indexList = intervals.toIndexList(self.id, interval, start, stop);
+            indexList = intervals.toIndexList(self.indexName, interval, start, stop);
             if (sortDirection === 'desc') indexList = indexList.reverse();
           } else if (self.isWildcard() && self.hasTimeField()) {
-            indexList = calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
+            indexList = calculateIndices(self.indexName, self.timeFieldName, start, stop, sortDirection);
           } else {
-            indexList = self.id;
+            indexList = self.indexName;
           }
 
           resolve(indexList);
@@ -228,6 +230,7 @@ define(function (require) {
 
       self.create = function () {
         var body = self.prepBody();
+        docSource._state.id = body.title;
         return docSource.doCreate(body)
         .then(setId)
         .catch(function (err) {
@@ -241,6 +244,7 @@ define(function (require) {
 
       self.save = function () {
         var body = self.prepBody();
+        docSource._state.id = body.title;
         return docSource.doIndex(body).then(setId);
       };
 

@@ -36,8 +36,12 @@ define(function (require) {
           docFetchProm = doc.fetch();
         } else {
           // we already know what the response will be
+          var id = body.title;
+          if (body.timeFieldName !== undefined) {
+            id = body.title + '(' + body.timeFieldName + ')';
+          }
           docFetchProm = Promise.resolve({
-            _id: resp._id,
+            _id: id,
             _index: params.index,
             _source: body,
             _type: params.type,
