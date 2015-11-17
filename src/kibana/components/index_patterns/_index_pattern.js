@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, Notifier, config, Promise, $rootScope) {
+  return function IndexPatternFactory(Private, timefilter, Notifier, config, Promise, $rootScope, safeConfirm) {
     var _ = require('lodash');
     var errors = require('errors');
     var angular = require('angular');
@@ -213,9 +213,15 @@ define(function (require) {
         return docSource.doCreate(body)
         .then(setId)
         .catch(function (err) {
-          var confirmMessage = 'Are you sure you want to overwrite this?';
-          if (_.deepGet(err, 'origError.status') === 409 && window.confirm(confirmMessage)) {
-            return docSource.doIndex(body).then(setId);
+          if (_.deepGet(err, 'origError.status') === 409) {
+            var confirmMessage = 'Are you sure you want to overwrite this?';
+
+            return safeConfirm(confirmMessage).then(
+              function () {
+                return docSource.doIndex(body).then(setId);
+              },
+              _.constant(false) // if the user doesn't overwrite, resolve with false
+            );
           }
           return Promise.resolve(false);
         });
