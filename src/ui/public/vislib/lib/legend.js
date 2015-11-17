@@ -28,7 +28,7 @@ define(function (require) {
       this.events = new Dispatch();
       this.vis = vis;
       this.el = vis.el;
-      this.color = color(labelsArray);
+      this.color = color(labelsArray, vis.uiState.get('vis.colors'));
       this._attr = _.defaults({}, vis._attr || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,

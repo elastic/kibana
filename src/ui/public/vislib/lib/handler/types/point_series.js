@@ -22,9 +22,9 @@ define(function (require) {
         var data;
 
         if (opts.zeroFill) {
-          data = new Data(injectZeros(vis.data), vis._attr);
+          data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);
         } else {
-          data = new Data(vis.data, vis._attr);
+          data = new Data(vis.data, vis._attr, vis.uiState);
         }
 
         return new Handler(vis, {
