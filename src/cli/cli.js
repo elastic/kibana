@@ -1,5 +1,8 @@
 let _ = require('lodash');
-let heapdump = require('heapdump');
+
+if (process.platform !== 'win32') {
+  let heapdump = require('heapdump');
+}
 
 let utils = require('requirefrom')('src/utils');
 let pkg = utils('packageJson');
