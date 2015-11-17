@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.2.1-snapshot",
+  "version": "4.2.1",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -167,7 +167,7 @@
     "npm": "2.11.0",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
-    "sinon": "1.16.1",
+    "sinon": "1.17.2",
     "source-map": "0.4.4",
     "wreck": "6.2.0"
   },
