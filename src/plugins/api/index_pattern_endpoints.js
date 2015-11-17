@@ -96,7 +96,7 @@ export default function (server) {
     path: '/api/index-patterns',
     method: 'POST',
     handler: function (req, reply) {
-      if (_.isEmpty(req.payload)) { reply(Boom.badRequest('Payload required')); }
+      if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
 
       const client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);

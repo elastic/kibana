@@ -27,7 +27,7 @@ define(function (require) {
 
     bdd.describe('POST index-patterns', function postIndexPatterns() {
 
-      bdd.it('missing payload should return 400', function missingPayload() {
+      bdd.it('should return 400 for a missing payload', function missingPayload() {
         return request.post('/index-patterns')
           .send({})
           .expect(400);
