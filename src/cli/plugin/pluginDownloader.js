@@ -5,7 +5,7 @@ const fs = require('fs');
 const request = require('request');
 const progressReporter = require('./progressReporter');
 const downloadHttpFile = require('./downloaders/http_spencer');
-const downloadLocalFile = require('./downloaders/file');
+const downloadLocalFile = require('./downloaders/file_spencer');
 
 module.exports = function (settings, logger) {
   let archiveType;

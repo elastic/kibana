@@ -23,35 +23,61 @@ function sendRequest({ sourceUrl, timeout }) {
   });
 }
 
-async function downloadResponse(resp, targetPath, progressReporter) {
-  const writeStream = createWriteStream(targetPath);
-  const writeClosed = fn(cb => writeStream.on('close', cb));
+// async function downloadResponse({ resp, targetPath, progressReporter }) {
+//   const writeStream = createWriteStream(targetPath);
+//   const writeClosed = fn(cb => writeStream.on('close', cb));
 
-  try {
-    await new Promise((resolve, reject) => {
-      // if either stream errors, fail quickly
-      resp.on('error', reject);
-      writeStream.on('error', reject);
+//   try {
+//     await new Promise((resolve, reject) => {
+//       // if either stream errors, fail quickly
+//       resp.on('error', reject);
+//       writeStream.on('error', reject);
 
-      // report progress as we download
-      resp.on('data', (chunk) => {
-        progressReporter.progress(chunk.length);
-      });
+//       // report progress as we download
+//       resp.on('data', (chunk) => {
+//         progressReporter.progress(chunk.length);
+//       });
 
-      // write the download to the file system
-      resp.pipe(writeStream);
+//       // write the download to the file system
+//       resp.pipe(writeStream);
 
-      // when the write is done, we are done
-      writeStream.on('close', resolve);
+//       // when the write is done, we are done
+//       writeStream.on('close', resolve);
+//     });
+//   } catch (err) {
+//     // once the writeStream is closed, remove the file
+//     // it wrote and rethrow the error
+//     writeStream.close();
+//     await writeClosed;
+//     unlinkSync(targetPath);
+//     throw err;
+//   }
+// }
+//
+
+function createWS(targetPath) {
+  return createWriteStream(targetPath);
+}
+
+function downloadResponse({ resp, targetPath, progressReporter }) {
+  return new Promise((resolve, reject) => {
+    const writeStream = createWS(targetPath);
+
+    // if either stream errors, fail quickly
+    resp.on('error', reject);
+    writeStream.on('error', reject);
+
+    // report progress as we download
+    resp.on('data', (chunk) => {
+      progressReporter.progress(chunk.length);
     });
-  } catch (err) {
-    // once the writeStream is closed, remove the file
-    // it wrote and rethrow the error
-    writeStream.close();
-    await writeClosed;
-    unlinkSync(targetPath);
-    throw err;
-  }
+
+    // write the download to the file system
+    resp.pipe(writeStream);
+
+    // when the write is done, we are done
+    writeStream.on('close', resolve);
+  });
 }
 
 function getArchiveTypeFromResponse(resp) {
@@ -66,16 +92,16 @@ function getArchiveTypeFromResponse(resp) {
 Responsible for managing http transfers
 */
 export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
-  console.log(`downloading '${sourceUrl}`);
+  //console.log(`downloading '${sourceUrl}`);
   try {
-    const { req, resp } = await sendRequest({ sourceUrl, timeout});
+    const { req, resp } = await sendRequest({ sourceUrl, timeout });
 
     try {
       let totalSize = parseFloat(resp.headers['content-length']) || 0;
       const progressReporter = getProgressReporter(logger);
       progressReporter.init(totalSize);
 
-      await downloadResponse(resp, targetPath, progressReporter);
+      await downloadResponse({ resp, targetPath, progressReporter });
     } catch (err) {
       req.abort();
       throw err;
