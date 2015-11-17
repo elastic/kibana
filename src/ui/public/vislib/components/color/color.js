@@ -10,7 +10,8 @@ define(function (require) {
      * and returns a hex color associated with that value.
      */
 
-    return function (arrayOfStringsOrNumbers) {
+    return function (arrayOfStringsOrNumbers, colorMapping) {
+      colorMapping = colorMapping || {};
       if (!_.isArray(arrayOfStringsOrNumbers)) {
         throw new Error('ColorUtil expects an array');
       }
@@ -24,7 +25,7 @@ define(function (require) {
       mappedColors.mapKeys(arrayOfStringsOrNumbers);
 
       return function (value) {
-        return mappedColors.get(value);
+        return colorMapping[value] || mappedColors.get(value);
       };
     };
   };

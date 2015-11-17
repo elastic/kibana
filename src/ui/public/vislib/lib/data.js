@@ -18,10 +18,12 @@ define(function (require) {
      * @param data {Object} Elasticsearch query results
      * @param attr {Object|*} Visualization options
      */
-    function Data(data, attr) {
+    function Data(data, attr, uiState) {
       if (!(this instanceof Data)) {
-        return new Data(data, attr);
+        return new Data(data, attr, uiState);
       }
+
+      this.uiState = uiState;
 
       var self = this;
       var offset;
@@ -646,7 +648,7 @@ define(function (require) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     Data.prototype.getColorFunc = function () {
-      return color(this.getLabels());
+      return color(this.getLabels(), this.uiState.get('vis.colors'));
     };
 
     /**
@@ -658,7 +660,7 @@ define(function (require) {
     Data.prototype.getPieColorFunc = function () {
       return color(this.pieNames(this.getVisData()).map(function (d) {
         return d.label;
-      }));
+      }), this.uiState.get('vis.colors'));
     };
 
     /**

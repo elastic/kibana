@@ -6,7 +6,7 @@ define(function (require) {
     var Data = Private(require('ui/vislib/lib/data'));
 
     return function (vis) {
-      var data = new Data(vis.data, vis._attr);
+      var data = new Data(vis.data, vis._attr, vis.uiState);
 
       var MapHandler = new Handler(vis, {
         data: data

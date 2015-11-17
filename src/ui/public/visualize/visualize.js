@@ -113,7 +113,7 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {

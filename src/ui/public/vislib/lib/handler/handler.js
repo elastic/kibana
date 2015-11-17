@@ -23,7 +23,7 @@ define(function (require) {
         return new Handler(vis, opts);
       }
 
-      this.data = opts.data || new Data(vis.data, vis._attr);
+      this.data = opts.data || new Data(vis.data, vis._attr, vis.uiState);
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;

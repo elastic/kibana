@@ -25,8 +25,8 @@ define(function (require) {
       this.listeners = opts.listeners || {};
     }
 
-    VislibVisType.prototype.createRenderbot = function (vis, $el) {
-      return new VislibRenderbot(vis, $el);
+    VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
+      return new VislibRenderbot(vis, $el, uiState);
     };
 
     return VislibVisType;

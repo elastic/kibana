@@ -4,8 +4,8 @@ define(function (require) {
     var Renderbot = Private(require('ui/Vis/Renderbot'));
 
     _.class(TemplateRenderbot).inherits(Renderbot);
-    function TemplateRenderbot(vis, $el) {
-      TemplateRenderbot.Super.call(this, vis, $el);
+    function TemplateRenderbot(vis, $el, uiState) {
+      TemplateRenderbot.Super.call(this, vis, $el, uiState);
 
       this.$scope = $rootScope.$new();
       this.$scope.vis = vis;
