@@ -44,7 +44,9 @@ define(function (require) {
         // set both the id and title to the index index
         indexPattern.id = indexPattern.title = index.name;
         if (index.isTimeBased) {
+          indexPattern.id = indexPattern.title = index.name + '(' + index.timeField.name + ')';
           indexPattern.timeFieldName = index.timeField.name;
+          indexPattern.indexName = index.name;
           if (index.nameIsPattern) {
             indexPattern.intervalName = index.nameInterval.name;
           }
