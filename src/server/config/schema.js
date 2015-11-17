@@ -30,7 +30,7 @@ module.exports = () => Joi.object({
     port: Joi.number().default(5601),
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string(),
-    basePath: Joi.string().default('').allow('').regex(/[^\/]$/, 'no trailing slashes'),
+    basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
       cert: Joi.string(),
       key: Joi.string()
