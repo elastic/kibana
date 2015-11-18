@@ -47,7 +47,85 @@ define(function (require) {
     clickSettings: function () {
       common.debug('click Settings tab');
       this.clickSelector('a[href*=\'settings\']');
+    },
+
+    clickTimepicker: function clickTimepicker() {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByClassName('navbar-timepicker-time-desc').click();
+    },
+
+    clickAbsoluteButton: function clickAbsoluteButton() {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByLinkText('Absolute').click();
+    },
+
+    setFromTime: function setFromTime(timeString) {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector('input[ng-model=\'absolute.from\']')
+      .clearValue()
+      .type(timeString);
+    },
+
+    setToTime: function setToTime(timeString) {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector('input[ng-model=\'absolute.to\']')
+      .clearValue()
+      .type(timeString);
+    },
+
+    clickGoButton: function clickGoButton() {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByClassName('kbn-timepicker-go')
+      .click();
+    },
+
+
+    setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
+      var self = this;
+      common.debug('--Clicking Absolute button');
+      return self.clickAbsoluteButton()
+      .then(function () {
+        common.debug('--Setting From Time : ' + fromTime);
+        return self.setFromTime(fromTime);
+      })
+      .then(function () {
+        common.debug('--Setting To Time : ' + toTime);
+        return self.setToTime(toTime);
+      })
+      .then(function () {
+        return self.clickGoButton();
+      });
+    },
+
+    collapseTimepicker: function collapseTimepicker() {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector('.fa.fa-chevron-up')
+      .click();
+    },
+
+    getToastMessage: function getToastMessage() {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      .getVisibleText();
+    },
+
+    waitForToastMessageGone: function waitForToastMessageGone() {
+      var self = this;
+      return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
+        return self.remote.setFindTimeout(1000)
+        .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+        .then(function toastMessage(messages) {
+          if (messages.length > 0) {
+            throw new Error('waiting for toast message to clear');
+          } else {
+            common.debug('now messages = 0 "' + messages + '"');
+            return messages;
+          }
+        });
+      });
     }
+
+
   };
 
   return HeaderPage;

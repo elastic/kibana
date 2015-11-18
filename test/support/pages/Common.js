@@ -127,12 +127,13 @@ define(function (require) {
       var start = Date.now();
       var retryDelay = 500;
       var lastTry = 0;
+      var tempMessage;
 
       function attempt() {
         lastTry = Date.now();
 
         if (lastTry - start > timeout) {
-          throw new Error('timeout');
+          throw new Error('timeout ' + tempMessage);
         }
 
         return Promise
@@ -143,6 +144,7 @@ define(function (require) {
         })
         .catch(function tryForTimeCatch(err) {
           self.debug('tryForTime failure, retry in ' + retryDelay + 'ms - ' + err.message);
+          tempMessage = err.message;
           return Promise.delay(retryDelay).then(attempt);
         });
       }
@@ -185,7 +187,7 @@ define(function (require) {
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
         var filepath = path.resolve(outDir, filename);
-        self.debug('Test Failed, taking screenshot "' + filepath + '"');
+        self.debug('Taking screenshot "' + filepath + '"');
         fs.writeFileSync(filepath, data);
       })
       .catch(function (err) {
