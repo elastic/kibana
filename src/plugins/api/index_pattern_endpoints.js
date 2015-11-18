@@ -1,11 +1,13 @@
 const esErrors = require('elasticsearch').errors;
 const Boom = require('Boom');
+const Joi = require('Joi');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const getMappings = require('./lib/get_mappings');
 const stitchPatternAndMappings = require('./lib/stitch_pattern_and_mappings');
 const {templateToPattern, patternToTemplate} = require('./lib/convert_pattern_and_template_name');
 const removeDeprecatedFieldProps = require('./lib/remove_deprecated_field_props');
+const indexPatternSchema = require('./lib/schemas/index_pattern_schema');
 
 export default function (server) {
 
@@ -97,6 +99,10 @@ export default function (server) {
     method: 'POST',
     handler: function (req, reply) {
       if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
+      const validation = Joi.validate(req.payload, indexPatternSchema);
+      if (validation.error) {
+        return reply(Boom.badRequest(validation.error));
+      }
 
       const client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
