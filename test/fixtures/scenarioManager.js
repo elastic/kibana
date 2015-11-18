@@ -68,6 +68,7 @@ ScenarioManager.prototype.unload = function (id) {
     if (reason.message.indexOf('index_not_found_exception') < 0) {
       console.log('reason.message: ' + reason.message);
       throw reason;
+    }
   });
 };
 
