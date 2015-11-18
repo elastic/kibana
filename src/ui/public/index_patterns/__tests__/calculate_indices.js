@@ -72,6 +72,9 @@ describe('ui/index_patterns/_calculate_indices', () => {
       it('max_value is set to original if not a moment object', () => {
         expect(constraints['@something'].max_value.gte).to.equal('1234567890');
       });
+      it('max_value format is set to epoch_millis', () => {
+        expect(constraints['@something'].max_value.format).to.equal('epoch_millis');
+      });
       it('max_value is set to moment.valueOf if given a moment object', () => {
         const start = moment();
         run({ start });
@@ -89,6 +92,9 @@ describe('ui/index_patterns/_calculate_indices', () => {
       });
       it('min_value is set to original if not a moment object', () => {
         expect(constraints['@something'].min_value.lte).to.equal('1234567890');
+      });
+      it('min_value format is set to epoch_millis', () => {
+        expect(constraints['@something'].min_value.format).to.equal('epoch_millis');
       });
       it('max_value is set to moment.valueOf if given a moment object', () => {
         const stop = moment();

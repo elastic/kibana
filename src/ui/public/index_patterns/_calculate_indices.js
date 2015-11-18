@@ -7,6 +7,14 @@ define(function (require) {
     return moment.isMoment(val) ? val.valueOf() : val;
   }
 
+  // returns a properly formatted millisecond timestamp index constraint
+  function msConstraint(comparison, value) {
+    return {
+      [comparison]: timeValue(value),
+      format: 'epoch_millis'
+    };
+  }
+
   return function CalculateIndicesFactory(Promise, es) {
 
     // Uses the field stats api to determine the names of indices that need to
@@ -22,10 +30,10 @@ define(function (require) {
     function getFieldStats(pattern, timeFieldName, start, stop) {
       const constraints = {};
       if (start) {
-        constraints.max_value = { gte: timeValue(start) };
+        constraints.max_value = msConstraint('gte', start);
       }
       if (stop) {
-        constraints.min_value = { lte: timeValue(stop) };
+        constraints.min_value = msConstraint('lte', stop);
       }
 
       return es.fieldStats({
