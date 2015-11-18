@@ -1,4 +1,4 @@
-module.exports = function (settings) {
+export default function createPluginLogger(settings) {
   let previousLineEnded = true;
   const silent = !!settings.silent;
   const quiet = !!settings.quiet;

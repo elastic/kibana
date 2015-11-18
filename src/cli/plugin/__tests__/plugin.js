@@ -1,10 +1,6 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-
-var plugin = require('../plugin');
-var installer = require('../pluginInstaller');
-var remover = require('../pluginRemover');
-var settingParser = require('../settingParser');
+const expect = require('expect.js');
+const sinon = require('sinon');
+const plugin = require('../plugin');
 
 describe('kibana cli', function () {
 
@@ -12,7 +8,7 @@ describe('kibana cli', function () {
 
     describe('commander options', function () {
 
-      var program = {
+      let program = {
         command: function () { return program; },
         description: function () { return program; },
         option: function () { return program; },
@@ -38,9 +34,9 @@ describe('kibana cli', function () {
       });
 
       it('should define the command line options', function () {
-        var spy = sinon.spy(program, 'option');
+        const spy = sinon.spy(program, 'option');
 
-        var options = [
+        const options = [
           /-i/,
           /-r/,
           /-s/,
@@ -50,10 +46,10 @@ describe('kibana cli', function () {
 
         plugin(program);
 
-        for (var i = 0; i < spy.callCount; i++) {
-          var call = spy.getCall(i);
-          for (var o = 0; o < options.length; o++) {
-            var option = options[o];
+        for (let i = 0; i < spy.callCount; i++) {
+          const call = spy.getCall(i);
+          for (let o = 0; o < options.length; o++) {
+            const option = options[o];
             if (call.args[0].match(option)) {
               options.splice(o, 1);
               break;

@@ -1,12 +1,11 @@
 const utils = require('requirefrom')('src/utils');
 const fromRoot = utils('fromRoot');
-
 const settingParser = require('./settingParser');
 const installer = require('./pluginInstaller');
 const remover = require('./pluginRemover');
 const pluginLogger = require('./pluginLogger');
 
-module.exports = function (program) {
+export default function pluginCli(program) {
   function processCommand(command, options) {
     let settings;
     try {

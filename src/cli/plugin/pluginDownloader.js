@@ -1,13 +1,9 @@
 const _ = require('lodash');
-const Promise = require('bluebird');
 const urlParse = require('url').parse;
-const fs = require('fs');
-const request = require('request');
-const progressReporter = require('./progressReporter');
-const downloadHttpFile = require('./downloaders/http_spencer');
-const downloadLocalFile = require('./downloaders/file_spencer');
+const downloadHttpFile = require('./downloaders/http');
+const downloadLocalFile = require('./downloaders/file');
 
-module.exports = function (settings, logger) {
+export default function createPluginDownloader(settings, logger) {
   let archiveType;
   let sourceType;
 
@@ -17,7 +13,6 @@ module.exports = function (settings, logger) {
 
     function tryNext() {
       const sourceUrl = urls.shift();
-      //console.log('tryNext', sourceUrl);
       if (!sourceUrl) {
         throw new Error('No valid url specified.');
       }
@@ -26,7 +21,6 @@ module.exports = function (settings, logger) {
 
       return downloadSingle(sourceUrl)
       .catch((err) => {
-        //console.log('download error handler', err);
         if (err.message === 'ENOTFOUND') {
           return tryNext();
         }
@@ -38,15 +32,12 @@ module.exports = function (settings, logger) {
   }
 
   function downloadSingle(sourceUrl) {
-    //console.log('downloadSingle', sourceUrl);
     const urlInfo = urlParse(sourceUrl);
     let downloadPromise;
 
     if (/^file/.test(urlInfo.protocol)) {
-      //console.log('calling downloadLocalFile');
       downloadPromise = downloadLocalFile(logger, urlInfo.path, settings.tempArchiveFile);
     } else {
-      //console.log('calling downloadHttpFile');
       downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
     }
 

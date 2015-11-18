@@ -11,7 +11,7 @@ const Promise = require('bluebird');
 const rimraf = require('rimraf');
 const mkdirp = Promise.promisify(require('mkdirp'));
 
-module.exports = {
+export default {
   install: install
 };
 
@@ -37,7 +37,7 @@ function install(settings, logger) {
   .then(() => {
     return downloader.download();
   })
-  .then((archiveType) => {
+  .then(({ archiveType }) => {
     return pluginExtractor (settings, logger, archiveType);
   })
   .then(async function() {

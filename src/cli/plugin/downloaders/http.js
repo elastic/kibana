@@ -1,95 +1,85 @@
-const Promise = require('bluebird');
-const fs = require('fs');
-const _ = require('lodash');
-const request = require('request');
+const { fromNode: fn } = require('bluebird');
+const { createWriteStream, unlinkSync } = require('fs');
+const Wreck = require('wreck');
 const getProgressReporter = require('../progressReporter');
+
+function sendRequest({ sourceUrl, timeout }) {
+  const maxRedirects = 11; //Because this one goes to 11.
+  return fn(cb => {
+    const req = Wreck.request('GET', sourceUrl, { timeout, redirects: maxRedirects }, (err, resp) => {
+      if (err) {
+        if (err.code === 'ECONNREFUSED') {
+          err = new Error('ENOTFOUND');
+        }
+
+        return cb(err);
+      }
+
+      if (resp.statusCode >= 400) {
+        return cb(new Error('ENOTFOUND'));
+      }
+
+      cb(null, { req, resp });
+    });
+  });
+}
+
+function downloadResponse({ resp, targetPath, progressReporter }) {
+  return new Promise((resolve, reject) => {
+    const writeStream = createWriteStream(targetPath);
+
+    // if either stream errors, fail quickly
+    resp.on('error', reject);
+    writeStream.on('error', reject);
+
+    // report progress as we download
+    resp.on('data', (chunk) => {
+      progressReporter.progress(chunk.length);
+    });
+
+    // write the download to the file system
+    resp.pipe(writeStream);
+
+    // when the write is done, we are done
+    writeStream.on('finish', resolve);
+  });
+}
+
+function getArchiveTypeFromResponse(resp) {
+  const contentType = (resp.headers['content-type'] || '');
+  switch (contentType.toLowerCase()) {
+    case 'application/zip': return '.zip';
+    case 'application/x-gzip': return '.tar.gz';
+  }
+}
 
 /*
 Responsible for managing http transfers
 */
-module.exports = function (logger, sourceUrl, targetPath, timeout) {
-  let _archiveType;
-  let _readStream;
-  let _error;
-  let _progressReporter = getProgressReporter(logger);
-
-  return new Promise(function (resolve, reject) {
-    let requestOptions = { url: sourceUrl };
-    if (timeout !== 0) {
-      requestOptions.timeout = timeout;
-    }
+export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
+  try {
+    const { req, resp } = await sendRequest({ sourceUrl, timeout });
 
     try {
-      request.get(requestOptions)
-      .on('response', handleResponse)
-      .on('data', handleData)
-      .on('error', _.partial(handleError, false, 'ENOTFOUND'));
+      let totalSize = parseFloat(resp.headers['content-length']) || 0;
+      const progressReporter = getProgressReporter(logger);
+      progressReporter.init(totalSize);
+
+      await downloadResponse({ resp, targetPath, progressReporter });
+
+      progressReporter.complete();
     } catch (err) {
-      if (err.message.match(/invalid uri/i)) {
-        handleError(true, 'ENOTFOUND');
-        return;
-      }
-      handleError(true, null, err);
+      req.abort();
+      throw err;
     }
 
-    function handleResponse(resp) {
-      _readStream = resp;
-
-      if (resp.statusCode >= 400) {
-        handleError(true, 'ENOTFOUND');
-      } else {
-        _archiveType = getArchiveTypeFromResponse(resp.headers['content-type']);
-        let totalSize = parseInt(resp.headers['content-length'], 10) || 0;
-
-        //Note: no progress is logged if the plugin is downloaded in a single packet
-        _progressReporter.init(totalSize);
-
-        let writeStream = fs.createWriteStream(targetPath)
-        .on('error', _.partial(handleError, false, null))
-        .on('finish', handleFinish);
-
-        _readStream.pipe(writeStream);
-      }
+    // all is well, return our archive type
+    const archiveType = getArchiveTypeFromResponse(resp);
+    return { archiveType };
+  } catch (err) {
+    if (err.message !== 'ENOTFOUND') {
+      logger.error(err);
     }
-
-    function handleError(finish, errorMessage, err) {
-      if (_error) return;
-
-      _error = err;
-      if (errorMessage) _error = new Error(errorMessage);
-
-      if (err) logger.error(err);
-      if (_readStream && _readStream.abort) _readStream.abort();
-      if (finish) handleFinish();
-    }
-
-    function handleFinish() {
-      if (_error) {
-        reject(_error);
-      } else {
-        logger.log('Transfer complete');
-        resolve({
-          archiveType: _archiveType
-        });
-      }
-    }
-
-    function handleData(buffer) {
-      if (_error) return;
-      _progressReporter.progress(buffer.length);
-    }
-
-    function getArchiveTypeFromResponse(contentType) {
-      contentType = contentType || '';
-
-      switch (contentType.toLowerCase()) {
-        case 'application/zip':
-          return '.zip';
-          break;
-        case 'application/x-gzip':
-          return '.tar.gz';
-          break;
-      }
-    }
-  });
+    throw err;
+  }
 };

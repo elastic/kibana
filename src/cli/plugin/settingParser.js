@@ -1,7 +1,7 @@
 const { resolve } = require('path');
 const expiry = require('expiry-js');
 
-module.exports = function (options) {
+export default function createSettingParser(options) {
   function parseMilliseconds(val) {
     let result;
 

@@ -1,7 +1,7 @@
 const zipExtract = require('./extractors/zip');
 const tarGzExtract = require('./extractors/tarGz');
 
-module.exports = function (settings, logger, archiveType) {
+export default function extractArchive(settings, logger, archiveType) {
   switch (archiveType) {
     case '.zip':
       return zipExtract(settings, logger);

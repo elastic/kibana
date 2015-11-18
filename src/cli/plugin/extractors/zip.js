@@ -1,21 +1,10 @@
-const Promise = require('bluebird');
 const DecompressZip = require('@bigfunger/decompress-zip');
 
-module.exports = function (settings, logger) {
-  return new Promise(function (resolve, reject) {
-    logger.log('Extracting plugin archive');
-
+async function extractArchive(settings) {
+  await new Promise((resolve, reject) => {
     const unzipper = new DecompressZip(settings.tempArchiveFile);
 
-    unzipper.on('error', function (err) {
-      logger.error(err);
-      return reject(new Error('Error extracting plugin archive'));
-    });
-
-    unzipper.on('extract', function (log) {
-      logger.log('Extraction complete');
-      return resolve();
-    });
+    unzipper.on('error', reject);
 
     unzipper.extract({
       path: settings.workingPath,
@@ -24,5 +13,20 @@ module.exports = function (settings, logger) {
       },
       strip: 1
     });
+
+    unzipper.on('extract', resolve);
   });
+}
+
+export default async function extractZip(settings, logger) {
+  try {
+    logger.log('Extracting plugin archive');
+
+    await extractArchive(settings);
+
+    logger.log('Extraction complete');
+  } catch (err) {
+    logger.error(err);
+    throw new Error('Error extracting plugin archive');
+  }
 };

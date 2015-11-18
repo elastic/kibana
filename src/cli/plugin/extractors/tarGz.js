@@ -1,30 +1,34 @@
 const zlib = require('zlib');
-const Promise = require('bluebird');
 const fs = require('fs');
 const tar = require('tar');
 
-module.exports = function (settings, logger) {
-  return new Promise(function (resolve, reject) {
+async function extractArchive(settings) {
+  await new Promise((resolve, reject) => {
     const gunzip = zlib.createGunzip();
     const tarExtract = new tar.Extract({ path: settings.workingPath, strip: 1 });
+    const readStream = fs.createReadStream(settings.tempArchiveFile);
 
+    readStream.on('error', reject);
+    gunzip.on('error', reject);
+    tarExtract.on('error', reject);
+
+    readStream
+    .pipe(gunzip)
+    .pipe(tarExtract);
+
+    tarExtract.on('finish', resolve);
+  });
+}
+
+export default async function extractTarball(settings, logger) {
+  try {
     logger.log('Extracting plugin archive');
 
-    fs.createReadStream(settings.tempArchiveFile)
-    .pipe(gunzip)
-    .on('error', handleError)
-    .pipe(tarExtract)
-    .on('error', handleError)
-    .on('end', handleEnd);
+    await extractArchive(settings);
 
-    function handleError(err) {
-      logger.error(err);
-      return reject(new Error('Error extracting plugin archive'));
-    }
-
-    function handleEnd() {
-      logger.log('Extraction complete');
-      return resolve();
-    }
-  });
+    logger.log('Extraction complete');
+  } catch (err) {
+    logger.error(err);
+    throw new Error('Error extracting plugin archive');
+  }
 };
