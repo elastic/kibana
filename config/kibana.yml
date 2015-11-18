@@ -8,6 +8,10 @@
 # and required if you want to execute requests from other clients (like curl).
 # server.xsrf.token: ""
 
+# If you are running kibana behind a proxy, and want to mount it at a path,
+# specify that path here. The basePath can't end in a slash.
+# server.basePath: ""
+
 # The Elasticsearch instance to use for all your queries.
 # elasticsearch.url: "http://localhost:9200"
 

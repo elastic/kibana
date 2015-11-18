@@ -15,6 +15,7 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
       profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.lazyPrebuild'),
+      urlBasePath: config.get('server.basePath'),
       unsafeCache: config.get('optimize.unsafeCache'),
     })
   );

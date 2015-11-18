@@ -3,15 +3,15 @@ define(function (require) {
     return function addToSiri(series, point, id, label) {
       id = id == null ? '' : id + '';
 
-      if (series[id]) {
-        series[id].values.push(point);
+      if (series.has(id)) {
+        series.get(id).values.push(point);
         return;
       }
 
-      series[id] = {
+      series.set(id, {
         label: label == null ? id : label,
         values: [point]
-      };
+      });
     };
   };
 });
