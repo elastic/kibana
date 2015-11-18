@@ -119,7 +119,7 @@ define(function (require) {
 
       this.binder.destroy();
       this.resizeChecker.destroy();
-      this.uiState.off('change', this._uiStateChangeHandler);
+      if (this.uiState) this.uiState.off('change', this._uiStateChangeHandler);
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
