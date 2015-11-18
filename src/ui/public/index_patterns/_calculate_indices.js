@@ -15,6 +15,15 @@ define(function (require) {
     };
   }
 
+  // returns a new object with any indexes removed that do not include the
+  // time field
+  //
+  // fixme: this really seems like a bug that needs to be fixed in
+  //        elasticsearch itself, but this workaround will do for now
+  function omitIndicesWithoutTimeField(indices, timeFieldName) {
+    return _.pick(indices, index => index.fields[timeFieldName]);
+  }
+
   return function CalculateIndicesFactory(Promise, es) {
 
     // Uses the field stats api to determine the names of indices that need to
@@ -22,7 +31,9 @@ define(function (require) {
     // given time range
     function calculateIndices(pattern, timeFieldName, start, stop, sortDirection) {
       return getFieldStats(pattern, timeFieldName, start, stop)
-      .then(resp => sortIndexStats(resp, timeFieldName, sortDirection));
+      .then(resp => resp.indices)
+      .then(indices => omitIndicesWithoutTimeField(indices, timeFieldName))
+      .then(indices => sortIndexStats(indices, timeFieldName, sortDirection));
     };
 
     // creates the configuration hash that must be passed to the elasticsearch
@@ -48,14 +59,14 @@ define(function (require) {
       });
     }
 
-    function sortIndexStats(resp, timeFieldName, sortDirection) {
-      if (!sortDirection) return _.keys(resp.indices);
+    function sortIndexStats(indices, timeFieldName, sortDirection) {
+      if (!sortDirection) return _.keys(indices);
 
       // FIXME: Once https://github.com/elastic/elasticsearch/issues/14404 is closed
       // this should be sorting based on the sortable value of a field.
       const edgeKey = sortDirection === 'desc' ? 'max_value' : 'min_value';
 
-      return _(resp.indices)
+      return _(indices)
       .map((stats, index) => (
         { index, edge: stats.fields[timeFieldName][edgeKey] }
       ))

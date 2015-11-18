@@ -12,11 +12,13 @@ describe('ui/index_patterns/_calculate_indices', () => {
   let response;
   let config;
   let constraints;
+  let indices;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     response = {
       indices: {
-        'mock-*': 'irrelevant, is ignored'
+        'mock-*': { fields: { '@something': {} } },
+        'ignore-*': { fields: {} }
       }
     };
 
@@ -37,7 +39,9 @@ describe('ui/index_patterns/_calculate_indices', () => {
   }));
 
   function run({ start = undefined, stop = undefined } = {}) {
-    calculateIndices('wat-*-no', '@something', start, stop);
+    calculateIndices('wat-*-no', '@something', start, stop).then(value => {
+      indices = value;
+    });
     $rootScope.$apply();
     config = _.first(es.fieldStats.lastCall.args);
     constraints = config.body.index_constraints;
@@ -101,6 +105,14 @@ describe('ui/index_patterns/_calculate_indices', () => {
         run({ stop });
         expect(constraints['@something'].min_value.lte).to.equal(stop.valueOf());
       });
+    });
+  });
+
+  describe('response filtering', () => {
+    it('filters out any indices that have empty fields', () => {
+      run();
+      expect(_.includes(indices, 'mock-*')).to.be(true);
+      expect(_.includes(indices, 'ignore-*')).to.be(false);
     });
   });
 
