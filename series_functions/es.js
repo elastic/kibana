@@ -26,6 +26,7 @@ function buildRequest(config, tlConfig) {
           date_histogram: {
             field: config.timefield,
             interval: config.interval,
+            time_zone: tlConfig.time.timezone,
             extended_bounds: {
               min: tlConfig.time.from,
               max: tlConfig.time.to

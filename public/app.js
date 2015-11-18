@@ -1,5 +1,4 @@
 var _ = require('lodash');
-
 var logoUrl = require('./logo.png');
 
 require('angularSortableView');
@@ -45,12 +44,13 @@ require('ui/routes')
   });
 
 app.controller('timelion', function (
-  $scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config, $timeout) {
+  $scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config, $timeout, Private) {
   timefilter.enabled = true;
   var notify = new Notifier({
     location: 'Timelion'
   });
 
+  var timezone = Private(require('plugins/timelion/services/timezone'))();
   var defaultExpression = '.es(*)';
   var savedSheet = $route.current.locals.savedSheet;
   var blankSheet = [defaultExpression];
@@ -152,7 +152,8 @@ app.controller('timelion', function (
     $http.post('/timelion/sheet', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
-        interval: getInterval($scope.state)
+        interval: getInterval($scope.state),
+        timezone: timezone
       }),
     })
     // data, status, headers, config

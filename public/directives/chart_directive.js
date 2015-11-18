@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var $ = require('jquery');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 require('flot');
 require('flotTime');
@@ -11,7 +11,7 @@ require('flotSymbol');
 
 var app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
+app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Private) {
   return {
     restrict: 'A',
     scope: {
@@ -19,6 +19,8 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
       search: '='
     },
     link: function ($scope, $elem) {
+      var timezone = Private(require('plugins/timelion/services/timezone'))();
+
       var legendValueNumbers;
       var debouncedSetLegendNumbers;
       var defaultOptions = {
@@ -26,6 +28,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout) {
         xaxis: {
           mode: 'time',
           tickLength: 0,
+          timezone: 'browser'
         },
         selection: {
           mode: 'x',
