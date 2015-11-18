@@ -4,6 +4,10 @@ define(function (require) {
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
   var request = require('intern/dojo/node!supertest-as-promised');
   var url = require('intern/dojo/node!url');
+  var Promise = require('bluebird');
+  var createTestData = require('intern/dojo/node!../../../unit/api/index_patterns/data');
+  var _ = require('intern/dojo/node!lodash');
+
 
   bdd.describe('index-patterns API', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
@@ -27,10 +31,26 @@ define(function (require) {
 
     bdd.describe('POST index-patterns', function postIndexPatterns() {
 
-      bdd.it('should return 400 for a missing payload', function missingPayload() {
-        return request.post('/index-patterns')
-          .send({})
-          .expect(400);
+      bdd.it('should return 400 for an invalid payload', function invalidPayload() {
+        return Promise.all([
+          request.post('/index-patterns').expect(400),
+
+          request.post('/index-patterns')
+            .send({})
+            .expect(400),
+
+          request.post('/index-patterns')
+            .send(_.assign(createTestData().indexPatternWithMappings, {title: false}))
+            .expect(400),
+
+          request.post('/index-patterns')
+            .send(_.assign(createTestData().indexPatternWithMappings, {fields: {}}))
+            .expect(400),
+
+          request.post('/index-patterns')
+            .send(_.assign(createTestData().indexPatternWithMappings, {fields: [{count: 0}]}))
+            .expect(400)
+        ]);
       });
 
     });
