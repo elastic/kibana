@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var $ = require('jquery');
-var moment = require('moment-timezone');
+var moment = require('moment');
 
 require('flot');
 require('flotTime');
