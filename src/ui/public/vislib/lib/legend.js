@@ -8,6 +8,9 @@ define(function (require) {
     var dataLabel = require('ui/vislib/lib/_data_label');
     var color = Private(require('ui/vislib/components/color/color'));
 
+    const NUM_COLORS = 5 * 5; // rows x columns
+    const colorPalette = Private(require('ui/vislib/components/color/color_palette'))(NUM_COLORS);
+
     /**
      * Appends legend to the visualization
      *
@@ -75,6 +78,28 @@ define(function (require) {
       .html(function () {
         return legendHeaderTemplate({ isOpen: self.vis.get('legendOpen') });
       });
+    };
+
+    Legend.prototype._colorPicker = function (el, label) {
+      const self = this;
+
+      const container = el.selectAll('div');
+      if (!container.empty()) return container.remove();
+
+      return el
+      .append('div')
+      .attr('class', 'color-selector')
+      .selectAll('i').data(colorPalette)
+      .enter()
+        .append('i')
+        .attr('class', 'fa fa-circle dots')
+        .attr('style', function (d) {
+          return `color: ${d};`;
+        }).on('click', function (d) {
+          const colors = self.vis.uiState.get('vis.colors') || {};
+          colors[label] = d;
+          self.vis.uiState.set('vis.colors', colors);
+        });
     };
 
     /**
@@ -198,10 +223,12 @@ define(function (require) {
       });
 
       legendDiv.selectAll('li.color').each(function (d) {
-        var label = d.label;
-        if (label !== undefined && label !== 'Count') {
-          d3.select(this).call(self.events.addClickEvent());
-        }
+        d3.select(this).on('click', function (d) {
+          self._colorPicker(d3.select(this), d.label);
+        });
+        //if (label !== undefined && label !== 'Count') {
+        //  d3.select(this).call(self.events.addClickEvent());
+        //}
       });
     };
 
