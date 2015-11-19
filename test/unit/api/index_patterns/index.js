@@ -9,6 +9,7 @@ define(function (require) {
   var post = require('./_post');
   var get = require('./_get');
   var put = require('./_put');
+  var del = require('./_del');
 
   bdd.describe('index-patterns API', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
@@ -25,5 +26,6 @@ define(function (require) {
     get(bdd, scenarioManager, request);
     post(bdd, scenarioManager, request);
     put(bdd, scenarioManager, request);
+    del(bdd, scenarioManager, request);
   });
 });
