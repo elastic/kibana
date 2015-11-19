@@ -76,21 +76,24 @@ export default function (server) {
     path: '/api/kibana/index_patterns/{id}',
     method: 'GET',
     handler: function (req, reply) {
-      let client = server.plugins.elasticsearch.client;
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       let pattern = req.params.id;
 
+      const params = {
+        index: '.kibana',
+        type: 'index-pattern',
+        id: req.params.id
+      };
+
       Promise.join(
-        client.get({
-          index: '.kibana',
-          type: 'index-pattern',
-          id: req.params.id
-        }).then((result) => {
-          result._source.fields = JSON.parse(result._source.fields);
-          return result._source;
-        }),
+        callWithRequest(req, 'get', params)
+          .then((result) => {
+            result._source.fields = JSON.parse(result._source.fields);
+            return result._source;
+          }),
         getMappings(pattern, req),
-        stitchPatternAndMappings
-      ).then(removeDeprecatedFieldProps)
+        stitchPatternAndMappings)
+        .then(removeDeprecatedFieldProps)
         .then(function (pattern) {
           reply(_.isArray(pattern) ? pattern[0] : pattern);
         }, function (error) {
