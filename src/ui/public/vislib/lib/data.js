@@ -42,7 +42,7 @@ define(function (require) {
       this.type = this.getDataType();
 
       this.labels = this._getLabels(this.data);
-      this.color = this.labels ? color(this.labels) : undefined;
+      this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {

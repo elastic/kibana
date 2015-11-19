@@ -26,6 +26,7 @@ dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
     var Layout;
     var vis;
+    var persistedState;
     var numberOfCharts;
     var testLayout;
 
@@ -35,7 +36,8 @@ dateHistogramArray.forEach(function (data, i) {
       ngMock.inject(function (Private) {
         Layout = Private(require('ui/vislib/lib/layout/layout'));
         vis = Private(require('fixtures/vislib/_vis_fixture'))();
-        vis.render(data);
+        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+        vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
     });
