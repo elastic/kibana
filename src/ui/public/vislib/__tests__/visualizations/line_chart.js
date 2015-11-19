@@ -29,6 +29,7 @@ describe('Vislib Line Chart', function () {
 
     describe(name + ' Data', function () {
       var vis;
+      var persistedState;
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
@@ -40,8 +41,9 @@ describe('Vislib Line Chart', function () {
         };
 
         vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
+        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
         vis.on('brush', _.noop);
-        vis.render(data);
+        vis.render(data, persistedState);
       }));
 
       afterEach(function () {
@@ -165,7 +167,7 @@ describe('Vislib Line Chart', function () {
       describe('defaultYExtents is true', function () {
         beforeEach(function () {
           vis._attr.defaultYExtents = true;
-          vis.render(data);
+          vis.render(data, persistedState);
         });
 
         it('should return yAxis extents equal to data extents', function () {

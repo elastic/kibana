@@ -8,6 +8,7 @@ describe('renderbot', function exportWrapper() {
   var Vis;
   var Renderbot;
   var VislibRenderbot;
+  var persistedState;
   var normalizeChartData;
   var mockVisType = {
     name: 'test'
@@ -21,6 +22,7 @@ describe('renderbot', function exportWrapper() {
       Vis = Private(require('ui/vislib/vis'));
       Renderbot = Private(require('ui/Vis/Renderbot'));
       VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       normalizeChartData = Private(require('ui/agg_response/index'));
     });
   }
@@ -35,7 +37,7 @@ describe('renderbot', function exportWrapper() {
 
     beforeEach(function () {
       createVisStub = sinon.stub(VislibRenderbot.prototype, '_createVis', _.noop);
-      renderbot = new VislibRenderbot(vis, $el);
+      renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 
     it('should be a Renderbot', function () {
@@ -63,7 +65,7 @@ describe('renderbot', function exportWrapper() {
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
       listenerSpy = sinon.spy(vislib.Vis.prototype, 'on');
-      renderbot = new VislibRenderbot(vis, $el);
+      renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 
     it('should attach listeners and set vislibVis', function () {
@@ -91,7 +93,7 @@ describe('renderbot', function exportWrapper() {
       createVisSpy = sinon.spy(VislibRenderbot.prototype, '_createVis');
       // getParamsStub = sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _identity);
       // getParamsStub.returns(params);
-      renderbot = new VislibRenderbot(vis, $el);
+      renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 
     it('should create a new Vis object when params change', function () {
@@ -120,13 +122,13 @@ describe('renderbot', function exportWrapper() {
     });
 
     it('should use #buildChartData', function () {
-      var renderbot = new VislibRenderbot(vis, $el);
+      var renderbot = new VislibRenderbot(vis, $el, persistedState);
 
       var football = {};
       var buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
       var renderStub = sinon.stub(renderbot.vislibVis, 'render');
 
-      renderbot.render('flat data');
+      renderbot.render('flat data', persistedState);
       expect(renderStub.callCount).to.be(1);
       expect(buildStub.callCount).to.be(1);
       expect(renderStub.firstCall.args[0]).to.be(football);
@@ -149,7 +151,7 @@ describe('renderbot', function exportWrapper() {
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
       listenerSpy = sinon.spy(vislib.Vis.prototype, 'off');
-      renderbot = new VislibRenderbot(vis, $el);
+      renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 
     it('should detatch listeners', function () {

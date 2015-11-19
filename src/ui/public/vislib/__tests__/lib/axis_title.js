@@ -8,6 +8,7 @@ var expect = require('expect.js');
 describe('Vislib AxisTitle Class Test Suite', function () {
   var AxisTitle;
   var Data;
+  var PersistedState;
   var axisTitle;
   var el;
   var dataObj;
@@ -76,6 +77,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     AxisTitle = Private(require('ui/vislib/lib/axis_title'));
     Data = Private(require('ui/vislib/lib/data'));
+    PersistedState = Private(require('ui/persisted_state/persisted_state'));
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper');
@@ -91,7 +93,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
       .style('width', '20px');
 
 
-    dataObj = new Data(data, {});
+    dataObj = new Data(data, {}, new PersistedState());
     xTitle = dataObj.get('xAxisLabel');
     yTitle = dataObj.get('yAxisLabel');
     axisTitle = new AxisTitle($('.vis-wrapper')[0], xTitle, yTitle);

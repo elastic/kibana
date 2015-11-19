@@ -6,6 +6,7 @@ var expect = require('expect.js');
 
 var YAxis;
 var Data;
+var persistedState;
 var el;
 var buildYAxis;
 var yAxis;
@@ -70,7 +71,7 @@ function createData(seriesData) {
 
   var dataObj = new Data(data, {
     defaultYMin: true
-  });
+  }, persistedState);
 
   buildYAxis = function (params) {
     return new YAxis(_.merge({}, params, {
@@ -94,6 +95,7 @@ describe('Vislib yAxis Class Test Suite', function () {
 
   beforeEach(ngMock.inject(function (Private) {
     Data = Private(require('ui/vislib/lib/data'));
+    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
     YAxis = Private(require('ui/vislib/lib/y_axis'));
 
     expect($('.y-axis-wrapper')).to.have.length(0);

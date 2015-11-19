@@ -30,7 +30,7 @@ describe('Vislib Color Module Test Suite', function () {
       seedColors = Private(require('ui/vislib/components/color/seed_colors'));
       getColors = Private(require('ui/vislib/components/color/color'));
       mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
-      color = getColors(arr);
+      color = getColors(arr, {});
     }));
 
     afterEach(ngMock.inject((config) => {
@@ -109,6 +109,11 @@ describe('Vislib Color Module Test Suite', function () {
 
     it('should return the value from the mapped colors', function () {
       expect(color(arr[1])).to.be(mappedColors.get(arr[1]));
+    });
+
+    it('should return the value from the specified color mapping overrides', function () {
+      const colorFn = getColors(arr, {good: 'red'});
+      expect(colorFn('good')).to.be('red');
     });
   });
 

@@ -8,6 +8,7 @@ var expect = require('expect.js');
 describe('Vislib ChartTitle Class Test Suite', function () {
   var ChartTitle;
   var Data;
+  var persistedState;
   var chartTitle;
   var el;
   var dataObj;
@@ -74,6 +75,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     ChartTitle = Private(require('ui/vislib/lib/chart_title'));
     Data = Private(require('ui/vislib/lib/data'));
+    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')
@@ -83,7 +85,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, {});
+    dataObj = new Data(data, {}, persistedState);
     chartTitle = new ChartTitle($('.vis-wrapper')[0], 'rows');
   }));
 

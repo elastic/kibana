@@ -101,10 +101,12 @@ var colsData = {
 
 describe('Vislib Data Class Test Suite', function () {
   var Data;
+  var persistedState;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Data = Private(require('ui/vislib/lib/data'));
+    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
   }));
 
   describe('Data Class (main)', function () {
@@ -113,7 +115,7 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should return an object', function () {
-      var rowIn = new Data(rowsData, {});
+      var rowIn = new Data(rowsData, {}, persistedState);
       expect(_.isObject(rowIn)).to.be(true);
     });
 
@@ -128,7 +130,7 @@ describe('Vislib Data Class Test Suite', function () {
         ],
         'yAxisLabel': 'customLabel'
       };
-      var modifiedData = new Data(seriesDataWithoutLabelInSeries, {});
+      var modifiedData = new Data(seriesDataWithoutLabelInSeries, {}, persistedState);
       expect(modifiedData.data.series[0].label).to.be('customLabel');
     });
 
@@ -158,7 +160,7 @@ describe('Vislib Data Class Test Suite', function () {
         ],
       };
 
-      var modifiedData = new Data(seriesDataWithoutLabelInRow, {});
+      var modifiedData = new Data(seriesDataWithoutLabelInRow, {}, persistedState);
       expect(modifiedData.data.rows[0].series[0].label).to.be('customLabel');
       expect(modifiedData.data.rows[1].series[0].label).to.be('customLabel');
     });
@@ -190,7 +192,7 @@ describe('Vislib Data Class Test Suite', function () {
         'yAxisLabel': 'customLabel'
       };
 
-      var modifiedData = new Data(seriesDataWithoutLabelInRow, {});
+      var modifiedData = new Data(seriesDataWithoutLabelInRow, {}, persistedState);
       expect(modifiedData.data.columns[0].series[0].label).to.be('customLabel');
       expect(modifiedData.data.columns[1].series[0].label).to.be('customLabel');
     });
@@ -210,7 +212,7 @@ describe('Vislib Data Class Test Suite', function () {
     };
 
     beforeEach(function () {
-      data = new Data(pieData, {});
+      data = new Data(pieData, {}, persistedState);
     });
 
     it('should remove zero values', function () {
@@ -228,9 +230,9 @@ describe('Vislib Data Class Test Suite', function () {
     var colOut;
 
     beforeEach(function () {
-      serIn = new Data(seriesData, {});
-      rowIn = new Data(rowsData, {});
-      colIn = new Data(colsData, {});
+      serIn = new Data(seriesData, {}, persistedState);
+      rowIn = new Data(rowsData, {}, persistedState);
+      colIn = new Data(colsData, {}, persistedState);
       serOut = serIn.flatten();
       rowOut = rowIn.flatten();
       colOut = colIn.flatten();
@@ -246,7 +248,7 @@ describe('Vislib Data Class Test Suite', function () {
 
     function testLength(inputData) {
       return function () {
-        var data = new Data(inputData, {});
+        var data = new Data(inputData, {}, persistedState);
         var len = _.reduce(data.chartData(), function (sum, chart) {
           return sum + chart.series.reduce(function (sum, series) {
             return sum + series.values.length;
@@ -267,9 +269,9 @@ describe('Vislib Data Class Test Suite', function () {
     var minValueStacked = 15;
 
     beforeEach(function () {
-      visData = new Data(dataSeries, {});
-      visDataNeg = new Data(dataSeriesNeg, {});
-      visDataStacked = new Data(dataStacked, { type: 'histogram' });
+      visData = new Data(dataSeries, {}, persistedState);
+      visDataNeg = new Data(dataSeriesNeg, {}, persistedState);
+      visDataStacked = new Data(dataStacked, { type: 'histogram' }, persistedState);
     });
 
     // The first value in the time series is less than the min date in the
@@ -304,9 +306,9 @@ describe('Vislib Data Class Test Suite', function () {
     var maxValueStacked = 115;
 
     beforeEach(function () {
-      visData = new Data(dataSeries, {});
-      visDataNeg = new Data(dataSeriesNeg, {});
-      visDataStacked = new Data(dataStacked, { type: 'histogram' });
+      visData = new Data(dataSeries, {}, persistedState);
+      visDataNeg = new Data(dataSeriesNeg, {}, persistedState);
+      visDataStacked = new Data(dataStacked, { type: 'histogram' }, persistedState);
     });
 
     // The first value in the time series is less than the min date in the
@@ -372,7 +374,7 @@ describe('Vislib Data Class Test Suite', function () {
     };
 
     beforeEach(function () {
-      data = new Data(geohashGridData, {});
+      data = new Data(geohashGridData, {}, persistedState);
     });
 
     describe('getVisData', function () {
@@ -393,7 +395,7 @@ describe('Vislib Data Class Test Suite', function () {
 
   describe('null value check', function () {
     it('should return false', function () {
-      var data = new Data(rowsData, {});
+      var data = new Data(rowsData, {}, persistedState);
       expect(data.hasNullValues()).to.be(false);
     });
 
@@ -409,7 +411,7 @@ describe('Vislib Data Class Test Suite', function () {
         ]
       });
 
-      var data = new Data(nullRowData, {});
+      var data = new Data(nullRowData, {}, persistedState);
       expect(data.hasNullValues()).to.be(true);
     });
   });

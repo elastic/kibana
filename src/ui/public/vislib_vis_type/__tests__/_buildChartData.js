@@ -4,7 +4,6 @@ describe('renderbot#buildChartData', function () {
   var expect = require('expect.js');
   var sinon = require('auto-release-sinon');
 
-  var VislibRenderbot;
   var buildChartData;
   var aggResponse;
   var TableGroup;
@@ -15,7 +14,6 @@ describe('renderbot#buildChartData', function () {
     Table = Private(require('ui/agg_response/tabify/_table'));
     TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
     aggResponse = Private(require('ui/agg_response/index'));
-    VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
     buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));
   }));
 

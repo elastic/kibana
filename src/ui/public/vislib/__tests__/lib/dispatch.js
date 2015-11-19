@@ -21,12 +21,14 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
   describe('', function () {
     var vis;
+    var persistedState;
     var SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      vis.render(data);
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      vis.render(data, persistedState);
       SimpleEmitter = require('ui/utils/SimpleEmitter');
     }));
 
@@ -45,12 +47,14 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
   describe('Stock event handlers', function () {
     var vis;
+    var persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       vis.on('brush', _.noop);
-      vis.render(data);
+      vis.render(data, persistedState);
     }));
 
     afterEach(function () {
@@ -114,12 +118,14 @@ describe('Vislib Dispatch Class Test Suite', function () {
   describe('Custom event handlers', function () {
     it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
       var vis;
+      var persistedState;
       var chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(require('fixtures/vislib/_vis_fixture'))();
+        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
         vis.on('someEvent', _.noop);
-        vis.render(data);
+        vis.render(data, persistedState);
 
         vis.handler.charts.forEach(function (chart) {
           expect(chart.events.listenerCount('someEvent')).to.be(1);
@@ -132,11 +138,13 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
     it('can be added after rendering', function () {
       var vis;
+      var persistedState;
       var chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(require('fixtures/vislib/_vis_fixture'))();
-        vis.render(data);
+        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+        vis.render(data, persistedState);
         vis.on('someEvent', _.noop);
 
         vis.handler.charts.forEach(function (chart) {

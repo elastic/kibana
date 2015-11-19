@@ -41,14 +41,16 @@ describe('Vislib Legend Class', function () {
       };
       var Legend;
       var vis;
+      var persistedState;
       var $el;
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
         vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
+        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
         Legend = Private(require('ui/vislib/lib/legend'));
         $el = d3.select('body').append('div').attr('class', 'fake-legend');
-        vis.render(data);
+        vis.render(data, persistedState);
       }));
 
       afterEach(function () {
