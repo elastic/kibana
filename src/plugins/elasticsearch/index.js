@@ -24,7 +24,7 @@ module.exports = function (kibana) {
           key: Joi.string()
         }).default(),
         apiVersion: Joi.string().default('2.0'),
-        minimumVerison: Joi.string().default('2.1.0')
+        minimumVersion: Joi.string().default('2.1.0')
       }).default();
     },
 
