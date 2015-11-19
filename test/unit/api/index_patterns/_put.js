@@ -50,6 +50,39 @@ define(function (require) {
           .expect(400);
       });
 
+      bdd.it('should return 400 if you try to update mappings', function () {
+        return request.put('/index-patterns/logstash-*')
+          .send(createTestData().indexPatternWithMappings)
+          .expect(400);
+      });
+
+      bdd.it('should return 400 for an invalid payload', function () {
+        function omitMappings(pattern) {
+          pattern.fields = _.map(pattern.fields, function (field) {
+            return _.omit(field, 'mapping');
+          });
+          return pattern;
+        };
+
+        return Promise.all([
+          request.put('/index-patterns/logstash-*').expect(400),
+
+          request.put('/index-patterns/logstash-*')
+            .send({})
+            .expect(400),
+
+          //fields must be an array
+          request.put('/index-patterns/logstash-*')
+            .send(_.assign(omitMappings(createTestData().indexPatternWithMappings), {fields: {}}))
+            .expect(400),
+
+          // field objects must have a name
+          request.put('/index-patterns/logstash-*')
+            .send(_.assign(omitMappings(createTestData().indexPatternWithMappings), {fields: [{count: 0}]}))
+            .expect(400)
+        ]);
+      });
+
     });
 
   };
