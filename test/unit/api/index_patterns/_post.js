@@ -31,8 +31,21 @@ define(function (require) {
             .send(_.assign(createTestData().indexPatternWithMappings, {fields: {}}))
             .expect(400),
 
+          // Fields must have a name
           request.post('/index-patterns')
             .send(_.assign(createTestData().indexPatternWithMappings, {fields: [{count: 0}]}))
+            .expect(400),
+
+          // Mapping requires type
+          request.post('/index-patterns')
+            .send(_.assign(createTestData().indexPatternWithMappings, {
+              fields: [{
+                'name': 'geo.coordinates',
+                'count': 0,
+                'scripted': false,
+                'mapping': {'index': 'not_analyzed', 'doc_values': false}
+              }]
+            }))
             .expect(400)
         ]);
       });
