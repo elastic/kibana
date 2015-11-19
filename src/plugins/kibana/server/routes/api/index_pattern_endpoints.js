@@ -196,7 +196,7 @@ export default function (server) {
         return reply(Boom.badRequest(validation.error));
       }
 
-      let client = server.plugins.elasticsearch.client;
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const indexPattern = _.cloneDeep(req.payload);
       const mappings = _(req.payload.fields)
         .indexBy('name')
@@ -210,18 +210,20 @@ export default function (server) {
       if (!_.isEmpty(mappings)) {
         reply(Boom.badRequest('Mappings cannot be updated'));
       } else {
-        client.update({
+        const params = {
           index: '.kibana',
           type: 'index-pattern',
           id: req.params.id,
           body: {
             doc: indexPattern
           }
-        }).then(function (pattern) {
-          reply(pattern);
-        }, function (error) {
-          reply(handleESError(error));
-        });
+        };
+        callWithRequest(req, 'update', params)
+          .then(function (pattern) {
+            reply(pattern);
+          }, function (error) {
+            reply(handleESError(error));
+          });
       }
     }
   });
@@ -230,22 +232,23 @@ export default function (server) {
     path: '/api/kibana/index_patterns/{id}',
     method: 'DELETE',
     handler: function (req, reply) {
-      let client = server.plugins.elasticsearch.client;
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      const deletePatternParams = {
+        index: '.kibana',
+        type: 'index-pattern',
+        id: req.params.id
+      };
 
       Promise.all([
-        client.delete({
-          index: '.kibana',
-          type: 'index-pattern',
-          id: req.params.id
-        }),
-        client.indices.deleteTemplate({
-          name: patternToTemplate(req.params.id)
-        }).catch((error) => {
-          if (!error.status || error.status !== 404) {
-            throw error;
-          }
-        })
-      ]).then(function (pattern) {
+        callWithRequest(req, 'delete', deletePatternParams),
+        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id)})
+          .catch((error) => {
+            if (!error.status || error.status !== 404) {
+              throw error;
+            }
+          })
+      ])
+      .then(function (pattern) {
         reply('success');
       }, function (error) {
         reply(handleESError(error));
