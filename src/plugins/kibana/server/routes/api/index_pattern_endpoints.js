@@ -34,9 +34,9 @@ export default function (server) {
     path: '/api/kibana/index_patterns',
     method: 'GET',
     handler: function (req, reply) {
-      let client = server.plugins.elasticsearch.client;
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
-      client.search({
+      const params = {
         index: '.kibana',
         type: 'index-pattern',
         body: {
@@ -44,21 +44,26 @@ export default function (server) {
             match_all: {}
           }
         }
-      }).then(function parseResults(results) {
-        const hits = results.hits.hits;
-        return _.map(hits, (patternHit) => {
-          patternHit._source.fields = JSON.parse(patternHit._source.fields);
-          return patternHit._source;
-        });
-      }).then((patterns) => {
-        return Promise.map(patterns, (pattern) => {
-          return getMappings(pattern.title, client).catch(() => {
-            return {};
-          }).then((mappings) => {
-            return stitchPatternAndMappings(pattern, mappings);
+      };
+
+      callWithRequest(req, 'search', params)
+        .then(function parseResults(results) {
+          const hits = results.hits.hits;
+          return _.map(hits, (patternHit) => {
+            patternHit._source.fields = JSON.parse(patternHit._source.fields);
+            return patternHit._source;
           });
-        });
-      }).then(removeDeprecatedFieldProps)
+        })
+        .then((patterns) => {
+          return Promise.map(patterns, (pattern) => {
+            return getMappings(pattern.title, req).catch(() => {
+              return {};
+            }).then((mappings) => {
+              return stitchPatternAndMappings(pattern, mappings);
+            });
+          });
+        })
+        .then(removeDeprecatedFieldProps)
         .then((patterns) => {
           reply(patterns);
         }, function (error) {
@@ -83,7 +88,7 @@ export default function (server) {
           result._source.fields = JSON.parse(result._source.fields);
           return result._source;
         }),
-        getMappings(pattern, client),
+        getMappings(pattern, req),
         stitchPatternAndMappings
       ).then(removeDeprecatedFieldProps)
         .then(function (pattern) {
