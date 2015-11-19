@@ -112,7 +112,7 @@ export default function (server) {
         return reply(Boom.badRequest(validation.error));
       }
 
-      const client = server.plugins.elasticsearch.client;
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const indexPattern = _.cloneDeep(req.payload);
       const isWildcard = _.contains(indexPattern.title, '*');
       const mappings = _(req.payload.fields)
@@ -124,56 +124,64 @@ export default function (server) {
         return _.omit(field, 'mapping');
       }));
 
-
-      client.create({
+      const patternCreateParams = {
         index: '.kibana',
         type: 'index-pattern',
         id: indexPattern.title,
         body: indexPattern
-      }).then((patternResponse) => {
-        if (!isWildcard || _.isEmpty(mappings)) {
-          return patternResponse;
-        }
-        else {
-          return client.indices.exists({
-            index: indexPattern.title
-          }).then((matchingIndices) => {
-            if (matchingIndices) {
-              throw Boom.conflict('Cannot create an index template if existing indices already match index pattern');
-            }
-            else {
-              return client.indices.putTemplate({
-                order: 0,
-                create: true,
-                name: patternToTemplate(indexPattern.title),
-                body: {
-                  template: indexPattern.title,
-                  mappings: {
-                    _default_: {
-                      properties: mappings
-                    }
-                  }
+      };
+
+      callWithRequest(req, 'create', patternCreateParams)
+        .then((patternResponse) => {
+          if (!isWildcard || _.isEmpty(mappings)) {
+            return patternResponse;
+          }
+          else {
+            return callWithRequest(req, 'indices.exists', {index: indexPattern.title})
+              .then((matchingIndices) => {
+                if (matchingIndices) {
+                  throw Boom.conflict('Cannot create an index template if existing indices already match index pattern');
                 }
+                else {
+                  const templateParams = {
+                    order: 0,
+                    create: true,
+                    name: patternToTemplate(indexPattern.title),
+                    body: {
+                      template: indexPattern.title,
+                      mappings: {
+                        _default_: {
+                          properties: mappings
+                        }
+                      }
+                    }
+                  };
+
+                  return callWithRequest(req, 'indices.putTemplate', templateParams);
+                }
+              })
+              .catch((templateError) => {
+                const deleteParams = {
+                  index: '.kibana',
+                  type: 'index-pattern',
+                  id: indexPattern.title
+                };
+                return callWithRequest(req, 'delete', deleteParams)
+                  .then(() => {
+                    throw templateError;
+                  }, () => {
+                    throw new Error(`index-pattern ${indexPattern.title} created successfully but index template
+                    creation failed. Failed to rollback index-pattern creation, must delete manually.`);
+                  });
               });
-            }
-          }).catch((templateError) => {
-            return client.delete({
-              index: '.kibana',
-              type: 'index-pattern',
-              id: indexPattern.title
-            }).then(() => {
-              throw templateError;
-            }, () => {
-              throw new Error(`index-pattern ${indexPattern.title} created successfully but index template creation
-                failed. Failed to rollback index-pattern creation, must delete manually.`);
-            });
-          });
-        }
-      }).then(() => {
-        reply('success').statusCode = 201;
-      }).catch(function (error) {
-        reply(handleESError(error));
-      });
+          }
+        })
+        .then(() => {
+          reply('success').statusCode = 201;
+        })
+        .catch(function (error) {
+          reply(handleESError(error));
+        });
     }
   });
 
