@@ -3,6 +3,8 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var createTestData = require('intern/dojo/node!../../../unit/api/index_patterns/data');
   var Promise = require('bluebird');
+  var indexPatternSchema = require('intern/dojo/node!../../../../src/plugins/api/lib/schemas/index_pattern_schema');
+  var Joi = require('intern/dojo/node!Joi');
 
   return function (bdd, scenarioManager, request) {
 
@@ -44,10 +46,46 @@ define(function (require) {
 
       bdd.describe('GET index-pattern by ID', function getIndexPatternByID() {
 
+        bdd.it('should return 200 with the valid index pattern requested', function () {
+          return request.get('/index-patterns/logstash-*')
+            .expect(200)
+            .then(function (res) {
+              expect(res.body.title).to.be('logstash-*');
+              Joi.assert(res.body, indexPatternSchema.post);
+            });
+        });
+
+        bdd.it('should return mappings info from the indices if there is no template', function () {
+          var pattern = createTestData().indexPatternWithMappings;
+          pattern.fields = _.map(pattern.fields, function (field) {
+            return _.omit(field, 'mapping');
+          });
+
+          return request.del('/index-patterns/logstash-*').expect(200)
+            .then(function () {
+              return scenarioManager.load('makelogs');
+            })
+            .then(function () {
+              return request.post('/index-patterns').send(pattern).expect(201);
+            })
+            .then(function () {
+              return request.get('/index-patterns/logstash-*').expect(200);
+            })
+            .then(function (res) {
+              expect(res.body.fields[0].mapping).to.be.an('object');
+            })
+            .finally(function () {
+              scenarioManager.unload('makelogs');
+            });
+        });
+
+        bdd.it('should return 404 for a non-existent ID', function () {
+          return request.get('/index-patterns/thisdoesnotexist').expect(404);
+        });
+
       });
+
     });
-
-
   };
 });
 
