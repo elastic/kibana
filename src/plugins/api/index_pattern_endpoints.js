@@ -107,9 +107,11 @@ export default function (server) {
       const client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
       const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
-      const mappings = _.omit(_.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
-        return value.mapping;
-      }), _.isUndefined);
+      const mappings = _(req.payload.fields)
+        .indexBy('name')
+        .mapValues(value => value.mapping)
+        .omit(_.isUndefined)
+        .value();
       indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
         return _.omit(field, 'mapping');
       }));
@@ -181,9 +183,11 @@ export default function (server) {
       let client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
       const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
-      const mappings = _.omit(_.mapValues(_.indexBy(req.payload.fields, 'name'), (value) => {
-        return value.mapping;
-      }), _.isUndefined);
+      const mappings = _(req.payload.fields)
+        .indexBy('name')
+        .mapValues(value => value.mapping)
+        .omit(_.isUndefined)
+        .value();
       indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
         return _.omit(field, 'mapping');
       }));
