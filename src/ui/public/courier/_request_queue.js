@@ -16,8 +16,11 @@ define(function (require) {
       });
     };
 
-    queue.get = function (/* strategies.. */) {
-      var strategies = _.toArray(arguments);
+    queue.getStartable = function (...strategies) {
+      return queue.get(...strategies).filter(req => req.canStart());
+    };
+
+    queue.get = function (...strategies) {
       return queue.filter(function (req) {
         var strategyMatch = !strategies.length;
         if (!strategyMatch) {
@@ -26,7 +29,7 @@ define(function (require) {
           });
         }
 
-        return strategyMatch && req.canStart();
+        return strategyMatch;
       });
     };
 
