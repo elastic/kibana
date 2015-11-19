@@ -3,11 +3,11 @@ const Boom = require('Boom');
 const Joi = require('Joi');
 const _ = require('lodash');
 const Promise = require('bluebird');
-const getMappings = require('./lib/get_mappings');
-const stitchPatternAndMappings = require('./lib/stitch_pattern_and_mappings');
-const {templateToPattern, patternToTemplate} = require('./lib/convert_pattern_and_template_name');
-const removeDeprecatedFieldProps = require('./lib/remove_deprecated_field_props');
-const indexPatternSchema = require('./lib/schemas/index_pattern_schema');
+const getMappings = require('../../lib/get_mappings');
+const stitchPatternAndMappings = require('../../lib/stitch_pattern_and_mappings');
+const {templateToPattern, patternToTemplate} = require('../../lib/convert_pattern_and_template_name');
+const removeDeprecatedFieldProps = require('../../lib/remove_deprecated_field_props');
+const indexPatternSchema = require('../../lib/schemas/index_pattern_schema');
 
 export default function (server) {
 

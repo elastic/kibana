@@ -3,7 +3,7 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var createTestData = require('intern/dojo/node!../../../unit/api/index_patterns/data');
   var Promise = require('bluebird');
-  var indexPatternSchema = require('intern/dojo/node!../../../../src/plugins/api/lib/schemas/index_pattern_schema');
+  var indexPatternSchema = require('intern/dojo/node!../../../../src/plugins/kibana/server/lib/schemas/index_pattern_schema');
   var Joi = require('intern/dojo/node!Joi');
 
   return function (bdd, scenarioManager, request) {
