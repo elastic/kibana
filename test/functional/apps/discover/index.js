@@ -19,6 +19,7 @@ define(function (require) {
     bdd.before(function () {
       common = new Common(this.remote);
       remote = this.remote;
+      this.timeout = 120000;
     });
 
     bdd.after(function unloadMakelogs() {
