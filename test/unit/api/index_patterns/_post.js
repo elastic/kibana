@@ -5,39 +5,39 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager, request) {
-    bdd.describe('POST index-patterns', function postIndexPatterns() {
+    bdd.describe('POST index_patterns', function postIndexPatterns() {
 
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana');
       });
 
       bdd.afterEach(function () {
-        return request.del('/index-patterns/logstash-*');
+        return request.del('/kibana/index_patterns/logstash-*');
       });
 
       bdd.it('should return 400 for an invalid payload', function invalidPayload() {
         return Promise.all([
-          request.post('/index-patterns').expect(400),
+          request.post('/kibana/index_patterns').expect(400),
 
-          request.post('/index-patterns')
+          request.post('/kibana/index_patterns')
             .send({})
             .expect(400),
 
-          request.post('/index-patterns')
+          request.post('/kibana/index_patterns')
             .send(_.assign(createTestData().indexPatternWithMappings, {title: false}))
             .expect(400),
 
-          request.post('/index-patterns')
+          request.post('/kibana/index_patterns')
             .send(_.assign(createTestData().indexPatternWithMappings, {fields: {}}))
             .expect(400),
 
           // Fields must have a name
-          request.post('/index-patterns')
+          request.post('/kibana/index_patterns')
             .send(_.assign(createTestData().indexPatternWithMappings, {fields: [{count: 0}]}))
             .expect(400),
 
           // Mapping requires type
-          request.post('/index-patterns')
+          request.post('/kibana/index_patterns')
             .send(_.assign(createTestData().indexPatternWithMappings, {
               fields: [{
                 'name': 'geo.coordinates',
@@ -51,13 +51,13 @@ define(function (require) {
       });
 
       bdd.it('should return 201 when a pattern is successfully created', function createPattern() {
-        return request.post('/index-patterns')
+        return request.post('/kibana/index_patterns')
           .send(createTestData().indexPatternWithMappings)
           .expect(201);
       });
 
       bdd.it('should create an index template if mappings are provided', function createTemplate() {
-        return request.post('/index-patterns')
+        return request.post('/kibana/index_patterns')
           .send(createTestData().indexPatternWithMappings)
           .expect(201)
           .then(function () {
@@ -71,7 +71,7 @@ define(function (require) {
           return _.omit(field, 'mapping');
         });
 
-        return request.post('/index-patterns')
+        return request.post('/kibana/index_patterns')
           .send(pattern)
           .expect(201)
           .then(function () {
@@ -88,7 +88,7 @@ define(function (require) {
         var pattern = createTestData().indexPatternWithMappings;
         pattern.title = 'notawildcard';
 
-        return request.post('/index-patterns')
+        return request.post('/kibana/index_patterns')
           .send(pattern)
           .expect(201)
           .then(function () {
@@ -102,11 +102,11 @@ define(function (require) {
       });
 
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
-        return request.post('/index-patterns')
+        return request.post('/kibana/index_patterns')
           .send(createTestData().indexPatternWithMappings)
           .expect(201)
           .then(function () {
-            return request.post('/index-patterns')
+            return request.post('/kibana/index_patterns')
               .send(createTestData().indexPatternWithMappings)
               .expect(409);
           });
@@ -119,7 +119,7 @@ define(function (require) {
             template: 'logstash-*'
           }
         }).then(function () {
-          return request.post('/index-patterns')
+          return request.post('/kibana/index_patterns')
             .send(createTestData().indexPatternWithMappings)
             .expect(409);
         });
@@ -130,7 +130,7 @@ define(function (require) {
           var pattern = createTestData().indexPatternWithMappings;
           pattern.title = '.kib*';
 
-          return request.post('/index-patterns')
+          return request.post('/kibana/index_patterns')
             .send(pattern)
             .expect(409);
         });
@@ -143,7 +143,7 @@ define(function (require) {
           });
           pattern.title = '.kib*';
 
-          return request.post('/index-patterns')
+          return request.post('/kibana/index_patterns')
             .send(pattern)
             .expect(201);
         });

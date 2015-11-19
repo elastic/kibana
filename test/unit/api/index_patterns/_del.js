@@ -7,23 +7,23 @@ define(function (require) {
 
   return function (bdd, scenarioManager, request) {
 
-    bdd.describe('DELETE index-patterns', function deleteIndexPatterns() {
+    bdd.describe('DELETE index_patterns', function deleteIndexPatterns() {
 
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana').then(function () {
-          return request.post('/index-patterns').send(createTestData().indexPatternWithMappings);
+          return request.post('/kibana/index_patterns').send(createTestData().indexPatternWithMappings);
         });
       });
 
       bdd.afterEach(function () {
-        return request.del('/index-patterns/logstash-*');
+        return request.del('/kibana/index_patterns/logstash-*');
       });
 
       bdd.it('should return 200 for successful deletion of pattern and template', function () {
-        return request.del('/index-patterns/logstash-*')
+        return request.del('/kibana/index_patterns/logstash-*')
           .expect(200)
           .then(function () {
-            return request.get('/index-patterns/logstash-*').expect(404);
+            return request.get('/kibana/index_patterns/logstash-*').expect(404);
           })
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
@@ -34,7 +34,7 @@ define(function (require) {
       });
 
       bdd.it('should return 404 for a non-existent id', function () {
-        return request.del('/index-patterns/doesnotexist')
+        return request.del('/kibana/index_patterns/doesnotexist')
           .expect(404);
       });
 

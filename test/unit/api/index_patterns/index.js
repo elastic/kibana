@@ -11,7 +11,7 @@ define(function (require) {
   var put = require('./_put');
   var del = require('./_del');
 
-  bdd.describe('index-patterns API', function () {
+  bdd.describe('index_patterns API', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
     request = request(url.format(config.servers.kibana) + '/api');
 

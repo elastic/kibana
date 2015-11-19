@@ -8,15 +8,15 @@ define(function (require) {
 
   return function (bdd, scenarioManager, request) {
 
-    bdd.describe('GET index-patterns', function getIndexPatterns() {
+    bdd.describe('GET index_patterns', function getIndexPatterns() {
 
       bdd.before(function () {
         return scenarioManager.reload('emptyKibana').then(function () {
           return Promise.all([
-            request.post('/index-patterns').send(createTestData().indexPatternWithMappings),
-            request.post('/index-patterns').send(_.assign(createTestData().indexPatternWithMappings, {title: 'foo'})),
-            request.post('/index-patterns').send(_.assign(createTestData().indexPatternWithMappings, {title: 'bar*'})),
-            request.post('/index-patterns').send(_.assign(createTestData().indexPatternWithMappings,
+            request.post('/kibana/index_patterns').send(createTestData().indexPatternWithMappings),
+            request.post('/kibana/index_patterns').send(_.assign(createTestData().indexPatternWithMappings, {title: 'foo'})),
+            request.post('/kibana/index_patterns').send(_.assign(createTestData().indexPatternWithMappings, {title: 'bar*'})),
+            request.post('/kibana/index_patterns').send(_.assign(createTestData().indexPatternWithMappings,
               {title: '[.marvel-es-]YYYY.MM.DD'}))
           ]).then(function () {
             return scenarioManager.client.indices.refresh({
@@ -28,15 +28,15 @@ define(function (require) {
 
       bdd.after(function () {
         return Promise.all([
-          request.del('/index-patterns/logstash-*'),
-          request.del('/index-patterns/foo'),
-          request.del('/index-patterns/bar*'),
-          request.del('/index-patterns/[.marvel-es-]YYYY.MM.DD')
+          request.del('/kibana/index_patterns/logstash-*'),
+          request.del('/kibana/index_patterns/foo'),
+          request.del('/kibana/index_patterns/bar*'),
+          request.del('/kibana/index_patterns/[.marvel-es-]YYYY.MM.DD')
         ]);
       });
 
       bdd.it('should return 200 with all patterns in an array', function return200() {
-        return request.get('/index-patterns')
+        return request.get('/kibana/index_patterns')
           .expect(200)
           .then(function (res) {
             expect(res.body).to.be.an('array');
@@ -44,10 +44,10 @@ define(function (require) {
           });
       });
 
-      bdd.describe('GET index-pattern by ID', function getIndexPatternByID() {
+      bdd.describe('GET index_pattern by ID', function getIndexPatternByID() {
 
         bdd.it('should return 200 with the valid index pattern requested', function () {
-          return request.get('/index-patterns/logstash-*')
+          return request.get('/kibana/index_patterns/logstash-*')
             .expect(200)
             .then(function (res) {
               expect(res.body.title).to.be('logstash-*');
@@ -61,15 +61,15 @@ define(function (require) {
             return _.omit(field, 'mapping');
           });
 
-          return request.del('/index-patterns/logstash-*').expect(200)
+          return request.del('/kibana/index_patterns/logstash-*').expect(200)
             .then(function () {
               return scenarioManager.load('makelogs');
             })
             .then(function () {
-              return request.post('/index-patterns').send(pattern).expect(201);
+              return request.post('/kibana/index_patterns').send(pattern).expect(201);
             })
             .then(function () {
-              return request.get('/index-patterns/logstash-*').expect(200);
+              return request.get('/kibana/index_patterns/logstash-*').expect(200);
             })
             .then(function (res) {
               expect(res.body.fields[0].mapping).to.be.an('object');
@@ -80,7 +80,7 @@ define(function (require) {
         });
 
         bdd.it('should return 404 for a non-existent ID', function () {
-          return request.get('/index-patterns/thisdoesnotexist').expect(404);
+          return request.get('/kibana/index_patterns/thisdoesnotexist').expect(404);
         });
 
       });
