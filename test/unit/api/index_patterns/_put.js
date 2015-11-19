@@ -38,6 +38,18 @@ define(function (require) {
           });
       });
 
+      bdd.it('should return 400 if you try to modify the title', function () {
+        var pattern = createTestData().indexPatternWithMappings;
+        pattern.fields = _.map(pattern.fields, function (field) {
+          return _.omit(field, 'mapping');
+        });
+        pattern.title = 'foo';
+
+        return request.put('/index-patterns/logstash-*')
+          .send(pattern)
+          .expect(400);
+      });
+
     });
 
   };

@@ -171,6 +171,9 @@ export default function (server) {
     path: '/api/index-patterns/{id}',
     method: 'PUT',
     handler: function (req, reply) {
+      if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
+      if (req.payload.title !== req.params.id) { return reply(Boom.badRequest('Updates to title not supported')); }
+
       let client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
       const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
