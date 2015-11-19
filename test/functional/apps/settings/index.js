@@ -16,6 +16,7 @@ define(function (require) {
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     bdd.before(function () {
+      this.timeout = 120000;
       return scenarioManager.reload('emptyKibana')
       .then(function () {
         return scenarioManager.loadIfEmpty('makelogs');
