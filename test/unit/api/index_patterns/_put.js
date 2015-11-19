@@ -83,6 +83,18 @@ define(function (require) {
         ]);
       });
 
+      bdd.it('should return 404 for a non-existent id', function () {
+        var pattern = createTestData().indexPatternWithMappings;
+        pattern.fields = _.map(pattern.fields, function (field) {
+          return _.omit(field, 'mapping');
+        });
+        pattern.title = 'idonotexist';
+
+        return request.put('/index-patterns/idonotexist')
+          .send(pattern)
+          .expect(404);
+      });
+
     });
 
   };
