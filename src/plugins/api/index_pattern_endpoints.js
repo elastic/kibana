@@ -31,7 +31,7 @@ export default function (server) {
   };
 
   server.route({
-    path: '/api/index-patterns',
+    path: '/api/kibana/index_patterns',
     method: 'GET',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
@@ -68,7 +68,7 @@ export default function (server) {
   });
 
   server.route({
-    path: '/api/index-patterns/{id}',
+    path: '/api/kibana/index_patterns/{id}',
     method: 'GET',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;
@@ -95,7 +95,7 @@ export default function (server) {
   });
 
   server.route({
-    path: '/api/index-patterns',
+    path: '/api/kibana/index_patterns',
     method: 'POST',
     handler: function (req, reply) {
       if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
@@ -170,7 +170,7 @@ export default function (server) {
   });
 
   server.route({
-    path: '/api/index-patterns/{id}',
+    path: '/api/kibana/index_patterns/{id}',
     method: 'PUT',
     handler: function (req, reply) {
       if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
@@ -212,7 +212,7 @@ export default function (server) {
   });
 
   server.route({
-    path: '/api/index-patterns/{id}',
+    path: '/api/kibana/index_patterns/{id}',
     method: 'DELETE',
     handler: function (req, reply) {
       let client = server.plugins.elasticsearch.client;

@@ -6,16 +6,16 @@ define(function (require) {
 
   return function (bdd, scenarioManager, request) {
 
-    bdd.describe('PUT index-patterns', function putIndexPatterns() {
+    bdd.describe('PUT index_patterns', function putIndexPatterns() {
 
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana').then(function () {
-          return request.post('/index-patterns').send(createTestData().indexPatternWithMappings);
+          return request.post('/kibana/index_patterns').send(createTestData().indexPatternWithMappings);
         });
       });
 
       bdd.afterEach(function () {
-        return request.del('/index-patterns/logstash-*');
+        return request.del('/kibana/index_patterns/logstash-*');
       });
 
       bdd.it('should return 200 for a successful update', function () {
@@ -26,11 +26,11 @@ define(function (require) {
         pattern.timeFieldName = 'foo';
         pattern.fields[0].count = 5;
 
-        return request.put('/index-patterns/logstash-*')
+        return request.put('/kibana/index_patterns/logstash-*')
           .send(pattern)
           .expect(200)
           .then(function () {
-            return request.get('/index-patterns/logstash-*');
+            return request.get('/kibana/index_patterns/logstash-*');
           })
           .then(function (res) {
             expect(res.body.timeFieldName).to.be('foo');
@@ -45,13 +45,13 @@ define(function (require) {
         });
         pattern.title = 'foo';
 
-        return request.put('/index-patterns/logstash-*')
+        return request.put('/kibana/index_patterns/logstash-*')
           .send(pattern)
           .expect(400);
       });
 
       bdd.it('should return 400 if you try to update mappings', function () {
-        return request.put('/index-patterns/logstash-*')
+        return request.put('/kibana/index_patterns/logstash-*')
           .send(createTestData().indexPatternWithMappings)
           .expect(400);
       });
@@ -65,19 +65,19 @@ define(function (require) {
         };
 
         return Promise.all([
-          request.put('/index-patterns/logstash-*').expect(400),
+          request.put('/kibana/index_patterns/logstash-*').expect(400),
 
-          request.put('/index-patterns/logstash-*')
+          request.put('/kibana/index_patterns/logstash-*')
             .send({})
             .expect(400),
 
           //fields must be an array
-          request.put('/index-patterns/logstash-*')
+          request.put('/kibana/index_patterns/logstash-*')
             .send(_.assign(omitMappings(createTestData().indexPatternWithMappings), {fields: {}}))
             .expect(400),
 
           // field objects must have a name
-          request.put('/index-patterns/logstash-*')
+          request.put('/kibana/index_patterns/logstash-*')
             .send(_.assign(omitMappings(createTestData().indexPatternWithMappings), {fields: [{count: 0}]}))
             .expect(400)
         ]);
@@ -90,7 +90,7 @@ define(function (require) {
         });
         pattern.title = 'idonotexist';
 
-        return request.put('/index-patterns/idonotexist')
+        return request.put('/kibana/index_patterns/idonotexist')
           .send(pattern)
           .expect(404);
       });
