@@ -99,7 +99,7 @@ export default function (server) {
     method: 'POST',
     handler: function (req, reply) {
       if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
-      const validation = Joi.validate(req.payload, indexPatternSchema);
+      const validation = Joi.validate(req.payload, indexPatternSchema.post);
       if (validation.error) {
         return reply(Boom.badRequest(validation.error));
       }
@@ -173,6 +173,10 @@ export default function (server) {
     handler: function (req, reply) {
       if (_.isEmpty(req.payload)) { return reply(Boom.badRequest('Payload required')); }
       if (req.payload.title !== req.params.id) { return reply(Boom.badRequest('Updates to title not supported')); }
+      const validation = Joi.validate(req.payload, indexPatternSchema.put);
+      if (validation.error) {
+        return reply(Boom.badRequest(validation.error));
+      }
 
       let client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
