@@ -106,7 +106,7 @@ export default function (server) {
 
       const client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
-      const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
+      const isWildcard = _.contains(indexPattern.title, '*');
       const mappings = _(req.payload.fields)
         .indexBy('name')
         .mapValues(value => value.mapping)
@@ -182,7 +182,6 @@ export default function (server) {
 
       let client = server.plugins.elasticsearch.client;
       const indexPattern = _.cloneDeep(req.payload);
-      const isWildcard = _.contains(indexPattern.title, '*') || (indexPattern.title.match(/\[.*]/) !== null);
       const mappings = _(req.payload.fields)
         .indexBy('name')
         .mapValues(value => value.mapping)
