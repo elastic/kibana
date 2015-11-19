@@ -163,7 +163,7 @@ define(function (require) {
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
-      var req = _.first(self._myQueued());
+      var req = _.first(self._myStartableQueued());
 
       if (!req) {
         req = self._createRequest();
@@ -179,7 +179,7 @@ define(function (require) {
      * @async
      */
     SourceAbstract.prototype.fetchQueued = function () {
-      return courierFetch.these(this._myQueued());
+      return courierFetch.these(this._myStartableQueued());
     };
 
     /**
@@ -203,8 +203,15 @@ define(function (require) {
      *****/
 
     SourceAbstract.prototype._myQueued = function () {
-      var reqs = requestQueue.getStartable(this._fetchStrategy);
-      return _.where(reqs, { source: this });
+      return requestQueue
+      .get(this._fetchStrategy)
+      .filter(req => req.source === this);
+    };
+
+    SourceAbstract.prototype._myStartableQueued = function () {
+      return requestQueue
+      .getStartable(this._fetchStrategy)
+      .filter(req => req.source === this);
     };
 
     SourceAbstract.prototype._createRequest = function () {
