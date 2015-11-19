@@ -87,7 +87,7 @@ export default function (server) {
         stitchPatternAndMappings
       ).then(removeDeprecatedFieldProps)
         .then(function (pattern) {
-          reply(pattern);
+          reply(_.isArray(pattern) ? pattern[0] : pattern);
         }, function (error) {
           reply(handleESError(error));
         });

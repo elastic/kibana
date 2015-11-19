@@ -8,6 +8,7 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var post = require('./_post');
   var get = require('./_get');
+  var put = require('./_put');
 
   bdd.describe('index-patterns API', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
@@ -23,5 +24,6 @@ define(function (require) {
 
     get(bdd, scenarioManager, request);
     post(bdd, scenarioManager, request);
+    put(bdd, scenarioManager, request);
   });
 });
