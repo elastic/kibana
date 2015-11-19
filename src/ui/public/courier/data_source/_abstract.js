@@ -203,7 +203,7 @@ define(function (require) {
      *****/
 
     SourceAbstract.prototype._myQueued = function () {
-      var reqs = requestQueue.get(this._fetchStrategy);
+      var reqs = requestQueue.getStartable(this._fetchStrategy);
       return _.where(reqs, { source: this });
     };
 
