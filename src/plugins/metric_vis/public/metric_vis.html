@@ -1,6 +1,16 @@
 <div ng-controller="KbnMetricVisController" class="metric-vis">
-    <div class="metric-container" ng-repeat="metric in metrics">
-        <div class="metric-value" ng-style="{'font-size': vis.params.fontSize+'pt'}">{{metric.value}}</div>
-        <div>{{metric.label}}</div>
+  <div class="metric-container" ng-repeat="metric in metrics">
+    <div ng-hide="!metric.value">
+      <div class="metric-value" ng-style="{'font-size': vis.params.fontSize+'pt'}">{{metric.value}}</div>
+      <div>{{metric.label}}</div>
     </div>
+    <div ng-if="!metric.value">
+      <div class="item top"></div>
+      <div class="item">
+        <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+        <div>No data available for {{metric.label}}</div>
+      </div>
+      <div class="item bottom"></div>
+    </div>
+  </div>
 </div>
