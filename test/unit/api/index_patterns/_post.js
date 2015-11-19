@@ -126,7 +126,7 @@ define(function (require) {
       });
 
       bdd.it('should return 409 conflict when mappings are provided with a pattern that matches existing indices',
-        function templateConflict() {
+        function existingIndicesConflict() {
           var pattern = createTestData().indexPatternWithMappings;
           pattern.title = '.kib*';
 
