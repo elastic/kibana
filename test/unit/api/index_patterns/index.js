@@ -1,6 +1,6 @@
 define(function (require) {
   var bdd = require('intern!bdd');
-  var config = require('intern').config;
+  var serverConfig = require('intern/dojo/node!../../../serverConfig');
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
   var request = require('intern/dojo/node!supertest-as-promised');
   var url = require('intern/dojo/node!url');
@@ -12,8 +12,8 @@ define(function (require) {
   var del = require('./_del');
 
   bdd.describe('index_patterns API', function () {
-    var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    request = request(url.format(config.servers.kibana) + '/api');
+    var scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
+    request = request(url.format(serverConfig.servers.kibana) + '/api');
 
     bdd.before(function () {
       return scenarioManager.load('emptyKibana');

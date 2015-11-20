@@ -7,7 +7,8 @@ module.exports = function (grunt) {
   grunt.registerTask('test:quick', [
     'test:server',
     'test:ui',
-    'test:browser'
+    'test:browser',
+    'test:api'
   ]);
 
   grunt.registerTask('test:dev', [
