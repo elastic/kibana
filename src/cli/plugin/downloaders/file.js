@@ -9,7 +9,7 @@ function openSourceFile({ sourcePath }) {
 
     return { readStream, fileInfo };
   } catch (err) {
-    if (err.message.match(/enoent/i)) {
+    if (err.code === 'ENOENT') {
       throw new Error('ENOTFOUND');
     }
 

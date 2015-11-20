@@ -8,10 +8,10 @@ async function extractArchive(settings) {
 
     unzipper.extract({
       path: settings.workingPath,
-      filter: function (file) {
+      strip: 1,
+      filter(file) {
         return file.type !== 'SymbolicLink';
-      },
-      strip: 1
+      }
     });
 
     unzipper.on('extract', resolve);
