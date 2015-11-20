@@ -32,8 +32,9 @@ define(function (require) {
               return self.checkForKibanaApp()
               .then(function (kibanaLoaded) {
                 if (!kibanaLoaded) {
-                  self.debug('Kibana is not loaded, retrying');
-                  throw new Error('Kibana is not loaded, retrying');
+                  var msg = 'Kibana is not loaded, retrying';
+                  self.debug(msg);
+                  throw new Error(msg);
                 }
               });
             }
@@ -44,12 +45,11 @@ define(function (require) {
           .then(function (currentUrl) {
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
-              self.debug('App failed to load: ' + appName +
+              var msg = 'App failed to load: ' + appName +
               ' in ' + defaultTimeout + 'ms' +
-              ' currentUrl = ' + currentUrl);
-              throw new Error('App failed to load: ' + appName +
-              ' in ' + defaultTimeout + 'ms' +
-              ' currentUrl = ' + currentUrl);
+              ' currentUrl = ' + currentUrl;
+              self.debug(msg);
+              throw new Error(msg);
             }
           });
         });
