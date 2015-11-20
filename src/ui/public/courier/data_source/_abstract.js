@@ -121,8 +121,10 @@ define(function (require) {
     SourceAbstract.prototype.onResults = function (handler) {
       var self = this;
 
-      return new PromiseEmitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject) {
+        const defer = Promise.defer();
         self._createRequest(defer);
+        defer.promise.then(resolve, reject);
       }, handler);
     };
 
