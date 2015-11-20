@@ -191,7 +191,10 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.cancelQueued = function () {
-      _.invoke(this._myQueued(), 'abort');
+      requestQueue
+      .get(this._fetchStrategy)
+      .filter(req => req.source === this)
+      .forEach(req => req.abort());
     };
 
     /**
@@ -205,12 +208,6 @@ define(function (require) {
     /*****
      * PRIVATE API
      *****/
-
-    SourceAbstract.prototype._myQueued = function () {
-      return requestQueue
-      .get(this._fetchStrategy)
-      .filter(req => req.source === this);
-    };
 
     SourceAbstract.prototype._myStartableQueued = function () {
       return requestQueue
