@@ -61,6 +61,7 @@ define(function (require) {
               config.set('defaultIndex', indexPattern.id);
             }
 
+            indexPattern.destroy();
             indexPatterns.cache.clear(indexPattern.id);
             kbnUrl.change('/settings/indices/' + indexPattern.id);
           });

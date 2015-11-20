@@ -257,6 +257,10 @@ define(function (require) {
         return '' + self.toJSON();
       };
 
+      self.destroy = function () {
+        docSource.destroy();
+      };
+
       self.metaFields = config.get('metaFields');
       self.getComputedFields = getComputedFields.bind(self);
 
