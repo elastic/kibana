@@ -54,14 +54,14 @@ the dynamic mapping feature in Elasticsearch.
 Kibana supports SSL encryption for both client requests and the requests the Kibana server
 sends to Elasticsearch.
 
-To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file `and
+To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file` and
 `ssl_cert_file` properties in `kibana.yml`:
 
 [source,text]
 ----
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
-ssl_key_file: /path/to/your/server.key
-ssl_cert_file: /path/to/your/server.crt
+server.ssl.key: /path/to/your/server.key
+server.ssl.cert: /path/to/your/server.crt
 ----
 
 If you are using Shield or a proxy that provides an HTTPS endpoint for Elasticsearch,
@@ -97,7 +97,7 @@ visualization.
 
 To configure access to Kibana using Shield, you create Shield roles
 for Kibana using the `kibana4` default role as a starting point. For more
-information, see {shield}/kibana.html#using-kibana4-with-shield[Shield with Kibana 4][Using Shield with Kibana 4].
+information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana 4 with Shield].
 
 [float]
 [[load-balancing]]

@@ -5,9 +5,10 @@
 reference fields by leafnode. For example, the `geoip.country_code` field can no longer support searches such as 
 `country_code:US`. Instead, use the entire field name. This change affects saved searches, visualizations, and dashboards 
 from previous versions of Kibana.
+* Kibana no longer features copy-to-clipboard functionality.
 
 [float]
-[[enhancementss]]
+[[enhancements]]
 == Enhancements
 
 * {k4issue}2855[Issue 2855]: Configurable Kibana log levels.
