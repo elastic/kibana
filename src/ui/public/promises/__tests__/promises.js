@@ -12,6 +12,16 @@ describe('Promise service', function () {
     $rootScope = $injector.get('$rootScope');
   }));
 
+  describe('Constructor', function () {
+    it('provides resolve and reject function', function () {
+      new Promise(function (resolve, reject) {
+        expect(resolve).to.be.a('function');
+        expect(reject).to.be.a('function');
+        expect(arguments).to.have.length(2);
+      });
+    });
+  });
+
   describe('Promise.fromNode', function () {
     it('creates a callback that controls a promise', function () {
       let callback;
