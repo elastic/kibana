@@ -4,7 +4,7 @@ define(function (require) {
   var createTestData = require('intern/dojo/node!../../../unit/api/index_patterns/data');
   var Promise = require('bluebird');
   var indexPatternSchema = require('intern/dojo/node!../../../../src/plugins/kibana/server/lib/schemas/index_pattern_schema');
-  var Joi = require('intern/dojo/node!Joi');
+  var Joi = require('intern/dojo/node!joi');
 
   return function (bdd, scenarioManager, request) {
 
