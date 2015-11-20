@@ -25,7 +25,9 @@ define(function (require) {
 
     self.delete = function (pattern) {
       self.getIds.clearCache();
+      pattern.destroy();
       patternCache.delete(pattern.id);
+
       return es.delete({
         index: kbnIndex,
         type: 'index-pattern',
