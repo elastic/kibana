@@ -13,6 +13,7 @@ define(function (require) {
     var scenarioManager;
     var remote;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
+    this.timeout = 120000;
 
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
