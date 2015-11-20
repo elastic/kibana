@@ -93,9 +93,11 @@ define(function (require) {
         });
 
         bdd.it('makelogs data should have expected number of fields', function () {
-          return settingsPage.getFieldsTabCount()
-          .then(function (tabCount) {
-            expect(tabCount).to.be('' + expectedFieldCount);
+          return common.tryForTime(5000, function () {
+            return settingsPage.getFieldsTabCount()
+            .then(function (tabCount) {
+              expect(tabCount).to.be('' + expectedFieldCount);
+            });
           })
           .catch(common.handleError(this));
         });
