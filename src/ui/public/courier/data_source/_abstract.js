@@ -123,8 +123,9 @@ define(function (require) {
 
       return new PromiseEmitter(function (resolve, reject) {
         const defer = Promise.defer();
-        self._createRequest(defer);
         defer.promise.then(resolve, reject);
+
+        self._createRequest(defer);
       }, handler);
     };
 
