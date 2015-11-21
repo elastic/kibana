@@ -16,6 +16,7 @@ define(function (require) {
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
     var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
     var type = 'index-pattern';
 
@@ -235,7 +236,14 @@ define(function (require) {
             var confirmMessage = 'Are you sure you want to overwrite this?';
 
             return safeConfirm(confirmMessage).then(
-              function () {
+              function overwrite() {
+                if (patternCache.get(self.id)) {
+                  return patternCache.get(self.id)
+                  .then(pattern => pattern.destroy())
+                  .then(() => patternCache.clear(self.id))
+                  .then(overwrite);
+                }
+
                 return docSource.doIndex(body).then(setId);
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
