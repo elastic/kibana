@@ -62,7 +62,6 @@ define(function (require) {
             }
 
             indexPattern.destroy();
-            indexPatterns.cache.clear(indexPattern.id);
             kbnUrl.change('/settings/indices/' + indexPattern.id);
           });
         });
