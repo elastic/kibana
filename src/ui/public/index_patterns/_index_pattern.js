@@ -230,39 +230,34 @@ define(function (require) {
         return body;
       };
 
-      function setId(id) {
-        return self.id = id;
-      }
-
       self.create = function () {
         var body = self.prepBody();
         return docSource.doCreate(body)
-        .then(setId)
         .catch(function (err) {
           if (_.get(err, 'origError.status') === 409) {
             var confirmMessage = 'Are you sure you want to overwrite this?';
 
             return safeConfirm(confirmMessage).then(
-              function overwrite() {
-                if (patternCache.get(self.id)) {
-                  return patternCache.get(self.id)
-                  .then(pattern => pattern.destroy())
-                  .then(() => patternCache.clear(self.id))
-                  .then(overwrite);
-                }
-
-                return docSource.doIndex(body).then(setId);
+              function () {
+                return Promise.try(function () {
+                  const cached = patternCache.get(self.id);
+                  if (cached) {
+                    return cached.then(pattern => pattern.destroy());
+                  }
+                })
+                .then(() => docSource.doIndex(body));
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
           }
           return Promise.resolve(false);
-        });
+        })
+        .then(() => self.id);
       };
 
       self.save = function () {
         var body = self.prepBody();
-        return docSource.doIndex(body).then(setId);
+        return docSource.doIndex(body).then(() => self.id);
       };
 
       self.refreshFields = function () {
