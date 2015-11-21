@@ -284,6 +284,7 @@ define(function (require) {
       };
 
       self.destroy = function () {
+        patternCache.clear(self.id);
         docSource.destroy();
       };
 
