@@ -54,7 +54,14 @@ define(function (require) {
     function IndexPattern(id) {
       var self = this;
 
-      setId(id);
+      if (id) {
+        Object.defineProperty(this, 'id', {
+          get() { return id; },
+          set() {
+            throw new Error('Saved IndexPatterns can not get new ids.');
+          }
+        });
+      }
 
       var docSource = new DocSource();
 
