@@ -21,6 +21,12 @@ Toggle Filter image:images/filter-toggle.png[]:: Click this icon to _toggle_ a f
 filters, and display in green. Only elements that match the filter are displayed. To change this to an exclusion 
 filters, displaying only elements that _don't_ match, toggle the filter. Exclusion filters display in red.
 Remove Filter image:images/filter-delete.png[]:: Click this icon to remove a filter entirely.
+Custom Filter image:images/filter-custom.png[]:: Click this icon to display a text field where you can customize the JSON
+representation of the filter:
++
+image::images/filter-custom-json.png[]
++
+Click the *Done* button to update the filter with your changes.
 
 To apply any of the filter actions to all the filters currently in place, click the image:images/filter-actions.png[] 
 *Global Filter Actions* button and select an action.
