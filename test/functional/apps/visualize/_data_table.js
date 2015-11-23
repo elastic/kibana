@@ -26,16 +26,36 @@ define(function (require) {
         remote = this.remote;
         fromTime = '2015-09-19 06:31:44.000';
         toTime = '2015-09-23 18:31:44.000';
-      });
 
-      bdd.beforeEach(function () {
-        return visualizePage.clickDataTable()
+
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          common.debug('navigateTo');
+          return settingsPage.navigateTo();
+        })
+        .then(function () {
+          common.debug('createIndexPattern');
+          return settingsPage.createIndexPattern();
+        })
+        .then(function () {
+          common.debug('navigateToApp visualize');
+          return common.navigateToApp('visualize');
+        })
+        .then(function () {
+          return common.sleep(2000);
+        })
+        .then(function () {
+          common.debug('clickLineChart');
+          return visualizePage.clickDataTable();
+        })
         .then(function clickNewSearch() {
+          common.debug('clickNewSearch');
           return visualizePage.clickNewSearch();
         })
         .then(function clickTimepicker() {
           return common.tryForTime(5000, function () {
-            return discoverPage.clickTimepicker();
+            common.debug('clickTimepicker');
+            return headerPage.clickTimepicker();
           });
         })
         .then(function setAbsoluteRange() {

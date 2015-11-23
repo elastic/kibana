@@ -138,6 +138,8 @@ define(function (require) {
           this.timeout = 60000;
           var remote = this.remote;
 
+          // this test only verifies the numerical part of this data
+          // it could also check the legend to verify the extensions
           var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
           return visualizePage.getLineChartData()

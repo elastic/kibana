@@ -27,16 +27,32 @@ define(function (require) {
         fromTime = '2015-09-19 06:31:44.000';
         toTime = '2015-09-23 18:31:44.000';
 
-      });
-
-      bdd.beforeEach(function () {
-        return visualizePage.clickTileMap()
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          common.debug('navigateTo');
+          return settingsPage.navigateTo();
+        })
+        .then(function () {
+          common.debug('createIndexPattern');
+          return settingsPage.createIndexPattern();
+        })
+        .then(function () {
+          common.debug('navigateToApp visualize');
+          return common.navigateToApp('visualize');
+        })
+        .then(function () {
+          return common.sleep(2000);
+        })
+        .then(function () {
+          common.debug('clickTileMap');
+          return visualizePage.clickTileMap();
+        })
         .then(function () {
           return visualizePage.clickNewSearch();
         })
         .then(function () {
           return common.tryForTime(5000, function () {
-            return discoverPage.clickTimepicker();
+            return headerPage.clickTimepicker();
           });
         })
         .then(function () {
@@ -68,6 +84,7 @@ define(function (require) {
           return headerPage.getSpinnerDone();
         });
       });
+
 
       bdd.describe('tile map chart', function indexPatternCreation() {
 

@@ -46,25 +46,25 @@ define(function (require) {
       });
     });
 
-    // bdd.after(function unloadMakelogs() {
-    //   return scenarioManager.unload('logstashFunctional');
-    // });
+    bdd.after(function unloadMakelogs() {
+      return scenarioManager.unload('logstashFunctional');
+    });
 
-    // chartTypeTest(bdd, scenarioManager); good
+    chartTypeTest(bdd, scenarioManager);
 
-    // areaChartTest(bdd, scenarioManager); // good
+    areaChartTest(bdd, scenarioManager);
 
-    // lineChartTest(bdd, scenarioManager);
-    //
-    // dataTableTest(bdd, scenarioManager);
-    //
-    // metricChartTest(bdd, scenarioManager);
-    //
+    lineChartTest(bdd, scenarioManager);
+
+    dataTableTest(bdd, scenarioManager);
+
+    metricChartTest(bdd, scenarioManager);
+
     pieChartTest(bdd, scenarioManager);
-    //
-    // tileMapTest(bdd, scenarioManager);
-    //
-    // verticalBarChartTest(bdd);
+
+    tileMapTest(bdd, scenarioManager);
+
+    verticalBarChartTest(bdd, scenarioManager);
 
   });
 });

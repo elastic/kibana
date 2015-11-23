@@ -17,7 +17,7 @@ define(function (require) {
       var fromTime;
       var toTime;
 
-      bdd.beforeEach(function () {
+      bdd.before(function () {
         common = new Common(this.remote);
         headerPage = new HeaderPage(this.remote);
         settingsPage = new SettingsPage(this.remote);
@@ -27,7 +27,26 @@ define(function (require) {
         fromTime = '2015-09-19 06:31:44.000';
         toTime = '2015-09-23 18:31:44.000';
 
-        return visualizePage.clickVerticalBarChart()
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          common.debug('navigateTo');
+          return settingsPage.navigateTo();
+        })
+        .then(function () {
+          common.debug('createIndexPattern');
+          return settingsPage.createIndexPattern();
+        })
+        .then(function () {
+          common.debug('navigateToApp visualize');
+          return common.navigateToApp('visualize');
+        })
+        .then(function () {
+          return common.sleep(2000);
+        })
+        .then(function () {
+          common.debug('clickVerticalBarChart');
+          return visualizePage.clickVerticalBarChart();
+        })
         .then(function clickNewSearch() {
           return visualizePage.clickNewSearch();
         })
@@ -36,7 +55,7 @@ define(function (require) {
         })
         .then(function clickTimepicker() {
           common.debug('Click time picker');
-          return discoverPage.clickTimepicker();
+          return headerPage.clickTimepicker();
         })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
@@ -100,6 +119,22 @@ define(function (require) {
         });
 
 
+        bdd.it('should show correct chart', function pageHeader() {
+
+          this.timeout = 60000;
+          var expectedChartValues = [15, 105, 518, 1261, 1485, 982, 322, 65, 29, 104,
+            483, 1163, 1507, 958, 317, 55, 17, 88, 498, 1209, 1488, 949, 308, 74, 4
+          ];
+
+          return visualizePage.getBarChartData()
+          .then(function showData(data) {
+            common.debug('data=' + data);
+            common.debug('data.length=' + data.length);
+            expect(data).to.eql(expectedChartValues);
+          })
+          .catch(common.handleError(this));
+        });
+
 
         bdd.it('should show correct data', function pageHeader() {
 
@@ -130,22 +165,6 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-
-        bdd.it('should show correct chart', function pageHeader() {
-
-          this.timeout = 60000;
-          var expectedChartValues = [15, 105, 518, 1261, 1485, 982, 322, 65, 29, 104,
-            483, 1163, 1507, 958, 317, 55, 17, 88, 498, 1209, 1488, 949, 308, 74, 4
-          ];
-
-          return visualizePage.getBarChartData()
-          .then(function showData(data) {
-            common.debug('data=' + data);
-            common.debug('data.length=' + data.length);
-            expect(data).to.eql(expectedChartValues);
-          })
-          .catch(common.handleError(this));
-        });
 
 
       });

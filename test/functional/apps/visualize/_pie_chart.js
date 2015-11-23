@@ -22,9 +22,6 @@ define(function (require) {
         discoverPage = new DiscoverPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
         remote = this.remote;
-      });
-
-      bdd.before(function () {
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
@@ -48,20 +45,21 @@ define(function (require) {
           common.debug('clickPieChart');
           return visualizePage.clickPieChart();
         })
-        .then(function () {
+        .then(function clickNewSearch() {
           return visualizePage.clickNewSearch();
         })
-        .then(function () {
-          common.debug('clickTimepicker');
-          return common.tryForTime(5000, function () {
-            return headerPage.clickTimepicker();
-          });
+        .then(function sleep() {
+          return common.sleep(1000);
         })
-        .then(function () {
+        .then(function clickTimepicker() {
+          common.debug('Click time picker');
+          return headerPage.clickTimepicker();
+        })
+        .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
         })
-        .then(function () {
+        .then(function collapseTimepicker() {
           common.debug('Collapse Time Picker pane');
           return headerPage.collapseTimepicker();
         })
@@ -95,6 +93,7 @@ define(function (require) {
           return headerPage.getSpinnerDone();
         });
       });
+
 
       bdd.describe('pie chart', function indexPatternCreation() {
 
@@ -175,7 +174,7 @@ define(function (require) {
           'M-264.8995143221307,55.98044133355214A270.75,270.75 0 0,1 -255.0335453610437,-90.90353810813123L0,0Z',
           'M-255.0335453610437,-90.90353810813123A270.75,270.75 0 0,1 -166.77401090750624,-213.28851770740727L0,0Z',
           'M-166.77401090750624,-213.28851770740727A270.75,270.75 0 0,1 -4.973596813037188e-14,-270.75L0,0Z'
-        ];
+          ];
 
           return visualizePage.getPieChartData()
           .then(function (pieData) {

@@ -32,10 +32,26 @@ define(function (require) {
         var vizName1 = 'Visualization ' + testSubName;
         this.timeout = 60000;
 
-      });
-
-      bdd.beforeEach(function () {
-        return visualizePage.clickMetric()
+        return scenarioManager.reload('emptyKibana')
+        .then(function () {
+          common.debug('navigateTo');
+          return settingsPage.navigateTo();
+        })
+        .then(function () {
+          common.debug('createIndexPattern');
+          return settingsPage.createIndexPattern();
+        })
+        .then(function () {
+          common.debug('navigateToApp visualize');
+          return common.navigateToApp('visualize');
+        })
+        .then(function () {
+          return common.sleep(2000);
+        })
+        .then(function () {
+          common.debug('clickMetric');
+          return visualizePage.clickMetric();
+        })
         .then(function clickNewSearch() {
           return visualizePage.clickNewSearch();
         })
@@ -44,7 +60,7 @@ define(function (require) {
         })
         .then(function clickTimepicker() {
           common.debug('Click time picker');
-          return discoverPage.clickTimepicker();
+          return headerPage.clickTimepicker();
         })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
@@ -56,10 +72,10 @@ define(function (require) {
         });
       });
 
+
       bdd.describe('metric chart', function indexPatternCreation() {
 
-
-        bdd.it('should show "Count"', function pageHeader() {
+        bdd.it('should show Count', function pageHeader() {
           var expectedCount = ['14,004', 'Count'];
 
           // initial metric of "Count" is selected by default
@@ -71,7 +87,7 @@ define(function (require) {
           });
         });
 
-        bdd.it('should show "Average"', function pageHeader() {
+        bdd.it('should show Average', function pageHeader() {
           var avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
           return visualizePage.clickMetricEditor()
           .then(function () {
@@ -96,13 +112,10 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Sum"', function pageHeader() {
+        bdd.it('should show Sum', function pageHeader() {
           var sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Sum');
-            return visualizePage.selectAggregation('Sum');
-          })
+          common.debug('Aggregation = Sum');
+          return visualizePage.selectAggregation('Sum')
           .then(function selectField() {
             common.debug('Field = phpmemory');
             return visualizePage.selectField('phpmemory');
@@ -121,14 +134,11 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Median"', function pageHeader() {
+        bdd.it('should show Median', function pageHeader() {
           var medianBytes = ['5,565.263', '50th percentile of bytes'];
           //  For now, only comparing the text label part of the metric
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Median');
-            return visualizePage.selectAggregation('Median');
-          })
+          common.debug('Aggregation = Median');
+          return visualizePage.selectAggregation('Median')
           .then(function selectField() {
             common.debug('Field = bytes');
             return visualizePage.selectField('bytes');
@@ -148,13 +158,10 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Min"', function pageHeader() {
+        bdd.it('should show Min', function pageHeader() {
           var minTimestamp = ['September 19th 2015, 19:00:00.000', 'Min @timestamp'];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Min');
-            return visualizePage.selectAggregation('Min');
-          })
+          common.debug('Aggregation = Min');
+          return visualizePage.selectAggregation('Min')
           .then(function selectField() {
             common.debug('Field = @timestamp');
             return visualizePage.selectField('@timestamp');
@@ -173,13 +180,10 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Max"', function pageHeader() {
+        bdd.it('should show Max', function pageHeader() {
           var maxRelatedContentArticleModifiedTime = ['April 3rd 2015, 19:54:41.000', 'Max relatedContent.article:modified_time'];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Max');
-            return visualizePage.selectAggregation('Max');
-          })
+          common.debug('Aggregation = Max');
+          return visualizePage.selectAggregation('Max')
           .then(function selectField() {
             common.debug('Field = relatedContent.article:modified_time');
             return visualizePage.selectField('relatedContent.article:modified_time');
@@ -198,15 +202,12 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Standard Deviation"', function pageHeader() {
+        bdd.it('should show Standard Deviation', function pageHeader() {
           var standardDeviationBytes = [ '-1,435.138', 'Lower Standard Deviation of bytes',
             '5,727.314', 'Average of bytes', '12,889.766', 'Upper Standard Deviation of bytes'
           ];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Standard Deviation');
-            return visualizePage.selectAggregation('Standard Deviation');
-          })
+          common.debug('Aggregation = Standard Deviation');
+          return visualizePage.selectAggregation('Standard Deviation')
           .then(function selectField() {
             common.debug('Field = bytes');
             return visualizePage.selectField('bytes');
@@ -225,13 +226,10 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Unique Count"', function pageHeader() {
+        bdd.it('should show Unique Count', function pageHeader() {
           var uniqueCountClientip = ['1,000', 'Unique count of clientip'];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Unique Count');
-            return visualizePage.selectAggregation('Unique Count');
-          })
+          common.debug('Aggregation = Unique Count');
+          return visualizePage.selectAggregation('Unique Count')
           .then(function selectField() {
             common.debug('Field = clientip');
             return visualizePage.selectField('clientip');
@@ -257,17 +255,14 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Percentiles"', function pageHeader() {
+        bdd.it('should show Percentiles', function pageHeader() {
           var percentileMachineRam = ['2,147,483,648', '1st percentile of machine.ram', '3,221,225,472',
             '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
             '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
             '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
           ];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Percentiles');
-            return visualizePage.selectAggregation('Percentiles');
-          })
+          common.debug('Aggregation = Percentiles');
+          return visualizePage.selectAggregation('Percentiles')
           .then(function selectField() {
             common.debug('Field =  machine.ram');
             return visualizePage.selectField('machine.ram');
@@ -286,13 +281,10 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show "Percentile Ranks"', function pageHeader() {
+        bdd.it('should show Percentile Ranks', function pageHeader() {
           var percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
-          return visualizePage.clickMetricEditor()
-          .then(function () {
-            common.debug('Aggregation = Percentile Ranks');
-            return visualizePage.selectAggregation('Percentile Ranks');
-          })
+          common.debug('Aggregation = Percentile Ranks');
+          return visualizePage.selectAggregation('Percentile Ranks')
           .then(function selectField() {
             common.debug('Field =  bytes');
             return visualizePage.selectField('memory');
@@ -311,24 +303,6 @@ define(function (require) {
                   expect(percentileRankBytes).to.eql(metricValue.split('\n'));
                 });
             });
-          // })
-          // .then(function saveVisualization() {
-          //   return visualizePage.saveVisualization(vizName1)
-          //     .then(function (message) {
-          //       common.debug('Saved viz message = ' + message);
-          //       expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-          //     });
-          // })
-          // .then(function testVisualizeWaitForToastMessageGone() {
-          //   return visualizePage.waitForToastMessageGone();
-          // })
-          // .then(function () {
-          //   return visualizePage.loadSavedVisualization(vizName1)
-          //     // take a snapshot just as an example.  Probably need to change the location to save them...
-          //     .takeScreenshot()
-          //     .then(function (data) {
-          //       fs.writeFileSync('./screenshot-' + testSubName + '.png', data);
-          //     });
           })
           .catch(common.handleError(this));
         });
