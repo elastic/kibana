@@ -1,6 +1,8 @@
 [[releasenotes]]
 == Kibana 4.3 Release Notes
 
+The 4.3 release of Kibana requires Elasticsearch 2.1 or later.
+
 Time-based index patterns are *deprecated* in this release of Kibana. Support for time-based index patterns will be removed
 entirely in the next major Kibana release. Elasticsearch 2.0 includes sophisticated date parsing APIs that Kibana uses to 
 determine date information, removing the need to specify dates in the index pattern name.
@@ -9,7 +11,7 @@ determine date information, removing the need to specify dates in the index patt
 [[enhancements]]
 == Enhancements
 
-* {k4issue}5109[Issue 5109]: Adds custom JSON to visualization filters.
+* {k4issue}5109[Issue 5109]: Adds custom JSON and filter alias naming for filters.
 * {k4issue}1726[Issue 1726]: Adds a color field formatter for value ranges in numeric fields.
 * {k4issue}4342[Issue 4342]: Increased performance for wildcard indices.
 * {k4issue}1600[Issue 1600]: Support for global time zones.

@@ -1,8 +1,8 @@
-[[kibana-server-properties-reference]]
+[[kibana-settings-reference]]
 
 WARNING: Modifying the following settings can signficantly affect Kibana's performance and cause problems that are difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
 
-.Kibana Server Properties Reference
+.Kibana Settings Reference
 [horizontal]
 `query:queryString:options`:: Options for the Lucene query string parser.
 `sort:options`:: Options for the Elasticsearch https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html[sort] parameter.
