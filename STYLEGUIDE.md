@@ -775,39 +775,22 @@ Several already exist, and can be found in `src/kibana/utils/_mixins.js`
 
 ## Modules
 
-Kibana uses AMD modules to organize code, and require.js to load those modules.
-
-Even Angular code is loaded this way.
-
-### Module paths
-
-Paths to modules should not be relative (ie. no dot notation). Instead, they should be loaded from one of the defined paths in the require config.
-
-*Right:*
-
-```js
-require('some/base/path/my_module');
-require('another/path/another_module');
-```
-
-*Wrong:*
-
-```js
-require('../my_module');
-require('./path/another_module');
-```
+Kibana uses WebPack, which supports many types of module definitions.
 
 ### CommonJS Syntax
 
-Module dependencies should be loaded via the CommonJS syntax:
+Module dependencies should be written using CommonJS or ES2015 syntax:
 
 *Right:*
 
 ```js
-define(function (require) {
-  var _ = require('lodash');
-  ...
-});
+const _ = require('lodash');
+module.exports = ...;
+```
+
+```js
+import _ from 'lodash';
+export default ...;
 ```
 
 *Wrong:*
@@ -824,7 +807,7 @@ Kibana is written in Angular, and uses several utility methods to make using Ang
 
 ### Defining modules
 
-Angular modules are defined using a custom require module named `module`. It is used as follows:
+Angular modules are defined using a custom require module named `ui/modules`. It is used as follows:
 
 ```js
 var app = require('ui/modules').get('app/namespace');
