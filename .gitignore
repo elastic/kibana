@@ -21,3 +21,4 @@ config/kibana.dev.yml
 coverage
 selenium
 .babelcache.json
+*.swp
