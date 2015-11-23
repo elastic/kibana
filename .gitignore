@@ -22,3 +22,4 @@ coverage
 selenium
 .babelcache.json
 *.swp
+*.swo
