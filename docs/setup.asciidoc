@@ -3,7 +3,7 @@
 You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
-* Elasticsearch 2.0 or later
+* Elasticsearch 2.1 or later
 * A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
@@ -71,7 +71,7 @@ To configure the Elasticsearch indices you want to access with Kibana:
 
 . Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 +
-image:images/Start-Page.jpg[Kibana start page]
+image:images/Start-Page.png[Kibana start page]
 +
 . Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
 guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case, you can use the
@@ -81,6 +81,9 @@ simply be the name of a single index.
 . Select the index field that contains the timestamp that you want to use to perform time-based comparisons. Kibana
 reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data,
 disable the *Index contains time-based events* option.
+WARNING: Time-based index patterns are *deprecated* in this release of Kibana. Support for time-based index patterns will 
+be removed entirely in the next major Kibana release. Elasticsearch 2.0 includes sophisticated date parsing APIs that 
+Kibana uses to determine date information, removing the need to specify dates in the index pattern name.
 . If new indices are generated periodically and have a timestamp appended to the name, select the *Use event times to
 create index names* option and select the *Index pattern interval*. This improves search performance by enabling Kibana
 to search only those indices that could contain data in the time range you specify. This is primarily applicable if you
