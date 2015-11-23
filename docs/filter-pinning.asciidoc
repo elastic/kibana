@@ -27,7 +27,8 @@ representation of the filter and specify an alias to use for the filter name:
 image::images/filter-custom-json.png[]
 +
 You can use JSON filter representation to implement predicate logic, with `should` for OR, `must` for AND, and `must_not` 
-for NOT, as in the following examples:
+for NOT:
++
 .OR Example
 ==========
 [source,json]
@@ -48,6 +49,7 @@ for NOT, as in the following examples:
   }
 }
 ==========
++
 .AND Example
 ==========
 [source,json]
@@ -69,6 +71,7 @@ for NOT, as in the following examples:
 }
 
 ==========
++
 .NOT Example
 ==========
 [source,json]
