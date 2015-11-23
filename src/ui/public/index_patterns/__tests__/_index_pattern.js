@@ -135,7 +135,6 @@ describe('index pattern', function () {
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
     require('testUtils/noDigestPromises').activateForSuite();
-    var indexPatternId = 'test-pattern';
     var indexPattern;
     var fieldLength;
     var truncatedFields;
@@ -405,12 +404,14 @@ describe('index pattern', function () {
 
   describe('#isWildcard()', function () {
     it('returns true if id has an *', function () {
-      indexPattern.id = 'foo*';
-      expect(indexPattern.isWildcard()).to.be(true);
+      return create('foo*').then(function (pattern) {
+        expect(pattern.isWildcard()).to.be(true);
+      });
     });
     it('returns false if id has no *', function () {
-      indexPattern.id = 'foo';
-      expect(indexPattern.isWildcard()).to.be(false);
+      return create('foo').then(function (pattern) {
+        expect(pattern.isWildcard()).to.be(false);
+      });
     });
   });
 });
