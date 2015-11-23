@@ -6,7 +6,7 @@ define(function (require) {
     debug: true,
     capabilities: {
       'selenium-version': '2.47.1',
-      'idle-timeout': 99
+      'idle-timeout': 30
     },
     environments: [{
       browserName: 'firefox'
