@@ -773,6 +773,18 @@ When creating a utility function, attach it as a lodash mixin.
 
 Several already exist, and can be found in `src/kibana/utils/_mixins.js`
 
+## Filenames
+
+All filenames should use `snake_case` and *can* start with an underscore if the module is not intended to be used outside of it's containing module.
+
+*Right:*
+  - `src/kibana/index_patterns/index_pattern.js`
+  - `src/kibana/index_patterns/_field.js`
+
+*Wrong:*
+  - `src/kibana/IndexPatterns/IndexPattern.js`
+  - `src/kibana/IndexPatterns/Field.js`
+
 ## Modules
 
 Kibana uses WebPack, which supports many types of module definitions.
@@ -855,7 +867,7 @@ require('ui/routes')
 
 # Html Style Guide
 
-### Multiple attribute values
+## Multiple attribute values
 
 When a node has multiple attributes that would cause it to exceed the line character limit, each attribute including the first should be on its own line with a single indent. Also, when a node that is styled in this way has child nodes, there should be a blank line between the openening parent tag and the first child tag.
 
@@ -869,6 +881,38 @@ When a node has multiple attributes that would cause it to exceed the line chara
   <li></li>
   ...
 </ul>
+```
+
+# Api Style Guide
+
+## Paths
+
+API routes must start with the `/api/` path segment, and should be followed by the plugin id if applicable:
+
+*Right:* `/api/marvel/v1/nodes`
+*Wrong:* `/marvel/api/v1/nodes`
+
+## Versions
+
+Kibana won't be supporting multiple API versions, so API's should not define a version.
+
+*Right:* `/api/kibana/index_patterns`
+*Wrong:* `/api/kibana/v1/index_patterns`
+
+## snake_case
+
+Kibana uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
+
+*Right:*
+```
+POST /api/kibana/index_patterns
+{
+  "id": "...",
+  "time_field_name": "...",
+  "fields": [
+    ...
+  ]
+}
 ```
 
 # Attribution
