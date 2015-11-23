@@ -49,7 +49,7 @@
     "test:coverage": "grunt test:coverage",
     "build": "grunt build",
     "start": "./bin/kibana --dev",
-    "precommit": "grunt lintStagedFiles",
+    "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
     "lint": "grunt eslint:source",
