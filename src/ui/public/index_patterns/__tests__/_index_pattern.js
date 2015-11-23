@@ -121,7 +121,6 @@ describe('index pattern', function () {
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
     require('testUtils/noDigestPromises').activateForSuite();
-    var indexPatternId = 'test-pattern';
     var indexPattern;
     var fieldLength;
     var truncatedFields;
