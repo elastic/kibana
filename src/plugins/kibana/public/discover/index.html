@@ -50,6 +50,16 @@
           <i aria-hidden="true" class="fa fa-folder-open-o"></i>
         </button>
       </kbn-tooltip>
+      <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
+        <button
+          aria-label="Share Search"
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('share') }}"
+          ng-class="{active: configTemplate.is('share')}"
+          ng-click="configTemplate.toggle('share');">
+          <i aria-hidden="true" class="fa fa-external-link"></i>
+        </button>
+      </kbn-tooltip>
     </div>
   </navbar>
 

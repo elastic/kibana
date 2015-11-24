@@ -91,7 +91,8 @@ define(function (require) {
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
       load: require('plugins/kibana/discover/partials/load_search.html'),
-      save: require('plugins/kibana/discover/partials/save_search.html')
+      save: require('plugins/kibana/discover/partials/save_search.html'),
+      share: require('plugins/kibana/discover/partials/share_search.html')
     });
 
     $scope.timefilter = timefilter;
