@@ -5,7 +5,7 @@ define(function (require) {
   // at runtime
   var Common = require('./Common');
 
-  var defaultTimeout = 20000;
+  var defaultTimeout = 60000;
   var common;
   var thisTime;
 
@@ -76,10 +76,11 @@ define(function (require) {
     },
 
     getCurrentQueryName: function getCurrentQueryName() {
-      return thisTime
-      .findByCssSelector('span.discover-info-title')
-      // .findByCssSelector('span[bo-bind="opts.savedSearch.title"]')
-      .getVisibleText();
+      return common.tryForTime(defaultTimeout, function () {
+        return thisTime
+        .findByCssSelector('span.discover-info-title')
+        .getVisibleText();
+      });
     },
 
     getBarChartData: function getBarChartData() {
