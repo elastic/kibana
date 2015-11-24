@@ -47,12 +47,22 @@ define(function (require) {
     selectTimeFieldOption: function (selection) {
       var self = this;
 
+      // open dropdown
       return self.getTimeFieldNameField().click()
       .then(function () {
+        // close dropdown, keep focus
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
-        return self.getTimeFieldOption(selection);
+        return common.tryForTime(defaultTimeout, function () {
+          return self.getTimeFieldOption(selection).click()
+          .then(function () {
+            return self.getTimeFieldOption(selection).isSelected();
+          })
+          .then(function (selected) {
+            if (!selected) throw new Error('option not selected: ' + selected);
+          });
+        });
       });
     },
 
