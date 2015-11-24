@@ -1,4 +1,5 @@
 define(function (require) {
+  var config = require('intern').config;
   var Common = require('../../../support/pages/Common');
   var SettingsPage = require('../../../support/pages/SettingsPage');
   var expect = require('intern/dojo/node!expect.js');
@@ -9,7 +10,7 @@ define(function (require) {
       var common;
       var settingsPage;
       var remote;
-      var defaultTimeout = 90000;
+      var defaultTimeout = config.timeouts.default;
 
       bdd.before(function () {
         common = new Common(this.remote);

@@ -75,7 +75,6 @@ define(function (require) {
             return headerPage.getToastMessage();
           })
           .then(function (toastMessage) {
-            common.debug('toast message: ' + toastMessage);
             expect(toastMessage).to.be(expectedSavedQueryMessage);
           })
           .then(function () {
