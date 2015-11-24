@@ -13,7 +13,7 @@ define(function (require) {
     common = new Common(this.remote);
   }
 
-  var defaultTimeout = 60000;
+  var defaultTimeout = 90000;
 
   HeaderPage.prototype = {
     constructor: HeaderPage,
