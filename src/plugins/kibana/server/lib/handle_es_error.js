@@ -3,6 +3,10 @@ const esErrors = require('elasticsearch').errors;
 const _ = require('lodash');
 
 module.exports = function handleESError(error) {
+  if (!(error instanceof Error)) {
+    throw new Error('Expected an instance of Error');
+  }
+
   if (error instanceof esErrors.ConnectionFault ||
     error instanceof esErrors.ServiceUnavailable ||
     error instanceof esErrors.NoConnections ||
