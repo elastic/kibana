@@ -82,7 +82,8 @@ define(function (require) {
         })
         .then(function () {
           return headerPage.getSpinnerDone();
-        });
+        })
+        .catch(common.handleError(this));
       });
 
 

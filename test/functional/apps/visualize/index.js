@@ -38,8 +38,11 @@ define(function (require) {
     bdd.before(function () {
       common.debug('running bdd.beforeEach');
       this.timeout = 120000;
-      // start each test with an empty kibana index
-      return scenarioManager.reload('emptyKibana')
+      return remote.setWindowSize(1200,800)
+      .then(function () {
+        //  start each test with an empty kibana index
+        return scenarioManager.reload('emptyKibana');
+      })
       // and load a minimal set of makelogs data
       .then(function loadIfEmptyMakelogs() {
         return scenarioManager.loadIfEmpty('logstashFunctional');

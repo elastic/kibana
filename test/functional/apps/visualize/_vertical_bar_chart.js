@@ -111,6 +111,9 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
+          .then(function () {
+            return headerPage.getSpinnerDone(); // only matches the hidden spinner
+          })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
             common.saveScreenshot('./screenshot-' + testSubName + '.png');

@@ -69,7 +69,8 @@ define(function (require) {
         .then(function collapseTimepicker() {
           common.debug('Collapse Time Picker pane');
           return headerPage.collapseTimepicker();
-        });
+        })
+        .catch(common.handleError(this));
       });
 
 

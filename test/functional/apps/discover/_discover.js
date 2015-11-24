@@ -51,7 +51,8 @@ define(function (require) {
         .then(function () {
           common.debug('collapseTimepicker');
           return headerPage.collapseTimepicker();
-        });
+        })
+        .catch(common.handleError(this));
       });
 
 

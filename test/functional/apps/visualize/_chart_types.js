@@ -30,7 +30,8 @@ define(function (require) {
         })
         .then(function () {
           return common.sleep(2000);
-        });
+        })
+        .catch(common.handleError(this));
       });
 
 

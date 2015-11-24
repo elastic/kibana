@@ -95,7 +95,8 @@ define(function (require) {
         .then(function getSpinnerDone() {
           common.debug('Waiting...');
           return headerPage.getSpinnerDone();
-        });
+        })
+        .catch(common.handleError(this));
       });
 
       bdd.describe('area charts', function indexPatternCreation() {

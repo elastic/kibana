@@ -20,6 +20,7 @@ define(function (require) {
     bdd.before(function () {
       common = new Common(this.remote);
       remote = this.remote;
+      return remote.setWindowSize(1200,800);
     });
 
     bdd.after(function unloadMakelogs() {

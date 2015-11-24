@@ -84,7 +84,8 @@ define(function (require) {
         })
         .then(function () {
           return headerPage.getSpinnerDone(); // only matches the hidden spinner
-        });
+        })
+        .catch(common.handleError(this));
       });
 
       bdd.describe('line charts', function indexPatternCreation() {
