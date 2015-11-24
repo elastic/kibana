@@ -7,8 +7,7 @@ define(function (require) {
 
     async function shortenUrl(url) {
       const relativeUrl = url.replace(baseUrl, '');
-
-      var formData = { url: relativeUrl };
+      const formData = { url: relativeUrl };
 
       try {
         const result = await $http.post('/shorten', formData);

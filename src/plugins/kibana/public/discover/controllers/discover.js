@@ -20,6 +20,7 @@ define(function (require) {
   require('ui/state_management/app_state');
   require('ui/timefilter');
   require('ui/highlight/highlight_tags');
+  require('ui/share');
 
   var app = require('ui/modules').get('apps/discover', [
     'kibana/notify',

@@ -17,61 +17,83 @@ export default function (server) {
         }
       });
     } catch (err) {
-      console.log(err);
-      //swallow errors. We don't care if there is no update.
+      console.log('Error updating url metadata', err);
+      //swallow errors. It isn't critical if there is no update.
     }
+  }
+
+  async function getUrlDoc(urlId) {
+    const urlDoc = await new Promise((resolve, reject) => {
+      const client = server.plugins.elasticsearch.client;
+
+      client.get({
+        index: '.kibana',
+        type: 'url',
+        id: urlId
+      })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        resolve();
+      });
+    });
+
+    return urlDoc;
+  }
+
+  async function createUrlDoc(url, urlId) {
+    const newUrlId = await new Promise((resolve, reject) => {
+      const client = server.plugins.elasticsearch.client;
+
+      client.index({
+        index: '.kibana',
+        type: 'url',
+        id: urlId,
+        body: {
+          url,
+          'access-count': 0,
+          'create-date': new Date(),
+          'access-date': new Date()
+        }
+      })
+      .then(response => {
+        resolve(response._id);
+      })
+      .catch(err => {
+        reject(err);
+      });
+    });
+
+    return newUrlId;
+  }
+
+  function createUrlId(url) {
+    const urlId = crypto.createHash('md5')
+    .update(url)
+    .digest('hex');
+
+    return urlId;
   }
 
   return {
     async generateUrlId(url) {
-      const urlId = await new Promise((resolve, reject) => {
-        const client = server.plugins.elasticsearch.client;
+      const urlId = createUrlId(url);
 
-        // const urlId = crypto.createHash('md5')
-        // .update(url)
-        // .digest('hex');
+      const urlDoc = await getUrlDoc(urlId);
+      if (urlDoc) return urlId;
 
-        client.index({
-          index: '.kibana',
-          type: 'url',
-          body: {
-            url,
-            'access-count': 0,
-            'create-date': new Date(),
-            'access-date': new Date()
-          }
-        })
-        .then(response => {
-          const urlId = response._id;
-          resolve(urlId);
-        })
-        .catch(err => {
-          reject(err);
-        });
-      });
-
-      return urlId;
+      return createUrlDoc(url, urlId);
     },
     async getUrl(urlId) {
-      const url = await new Promise((resolve, reject) => {
-        const client = server.plugins.elasticsearch.client;
+      try {
+        const urlDoc = await getUrlDoc(urlId);
+        updateMetadata(urlId, urlDoc);
 
-        client.get({
-          index: '.kibana',
-          type: 'url',
-          id: urlId
-        })
-        .then(response => {
-          const url = response._source.url;
-          updateMetadata(urlId, response);
-          resolve(url);
-        })
-        .catch(err => {
-          resolve('/');
-        });
-      });
-
-      return url;
+        return urlDoc._source.url;
+      } catch (err) {
+        return '/';
+      }
     }
   };
 };

@@ -63,7 +63,6 @@ module.exports = function (kbnServer, server, config) {
 
   server.connection(connectionOptions);
 
-
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
     this.route({
