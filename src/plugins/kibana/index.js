@@ -1,4 +1,4 @@
-const indexPatternEndpoints = require('./server/routes/api/index_pattern_endpoints');
+const indexPatterns = require('./server/routes/api/index_patterns');
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
@@ -48,7 +48,7 @@ module.exports = function (kibana) {
     },
 
     init: function (server, options) {
-      indexPatternEndpoints(server);
+      indexPatterns(server);
     }
   });
 
