@@ -26,8 +26,7 @@ define(function (require) {
     'kibana/courier',
     'kibana/config',
     'kibana/notify',
-    'kibana/typeahead',
-    'kibana/share'
+    'kibana/typeahead'
   ]);
 
   require('ui/routes')
@@ -92,7 +91,6 @@ define(function (require) {
         var $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
-          //console.log('watch state.options');
           if (!angular.equals(newVal, oldVal)) $state.save();
         });
         $scope.$watch('state.options.darkTheme', setDarkTheme);
@@ -157,7 +155,6 @@ define(function (require) {
         }
 
         function setDarkTheme(enabled) {
-          //console.log('setDarkTheme');
           var theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
           chrome.removeApplicationClass(['theme-dark', 'theme-light']);
           chrome.addApplicationClass(theme);
@@ -165,7 +162,6 @@ define(function (require) {
 
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
-          //console.log('queryFilter update');
           updateQueryOnRootSource();
           $state.save();
         });
@@ -239,16 +235,6 @@ define(function (require) {
           save: $scope.save,
           addVis: $scope.addVis,
           addSearch: $scope.addSearch
-          // ,
-          // shareData: function () {
-          //   //console.log('this is being called.');
-          //   return {
-          //     link: $location.absUrl(),
-          //     // This sucks, but seems like the cleanest way. Uhg.
-          //     embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-          //       '" height="600" width="800"></iframe>'
-          //   };
-          // }
         };
 
         init();

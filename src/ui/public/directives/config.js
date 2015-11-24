@@ -29,7 +29,6 @@ define(function (require) {
         var tmpScope = $scope.$new();
 
         $scope.$watch('configObject', function (newVal) {
-          console.log('config watch');
           $scope[attr.configObject] = $scope.configObject;
         });
 
@@ -45,7 +44,6 @@ define(function (require) {
           'configSubmit',
           'configTemplate.current || configTemplate'
         ], function () {
-          console.log('config watchMulti');
           var tmpl = $scope.configTemplate;
           if (tmpl instanceof ConfigTemplate) {
             tmpl = tmpl.toString();

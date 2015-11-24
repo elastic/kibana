@@ -1,5 +1,5 @@
 define(function (require) {
-  const app = require('ui/modules').get('kibana/share');
+  const app = require('ui/modules').get('kibana');
 
   app.directive('share', function (Private) {
     const urlShortener = Private(require('./url_shortener'));
