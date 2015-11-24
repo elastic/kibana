@@ -9,7 +9,7 @@
             input-focus
             kbn-typeahead-input
             ng-model="state.query"
-            placeholder="Search..."
+            placeholder="Query String"
             aria-label="Search input"
             type="text"
             class="form-control">
@@ -23,6 +23,17 @@
     </form>
 
     <div class="button-group" role="toolbar">
+      <kbn-tooltip text="New Alert" placement="bottom" append-to-body="1">
+        <button
+          aria-haspopup="true"
+          aria-expanded="{{ configTemplate.is('alert') }}"
+          ng-click="configTemplate.toggle('alert');"
+          ng-class="{active: configTemplate.is('alert')}"
+          aria-label="New Alert">
+          <i aria-hidden="true" class="fa fa-bell-o"></i>
+          <span class="create-alert-button-text" style="margin-left: 5px;">Create Alert</span>
+        </button>
+      </kbn-tooltip>
       <kbn-tooltip text="New Search" placement="bottom" append-to-body="1">
         <button
           ng-click="newQuery()"
@@ -203,3 +214,6 @@
     </div>
   </div>
 </div>
+
+
+

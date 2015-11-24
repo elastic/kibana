@@ -1,0 +1,147 @@
+<form role="form" class="container-fluid" ng-submit="opts.saveAlert()">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Query</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" id="query"
+							placeholder="Enter text">
+					</div>
+				</div>
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Name</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" id="name"
+							placeholder="Alert Name">
+					</div>
+				</div>
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Description</label>
+					<div class="col-md-8">
+						<textarea class="form-control" id="description" rows="3"></textarea>
+					</div>
+				</div>
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Time Range</label>
+					<div class="col-md-6">
+						<select id="timeRange" class="form-control">
+							<option value="5">Every 5 minutes</option>
+							<option value="10">Every 10 minutes</option>
+							<option value="30">Every 30 minutes</option>
+							<option value="60">Every hour</option>
+							<option value="180">Every 3 hours</option>
+							<option value="360">Every 6 hours</option>
+							<option value="720">Every 12 hours</option>
+							<option value="1440">Every 24 hours</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Trigger if number of
+						results</label>
+					<div class="col-md-6">
+						<div class="row">
+							<div class="col-md-8">
+								<select id="triggerCondition" class="form-control">
+									<option value="EQUALS">Equal to</option>
+									<option value="NOT_EQUALS">Not equal to</option>
+									<option value="GREATER_THAN">Greater than</option>
+									<option value="GREATER_THAN_OR_EQUALS">Greater than or
+										equals</option>
+									<option value="LESS_THAN">Less than</option>
+									<option value="LESS_THAN_OR_EQUALS">Less than or
+										equals</option>
+								</select>
+							</div>
+							<div class="col-md-4">
+								<input type="text" id="triggerNumber" class="form-control"
+									placeholder="" value="5">
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Send email To</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+							<input type="email" class="form-control" id="sendTo"
+								placeholder="Email Address">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Severity</label>
+
+					<div class="col-md-8">
+						<div class="radio-list">
+							<label class="radio-inline"> <input type="radio"
+								name="optionsRadios" id="optionsRadios25" value="option1"
+								checked> <span class="label label-success">LOW</span>
+							</label> <label class="radio-inline"> <input type="radio"
+								name="optionsRadios" id="optionsRadios26" value="option2"
+								checked> <span class="label label-warning">MEDIUM</span>
+							</label> <label class="radio-inline"> <input type="radio"
+								name="optionsRadios" id="optionsRadios27" value="option3">
+								<span class="label label-danger">HIGH</span>
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label"></label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<label> <input type="checkbox" id="enabled"
+								checked="true"> Enabled
+							</label>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="form-group col-md-10">
+					<label class="col-md-3 control-label">Suppress triggering
+						for</label>
+					<div class="col-md-6">
+						<div class="row">
+
+							<div class="col-md-4">
+								<input type="text" class="form-control" placeholder="" value="1">
+							</div>
+							<div class="col-md-8">
+								<select class="form-control">
+									<option value="hours">hours</option>
+									<option value="days">days</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 
+				<div class="form-group">
+					<label for="SaveSearch" class="control-label">Create Alert</label>
+					<input id="SaveSearch" ng-model="opts.savedSearch.title"
+						input-focus="select" class="form-control"
+						placeholder="Name this search...">
+				</div>
+				-->
+
+				<div class="form-group col-md-10">
+					<div class="col-md-6 col-md-offset-3">
+						<button ng-disabled="!opts.savedSearch.title" type="submit"
+							class="btn btn-primary">Create Alert</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>

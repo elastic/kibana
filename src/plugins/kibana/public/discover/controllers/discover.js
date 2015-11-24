@@ -90,6 +90,7 @@ define(function (require) {
 
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
+      alert: require('plugins/kibana/discover/partials/alert_search.html'),
       load: require('plugins/kibana/discover/partials/load_search.html'),
       save: require('plugins/kibana/discover/partials/save_search.html')
     });
@@ -285,6 +286,37 @@ define(function (require) {
       })
       .catch(notify.error);
     };
+    
+    
+    $scope.opts.saveAlert = function () {
+    	
+    	var name=$("#name").val();
+		var query=$("#query").val();
+		var sendTo=$("#sendTo").val();
+		var timeRange=$("#timeRange").val();
+		var triggerCondition=$("#triggerCondition").val();
+		var triggerNumber=$("#triggerNumber").val();
+		
+		var enabled=$("#enabled").is(':checked');
+		var jsonData = '{"name":"'+name+'","query":"'+query+'","timeRange":"'+timeRange+'","enabled":"'+enabled+'",'
+			+'"sendTo":"'+sendTo+'","triggerNumber":"'+triggerNumber+'","triggerCondition":"'+triggerCondition+'"}';
+
+		jQuery.ajax({
+			url : "http://localhost:9000/alert/",
+			type : "POST",
+			dataType : "json",
+			contentType : "application/json",
+			data : jsonData,
+			cache : false,
+			success : function(data) {
+				alert("保存成功");
+			},
+			complete : function() {
+				//$("#long").dialog("close");
+			}
+		})
+       
+      };
 
     $scope.opts.fetch = $scope.fetch = function () {
       // ignore requests to fetch before the app inits
@@ -421,7 +453,7 @@ define(function (require) {
     $scope.resetQuery = function () {
       kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
     };
-
+    
     $scope.newQuery = function () {
       kbnUrl.change('/discover');
     };
