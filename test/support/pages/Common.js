@@ -51,14 +51,13 @@ define(function (require) {
               self.debug(msg);
               throw new Error(msg);
             }
+
+            return currentUrl;
           });
         });
       };
 
       return doNavigation(appUrl)
-      .then(function () {
-        return self.remote.getCurrentUrl();
-      })
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
