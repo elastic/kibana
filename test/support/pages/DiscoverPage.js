@@ -5,7 +5,7 @@ define(function (require) {
   // at runtime
   var Common = require('./Common');
 
-  var defaultTimeout = 60000;
+  var defaultTimeout = 90000;
   var common;
   var thisTime;
 
