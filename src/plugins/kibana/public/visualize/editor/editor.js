@@ -234,14 +234,14 @@ define(function (require) {
       }, notify.fatal);
     };
 
-    $scope.shareData = function () {
-      return {
-        link: $location.absUrl(),
-        // This sucks, but seems like the cleanest way. Uhg.
-        embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-          '" height="600" width="800"></iframe>'
-      };
-    };
+    // $scope.shareData = function () {
+    //   return {
+    //     link: $location.absUrl(),
+    //     // This sucks, but seems like the cleanest way. Uhg.
+    //     embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
+    //       '" height="600" width="800"></iframe>'
+    //   };
+    // };
 
     $scope.unlink = function () {
       if (!$state.linked) return;
