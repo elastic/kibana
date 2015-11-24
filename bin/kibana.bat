@@ -17,8 +17,12 @@ If Not Exist "%NODE%" (
   )
 )
 
+if "%NODE_OPTIONS%" == "" (
+  set NODE_OPTIONS=--max-old-space-size=250
+)
+
 TITLE Kibana Server
-"%NODE%" "%DIR%\src\cli" %*
+"%NODE%" %NODE_OPTIONS% "%DIR%\src\cli" %*
 
 :finally
 
