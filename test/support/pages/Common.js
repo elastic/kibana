@@ -11,7 +11,7 @@ define(function (require) {
     this.remote = remote;
   }
 
-  var defaultTimeout = 90000;
+  var defaultTimeout = config.timeouts.default;
 
   Common.prototype = {
     constructor: Common,

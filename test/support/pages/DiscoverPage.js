@@ -1,11 +1,9 @@
 // in test/support/pages/DiscoverPage.js
 define(function (require) {
-  // the page object is created as a constructor
-  // so we can provide the remote Command object
-  // at runtime
+  var config = require('intern').config;
   var Common = require('./Common');
 
-  var defaultTimeout = 90000;
+  var defaultTimeout = config.timeouts.default;
   var common;
   var thisTime;
 

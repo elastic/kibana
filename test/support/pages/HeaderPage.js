@@ -1,6 +1,6 @@
 // in test/support/pages/HeaderPage.js
 define(function (require) {
-
+  var config = require('intern').config;
   var Common = require('./Common');
 
   var common;
@@ -13,7 +13,7 @@ define(function (require) {
     common = new Common(this.remote);
   }
 
-  var defaultTimeout = 90000;
+  var defaultTimeout = config.timeouts.default;
 
   HeaderPage.prototype = {
     constructor: HeaderPage,
