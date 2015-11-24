@@ -9,7 +9,7 @@ define(function (require) {
       var common;
       var settingsPage;
       var remote;
-      var longTimeout = 60000;
+      var defaultTimeout = 90000;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -94,7 +94,7 @@ define(function (require) {
         });
 
         bdd.it('makelogs data should have expected number of fields', function () {
-          return common.tryForTime(longTimeout, function () {
+          return common.tryForTime(defaultTimeout, function () {
             return settingsPage.getFieldsTabCount()
             .then(function (tabCount) {
               expect(tabCount).to.be('' + expectedFieldCount);
