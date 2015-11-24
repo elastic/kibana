@@ -13,14 +13,14 @@ define(function (require) {
     common = new Common(this.remote);
   }
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = 60000;
 
   HeaderPage.prototype = {
     constructor: HeaderPage,
 
     clickSelector: function (selector) {
       var self = this.remote;
-      return common.tryForTime(5000, function () {
+      return common.tryForTime(defaultTimeout, function () {
         return self.setFindTimeout(defaultTimeout)
         .findByCssSelector(selector)
         .then(function (tab) {
@@ -111,8 +111,8 @@ define(function (require) {
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-      return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
-        return self.remote.setFindTimeout(1000)
+      return common.tryForTime(defaultTimeout * 2, function () {
+        return self.remote.setFindTimeout(defaultTimeout)
         .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
         .then(function toastMessage(messages) {
           if (messages.length > 0) {
