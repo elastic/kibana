@@ -35,18 +35,10 @@ list.
 contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index 
 mapping to list all of the fields that contain a timestamp.
 
-. If new indices are generated periodically and have a timestamp appended to the name, select the *Use event times to 
-create index names* option and select the *Index pattern interval*. This enables Kibana to search only those indices 
-that could possibly contain data in the time range you specify. This is primarily applicable if you are using Logstash 
-to feed data into Elasticsearch.
-
 . Click *Create* to add the index pattern. 
 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite* 
 button. 
-
-NOTE: Using event times in index names is deprecated in the 4.3 release of Kibana. Kibana and Elasticsearch can now
-parse index names with timestamp information automatically.
 
 To use an event time in an index name, enclose the static text in the pattern and specify the date format using the 
 tokens described in the following table.
@@ -267,14 +259,14 @@ To set advanced options:
 . Enter a new value for the option. 
 . Click the *Save* button.
 
+include::advanced-settings.asciidoc[]
+
 [[kibana-server-properties]]
 === Setting Kibana Server Properties
 
 The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run 
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine, 
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
-
-include::advanced-settings.asciidoc[]
 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
