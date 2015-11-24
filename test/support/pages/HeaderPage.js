@@ -122,6 +122,10 @@ define(function (require) {
             common.debug('toast message clear');
             return messages;
           }
+        })
+        .catch(function () {
+          common.debug('toast message not found');
+          return;
         });
       });
     }
