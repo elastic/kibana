@@ -148,9 +148,9 @@ define(function (require) {
 
         return Promise
         .try(block)
-        .then(function tryForTimeSuccess() {
+        .then(function tryForTimeSuccess(resolved) {
           self.debug('tryForTime success in about ' + (lastTry - start) + ' ms');
-          return (lastTry - start);
+          return resolved;
         })
         .catch(function tryForTimeCatch(err) {
           self.debug('tryForTime failure, retry in ' + retryDelay + 'ms - ' + err.message);
