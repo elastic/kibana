@@ -19,6 +19,7 @@ define(function (require) {
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
       var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
