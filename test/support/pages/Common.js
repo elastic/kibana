@@ -51,14 +51,13 @@ define(function (require) {
               self.debug(msg);
               throw new Error(msg);
             }
+
+            return currentUrl;
           });
         });
       };
 
       return doNavigation(appUrl)
-      .then(function () {
-        return self.remote.getCurrentUrl();
-      })
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
@@ -148,9 +147,9 @@ define(function (require) {
 
         return Promise
         .try(block)
-        .then(function tryForTimeSuccess() {
+        .then(function tryForTimeSuccess(resolved) {
           self.debug('tryForTime success in about ' + (lastTry - start) + ' ms');
-          return (lastTry - start);
+          return resolved;
         })
         .catch(function tryForTimeCatch(err) {
           self.debug('tryForTime failure, retry in ' + retryDelay + 'ms - ' + err.message);
