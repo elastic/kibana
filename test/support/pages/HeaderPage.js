@@ -1,6 +1,6 @@
 // in test/support/pages/HeaderPage.js
 define(function (require) {
-
+  var config = require('intern').config;
   var Common = require('./Common');
 
   var common;
@@ -13,7 +13,7 @@ define(function (require) {
     common = new Common(this.remote);
   }
 
-  var defaultTimeout = 60000;
+  var defaultTimeout = config.timeouts.default;
 
   HeaderPage.prototype = {
     constructor: HeaderPage,
@@ -111,16 +111,21 @@ define(function (require) {
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-      return common.tryForTime(defaultTimeout * 2, function () {
-        return self.remote.setFindTimeout(1000)
-        .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      return common.tryForTime(defaultTimeout, function () {
+        return self.remote.setFindTimeout(500)
+        .findAllByCssSelector('kbn-truncated.toast-message')
         .then(function toastMessage(messages) {
           if (messages.length > 0) {
+            common.debug('toast message found, waiting...');
             throw new Error('waiting for toast message to clear');
           } else {
-            common.debug('now messages = 0 "' + messages + '"');
+            common.debug('toast message clear');
             return messages;
           }
+        })
+        .catch(function () {
+          common.debug('toast message not found');
+          return;
         });
       });
     }

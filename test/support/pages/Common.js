@@ -11,7 +11,7 @@ define(function (require) {
     this.remote = remote;
   }
 
-  var defaultTimeout = 60000;
+  var defaultTimeout = config.timeouts.default;
 
   Common.prototype = {
     constructor: Common,
@@ -19,6 +19,7 @@ define(function (require) {
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
       var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
@@ -147,12 +148,8 @@ define(function (require) {
 
         return Promise
         .try(block)
-        .then(function tryForTimeSuccess(resolved) {
-          self.debug('tryForTime success in about ' + (lastTry - start) + ' ms');
-          return resolved;
-        })
         .catch(function tryForTimeCatch(err) {
-          self.debug('tryForTime failure, retry in ' + retryDelay + 'ms - ' + err.message);
+          self.debug('tryForTime failure: ' + err.message);
           tempMessage = err.message;
           return Promise.delay(retryDelay).then(attempt);
         });

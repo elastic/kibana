@@ -23,6 +23,9 @@ define(function (require) {
         'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
         'moment': './node_modules/moment/moment.js'
       }
-    }
+    },
+    timeouts: {
+      default: 90000
+    },
   }, serverConfig);
 });
