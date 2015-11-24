@@ -7,7 +7,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./Common');
 
-  var defaultTimeout = 60000;
+  var defaultTimeout = 90000;
   var common;
 
   function SettingsPage(remote) {
@@ -47,12 +47,22 @@ define(function (require) {
     selectTimeFieldOption: function (selection) {
       var self = this;
 
+      // open dropdown
       return self.getTimeFieldNameField().click()
       .then(function () {
+        // close dropdown, keep focus
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
-        return self.getTimeFieldOption(selection);
+        return common.tryForTime(defaultTimeout, function () {
+          return self.getTimeFieldOption(selection).click()
+          .then(function () {
+            return self.getTimeFieldOption(selection).isSelected();
+          })
+          .then(function (selected) {
+            if (!selected) throw new Error('option not selected: ' + selected);
+          });
+        });
       });
     },
 
@@ -126,11 +136,13 @@ define(function (require) {
       var self = this;
       var selector = 'li.kbn-settings-tab.active a small';
 
-      return self.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector(selector).getVisibleText()
-      .then(function (theText) {
-        // the value has () around it, remove them
-        return theText.replace(/\((.*)\)/, '$1');
+      return common.tryForTime(defaultTimeout, function () {
+        return self.remote.setFindTimeout(defaultTimeout / 10)
+        .findByCssSelector(selector).getVisibleText()
+        .then(function (theText) {
+          // the value has () around it, remove them
+          return theText.replace(/\((.*)\)/, '$1');
+        });
       });
     },
 
