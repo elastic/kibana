@@ -47,9 +47,8 @@ module.exports = function bindToJquery($) {
     var $els = $();
     var $context = this;
 
-    testSubjSelector(...subjectSelectors)
-    .forEach(function (cssSelector) {
-      $els = $els.add($context.find(cssSelector));
+    subjectSelectors.forEach(function (selector) {
+      $els = $els.add($context.find(testSubjSelector(selector)));
     });
 
     return $els;
