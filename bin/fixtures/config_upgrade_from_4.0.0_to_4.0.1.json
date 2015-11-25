@@ -1,0 +1,35 @@
+{
+   "took": 1,
+   "timed_out": false,
+   "_shards": {
+      "total": 1,
+      "successful": 1,
+      "failed": 0
+   },
+   "hits": {
+      "total": 2,
+      "max_score": 1,
+      "hits": [
+         {
+            "_index": ".kibana",
+            "_type": "config",
+            "_id": "4.0.1",
+            "_score": 1,
+            "_source": {
+               "buildNum": 5921,
+               "defaultIndex": "logstash-*"
+            }
+         },
+         {
+            "_index": ".kibana",
+            "_type": "config",
+            "_id": "4.0.0",
+            "_score": 1,
+            "_source": {
+               "buildNum": 5888,
+               "defaultIndex": "logstash-*"
+            }
+         }
+      ]
+   }
+}
