@@ -26,6 +26,19 @@ define(function (require) {
         esResp: '=?',
       },
       template: require('ui/visualize/visualize.html'),
+      controller: function ($scope) {
+        // Show no results message when hasZeroHits is true and it requires search
+        $scope.showNoResultsMessage = function (hasZeroHits) {
+          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
+
+          if (requiresSearch && hasZeroHits) {
+            // The metric vis does not show a no results message
+            return _.get($scope, 'vis.type.name') !== 'metric';
+          }
+
+          return false;
+        };
+      },
       link: function ($scope, $el, attr) {
         var chart; // set in "vis" watcher
         var minVisChartHeight = 180;
