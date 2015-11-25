@@ -110,11 +110,6 @@ define(function (require) {
       .then(function () {
         return barArray;
       });
-    },
-
-    getSpinnerDone: function getSpinnerDone() {
-      common.debug('--getSpinner done method');
-      return thisTime.findByCssSelector('span.spinner.ng-hide');
     }
 
   };

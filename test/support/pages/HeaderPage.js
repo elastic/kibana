@@ -82,8 +82,12 @@ define(function (require) {
 
     setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
       var self = this;
-      common.debug('--Clicking Absolute button');
-      return self.clickAbsoluteButton()
+      common.debug('clickTimepicker');
+      return self.clickTimepicker()
+      .then(function () {
+        common.debug('--Clicking Absolute button');
+        return self.clickAbsoluteButton();
+      })
       .then(function () {
         common.debug('--Setting From Time : ' + fromTime);
         return self.setFromTime(fromTime);
@@ -94,6 +98,9 @@ define(function (require) {
       })
       .then(function () {
         return self.clickGoButton();
+      })
+      .then(function () {
+        self.collapseTimepicker();
       });
     },
 
@@ -128,8 +135,19 @@ define(function (require) {
           return;
         });
       });
-    }
+    },
 
+    getSpinnerDone: function getSpinnerDone() {
+      var self = this;
+      return this.remote
+      .setFindTimeout(defaultTimeout * 10)
+      .findByCssSelector('span.spinner.ng-hide');
+      // .then(function () {
+      //   return self.remote
+      //   .setFindTimeout(defaultTimeout * 10)
+      //   .findByCssSelector('div.spinner.large.ng-hide');
+      // });
+    }
 
   };
 

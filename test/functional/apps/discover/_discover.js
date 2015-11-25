@@ -41,17 +41,10 @@ define(function (require) {
           return common.navigateToApp('discover');
         })
         .then(function () {
-          common.debug('clickTimepicker');
-          return headerPage.clickTimepicker();
-        })
-        .then(function () {
           common.debug('setAbsoluteRange');
           return headerPage.setAbsoluteRange(fromTime, toTime);
         })
-        .then(function () {
-          common.debug('collapseTimepicker');
-          return headerPage.collapseTimepicker();
-        });
+        .catch(common.handleError(this));
       });
 
 
