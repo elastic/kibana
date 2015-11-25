@@ -92,12 +92,10 @@ define(function (require) {
         bdd.it('load query should show query name', function () {
           return discoverPage.loadSavedSearch(queryName1)
           .then(function () {
-            return common.tryForTime(15000, function () {
-              return discoverPage.getCurrentQueryName()
-              .then(function (actualQueryNameString) {
-                expect(actualQueryNameString).to.be(queryName1);
-              });
-            });
+            return discoverPage.getCurrentQueryName();
+          })
+          .then(function (actualQueryNameString) {
+            expect(actualQueryNameString).to.be(queryName1);
           })
           .catch(common.handleError(this));
         });
