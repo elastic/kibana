@@ -3,7 +3,7 @@ define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
   var moment = require('moment');
-  var testSubjSelector = require('@spalger/test-subj-selector');
+  var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
   var getUrl = require('intern/dojo/node!../../utils/getUrl');
   var fs = require('intern/dojo/node!fs');
   var path = require('intern/dojo/node!path');
