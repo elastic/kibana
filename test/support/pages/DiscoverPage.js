@@ -1,11 +1,9 @@
 // in test/support/pages/DiscoverPage.js
 define(function (require) {
-  // the page object is created as a constructor
-  // so we can provide the remote Command object
-  // at runtime
+  var config = require('intern').config;
   var Common = require('./Common');
 
-  var defaultTimeout = 20000;
+  var defaultTimeout = config.timeouts.default;
   var common;
   var thisTime;
 
@@ -76,10 +74,11 @@ define(function (require) {
     },
 
     getCurrentQueryName: function getCurrentQueryName() {
-      return thisTime
-      .findByCssSelector('span.discover-info-title')
-      // .findByCssSelector('span[bo-bind="opts.savedSearch.title"]')
-      .getVisibleText();
+      return common.tryForTime(defaultTimeout, function () {
+        return thisTime
+        .findByCssSelector('span.discover-info-title')
+        .getVisibleText();
+      });
     },
 
     getBarChartData: function getBarChartData() {
