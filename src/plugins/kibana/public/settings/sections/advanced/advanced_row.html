@@ -1,4 +1,4 @@
-<tr ng-class="conf.value === undefined ? 'default' : 'custom'">
+<tr ng-class="conf.value === undefined ? 'default' : 'custom'" data-test-subj="advancedSetting {{conf.name}}" >
   <td class="name">
     <b>{{conf.name}}</b>
     <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
