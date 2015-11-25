@@ -42,9 +42,6 @@ define(function (require) {
           return common.navigateToApp('visualize');
         })
         .then(function () {
-          return common.sleep(2000);
-        })
-        .then(function () {
           common.debug('clickAreaChart');
           return visualizePage.clickAreaChart();
         })
@@ -52,19 +49,9 @@ define(function (require) {
           common.debug('clickNewSearch');
           return visualizePage.clickNewSearch();
         })
-        .then(function clickTimepicker() {
-          common.debug('clickTimepicker');
-          return common.tryForTime(5000, function () {
-            return headerPage.clickTimepicker();
-          });
-        })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function collapseTimepicker() {
-          common.debug('Collapse Time Picker pane');
-          return headerPage.collapseTimepicker();
         })
         .then(function clickBucket() {
           common.debug('Click X-Axis');
@@ -134,19 +121,30 @@ define(function (require) {
 
           this.timeout = 60000;
 
-          var expectedTableData = ['September 19th 2015, 18:00:00.000 15',
-          'September 19th 2015, 21:00:00.000 105', 'September 20th 2015, 00:00:00.000 518',
-          'September 20th 2015, 03:00:00.000 1,261', 'September 20th 2015, 06:00:00.000 1,485',
-          'September 20th 2015, 09:00:00.000 982', 'September 20th 2015, 12:00:00.000 322',
-          'September 20th 2015, 15:00:00.000 65', 'September 20th 2015, 18:00:00.000 29',
-          'September 20th 2015, 21:00:00.000 104', 'September 21st 2015, 00:00:00.000 483',
-          'September 21st 2015, 03:00:00.000 1,163', 'September 21st 2015, 06:00:00.000 1,507',
-          'September 21st 2015, 09:00:00.000 958', 'September 21st 2015, 12:00:00.000 317',
-          'September 21st 2015, 15:00:00.000 55', 'September 21st 2015, 18:00:00.000 17',
-          'September 21st 2015, 21:00:00.000 88', 'September 22nd 2015, 00:00:00.000 498',
-          'September 22nd 2015, 03:00:00.000 1,209', 'September 22nd 2015, 06:00:00.000 1,488',
-          'September 22nd 2015, 09:00:00.000 949', 'September 22nd 2015, 12:00:00.000 308',
-          'September 22nd 2015, 15:00:00.000 74', 'September 22nd 2015, 18:00:00.000 4'
+          var expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
+            'September 20th 2015, 03:00:00.000 202',
+            'September 20th 2015, 06:00:00.000 740',
+            'September 20th 2015, 09:00:00.000 1,437',
+            'September 20th 2015, 12:00:00.000 1,371',
+            'September 20th 2015, 15:00:00.000 751',
+            'September 20th 2015, 18:00:00.000 188',
+            'September 20th 2015, 21:00:00.000 31',
+            'September 21st 2015, 00:00:00.000 42',
+            'September 21st 2015, 03:00:00.000 202',
+            'September 21st 2015, 06:00:00.000 683',
+            'September 21st 2015, 09:00:00.000 1,361',
+            'September 21st 2015, 12:00:00.000 1,415',
+            'September 21st 2015, 15:00:00.000 707',
+            'September 21st 2015, 18:00:00.000 177',
+            'September 21st 2015, 21:00:00.000 27',
+            'September 22nd 2015, 00:00:00.000 32',
+            'September 22nd 2015, 03:00:00.000 175',
+            'September 22nd 2015, 06:00:00.000 707',
+            'September 22nd 2015, 09:00:00.000 1,408',
+            'September 22nd 2015, 12:00:00.000 1,355',
+            'September 22nd 2015, 15:00:00.000 726',
+            'September 22nd 2015, 18:00:00.000 201',
+            'September 22nd 2015, 21:00:00.000 29'
           ];
 
           return visualizePage.collapseChart()
@@ -175,10 +173,34 @@ define(function (require) {
           this.timeout = 60000;
 
           var chartHeight = 0;
-          var xAxisLabels = ['2015-09-19 19:00', '2015-09-20 19:00', '2015-09-21 19:00', '2015-09-22 19:00'];
+          var xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
+            '2015-09-22 00:00', '2015-09-23 00:00'
+          ];
           var yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
-          var expectedAreaChartData = [15, 105, 518, 1261, 1485, 982, 322, 65, 29,
-            104, 483, 1163, 1507, 958, 317, 55, 17, 88, 498, 1209, 1488, 949, 308, 74, 4
+          var expectedAreaChartData = [37,
+            202,
+            740,
+            1437,
+            1371,
+            751,
+            188,
+            31,
+            42,
+            202,
+            683,
+            1361,
+            1415,
+            707,
+            177,
+            27,
+            32,
+            175,
+            707,
+            1408,
+            1355,
+            726,
+            201,
+            29
           ];
 
           return visualizePage.getXAxisLabels()

@@ -39,29 +39,15 @@ define(function (require) {
           return common.navigateToApp('visualize');
         })
         .then(function () {
-          return common.sleep(2000);
-        })
-        .then(function () {
           common.debug('clickLineChart');
           return visualizePage.clickLineChart();
         })
         .then(function clickNewSearch() {
           return visualizePage.clickNewSearch();
         })
-        .then(function sleep() {
-          return common.sleep(1000);
-        })
-        .then(function clickTimepicker() {
-          common.debug('Click time picker');
-          return headerPage.clickTimepicker();
-        })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function collapseTimepicker() {
-          common.debug('Collapse Time Picker pane');
-          return headerPage.collapseTimepicker();
         })
         .then(function clickBucket() {
           common.debug('Bucket = Split Chart');

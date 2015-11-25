@@ -46,29 +46,15 @@ define(function (require) {
           return common.navigateToApp('visualize');
         })
         .then(function () {
-          return common.sleep(2000);
-        })
-        .then(function () {
           common.debug('clickMetric');
           return visualizePage.clickMetric();
         })
         .then(function clickNewSearch() {
           return visualizePage.clickNewSearch();
         })
-        .then(function sleep() {
-          return common.sleep(1000);
-        })
-        .then(function clickTimepicker() {
-          common.debug('Click time picker');
-          return headerPage.clickTimepicker();
-        })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function collapseTimepicker() {
-          common.debug('Collapse Time Picker pane');
-          return headerPage.collapseTimepicker();
         })
         .catch(common.handleError(this));
       });
@@ -160,7 +146,7 @@ define(function (require) {
         });
 
         bdd.it('should show Min', function pageHeader() {
-          var minTimestamp = ['September 19th 2015, 19:00:00.000', 'Min @timestamp'];
+          var minTimestamp = ['September 20th 2015, 00:00:00.000', 'Min @timestamp'];
           common.debug('Aggregation = Min');
           return visualizePage.selectAggregation('Min')
           .then(function selectField() {
@@ -182,7 +168,7 @@ define(function (require) {
         });
 
         bdd.it('should show Max', function pageHeader() {
-          var maxRelatedContentArticleModifiedTime = ['April 3rd 2015, 19:54:41.000', 'Max relatedContent.article:modified_time'];
+          var maxRelatedContentArticleModifiedTime = ['April 4th 2015, 00:54:41.000', 'Max relatedContent.article:modified_time'];
           common.debug('Aggregation = Max');
           return visualizePage.selectAggregation('Max')
           .then(function selectField() {

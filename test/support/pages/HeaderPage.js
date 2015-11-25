@@ -82,8 +82,12 @@ define(function (require) {
 
     setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
       var self = this;
-      common.debug('--Clicking Absolute button');
-      return self.clickAbsoluteButton()
+      common.debug('clickTimepicker');
+      return self.clickTimepicker()
+      .then(function () {
+        common.debug('--Clicking Absolute button');
+        return self.clickAbsoluteButton();
+      })
       .then(function () {
         common.debug('--Setting From Time : ' + fromTime);
         return self.setFromTime(fromTime);
@@ -94,6 +98,9 @@ define(function (require) {
       })
       .then(function () {
         return self.clickGoButton();
+      })
+      .then(function () {
+        self.collapseTimepicker();
       });
     },
 

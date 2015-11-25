@@ -28,9 +28,6 @@ define(function (require) {
           common.debug('navigateToApp visualize');
           return common.navigateToApp('visualize');
         })
-        .then(function () {
-          return common.sleep(2000);
-        })
         .catch(common.handleError(this));
       });
 

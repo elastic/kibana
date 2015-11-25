@@ -49,6 +49,7 @@ define(function (require) {
       });
     });
 
+
     bdd.after(function unloadMakelogs() {
       return scenarioManager.unload('logstashFunctional');
     });

@@ -41,29 +41,15 @@ define(function (require) {
           return common.navigateToApp('visualize');
         })
         .then(function () {
-          return common.sleep(2000);
-        })
-        .then(function () {
           common.debug('clickVerticalBarChart');
           return visualizePage.clickVerticalBarChart();
         })
         .then(function clickNewSearch() {
           return visualizePage.clickNewSearch();
         })
-        .then(function sleep() {
-          return common.sleep(1000);
-        })
-        .then(function clickTimepicker() {
-          common.debug('Click time picker');
-          return headerPage.clickTimepicker();
-        })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function collapseTimepicker() {
-          common.debug('Collapse Time Picker pane');
-          return headerPage.collapseTimepicker();
         })
         .then(function clickBucket() {
           common.debug('Bucket = X-Axis');
@@ -125,8 +111,8 @@ define(function (require) {
         bdd.it('should show correct chart', function pageHeader() {
 
           this.timeout = 60000;
-          var expectedChartValues = [15, 105, 518, 1261, 1485, 982, 322, 65, 29, 104,
-            483, 1163, 1507, 958, 317, 55, 17, 88, 498, 1209, 1488, 949, 308, 74, 4
+          var expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
+            1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
           ];
 
           return visualizePage.getBarChartData()
@@ -145,16 +131,16 @@ define(function (require) {
           this.timeout = 60000;
 
           // this is only the first page of the tabular data.
-          var expectedChartData =  [ 'September 19th 2015, 18:00:00.000 15',
-            'September 19th 2015, 21:00:00.000 105',
-            'September 20th 2015, 00:00:00.000 518',
-            'September 20th 2015, 03:00:00.000 1,261',
-            'September 20th 2015, 06:00:00.000 1,485',
-            'September 20th 2015, 09:00:00.000 982',
-            'September 20th 2015, 12:00:00.000 322',
-            'September 20th 2015, 15:00:00.000 65',
-            'September 20th 2015, 18:00:00.000 29',
-            'September 20th 2015, 21:00:00.000 104'
+          var expectedChartData =  [ 'September 20th 2015, 00:00:00.000 37',
+            'September 20th 2015, 03:00:00.000 202',
+            'September 20th 2015, 06:00:00.000 740',
+            'September 20th 2015, 09:00:00.000 1,437',
+            'September 20th 2015, 12:00:00.000 1,371',
+            'September 20th 2015, 15:00:00.000 751',
+            'September 20th 2015, 18:00:00.000 188',
+            'September 20th 2015, 21:00:00.000 31',
+            'September 21st 2015, 00:00:00.000 42',
+            'September 21st 2015, 03:00:00.000 202'
           ];
 
           return visualizePage.collapseChart()

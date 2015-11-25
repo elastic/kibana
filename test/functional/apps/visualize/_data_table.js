@@ -42,29 +42,16 @@ define(function (require) {
           return common.navigateToApp('visualize');
         })
         .then(function () {
-          return common.sleep(2000);
-        })
-        .then(function () {
-          common.debug('clickLineChart');
+          common.debug('clickDataTable');
           return visualizePage.clickDataTable();
         })
         .then(function clickNewSearch() {
           common.debug('clickNewSearch');
           return visualizePage.clickNewSearch();
         })
-        .then(function clickTimepicker() {
-          return common.tryForTime(5000, function () {
-            common.debug('clickTimepicker');
-            return headerPage.clickTimepicker();
-          });
-        })
         .then(function setAbsoluteRange() {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function collapseTimepicker() {
-          common.debug('Collapse Time Picker pane');
-          return headerPage.collapseTimepicker();
         })
         .then(function clickBucket() {
           common.debug('Bucket = Split Rows');

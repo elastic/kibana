@@ -7,7 +7,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./Common');
 
-  var defaultTimeout = 60000;
+  var defaultTimeout = 6000;
   var common;
 
   function SettingsPage(remote) {
@@ -20,6 +20,47 @@ define(function (require) {
 
     navigateTo: function () {
       return common.navigateToApp('settings');
+    },
+
+    setAdvancedSetting2: function (propertyName, propertyValue) {
+      var self = this;
+      // assumes we're on Settings tab already
+      //click Advanced sub-tab
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByLinkText('Advanced').click()
+      .then(function () {
+        //.table
+        return self.remote.findByCssSelector('tr')
+        .then(function (table) {
+          common.log('table.rows = ' + table.length); // undefined
+          common.log('table.rows = ' + table.size); // undefined
+          common.log('table.rows = ' + table.count); // undefined
+          common.log('table.getProperty(rows).length = ' + table.getProperty('rows').length); // undefined
+          common.log('table.getProperty(rows) = ' + table.getProperty('rows')); // [object Object]
+          common.log('table.getProperty(rows).size = ' + table.getProperty('rows').size); // undefined
+          // common.log('table.getProperty(rows).size = ' + table.getProperty('rows').size()); // exception
+        });
+      });
+
+    },
+
+    setAdvancedSetting: function (propertyName, propertyValue) {
+      var self = this;
+      // assumes we're on Settings tab already
+      //click Advanced sub-tab
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findByLinkText('Advanced').click()
+      .then(function () {
+        return self.remote.findByCssSelector('tr > td > b:contains("' + propertyName + '")')
+        .then(function (foundit) {
+          console.log('foundit)');
+        });
+      });
+    // },
+      // .ng-binding
+      // tr.ng-scope:nth-child(4) > td:nth-child(1)
+      // tr.ng-scope:nth-child(4) > td:nth-child(3) > button:nth-child(1)  (the edit button)
+      // .findByCssSelector('input[ng-model="index.isTimeBased"]');
     },
 
     getTimeBasedEventsCheckbox: function () {

@@ -41,9 +41,6 @@ define(function (require) {
           return common.navigateToApp('visualize');
         })
         .then(function () {
-          return common.sleep(2000);
-        })
-        .then(function () {
           common.debug('clickTileMap');
           return visualizePage.clickTileMap();
         })
@@ -51,17 +48,8 @@ define(function (require) {
           return visualizePage.clickNewSearch();
         })
         .then(function () {
-          return common.tryForTime(5000, function () {
-            return headerPage.clickTimepicker();
-          });
-        })
-        .then(function () {
           common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
           return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function () {
-          common.debug('Collapse Time Picker pane');
-          return headerPage.collapseTimepicker();
         })
         .then(function () {
           common.debug('select bucket Geo Coordinates');

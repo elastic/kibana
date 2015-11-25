@@ -96,14 +96,14 @@ define(function (require) {
     },
 
     //
-    clickTimepicker: function clickTimepicker() {
-      return this.remote
-      .setFindTimeout(defaultTimeout * 2)
-      .findByClassName('navbar-timepicker-time-desc')
-      .then(function (picker) {
-        return picker.click();
-      });
-    },
+    // clickTimepicker: function clickTimepicker() {
+    //   return this.remote
+    //   .setFindTimeout(defaultTimeout * 2)
+    //   .findByClassName('navbar-timepicker-time-desc')
+    //   .then(function (picker) {
+    //     return picker.click();
+    //   });
+    // },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
       return this.remote
@@ -138,22 +138,22 @@ define(function (require) {
     },
 
 
-    setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
-      var self = this;
-      common.debug('--Clicking Absolute button');
-      return self.clickAbsoluteButton()
-      .then(function () {
-        common.debug('--Setting From Time : ' + fromTime);
-        return self.setFromTime(fromTime);
-      })
-      .then(function () {
-        common.debug('--Setting To Time : ' + toTime);
-        return self.setToTime(toTime);
-      })
-      .then(function () {
-        return self.clickGoButton();
-      });
-    },
+    // setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
+    //   var self = this;
+    //   common.debug('--Clicking Absolute button');
+    //   return self.clickAbsoluteButton()
+    //   .then(function () {
+    //     common.debug('--Setting From Time : ' + fromTime);
+    //     return self.setFromTime(fromTime);
+    //   })
+    //   .then(function () {
+    //     common.debug('--Setting To Time : ' + toTime);
+    //     return self.setToTime(toTime);
+    //   })
+    //   .then(function () {
+    //     return self.clickGoButton();
+    //   });
+    // },
 
     collapseChart: function collapseChart() {
       return this.remote
@@ -162,12 +162,12 @@ define(function (require) {
       .click();
     },
 
-    collapseTimepicker: function collapseTimepicker() {
-      return this.remote
-      .setFindTimeout(defaultTimeout)
-      .findByCssSelector('i.fa.fa-chevron-up')
-      .click();
-    },
+    // collapseTimepicker: function collapseTimepicker() {
+    //   return this.remote
+    //   .setFindTimeout(defaultTimeout)
+    //   .findByCssSelector('i.fa.fa-chevron-up')
+    //   .click();
+    // },
 
     getMetric: function getMetric() {
       return this.remote
