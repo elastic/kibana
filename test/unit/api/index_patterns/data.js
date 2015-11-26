@@ -2,7 +2,7 @@ module.exports = function createTestData() {
   return {
     indexPatternWithMappings: {
       'title': 'logstash-*',
-      'timeFieldName': '@timestamp',
+      'time_field_name': '@timestamp',
       'fields': [{
         'name': 'geo.coordinates',
         'count': 0,

@@ -6,6 +6,12 @@ define(function (require) {
   var indexPatternSchema = require('intern/dojo/node!../../../../src/plugins/kibana/server/lib/schemas/index_pattern_schema');
   var Joi = require('intern/dojo/node!joi');
 
+  function expectSnakeCase(object) {
+    _.forEach(object, function (value, key) {
+      expect(key).to.be(_.snakeCase(key));
+    });
+  }
+
   return function (bdd, scenarioManager, request) {
 
     bdd.describe('GET index_patterns', function getIndexPatterns() {
@@ -44,6 +50,14 @@ define(function (require) {
           });
       });
 
+      bdd.it('should use snake_case in the response body', function () {
+        return request.get('/kibana/index_patterns')
+          .expect(200)
+          .then(function (res) {
+            _.forEach(res.body, expectSnakeCase);
+          });
+      });
+
       bdd.describe('GET index_pattern by ID', function getIndexPatternByID() {
 
         bdd.it('should return 200 with the valid index pattern requested', function () {
@@ -52,6 +66,14 @@ define(function (require) {
             .then(function (res) {
               expect(res.body.title).to.be('logstash-*');
               Joi.assert(res.body, indexPatternSchema.post);
+            });
+        });
+
+        bdd.it('should use snake_case in the response body', function () {
+          return request.get('/kibana/index_patterns/logstash-*')
+            .expect(200)
+            .then(function (res) {
+              expectSnakeCase(res.body);
             });
         });
 

@@ -148,6 +148,14 @@ define(function (require) {
             .expect(201);
         });
 
+      bdd.it('should enforce snake_case in the request body', function () {
+        return request.post('/kibana/index_patterns')
+          .send(_.mapKeys(createTestData().indexPatternWithMappings, function (value, key) {
+            return _.camelCase(key);
+          }))
+          .expect(400);
+      });
+
     });
 
   };

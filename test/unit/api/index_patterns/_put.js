@@ -23,7 +23,7 @@ define(function (require) {
         pattern.fields = _.map(pattern.fields, function (field) {
           return _.omit(field, 'mapping');
         });
-        pattern.timeFieldName = 'foo';
+        pattern.time_field_name = 'foo';
         pattern.fields[0].count = 5;
 
         return request.put('/kibana/index_patterns/logstash-*')
@@ -33,7 +33,7 @@ define(function (require) {
             return request.get('/kibana/index_patterns/logstash-*');
           })
           .then(function (res) {
-            expect(res.body.timeFieldName).to.be('foo');
+            expect(res.body.time_field_name).to.be('foo');
             expect(res.body.fields[0].count).to.be(5);
           });
       });
@@ -93,6 +93,12 @@ define(function (require) {
         return request.put('/kibana/index_patterns/idonotexist')
           .send(pattern)
           .expect(404);
+      });
+
+      bdd.it('should enforce snake_case in the request body', function () {
+        return request.put('/kibana/index_patterns/logstash-*')
+          .send({timeFieldName: 'foo'})
+          .expect(400);
       });
 
     });
