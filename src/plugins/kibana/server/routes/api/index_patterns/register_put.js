@@ -12,7 +12,7 @@ module.exports = function registerPut(server) {
       if (_.isEmpty(req.payload)) {
         return reply(Boom.badRequest('Payload required'));
       }
-      if (req.payload.title !== req.params.id) {
+      if (req.payload.title && req.payload.title !== req.params.id) {
         return reply(Boom.badRequest('Updates to title not supported'));
       }
       const validation = Joi.validate(req.payload, indexPatternSchema.put);

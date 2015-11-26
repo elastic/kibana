@@ -7,6 +7,12 @@ const handleESError = require('../../../lib/handle_es_error');
 
 module.exports = function registerGet(server) {
 
+  function convertToSnakeCase(object) {
+    return _.mapKeys(object, (value, key) => {
+      return _.snakeCase(key);
+    });
+  }
+
   server.route({
     path: '/api/kibana/index_patterns',
     method: 'GET',
@@ -42,6 +48,9 @@ module.exports = function registerGet(server) {
         })
         .then(removeDeprecatedFieldProps)
         .then((patterns) => {
+          return _.map(patterns, convertToSnakeCase);
+        })
+        .then((patterns) => {
           reply(patterns);
         }, function (error) {
           reply(handleESError(error));
@@ -71,8 +80,12 @@ module.exports = function registerGet(server) {
         getMappings(pattern, req),
         stitchPatternAndMappings)
         .then(removeDeprecatedFieldProps)
+        .then((pattern) => {
+          return _.isArray(pattern) ? pattern[0] : pattern;
+        })
+        .then(convertToSnakeCase)
         .then(function (pattern) {
-          reply(_.isArray(pattern) ? pattern[0] : pattern);
+          reply(pattern);
         }, function (error) {
           reply(handleESError(error));
         });
