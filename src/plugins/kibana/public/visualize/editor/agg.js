@@ -71,18 +71,18 @@ define(function (require) {
           return metricCount > aggregation.schema.min;
         };
 
-        // TODO: include metric labels in params in Agg
-        function setMetricsLabels() {
+        // TODO: include agg labels in params in Agg
+        function setAggLabels() {
           if (!$scope.vis) { // For testing
             return;
           }
 
-          if ($scope.vis.params.metricsLabels === undefined) {
-            $scope.vis.params.metricsLabels = {};
+          if ($scope.vis.params.aggLabels === undefined) {
+            $scope.vis.params.aggLabels = {};
             return;
           }
 
-          var metricsLabels = $scope.vis.params.metricsLabels;
+          var aggLabels = $scope.vis.params.aggLabels;
           var firstSibling = $scope;
 
           // Find the first sibling (scope)
@@ -91,31 +91,23 @@ define(function (require) {
           }
 
           var sibling = firstSibling;
-          // Travel all siblings setting metric label
+          // Travel all siblings setting agg label
           while (sibling !== null) {
-            sibling.metric_label = metricsLabels[sibling.$index];
+            if (sibling.agg) { // Pie is not defined
+              sibling.agg_label = aggLabels[sibling.agg.id - 1];
+            }
             sibling = sibling.$$nextSibling;
           }
         }
 
-        setMetricsLabels(); // Fill with saved labels the metrics labels forms
+        setAggLabels(); // Fill with saved labels the metrics labels forms
 
         $scope.showFormLabel = function () {
-          $scope.vis.params.metricsLabels[$scope.$index] = $scope.metric_label;
+          $scope.vis.params.aggLabels[$scope.agg.id - 1] = $scope.agg_label;
 
-          $scope.showMetricLabel = !$scope.showMetricLabel;
+          $scope.showAggLabel = !$scope.showAggLabel;
           // TODO: Hack, labels should be params so viz.dirty is auto changed
           $scope.vis.dirty = true;
-        };
-
-        $scope.useAggLabels = function (aggregation) {
-          var supported = false;
-
-          // Only supported in Metric vis yet
-          if (aggregation.vis && aggregation.vis.type.name === 'metric') {
-            supported = true;
-          }
-          return supported;
         };
 
         function calcAggIsTooLow() {
