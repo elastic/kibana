@@ -29,8 +29,8 @@ define(function (require) {
           addToSiri(series, point, seriesId, seriesLabel);
         });
 
-      }, {})
-      .values()
+      }, new Map())
+      .thru(series => [...series.values()])
       .value();
 
       if (multiY) {

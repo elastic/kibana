@@ -1,4 +1,4 @@
-# Kibana 4.3.0-snapshot
+# Kibana 4.4.0-snapshot
 
 [![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
 
@@ -6,7 +6,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 ## Requirements
 
-- Elasticsearch version 2.0.0 or later
+- Elasticsearch version 2.1.0 or later
 - Kibana binary package
 
 ## Installation
@@ -20,8 +20,6 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 You're up and running! Fantastic! Kibana is now running on port 5601, so point your browser at http://YOURDOMAIN.com:5601.
 
 The first screen you arrive at will ask you to configure an **index pattern**. An index pattern describes to Kibana how to access your data. We make the guess that you're working with log data, and we hope (because it's awesome) that you're working with Logstash. By default, we fill in `logstash-*` as your index pattern, thus the only thing you need to do is select which field contains the timestamp you'd like to use. Kibana reads your Elasticsearch mapping to find your time fields - select one from the list and hit *Create*.
-
-**Tip:** there's an optimization in the way of the *Use event times to create index names* option. Since Logstash creates an index every day, Kibana uses that fact to only search indices that could possibly contain data in your selected time range.
 
 Congratulations, you have an index pattern! You should now be looking at a paginated list of the fields in your index or indices, as well as some informative data about them. Kibana has automatically set this new index pattern as your default index pattern. If you'd like to know more about index patterns, pop into to the [Settings](#settings) section of the documentation.
 
@@ -39,7 +37,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |  |
 | --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.2.0-snapshot-windows.zip) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-darwin-x64.zip) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-linux-x64.zip) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-linux-x86.zip) |
+| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.4.0-snapshot-windows.zip) |

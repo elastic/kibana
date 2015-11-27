@@ -57,6 +57,7 @@ define(function (require) {
         filter.meta.value = result.value;
         filter.meta.disabled = !!(filter.meta.disabled);
         filter.meta.negate = !!(filter.meta.negate);
+        filter.meta.alias = filter.meta.alias || null;
         return filter;
       });
     };

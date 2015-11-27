@@ -4,7 +4,8 @@
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
           ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-          <input validate-query="searchSource"
+          <input
+            parse-query
             input-focus
             kbn-typeahead-input
             ng-model="state.query"
@@ -16,7 +17,6 @@
             ng-disabled="discoverSearch.$invalid"
             aria-label="Search">
             <span aria-hidden="true" class="fa fa-search"></span></button>
-          <!--<button type="button" ng-click="resetQuery()" aria-label="Reset query"><span aria-hidden="true" class="fa fa-ban"></span></button>-->
         </div>
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>
@@ -77,7 +77,7 @@
 
         <div class="discover-info">
           <span ng-show="opts.savedSearch.id" class="discover-info-title">
-            <span bindonce bo-bind="opts.savedSearch.title"></span>
+            <span ng-bind="::opts.savedSearch.title"></span>
             <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
           </span>
 
@@ -93,7 +93,7 @@
                 <h1>No results found <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
 
                 <p>
-                  Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here's some ideas:
+                  Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here are some ideas:
                 </p>
 
                 <div class="shard-failures" ng-show="failures">

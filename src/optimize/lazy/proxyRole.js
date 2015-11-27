@@ -13,7 +13,8 @@ module.exports = (kbnServer, server, config) => {
         passThrough: true,
         xforward: true
       }
-    }
+    },
+    config: {auth: false}
   });
 
   return fromNode(cb => {

@@ -17,7 +17,8 @@ define(function (require) {
     DateTime.fieldType = 'date';
 
     DateTime.paramDefaults = new BoundToConfigObj({
-      pattern: '=dateFormat'
+      pattern: '=dateFormat',
+      timezone: '=dateFormat:tz'
     });
 
     DateTime.editor = {
@@ -41,9 +42,14 @@ define(function (require) {
       // don't give away our ref to converter so
       // we can hot-swap when config changes
       var pattern = this.param('pattern');
+      var timezone = this.param('timezone');
 
-      if (this._memoizedPattern !== pattern) {
+      var timezoneChanged = this._timeZone !== timezone;
+      var datePatternChanged = this._memoizedPattern !== pattern;
+      if (timezoneChanged || datePatternChanged) {
+        this._timeZone = timezone;
         this._memoizedPattern = pattern;
+
         this._memoizedConverter = _.memoize(function converter(val) {
           if (val === null || val === undefined) {
             return '-';
@@ -51,6 +57,7 @@ define(function (require) {
           return moment(val).format(pattern);
         });
       }
+
       return this._memoizedConverter(val);
     };
 

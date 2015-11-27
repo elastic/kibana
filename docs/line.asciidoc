@@ -53,10 +53,16 @@ changes* button to keep your visualization in its current state.
 
 [float]
 [[bubble-chart]]
-=== Bubble Charts
+==== Bubble Charts
 You can convert a line chart visualization to a bubble chart by performing the following steps:
 
 . Click *Add Metrics* for the visualization's Y axis, then select *Dot Size*.
 . Select a metric aggregation from the drop-down list.
 . In the *Options* tab, uncheck the *Show Connecting Lines* box.
 . Click the *Apply changes* button.
+
+[float]
+[[line-viewing-detailed-information]]
+==== Viewing Detailed Information
+
+include::visualization-raw-data.asciidoc[]

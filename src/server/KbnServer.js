@@ -83,4 +83,18 @@ module.exports = class KbnServer {
   async close() {
     await fromNode(cb => this.server.stop(cb));
   }
+
+  async inject(opts) {
+    if (!this.server) await this.ready();
+
+    return await fromNode(cb => {
+      try {
+        this.server.inject(opts, (resp) => {
+          cb(null, resp);
+        });
+      } catch (err) {
+        cb(err);
+      }
+    });
+  }
 };

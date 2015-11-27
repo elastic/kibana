@@ -16,7 +16,7 @@ bin/kibana plugin --install <org>/<package>/<version>
 You can also use `-i` instead of `--install`, as in the following example:
 
 [source,shell]
-bin/kibana plugin -i elasticsearch/marvel-ui/latest
+bin/kibana plugin -i elasticsearch/marvel/latest
 
 Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the 
 plugin from `download.elastic.co`.
@@ -77,7 +77,7 @@ Use the `--remove` or `-r` option to remove a plugin, including any configuratio
 example:
 
 [source,shell]
-bin/kibana plugin --remove marvel-ui
+bin/kibana plugin --remove marvel
 
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
 
@@ -121,6 +121,7 @@ path to that configuration file each time you use the `bin/kibana plugin` comman
 74:: I/O error
 70:: Other error
 
+[float]
 [[plugin-switcher]]
 == Switching Plugin Functionality
 

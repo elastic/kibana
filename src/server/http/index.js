@@ -40,7 +40,8 @@ module.exports = function (kbnServer, server, config) {
           listing: true,
           lookupCompressed: true
         }
-      }
+      },
+      config: {auth: false}
     });
   });
 
@@ -51,7 +52,8 @@ module.exports = function (kbnServer, server, config) {
       method: 'GET',
       handler: {
         file: filePath
-      }
+      },
+      config: {auth: false}
     });
   });
 
@@ -97,7 +99,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     handler: function (req, reply) {
       return reply.view('rootRedirect', {
-        hashRoute: '/app/kibana',
+        hashRoute: `${config.get('server.basePath')}/app/kibana`,
         defaultRoute: getDefaultRoute(kbnServer),
       });
     }
@@ -119,4 +121,6 @@ module.exports = function (kbnServer, server, config) {
       .permanent(true);
     }
   });
+
+  return kbnServer.mixin(require('./xsrf'));
 };

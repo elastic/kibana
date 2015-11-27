@@ -19,12 +19,12 @@ module.exports = function (kibana) {
         startupTimeout: Joi.number().default(5000),
         ssl: Joi.object({
           verify: Joi.boolean().default(true),
-          ca: Joi.string(),
+          ca: Joi.array().single().items(Joi.string()),
           cert: Joi.string(),
           key: Joi.string()
         }).default(),
         apiVersion: Joi.string().default('2.0'),
-        minimumVerison: Joi.string().default('2.0.0')
+        minimumVerison: Joi.string().default('2.1.0')
       }).default();
     },
 
@@ -36,6 +36,7 @@ module.exports = function (kibana) {
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');
       createProxy(server, 'POST', '/{index}/_search');
+      createProxy(server, 'POST', '/{index}/_field_stats');
       createProxy(server, 'POST', '/_msearch');
 
       function noBulkCheck(request, reply) {

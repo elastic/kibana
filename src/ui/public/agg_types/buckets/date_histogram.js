@@ -7,7 +7,9 @@ define(function (require) {
     var TimeBuckets = Private(require('ui/time_buckets'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
     var intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
-    var timeZone = tzDetect.determine().name();
+    var configDefaults = Private(require('ui/config/defaults'));
+
+    var detectedTimezone = tzDetect.determine().name();
     var tzOffset = moment().format('Z');
 
     function getInterval(agg) {
@@ -94,7 +96,11 @@ define(function (require) {
             var interval = agg.buckets.getInterval();
             output.bucketInterval = interval;
             output.params.interval = interval.expression;
-            output.params.time_zone = timeZone || tzOffset;
+
+            var isDefaultTimezone = config.get('dateFormat:tz') === configDefaults['dateFormat:tz'].value;
+            output.params.time_zone = isDefaultTimezone ?
+              (detectedTimezone || tzOffset) :
+              config.get('dateFormat:tz');
 
             var scaleMetrics = interval.scaled && interval.scale < 1;
             if (scaleMetrics) {

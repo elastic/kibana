@@ -3,6 +3,9 @@ define(function (require) {
   var module = require('ui/modules').get('kibana');
   var template = require('ui/filter_bar/filter_bar.html');
   var moment = require('moment');
+  var angular = require('angular');
+
+  require('ui/directives/json_input');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
@@ -12,6 +15,7 @@ define(function (require) {
     var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
+    var privateFilterFieldRegex = /(^\$|meta)/;
 
     return {
       restrict: 'E',
@@ -28,12 +32,20 @@ define(function (require) {
           'invertFilter',
           'invertAll',
           'removeFilter',
-          'removeAll'
+          'removeAll',
+          'updateFilter'
         ].forEach(function (method) {
           $scope[method] = queryFilter[method];
         });
 
         $scope.state = getAppState();
+
+        $scope.aceLoaded = function (editor) {
+          editor.$blockScrolling = Infinity;
+          var session = editor.getSession();
+          session.setTabSize(2);
+          session.setUseSoftTabs(true);
+        };
 
         $scope.applyFilters = function (filters) {
           // add new filters
@@ -46,6 +58,26 @@ define(function (require) {
           }
         };
 
+        $scope.startEditingFilter = function (source) {
+          return $scope.editingFilter = {
+            source: source,
+            type: _.findKey(source, function (val, key) {
+              return !key.match(privateFilterFieldRegex);
+            }),
+            model: convertToEditableFilter(source),
+            alias: source.meta.alias
+          };
+        };
+
+        $scope.stopEditingFilter = function () {
+          $scope.editingFilter = null;
+        };
+
+        $scope.editDone = function () {
+          $scope.updateFilter($scope.editingFilter);
+          $scope.stopEditingFilter();
+        };
+
         $scope.clearFilterBar = function () {
           $scope.newFilters = [];
           $scope.changeTimeFilter = null;
@@ -53,6 +85,7 @@ define(function (require) {
 
         // update the scope filter list on filter changes
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.stopEditingFilter();
           updateFilters();
         });
 
@@ -94,6 +127,12 @@ define(function (require) {
             .then($scope.addFilters);
           }
         });
+
+        function convertToEditableFilter(filter) {
+          return _.omit(_.cloneDeep(filter), function (val, key) {
+            return key.match(privateFilterFieldRegex);
+          });
+        }
 
         function updateFilters() {
           var filters = queryFilter.getFilters();

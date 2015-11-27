@@ -1,4 +1,7 @@
-define(function () {
+define(function (require) {
+  var moment = require('moment-timezone');
+  var _ = require('lodash');
+
   return function configDefaultsProvider() {
     // wraped in provider so that a new instance is given to each app/test
 
@@ -19,6 +22,12 @@ define(function () {
       'dateFormat': {
         value: 'MMMM Do YYYY, HH:mm:ss.SSS',
         description: 'When displaying a pretty formatted date, use this format',
+      },
+      'dateFormat:tz': {
+        value: 'Browser',
+        description: 'Which timezone should be used.  "Browser" will use the timezone detected by your browser.',
+        type: 'select',
+        options: _.union(['Browser'], moment.tz.names())
       },
       'dateFormat:scaled': {
         type: 'json',
@@ -49,6 +58,11 @@ define(function () {
       'discover:sampleSize': {
         value: 500,
         description: 'The number of rows to show in the table',
+      },
+      'doc_table:highlight': {
+        value: true,
+        description: 'Highlight results in Discover and Saved Searches Dashboard.' +
+          'Highlighing makes request slow when working on big documents.',
       },
       'courier:maxSegmentCount': {
         value: 30,
@@ -98,6 +112,10 @@ define(function () {
           'Count': '#57c17b'
         }),
         description: 'Maps values to specified colors within visualizations'
+      },
+      'visualization:loadingDelay': {
+        value: '2s',
+        description: 'Time to wait before dimming visualizations during query'
       },
       'csv:separator': {
         value: ',',

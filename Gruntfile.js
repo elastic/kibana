@@ -43,8 +43,10 @@ module.exports = function (grunt) {
     lintThese: [
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
+      '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
-      '!<%= src %>/fixtures/**/*.js'
+      '!<%= src %>/fixtures/**/*.js',
+      '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ],
     deepModules: {
       'caniuse-db': '1.0.30000265',

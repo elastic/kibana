@@ -7,7 +7,9 @@ module.exports = {
   },
   all: {
     src: [
+      'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
+      'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
       '!src/ui/**'
     ]

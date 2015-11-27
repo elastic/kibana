@@ -46,7 +46,7 @@
             ng-class="queryInput.$invalid ? 'has-error' : ''">
             <input
               ng-model="state.query"
-              validate-query
+              parse-query
               input-focus
               kbn-typeahead-input
               placeholder="Search..."
@@ -126,19 +126,19 @@
 
   <div class="vis-editor-content">
 
-    <div class="collapsible-sidebar">
-        <vis-editor-sidebar class="vis-editor-sidebar" ng-if="chrome.getVisible()"></vis-editor-sidebar>
+    <div class="collapsible-sidebar" ng-if="chrome.getVisible()">
+        <vis-editor-sidebar class="vis-editor-sidebar"></vis-editor-sidebar>
     </div>
 
     <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
       <div class="visualize-info" ng-if="savedVis.id">
-        <div class="visualize-info-tab" title="{{savedVis.vis.type.title}}">
-          <i class="fa" aria-label="{{savedVis.vis.type.title}} Icon" ng-class="savedVis.vis.type.icon"></i>
-          <span bindonce bo-bind="savedVis.title"></span>
+        <div class="visualize-info-tab" title="{{::savedVis.vis.type.title}}">
+          <i class="fa" aria-label="{{::savedVis.vis.type.title}} Icon" ng-class="savedVis.vis.type.icon"></i>
+          <span ng-bind="::savedVis.title"></span>
         </div>
       </div>
 
-      <visualize vis="vis" editable-vis="editableVis"  search-source="savedVis.searchSource"></visualize>
+      <visualize vis="vis" ui-state="uiState" show-spy-panel="chrome.getVisible()" search-source="savedVis.searchSource" editable-vis="editableVis"></visualize>
     </div>
   </div>
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope) {
+  return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
     var _ = require('lodash');
     var errors = require('ui/errors');
     var angular = require('angular');
@@ -15,6 +15,7 @@ define(function (require) {
 
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
+    var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
 
     var type = 'index-pattern';
 
@@ -175,13 +176,30 @@ define(function (require) {
         return this.intervalName && _.find(intervals, { name: this.intervalName });
       };
 
-      self.toIndexList = function (start, stop) {
-        var interval = this.getInterval();
-        if (interval) {
-          return intervals.toIndexList(self.id, interval, start, stop);
-        } else {
-          return self.id;
-        }
+      self.toIndexList = function (start, stop, sortDirection) {
+        return new Promise(function (resolve) {
+          var indexList;
+          var interval = self.getInterval();
+
+          if (interval) {
+            indexList = intervals.toIndexList(self.id, interval, start, stop);
+            if (sortDirection === 'desc') indexList = indexList.reverse();
+          } else if (self.isWildcard() && self.hasTimeField()) {
+            indexList = calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
+          } else {
+            indexList = self.id;
+          }
+
+          resolve(indexList);
+        });
+      };
+
+      self.hasTimeField = function () {
+        return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+      };
+
+      self.isWildcard = function () {
+        return _.includes(this.id, '*');
       };
 
       self.prepBody = function () {
@@ -213,9 +231,15 @@ define(function (require) {
         return docSource.doCreate(body)
         .then(setId)
         .catch(function (err) {
-          var confirmMessage = 'Are you sure you want to overwrite this?';
-          if (_.get(err, 'origError.status') === 409 && window.confirm(confirmMessage)) { // eslint-disable-line no-alert
-            return docSource.doIndex(body).then(setId);
+          if (_.get(err, 'origError.status') === 409) {
+            var confirmMessage = 'Are you sure you want to overwrite this?';
+
+            return safeConfirm(confirmMessage).then(
+              function () {
+                return docSource.doIndex(body).then(setId);
+              },
+              _.constant(false) // if the user doesn't overwrite, resolve with false
+            );
           }
           return Promise.resolve(false);
         });

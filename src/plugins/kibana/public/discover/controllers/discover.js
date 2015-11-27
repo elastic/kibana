@@ -14,7 +14,6 @@ define(function (require) {
   require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
-  require('ui/validate_query');
   require('ui/filters/moment');
   require('ui/courier');
   require('ui/index_patterns');
@@ -192,6 +191,9 @@ define(function (require) {
         });
 
         $scope.$watch('vis.aggs', function () {
+          // no timefield, no vis, nothing to update
+          if (!$scope.opts.timefield) return;
+
           var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
           if (buckets && buckets.length === 1) {
@@ -217,7 +219,13 @@ define(function (require) {
             if (rows == null && oldRows == null) return status.LOADING;
 
             var rowsEmpty = _.isEmpty(rows);
-            if (rowsEmpty && fetchStatus) return status.LOADING;
+            // An undefined fetchStatus means the requests are still being
+            // prepared to be sent. When all requests are completed,
+            // fetchStatus is set to null, so it's important that we
+            // specifically check for undefined to determine a loading status.
+            var preparingForFetch = _.isUndefined(fetchStatus);
+            if (preparingForFetch) return status.LOADING;
+            else if (rowsEmpty && fetchStatus) return status.LOADING;
             else if (!rowsEmpty) return status.READY;
             else return status.NO_RESULTS;
           }
@@ -240,8 +248,7 @@ define(function (require) {
         }()));
 
         $scope.searchSource.onError(function (err) {
-          console.log(err);
-          notify.error('An error occurred with your request. Reset your inputs and try again.');
+          notify.error(err);
         }).catch(notify.fatal);
 
         function initForTime() {
@@ -427,14 +434,17 @@ define(function (require) {
       .size($scope.opts.sampleSize)
       .sort(getSort($state.sort, $scope.indexPattern))
       .query(!$state.query ? null : $state.query)
-      .highlight({
-        pre_tags: [highlightTags.pre],
-        post_tags: [highlightTags.post],
-        fields: {'*': {}},
-        require_field_match: false,
-        fragment_size: 2147483647 // Limit of an integer.
-      })
       .set('filter', queryFilter.getFilters());
+
+      if (config.get('doc_table:highlight')) {
+        $scope.searchSource.highlight({
+          pre_tags: [highlightTags.pre],
+          post_tags: [highlightTags.post],
+          fields: {'*': {}},
+          require_field_match: false,
+          fragment_size: 2147483647 // Limit of an integer.
+        });
+      }
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms

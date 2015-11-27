@@ -16,6 +16,7 @@ let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 class BaseOptimizer {
   constructor(opts) {
     this.env = opts.env;
+    this.urlBasePath = opts.urlBasePath;
     this.bundles = opts.bundles;
     this.profile = opts.profile || false;
 
@@ -74,7 +75,7 @@ class BaseOptimizer {
         path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
-        publicPath: '/bundles/',
+        publicPath: `${this.urlBasePath || ''}/bundles/`,
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
@@ -105,6 +106,7 @@ class BaseOptimizer {
           },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
           { test: /\.jade$/, loader: 'jade' },
+          { test: /\.json$/, loader: 'json' },
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
@@ -129,7 +131,7 @@ class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.jsx', '.less', ''],
+        extensions: ['.js', '.json', '.jsx', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
         loaderPostfixes: ['-loader', ''],

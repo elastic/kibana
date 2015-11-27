@@ -9,15 +9,16 @@ require('ui/private');
 require('ui/promises');
 
 var metadata = require('ui/metadata');
-var TabCollection = require('ui/chrome/TabCollection');
 
 var chrome = {};
 var internals = _.defaults(
   _.cloneDeep(metadata),
   {
+    basePath: '',
     rootController: null,
     rootTemplate: null,
     showAppsLink: null,
+    xsrfToken: null,
     brand: null,
     nav: [],
     applicationClasses: []
@@ -30,6 +31,7 @@ $('<link>').attr({
 }).appendTo('head');
 
 require('./api/apps')(chrome, internals);
+require('./api/xsrf')(chrome, internals);
 require('./api/nav')(chrome, internals);
 require('./api/angular')(chrome, internals);
 require('./api/controls')(chrome, internals);
