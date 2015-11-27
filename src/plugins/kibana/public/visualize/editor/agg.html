@@ -53,12 +53,11 @@
       <i aria-hidden="true" class="fa fa-caret-down"></i>
     </button>
 
-    <!-- metric label button -->
+    <!-- label button -->
     <!-- Next line won't work with tooltip or ng-if -->
-    <!-- ng-click="showMetricLabel = !showMetricLabel" -->
+    <!-- ng-click="showAggLabel = !showAggLabel" -->
     <button
       aria-label="Label"
-      ng-if="useAggLabels(agg)"
       ng-click="showFormLabel(agg)"
       tooltip="Label for the aggregation"
       tooltip-append-to-body="true"
@@ -84,10 +83,10 @@
 
 </div>
 
-  <div class="form-group" ng-show="showMetricLabel">
-    <label>Metric {{$index + 1}} label</label>
+  <div class="form-group" ng-show="showAggLabel">
+    <label>Label {{agg.id}}</label>
     <input
-      ng-model="metric_label"
+      ng-model="agg_label"
       placeholder="Label"
       type="text"
       class="form-control"

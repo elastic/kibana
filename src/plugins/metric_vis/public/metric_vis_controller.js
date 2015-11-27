@@ -13,12 +13,11 @@ define(function (require) {
         table.columns.forEach(function (column, i) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
           var title;
-          if ($scope.vis && $scope.vis.params.metricsLabels) {
-            title = $scope.vis.params.metricsLabels[i];
+          if ($scope.vis && $scope.vis.params.aggLabels) {
+            title = $scope.vis.params.aggLabels[i];
           }
           metrics.push({
-            // label: column.title,
-            label: title  || column.title,
+            label: column.title,
             value: fieldFormatter(table.rows[0][i])
           });
         });
