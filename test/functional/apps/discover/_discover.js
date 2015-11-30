@@ -12,7 +12,6 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var remote;
-      this.timeout = 60000;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -71,7 +70,6 @@ define(function (require) {
 
         bdd.it('save query should show toast message and display query name', function () {
           var expectedSavedQueryMessage = 'Discover: Saved Data Source "' + queryName1 + '"';
-          this.timeout = 60000;
           return discoverPage.saveSearch(queryName1)
           .then(function () {
             return headerPage.getToastMessage();
@@ -94,12 +92,10 @@ define(function (require) {
         bdd.it('load query should show query name', function () {
           return discoverPage.loadSavedSearch(queryName1)
           .then(function () {
-            return common.tryForTime(15000, function () {
-              return discoverPage.getCurrentQueryName()
-              .then(function (actualQueryNameString) {
-                expect(actualQueryNameString).to.be(queryName1);
-              });
-            });
+            return discoverPage.getCurrentQueryName();
+          })
+          .then(function (actualQueryNameString) {
+            expect(actualQueryNameString).to.be(queryName1);
           })
           .catch(common.handleError(this));
         });

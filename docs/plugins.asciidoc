@@ -121,6 +121,7 @@ path to that configuration file each time you use the `bin/kibana plugin` comman
 74:: I/O error
 70:: Other error
 
+[float]
 [[plugin-switcher]]
 == Switching Plugin Functionality
 

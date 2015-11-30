@@ -3,10 +3,10 @@ define(function (require) {
   var _ = require('intern/dojo/node!lodash');
 
   return _.assign({
-    debug: false,
+    debug: true,
     capabilities: {
       'selenium-version': '2.47.1',
-      'idle-timeout': 30
+      'idle-timeout': 99
     },
     environments: [{
       browserName: 'firefox'
@@ -23,6 +23,9 @@ define(function (require) {
         'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
         'moment': './node_modules/moment/moment.js'
       }
-    }
+    },
+    timeouts: {
+      default: 90000
+    },
   }, serverConfig);
 });

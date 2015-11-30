@@ -121,7 +121,10 @@ define(function (require) {
     SourceAbstract.prototype.onResults = function (handler) {
       var self = this;
 
-      return new PromiseEmitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject) {
+        const defer = Promise.defer();
+        defer.promise.then(resolve, reject);
+
         self._createRequest(defer);
       }, handler);
     };
@@ -142,7 +145,10 @@ define(function (require) {
     SourceAbstract.prototype.onError = function (handler) {
       var self = this;
 
-      return new PromiseEmitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject) {
+        const defer = Promise.defer();
+        defer.promise.then(resolve, reject);
+
         errorHandlers.push({
           source: self,
           defer: defer
@@ -161,7 +167,7 @@ define(function (require) {
      */
     SourceAbstract.prototype.fetch = function () {
       var self = this;
-      var req = _.first(self._myQueued());
+      var req = _.first(self._myStartableQueued());
 
       if (!req) {
         req = self._createRequest();
@@ -177,7 +183,7 @@ define(function (require) {
      * @async
      */
     SourceAbstract.prototype.fetchQueued = function () {
-      return courierFetch.these(this._myQueued());
+      return courierFetch.these(this._myStartableQueued());
     };
 
     /**
@@ -185,7 +191,10 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.cancelQueued = function () {
-      _.invoke(this._myQueued(), 'abort');
+      requestQueue
+      .get(this._fetchStrategy)
+      .filter(req => req.source === this)
+      .forEach(req => req.abort());
     };
 
     /**
@@ -200,9 +209,10 @@ define(function (require) {
      * PRIVATE API
      *****/
 
-    SourceAbstract.prototype._myQueued = function () {
-      var reqs = requestQueue.get(this._fetchStrategy);
-      return _.where(reqs, { source: this });
+    SourceAbstract.prototype._myStartableQueued = function () {
+      return requestQueue
+      .getStartable(this._fetchStrategy)
+      .filter(req => req.source === this);
     };
 
     SourceAbstract.prototype._createRequest = function () {
